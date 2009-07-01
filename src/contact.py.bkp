@@ -1,0 +1,337 @@
+from command import CommandCall
+
+
+class Contact:
+    id = 0
+    properties={'contact_name' : {'required':True},
+                'alias' : {'required':False, 'default':'none'},
+                'contactgroups' : {'required':False, 'default':''},
+                'host_notifications_enabled' : {'required':True},
+                'service_notifications_enabled' : {'required':True},
+                'host_notification_period' : {'required':True},
+                'service_notification_period' : {'required':True},
+                'host_notification_options' : {'required':True},
+                'service_notification_options' : {'required':True},
+                'host_notification_commands' : {'required':True},
+                'service_notification_commands' : {'required':True},
+                'email' : {'required' : False, 'default':'none'},
+                'pager' : {'required' : False, 'default':'none'},
+                'addressx' : {'required' : False, 'default':'none'},
+                'can_submit_commands' : {'required' : False, 'default':'0'},
+                'retain_status_information' : {'required' : False, 'default':'1'},
+                'retain_nonstatus_information' : {'required' : False, 'default':'1'}
+                }
+
+    def __init__(self, params={}):
+        self.id = self.__class__.id
+        self.__class__.id += 1
+        
+        self.customs = {} # for custom variables
+        self.plus = {} # for value with a +
+
+        #[0] = +  -> new key-plus
+        #[0] = _  -> new custom entry
+        for key in params:
+            if params[key][0] == '+':
+                self.plus[key] = params[key][1:] # we remove the +
+            elif key[0] == "_":
+                self.customs[key] = params[key]
+            else:
+                setattr(self, key, params[key])
+
+
+    def clean(self):
+        pass
+
+
+    #We change plain text commands by list of commands
+    def pythonize(self):
+        #Service notif fist
+        cmds = self.service_notification_commands.split(',')        
+        self.service_notification_commands = []
+        for cmd in cmds:
+            self.service_notification_commands.append(cmd.strip())
+
+        #Host notif then
+        cmds = self.host_notification_commands.split(',')
+        self.host_notification_commands = []
+        for cmd in cmds:
+            self.host_notification_commands.append(cmd.strip())
+
+        #Pythonize values
+        self.host_notifications_enabled = bool(self.host_notifications_enabled)
+        self.service_notification_options = self.service_notification_options.split(',')
+        self.retain_status_information = bool(self.retain_status_information)
+        self.service_notifications_enabled = bool(self.service_notifications_enabled)
+        self.can_submit_commands = bool(self.can_submit_commands)
+        self.retain_nonstatus_information = bool(self.retain_nonstatus_information)
+        self.host_notification_options = self.host_notification_options.split(',')
+
+    
+    def __str__(self):
+        return str(self.__dict__)
+
+
+    def is_tpl(self):
+        try:
+            return self.register == '0'
+        except:
+            return False
+
+
+    def has(self, prop):
+        try:
+            getattr(self,prop)
+        except:
+            return False
+        return True
+
+
+    #If a prop is absent and is not required, put the default value
+    def fill_default(self):
+        for prop in Contact.properties:
+            if not self.has(prop) and not Contact.properties[prop]['required']:
+                value = Contact.properties[prop]['default']
+                setattr(self, prop, value)
+
+
+    def get_templates(self):
+        if self.has('use'):
+            return self.use.split(',')
+        else:
+            return []
+
+            
+    def get_srv_notif_cmds(self):
+        return self.service_notification_commands
+
+
+    def get_hst_notif_cmds(self):
+        return self.host_notification_commands
+
+
+    def replace_srv_notif_cmds(self, cmds):
+        self.service_notification_commands = cmds
+
+
+    def replace_hst_notif_cmds(self, cmds):
+        self.host_notification_commands = cmds
+
+
+    #We fillfull properties with template ones if need
+    def get_property_by_inheritance(self, contacts, prop):
+        if self.has(prop):
+            value = getattr(self, prop)
+            if self.has_plus(prop):#Manage the additive inheritance for the property, if property is in plus, add or replace it
+                value = value+','+self.get_plus_and_delete(prop)
+            return value
+        tpls = self.get_templates()
+        for tpl in tpls:
+            c = contacts.find_tpl_by_name(tpl)
+            if c is not None:
+                value = c.get_property_by_inheritance(contacts, prop)
+                if value is not None:
+                    if self.has_plus(prop):
+                        value = value+','+self.get_plus_and_delete(prop)
+                    setattr(self, prop, value)
+                    return value
+        if self.has_plus(prop):
+            value = self.get_plus_and_delete(prop)
+            setattr(self, prop, value)
+            return value
+        return None
+
+    
+    #We fillfull properties with template ones if need
+    def get_customs_properties_by_inheritance(self, contacts):
+        cv = {} # custom variables dict
+        tpls = self.get_templates()
+        for tpl in tpls:
+            c = contacts.find_tpl_by_name(tpl)
+            if c is not None:
+                tpl_cv = c.get_customs_properties_by_inheritance(contacts)
+                if tpl_cv is not {}:
+                    for prop in tpl_cv:
+                        if prop not in self.customs:
+                            value = tpl_cv[prop]
+                        else:
+                            value = self.customs[prop]
+                        if self.has_plus(prop):
+                            value = value+self.get_plus_and_delete(prop)
+                        self.customs[prop]=value
+        for prop in self.customs:
+            value = self.customs[prop]
+            if self.has_plus(prop):
+                value = value = value+','+self.get_plus_and_delete(prop)
+                self.customs[prop] = value
+        #We can get custom properties in plus, we need to get all entires and put
+        #them into customs
+        cust_in_plus = self.get_all_plus_and_delete()
+        for prop in cust_in_plus:
+            self.customs[prop] = cust_in_plus[prop]
+        return self.customs
+
+    
+    def has_plus(self, prop):
+        try:
+            self.plus[prop]
+        except:
+            return False
+        return True
+
+
+    def get_all_plus_and_delete(self):
+        res = {}
+        props = self.plus.keys() #we delete entries, so no for ... in ...
+        for prop in props:
+            res[prop] = self.get_plus_and_delete(prop)
+        return res
+
+
+    def get_plus_and_delete(self, prop):
+        val = self.plus[prop]
+        del self.plus[prop]
+        return val
+
+
+    #Check is required prop are set:
+    #template are always correct
+    def is_correct(self):
+        if self.is_tpl:
+            return True
+        for prop in Contact.properties:
+            if not self.has(prop) and Contact.properties[prop]['required']:
+                return False
+        return True
+
+
+class Contacts:
+    def __init__(self, contacts):
+        self.contacts = {}
+        for c in contacts:
+            self.contacts[c.id] = c
+
+    
+    def find_cont_id_by_name(self, name):
+        for id in self.contacts:
+            if self.contacts[id].contact_name == name:
+                return id
+        return None
+
+
+    def find_cont_by_name(self, name):
+        id = self.find_cont_id_by_name(name)
+        if id is not None:
+            return self.contacts[id]
+        else:
+            return None
+
+
+    def linkify(self, timeperiods, commands):
+        self.linkify_c_by_tp(timeperiods)
+        self.linkify_c_by_cmd(commands)
+
+
+    def pythonize(self):
+        for id in self.contacts:
+            self.contacts[id].pythonize()
+
+
+    def find_tpl_by_name(self, name):
+        for id in self.contacts:
+            c = self.contacts[id]
+            if c.is_tpl() and c.name == name:
+                return c
+        return None
+
+
+    def is_correct(self):
+        for id in self.contacts:
+            c=self.contacts[id]
+            c.is_correct()
+
+
+    #We remove useless properties
+    def clean_useless(self):
+        #First templates
+        tpls = [id for id in self.contacts if self.contacts[id].is_tpl()]
+        for id in tpls:
+            del self.contacts[id]
+
+    
+    #We just search for each timeperiod the id of the tp
+    #and replace the name by the id
+    def linkify_c_by_tp(self, timeperiods):
+        for id in self.contacts:
+            c = self.contacts[id]
+            #service notif period
+            sntp_name = c.service_notification_period
+            #host notf period
+            hntp_name = c.host_notification_period
+
+            #The new member list, in id
+            sntp = timeperiods.find_tp_by_name(sntp_name)
+            hntp = timeperiods.find_tp_by_name(hntp_name)
+            
+            c.service_notification_period = sntp
+            c.host_notification_period = hntp
+
+
+    #Simplify hosts commands by commands id
+    def linkify_c_by_cmd(self, commands):
+        for id in self.contacts:
+            tmp = []
+            for cmd in self.contacts[id].service_notification_commands:
+                tmp.append(CommandCall(commands,cmd))
+            self.contacts[id].service_notification_commands = tmp
+
+            tmp = []
+            for cmd in self.contacts[id].host_notification_commands:
+                tmp.append(CommandCall(commands,cmd))
+            self.contacts[id].host_notification_commands = tmp
+
+
+    #If a prop is absent and is not required, put the default value
+    def fill_default(self):
+        for id in self.contacts:
+            c = self.contacts[id]
+            c.fill_default()
+
+    
+    def __str__(self):
+        s = ''
+        for id in self.contacts:
+            s = s + 'Contact:' + str(id) + str(self.contacts[id]) + '\n'
+        return s
+
+
+    #Inheritance forjust a property
+    def apply_partial_inheritance(self, prop):
+        for id in self.contacts:
+            c = self.contacts[id]
+            c.get_property_by_inheritance(self, prop)
+
+
+    def apply_inheritance(self):
+        #We check for all Host properties if the host has it
+        #if not, it check all host templates for a value
+        for prop in Contact.properties:
+            self.apply_partial_inheritance(prop)
+        for id in self.contacts:
+            c = self.contacts[id]
+            c.get_customs_properties_by_inheritance(self)
+
+
+    #We look for contacts property in contacts and
+    def explode(self, contactgroups):
+        #Hostgroups property need to be fullfill for got the informations
+        self.apply_partial_inheritance('contactgroups')
+        for id in self.contacts:
+            c = self.contacts[id]
+            if not c.is_tpl():
+                cname = c.contact_name
+                if c.has('contactgroups'):
+                    cgs = c.contactgroups.split(',')
+                    for cg in cgs:
+                        contactgroups.add_member(cname, cg.strip())
+        #TODO: clean all hostgroups property in hosts

@@ -1,0 +1,5 @@
+python-pyorbit
+python-pexpect
+sudo apt-get install python-setuptools
+sudo easy_install python-graph
+

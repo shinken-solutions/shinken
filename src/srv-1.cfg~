@@ -1,0 +1,7 @@
+define host{
+        use                     linux-server
+        host_name               srv-1
+        alias                   srv-1
+        address                 seliostap02
+        }
+

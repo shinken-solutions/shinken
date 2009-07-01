@@ -1,0 +1,167 @@
+from itemgroup import Itemgroup, Itemgroups
+
+class Contactgroup(Itemgroup):
+    id = 0
+    def __init__(self, params={}):
+        self.id = Contactgroup.id
+        Contactgroup.id = Contactgroup.id + 1
+        for key in params:
+            setattr(self, key, params[key])
+
+    def clean(self):
+        pass
+
+    def pythonize(self):
+        mbrs = self.members.split(',')        
+        self.members = []
+        for mbr in mbrs:
+            self.members.append(mbr.strip())
+
+    def has(self, prop):
+        try:
+            getattr(self,prop)
+        except:
+            return False
+        return True
+    
+    
+    def get_contacts(self):
+        return self.members#.split(',')
+
+    def replace_members(self, members):
+        self.members = members
+
+    def add_string_member(self, member):
+        if ',' in self.members:
+            self.members += ','+member
+        else:
+            self.members = member
+
+    def __str__(self):
+        return str(self.__dict__)+'\n'
+
+    #a host group is correct if all members actually exists
+    def is_correct(self):
+        #print "Correct?", self.members
+        if not None in self.members:
+            return True
+        else:
+            #print "Bad member", self.members
+            return False
+
+    
+    def get_contactgroup_members(self):
+        if self.has('contactgroup_members'):
+            return self.contactgroup_members.split(',')
+        else:
+            return []
+
+    #We fillfull properties with template ones if need
+    def get_contacts_by_explosion(self, contactgroups):
+        #print "Begin: I search my contacts", self
+        cg_mbrs = self.get_contactgroup_members()
+        #print "I found cg_mbrs:", cg_mbrs
+        for cg_mbr in cg_mbrs:
+            cg = contactgroups.find_cg_by_name(cg_mbr)
+            #print "J'ai trouve un papa", cg
+            if cg is not None:
+                value = cg.get_contacts_by_explosion(contactgroups)
+                if value is not None:
+                    #print "1: return", value
+                    self.add_string_member(value)
+        if self.has('members'):
+            #print "2: return", self.members
+            return self.members
+        else:
+            #print "3: return vide"
+            return ''
+
+
+class Contactgroups(Itemgroups):
+    contactgroups = {}
+    def __init__(self, contactgroups):
+        for cg in contactgroups:
+            self.contactgroups[cg.id] = cg
+    
+    def find_cg_id_by_name(self, name):
+        for id in self.contactgroups:
+            if self.contactgroups[id].contactgroup_name == name:
+                return id
+        return None
+
+    def find_cg_by_name(self, name):
+        id = self.find_cg_id_by_name(name)
+        if id is not None:
+            return self.contactgroups[id]
+        else:
+            return None
+        
+
+    def __str__(self):
+        s = ''
+        for id in self.contactgroups:
+            s += str(self.contactgroups[id])
+        return s
+
+    def get_members_by_name(self, cgname):
+        id = self.find_cg_id_by_name(cgname)
+        #print "findding:",cgname,"ID=>", id
+        if id == None:
+            return []
+        return self.contactgroups[id].get_contacts()
+
+    def add_contactgroup(self, cg):
+        self.contactgroups[cg.id] = cg
+
+
+    def linkify(self, contacts):
+        self.linkify_cg_by_cont(contacts)
+
+    def pythonize(self):
+        for id in self.contactgroups:
+            cg = self.contactgroups[id]
+            cg.pythonize()
+
+
+    #We just search for each host the id of the host
+    #and replace the name by the id
+    def linkify_cg_by_cont(self, contacts):
+        for id in self.contactgroups:
+            mbrs = self.contactgroups[id].get_contacts()
+
+            #The new member list, in id
+            new_mbrs = []
+            for mbr in mbrs:
+                new_mbrs.append(contacts.find_cont_by_name(mbr))
+                #print "Got:", member, "=", self.hosts.find_host_id_by_name(member)
+            
+            #We find the id, we remplace the names
+            self.contactgroups[id].replace_members(new_mbrs)
+
+
+
+    #Add a contact string to a contact member
+    #if the contact group do not exist, create it
+    def add_member(self, cname, cgname):
+        #print "Asking for adding", cname, "into", cgname
+        id = self.find_cg_id_by_name(cgname)
+        #if the id do not exist, create the cg
+        if id == None:
+            cg = Contactgroup({'contactgroup_name' : cgname, 'alias' : cgname, 'members' :  cname})
+            #print "Creating :", cg
+            self.add_contactgroup(cg)
+        else:
+            self.contactgroups[id].add_string_member(cname)
+            #print "Add a member :", self.contactgroups[id]
+
+    def is_correct(self):
+        for id in self.contactgroups:
+            self.contactgroups[id].is_correct()
+
+    #Use to fill members with contactgroup_members
+    def explode(self):
+        for id in self.contactgroups:
+            cg = self.contactgroups[id]
+            if cg.has('contactgroup_members'):
+                #print "Ah cg dans cg!:", cg
+                cg.get_contacts_by_explosion(self)

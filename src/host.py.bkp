@@ -1,0 +1,434 @@
+from command import CommandCall
+from graph import digraph
+
+class Host:
+    id = 1
+    #properties: (name, requied)
+    properties={'host_name': {'required': True},
+                'alias': {'required':  True},
+                'display_name': {'required': False, 'default':'none'},
+                'address': {'required': True},
+                'parents': {'required': False, 'default': ''},
+                'hostgroups': {'required': False, 'default' : ''},
+                'check_command': {'required': False, 'default':''},
+                'initial_state': {'required': False, 'default':'u'},
+                'max_check_attempts': {'required': True},
+                'check_interval': {'required': False, 'default':'0'},
+                'retry_interval': {'required': False, 'default':'0'},
+                'active_checks_enabled': {'required': False, 'default':'1'},
+                'passive_checks_enabled': {'required': False, 'default':'1'},
+                'check_period': {'required': True},
+                'obsess_over_host': {'required': False, 'default':'0'},
+                'check_freshness': {'required': False, 'default':'0'},
+                'freshness_threshold': {'required': False, 'default':'0'},
+                'event_handler': {'required': False, 'default':''},
+                'event_handler_enabled': {'required': False, 'default':'0'},
+                'low_flap_threshold': {'required':False, 'default':'25'},
+                'high_flap_threshold': {'required': False, 'default':'50'},
+                'flap_detection_enabled': {'required': False, 'default':'1'},
+                'flap_detection_options': {'required': False, 'default':'o,d,u'},
+                'process_perf_data': {'required': False, 'default':'1'},
+                'retain_status_information': {'required': False, 'default':'1'},
+                'retain_nonstatus_information': {'required': False, 'default':'1'},
+                'contacts': {'required': True},
+                'contact_groups': {'required': True},
+                'notification_interval': {'required': True},
+                'first_notification_delay': {'required': False, 'default':'0'},
+                'notification_period': {'required': True},
+                'notification_options': {'required': False, 'default':'d,u,r,f'},
+                'notifications_enabled': {'required': False, 'default':'1'},
+                'stalking_options': {'required': False, 'default':'o,d,u'},
+                'notes': {'required': False, 'default':''},
+                'notes_url': {'required': False, 'default':''},
+                'action_url': {'required': False, 'default':''},
+                'icon_image': {'required': False, 'default':''},
+                'icon_image_alt': {'required': False, 'default':''},
+                'vrml_image': {'required': False, 'default':''},
+                'statusmap_image': {'required': False, 'default':''},
+                '2d_coords': {'required': False, 'default':''},
+                '3d_coords': {'required': False, 'default':''},
+                'failure_prediction_enabled': {'required' : False, 'default' : '0'}
+                }
+
+    
+    def __init__(self, params={}):
+        #Each host have an id
+        self.id = self.__class__.id#Host.id
+        #Host.id = Host.id + 1
+        self.__class__.id += 1
+        self.customs = {} # for custom variables
+        self.plus = {} # for value with a +
+
+        #[0] = +  -> new key-plus
+        #[0] = _  -> new custom entry
+        for key in params:
+            if params[key][0] == '+':
+                self.plus[key] = params[key][1:] # we remove the +
+            elif key[0] == "_":
+                self.customs[key] = params[key]
+            else:
+                setattr(self, key, params[key])
+
+
+    def clean(self):
+        pass
+
+
+    def has(self, prop):
+        return hasattr(self, prop)
+
+
+    def get_all_properties():
+        return list(Host.known_properties)
+
+
+    def pythonize(self):
+        try:
+            if self.parents == "":
+                self.parents = []
+            else:
+                parents = self.parents.split(',')        
+                self.parents = []
+                for parent in parents:
+                    self.parents.append(parent.strip())
+        
+            #Pythonize property
+            self.active_checks_enabled = bool(self.active_checks_enabled)
+            self.retry_interval = int(self.retry_interval)
+            self.low_flap_threshold = int(self.low_flap_threshold)
+            self.process_perf_data = bool(self.process_perf_data)
+            self.notification_interval = int(self.notification_interval)
+            self.failure_prediction_enabled = bool(self.failure_prediction_enabled)
+            self.flap_detection_options = self.flap_detection_options.split(',')
+            self.retain_status_information = bool(self.retain_status_information)
+            self.stalking_options = self.stalking_options.split(',')
+            self.event_handler_enabled = bool(self.event_handler_enabled)
+            self.first_notification_delay = int(self.first_notification_delay)
+            self.flap_detection_enabled = bool(self.flap_detection_enabled)
+            self.notification_options = self.notification_options.split(',')
+            self.high_flap_threshold = int(self.high_flap_threshold)
+            self.retain_nonstatus_information = bool(self.retain_nonstatus_information)
+            self.notifications_enabled = bool(self.notifications_enabled)
+            self.obsess_over_host = bool(self.obsess_over_host)
+            self.freshness_threshold = int(self.freshness_threshold)
+            self.passive_checks_enabled = bool(self.passive_checks_enabled)
+            self.check_interval = int(self.check_interval)
+            self.max_check_attempts = int(self.max_check_attempts)
+            self.check_freshness = bool(self.check_freshness)
+        except AttributeError as e:
+            print e
+
+
+    def is_tpl(self):
+        try:
+            return self.register == '0'
+        except:
+            return False
+
+
+    def __str__(self):
+        return str(self.__dict__)+'\n'+str(self.__class__)
+
+
+    def get_templates(self):
+        if self.has('use'):
+            return self.use.split(',')
+        else:
+            return []
+
+
+    #We fillfull properties with template ones if need
+#    def get_property_by_inheritance(self, hosts, prop):
+#        if self.has(prop):
+#            value = getattr(self, prop)
+#            #print 'Me', self, 'Aready have', prop, value
+#            return value
+#        tpls = self.get_templates()
+#        #print "Me", self, "Search for", prop, 'in my templates', tpls
+#        for tpl in tpls:
+#            h = hosts.find_tpl_by_name(tpl)
+#            #print "Papa!:", h
+#            value = h.get_property_by_inheritance(hosts, prop)
+#            if value is not None:
+#                #print "Papa me donne:", value, "merci papa"
+#                setattr(self, prop, value)
+#                return value
+#        #print "Ni moi ni mes papas n'ont",prop
+#        return None
+
+
+    #We fillfull properties with template ones if need
+    def get_property_by_inheritance(self, hosts, prop):
+        if self.has(prop):
+            value = getattr(self, prop)
+            if self.has_plus(prop):#Manage the additive inheritance for the property, if property is in plus, add or replace it
+                value = value+','+self.get_plus_and_delete(prop)
+            return value
+        tpls = self.get_templates()
+        for tpl in tpls:
+            h = hosts.find_tpl_by_name(tpl)
+            if h is not None:
+                value = h.get_property_by_inheritance(hosts, prop)
+                if value is not None:
+                    if self.has_plus(prop):
+                        value = value+','+self.get_plus_and_delete(prop)
+                    setattr(self, prop, value)
+                    return value
+        if self.has_plus(prop):
+            value = self.get_plus_and_delete(prop)
+            setattr(self, prop, value)
+            return value
+        return None
+
+
+    #We fillfull properties with template ones if need
+    def get_customs_properties_by_inheritance(self, hosts):
+        cv = {} # custom variables dict
+        tpls = self.get_templates()
+        for tpl in tpls:
+            h = hosts.find_tpl_by_name(tpl)
+            if h is not None:
+                tpl_cv = h.get_customs_properties_by_inheritance(hosts)
+                if tpl_cv is not {}:
+                    for prop in tpl_cv:
+                        if prop not in self.customs:
+                            value = tpl_cv[prop]
+                        else:
+                            value = self.customs[prop]
+                        if self.has_plus(prop):
+                            value = value+self.get_plus_and_delete(prop)
+                        self.customs[prop]=value
+        for prop in self.customs:
+            value = self.customs[prop]
+            if self.has_plus(prop):
+                value = value = value+','+self.get_plus_and_delete(prop)
+                self.customs[prop] = value
+        #We can get custom properties in plus, we need to get all entires and put
+        #them into customs
+        cust_in_plus = self.get_all_plus_and_delete()
+        for prop in cust_in_plus:
+            self.customs[prop] = cust_in_plus[prop]
+        return self.customs
+
+    
+    def get_all_plus_and_delete(self):
+        res = {}
+        props = self.plus.keys() #we delete entries, so no for ... in ...
+        for prop in props:
+            res[prop] = self.get_plus_and_delete(prop)
+        return res
+
+
+    def has_plus(self, prop):
+        try:
+            self.plus[prop]
+        except:
+            return False
+        return True
+
+
+    def get_plus_and_delete(self, prop):
+        val = self.plus[prop]
+        del self.plus[prop]
+        return val
+
+
+    #If a prop is absent and is not required, put the default value
+    def fill_default(self):
+        for prop in Host.properties:
+            if not self.has(prop) and not Host.properties[prop]['required']:
+                value = Host.properties[prop]['default']
+                setattr(self, prop, value)
+
+
+    #Check is required prop are set:
+    #template are always correct
+    #contacts OR contactgroups is need
+    def is_correct(self):
+        if self.is_tpl:
+            return True
+        for prop in Host.properties:
+            if not self.has(prop) and Host.properties[prop]['required']:
+                if prop == 'contacts' or prop == 'contacgroups':
+                    pass
+                else:
+                    print "I do not have", prop
+                    return False
+        if self.has('contacts') or self.has('contacgroups'):
+            return True
+        else:
+            print "I do not have contacts nor contacgroups"
+            return False
+
+
+
+class Hosts:
+    def __init__(self, hosts):
+        self.hosts = {}
+        self.parents = digraph()
+        #0 is pynag node
+        self.parents.add_node(0)
+        for h in hosts:
+            self.hosts[h.id] = h
+
+
+    def __str__(self):
+        s = ''
+        for id in self.hosts:
+            s = s + str(id)  + str(self.hosts[id])  + '\n'
+        return s
+
+
+    def find_tpl_by_name(self, name):
+        for id in self.hosts:
+            h = self.hosts[id]
+            if h.is_tpl() and h.name == name:
+                return h
+        return None
+        
+    
+    def find_host_id_by_name(self, name):
+        for id in self.hosts:
+            h = self.hosts[id]
+            if h.has('host_name'):
+                if h.host_name == name:
+                    return id
+        return None
+
+
+    def find_host_by_name(self, name):
+        i = self.find_host_id_by_name(name)
+        if i is not None:
+            return self.hosts[i]
+        else:
+            return None
+
+
+    def linkify(self, timeperiods=None, commands=None):
+        self.linkify_h_by_tp(timeperiods)
+        self.linkify_h_by_h()
+        self.linkify_h_by_cmd(commands)
+        
+
+    #Simplify notif_period and check period by timeperiod id
+    def linkify_h_by_tp(self, timeperiods):
+        for h in self.hosts.values():
+            try:
+                #h = self.hosts[id]
+                #notif period
+                ntp_name = h.notification_period
+                ntp = timeperiods.find_tp_by_name(ntp_name)
+                h.notification_period = ntp
+                #check period
+                ctp_name = h.check_period
+                ctp = timeperiods.find_tp_by_name(ctp_name)
+                h.check_period = ctp
+            except AttributeError as e:
+                print e
+    
+
+    #Simplify parents names by host id
+    def linkify_h_by_h(self):
+        for h in self.hosts.values():
+            parents = h.parents
+            #The new member list, in id
+            new_parents = []
+            for parent in parents:
+                new_parents.append(self.find_host_by_name(parent))
+            
+            #We find the id, we remplace the names
+            h.parents = new_parents
+
+    
+    #Simplify hosts commands by commands id
+    def linkify_h_by_cmd(self, commands):
+        for h in self.hosts.values():
+            h.check_command = CommandCall(commands, h.check_command)
+
+
+    #Inheritance forjust a property
+    def apply_partial_inheritance(self, prop):
+        #print "checking for prop:", prop
+        for h in self.hosts.values():
+            #h = self.hosts[id]
+            h.get_property_by_inheritance(self, prop)
+
+
+    def apply_inheritance(self):
+        #We check for all Host properties if the host has it
+        #if not, it check all host templates for a value
+        for prop in Host.properties:
+            self.apply_partial_inheritance(prop)
+        for h in self.hosts.values():
+            #h = self.hosts[id]
+            h.get_customs_properties_by_inheritance(self)
+            
+
+    def fill_default(self):
+        for h in self.hosts.values():
+            #h=self.hosts[id]
+            h.fill_default()
+
+
+    def is_correct(self):
+        for h in self.hosts.values():
+            #h=self.hosts[id]
+            h.is_correct()
+
+
+    #We remove all properties not needed
+    def clean_useless(self):
+        #First, we remove the templates
+        tpls = [id for id in self.hosts if self.hosts[id].is_tpl()]
+        for id in tpls:
+            del self.hosts[id]
+
+
+    def pythonize(self):
+        for h in self.hosts.values():
+            #h=self.hosts[id]
+            h.pythonize()
+
+
+    #We look for hostgroups property in hosts and
+    def explode(self, hostgroups):
+        #Hostgroups property need to be fullfill for got the informations
+        self.apply_partial_inheritance('hostgroups')
+        for h in self.hosts.values():
+            #h = self.hosts[id]
+            if not h.is_tpl():
+                hname = h.host_name
+                if h.has('hostgroups'):
+                    hgs = h.hostgroups.split(',')
+                    for hg in hgs:
+                        hostgroups.add_member(hname, hg.strip())
+        
+        
+    #Create depenancies
+    def apply_dependancies(self):
+        #Create parent graph
+        for h in self.hosts.values():
+            id = h.id
+            #h = self.hosts[id]
+            if id not in self.parents:
+                self.parents.add_node(id)
+            #Make pynag the parent of all nodes
+
+            if len(h.parents) >= 1:
+                for parent in h.parents:
+                    if parent not in self.parents:
+                        self.parents.add_node(parent)
+                    self.parents.add_edge(parent, id)
+            else:#host without parent are pynag childs
+                self.parents.add_edge(0, id)
+        print "Loop: ", self.parents.find_cycle()
+        #print "Fin loop check"
+        
+        #Debug
+        #dot = self.parents.write(fmt='dot')
+        #f = open('graph.dot', 'w')
+        #f.write(dot)
+        #f.close()
+        #import os
+        # Draw as a png (note: this requires the graphiz 'dot' program to be installed)
+        #os.system('dot graph.dot -Tpng > hosts.png')

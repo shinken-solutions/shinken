@@ -1,0 +1,817 @@
+**********************
+Trying to resolve  1999-01-28	 00:00-24:00
+Googd catch 4
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Thu Jan 28 00:00:00 1999 End relatif Fri Jan 29 00:00:00 1999
+
+T_day Wed May  6 21:38:41 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Thu Jan 28 00:00:00 1999 End relatif Fri Jan 29 00:00:00 1999
+Sec from morning 77921
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+T_day2 Wed May  6 21:38:41 2009
+DR: i'm not find any valid time from 1241646800.73
+===> No future time!!!
+{'dateranges': [<__main__.CalendarDaterange instance at 0xb7c5050c>], 'unresolved': [], 'id': 1, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 0, 'smday': 28, 'emday': 28, 'start_time': 917478000.0, 'eyear': 1999, 'swday': 0, 'emon': '01', 'swday_offset': 0, 'smon': '01', 'end_time': 917564400.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 1999, 'timeranges': [<__main__.Timerange instance at 0xb7c504ac>]}
+Start and end:('Thu Jan 28 00:00:00 1999', 'Fri Jan 29 00:00:00 1999')
+
+
+**********************
+Trying to resolve  monday 3			00:00-24:00		
+Good catch 12
+Debug: ('monday', '3', '00:00-24:00')
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon May 18 00:00:00 2009 End relatif Tue May 19 00:00:00 2009
+
+T_day Mon May 18 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon May 18 00:00:00 2009 End relatif Tue May 19 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Mon May 18 00:00:00 2009
+Get next valid for now + 5 min ==> Mon May 18 00:00:00 2009 <==
+{'dateranges': [<__main__.WeekDayDaterange instance at 0xb7c5050c>], 'unresolved': [], 'id': 2, 'is_valid_today': False}
+{'ewday': 'monday', 'is_valid_today': False, 'skip_interval': 0, 'smday': 0, 'emday': 0, 'start_time': 1242597600.0, 'eyear': 2009, 'swday': 'monday', 'emon': 0, 'swday_offset': 3, 'smon': 0, 'end_time': 1242684000.0, 'ewday_offset': 3, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c5054c>]}
+Start and end:('Mon May 18 00:00:00 2009', 'Tue May 19 00:00:00 2009')
+
+
+**********************
+Trying to resolve  day 2			00:00-24:00
+Good catch 12
+Debug: ('day', '2', '00:00-24:00')
+Need  month too
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Need  month too
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Need  month too
+Start relatif: Wed Jun  3 00:00:00 2009 End relatif Wed Jun  3 00:00:00 2009
+
+T_day Wed Jun  3 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Need  month too
+Start relatif: Wed Jun  3 00:00:00 2009 End relatif Wed Jun  3 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Wed Jun  3 00:00:00 2009
+Get next valid for now + 5 min ==> Wed Jun  3 00:00:00 2009 <==
+Need  month too
+{'dateranges': [<__main__.MonthDayDaterange instance at 0xb7c5050c>], 'unresolved': [], 'id': 3, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 0, 'smday': 2, 'emday': 2, 'start_time': 1243980000.0, 'eyear': 2009, 'swday': 0, 'emon': 0, 'swday_offset': 0, 'smon': 0, 'end_time': 1243980000.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c5062c>]}
+Start and end:('Wed Jun  3 00:00:00 2009', 'Wed Jun  3 00:00:00 2009')
+
+
+**********************
+Trying to resolve  february 10		00:00-24:00
+Good catch 12
+Debug: ('february', '10', '00:00-24:00')
+Need  year
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Need  year
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Need  year
+Start relatif: Wed Feb 10 00:00:00 2010 End relatif Thu Feb 11 00:00:00 2010
+
+T_day Wed Feb 10 00:00:00 2010
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Need  year
+Start relatif: Wed Feb 10 00:00:00 2010 End relatif Thu Feb 11 00:00:00 2010
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Wed Feb 10 00:00:00 2010
+Get next valid for now + 5 min ==> Wed Feb 10 00:00:00 2010 <==
+Need  year
+{'dateranges': [<__main__.MonthDateDaterange instance at 0xb7c5062c>], 'unresolved': [], 'id': 4, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 0, 'smday': 10, 'emday': 10, 'start_time': 1265756400.0, 'eyear': 2009, 'swday': 0, 'emon': 'february', 'swday_offset': 0, 'smon': 'february', 'end_time': 1265842800.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50bac>]}
+Start and end:('Wed Feb 10 00:00:00 2010', 'Thu Feb 11 00:00:00 2010')
+
+
+**********************
+Trying to resolve  february -1 00:00-24:00
+Good catch 11
+Debug: ('february', '-1', '', '00:00-24:00')
+Good catch 12
+Debug: ('february', '-1', '00:00-24:00')
+Need  year
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Need  year
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Need  year
+Start relatif: Sun Feb 28 00:00:00 2010 End relatif Mon Mar  1 00:00:00 2010
+
+T_day Sun Feb 28 00:00:00 2010
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Need  year
+Start relatif: Sun Feb 28 00:00:00 2010 End relatif Mon Mar  1 00:00:00 2010
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Sun Feb 28 00:00:00 2010
+Get next valid for now + 5 min ==> Sun Feb 28 00:00:00 2010 <==
+Need  year
+{'dateranges': [<__main__.MonthDateDaterange instance at 0xb7c5044c>], 'unresolved': [], 'id': 5, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 0, 'smday': -1, 'emday': -1, 'start_time': 1267311600.0, 'eyear': 2009, 'swday': 0, 'emon': 'february', 'swday_offset': 0, 'smon': 'february', 'end_time': 1267398000.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50b0c>]}
+Start and end:('Sun Feb 28 00:00:00 2010', 'Mon Mar  1 00:00:00 2010')
+
+
+**********************
+Trying to resolve  friday -2			00:00-24:00
+Good catch 12
+Debug: ('friday', '-2', '00:00-24:00')
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed May 20 00:00:00 2009 End relatif Thu May 21 00:00:00 2009
+
+T_day Wed May 20 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed May 20 00:00:00 2009 End relatif Thu May 21 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Wed May 20 00:00:00 2009
+Get next valid for now + 5 min ==> Wed May 20 00:00:00 2009 <==
+{'dateranges': [<__main__.WeekDayDaterange instance at 0xb7c50b0c>], 'unresolved': [], 'id': 6, 'is_valid_today': False}
+{'ewday': 'friday', 'is_valid_today': False, 'skip_interval': 0, 'smday': 0, 'emday': 0, 'start_time': 1242770400.0, 'eyear': 2009, 'swday': 'friday', 'emon': 0, 'swday_offset': -2, 'smon': 0, 'end_time': 1242856800.0, 'ewday_offset': -2, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c506ac>]}
+Start and end:('Wed May 20 00:00:00 2009', 'Thu May 21 00:00:00 2009')
+
+
+**********************
+Trying to resolve  thursday -1 november 00:00-24:00
+Good catch 11
+Debug: ('thursday', '-1', 'november', '00:00-24:00')
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Thu Nov 26 00:00:00 2009 End relatif Fri Nov 27 00:00:00 2009
+
+T_day Thu Nov 26 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Thu Nov 26 00:00:00 2009 End relatif Fri Nov 27 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Thu Nov 26 00:00:00 2009
+Get next valid for now + 5 min ==> Thu Nov 26 00:00:00 2009 <==
+{'dateranges': [<__main__.MonthWeekDayDaterange instance at 0xb7c5050c>], 'unresolved': [], 'id': 7, 'is_valid_today': False}
+{'ewday': 'thursday', 'is_valid_today': False, 'skip_interval': 0, 'smday': 0, 'emday': 0, 'start_time': 1259190000.0, 'eyear': 2009, 'swday': 'thursday', 'emon': 'november', 'swday_offset': -1, 'smon': 'november', 'end_time': 1259276400.0, 'ewday_offset': -1, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50c6c>]}
+Start and end:('Thu Nov 26 00:00:00 2009', 'Fri Nov 27 00:00:00 2009')
+
+
+**********************
+Trying to resolve  2007-01-01 - 2008-02-01	00:00-24:00
+Googd catch 3
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon Jan  1 00:00:00 2007 End relatif Sat Feb  2 00:00:00 2008
+
+T_day Wed May  6 21:38:41 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon Jan  1 00:00:00 2007 End relatif Sat Feb  2 00:00:00 2008
+Sec from morning 77921
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+T_day2 Wed May  6 21:38:41 2009
+DR: i'm not find any valid time from 1241646800.74
+===> No future time!!!
+{'dateranges': [<__main__.CalendarDaterange instance at 0xb7c50dcc>], 'unresolved': [], 'id': 8, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 0, 'smday': 1, 'emday': 1, 'start_time': 1167606000.0, 'eyear': 2008, 'swday': 0, 'emon': '02', 'swday_offset': 0, 'smon': '01', 'end_time': 1201906800.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2007, 'timeranges': [<__main__.Timerange instance at 0xb7c50e2c>]}
+Start and end:('Mon Jan  1 00:00:00 2007', 'Sat Feb  2 00:00:00 2008')
+
+
+**********************
+Trying to resolve  monday 3 - thursday 4	00:00-24:00
+Googd catch 10
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon May 18 00:00:00 2009 End relatif Fri May 29 00:00:00 2009
+
+T_day Mon May 18 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon May 18 00:00:00 2009 End relatif Fri May 29 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Mon May 18 00:00:00 2009
+Get next valid for now + 5 min ==> Mon May 18 00:00:00 2009 <==
+{'dateranges': [<__main__.WeekDayDaterange instance at 0xb7c50e2c>], 'unresolved': [], 'id': 9, 'is_valid_today': False}
+{'ewday': 'thursday', 'is_valid_today': False, 'skip_interval': 0, 'smday': 0, 'emday': 0, 'start_time': 1242597600.0, 'eyear': 2009, 'swday': 'monday', 'emon': 0, 'swday_offset': 3, 'smon': 0, 'end_time': 1243548000.0, 'ewday_offset': 4, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c5062c>]}
+Start and end:('Mon May 18 00:00:00 2009', 'Fri May 29 00:00:00 2009')
+
+
+**********************
+Trying to resolve  day 1 - 15		00:00-24:00
+Googd catch 9
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+DEBUG: T: Wed May  6 21:43:41 2009 Morning Wed May  6 00:00:00 2009 sec from morning Thu Jan  1 22:43:41 1970
+With 0 : 0 - 24 : 0
+TR {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24}  for 1241639021.74 is valid
+Get next valid for now + 5 min ==> Wed May  6 21:43:41 2009 <==
+{'dateranges': [<__main__.MonthDayDaterange instance at 0xb7c50e2c>], 'unresolved': [], 'id': 10, 'is_valid_today': True}
+{'ewday': 0, 'is_valid_today': True, 'skip_interval': 0, 'smday': 1, 'emday': 15, 'start_time': 1241128800.0, 'eyear': 2009, 'swday': 0, 'emon': 0, 'swday_offset': 0, 'smon': 0, 'end_time': 1242424800.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50b0c>]}
+Start and end:('Fri May  1 00:00:00 2009', 'Sat May 16 00:00:00 2009')
+
+
+**********************
+Trying to resolve  day 20 - -1		00:00-24:00
+Googd catch 9
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed May 20 00:00:00 2009 End relatif Mon Jun  1 00:00:00 2009
+
+T_day Wed May 20 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed May 20 00:00:00 2009 End relatif Mon Jun  1 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Wed May 20 00:00:00 2009
+Get next valid for now + 5 min ==> Wed May 20 00:00:00 2009 <==
+{'dateranges': [<__main__.MonthDayDaterange instance at 0xb7c50f0c>], 'unresolved': [], 'id': 11, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 0, 'smday': 20, 'emday': -1, 'start_time': 1242770400.0, 'eyear': 2009, 'swday': 0, 'emon': 0, 'swday_offset': 0, 'smon': 0, 'end_time': 1243807200.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c5062c>]}
+Start and end:('Wed May 20 00:00:00 2009', 'Mon Jun  1 00:00:00 2009')
+
+
+**********************
+Trying to resolve  july -10 - -1		00:00-24:00
+Googd catch 9
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed Jul 22 00:00:00 2009 End relatif Sat Aug  1 00:00:00 2009
+
+T_day Wed Jul 22 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed Jul 22 00:00:00 2009 End relatif Sat Aug  1 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Wed Jul 22 00:00:00 2009
+Get next valid for now + 5 min ==> Wed Jul 22 00:00:00 2009 <==
+{'dateranges': [<__main__.MonthDateDaterange instance at 0xb7c50b6c>], 'unresolved': [], 'id': 12, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 0, 'smday': -10, 'emday': -1, 'start_time': 1248213600.0, 'eyear': 2009, 'swday': 0, 'emon': 'july', 'swday_offset': 0, 'smon': 'july', 'end_time': 1249077600.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50e2c>]}
+Start and end:('Wed Jul 22 00:00:00 2009', 'Sat Aug  1 00:00:00 2009')
+
+
+**********************
+Trying to resolve  april 10 - may 15		00:00-24:00
+Googd catch 10
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+DEBUG: T: Wed May  6 21:43:41 2009 Morning Wed May  6 00:00:00 2009 sec from morning Thu Jan  1 22:43:41 1970
+With 0 : 0 - 24 : 0
+TR {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24}  for 1241639021.74 is valid
+Get next valid for now + 5 min ==> Wed May  6 21:43:41 2009 <==
+{'dateranges': [<__main__.MonthDateDaterange instance at 0xb7c50c2c>], 'unresolved': [], 'id': 13, 'is_valid_today': True}
+{'ewday': 0, 'is_valid_today': True, 'skip_interval': 0, 'smday': 10, 'emday': 15, 'start_time': 1239314400.0, 'eyear': 2009, 'swday': 0, 'emon': 'may', 'swday_offset': 0, 'smon': 'april', 'end_time': 1242424800.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50b0c>]}
+Start and end:('Fri Apr 10 00:00:00 2009', 'Sat May 16 00:00:00 2009')
+
+
+**********************
+Trying to resolve  tuesday 1 april - friday 2 may 00:00-24:00
+Googd catch 8
+Debug: ('tuesday', '1', 'april', 'friday', '2', 'may', '00:00-24:00')
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+DEBUG: T: Wed May  6 21:43:41 2009 Morning Wed May  6 00:00:00 2009 sec from morning Thu Jan  1 22:43:41 1970
+With 0 : 0 - 24 : 0
+TR {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24}  for 1241639021.74 is valid
+Get next valid for now + 5 min ==> Wed May  6 21:43:41 2009 <==
+{'dateranges': [<__main__.MonthWeekDayDaterange instance at 0xb7c50e2c>], 'unresolved': [], 'id': 14, 'is_valid_today': True}
+{'ewday': 'friday', 'is_valid_today': True, 'skip_interval': 0, 'smday': 0, 'emday': 0, 'start_time': 1239055200.0, 'eyear': 2009, 'swday': 'tuesday', 'emon': 'may', 'swday_offset': 1, 'smon': 'april', 'end_time': 1241820000.0, 'ewday_offset': 2, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50b6c>]}
+Start and end:('Tue Apr  7 00:00:00 2009', 'Sat May  9 00:00:00 2009')
+
+
+**********************
+Trying to resolve  2007-01-01 - 2008-02-01 / 3 00:00-24:00
+Googd catch 1
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon Jan  1 00:00:00 2007 End relatif Sat Feb  2 00:00:00 2008
+
+T_day Wed May  6 21:38:41 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon Jan  1 00:00:00 2007 End relatif Sat Feb  2 00:00:00 2008
+Sec from morning 77921
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+T_day2 Wed May  6 21:38:41 2009
+DR: i'm not find any valid time from 1241646800.74
+===> No future time!!!
+{'dateranges': [<__main__.CalendarDaterange instance at 0xb7c5062c>], 'unresolved': [], 'id': 15, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 3, 'smday': 1, 'emday': 1, 'start_time': 1167606000.0, 'eyear': 2008, 'swday': 0, 'emon': '02', 'swday_offset': 0, 'smon': '01', 'end_time': 1201906800.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2007, 'timeranges': [<__main__.Timerange instance at 0xb7c5050c>]}
+Start and end:('Mon Jan  1 00:00:00 2007', 'Sat Feb  2 00:00:00 2008')
+
+
+**********************
+Trying to resolve  2008-04-01 / 7		00:00-24:00
+Good catch 2
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Tue Apr  1 00:00:00 2008 End relatif Wed Apr  2 00:00:00 2008
+
+T_day Wed May  6 21:38:41 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Tue Apr  1 00:00:00 2008 End relatif Wed Apr  2 00:00:00 2008
+Sec from morning 77921
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+T_day2 Wed May  6 21:38:41 2009
+DR: i'm not find any valid time from 1241646800.74
+===> No future time!!!
+{'dateranges': [<__main__.CalendarDaterange instance at 0xb7c5044c>], 'unresolved': [], 'id': 16, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 7, 'smday': 1, 'emday': 1, 'start_time': 1207000800.0, 'eyear': 2008, 'swday': 0, 'emon': '04', 'swday_offset': 0, 'smon': '04', 'end_time': 1207087200.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2008, 'timeranges': [<__main__.Timerange instance at 0xb7c50dec>]}
+Start and end:('Tue Apr  1 00:00:00 2008', 'Wed Apr  2 00:00:00 2008')
+
+
+**********************
+Trying to resolve  day 1 - 15 / 5		00:00-24:00
+Googd catch 7
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+DEBUG: T: Wed May  6 21:43:41 2009 Morning Wed May  6 00:00:00 2009 sec from morning Thu Jan  1 22:43:41 1970
+With 0 : 0 - 24 : 0
+TR {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24}  for 1241639021.74 is valid
+Get next valid for now + 5 min ==> Wed May  6 21:43:41 2009 <==
+{'dateranges': [<__main__.MonthDayDaterange instance at 0xb7c50dec>], 'unresolved': [], 'id': 17, 'is_valid_today': True}
+{'ewday': 0, 'is_valid_today': True, 'skip_interval': 5, 'smday': 1, 'emday': 15, 'start_time': 1241128800.0, 'eyear': 2009, 'swday': 0, 'emon': 0, 'swday_offset': 0, 'smon': 0, 'end_time': 1242424800.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50f6c>]}
+Start and end:('Fri May  1 00:00:00 2009', 'Sat May 16 00:00:00 2009')
+
+
+**********************
+Trying to resolve  july 10 - 15 / 2 00:00-24:00
+Googd catch 7
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Fri Jul 10 00:00:00 2009 End relatif Thu Jul 16 00:00:00 2009
+
+T_day Fri Jul 10 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Fri Jul 10 00:00:00 2009 End relatif Thu Jul 16 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Fri Jul 10 00:00:00 2009
+Get next valid for now + 5 min ==> Fri Jul 10 00:00:00 2009 <==
+{'dateranges': [<__main__.MonthDateDaterange instance at 0xb7c50e2c>], 'unresolved': [], 'id': 18, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 2, 'smday': 10, 'emday': 15, 'start_time': 1247176800.0, 'eyear': 2009, 'swday': 0, 'emon': 'july', 'swday_offset': 0, 'smon': 'july', 'end_time': 1247695200.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c5062c>]}
+Start and end:('Fri Jul 10 00:00:00 2009', 'Thu Jul 16 00:00:00 2009')
+
+
+**********************
+Trying to resolve  tuesday 1 april - friday 2 may / 6 00:00-24:00
+Googd catch 5
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+DEBUG: T: Wed May  6 21:43:41 2009 Morning Wed May  6 00:00:00 2009 sec from morning Thu Jan  1 22:43:41 1970
+With 0 : 0 - 24 : 0
+TR {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24}  for 1241639021.74 is valid
+Get next valid for now + 5 min ==> Wed May  6 21:43:41 2009 <==
+{'dateranges': [<__main__.MonthWeekDayDaterange instance at 0xb7c50e8c>], 'unresolved': [], 'id': 19, 'is_valid_today': True}
+{'ewday': 'friday', 'is_valid_today': True, 'skip_interval': 6, 'smday': 0, 'emday': 0, 'start_time': 1239055200.0, 'eyear': 2009, 'swday': 'tuesday', 'emon': 'may', 'swday_offset': 1, 'smon': 'april', 'end_time': 1241820000.0, 'ewday_offset': 2, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c5044c>]}
+Start and end:('Tue Apr  7 00:00:00 2009', 'Sat May  9 00:00:00 2009')
+
+
+**********************
+Trying to resolve  tuesday 1 october - friday 2 may / 6 00:00-24:00
+Googd catch 5
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Tue Oct  6 00:00:00 2009 End relatif Sat May 15 00:00:00 2010
+
+T_day Tue Oct  6 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Tue Oct  6 00:00:00 2009 End relatif Sat May 15 00:00:00 2010
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Tue Oct  6 00:00:00 2009
+Get next valid for now + 5 min ==> Tue Oct  6 00:00:00 2009 <==
+{'dateranges': [<__main__.MonthWeekDayDaterange instance at 0xb7c50e2c>], 'unresolved': [], 'id': 20, 'is_valid_today': False}
+{'ewday': 'friday', 'is_valid_today': False, 'skip_interval': 6, 'smday': 0, 'emday': 0, 'start_time': 1254780000.0, 'eyear': 2009, 'swday': 'tuesday', 'emon': 'may', 'swday_offset': 1, 'smon': 'october', 'end_time': 1273874400.0, 'ewday_offset': 2, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50d2c>]}
+Start and end:('Tue Oct  6 00:00:00 2009', 'Sat May 15 00:00:00 2010')
+
+
+**********************
+Trying to resolve  december 2 - may -15		00:00-24:00
+Googd catch 10
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed Dec  2 00:00:00 2009 End relatif Tue May 18 00:00:00 2010
+
+T_day Wed Dec  2 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed Dec  2 00:00:00 2009 End relatif Tue May 18 00:00:00 2010
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Wed Dec  2 00:00:00 2009
+Get next valid for now + 5 min ==> Wed Dec  2 00:00:00 2009 <==
+{'dateranges': [<__main__.MonthDateDaterange instance at 0xb7c50d2c>], 'unresolved': [], 'id': 21, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 0, 'smday': 2, 'emday': -15, 'start_time': 1259708400.0, 'eyear': 2009, 'swday': 0, 'emon': 'may', 'swday_offset': 0, 'smon': 'december', 'end_time': 1274133600.0, 'ewday_offset': 0, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c5044c>]}
+Start and end:('Wed Dec  2 00:00:00 2009', 'Tue May 18 00:00:00 2010')
+
+
+**********************
+Trying to resolve  monday 3 - thursday 4 / 2 00:00-24:00
+Googd catch 6
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon May 18 00:00:00 2009 End relatif Fri May 29 00:00:00 2009
+
+T_day Mon May 18 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon May 18 00:00:00 2009 End relatif Fri May 29 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Mon May 18 00:00:00 2009
+Get next valid for now + 5 min ==> Mon May 18 00:00:00 2009 <==
+{'dateranges': [<__main__.WeekDayDaterange instance at 0xb7c5044c>], 'unresolved': [], 'id': 22, 'is_valid_today': False}
+{'ewday': 'thursday', 'is_valid_today': False, 'skip_interval': 2, 'smday': 0, 'emday': 0, 'start_time': 1242597600.0, 'eyear': 2009, 'swday': 'monday', 'emon': 0, 'swday_offset': 3, 'smon': 0, 'end_time': 1243548000.0, 'ewday_offset': 4, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50eac>]}
+Start and end:('Mon May 18 00:00:00 2009', 'Fri May 29 00:00:00 2009')
+
+
+**********************
+Trying to resolve  monday 4 - thursday 3 / 2 00:00-24:00
+Googd catch 6
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon May 25 00:00:00 2009 End relatif Mon Jun 22 00:00:00 2009
+
+T_day Mon May 25 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Mon May 25 00:00:00 2009 End relatif Mon Jun 22 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Mon May 25 00:00:00 2009
+Get next valid for now + 5 min ==> Mon May 25 00:00:00 2009 <==
+{'dateranges': [<__main__.WeekDayDaterange instance at 0xb7c5044c>], 'unresolved': [], 'id': 23, 'is_valid_today': False}
+{'ewday': 'thursday', 'is_valid_today': False, 'skip_interval': 2, 'smday': 0, 'emday': 0, 'start_time': 1243202400.0, 'eyear': 2009, 'swday': 'monday', 'emon': 0, 'swday_offset': 4, 'smon': 0, 'end_time': 1245621600.0, 'ewday_offset': 3, 'other': '00:00-24:00', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50c6c>]}
+Start and end:('Mon May 25 00:00:00 2009', 'Mon Jun 22 00:00:00 2009')
+
+
+**********************
+Trying to resolve  day -1 - 15 / 5		01:00-24:00,00:30-05:60
+Googd catch 7
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 1, 'hend': 24} TR: {'mend': 60, 'mstart': 30, 'hstart': 0, 'hend': 5} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Sun May 31 00:00:00 2009 End relatif Tue Jun 16 00:00:00 2009
+
+T_day Sun May 31 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 1, 'hend': 24} TR: {'mend': 60, 'mstart': 30, 'hstart': 0, 'hend': 5} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 1, 'hend': 24} TR: {'mend': 60, 'mstart': 30, 'hstart': 0, 'hend': 5} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Sun May 31 00:00:00 2009 End relatif Tue Jun 16 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 1, 'hend': 24} TR: {'mend': 60, 'mstart': 30, 'hstart': 0, 'hend': 5} Starts [3600, 1800]
+T_day2 Sun May 31 00:00:00 2009
+Get next valid for now + 5 min ==> Sun May 31 00:30:00 2009 <==
+{'dateranges': [<__main__.MonthDayDaterange instance at 0xb7c50c6c>], 'unresolved': [], 'id': 24, 'is_valid_today': False}
+{'ewday': 0, 'is_valid_today': False, 'skip_interval': 5, 'smday': -1, 'emday': 15, 'start_time': 1243720800.0, 'eyear': 2009, 'swday': 0, 'emon': 0, 'swday_offset': 0, 'smon': 0, 'end_time': 1245103200.0, 'ewday_offset': 0, 'other': '01:00-24:00,00:30-05:60', 'syear': 2009, 'timeranges': [<__main__.Timerange instance at 0xb7c50d4c>, <__main__.Timerange instance at 0xb7c5050c>]}
+Start and end:('Sun May 31 00:00:00 2009', 'Tue Jun 16 00:00:00 2009')
+
+
+**********************
+Trying to resolve  tuesday 00:00-24:00
+Good catch 13
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Tue May 12 00:00:00 2009 End relatif Wed May 13 00:00:00 2009
+
+T_day Tue May 12 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Tue May 12 00:00:00 2009 End relatif Wed May 13 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Tue May 12 00:00:00 2009
+Get next valid for now + 5 min ==> Tue May 12 00:00:00 2009 <==
+{'dateranges': [<__main__.StandardDaterange instance at 0xb7c5050c>], 'unresolved': [], 'id': 25, 'is_valid_today': False}
+{'syear': 2009, 'is_valid_today': False, 'start_time': 1242079200.0, 'month': 5, 'other': '00:00-24:00', 'end_time': 1242165600.0, 'wday': 3, 'day': 'tuesday', 'timeranges': [<__main__.Timerange instance at 0xb7c50c6c>]}
+Start and end:('Tue May 12 00:00:00 2009', 'Wed May 13 00:00:00 2009')
+
+
+**********************
+Trying to resolve  sunday 00:00-24:00
+Good catch 13
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Sun May 10 00:00:00 2009 End relatif Mon May 11 00:00:00 2009
+
+T_day Sun May 10 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Sun May 10 00:00:00 2009 End relatif Mon May 11 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 24} Starts [0]
+T_day2 Sun May 10 00:00:00 2009
+Get next valid for now + 5 min ==> Sun May 10 00:00:00 2009 <==
+{'dateranges': [<__main__.StandardDaterange instance at 0xb7c5050c>], 'unresolved': [], 'id': 26, 'is_valid_today': False}
+{'syear': 2009, 'is_valid_today': False, 'start_time': 1241906400.0, 'month': 5, 'other': '00:00-24:00', 'end_time': 1241992800.0, 'wday': 3, 'day': 'sunday', 'timeranges': [<__main__.Timerange instance at 0xb7c50d4c>]}
+Start and end:('Sun May 10 00:00:00 2009', 'Mon May 11 00:00:00 2009')
+
+
+**********************
+Trying to resolve  saturday 03:00-24:00,00:32-01:02
+Good catch 13
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 3, 'hend': 24} TR: {'mend': 2, 'mstart': 32, 'hstart': 0, 'hend': 1} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Sat May  9 00:00:00 2009 End relatif Sun May 10 00:00:00 2009
+
+T_day Sat May  9 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 0, 'mstart': 0, 'hstart': 3, 'hend': 24} TR: {'mend': 2, 'mstart': 32, 'hstart': 0, 'hend': 1} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 0, 'mstart': 0, 'hstart': 3, 'hend': 24} TR: {'mend': 2, 'mstart': 32, 'hstart': 0, 'hend': 1} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Sat May  9 00:00:00 2009 End relatif Sun May 10 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 0, 'mstart': 0, 'hstart': 3, 'hend': 24} TR: {'mend': 2, 'mstart': 32, 'hstart': 0, 'hend': 1} Starts [10800, 1920]
+T_day2 Sat May  9 00:00:00 2009
+Get next valid for now + 5 min ==> Sat May  9 00:32:00 2009 <==
+{'dateranges': [<__main__.StandardDaterange instance at 0xb7c5050c>], 'unresolved': [], 'id': 27, 'is_valid_today': False}
+{'syear': 2009, 'is_valid_today': False, 'start_time': 1241820000.0, 'month': 5, 'other': '03:00-24:00,00:32-01:02', 'end_time': 1241906400.0, 'wday': 3, 'day': 'saturday', 'timeranges': [<__main__.Timerange instance at 0xb7c50c2c>, <__main__.Timerange instance at 0xb7c50e0c>]}
+Start and end:('Sat May  9 00:00:00 2009', 'Sun May 10 00:00:00 2009')
+
+
+**********************
+Trying to resolve  wednesday 09:00-15:46,00:00-21:00
+Good catch 13
+TP: calling get_next_valid_time_from_t : Wed May  6 21:43:41 2009
+get_next_valid_time_from_t Wed May  6 21:43:41 2009
+DEBUG: T: Wed May  6 21:43:41 2009 Morning Wed May  6 00:00:00 2009 sec from morning Thu Jan  1 22:43:41 1970
+With 9 : 0 - 15 : 46
+TR {'mend': 46, 'mstart': 0, 'hstart': 9, 'hend': 15} for 1241639021.75 is not valid
+DEBUG: T: Wed May  6 21:43:41 2009 Morning Wed May  6 00:00:00 2009 sec from morning Thu Jan  1 22:43:41 1970
+With 0 : 0 - 21 : 0
+TR {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 21} for 1241639021.75 is not valid
+Proposed t is not valid
+
+Sec from morning 78221
+TR: {'mend': 46, 'mstart': 0, 'hstart': 9, 'hend': 15} TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 21} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed May 13 00:00:00 2009 End relatif Thu May 14 00:00:00 2009
+
+T_day Wed May 13 00:00:00 2009
+Debug for Wed May  6 21:43:41 2009
+Sec from morning 78221
+TR: {'mend': 46, 'mstart': 0, 'hstart': 9, 'hend': 15} TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 21} Starts []
+Next available range: None
+At last... None
+Sec from morning 86000
+TR: {'mend': 46, 'mstart': 0, 'hstart': 9, 'hend': 15} TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 21} Starts []
+!!!!!!!!!!!!!Need new period
+Start relatif: Wed May 13 00:00:00 2009 End relatif Thu May 14 00:00:00 2009
+Sec from morning 0
+TR: {'mend': 46, 'mstart': 0, 'hstart': 9, 'hend': 15} TR: {'mend': 0, 'mstart': 0, 'hstart': 0, 'hend': 21} Starts [32400, 0]
+T_day2 Wed May 13 00:00:00 2009
+Get next valid for now + 5 min ==> Wed May 13 00:00:00 2009 <==
+{'dateranges': [<__main__.StandardDaterange instance at 0xb7c50c6c>], 'unresolved': [], 'id': 28, 'is_valid_today': True}
+{'syear': 2009, 'is_valid_today': True, 'start_time': 1241560800.0, 'month': 5, 'other': '09:00-15:46,00:00-21:00', 'end_time': 1241647200.0, 'wday': 3, 'day': 'wednesday', 'timeranges': [<__main__.Timerange instance at 0xb7c50c2c>, <__main__.Timerange instance at 0xb7c50eac>]}
+Start and end:('Wed May  6 00:00:00 2009', 'Thu May  7 00:00:00 2009')
+
+
