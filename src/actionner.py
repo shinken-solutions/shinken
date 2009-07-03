@@ -17,11 +17,13 @@ m = Queue() #Slave -> Master
 schedulers = {
     0 : {'url' : "PYROLOC://localhost:7768/Checks",
          'con' : None,
-         'verifs' : {}
+         'verifs' : {},
+         'running_id' : 0
          },
     1 : {'url' : "PYROLOC://localhost:7770/Checks",
          'con' : None,
-         'verifs' : {}
+         'verifs' : {},
+         'running_id' : 0
          }
     }
 
@@ -43,6 +45,14 @@ def pynag_con_init(id):
     global schedulers#request_checks
     print "init de connexion avec", schedulers[id]['url']
     schedulers[id]['con'] = Pyro.core.getProxyForURI(schedulers[id]['url'])
+    try:
+        new_run_id = schedulers[id]['con'].get_running_id()
+    except Pyro.errors.ProtocolError, exp:
+        print exp
+        return
+    if schedulers[id]['running_id'] != 0 and new_run_id != running_id:
+        schedulers[id]['verifs'].clear()
+    schedulers[id]['running_id'] = new_run_id
 
 
 #Manage messages from Workers
@@ -174,6 +184,7 @@ if __name__ == '__main__':
             new_checks = []
             #We check for new check
             for sched_id in schedulers:
+                #new_checks = []
                 try:
                     con = schedulers[sched_id]['con']
                     tmp_verifs = con.get_checks(do_checks=True, do_actions=True)
@@ -192,6 +203,7 @@ if __name__ == '__main__':
             #print "********Got %d new checks*******" % len(new_checks)
             for chk in new_checks:
                 chk.set_status('queue')
+                verifs = schedulers[chk.sched_id]['verifs']
                 id = chk.get_id()
                 verifs[id] = chk
                 msg = Message(id=0, type='Do', data=verifs[id])
