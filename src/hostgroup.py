@@ -12,6 +12,7 @@ class Hostgroup(Itemgroup):
         }
 
     def get_hosts(self):
+        print "Searching hosts", self.members
         return self.members
 
 

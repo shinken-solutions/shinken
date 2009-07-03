@@ -1,4 +1,6 @@
-import os, sys, re, time, string
+import os, sys, re, time, string, copy
+import pygraph
+import itertools
 
 from timeperiod import Timeperiod,Timeperiods
 from service import Service,Services
@@ -10,6 +12,11 @@ from contactgroup import Contactgroup,Contactgroups
 from servicegroup import Servicegroup,Servicegroups
 from item import Item
 from macroresolver import MacroResolver
+from borg import Borg
+from singleton import Singleton
+from servicedependency import Servicedependency, Servicedependencies
+from hostdependency import Hostdependency, Hostdependencies
+from schedulerlink import SchedulerLink, SchedulerLinks
 
 from util import to_int, to_char, to_split, to_bool
 #import psyco
@@ -26,6 +33,12 @@ class Config(Item):
     #commands
     #timeperiods
 
+    #Properties: 
+    #required : if True, there is not default, and the config must put them
+    #default: if not set, take this value
+    #pythonize : function call to 
+    #class_inherit : (Service, 'blabla') : must set this propertie to the Service class with name blabla
+    #if (Service, None) : must set this properti to the Service class with same name
     properties={'log_file' : {'required':False, 'default' : '/tmp/log.txt'},
                 'object_cache_file' : {'required':False, 'default' : '/tmp/object.dat'},
                 'precached_object_file' : {'required':False , 'default' : '/tmp/object.precache'},
@@ -35,12 +48,12 @@ class Config(Item):
                 'status_update_interval' : {'required':False, 'default':'15', 'pythonize': to_int},
                 'nagios_user' : {'required':False, 'default':'nap'},
                 'nagios_group' : {'required':False, 'default':'nap'},
-                'enable_notifications' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'execute_service_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'accept_passive_service_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'execute_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'accept_passive_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'enable_event_handlers' : {'required':False, 'default':'1', 'pythonize': to_bool},
+                'enable_notifications' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
+                'execute_service_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'execute_checks')]},
+                'accept_passive_service_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'accept_passive_checks')]},
+                'execute_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'execute_checks')]},
+                'accept_passive_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'accept_passive_checks')]},
+                'enable_event_handlers' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'log_rotation_method' : {'required':False, 'default':'d', 'pythonize': to_char},
                 'log_archive_path' : {'required':False, 'default':'/tmp/'},
                 'check_external_commands' : {'required':False, 'default':'1', 'pythonize': to_bool},
@@ -55,93 +68,93 @@ class Config(Item):
                 'retention_update_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
                 'use_retained_program_state' : {'required':False, 'default':'1', 'pythonize': to_bool},
                 'use_retained_scheduling_info' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'retained_host_attribute_mask' : {'required':False, 'default':'0'},
-                'retained_service_attribute_mask' : {'required':False, 'default':'0'},
-                'retained_process_host_attribute_mask' : {'required':False, 'default':'0'},
-                'retained_process_service_attribute_mask' : {'required':False, 'default':'0'},
-                'retained_contact_host_attribute_mask' : {'required':False, 'default':'0'},
-                'retained_contact_service_attribute_mask' : {'required':False, 'default':'0'},
+                'retained_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_attribute_mask')]},
+                'retained_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Service, 'retained_attribute_mask')]},
+                'retained_process_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_process_attribute_mask')]},
+                'retained_process_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_process_attribute_mask')]},
+                'retained_contact_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_contact_attribute_mask')]},
+                'retained_contact_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Service, 'retained_contact_attribute_mask')]},
                 'use_syslog' : {'required':False, 'default':'0', 'pythonize': to_bool},
-                'log_notifications' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'log_service_retries' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'log_host_retries' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'log_event_handlers' : {'required':False, 'default':'1', 'pythonize': to_bool},
+                'log_notifications' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
+                'log_service_retries' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'log_retries')]},
+                'log_host_retries' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'log_retries')]},
+                'log_event_handlers' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'log_initial_states' : {'required':False, 'default':'1', 'pythonize': to_bool},
                 'log_external_commands' : {'required':False, 'default':'1', 'pythonize': to_bool},
                 'log_passive_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'global_host_event_handler' : {'required':False, 'default':''},
-                'global_service_event_handler' : {'required':False, 'default':''},
+                'global_host_event_handler' : {'required':False, 'default':'', 'class_inherit' : [(Host, 'global_event_handler')]},
+                'global_service_event_handler' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'global_event_handler')]},
                 'sleep_time' : {'required':False, 'default':'1', 'pythonize': to_int},
-                'service_inter_check_delay_method' : {'required':False, 'default':'s'},
-                'max_service_check_spread' : {'required':False, 'default':'30', 'pythonize': to_int},
-                'service_interleave_factor' : {'required':False, 'default':'s'},
+                'service_inter_check_delay_method' : {'required':False, 'default':'s', 'class_inherit' : [(Service, 'inter_check_delay_method')]},
+                'max_service_check_spread' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Service, 'max_check_spread')]},
+                'service_interleave_factor' : {'required':False, 'default':'s', 'class_inherit' : [(Service, 'interleave_factor')]},
                 'max_concurrent_checks' : {'required':False, 'default':'200', 'pythonize': to_int},
                 'check_result_reaper_frequency' : {'required':False, 'default':'5', 'pythonize': to_int},
                 'max_check_result_reaper_time' : {'required':False, 'default':'30', 'pythonize': to_int},
                 'check_result_path' : {'required':False, 'default':'/tmp/'},
                 'max_check_result_file_age' : {'required':False, 'default':'3600', 'pythonize': to_int},
-                'host_inter_check_delay_method' : {'required':False, 'default':'s'},
-                'max_host_check_spread' : {'required':False, 'default':'30', 'pythonize': to_int},
-                'interval_length' : {'required':False, 'default':'60', 'pythonize': to_int},
-                'auto_reschedule_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'auto_rescheduling_interval' : {'required':False, 'default':'30', 'pythonize': to_int},
-                'auto_rescheduling_window' : {'required':False, 'default':'180', 'pythonize': to_int},
-                'use_aggressive_host_checking' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'translate_passive_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'passive_host_checks_are_soft' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'enable_predictive_host_dependency_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'enable_predictive_service_dependency_checks' : {'required':False, 'default':'1'},
-                'cached_host_check_horizon' : {'required':False, 'default':'15', 'pythonize': to_int},
-                'cached_service_check_horizon' : {'required':False, 'default':'15', 'pythonize': to_int},
+                'host_inter_check_delay_method' : {'required':False, 'default':'s', 'class_inherit' : [(Host, 'inter_check_delay_method')]},
+                'max_host_check_spread' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Host, 'max_check_spread')]},
+                'interval_length' : {'required':False, 'default':'60', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
+                'auto_reschedule_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
+                'auto_rescheduling_interval' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
+                'auto_rescheduling_window' : {'required':False, 'default':'180', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
+                'use_aggressive_host_checking' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None)]},
+                'translate_passive_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'translate_passive_checks')]},
+                'passive_host_checks_are_soft' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'passive_checks_are_soft')]},
+                'enable_predictive_host_dependency_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'enable_predictive_dependency_checks')]},
+                'enable_predictive_service_dependency_checks' : {'required':False, 'default':'1', 'class_inherit' : [(Service, 'enable_predictive_dependency_checks')]},
+                'cached_host_check_horizon' : {'required':False, 'default':'15', 'pythonize': to_int, 'class_inherit' : [(Host, 'cached_check_horizon')]},
+                'cached_service_check_horizon' : {'required':False, 'default':'15', 'pythonize': to_int, 'class_inherit' : [(Service, 'cached_check_horizon')]},
                 'use_large_installation_tweaks' : {'required':False, 'default':'0', 'pythonize': to_bool},
                 'free_child_process_memory' : {'required':False, 'default':'1', 'pythonize': to_bool},
                 'child_processes_fork_twice' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'enable_environment_macros' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'enable_flap_detection' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'low_service_flap_threshold' : {'required':False, 'default':'25', 'pythonize': to_int},
-                'high_service_flap_threshold' : {'required':False, 'default':'50', 'pythonize': to_int},
-                'low_host_flap_threshold' : {'required':False, 'default':'25', 'pythonize': to_int},
-                'high_host_flap_threshold' : {'required':False, 'default':'50', 'pythonize': to_int},
-                'soft_state_dependencies' : {'required':False, 'default':'0', 'pythonize': to_bool},
-                'service_check_timeout' : {'required':False, 'default':'10', 'pythonize': to_int},
-                'host_check_timeout' : {'required':False, 'default':'10', 'pythonize': to_int},
-                'event_handler_timeout' : {'required':False, 'default':'10', 'pythonize': to_int},
-                'notification_timeout' : {'required':False, 'default':'5', 'pythonize': to_int},
-                'ocsp_timeout' : {'required':False, 'default':'5', 'pythonize': to_int},
-                'ochp_timeout' : {'required':False, 'default':'5', 'pythonize': to_int},
-                'perfdata_timeout' : {'required':False, 'default':'2', 'pythonize': to_int},
-                'obsess_over_services' : {'required':False, 'default':'0', 'pythonize': to_bool},
-                'ocsp_command' : {'required':False, 'default':''},
-                'obsess_over_hosts' : {'required':False, 'default':'0', 'pythonize': to_bool},
-                'ochp_command' : {'required':False, 'default':''},
-                'process_performance_data' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'host_perfdata_command' : {'required':False, 'default':''},
-                'service_perfdata_command' : {'required':False, 'default':''},
-                'host_perfdata_file' : {'required':False, 'default':'/tmp/host.perf'},
-                'service_perfdata_file' : {'required':False, 'default':'/tmp/service.perf'},
-                'host_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf'},
-                'service_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf'},
-                'host_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char},
-                'service_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char},
+                'enable_environment_macros' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
+                'enable_flap_detection' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
+                'low_service_flap_threshold' : {'required':False, 'default':'25', 'pythonize': to_int, 'class_inherit' : [(Service, 'low_flap_threshold')]},
+                'high_service_flap_threshold' : {'required':False, 'default':'50', 'pythonize': to_int, 'class_inherit' : [(Service, 'high_flap_threshold')]},
+                'low_host_flap_threshold' : {'required':False, 'default':'25', 'pythonize': to_int, 'class_inherit' : [(Host, 'low_flap_threshold')]},
+                'high_host_flap_threshold' : {'required':False, 'default':'50', 'pythonize': to_int, 'class_inherit' : [(Host, 'high_flap_threshold')]},
+                'soft_state_dependencies' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
+                'service_check_timeout' : {'required':False, 'default':'10', 'pythonize': to_int, 'class_inherit' : [(Service, 'check_timeout')]},
+                'host_check_timeout' : {'required':False, 'default':'10', 'pythonize': to_int, 'class_inherit' : [(Host, 'check_timeout')]},
+                'event_handler_timeout' : {'required':False, 'default':'10', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
+                'notification_timeout' : {'required':False, 'default':'5', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
+                'ocsp_timeout' : {'required':False, 'default':'5', 'pythonize': to_int, 'class_inherit' : [(Service, None)]},
+                'ochp_timeout' : {'required':False, 'default':'5', 'pythonize': to_int, 'class_inherit' : [(Host, None)]},
+                'perfdata_timeout' : {'required':False, 'default':'2', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
+                'obsess_over_services' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Service, 'obsess_over')]},
+                'ocsp_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, None)]},
+                'obsess_over_hosts' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, 'obsess_over')]},
+                'ochp_command' : {'required':False, 'default':'', 'class_inherit' : [(Host, None)]},
+                'process_performance_data' : {'required':False, 'default':'1', 'pythonize': to_bool , 'class_inherit' : [(Host, None), (Service, None)]},
+                'host_perfdata_command' : {'required':False, 'default':'' , 'class_inherit' : [(Host, 'perfdata_command')]},
+                'service_perfdata_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'perfdata_command')]},
+                'host_perfdata_file' : {'required':False, 'default':'/tmp/host.perf' , 'class_inherit' : [(Host, 'perfdata_file')]},
+                'service_perfdata_file' : {'required':False, 'default':'/tmp/service.perf' , 'class_inherit' : [(Service, 'perfdata_file')]},
+                'host_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Host, 'perfdata_file_template')]},
+                'service_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Service, 'perfdata_file_template')]},
+                'host_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Host, 'perfdata_file_mode')]},
+                'service_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Service, 'perfdata_file_mode')]},
                 'host_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int},
                 'service_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int},
-                'host_perfdata_file_processing_command' : {'required':False, 'default':''},
-                'service_perfdata_file_processing_command' : {'required':False, 'default':''},
-                'check_for_orphaned_services' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'check_for_orphaned_hosts' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'check_service_freshness' : {'required':False, 'default':'1', 'pythonize': to_bool},
+                'host_perfdata_file_processing_command' : {'required':False, 'default':'', 'class_inherit' : [(Host, 'perfdata_file_processing_command')]},
+                'service_perfdata_file_processing_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'perfdata_file_processing_command')]},
+                'check_for_orphaned_services' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'check_for_orphaned')]},
+                'check_for_orphaned_hosts' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'check_for_orphaned')]},
+                'check_service_freshness' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'check_freshness')]},
                 'service_freshness_check_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
-                'check_host_freshness' : {'required':False, 'default':'1', 'pythonize': to_bool},
+                'check_host_freshness' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'check_freshness')]},
                 'host_freshness_check_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
-                'additional_freshness_latency' : {'required':False, 'default':'15', 'pythonize': to_int},
+                'additional_freshness_latency' : {'required':False, 'default':'15', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
                 'enable_embedded_perl' : {'required':False, 'default':'1', 'pythonize': to_bool},
                 'use_embedded_perl_implicitly' : {'required':False, 'default':'0', 'pythonize': to_bool},
-                'date_format' : {'required':False, 'default':'us'},
-                'use_timezone' : {'required':False, 'default':'FR/Paris'},
+                'date_format' : {'required':False, 'default':'us', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
+                'use_timezone' : {'required':False, 'default':'FR/Paris', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
                 'illegal_object_name_chars' : {'required':False, 'default':'/tmp/'},
-                'illegal_macro_output_chars' : {'required':False, 'default':''},
-                'use_regexp_matching' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'use_true_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool},
+                'illegal_macro_output_chars' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
+                'use_regexp_matching' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
+                'use_true_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
                 'admin_email' : {'required':False, 'default':'admin@localhost'},
                 'admin_pager' : {'required':False, 'default':''},
                 'event_broker_options' : {'required':False, 'default':''},
@@ -179,6 +192,7 @@ class Config(Item):
         for elt in params:
             elts = elt.split('=')
             self.params[elts[0]] = elts[1]
+            setattr(self, elts[0], elts[1])
 
     def _cut_line(self, line):
         punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
@@ -206,7 +220,7 @@ class Config(Item):
                     fd = open(elts[1])
                     res += fd.read()
                     fd.close()
-                except IOError as exp:
+                except IOError ,exp:
                     print exp
         #print "Got", res
         self.read_config_buf(res)
@@ -226,7 +240,10 @@ class Config(Item):
                     'contact' : [],
                     'host' : [],
                     'service' : [],
-                    'servicegroup' : []
+                    'servicegroup' : [],
+                    'servicedependency' : [],
+                    'hostdependency' : [],
+                    'scheduler' : []
                     }
         
         tmp=[]
@@ -246,19 +263,24 @@ class Config(Item):
             #The old entry must be save before
             elif re.search("^define", line):
                 in_define = True
-                #print "Add a", tmp_type, ":", tmp
+                
                 objectscfg[tmp_type].append(tmp)
                 tmp=[]
                 #Get new type
                 elts = re.split('\s', line)
                 tmp_type = elts[1]
+                #print "Add a", tmp_type, ":", tmp
                 tmp_type = tmp_type.split('{')[0]
+                #print "Add a", tmp_type, ":", tmp
             else:
                 if in_define:
+                    #if tmp_type == 'servicedependency':
+                    #    print 'ADD A NEW LINE', line
                     tmp.append(line)
                 else:
                     params.append(line)
                     
+        objectscfg[tmp_type].append(tmp)
                 #print 'Add line', line
         objects = {}
         
@@ -267,6 +289,8 @@ class Config(Item):
         self.load_params(params)
         
         for type in objectscfg:
+            if type == 'servicedependency':
+                print "SERVICE DEP!", objectscfg[type]
             objects[type]=[]
             #print 'Doing type:',type
             for items in objectscfg[type]:
@@ -325,7 +349,7 @@ class Config(Item):
             c = Command(commandcfg)
             c.clean()
             commands.append(c)
-            print "Creating command", c
+            #print "Creating command", c
         self.commands = Commands(commands)
         
         hosts = []
@@ -361,6 +385,29 @@ class Config(Item):
             contactgroups.append(cg)
         self.contactgroups = Contactgroups(contactgroups)
 
+        servicedependencies = []
+        print objects
+        for servicedependencycfg in objects['servicedependency']:
+            #print "*********************** SD*********************"
+            sd = Servicedependency(servicedependencycfg)
+            sd.clean()
+            servicedependencies.append(sd)
+        self.servicedependencies = Servicedependencies(servicedependencies)
+
+        hostdependencies = []
+        for hostdependencycfg in objects['hostdependency']:
+            hd = Servicedependency(hostdependencycfg)
+            hd.clean()
+            hostdependencies.append(hd)
+        self.hostdependencies = Hostdependencies(hostdependencies)
+
+        schedulerlinks = []
+        for sched_link in objects['scheduler']:
+            sl = SchedulerLink(sched_link)
+            sl.clean()
+            schedulerlinks.append(sl)
+        self.schedulerlinks = SchedulerLinks(schedulerlinks)
+
 
     #We use linkify to make the config smaller (not name but direct link when possible)
     def linkify(self):
@@ -392,20 +439,25 @@ class Config(Item):
         print "Timeperiods"
         #link timeperiods with timeperiods (exclude part)
         self.timeperiods.linkify()
+
+        print "Servicedependancy"
+        self.servicedependencies.linkify(self.hosts, self.services, self.timeperiods)
         
-        
+
     def dump(self):
         #print 'Parameters:', self
         #print 'Hostgroups:',self.hostgroups,'\n'
-        #print 'Services:', self.services
+        print 'Services:', self.services
         #print 'Templates:', self.hosts_tpl
-        print 'Hosts:',self.hosts,'\n'
+        #print 'Hosts:',self.hosts,'\n'
         #print 'Contacts:', self.contacts
         #print 'contactgroups',self.contactgroups
         #print 'Servicegroups:', self.servicegroups
         #print 'Timepriods:', self.timeperiods
         #print 'Commands:', self.commands
         #print "Number of services:", len(self.services.items)
+        #print "Service Dep", self.servicedependencies
+        print "Schedulers", self.schedulerlinks
         pass
 
     #Use to fill groups values on hosts and create new services (for host group ones)
@@ -430,18 +482,23 @@ class Config(Item):
 
         print "Services"
         self.services.explode(self.hostgroups, self.contactgroups, self.servicegroups)
+        print "nb of services : %d" % len(self.services.items)
 
         print "Servicegroups"
         self.servicegroups.explode()
 
         print "Timeperiods"
         self.timeperiods.explode()
+
+        print "Servicedependancy"
+        self.servicedependencies.explode()
         #services = time.time()
         #print "Time: Overall Explode :", services-begin, " (hosts:",hosts-begin," ) (contactgroups:",contactgroups-hosts," ) (contacts:",contacts-contactgroups," ) (services:",services-contacts,")"        
 
 
     def apply_dependancies(self):
         self.hosts.apply_dependancies()
+        self.services.apply_dependancies()
 
     #Use to apply inheritance (template and implicit ones)
     def apply_inheritance(self):
@@ -464,11 +521,14 @@ class Config(Item):
         self.contacts.fill_default()
         self.services.fill_default()
 
+
     def is_correct(self):
         self.hosts.is_correct()
         self.hostgroups.is_correct()
         self.contacts.is_correct()
         self.contactgroups.is_correct()
+        self.schedulerlinks.is_correct()
+
 
     def pythonize(self):
         #call item pythonize for parameters
@@ -483,14 +543,213 @@ class Config(Item):
         self.contacts.pythonize()
         #contacts = time.time()
         self.services.pythonize()
+        self.servicedependencies.pythonize()
+        self.schedulerlinks.pythonize()
         #services = time.time()
         #print "Time: Overall Pythonize :", services-begin, " (hosts:",hosts-begin," ) (hostgroups:",hostgroups-hosts,") (contactgroups:",contactgroups-hostgroups," ) (contacts:",contacts-contactgroups," ) (services:",services-contacts,")"
+
+    #Explode parameters like cached_service_check_horizon in the Service class in a cached_check_horizon manner
+    def explode_global_conf(self):
+        Service.load_global_conf(self)
+        Host.load_global_conf(self)
+        Contact.load_global_conf(self)
 
 
     def clean_useless(self):
         self.hosts.clean_useless()
         self.contacts.clean_useless()
         self.services.clean_useless()
+
+
+    #Create packs of hosts an services so in a pack, 
+    #all dependencies are resolved
+    #It create a graph. All hosts are connected to theyre
+    #parents, and host witouht parent are connected to host 'root'
+    #services are link to the host. Dependencies are managed
+    def create_packs(self):
+        g = pygraph.digraph()
+        #The master node
+        g.add_node('root')
+
+        #Node that are not directy connected to the root
+        indirect_nodes = []
+
+        for h in self.hosts:
+            print "Doing host", h.host_name, h.id
+            if h not in g:
+                print "Adding", h.host_name
+                g.add_node(h)
+            g.add_edge('root', h)
+
+            for p in h.parents:
+                if p not in g:
+                    print "Adding", p.host_name
+                    g.add_node(p)
+                g.add_edge(p, h)
+                print "My parent:", p.host_name
+                if h not in indirect_nodes:
+                    indirect_nodes.append(h)
+
+            for (dep, tmp, tmp2, tp3) in h.act_depend_of:
+                print "My dep", dep.host_name
+                if dep not in g:
+                    print "Adding", dep.host_name
+                    g.add_node(dep)
+                g.add_edge(dep, h)
+                if h not in indirect_nodes:
+                    indirect_nodes.append(h)
+
+            for (dep, tmp, tmp2, tp3) in h.chk_depend_of:
+                print "My dep", dep.host_name
+                if dep not in g:
+                    print "Adding", dep.host_name
+                    g.add_node(dep)
+                g.add_edge(dep, h)
+                if h not in indirect_nodes:
+                    indirect_nodes.append(h)
+            
+            for s in h.services:
+                if s not in g:
+                    g.add_node(s)
+                g.add_edge(h,s)
+
+        for s in self.services:
+            if s not in g:
+                g.add_node(s) # Not a pb if already exist
+            for (dep, tmp, tmp2, tp3) in s.act_depend_of:
+                if dep not in g:
+                    g.add_node(dep)
+                g.add_edge(dep, s)
+            for (dep, tmp, tmp2, tp3) in s.chk_depend_of:
+                if dep not in g:
+                    g.add_node(dep)
+                g.add_edge(dep, s)
+
+        print "G:", len(g), g.nodes()
+
+        #We delete link between indirect node and the root
+        for h in indirect_nodes:
+            g.del_edge('root', h)
+
+        print "Indirect:"
+        for h in indirect_nodes:
+            print "Indirect node:", h.host_name
+        print "Nb hosts:", len(self.hosts)
+        print 'first level'
+        packs = []
+        for h in g.neighbors('root'): # First level nodes
+            (tmp, pack, tmp2) = g.depth_first_search(h)
+            print "TMP:", pack
+            packs.append(pack)
+
+        #print "G:", g
+        print "*******Dumping All Packs*****", "Number of packs:", len(packs)
+        for pack in packs:
+            print "Pack", pack, "len:", len(pack)
+            for h in pack:
+                print h.get_name()
+        print "Fin all packs"
+        return packs
+
+
+    #Use the self.conf and make nb_parts new confs.
+    #nbparts is equal to the number of schedulerlink
+    #New confs are independant whith checks. The only communication
+    #That can be need is macro in commands
+    def cut_into_parts(self):
+        print "Scheduler configurated :", self.schedulerlinks
+        nb_parts = len([s for s in self.schedulerlinks if not s.spare and s.is_alive()])
+        print "Cutting into", nb_parts, "parts"
+
+        if nb_parts == 0:
+            nb_parts = 1
+        
+        self.confs = {}
+        for i in xrange(0, nb_parts):
+            print "Create Conf:", i, nb_parts
+            self.confs[i] = Config()
+            
+            #Now we copy all properties of conf into the new ones
+            for prop in Config.properties:
+                val = getattr(self, prop)
+                setattr(self.confs[i], prop, val)
+            
+            #we need a deepcopy because each conf
+            #will have new hostgroups
+            self.confs[i].commands = self.commands
+            self.confs[i].timeperiods = self.timeperiods
+            self.confs[i].hostgroups = copy.deepcopy(self.hostgroups) #TODO just copy?
+            self.confs[i].contactgroups = self.contactgroups
+            self.confs[i].contacts = self.contacts
+            self.confs[i].schedulerlinks = copy.copy(self.schedulerlinks)
+            self.confs[i].servicegroups = copy.deepcopy(self.servicegroups)#TODO just copy?
+            self.confs[i].hosts = []#will be Classified after
+            self.confs[i].services = []
+            self.confs[i].other_elements = {}
+            self.confs[i].is_assigned = False #if a scheduler have accepted the conf
+
+        #just create packs. There can be numerous ones
+        packs = self.create_packs()
+
+        #create roundrobin iterator for id of cfg
+        rr = itertools.cycle(list(xrange(0, nb_parts)))
+
+        #Now we explode packs into confs, and we 'load balance' thems
+        for pack in packs:
+            i = rr.next()
+            print "Load balancing conf ", i
+            for elt in pack:
+                if isinstance(elt, Service):
+                    self.confs[i].services.append(elt)
+                else:
+                    self.confs[i].hosts.append(elt)
+        
+        for i in self.confs:
+            print "Finishing packs", i
+            cfg = self.confs[i]
+
+            for hg in cfg.hostgroups:
+                mbrs = hg.members
+                hg.members = []
+
+                for h in cfg.hosts:
+                    if h in mbrs:
+                        hg.members.append(h)
+                        print "Set", h.get_name(), "to be add"
+                #print "Removing hosts in hostgroup", hosts_to_del
+                for h in hg.members:
+                    print "We've got member:", h.host_name
+            
+            for sg in cfg.servicegroups:
+                mbrs = sg.members
+                sg.members = []
+                for s in cfg.services:
+                    if s in mbrs:
+                        sg.members.append(s)
+                        print "Set", s.get_name(), "to be add"
+                #print "Removing hosts in hostgroup", hosts_to_del
+                for s in sg.members:
+                    print "We've got member:", s.get_name()
+
+            cfg.hosts = Hosts(cfg.hosts)
+            cfg.services = Services(cfg.services)
+            print "CFG:", cfg, "Nb elments:", len(cfg.hosts) + len(cfg.services)
+            print cfg.hostgroups
+
+        print "Finishing Conf"
+
+        #Now we fill other_elements by host (service are with their host)
+        for i in self.confs:
+            print "Doing",  i
+            for h in self.confs[i].hosts:
+                print "Doing h", h.get_name(), [j for j in self.confs if j != i]
+                for j in [j for j in self.confs if j != i]:
+                    print "*********Add", h.get_name(), "in the conf", j
+                    self.confs[i].other_elements[h.get_name()] = i
+
+        print "HeheConf:", self, "Confs:", self.confs
+        #return new_confs
+
 
 if __name__ == '__main__':
     c = Config()
@@ -501,7 +760,6 @@ if __name__ == '__main__':
     c.read_config("nagios.cfg")
     #c.idfy()
     #c.dump()
-    
     
     print "****************** Explode ******************"
     
@@ -544,27 +802,35 @@ if __name__ == '__main__':
     
     print "*************** applying dependancies ************"
     c.apply_dependancies()
-    
+
+    print "************** Exlode global conf ****************"
+    c.explode_global_conf()
     
     print "****************** Correct ?******************"
     #We check if the config is OK
     c.is_correct()
     dump = getattr(c, 'dump')
-    print dump
+    #print dump
     dump()
     #c.dump()
+
+    c.cut_into_parts()
     
     m = MacroResolver()
     m.init(c)
     h = c.hosts.items[6]
-    print h
+    #print h
+    #print c
+
     s = c.services.items[3]
-    print s
+    #print s
     com = s.check_command
-    print com
+    #print com
     con = c.contacts.items[2]
     #for i in xrange(1 ,1000):
-    m.resolve_command(com, h, s, con)
+    m.resolve_command(com, h, s, con, None)
+    #dump()
     print "finish!!"
+
     
 

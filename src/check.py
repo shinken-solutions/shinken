@@ -7,8 +7,9 @@ class Check(Action):
     #_status = None
     #_command = None
     #id = 0
-    def __init__(self, status, command, ref, ref_type, t_to_go):
-        self.type = 'check'
+    def __init__(self, status, command, ref, ref_type, t_to_go, dep_check_id=None):
+        self.is_a = 'check'
+        self.type = ''
         #self.id = self.__class__.id
         self.id = Action.id
         Action.id += 1
@@ -21,14 +22,16 @@ class Check(Action):
         self.ref = ref
         self.ref_type = ref_type
         self.t_to_go = t_to_go
+        self.depend_on = []
+        self.depend_on_me = dep_check_id
 
     def get_outputs(self, out):
         elts = out.split('\n')
         self.output = elts[0]
         if len(elts) > 1:
             self.long_output = '\n'.join(elts[1:])
-        print "Setting output:", self.output
-        print "Setting longoutput", self.long_output
+        #print "Setting output:", self.output
+        #print "Setting longoutput", self.long_output
 
     
     def execute(self):

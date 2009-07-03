@@ -4,22 +4,23 @@ from action import Action
 class Notification(Action):
     #id = 0
     macros = {
-        'NOTIFICATIONTYPE' : '',
-        'NOTIFICATIONRECIPIENTS' : '',
-        'NOTIFICATIONISESCALATED' : '',
-        'NOTIFICATIONAUTHOR' : '',
-        'NOTIFICATIONAUTHORNAME' : '',
-        'NOTIFICATIONAUTHORALIAS' : '',
-        'NOTIFICATIONCOMMENT' : '',
-        'HOSTNOTIFICATIONNUMBER' : '',
-        'HOSTNOTIFICATIONID' : '',
-        'SERVICENOTIFICATIONNUMBER' : '',
-        'SERVICENOTIFICATIONID' : ''
+        'NOTIFICATIONTYPE' : 'type',
+        'NOTIFICATIONRECIPIENTS' : 'recipients',
+        'NOTIFICATIONISESCALATED' : 'is_escaladed',
+        'NOTIFICATIONAUTHOR' : 'author',
+        'NOTIFICATIONAUTHORNAME' : 'author_name',
+        'NOTIFICATIONAUTHORALIAS' : 'author_alias',
+        'NOTIFICATIONCOMMENT' : 'comment',
+        'HOSTNOTIFICATIONNUMBER' : 'number',
+        'HOSTNOTIFICATIONID' : 'get_id',
+        'SERVICENOTIFICATIONNUMBER' : 'number',
+        'SERVICENOTIFICATIONID' : 'get_id'
         }
     
     
-    def __init__(self, status, command, ref, ref_type, t_to_go):
-        self.type = 'notification'
+    def __init__(self, type , status, command, ref, ref_type, t_to_go):
+        self.is_a = 'notification'
+        self.type = type
         self.id = Action.id
         Action.id += 1
         self._in_timeout = False
@@ -70,7 +71,7 @@ class Notification(Action):
 
     
     def __str__(self):
-        return "Check %d status:%s command:%s ref:%s" % (self.id, self.status, self._command, self.ref)
+        return ''#str(self.__dict__)
 
 
     def get_id(self):

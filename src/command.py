@@ -26,6 +26,7 @@ class CommandCall:
     def __init__(self, commands, call):
         self.id = self.__class__.id
         self.__class__.id += 1
+        self.call = call
         tab = call.split('!')
         self.command = tab[0]
         self.args = tab[1:]
@@ -40,6 +41,8 @@ class CommandCall:
         return str(self.__dict__)
         #return "%d %s" % (self.command, self.args)
 
+    def get_name(self):
+        return self.call
 
 
 class Commands:

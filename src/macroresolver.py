@@ -2,7 +2,7 @@ import re
 from borg import Borg
 from singleton import Singleton
 #from host import Host
-
+import time
 from contact import Contact
 
 
@@ -10,31 +10,31 @@ class MacroResolver(Borg):
 #    __metaclass__ = Singleton
 
     macros = {
-        'TOTALHOSTSUP' : '',
-        'TOTALHOSTSDOWN' : '',
-        'TOTALHOSTSUNREACHABLE' : '',
-        'TOTALHOSTSDOWNUNHANDLED' : '',
-        'TOTALHOSTSUNREACHABLEUNHANDLED' : '',
-        'TOTALHOSTPROBLEMS' : '',
-        'TOTALHOSTPROBLEMSUNHANDLED' : '',
-        'TOTALSERVICESOK' : '',
-        'TOTALSERVICESWARNING' : '',
-        'TOTALSERVICESCRITICAL' : '',
-        'TOTALSERVICESUNKNOWN' : '',
-        'TOTALSERVICESWARNINGUNHANDLED' : '',
-        'TOTALSERVICESCRITICALUNHANDLED' : '',
-        'TOTALSERVICESUNKNOWNUNHANDLED' : '',
-        'TOTALSERVICEPROBLEMS' : '',
-        'TOTALSERVICEPROBLEMSUNHANDLED' : '',
+        'TOTALHOSTSUP' : 'get_total_hosts_up',
+        'TOTALHOSTSDOWN' : 'get_total_hosts_down',
+        'TOTALHOSTSUNREACHABLE' : 'get_total_hosts_unreacheable',
+        'TOTALHOSTSDOWNUNHANDLED' : 'get_total_hosts_unhandled',
+        'TOTALHOSTSUNREACHABLEUNHANDLED' : 'get_total_hosts_unreacheable_unhandled',
+        'TOTALHOSTPROBLEMS' : 'get_total_host_problems',
+        'TOTALHOSTPROBLEMSUNHANDLED' : 'get_total_host_problems_unhandled',
+        'TOTALSERVICESOK' : 'get_total_service_ok',
+        'TOTALSERVICESWARNING' : 'get_total_services_warning',
+        'TOTALSERVICESCRITICAL' : 'get_total_services_critical',
+        'TOTALSERVICESUNKNOWN' : 'get_total_services_unknown',
+        'TOTALSERVICESWARNINGUNHANDLED' : 'get_total_services_warning_unhandled',
+        'TOTALSERVICESCRITICALUNHANDLED' : 'get_total_services_critical_unhandled',
+        'TOTALSERVICESUNKNOWNUNHANDLED' : 'get_total_services_unknown_unhandled',
+        'TOTALSERVICEPROBLEMS' : 'get_total_service_problems',
+        'TOTALSERVICEPROBLEMSUNHANDLED' : 'get_total_service_problems_unhandled',
         
-        'LONGDATETIME' : '',
-        'SHORTDATETIME' : '',
-        'DATE' : '',
-        'TIME' : '',
-        'TIMET' : '',
+        'LONGDATETIME' : 'get_long_date_time',
+        'SHORTDATETIME' : 'get_short_date_time',
+        'DATE' : 'get_date',
+        'TIME' : 'get_time',
+        'TIMET' : 'get_timet',
         
-        'PROCESSSTARTTIME' : '',
-        'EVENTSTARTTIME' : '',
+        'PROCESSSTARTTIME' : 'get_process_start_time',
+        'EVENTSTARTTIME' : 'get_events_start_time',
 
         }
 
@@ -76,11 +76,11 @@ class MacroResolver(Borg):
                 #prop = macros[macro]['class'].macros[macro]
                 #print "Getting", prop, "for", elt
                 return getattr(elt, prop)
-        except AttributeError as exp:
+        except AttributeError (exp):
             return str(exp)
-    
 
-    def resolve_command(self, com, h, s, c):
+
+    def resolve_command(self, com, h, s, c, n):
         #print "Trying to resolve command", com
         #print "Args", com.args
         c_line = com.command.command_line
@@ -93,8 +93,11 @@ class MacroResolver(Borg):
                 macros[macro]['val'] = self.resolve_argn(macro, com.args)
                 macros[macro]['type'] = 'resolved'
             if macros[macro]['type'] == 'class':
-                for elt in [h, s, c]:
-                    if type(elt) == macros[macro]['class']:
+                #print "Search for type", macros[macro]['class']
+                for elt in [h, s, c, n, self]:
+                    #print "Type etl:", type(elt), elt
+                    if elt is not None and elt.__class__ == macros[macro]['class']:
+                        #print "Elt is a", macros[macro]['class']
                         prop = macros[macro]['class'].macros[macro]
                         macros[macro]['val'] = self.get_value_from_element(elt, prop)
         #print "New resolved macros", macros
@@ -117,7 +120,8 @@ class MacroResolver(Borg):
             from service import Service
             from host import Host
             from contact import Contact
-            for cls in [Host, Service, Contact]:
+            from notification import Notification
+            for cls in [Host, Service, Contact, Notification, MacroResolver]:
                 if macro in cls.macros:
                     #print "Got a class macro", macro, str(cls)
                     macros[macro]['type'] = 'class'
@@ -138,3 +142,27 @@ class MacroResolver(Borg):
             except IndexError:
                 return ''
 
+
+    #Get Fri 15 May 11:42:39 CEST 2009
+    def get_long_date_time(self):
+        return time.strftime("%a %d %b %H:%M:%S %Z %Y", time.localtime())
+
+
+    #Get 10-13-2000 00:30:28
+    def get_short_date_time(self):
+        return time.strftime("%d-%m-%Y %H:%M:%S", time.localtime())
+
+
+    #Get 10-13-2000
+    def get_date(self):
+        return time.strftime("%d-%m-%Y", time.localtime())
+
+
+    #Get 00:30:28
+    def get_time(self):
+        return time.strftime("%H:%M:%S", time.localtime())
+
+
+    #Get epoch time
+    def get_timet(self):
+        return str(int(time.time()))

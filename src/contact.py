@@ -45,6 +45,7 @@ class Contact(Item):
         t = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
              'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's'}
         if state in t:
+            #print 'State:', t[state] in self.service_notification_options, 'b:', b,self
             return b and t[state] in self.service_notification_options
         return False
 
@@ -77,8 +78,8 @@ class Contacts(Items):
     #We just search for each timeperiod the id of the tp
     #and replace the name by the id
     def linkify_c_by_tp(self, timeperiods):
-        for id in self.items:
-            c = self.items[id]
+        for c in self:#.items:
+            #c = self.items[id]
             #service notif period
             sntp_name = c.service_notification_period
             #host notf period
@@ -94,24 +95,24 @@ class Contacts(Items):
 
     #Simplify hosts commands by commands id
     def linkify_c_by_cmd(self, commands):
-        for id in self.items:
+        for c in self:#.items:
             tmp = []
-            for cmd in self.items[id].service_notification_commands.split(','):
+            for cmd in c.service_notification_commands.split(','):
                 tmp.append(CommandCall(commands,cmd))
-            self.items[id].service_notification_commands = tmp
+            c.service_notification_commands = tmp
 
             tmp = []
-            for cmd in self.items[id].host_notification_commands.split(','):
+            for cmd in c.host_notification_commands.split(','):
                 tmp.append(CommandCall(commands,cmd))
-            self.items[id].host_notification_commands = tmp
+            c.host_notification_commands = tmp
 
 
     #We look for contacts property in contacts and
     def explode(self, contactgroups):
         #Hostgroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('contactgroups')
-        for id in self.items:
-            c = self.items[id]
+        for c in self:#.items:
+            #c = self.items[id]
             if not c.is_tpl():
                 cname = c.contact_name
                 if c.has('contactgroups'):

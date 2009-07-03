@@ -55,5 +55,26 @@ def to_split(val):
         val = []
     return val
 
+#bool('0') = true, so...
 def to_bool(val):
-    return bool(val)
+    if val == '1':
+        return True
+    else:
+        return False
+
+def from_bool_to_string(b):
+    if b :
+        return '1'
+    else:
+        return '0'
+
+
+###################### Sorting ################"
+def scheduler_no_spare_first(x, y):
+    if x.spare and not y.spare:
+        return 1
+    elif x.spare and y.spare:
+        return 0
+    else:
+        return -1
+        

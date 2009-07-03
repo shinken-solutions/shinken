@@ -1,5 +1,7 @@
 from command import CommandCall
 from util import to_int, to_char, to_split, to_bool
+from copy import deepcopy
+
 
 class Item(object):
     def __init__(self, params={}):
@@ -11,7 +13,8 @@ class Item(object):
 
         #adding running properties like latency
         for prop in self.__class__.running_properties:
-            setattr(self, prop, self.__class__.running_properties[prop])
+            setattr(self, prop, deepcopy(self.__class__.running_properties[prop]))#deep copy because we need
+            #eatch istance to have his own running prop!
 
         #[0] = +  -> new key-plus
         #[0] = _  -> new custom entry
@@ -23,9 +26,34 @@ class Item(object):
             else:
                 setattr(self, key, params[key])
 
+    #return a copy of the item, but give him a new id
+    def copy(self):
+        i = deepcopy(self)
+        cls = i.__class__
+        i.id = cls.id
+        cls.id += 1
+        return i
+
+
+    def clean(self):
+        pass
     
     def __str__(self):
         return str(self.__dict__)+'\n'
+
+
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.id == other.id
+        return NotImplemented
+
+
+    def __ne__(self, other):
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result
 
 
     def is_tpl(self):
@@ -46,6 +74,27 @@ class Item(object):
             if not self.has(prop) and not properties[prop]['required']:
                 value = properties[prop]['default']
                 setattr(self, prop, value)
+
+
+    #We load every usefull parameter so no need to access global conf later
+    #Must be called after a change in a gloabl conf parameter
+    def load_global_conf(cls, conf):
+        print "Load global conf=========================="
+        #conf have properties, if 'enable_notifications' : { [...] 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]}
+        #get the name and put the value if None, put the Name (not None) if not (not clear ?)
+        for prop in conf.properties:
+            if 'class_inherit' in conf.properties[prop]:
+                for (cls_dest, change_name) in conf.properties[prop]['class_inherit']:
+                    if cls_dest == cls:#ok, we've got something to get
+                        value = getattr(conf, prop)
+                        if change_name is None:
+                            setattr(cls, prop, value)
+                        else:
+                            setattr(cls, change_name, value)
+        #print "OK, finally, we've got...", str(cls.__dict__)
+    #Make this method a classmethod
+    load_global_conf = classmethod(load_global_conf)
+
 
     #Use to make pyton properties
     def pythonize(self):
@@ -158,12 +207,46 @@ class Item(object):
         return True
 
 
+
+    def add_downtime(self, downtime):
+        self.downtimes.append(downtime)
+
+
+    def del_downtime(self, downtime_id):
+        d_to_del = None
+        for dt in self.downtimes:
+            if dt.id == downtime_id:
+                d_to_del = dt
+        if d_to_del is not None:
+            self.downtimes.remove(d_to_del)
+            
+
 class Items(object):
     def __init__(self, items):
         self.items = {}
         for i in items:
             self.items[i.id] = i
+            
+            
+    def __iter__(self):
+        return self.items.itervalues()
 
+
+    def __len__(self):
+        return len(self.items)
+
+
+    def __delitem__(self, key):
+        del self.items[key]
+
+
+    def __setitem__(self, key, value):
+        self.items[key] = value
+
+
+    def __getitem__(self, key):
+        return self.items[key]
+    
     
     def find_id_by_name(self, name):
         for id in self.items:
@@ -179,12 +262,6 @@ class Items(object):
             return self.items[id]
         else:
             return None
-
-
-#    def linkify(self, timeperiods, commands):
-#        self.linkify_c_by_tp(timeperiods)
-#        self.linkify_c_by_cmd(commands)
-
 
     def pythonize(self):
         for id in self.items:
@@ -211,38 +288,6 @@ class Items(object):
         tpls = [id for id in self.items if self.items[id].is_tpl()]
         for id in tpls:
             del self.items[id]
-
-    
-#    #We just search for each timeperiod the id of the tp
-#    #and replace the name by the id
-#    def linkify_c_by_tp(self, timeperiods):
-#        for id in self.contacts:
-#            c = self.contacts[id]
-#            #service notif period
-#            sntp_name = c.service_notification_period
-#            #host notf period
-#            hntp_name = c.host_notification_period
-#
-#            #The new member list, in id
-#            sntp = timeperiods.find_tp_by_name(sntp_name)
-#            hntp = timeperiods.find_tp_by_name(hntp_name)
-#            
-#            c.service_notification_period = sntp
-#            c.host_notification_period = hntp
-
-
-#    #Simplify hosts commands by commands id
-#    def linkify_c_by_cmd(self, commands):
-#        for id in self.contacts:
-#            tmp = []
-#            for cmd in self.contacts[id].service_notification_commands:
-#                tmp.append(CommandCall(commands,cmd))
-#            self.contacts[id].service_notification_commands = tmp
-#
-#            tmp = []
-#            for cmd in self.contacts[id].host_notification_commands:
-#                tmp.append(CommandCall(commands,cmd))
-#            self.contacts[id].host_notification_commands = tmp
 
 
     #If a prop is absent and is not required, put the default value
@@ -278,17 +323,3 @@ class Items(object):
             i = self.items[id]
             i.get_customs_properties_by_inheritance(self)
 
-
-#    #We look for contacts property in contacts and
-#    def explode(self, contactgroups):
-#        #Hostgroups property need to be fullfill for got the informations
-#        self.apply_partial_inheritance('contactgroups')
-#        for id in self.contacts:
-#            c = self.contacts[id]
-#            if not c.is_tpl():
-#                cname = c.contact_name
-#                if c.has('contactgroups'):
-#                    cgs = c.contactgroups.split(',')
-#                    for cg in cgs:
-#                        contactgroups.add_member(cname, cg.strip())
-#        #TODO: clean all hostgroups property in hosts

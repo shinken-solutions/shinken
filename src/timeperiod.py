@@ -450,7 +450,11 @@ class Timeperiod:
                 self.unresolved.append(key+' '+params[key])
         self.is_valid_today = False
 
+
+    def get_name(self):
+        return self.timeperiod_name
         
+
     def clean(self):
         pass
 
@@ -788,6 +792,7 @@ class Timeperiods(Items):
         for id in self.items:
             tp = self.items[id]
             tp.linkify(self)
+
 
 
 if __name__ == '__main__':

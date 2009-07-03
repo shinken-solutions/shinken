@@ -15,11 +15,14 @@ s = Queue() #Global Master -> Slave
 m = Queue() #Slave -> Master
 
 schedulers = {
-    0 : {'url' : "PYROLOC://localhost:7766/Checks",
-         'con' : None
+    0 : {'url' : "PYROLOC://localhost:7768/Checks",
+         'con' : None,
+         'verifs' : {}
          },
-    1 : {'url' : "PYROLOC://localhost:7767/Checks",
-         'con' : None }
+    1 : {'url' : "PYROLOC://localhost:7770/Checks",
+         'con' : None,
+         'verifs' : {}
+         }
     }
 
 workers = {} #dict of active workers
@@ -28,7 +31,7 @@ zombies = [] #list of quite old zombies, will be join now
 
 request_checks = None #Pyro.core.getProxyForURI("PYROLOC://localhost:7766/Checks")
 
-verifs = {}
+#verifs = {}
 
 #Seq id for workers
 seq_worker = get_sequence()
@@ -38,6 +41,7 @@ seq_worker = get_sequence()
 #initialise or re-initialise connexion with pynag
 def pynag_con_init(id):
     global schedulers#request_checks
+    print "init de connexion avec", schedulers[id]['url']
     schedulers[id]['con'] = Pyro.core.getProxyForURI(schedulers[id]['url'])
 
 
@@ -45,6 +49,7 @@ def pynag_con_init(id):
 def manage_msg(msg):
     global zombie
     global workers
+    global schedulers
     
     if msg.get_type() == 'IWantToDie':
         zombie = msg.get_from()
@@ -55,44 +60,48 @@ def manage_msg(msg):
         id = msg.get_from()
         workers[id].reset_idle()
         chk = msg.get_data()
-        print "Get result from worker", chk
+        sched_id = chk.sched_id
+        print "[%d]Get result from worker" % sched_id, chk
         chk.set_status('waitforhomerun')
-        verifs[chk.get_id()] = chk
+
+        schedulers[sched_id]['verifs'][chk.get_id()] = chk
 
 
 #Return the chk to pynag and clean them
 def manage_return():
-    global verifs
+    #global verifs
     global schedulers#request_checks
 
-    ret = {}
-    for i in schedulers:
-        ret[i] = []
+    #ret = {}
+    for sched_id in schedulers:
+        ret = []
+        verifs = schedulers[sched_id]['verifs']
+        #Get the id to return to pynag, so after make a big array with only them
+        id_to_return = [elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun']
+        #print "Check in progress:", verifs.values()
+        for id in id_to_return:
+            v = verifs[id]
+            #sched_id = v.sched_id
+            del v.sched_id
+            ret.append(v)
+            #del verifs[id]
+
+        #for sched_id in schedulers:
+        if ret is not []:
+            try:
+                con = schedulers[sched_id]['con']
+                con.put_results(ret)
+                #We clean ONLY if the send is OK
+            except Pyro.errors.ProtocolError:
+                pynag_con_init(sched_id)
+                return
+            except Exception,x:
+                print ''.join(Pyro.util.getPyroTraceback(x))
+                sys.exit(0)
         
-    #Get the id to return to pynag, so after make a big array with only them
-    id_to_return = [elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun']
-    #print "Check in progress:", verifs.values()
-    for id in id_to_return:
-        v = verifs[id]
-        sched_id = v.sched_id
-        del v.sched_id
-        ret[sched_id].append(v)
-        #del verifs[id]
-
-    try:
-        con = schedulers[id]['con']
-        con.put_results(ret)
-        #We clean ONLY if the send is OK
-    except Pyro.errors.ProtocolError:
-        pynag_con_init(sched_id)
-        return
-    except Exception,x:
-        print ''.join(Pyro.util.getPyroTraceback(x))
-        sys.exit(0)
-
-
-    for id in id_to_return:
-        del verifs[id]
+                
+        for id in id_to_return:
+            del verifs[id]
 
 
 if __name__ == '__main__':
@@ -143,25 +152,31 @@ if __name__ == '__main__':
             zombies = newzombies
             newzombies = []
 
-            #We add new worker if the queue is > 80% of the worker number
-            #print 'Total number of Workers : %d' % len(workers)
-            nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
-            nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
-
-            if not i % 10:
-                print 'Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (len(workers), len(verifs), nb_queue, nb_waitforhomerun)
+            nb_queue = 0
+            for sched_id in schedulers:
+                #print "Stats for Scheduler No:", sched_id
+                verifs = schedulers[sched_id]['verifs']
+                #We add new worker if the queue is > 80% of the worker number
+                #print 'Total number of Workers : %d' % len(workers)
+                tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
+                nb_queue += tmp_nb_queue
+                nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
+                
+                if not i % 10:
+                    print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)
             
             while nb_queue > 0.8 * len(workers) and len(workers) < 20:
                 id = seq_worker.next()
                 print "Allocate New worker : ",id
-                workers[id]=Worker(id, s, m, mortal=True)
+                workers[id] = Worker(id, s, m, mortal=True)
                 workers[id].start()
                 
             new_checks = []
             #We check for new check
             for sched_id in schedulers:
                 try:
-                    tmp_verifs = request_checks.get_checks(do_checks=True, do_actions=True)
+                    con = schedulers[sched_id]['con']
+                    tmp_verifs = con.get_checks(do_checks=True, do_actions=True)
                     for v in tmp_verifs:
                         v.sched_id = sched_id
                     new_checks.extend(tmp_verifs)

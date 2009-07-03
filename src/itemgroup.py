@@ -32,6 +32,10 @@ class Itemgroup:
         return str(self.__dict__)+'\n'
 
 
+    def __iter__(self):
+        return self.members.__iter__()#values()
+
+
     #a host group is correct if all members actually exists
     def is_correct(self):
         if not None in self.members:
@@ -72,6 +76,10 @@ class Itemgroups:
         for id in self.itemgroups:
             s += str(self.itemgroups[id])+'\n'
         return s
+
+    def __iter__(self):
+        return self.itemgroups.itervalues()
+
 
     def add(self, ig):
         self.itemgroups[ig.id] = ig

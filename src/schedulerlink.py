@@ -42,6 +42,7 @@ class SchedulerLink(Item):
 
 
     def is_alive(self):
+        print "Trying to see if ", self.address+":"+str(self.port), "is alive"
         try:
             if self.con == None:
                 self.create_connexion()

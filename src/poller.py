@@ -19,6 +19,7 @@ newzombies = [] #list of fresh new zombies, will be join the next loop
 zombies = [] #list of quite old zombies, will be join now
 
 request_checks = None #Pyro.core.getProxyForURI("PYROLOC://localhost:7766/Checks")
+running_id = 0
 
 verifs = {}
 
@@ -27,10 +28,24 @@ seq_worker = get_sequence()
 #seq_verif = get_sequence()
 
 
-#initialise or re-initialise connexion with pynag
-def pynag_con_init():
+#initialise or re-initialise connexion with scheduler
+#Check if pynag running id is still the same (just a connexion lost) or change
+# so checks are bad
+def scheduler_con_init():
     global request_checks
-    request_checks = Pyro.core.getProxyForURI("PYROLOC://localhost:7766/Checks")
+    global running_id
+    global verifs
+    
+    request_checks = Pyro.core.getProxyForURI("PYROLOC://localhost:7768/Checks")
+    try:
+        new_run_id = request_checks.get_running_id()
+    except Pyro.errors.ProtocolError, exp:
+        print exp
+        return
+    if running_id != 0 and new_run_id != running_id:
+        verifs.clear()
+    running_id = new_run_id
+
 
 #Manage messages from Workers
 def manage_msg(msg):
@@ -46,7 +61,7 @@ def manage_msg(msg):
         id = msg.get_from()
         workers[id].reset_idle()
         chk = msg.get_data()
-        print "Get result from worker", chk
+        #print "Get result from worker", chk
         chk.set_status('waitforhomerun')
         verifs[chk.get_id()] = chk
 
@@ -67,7 +82,7 @@ def manage_return():
         request_checks.put_results(ret)
         #We clean ONLY if the send is OK
     except Pyro.errors.ProtocolError:
-        pynag_con_init()
+        scheduler_con_init()
         return
     except Exception,x:
         print ''.join(Pyro.util.getPyroTraceback(x))
@@ -81,7 +96,7 @@ def manage_return():
 if __name__ == '__main__':
 
     #Connexion init with PyNag server
-    pynag_con_init()
+    scheduler_con_init()
 
     #Allocate Mortal Threads
     for i in xrange(1, 5):
@@ -146,7 +161,7 @@ if __name__ == '__main__':
             except Pyro.errors.ProtocolError as exp:
                 print exp
                 #we reinitialise the ccnnexion to pynag
-                pynag_con_init()
+                scheduler_con_init()
                 new_checks=[]
             except Exception,x:
                 print ''.join(Pyro.util.getPyroTraceback(x))

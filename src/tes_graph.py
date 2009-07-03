@@ -4,6 +4,7 @@ import os
 import sys
 import graph
 
+
 # Graph creation
 g = graph.digraph()
 g.add_node(1)
