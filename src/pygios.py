@@ -78,7 +78,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
 	def put_conf(self, conf):
-		self.app.conf = conf# = arbiter.get_conf(0)
+		self.app.conf = conf
 		print "Get conf:", self.app.conf
 		self.app.have_conf = True
 		print "Have conf?", self.app.have_conf
