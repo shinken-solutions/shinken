@@ -412,12 +412,12 @@ class Config(Item):
             schedulerlinks.append(sl)
         self.schedulerlinks = SchedulerLinks(schedulerlinks)
 
-        actionnerlinks = []
+        actionners = []
         for actionner_link in objects['actionner']:
             al = ActionnerLink(actionner_link)
             al.clean()
-            actionnerlinks.append(al)
-        self.actionnerlinks = ActionnerLinks(actionnerlinks)
+            actionners.append(al)
+        self.actionners = ActionnerLinks(actionners)
 
         pollerlinks = []
         for poller_link in objects['poller']:
@@ -517,6 +517,7 @@ class Config(Item):
     def apply_dependancies(self):
         self.hosts.apply_dependancies()
         self.services.apply_dependancies()
+
 
     #Use to apply inheritance (template and implicit ones)
     def apply_inheritance(self):

@@ -24,15 +24,21 @@ class ActionnerLink(Item):
 
 
     def create_connexion(self):
+        print "Creating connexion"
         self.uri = "PYROLOC://"+self.address+":"+str(self.port)+"/ForArbiter"
         self.con = Pyro.core.getProxyForURI(self.uri)
-
+        print "Connexion created", self.uri
 
     def put_conf(self, conf):
         if self.con == None:
             self.create_connexion()
-
-        self.con.put_conf(conf)
+        print "Connexion is OK, now we put conf", conf
+            
+        try:
+            self.con.put_conf(conf)
+        except Exception,x:
+            print ''.join(Pyro.util.getPyroTraceback(x))
+            #sys.exit(0)
 
 
     def is_alive(self):

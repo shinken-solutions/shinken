@@ -8,19 +8,52 @@ from message import Message
 #from check import Check
 from worker import Worker
 from util import get_sequence
+import select
 
 
+#Interface for Arbiter, our big MASTER
+#It put us our conf
+class IForArbiter(Pyro.core.ObjBase):
+	def __init__(self, schedulers):
+            Pyro.core.ObjBase.__init__(self)
+            self.schedulers = schedulers
+
+
+	def put_conf(self, conf):
+            global have_conf
+            have_conf = True
+            print "Sending us ", conf
+            for sched_id in conf['schedulers'] :
+                s = conf['schedulers'][sched_id]
+                self.schedulers[sched_id] = s
+                self.schedulers[sched_id]['uri'] = "PYROLOC://%s:%d/Checks" % (s['address'], s['port'])
+                self.schedulers[sched_id] = conf['schedulers'][sched_id]
+                self.schedulers[sched_id]['verifs'] = {}
+                self.schedulers[sched_id]['running_id'] = 0
+                
+		print "We have our schedulers :", self.schedulers
+
+
+	def ping(self):
+		return True
+
+
+
+
+have_conf = False
 
 s = Queue() #Global Master -> Slave
 m = Queue() #Slave -> Master
 
+print "S initialised", s, s.__dict__
+
 schedulers = {
-    0 : {'url' : "PYROLOC://localhost:7768/Checks",
+    0 : {'uri' : "PYROLOC://localhost:7768/FALSE",
          'con' : None,
          'verifs' : {},
          'running_id' : 0
          },
-    1 : {'url' : "PYROLOC://localhost:7770/Checks",
+    1 : {'uri' : "PYROLOC://localhost:7770/FALSE",
          'con' : None,
          'verifs' : {},
          'running_id' : 0
@@ -43,12 +76,16 @@ seq_worker = get_sequence()
 #initialise or re-initialise connexion with pynag
 def pynag_con_init(id):
     global schedulers#request_checks
-    print "init de connexion avec", schedulers[id]['url']
-    schedulers[id]['con'] = Pyro.core.getProxyForURI(schedulers[id]['url'])
+    print "init de connexion avec", schedulers[id]['uri']
+    schedulers[id]['con'] = Pyro.core.getProxyForURI(schedulers[id]['uri'])
     try:
         new_run_id = schedulers[id]['con'].get_running_id()
     except Pyro.errors.ProtocolError, exp:
         print exp
+        return
+    except Pyro.errors.NamingError, exp:
+        print "Scheduler is not initilised", exp
+        schedulers[id]['con'] = None
         return
     if schedulers[id]['running_id'] != 0 and new_run_id != running_id:
         schedulers[id]['verifs'].clear()
@@ -100,7 +137,8 @@ def manage_return():
         if ret is not []:
             try:
                 con = schedulers[sched_id]['con']
-                con.put_results(ret)
+                if con is not None:#None = not initialized
+                    con.put_results(ret)
                 #We clean ONLY if the send is OK
             except Pyro.errors.ProtocolError:
                 pynag_con_init(sched_id)
@@ -115,6 +153,43 @@ def manage_return():
 
 
 if __name__ == '__main__':
+    #Daemon init
+    Pyro.core.initServer()
+    port = int(sys.argv[1])
+    print "Port:", port
+    daemon = Pyro.core.Daemon(port=port)
+    uri2 = daemon.connect(IForArbiter(schedulers),"ForArbiter")
+
+    #We wait for conf
+
+    print "Waiting for a configuration"
+    timeout = 1.0
+    while not have_conf :
+        socks = daemon.getServerSockets()
+        avant = time.time()
+        #socks.append(self.fifo)
+        ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
+        if ins != []:
+            for sock in socks:
+                if sock in ins:
+                    daemon.handleRequests()
+                    print "Apres handle : Have conf?", have_conf
+                    #have_conf = True
+                    apres = time.time()
+                    diff = apres-avant
+                    timeout = timeout - diff
+                    break    # no need to continue with the for loop
+        else: #Timeout
+            print "Waiting for a configuration"
+            timeout = 1.0
+
+        if timeout < 0:
+            timeout = 1.0
+
+
+
+
+    
 
     #Connexion init with PyNag server
     for sched_id in schedulers:
@@ -187,10 +262,11 @@ if __name__ == '__main__':
                 #new_checks = []
                 try:
                     con = schedulers[sched_id]['con']
-                    tmp_verifs = con.get_checks(do_checks=True, do_actions=True)
-                    for v in tmp_verifs:
-                        v.sched_id = sched_id
-                    new_checks.extend(tmp_verifs)
+                    if con is not None: #None = not initilized
+                        tmp_verifs = con.get_checks(do_checks=True, do_actions=True)
+                        for v in tmp_verifs:
+                            v.sched_id = sched_id
+                        new_checks.extend(tmp_verifs)
                 except Pyro.errors.ProtocolError as exp:
                     print exp
                 #we reinitialise the ccnnexion to pynag
@@ -207,6 +283,7 @@ if __name__ == '__main__':
                 id = chk.get_id()
                 verifs[id] = chk
                 msg = Message(id=0, type='Do', data=verifs[id])
+                print "S avant plantage:", s
                 s.put(msg)
             
                 

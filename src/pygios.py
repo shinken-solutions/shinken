@@ -39,10 +39,10 @@ class IChecks(Pyro.core.ObjBase):
 
 		
         def get_checks(self , do_checks=False, do_actions=False):
-		#print "We ask us checks"
+		print "We ask us checks"
 		#print "->Asking for scheduler"
 		res = self.sched.get_to_run_checks(do_checks, do_actions)
-		#print "Sending %d checks" % len(res)
+		print "Sending %d checks" % len(res)
 		return res
 	
 	
@@ -95,7 +95,7 @@ class Pygios:
 		Pyro.core.initServer()
 		port = int(sys.argv[1])
 		print "Port:", port
-		self.poller_daemon = Pyro.core.Daemon(port=7768)
+		self.poller_daemon = Pyro.core.Daemon(port=port)
 		#self.arbiter_daemon = Pyro.core.Daemon(port=7769)
 		self.sched = Scheduler(self.poller_daemon)#, self.arbiter_daemon)
 		
@@ -128,7 +128,7 @@ class Pygios:
 						diff = apres-avant
 						timeout = timeout - diff
 						break    # no need to continue with the for loop
-			else:#Timeout
+			else: #Timeout
 				print "Waiting for a configuration"
 				timeout = 1.0
 
@@ -136,43 +136,9 @@ class Pygios:
 				timeout = 1.0
 
 
-#		dummy_conf = Config()
-#		self.conf = dummy_conf
-#		#initialise or re-initialise connexion with scheduler
-#Check if pynag running id is still the same (just a connexion lost) or change
-#		# so checks are bad
-#		
-#		arbiter = Pyro.core.getProxyForURI("PYROLOC://localhost:7767/Arbiter")
-#		self.conf = arbiter.get_conf(0)
-#		print "Get conf:", self.conf
-
-
 	def main(self):
 		print "Loading configuration"
-		#self.get_conf()#Config()
-		#g_config = self.conf
-		#self.conf.read_config("nagios.cfg")
 
-		#print "****************** Explode ***********************"
-		#self.conf.explode()
-		
-		#print "****************** Inheritance *******************"
-		#self.conf.apply_inheritance()
-		
-		#print "****************** Fill default ******************"
-		#self.conf.fill_default()
-		
-		#print "****************** Clean templates ******************"
-		#self.conf.clean_useless()
-		
-		#print "****************** Pythonize ******************"
-		#self.conf.pythonize()
-		
-		#print "****************** Linkify ******************"
-		#self.conf.linkify()
-		
-		#print "*************** applying dependancies ************"
-		#self.conf.apply_dependancies()
 		
 		#print "************** Exlode global conf ****************"
 		self.conf.explode_global_conf()

@@ -8,6 +8,7 @@ import Pyro.core, time
 import signal
 import select
 import random
+import copy
 from check import Check
 from util import get_sequence, scheduler_no_spare_first
 from scheduler import Scheduler
@@ -32,6 +33,10 @@ class Arbiter:
 
         for sched in self.conf.schedulerlinks.items.values():
             print "sched", sched, "is alive ?", sched.is_alive()
+
+        for actionner in self.conf.actionners.items.values():
+            print "Actionner", actionner, "is alive ?", actionner.is_alive()
+        
         
         #self.conf.schedulerlinks.sort(scheduler_no_spare_first)
         #no_spare_sched = [s for s in self.conf.schedulerlinks if not s.spare]
@@ -54,6 +59,19 @@ class Arbiter:
                             print exp
                         except Pyro.errors.ProtocolError as exp:
                             print exp
+
+        #TODO : more python
+        tmp_conf = {}
+        tmp_conf['schedulers'] = {}
+        i = 0
+        for sched in self.conf.schedulerlinks:
+            tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address}
+            i += 1
+            
+        for actionner in self.conf.actionners.items.values():
+            actionner.put_conf(tmp_conf)
+            
+
 
         nb_confs = len(self.conf.confs)
         nb_assigned_confs = len([c for c in self.conf.confs.values() if c.is_assigned])
