@@ -93,16 +93,21 @@ class Pygios:
 	def __init__(self):
 		
 		Pyro.core.initServer()
+		port = int(sys.argv[1])
+		print "Port:", port
 		self.poller_daemon = Pyro.core.Daemon(port=7768)
-		self.arbiter_daemon = Pyro.core.Daemon(port=7769)
-		self.sched = Scheduler(self.poller_daemon, self.arbiter_daemon)
-		self.uri = self.poller_daemon.connect(IChecks(self.sched),"Checks")
-		self.uri2 = self.arbiter_daemon.connect(IForArbiter(self),"ForArbiter")
+		#self.arbiter_daemon = Pyro.core.Daemon(port=7769)
+		self.sched = Scheduler(self.poller_daemon)#, self.arbiter_daemon)
+		
+		#self.uri2 = self.arbiter_daemon.connect(IForArbiter(self),"ForArbiter")
+		self.uri2 = self.poller_daemon.connect(IForArbiter(self),"ForArbiter")
 		print "The daemon runs on port:",self.poller_daemon.port
-		print "The arbiter daemon runs on port:",self.arbiter_daemon.port
-		print "The object's uri is:",self.uri
+		print "The arbiter daemon runs on port:",self.poller_daemon.port
 		print "The object's uri2 is:",self.uri2
 		self.wait_conf()
+		print "Ok we've got conf"
+		self.uri = self.poller_daemon.connect(IChecks(self.sched),"Checks")
+		print "The object's uri is:",self.uri
 
 
 	def wait_conf(self):
@@ -110,16 +115,16 @@ class Pygios:
 		print "Waiting for a configuration"
 		timeout = 1.0
 		while not self.have_conf :
-			socks=self.arbiter_daemon.getServerSockets()
-			avant=time.time()
+			socks = self.poller_daemon.getServerSockets()
+			avant = time.time()
 			#socks.append(self.fifo)
 			ins,outs,exs=select.select(socks,[],[],timeout)   # 'foreign' event loop
 			if ins != []:
 				for s in socks:
 					if s in ins:
-						self.arbiter_daemon.handleRequests()
+						self.poller_daemon.handleRequests()
 						print "Apres handle : Have conf?", self.have_conf
-						apres=time.time()
+						apres = time.time()
 						diff = apres-avant
 						timeout = timeout - diff
 						break    # no need to continue with the for loop

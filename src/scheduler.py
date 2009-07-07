@@ -5,9 +5,9 @@ from status import StatusFile
 
 
 class Scheduler:
-    def __init__(self, daemon, arbiter_daemon):
+    def __init__(self, daemon):#, arbiter_daemon):
         self.daemon = daemon
-        self.arbiter_daemon = arbiter_daemon
+        #self.arbiter_daemon = arbiter_daemon
 
 
     #Load conf for future use
