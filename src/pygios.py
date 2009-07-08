@@ -96,6 +96,9 @@ class Pygios:
 		port = int(sys.argv[1])
 		print "Port:", port
 		self.poller_daemon = Pyro.core.Daemon(port=port)
+		if self.poller_daemon.port != port:
+			print "Sorry, the port %d is not free" % port
+			sys.exit(1)
 		#self.arbiter_daemon = Pyro.core.Daemon(port=7769)
 		self.sched = Scheduler(self.poller_daemon)#, self.arbiter_daemon)
 		
