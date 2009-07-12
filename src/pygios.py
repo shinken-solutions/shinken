@@ -90,8 +90,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
 class Pygios:
-	def __init__(self):
-		
+	def __init__(self):		
 		Pyro.core.initServer()
 		port = int(sys.argv[1])
 		print "Port:", port

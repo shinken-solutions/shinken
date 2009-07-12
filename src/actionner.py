@@ -18,6 +18,7 @@ class IForArbiter(Pyro.core.ObjBase):
 		self.app = app
 		self.schedulers = app.schedulers
 
+
 	#function called by arbiter for giving us our conf
 	#conf must be a dict with:
 	#'schedulers' : schedulers dict (by id) with address and port
@@ -25,16 +26,18 @@ class IForArbiter(Pyro.core.ObjBase):
 		#global have_conf
 		self.app.have_conf = True
 		print "Sending us ", conf
+		#If we've got something in the schedulers, we do not want it anymore
+		self.schedulers.clear()
 		for sched_id in conf['schedulers'] :
 			s = conf['schedulers'][sched_id]
 			self.schedulers[sched_id] = s
 			self.schedulers[sched_id]['uri'] = "PYROLOC://%s:%d/Checks" % (s['address'], s['port'])
 			#self.schedulers[sched_id] = conf['schedulers'][sched_id]
 			self.schedulers[sched_id]['verifs'] = {}
-			self.schedulers[sched_id]['running_id'] = 0
-		
+			self.schedulers[sched_id]['running_id'] = 0		
 		print "We have our schedulers :", self.schedulers
 		
+
 	#Use for arbiter to know if we are alive
 	def ping(self):
 		print "We ask us for a ping"
@@ -59,6 +62,7 @@ class Actionner:
 		
 		#TODO : change with id in the Class
 		self.seq_worker = get_sequence()
+
 
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):

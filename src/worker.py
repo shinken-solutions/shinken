@@ -50,14 +50,14 @@ class Worker:
     #c = Control Queue for the worker
     def work(self, s,m,c):
         while True:
-            msg=None
-            cmsg=None
+            msg = None
+            cmsg = None
             
             try:
-                msg=s.get(timeout=1.0)
+                msg = s.get(timeout=1.0)
             except:
                 #print "Empty Queue", self._id
-                msg=None
+                msg = None
                 #print "[%d] idle up %s" % (self._id, self._idletime)
                 self._idletime = self._idletime + 1
             
@@ -72,11 +72,11 @@ class Worker:
                 chk.set_status('executed')
                 
                 #We answer to the master
-                msg=Message(id=self._id, type='Result',data=chk)
+                msg = Message(id=self._id, type='Result',data=chk)
                 m.put(msg)
                 
             try:
-                cmsg=c.get(block=False)
+                cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self._id
                     break
