@@ -1,3 +1,11 @@
+#!/usr/bin/python
+#This class is an application for launch actions 
+#like notifications or event handlers
+#The actionner listen configuration from Arbiter in a port (first argument)
+#the configuration gived by arbiter is schedulers where actionner will take actions.
+#When already launch and have a conf, actionner still listen to arbiter (one a timeout)
+#if arbiter whant it to have a new conf, actionner forgot old chedulers (and actions into)
+#take new ones and do the (new) job.
 from multiprocessing import Process, Queue
 import time
 import sys
@@ -23,7 +31,6 @@ class IForArbiter(Pyro.core.ObjBase):
 	#conf must be a dict with:
 	#'schedulers' : schedulers dict (by id) with address and port
 	def put_conf(self, conf):
-		#global have_conf
 		self.app.have_conf = True
 		print "Sending us ", conf
 		#If we've got something in the schedulers, we do not want it anymore
@@ -32,9 +39,11 @@ class IForArbiter(Pyro.core.ObjBase):
 			s = conf['schedulers'][sched_id]
 			self.schedulers[sched_id] = s
 			self.schedulers[sched_id]['uri'] = "PYROLOC://%s:%d/Checks" % (s['address'], s['port'])
-			#self.schedulers[sched_id] = conf['schedulers'][sched_id]
 			self.schedulers[sched_id]['verifs'] = {}
-			self.schedulers[sched_id]['running_id'] = 0		
+			self.schedulers[sched_id]['running_id'] = 0
+			#We cannot reinit connexions because this code in in a thread, and
+			#pyro do not allow thread to create new connexions...
+			#So we do it just after.
 		print "We have our schedulers :", self.schedulers
 		
 
@@ -77,6 +86,8 @@ class Actionner:
 			print "Scheduler is not initilised", exp
 			self.schedulers[id]['con'] = None
 			return
+		#The schedulers have been restart : it has a new run_id.
+		#So we clear all verifs, they are obsolete now.
 		if self.schedulers[id]['running_id'] != 0 and new_run_id != running_id:
 			self.schedulers[id]['verifs'].clear()
 		self.schedulers[id]['running_id'] = new_run_id
@@ -85,15 +96,12 @@ class Actionner:
 
         #Manage messages from Workers
 	def manage_msg(self, msg):
-		#global zombie
-		#global workers
-		#global schedulers
-    
+		#Ok, a worker whant to die. It's sad, but we must kill him!!!
 		if msg.get_type() == 'IWantToDie':
 			zombie = msg.get_from()
 			print "Got a ding wish from ",zombie
 			self.workers[zombie].join()
-    
+		#Ok, it's a result. We get it, and fill verifs of the good sched_id
 		if msg.get_type() == 'Result':
 			id = msg.get_from()
 			self.workers[id].reset_idle()
@@ -101,14 +109,12 @@ class Actionner:
 			sched_id = chk.sched_id
 			print "[%d]Get result from worker" % sched_id, chk
 			chk.set_status('waitforhomerun')
-
 			self.schedulers[sched_id]['verifs'][chk.get_id()] = chk
 
 
         #Return the chk to scheduler and clean them
 	def manage_return(self):
-		#global schedulers#request_checks
-                #ret = {}
+		#Fot all schedulers, we check for waitforhomerun and we send back results
 		for sched_id in self.schedulers:
 			ret = []
 			verifs = self.schedulers[sched_id]['verifs']
@@ -116,15 +122,16 @@ class Actionner:
 			id_to_return = [elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun']
 			for id in id_to_return:
 				v = verifs[id]
+				#We got v without the sched_id prop, so we remove it before resent it.
 				del v.sched_id
 				ret.append(v)
+			#Now ret have all verifs, we can return them
 			print "[%d] Returning %s results" % (sched_id, ret)
 			if ret is not []:
 				try:
 					con = self.schedulers[sched_id]['con']
 					if con is not None:#None = not initialized
 						con.put_results(ret)
-                
 				except Pyro.errors.ProtocolError:
 					self.pynag_con_init(sched_id)
 					return
@@ -137,21 +144,21 @@ class Actionner:
 				del verifs[id]
 
 
+	#Main function, will loop forever
 	def main(self):
                 #Daemon init
 		Pyro.core.initServer()
 		self.port = int(sys.argv[1])
 		print "Port:", self.port
 		self.daemon = Pyro.core.Daemon(port=self.port)
-		#If the port is not free, pyro take an other. I don't like taht!
+		#If the port is not free, pyro take an other. I don't like that!
 		if self.daemon.port != self.port:
 			print "Sorry, the port %d was not free" % self.port
 			sys.exit(1)
 		self.uri2 = self.daemon.connect(IForArbiter(self),"ForArbiter")
 
-                #We wait for conf
-		
-		print "Waiting for a configuration"
+                #We wait for initial conf
+		print "Waiting for initial configuration"
 		timeout = 1.0
 		while not self.have_conf :
 			socks = self.daemon.getServerSockets()
@@ -162,7 +169,6 @@ class Actionner:
 					if sock in ins:
 						self.daemon.handleRequests()
 						print "Apres handle : Have conf?", self.have_conf
-                    #have_conf = True
 						apres = time.time()
 						diff = apres-avant
 						timeout = timeout - diff
@@ -195,7 +201,17 @@ class Actionner:
 				print "Loop ",i
 			begin_loop = time.time()
 
-			#print "Timeout", timeout
+			#Now we check if arbiter speek to us in the daemon. If so, we listen for it
+			#When it push us conf, we reinit connexions
+			timeout_daemon = 0.0
+			socks = self.daemon.getServerSockets()
+			ins,outs,exs = select.select(socks,[],[],timeout_daemon)   # 'foreign' event loop
+			if ins != []:
+				for sock in socks:
+					if sock in ins:
+						self.daemon.handleRequests()
+						for sched_id in self.schedulers:
+							self.pynag_con_init(sched_id)
 			
 			try:
 				msg = self.m.get(timeout=timeout)
@@ -205,37 +221,34 @@ class Actionner:
                                 #Manager the msg like check return
 				manage_msg(msg)
             
-            #We add the time pass on the workers'idle time
+                                #We add the time pass on the workers'idle time
 				for id in self.workers:
 					self.workers[id].add_idletime(after-begin_loop)
 					
 					
 			except : #Time out Part
-            #print "Master: timeout "
 				after = time.time()
 				timeout = 1.0
 				
-            #We join (old)zombies and we move new ones in the old list
+                                #We join (old)zombies and we move new ones in the old list
 				for id in self.zombies:
 					self.workers[id].join()
 					del self.workers[id]
+				#We switch so zombie will be kill, and new ones wil go in newzombies
 				self.zombies = self.newzombies
 				self.newzombies = []
 
-				nb_queue = 0
+				nb_queue = 0 # Len of actions in queue status, so the "working" queue
 				for sched_id in self.schedulers:
-                #print "Stats for Scheduler No:", sched_id
 					verifs = self.schedulers[sched_id]['verifs']
-                #We add new worker if the queue is > 80% of the worker number
-                #print 'Total number of Workers : %d' % len(workers)
 					tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
 					nb_queue += tmp_nb_queue
 					nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
-					
+					#Just print stat sometimes
 					if not i % 10:
 						print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)
             
-
+                                #We add new worker if the queue is > 80% of the worker number
 				while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 20:
 					id = self.seq_worker.next()
 					print "Allocate New worker : ",id
@@ -260,7 +273,8 @@ class Actionner:
 					except Exception,x:
 						print ''.join(Pyro.util.getPyroTraceback(x))
 						sys.exit(0)
-            
+				#Ok, we've got new actions in new_checks
+				#so we put them in queue state and we put in in the working queue for workers
 				for chk in new_checks:
 					chk.set_status('queue')
 					verifs = self.schedulers[chk.sched_id]['verifs']
@@ -275,19 +289,19 @@ class Actionner:
 				self.manage_return()
             
             
-            #We add the time pass on the workers
+				#We add the time pass on the workers
 				for id in self.workers:
 					self.workers[id].add_idletime(after-begin_loop)
             
 				delworkers = []
-            #We look for cleaning workers
+                                #We look for cleaning workers
 				for id in self.workers:
 					if self.workers[id].is_killable():
 						msg=Message(id=0, type='Die')
 						self.workers[id].send_message(msg)
 						self.workers[id].set_zombie()
 						delworkers.append(id)
-                                        #Cleaning the workers
+				#Cleaning the workers
 				for id in delworkers:
 					self.newzombies.append(id)
 
