@@ -11,6 +11,7 @@ import time
 import sys
 import Pyro.core
 import select
+
 from message import Message
 from worker import Worker
 from util import get_sequence
@@ -144,22 +145,13 @@ class Actionner:
 				del verifs[id]
 
 
-	#Main function, will loop forever
-	def main(self):
-                #Daemon init
-		Pyro.core.initServer()
-		self.port = int(sys.argv[1])
-		print "Port:", self.port
-		self.daemon = Pyro.core.Daemon(port=self.port)
-		#If the port is not free, pyro take an other. I don't like that!
-		if self.daemon.port != self.port:
-			print "Sorry, the port %d was not free" % self.port
-			sys.exit(1)
-		self.uri2 = self.daemon.connect(IForArbiter(self),"ForArbiter")
-
-                #We wait for initial conf
+	#Use to wait conf from arbiter.
+	#It send us conf in our daemon. It put the have_conf prop if he send us something
+	#(it can just do a ping)
+	def wait_for_initial_conf(self):
 		print "Waiting for initial configuration"
 		timeout = 1.0
+		#Arbiter do not already set our have_conf param
 		while not self.have_conf :
 			socks = self.daemon.getServerSockets()
 			avant = time.time()
@@ -178,7 +170,114 @@ class Actionner:
 				timeout = 1.0
 
 			if timeout < 0:
-				timeout = 1.0
+				timeout = 1.0		
+
+				
+	#The arbiter can resent us new conf in the daemon port.
+	#We do not want to loose time about it, so it's not a bloking wait, timeout = 0s
+	#If it send us a new conf, we reinit the connexions of all schedulers
+	def watch_for_new_conf(self):
+		timeout_daemon = 0.0
+		socks = self.daemon.getServerSockets()
+		ins,outs,exs = select.select(socks,[],[],timeout_daemon)   # 'foreign' event loop
+		if ins != []:
+			for sock in socks:
+				if sock in ins:
+					self.daemon.handleRequests()
+					for sched_id in self.schedulers:
+						self.pynag_con_init(sched_id)
+
+
+	#Workers are process. We need to clean them some time (see zombie part)
+	#Here we create new workers if the queue load (len of verifs) is too long
+	#here it's > 80% of workers
+	def adjust_worker_number_by_load(self):
+		nb_queue = 0 # Len of actions in queue status, so the "working" queue
+		for sched_id in self.schedulers:
+			verifs = self.schedulers[sched_id]['verifs']
+			tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
+			nb_queue += tmp_nb_queue
+			nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
+			#Just print stat sometimes
+			if not i % 10:
+				print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)
+            
+		#We add new worker if the queue is > 80% of the worker number
+		while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 20:
+			id = self.seq_worker.next()
+			print "Allocate New worker : ",id
+			self.workers[id] = Worker(id, self.s, self.m, mortal=True)
+			self.workers[id].start()
+
+
+	#We get new actions from schedulers, we create a Message ant we put it in the s queue (from master to slave)
+	def get_new_actions(self):
+		new_checks = []
+		#We check for new check
+		for sched_id in self.schedulers:
+			try:
+				con = self.schedulers[sched_id]['con']
+				if con is not None: #None = not initilized
+					tmp_verifs = con.get_checks(do_checks=False, do_actions=True)
+					print "We've got new verifs" , tmp_verifs
+					for v in tmp_verifs:
+						v.sched_id = sched_id
+					new_checks.extend(tmp_verifs)
+			except Pyro.errors.ProtocolError as exp:
+				print exp
+				#we reinitialise the ccnnexion to pynag
+				self.pynag_con_init(sched_id)
+			except Exception,x:
+				print ''.join(Pyro.util.getPyroTraceback(x))
+				sys.exit(0)
+		#Ok, we've got new actions in new_checks
+		#so we put them in queue state and we put in in the working queue for workers
+		for chk in new_checks:
+			chk.set_status('queue')
+			verifs = self.schedulers[chk.sched_id]['verifs']
+			id = chk.get_id()
+			verifs[id] = chk
+			msg = Message(id=0, type='Do', data=verifs[id])
+			self.s.put(msg)
+
+
+	#Main function, will loop forever
+	def main(self):
+                #Daemon init
+		Pyro.core.initServer()
+		self.port = int(sys.argv[1])
+		print "Port:", self.port
+		self.daemon = Pyro.core.Daemon(port=self.port)
+		#If the port is not free, pyro take an other. I don't like that!
+		if self.daemon.port != self.port:
+			print "Sorry, the port %d was not free" % self.port
+			sys.exit(1)
+		self.uri2 = self.daemon.connect(IForArbiter(self),"ForArbiter")
+
+                #We wait for initial conf
+		self.wait_for_initial_conf()
+		
+                #print "Waiting for initial configuration"
+		#timeout = 1.0
+		#while not self.have_conf :
+		#	socks = self.daemon.getServerSockets()
+		#	avant = time.time()
+		#	ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
+		#	if ins != []:
+		#		for sock in socks:
+		#			if sock in ins:
+		#				self.daemon.handleRequests()
+		#				print "Apres handle : Have conf?", self.have_conf
+		#				apres = time.time()
+		#				diff = apres-avant
+		#				timeout = timeout - diff
+		#				break    # no need to continue with the for loop
+		#	else: #Timeout
+		#		print "Waiting for a configuration"
+		#		timeout = 1.0
+		#
+		#	if timeout < 0:
+		#		timeout = 1.0
     
 
                 #Connexion init with PyNag server
@@ -203,15 +302,16 @@ class Actionner:
 
 			#Now we check if arbiter speek to us in the daemon. If so, we listen for it
 			#When it push us conf, we reinit connexions
-			timeout_daemon = 0.0
-			socks = self.daemon.getServerSockets()
-			ins,outs,exs = select.select(socks,[],[],timeout_daemon)   # 'foreign' event loop
-			if ins != []:
-				for sock in socks:
-					if sock in ins:
-						self.daemon.handleRequests()
-						for sched_id in self.schedulers:
-							self.pynag_con_init(sched_id)
+			self.watch_for_new_conf()
+			#timeout_daemon = 0.0
+			#socks = self.daemon.getServerSockets()
+			#ins,outs,exs = select.select(socks,[],[],timeout_daemon)   # 'foreign' event loop
+			#if ins != []:
+			#	for sock in socks:
+			#		if sock in ins:
+			#			self.daemon.handleRequests()
+			#			for sched_id in self.schedulers:
+			#				self.pynag_con_init(sched_id)
 			
 			try:
 				msg = self.m.get(timeout=timeout)
@@ -238,51 +338,57 @@ class Actionner:
 				self.zombies = self.newzombies
 				self.newzombies = []
 
-				nb_queue = 0 # Len of actions in queue status, so the "working" queue
-				for sched_id in self.schedulers:
-					verifs = self.schedulers[sched_id]['verifs']
-					tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
-					nb_queue += tmp_nb_queue
-					nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
-					#Just print stat sometimes
-					if not i % 10:
-						print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)
+				#Maybe we do not have enouth workers, we check for it
+				#and launch new ones if need
+				self.adjust_worker_number_by_load()
+				#nb_queue = 0 # Len of actions in queue status, so the "working" queue
+				#for sched_id in self.schedulers:
+				#	verifs = self.schedulers[sched_id]['verifs']
+				#	tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
+				#	nb_queue += tmp_nb_queue
+				#	nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
+				#	#Just print stat sometimes
+				#	if not i % 10:
+				#		print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)
             
                                 #We add new worker if the queue is > 80% of the worker number
-				while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 20:
-					id = self.seq_worker.next()
-					print "Allocate New worker : ",id
-					self.workers[id] = Worker(id, self.s, self.m, mortal=True)
-					self.workers[id].start()
+				#while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 20:
+				#	id = self.seq_worker.next()
+				#	print "Allocate New worker : ",id
+				#	self.workers[id] = Worker(id, self.s, self.m, mortal=True)
+				#	self.workers[id].start()
                 
-				new_checks = []
+				#Now we can get new actions from schedulers
+				self.get_new_actions()
+				
+				#new_checks = []
 				#We check for new check
-				for sched_id in self.schedulers:
-					try:
-						con = self.schedulers[sched_id]['con']
-						if con is not None: #None = not initilized
-							tmp_verifs = con.get_checks(do_checks=False, do_actions=True)
-							print "We've got new verifs" , tmp_verifs
-							for v in tmp_verifs:
-								v.sched_id = sched_id
-							new_checks.extend(tmp_verifs)
-					except Pyro.errors.ProtocolError as exp:
-						print exp
-                                                #we reinitialise the ccnnexion to pynag
-						self.pynag_con_init(sched_id)
-					except Exception,x:
-						print ''.join(Pyro.util.getPyroTraceback(x))
-						sys.exit(0)
-				#Ok, we've got new actions in new_checks
-				#so we put them in queue state and we put in in the working queue for workers
-				for chk in new_checks:
-					chk.set_status('queue')
-					verifs = self.schedulers[chk.sched_id]['verifs']
-					id = chk.get_id()
-					verifs[id] = chk
-					msg = Message(id=0, type='Do', data=verifs[id])
-					#print "S avant plantage:", s
-					self.s.put(msg)
+				#for sched_id in self.schedulers:
+				#	try:
+				#		con = self.schedulers[sched_id]['con']
+				#		if con is not None: #None = not initilized
+				#			tmp_verifs = con.get_checks(do_checks=False, do_actions=True)
+				#			print "We've got new verifs" , tmp_verifs
+				#			for v in tmp_verifs:
+				#				v.sched_id = sched_id
+				#			new_checks.extend(tmp_verifs)
+				#	except Pyro.errors.ProtocolError as exp:
+				#		print exp
+                                #                #we reinitialise the ccnnexion to pynag
+				#		self.pynag_con_init(sched_id)
+				#	except Exception,x:
+				#		print ''.join(Pyro.util.getPyroTraceback(x))
+				#		sys.exit(0)
+				##Ok, we've got new actions in new_checks
+				##so we put them in queue state and we put in in the working queue for workers
+				#for chk in new_checks:
+				#	chk.set_status('queue')
+				#	verifs = self.schedulers[chk.sched_id]['verifs']
+				#	id = chk.get_id()
+				#	verifs[id] = chk
+				#	msg = Message(id=0, type='Do', data=verifs[id])
+				#	#print "S avant plantage:", s
+				#	self.s.put(msg)
 					
 					
                                 #We send all finished checks
