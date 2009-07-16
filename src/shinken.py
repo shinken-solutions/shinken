@@ -15,7 +15,7 @@ from config import Config
 from macroresolver import MacroResolver
 from external_command import ExternalCommand
 
-seq_verif = get_sequence()
+#seq_verif = get_sequence()
 
 time_send = time.time()
 
@@ -94,7 +94,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
 
-class Pygios:
+class Shinken:
 	def __init__(self):		
 		Pyro.core.initServer()
 		port = int(sys.argv[1])
@@ -186,5 +186,5 @@ class Pygios:
 				
 
 if __name__ == '__main__':
-	p = Pygios()
+	p = Shinken()
 	p.main()

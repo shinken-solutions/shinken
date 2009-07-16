@@ -3,14 +3,17 @@ from message import Message
 
 class Worker:
     """The Worker class """
-    _id = None
+    id = 0#None
     _process = None
     _mortal = None
     _idletime = None
     _timeout = None
     _c = None
     def __init__(self, id, s, m, mortal=True, timeout=30):
-        self._id = id
+        self.id = self.__class__.id
+        self.__class__.id += 1
+
+        #self._id = id
         self._mortal = mortal
         self._idletime = 0
         self._timeout = timeout
@@ -72,18 +75,18 @@ class Worker:
                 chk.set_status('executed')
                 
                 #We answer to the master
-                msg = Message(id=self._id, type='Result',data=chk)
+                msg = Message(id=self.id, type='Result',data=chk)
                 m.put(msg)
                 
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    print "[%d]Dad say we are diing..." % self._id
+                    print "[%d]Dad say we are diing..." % self.id
                     break
             except :
                 pass
                 
             if self._mortal == True and self._idletime > 2 * self._timeout:
-                print "[%d]Timeout, Arakiri" % self._id
+                print "[%d]Timeout, Arakiri" % self.id
                 #The master must be dead and we are loonely, we must die
                 break

@@ -190,6 +190,15 @@ class Reactionner:
 						self.pynag_con_init(sched_id)
 
 
+	#Create and launch a new worker, and put it into self.workers
+	#It can be mortal or not
+	def create_and_launch_worker(self, mortal=True):
+		w = Worker(1, self.s, self.m, mortal=mortal)
+		self.workers[w.id] = w#Worker(id, self.s, self.m, mortal=True)
+		print "Allocate : ", w.id
+		self.workers[w.id].start()
+
+
 	#Workers are process. We need to clean them some time (see zombie part)
 	#Here we create new workers if the queue load (len of verifs) is too long
 	#here it's > 80% of workers
@@ -202,20 +211,16 @@ class Reactionner:
 			nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
 			#Just print stat sometimes
 			#if not i % 10:
-			print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)
-            
+			print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
 		#We add new worker if the queue is > 80% of the worker number
 		while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 20:
-			id = self.seq_worker.next()
-			print "Allocate New worker : ",id
-			self.workers[id] = Worker(id, self.s, self.m, mortal=True)
-			self.workers[id].start()
+			self.create_and_launch_worker()
 
 
 	#We get new actions from schedulers, we create a Message ant we put it in the s queue (from master to slave)
 	def get_new_actions(self):
 		new_checks = []
-		#We check for new check
+		#We check for new check in each schedulers and put the result in new_checks
 		for sched_id in self.schedulers:
 			try:
 				con = self.schedulers[sched_id]['con']
@@ -235,7 +240,7 @@ class Reactionner:
 				print exp
 			except Pyro.errors.NamingError as exp:#scheduler must not have checks
 				print exp
-			except Exception,x:
+			except Exception,x: # What the F**k? We do not know what happenned, so.. bye bye :)
 				print ''.join(Pyro.util.getPyroTraceback(x))
 				sys.exit(0)
 		#Ok, we've got new actions in new_checks
@@ -271,10 +276,7 @@ class Reactionner:
 
                 #Allocate Mortal Threads
 		for i in xrange(1, 5):
-				id = self.seq_worker.next()
-				print "Allocate : ",id
-				self.workers[id] = Worker(id, self.s, self.m, mortal=True)
-				self.workers[id].start()
+			self.create_and_launch_worker() #create mortal worker
 
 		#Now main loop
 		i = 0
@@ -301,7 +303,6 @@ class Reactionner:
 				for id in self.workers:
 					self.workers[id].add_idletime(after-begin_loop)
 					
-					
 			except : #Time out Part
 				after = time.time()
 				timeout = 1.0
@@ -317,59 +318,12 @@ class Reactionner:
 				#Maybe we do not have enouth workers, we check for it
 				#and launch new ones if need
 				self.adjust_worker_number_by_load()
-				#nb_queue = 0 # Len of actions in queue status, so the "working" queue
-				#for sched_id in self.schedulers:
-				#	verifs = self.schedulers[sched_id]['verifs']
-				#	tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
-				#	nb_queue += tmp_nb_queue
-				#	nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
-				#	#Just print stat sometimes
-				#	if not i % 10:
-				#		print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)
-            
-                                #We add new worker if the queue is > 80% of the worker number
-				#while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 20:
-				#	id = self.seq_worker.next()
-				#	print "Allocate New worker : ",id
-				#	self.workers[id] = Worker(id, self.s, self.m, mortal=True)
-				#	self.workers[id].start()
                 
 				#Now we can get new actions from schedulers
 				self.get_new_actions()
 				
-				#new_checks = []
-				#We check for new check
-				#for sched_id in self.schedulers:
-				#	try:
-				#		con = self.schedulers[sched_id]['con']
-				#		if con is not None: #None = not initilized
-				#			tmp_verifs = con.get_checks(do_checks=False, do_actions=True)
-				#			print "We've got new verifs" , tmp_verifs
-				#			for v in tmp_verifs:
-				#				v.sched_id = sched_id
-				#			new_checks.extend(tmp_verifs)
-				#	except Pyro.errors.ProtocolError as exp:
-				#		print exp
-                                #                #we reinitialise the ccnnexion to pynag
-				#		self.pynag_con_init(sched_id)
-				#	except Exception,x:
-				#		print ''.join(Pyro.util.getPyroTraceback(x))
-				#		sys.exit(0)
-				##Ok, we've got new actions in new_checks
-				##so we put them in queue state and we put in in the working queue for workers
-				#for chk in new_checks:
-				#	chk.set_status('queue')
-				#	verifs = self.schedulers[chk.sched_id]['verifs']
-				#	id = chk.get_id()
-				#	verifs[id] = chk
-				#	msg = Message(id=0, type='Do', data=verifs[id])
-				#	#print "S avant plantage:", s
-				#	self.s.put(msg)
-					
-					
                                 #We send all finished checks
 				self.manage_return()
-            
             
 				#We add the time pass on the workers
 				for id in self.workers:
