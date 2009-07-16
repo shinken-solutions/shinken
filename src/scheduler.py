@@ -8,7 +8,7 @@ class Scheduler:
     def __init__(self, daemon):#, arbiter_daemon):
         self.daemon = daemon
         #self.arbiter_daemon = arbiter_daemon
-
+        self.must_run = True
 
     #Load conf for future use
     def load_conf(self, conf):
@@ -26,6 +26,9 @@ class Scheduler:
         self.downtimes = {}
         self.status_file = StatusFile(self)
 
+
+    def die(self):
+        self.must_run = False
 
     #Load the external commander
     def load_external_command(self, e):
@@ -233,13 +236,13 @@ class Scheduler:
         print "First scheduling"
         self.schedule()
         timeout = 1.0
-        while True :
-            socks=self.daemon.getServerSockets()
-            avant=time.time()
+        while self.must_run :
+            socks = self.daemon.getServerSockets()
+            avant = time.time()
 
             #socks.append(self.fifo)
  
-            ins,outs,exs=select.select(socks,[],[],timeout)   # 'foreign' event loop
+            ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
             if ins != []:
 		for s in socks:
                         if s in ins:

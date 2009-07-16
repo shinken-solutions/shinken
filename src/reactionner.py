@@ -56,7 +56,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
 #Our main APP class
-class Actionner:
+class Reactionner:
 	def __init__(self):
 		#Bool to know if we have received conf from arbiter
 		self.have_conf = False
@@ -136,6 +136,8 @@ class Actionner:
 				except Pyro.errors.ProtocolError:
 					self.pynag_con_init(sched_id)
 					return
+				except AttributeError as exp: #the scheduler must  not be initialized
+					print exp
 				except Exception,x:
 					print ''.join(Pyro.util.getPyroTraceback(x))
 					sys.exit(0)
@@ -199,8 +201,8 @@ class Actionner:
 			nb_queue += tmp_nb_queue
 			nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
 			#Just print stat sometimes
-			if not i % 10:
-				print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)
+			#if not i % 10:
+			print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)
             
 		#We add new worker if the queue is > 80% of the worker number
 		while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 20:
@@ -223,10 +225,16 @@ class Actionner:
 					for v in tmp_verifs:
 						v.sched_id = sched_id
 					new_checks.extend(tmp_verifs)
+			except KeyError as exp: #Ok, con is not know, so we create it
+				self.pynag_con_init(sched_id)
 			except Pyro.errors.ProtocolError as exp:
 				print exp
 				#we reinitialise the ccnnexion to pynag
 				self.pynag_con_init(sched_id)
+			except AttributeError as exp: #scheduler must not be initialized
+				print exp
+			except Pyro.errors.NamingError as exp:#scheduler must not have checks
+				print exp
 			except Exception,x:
 				print ''.join(Pyro.util.getPyroTraceback(x))
 				sys.exit(0)
@@ -256,29 +264,6 @@ class Actionner:
 
                 #We wait for initial conf
 		self.wait_for_initial_conf()
-		
-                #print "Waiting for initial configuration"
-		#timeout = 1.0
-		#while not self.have_conf :
-		#	socks = self.daemon.getServerSockets()
-		#	avant = time.time()
-		#	ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
-		#	if ins != []:
-		#		for sock in socks:
-		#			if sock in ins:
-		#				self.daemon.handleRequests()
-		#				print "Apres handle : Have conf?", self.have_conf
-		#				apres = time.time()
-		#				diff = apres-avant
-		#				timeout = timeout - diff
-		#				break    # no need to continue with the for loop
-		#	else: #Timeout
-		#		print "Waiting for a configuration"
-		#		timeout = 1.0
-		#
-		#	if timeout < 0:
-		#		timeout = 1.0
-    
 
                 #Connexion init with PyNag server
 		for sched_id in self.schedulers:
@@ -303,15 +288,6 @@ class Actionner:
 			#Now we check if arbiter speek to us in the daemon. If so, we listen for it
 			#When it push us conf, we reinit connexions
 			self.watch_for_new_conf()
-			#timeout_daemon = 0.0
-			#socks = self.daemon.getServerSockets()
-			#ins,outs,exs = select.select(socks,[],[],timeout_daemon)   # 'foreign' event loop
-			#if ins != []:
-			#	for sock in socks:
-			#		if sock in ins:
-			#			self.daemon.handleRequests()
-			#			for sched_id in self.schedulers:
-			#				self.pynag_con_init(sched_id)
 			
 			try:
 				msg = self.m.get(timeout=timeout)
@@ -413,5 +389,5 @@ class Actionner:
 
 
 if __name__ == '__main__':
-	actionner = Actionner()
-	actionner.main()
+	reactionner = Reactionner()
+	reactionner.main()

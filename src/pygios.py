@@ -82,7 +82,12 @@ class IForArbiter(Pyro.core.ObjBase):
 		print "Get conf:", self.app.conf
 		self.app.have_conf = True
 		print "Have conf?", self.app.have_conf
-
+		
+                #if app already have a scheduler, we must say him to DIE Mouahahah
+		#So It will quit, and will load a new conf (and create a brand new scheduler)
+		if hasattr(self.app, "sched"):
+			self.app.sched.die()
+			
 
 	def ping(self):
 		return True
@@ -99,22 +104,25 @@ class Pygios:
 			print "Sorry, the port %d is not free" % port
 			sys.exit(1)
 		#self.arbiter_daemon = Pyro.core.Daemon(port=7769)
-		self.sched = Scheduler(self.poller_daemon)#, self.arbiter_daemon)
+
 		
 		#self.uri2 = self.arbiter_daemon.connect(IForArbiter(self),"ForArbiter")
-		self.uri2 = self.poller_daemon.connect(IForArbiter(self),"ForArbiter")
+		i_for_arbiter = IForArbiter(self)
+		self.uri2 = self.poller_daemon.connect(i_for_arbiter,"ForArbiter")
 		print "The daemon runs on port:",self.poller_daemon.port
 		print "The arbiter daemon runs on port:",self.poller_daemon.port
 		print "The object's uri2 is:",self.uri2
-		self.wait_conf()
+		
+		self.must_run = True
+		self.wait_initial_conf()
 		print "Ok we've got conf"
-		self.uri = self.poller_daemon.connect(IChecks(self.sched),"Checks")
-		print "The object's uri is:",self.uri
+		
+		
 
 
-	def wait_conf(self):
+	def wait_initial_conf(self):
 		self.have_conf = False
-		print "Waiting for a configuration"
+		print "Waiting for initial configuration"
 		timeout = 1.0
 		while not self.have_conf :
 			socks = self.poller_daemon.getServerSockets()
@@ -137,11 +145,12 @@ class Pygios:
 			if timeout < 0:
 				timeout = 1.0
 
-
-	def main(self):
-		print "Loading configuration"
-
+	def load_conf(self):
+		self.sched = Scheduler(self.poller_daemon)#, self.arbiter_daemon)
+		self.uri = self.poller_daemon.connect(IChecks(self.sched),"Checks")
+		print "The object's uri is:",self.uri
 		
+		print "Loading configuration"
 		#print "************** Exlode global conf ****************"
 		self.conf.explode_global_conf()
 
@@ -163,11 +172,18 @@ class Pygios:
 		
 		#External command need the sched because he can raise checks
 		e.load_scheduler(self.sched)
+
+
+
+	def main(self):
+		self.load_conf()
 		
 		print "Configuration Loaded"
-		self.sched.run()
-	
-
+		while self.must_run:
+			self.sched.run()
+			if self.must_run: #Ok, we quit scheduler, but maybe it's just for reloadin our configuration
+				self.load_conf()
+				
 
 if __name__ == '__main__':
 	p = Pygios()
