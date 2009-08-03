@@ -1,3 +1,7 @@
+#This class is used for poller and reactionner to work.
+#The worker is a process launch by theses process and read Message in a Queue (self.s) (slave)
+#They launch the Check and then send the result in the Queue self.m (master)
+#they can die if they do not do anything (param timeout)
 from multiprocessing import Process, Queue
 from message import Message
 
@@ -57,7 +61,9 @@ class Worker:
             cmsg = None
             
             try:
+                #print "I", self.id, "wait for a message"
                 msg = s.get(timeout=1.0)
+                #print "I", self.id, "I've got a message!"
             except:
                 #print "Empty Queue", self._id
                 msg = None

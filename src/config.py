@@ -17,7 +17,7 @@ from singleton import Singleton
 from servicedependency import Servicedependency, Servicedependencies
 from hostdependency import Hostdependency, Hostdependencies
 from schedulerlink import SchedulerLink, SchedulerLinks
-from actionnerlink import ActionnerLink, ActionnerLinks
+from reactionnerlink import ReactionnerLink, ReactionnerLinks
 from pollerlink import PollerLink, PollerLinks
 
 from util import to_int, to_char, to_split, to_bool
@@ -246,7 +246,7 @@ class Config(Item):
                     'servicedependency' : [],
                     'hostdependency' : [],
                     'scheduler' : [],
-                    'actionner' : [],
+                    'reactionner' : [],
                     'poller' : []
                     }
         
@@ -412,19 +412,19 @@ class Config(Item):
             schedulerlinks.append(sl)
         self.schedulerlinks = SchedulerLinks(schedulerlinks)
 
-        actionners = []
-        for actionner_link in objects['actionner']:
-            al = ActionnerLink(actionner_link)
-            al.clean()
-            actionners.append(al)
-        self.actionners = ActionnerLinks(actionners)
+        reactionners = []
+        for reactionner_link in objects['reactionner']:
+            ral = ReactionnerLink(reactionner_link)
+            ral.clean()
+            reactionners.append(ral)
+        self.reactionners = ReactionnerLinks(reactionners)
 
         pollerlinks = []
         for poller_link in objects['poller']:
             pl = PollerLink(poller_link)
             pl.clean()
             pollerlinks.append(pl)
-        self.pollerlinks = PollerLinks(pollerlinks)
+        self.pollers = PollerLinks(pollerlinks)
 
 
     #We use linkify to make the config smaller (not name but direct link when possible)

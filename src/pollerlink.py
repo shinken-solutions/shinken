@@ -30,8 +30,14 @@ class PollerLink(Item):
     def put_conf(self, conf):
         if self.con == None:
             self.create_connexion()
+        print "Connexion is OK, now we put conf", conf
+            
+        try:
+            self.con.put_conf(conf)
+        except Exception,x:
+            print ''.join(Pyro.util.getPyroTraceback(x))
+            #sys.exit(0)
 
-        self.con.put_conf(conf)
 
 
     def is_alive(self):

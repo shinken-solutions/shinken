@@ -6,6 +6,7 @@
 #When already launch and have a conf, actionner still listen to arbiter (one a timeout)
 #if arbiter whant it to have a new conf, actionner forgot old chedulers (and actions into)
 #take new ones and do the (new) job.
+from Queue import Empty
 from multiprocessing import Process, Queue
 import time
 import sys
@@ -15,7 +16,6 @@ import select
 from message import Message
 from worker import Worker
 from util import get_sequence
-
 
 
 #Interface for Arbiter, our big MASTER
@@ -70,8 +70,7 @@ class Reactionner:
 		self.newzombies = [] #list of fresh new zombies, will be join the next loop
 		self.zombies = [] #list of quite old zombies, will be join now
 		
-		#TODO : change with id in the Class
-		self.seq_worker = get_sequence()
+		#self.seq_worker = get_sequence()
 
 
 	#initialise or re-initialise connexion with scheduler
@@ -103,6 +102,7 @@ class Reactionner:
 			print "Got a ding wish from ",zombie
 			self.workers[zombie].join()
 		#Ok, it's a result. We get it, and fill verifs of the good sched_id
+
 		if msg.get_type() == 'Result':
 			id = msg.get_from()
 			self.workers[id].reset_idle()
@@ -111,6 +111,7 @@ class Reactionner:
 			print "[%d]Get result from worker" % sched_id, chk
 			chk.set_status('waitforhomerun')
 			self.schedulers[sched_id]['verifs'][chk.get_id()] = chk
+
 
 
         #Return the chk to scheduler and clean them
@@ -230,6 +231,8 @@ class Reactionner:
 					for v in tmp_verifs:
 						v.sched_id = sched_id
 					new_checks.extend(tmp_verifs)
+				else:
+					self.pynag_con_init(sched_id)
 			except KeyError as exp: #Ok, con is not know, so we create it
 				self.pynag_con_init(sched_id)
 			except Pyro.errors.ProtocolError as exp:
@@ -297,13 +300,13 @@ class Reactionner:
 				timeout -= after-begin_loop
 				
                                 #Manager the msg like check return
-				manage_msg(msg)
+				self.manage_msg(msg)
             
                                 #We add the time pass on the workers'idle time
 				for id in self.workers:
 					self.workers[id].add_idletime(after-begin_loop)
 					
-			except : #Time out Part
+			except Empty as exp: #Time out Part
 				after = time.time()
 				timeout = 1.0
 				

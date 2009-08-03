@@ -4,11 +4,12 @@ import os
 import re
 import time
 import sys
-import Pyro.core, time
+import Pyro.core
 import signal
 import select
 import random
 import copy
+
 from check import Check
 from util import get_sequence, scheduler_no_spare_first
 from scheduler import Scheduler
@@ -34,8 +35,8 @@ class Arbiter:
         for sched in self.conf.schedulerlinks.items.values():
             print "sched", sched, "is alive ?", sched.is_alive()
 
-        for actionner in self.conf.actionners.items.values():
-            print "Actionner", actionner, "is alive ?", actionner.is_alive()
+        for reactionner in self.conf.reactionners.items.values():
+            print "Reactionner", reactionner, "is alive ?", reactionner.is_alive()
         
         
         #self.conf.schedulerlinks.sort(scheduler_no_spare_first)
@@ -68,9 +69,20 @@ class Arbiter:
             tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address}
             i += 1
             
-        for actionner in self.conf.actionners.items.values():
-            actionner.put_conf(tmp_conf)
-            
+        for reactionner in self.conf.reactionners.items.values():
+            reactionner.put_conf(tmp_conf)
+
+        #TODO : clean and link
+        #Now Poller
+        tmp_conf = {}
+        tmp_conf['schedulers'] = {}
+        i = 0
+        sched = self.conf.schedulerlinks[0]
+        tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address}
+        
+
+        for poller in self.conf.pollers.items.values():
+            poller.put_conf(tmp_conf)
 
 
         nb_confs = len(self.conf.confs)

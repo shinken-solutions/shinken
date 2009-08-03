@@ -3,7 +3,7 @@ import Pyro.core
 from item import Item, Items
 from util import to_int, to_char, to_split, to_bool
 
-class ActionnerLink(Item):
+class ReactionnerLink(Item):
     id = 0
     properties={'name' : {'required' : True },
                 'scheduler_name' : {'required' : True},
@@ -28,6 +28,7 @@ class ActionnerLink(Item):
         self.uri = "PYROLOC://"+self.address+":"+str(self.port)+"/ForArbiter"
         self.con = Pyro.core.getProxyForURI(self.uri)
         print "Connexion created", self.uri
+
 
     def put_conf(self, conf):
         if self.con == None:
@@ -56,9 +57,9 @@ class ActionnerLink(Item):
             return False
 
 
-class ActionnerLinks(Items):
+class ReactionnerLinks(Items):
     name_property = "name"
-    inner_class = ActionnerLink
+    inner_class = ReactionnerLink
 
 #    def find_spare
 #    def sort(self, f):
