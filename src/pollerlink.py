@@ -17,6 +17,9 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#This class is the link between Arbiter and Poller. With It, arbiter
+#can see if a poller is alive, and can send it new configuration
+
 import Pyro.core
 
 from item import Item, Items
@@ -78,6 +81,3 @@ class PollerLinks(Items):
     name_property = "name"
     inner_class = PollerLink
 
-#    def find_spare
-#    def sort(self, f):
-#        self.items.sort(f)

@@ -24,6 +24,7 @@
 from multiprocessing import Process, Queue
 from message import Message
 
+#Worker class
 class Worker:
     """The Worker class """
     id = 0#None
@@ -36,34 +37,41 @@ class Worker:
         self.id = self.__class__.id
         self.__class__.id += 1
 
-        #self._id = id
         self._mortal = mortal
         self._idletime = 0
         self._timeout = timeout
         self._c = Queue() # Private Control queue for the Worker
         self._process = Process(target=self.work, args=(s, m, self._c))
 
+
     def is_mortal(self):
         return self._mortal
+
 
     def start(self):
         self._process.start()
 
+
     def join(self):
         self._process.join()
+
 
     def is_killable(self):
         #print "M[%d]Is killable? %s %s %s" % (self._id, self._mortal , self._idletime , self._timeout)
         return self._mortal and self._idletime > self._timeout
 
+
     def add_idletime(self, time):
         self._idletime = self._idletime + time
 
+
     def reset_idle(self):
         self._idletime = 0
+
     
     def send_message(self, msg):
         self._c.put(msg)
+
         
     #A zombie is immortal, so kill not be kill anymore
     def set_zombie(self):

@@ -17,6 +17,12 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#This is the class of the Arbiter. It's role is to read configuration,
+#cuts it, and send it to other elements like schedulers, reactionner 
+#or pollers. It is responsible for hight avaibility part. If a scheduler is dead,
+#it send it's conf to another if available.
+#It also read order form users (nagios.cmd) and send orders to schedulers.
+
 import os
 import re
 import time
@@ -34,12 +40,8 @@ from config import Config
 from macroresolver import MacroResolver
 from external_command import ExternalCommand
 
-seq_verif = get_sequence()
 
-time_send = time.time()
-
-
-
+#Main Arbiter Class
 class Arbiter:
     def __init__(self):
         pass
@@ -157,21 +159,11 @@ class Arbiter:
         print "****************** Send Configuration to schedulers******************"
         self.send_conf_to_schedulers()
         
-        #self.conf.dump()
-        #Creating the Macroresolver Class & unique instance
-	#m = MacroResolver()
-	#m.init(self.conf)
-		
-	#self.sched.load_conf(self.conf)
-
 	#Now create the external commander
 	e = ExternalCommand(self.conf, 'dispatcher')
 
 	#Scheduler need to know about external command to activate it if necessery
 	self.load_external_command(e)
-	
-	#External command need the sched because he can raise checks
-	#e.load_scheduler(self.sched)
 	
 	print "Configuration Loaded"
 	self.run()
@@ -179,11 +171,10 @@ class Arbiter:
 
     #Main function
     def run(self):
-        print "First scheduling"
-        #self.schedule()
+        print "Run baby, run..."
         timeout = 1.0
         while True :
-            socks=[]#self.daemon.getServerSockets()
+            socks=[]
             avant=time.time()
             
             socks.append(self.fifo)
@@ -196,13 +187,7 @@ class Arbiter:
                         if s == self.fifo:
                             self.external_command.read_and_interpret()
                             self.fifo = self.external_command.open()
-                            #Must be paquet from poller
-                        #else:
-                        #    self.daemon.handleRequests()
-                        #    apres=time.time()
-                        #    diff = apres-avant
-                        #    timeout = timeout - diff
-                        #    break    # no need to continue with the for loop
+
             else:#Timeout
                 print "Timeout"
                 if not self.are_all_conf_assigned:

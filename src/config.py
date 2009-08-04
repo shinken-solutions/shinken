@@ -17,6 +17,12 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#Config is the class to read, load and manipulate the user
+#configuration. It read a main cfg (nagios.cfg) and get all informations
+#from it. It create objects, make link between them, clean them, and cut
+#them into independant parts. The main user of this is Arbiter, but schedulers
+#use it too (but far less)
+
 import os, sys, re, time, string, copy
 import pygraph
 import itertools
@@ -46,13 +52,6 @@ from util import to_int, to_char, to_split, to_bool
 
 class Config(Item):
     cache_path = "objects.cache"
-    #hosts
-    #hostgroups
-    #services
-    #contacts
-    #contactgroups
-    #commands
-    #timeperiods
 
     #Properties: 
     #required : if True, there is not default, and the config must put them
@@ -206,8 +205,10 @@ class Config(Item):
         'ADMINPAGER' : ''
         }
 
+
     def __init__(self):
         self.params = {}
+
 
     def load_params(self, params):
         for elt in params:
@@ -215,14 +216,17 @@ class Config(Item):
             self.params[elts[0]] = elts[1]
             setattr(self, elts[0], elts[1])
 
+
     def _cut_line(self, line):
         punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
         tmp = re.split("[" + string.whitespace + "]+" , line)
         r = [elt for elt in tmp if elt != '']
         return r
 
+
     def _join_values(self, values):
         return ' '.join(values)
+
 
     def read_config(self, file):
         print "Opening config file", file
@@ -248,10 +252,6 @@ class Config(Item):
         
 
     def read_config_buf(self, buf):
-        #fd=open(file)
-        #buf=buf.readlines()
-        #fd.close()
-
         params=[]
         objectscfg={'void': [],
                     'timeperiod' : [],
@@ -411,7 +411,6 @@ class Config(Item):
         servicedependencies = []
         print objects
         for servicedependencycfg in objects['servicedependency']:
-            #print "*********************** SD*********************"
             sd = Servicedependency(servicedependencycfg)
             sd.clean()
             servicedependencies.append(sd)
@@ -789,24 +788,22 @@ class Config(Item):
         #return new_confs
 
 
+#The config main part is use only for testing purpose
 if __name__ == '__main__':
     c = Config()
     #c.read_cache(c.cache_path)
     
     print "****************** Read ******************"
-    
     c.read_config("nagios.cfg")
     #c.idfy()
     #c.dump()
     
     print "****************** Explode ******************"
-    
     #create or update new hostgroup or service by looking at
     c.explode()
     c.dump()
 
     print "****************** Inheritance ******************"
-    
     #We apply all inheritance
     c.apply_inheritance()
     c.dump()
@@ -819,7 +816,6 @@ if __name__ == '__main__':
     c.dump()
     
     print "****************** Clean templates ******************"
-    
     #We can clean the tpl now
     c.clean_useless()
     c.dump()
@@ -840,6 +836,7 @@ if __name__ == '__main__':
     
     print "*************** applying dependancies ************"
     c.apply_dependancies()
+
 
     print "************** Exlode global conf ****************"
     c.explode_global_conf()

@@ -87,8 +87,6 @@ class Poller:
 		self.workers = {} #dict of active workers
 		self.newzombies = [] #list of fresh new zombies, will be join the next loop
 		self.zombies = [] #list of quite old zombies, will be join now
-		
-		#self.seq_worker = get_sequence()
 
 
 	#initialise or re-initialise connexion with scheduler
@@ -367,6 +365,7 @@ class Poller:
 					self.newzombies.append(id)
 
 
+#lets go to the party
 if __name__ == '__main__':
 	poller = Poller()
 	poller.main()

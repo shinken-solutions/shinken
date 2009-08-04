@@ -41,11 +41,6 @@ from macroresolver import MacroResolver
 from external_command import ExternalCommand
 
 
-#time_send = time.time()
-
-#g_config = None
-
-
 #Interface for Workers
 #They connect here and see if they are still OK with
 #our running_id, if not, they must ddrop their checks
@@ -95,7 +90,7 @@ class IForArbiter(Pyro.core.ObjBase):
 		return self.running_id
 
 
-	#
+	#use full too?
 	def get_info(self, type, ref, prop, other):
 		return self.app.sched.get_info(type, ref, prop, other)
 
