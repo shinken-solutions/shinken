@@ -76,7 +76,7 @@ class MacroResolver(Borg):
         macros = {}
         in_macro = False
         for elt in elts:
-            #print elt
+            #print 'Debug:', elt, 'in macro?', in_macro
             if elt == '$':
                 in_macro = not in_macro
             elif in_macro:
@@ -95,8 +95,30 @@ class MacroResolver(Borg):
                 #prop = macros[macro]['class'].macros[macro]
                 #print "Getting", prop, "for", elt
                 return getattr(elt, prop)
-        except AttributeError (exp):
+        except AttributeError as exp:
             return str(exp)
+
+
+    #Resolve just a line with data
+    def resolve_macro(self, c_line, data):
+        macros = self.get_macros(c_line)
+        clss = [d.__class__ for d in data]
+        self.get_type_of_macro_new(macros, clss)
+        print "Got macros:", macros
+        for macro in macros:
+            if macros[macro]['type'] == 'class':
+                #print "Search for type", macros[macro]['class']
+                data.append(self)
+                for elt in data:
+                    if elt is not None and elt.__class__ == macros[macro]['class']:
+                        prop = macros[macro]['class'].macros[macro]
+                        macros[macro]['val'] = self.get_value_from_element(elt, prop)
+        print "New resolved macros", macros
+        for macro in macros:
+            #print "Changing", '$'+macro+'$', "by", macros[macro]['val']
+            c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
+        #print "Final command:", c_line
+        return c_line
 
 
     def resolve_command(self, com, h, s, c, n):
@@ -125,6 +147,23 @@ class MacroResolver(Borg):
             c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
         #print "Final command:", c_line
         return c_line
+
+
+    def get_type_of_macro_new(self, macros, clss):
+        for macro in macros:
+            if re.match('ARG\d', macro):
+                macros[macro]['type'] = 'ARGN'
+                continue
+            elif re.match('USER\d', macro):
+                macros[macro]['type'] = 'USERN'
+                continue
+            
+            for cls in clss:
+                if macro in cls.macros:
+                    #print "Got a class macro", macro, str(cls)
+                    macros[macro]['type'] = 'class'
+                    macros[macro]['class'] = cls
+            #elif macro['type'] = 'unknown
         
         
     def get_type_of_macro(self, macros):

@@ -17,24 +17,20 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is an application for launch actions 
-#like notifications or event handlers
-#The actionner listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where actionner will take actions.
-#When already launch and have a conf, actionner still listen to arbiter (one a timeout)
-#if arbiter whant it to have a new conf, actionner forgot old chedulers (and actions into)
-#take new ones and do the (new) job.
+#This class is use to be a plugin interface
 
-from actionner import Actionner
+from item import Item
 
+class Plugin(Item):
+    def __init__(self):
+        pass
 
-#Our main APP class
-class Reactionner (Actionner):
-	do_checks = False
-	do_actions = True
+    
+    def init(self, args):
+        pass
 
+    def deinit(self):
+        pass
 
-#lets go to the party
-if __name__ == '__main__':
-	reactionner = Reactionner()
-	reactionner.main()
+    def go_for(self, callback, data):
+        pass

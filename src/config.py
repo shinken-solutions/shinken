@@ -43,6 +43,7 @@ from servicedependency import Servicedependency, Servicedependencies
 from hostdependency import Hostdependency, Hostdependencies
 from schedulerlink import SchedulerLink, SchedulerLinks
 from reactionnerlink import ReactionnerLink, ReactionnerLinks
+from brokerlink import BrokerLink, BrokerLinks
 from pollerlink import PollerLink, PollerLinks
 
 from util import to_int, to_char, to_split, to_bool
@@ -266,6 +267,7 @@ class Config(Item):
                     'hostdependency' : [],
                     'scheduler' : [],
                     'reactionner' : [],
+                    'broker' : [],
                     'poller' : []
                     }
         
@@ -436,6 +438,13 @@ class Config(Item):
             ral.clean()
             reactionners.append(ral)
         self.reactionners = ReactionnerLinks(reactionners)
+
+        brokers = []
+        for broker_link in objects['broker']:
+            rbl = BrokerLink(broker_link)
+            rbl.clean()
+            brokers.append(rbl)
+        self.brokers = BrokerLinks(brokers)
 
         pollerlinks = []
         for poller_link in objects['poller']:

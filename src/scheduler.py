@@ -21,7 +21,7 @@ import select, time
 from check import Check
 from notification import Notification
 from status import StatusFile
-
+from brok import Brok
 
 class Scheduler:
     def __init__(self, daemon):#, arbiter_daemon):
@@ -43,6 +43,7 @@ class Scheduler:
         self.checks = {}
         self.actions = {}
         self.downtimes = {}
+        self.broks = {}
         self.status_file = StatusFile(self)
 
 
@@ -66,13 +67,16 @@ class Scheduler:
     def add_or_update_action(self, a):
         self.actions[a.id] = a
 
+
     def add_downtime(self, dt):
         self.downtimes[dt.id] = dt
+
 
     def del_downtime(self, dt_id):
         dt = self.downtimes[dt.id]
         dt.ref.del_downtime(dt_id)
         del self.downtimes[dt.id]
+
 
     #Called by poller to get checks
     #Can get checks and actiosn (notifications and co)
@@ -136,6 +140,56 @@ class Scheduler:
             self.add_or_update_check(c)#self.checks[c.id] = c
         else:
             print "Type unknown"
+
+
+    #Call by brokers to have broks
+    def get_broks(self):
+        return self.broks
+
+
+    #Fill the self.broks with broks of self (process id, and co)
+    #broks of service and hosts (initial status)
+    def fill_initial_broks(self):
+        #first the program status
+        b = self.get_program_status_brok()
+        self.broks[b.id] = b
+
+        #Then initial states
+
+        print "Created initial Broks:", self.broks
+        
+        
+
+    #Get a brok with program status
+    #TODO : GET REAL VALUES
+    def get_program_status_brok(self):
+        now = time.time()
+        data = {"is_running" : 1,
+                "last_alive" : now,
+                "program_start" : now,
+                "pid" : 9999,
+                "daemon_mode" : 1,
+                "last_command_check" : now,
+                "last_log_rotation" : now,
+                "notifications_enabled" : 1,
+                "active_service_checks_enabled" : 1,
+                "passive_service_checks_enabled" : 1,
+                "active_host_checks_enabled" : 1,
+                "passive_host_checks_enabled" : 1,
+                "event_handlers_enabled" : 1,
+                "flap_detection_enabled" : 1,
+                "failure_prediction_enabled" : 0,
+                "process_performance_data" : 1,
+                "obsess_over_hosts" : 0,
+                "obsess_over_services" : 0,
+                "modified_host_attributes" : 0,
+                "modified_service_attributes" : 0,
+                "global_host_event_handler" : '',
+                'global_service_event_handler' : ''
+                }
+        b = Brok('program_status', data)
+        return b
+
 
 
     #Called every 1sec to consume every result in services or hosts
@@ -203,6 +257,7 @@ class Scheduler:
         for id in id_to_del:
             del self.checks[id]
 
+
     def update_status_file(self):
         self.status_file.create_or_update()
             
@@ -239,6 +294,7 @@ class Scheduler:
             if c is not None:
                 self.add_or_update_check(c)#self.checks[c.id] = c
 
+
     #Raise checks for no fresh states
     def check_freshness(self):
         checks = []
@@ -254,11 +310,14 @@ class Scheduler:
     def run(self):
         print "First scheduling"
         self.schedule()
+
+        #Ok, now all is initilised, we can make the inital broks
+        self.fill_initial_broks()
+        
         timeout = 1.0
         while self.must_run :
             socks = self.daemon.getServerSockets()
             avant = time.time()
-
             #socks.append(self.fifo)
  
             ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop

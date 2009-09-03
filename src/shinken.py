@@ -43,7 +43,7 @@ from external_command import ExternalCommand
 
 #Interface for Workers
 #They connect here and see if they are still OK with
-#our running_id, if not, they must ddrop their checks
+#our running_id, if not, they must drop their checks
 #in progress
 class IChecks(Pyro.core.ObjBase):
 	#we keep sched link
@@ -66,6 +66,7 @@ class IChecks(Pyro.core.ObjBase):
 		res = self.sched.get_to_run_checks(do_checks, do_actions)
 		print "Sending %d checks" % len(res)
 		return res
+
 	
 	#poller or reactionner are putting us results
 	def put_results(self, results):
@@ -73,6 +74,29 @@ class IChecks(Pyro.core.ObjBase):
 		for c in results:
 			self.sched.put_results(c)
 
+
+
+#Interface for Brokers
+#They connect here and get all broks (data for brokers)
+#datas must be ORDERED! (initial status BEFORE uodate...)
+class IBroks(Pyro.core.ObjBase):
+	#we keep sched link
+	def __init__(self, sched):
+                Pyro.core.ObjBase.__init__(self)
+		self.sched = sched
+		#self.running_id = random.random()
+
+		
+	#poller or reactionner ask us actions
+	def get_broks(self):
+		print "We ask us broks"
+		res = self.sched.get_broks()
+		print "Sending %d broks" % len(res), res
+		return res
+
+	#Ping? Pong!
+	def ping(self):
+		return None
 
 
 #Interface for Arbiter, our big MASTER
@@ -187,6 +211,9 @@ class Shinken:
 		self.uri = self.poller_daemon.connect(IChecks(self.sched),"Checks")
 		print "The object's uri is:",self.uri
 		
+		self.uri2 = self.poller_daemon.connect(IBroks(self.sched),"Broks")
+		print "The object's uri2 is:",self.uri2
+
 		print "Loading configuration"
 		self.conf.explode_global_conf()
 		self.conf.is_correct()

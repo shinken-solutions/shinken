@@ -57,6 +57,10 @@ class Arbiter:
         for reactionner in self.conf.reactionners.items.values():
             print "Reactionner", reactionner, "is alive ?", reactionner.is_alive()
         
+
+        for broker in self.conf.brokers.items.values():
+            print "Broker", broker, "is alive ?", broker.is_alive()
+
         
         #self.conf.schedulerlinks.sort(scheduler_no_spare_first)
         #no_spare_sched = [s for s in self.conf.schedulerlinks if not s.spare]
@@ -90,6 +94,10 @@ class Arbiter:
             
         for reactionner in self.conf.reactionners.items.values():
             reactionner.put_conf(tmp_conf)
+
+        for broker in self.conf.brokers.items.values():
+            broker.put_conf(tmp_conf)
+
 
         #TODO : clean and link
         #Now Poller

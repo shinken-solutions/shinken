@@ -17,24 +17,14 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is an application for launch actions 
-#like notifications or event handlers
-#The actionner listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where actionner will take actions.
-#When already launch and have a conf, actionner still listen to arbiter (one a timeout)
-#if arbiter whant it to have a new conf, actionner forgot old chedulers (and actions into)
-#take new ones and do the (new) job.
-
-from actionner import Actionner
+class Brok:
+    id = 0
+    def __init__(self, type, data):
+        self.type = type
+        self.id = self.__class__.id
+        self.__class__.id += 1
+        self.data = data
 
 
-#Our main APP class
-class Reactionner (Actionner):
-	do_checks = False
-	do_actions = True
-
-
-#lets go to the party
-if __name__ == '__main__':
-	reactionner = Reactionner()
-	reactionner.main()
+    def __str__(self):
+        return str(self.__dict__)+'\n'
