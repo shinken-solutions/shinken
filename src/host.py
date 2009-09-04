@@ -26,36 +26,43 @@ import time, random
 from macroresolver import MacroResolver
 from check import Check
 from notification import Notification
+from brok import Brok
 
 class Host(SchedulingItem):
     id = 1 #0 is reserved for host (primary node for parents)
     ok_up = 'UP'
 
-    #defined properties (from configuration)
-    properties={'host_name': {'required': True},
+    #properties defined by configuration
+    #required : is required in conf
+    #default : default value if no set in conf
+    #pythonize : function to call when transfort string to python object
+    #status_broker_name : if set, send to broker and put name of data. If None, use the prop name.
+    #Only for the inital call
+    #broker_name : same for inital, but for status update call
+    properties={'host_name': {'required': True, 'status_broker_name' : None, 'broker_name' : None},
                 'alias': {'required':  True},
                 'display_name': {'required': False, 'default':'none'},
                 'address': {'required': True},
                 'parents': {'required': False, 'default': '' , 'pythonize': to_split},
                 'hostgroups': {'required': False, 'default' : ''},
                 'check_command': {'required': False, 'default':''},
-                'initial_state': {'required': False, 'default':'u', 'pythonize': to_char},
+                'initial_state': {'required': False, 'default':'u', 'pythonize': to_char, 'status_broker_name' : None},
                 'max_check_attempts': {'required': True , 'pythonize': to_int},
                 'check_interval': {'required': False, 'default':'0', 'pythonize': to_int},
                 'retry_interval': {'required': False, 'default':'0', 'pythonize': to_int},
-                'active_checks_enabled': {'required': False, 'default':'1', 'pythonize': to_bool},
+                'active_checks_enabled': {'required': False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
                 'passive_checks_enabled': {'required': False, 'default':'1', 'pythonize': to_bool},
                 'check_period': {'required': True},
-                'obsess_over_host': {'required': False, 'default':'0' , 'pythonize': to_bool},
-                'check_freshness': {'required': False, 'default':'0', 'pythonize': to_bool},
-                'freshness_threshold': {'required': False, 'default':'0', 'pythonize': to_int},
+                'obsess_over_host': {'required': False, 'default':'0' , 'pythonize': to_bool, 'status_broker_name' : None},
+                'check_freshness': {'required': False, 'default':'0', 'pythonize': to_bool, 'status_broker_name' : None},
+                'freshness_threshold': {'required': False, 'default':'0', 'pythonize': to_int, 'status_broker_name' : None},
                 'event_handler': {'required': False, 'default':''},
-                'event_handler_enabled': {'required': False, 'default':'0', 'pythonize': to_bool},
-                'low_flap_threshold': {'required':False, 'default':'25', 'pythonize': to_int},
-                'high_flap_threshold': {'required': False, 'default':'50', 'pythonize': to_int},
-                'flap_detection_enabled': {'required': False, 'default':'1', 'pythonize': to_bool},
+                'event_handler_enabled': {'required': False, 'default':'0', 'pythonize': to_bool, 'status_broker_name' : None},
+                'low_flap_threshold': {'required':False, 'default':'25', 'pythonize': to_int, 'status_broker_name' : None},
+                'high_flap_threshold': {'required': False, 'default':'50', 'pythonize': to_int, 'status_broker_name' : None},
+                'flap_detection_enabled': {'required': False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
                 'flap_detection_options': {'required': False, 'default':'o,d,u', 'pythonize': to_split},
-                'process_perf_data': {'required': False, 'default':'1', 'pythonize': to_bool},
+                'process_perf_data': {'required': False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
                 'retain_status_information': {'required': False, 'default':'1', 'pythonize': to_bool},
                 'retain_nonstatus_information': {'required': False, 'default':'1', 'pythonize': to_bool},
                 'contacts': {'required': True},
@@ -64,7 +71,7 @@ class Host(SchedulingItem):
                 'first_notification_delay': {'required': False, 'default':'0', 'pythonize': to_int},
                 'notification_period': {'required': True},
                 'notification_options': {'required': False, 'default':'d,u,r,f', 'pythonize': to_split},
-                'notifications_enabled': {'required': False, 'default':'1', 'pythonize': to_bool},
+                'notifications_enabled': {'required': False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
                 'stalking_options': {'required': False, 'default':'o,d,u', 'pythonize': to_split},
                 'notes': {'required': False, 'default':''},
                 'notes_url': {'required': False, 'default':''},
@@ -77,27 +84,58 @@ class Host(SchedulingItem):
                 '3d_coords': {'required': False, 'default':''},
                 'failure_prediction_enabled': {'required' : False, 'default' : '0', 'pythonize': to_bool}
                 }
+
     #properties set only for running purpose
     running_properties = {
-        'last_chk' : 0,
-        'next_chk' : 0,
-        'in_checking' : False,
-        'latency' : 0,
-        'attempt' : 0,
-        'state' : 'PENDING',
-        'state_type' : 'SOFT',
-        'output' : '',
-        'long_output' : '',
-        'is_flapping' : False,
-        'is_in_downtime' : False,
-        'act_depend_of' : [], #dependencies for actions like notif of event handler, so AFTER check return
-        'chk_depend_of' : [], #dependencies for checks raise, so BEFORE checks
-        'last_state_update' : time.time(),
-        'services' : [],
-        'checks_in_progress' : [],
-        'downtimes' : [],
-        'flapping_changes' : [],
-        'percent_state_change' : 0.0
+        'last_chk' : {'default' : 0, 'status_broker_name' : 'last_check', 'broker_name' : 'last_check'},
+        'next_chk' : {'default' : 0, 'status_broker_name' : 'next_check'},
+        'in_checking' : {'default' : False},
+        'latency' : {'default' : 0, 'broker_name' : None},
+        'attempt' : {'default' : 0, 'status_broker_name' : 'current_attempt', 'broker_name' : 'current_attempt'},
+        'state' : {'default' : 'PENDING'},
+        'state_id' :  {'default' : 0, 'status_broker_name' : 'current_state', 'broker_name' : 'current_state'},
+        'state_type' : {'default' : 'SOFT'},
+        'state_type_id' : {'default' : 0, 'status_broker_name' : 'state_type', 'broker_name' : 'state_type'},
+        'current_event_id' :  {'default' : 0, 'status_broker_name' : None},
+        'last_event_id' :  {'default' : 0, 'status_broker_name' : None},
+        'last_state_id' :  {'default' : 0, 'status_broker_name' : 'last_state'},
+        'last_state_change' :  {'default' : time.time(), 'status_broker_name' : None},
+        'last_hard_state_change' :  {'default' : time.time(), 'status_broker_name' : None},
+        'last_hard_state' :  {'default' : time.time(), 'status_broker_name' : None},
+        'output' : {'default' : '', 'broker_name' : None},
+        'long_output' : {'default' : '', 'broker_name' : None},
+        'is_flapping' : {'default' : False, 'status_broker_name' : None},
+        'is_in_downtime' : {'default' : False},
+        'flapping_comment_id' : {'default' : 0, 'status_broker_name' : None},
+        'act_depend_of' : {'default' : []}, #dependencies for actions like notif of event handler, so AFTER check return
+        'chk_depend_of' : {'default' : []}, #dependencies for checks raise, so BEFORE checks
+        'last_state_update' : {'default' : time.time()},
+        'services' : {'default' : []},
+        'checks_in_progress' : {'default' : []},
+        'downtimes' : {'default' : []},
+        'flapping_changes' : {'default' : []},
+        'percent_state_change' : {'default' : 0.0, 'status_broker_name' : None},
+        'problem_has_been_acknowledged' : {'default' : False, 'status_broker_name' : None},
+        'acknowledgement_type' : {'default' : 1, 'status_broker_name' : None, 'broker_name' : None},
+        'check_type' : {'default' : 1, 'status_broker_name' : None, 'broker_name' : None},
+        'has_been_checked' : {'default' : 1, 'status_broker_name' : None},
+        'should_be_scheduled' : {'default' : 1, 'status_broker_name' : None},
+        'last_problem_id' : {'default' : 0, 'status_broker_name' : None},
+        'current_problem_id' : {'default' : 0, 'status_broker_name' : None},
+        'execution_time' : {'default' : 0.0, 'status_broker_name' : None, 'broker_name' : None},
+        'last_notification' : {'default' : time.time(), 'status_broker_name' : None},
+        'current_notification_number' : {'default' : 0, 'status_broker_name' : None},
+        'current_notification_id' : {'default' : 0, 'status_broker_name' : None},
+        'check_flapping_recovery_notification' : {'default' : True, 'status_broker_name' : None},
+        'scheduled_downtime_depth' : {'default' : 0, 'status_broker_name' : None},
+        'pending_flex_downtime' : {'default' : 0, 'status_broker_name' : None},
+        'timeout' : {'default' : 0, 'broker_name' : None},
+        'start_time' : {'default' : 0, 'broker_name' : None},
+        'end_time' : {'default' : 0, 'broker_name' : None},
+        'early_timeout' : {'default' : 0, 'broker_name' : None},
+        'return_code' : {'default' : 0, 'broker_name' : None},
+        'perf_data' : {'default' : '', 'broker_name' : None}
+
         }
 
     #Hosts macros and prop that give the information
@@ -310,6 +348,29 @@ class Host(SchedulingItem):
         return c
 
 
+    #Get a brok with service status
+    #TODO : GET REAL VALUES and more pythonize
+    def get_initial_status_brok(self):
+        cls = self.__class__
+        data = {}
+        #Now config properties
+        for prop in cls.properties:
+            if 'status_broker_name' in cls.properties[prop]:
+                broker_name = cls.properties[prop]['status_broker_name']
+                if broker_name is None:
+                    data[prop] = getattr(self, prop)
+                else:
+                    data[broker_name] = getattr(self, prop)
+        #We've got prop in running_properties too
+        for prop in cls.running_properties:
+            if 'status_broker_name' in cls.running_properties[prop]:
+                broker_name = cls.running_properties[prop]['status_broker_name']
+                if broker_name is None:
+                    data[prop] = getattr(self, prop)
+                else:
+                    data[broker_name] = getattr(self, prop)
+        b = Brok('initial_host_status', data)
+        return b
 
 
 class Hosts(Items):

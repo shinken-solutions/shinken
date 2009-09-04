@@ -30,8 +30,8 @@ class SchedulerLink(Item):
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
                 }
  
-    running_properties = {'is_active' : False,
-                          'con' : None
+    running_properties = {'is_active' : {'default' : False},
+                          'con' : {'default' : None}
                           #self.is_alive = False
                           }
     macros = {}

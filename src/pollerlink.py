@@ -33,8 +33,8 @@ class PollerLink(Item):
                 'port' : {'required':  True, 'pythonize': to_int}
                 }
  
-    running_properties = {'is_active' : False,
-                          'con' : None
+    running_properties = {'is_active' : {'default' : False},
+                          'con' : {'default' : None}
                           #self.is_alive = False
                           }
     macros = {}

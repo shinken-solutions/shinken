@@ -84,12 +84,12 @@ class Arbiter:
                         except Pyro.errors.ProtocolError as exp:
                             print exp
 
-        #TODO : more python
+        #TODO : more python and change ID
         tmp_conf = {}
         tmp_conf['schedulers'] = {}
         i = 0
         for sched in self.conf.schedulerlinks:
-            tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address}
+            tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : 0}
             i += 1
             
         for reactionner in self.conf.reactionners.items.values():

@@ -59,6 +59,7 @@ class IForArbiter(Pyro.core.ObjBase):
 			self.schedulers[sched_id] = s
 			self.schedulers[sched_id]['uri'] = "PYROLOC://%s:%d/Broks" % (s['address'], s['port'])
 			self.schedulers[sched_id]['broks'] = {}
+			self.schedulers[sched_id]['instance_id'] = s['instance_id']
 			#self.schedulers[sched_id]['running_id'] = 0
 			#We cannot reinit connexions because this code in in a thread, and
 			#pyro do not allow thread to create new connexions...
@@ -205,6 +206,7 @@ class Broker:
 				if sock in ins:
 					self.daemon.handleRequests()
 					for sched_id in self.schedulers:
+						print self.schedulers[sched_id]
 						self.pynag_con_init(sched_id)
 
 
@@ -233,6 +235,151 @@ class Broker:
 #                self.create_and_launch_worker()
 
 
+	#Create the database connexion
+	#TODO : finish error catch
+	def connect_database(self):
+		import MySQLdb
+		self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root",db = "merlin")
+		self.db_cursor = self.db.cursor ()
+
+
+	#Just run the query
+	#TODO: finish catch
+	def execute_query(self, query):
+		self.db_cursor.execute (query)# "UPDATE host SET max_check_attempts='%d' WHERE host_name='localhost'" % i)
+		self.db.commit ()
+
+	#Get a brok, parse it, and return the queries for database
+	def manage_program_status_brok(self, b):
+		data = b.data
+		query = "UPDATE program_status SET is_running = %d, \
+			last_alive = %lu, program_start = %lu, pid = %d, daemon_mode = %d, \
+			last_command_check = %lu, last_log_rotation = %lu, \
+			notifications_enabled = %d, \
+			active_service_checks_enabled = %d, passive_service_checks_enabled = %d, \
+			active_host_checks_enabled = %d, passive_host_checks_enabled = %d, \
+			event_handlers_enabled = %d, flap_detection_enabled = %d, \
+			failure_prediction_enabled = %d, process_performance_data = %d, \
+			obsess_over_hosts = %d, obsess_over_services = %d, \
+			modified_host_attributes = %lu, modified_service_attributes = %lu, \
+			global_host_event_handler = '%s', global_service_event_handler = '%s'\
+			WHERE instance_id = %d" % (data["is_running"] , data["last_alive"],
+						   data["program_start"], data["pid"],
+						   data["daemon_mode"], data["last_command_check"],
+						   data["last_log_rotation"], data["notifications_enabled"],
+						   data["active_service_checks_enabled"], 
+						   data["passive_service_checks_enabled"],
+						   data["active_host_checks_enabled"],
+						   data["passive_host_checks_enabled"],
+						   data["event_handlers_enabled"],
+						   data["flap_detection_enabled"],
+						   data["failure_prediction_enabled"],
+						   data["process_performance_data"],
+						   data["obsess_over_hosts"],data["obsess_over_services"],
+						   data["modified_host_attributes"],
+						   data["modified_service_attributes"],
+						   data["global_host_event_handler"],
+						   data['global_service_event_handler'],
+						   b.instance_id)
+		return [query]
+	
+	
+	#Get a brok, parse it, and return the query for database
+	def manage_initial_service_status_brok(self, b):
+		data = b.data
+
+		#It's a initial entry, so we need to clean old entries
+		delete_query = "DELETE FROM service WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'], data['service_description'])
+
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "INSERT INTO service "
+		props_str = ' ('
+		values_str = ' ('
+		i = 0 #for the , problem...
+		for prop in data:
+			i += 1
+			val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+			if isinstance(val, bool):
+				if val:
+					val = 1
+				else:
+					val = 0
+			if i == 1:
+				props_str = props_str + "%s " % prop
+				values_str = values_str + "'%s' " % val
+			else:
+				props_str = props_str + ", %s " % prop
+				values_str = values_str + ", '%s' " % val
+		#Ok we've got data, let's finish the query
+		props_str = props_str + ' )'
+		values_str = values_str + ' )'
+		query = query + props_str + 'VALUES' + values_str
+		return [delete_query, query]
+
+
+	#Get a brok, parse it, and return the query for database
+	def manage_initial_host_status_brok(self, b):
+		data = b.data
+		#It's a initial entry, so we need to clean old entries
+		delete_query = "DELETE FROM host WHERE host_name = '%s'" % data['host_name']
+
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "INSERT INTO host "
+		props_str = ' ('
+		values_str = ' ('
+		i = 0 #for the , problem...
+		for prop in data:
+			i += 1
+			val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+			if isinstance(val, bool):
+				if val:
+					val = 1
+				else:
+					val = 0
+			if i == 1:
+				props_str = props_str + "%s " % prop
+				values_str = values_str + "'%s' " % val
+			else:
+				props_str = props_str + ", %s " % prop
+				values_str = values_str + ", '%s' " % val
+		#Ok we've got data, let's finish the query
+		props_str = props_str + ' )'
+		values_str = values_str + ' )'
+		query = query + props_str + 'VALUES' + values_str
+		return [delete_query, query]
+
+
+
+	#Get a brok, parse it, and put in in database
+	def manage_brok(self, b):
+		if b.type == 'program_status':
+			queries = self.manage_program_status_brok(b)
+			print "I run queries :", queries
+			for q in queries :
+				self.execute_query(q)
+			return
+		if b.type == 'initial_service_status':
+			print "DATA SERVICE:", b.data
+			queries = self.manage_initial_service_status_brok(b)
+                        print "I run queries :", queries
+			for q in queries :
+                                self.execute_query(q)
+                        return
+		if b.type == 'initial_host_status':
+			print "DATA HOST:", b.data
+                        queries = self.manage_initial_host_status_brok(b)
+                        print "I run queries :", queries
+                        for q in queries :
+                                self.execute_query(q)
+                        return
+
+		
+
+
 	#We get new broks from schedulers
 	def get_new_broks(self):
 		new_broks = {}
@@ -241,14 +388,10 @@ class Broker:
 			try:
 				con = self.schedulers[sched_id]['con']
 				if con is not None: #None = not initilized
-                                        #Here are the differences between a poller and a reactionner:
-                                        #Poller will only do checks, reactionner do actions
-                                        #do_checks = self.__class__.do_checks
-                                        #do_actions = self.__class__.do_actions
 					tmp_broks = con.get_broks()
-					print "We've got new broks" , tmp_broks
-					for v in tmp_broks.values():
-						v.sched_id = sched_id
+					print "We've got new broks" , tmp_broks.values()
+					for b in tmp_broks.values():
+						b.instance_id = self.schedulers[sched_id]['instance_id']
 					new_broks.update(tmp_broks)
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id)
@@ -270,6 +413,8 @@ class Broker:
 		for b in new_broks.values():
 			#b = new_broks[id]
 			print  "DBG: Brok", b, b.type, b.data
+			#Ok, we can get the brok, and doing something with it
+			self.manage_brok(b)
 			#chk.set_status('queue')
 			#verifs = self.schedulers[chk.sched_id]['verifs']
 			#id = chk.get_id()
@@ -293,6 +438,10 @@ class Broker:
 
                 #We wait for initial conf
 		self.wait_for_initial_conf()
+
+
+		#Init database
+		self.connect_database()
 
                 #Connexion init with PyNag server
 		for sched_id in self.schedulers:

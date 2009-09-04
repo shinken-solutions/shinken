@@ -144,7 +144,10 @@ class Scheduler:
 
     #Call by brokers to have broks
     def get_broks(self):
-        return self.broks
+        res = self.broks
+        #They are gone, we keep none!
+        self.broks = {}
+        return res#self.broks
 
 
     #Fill the self.broks with broks of self (process id, and co)
@@ -155,7 +158,16 @@ class Scheduler:
         self.broks[b.id] = b
 
         #Then initial states
+        #Hosts
+        for h in self.hosts:
+            b = h.get_initial_status_brok()
+            self.broks[b.id] = b
 
+        #Now, services:
+        for s in self.services:
+            b = s.get_initial_status_brok()
+            self.broks[b.id] = b
+        
         print "Created initial Broks:", self.broks
         
         

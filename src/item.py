@@ -32,7 +32,7 @@ class Item(object):
 
         #adding running properties like latency
         for prop in self.__class__.running_properties:
-            setattr(self, prop, deepcopy(self.__class__.running_properties[prop]))#deep copy because we need
+            setattr(self, prop, deepcopy(self.__class__.running_properties[prop]['default']))#deep copy because we need
             #eatch istance to have his own running prop!
 
         #[0] = +  -> new key-plus
