@@ -16,6 +16,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
 
 from pexpect import *
 from action import Action
@@ -43,6 +44,9 @@ class Check(Action):
         self.t_to_go = t_to_go
         self.depend_on = []
         self.depend_on_me = dep_check_id
+        self.check_time = 0
+        self.execution_time = 0
+
 
     def get_outputs(self, out):
         elts = out.split('\n')
@@ -57,7 +61,8 @@ class Check(Action):
         #print "Executing %s" % self._command
         child = spawn ('/bin/sh -c "%s"' % self._command)
         self.status = 'lanched'
-        
+        self.check_time = time.time()
+
         try:
             child.expect_exact(EOF, timeout=5)
             self.get_outputs(child.before)
@@ -72,6 +77,7 @@ class Check(Action):
             print "On le kill"
             self.status = 'timeout'
             child.terminate(force=True)
+        self.execution_time = time.time() - self.check_time
 
 
     def is_launchable(self, t):

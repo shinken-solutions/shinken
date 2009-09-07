@@ -17,7 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import select, time
+import select, time, os
 from check import Check
 from notification import Notification
 from status import StatusFile
@@ -63,6 +63,22 @@ class Scheduler:
         #print "Adding a NEW CHECK:", c.id
         self.checks[c.id] = c
 
+    #We just add a brok in our broks queue
+    def add_brok(self, b):
+        self.broks[b.id] = b
+
+    #Ask item (host or service) a update_status
+    #and add it to our broks queue
+    def get_and_register_status_brok(self, item):
+        b = item.get_update_status_brok()
+        self.add_brok(b)
+
+    #Ask item (host or service) a check_result_brok
+    #and add it to our broks queue
+    def get_and_register_check_result_brok(self, item):
+        b = item.get_check_result_brok()
+        self.add_brok(b)
+
 
     def add_or_update_action(self, a):
         self.actions[a.id] = a
@@ -79,16 +95,18 @@ class Scheduler:
 
 
     #Called by poller to get checks
-    #Can get checks and actiosn (notifications and co)
+    #Can get checks and actions (notifications and co)
     def get_to_run_checks(self, do_checks=False, do_actions=False):
         res = []
         now = time.time()
+
         #If poller want to do checks
         if do_checks:
             for c in self.checks.values():
                 if c.status == 'scheduled' and c.is_launchable(now):
                     c.status = 'inpoller'
                     res.append(c)
+
         #If poller want to notify too
         if do_actions:
             for a in self.actions.values():
@@ -155,22 +173,27 @@ class Scheduler:
     def fill_initial_broks(self):
         #first the program status
         b = self.get_program_status_brok()
-        self.broks[b.id] = b
+        self.add_brok(b)#broks[b.id] = b
 
         #Then initial states
         #Hosts
         for h in self.hosts:
             b = h.get_initial_status_brok()
-            self.broks[b.id] = b
+            self.add_brok(b)#self.broks[b.id] = b
 
         #Now, services:
         for s in self.services:
             b = s.get_initial_status_brok()
-            self.broks[b.id] = b
+            self.add_brok(b)#self.broks[b.id] = b
         
         print "Created initial Broks:", self.broks
         
-        
+    
+    #Crate a brok with program status info
+    def get_and_register_program_status_brok(self):
+        b = self.get_program_status_brok()
+        self.add_brok(b)
+
 
     #Get a brok with program status
     #TODO : GET REAL VALUES
@@ -179,25 +202,25 @@ class Scheduler:
         data = {"is_running" : 1,
                 "last_alive" : now,
                 "program_start" : now,
-                "pid" : 9999,
+                "pid" : os.getpid(),
                 "daemon_mode" : 1,
                 "last_command_check" : now,
                 "last_log_rotation" : now,
-                "notifications_enabled" : 1,
-                "active_service_checks_enabled" : 1,
-                "passive_service_checks_enabled" : 1,
-                "active_host_checks_enabled" : 1,
-                "passive_host_checks_enabled" : 1,
-                "event_handlers_enabled" : 1,
-                "flap_detection_enabled" : 1,
-                "failure_prediction_enabled" : 0,
-                "process_performance_data" : 1,
-                "obsess_over_hosts" : 0,
-                "obsess_over_services" : 0,
+                "notifications_enabled" : self.conf.enable_notifications,
+                "active_service_checks_enabled" : self.conf.execute_service_checks,
+                "passive_service_checks_enabled" : self.conf.accept_passive_service_checks,
+                "active_host_checks_enabled" : self.conf.execute_host_checks,
+                "passive_host_checks_enabled" : self.conf.accept_passive_host_checks,
+                "event_handlers_enabled" : self.conf.enable_event_handlers,
+                "flap_detection_enabled" : self.conf.enable_flap_detection,
+                "failure_prediction_enabled" : 0,#self.conf.failure_prediction_enabled,
+                "process_performance_data" : self.conf.process_performance_data,
+                "obsess_over_hosts" : self.conf.obsess_over_hosts,
+                "obsess_over_services" : self.conf.obsess_over_services,
                 "modified_host_attributes" : 0,
                 "modified_service_attributes" : 0,
-                "global_host_event_handler" : '',
-                'global_service_event_handler' : ''
+                "global_host_event_handler" : self.conf.global_host_event_handler,
+                'global_service_event_handler' : self.conf.global_service_event_handler
                 }
         b = Brok('program_status', data)
         return b
@@ -217,9 +240,19 @@ class Scheduler:
                     #actions = self.services.items[c.ref].consume_result(c)
                     actions = self.services[c.ref].consume_result(c)
                     print "Res Action:", actions
+                    #The update of the host/service must have changed, we brok it
+                    self.get_and_register_check_result_brok(self.services[c.ref])
+                    #b = self.services[c.ref].get_check_result_brok()
+                    #self.add_brok(b)
                 if c.ref_type == 'host':
                     #actions = self.hosts.items[c.ref].consume_result(c)
                     actions = self.hosts[c.ref].consume_result(c)
+                    #The update of the host/service must have changed, we brok it
+                    self.get_and_register_check_result_brok(self.hosts[c.ref])
+                    #b = self.hosts[c.ref].get_check_result_brok()
+                    #self.add_brok(b)                
+
+                #Now we manage the actions we must do
                 for a in actions:
                     if a.is_a == 'notification':
                         #print "*******Adding a notification"
@@ -242,9 +275,11 @@ class Scheduler:
                 if c.ref_type == 'service':
                     #actions = self.services.items[c.ref].consume_result(c)
                     actions = self.services[c.ref].consume_result(c)
+                    self.get_and_register_check_result_brok(self.services[c.ref])
                 if c.ref_type == 'host':
                     #actions = self.hosts.items[c.ref].consume_result(c)
                     actions = self.hosts[c.ref].consume_result(c)
+                    self.get_and_register_check_result_brok(self.hosts[c.ref])
                 for a in actions:
                     if a.is_a == 'notification':
                         #print "*******Adding a notification"

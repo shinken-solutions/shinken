@@ -41,6 +41,7 @@ from macroresolver import MacroResolver
 from external_command import ExternalCommand
 
 
+
 #Interface for Workers
 #They connect here and see if they are still OK with
 #our running_id, if not, they must drop their checks
@@ -84,7 +85,12 @@ class IBroks(Pyro.core.ObjBase):
 	def __init__(self, sched):
                 Pyro.core.ObjBase.__init__(self)
 		self.sched = sched
-		#self.running_id = random.random()
+		self.running_id = random.random()
+
+
+	#Broker need to void it's broks?
+	def get_running_id(self):
+		return self.running_id
 
 		
 	#poller or reactionner ask us actions
@@ -93,6 +99,7 @@ class IBroks(Pyro.core.ObjBase):
 		res = self.sched.get_broks()
 		print "Sending %d broks" % len(res), res
 		return res
+
 
 	#Ping? Pong!
 	def ping(self):
@@ -143,6 +150,7 @@ class IForArbiter(Pyro.core.ObjBase):
 	#Arbiter want to know if we are alive
 	def ping(self):
 		return True
+
 
 
 #Tha main app class

@@ -130,6 +130,7 @@ class SchedulingItem(Item):
         else:# every parents are dead, so... It's not my fault :)
             return True
 
+
     #Use to know if I raise dependency for soneone else (with status)
     #If I do not raise dep, maybe my dep raise me. If so, I raise dep.
     #So it's a recursive function
@@ -146,6 +147,7 @@ class SchedulingItem(Item):
                     return True
         #No, I relly do not raise...
         return False
+
 
     #Use to know if my dep force me not to be checked
     #So check the chk_depend_of if they raise me
@@ -237,7 +239,9 @@ class SchedulingItem(Item):
             print "Not removing check", c.id, "for service", self.get_name()
         self.update_in_checking()
         
-        self.latency = now - c.t_to_go
+        self.latency = c.check_time - c.t_to_go#now - c.t_to_go
+        self.execution_time = c.execution_time
+        self.last_chk = c.check_time
         self.output = c.output
         self.long_output = c.long_output
         self.set_state_from_exit_status(c.exit_status)

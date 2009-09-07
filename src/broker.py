@@ -60,7 +60,7 @@ class IForArbiter(Pyro.core.ObjBase):
 			self.schedulers[sched_id]['uri'] = "PYROLOC://%s:%d/Broks" % (s['address'], s['port'])
 			self.schedulers[sched_id]['broks'] = {}
 			self.schedulers[sched_id]['instance_id'] = s['instance_id']
-			#self.schedulers[sched_id]['running_id'] = 0
+			self.schedulers[sched_id]['running_id'] = 0
 			#We cannot reinit connexions because this code in in a thread, and
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
@@ -71,6 +71,7 @@ class IForArbiter(Pyro.core.ObjBase):
 	def ping(self):
 		print "We ask us for a ping"
 		return True
+
 
 
 #Our main APP class
@@ -97,6 +98,7 @@ class Broker:
 		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(self.schedulers[id]['uri'])
 		try:
 			self.schedulers[id]['con'].ping()
+			new_run_id = self.schedulers[id]['con'].get_running_id()
 		except Pyro.errors.ProtocolError, exp:
 			print exp
 			return
@@ -106,9 +108,9 @@ class Broker:
 			return
 		#The schedulers have been restart : it has a new run_id.
 		#So we clear all verifs, they are obsolete now.
-		#if self.schedulers[id]['running_id'] != 0 and new_run_id != running_id:
-		#	self.schedulers[id]['verifs'].clear()
-		#self.schedulers[id]['running_id'] = new_run_id
+		if self.schedulers[id]['running_id'] != 0 and new_run_id != running_id:
+			self.schedulers[id]['broks'].clear()
+		self.schedulers[id]['running_id'] = new_run_id
 		print "Connexion OK"
 
 
@@ -283,7 +285,7 @@ class Broker:
 						   b.instance_id)
 		return [query]
 	
-	
+
 	#Get a brok, parse it, and return the query for database
 	def manage_initial_service_status_brok(self, b):
 		data = b.data
@@ -312,11 +314,71 @@ class Broker:
 			else:
 				props_str = props_str + ", %s " % prop
 				values_str = values_str + ", '%s' " % val
+
 		#Ok we've got data, let's finish the query
 		props_str = props_str + ' )'
 		values_str = values_str + ' )'
 		query = query + props_str + 'VALUES' + values_str
 		return [delete_query, query]
+
+
+	#Get a brok, parse it, and return the query for database
+	def manage_service_check_result_brok(self, b):
+		data = b.data
+		
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "UPDATE service set "
+		i = 0 #for the , problem...
+
+		query_folow = ''
+		i = 0 #for the , problem...
+		for prop in data:
+			i += 1
+			val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+			if isinstance(val, bool):
+				if val:
+					val = 1
+				else:
+					val = 0
+			if i == 1:
+				query_folow += "%s='%s' " % (prop, val)
+			else:
+				query_folow += ", %s='%s' " % (prop, val)
+				
+		query = query + query_folow + " WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'] , data['service_description'])
+		return [query]
+
+
+	#Get a brok, parse it, and return the query for database
+	def manage_update_service_status_brok(self, b):
+		data = b.data
+		
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "UPDATE service set "
+		i = 0 #for the , problem...
+
+		query_folow = ''
+		i = 0 #for the , problem...
+		for prop in data:
+			i += 1
+			val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+			if isinstance(val, bool):
+				if val:
+					val = 1
+				else:
+					val = 0
+			if i == 1:
+				query_folow += "%s='%s' " % (prop, val)
+			else:
+				query_folow += ", %s='%s' " % (prop, val)
+				
+		query = query + query_folow + " WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'] , data['service_description'])
+		return [query]
+
 
 
 	#Get a brok, parse it, and return the query for database
@@ -353,29 +415,116 @@ class Broker:
 		return [delete_query, query]
 
 
+	#Get a brok, parse it, and return the query for database
+	def manage_host_check_result_brok(self, b):
+		data = b.data
+		
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "UPDATE host set "
+		i = 0 #for the , problem...
+
+		query_folow = ''
+		i = 0 #for the , problem...
+		for prop in data:
+			i += 1
+			val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+			if isinstance(val, bool):
+				if val:
+					val = 1
+				else:
+					val = 0
+			if i == 1:
+				query_folow += "%s='%s' " % (prop, val)
+			else:
+				query_folow += ", %s='%s' " % (prop, val)
+				
+		query = query + query_folow + " WHERE host_name = '%s'" % data['host_name']
+		return [query]
+
+
+	#Get a brok, parse it, and return the query for database
+	def manage_update_host_status_brok(self, b):
+		data = b.data
+		
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "UPDATE host set "
+		i = 0 #for the , problem...
+
+		query_folow = ''
+		i = 0 #for the , problem...
+		for prop in data:
+			i += 1
+			val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+			if isinstance(val, bool):
+				if val:
+					val = 1
+				else:
+					val = 0
+			if i == 1:
+				query_folow += "%s='%s' " % (prop, val)
+			else:
+				query_folow += ", %s='%s' " % (prop, val)
+				
+		query = query + query_folow + " WHERE host_name = '%s'" % data['host_name']
+		return [query]
+
+
 
 	#Get a brok, parse it, and put in in database
 	def manage_brok(self, b):
 		if b.type == 'program_status':
 			queries = self.manage_program_status_brok(b)
-			print "I run queries :", queries
+			#print "I run queries :", queries
 			for q in queries :
 				self.execute_query(q)
 			return
 		if b.type == 'initial_service_status':
-			print "DATA SERVICE:", b.data
+			#print "DATA SERVICE:", b.data
 			queries = self.manage_initial_service_status_brok(b)
-                        print "I run queries :", queries
+                        #print "I run queries :", queries
 			for q in queries :
                                 self.execute_query(q)
                         return
 		if b.type == 'initial_host_status':
-			print "DATA HOST:", b.data
+			#print "DATA HOST:", b.data
                         queries = self.manage_initial_host_status_brok(b)
-                        print "I run queries :", queries
+                        #print "I run queries :", queries
                         for q in queries :
                                 self.execute_query(q)
                         return
+		if b.type == 'service_check_result':
+			#print "DATA SERVICE:", b.data
+                        queries = self.manage_service_check_result_brok(b)
+                        #print "I run queries :", queries
+	                for q in queries :
+                                self.execute_query(q)
+                        return
+		if b.type == 'host_check_result':
+			#print "DATA SERVICE:", b.data
+                        queries = self.manage_host_check_result_brok(b)
+                        #print "I run queries :", queries
+	                for q in queries :
+                                self.execute_query(q)
+                        return
+		if b.type == 'update_service_status':
+			#print "DATA SERVICE:", b.data
+                        queries = self.manage_update_service_status_brok(b)
+                        #print "I run queries :", queries
+	                for q in queries :
+                                self.execute_query(q)
+                        return
+		if b.type == 'update_host_status':
+			#print "DATA SERVICE:", b.data
+                        queries = self.manage_update_host_status_brok(b)
+                        #print "I run queries :", queries
+	                for q in queries :
+                                self.execute_query(q)
+                        return
+		print "Unknown Brok type!!", b
 
 		
 
@@ -389,7 +538,7 @@ class Broker:
 				con = self.schedulers[sched_id]['con']
 				if con is not None: #None = not initilized
 					tmp_broks = con.get_broks()
-					print "We've got new broks" , tmp_broks.values()
+					#print "We've got new broks" , tmp_broks.values()
 					for b in tmp_broks.values():
 						b.instance_id = self.schedulers[sched_id]['instance_id']
 					new_broks.update(tmp_broks)
@@ -409,10 +558,10 @@ class Broker:
 				print ''.join(Pyro.util.getPyroTraceback(x))
 				sys.exit(0)
 		#Ok, we've got new broks in new_broks
-		print "New Broks:", new_broks
+		#print "New Broks:", new_broks
 		for b in new_broks.values():
 			#b = new_broks[id]
-			print  "DBG: Brok", b, b.type, b.data
+			#print  "DBG: Brok", b, b.type, b.data
 			#Ok, we can get the brok, and doing something with it
 			self.manage_brok(b)
 			#chk.set_status('queue')
