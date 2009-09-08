@@ -17,11 +17,11 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is an interface for reactionner and poller
-#The actionner listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where actionner will take actions.
-#When already launch and have a conf, actionner still listen to arbiter (one a timeout)
-#if arbiter whant it to have a new conf, actionner forgot old chedulers (and actions into)
+#This class is an interface for Broker
+#The broker listen configuration from Arbiter in a port (first argument)
+#the configuration gived by arbiter is schedulers where broker will take broks.
+#When already launch and have a conf, broker still listen to arbiter (one a timeout)
+#if arbiter whant it to have a new conf, broker forgot old chedulers (and broks into)
 #take new ones and do the (new) job.
 
 from Queue import Empty
@@ -87,9 +87,13 @@ class Broker:
 
 		#self.workers = {} #dict of active workers
 		##self.newzombies = [] #list of fresh new zombies, will be join the next loop
-		#self.zombies = [] #list of quite old zombies, will be join now
-		
+		#self.zombies = [] #list of quite old zombies, will be join now		
 		#self.seq_worker = get_sequence()
+
+
+	#The classic has : do we have a prop or not?
+	def has(self, prop):
+		return hasattr(self, prop)
 
 
 	#initialise or re-initialise connexion with scheduler
@@ -113,59 +117,6 @@ class Broker:
 		self.schedulers[id]['running_id'] = new_run_id
 		print "Connexion OK"
 
-
-#        #Manage messages from Workers
-#	def manage_msg(self, msg):
-#		#Ok, a worker whant to die. It's sad, but we must kill him!!!
-#		if msg.get_type() == 'IWantToDie':
-#			zombie = msg.get_from()
-#			print "Got a ding wish from ",zombie
-#			self.workers[zombie].join()
-#		#Ok, it's a result. We get it, and fill verifs of the good sched_id
-#
-#		if msg.get_type() == 'Result':
-#			id = msg.get_from()
-#			self.workers[id].reset_idle()
-#			chk = msg.get_data()
-#			sched_id = chk.sched_id
-#			print "[%d]Get result from worker" % sched_id, chk
-#			chk.set_status('waitforhomerun')
-#			self.schedulers[sched_id]['verifs'][chk.get_id()] = chk
-
-
-
-#        #Return the chk to scheduler and clean them
-#	def manage_return(self):
-#		#Fot all schedulers, we check for waitforhomerun and we send back results
-#		for sched_id in self.schedulers:
-#			ret = []
-#			verifs = self.schedulers[sched_id]['verifs']
-#                        #Get the id to return to pynag, so after make a big array with only them
-#			id_to_return = [elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun']
-#			for id in id_to_return:
-#				v = verifs[id]
-#				#We got v without the sched_id prop, so we remove it before resent it.
-#				del v.sched_id
-#				ret.append(v)
-#			#Now ret have all verifs, we can return them
-#			print "[%d] Returning %s results" % (sched_id, ret)
-#			if ret is not []:
-#				try:
-#					con = self.schedulers[sched_id]['con']
-#					if con is not None:#None = not initialized
-#						con.put_results(ret)
-#				except Pyro.errors.ProtocolError:
-#					self.pynag_con_init(sched_id)
-#					return
-#				except AttributeError as exp: #the scheduler must  not be initialized
-#					print exp
-#				except Exception,x:
-#					print ''.join(Pyro.util.getPyroTraceback(x))
-#					sys.exit(0)
-#        
-#			#We clean ONLY if the send is OK
-#			for id in id_to_return:
-#				del verifs[id]
 
 
 	#Use to wait conf from arbiter.
@@ -212,31 +163,6 @@ class Broker:
 						self.pynag_con_init(sched_id)
 
 
-#	#Create and launch a new worker, and put it into self.workers
-#	#It can be mortal or not
-#	def create_and_launch_worker(self, mortal=True):
-#		w = Worker(1, self.s, self.m, mortal=mortal)
-#		self.workers[w.id] = w#Worker(id, self.s, self.m, mortal=True)
-#		print "Allocate : ", w.id
-#		self.workers[w.id].start()
-
-
-#	#Workers are process. We need to clean them some time (see zombie part)
-#	#Here we create new workers if the queue load (len of verifs) is too long
-#	#here it's > 80% of workers
-#	def adjust_worker_number_by_load(self):
-#            nb_queue = 0 # Len of actions in queue status, so the "working" queue
-#            for sched_id in self.schedulers:
-#                verifs = self.schedulers[sched_id]['verifs']
-#                tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
-#                nb_queue += tmp_nb_queue
-#                nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
-#                print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
-#		#We add new worker if the queue is > 80% of the worker number
-#            while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 20:
-#                self.create_and_launch_worker()
-
-
 	#Create the database connexion
 	#TODO : finish error catch
 	def connect_database(self):
@@ -254,6 +180,8 @@ class Broker:
 
 
 	#Ok, we are at launch and a scheduler want him only, OK...
+	#So ca create several queries with all tables we need to delete with our instance_id
+	#This brob must be send at the begining of a scheduler session, if not, BAD THINGS MAY HAPPENED :)
 	def manage_clean_all_my_instance_id_brok(self, b):
 		instance_id = b.data['instance_id']
 		tables = ['command', 'comment', 'contact', 'contactgroup', 'downtime', 'host', 
@@ -276,7 +204,7 @@ class Broker:
 		query = "INSERT INTO program_status "
 		props_str = ' ('
 		values_str = ' ('
-		i = 0 #for the , problem...
+		i = 0 #for the ',' problem... look like C here...
 		for prop in data:
 			i += 1
 			val = data[prop]
@@ -299,38 +227,6 @@ class Broker:
 		query = query + props_str + 'VALUES' + values_str
 		return [query]
 
-
-		#query = "UPDATE program_status SET is_running = %d, \
-		#	last_alive = %lu, program_start = %lu, pid = %d, daemon_mode = %d, \
-		#	last_command_check = %lu, last_log_rotation = %lu, \
-		#	notifications_enabled = %d, \
-		#	active_service_checks_enabled = %d, passive_service_checks_enabled = %d, \
-		#	active_host_checks_enabled = %d, passive_host_checks_enabled = %d, \
-		#	event_handlers_enabled = %d, flap_detection_enabled = %d, \
-		#	failure_prediction_enabled = %d, process_performance_data = %d, \
-		#	obsess_over_hosts = %d, obsess_over_services = %d, \
-		#	modified_host_attributes = %lu, modified_service_attributes = %lu, \
-		#	global_host_event_handler = '%s', global_service_event_handler = '%s'\
-		#	WHERE instance_id = %d" % (data["is_running"] , data["last_alive"],
-		#				   data["program_start"], data["pid"],
-		#				   data["daemon_mode"], data["last_command_check"],
-		#				   data["last_log_rotation"], data["notifications_enabled"],
-		#				   data["active_service_checks_enabled"], 
-		#				   data["passive_service_checks_enabled"],
-		#				   data["active_host_checks_enabled"],
-		#				   data["passive_host_checks_enabled"],
-		#				   data["event_handlers_enabled"],
-		#				   data["flap_detection_enabled"],
-		#				   data["failure_prediction_enabled"],
-		#				   data["process_performance_data"],
-		#				   data["obsess_over_hosts"],data["obsess_over_services"],
-		#				   data["modified_host_attributes"],
-		#				   data["modified_service_attributes"],
-		#				   data["global_host_event_handler"],
-		#				   data['global_service_event_handler'],
-		#				   b.instance_id)
-		#return [query]
-	
 
 	#Get a brok, parse it, and return the query for database
 	def manage_initial_service_status_brok(self, b):
@@ -608,78 +504,15 @@ class Broker:
 
 	#Get a brok, parse it, and put in in database
 	def manage_brok(self, b):
-		if b.type == 'program_status':
-			queries = self.manage_program_status_brok(b)
-			#print "I run queries :", queries
+		type = b.type
+		manager = 'manage_'+type+'_brok'
+		if self.has(manager):
+			f = getattr(self, manager)
+			queries = f(b)
 			for q in queries :
-				self.execute_query(q)
-			return
-		if b.type == 'initial_service_status':
-			#print "DATA SERVICE:", b.data
-			queries = self.manage_initial_service_status_brok(b)
-                        #print "I run queries :", queries
-			for q in queries :
-                                self.execute_query(q)
-                        return
-		if b.type == 'initial_host_status':
-			#print "DATA HOST:", b.data
-                        queries = self.manage_initial_host_status_brok(b)
-                        #print "I run queries :", queries
-                        for q in queries :
-                                self.execute_query(q)
-                        return
-		if b.type == 'service_check_result':
-			#print "DATA SERVICE:", b.data
-                        queries = self.manage_service_check_result_brok(b)
-                        #print "I run queries :", queries
-	                for q in queries :
-                                self.execute_query(q)
-                        return
-		if b.type == 'host_check_result':
-			#print "DATA SERVICE:", b.data
-                        queries = self.manage_host_check_result_brok(b)
-                        #print "I run queries :", queries
-	                for q in queries :
-                                self.execute_query(q)
-                        return
-		if b.type == 'update_service_status':
-			#print "DATA SERVICE:", b.data
-                        queries = self.manage_update_service_status_brok(b)
-                        #print "I run queries :", queries
-	                for q in queries :
-                                self.execute_query(q)
-                        return
-		if b.type == 'update_host_status':
-			#print "DATA SERVICE:", b.data
-                        queries = self.manage_update_host_status_brok(b)
-                        #print "I run queries :", queries
-	                for q in queries :
-                                self.execute_query(q)
-                        return
-		if b.type == 'initial_hostgroup_status':
-			print "DATA HOSTGROUP:", b.data
-                        queries = self.manage_initial_hostgroup_status_brok(b)
-                        print "I run queries :", queries
-	                for q in queries :
-                                self.execute_query(q)
-                        return
-		if b.type == 'initial_servicegroup_status':
-			print "DATA SERVICEGROUP:", b.data
-                        queries = self.manage_initial_servicegroup_status_brok(b)
-                        print "I run queries :", queries
-	                for q in queries :
-                                self.execute_query(q)
-                        return
-		if b.type == 'clean_all_my_instance_id':
-                        print "DATA clean_all_my_instance_id:", b.data
-                        queries = self.manage_clean_all_my_instance_id_brok(b)
-                        print "I run queries :", queries
-                        for q in queries :
                                 self.execute_query(q)
                         return
 		print "Unknown Brok type!!", b
-
-		
 
 
 	#We get new broks from schedulers
@@ -713,16 +546,8 @@ class Broker:
 		#Ok, we've got new broks in new_broks
 		#print "New Broks:", new_broks
 		for b in new_broks.values():
-			#b = new_broks[id]
-			#print  "DBG: Brok", b, b.type, b.data
 			#Ok, we can get the brok, and doing something with it
 			self.manage_brok(b)
-			#chk.set_status('queue')
-			#verifs = self.schedulers[chk.sched_id]['verifs']
-			#id = chk.get_id()
-			#verifs[id] = chk
-			#msg = Message(id=0, type='Do', data=verifs[id])
-			#self.s.put(msg)
 
 
 	#Main function, will loop forever
