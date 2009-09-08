@@ -793,6 +793,10 @@ class Config(Item):
                     print "*********Add", h.get_name(), "in the conf", j
                     self.confs[i].other_elements[h.get_name()] = i
 
+        #We tag conf with isntance_id
+        for i in self.confs:
+            self.confs[i].instance_id = i
+
         print "HeheConf:", self, "Confs:", self.confs
         #return new_confs
 

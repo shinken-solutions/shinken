@@ -18,9 +18,20 @@
 
 
 from itemgroup import Itemgroup, Itemgroups
+from brok import Brok
 
 class Servicegroup(Itemgroup):
-    id = 0
+    id = 1 #0 is always a little bit special... like in database
+
+    properties={'id': {'required': False, 'default': 0, 'status_broker_name' : None},
+                'servicegroup_name': {'required': True, 'status_broker_name' : None},
+                'alias': {'required':  True, 'status_broker_name' : None},
+                'notes': {'required': False, 'default':'', 'status_broker_name' : None},
+                'notes_url': {'required': False, 'default':'', 'status_broker_name' : None},
+                'action_url': {'required': False, 'default':'', 'status_broker_name' : None},
+                'members' : {'required': True}#No status_broker_name because it put hosts, not host_name
+                }
+
 
     macros = {
         'SERVICEGROUPALIAS' : 'alias',
@@ -54,6 +65,27 @@ class Servicegroup(Itemgroup):
             return self.members
         else:
             return ''
+
+    #Get a brok with hostgroup info (like id, name)
+    #members is special : list of (id, host_name) for database info
+    def get_initial_status_brok(self):
+        cls = self.__class__
+        data = {}
+        #Now config properties
+        for prop in cls.properties:
+            if 'status_broker_name' in cls.properties[prop]:
+                broker_name = cls.properties[prop]['status_broker_name']
+                if self.has(prop):
+                    if broker_name is None:
+                        data[prop] = getattr(self, prop)
+                    else:
+                        data[broker_name] = getattr(self, prop)
+        #Here members is jsut a bunch of host, I need name in place
+        data['members'] = []
+        for s in self.members:
+            data['members'].append( (s.id, s.get_name()) )#it look like lisp! ((( ..))) 
+        b = Brok('initial_servicegroup_status', data)
+        return b
 
 
 

@@ -248,42 +248,88 @@ class Broker:
 	#Just run the query
 	#TODO: finish catch
 	def execute_query(self, query):
-		self.db_cursor.execute (query)# "UPDATE host SET max_check_attempts='%d' WHERE host_name='localhost'" % i)
+		print "I run query", query
+		self.db_cursor.execute (query)
 		self.db.commit ()
+
+
+	#Ok, we are at launch and a scheduler want him only, OK...
+	def manage_clean_all_my_instance_id_brok(self, b):
+		instance_id = b.data['instance_id']
+		tables = ['command', 'comment', 'contact', 'contactgroup', 'downtime', 'host', 
+			  'hostdependency', 'hostescalation', 'hostgroup', 'notification', 'program_status', 
+			  'scheduled_downtime', 'service',  'serviceescalation',
+			  'servicegroup', 'timeperiod']
+		res = []
+		for table in tables:
+			q = "DELETE FROM %s WHERE instance_id = '%s' " % (table, instance_id)
+			res.append(q)
+		return res
+
 
 	#Get a brok, parse it, and return the queries for database
 	def manage_program_status_brok(self, b):
 		data = b.data
-		query = "UPDATE program_status SET is_running = %d, \
-			last_alive = %lu, program_start = %lu, pid = %d, daemon_mode = %d, \
-			last_command_check = %lu, last_log_rotation = %lu, \
-			notifications_enabled = %d, \
-			active_service_checks_enabled = %d, passive_service_checks_enabled = %d, \
-			active_host_checks_enabled = %d, passive_host_checks_enabled = %d, \
-			event_handlers_enabled = %d, flap_detection_enabled = %d, \
-			failure_prediction_enabled = %d, process_performance_data = %d, \
-			obsess_over_hosts = %d, obsess_over_services = %d, \
-			modified_host_attributes = %lu, modified_service_attributes = %lu, \
-			global_host_event_handler = '%s', global_service_event_handler = '%s'\
-			WHERE instance_id = %d" % (data["is_running"] , data["last_alive"],
-						   data["program_start"], data["pid"],
-						   data["daemon_mode"], data["last_command_check"],
-						   data["last_log_rotation"], data["notifications_enabled"],
-						   data["active_service_checks_enabled"], 
-						   data["passive_service_checks_enabled"],
-						   data["active_host_checks_enabled"],
-						   data["passive_host_checks_enabled"],
-						   data["event_handlers_enabled"],
-						   data["flap_detection_enabled"],
-						   data["failure_prediction_enabled"],
-						   data["process_performance_data"],
-						   data["obsess_over_hosts"],data["obsess_over_services"],
-						   data["modified_host_attributes"],
-						   data["modified_service_attributes"],
-						   data["global_host_event_handler"],
-						   data['global_service_event_handler'],
-						   b.instance_id)
+
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "INSERT INTO program_status "
+		props_str = ' ('
+		values_str = ' ('
+		i = 0 #for the , problem...
+		for prop in data:
+			i += 1
+			val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+			if isinstance(val, bool):
+				if val:
+					val = 1
+				else:
+					val = 0
+			if i == 1:
+				props_str = props_str + "%s " % prop
+				values_str = values_str + "'%s' " % val
+			else:
+				props_str = props_str + ", %s " % prop
+				values_str = values_str + ", '%s' " % val
+
+		#Ok we've got data, let's finish the query
+		props_str = props_str + ' )'
+		values_str = values_str + ' )'
+		query = query + props_str + 'VALUES' + values_str
 		return [query]
+
+
+		#query = "UPDATE program_status SET is_running = %d, \
+		#	last_alive = %lu, program_start = %lu, pid = %d, daemon_mode = %d, \
+		#	last_command_check = %lu, last_log_rotation = %lu, \
+		#	notifications_enabled = %d, \
+		#	active_service_checks_enabled = %d, passive_service_checks_enabled = %d, \
+		#	active_host_checks_enabled = %d, passive_host_checks_enabled = %d, \
+		#	event_handlers_enabled = %d, flap_detection_enabled = %d, \
+		#	failure_prediction_enabled = %d, process_performance_data = %d, \
+		#	obsess_over_hosts = %d, obsess_over_services = %d, \
+		#	modified_host_attributes = %lu, modified_service_attributes = %lu, \
+		#	global_host_event_handler = '%s', global_service_event_handler = '%s'\
+		#	WHERE instance_id = %d" % (data["is_running"] , data["last_alive"],
+		#				   data["program_start"], data["pid"],
+		#				   data["daemon_mode"], data["last_command_check"],
+		#				   data["last_log_rotation"], data["notifications_enabled"],
+		#				   data["active_service_checks_enabled"], 
+		#				   data["passive_service_checks_enabled"],
+		#				   data["active_host_checks_enabled"],
+		#				   data["passive_host_checks_enabled"],
+		#				   data["event_handlers_enabled"],
+		#				   data["flap_detection_enabled"],
+		#				   data["failure_prediction_enabled"],
+		#				   data["process_performance_data"],
+		#				   data["obsess_over_hosts"],data["obsess_over_services"],
+		#				   data["modified_host_attributes"],
+		#				   data["modified_service_attributes"],
+		#				   data["global_host_event_handler"],
+		#				   data['global_service_event_handler'],
+		#				   b.instance_id)
+		#return [query]
 	
 
 	#Get a brok, parse it, and return the query for database
@@ -416,6 +462,92 @@ class Broker:
 
 
 	#Get a brok, parse it, and return the query for database
+	def manage_initial_hostgroup_status_brok(self, b):
+		data = b.data
+		#It's a initial entry, so we need to clean old entries
+		delete_query = "DELETE FROM hostgroup WHERE hostgroup_name = '%s'" % data['hostgroup_name']
+
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "INSERT INTO hostgroup "
+		props_str = ' ('
+		values_str = ' ('
+		i = 0 #for the , problem...
+		for prop in data:
+			if prop != 'members': #members are not in the same table, so do not add them here
+				i += 1
+				val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+				if isinstance(val, bool):
+					if val:
+						val = 1
+					else:
+						val = 0
+				if i == 1:
+					props_str = props_str + "%s " % prop
+					values_str = values_str + "'%s' " % val
+				else:
+					props_str = props_str + ", %s " % prop
+					values_str = values_str + ", '%s' " % val
+		#Ok we've got data, let's finish the query
+		props_str = props_str + ' )'
+		values_str = values_str + ' )'
+		query = query + props_str + 'VALUES' + values_str
+
+		res = [delete_query, query]
+
+		for (h_id, h_name) in b.data['members']:
+			q_del = "DELETE FROM host_hostgroup WHERE host = '%s' and hostgroup='%s'" % (h_id, b.data['id'])
+			res.append(q_del)
+			q = "INSERT INTO host_hostgroup (host, hostgroup) VALUES ('%s', '%s')" % (h_id, b.data['id'])
+			res.append(q)
+		return res
+
+
+	#Get a brok, parse it, and return the query for database
+	def manage_initial_servicegroup_status_brok(self, b):
+		data = b.data
+		#It's a initial entry, so we need to clean old entries
+		delete_query = "DELETE FROM servicegroup WHERE servicegroup_name = '%s'" % data['servicegroup_name']
+
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "INSERT INTO servicegroup "
+		props_str = ' ('
+		values_str = ' ('
+		i = 0 #for the , problem...
+		for prop in data:
+			if prop != 'members': #members are not in the same table, so do not add them here
+				i += 1
+				val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+				if isinstance(val, bool):
+					if val:
+						val = 1
+					else:
+						val = 0
+				if i == 1:
+					props_str = props_str + "%s " % prop
+					values_str = values_str + "'%s' " % val
+				else:
+					props_str = props_str + ", %s " % prop
+					values_str = values_str + ", '%s' " % val
+		#Ok we've got data, let's finish the query
+		props_str = props_str + ' )'
+		values_str = values_str + ' )'
+		query = query + props_str + 'VALUES' + values_str
+
+		res = [delete_query, query]
+
+		for (s_id, s_name) in b.data['members']:
+			q_del = "DELETE FROM service_servicegroup WHERE service='%s' and servicegroup='%s'" % (s_id, b.data['id'])
+			res.append(q_del)
+			q = "INSERT INTO service_servicegroup (service, servicegroup) VALUES ('%s', '%s')" % (s_id, b.data['id'])
+			res.append(q)
+		return res
+
+
+	#Get a brok, parse it, and return the query for database
 	def manage_host_check_result_brok(self, b):
 		data = b.data
 		
@@ -522,6 +654,27 @@ class Broker:
                         queries = self.manage_update_host_status_brok(b)
                         #print "I run queries :", queries
 	                for q in queries :
+                                self.execute_query(q)
+                        return
+		if b.type == 'initial_hostgroup_status':
+			print "DATA HOSTGROUP:", b.data
+                        queries = self.manage_initial_hostgroup_status_brok(b)
+                        print "I run queries :", queries
+	                for q in queries :
+                                self.execute_query(q)
+                        return
+		if b.type == 'initial_servicegroup_status':
+			print "DATA SERVICEGROUP:", b.data
+                        queries = self.manage_initial_servicegroup_status_brok(b)
+                        print "I run queries :", queries
+	                for q in queries :
+                                self.execute_query(q)
+                        return
+		if b.type == 'clean_all_my_instance_id':
+                        print "DATA clean_all_my_instance_id:", b.data
+                        queries = self.manage_clean_all_my_instance_id_brok(b)
+                        print "I run queries :", queries
+                        for q in queries :
                                 self.execute_query(q)
                         return
 		print "Unknown Brok type!!", b

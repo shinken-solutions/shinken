@@ -33,7 +33,7 @@ from brok import Brok
 
 
 class Service(SchedulingItem):
-    id = 0 # Every service have a unique ID
+    id = 1 # Every service have a unique ID, and 0 is always special in database and co...
     ok_up = 'OK'
 
     #properties defined by configuration
@@ -328,7 +328,7 @@ class Service(SchedulingItem):
     #TODO : GET REAL VALUES and more pythonize
     def get_initial_status_brok(self):
         cls = self.__class__
-        data = {}
+        data = {'id' : self.id}
         #Now config properties
         for prop in cls.properties:
             if 'status_broker_name' in cls.properties[prop]:
@@ -352,7 +352,7 @@ class Service(SchedulingItem):
     #TODO : GET REAL VALUES and more pythonize
     def get_update_status_brok(self):
         cls = self.__class__
-        data = {}
+        data = {'id' : self.id}
         #Now config properties
         for prop in cls.properties:
             if 'status_broker_name' in cls.properties[prop]:

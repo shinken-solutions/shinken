@@ -22,7 +22,7 @@ from item import Item, Items
 from util import to_int, to_char, to_split, to_bool
 
 class Contact(Item):
-    id = 0
+    id = 1#0 is always special in database, so we do not take risk here
     properties={'contact_name' : {'required':True},
                 'alias' : {'required':False, 'default':'none'},
                 'contactgroups' : {'required':False, 'default':''},

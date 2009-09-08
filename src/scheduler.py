@@ -45,7 +45,7 @@ class Scheduler:
         self.downtimes = {}
         self.broks = {}
         self.status_file = StatusFile(self)
-
+        self.instance_id = conf.instance_id
 
     def die(self):
         self.must_run = False
@@ -64,7 +64,9 @@ class Scheduler:
         self.checks[c.id] = c
 
     #We just add a brok in our broks queue
+    #But before we tag it with our instance_id
     def add_brok(self, b):
+        b.data['instance_id'] = self.instance_id
         self.broks[b.id] = b
 
     #Ask item (host or service) a update_status
@@ -171,6 +173,10 @@ class Scheduler:
     #Fill the self.broks with broks of self (process id, and co)
     #broks of service and hosts (initial status)
     def fill_initial_broks(self):
+        #First a Brok for delete all from my instance_id
+        b = Brok('clean_all_my_instance_id',{'instance_id' : self.instance_id})
+        self.add_brok(b)
+
         #first the program status
         b = self.get_program_status_brok()
         self.add_brok(b)#broks[b.id] = b
@@ -181,11 +187,21 @@ class Scheduler:
             b = h.get_initial_status_brok()
             self.add_brok(b)#self.broks[b.id] = b
 
+        #Now hostgroup info
+        for hg in self.hostgroups:
+            b = hg.get_initial_status_brok()
+            self.add_brok(b)
+
         #Now, services:
         for s in self.services:
             b = s.get_initial_status_brok()
             self.add_brok(b)#self.broks[b.id] = b
         
+        #Now hostgroup info
+        for sg in self.servicegroups:
+            b = sg.get_initial_status_brok()
+            self.add_brok(b)
+
         print "Created initial Broks:", self.broks
         
     

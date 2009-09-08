@@ -352,7 +352,7 @@ class Host(SchedulingItem):
     #TODO : GET REAL VALUES and more pythonize
     def get_initial_status_brok(self):
         cls = self.__class__
-        data = {}
+        data = {'id' : self.id}
         #Now config properties
         for prop in cls.properties:
             if 'status_broker_name' in cls.properties[prop]:
@@ -377,7 +377,7 @@ class Host(SchedulingItem):
     #TODO : GET REAL VALUES and more pythonize
     def get_update_status_brok(self):
         cls = self.__class__
-        data = {}
+        data = {'id' : self.id}
         #Now config properties
         for prop in cls.properties:
             if 'status_broker_name' in cls.properties[prop]:
