@@ -30,10 +30,12 @@ import time
 import sys
 import Pyro.core
 import select
+import copy
 
 from message import Message
 from worker import Worker
 from util import get_sequence
+from plugins import Plugins
 
 
 #Interface for Arbiter, our big MASTER
@@ -84,7 +86,7 @@ class Broker:
 
 		#Ours schedulers
 		self.schedulers = {}
-
+		self.mods = [] # for brokers from plugins
 		#self.workers = {} #dict of active workers
 		##self.newzombies = [] #list of fresh new zombies, will be join the next loop
 		#self.zombies = [] #list of quite old zombies, will be join now		
@@ -174,9 +176,82 @@ class Broker:
 	#Just run the query
 	#TODO: finish catch
 	def execute_query(self, query):
-		print "I run query", query
+		#print "I run query", query, "\n"
 		self.db_cursor.execute (query)
 		self.db.commit ()
+
+
+	#Create a INSERT query in table with all data of data (a dict)
+	def create_insert_query(self, table, data):
+		query = "INSERT INTO %s " % table
+		props_str = ' ('
+		values_str = ' ('
+		i = 0 #for the ',' problem... look like C here...
+		for prop in data:
+			i += 1
+			val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+			if isinstance(val, bool):
+				if val:
+					val = 1
+				else:
+					val = 0
+			if i == 1:
+				props_str = props_str + "%s " % prop
+				values_str = values_str + "'%s' " % val
+			else:
+				props_str = props_str + ", %s " % prop
+				values_str = values_str + ", '%s' " % val
+
+		#Ok we've got data, let's finish the query
+		props_str = props_str + ' )'
+		values_str = values_str + ' )'
+		query = query + props_str + 'VALUES' + values_str
+		return query
+
+	
+	#Create a update query of table with data, and use where data for the WHERE clause
+	def create_update_query(self, table, data, where_data):
+		#We want a query like :
+		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
+		query = "UPDATE %s set " % table
+		
+		#First data manage
+		query_folow = ''
+		i = 0 #for the , problem...
+		for prop in data:
+			i += 1
+			val = data[prop]
+			#Boolean must be catch, because we want 0 or 1, not True or False
+			if isinstance(val, bool):
+				if val:
+					val = 1
+				else:
+					val = 0
+			if i == 1:
+				query_folow += "%s='%s' " % (prop, val)
+			else:
+				query_folow += ", %s='%s' " % (prop, val)
+
+		#Ok for data, now WHERE, same things
+		where_clause = " WHERE "
+		i = 0 # For the 'and' problem
+		for prop in where_data:
+			i += 1
+                        val = where_data[prop]
+                        #Boolean must be catch, because we want 0 or 1, not True or False
+                        if isinstance(val, bool):
+                                if val:
+                                        val = 1
+                                else:
+                                        val = 0
+                        if i == 1:
+                                where_clause += "%s='%s' " % (prop, val)
+                        else:
+                                where_clause += "and %s='%s' " % (prop, val)
+
+		query = query + query_folow + where_clause#" WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'] , data['service_description'])				
+		return query
 
 
 	#Ok, we are at launch and a scheduler want him only, OK...
@@ -201,95 +276,29 @@ class Broker:
 
 		#We want a query like :
 		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-		query = "INSERT INTO program_status "
-		props_str = ' ('
-		values_str = ' ('
-		i = 0 #for the ',' problem... look like C here...
-		for prop in data:
-			i += 1
-			val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
-			if isinstance(val, bool):
-				if val:
-					val = 1
-				else:
-					val = 0
-			if i == 1:
-				props_str = props_str + "%s " % prop
-				values_str = values_str + "'%s' " % val
-			else:
-				props_str = props_str + ", %s " % prop
-				values_str = values_str + ", '%s' " % val
+		query = self.create_insert_query('program_status', data)
 
-		#Ok we've got data, let's finish the query
-		props_str = props_str + ' )'
-		values_str = values_str + ' )'
-		query = query + props_str + 'VALUES' + values_str
 		return [query]
 
 
 	#Get a brok, parse it, and return the query for database
 	def manage_initial_service_status_brok(self, b):
 		data = b.data
-
 		#It's a initial entry, so we need to clean old entries
-		delete_query = "DELETE FROM service WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'], data['service_description'])
+		#delete_query = "DELETE FROM service WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'], data['service_description'])
 
-		#We want a query like :
-		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-		query = "INSERT INTO service "
-		props_str = ' ('
-		values_str = ' ('
-		i = 0 #for the , problem...
-		for prop in data:
-			i += 1
-			val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
-			if isinstance(val, bool):
-				if val:
-					val = 1
-				else:
-					val = 0
-			if i == 1:
-				props_str = props_str + "%s " % prop
-				values_str = values_str + "'%s' " % val
-			else:
-				props_str = props_str + ", %s " % prop
-				values_str = values_str + ", '%s' " % val
+		query = self.create_insert_query('service', data)		
 
-		#Ok we've got data, let's finish the query
-		props_str = props_str + ' )'
-		values_str = values_str + ' )'
-		query = query + props_str + 'VALUES' + values_str
-		return [delete_query, query]
+		return [query]
 
 
 	#Get a brok, parse it, and return the query for database
 	def manage_service_check_result_brok(self, b):
 		data = b.data
 		
-		#We want a query like :
-		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-		query = "UPDATE service set "
-		i = 0 #for the , problem...
+		where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
+		query = self.create_update_query('service', data, where_clause)
 
-		query_folow = ''
-		i = 0 #for the , problem...
-		for prop in data:
-			i += 1
-			val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
-			if isinstance(val, bool):
-				if val:
-					val = 1
-				else:
-					val = 0
-			if i == 1:
-				query_folow += "%s='%s' " % (prop, val)
-			else:
-				query_folow += ", %s='%s' " % (prop, val)
-				
-		query = query + query_folow + " WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'] , data['service_description'])
 		return [query]
 
 
@@ -297,28 +306,9 @@ class Broker:
 	def manage_update_service_status_brok(self, b):
 		data = b.data
 		
-		#We want a query like :
-		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-		query = "UPDATE service set "
-		i = 0 #for the , problem...
+		where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
+		query = self.create_update_query('service', data, where_clause)
 
-		query_folow = ''
-		i = 0 #for the , problem...
-		for prop in data:
-			i += 1
-			val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
-			if isinstance(val, bool):
-				if val:
-					val = 1
-				else:
-					val = 0
-			if i == 1:
-				query_folow += "%s='%s' " % (prop, val)
-			else:
-				query_folow += ", %s='%s' " % (prop, val)
-				
-		query = query + query_folow + " WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'] , data['service_description'])
 		return [query]
 
 
@@ -327,74 +317,33 @@ class Broker:
 	def manage_initial_host_status_brok(self, b):
 		data = b.data
 		#It's a initial entry, so we need to clean old entries
-		delete_query = "DELETE FROM host WHERE host_name = '%s'" % data['host_name']
+		#delete_query = "DELETE FROM host WHERE host_name = '%s'" % data['host_name']
 
-		#We want a query like :
-		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-		query = "INSERT INTO host "
-		props_str = ' ('
-		values_str = ' ('
-		i = 0 #for the , problem...
-		for prop in data:
-			i += 1
-			val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
-			if isinstance(val, bool):
-				if val:
-					val = 1
-				else:
-					val = 0
-			if i == 1:
-				props_str = props_str + "%s " % prop
-				values_str = values_str + "'%s' " % val
-			else:
-				props_str = props_str + ", %s " % prop
-				values_str = values_str + ", '%s' " % val
-		#Ok we've got data, let's finish the query
-		props_str = props_str + ' )'
-		values_str = values_str + ' )'
-		query = query + props_str + 'VALUES' + values_str
-		return [delete_query, query]
+		query = self.create_insert_query('host', data)
+
+		return [query]
 
 
 	#Get a brok, parse it, and return the query for database
 	def manage_initial_hostgroup_status_brok(self, b):
 		data = b.data
 		#It's a initial entry, so we need to clean old entries
-		delete_query = "DELETE FROM hostgroup WHERE hostgroup_name = '%s'" % data['hostgroup_name']
+		#delete_query = "DELETE FROM hostgroup WHERE hostgroup_name = '%s'" % data['hostgroup_name']
 
-		#We want a query like :
-		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-		query = "INSERT INTO hostgroup "
-		props_str = ' ('
-		values_str = ' ('
-		i = 0 #for the , problem...
-		for prop in data:
-			if prop != 'members': #members are not in the same table, so do not add them here
-				i += 1
-				val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
-				if isinstance(val, bool):
-					if val:
-						val = 1
-					else:
-						val = 0
-				if i == 1:
-					props_str = props_str + "%s " % prop
-					values_str = values_str + "'%s' " % val
-				else:
-					props_str = props_str + ", %s " % prop
-					values_str = values_str + ", '%s' " % val
-		#Ok we've got data, let's finish the query
-		props_str = props_str + ' )'
-		values_str = values_str + ' )'
-		query = query + props_str + 'VALUES' + values_str
+		#Here we've got a special case : in data, there is members
+		#and we do not want it in the INSERT query, so we crate a tmp_data without it
+		tmp_data = copy.copy(data)
+		del tmp_data['members']
+		query = self.create_insert_query('hostgroup', tmp_data)
 
-		res = [delete_query, query]
-
+		res = [query]
+		
+		#Ok, the hostgroup table is uptodate, now we add relations between hosts and hostgroups
 		for (h_id, h_name) in b.data['members']:
+			#First clean
 			q_del = "DELETE FROM host_hostgroup WHERE host = '%s' and hostgroup='%s'" % (h_id, b.data['id'])
 			res.append(q_del)
+			#Then add
 			q = "INSERT INTO host_hostgroup (host, hostgroup) VALUES ('%s', '%s')" % (h_id, b.data['id'])
 			res.append(q)
 		return res
@@ -406,38 +355,19 @@ class Broker:
 		#It's a initial entry, so we need to clean old entries
 		delete_query = "DELETE FROM servicegroup WHERE servicegroup_name = '%s'" % data['servicegroup_name']
 
-		#We want a query like :
-		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-		query = "INSERT INTO servicegroup "
-		props_str = ' ('
-		values_str = ' ('
-		i = 0 #for the , problem...
-		for prop in data:
-			if prop != 'members': #members are not in the same table, so do not add them here
-				i += 1
-				val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
-				if isinstance(val, bool):
-					if val:
-						val = 1
-					else:
-						val = 0
-				if i == 1:
-					props_str = props_str + "%s " % prop
-					values_str = values_str + "'%s' " % val
-				else:
-					props_str = props_str + ", %s " % prop
-					values_str = values_str + ", '%s' " % val
-		#Ok we've got data, let's finish the query
-		props_str = props_str + ' )'
-		values_str = values_str + ' )'
-		query = query + props_str + 'VALUES' + values_str
+		#Here we've got a special case : in data, there is members
+		#and we do not want it in the INSERT query, so we crate a tmp_data without it
+		tmp_data = copy.copy(data)
+		del tmp_data['members']
+		query = self.create_insert_query('servicegroup', tmp_data)
 
 		res = [delete_query, query]
 
 		for (s_id, s_name) in b.data['members']:
+			#first clean
 			q_del = "DELETE FROM service_servicegroup WHERE service='%s' and servicegroup='%s'" % (s_id, b.data['id'])
 			res.append(q_del)
+			#Then add
 			q = "INSERT INTO service_servicegroup (service, servicegroup) VALUES ('%s', '%s')" % (s_id, b.data['id'])
 			res.append(q)
 		return res
@@ -447,72 +377,43 @@ class Broker:
 	def manage_host_check_result_brok(self, b):
 		data = b.data
 		
-		#We want a query like :
-		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-		query = "UPDATE host set "
-		i = 0 #for the , problem...
+		where_clause = {'host_name' : data['host_name']}
+		query = self.create_update_query('host', data, where_clause)
 
-		query_folow = ''
-		i = 0 #for the , problem...
-		for prop in data:
-			i += 1
-			val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
-			if isinstance(val, bool):
-				if val:
-					val = 1
-				else:
-					val = 0
-			if i == 1:
-				query_folow += "%s='%s' " % (prop, val)
-			else:
-				query_folow += ", %s='%s' " % (prop, val)
-				
-		query = query + query_folow + " WHERE host_name = '%s'" % data['host_name']
 		return [query]
 
 
 	#Get a brok, parse it, and return the query for database
 	def manage_update_host_status_brok(self, b):
 		data = b.data
-		
-		#We want a query like :
-		#INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-		query = "UPDATE host set "
-		i = 0 #for the , problem...
 
-		query_folow = ''
-		i = 0 #for the , problem...
-		for prop in data:
-			i += 1
-			val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
-			if isinstance(val, bool):
-				if val:
-					val = 1
-				else:
-					val = 0
-			if i == 1:
-				query_folow += "%s='%s' " % (prop, val)
-			else:
-				query_folow += ", %s='%s' " % (prop, val)
-				
-		query = query + query_folow + " WHERE host_name = '%s'" % data['host_name']
+		where_clause = {'host_name' : data['host_name']}
+		query = self.create_update_query('host', data, where_clause)
+
 		return [query]
 
 
 
 	#Get a brok, parse it, and put in in database
+	#We call functions like manage_ TYPEOFBROK _brok that return us queries
 	def manage_brok(self, b):
-		type = b.type
-		manager = 'manage_'+type+'_brok'
-		if self.has(manager):
-			f = getattr(self, manager)
-			queries = f(b)
-			for q in queries :
-                                self.execute_query(q)
-                        return
-		print "Unknown Brok type!!", b
+		#type = b.type
+		#manager = 'manage_'+type+'_brok'
+		
+		#Call all plugins if they catch the call
+		for mod in self.mods:
+			mod.manage_brok(b)
+			#if hasattr(mod, manager):
+			#	f = getattr(mod, manager)
+			#	f(b)
+		
+		#if self.has(manager):
+		#	f = getattr(self, manager)
+		#	queries = f(b)
+		#	for q in queries :
+                #                self.execute_query(q)
+                #        return
+		#print "Unknown Brok type!!", b
 
 
 	#We get new broks from schedulers
@@ -566,6 +467,14 @@ class Broker:
                 #We wait for initial conf
 		self.wait_for_initial_conf()
 
+
+		#Do the plugins part
+		self.plugins_manager = Plugins()
+		self.plugins_manager.load()
+		#self.plugins_manager.init()
+		self.mods = self.plugins_manager.get_brokers()
+		for mod in self.mods:
+			mod.init()
 
 		#Init database
 		self.connect_database()

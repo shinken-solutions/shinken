@@ -19,20 +19,38 @@
 
 #This class is use to mnager plugins and call callback
 
-from item import Items
-from plugin import Plugin
 
-class Plugins(Items):
-    name_property = "name" #use for the search by name
-    inner_class = Plugin #use for know what is in items
+import os
+import os.path
+import imp
+import sys
 
-    def register(self):
-        ndomod = Ndomod()
-	ndomod.init('')
-        self.items.append(ndomod)
+#pluginpath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "plugins/")
 
-    
-    def go_for(self, callback, data):
-        for plug in self:
-            plug.go_for(callback, data)
+#Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html
 
+class Plugins():
+
+    def __init__(self):
+        pass
+
+    def load(self):
+        #We get all plugins names
+        pluginpath = "./plugins"
+        pluginfiles = [fname[:-3] for fname in os.listdir(pluginpath) if fname.endswith(".py")]
+        
+        #Now we try to load thems
+        if not pluginpath in sys.path:
+            sys.path.append(pluginpath)
+        self.imported_modules = [__import__(fname) for fname in pluginfiles]
+
+    #def init(self):
+    #    for mod in self.imported_modules:
+    #        mod.init()
+
+    def get_brokers(self):
+        brokers = []
+        for mod in self.imported_modules:
+            b = mod.get_broker()
+            brokers.append(b)
+        return brokers
