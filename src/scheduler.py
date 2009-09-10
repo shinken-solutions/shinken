@@ -181,26 +181,15 @@ class Scheduler:
         b = self.get_program_status_brok()
         self.add_brok(b)#broks[b.id] = b
 
-        #Then initial states
-        #Hosts
-        for h in self.hosts:
-            b = h.get_initial_status_brok()
-            self.add_brok(b)#self.broks[b.id] = b
-
-        #Now hostgroup info
-        for hg in self.hostgroups:
-            b = hg.get_initial_status_brok()
-            self.add_brok(b)
-
-        #Now, services:
-        for s in self.services:
-            b = s.get_initial_status_brok()
-            self.add_brok(b)#self.broks[b.id] = b
-        
-        #Now hostgroup info
-        for sg in self.servicegroups:
-            b = sg.get_initial_status_brok()
-            self.add_brok(b)
+        #We cant initial_status from all this types
+        #The order is important, service need host...
+        initial_status_types = [self.hosts, self.hostgroups,  \
+                                self.services, self.servicegroups, \
+                                self.contacts, self.contactgroups]
+        for tab in initial_status_types:
+            for i in tab:
+                b = i.get_initial_status_brok()
+                self.add_brok(b)
 
         print "Created initial Broks:", self.broks
         

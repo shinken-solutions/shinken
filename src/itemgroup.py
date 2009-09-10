@@ -16,9 +16,11 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from brok import Brok
 
 class Itemgroup:
     id = 0
+
     def __init__(self, params={}):
         self.id = self.__class__.id
         self.__class__.id += 1
@@ -63,6 +65,29 @@ class Itemgroup:
 
     def has(self, prop):
         return hasattr(self, prop)
+
+
+    #Get a brok with hostgroup info (like id, name)
+    #members is special : list of (id, host_name) for database info
+    def get_initial_status_brok(self):
+        cls = self.__class__
+        data = {}
+        #Now config properties
+        for prop in cls.properties:
+            if 'status_broker_name' in cls.properties[prop]:
+                broker_name = cls.properties[prop]['status_broker_name']
+                if self.has(prop):
+                    if broker_name is None:
+                        data[prop] = getattr(self, prop)
+                    else:
+                        data[broker_name] = getattr(self, prop)
+        #Here members is jsut a bunch of host, I need name in place
+        data['members'] = []
+        for i in self.members:
+            data['members'].append( (i.id, i.get_name()) )#it look like lisp! ((( ..))) 
+        b = Brok('initial_'+cls.my_type+'_status', data)
+        return b
+
 
 
 class Itemgroups:

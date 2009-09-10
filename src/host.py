@@ -31,6 +31,8 @@ from brok import Brok
 class Host(SchedulingItem):
     id = 1 #0 is reserved for host (primary node for parents)
     ok_up = 'UP'
+    my_type = 'host'
+
 
     #properties defined by configuration
     #required : is required in conf
@@ -348,79 +350,6 @@ class Host(SchedulingItem):
         return c
 
 
-    #Get a brok with service status
-    #TODO : GET REAL VALUES and more pythonize
-    def get_initial_status_brok(self):
-        cls = self.__class__
-        data = {'id' : self.id}
-        #Now config properties
-        for prop in cls.properties:
-            if 'status_broker_name' in cls.properties[prop]:
-                broker_name = cls.properties[prop]['status_broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        #We've got prop in running_properties too
-        for prop in cls.running_properties:
-            if 'status_broker_name' in cls.running_properties[prop]:
-                broker_name = cls.running_properties[prop]['status_broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        b = Brok('initial_host_status', data)
-        return b
-
-
-    #Get a brok with service status
-    #TODO : GET REAL VALUES and more pythonize
-    def get_update_status_brok(self):
-        cls = self.__class__
-        data = {'id' : self.id}
-        #Now config properties
-        for prop in cls.properties:
-            if 'status_broker_name' in cls.properties[prop]:
-                broker_name = cls.properties[prop]['status_broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        #We've got prop in running_properties too
-        for prop in cls.running_properties:
-            if 'status_broker_name' in cls.running_properties[prop]:
-                broker_name = cls.running_properties[prop]['status_broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        b = Brok('update_host_status', data)
-        return b
-
-
-    #Get a brok with service status
-    #TODO : GET REAL VALUES and more pythonize
-    def get_check_result_brok(self):
-        cls = self.__class__
-        data = {}
-        #Now config properties
-        for prop in cls.properties:
-            if 'broker_name' in cls.properties[prop]:
-                broker_name = cls.properties[prop]['broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        #We've got prop in running_properties too
-        for prop in cls.running_properties:
-            if 'broker_name' in cls.running_properties[prop]:
-                broker_name = cls.running_properties[prop]['broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        b = Brok('host_check_result', data)
-        return b
 
 
 class Hosts(Items):

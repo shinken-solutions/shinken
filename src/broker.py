@@ -203,8 +203,6 @@ class Broker(Actionner):
 			self.watch_for_new_conf()
 
 			timeout = 1.0
-
-                
 			#Now we can get new actions from schedulers
 			self.get_new_broks()
 			#TODO : sleep better...

@@ -23,23 +23,25 @@ from util import to_int, to_char, to_split, to_bool
 
 class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
-    properties={'contact_name' : {'required':True},
-                'alias' : {'required':False, 'default':'none'},
+    my_type = 'contact'
+
+    properties={'contact_name' : {'required':True, 'status_broker_name' : None},
+                'alias' : {'required':False, 'default':'none', 'status_broker_name' : None},
                 'contactgroups' : {'required':False, 'default':''},
-                'host_notifications_enabled' : {'required':True, 'pythonize': to_bool},
-                'service_notifications_enabled' : {'required':True, 'pythonize': to_bool},
+                'host_notifications_enabled' : {'required':True, 'pythonize': to_bool, 'status_broker_name' : None},
+                'service_notifications_enabled' : {'required':True, 'pythonize': to_bool, 'status_broker_name' : None},
                 'host_notification_period' : {'required':True},
                 'service_notification_period' : {'required':True},
                 'host_notification_options' : {'required':True, 'pythonize': to_split},
                 'service_notification_options' : {'required':True, 'pythonize': to_split},
                 'host_notification_commands' : {'required':True},
                 'service_notification_commands' : {'required':True},
-                'email' : {'required' : False, 'default':'none'},
-                'pager' : {'required' : False, 'default':'none'},
+                'email' : {'required' : False, 'default':'none', 'status_broker_name' : None},
+                'pager' : {'required' : False, 'default':'none', 'status_broker_name' : None},
                 'addressx' : {'required' : False, 'default':'none'},
-                'can_submit_commands' : {'required' : False, 'default':'0', 'pythonize': to_bool},
-                'retain_status_information' : {'required' : False, 'default':'1', 'pythonize': to_bool},
-                'retain_nonstatus_information' : {'required' : False, 'default':'1', 'pythonize': to_bool}
+                'can_submit_commands' : {'required' : False, 'default':'0', 'pythonize': to_bool, 'status_broker_name' : None},
+                'retain_status_information' : {'required' : False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
+                'retain_nonstatus_information' : {'required' : False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None}
                 }
 
     running_properties = {}
@@ -55,9 +57,13 @@ class Contact(Item):
         'CONTACTGROUPNAMES' : 'get_groupnames'
         }
 
+    #For debugging purpose only (nice name)
+    def get_name(self):
+        return self.contact_name
+
+
     #Search for notification_options with state and if t is in service_notification_period
     def want_service_notification(self, t, state):
-        #print self
         b = self.service_notification_period.is_time_valid(t)
         if 'n' in self.service_notification_options:
             return False
@@ -68,9 +74,9 @@ class Contact(Item):
             return b and t[state] in self.service_notification_options
         return False
 
+
     #Search for notification_options with state and if t is in host_notification_period
     def want_host_notification(self, t, state):
-        #print self
         b = self.host_notification_period.is_time_valid(t)
         if 'n' in self.host_notification_options:
             return False

@@ -20,7 +20,15 @@
 from itemgroup import Itemgroup, Itemgroups
 
 class Contactgroup(Itemgroup):
-    id = 0
+    id = 1
+    my_type = 'contactgroup'
+
+    properties={'id': {'required': False, 'default': 0, 'status_broker_name' : None},
+                'contactgroup_name': {'required': True, 'status_broker_name' : None},
+                'alias': {'required':  True, 'status_broker_name' : None},
+                'members' : {'required': True}#No status_broker_name because it put hosts, not host_name
+                }
+
 
     macros = {
         'CONTACTGROUPALIAS' : 'alias',
@@ -36,6 +44,7 @@ class Contactgroup(Itemgroup):
             return self.contactgroup_members.split(',')
         else:
             return []
+
 
     #We fillfull properties with template ones if need
     def get_contacts_by_explosion(self, contactgroups):

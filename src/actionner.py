@@ -279,11 +279,14 @@ class Actionner:
 	def main(self):
                 #Daemon init
 		Pyro.core.initServer()
+
+		#Let the user give us a port, if not, take the default one
 		if len(sys.argv) == 2:
 			self.port = int(sys.argv[1])
 		else:
 			self.port = self.__class__.default_port
 		print "Port:", self.port
+
 		self.daemon = Pyro.core.Daemon(port=self.port)
 		#If the port is not free, pyro take an other. I don't like that!
 		if self.daemon.port != self.port:

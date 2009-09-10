@@ -20,6 +20,7 @@
 from command import CommandCall
 from util import to_int, to_char, to_split, to_bool
 from copy import deepcopy
+from brok import Brok
 
 
 class Item(object):
@@ -238,6 +239,62 @@ class Item(object):
                 d_to_del = dt
         if d_to_del is not None:
             self.downtimes.remove(d_to_del)
+
+
+    #Fill data with info of item by looking at brok_type
+    #in props of properties or running_propterties
+    def fill_data_brok_from(self, data, brok_type):
+        cls = self.__class__
+        #Now config properties
+        for prop in cls.properties:
+            if brok_type in cls.properties[prop]:
+                broker_name = cls.properties[prop][brok_type]
+                if broker_name is None:
+                    data[prop] = getattr(self, prop)
+                else:
+                    data[broker_name] = getattr(self, prop)
+        #We've got prop in running_properties too
+        for prop in cls.running_properties:
+            if brok_type in cls.running_properties[prop]:
+                broker_name = cls.running_properties[prop][brok_type]
+                if broker_name is None:
+                    data[prop] = getattr(self, prop)
+                else:
+                    data[broker_name] = getattr(self, prop)
+
+
+    #Get a brok with initial status
+    def get_initial_status_brok(self):
+        cls = self.__class__
+        my_type = cls.my_type
+        data = {'id' : self.id}
+        
+        self.fill_data_brok_from(data, 'status_broker_name')
+        b = Brok('initial_'+my_type+'_status', data)
+        return b
+
+
+    #Get a brok with update item status
+    def get_update_status_brok(self):
+        cls = self.__class__
+        my_type = cls.my_type
+        
+        data = {'id' : self.id}
+        self.fill_data_brok_from(data, 'status_broker_name')
+        b = Brok('update_'+my_type+'_status', data)
+        return b
+
+
+    #Get a brok with check_result
+    def get_check_result_brok(self):
+        cls = self.__class__
+        my_type = cls.my_type
+
+        data = {}
+        self.fill_data_brok_from(data, 'broker_name')
+        b = Brok(my_type+'_check_result', data)
+        return b
+
             
 
 class Items(object):

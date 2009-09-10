@@ -16,8 +16,15 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import copy
 
+#This Class is a plugin for the Shinken Broker. It is in charge
+#to brok information into the merlin database. for the moment
+#only Mysql is supported. This code is __imported__ from Broker.
+#The managed_brok function is called by Broker for manage the broks. It calls
+#the manage_*_brok functions that create queries, and then run queries.
+
+
+import copy
 
 #This text is print at the import
 print "I am Merlin Broker"
@@ -41,6 +48,9 @@ class Merlindb_broker:
         return hasattr(self, prop)
 
 
+    #Called by Broker so we can do init stuff
+    #TODO : add conf param to get pass with init
+    #Conf from arbiter!
     def init(self):
         print "I connect to database, thanks"
         self.connect_database()
@@ -52,10 +62,10 @@ class Merlindb_broker:
         type = b.type
         manager = 'manage_'+type+'_brok'
         print "(Merlin) I search manager:", manager
-        #print "My dict:", self.__dict__, dir(self)
         if self.has(manager):
             f = getattr(self, manager)
             queries = f(b)
+            #Ok, we've got queries, now : run them!
             for q in queries :
                 self.execute_query(q)
             return
@@ -63,7 +73,7 @@ class Merlindb_broker:
 
 
     #Create the database connexion
-    #TODO : finish error catch
+    #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         import MySQLdb
         self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root",db = "merlin")
@@ -87,7 +97,7 @@ class Merlindb_broker:
         for prop in data:
             i += 1
             val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
+            #Boolean must be catch, because we want 0 or 1, not True or False
             if isinstance(val, bool):
                 if val:
                     val = 1
@@ -109,8 +119,6 @@ class Merlindb_broker:
     
     #Create a update query of table with data, and use where data for the WHERE clause
     def create_update_query(self, table, data, where_data):
-        #We want a query like :
-        #INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
         query = "UPDATE %s set " % table
 		
         #First data manage
@@ -147,7 +155,7 @@ class Merlindb_broker:
             else:
                 where_clause += "and %s='%s' " % (prop, val)
 
-        query = query + query_folow + where_clause#" WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'] , data['service_description'])				
+        query = query + query_folow + where_clause
         return query
     
     
@@ -167,69 +175,55 @@ class Merlindb_broker:
         return res
 
 
-    #Get a brok, parse it, and return the queries for database
+    #Program status is .. status of program? :)
+    #Like pid, daemon mode, last activity, etc
+    #We aleady clean database, so insert
     def manage_program_status_brok(self, b):
-        data = b.data
-
-        #We want a query like :
-        #INSERT INTO example (name, age) VALUES('Timmy Mellowman', '23' )
-        query = self.create_insert_query('program_status', data)
-
+        query = self.create_insert_query('program_status', b.data)
         return [query]
 
 
-    #Get a brok, parse it, and return the query for database
+    #Initial service status is at start. We need an insert because we clean the base
     def manage_initial_service_status_brok(self, b):
-        data = b.data
-        #It's a initial entry, so we need to clean old entries
-        #delete_query = "DELETE FROM service WHERE host_name = '%s' AND service_description = '%s'" % (data['host_name'], data['service_description'])
-
-        query = self.create_insert_query('service', data)		
-
+        #It's a initial entry, so we need insert
+        query = self.create_insert_query('service', b.data)		
         return [query]
 
 
-    #Get a brok, parse it, and return the query for database
+    #A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
-        
+        #We just impact the service :)
         where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
         query = self.create_update_query('service', data, where_clause)
-
         return [query]
 
 
-    #Get a brok, parse it, and return the query for database
+    #A full service status? Ok, update data
     def manage_update_service_status_brok(self, b):
         data = b.data
-		
         where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
         query = self.create_update_query('service', data, where_clause)
-        
         return [query]
 
 
-
-    #Get a brok, parse it, and return the query for database
+    #A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
-        data = b.data
-        #It's a initial entry, so we need to clean old entries
-        #delete_query = "DELETE FROM host WHERE host_name = '%s'" % data['host_name']
-
-        query = self.create_insert_query('host', data)
-
+        query = self.create_insert_query('host', b.data)
         return [query]
 
 
-    #Get a brok, parse it, and return the query for database
+    #A new host group? Insert it
+    #We need to do something for the members prop (host.id, host_name)
+    #They are for host_hostgroup table, with just host.id hostgroup.id
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
+
         #Here we've got a special case : in data, there is members
         #and we do not want it in the INSERT query, so we crate a tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         query = self.create_insert_query('hostgroup', tmp_data)
-
         res = [query]
 		
         #Ok, the hostgroup table is uptodate, now we add relations between hosts and hostgroups
@@ -243,20 +237,18 @@ class Merlindb_broker:
         return res
 
 
-    #Get a brok, parse it, and return the query for database
+    #same from hostgroup, but with servicegroup
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
-        #It's a initial entry, so we need to clean old entries
-        delete_query = "DELETE FROM servicegroup WHERE servicegroup_name = '%s'" % data['servicegroup_name']
 
         #Here we've got a special case : in data, there is members
         #and we do not want it in the INSERT query, so we crate a tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         query = self.create_insert_query('servicegroup', tmp_data)
+        res = [query]
 
-        res = [delete_query, query]
-
+        #Now the members part
         for (s_id, s_name) in b.data['members']:
             #first clean
             q_del = "DELETE FROM service_servicegroup WHERE service='%s' and servicegroup='%s'" % (s_id, b.data['id'])
@@ -267,22 +259,46 @@ class Merlindb_broker:
         return res
 
 
-    #Get a brok, parse it, and return the query for database
+    #Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
         data = b.data
-		
+        #Only the host is impacted
         where_clause = {'host_name' : data['host_name']}
         query = self.create_update_query('host', data, where_clause)
-
         return [query]
 
 
-    #Get a brok, parse it, and return the query for database
+    #Ok the host is updated
     def manage_update_host_status_brok(self, b):
         data = b.data
-
+        #Only this host
         where_clause = {'host_name' : data['host_name']}
         query = self.create_update_query('host', data, where_clause)
-
         return [query]
 
+
+    #A contact have just be created, database is clean, we INSERT it
+    def manage_initial_contact_status_brok(self, b):
+        query = self.create_insert_query('contact', b.data)
+        return [query]
+
+    #same from hostgroup, but with servicegroup
+    def manage_initial_contactgroup_status_brok(self, b):
+        data = b.data
+
+        #Here we've got a special case : in data, there is members
+        #and we do not want it in the INSERT query, so we crate a tmp_data without it
+        tmp_data = copy.copy(data)
+        del tmp_data['members']
+        query = self.create_insert_query('contactgroup', tmp_data)
+        res = [query]
+
+        #Now the members part
+        for (c_id, c_name) in b.data['members']:
+            #first clean
+            q_del = "DELETE FROM contact_contactgroup WHERE contact='%s' and contactgroup='%s'" % (c_id, b.data['id'])
+            res.append(q_del)
+            #Then add
+            q = "INSERT INTO contact_contactgroup (contact, contactgroup) VALUES ('%s', '%s')" % (c_id, b.data['id'])
+            res.append(q)
+        return res

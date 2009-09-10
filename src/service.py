@@ -26,7 +26,6 @@ import random
 import time
 from check import Check
 from notification import Notification
-#from timeperiod import Timeperiod
 from macroresolver import MacroResolver
 from brok import Brok
 
@@ -34,7 +33,9 @@ from brok import Brok
 
 class Service(SchedulingItem):
     id = 1 # Every service have a unique ID, and 0 is always special in database and co...
-    ok_up = 'OK'
+    ok_up = 'OK' # The host and service do not have the same 0 value, now yes :)
+
+    my_type = 'service' #used by item class for format specific value like for Broks
 
     #properties defined by configuration
     #required : is required in conf
@@ -182,7 +183,7 @@ class Service(SchedulingItem):
         }
 
     #Give a nice name output, for debbuging purpose
-    #(Yes, debbuging can happen...)
+    #(Yes, debbuging CAN happen...)
     def get_name(self):
         return self.host_name+'/'+self.service_description
 
@@ -222,7 +223,6 @@ class Service(SchedulingItem):
             self.state = 'UNDETERMINED'
         if status in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
-
 
 
     #Return True if status is the state (like OK) or small form like 'o'
@@ -323,82 +323,6 @@ class Service(SchedulingItem):
         #We need to return the check for scheduling adding
         return c
 
-
-    #Get a brok with service status
-    #TODO : GET REAL VALUES and more pythonize
-    def get_initial_status_brok(self):
-        cls = self.__class__
-        data = {'id' : self.id}
-        #Now config properties
-        for prop in cls.properties:
-            if 'status_broker_name' in cls.properties[prop]:
-                broker_name = cls.properties[prop]['status_broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        #We've got prop in running_properties too
-        for prop in cls.running_properties:
-            if 'status_broker_name' in cls.running_properties[prop]:
-                broker_name = cls.running_properties[prop]['status_broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        b = Brok('initial_service_status', data)
-        return b
-
-    #Get a brok with service status
-    #TODO : GET REAL VALUES and more pythonize
-    def get_update_status_brok(self):
-        cls = self.__class__
-        data = {'id' : self.id}
-        #Now config properties
-        for prop in cls.properties:
-            if 'status_broker_name' in cls.properties[prop]:
-                broker_name = cls.properties[prop]['status_broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        #We've got prop in running_properties too
-        for prop in cls.running_properties:
-            if 'status_broker_name' in cls.running_properties[prop]:
-                broker_name = cls.running_properties[prop]['status_broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        b = Brok('update_service_status', data)
-        return b
-
-
-
-    #Get a brok with service status
-    #TODO : GET REAL VALUES and more pythonize
-    def get_check_result_brok(self):
-        cls = self.__class__
-        data = {}
-        #Now config properties
-        for prop in cls.properties:
-            if 'broker_name' in cls.properties[prop]:
-                broker_name = cls.properties[prop]['broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        #We've got prop in running_properties too
-        for prop in cls.running_properties:
-            if 'broker_name' in cls.running_properties[prop]:
-                broker_name = cls.running_properties[prop]['broker_name']
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
-        b = Brok('service_check_result', data)
-        return b
-
-    
 
 
 class Services(Items):
@@ -520,6 +444,7 @@ class Services(Items):
         self.apply_implicit_inheritance(hosts)
         for s in self:
             s.get_customs_properties_by_inheritance(self)
+
 
     #Create dependancies for services (daddy ones)
     def apply_dependancies(self):
