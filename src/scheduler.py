@@ -304,17 +304,20 @@ class Scheduler:
     def delete_unwanted_notifications(self):
         id_to_del = []
         for a in self.actions.values():
-            if a.ref_type == 'service':
-                #service = self.services.items[a.ref['service']]
-                service = self.services[a.ref['service']]
-                if not service.still_need(a):
+            item = self.get_ref_item_from_action(a)
+            if not item.still_need(a):
                     id_to_del.append(a.id)
-            if a.ref_type == 'host':
-                #host = self.hosts.items[a.ref['host']]
-                host = self.hosts[a.ref['host']]
-                if not host.still_need(a):
-                    id_to_del.append(a.id)
-        #print "**********Deleting Notifications", id_to_del
+            #if a.ref_type == 'service':
+            #    #service = self.services.items[a.ref['service']]
+            #    service = self.services[a.ref['service']]
+            #    if not service.still_need(a):
+            #        id_to_del.append(a.id)
+            #if a.ref_type == 'host':
+            #    #host = self.hosts.items[a.ref['host']]
+            #    host = self.hosts[a.ref['host']]
+            #    if not host.still_need(a):
+            #        id_to_del.append(a.id)
+
         for id in id_to_del:
             del self.actions[id]
 
