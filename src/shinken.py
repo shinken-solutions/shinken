@@ -155,6 +155,8 @@ class IForArbiter(Pyro.core.ObjBase):
 
 #Tha main app class
 class Shinken:
+	default_port = 7768
+
 	#Create the shinken class:
 	#Create a Pyro server (port = arvg 1)
 	#then create the interface for arbiter
@@ -162,11 +164,15 @@ class Shinken:
 	def __init__(self):
 		#create the server
 		Pyro.core.initServer()
-		port = int(sys.argv[1])
-		print "Port:", port
-		self.poller_daemon = Pyro.core.Daemon(port=port)
-		if self.poller_daemon.port != port:
-			print "Sorry, the port %d is not free" % port
+	
+		if len(sys.argv) == 2:
+			self.port = int(sys.argv[1])
+		else:
+			self.port = self.__class__.default_port
+		print "Port:", self.port
+		self.poller_daemon = Pyro.core.Daemon(port=self.port)
+		if self.poller_daemon.port != self.port:
+			print "Sorry, the port %d is not free" % self.port
 			sys.exit(1)
 
 		#Now the interface

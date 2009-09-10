@@ -31,6 +31,7 @@ from actionner import Actionner
 class Poller (Actionner):
 	do_checks = True
 	do_actions = False
+	default_port = 7771
 
 
 #lets go to the party

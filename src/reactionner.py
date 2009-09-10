@@ -32,7 +32,7 @@ from actionner import Actionner
 class Reactionner (Actionner):
 	do_checks = False
 	do_actions = True
-
+	default_port = 7769
 
 #lets go to the party
 if __name__ == '__main__':

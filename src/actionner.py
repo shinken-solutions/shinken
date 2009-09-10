@@ -87,7 +87,6 @@ class Actionner:
 		self.newzombies = [] #list of fresh new zombies, will be join the next loop
 		self.zombies = [] #list of quite old zombies, will be join now
 		
-		#self.seq_worker = get_sequence()
 
 
 	#initialise or re-initialise connexion with scheduler
@@ -280,7 +279,10 @@ class Actionner:
 	def main(self):
                 #Daemon init
 		Pyro.core.initServer()
-		self.port = int(sys.argv[1])
+		if len(sys.argv) == 2:
+			self.port = int(sys.argv[1])
+		else:
+			self.port = self.__class__.default_port
 		print "Port:", self.port
 		self.daemon = Pyro.core.Daemon(port=self.port)
 		#If the port is not free, pyro take an other. I don't like that!
