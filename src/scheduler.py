@@ -47,16 +47,37 @@ class Scheduler:
         self.status_file = StatusFile(self)
         self.instance_id = conf.instance_id
 
+
     def die(self):
         self.must_run = False
+
 
     #Load the external commander
     def load_external_command(self, e):
         self.external_command = e
         #self.fifo = e.open()
 
+
     def run_external_command(self, command):
         self.external_command.resolve_command(command)
+
+
+    #And action if for service or host.
+    #We just wuant the service of the host that is the ref
+    #BUT: ref is int or dict... so...
+    #TODO : clean this fucking ref...
+    def get_ref_item_from_action(self, action):
+        ref = action.ref
+        if action.ref_type == 'service':
+            if isinstance(ref, int):
+                return self.services[ref]
+            else:
+                return self.services[action.ref['service']]
+        if action.ref_type == 'host':
+            if isinstance(ref, int):
+                return self.hosts[action.ref]
+            else:
+                return self.hosts[action.ref['host']]
 
 
     def add_or_update_check(self, c):
@@ -114,23 +135,11 @@ class Scheduler:
             for a in self.actions.values():
                 #contact = self.contacts.items[a.ref['contact']]
                 contact = self.contacts[a.ref['contact']]
-                if a.ref_type == 'service':
-                    #service = self.services.items[a.ref['service']]
-                    service = self.services[a.ref['service']]
-                    #print "Is launchable?",a,service.is_notification_launchable(a, contact)
-                    if a.status == 'scheduled' and service.is_notification_launchable(a, contact):
-                        #print "***********************Giving a notification to run"
-                        service.update_notification(a, contact)
-                        a.status = 'inpoller'
-                        res.append(a)
-                if a.ref_type == 'host':
-                    #host = self.hosts.items[a.ref['host']]
-                    host = self.hosts[a.ref['host']]
-                    if a.status == 'scheduled' and host.is_notification_launchable(a, contact):
-                        #print "***********************Giving a notification to run"
-                        host.update_notification(a, contact)
-                        a.status = 'inpoller'
-                        res.append(a)
+                item = self.get_ref_item_from_action(a)
+                if a.status == 'scheduled' and item.is_notification_launchable(a, contact):
+                    item.update_notification(a, contact)
+                    a.status = 'inpoller'
+                    res.append(a)
         return res
 
 
@@ -138,26 +147,14 @@ class Scheduler:
     def put_results(self, c):
         print "Get results"
         if c.is_a == 'notification':
-            #print "Get notification from poller", c.id
-            if c.ref_type == 'service':
-                #service = self.services.items[c.ref['service']]
-                service = self.services[c.ref['service']]
-                a = service.get_new_notification_from(c)
-                if a is not None:
-                    #print "==========>Getting a new service notification <========="
-                    self.add_or_update_action(a)#self.actions[a.id] = a
-                del self.actions[c.id]
-            if c.ref_type == 'host':
-                #host = self.hosts.items[c.ref['host']]
-                host = self.hosts[c.ref['host']]
-                a = host.get_new_notification_from(c)
-                if a is not None:
-                    #print "==========>Getting a new host notification <========="
-                    self.add_or_update_action(a)#self.actions[a.id] = a
-                del self.actions[c.id]
+            item = self.get_ref_item_from_action(c)
+            a = item.get_new_notification_from(c)
+            if a is not None:
+                self.add_or_update_action(a)
+            del self.actions[c.id]
         elif c.is_a == 'check':
             c.status = 'waitconsume'
-            self.add_or_update_check(c)#self.checks[c.id] = c
+            self.add_or_update_check(c)
         else:
             print "Type unknown"
 
@@ -167,7 +164,7 @@ class Scheduler:
         res = self.broks
         #They are gone, we keep none!
         self.broks = {}
-        return res#self.broks
+        return res
 
 
     #Fill the self.broks with broks of self (process id, and co)
@@ -241,27 +238,17 @@ class Scheduler:
             print c
             if c.status == 'waitconsume':
                 print "A check to consume"
-                if c.ref_type == 'service':
-                    #actions = self.services.items[c.ref].consume_result(c)
-                    actions = self.services[c.ref].consume_result(c)
-                    print "Res Action:", actions
-                    #The update of the host/service must have changed, we brok it
-                    self.get_and_register_check_result_brok(self.services[c.ref])
-                    #b = self.services[c.ref].get_check_result_brok()
-                    #self.add_brok(b)
-                if c.ref_type == 'host':
-                    #actions = self.hosts.items[c.ref].consume_result(c)
-                    actions = self.hosts[c.ref].consume_result(c)
-                    #The update of the host/service must have changed, we brok it
-                    self.get_and_register_check_result_brok(self.hosts[c.ref])
-                    #b = self.hosts[c.ref].get_check_result_brok()
-                    #self.add_brok(b)                
+                item = self.get_ref_item_from_action(c)
+                actions = item.consume_result(c)
+                print "Res Action:", actions
+                #The update of the host/service must have changed, we brok it
+                self.get_and_register_check_result_brok(item)
 
                 #Now we manage the actions we must do
                 for a in actions:
                     if a.is_a == 'notification':
                         #print "*******Adding a notification"
-                        self.add_or_update_action(a)#self.actions[a.id] = a
+                        self.add_or_update_action(a)
                     elif  a.is_a == 'check':
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
@@ -273,18 +260,16 @@ class Scheduler:
                 self.checks[c.depend_on_me].depend_on.remove(c.id)
                 #REMOVE OLD DEP CHECL -> zombie
                 c.status = 'zombie'
-                
+
+        #Now, reintegr dep checks
         for c in self.checks.values():
             if c.status == 'waitdep' and len(c.depend_on) == 0:
                 print c.id, "OK we've got all dep!, now we can resolve check"
-                if c.ref_type == 'service':
-                    #actions = self.services.items[c.ref].consume_result(c)
-                    actions = self.services[c.ref].consume_result(c)
-                    self.get_and_register_check_result_brok(self.services[c.ref])
-                if c.ref_type == 'host':
-                    #actions = self.hosts.items[c.ref].consume_result(c)
-                    actions = self.hosts[c.ref].consume_result(c)
-                    self.get_and_register_check_result_brok(self.hosts[c.ref])
+                item = self.get_ref_item_from_action(c)
+                actions = item.consume_result(c)
+                self.get_and_register_check_result_brok(item)
+
+                #Now we manage the actions we must do
                 for a in actions:
                     if a.is_a == 'notification':
                         #print "*******Adding a notification"
@@ -295,7 +280,7 @@ class Scheduler:
                 
         print "We add new Dep checks", checks_to_add
         for c in checks_to_add:
-            self.add_or_update_check(c)#self.checks[c.id] = c
+            self.add_or_update_check(c)
 
 
     #Called every 1sec to delete all checks in a zombie state

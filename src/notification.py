@@ -22,6 +22,22 @@ from action import Action
 
 class Notification(Action):
     #id = 0
+    
+    properties={'notification_type' : {'required': False, 'default':0, 'status_broker_name' : None},
+                'start_time' : {'required': False, 'default':0, 'status_broker_name' : None},
+                'end_time' : {'required': False, 'default':0, 'status_broker_name' : None},
+                'contact_name' : {'required': False, 'default':'', 'status_broker_name' : None},
+                'host_name' : {'required': False, 'default':'', 'status_broker_name' : None},
+                'service_description' : {'required': False, 'default':'', 'status_broker_name' : None},
+                'reason_type' : {'required': False, 'default':0, 'status_broker_name' : None},
+                'state' : {'required': False, 'default':0, 'status_broker_name' : None},
+                'output' : {'required': False, 'default':'', 'status_broker_name' : None},
+                'ack_author' : {'required': False, 'default':'', 'status_broker_name' : None},
+                'ack_data' : {'required': False, 'default':'', 'status_broker_name' : None},
+                'escalated' : {'required': False, 'default':0, 'status_broker_name' : None},
+                'contacts_notified' : {'required': False, 'default':0, 'status_broker_name' : None}
+                }
+
     macros = {
         'NOTIFICATIONTYPE' : 'type',
         'NOTIFICATIONRECIPIENTS' : 'recipients',
@@ -40,8 +56,10 @@ class Notification(Action):
     def __init__(self, type , status, command, ref, ref_type, t_to_go):
         self.is_a = 'notification'
         self.type = type
+
         self.id = Action.id
         Action.id += 1
+
         self._in_timeout = False
         self.status = status
         self.exit_status = 3
@@ -50,6 +68,9 @@ class Notification(Action):
         self.ref = ref
         self.ref_type = ref_type
         self.t_to_go = t_to_go
+        
+        #For brok
+        
 
     
     def execute(self):

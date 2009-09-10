@@ -251,18 +251,22 @@ class Service(SchedulingItem):
         notifications = []
         now = time.time()
         t = self.notification_period.get_next_valid_time_from_t(now)
+        m = MacroResolver()
         
         for contact in self.contacts:
             for cmd in contact.service_notification_commands:
                 print "SRV: Raise notification"
-                #create without real command, it will be update just before being send
-                notifications.append(Notification(type, 'scheduled', 'VOID', {'service' : self.id, 'contact' : contact.id, 'command': cmd}, 'service', t))
+                n = Notification(type, 'scheduled', 'VOID', {'service' : self.id, 'contact' : contact.id, 'command': cmd}, 'service', t)
+                #command = n.ref['command']
+                #n._command = m.resolve_command(command, self.host_name, self, contact, n)
+                notifications.append(n)
         return notifications
 
 
     #We are just going to launch the notif to the poller
     #so we must actualise the command (Macros)
     def update_notification(self, n,  contact):
+        #pass
         m = MacroResolver()
         command = n.ref['command']
         n._command = m.resolve_command(command, self.host_name, self, contact, n)
@@ -283,7 +287,11 @@ class Service(SchedulingItem):
         #a recovery notif is send ony one time
         if n.type == 'RECOVERY':
             return None
-        return Notification(n.type, 'scheduled','', {'service' : n.ref['service'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'service', now + self.notification_interval * 60)
+        new_n = Notification(n.type, 'scheduled','', {'service' : n.ref['service'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'service', now + self.notification_interval * 60)
+        #m = MacroResolver()
+        #command = new_n.ref['command']
+        #new_n._command = m.resolve_command(command, self.host_name, self, contact, n)
+        return new_n
 
 
     #Check if the notificaton is still necessery
