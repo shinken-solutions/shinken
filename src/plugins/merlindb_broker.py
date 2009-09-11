@@ -302,3 +302,8 @@ class Merlindb_broker:
             q = "INSERT INTO contact_contactgroup (contact, contactgroup) VALUES ('%s', '%s')" % (c_id, b.data['id'])
             res.append(q)
         return res
+
+    #A notification have just be created, we INSERT it
+    def manage_notification_raise_brok(self, b):
+        query = self.create_insert_query('notification', b.data)
+        return [query]

@@ -285,6 +285,9 @@ class Host(SchedulingItem):
         now = time.time()
         t = self.notification_period.get_next_valid_time_from_t(now)
         print "HOST: We are creating a notification for", time.asctime(time.localtime(t))
+
+        m = MacroResolver()
+
         for contact in self.contacts:
             for cmd in contact.host_notification_commands:
                 #create without real command, it will be update just before being send
@@ -296,14 +299,6 @@ class Host(SchedulingItem):
                 if self.is_notification_launchable(n, contact):
                     notifications.append(n)
         return notifications
-
-
-    #We are just going to launch the notif to the poller
-    #so we must actualise the command (Macros).
-    def update_notification(self, n,  contact):
-        m = MacroResolver()
-        command = n.ref['command']
-        n._command = m.resolve_command(command, self, None, contact, n)
 
 
     #see if the notification is launchable (time is OK and contact is OK too)

@@ -136,9 +136,7 @@ class Scheduler:
                 #contact = self.contacts.items[a.ref['contact']]
                 contact = self.contacts[a.ref['contact']]
                 item = self.get_ref_item_from_action(a)
-                if a.status == 'scheduled' and item.is_notification_launchable(a, contact):
-                    #We do not more update the command now, it's done ate the creation...
-                    #item.update_notification(a, contact)
+                if a.status == 'scheduled':
                     a.status = 'inpoller'
                     res.append(a)
         return res
@@ -152,6 +150,9 @@ class Scheduler:
             a = item.get_new_notification_from(c)
             if a is not None:
                 self.add_or_update_action(a)
+                #Get Brok from this new notification
+                b = a.get_initial_status_brok()
+                self.add_brok(b)
             del self.actions[c.id]
         elif c.is_a == 'check':
             c.status = 'waitconsume'
@@ -177,7 +178,7 @@ class Scheduler:
 
         #first the program status
         b = self.get_program_status_brok()
-        self.add_brok(b)#broks[b.id] = b
+        self.add_brok(b)
 
         #We cant initial_status from all this types
         #The order is important, service need host...
@@ -250,6 +251,9 @@ class Scheduler:
                     if a.is_a == 'notification':
                         #print "*******Adding a notification"
                         self.add_or_update_action(a)
+                        #Get Brok from this new notification
+                        b = a.get_initial_status_brok()
+                        self.add_brok(b)
                     elif  a.is_a == 'check':
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
@@ -273,8 +277,10 @@ class Scheduler:
                 #Now we manage the actions we must do
                 for a in actions:
                     if a.is_a == 'notification':
-                        #print "*******Adding a notification"
-                        self.add_or_update_action(a)#self.actions[a.id] = a
+                        self.add_or_update_action(a)
+                        #Get Brok from this new notification
+                        b = a.get_initial_status_brok()
+                        self.add_brok(b)
                     elif  a.is_a == 'check':
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)

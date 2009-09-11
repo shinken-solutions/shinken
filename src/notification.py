@@ -19,6 +19,7 @@
 
 from pexpect import *
 from action import Action
+from brok import Brok
 
 class Notification(Action):
     #id = 0
@@ -53,7 +54,10 @@ class Notification(Action):
         }
     
     
-    def __init__(self, type , status, command, ref, ref_type, t_to_go):
+    def __init__(self, type , status, command, ref, ref_type, t_to_go, \
+                 contact_name='', host_name='', service_description='',
+                 reason_type=1, state=0, ack_author='', ack_data='', escalated=0, contacts_notified=0,
+                 start_time=0, end_time=0, notification_type=0):
         self.is_a = 'notification'
         self.type = type
 
@@ -70,8 +74,18 @@ class Notification(Action):
         self.t_to_go = t_to_go
         
         #For brok
-        
-
+        self.contact_name = contact_name
+        self.host_name = host_name
+        self.service_description = service_description
+        self.reason_type = reason_type
+        self.state = state
+        self.ack_author = ack_author
+        self.ack_data = ack_data
+        self.escalated = escalated
+        self.contacts_notified = contacts_notified
+        self.start_time = start_time
+        self.end_time = end_time
+        self.notification_type = notification_type
     
     def execute(self):
         print "Notification %s" % self._command
@@ -116,3 +130,28 @@ class Notification(Action):
 
     def get_id(self):
         return self.id
+
+    
+    #Fill data with info of item by looking at brok_type
+    #in props of properties or running_propterties
+    def fill_data_brok_from(self, data, brok_type):
+        cls = self.__class__
+        #Now config properties
+        for prop in cls.properties:
+            if brok_type in cls.properties[prop]:
+                broker_name = cls.properties[prop][brok_type]
+                if broker_name is None:
+                    data[prop] = getattr(self, prop)
+                else:
+                    data[broker_name] = getattr(self, prop)
+
+
+    #Get a brok with initial status
+    def get_initial_status_brok(self):
+        data = {'id' : self.id}
+        
+        self.fill_data_brok_from(data, 'status_broker_name')
+        b = Brok('notification_raise', data)
+        return b
+
+

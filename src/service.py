@@ -267,15 +267,6 @@ class Service(SchedulingItem):
         return notifications
 
 
-    #We are just going to launch the notif to the poller
-    #so we must actualise the command (Macros)
-    def update_notification(self, n,  contact):
-        #pass
-        m = MacroResolver()
-        command = n.ref['command']
-        n._command = m.resolve_command(command, self.host_name, self, contact, n)
-
-
     #see if the notification is launchable (time is OK and contact is OK too)
     def is_notification_launchable(self, n, contact):
         now = time.time()
