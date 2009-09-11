@@ -299,7 +299,7 @@ class Host(SchedulingItem):
 
 
     #We are just going to launch the notif to the poller
-    #so we must actualise the command (Macros)
+    #so we must actualise the command (Macros).
     def update_notification(self, n,  contact):
         m = MacroResolver()
         command = n.ref['command']
