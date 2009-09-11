@@ -22,12 +22,13 @@ from check import Check
 from notification import Notification
 from status import StatusFile
 from brok import Brok
+from downtime import Downtime
 
 class Scheduler:
-    def __init__(self, daemon):#, arbiter_daemon):
-        self.daemon = daemon
-        #self.arbiter_daemon = arbiter_daemon
-        self.must_run = True
+    def __init__(self, daemon):
+        self.daemon = daemon #Pyro daemon for incomming orders/askings
+        self.must_run = True #When set to false by us, we die and arbiter launch a new Scheduler
+
 
     #Load conf for future use
     def load_conf(self, conf):
@@ -40,14 +41,18 @@ class Scheduler:
         self.servicegroups = conf.servicegroups
         self.timeperiods = conf.timeperiods
         self.commands = conf.commands
+        #Ours queues
         self.checks = {}
         self.actions = {}
         self.downtimes = {}
         self.broks = {}
-        self.status_file = StatusFile(self)
-        self.instance_id = conf.instance_id
+
+        self.status_file = StatusFile(self)        #External status file
+        self.instance_id = conf.instance_id #From Arbiter. Use for Broker to disting betweens schedulers
 
 
+    #Oh... Arbiter want us to die... For launch a new Scheduler
+    #"Mais qu'a-t-il de plus que je n'ais pas?"
     def die(self):
         self.must_run = False
 
@@ -58,6 +63,7 @@ class Scheduler:
         #self.fifo = e.open()
 
 
+    #We've got activity in the fifo, we get and run commands
     def run_external_command(self, command):
         self.external_command.resolve_command(command)
 
@@ -80,37 +86,45 @@ class Scheduler:
                 return self.hosts[action.ref['host']]
 
 
-    def add_or_update_check(self, c):
-        #print "Adding a NEW CHECK:", c.id
-        self.checks[c.id] = c
+    #Schedulers have some queues. We can simplify call by adding
+    #elements into the proper queue just by looking at their type
+    #Brok -> self.broks
+    #Check -> self.checks
+    #Notification -> self.actions
+    #Downtime -> self.downtimes
+    def add(self, elt):
+        #For checks and notif, add is also an update function
+        if isinstance(elt, Check):
+            self.checks[elt.id] = elt
+            return
+        if isinstance(elt, Notification):
+            self.actions[elt.id] = elt
+            return
+        if isinstance(elt, Brok):
+            #For brok, we TAG brok with our instance_id
+            elt.data['instance_id'] = self.instance_id
+            self.broks[elt.id] = elt
+            return
+        if isinstance(elt, Downtime):
+            self.downtimes[elt.id] = elt
+            return
 
-    #We just add a brok in our broks queue
-    #But before we tag it with our instance_id
-    def add_brok(self, b):
-        b.data['instance_id'] = self.instance_id
-        self.broks[b.id] = b
 
     #Ask item (host or service) a update_status
     #and add it to our broks queue
     def get_and_register_status_brok(self, item):
         b = item.get_update_status_brok()
-        self.add_brok(b)
+        self.add(b)
+
 
     #Ask item (host or service) a check_result_brok
     #and add it to our broks queue
     def get_and_register_check_result_brok(self, item):
         b = item.get_check_result_brok()
-        self.add_brok(b)
+        self.add(b)
 
 
-    def add_or_update_action(self, a):
-        self.actions[a.id] = a
-
-
-    def add_downtime(self, dt):
-        self.downtimes[dt.id] = dt
-
-
+    #We do not want this downtime id
     def del_downtime(self, dt_id):
         dt = self.downtimes[dt.id]
         dt.ref.del_downtime(dt_id)
@@ -142,26 +156,27 @@ class Scheduler:
         return res
 
 
-    #Caled by poller to send result
+    #Caled by poller and reactionner to send result
     def put_results(self, c):
         print "Get results"
         if c.is_a == 'notification':
             item = self.get_ref_item_from_action(c)
             a = item.get_new_notification_from(c)
             if a is not None:
-                self.add_or_update_action(a)
+                self.add(a)
                 #Get Brok from this new notification
                 b = a.get_initial_status_brok()
-                self.add_brok(b)
+                self.add(b)
             del self.actions[c.id]
         elif c.is_a == 'check':
             c.status = 'waitconsume'
-            self.add_or_update_check(c)
+            self.add(c)
         else:
             print "Type unknown"
 
 
     #Call by brokers to have broks
+    #We give them, and clean them!
     def get_broks(self):
         res = self.broks
         #They are gone, we keep none!
@@ -174,11 +189,11 @@ class Scheduler:
     def fill_initial_broks(self):
         #First a Brok for delete all from my instance_id
         b = Brok('clean_all_my_instance_id',{'instance_id' : self.instance_id})
-        self.add_brok(b)
+        self.add(b)
 
         #first the program status
         b = self.get_program_status_brok()
-        self.add_brok(b)
+        self.add(b)
 
         #We cant initial_status from all this types
         #The order is important, service need host...
@@ -188,7 +203,7 @@ class Scheduler:
         for tab in initial_status_types:
             for i in tab:
                 b = i.get_initial_status_brok()
-                self.add_brok(b)
+                self.add(b)
 
         print "Created initial Broks:", self.broks
         
@@ -196,7 +211,7 @@ class Scheduler:
     #Crate a brok with program status info
     def get_and_register_program_status_brok(self):
         b = self.get_program_status_brok()
-        self.add_brok(b)
+        self.add(b)
 
 
     #Get a brok with program status
@@ -217,7 +232,7 @@ class Scheduler:
                 "passive_host_checks_enabled" : self.conf.accept_passive_host_checks,
                 "event_handlers_enabled" : self.conf.enable_event_handlers,
                 "flap_detection_enabled" : self.conf.enable_flap_detection,
-                "failure_prediction_enabled" : 0,#self.conf.failure_prediction_enabled,
+                "failure_prediction_enabled" : 0,
                 "process_performance_data" : self.conf.process_performance_data,
                 "obsess_over_hosts" : self.conf.obsess_over_hosts,
                 "obsess_over_services" : self.conf.obsess_over_services,
@@ -242,23 +257,21 @@ class Scheduler:
                 print "A check to consume"
                 item = self.get_ref_item_from_action(c)
                 actions = item.consume_result(c)
-                print "Res Action:", actions
                 #The update of the host/service must have changed, we brok it
                 self.get_and_register_check_result_brok(item)
 
                 #Now we manage the actions we must do
                 for a in actions:
                     if a.is_a == 'notification':
-                        #print "*******Adding a notification"
-                        self.add_or_update_action(a)
+                        self.add(a)
                         #Get Brok from this new notification
                         b = a.get_initial_status_brok()
-                        self.add_brok(b)
+                        self.add(b)
                     elif  a.is_a == 'check':
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
 
-        #All 'finished' checks (no more dep) raise checks tey depend
+        #All 'finished' checks (no more dep) raise checks they depends on
         for c in self.checks.values():
             if c.status == 'havetoresolvedep':
                 print "I remove dep", c.id, "on the check", c.depend_on_me
@@ -277,17 +290,17 @@ class Scheduler:
                 #Now we manage the actions we must do
                 for a in actions:
                     if a.is_a == 'notification':
-                        self.add_or_update_action(a)
+                        self.add(a)
                         #Get Brok from this new notification
                         b = a.get_initial_status_brok()
-                        self.add_brok(b)
+                        self.add(b)
                     elif  a.is_a == 'check':
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
                 
         print "We add new Dep checks", checks_to_add
         for c in checks_to_add:
-            self.add_or_update_check(c)
+            self.add(c)
 
 
     #Called every 1sec to delete all checks in a zombie state
@@ -299,9 +312,10 @@ class Scheduler:
                 id_to_del.append(c.id)
         #une petite tape dans le doc et tu t'en vas, merci...
         for id in id_to_del:
-            del self.checks[id]
+            del self.checks[id] # ZANKUSEN!
 
 
+    #Use to update the status file.
     def update_status_file(self):
         self.status_file.create_or_update()
             
@@ -314,43 +328,28 @@ class Scheduler:
             item = self.get_ref_item_from_action(a)
             if not item.still_need(a):
                     id_to_del.append(a.id)
-            #if a.ref_type == 'service':
-            #    #service = self.services.items[a.ref['service']]
-            #    service = self.services[a.ref['service']]
-            #    if not service.still_need(a):
-            #        id_to_del.append(a.id)
-            #if a.ref_type == 'host':
-            #    #host = self.hosts.items[a.ref['host']]
-            #    host = self.hosts[a.ref['host']]
-            #    if not host.still_need(a):
-            #        id_to_del.append(a.id)
-
+        #Ok, now we DEL
         for id in id_to_del:
             del self.actions[id]
 
 
     #Main schedule function to make the regular scheduling
     def schedule(self):
-        #ask for service their next check
-        for s in self.services:
-            c = s.schedule()
-            if c is not None:
-                self.add_or_update_check(c)#self.checks[c.id] = c
-        for h in self.hosts:
-            c = h.schedule()
-            if c is not None:
-                self.add_or_update_check(c)#self.checks[c.id] = c
+        #ask for service and hosts their next check
+        for type_tab in [self.services, self.hosts]:
+            for i in type_tab:#self.services:
+                c = i.schedule()
+                if c is not None:
+                    self.add(c)
 
 
-    #Raise checks for no fresh states
+    #Raise checks for no fresh states for services and hosts
     def check_freshness(self):
-        checks = []
-        for s in self.services:
-            c = s.do_check_freshness()
-        for h in self.hosts:
-            c = h.do_check_freshness()
-        if c is not None:
-            self.add_or_update_check(c)
+        for type_tab in [self.services, self.hosts]:
+            for i in type_tab:
+                c = i.do_check_freshness()
+                if c is not None:
+                    self.add(c)
 
 
     #Main function
@@ -382,7 +381,7 @@ class Scheduler:
                             diff = apres-avant
                             timeout = timeout - diff
                             break    # no need to continue with the for loop
-            else:#Timeout
+            else: #Timeout
 		timeout = 1.0
                 print "**********Schedule********"
                 self.schedule()

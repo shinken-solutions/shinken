@@ -912,8 +912,8 @@ class ExternalCommand:
             c.exit_status = status_code
             c.get_outputs(plugin_output)
             c.status = 'waitconsume'
-            #We add in the
-            self.sched.add_or_update_check(c)
+            #We add in the check
+            self.add(c)
 
 
     #PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
@@ -928,8 +928,8 @@ class ExternalCommand:
             c.exit_status = return_code
             c.get_outputs(plugin_output)
             c.status = 'waitconsume'
-            #We add in the 
-            self.sched.add_or_update_check(c)
+            #We add in the check
+            self.sched.add(c)
 
 
     #READ_STATE_INFORMATION
@@ -963,7 +963,7 @@ class ExternalCommand:
     #SCHEDULE_FORCED_HOST_CHECK;<host_name>;<check_time>
     def SCHEDULE_FORCED_HOST_CHECK(self, host, check_time):
         c = host.schedule(force=True, force_time=check_time)
-        self.sched.add_or_update_check(c)
+        self.sched.add(c)
         self.sched.get_and_register_status_brok(host)
 
     #SCHEDULE_FORCED_HOST_SVC_CHECKS;<host_name>;<check_time>
@@ -975,7 +975,7 @@ class ExternalCommand:
     #SCHEDULE_FORCED_SVC_CHECK;<host_name>;<service_description>;<check_time>
     def SCHEDULE_FORCED_SVC_CHECK(self, service, check_time):
         c = service.schedule(force=True, force_time=check_time)
-        self.sched.add_or_update_check(c)
+        self.sched.add(c)
         self.sched.get_and_register_status_brok(service)
 
     #SCHEDULE_HOSTGROUP_HOST_DOWNTIME;<hostgroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
@@ -989,14 +989,14 @@ class ExternalCommand:
     #SCHEDULE_HOST_CHECK;<host_name>;<check_time>
     def SCHEDULE_HOST_CHECK(self, host, check_time):
         c = host.schedule(force=False, force_time=check_time)
-        self.sched.add_or_update_check(c)
+        self.sched.add(c)
         self.sched.get_and_register_status_brok(host)
 
     #SCHEDULE_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_HOST_DOWNTIME(self, host, start_time, end_time, fixed, trigger_id, duration, author, comment):
         dt = Downtime(host, start_time, end_time, fixed, trigger_id, duration, author, comment)
         host.add_downtime(dt)
-        self.sched.add_downtime(dt)
+        self.sched.add(dt)
 
     #SCHEDULE_HOST_SVC_CHECKS;<host_name>;<check_time>
     def SCHEDULE_HOST_SVC_CHECKS(self, host, check_time):
@@ -1020,14 +1020,14 @@ class ExternalCommand:
     #SCHEDULE_SVC_CHECK;<host_name>;<service_description>;<check_time>
     def SCHEDULE_SVC_CHECK(self, service, check_time):
         c = service.schedule(force=False, force_time=check_time)
-        self.sched.add_or_update_check(c)
+        self.sched.add(c)
         self.sched.get_and_register_status_brok(service)
 
     #SCHEDULE_SVC_DOWNTIME;<host_name>;<service_desription><start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SVC_DOWNTIME(self, service, start_time, end_time, fixed, trigger_id, duration, author, comment):
         dt = Downtime(service, start_time, end_time, fixed, trigger_id, duration, author, comment)
         host.add_downtime(dt)
-        self.sched.add_downtime(dt)
+        self.sched.add(dt)
 
     #SEND_CUSTOM_HOST_NOTIFICATION;<host_name>;<options>;<author>;<comment>
     def SEND_CUSTOM_HOST_NOTIFICATION(self, host, options, author, comment):
