@@ -137,7 +137,8 @@ class Scheduler:
                 contact = self.contacts[a.ref['contact']]
                 item = self.get_ref_item_from_action(a)
                 if a.status == 'scheduled' and item.is_notification_launchable(a, contact):
-                    item.update_notification(a, contact)
+                    #We do not more update the command now, it's done ate the creation...
+                    #item.update_notification(a, contact)
                     a.status = 'inpoller'
                     res.append(a)
         return res

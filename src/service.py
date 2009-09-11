@@ -257,9 +257,13 @@ class Service(SchedulingItem):
             for cmd in contact.service_notification_commands:
                 print "SRV: Raise notification"
                 n = Notification(type, 'scheduled', 'VOID', {'service' : self.id, 'contact' : contact.id, 'command': cmd}, 'service', t)
-                #command = n.ref['command']
-                #n._command = m.resolve_command(command, self.host_name, self, contact, n)
-                notifications.append(n)
+
+                #The notif must be fill with current data, so we create the commmand now
+                command = n.ref['command']
+                n._command = m.resolve_command(command, self.host_name, self, contact, n)
+                #Maybe the contact do not want this notif? Arg!
+                if self.is_notification_launchable(n, contact):
+                    notifications.append(n)
         return notifications
 
 
@@ -276,9 +280,9 @@ class Service(SchedulingItem):
     def is_notification_launchable(self, n, contact):
         now = time.time()
         if n.type == 'PROBLEM':
-            return now > n.t_to_go and self.state != 'OK' and  contact.want_service_notification(now, self.state)
+            return self.state != 'OK' and  contact.want_service_notification(now, self.state)
         else:
-            return now > n.t_to_go and self.state == 'OK' and  contact.want_service_notification(now, self.state)
+            return self.state == 'OK' and  contact.want_service_notification(now, self.state)
             
 
     #We just send a notification, we need new ones in notification_interval

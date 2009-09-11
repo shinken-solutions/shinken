@@ -288,7 +288,13 @@ class Host(SchedulingItem):
         for contact in self.contacts:
             for cmd in contact.host_notification_commands:
                 #create without real command, it will be update just before being send
-                notifications.append(Notification(type, 'scheduled', 'VOID', {'host' : self.id, 'contact' : contact.id, 'command': cmd}, 'host', t))
+                n = Notification(type, 'scheduled', 'VOID', {'host' : self.id, 'contact' : contact.id, 'command': cmd}, 'host', t)
+                #The notif must be fill with current data, so we create the commmand now
+                command = n.ref['command']
+                n._command = m.resolve_command(command, self, None, contact, n)
+                #Maybe the contact do not want this notif? Arg!
+                if self.is_notification_launchable(n, contact):
+                    notifications.append(n)
         return notifications
 
 
