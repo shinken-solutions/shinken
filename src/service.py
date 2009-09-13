@@ -408,13 +408,14 @@ class Services(Items):
     #Make link between service and it's contacts
     def linkify_s_by_c(self, contacts):
         for s in self:
-            contacts_tab = s.contacts.split(',')
-            new_contacts = []
-            for c_name in contacts_tab:
-                c_name = c_name.strip()
-                c = contacts.find_by_name(c_name)
-                new_contacts.append(c)
-            s.contacts = new_contacts
+            if s.has('contacts'):
+                contacts_tab = s.contacts.split(',')
+                new_contacts = []
+                for c_name in contacts_tab:
+                    c_name = c_name.strip()
+                    c = contacts.find_by_name(c_name)
+                    new_contacts.append(c)
+                s.contacts = new_contacts
 
 
     #Delete services by ids
@@ -477,7 +478,7 @@ class Services(Items):
                     hgname = hgname.strip()
                     hnames = hostgroups.get_members_by_name(hgname)
                     #We add hosts in the service host_name
-                    print s.host_name, hgname
+                    #print s.host_name, hgname
                     if s.has('host_name') and hnames != []:
                         s.host_name += ',' + str(hnames)
                     else:

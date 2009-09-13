@@ -271,6 +271,8 @@ class Config(Item):
                     'poller' : []
                     }
         
+        
+        #print "I search :", objectscfg
         tmp=[]
         tmp_type='void'
         in_define = False
@@ -618,57 +620,62 @@ class Config(Item):
         g.add_node('root')
 
         #Node that are not directy connected to the root
-        indirect_nodes = []
+        indirect_nodes = set()#[]#Spped up instead of []
 
         for h in self.hosts:
             print "Doing host", h.host_name, h.id
-            if h not in g:
-                print "Adding", h.host_name
-                g.add_node(h)
+            #if h not in g:
+            #    print "Adding", h.host_name
+            g.add_node(h)
             g.add_edge('root', h)
 
             for p in h.parents:
-                if p not in g:
-                    print "Adding", p.host_name
-                    g.add_node(p)
-                g.add_edge(p, h)
-                print "My parent:", p.host_name
-                if h not in indirect_nodes:
-                    indirect_nodes.append(h)
+                if p is not None:
+                    if p not in g:
+                        print "Adding", p.host_name
+                        g.add_node(p)
+                    g.add_edge(p, h)
+                    print "My parent:", p.host_name
+                    #if h not in indirect_nodes:
+                        #indirect_nodes.append(h)
+                    indirect_nodes.add(h)
 
             for (dep, tmp, tmp2, tp3) in h.act_depend_of:
                 print "My dep", dep.host_name
-                if dep not in g:
-                    print "Adding", dep.host_name
-                    g.add_node(dep)
+                #if dep not in g:
+                #    print "Adding", dep.host_name
+                g.add_node(dep)
                 g.add_edge(dep, h)
-                if h not in indirect_nodes:
-                    indirect_nodes.append(h)
+                #if h not in indirect_nodes:
+                    #indirect_nodes.append(h)
+                indirect_nodes.add(h)
 
             for (dep, tmp, tmp2, tp3) in h.chk_depend_of:
                 print "My dep", dep.host_name
-                if dep not in g:
-                    print "Adding", dep.host_name
-                    g.add_node(dep)
+                #if dep not in g:
+                #    print "Adding", dep.host_name
+                g.add_node(dep)
                 g.add_edge(dep, h)
-                if h not in indirect_nodes:
-                    indirect_nodes.append(h)
-            
+                #if h not in indirect_nodes:
+                    #indirect_nodes.append(h)
+                indirect_nodes.add(h)            
+
             for s in h.services:
-                if s not in g:
-                    g.add_node(s)
+                #if s not in g:
+                g.add_node(s)
                 g.add_edge(h,s)
 
         for s in self.services:
-            if s not in g:
-                g.add_node(s) # Not a pb if already exist
+            print "Doing Service:", s.get_name()
+            #if s not in g:
+            g.add_node(s) # Not a pb if already exist
             for (dep, tmp, tmp2, tp3) in s.act_depend_of:
-                if dep not in g:
-                    g.add_node(dep)
+                #if dep not in g:
+                g.add_node(dep)
                 g.add_edge(dep, s)
             for (dep, tmp, tmp2, tp3) in s.chk_depend_of:
-                if dep not in g:
-                    g.add_node(dep)
+                #if dep not in g:
+                g.add_node(dep)
                 g.add_edge(dep, s)
 
         print "G:", len(g), g.nodes()
@@ -684,7 +691,7 @@ class Config(Item):
         print 'first level'
         packs = []
         for h in g.neighbors('root'): # First level nodes
-            (tmp, pack, tmp2) = g.depth_first_search(h)
+            (tmp, pack, tmp2) = pygraph.algorithms.searching.depth_first_search(g, root=h)#self.parents)#.find_cycle()g.depth_first_search(h)
             print "TMP:", pack
             packs.append(pack)
 

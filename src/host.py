@@ -16,9 +16,10 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import pygraph
 
 from command import CommandCall
-from pygraph import digraph
+#from pygraph import digraph
 from item import Item, Items
 from schedulingitem import SchedulingItem
 from util import to_int, to_char, to_split, to_bool
@@ -274,8 +275,9 @@ class Host(SchedulingItem):
         print "I-ve got my parents", self.parents
         print "Before", self.act_depend_of
         for parent in self.parents:
-            print "I add a daddy!", parent.host_name
-            self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None) )
+            if parent is not None:
+                print "I add a daddy!", parent.host_name
+                self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None) )
         print "finnaly : ", self.act_depend_of
 
 
@@ -381,7 +383,7 @@ class Hosts(Items):
                 ctp_name = h.check_period
                 ctp = timeperiods.find_by_name(ctp_name)
                 h.check_period = ctp
-            except AttributeError (exp):
+            except AttributeError as exp:
                 print exp
     
 
@@ -407,14 +409,15 @@ class Hosts(Items):
     #Link with conacts
     def linkify_h_by_c(self, contacts):
         for h in self:
-            contacts_tab = h.contacts.split(',')
-            new_contacts = []
-            for c_name in contacts_tab:
-                c_name = c_name.strip()
-                c = contacts.find_by_name(c_name)
-                new_contacts.append(c)
+            if h.has('contacts'):
+                contacts_tab = h.contacts.split(',')
+                new_contacts = []
+                for c_name in contacts_tab:
+                    c_name = c_name.strip()
+                    c = contacts.find_by_name(c_name)
+                    new_contacts.append(c)
                 
-            h.contacts = new_contacts
+                h.contacts = new_contacts
 
 
     #We look for hostgroups property in hosts and
@@ -452,8 +455,8 @@ class Hosts(Items):
     #Depencies at the host level: host parent
     def apply_dependancies(self):
         #Create parent graph
-        self.parents = digraph()
-        #0 is pynag node
+        self.parents = pygraph.digraph()
+        #0 is shinken node
         self.parents.add_node(0)
         for h in self:#.items.values():
             id = h.id
@@ -462,18 +465,19 @@ class Hosts(Items):
             #If there are parents, we update the parents node
             if len(h.parents) >= 1:
                 for parent in h.parents:
-                    parent_id = parent.id
-                    if parent_id not in self.parents:
-                        self.parents.add_node(parent_id)
-                    self.parents.add_edge(parent_id, id)
-                    print "Add relation between", parent_id, id
-            else:#host without parent are pynag childs
+                    if parent is not None:
+                        parent_id = parent.id
+                        if parent_id not in self.parents:
+                            self.parents.add_node(parent_id)
+                        self.parents.add_edge(parent_id, id)
+                        print "Add relation between", parent_id, id
+            else: #host without parent are shinken childs
                 print "Add relation between", 0, id
                 self.parents.add_edge(0, id)
-        print "Loop: ", self.parents.find_cycle()
+        print "Loop: ", pygraph.algorithms.cycles.find_cycle(self.parents)#.find_cycle()
         #print "Fin loop check"
         
-        for h in self:#.items.values():
+        for h in self: #.items.values():
             h.fill_parents_dependancie()
             
         #Debug

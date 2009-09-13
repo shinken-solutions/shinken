@@ -209,4 +209,7 @@ class Arbiter:
 
 if __name__ == '__main__':
 	p = Arbiter()
-	p.main()
+        import cProfile
+	#p.main()
+        command = """p.main()"""
+        cProfile.runctx( command, globals(), locals(), filename="Arbiter.profile" )
