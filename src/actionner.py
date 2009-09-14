@@ -124,7 +124,7 @@ class Actionner:
 			self.workers[id].reset_idle()
 			chk = msg.get_data()
 			sched_id = chk.sched_id
-			print "[%d]Get result from worker" % sched_id, chk
+			#print "[%d]Get result from worker" % sched_id, chk
 			chk.set_status('waitforhomerun')
 			self.schedulers[sched_id]['verifs'][chk.get_id()] = chk
 
@@ -144,7 +144,7 @@ class Actionner:
 				del v.sched_id
 				ret.append(v)
 			#Now ret have all verifs, we can return them
-			print "[%d] Returning %s results" % (sched_id, ret)
+			#print "[%d] Returning %s results" % (sched_id, ret)
 			if ret is not []:
 				try:
 					con = self.schedulers[sched_id]['con']

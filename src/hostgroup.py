@@ -20,6 +20,7 @@
 from itemgroup import Itemgroup, Itemgroups
 from brok import Brok
 
+
 class Hostgroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'hostgroup'
@@ -42,7 +43,7 @@ class Hostgroup(Itemgroup):
         }
 
     def get_hosts(self):
-        print "Searching hosts", self.members
+        #print "Searching hosts", self.members
         return self.members
 
 

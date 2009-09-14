@@ -57,7 +57,7 @@ class BrokerLink(Item):
         try:
             self.con.put_conf(conf)
         except Exception,x:
-            print ''.join(Pyro.util.getPyroTraceback(x))
+            print "connexion problem"#''.join(Pyro.util.getPyroTraceback(x))
             #sys.exit(0)
 
 

@@ -28,8 +28,8 @@ class Contact(Item):
     properties={'contact_name' : {'required':True, 'status_broker_name' : None},
                 'alias' : {'required':False, 'default':'none', 'status_broker_name' : None},
                 'contactgroups' : {'required':False, 'default':''},
-                'host_notifications_enabled' : {'required':True, 'pythonize': to_bool, 'status_broker_name' : None},
-                'service_notifications_enabled' : {'required':True, 'pythonize': to_bool, 'status_broker_name' : None},
+                'host_notifications_enabled' : {'required':False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
+                'service_notifications_enabled' : {'required':False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
                 'host_notification_period' : {'required':True},
                 'service_notification_period' : {'required':True},
                 'host_notification_options' : {'required':True, 'pythonize': to_split},
@@ -91,6 +91,7 @@ class Contact(Item):
         pass
 
 
+
 class Contacts(Items):
     name_property = "contact_name"
     inner_class = Contact
@@ -134,7 +135,7 @@ class Contacts(Items):
 
     #We look for contacts property in contacts and
     def explode(self, contactgroups):
-        #Hostgroups property need to be fullfill for got the informations
+        #Contactgroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('contactgroups')
         for c in self:#.items:
             #c = self.items[id]

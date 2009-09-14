@@ -185,6 +185,7 @@ class SchedulingItem(Item):
     #The first scheduling is a little random, so all checks
     #are not launch in the same time...
     def schedule(self, force=False, force_time=None):
+        #print "Scheduling:", self.get_name()
         #if last_chk == 0 put in a random way so all checks are not in the same time
         
         now = time.time()
@@ -197,12 +198,12 @@ class SchedulingItem(Item):
         #print "Service check?", cls.execute_checks
         if (not self.active_checks_enabled or not cls.execute_checks) and not force:
             return None
-        
         #Interval change is in a HARD state or not
         if self.state == 'HARD':
             interval = self.check_interval
-        else:
+        else: #TODO : if no retry_interval?
             interval = self.retry_interval
+
         
         #The next_chk is pass so we need a new one
         #so we got a check_interval

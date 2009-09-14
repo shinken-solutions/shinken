@@ -57,7 +57,7 @@ class ReactionnerLink(Item):
         try:
             self.con.put_conf(conf)
         except Exception,x:
-            print ''.join(Pyro.util.getPyroTraceback(x))
+            print 'Connexion problem'#''.join(Pyro.util.getPyroTraceback(x))
             #sys.exit(0)
 
 

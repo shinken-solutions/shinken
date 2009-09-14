@@ -231,7 +231,7 @@ class Shinken:
 		print "Loading configuration"
 		self.conf.explode_global_conf()
 		self.conf.is_correct()
-		self.conf.dump()
+		#self.conf.dump()
 		#Creating the Macroresolver Class & unique instance
 		m = MacroResolver()
 		m.init(self.conf)

@@ -54,6 +54,11 @@ class Servicedependency(Item):
 #        Servicedependency.id = Servicedependency.id + 1
 #        return sd
 
+    #Give a nice name output, for debbuging purpose
+    #(Yes, debbuging CAN happen...)
+    def get_name(self):
+        return self.dependent_host_name+'/'+self.dependent_service_description+'..'+self.host_name+'/'+self.service_description
+
 
 
 class Servicedependencies(Items):
@@ -64,7 +69,7 @@ class Servicedependencies(Items):
 
     #We create new servicedep if necessery (host groups and co)
     def explode(self):
-        print "Exploding Service dep"
+        #print "Exploding Service dep"
         #The "old" services will be removed. All services with 
         #more than one host or a host group will be in it
         srvdep_to_remove = []
@@ -134,7 +139,7 @@ class Servicedependencies(Items):
 
     #We backport service dep to service. So SD is not need anymore
     def linkify_s_by_sd(self):
-        print self
+        #print self
         for sd in self:#.items:
             s = sd.dependent_service_description
             if s is not None:

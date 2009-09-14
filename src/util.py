@@ -87,7 +87,7 @@ def from_bool_to_string(b):
         return '0'
 
 
-###################### Sorting ################"
+###################### Sorting ################
 def scheduler_no_spare_first(x, y):
     if x.spare and not y.spare:
         return 1
@@ -96,3 +96,11 @@ def scheduler_no_spare_first(x, y):
     else:
         return -1
         
+
+
+##################### Cleaning ##############
+def strip_and_uniq(tab):
+    new_tab = set()
+    for elt in tab:
+        new_tab.add(elt.strip())
+    return list(new_tab)

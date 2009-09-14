@@ -103,7 +103,7 @@ class Scheduler:
         if isinstance(elt, Brok):
             #For brok, we TAG brok with our instance_id
             elt.data['instance_id'] = self.instance_id
-            self.broks[elt.id] = elt
+            #TODO : reactive broks ! self.broks[elt.id] = elt
             return
         if isinstance(elt, Downtime):
             self.downtimes[elt.id] = elt
@@ -158,7 +158,7 @@ class Scheduler:
 
     #Caled by poller and reactionner to send result
     def put_results(self, c):
-        print "Get results"
+        #print "Get results"
         if c.is_a == 'notification':
             item = self.get_ref_item_from_action(c)
             a = item.get_new_notification_from(c)
@@ -252,9 +252,9 @@ class Scheduler:
         print "Consume results"
         checks_to_add = []
         for c in self.checks.values():
-            print c
+            #print c
             if c.status == 'waitconsume':
-                print "A check to consume"
+                #print "A check to consume"
                 item = self.get_ref_item_from_action(c)
                 actions = item.consume_result(c)
                 #The update of the host/service must have changed, we brok it
@@ -421,14 +421,14 @@ class Scheduler:
                 #        print 'Host notification', n
                 print "."
                 print "Service still in checking?"
-                for s in self.services:
-                    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
-                    for i in s.checks_in_progress:
-                        print self.checks[i]
-                for s in self.hosts:
-                    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
-                    for i in s.checks_in_progress:
-                        print self.checks[i]
+                #for s in self.services:
+                #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
+                #    for i in s.checks_in_progress:
+                #        print self.checks[i]
+                #for s in self.hosts:
+                #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
+                #    for i in s.checks_in_progress:
+                #        print self.checks[i]
 
             if timeout < 0:
 		timeout = 1.0

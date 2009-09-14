@@ -16,19 +16,18 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import random
+import time
 
 from command import CommandCall
 from copy import deepcopy
 from item import Item, Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool
-import random
-import time
+from util import to_int, to_char, to_split, to_bool, strip_and_uniq
 from check import Check
 from notification import Notification
 from macroresolver import MacroResolver
 from brok import Brok
-
 
 
 class Service(SchedulingItem):
@@ -70,7 +69,7 @@ class Service(SchedulingItem):
             'process_perf_data' : {'required':False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
             'retain_status_information' : {'required':False, 'default':'1', 'pythonize': to_bool},
             'retain_nonstatus_information' : {'required':False, 'default':'1', 'pythonize': to_bool},
-            'notification_interval' : {'required':True, 'pythonize': to_int},
+            'notification_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
             'first_notification_delay' : {'required':False, 'default':'0', 'pythonize': to_int},
             'notification_period' : {'required':True},
             'notification_options' : {'required':False, 'default':'w,u,c,r,f,s', 'pythonize': to_split},
@@ -186,6 +185,39 @@ class Service(SchedulingItem):
     #(Yes, debbuging CAN happen...)
     def get_name(self):
         return self.host_name+'/'+self.service_description
+
+
+    #Check is required prop are set:
+    #template are always correct
+    #contacts OR contactgroups is need
+    def is_correct(self):
+        state = True #guilty or not? :)
+        cls = self.__class__
+
+        special_properties = ['contacts', 'contactgroups', 'check_period', 'notification_interval',
+                              'host_name', 'hostgroup_name']
+        for prop in cls.properties:
+            if prop not in special_properties:
+                if not self.has(prop) and cls.properties[prop]['required']:
+                    print self.get_name()," : I do not have", prop
+                    state = False #Bad boy...
+
+        #Ok now we manage special cases...
+        if not self.has('contacts') and not self.has('contacgroups') and  self.notifications_enabled == True:
+            print self.get_name()," : I do not have contacts nor contacgroups"
+            state = False
+        if not self.has('check_command') or not self.check_command.is_valid():
+            print self.get_name()," : my check_command is invalid"
+            state = False
+        if not self.has('notification_interval') and  self.notifications_enabled == True:
+            print self.get_name()," : I've got no notification_interval but I've got notifications enabled"
+            state = False
+        if not self.has('host') or self.host == None:
+            #if not self.has('host_name') and not self.has('hostgroup_name'):
+            print self.get_name(),": I do not have and host"
+            state = False
+        return state
+
 
 
     #The service is dependent of his father dep
@@ -321,7 +353,7 @@ class Service(SchedulingItem):
             #We keep a trace of all checks in progress
             #to know if we are in checking_or not
             self.checks_in_progress.append(c.id)
-            print self.get_name()+" we ask me for a check" + str(c.id)
+            #print self.get_name()+" we ask me for a check" + str(c.id)
         self.update_in_checking()
         #We need to return the check for scheduling adding
         return c
@@ -329,8 +361,24 @@ class Service(SchedulingItem):
 
 
 class Services(Items):
-    #Search a service id by it's name and hot_name
+    def create_reversed_list(self):
+        self.reversed_list = {}
+        for s in self:
+            if s.has('service_description') and s.has('host_name'):
+                s_desc = getattr(s, 'service_description')
+                s_host_name = getattr(s, 'host_name')
+                key = (s_host_name, s_desc)
+                self.reversed_list[key] = s.id#getattr(self.items[id], name_property)
+
+
+    #TODO : finish serach to use reversed
+    #Search a service id by it's name and host_name
     def find_srv_id_by_name_and_hostname(self, host_name, name):
+        #key = (host_name, name)
+        #if key in self.reversed_list:
+        #    return self.reversed_list[key]
+
+        #if not, maybe in the whole list?
         for s in self:
             #Runtinme first, available only after linkify
             if s.has('service_description') and s.has('host'):
@@ -375,9 +423,10 @@ class Services(Items):
                 hst = hosts.find_by_name(hst_name)
                 s.host = hst
                 #Let the host know we are his service
-                hst.add_service_link(s)
+                if s.host is not None:
+                    hst.add_service_link(s)
             except AttributeError as exp:
-                print exp
+                pass #Will be catch at the is_correct moment
 
 
     #Link the service with a command for the check command
@@ -473,10 +522,13 @@ class Services(Items):
         for s in self:
             if s.has('hostgroup_name'):
                 hgnames = s.hostgroup_name.split(',')
+                #hgnames = strip_and_uniq(hgnames) #Maybe there is an hostgroup several time, we don't want it
+                #hgnames = list(set(hgnames))
                 for hgname in hgnames:
-                    print "Doing a hgname", hgname
+                    #print "Doing a hgname", hgname
                     hgname = hgname.strip()
                     hnames = hostgroups.get_members_by_name(hgname)
+                    #hnames = strip_and_uniq(hnames) #Maybe an host is several time, we dont' want it
                     #We add hosts in the service host_name
                     #print s.host_name, hgname
                     if s.has('host_name') and hnames != []:
@@ -499,22 +551,57 @@ class Services(Items):
                             s.contacts += ','+cnames
                         else:
                             s.contacts = cnames
-        
+ 
+        dbg_i = 0
+        dbg_uniq = 0
+
         #Then for every host create a copy of the service with just the host
         service_to_check = self.items.keys() #because we are adding services, we can't just loop in it
         for id in service_to_check:
             s = self.items[id]
             if not s.is_tpl(): #Exploding template is useless
                 hnames = s.host_name.split(',')
+                hnames = strip_and_uniq(hnames)
+                #print "DGB: Uniq remove some hosts: ",dbg_len-dbg_len2, 'sur', dbg_len
+                #if dbg_len-dbg_len2 != 0 and dbg_len / (dbg_len-dbg_len2) != 2:
+                #    print "DBG: possible error:", s.get_name()
                 if len(hnames) >= 2:
+                    #print "DBG: create service ", s.service_description, " for: ", hnames
                     for hname in hnames:
+                        #dbg_i += 1
                         hname = hname.strip()
                         new_s = s.copy()
                         new_s.host_name = hname
+                        #print "Adding a new service:", new_s.get_name(), 'from', s.get_name()
                         self.items[new_s.id] = new_s
-                    srv_to_remove.append(id)
-        
-        self.delete_services_by_id(srv_to_remove)
+                    srv_to_remove.append(id) #Multiple host_name -> the original service
+                    #must be delete
+                #else:
+                #    dbg_uniq += 1
+                    #print "We've got an unique service", s.get_name()
+
+
+        #print "We add", dbg_i, "new services", 
+        #print "Uniq service:", dbg_uniq
+        #print "We remove old service : nb = ", len(srv_to_remove)
+        #self.delete_services_by_id(srv_to_remove)
+        print "Total services :", len([i  for  i in self if not i.is_tpl()])
+
+        #dbg_tab = []
+        #print "Ok, ours services!"
+        #for s in self:
+        #    if s.has('host_name'):
+        #        h_name = s.host_name
+        #    else:
+        #        h_name = '?'
+        #    if s.has('service_description'):
+        #        s_name = s.service_description
+        #    else:
+        #        s_name = '?'
+        #    name = h_name + '/' + s_name
+        #    dbg_tab.append(name)
+        #    dbg_tab.sort()
+        #print dbg_tab
 
         #Servicegroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('servicegroups')

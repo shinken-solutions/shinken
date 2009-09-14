@@ -63,10 +63,10 @@ class Item(object):
 
 
 
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.id == other.id
-        return NotImplemented
+    #def __eq__(self, other):
+    #    if isinstance(other, self.__class__):
+    #        return self.id == other.id
+    #    return NotImplemented
 
 
     def __ne__(self, other):
@@ -83,6 +83,7 @@ class Item(object):
             return False
 
 
+    #has = hasattr
     def has(self, prop):
         return hasattr(self, prop)
 
@@ -129,7 +130,8 @@ class Item(object):
                     #print "Changing ", old_val, "by", new_val
                     setattr(self, prop, new_val)
             except AttributeError as exp:
-                print exp
+                #print self.get_name(), ' : ', exp
+                pass # Will be catch at the is_correct moment
 
 
     def get_templates(self):
@@ -218,13 +220,15 @@ class Item(object):
     #Check is required prop are set:
     #template are always correct
     def is_correct(self):
-        if self.is_tpl:
-            return True
+        #if self.is_tpl:
+        #    return True
+        state = True
         properties = self.__class__.properties
         for prop in properties:
             if not self.has(prop) and properties[prop]['required']:
-                return False
-        return True
+                print self.get_name(), "missing property :", prop
+                state = False
+        return state
 
 
 
@@ -302,7 +306,9 @@ class Items(object):
         self.items = {}
         for i in items:
             self.items[i.id] = i
-            
+        self.templates = {}
+        
+    
             
     def __iter__(self):
         return self.items.itervalues()
@@ -323,13 +329,27 @@ class Items(object):
     def __getitem__(self, key):
         return self.items[key]
     
+
+    def create_reversed_list(self):
+        self.reversed_list = {}
+        name_property = self.__class__.name_property
+        for id in self.items:
+            if self.items[id].has(name_property):
+                name = getattr(self.items[id], name_property)
+                self.reversed_list[name] = id#getattr(self.items[id], name_property)
+
     
     def find_id_by_name(self, name):
-        for id in self.items:
-            name_property = self.__class__.name_property
-            if self.items[id].has(name_property) and getattr(self.items[id], name_property) == name:
-                return id
-        return None
+        #name_property = self.__class__.name_property
+        #for id in self.items:
+        #    #name_property = self.__class__.name_property
+        #    if self.items[id].has(name_property) and getattr(self.items[id], name_property) == name:
+        #        return id
+        #return None
+        if name in self.reversed_list:
+            return self.reversed_list[name]
+        else:
+            return None
 
 
     def find_by_name(self, name):
@@ -344,10 +364,18 @@ class Items(object):
             self.items[id].pythonize()
 
 
-    def find_tpl_by_name(self, name):
+    def create_tpl_list(self):
         for id in self.items:
             i = self.items[id]
-            if i.is_tpl() and i.name == name:
+            if i.is_tpl():
+                self.templates[id] = i
+            
+
+
+    def find_tpl_by_name(self, name):
+        for id in self.templates:#items:
+            i = self.items[id]
+            if i.name == name:
                 return i
         return None
 
@@ -356,14 +384,17 @@ class Items(object):
         for id in self.items:
             i = self.items[id]
             i.is_correct()
+            #if not i.is_correct():
+            #    print "An item is not correct:", i.get_name()
 
 
-    #We remove useless properties
+    #We remove useless properties and templates
     def clean_useless(self):
         #First templates
         tpls = [id for id in self.items if self.items[id].is_tpl()]
         for id in tpls:
             del self.items[id]
+        del self.templates
 
 
     #If a prop is absent and is not required, put the default value

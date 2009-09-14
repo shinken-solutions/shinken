@@ -70,7 +70,7 @@ class Host(SchedulingItem):
                 'retain_nonstatus_information': {'required': False, 'default':'1', 'pythonize': to_bool},
                 'contacts': {'required': True},
                 'contact_groups': {'required': True},
-                'notification_interval': {'required': True, 'pythonize': to_int},
+                'notification_interval': {'required': False, 'default':'60', 'pythonize': to_int},
                 'first_notification_delay': {'required': False, 'default':'0', 'pythonize': to_int},
                 'notification_period': {'required': True},
                 'notification_options': {'required': False, 'default':'d,u,r,f', 'pythonize': to_split},
@@ -196,23 +196,28 @@ class Host(SchedulingItem):
 
 
     #Check is required prop are set:
-    #template are always correct
     #contacts OR contactgroups is need
     def is_correct(self):
-        if self.is_tpl:
-            return True
-        for prop in Host.properties:
-            if not self.has(prop) and Host.properties[prop]['required']:
-                if prop == 'contacts' or prop == 'contacgroups':
-                    pass
-                else:
-                    print "I do not have", prop
-                    return False
-        if self.has('contacts') or self.has('contacgroups'):
-            return True
-        else:
-            print "I do not have contacts nor contacgroups"
-            return False
+        state = True #guilty or not? :)
+        cls = self.__class__
+
+        special_properties = ['contacts', 'contactgroups', 'check_period', 'notification_interval']
+        for prop in cls.properties:
+            if prop not in special_properties:
+                if not self.has(prop) and cls.properties[prop]['required']:
+                    print self.get_name()," : I do not have", prop
+                    state = False #Bad boy...
+        #Ok now we manage special cases...
+        if not self.has('contacts') and not self.has('contacgroups') and self.notifications_enabled == True:
+            print self.get_name()," : I do not have contacts nor contacgroups"
+            state = False
+        if not self.has('check_command') or not self.check_command.is_valid():
+            print self.get_name()," : my check_command is invalid"
+            state = False
+        if not self.has('notification_interval') and self.notifications_enabled == True:
+            print self.get_name()," : I've got no notification_interval but I've got notifications enabled"
+            state = False
+        return state
 
 
     #Macro part
@@ -271,14 +276,14 @@ class Host(SchedulingItem):
 
     #fill act_depend_of with my parents (so network dep)
     def fill_parents_dependancie(self):
-        print "Me", self.host_name, "is getting my parents"
-        print "I-ve got my parents", self.parents
-        print "Before", self.act_depend_of
+        #print "Me", self.host_name, "is getting my parents"
+        #print "I-ve got my parents", self.parents
+        #print "Before", self.act_depend_of
         for parent in self.parents:
             if parent is not None:
-                print "I add a daddy!", parent.host_name
+                #print "I add a daddy!", parent.host_name
                 self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None) )
-        print "finnaly : ", self.act_depend_of
+        #print "finnaly : ", self.act_depend_of
 
 
     #Create notifications but without commands. It will be update juste before being send
@@ -373,7 +378,7 @@ class Hosts(Items):
     #Simplify notif_period and check period by timeperiod id
     def linkify_h_by_tp(self, timeperiods):
         for h in self:
-            print "Linify ", h
+            #print "Linify ", h
             try:
                 #notif period
                 ntp_name = h.notification_period
@@ -384,7 +389,7 @@ class Hosts(Items):
                 ctp = timeperiods.find_by_name(ctp_name)
                 h.check_period = ctp
             except AttributeError as exp:
-                print exp
+                pass #Will be catch at the is_correct moment
     
 
     #Link host with hosts (parents)
@@ -395,7 +400,7 @@ class Hosts(Items):
             new_parents = []
             for parent in parents:
                 new_parents.append(self.find_by_name(parent))
-            print "Me,", h.host_name, "define my parents", new_parents
+            #print "Me,", h.host_name, "define my parents", new_parents
             #We find the id, we remplace the names
             h.parents = new_parents
 
@@ -470,9 +475,9 @@ class Hosts(Items):
                         if parent_id not in self.parents:
                             self.parents.add_node(parent_id)
                         self.parents.add_edge(parent_id, id)
-                        print "Add relation between", parent_id, id
+                        #print "Add relation between", parent_id, id
             else: #host without parent are shinken childs
-                print "Add relation between", 0, id
+                #print "Add relation between", 0, id
                 self.parents.add_edge(0, id)
         print "Loop: ", pygraph.algorithms.cycles.find_cycle(self.parents)#.find_cycle()
         #print "Fin loop check"

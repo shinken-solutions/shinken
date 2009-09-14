@@ -137,6 +137,12 @@ class Arbiter:
         print "****************** Explode ***********************"
         self.conf.explode()
         
+        print "****************** Create Template list **********"
+        self.conf.create_templates_list()
+
+        print "***************** Create Name reversed list ******"
+        self.conf.create_reversed_list()
+
         print "****************** Inheritance *******************"
         self.conf.apply_inheritance()
         
@@ -160,6 +166,7 @@ class Arbiter:
         
         print "****************** Correct ?******************"
         self.conf.is_correct()
+
 
         print "****************** Cut into parts ******************"
         self.confs = self.conf.cut_into_parts()

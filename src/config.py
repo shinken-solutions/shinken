@@ -316,8 +316,8 @@ class Config(Item):
         self.load_params(params)
         
         for type in objectscfg:
-            if type == 'servicedependency':
-                print "SERVICE DEP!", objectscfg[type]
+            #if type == 'servicedependency':
+                #print "SERVICE DEP!", objectscfg[type]
             objects[type]=[]
             #print 'Doing type:',type
             for items in objectscfg[type]:
@@ -413,7 +413,7 @@ class Config(Item):
         self.contactgroups = Contactgroups(contactgroups)
 
         servicedependencies = []
-        print objects
+        #print objects
         for servicedependencycfg in objects['servicedependency']:
             sd = Servicedependency(servicedependencycfg)
             sd.clean()
@@ -528,8 +528,9 @@ class Config(Item):
         self.hostgroups.explode()
 
         print "Services"
+        print "Initialy got nb of services : %d" % len(self.services.items)
         self.services.explode(self.hostgroups, self.contactgroups, self.servicegroups)
-        print "nb of services : %d" % len(self.services.items)
+        print "finally got nb of services : %d" % len(self.services.items)
 
         print "Servicegroups"
         self.servicegroups.explode()
@@ -570,12 +571,26 @@ class Config(Item):
         self.services.fill_default()
 
 
+    def create_templates_list(self):
+        self.hosts.create_tpl_list()
+        self.contacts.create_tpl_list()
+        self.services.create_tpl_list()
+        
+
+    def create_reversed_list(self):
+        self.hosts.create_reversed_list()
+        self.contacts.create_reversed_list()
+        self.services.create_reversed_list()
+        self.timeperiods.create_reversed_list()
+
+
     def is_correct(self):
         self.hosts.is_correct()
         self.hostgroups.is_correct()
         self.contacts.is_correct()
         self.contactgroups.is_correct()
         self.schedulerlinks.is_correct()
+        self.services.is_correct()
 
 
     def pythonize(self):
@@ -623,7 +638,7 @@ class Config(Item):
         indirect_nodes = set()#[]#Spped up instead of []
 
         for h in self.hosts:
-            print "Doing host", h.host_name, h.id
+            #print "Doing host", h.host_name, h.id
             #if h not in g:
             #    print "Adding", h.host_name
             g.add_node(h)
@@ -632,16 +647,16 @@ class Config(Item):
             for p in h.parents:
                 if p is not None:
                     if p not in g:
-                        print "Adding", p.host_name
+                        #print "Adding", p.host_name
                         g.add_node(p)
                     g.add_edge(p, h)
-                    print "My parent:", p.host_name
+                    #print "My parent:", p.host_name
                     #if h not in indirect_nodes:
                         #indirect_nodes.append(h)
                     indirect_nodes.add(h)
 
             for (dep, tmp, tmp2, tp3) in h.act_depend_of:
-                print "My dep", dep.host_name
+                #print "My dep", dep.host_name
                 #if dep not in g:
                 #    print "Adding", dep.host_name
                 g.add_node(dep)
@@ -651,7 +666,7 @@ class Config(Item):
                 indirect_nodes.add(h)
 
             for (dep, tmp, tmp2, tp3) in h.chk_depend_of:
-                print "My dep", dep.host_name
+                #print "My dep", dep.host_name
                 #if dep not in g:
                 #    print "Adding", dep.host_name
                 g.add_node(dep)
@@ -666,7 +681,7 @@ class Config(Item):
                 g.add_edge(h,s)
 
         for s in self.services:
-            print "Doing Service:", s.get_name()
+            #print "Doing Service:", s.get_name()
             #if s not in g:
             g.add_node(s) # Not a pb if already exist
             for (dep, tmp, tmp2, tp3) in s.act_depend_of:
@@ -678,30 +693,30 @@ class Config(Item):
                 g.add_node(dep)
                 g.add_edge(dep, s)
 
-        print "G:", len(g), g.nodes()
+        #print "G:", len(g), g.nodes()
 
         #We delete link between indirect node and the root
         for h in indirect_nodes:
             g.del_edge('root', h)
 
-        print "Indirect:"
-        for h in indirect_nodes:
-            print "Indirect node:", h.host_name
-        print "Nb hosts:", len(self.hosts)
-        print 'first level'
+        #print "Indirect:"
+        #for h in indirect_nodes:
+        #    print "Indirect node:", h.host_name
+        #print "Nb hosts:", len(self.hosts)
+        #print 'first level'
         packs = []
         for h in g.neighbors('root'): # First level nodes
             (tmp, pack, tmp2) = pygraph.algorithms.searching.depth_first_search(g, root=h)#self.parents)#.find_cycle()g.depth_first_search(h)
-            print "TMP:", pack
+            #print "TMP:", pack
             packs.append(pack)
 
         #print "G:", g
-        print "*******Dumping All Packs*****", "Number of packs:", len(packs)
-        for pack in packs:
-            print "Pack", pack, "len:", len(pack)
-            for h in pack:
-                print h.get_name()
-        print "Fin all packs"
+        #print "*******Dumping All Packs*****", "Number of packs:", len(packs)
+        #for pack in packs:
+            #print "Pack", pack, "len:", len(pack)
+            #for h in pack:
+            #    print h.get_name()
+        #print "Fin all packs"
         return packs
 
 
@@ -710,16 +725,16 @@ class Config(Item):
     #New confs are independant whith checks. The only communication
     #That can be need is macro in commands
     def cut_into_parts(self):
-        print "Scheduler configurated :", self.schedulerlinks
+        #print "Scheduler configurated :", self.schedulerlinks
         nb_parts = len([s for s in self.schedulerlinks if not s.spare and s.is_alive()])
-        print "Cutting into", nb_parts, "parts"
+        #print "Cutting into", nb_parts, "parts"
 
         if nb_parts == 0:
             nb_parts = 1
         
         self.confs = {}
         for i in xrange(0, nb_parts):
-            print "Create Conf:", i, nb_parts
+            #print "Create Conf:", i, nb_parts
             self.confs[i] = Config()
             
             #Now we copy all properties of conf into the new ones
@@ -750,7 +765,7 @@ class Config(Item):
         #Now we explode packs into confs, and we 'load balance' thems
         for pack in packs:
             i = rr.next()
-            print "Load balancing conf ", i
+            #print "Load balancing conf ", i
             for elt in pack:
                 if isinstance(elt, Service):
                     self.confs[i].services.append(elt)
@@ -758,7 +773,7 @@ class Config(Item):
                     self.confs[i].hosts.append(elt)
         
         for i in self.confs:
-            print "Finishing packs", i
+            #print "Finishing packs", i
             cfg = self.confs[i]
 
             for hg in cfg.hostgroups:
@@ -768,10 +783,10 @@ class Config(Item):
                 for h in cfg.hosts:
                     if h in mbrs:
                         hg.members.append(h)
-                        print "Set", h.get_name(), "to be add"
+                        #print "Set", h.get_name(), "to be add"
                 #print "Removing hosts in hostgroup", hosts_to_del
-                for h in hg.members:
-                    print "We've got member:", h.host_name
+                #for h in hg.members:
+                #    print "We've got member:", h.host_name
             
             for sg in cfg.servicegroups:
                 mbrs = sg.members
@@ -779,32 +794,36 @@ class Config(Item):
                 for s in cfg.services:
                     if s in mbrs:
                         sg.members.append(s)
-                        print "Set", s.get_name(), "to be add"
+                        #print "Set", s.get_name(), "to be add"
                 #print "Removing hosts in hostgroup", hosts_to_del
-                for s in sg.members:
-                    print "We've got member:", s.get_name()
+                #for s in sg.members:
+                #    print "We've got member:", s.get_name()
 
             cfg.hosts = Hosts(cfg.hosts)
             cfg.services = Services(cfg.services)
-            print "CFG:", cfg, "Nb elments:", len(cfg.hosts) + len(cfg.services)
-            print cfg.hostgroups
+            #print "CFG:", cfg, "Nb elments:", len(cfg.hosts) + len(cfg.services)
+            #print cfg.hostgroups
 
-        print "Finishing Conf"
+        #print "Finishing Conf"
 
         #Now we fill other_elements by host (service are with their host)
         for i in self.confs:
-            print "Doing",  i
+            #print "Doing",  i
             for h in self.confs[i].hosts:
-                print "Doing h", h.get_name(), [j for j in self.confs if j != i]
+                #print "Doing h", h.get_name(), [j for j in self.confs if j != i]
                 for j in [j for j in self.confs if j != i]:
-                    print "*********Add", h.get_name(), "in the conf", j
+                    #print "*********Add", h.get_name(), "in the conf", j
                     self.confs[i].other_elements[h.get_name()] = i
 
         #We tag conf with isntance_id
         for i in self.confs:
             self.confs[i].instance_id = i
 
-        print "HeheConf:", self, "Confs:", self.confs
+        #print "HeheConf:", self, "Confs:", self.confs
+        #for cfg in self.confs.values():
+            #for h in cfg.hosts:
+                #print "DBG: host", h
+                #print "DBG2: ", h.get_name(), h.check_command, h.check_command.is_valid(), h.is_correct()
         #return new_confs
 
 
