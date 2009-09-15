@@ -143,6 +143,9 @@ class Arbiter:
         print "***************** Create Name reversed list ******"
         self.conf.create_reversed_list()
 
+        print "***************** Cleaning Twins *****************"
+        self.conf.remove_twins()
+
         print "****************** Inheritance *******************"
         self.conf.apply_inheritance()
         

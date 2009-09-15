@@ -361,14 +361,23 @@ class Service(SchedulingItem):
 
 
 class Services(Items):
+    #Create the reversed list for speedup search by host_name/name
+    #We also tag service already in list : they are twins. It'a a bad things.
+    #Hostgroups service have an ID higer thant host service. So it we tag 
+    #an id that already are in the list, this service is already exist, and is a host,
+    #or a previous hostgroup, but define before.
     def create_reversed_list(self):
         self.reversed_list = {}
+        self.twins = []
         for s in self:
             if s.has('service_description') and s.has('host_name'):
                 s_desc = getattr(s, 'service_description')
                 s_host_name = getattr(s, 'host_name')
                 key = (s_host_name, s_desc)
-                self.reversed_list[key] = s.id#getattr(self.items[id], name_property)
+                if key not in self.reversed_list:
+                    self.reversed_list[key] = s.id
+                else:
+                    self.twins.append(s.id)
 
 
     #TODO : finish serach to use reversed
@@ -477,7 +486,7 @@ class Services(Items):
     #contact_groups, notification_interval , notification_period
     #So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
-        for prop in ['contact_groups', 'notification_interval' , 'notification_period']:
+        for prop in ['contacts', 'contact_groups', 'notification_interval' , 'notification_period']:
             for s in self:
                 if not s.is_tpl():
                     if not s.has(prop) and s.has('host_name'):
@@ -522,19 +531,15 @@ class Services(Items):
         for s in self:
             if s.has('hostgroup_name'):
                 hgnames = s.hostgroup_name.split(',')
-                #hgnames = strip_and_uniq(hgnames) #Maybe there is an hostgroup several time, we don't want it
-                #hgnames = list(set(hgnames))
                 for hgname in hgnames:
-                    #print "Doing a hgname", hgname
                     hgname = hgname.strip()
                     hnames = hostgroups.get_members_by_name(hgname)
-                    #hnames = strip_and_uniq(hnames) #Maybe an host is several time, we dont' want it
                     #We add hosts in the service host_name
-                    #print s.host_name, hgname
                     if s.has('host_name') and hnames != []:
                         s.host_name += ',' + str(hnames)
                     else:
                         s.host_name = str(hnames)
+
 
         #We adding all hosts of the hostgroups into the host_name property
         #because we add the hostgroup one AFTER the host, they are before and 
@@ -552,56 +557,28 @@ class Services(Items):
                         else:
                             s.contacts = cnames
  
-        dbg_i = 0
-        dbg_uniq = 0
-
         #Then for every host create a copy of the service with just the host
         service_to_check = self.items.keys() #because we are adding services, we can't just loop in it
+
         for id in service_to_check:
             s = self.items[id]
             if not s.is_tpl(): #Exploding template is useless
                 hnames = s.host_name.split(',')
                 hnames = strip_and_uniq(hnames)
-                #print "DGB: Uniq remove some hosts: ",dbg_len-dbg_len2, 'sur', dbg_len
-                #if dbg_len-dbg_len2 != 0 and dbg_len / (dbg_len-dbg_len2) != 2:
-                #    print "DBG: possible error:", s.get_name()
                 if len(hnames) >= 2:
-                    #print "DBG: create service ", s.service_description, " for: ", hnames
                     for hname in hnames:
-                        #dbg_i += 1
                         hname = hname.strip()
                         new_s = s.copy()
                         new_s.host_name = hname
-                        #print "Adding a new service:", new_s.get_name(), 'from', s.get_name()
                         self.items[new_s.id] = new_s
-                    srv_to_remove.append(id) #Multiple host_name -> the original service
+                    #Multiple host_name -> the original service
                     #must be delete
-                #else:
-                #    dbg_uniq += 1
-                    #print "We've got an unique service", s.get_name()
+                    srv_to_remove.append(id)                    
+                else: #Maybe the hnames was full of same host, so we must reset the name
+                    for hname in hnames: #So even if len == 0, we are protected
+                        s.host_name = hname
 
-
-        #print "We add", dbg_i, "new services", 
-        #print "Uniq service:", dbg_uniq
-        #print "We remove old service : nb = ", len(srv_to_remove)
-        #self.delete_services_by_id(srv_to_remove)
-        print "Total services :", len([i  for  i in self if not i.is_tpl()])
-
-        #dbg_tab = []
-        #print "Ok, ours services!"
-        #for s in self:
-        #    if s.has('host_name'):
-        #        h_name = s.host_name
-        #    else:
-        #        h_name = '?'
-        #    if s.has('service_description'):
-        #        s_name = s.service_description
-        #    else:
-        #        s_name = '?'
-        #    name = h_name + '/' + s_name
-        #    dbg_tab.append(name)
-        #    dbg_tab.sort()
-        #print dbg_tab
+        self.delete_services_by_id(srv_to_remove)
 
         #Servicegroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('servicegroups')
@@ -613,4 +590,5 @@ class Services(Items):
                     sgs = s.servicegroups.split(',')
                     for sg in sgs:
                         servicegroups.add_member(shname+','+sname, sg)
-        
+
+

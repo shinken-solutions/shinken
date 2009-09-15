@@ -330,13 +330,20 @@ class Items(object):
         return self.items[key]
     
 
+    #We create the reversed list so search will be faster
+    #We also create a twins list with id of twins (not the original
+    #just the others, higher twins)
     def create_reversed_list(self):
         self.reversed_list = {}
+        self.twins = []
         name_property = self.__class__.name_property
         for id in self.items:
             if self.items[id].has(name_property):
                 name = getattr(self.items[id], name_property)
-                self.reversed_list[name] = id#getattr(self.items[id], name_property)
+                if name not in self.reversed_list:
+                    self.reversed_list[name] = id
+                else:
+                    self.twins.append(id)
 
     
     def find_id_by_name(self, name):
@@ -430,3 +437,19 @@ class Items(object):
             i = self.items[id]
             i.get_customs_properties_by_inheritance(self)
 
+
+    #We remove twins
+    #Remember: item id respect the order of conf. So if and item is defined multiple times,
+    #we want to keep the first one.
+    #Services are also managed here but they are specials:
+    #We remove twins services with the same host_name/service_description
+    #Remember: host service are take into account first before hostgroup service
+    #Id of host service are lower than hostgroups one, so they are in self.twins_services
+    #and we can remove them.
+    def remove_twins(self):
+        for id in self.twins:
+            i = self.items[id]
+            type = i.__class__.my_type
+            print 'Warning: the', type, i.get_name(), 'is already defined.'
+            del self.items[id] #bye bye
+        del self.twins #no more need

@@ -544,6 +544,12 @@ class Config(Item):
         #print "Time: Overall Explode :", services-begin, " (hosts:",hosts-begin," ) (contactgroups:",contactgroups-hosts," ) (contacts:",contacts-contactgroups," ) (services:",services-contacts,")"        
 
 
+    def remove_twins(self):
+        self.hosts.remove_twins()
+        self.services.remove_twins()
+        self.contacts.remove_twins()
+        self.timeperiods.remove_twins()
+
     def apply_dependancies(self):
         self.hosts.apply_dependancies()
         self.services.apply_dependancies()
