@@ -42,6 +42,10 @@ class Hostgroup(Itemgroup):
         'HOSTGROUPACTIONURL' : 'action_url'
         }
 
+    def get_name(self):
+        return self.hostgroup_name
+
+
     def get_hosts(self):
         #print "Searching hosts", self.members
         return self.members

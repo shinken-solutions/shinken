@@ -19,7 +19,7 @@
 
 from command import CommandCall
 from util import to_int, to_char, to_split, to_bool
-from copy import deepcopy
+from copy import deepcopy, copy
 from brok import Brok
 
 
@@ -31,9 +31,10 @@ class Item(object):
         self.customs = {} # for custom variables
         self.plus = {} # for value with a +
 
-        #adding running properties like latency
-        for prop in self.__class__.running_properties:
-            setattr(self, prop, deepcopy(self.__class__.running_properties[prop]['default']))#deep copy because we need
+        cls = self.__class__
+        #adding running properties like latency, dependency list, etc
+        for prop in cls.running_properties:
+            setattr(self, prop, copy(cls.running_properties[prop]['default']))#copy because we need
             #eatch istance to have his own running prop!
 
         #[0] = +  -> new key-plus
@@ -46,34 +47,26 @@ class Item(object):
             else:
                 setattr(self, key, params[key])
 
+
     #return a copy of the item, but give him a new id
     def copy(self):
-        i = deepcopy(self)
-        cls = i.__class__
-        i.id = cls.id
-        cls.id += 1
+        #i = deepcopy(self)
+        cls = self.__class__
+        i = cls({})#Dummy item but with it's own running properties
+        for prop in cls.properties:
+            if self.has(prop):
+                val = getattr(self,prop)
+                setattr(i, prop, val)
         return i
 
 
     def clean(self):
         pass
+
     
     def __str__(self):
         return str(self.__dict__)+'\n'
 
-
-
-    #def __eq__(self, other):
-    #    if isinstance(other, self.__class__):
-    #        return self.id == other.id
-    #    return NotImplemented
-
-
-    def __ne__(self, other):
-        result = self.__eq__(other)
-        if result is NotImplemented:
-            return result
-        return not result
 
 
     def is_tpl(self):
@@ -90,9 +83,12 @@ class Item(object):
 
     #If a prop is absent and is not required, put the default value
     def fill_default(self):
-        properties = self.__class__.properties
-        for prop in properties:
-            if not self.has(prop) and not properties[prop]['required']:
+        cls = self.__class__
+        properties = cls.properties
+        not_required_properties = [prop for prop in properties if not properties[prop]['required']]
+        for prop in not_required_properties:
+            if not self.has(prop):
+            #if not hasattr(self, prop):
                 value = properties[prop]['default']
                 setattr(self, prop, value)
 

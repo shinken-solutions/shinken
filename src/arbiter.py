@@ -133,12 +133,15 @@ class Arbiter:
         self.conf = Config()
         g_config = self.conf
         self.conf.read_config("nagios.cfg")
+
+        print "****************** Create Template list **********"
+        self.conf.create_templates_list()
+
+        print "****************** Inheritance *******************"
+        self.conf.apply_inheritance()
         
         print "****************** Explode ***********************"
         self.conf.explode()
-        
-        print "****************** Create Template list **********"
-        self.conf.create_templates_list()
 
         print "***************** Create Name reversed list ******"
         self.conf.create_reversed_list()
@@ -146,9 +149,9 @@ class Arbiter:
         print "***************** Cleaning Twins *****************"
         self.conf.remove_twins()
 
-        print "****************** Inheritance *******************"
-        self.conf.apply_inheritance()
-        
+        print "****************** Implicit inheritance *******************"
+        self.conf.apply_implicit_inheritance()
+
         print "****************** Fill default ******************"
         self.conf.fill_default()
         

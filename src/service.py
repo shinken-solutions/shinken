@@ -441,6 +441,7 @@ class Services(Items):
     #Link the service with a command for the check command
     def linkify_s_by_cmd(self, commands):
         for s in self:
+            #print "Linkify s by cmd", s.get_name(), s.check_command
             s.check_command = CommandCall(commands, s.check_command)
 
 
@@ -502,8 +503,9 @@ class Services(Items):
         for prop in Service.properties:
             self.apply_partial_inheritance(prop)
 
+
         #Then implicit inheritance
-        self.apply_implicit_inheritance(hosts)
+        #self.apply_implicit_inheritance(hosts)
         for s in self:
             s.get_customs_properties_by_inheritance(self)
 

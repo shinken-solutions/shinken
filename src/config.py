@@ -570,6 +570,13 @@ class Config(Item):
         #services = time.time()
         #print "Time: Overall Inheritance :", services-begin, " (hosts:",hosts-begin," ) (contacts:",contacts-hosts," ) (services:",services-contacts,")"
 
+
+    #Use to apply inheritance (template and implicit ones)
+    def apply_implicit_inheritance(self):
+        print "Services"
+        self.services.apply_implicit_inheritance(self.hosts)
+
+
     def fill_default(self):
         super(Config, self).fill_default()
         self.hosts.fill_default()
@@ -635,94 +642,68 @@ class Config(Item):
     #It create a graph. All hosts are connected to theyre
     #parents, and host witouht parent are connected to host 'root'
     #services are link to the host. Dependencies are managed
-    def create_packs(self):
+    def create_packs(self, nb_packs):
         g = pygraph.digraph()
         #The master node
         g.add_node('root')
 
         #Node that are not directy connected to the root
-        indirect_nodes = set()#[]#Spped up instead of []
+        indirect_nodes = set()#Speed up instead of [] be cause not check for in
 
         for h in self.hosts:
-            #print "Doing host", h.host_name, h.id
-            #if h not in g:
-            #    print "Adding", h.host_name
             g.add_node(h)
             g.add_edge('root', h)
-
+            
             for p in h.parents:
                 if p is not None:
-                    if p not in g:
-                        #print "Adding", p.host_name
-                        g.add_node(p)
+                    g.add_node(p)
                     g.add_edge(p, h)
-                    #print "My parent:", p.host_name
-                    #if h not in indirect_nodes:
-                        #indirect_nodes.append(h)
                     indirect_nodes.add(h)
 
             for (dep, tmp, tmp2, tp3) in h.act_depend_of:
-                #print "My dep", dep.host_name
-                #if dep not in g:
-                #    print "Adding", dep.host_name
                 g.add_node(dep)
                 g.add_edge(dep, h)
-                #if h not in indirect_nodes:
-                    #indirect_nodes.append(h)
                 indirect_nodes.add(h)
-
             for (dep, tmp, tmp2, tp3) in h.chk_depend_of:
-                #print "My dep", dep.host_name
-                #if dep not in g:
-                #    print "Adding", dep.host_name
                 g.add_node(dep)
                 g.add_edge(dep, h)
-                #if h not in indirect_nodes:
-                    #indirect_nodes.append(h)
                 indirect_nodes.add(h)            
 
             for s in h.services:
-                #if s not in g:
                 g.add_node(s)
                 g.add_edge(h,s)
 
         for s in self.services:
-            #print "Doing Service:", s.get_name()
-            #if s not in g:
             g.add_node(s) # Not a pb if already exist
             for (dep, tmp, tmp2, tp3) in s.act_depend_of:
-                #if dep not in g:
                 g.add_node(dep)
                 g.add_edge(dep, s)
             for (dep, tmp, tmp2, tp3) in s.chk_depend_of:
-                #if dep not in g:
                 g.add_node(dep)
                 g.add_edge(dep, s)
-
-        #print "G:", len(g), g.nodes()
 
         #We delete link between indirect node and the root
         for h in indirect_nodes:
             g.del_edge('root', h)
 
-        #print "Indirect:"
-        #for h in indirect_nodes:
-        #    print "Indirect node:", h.host_name
-        #print "Nb hosts:", len(self.hosts)
-        #print 'first level'
-        packs = []
+        tmp_packs = []
         for h in g.neighbors('root'): # First level nodes
-            (tmp, pack, tmp2) = pygraph.algorithms.searching.depth_first_search(g, root=h)#self.parents)#.find_cycle()g.depth_first_search(h)
-            #print "TMP:", pack
-            packs.append(pack)
+            (tmp, pack, tmp2) = pygraph.algorithms.searching.depth_first_search(g, root=h)
+            tmp_packs.append(pack)
+        
+        #create roundrobin iterator for id of cfg
+        rr = itertools.cycle(list(xrange(0, nb_packs)))
 
-        #print "G:", g
-        #print "*******Dumping All Packs*****", "Number of packs:", len(packs)
-        #for pack in packs:
-            #print "Pack", pack, "len:", len(pack)
-            #for h in pack:
-            #    print h.get_name()
-        #print "Fin all packs"
+        packs = {}
+        for i in xrange(0, nb_packs):
+            packs[i] = []
+        
+        #Now we explode packs into confs, and we 'load balance' thems
+        #in a roundrobin way
+        for pack in tmp_packs:
+            i = rr.next()
+            for elt in pack:
+                packs[i].append(elt)
         return packs
 
 
@@ -738,9 +719,13 @@ class Config(Item):
         if nb_parts == 0:
             nb_parts = 1
         
+        #TODO : DBG
+        nb_parts = 2
+
+        print "Creating confs"
         self.confs = {}
         for i in xrange(0, nb_parts):
-            #print "Create Conf:", i, nb_parts
+            print "Create Conf:", i, '/', nb_parts -1
             self.confs[i] = Config()
             
             #Now we copy all properties of conf into the new ones
@@ -752,85 +737,82 @@ class Config(Item):
             #will have new hostgroups
             self.confs[i].commands = self.commands
             self.confs[i].timeperiods = self.timeperiods
-            self.confs[i].hostgroups = copy.deepcopy(self.hostgroups) #TODO just copy?
+            #Create hostgroups with just the name and same id, but no members
+            new_hostgroups = []
+            for hg in self.hostgroups:
+                new_hostgroups.append(hg.copy_shell())
+            self.confs[i].hostgroups = Hostgroups(new_hostgroups)
             self.confs[i].contactgroups = self.contactgroups
             self.confs[i].contacts = self.contacts
             self.confs[i].schedulerlinks = copy.copy(self.schedulerlinks)
-            self.confs[i].servicegroups = copy.deepcopy(self.servicegroups)#TODO just copy?
-            self.confs[i].hosts = []#will be Classified after
-            self.confs[i].services = []
-            self.confs[i].other_elements = {}
+            #Create hostgroups with just the name and same id, but no members
+            new_servicegroups = []
+            for sg in self.servicegroups:
+                new_servicegroups.append(sg.copy_shell())
+            self.confs[i].servicegroups = Servicegroups(new_servicegroups)
+            self.confs[i].hosts = [] #will be fill after
+            self.confs[i].services = [] #will be fill after
+            self.confs[i].other_elements = {} # The elements of theothers conf will be tag here
             self.confs[i].is_assigned = False #if a scheduler have accepted the conf
 
+        print "Creating packs"
+
         #just create packs. There can be numerous ones
-        packs = self.create_packs()
+        #In pack we've got hosts and service
+        packs = self.create_packs(nb_parts)
 
-        #create roundrobin iterator for id of cfg
-        rr = itertools.cycle(list(xrange(0, nb_parts)))
-
-        #Now we explode packs into confs, and we 'load balance' thems
-        for pack in packs:
-            i = rr.next()
-            #print "Load balancing conf ", i
+        for i in packs:
+            pack = packs[i]
             for elt in pack:
                 if isinstance(elt, Service):
                     self.confs[i].services.append(elt)
-                else:
+                else: #not a service? So a host
                     self.confs[i].hosts.append(elt)
-        
+
+        #Ok packs are integrated, but now we must fill
+        #
+        print "Finishing packs"
         for i in self.confs:
-            #print "Finishing packs", i
+            print "Finishing pack Nb:", i
             cfg = self.confs[i]
-
-            for hg in cfg.hostgroups:
-                mbrs = hg.members
-                hg.members = []
-
-                for h in cfg.hosts:
-                    if h in mbrs:
-                        hg.members.append(h)
-                        #print "Set", h.get_name(), "to be add"
-                #print "Removing hosts in hostgroup", hosts_to_del
-                #for h in hg.members:
-                #    print "We've got member:", h.host_name
-            
-            for sg in cfg.servicegroups:
-                mbrs = sg.members
-                sg.members = []
-                for s in cfg.services:
-                    if s in mbrs:
-                        sg.members.append(s)
-                        #print "Set", s.get_name(), "to be add"
-                #print "Removing hosts in hostgroup", hosts_to_del
-                #for s in sg.members:
-                #    print "We've got member:", s.get_name()
 
             cfg.hosts = Hosts(cfg.hosts)
             cfg.services = Services(cfg.services)
-            #print "CFG:", cfg, "Nb elments:", len(cfg.hosts) + len(cfg.services)
-            #print cfg.hostgroups
+            
+            for ori_hg in self.hostgroups:
+                hg = cfg.hostgroups.find_by_name(ori_hg.get_name())
+                mbrs = ori_hg.members
+                mbrs_id = []
+                for h in mbrs:
+                    if h is not None:
+                        mbrs_id.append(h.id)
+                for h in cfg.hosts:
+                    if h.id in mbrs_id:
+                        hg.members.append(h)
 
-        #print "Finishing Conf"
+                
+            for ori_sg in self.servicegroups:
+                sg = cfg.servicegroups.find_by_name(ori_sg.get_name())
+                mbrs = ori_sg.members
+                mbrs_id = []
+                for s in mbrs:
+                    if s is not None:
+                        mbrs_id.append(s.id)
+                for s in cfg.services:
+                    if s.id in mbrs_id:
+                        sg.members.append(s)
 
-        #Now we fill other_elements by host (service are with their host)
+
+        #Now we fill other_elements by host (service are with their host so they are not tagged)
         for i in self.confs:
-            #print "Doing",  i
             for h in self.confs[i].hosts:
-                #print "Doing h", h.get_name(), [j for j in self.confs if j != i]
-                for j in [j for j in self.confs if j != i]:
-                    #print "*********Add", h.get_name(), "in the conf", j
+                for j in [j for j in self.confs if j != i]: #So other than i
                     self.confs[i].other_elements[h.get_name()] = i
 
         #We tag conf with isntance_id
         for i in self.confs:
             self.confs[i].instance_id = i
 
-        #print "HeheConf:", self, "Confs:", self.confs
-        #for cfg in self.confs.values():
-            #for h in cfg.hosts:
-                #print "DBG: host", h
-                #print "DBG2: ", h.get_name(), h.check_command, h.check_command.is_valid(), h.is_correct()
-        #return new_confs
 
 
 #The config main part is use only for testing purpose

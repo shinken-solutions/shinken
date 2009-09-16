@@ -42,8 +42,13 @@ class Servicegroup(Itemgroup):
         'SERVICEGROUPACTIONURL' : 'action_url'
         }
     
+    
     def get_services(self):
         return self.members
+
+
+    def get_name(self):
+        return self.servicegroup_name
 
 
     def get_servicegroup_members(self):

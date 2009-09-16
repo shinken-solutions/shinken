@@ -32,6 +32,22 @@ class Itemgroup:
         pass
 
 
+    def copy_shell(self):
+        cls = self.__class__
+        old_id = cls.id
+        new_i = cls()
+        new_i.id = self.id
+        cls.id = old_id
+        
+        for prop in cls.properties:
+            if prop is not 'members':
+                if self.has(prop):
+                    val = getattr(self, prop)
+                    setattr(new_i, prop, val)
+        new_i.members = []
+        return new_i
+                    
+
     def pythonize(self):
         mbrs = self.members.split(',')        
         self.members = []
