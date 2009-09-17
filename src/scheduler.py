@@ -103,7 +103,7 @@ class Scheduler:
         if isinstance(elt, Brok):
             #For brok, we TAG brok with our instance_id
             elt.data['instance_id'] = self.instance_id
-            #TODO : reactive broks ! self.broks[elt.id] = elt
+            self.broks[elt.id] = elt
             return
         if isinstance(elt, Downtime):
             self.downtimes[elt.id] = elt
@@ -184,6 +184,7 @@ class Scheduler:
         return res
 
 
+
     #Fill the self.broks with broks of self (process id, and co)
     #broks of service and hosts (initial status)
     def fill_initial_broks(self):
@@ -205,7 +206,7 @@ class Scheduler:
                 b = i.get_initial_status_brok()
                 self.add(b)
 
-        print "Created initial Broks:", self.broks
+        print "Created initial Broks:", len(self.broks)
         
     
     #Crate a brok with program status info
@@ -354,11 +355,16 @@ class Scheduler:
 
     #Main function
     def run(self):
+        #Ok, now all is initilised, we can make the inital broks
+        self.fill_initial_broks()
+
+        #TODO : OK if after broks?
         print "First scheduling"
         self.schedule()
 
-        #Ok, now all is initilised, we can make the inital broks
-        self.fill_initial_broks()
+
+        #TODO : a better tick count
+        status_tick = 0
         
         timeout = 1.0
         while self.must_run :
@@ -393,8 +399,12 @@ class Scheduler:
                 self.delete_unwanted_notifications()
                 print "********** Delete freshnesh******"
                 self.check_freshness()
-                print "********** Delete update status******"
-                self.update_status_file()
+
+                if (status_tick % 60) == 0:
+                    print "********** Update status file******"
+                    self.update_status_file()
+                status_tick += 1
+
                 print "******* Fin loop********"
 
                 #stats

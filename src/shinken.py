@@ -97,7 +97,7 @@ class IBroks(Pyro.core.ObjBase):
 	def get_broks(self):
 		print "We ask us broks"
 		res = self.sched.get_broks()
-		print "Sending %d broks" % len(res), res
+		print "Sending %d broks" % len(res)#, res
 		return res
 
 
@@ -266,4 +266,8 @@ class Shinken:
 #Here we go!
 if __name__ == '__main__':
 	p = Shinken()
-	p.main()
+        import cProfile
+	#p.main()
+        command = """p.main()"""
+        cProfile.runctx( command, globals(), locals(), filename="Shinken.profile" )
+

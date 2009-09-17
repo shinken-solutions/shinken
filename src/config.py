@@ -201,7 +201,6 @@ class Config(Item):
         'COMMANDFILE' : '',
         'HOSTPERFDATAFILE' : '',
         'SERVICEPERFDATAFILE' : '',
-
         'ADMINEMAIL' : '',
         'ADMINPAGER' : ''
         }
@@ -720,7 +719,7 @@ class Config(Item):
             nb_parts = 1
         
         #TODO : DBG
-        nb_parts = 2
+        #nb_parts = 2
 
         print "Creating confs"
         self.confs = {}

@@ -200,9 +200,9 @@ class SchedulingItem(Item):
             return None
         #Interval change is in a HARD state or not
         if self.state == 'HARD':
-            interval = self.check_interval
+            interval = self.check_interval * 60
         else: #TODO : if no retry_interval?
-            interval = self.retry_interval
+            interval = self.retry_interval * 60
 
         
         #The next_chk is pass so we need a new one

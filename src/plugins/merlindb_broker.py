@@ -61,7 +61,7 @@ class Merlindb_broker:
     def manage_brok(self, b):
         type = b.type
         manager = 'manage_'+type+'_brok'
-        print "(Merlin) I search manager:", manager
+        #print "(Merlin) I search manager:", manager
         if self.has(manager):
             f = getattr(self, manager)
             queries = f(b)
@@ -84,7 +84,7 @@ class Merlindb_broker:
     #TODO: finish catch
     def execute_query(self, query):
         #print "I run query", query, "\n"
-        self.db_cursor.execute (query)
+        self.db_cursor.execute(query)
         self.db.commit ()
 
 

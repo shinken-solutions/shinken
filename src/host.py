@@ -347,7 +347,7 @@ class Host(SchedulingItem):
             command_line = m.resolve_command(self.check_command, self, None, None, None)
             
             #Make the Check object and put the service in checking
-            print "Asking for a check with command:", command_line
+            #print "Asking for a check with command:", command_line
             c = Check('scheduled',command_line, self.id, 'host', self.next_chk, ref_check_id)
             
             #We keep a trace of all checks in progress
