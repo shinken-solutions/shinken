@@ -199,7 +199,7 @@ class SchedulingItem(Item):
         if (not self.active_checks_enabled or not cls.execute_checks) and not force:
             return None
         #Interval change is in a HARD state or not
-        if self.state == 'HARD':
+        if self.state_type == 'HARD':
             interval = self.check_interval * 60
         else: #TODO : if no retry_interval?
             interval = self.retry_interval * 60
@@ -211,12 +211,15 @@ class SchedulingItem(Item):
             r = interval * (random.random() - 0.5)
             time_add = interval*10/2 + r*10
         else:
-            time_add = interval*10
+            time_add = interval
         
         if force_time is None:
             self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
         else:
             self.next_chk = force_time
+
+        #print "Time to add", time_add, "interval", interval, 'check_interval', self.check_interval, self.state
+        #print "Last check", time.asctime(time.localtime(self.last_chk))
         #print "Next check", time.asctime(time.localtime(self.next_chk))
         
         #Get the command to launch

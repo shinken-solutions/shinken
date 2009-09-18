@@ -648,42 +648,57 @@ class Config(Item):
 
         #Node that are not directy connected to the root
         indirect_nodes = set()#Speed up instead of [] be cause not check for in
+        #nodes = [] #Speed up graph creation, because add_node is slow
+        #relations = () #Speed up edge creation
 
+        #We fill the graph
+        g.add_nodes(self.hosts)
+        #for h in self.hosts:
+        #    g.add_node(h)
+
+        #for s in self.services:
+        #    g.add_node(s)
+        g.add_nodes(self.services)
+
+        #Now the relations
         for h in self.hosts:
-            g.add_node(h)
+            #g.add_node(h)
             g.add_edge('root', h)
             
             for p in h.parents:
                 if p is not None:
-                    g.add_node(p)
+                    #g.add_node(p)
                     g.add_edge(p, h)
                     indirect_nodes.add(h)
 
             for (dep, tmp, tmp2, tp3) in h.act_depend_of:
-                g.add_node(dep)
+                #g.add_node(dep)
                 g.add_edge(dep, h)
                 indirect_nodes.add(h)
             for (dep, tmp, tmp2, tp3) in h.chk_depend_of:
-                g.add_node(dep)
+                #g.add_node(dep)
                 g.add_edge(dep, h)
                 indirect_nodes.add(h)            
 
-            for s in h.services:
-                g.add_node(s)
-                g.add_edge(h,s)
+            #TODO: 
+            #Really usefull si host already is in act_depend_of?
+            #for s in h.services:
+            #    #g.add_node(s)
+            #    g.add_edge(h,s)
 
         for s in self.services:
-            g.add_node(s) # Not a pb if already exist
+            #g.add_node(s) # Not a pb if already exist
             for (dep, tmp, tmp2, tp3) in s.act_depend_of:
-                g.add_node(dep)
+                #g.add_node(dep)
                 g.add_edge(dep, s)
             for (dep, tmp, tmp2, tp3) in s.chk_depend_of:
-                g.add_node(dep)
+                #g.add_node(dep)
                 g.add_edge(dep, s)
 
         #We delete link between indirect node and the root
         for h in indirect_nodes:
             g.del_edge('root', h)
+
 
         tmp_packs = []
         for h in g.neighbors('root'): # First level nodes

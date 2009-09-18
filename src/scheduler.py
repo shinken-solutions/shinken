@@ -318,7 +318,9 @@ class Scheduler:
 
     #Use to update the status file.
     def update_status_file(self):
-        self.status_file.create_or_update()
+        #TODO : OPTIMIZE it because it sucks
+        pass
+        #self.status_file.create_or_update()
             
 
     #Notifications are re-scheduling, this function check if unwanted notif
@@ -338,7 +340,7 @@ class Scheduler:
     def schedule(self):
         #ask for service and hosts their next check
         for type_tab in [self.services, self.hosts]:
-            for i in type_tab:#self.services:
+            for i in type_tab:
                 c = i.schedule()
                 if c is not None:
                     self.add(c)
