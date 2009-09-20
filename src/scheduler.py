@@ -367,6 +367,7 @@ class Scheduler:
 
         #TODO : a better tick count
         status_tick = 0
+        #schedule_tick = 0
         
         timeout = 1.0
         while self.must_run :
@@ -391,8 +392,10 @@ class Scheduler:
                             break    # no need to continue with the for loop
             else: #Timeout
 		timeout = 1.0
+                #if (schedule_tick % 5) == 0:
                 print "**********Schedule********"
                 self.schedule()
+                #schedule_tick += 1
                 print "**********Consume*********"
                 self.consume_results()
                 print "**********Delete zombie****"
@@ -431,8 +434,8 @@ class Scheduler:
                 #        print 'Service notification', n
                 #    if n.ref_type == 'host':
                 #        print 'Host notification', n
-                print "."
-                print "Service still in checking?"
+                #print "."
+                #print "Service still in checking?"
                 #for s in self.services:
                 #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
                 #    for i in s.checks_in_progress:
@@ -441,6 +444,11 @@ class Scheduler:
                 #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
                 #    for i in s.checks_in_progress:
                 #        print self.checks[i]
+                #from guppy import hpy
+                #hp=hpy()
+                #print hp.heap()
+                #print hp.heapu()
+
 
             if timeout < 0:
 		timeout = 1.0

@@ -543,6 +543,7 @@ class Timeperiod:
     get_month_id = classmethod(get_month_id)
 
 
+    #@memoized
     def get_month_by_id(cls, id):
         id = id % 12
         for key in Timeperiod.months:

@@ -39,6 +39,7 @@ class Command:
 #This class is use when a service, contact or host define
 #a command with args.
 class CommandCall:
+    __slots__ = ('id', 'call', 'command', 'valid', 'args')
     id = 0
     def __init__(self, commands, call):
         self.id = self.__class__.id

@@ -17,6 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import re, time, calendar
+#from memoized import memoized
 
 ############################### SEQUENCES ###############################
 def get_sequence():

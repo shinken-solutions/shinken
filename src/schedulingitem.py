@@ -209,7 +209,7 @@ class SchedulingItem(Item):
         #so we got a check_interval
         if self.next_chk == 0:
             r = interval * (random.random() - 0.5)
-            time_add = interval*10/2 + r*10
+            time_add = interval/2 + r
         else:
             time_add = interval
         

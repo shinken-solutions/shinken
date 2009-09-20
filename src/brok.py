@@ -18,6 +18,7 @@
 
 
 class Brok:
+    __slots__ = ('__dict__','id', 'type', 'data')
     id = 0
     def __init__(self, type, data):
         self.type = type

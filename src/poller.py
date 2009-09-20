@@ -36,5 +36,9 @@ class Poller (Actionner):
 
 #lets go to the party
 if __name__ == '__main__':
-	poller = Poller()
-	poller.main()
+	p = Poller()
+        import cProfile
+	#p.main()
+        command = """p.main()"""
+        cProfile.runctx( command, globals(), locals(), filename="Poller.profile" )
+

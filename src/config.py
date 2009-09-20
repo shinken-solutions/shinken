@@ -643,66 +643,45 @@ class Config(Item):
     #services are link to the host. Dependencies are managed
     def create_packs(self, nb_packs):
         g = pygraph.digraph()
-        #The master node
-        g.add_node('root')
 
-        #Node that are not directy connected to the root
-        indirect_nodes = set()#Speed up instead of [] be cause not check for in
-        #nodes = [] #Speed up graph creation, because add_node is slow
-        #relations = () #Speed up edge creation
-
-        #We fill the graph
         g.add_nodes(self.hosts)
-        #for h in self.hosts:
-        #    g.add_node(h)
-
-        #for s in self.services:
-        #    g.add_node(s)
-        g.add_nodes(self.services)
+        
+        links=set()
 
         #Now the relations
         for h in self.hosts:
-            #g.add_node(h)
-            g.add_edge('root', h)
-            
             for p in h.parents:
                 if p is not None:
-                    #g.add_node(p)
-                    g.add_edge(p, h)
-                    indirect_nodes.add(h)
+                    links.add((p, h))
 
-            for (dep, tmp, tmp2, tp3) in h.act_depend_of:
-                #g.add_node(dep)
-                g.add_edge(dep, h)
-                indirect_nodes.add(h)
-            for (dep, tmp, tmp2, tp3) in h.chk_depend_of:
-                #g.add_node(dep)
-                g.add_edge(dep, h)
-                indirect_nodes.add(h)            
+            for (dep, tmp, tmp2, tmp3) in h.act_depend_of:
+                links.add((dep, h))
 
-            #TODO: 
-            #Really usefull si host already is in act_depend_of?
-            #for s in h.services:
-            #    #g.add_node(s)
-            #    g.add_edge(h,s)
+            for (dep, tmp, tmp2, tmp3) in h.chk_depend_of:
+                links.add((dep, h))
 
         for s in self.services:
-            #g.add_node(s) # Not a pb if already exist
-            for (dep, tmp, tmp2, tp3) in s.act_depend_of:
-                #g.add_node(dep)
-                g.add_edge(dep, s)
-            for (dep, tmp, tmp2, tp3) in s.chk_depend_of:
-                #g.add_node(dep)
-                g.add_edge(dep, s)
+            for (dep, tmp, tmp2, tmp3) in s.act_depend_of:
+                #I don't care about dep host: they are just the host
+                #of the service...
+                if dep.has('host'):
+                    links.add((dep.host, s.host))
 
-        #We delete link between indirect node and the root
-        for h in indirect_nodes:
-            g.del_edge('root', h)
-
+            for (dep, tmp, tmp2, tmp3) in s.chk_depend_of:
+                links.add((dep.host, h))
+        
+        for (dep, h) in links:
+            g.add_edge(dep, h)
+            g.add_edge(h, dep)
+        
+        access_list = pygraph.algorithms.accessibility.accessibility(g)
 
         tmp_packs = []
-        for h in g.neighbors('root'): # First level nodes
-            (tmp, pack, tmp2) = pygraph.algorithms.searching.depth_first_search(g, root=h)
+        while(access_list != {}):
+            (h, pack) = access_list.popitem()
+            for connexion in pack:
+                if connexion != h:
+                    del access_list[connexion]
             tmp_packs.append(pack)
         
         #create roundrobin iterator for id of cfg
@@ -712,12 +691,13 @@ class Config(Item):
         for i in xrange(0, nb_packs):
             packs[i] = []
         
-        #Now we explode packs into confs, and we 'load balance' thems
-        #in a roundrobin way
+        #Now we explode the numerous packs into nb_packs reals packs:
+        #we 'load balance' thems in a roundrobin way
         for pack in tmp_packs:
             i = rr.next()
             for elt in pack:
                 packs[i].append(elt)
+
         return packs
 
 
@@ -732,9 +712,6 @@ class Config(Item):
 
         if nb_parts == 0:
             nb_parts = 1
-        
-        #TODO : DBG
-        #nb_parts = 2
 
         print "Creating confs"
         self.confs = {}
@@ -777,12 +754,22 @@ class Config(Item):
 
         for i in packs:
             pack = packs[i]
-            for elt in pack:
-                if isinstance(elt, Service):
-                    self.confs[i].services.append(elt)
-                else: #not a service? So a host
-                    self.confs[i].hosts.append(elt)
+            for h in pack:
+                #if isinstance(elt, Service):
+                #    self.confs[i].services.append(elt)
+                #else: #not a service? So a host
+                #    self.confs[i].hosts.append(elt)
+                self.confs[i].hosts.append(h)
+                for s in h.services:
+                    self.confs[i].services.append(s)
+                    
 
+        #print "OK FINALLY NB OF SERVICES:", len(self.confs[0].services)
+        #for s in self.confs[0].services:
+        #    print s.get_name()
+        #print "VERSUS:", len(self.services)
+        #for s in self.services:
+        #    print s.get_name()
         #Ok packs are integrated, but now we must fill
         #
         print "Finishing packs"

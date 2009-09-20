@@ -140,6 +140,13 @@ class IForArbiter(Pyro.core.ObjBase):
 		print "Get conf:", self.app.conf
 		self.app.have_conf = True
 		print "Have conf?", self.app.have_conf
+
+		print "Just apres reception"
+                #from guppy import hpy
+                #hp=hpy()
+                #print hp.heap()
+                #print hp.heapu()
+
 		
                 #if app already have a scheduler, we must say him to DIE Mouahahah
 		#So It will quit, and will load a new conf (and create a brand new scheduler)

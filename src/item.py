@@ -27,6 +27,7 @@ class Item(object):
     def __init__(self, params={}):
         self.id = self.__class__.id
         self.__class__.id += 1
+
         
         self.customs = {} # for custom variables
         self.plus = {} # for value with a +

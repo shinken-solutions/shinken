@@ -173,6 +173,10 @@ class Arbiter:
         print "****************** Correct ?******************"
         self.conf.is_correct()
 
+        #from guppy import hpy
+        #hp=hpy()
+        #print hp.heap()
+        #print hp.heapu()
 
         print "****************** Cut into parts ******************"
         self.confs = self.conf.cut_into_parts()
@@ -187,6 +191,7 @@ class Arbiter:
 	self.load_external_command(e)
 	
 	print "Configuration Loaded"
+
 	self.run()
 	
 

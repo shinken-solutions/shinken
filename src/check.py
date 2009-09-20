@@ -23,7 +23,10 @@ from action import Action
 #from message import Message
 
 class Check(Action):
-    """The check class"""
+    __slots__ = ('id', 'is_a', 'type', '_in_timeout', 'status', 'exit_status',\
+                  '_command', 'output', 'long_output', 'ref', 'ref_type', \
+                     't_to_go', 'depend_on', 'depend_on_me', 'check_time', \
+                     'execution_time')
     #_status = None
     #_command = None
     #id = 0
