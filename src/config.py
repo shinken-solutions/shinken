@@ -642,47 +642,54 @@ class Config(Item):
     #parents, and host witouht parent are connected to host 'root'
     #services are link to the host. Dependencies are managed
     def create_packs(self, nb_packs):
+        #We create a grah with host in nodes
         g = pygraph.digraph()
-
         g.add_nodes(self.hosts)
         
-        links=set()
+        #links will be used for relations between hosts
+        links = set()
 
         #Now the relations
         for h in self.hosts:
+            #Add parent relations
             for p in h.parents:
                 if p is not None:
                     links.add((p, h))
-
+            #Add the others dependencies
             for (dep, tmp, tmp2, tmp3) in h.act_depend_of:
                 links.add((dep, h))
-
             for (dep, tmp, tmp2, tmp3) in h.chk_depend_of:
                 links.add((dep, h))
 
+        #For services : they are link woth their own host but we need
+        #To have the hosts of service dep in the same pack too
         for s in self.services:
             for (dep, tmp, tmp2, tmp3) in s.act_depend_of:
                 #I don't care about dep host: they are just the host
                 #of the service...
                 if dep.has('host'):
                     links.add((dep.host, s.host))
-
+            #The othe type of dep
             for (dep, tmp, tmp2, tmp3) in s.chk_depend_of:
                 links.add((dep.host, h))
-        
+        #Now we create links in the graph. With links (set)
+        #We are sure to call the less add_edge
         for (dep, h) in links:
             g.add_edge(dep, h)
             g.add_edge(h, dep)
         
+        #Access_list from a node il all nodes that are connected
+        #with it : it's a list of ours mini_packs
         access_list = pygraph.algorithms.accessibility.accessibility(g)
 
-        tmp_packs = []
+        #now we read all mini_packs
+        tmp_packs = [] # Ours mini_pack list
         while(access_list != {}):
-            (h, pack) = access_list.popitem()
-            for connexion in pack:
+            (h, mini_pack) = access_list.popitem()
+            for connexion in mini_pack:
                 if connexion != h:
                     del access_list[connexion]
-            tmp_packs.append(pack)
+            tmp_packs.append(mini_pack)
         
         #create roundrobin iterator for id of cfg
         rr = itertools.cycle(list(xrange(0, nb_packs)))
@@ -755,31 +762,21 @@ class Config(Item):
         for i in packs:
             pack = packs[i]
             for h in pack:
-                #if isinstance(elt, Service):
-                #    self.confs[i].services.append(elt)
-                #else: #not a service? So a host
-                #    self.confs[i].hosts.append(elt)
                 self.confs[i].hosts.append(h)
                 for s in h.services:
                     self.confs[i].services.append(s)
-                    
 
-        #print "OK FINALLY NB OF SERVICES:", len(self.confs[0].services)
-        #for s in self.confs[0].services:
-        #    print s.get_name()
-        #print "VERSUS:", len(self.services)
-        #for s in self.services:
-        #    print s.get_name()
-        #Ok packs are integrated, but now we must fill
-        #
+        #We've nearly have hosts and services. Now we want REALS hosts (Class)
+        #And we want groups too
         print "Finishing packs"
         for i in self.confs:
             print "Finishing pack Nb:", i
             cfg = self.confs[i]
 
+            #Create ours classes
             cfg.hosts = Hosts(cfg.hosts)
             cfg.services = Services(cfg.services)
-            
+            #Fill host groups
             for ori_hg in self.hostgroups:
                 hg = cfg.hostgroups.find_by_name(ori_hg.get_name())
                 mbrs = ori_hg.members
@@ -790,8 +787,7 @@ class Config(Item):
                 for h in cfg.hosts:
                     if h.id in mbrs_id:
                         hg.members.append(h)
-
-                
+            #Fill servicegroup
             for ori_sg in self.servicegroups:
                 sg = cfg.servicegroups.find_by_name(ori_sg.get_name())
                 mbrs = ori_sg.members
@@ -802,7 +798,6 @@ class Config(Item):
                 for s in cfg.services:
                     if s.id in mbrs_id:
                         sg.members.append(s)
-
 
         #Now we fill other_elements by host (service are with their host so they are not tagged)
         for i in self.confs:
@@ -819,12 +814,9 @@ class Config(Item):
 #The config main part is use only for testing purpose
 if __name__ == '__main__':
     c = Config()
-    #c.read_cache(c.cache_path)
     
     print "****************** Read ******************"
     c.read_config("nagios.cfg")
-    #c.idfy()
-    #c.dump()
     
     print "****************** Explode ******************"
     #create or update new hostgroup or service by looking at
