@@ -170,6 +170,7 @@ class Shinken:
 	#Then, it wait for a first configuration
 	def __init__(self):
 		#create the server
+		Pyro.config.PYRO_COMPRESSION = 1
 		Pyro.core.initServer()
 	
 		if len(sys.argv) == 2:
@@ -193,7 +194,6 @@ class Shinken:
 		self.must_run = True
 		self.wait_initial_conf()
 		print "Ok we've got conf"
-		
 		
 
 	#We wait (block) for arbiter to send us conf

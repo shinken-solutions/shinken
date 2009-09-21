@@ -134,9 +134,9 @@ class Scheduler:
         else:
             nb_checks_drops = 0
 
+        #For broks and actions, it's more simple
         if len(self.broks) > 0:
             id_max = self.broks.keys()[-1]
-            #For broks and actions, it's more simple
             id_to_del_broks = [i for i in self.broks if i < id_max - max_broks]
             nb_broks_drops = len(id_to_del_broks)
             for i in id_to_del_broks:
