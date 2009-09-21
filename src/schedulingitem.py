@@ -225,6 +225,15 @@ class SchedulingItem(Item):
         #Get the command to launch
         return self.launch_check(self.next_chk)
 
+    def remove_in_progress_check(self, id):
+        #The check is consume, uptade the in_checking propertie
+        if id in self.checks_in_progress:
+            self.checks_in_progress.remove(id)
+        else:
+            print "Not removing check", id, "for service", self.get_name()
+        self.update_in_checking()
+
+
 
     #consume a check return and send action in return
     #main function of reaction of checks like raise notifications
@@ -237,11 +246,7 @@ class SchedulingItem(Item):
         OK_UP = self.__class__.ok_up #OK for service, UP for host
         
         #The check is consume, uptade the in_checking propertie
-        if c.id in self.checks_in_progress:
-            self.checks_in_progress.remove(c.id)
-        else:
-            print "Not removing check", c.id, "for service", self.get_name()
-        self.update_in_checking()
+        self.remove_in_progress_check(c.id)
         
         self.latency = c.check_time - c.t_to_go#now - c.t_to_go
         self.execution_time = c.execution_time

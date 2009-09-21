@@ -97,17 +97,67 @@ class Scheduler:
         if isinstance(elt, Check):
             self.checks[elt.id] = elt
             return
-        if isinstance(elt, Notification):
-            self.actions[elt.id] = elt
-            return
         if isinstance(elt, Brok):
             #For brok, we TAG brok with our instance_id
             elt.data['instance_id'] = self.instance_id
             self.broks[elt.id] = elt
             return
+        if isinstance(elt, Notification):
+            self.actions[elt.id] = elt
+            return
         if isinstance(elt, Downtime):
             self.downtimes[elt.id] = elt
             return
+
+
+    #Ours queues may explode if noone ask us for elements
+    #It's very dangerous : you can crash your server... and it's a bad thing :)
+    #So we 'just' keep last elements : 2 of max is a good overhead
+    def clean_queues(self):
+        max_checks = 2 * (len(self.hosts) + len(self.services))
+        max_broks = 2 * (len(self.hosts) + len(self.services))
+        max_actions = 2* len(self.contacts) * (len(self.hosts) + len(self.services))
+
+        #For checks, it's not very simple: 
+        #For checks, they may be referred to their host/service
+        #We do not just del them in checks, but also in their service/host
+        #We want id of less than max_id - 2*max_checks
+        if len(self.checks) > 0:
+            id_max = self.checks.keys()[-1] #The max id is the last id : max is SO slow!
+            id_to_del_checks = [i for i in self.checks if i < id_max - max_checks]
+            nb_checks_drops = len(id_to_del_checks)
+            for i in id_to_del_checks:
+                c = self.checks[i]
+                elt = self.get_ref_item_from_action(c)
+                elt.remove_in_progress_check(i) #It's refered as it's id
+                del self.checks[i] #Bye bye ...
+        else:
+            nb_checks_drops = 0
+
+        if len(self.broks) > 0:
+            id_max = self.broks.keys()[-1]
+            #For broks and actions, it's more simple
+            id_to_del_broks = [i for i in self.broks if i < id_max - max_broks]
+            nb_broks_drops = len(id_to_del_broks)
+            for i in id_to_del_broks:
+                del self.broks[i]
+        else:
+            nb_broks_drops = 0
+
+        if len(self.actions) > 0:
+            id_max = self.actions.keys()[-1]
+            #Actions are not refered in hosts/services :) so ...
+            id_to_del_actions = [i for i in self.actions if i < id_max - max_actions]
+            nb_actions_drops = len(id_to_del_actions)
+            for i in id_to_del_actions:
+                del self.actions[i]
+        else:
+            nb_actions_drops = 0
+        
+        #print "WARNING:", self.broks.keys()[-1] - max_broks, 'Min =', self.broks[self.broks.keys()[0]]
+        #print "WARNING:", "checks", len(self.checks),'/',max_checks, len(self.broks),'/',max_broks, len(self.actions)
+        if nb_checks_drops !=0 or nb_broks_drops!=0 or nb_actions_drops!= 0:
+            print "WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops)
 
 
     #Ask item (host or service) a update_status
@@ -182,7 +232,6 @@ class Scheduler:
         #They are gone, we keep none!
         self.broks = {}
         return res
-
 
 
     #Fill the self.broks with broks of self (process id, and co)
@@ -409,6 +458,9 @@ class Scheduler:
                     print "********** Update status file******"
                     self.update_status_file()
                 status_tick += 1
+
+                print "************** Clean queues ************"
+                self.clean_queues()
 
                 print "******* Fin loop********"
 
