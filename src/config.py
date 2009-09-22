@@ -583,10 +583,10 @@ class Config(Item):
         self.services.fill_default()
 
 
-    def create_templates_list(self):
-        self.hosts.create_tpl_list()
-        self.contacts.create_tpl_list()
-        self.services.create_tpl_list()
+    def linkify_templates(self):
+        self.hosts.linkify_templates()
+        self.contacts.linkify_templates()
+        self.services.linkify_templates()
         
 
     def create_reversed_list(self):
@@ -667,7 +667,7 @@ class Config(Item):
             for (dep, tmp, tmp2, tmp3) in s.act_depend_of:
                 #I don't care about dep host: they are just the host
                 #of the service...
-                if dep.has('host'):
+                if hasattr(dep, 'host'):
                     links.add((dep.host, s.host))
             #The othe type of dep
             for (dep, tmp, tmp2, tmp3) in s.chk_depend_of:

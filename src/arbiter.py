@@ -41,6 +41,7 @@ from macroresolver import MacroResolver
 from external_command import ExternalCommand
 
 
+
 #Main Arbiter Class
 class Arbiter:
     def __init__(self):
@@ -48,6 +49,8 @@ class Arbiter:
 
 
     def send_conf_to_schedulers(self):
+
+        #print "SIZEOFME:", self.__sizeof__()
         
         self.conf.schedulerlinks.items.values().sort(scheduler_no_spare_first)
 
@@ -61,6 +64,10 @@ class Arbiter:
         for broker in self.conf.brokers.items.values():
             print "Broker", broker, "is alive ?", broker.is_alive()
 
+
+        #for conf in self.conf.confs.values():
+        #    a = cPickle.dumps(conf)
+        #    print "Taille A:", a.__sizeof__()
         
         #self.conf.schedulerlinks.sort(scheduler_no_spare_first)
         #no_spare_sched = [s for s in self.conf.schedulerlinks if not s.spare]
@@ -75,7 +82,8 @@ class Arbiter:
                     if not sched.is_active and not conf.is_assigned:
                         print sched.id
                         try:
-                            sched.put_conf(conf)
+                            #print "Taille A:", cPickle.dumps(conf).__sizeof__()
+                            sched.put_conf(conf)#cPickle.dumps(conf))
                             sched.is_active = True
                             conf.is_assigned = True
                             conf.assigned_to = sched
@@ -134,8 +142,8 @@ class Arbiter:
         g_config = self.conf
         self.conf.read_config("nagios.cfg")
 
-        print "****************** Create Template list **********"
-        self.conf.create_templates_list()
+        print "****************** Create Template links **********"
+        self.conf.linkify_templates()
 
         print "****************** Inheritance *******************"
         self.conf.apply_inheritance()

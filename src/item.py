@@ -25,6 +25,7 @@ from brok import Brok
 
 class Item(object):
     def __init__(self, params={}):
+        #We have our own id of My Class type :)
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -35,7 +36,14 @@ class Item(object):
         cls = self.__class__
         #adding running properties like latency, dependency list, etc
         for prop in cls.running_properties:
-            setattr(self, prop, copy(cls.running_properties[prop]['default']))#copy because we need
+            #Copy is slow, so we check type
+            #Type with __iter__ are list or dict, or tuple. Item need it's own list, so qe copy
+            val = cls.running_properties[prop]['default']
+            if hasattr(val, '__iter__'): 
+                setattr(self, prop, copy(val))
+            else:
+                setattr(self, prop, val)
+            #setattr(self, prop, copy(cls.running_properties[prop]['default']))#copy because we need
             #eatch istance to have his own running prop!
 
         #[0] = +  -> new key-plus
@@ -51,11 +59,11 @@ class Item(object):
 
     #return a copy of the item, but give him a new id
     def copy(self):
-        #i = deepcopy(self)
         cls = self.__class__
         i = cls({})#Dummy item but with it's own running properties
-        for prop in cls.properties:
-            if self.has(prop):
+        properties = cls.properties
+        for prop in properties:
+            if hasattr(self, prop):
                 val = getattr(self,prop)
                 setattr(i, prop, val)
         return i
@@ -69,7 +77,6 @@ class Item(object):
         return str(self.__dict__)+'\n'
 
 
-
     def is_tpl(self):
         try:
             return self.register == '0'
@@ -78,8 +85,8 @@ class Item(object):
 
 
     #has = hasattr
-    def has(self, prop):
-        return hasattr(self, prop)
+    #def has(self, prop):
+    #    return hasattr(self, prop)
 
 
     #If a prop is absent and is not required, put the default value
@@ -88,8 +95,7 @@ class Item(object):
         properties = cls.properties
         not_required_properties = [prop for prop in properties if not properties[prop]['required']]
         for prop in not_required_properties:
-            if not self.has(prop):
-            #if not hasattr(self, prop):
+            if not hasattr(self, prop):
                 value = properties[prop]['default']
                 setattr(self, prop, value)
 
@@ -132,7 +138,7 @@ class Item(object):
 
 
     def get_templates(self):
-        if self.has('use'):
+        if hasattr(self, 'use'):
             return self.use.split(',')
         else:
             return []
@@ -140,45 +146,47 @@ class Item(object):
 
     #We fillfull properties with template ones if need
     def get_property_by_inheritance(self, items, prop):
-        if self.has(prop):
+        #If I have the prop, I take mine but I check if I must
+        #add a plus porperty
+        if hasattr(self, prop):
             value = getattr(self, prop)
-            if self.has_plus(prop):#Manage the additive inheritance for the property, if property is in plus, add or replace it
+            #Manage the additive inheritance for the property,
+            #if property is in plus, add or replace it
+            if self.has_plus(prop):
                 value = value+','+self.get_plus_and_delete(prop)
             return value
-        tpls = self.get_templates()
-        for tpl in tpls:
-            i = items.find_tpl_by_name(tpl)
-            if i is not None:
-                value = i.get_property_by_inheritance(items, prop)
-                if value is not None:
-                    if self.has_plus(prop):
-                        value = value+','+self.get_plus_and_delete(prop)
-                    setattr(self, prop, value)
-                    return value
+        #Ok, I do not have prop, Maybe my templates do?
+        #Same story for plus
+        for i in self.templates:
+            value = i.get_property_by_inheritance(items, prop)
+            if value is not None:
+                if self.has_plus(prop):
+                    value = value+','+self.get_plus_and_delete(prop)
+                setattr(self, prop, value)
+                return value
+        #I do not have prop, my templates too... Maybe a plus?
         if self.has_plus(prop):
             value = self.get_plus_and_delete(prop)
             setattr(self, prop, value)
             return value
+        #Not event a plus... so None :)
         return None
 
     
     #We fillfull properties with template ones if need
     def get_customs_properties_by_inheritance(self, items):
         cv = {} # custom variables dict
-        tpls = self.get_templates()
-        for tpl in tpls:
-            i = items.find_tpl_by_name(tpl)
-            if i is not None:
-                tpl_cv = i.get_customs_properties_by_inheritance(items)
-                if tpl_cv is not {}:
-                    for prop in tpl_cv:
-                        if prop not in self.customs:
-                            value = tpl_cv[prop]
-                        else:
-                            value = self.customs[prop]
-                        if self.has_plus(prop):
-                            value = value+self.get_plus_and_delete(prop)
-                        self.customs[prop]=value
+        for i in self.templates:
+            tpl_cv = i.get_customs_properties_by_inheritance(items)
+            if tpl_cv is not {}:
+                for prop in tpl_cv:
+                    if prop not in self.customs:
+                        value = tpl_cv[prop]
+                    else:
+                        value = self.customs[prop]
+                    if self.has_plus(prop):
+                        value = value+self.get_plus_and_delete(prop)
+                    self.customs[prop]=value
         for prop in self.customs:
             value = self.customs[prop]
             if self.has_plus(prop):
@@ -222,7 +230,7 @@ class Item(object):
         state = True
         properties = self.__class__.properties
         for prop in properties:
-            if not self.has(prop) and properties[prop]['required']:
+            if not hasattr(self, prop) and properties[prop]['required']:
                 print self.get_name(), "missing property :", prop
                 state = False
         return state
@@ -335,7 +343,7 @@ class Items(object):
         self.twins = []
         name_property = self.__class__.name_property
         for id in self.items:
-            if self.items[id].has(name_property):
+            if hasattr(self.items[id], name_property):
                 name = getattr(self.items[id], name_property)
                 if name not in self.reversed_list:
                     self.reversed_list[name] = id
@@ -363,6 +371,7 @@ class Items(object):
         else:
             return None
 
+
     def pythonize(self):
         for id in self.items:
             self.items[id].pythonize()
@@ -373,7 +382,6 @@ class Items(object):
             i = self.items[id]
             if i.is_tpl():
                 self.templates[id] = i
-            
 
 
     def find_tpl_by_name(self, name):
@@ -384,9 +392,23 @@ class Items(object):
         return None
 
 
+    def linkify_templates(self):
+        #First we create a list of all templates
+        self.create_tpl_list() 
+        for i in self:
+            tpls = i.get_templates()
+            new_tpls = []
+            for tpl in tpls:
+                t = self.find_tpl_by_name(tpl)
+                if t is not None:
+                    new_tpls.append(t)
+            i.templates = new_tpls
+            
+
+
     def is_correct(self):
-        for id in self.items:
-            i = self.items[id]
+        for i in self:#.items:
+            #i = self.items[id]
             i.is_correct()
             #if not i.is_correct():
             #    print "An item is not correct:", i.get_name()
@@ -403,35 +425,32 @@ class Items(object):
 
     #If a prop is absent and is not required, put the default value
     def fill_default(self):
-        for id in self.items:
-            i = self.items[id]
+        for i in self:
             i.fill_default()
 
     
     def __str__(self):
         s = ''
+        cls = self.__class__
         for id in self.items:
-            cls = self.items[id].__class__
             s = s + str(cls) + ':' + str(id) + str(self.items[id]) + '\n'
         return s
 
 
     #Inheritance forjust a property
     def apply_partial_inheritance(self, prop):
-        for id in self.items:
-            i = self.items[id]
+        for i in self:
             i.get_property_by_inheritance(self, prop)
 
 
     def apply_inheritance(self):
-        #We check for all Host properties if the host has it
+        #We check for all Class properties if the host has it
         #if not, it check all host templates for a value
-        cls = self.inner_class#items[0].__class__
+        cls = self.inner_class
         properties = cls.properties
         for prop in properties:
             self.apply_partial_inheritance(prop)
-        for id in self.items:
-            i = self.items[id]
+        for i in self:
             i.get_customs_properties_by_inheritance(self)
 
 

@@ -24,6 +24,9 @@ from status import StatusFile
 from brok import Brok
 from downtime import Downtime
 
+
+#from guppy import hpy
+
 class Scheduler:
     def __init__(self, daemon):
         self.daemon = daemon #Pyro daemon for incomming orders/askings
@@ -158,6 +161,13 @@ class Scheduler:
         #print "WARNING:", "checks", len(self.checks),'/',max_checks, len(self.broks),'/',max_broks, len(self.actions)
         if nb_checks_drops !=0 or nb_broks_drops!=0 or nb_actions_drops!= 0:
             print "WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops)
+
+            
+    #For tunning purpose we use caches but we do not whant them to explode
+    #So we clean thems
+    def clean_caches(self):
+        for tp in self.timeperiods:
+            tp.clean_cache()
 
 
     #Ask item (host or service) a update_status
@@ -453,6 +463,8 @@ class Scheduler:
                 self.delete_unwanted_notifications()
                 print "********** Delete freshnesh******"
                 self.check_freshness()
+                print "********** Clean caches *********"
+                self.clean_caches()
 
                 if (status_tick % 60) == 0:
                     print "********** Update status file******"
@@ -496,7 +508,7 @@ class Scheduler:
                 #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
                 #    for i in s.checks_in_progress:
                 #        print self.checks[i]
-                #from guppy import hpy
+
                 #hp=hpy()
                 #print hp.heap()
                 #print hp.heapu()

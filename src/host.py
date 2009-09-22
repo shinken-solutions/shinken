@@ -204,17 +204,17 @@ class Host(SchedulingItem):
         special_properties = ['contacts', 'contactgroups', 'check_period', 'notification_interval']
         for prop in cls.properties:
             if prop not in special_properties:
-                if not self.has(prop) and cls.properties[prop]['required']:
+                if not hasattr(self, prop) and cls.properties[prop]['required']:
                     print self.get_name()," : I do not have", prop
                     state = False #Bad boy...
         #Ok now we manage special cases...
-        if not self.has('contacts') and not self.has('contacgroups') and self.notifications_enabled == True:
+        if not hasattr(self, 'contacts') and not hasattr(self, 'contacgroups') and self.notifications_enabled == True:
             print self.get_name()," : I do not have contacts nor contacgroups"
             state = False
-        if not self.has('check_command') or not self.check_command.is_valid():
+        if not hasattr(self, 'check_command') or not self.check_command.is_valid():
             print self.get_name()," : my check_command is invalid"
             state = False
-        if not self.has('notification_interval') and self.notifications_enabled == True:
+        if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
             print self.get_name()," : I've got no notification_interval but I've got notifications enabled"
             state = False
         return state
@@ -414,7 +414,7 @@ class Hosts(Items):
     #Link with conacts
     def linkify_h_by_c(self, contacts):
         for h in self:
-            if h.has('contacts'):
+            if hasattr(h, 'contacts'):
                 contacts_tab = h.contacts.split(',')
                 new_contacts = []
                 for c_name in contacts_tab:
@@ -428,28 +428,28 @@ class Hosts(Items):
     #We look for hostgroups property in hosts and
     def explode(self, hostgroups, contactgroups):
         #Hostgroups property need to be fullfill for got the informations
-        self.apply_partial_inheritance('hostgroups')
-        self.apply_partial_inheritance('contact_groups')
+        #self.apply_partial_inheritance('hostgroups')
+        #self.apply_partial_inheritance('contact_groups')
         
         #Explode host in the hostgroups
         for h in self:
             if not h.is_tpl():
                 hname = h.host_name
-                if h.has('hostgroups'):
+                if hasattr(h, 'hostgroups'):
                     hgs = h.hostgroups.split(',')
                     for hg in hgs:
                         hostgroups.add_member(hname, hg.strip())
         
         #We add contacts of contact groups into the contacts prop
         for h in self:#.items:
-            if h.has('contact_groups'):
+            if hasattr(h, 'contact_groups'):
                 cgnames = h.contact_groups.split(',')
                 for cgname in cgnames:
                     cgname = cgname.strip()
                     cnames = contactgroups.get_members_by_name(cgname)
                     #We add hosts in the service host_name
                     if cnames != []:
-                        if h.has('contacts'):
+                        if hasattr(h, 'contacts'):
                             h.contacts += ','+cnames
                         else:
                             h.contacts = cnames

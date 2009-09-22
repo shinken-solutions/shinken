@@ -139,11 +139,10 @@ class Servicedependencies(Items):
 
     #We backport service dep to service. So SD is not need anymore
     def linkify_s_by_sd(self):
-        #print self
-        for sd in self:#.items:
+        for sd in self:
             s = sd.dependent_service_description
             if s is not None:
-                if sd.has('dependency_period'):
+                if hasattr(sd, 'dependency_period'):
                     s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, sd.dependency_period)
                     s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, sd.dependency_period)
                 else:

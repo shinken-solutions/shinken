@@ -107,6 +107,8 @@ class Actionner:
 		if self.schedulers[id]['running_id'] != 0 and new_run_id != running_id:
 			self.schedulers[id]['verifs'].clear()
 		self.schedulers[id]['running_id'] = new_run_id
+		#We do not need result of put_results, there is no one
+		self.schedulers[id]['con']._setOneway('put_results')
 		print "Connexion OK"
 
 
@@ -228,7 +230,7 @@ class Actionner:
                 nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
                 print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
 		#We add new worker if the queue is > 80% of the worker number
-            while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 50:
+            while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 30:
                 self.create_and_launch_worker()
 
 

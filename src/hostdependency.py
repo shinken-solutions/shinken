@@ -103,7 +103,7 @@ class Hostdependencies(Items):
         for hd in self:#.items:
             h = hd.dependent_host_name
             if h is not None:
-                if hd.has('dependency_period'):
+                if hasattr(hd, 'dependency_period'):
                     h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, hd.dependency_period)
                 else:
                     h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, None)

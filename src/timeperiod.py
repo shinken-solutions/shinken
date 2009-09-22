@@ -68,7 +68,7 @@
 import re, time, calendar
 from item import Item, Items
 from util import *
-#from memoized import memoized
+from memoized import memoized
 #import psyco
 #psyco.full()
 
@@ -470,6 +470,7 @@ class Timeperiod:
                 self.unresolved.append(key+' '+params[key])
         self.is_valid_today = False
 
+        self.cache = {} #For tunning purpose only
 
     def get_name(self):
         return self.timeperiod_name
@@ -527,11 +528,43 @@ class Timeperiod:
             return local_min
 
 
+    def find_next_valid_time_from_cache(self, t):
+        try:
+            return self.cache[t]
+        except KeyError:
+            return None
+
+
+    #clean the get_next_valid_time_from_t cache
+    #The entries are a dict on t. t < now are useless
+    #Because we do not care about past anymore.
+    #If not, it's not important, it's just a cache after all :)
+    def clean_cache(self):
+        now = int(time.time())
+        t_to_del = []
+        for t in self.cache:
+            if t < now:
+                t_to_del.append(t)
+        for t in t_to_del:
+            del self.cache[t]
+
+
+    #@memoized(100)
     def get_next_valid_time_from_t(self, t):
+        #first find from cache
+        t = int(t)
+        res_from_cache = self.find_next_valid_time_from_cache(t)
+        if res_from_cache is not None:
+            return res_from_cache
+        
+        #Ok, not in cache...
         dr_mins = []
         for dr in self.dateranges:
             dr_mins.append(dr.get_next_valid_time_from_t(t))
         local_min = min(dr_mins)
+        
+        #Ok, we update the cache...
+        self.cache[t] = local_min
         return local_min
 
     

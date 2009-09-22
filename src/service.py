@@ -74,7 +74,7 @@ class Service(SchedulingItem):
     #Only for the inital call
     #broker_name : same for status, but for status update call
     properties={'host_name' : {'required':True, 'status_broker_name' : None, 'broker_name' : None},
-            'hostgroup_name' : {'required':True},
+            'hostgroup_name' : {'required':False, 'default':''},
             'service_description' : {'required':True, 'status_broker_name' : None, 'broker_name' : None},
             'display_name' : {'required':False , 'default':None},
             'servicegroups' : {'required':False, 'default':''},
@@ -164,8 +164,8 @@ class Service(SchedulingItem):
         'end_time' : {'default' : 0, 'broker_name' : None},
         'early_timeout' : {'default' : 0, 'broker_name' : None},
         'return_code' : {'default' : 0, 'broker_name' : None},
-        'perf_data' : {'default' : '', 'broker_name' : None}
-        
+        'perf_data' : {'default' : '', 'broker_name' : None},
+        'host' : {'default' : None}
         }
 
     #Mapping between Macros and properties (can be prop or a function)
@@ -216,6 +216,34 @@ class Service(SchedulingItem):
     def get_name(self):
         return self.host_name+'/'+self.service_description
 
+    
+    #Call by picle for dataify service
+    #Here we do not want a dict, it's too heavy
+    #We create a list with properties inlined
+    #The setstate function do the inverse
+    def __getstate__(self):
+        cls = self.__class__
+        #id is not in *_properties
+        res = [self.id] 
+        for prop in cls.properties:
+            res.append(getattr(self, prop))
+        for prop in cls.running_properties:
+            res.append(getattr(self, prop))
+        #We reverse because we whant to recreate
+        #By check at properties in the same order
+        res.reverse()
+        return res
+
+
+    #Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state.pop()
+        for prop in cls.properties:
+            setattr(self, prop, state.pop())
+        for prop in cls.running_properties:
+            setattr(self, prop, state.pop())
+
 
     #Check is required prop are set:
     #template are always correct
@@ -228,21 +256,21 @@ class Service(SchedulingItem):
                               'host_name', 'hostgroup_name']
         for prop in cls.properties:
             if prop not in special_properties:
-                if not self.has(prop) and cls.properties[prop]['required']:
+                if not hasattr(self, prop) and cls.properties[prop]['required']:
                     print self.get_name()," : I do not have", prop
                     state = False #Bad boy...
 
         #Ok now we manage special cases...
-        if not self.has('contacts') and not self.has('contacgroups') and  self.notifications_enabled == True:
+        if not hasattr(self, 'contacts') and not hasattr(self, 'contacgroups') and  self.notifications_enabled == True:
             print self.get_name()," : I do not have contacts nor contacgroups"
             state = False
-        if not self.has('check_command') or not self.check_command.is_valid():
+        if not hasattr(self, 'check_command') or not self.check_command.is_valid():
             print self.get_name()," : my check_command is invalid"
             state = False
-        if not self.has('notification_interval') and  self.notifications_enabled == True:
+        if not hasattr(self, 'notification_interval') and  self.notifications_enabled == True:
             print self.get_name()," : I've got no notification_interval but I've got notifications enabled"
             state = False
-        if not self.has('host') or self.host == None:
+        if not hasattr(self, 'host') or self.host == None:
             #if not self.has('host_name') and not self.has('hostgroup_name'):
             print self.get_name(),": I do not have and host"
             state = False
@@ -400,7 +428,7 @@ class Services(Items):
         self.reversed_list = {}
         self.twins = []
         for s in self:
-            if s.has('service_description') and s.has('host_name'):
+            if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
                 s_desc = getattr(s, 'service_description')
                 s_host_name = getattr(s, 'host_name')
                 key = (s_host_name, s_desc)
@@ -420,11 +448,11 @@ class Services(Items):
         #if not, maybe in the whole list?
         for s in self:
             #Runtinme first, available only after linkify
-            if s.has('service_description') and s.has('host'):
+            if hasattr(s, 'service_description') and hasattr(s, 'host'):
                 if s.service_description == name and s.host == host_name:
                         return s.id
             #At config part, available before linkify
-            if s.has('service_description') and s.has('host_name'):
+            if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
                 if s.service_description == name and s.host_name == host_name:
                     return s.id
         return None
@@ -496,7 +524,7 @@ class Services(Items):
     #Make link between service and it's contacts
     def linkify_s_by_c(self, contacts):
         for s in self:
-            if s.has('contacts'):
+            if hasattr(s, 'contacts'):
                 contacts_tab = s.contacts.split(',')
                 new_contacts = []
                 for c_name in contacts_tab:
@@ -519,9 +547,9 @@ class Services(Items):
         for prop in ['contacts', 'contact_groups', 'notification_interval' , 'notification_period']:
             for s in self:
                 if not s.is_tpl():
-                    if not s.has(prop) and s.has('host_name'):
+                    if not hasattr(s, prop) and hasattr(s, 'host_name'):
                         h = hosts.find_by_name(s.host_name)
-                        if h is not None and h.has(prop):
+                        if h is not None and hasattr(h, prop):
                             setattr(s, prop, getattr(h, prop))
 
 
@@ -548,9 +576,9 @@ class Services(Items):
     #We create new service if necessery (host groups and co)
     def explode(self, hostgroups, contactgroups, servicegroups):
         #Hostgroups property need to be fullfill for got the informations
-        self.apply_partial_inheritance('contact_groups')
-        self.apply_partial_inheritance('hostgroup_name')
-        self.apply_partial_inheritance('host_name')
+        #self.apply_partial_inheritance('contact_groups')
+        #self.apply_partial_inheritance('hostgroup_name')
+        #self.apply_partial_inheritance('host_name')
 
         #The "old" services will be removed. All services with 
         #more than one host or a host group will be in it
@@ -560,13 +588,13 @@ class Services(Items):
         #because we add the hostgroup one AFTER the host, they are before and 
         #hostgroup one will NOT be created
         for s in self:
-            if s.has('hostgroup_name'):
+            if hasattr(s, 'hostgroup_name'):
                 hgnames = s.hostgroup_name.split(',')
                 for hgname in hgnames:
                     hgname = hgname.strip()
                     hnames = hostgroups.get_members_by_name(hgname)
                     #We add hosts in the service host_name
-                    if s.has('host_name') and hnames != []:
+                    if hasattr(s, 'host_name') and hnames != []:
                         s.host_name += ',' + str(hnames)
                     else:
                         s.host_name = str(hnames)
@@ -576,14 +604,14 @@ class Services(Items):
         #because we add the hostgroup one AFTER the host, they are before and 
         #hostgroup one will NOT be created
         for s in self:
-            if s.has('contact_groups'):
+            if hasattr(s, 'contact_groups'):
                 cgnames = s.contact_groups.split(',')
                 for cgname in cgnames:
                     cgname = cgname.strip()
                     cnames = contactgroups.get_members_by_name(cgname)
                     #We add hosts in the service host_name
                     if cnames != []:
-                        if s.has('contacts'):
+                        if hasattr(s, 'contacts'):
                             s.contacts += ','+cnames
                         else:
                             s.contacts = cnames
@@ -612,12 +640,12 @@ class Services(Items):
         self.delete_services_by_id(srv_to_remove)
 
         #Servicegroups property need to be fullfill for got the informations
-        self.apply_partial_inheritance('servicegroups')
+        #self.apply_partial_inheritance('servicegroups')
         for s in self:
             if not s.is_tpl():
                 sname = s.service_description
                 shname = s.host_name
-                if s.has('servicegroups'):
+                if hasattr(s, 'servicegroups'):
                     sgs = s.servicegroups.split(',')
                     for sg in sgs:
                         servicegroups.add_member(shname+','+sname, sg)

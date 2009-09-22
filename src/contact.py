@@ -137,11 +137,10 @@ class Contacts(Items):
     def explode(self, contactgroups):
         #Contactgroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('contactgroups')
-        for c in self:#.items:
-            #c = self.items[id]
+        for c in self:
             if not c.is_tpl():
                 cname = c.contact_name
-                if c.has('contactgroups'):
+                if hasattr(c, 'contactgroups'):
                     cgs = c.contactgroups.split(',')
                     for cg in cgs:
                         contactgroups.add_member(cname, cg.strip())

@@ -71,7 +71,6 @@ class IChecks(Pyro.core.ObjBase):
 	
 	#poller or reactionner are putting us results
 	def put_results(self, results):
-		#print "Received %d results" % len(results)
 		for c in results:
 			self.sched.put_results(c)
 
@@ -136,7 +135,7 @@ class IForArbiter(Pyro.core.ObjBase):
 	#app has a scheduler, we ask it to die, so the new conf 
 	#will be load, and a new scheduler created
 	def put_conf(self, conf):
-		self.app.conf = conf
+		self.app.conf = conf#cPickle.loads(conf)
 		print "Get conf:", self.app.conf
 		self.app.have_conf = True
 		print "Have conf?", self.app.have_conf
