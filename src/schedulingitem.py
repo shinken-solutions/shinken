@@ -253,6 +253,7 @@ class SchedulingItem(Item):
         self.last_chk = c.check_time
         self.output = c.output
         self.long_output = c.long_output
+        self.perf_data = c.perf_data
         self.set_state_from_exit_status(c.exit_status)
         self.add_attempt()
 
@@ -327,7 +328,7 @@ class SchedulingItem(Item):
         
         #Volatile part
         #Only for service
-        elif c.exit_status != 0 and self.has('is_volatile') and self.is_volatile:
+        elif c.exit_status != 0 and hasattr(self, 'is_volatile') and self.is_volatile:
             self.state_type = 'HARD'
             if not no_action:
                 return self.create_notifications('PROBLEM')

@@ -49,11 +49,19 @@ class Check(Action):
         self.depend_on_me = dep_check_id
         self.check_time = 0
         self.execution_time = 0
+        self.perf_data = ''
 
 
     def get_outputs(self, out):
         elts = out.split('\n')
-        self.output = elts[0]
+        #For perf data
+        elts_line1 = elts[0].split('|')
+        #First line before | is output
+        self.output = elts_line1[0]
+        #After | is perfdata
+        if len(elts_line1) > 1:
+            self.perf_data = elts_line1[1]
+        #The others lines are long_output
         if len(elts) > 1:
             self.long_output = '\n'.join(elts[1:])
         #print "Setting output:", self.output

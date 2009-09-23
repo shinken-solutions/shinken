@@ -213,8 +213,9 @@ class Shinken:
 						diff = apres-avant
 						timeout = timeout - diff
 						break    # no need to continue with the for loop
-			else: #Timeout
-				print "Waiting for a configuration"
+			else: #Timeou
+				sys.stdout.write(".")
+				sys.stdout.flush()
 				timeout = 1.0
 
 			if timeout < 0:
