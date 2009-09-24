@@ -400,6 +400,11 @@ class Service(SchedulingItem):
     #return a check to check the service
     def launch_check(self, t, ref_check_id = None):
         c = None
+
+        #if I'm already in checking, Why launch a new check?
+        #If ref_check_id is not None , this is a dependancy_ check
+        
+
         if not self.is_no_check_dependant():
             #Get the command to launch
             m = MacroResolver()
@@ -407,7 +412,7 @@ class Service(SchedulingItem):
             
             #Make the Check object and put the service in checking
             #print "Asking for a check with command:", command_line
-            c = Check('scheduled',command_line, self.id, 'service', self.next_chk, ref_check_id)
+            c = Check('scheduled', command_line, self.id, 'service', self.next_chk, ref_check_id)
             #We keep a trace of all checks in progress
             #to know if we are in checking_or not
             self.checks_in_progress.append(c.id)

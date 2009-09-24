@@ -96,6 +96,7 @@ class SchedulingItem(Item):
             if cls.check_freshness:
                 if self.check_freshness:
                     if self.last_state_update < now - self.freshness_threshold:
+                        print "Warning : ", self.get_name(), " is not so fresh! I raise a new check"
                         return self.launch_check(now)
         return None
 
@@ -168,11 +169,12 @@ class SchedulingItem(Item):
         for (dep, status, type, tp) in self.act_depend_of:
             #If the dep timeperiod is not valid, do notraise the dep, None=everytime
             if tp is None or tp.is_time_valid(now):
-                #if the update is 'fresh', do not raise dep, cached_check_horizon = cached_service_check_horizon for service
+                #if the update is 'fresh', do not raise dep,
+                #cached_check_horizon = cached_service_check_horizon for service
                 if dep.last_state_update < now - cls.cached_check_horizon:
                     checks.append(dep.launch_check(now, ref_check_id))
                 else:
-                    print "********************************************* The state is FRESH", dep.host_name, time.asctime(time.localtime(dep.last_state_update))
+                    print "**************** The state is FRESH", dep.host_name, time.asctime(time.localtime(dep.last_state_update))
         return checks
 
 
