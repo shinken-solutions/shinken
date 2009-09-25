@@ -30,7 +30,7 @@ class Check(Action):
     #_status = None
     #_command = None
     #id = 0
-    def __init__(self, status, command, ref, ref_type, t_to_go, dep_check_id=None):
+    def __init__(self, status, command, ref, ref_type, t_to_go, dep_check=None):
         self.is_a = 'check'
         self.type = ''
         #self.id = self.__class__.id
@@ -46,11 +46,24 @@ class Check(Action):
         self.ref_type = ref_type
         self.t_to_go = t_to_go
         self.depend_on = []
-        self.depend_on_me = dep_check_id
+        if dep_check is None:
+            self.depend_on_me = []
+        else:
+            self.depend_on_me = [dep_check]
         self.check_time = 0
         self.execution_time = 0
         self.perf_data = ''
 
+    
+    def get_return_from(self, c):
+        self.exit_status  = c.exit_status
+        self.output = c.output
+        self.long_output = c.long_output
+        self.check_time = c.check_time
+        #print "Getting cehck time", c.check_time, 'and t to go', self.t_to_go
+        self.execution_time = c.execution_time
+        self.perf_data = c.perf_data
+        
 
     def get_outputs(self, out):
         elts = out.split('\n')

@@ -398,12 +398,18 @@ class Service(SchedulingItem):
 
 
     #return a check to check the service
-    def launch_check(self, t, ref_check_id = None):
+    def launch_check(self, t, ref_check = None):
         c = None
 
         #if I'm already in checking, Why launch a new check?
         #If ref_check_id is not None , this is a dependancy_ check
-        
+        if self.in_checking and ref_check != None:
+            print "FUCK, I do not want to launch a new check, I alreay have one"
+            c_in_progress = self.checks_in_progress[0]
+            if c_in_progress.t_to_go > time.time(): #Very far?
+                c_in_progress.t_to_go = time.time() #Ok, I want a check right NOW
+            c_in_progress.depend_on_me.append(ref_check)
+            return c_in_progress.id
 
         if not self.is_no_check_dependant():
             #Get the command to launch
@@ -412,10 +418,10 @@ class Service(SchedulingItem):
             
             #Make the Check object and put the service in checking
             #print "Asking for a check with command:", command_line
-            c = Check('scheduled', command_line, self.id, 'service', self.next_chk, ref_check_id)
+            c = Check('scheduled', command_line, self.id, 'service', t, ref_check)
             #We keep a trace of all checks in progress
             #to know if we are in checking_or not
-            self.checks_in_progress.append(c.id)
+            self.checks_in_progress.append(c)
             #print self.get_name()+" we ask me for a check" + str(c.id)
         self.update_in_checking()
         #We need to return the check for scheduling adding

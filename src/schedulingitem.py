@@ -162,7 +162,7 @@ class SchedulingItem(Item):
 
     #call by a bad consume check where item see that he have dep
     #and maybe he is not in real fault.
-    def raise_dependancies_check(self, ref_check_id):
+    def raise_dependancies_check(self, ref_check):
         now = time.time()
         cls = self.__class__
         checks = []
@@ -172,7 +172,8 @@ class SchedulingItem(Item):
                 #if the update is 'fresh', do not raise dep,
                 #cached_check_horizon = cached_service_check_horizon for service
                 if dep.last_state_update < now - cls.cached_check_horizon:
-                    checks.append(dep.launch_check(now, ref_check_id))
+                    c = dep.launch_check(now, ref_check)
+                    checks.append(c)
                 else:
                     print "**************** The state is FRESH", dep.host_name, time.asctime(time.localtime(dep.last_state_update))
         return checks
@@ -192,7 +193,8 @@ class SchedulingItem(Item):
         
         now = time.time()
         #next_chk il already set, do not change
-        if self.next_chk >= now or self.in_checking and not force:
+        #if self.next_chk >= now or self.in_checking and not force:
+        if self.in_checking and not force:
             return None
 
         cls = self.__class__
@@ -227,14 +229,14 @@ class SchedulingItem(Item):
         #Get the command to launch
         return self.launch_check(self.next_chk)
 
-    def remove_in_progress_check(self, id):
-        #The check is consume, uptade the in_checking propertie
-        if id in self.checks_in_progress:
-            self.checks_in_progress.remove(id)
-        else:
-            print "Not removing check", id, "for service", self.get_name()
-        self.update_in_checking()
 
+    def remove_in_progress_check(self, c):
+        #The check is consume, uptade the in_checking propertie
+        if c in self.checks_in_progress:
+            self.checks_in_progress.remove(c)
+        else:
+            print "Not removing check", c, "for ", self.get_name()
+        self.update_in_checking()
 
 
     #consume a check return and send action in return
@@ -247,10 +249,7 @@ class SchedulingItem(Item):
         now = time.time()
         OK_UP = self.__class__.ok_up #OK for service, UP for host
         
-        #The check is consume, uptade the in_checking propertie
-        self.remove_in_progress_check(c.id)
-        
-        self.latency = c.check_time - c.t_to_go#now - c.t_to_go
+        self.latency = c.check_time - c.t_to_go
         self.execution_time = c.execution_time
         self.last_chk = c.check_time
         self.output = c.output
@@ -267,20 +266,32 @@ class SchedulingItem(Item):
             print self.get_name(), "I depend of someone, and I need a result"
             c.status = 'waitdep'
             #Make sure the check know about his dep
-            checks = self.raise_dependancies_check(c.id)
+            #C is my check, and he wants dependancies
+            checks = self.raise_dependancies_check(c)
+            to_del = []
             for check in checks:
-                print c.id, self.get_name()," I depend on check", check.id
-                c.depend_on.append(check.id)
+                #C is a int? Ok, in fact it's a check that is already in progress
+                if isinstance(check, int):
+                    c.depend_on.append(check)
+                    to_del.append(check)
+                else:
+                    print c.id, self.get_name()," I depend on check", check.id
+                    c.depend_on.append(check.id)
+            for i in to_del:
+                checks.remove(i)
             return checks
 
+        #The check is consume, uptade the in_checking propertie
+        self.remove_in_progress_check(c)
+
         #C is a check and someone wait for it
-        if c.status == 'waitconsume' and c.depend_on_me is not None:
+        if c.status == 'waitconsume' and c.depend_on_me != []:
             print c.id, self.get_name(), "OK, someone wait for me", c.depend_on_me
             c.status = 'havetoresolvedep'
 
         #if finish, check need to be set to a zombie state to be removed
         #it can be change if necessery before return, like for dependancies
-        if c.status == 'waitconsume' and c.depend_on_me == None:
+        if c.status == 'waitconsume' and c.depend_on_me == []:
             #print "SRV OK, nobody depend on me!!"
             c.status = 'zombie'
         
@@ -288,7 +299,7 @@ class SchedulingItem(Item):
         no_action = False
         #C was waitdep, but now all dep are resolved, so check for deps
         if c.status == 'waitdep':
-            if c.depend_on_me is not None:
+            if c.depend_on_me != []:
                 print self.get_name(), "OK, someone wait for me", c.depend_on_me
                 c.status = 'havetoresolvedep'
             else:

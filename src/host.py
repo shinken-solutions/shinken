@@ -339,8 +339,19 @@ class Host(SchedulingItem):
     
 
     #return a check to check the host
-    def launch_check(self, t , ref_check_id = None):
+    def launch_check(self, t , ref_check = None):
         c = None
+        
+        #if I'm already in checking, Why launch a new check?
+        #If ref_check_id is not None , this is a dependancy_ check
+        if self.in_checking and ref_check != None:
+            c_in_progress = self.checks_in_progress[0]
+            if c_in_progress.t_to_go > time.time(): #Very far?
+                c_in_progress.t_to_go = time.time()
+            c_in_progress.depend_on_me.append(ref_check)
+            print "****************** I prefer give you my previous check, really", c_in_progress.id
+            return c_in_progress.id
+        
         if not self.is_no_check_dependant():
             #Get the command to launch
             m = MacroResolver()
@@ -348,11 +359,11 @@ class Host(SchedulingItem):
             
             #Make the Check object and put the service in checking
             #print "Asking for a check with command:", command_line
-            c = Check('scheduled',command_line, self.id, 'host', self.next_chk, ref_check_id)
+            c = Check('scheduled',command_line, self.id, 'host', t, ref_check)
             
             #We keep a trace of all checks in progress
             #to know if we are in checking_or not
-            self.checks_in_progress.append(c.id)
+            self.checks_in_progress.append(c)
         self.update_in_checking()
         #We need to return the check for scheduling adding
         return c

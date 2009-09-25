@@ -125,20 +125,29 @@ class Scheduler:
         #For checks, they may be referred to their host/service
         #We do not just del them in checks, but also in their service/host
         #We want id of less than max_id - 2*max_checks
-        if len(self.checks) > 0:
+        if len(self.checks) > max_checks:
             id_max = self.checks.keys()[-1] #The max id is the last id : max is SO slow!
-            id_to_del_checks = [i for i in self.checks if i < id_max - max_checks]
-            nb_checks_drops = len(id_to_del_checks)
-            for i in id_to_del_checks:
-                c = self.checks[i]
+            to_del_checks = [c for c in self.checks.values() if c.id < id_max - max_checks]
+            nb_checks_drops = len(to_del_checks)
+            if nb_checks_drops > 0:
+                print "I have to del some checks..., sorry", to_del_checks
+            for c in to_del_checks:
+                i = c.id
                 elt = self.get_ref_item_from_action(c)
-                elt.remove_in_progress_check(i) #It's refered as it's id
-                del self.checks[i] #Bye bye ...
+                #First remove the link in host/service
+                elt.remove_in_progress_check(c)
+                #Then in dependant checks (I depend on, or check
+                #depend on me)
+                for dependant_checks in c.depend_on_me:
+                    dependant_checks.depend_on.remove(c.id)
+                for c_temp in c.depend_on:
+                    c_temp.depen_on_me.remove(c)
+                del self.checks[i] #Final Bye bye ...
         else:
             nb_checks_drops = 0
 
         #For broks and actions, it's more simple
-        if len(self.broks) > 0:
+        if len(self.broks) > max_broks:
             id_max = self.broks.keys()[-1]
             id_to_del_broks = [i for i in self.broks if i < id_max - max_broks]
             nb_broks_drops = len(id_to_del_broks)
@@ -147,7 +156,7 @@ class Scheduler:
         else:
             nb_broks_drops = 0
 
-        if len(self.actions) > 0:
+        if len(self.actions) > max_actions:
             id_max = self.actions.keys()[-1]
             #Actions are not refered in hosts/services :) so ...
             id_to_del_actions = [i for i in self.actions if i < id_max - max_actions]
@@ -229,8 +238,9 @@ class Scheduler:
                 self.add(b)
             del self.actions[c.id]
         elif c.is_a == 'check':
-            c.status = 'waitconsume'
-            self.add(c)
+            self.checks[c.id].get_return_from(c)
+            self.checks[c.id].status = 'waitconsume'
+            #self.add(c)
         else:
             print "Type unknown"
 
@@ -314,7 +324,7 @@ class Scheduler:
         for c in self.checks.values():
             #print c
             if c.status == 'waitconsume':
-                #print "A check to consume"
+                #print "A check to consume", c.id
                 item = self.get_ref_item_from_action(c)
                 actions = item.consume_result(c)
                 #The update of the host/service must have changed, we brok it
@@ -331,11 +341,19 @@ class Scheduler:
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
 
+        print "DBG:"
+        for c in self.checks.values():
+            if c.ref_type == 'host':
+                print c.id, ":", c.status, 'Depend_on_me:', len(c.depend_on_me), 'depend_on', c.depend_on        
+
         #All 'finished' checks (no more dep) raise checks they depends on
         for c in self.checks.values():
             if c.status == 'havetoresolvedep':
-                print "I remove dep", c.id, "on the check", c.depend_on_me
-                self.checks[c.depend_on_me].depend_on.remove(c.id)
+                print "I remove dep", c.id, "on the checks in ", c.depend_on_me
+                #self.checks[c.depend_on_me].depend_on.remove(c.id)
+                for dependant_checks in c.depend_on_me:
+                    print "So removing check", c.id, "in" , dependant_checks.id
+                    dependant_checks.depend_on.remove(c.id)#Ok, now dependant will no more wait c
                 #REMOVE OLD DEP CHECL -> zombie
                 c.status = 'zombie'
 
@@ -357,10 +375,10 @@ class Scheduler:
                     elif  a.is_a == 'check':
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
-                
-        print "We add new Dep checks", checks_to_add
-        for c in checks_to_add:
-            self.add(c)
+        if checks_to_add != []:
+            print "We add new Dep checks", checks_to_add
+            for c in checks_to_add:
+                self.add(c)
 
 
     #Called every 1sec to delete all checks in a zombie state
@@ -467,14 +485,14 @@ class Scheduler:
                 self.clean_caches()
 
                 if (status_tick % 60) == 0:
-                    print "********** Update status file******"
+                    #print "********** Update status file******"
                     self.update_status_file()
                 status_tick += 1
 
-                print "************** Clean queues ************"
+                #print "************** Clean queues ************"
                 self.clean_queues()
 
-                print "******* Fin loop********"
+                #print "******* Fin loop********"
 
                 #stats
                 nb_scheduled = len([c for c in self.checks.values() if c.status=='scheduled'])
@@ -482,7 +500,7 @@ class Scheduler:
                 nb_zombies = len([c for c in self.checks.values() if c.status=='zombie'])
                 nb_notifications = len(self.actions)
 
-                print "Checks:", "scheduled", nb_scheduled, "inpoller", nb_inpoller, "zombies", nb_zombies, "notifications", nb_notifications
+                print "Checks:", "total", len(self.checks), "scheduled", nb_scheduled, "inpoller", nb_inpoller, "zombies", nb_zombies, "notifications", nb_notifications
 
                 m = 0.0
                 m_nb = 0
@@ -501,14 +519,17 @@ class Scheduler:
                 #print "."
                 #print "Service still in checking?"
                 #for s in self.services:
-                #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
+                #    print s.get_name()+':'+str(s.in_checking)
                 #    for i in s.checks_in_progress:
-                #        print self.checks[i]
-                #for s in self.hosts:
-                #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
-                #    for i in s.checks_in_progress:
-                #        print self.checks[i]
+                #        print i, i.t_to_go
+                for s in self.hosts:
+                    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
+                    for i in s.checks_in_progress:
+                        print i#self.checks[i]
 
+                for c in self.checks.values():
+                    if c.ref_type == 'host':
+                        print c.id, ":", c.status, 'Depend_on_me:', len(c.depend_on_me), 'depend_on', c.depend_on
                 #hp=hpy()
                 #print hp.heap()
                 #print hp.heapu()
