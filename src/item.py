@@ -17,9 +17,9 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from command import CommandCall
-from util import to_int, to_char, to_split, to_bool
-from copy import deepcopy, copy
+#from command import CommandCall
+#from util import to_int, to_char, to_split, to_bool
+from copy import copy
 from brok import Brok
 
 
@@ -37,13 +37,13 @@ class Item(object):
         #adding running properties like latency, dependency list, etc
         for prop in cls.running_properties:
             #Copy is slow, so we check type
-            #Type with __iter__ are list or dict, or tuple. Item need it's own list, so qe copy
+            #Type with __iter__ are list or dict, or tuple.
+            #Item need it's own list, so qe copy
             val = cls.running_properties[prop]['default']
             if hasattr(val, '__iter__'): 
                 setattr(self, prop, copy(val))
             else:
                 setattr(self, prop, val)
-            #setattr(self, prop, copy(cls.running_properties[prop]['default']))#copy because we need
             #eatch istance to have his own running prop!
 
         #[0] = +  -> new key-plus
@@ -64,7 +64,7 @@ class Item(object):
         properties = cls.properties
         for prop in properties:
             if hasattr(self, prop):
-                val = getattr(self,prop)
+                val = getattr(self, prop)
                 setattr(i, prop, val)
         return i
 
@@ -93,8 +93,9 @@ class Item(object):
     def fill_default(self):
         cls = self.__class__
         properties = cls.properties
-        not_required_properties = [prop for prop in properties if not properties[prop]['required']]
-        for prop in not_required_properties:
+        not_required = [prop for prop in properties \
+                            if not properties[prop]['required']]
+        for prop in not_required:
             if not hasattr(self, prop):
                 value = properties[prop]['default']
                 setattr(self, prop, value)
@@ -104,8 +105,11 @@ class Item(object):
     #Must be called after a change in a gloabl conf parameter
     def load_global_conf(cls, conf):
         print "Load global conf=========================="
-        #conf have properties, if 'enable_notifications' : { [...] 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]}
-        #get the name and put the value if None, put the Name (not None) if not (not clear ?)
+        #conf have properties, if 'enable_notifications' : 
+        #{ [...] 'class_inherit' : [(Host, None), (Service, None),
+        # (Contact, None)]}
+        #get the name and put the value if None, put the Name 
+        #(not None) if not (not clear ?)
         for prop in conf.properties:
             if 'class_inherit' in conf.properties[prop]:
                 for (cls_dest, change_name) in conf.properties[prop]['class_inherit']:
@@ -115,7 +119,7 @@ class Item(object):
                             setattr(cls, prop, value)
                         else:
                             setattr(cls, change_name, value)
-        #print "OK, finally, we've got...", str(cls.__dict__)
+
     #Make this method a classmethod
     load_global_conf = classmethod(load_global_conf)
 
@@ -175,7 +179,6 @@ class Item(object):
     
     #We fillfull properties with template ones if need
     def get_customs_properties_by_inheritance(self, items):
-        cv = {} # custom variables dict
         for i in self.templates:
             tpl_cv = i.get_customs_properties_by_inheritance(items)
             if tpl_cv is not {}:
@@ -186,13 +189,14 @@ class Item(object):
                         value = self.customs[prop]
                     if self.has_plus(prop):
                         value = value+self.get_plus_and_delete(prop)
-                    self.customs[prop]=value
+                    self.customs[prop] = value
         for prop in self.customs:
             value = self.customs[prop]
             if self.has_plus(prop):
                 value = value = value+','+self.get_plus_and_delete(prop)
                 self.customs[prop] = value
-        #We can get custom properties in plus, we need to get all entires and put
+        #We can get custom properties in plus, we need to get all 
+        #entires and put
         #them into customs
         cust_in_plus = self.get_all_plus_and_delete()
         for prop in cust_in_plus:
@@ -352,12 +356,6 @@ class Items(object):
 
     
     def find_id_by_name(self, name):
-        #name_property = self.__class__.name_property
-        #for id in self.items:
-        #    #name_property = self.__class__.name_property
-        #    if self.items[id].has(name_property) and getattr(self.items[id], name_property) == name:
-        #        return id
-        #return None
         if name in self.reversed_list:
             return self.reversed_list[name]
         else:
@@ -455,12 +453,14 @@ class Items(object):
 
 
     #We remove twins
-    #Remember: item id respect the order of conf. So if and item is defined multiple times,
+    #Remember: item id respect the order of conf. So if and item
+    # is defined multiple times,
     #we want to keep the first one.
     #Services are also managed here but they are specials:
     #We remove twins services with the same host_name/service_description
     #Remember: host service are take into account first before hostgroup service
-    #Id of host service are lower than hostgroups one, so they are in self.twins_services
+    #Id of host service are lower than hostgroups one, so they are 
+    #in self.twins_services
     #and we can remove them.
     def remove_twins(self):
         for id in self.twins:

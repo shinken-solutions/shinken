@@ -19,25 +19,26 @@
 
 #This is the class of the Arbiter. It's role is to read configuration,
 #cuts it, and send it to other elements like schedulers, reactionner 
-#or pollers. It is responsible for hight avaibility part. If a scheduler is dead,
+#or pollers. It is responsible for hight avaibility part. If a scheduler
+#is dead,
 #it send it's conf to another if available.
 #It also read order form users (nagios.cmd) and send orders to schedulers.
 
-import os
+#import os
 import re
 import time
-import sys
+#import sys
 import Pyro.core
-import signal
+#import signal
 import select
-import random
-import copy
+#import random
+#import copy
 
-from check import Check
-from util import get_sequence, scheduler_no_spare_first
+#from check import Check
+from util import scheduler_no_spare_first
 from scheduler import Scheduler
 from config import Config
-from macroresolver import MacroResolver
+#from macroresolver import MacroResolver
 from external_command import ExternalCommand
 
 
@@ -49,9 +50,6 @@ class Arbiter:
 
 
     def send_conf_to_schedulers(self):
-
-        #print "SIZEOFME:", self.__sizeof__()
-        
         self.conf.schedulerlinks.items.values().sort(scheduler_no_spare_first)
 
         for sched in self.conf.schedulerlinks.items.values():
@@ -59,22 +57,10 @@ class Arbiter:
 
         for reactionner in self.conf.reactionners.items.values():
             print "Reactionner", reactionner, "is alive ?", reactionner.is_alive()
-        
 
         for broker in self.conf.brokers.items.values():
             print "Broker", broker, "is alive ?", broker.is_alive()
 
-
-        #for conf in self.conf.confs.values():
-        #    a = cPickle.dumps(conf)
-        #    print "Taille A:", a.__sizeof__()
-        
-        #self.conf.schedulerlinks.sort(scheduler_no_spare_first)
-        #no_spare_sched = [s for s in self.conf.schedulerlinks if not s.spare]
-        
-        #conf_association = zip(self.conf.schedulerlinks, self.conf.confs.values())
-        nb_error = 0
-        #for (sched, conf) in conf_association:
         print "Dispatching ", len(self.conf.confs), "configurations"
         for conf in self.conf.confs.values():
             if not conf.is_assigned:
@@ -82,8 +68,7 @@ class Arbiter:
                     if not sched.is_active and not conf.is_assigned:
                         print sched.id
                         try:
-                            #print "Taille A:", cPickle.dumps(conf).__sizeof__()
-                            sched.put_conf(conf)#cPickle.dumps(conf))
+                            sched.put_conf(conf)
                             sched.is_active = True
                             conf.is_assigned = True
                             conf.assigned_to = sched
@@ -139,7 +124,6 @@ class Arbiter:
     def main(self):
         print "Loading configuration"
         self.conf = Config()
-        g_config = self.conf
         self.conf.read_config("nagios.cfg")
 
         print "****************** Create Template links **********"
@@ -195,7 +179,8 @@ class Arbiter:
 	#Now create the external commander
 	e = ExternalCommand(self.conf, 'dispatcher')
 
-	#Scheduler need to know about external command to activate it if necessery
+	#Scheduler need to know about external command to activate it 
+        #if necessery
 	self.load_external_command(e)
 	
 	print "Configuration Loaded"
@@ -208,12 +193,12 @@ class Arbiter:
         print "Run baby, run..."
         timeout = 1.0
         while True :
-            socks=[]
-            avant=time.time()
+            socks = []
+            avant = time.time()
             
             socks.append(self.fifo)
-            
-            ins,outs,exs=select.select(socks,[],[],timeout)   # 'foreign' event loop
+            # 'foreign' event loop
+            ins,outs,exs = select.select(socks,[],[],timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:

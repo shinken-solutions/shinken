@@ -16,18 +16,18 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import random
+#import random
 import time
 
 from command import CommandCall
-from copy import deepcopy
-from item import Item, Items
+#from copy import deepcopy
+from item import Items
 from schedulingitem import SchedulingItem
 from util import to_int, to_char, to_split, to_bool, strip_and_uniq
 from check import Check
 from notification import Notification
 from macroresolver import MacroResolver
-from brok import Brok
+#from brok import Brok
 
 
 class Service(SchedulingItem):
@@ -252,12 +252,13 @@ class Service(SchedulingItem):
         state = True #guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['contacts', 'contactgroups', 'check_period', 'notification_interval',
-                              'host_name', 'hostgroup_name']
+        special_properties = ['contacts', 'contactgroups', 'check_period', \
+                                  'notification_interval', 'host_name', \
+                                  'hostgroup_name']
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
-                    print self.get_name()," : I do not have", prop
+                    print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
 
         #Ok now we manage special cases...
@@ -331,7 +332,7 @@ class Service(SchedulingItem):
         return False
 
 
-    #Create notifications but without commands. It will be update juste before being send
+    #Create notifications
     def create_notifications(self, type):
         #if notif is disabled, not need to go thurser
         cls = self.__class__
@@ -348,7 +349,8 @@ class Service(SchedulingItem):
                 print "SRV: Raise notification"
                 n = Notification(type, 'scheduled', 'VOID', {'service' : self.id, 'contact' : contact.id, 'command': cmd}, 'service', t)
 
-                #The notif must be fill with current data, so we create the commmand now
+                #The notif must be fill with current data, 
+                #so we create the commmand now
                 command = n.ref['command']
                 n._command = m.resolve_command(command, self.host_name, self, contact, n)
                 #Maybe the contact do not want this notif? Arg!
@@ -373,19 +375,18 @@ class Service(SchedulingItem):
         if n.type == 'RECOVERY':
             return None
         new_n = Notification(n.type, 'scheduled','', {'service' : n.ref['service'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'service', now + self.notification_interval * 60)
-        #m = MacroResolver()
-        #command = new_n.ref['command']
-        #new_n._command = m.resolve_command(command, self.host_name, self, contact, n)
         return new_n
 
 
     #Check if the notificaton is still necessery
     def still_need(self, n):
-        now = time.time()
-        #if state != OK, te service still got a pb, so notification still necessery
+        #now = time.time()
+        #if state != OK, te service still got a pb, 
+        #so notification still necessery
         if self.state != 'OK':
             return True
-        #state is OK but notif is in poller, so do not remove, will be done after
+        #state is OK but notif is in poller, 
+        #so do not remove, will be done after
         if n.status == 'inpoller':
             return True
         #we do not see why to save this notification, so...
@@ -433,7 +434,8 @@ class Services(Items):
     #Create the reversed list for speedup search by host_name/name
     #We also tag service already in list : they are twins. It'a a bad things.
     #Hostgroups service have an ID higer thant host service. So it we tag 
-    #an id that already are in the list, this service is already exist, and is a host,
+    #an id that already are in the list, this service is already
+    #exist, and is a host,
     #or a previous hostgroup, but define before.
     def create_reversed_list(self):
         self.reversed_list = {}
@@ -555,7 +557,8 @@ class Services(Items):
     #contact_groups, notification_interval , notification_period
     #So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
-        for prop in ['contacts', 'contact_groups', 'notification_interval' , 'notification_period']:
+        for prop in ['contacts', 'contact_groups', 'notification_interval', \
+                         'notification_period']:
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):
@@ -628,7 +631,8 @@ class Services(Items):
                             s.contacts = cnames
  
         #Then for every host create a copy of the service with just the host
-        service_to_check = self.items.keys() #because we are adding services, we can't just loop in it
+        #because we are adding services, we can't just loop in it
+        service_to_check = self.items.keys()
 
         for id in service_to_check:
             s = self.items[id]
@@ -644,7 +648,8 @@ class Services(Items):
                     #Multiple host_name -> the original service
                     #must be delete
                     srv_to_remove.append(id)                    
-                else: #Maybe the hnames was full of same host, so we must reset the name
+                else: #Maybe the hnames was full of same host,
+                      #so we must reset the name
                     for hname in hnames: #So even if len == 0, we are protected
                         s.host_name = hname
 

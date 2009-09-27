@@ -30,7 +30,8 @@ from downtime import Downtime
 class Scheduler:
     def __init__(self, daemon):
         self.daemon = daemon #Pyro daemon for incomming orders/askings
-        self.must_run = True #When set to false by us, we die and arbiter launch a new Scheduler
+        self.must_run = True #When set to false by us, we die and 
+                             #arbiter launch a new Scheduler
 
 
     #Load conf for future use
@@ -51,7 +52,9 @@ class Scheduler:
         self.broks = {}
 
         self.status_file = StatusFile(self)        #External status file
-        self.instance_id = conf.instance_id #From Arbiter. Use for Broker to disting betweens schedulers
+        self.instance_id = conf.instance_id #From Arbiter. Use for 
+                                            #Broker to disting betweens
+                                            #schedulers
 
 
     #Oh... Arbiter want us to die... For launch a new Scheduler
@@ -126,7 +129,8 @@ class Scheduler:
         #We do not just del them in checks, but also in their service/host
         #We want id of less than max_id - 2*max_checks
         if len(self.checks) > max_checks:
-            id_max = self.checks.keys()[-1] #The max id is the last id : max is SO slow!
+            id_max = self.checks.keys()[-1] #The max id is the last id
+                                            #: max is SO slow!
             to_del_checks = [c for c in self.checks.values() if c.id < id_max - max_checks]
             nb_checks_drops = len(to_del_checks)
             if nb_checks_drops > 0:
@@ -166,9 +170,7 @@ class Scheduler:
         else:
             nb_actions_drops = 0
         
-        #print "WARNING:", self.broks.keys()[-1] - max_broks, 'Min =', self.broks[self.broks.keys()[0]]
-        #print "WARNING:", "checks", len(self.checks),'/',max_checks, len(self.broks),'/',max_broks, len(self.actions)
-        if nb_checks_drops !=0 or nb_broks_drops!=0 or nb_actions_drops!= 0:
+        if nb_checks_drops !=0 or nb_broks_drops != 0 or nb_actions_drops != 0:
             print "WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops)
 
             
@@ -195,7 +197,7 @@ class Scheduler:
 
     #We do not want this downtime id
     def del_downtime(self, dt_id):
-        dt = self.downtimes[dt.id]
+        dt = self.downtimes[dt_id]
         dt.ref.del_downtime(dt_id)
         del self.downtimes[dt.id]
 
@@ -217,8 +219,8 @@ class Scheduler:
         if do_actions:
             for a in self.actions.values():
                 #contact = self.contacts.items[a.ref['contact']]
-                contact = self.contacts[a.ref['contact']]
-                item = self.get_ref_item_from_action(a)
+                #contact = self.contacts[a.ref['contact']]
+                #item = self.get_ref_item_from_action(a)
                 if a.status == 'scheduled':
                     a.status = 'inpoller'
                     res.append(a)
@@ -258,7 +260,7 @@ class Scheduler:
     #broks of service and hosts (initial status)
     def fill_initial_broks(self):
         #First a Brok for delete all from my instance_id
-        b = Brok('clean_all_my_instance_id',{'instance_id' : self.instance_id})
+        b = Brok('clean_all_my_instance_id', {'instance_id' : self.instance_id})
         self.add(b)
 
         #first the program status
@@ -353,7 +355,8 @@ class Scheduler:
                 #self.checks[c.depend_on_me].depend_on.remove(c.id)
                 for dependant_checks in c.depend_on_me:
                     print "So removing check", c.id, "in" , dependant_checks.id
-                    dependant_checks.depend_on.remove(c.id)#Ok, now dependant will no more wait c
+                    #Ok, now dependant will no more wait c
+                    dependant_checks.depend_on.remove(c.id)
                 #REMOVE OLD DEP CHECL -> zombie
                 c.status = 'zombie'
 
@@ -437,10 +440,8 @@ class Scheduler:
         #Ok, now all is initilised, we can make the inital broks
         self.fill_initial_broks()
 
-        #TODO : OK if after broks?
         print "First scheduling"
         self.schedule()
-
 
         #TODO : a better tick count
         status_tick = 0
@@ -451,8 +452,8 @@ class Scheduler:
             socks = self.daemon.getServerSockets()
             avant = time.time()
             #socks.append(self.fifo)
- 
-            ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
+            # 'foreign' event loop
+            ins,outs,exs = select.select(socks,[],[],timeout)
             if ins != []:
 		for s in socks:
                         if s in ins:
@@ -463,7 +464,7 @@ class Scheduler:
                             #Must be paquet from poller
                             #else:
                             self.daemon.handleRequests()
-                            apres=time.time()
+                            apres = time.time()
                             diff = apres-avant
                             timeout = timeout - diff
                             break    # no need to continue with the for loop

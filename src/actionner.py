@@ -19,13 +19,16 @@
 
 #This class is an interface for reactionner and poller
 #The actionner listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where actionner will take actions.
-#When already launch and have a conf, actionner still listen to arbiter (one a timeout)
-#if arbiter whant it to have a new conf, actionner forgot old chedulers (and actions into)
+#the configuration gived by arbiter is schedulers where actionner will 
+#take actions.
+#When already launch and have a conf, actionner still listen to arbiter
+#(one a timeout)
+#if arbiter whant it to have a new conf, actionner forgot old schedulers
+#(and actions into)
 #take new ones and do the (new) job.
 
 from Queue import Empty
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
 import time
 import sys
 import Pyro.core
@@ -33,7 +36,7 @@ import select
 
 from message import Message
 from worker import Worker
-from util import get_sequence
+#from util import get_sequence
 
 
 #Interface for Arbiter, our big MASTER
@@ -57,7 +60,8 @@ class IForArbiter(Pyro.core.ObjBase):
 		for sched_id in conf['schedulers'] :
 			s = conf['schedulers'][sched_id]
 			self.schedulers[sched_id] = s
-			self.schedulers[sched_id]['uri'] = "PYROLOC://%s:%d/Checks" % (s['address'], s['port'])
+			uri = "PYROLOC://%s:%d/Checks" % (s['address'], s['port'])
+			self.schedulers[sched_id]['uri'] = uri
 			self.schedulers[sched_id]['verifs'] = {}
 			self.schedulers[sched_id]['running_id'] = 0
 			#We cannot reinit connexions because this code in in a thread, and
@@ -117,7 +121,7 @@ class Actionner:
 		#Ok, a worker whant to die. It's sad, but we must kill him!!!
 		if msg.get_type() == 'IWantToDie':
 			zombie = msg.get_from()
-			print "Got a ding wish from ",zombie
+			print "Got a ding wish from ", zombie
 			self.workers[zombie].join()
 		#Ok, it's a result. We get it, and fill verifs of the good sched_id
 
@@ -126,10 +130,8 @@ class Actionner:
 			self.workers[id].reset_idle()
 			chk = msg.get_data()
 			sched_id = chk.sched_id
-			#print "[%d]Get result from worker" % sched_id, chk
 			chk.set_status('waitforhomerun')
 			self.schedulers[sched_id]['verifs'][chk.get_id()] = chk
-
 
 
         #Return the chk to scheduler and clean them
@@ -138,15 +140,16 @@ class Actionner:
 		for sched_id in self.schedulers:
 			ret = []
 			verifs = self.schedulers[sched_id]['verifs']
-                        #Get the id to return to pynag, so after make a big array with only them
+                        #Get the id to return to shinken, so after make 
+			#a big array with only them
 			id_to_return = [elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun']
 			for id in id_to_return:
 				v = verifs[id]
-				#We got v without the sched_id prop, so we remove it before resent it.
+				#We got v without the sched_id prop, so we
+				#remove it before resent it.
 				del v.sched_id
 				ret.append(v)
 			#Now ret have all verifs, we can return them
-			#print "[%d] Returning %s results" % (sched_id, ret)
 			if ret is not []:
 				try:
 					con = self.schedulers[sched_id]['con']
@@ -167,7 +170,8 @@ class Actionner:
 
 
 	#Use to wait conf from arbiter.
-	#It send us conf in our daemon. It put the have_conf prop if he send us something
+	#It send us conf in our daemon. It put the have_conf prop
+	#if he send us something
 	#(it can just do a ping)
 	def wait_for_initial_conf(self):
 		print "Waiting for initial configuration"
@@ -196,12 +200,14 @@ class Actionner:
 
 				
 	#The arbiter can resent us new conf in the daemon port.
-	#We do not want to loose time about it, so it's not a bloking wait, timeout = 0s
+	#We do not want to loose time about it, so it's not a bloking 
+	#wait, timeout = 0s
 	#If it send us a new conf, we reinit the connexions of all schedulers
 	def watch_for_new_conf(self):
 		timeout_daemon = 0.0
 		socks = self.daemon.getServerSockets()
-		ins,outs,exs = select.select(socks,[],[],timeout_daemon)   # 'foreign' event loop
+		# 'foreign' event loop
+		ins,outs,exs = select.select(socks,[],[],timeout_daemon)
 		if ins != []:
 			for sock in socks:
 				if sock in ins:
@@ -223,7 +229,7 @@ class Actionner:
 	#Here we create new workers if the queue load (len of verifs) is too long
 	#here it's > 80% of workers
 	def adjust_worker_number_by_load(self):
-            nb_queue = 0 # Len of actions in queue status, so the "working" queue
+            nb_queue = 0 # Len of actions in queue status, so the working queue
             for sched_id in self.schedulers:
                 verifs = self.schedulers[sched_id]['verifs']
                 tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
@@ -235,7 +241,8 @@ class Actionner:
                 self.create_and_launch_worker()
 
 
-	#We get new actions from schedulers, we create a Message ant we put it in the s queue (from master to slave)
+	#We get new actions from schedulers, we create a Message ant we 
+	#put it in the s queue (from master to slave)
 	def get_new_actions(self):
 		new_checks = []
 		#We check for new check in each schedulers and put the result in new_checks
@@ -243,8 +250,10 @@ class Actionner:
 			try:
 				con = self.schedulers[sched_id]['con']
 				if con is not None: #None = not initilized
-                                        #Here are the differences between a poller and a reactionner:
-                                        #Poller will only do checks, reactionner do actions
+                                        #Here are the differences between a 
+					#poller and a reactionner:
+                                        #Poller will only do checks,
+					#reactionner do actions
                                         do_checks = self.__class__.do_checks
                                         do_actions = self.__class__.do_actions
 					tmp_verifs = con.get_checks(do_checks=do_checks, do_actions=do_actions)
@@ -254,21 +263,27 @@ class Actionner:
 					new_checks.extend(tmp_verifs)
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id)
-			except KeyError as exp: #Ok, con is not know, so we create it
+                        #Ok, con is not know, so we create it
+			except KeyError as exp:
 				self.pynag_con_init(sched_id)
 			except Pyro.errors.ProtocolError as exp:
 				print exp
 				#we reinitialise the ccnnexion to pynag
 				self.pynag_con_init(sched_id)
-			except AttributeError as exp: #scheduler must not be initialized
+                        #scheduler must not be initialized
+			except AttributeError as exp:
 				print exp
-			except Pyro.errors.NamingError as exp:#scheduler must not have checks
+                        #scheduler must not have checks
+			except Pyro.errors.NamingError as exp:
 				print exp
-			except Exception,x: # What the F**k? We do not know what happenned, so.. bye bye :)
+			# What the F**k? We do not know what happenned,
+			#so.. bye bye :)
+			except Exception,x:
 				print ''.join(Pyro.util.getPyroTraceback(x))
 				sys.exit(0)
 		#Ok, we've got new actions in new_checks
-		#so we put them in queue state and we put in in the working queue for workers
+		#so we put them in queue state and we put in in the
+		#working queue for workers
 		for chk in new_checks:
 			chk.set_status('queue')
 			verifs = self.schedulers[chk.sched_id]['verifs']
@@ -314,7 +329,7 @@ class Actionner:
 		while True:
 			i = i + 1
 			if not i % 50:
-				print "Loop ",i
+				print "Loop ", i
 			begin_loop = time.time()
 
 			#Now we check if arbiter speek to us in the daemon. If so, we listen for it
@@ -337,11 +352,13 @@ class Actionner:
 				after = time.time()
 				timeout = 1.0
 				
-                                #We join (old)zombies and we move new ones in the old list
+                                #We join (old)zombies and we move new ones
+				#in the old list
 				for id in self.zombies:
 					self.workers[id].join()
 					del self.workers[id]
-				#We switch so zombie will be kill, and new ones wil go in newzombies
+				#We switch so zombie will be kill, and new
+				#ones wil go in newzombies
 				self.zombies = self.newzombies
 				self.newzombies = []
 
@@ -363,7 +380,7 @@ class Actionner:
                                 #We look for cleaning workers
 				for id in self.workers:
 					if self.workers[id].is_killable():
-						msg=Message(id=0, type='Die')
+						msg = Message(id=0, type='Die')
 						self.workers[id].send_message(msg)
 						self.workers[id].set_zombie()
 						delworkers.append(id)

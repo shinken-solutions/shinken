@@ -23,7 +23,7 @@
 import Pyro.core
 
 from item import Item, Items
-from util import to_int, to_char, to_split, to_bool
+from util import to_int#, to_char, to_split, to_bool
 
 class PollerLink(Item):
     id = 0
@@ -56,10 +56,9 @@ class PollerLink(Item):
             
         try:
             self.con.put_conf(conf)
-        except Exception,x:
+        except Exception, x:
             print 'Connexion problem'#''.join(Pyro.util.getPyroTraceback(x))
             #sys.exit(0)
-
 
 
     def is_alive(self):

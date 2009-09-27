@@ -24,17 +24,17 @@
 #and a new one is created.
 #The scheduler create list of checks and actions for poller
 #and reactionner.
-import os
-import re
+#import os
+#import re
 import time
 import sys
 import Pyro.core
-import signal
+#import signal
 import select
 import random
 
 from check import Check
-from util import get_sequence
+#from util import get_sequence
 from scheduler import Scheduler
 from config import Config
 from macroresolver import MacroResolver
@@ -147,7 +147,8 @@ class IForArbiter(Pyro.core.ObjBase):
                 #print hp.heapu()
 
 		
-                #if app already have a scheduler, we must say him to DIE Mouahahah
+                #if app already have a scheduler, we must say him to 
+                #DIE Mouahahah
 		#So It will quit, and will load a new conf (and create a brand new scheduler)
 		if hasattr(self.app, "sched"):
 			self.app.sched.die()
@@ -185,9 +186,9 @@ class Shinken:
 		#Now the interface
 		i_for_arbiter = IForArbiter(self)
 		self.uri2 = self.poller_daemon.connect(i_for_arbiter,"ForArbiter")
-		print "The daemon runs on port:",self.poller_daemon.port
-		print "The arbiter daemon runs on port:",self.poller_daemon.port
-		print "The object's uri2 is:",self.uri2
+		print "The daemon runs on port:", self.poller_daemon.port
+		print "The arbiter daemon runs on port:", self.poller_daemon.port
+		print "The object's uri2 is:", self.uri2
 		
 		#Ok, now the conf
 		self.must_run = True
@@ -203,7 +204,8 @@ class Shinken:
 		while not self.have_conf :
 			socks = self.poller_daemon.getServerSockets()
 			avant = time.time()
-			ins,outs,exs=select.select(socks,[],[],timeout)   # 'foreign' event loop
+			# 'foreign' event loop
+			ins,outs,exs = select.select(socks,[],[],timeout)
 			if ins != []:
 				for s in socks:
 					if s in ins:
@@ -266,7 +268,9 @@ class Shinken:
 		print "Configuration Loaded"
 		while self.must_run:
 			self.sched.run()
-			if self.must_run: #Ok, we quit scheduler, but maybe it's just for reloadin our configuration
+                        #Ok, we quit scheduler, but maybe it's just for
+			#reloading our configuration
+			if self.must_run:
 				self.load_conf()
 				
 

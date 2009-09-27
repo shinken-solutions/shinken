@@ -18,7 +18,7 @@
 
 
 import os, time
-from util import to_int, to_char, to_split, to_bool
+from util import to_int, to_bool
 from downtime import Downtime
 
 class ExternalCommand:
@@ -439,10 +439,6 @@ class ExternalCommand:
     def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod):
         pass
 
-    #CHANGE_HOST_CHECK_TIMEPERIOD;<host_name>;<check_timeperod>
-    def CHANGE_HOST_CHECK_TIMEPERIOD(host, check_timeperod):
-        pass
-
     #CHANGE_HOST_EVENT_HANDLER;<host_name>;<event_handler_command>
     def CHANGE_HOST_EVENT_HANDLER(self, host, event_handler_command):
         pass
@@ -619,7 +615,7 @@ class ExternalCommand:
         self.sched.get_and_register_status_brok(host)
 
     #DISABLE_HOST_FRESHNESS_CHECKS
-    def DISABLE_HOST_FRESHNESS_CHECKS(self):
+    def DISABLE_HOST_FRESHNESS_CHECKS(self, host):
         host.check_freshness = False
         self.sched.get_and_register_status_brok(host)
 
@@ -1026,7 +1022,7 @@ class ExternalCommand:
     #SCHEDULE_SVC_DOWNTIME;<host_name>;<service_desription><start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SVC_DOWNTIME(self, service, start_time, end_time, fixed, trigger_id, duration, author, comment):
         dt = Downtime(service, start_time, end_time, fixed, trigger_id, duration, author, comment)
-        host.add_downtime(dt)
+        service.add_downtime(dt)
         self.sched.add(dt)
 
     #SEND_CUSTOM_HOST_NOTIFICATION;<host_name>;<options>;<author>;<comment>

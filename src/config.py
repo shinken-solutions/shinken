@@ -23,22 +23,20 @@
 #them into independant parts. The main user of this is Arbiter, but schedulers
 #use it too (but far less)
 
-import os, sys, re, time, string, copy
+import re, string, copy
 import pygraph
 import itertools
 
-from timeperiod import Timeperiod,Timeperiods
-from service import Service,Services
-from command import Command,Commands
-from host import Host,Hosts
-from hostgroup import Hostgroup,Hostgroups
-from contact import Contact,Contacts
-from contactgroup import Contactgroup,Contactgroups
-from servicegroup import Servicegroup,Servicegroups
+from timeperiod import Timeperiod, Timeperiods
+from service import Service, Services
+from command import Command, Commands
+from host import Host, Hosts
+from hostgroup import Hostgroup, Hostgroups
+from contact import Contact, Contacts
+from contactgroup import Contactgroup, Contactgroups
+from servicegroup import Servicegroup, Servicegroups
 from item import Item
 from macroresolver import MacroResolver
-from borg import Borg
-from singleton import Singleton
 from servicedependency import Servicedependency, Servicedependencies
 from hostdependency import Hostdependency, Hostdependencies
 from schedulerlink import SchedulerLink, SchedulerLinks
@@ -46,7 +44,7 @@ from reactionnerlink import ReactionnerLink, ReactionnerLinks
 from brokerlink import BrokerLink, BrokerLinks
 from pollerlink import PollerLink, PollerLinks
 
-from util import to_int, to_char, to_split, to_bool
+from util import to_int, to_char, to_bool
 #import psyco
 #psyco.full()
 
@@ -58,8 +56,10 @@ class Config(Item):
     #required : if True, there is not default, and the config must put them
     #default: if not set, take this value
     #pythonize : function call to 
-    #class_inherit : (Service, 'blabla') : must set this propertie to the Service class with name blabla
-    #if (Service, None) : must set this properti to the Service class with same name
+    #class_inherit : (Service, 'blabla') : must set this propertie to the 
+    #Service class with name blabla
+    #if (Service, None) : must set this properti to the Service class with
+    #same name
     properties={'log_file' : {'required':False, 'default' : '/tmp/log.txt'},
                 'object_cache_file' : {'required':False, 'default' : '/tmp/object.dat'},
                 'precached_object_file' : {'required':False , 'default' : '/tmp/object.precache'},
@@ -218,7 +218,7 @@ class Config(Item):
 
 
     def _cut_line(self, line):
-        punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
+        #punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
         tmp = re.split("[" + string.whitespace + "]+" , line)
         r = [elt for elt in tmp if elt != '']
         return r
@@ -232,10 +232,10 @@ class Config(Item):
         print "Opening config file", file
         #just a first pass to get the cfg_file and all files in a buf
         res = ''
-        fd=open(file)
-        buf=fd.readlines()
+        fd = open(file)
+        buf = fd.readlines()
         fd.close()
-        #res += buf
+
         for line in buf:
             res += line
             line = line[:-1]
@@ -252,8 +252,8 @@ class Config(Item):
         
 
     def read_config_buf(self, buf):
-        params=[]
-        objectscfg={'void': [],
+        params = []
+        objectscfg = {'void': [],
                     'timeperiod' : [],
                     'command' : [],
                     'contactgroup' : [],
@@ -269,18 +269,13 @@ class Config(Item):
                     'broker' : [],
                     'poller' : []
                     }
-        
-        
-        #print "I search :", objectscfg
-        tmp=[]
-        tmp_type='void'
+        tmp = []
+        tmp_type = 'void'
         in_define = False
         lines = buf.split('\n')
-        for line in lines:#buf.readlines():
-            #line = line[:-1]
-
-            line=line.split(';')[0]
-            if re.search("}",line):
+        for line in lines:
+            line = line.split(';')[0]
+            if re.search("}", line):
                 in_define = False
             if re.search("^#|^$|}", line):
                 pass
@@ -291,52 +286,36 @@ class Config(Item):
                 in_define = True
                 
                 objectscfg[tmp_type].append(tmp)
-                tmp=[]
+                tmp = []
                 #Get new type
                 elts = re.split('\s', line)
                 tmp_type = elts[1]
-                #print "Add a", tmp_type, ":", tmp
                 tmp_type = tmp_type.split('{')[0]
-                #print "Add a", tmp_type, ":", tmp
             else:
                 if in_define:
-                    #if tmp_type == 'servicedependency':
-                    #    print 'ADD A NEW LINE', line
                     tmp.append(line)
                 else:
                     params.append(line)
                     
         objectscfg[tmp_type].append(tmp)
-                #print 'Add line', line
         objects = {}
         
-        #print "Debug:", objectscfg
-        print "Params",params
+        print "Params", params
         self.load_params(params)
         
         for type in objectscfg:
-            #if type == 'servicedependency':
-                #print "SERVICE DEP!", objectscfg[type]
-            objects[type]=[]
-            #print 'Doing type:',type
+            objects[type] = []
             for items in objectscfg[type]:
-                #print 'Items:', items
-                tmp={}
+                tmp = {}
                 for line in items:
                     elts = self._cut_line(line)
                     if elts !=  []:
-                        #print "Got elts:", elts
                         prop = elts[0]
                         value = self._join_values(elts[1:])
                         tmp[prop] = value
-                        #print 'Add', prop, 'Val:', value
                 if tmp != {}:
-                    #print 'Append:', tmp, '\n\n'
                     objects[type].append(tmp)
         
-        #print 'Objects:', objects['service']
-        #print "Nb of services:", len(objects['service'])
-    
         #We create dict of objects
         timeperiods = []
         for timeperiodcfg in objects['timeperiod']:
@@ -346,49 +325,32 @@ class Config(Item):
         self.timeperiods = Timeperiods(timeperiods)
         
         services = []
-        #services_tpl = []
         for servicecfg in objects['service']:
             s = Service(servicecfg)
             s.clean()
-            #if s.is_tpl():
             services.append(s)
-            #else:
-            #    services_tpl.append(s)
         self.services = Services(services)
-        #self.services_tpl = Services(services_tpl)
 
         servicegroups = []
-        #services_tpl = []
         for servicegroupcfg in objects['servicegroup']:
             sg = Servicegroup(servicegroupcfg)
             sg.clean()
-            #if s.is_tpl():
             servicegroups.append(sg)
-            #else:
-            #    services_tpl.append(s)
         self.servicegroups = Servicegroups(servicegroups)
-        #self.services_tpl = Services(services_tpl)
-
         
         commands = []
         for commandcfg in objects['command']:
             c = Command(commandcfg)
             c.clean()
             commands.append(c)
-            #print "Creating command", c
         self.commands = Commands(commands)
         
         hosts = []
-        #hosts_tpl = []
         for hostcfg in objects['host']:
             h = Host(hostcfg)
             h.clean()
-            #if h.is_tpl():
-            #    hosts_tpl.append(h)
-            #else:
             hosts.append(h)
         self.hosts = Hosts(hosts)
-        #self.hosts_tpl = Hosts(hosts_tpl)
 
         hostgroups = []
         for hostgroupcfg in objects['hostgroup']:
@@ -412,7 +374,6 @@ class Config(Item):
         self.contactgroups = Contactgroups(contactgroups)
 
         servicedependencies = []
-        #print objects
         for servicedependencycfg in objects['servicedependency']:
             sd = Servicedependency(servicedependencycfg)
             sd.clean()
@@ -421,7 +382,7 @@ class Config(Item):
 
         hostdependencies = []
         for hostdependencycfg in objects['hostdependency']:
-            hd = Servicedependency(hostdependencycfg)
+            hd = Hostdependency(hostdependencycfg)
             hd.clean()
             hostdependencies.append(hd)
         self.hostdependencies = Hostdependencies(hostdependencies)
@@ -455,7 +416,10 @@ class Config(Item):
         self.pollers = PollerLinks(pollerlinks)
 
 
-    #We use linkify to make the config smaller (not name but direct link when possible)
+    #We use linkify to make the config more efficient : elements will be
+    #linked, like pointers. For example, a host will have it's service,
+    #and contacts directly in it's properties
+    #REMEMBER: lnify AFTER explode...
     def linkify(self):
         #Do the simplify AFTER explode groups
         print "Hostgroups"
@@ -504,22 +468,16 @@ class Config(Item):
         #print "Number of services:", len(self.services.items)
         #print "Service Dep", self.servicedependencies
         print "Schedulers", self.schedulerlinks
-        pass
 
-    #Use to fill groups values on hosts and create new services (for host group ones)
+
+    #Use to fill groups values on hosts and create new services
+    #(for host group ones)
     def explode(self):
         #first elements, after groups
-
-        #hosts = time.time()
-        #self.contactgroups.explode()
-        #contactgroups = time.time()
-
         print "Contacts"
         self.contacts.explode(self.contactgroups)
-
         print "Contactgroups"
         self.contactgroups.explode()
-        #contacts = time.time()
 
         print "Hosts"
         self.hosts.explode(self.hostgroups, self.contactgroups)
@@ -529,8 +487,7 @@ class Config(Item):
         print "Services"
         print "Initialy got nb of services : %d" % len(self.services.items)
         self.services.explode(self.hostgroups, self.contactgroups, self.servicegroups)
-        print "finally got nb of services : %d" % len(self.services.items)
-
+        #print "finally got nb of services : %d" % len(self.services.items)
         print "Servicegroups"
         self.servicegroups.explode()
 
@@ -539,56 +496,58 @@ class Config(Item):
 
         print "Servicedependancy"
         self.servicedependencies.explode()
-        #services = time.time()
-        #print "Time: Overall Explode :", services-begin, " (hosts:",hosts-begin," ) (contactgroups:",contactgroups-hosts," ) (contacts:",contacts-contactgroups," ) (services:",services-contacts,")"        
 
 
+    #Remove elements will the same name, so twins :)
     def remove_twins(self):
         self.hosts.remove_twins()
         self.services.remove_twins()
         self.contacts.remove_twins()
         self.timeperiods.remove_twins()
 
+
+    #Dependancies are importants for scheduling
+    #This function create dependencies linked between elements.
     def apply_dependancies(self):
         self.hosts.apply_dependancies()
         self.services.apply_dependancies()
 
 
     #Use to apply inheritance (template and implicit ones)
+    #So elements wil have their configured properties
     def apply_inheritance(self):
         #inheritance properties by template
-        #begin = time.time()
         print "Hosts"
         self.hosts.apply_inheritance()
-        #hosts = time.time()
         print "Contacts"
         self.contacts.apply_inheritance()
-        #contacts = time.time()
         print "Services"
         self.services.apply_inheritance(self.hosts)
-        #services = time.time()
-        #print "Time: Overall Inheritance :", services-begin, " (hosts:",hosts-begin," ) (contacts:",contacts-hosts," ) (services:",services-contacts,")"
 
 
-    #Use to apply inheritance (template and implicit ones)
+    #Use to apply implicit inheritance
     def apply_implicit_inheritance(self):
         print "Services"
         self.services.apply_implicit_inheritance(self.hosts)
 
 
+    #will fill propeties for elements so they wil have all theirs properties
     def fill_default(self):
+        #Fill default for config (self)
         super(Config, self).fill_default()
         self.hosts.fill_default()
         self.contacts.fill_default()
         self.services.fill_default()
 
 
+    #Link templates with elements
     def linkify_templates(self):
         self.hosts.linkify_templates()
         self.contacts.linkify_templates()
         self.services.linkify_templates()
         
 
+    #Reversed list is a dist with name for quick search by name
     def create_reversed_list(self):
         self.hosts.create_reversed_list()
         self.contacts.create_reversed_list()
@@ -596,6 +555,7 @@ class Config(Item):
         self.timeperiods.create_reversed_list()
 
 
+    #check if elements are correct or no (fill with defaults, etc)
     def is_correct(self):
         self.hosts.is_correct()
         self.hostgroups.is_correct()
@@ -605,31 +565,28 @@ class Config(Item):
         self.services.is_correct()
 
 
+    #We've got strings (like 1) but we want pthon elements, like True
     def pythonize(self):
         #call item pythonize for parameters
         super(Config, self).pythonize()
-        #begin = time.time()
         self.hosts.pythonize()
-        #hosts = time.time()
         self.hostgroups.pythonize()
-        #hostgroups = time.time()
         self.contactgroups.pythonize()
-        #contactgroups = time.time()
         self.contacts.pythonize()
-        #contacts = time.time()
         self.services.pythonize()
         self.servicedependencies.pythonize()
         self.schedulerlinks.pythonize()
-        #services = time.time()
-        #print "Time: Overall Pythonize :", services-begin, " (hosts:",hosts-begin," ) (hostgroups:",hostgroups-hosts,") (contactgroups:",contactgroups-hostgroups," ) (contacts:",contacts-contactgroups," ) (services:",services-contacts,")"
 
-    #Explode parameters like cached_service_check_horizon in the Service class in a cached_check_horizon manner
+
+    #Explode parameters like cached_service_check_horizon in the
+    #Service class in a cached_check_horizon manner
     def explode_global_conf(self):
         Service.load_global_conf(self)
         Host.load_global_conf(self)
         Contact.load_global_conf(self)
 
 
+    #Clean useless elements like templates because they are not need anymore
     def clean_useless(self):
         self.hosts.clean_useless()
         self.contacts.clean_useless()
@@ -671,7 +628,7 @@ class Config(Item):
                     links.add((dep.host, s.host))
             #The othe type of dep
             for (dep, tmp, tmp2, tmp3) in s.chk_depend_of:
-                links.add((dep.host, h))
+                links.add((dep.host, s.host))
         #Now we create links in the graph. With links (set)
         #We are sure to call the less add_edge
         for (dep, h) in links:
@@ -750,8 +707,10 @@ class Config(Item):
             self.confs[i].servicegroups = Servicegroups(new_servicegroups)
             self.confs[i].hosts = [] #will be fill after
             self.confs[i].services = [] #will be fill after
-            self.confs[i].other_elements = {} # The elements of theothers conf will be tag here
-            self.confs[i].is_assigned = False #if a scheduler have accepted the conf
+            self.confs[i].other_elements = {} # The elements of the others
+                                              #conf will be tag here
+            self.confs[i].is_assigned = False #if a scheduler have
+                                              #accepted the conf
 
         print "Creating packs"
 
@@ -799,7 +758,8 @@ class Config(Item):
                     if s.id in mbrs_id:
                         sg.members.append(s)
 
-        #Now we fill other_elements by host (service are with their host so they are not tagged)
+        #Now we fill other_elements by host (service are with their host
+        #so they are not tagged)
         for i in self.confs:
             for h in self.confs[i].hosts:
                 for j in [j for j in self.confs if j != i]: #So other than i

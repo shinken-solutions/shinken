@@ -17,11 +17,12 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#A Brok is a peace of information exported by Shinken to the Broker. Broker can do whatever 
+#A Brok is a peace of information exported by Shinken to the Broker. 
+#Broker can do whatever 
 #he wants with it.
 
 class Brok:
-    __slots__ = ('__dict__','id', 'type', 'data')
+    __slots__ = ('__dict__', 'id', 'type', 'data')
     id = 0
     def __init__(self, type, data):
         self.type = type

@@ -23,7 +23,7 @@ from item import Item
 #from util import to_int, to_char, to_split, to_bool
 import random
 import time
-from check import Check
+#from check import Check
 from notification import Notification
 from timeperiod import Timeperiod
 from macroresolver import MacroResolver
@@ -153,6 +153,7 @@ class SchedulingItem(Item):
     #Use to know if my dep force me not to be checked
     #So check the chk_depend_of if they raise me
     def is_no_check_dependant(self):
+        now = time.time()
         for (dep, status, type, tp) in self.chk_depend_of:
             if tp is None and tp.is_time_valid(now):
                 if dep.do_i_raise_dependency(status):
@@ -167,7 +168,8 @@ class SchedulingItem(Item):
         cls = self.__class__
         checks = []
         for (dep, status, type, tp) in self.act_depend_of:
-            #If the dep timeperiod is not valid, do notraise the dep, None=everytime
+            #If the dep timeperiod is not valid, do notraise the dep,
+            #None=everytime
             if tp is None or tp.is_time_valid(now):
                 #if the update is 'fresh', do not raise dep,
                 #cached_check_horizon = cached_service_check_horizon for service
@@ -189,7 +191,8 @@ class SchedulingItem(Item):
     #are not launch in the same time...
     def schedule(self, force=False, force_time=None):
         #print "Scheduling:", self.get_name()
-        #if last_chk == 0 put in a random way so all checks are not in the same time
+        #if last_chk == 0 put in a random way so all checks 
+        #are not in the same time
         
         now = time.time()
         #next_chk il already set, do not change
@@ -222,10 +225,6 @@ class SchedulingItem(Item):
         else:
             self.next_chk = force_time
 
-        #print "Time to add", time_add, "interval", interval, 'check_interval', self.check_interval, self.state
-        #print "Last check", time.asctime(time.localtime(self.last_chk))
-        #print "Next check", time.asctime(time.localtime(self.next_chk))
-        
         #Get the command to launch
         return self.launch_check(self.next_chk)
 
@@ -258,9 +257,8 @@ class SchedulingItem(Item):
         self.set_state_from_exit_status(c.exit_status)
         self.add_attempt()
 
-        #print "SRV Context:", c.id, 'status', c.status, 'depend_on_me', c.depend_on_me, 'exit_status', c.exit_status,'depend_of ', self.act_depend_of
-
-        #If we got a bad result on a normal check, and we have dep, we raise dep checks
+        #If we got a bad result on a normal check, and we have dep,
+        #we raise dep checks
         #put the actual check in waitdep and we return all new checks
         if c.exit_status != 0 and c.status == 'waitconsume' and len(self.act_depend_of) != 0:
             print self.get_name(), "I depend of someone, and I need a result"
@@ -270,7 +268,8 @@ class SchedulingItem(Item):
             checks = self.raise_dependancies_check(c)
             to_del = []
             for check in checks:
-                #C is a int? Ok, in fact it's a check that is already in progress
+                #C is a int? Ok, in fact it's a check that is
+                #already in progress
                 if isinstance(check, int):
                     c.depend_on.append(check)
                     to_del.append(check)
@@ -309,7 +308,8 @@ class SchedulingItem(Item):
             no_action = self.is_no_action_dependant()
             print "No action:", no_action
 
-        #If no_action is False, maybe we are in downtime, so no_action become true
+        #If no_action is False, maybe we are in downtime,
+        #so no_action become true
         if no_action == False:
             for dt in self.downtimes:
                 if dt.is_in_downtime():
@@ -354,7 +354,8 @@ class SchedulingItem(Item):
             self.attempt = 1
             return []
         
-        #If no OK in a no OK : if hard, still hard, if soft, check at self.max_check_attempts
+        #If no OK in a no OK : if hard, still hard, if soft,
+        #check at self.max_check_attempts
         #when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
             if self.is_max_attempts() and self.state_type == 'SOFT':

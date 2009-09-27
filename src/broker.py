@@ -20,21 +20,23 @@
 #This class is an interface for Broker
 #The broker listen configuration from Arbiter in a port (first argument)
 #the configuration gived by arbiter is schedulers where broker will take broks.
-#When already launch and have a conf, broker still listen to arbiter (one a timeout)
-#if arbiter whant it to have a new conf, broker forgot old chedulers (and broks into)
+#When already launch and have a conf, broker still listen to arbiter
+# (one a timeout)
+#if arbiter whant it to have a new conf, broker forgot old chedulers
+#(and broks into)
 #take new ones and do the (new) job.
 
 from Queue import Empty
-from multiprocessing import Process, Queue
+#from multiprocessing import Process, Queue
 import time
 import sys
 import Pyro.core
-import select
-import copy
+#import select
+#import copy
 
-from message import Message
-from worker import Worker
-from util import get_sequence
+#from message import Message
+#from worker import Worker
+#from util import get_sequence
 from plugins import Plugins
 from actionner import Actionner
 
@@ -55,16 +57,19 @@ class IForArbiter(Pyro.core.ObjBase):
 	def put_conf(self, conf):
 		self.app.have_conf = True
 		print "Sending us ", conf
-		#If we've got something in the schedulers, we do not want it anymore
+		#If we've got something in the schedulers, we do not
+		#want it anymore
 		self.schedulers.clear()
 		for sched_id in conf['schedulers'] :
 			s = conf['schedulers'][sched_id]
 			self.schedulers[sched_id] = s
-			self.schedulers[sched_id]['uri'] = "PYROLOC://%s:%d/Broks" % (s['address'], s['port'])
+			uri = "PYROLOC://%s:%d/Broks" % (s['address'], s['port'])
+			self.schedulers[sched_id]['uri'] = uri
 			self.schedulers[sched_id]['broks'] = {}
 			self.schedulers[sched_id]['instance_id'] = s['instance_id']
 			self.schedulers[sched_id]['running_id'] = 0
-			#We cannot reinit connexions because this code in in a thread, and
+			#We cannot reinit connexions because this code in
+			#in a thread, and
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
 		print "We have our schedulers :", self.schedulers
@@ -93,7 +98,8 @@ class Broker(Actionner):
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
 		print "init de connexion avec", self.schedulers[id]['uri']
-		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(self.schedulers[id]['uri'])
+		uri = self.schedulers[id]['uri']
+		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(uri)
 		try:
 			self.schedulers[id]['con'].ping()
 			new_run_id = self.schedulers[id]['con'].get_running_id()
@@ -123,29 +129,34 @@ class Broker(Actionner):
 	#We get new broks from schedulers
 	def get_new_broks(self):
 		new_broks = {}
-		#We check for new check in each schedulers and put the result in new_checks
+		#We check for new check in each schedulers and put
+		#the result in new_checks
 		for sched_id in self.schedulers:
 			try:
 				con = self.schedulers[sched_id]['con']
 				if con is not None: #None = not initilized
 					tmp_broks = con.get_broks()
-					#print "We've got new broks" , tmp_broks.values()
 					for b in tmp_broks.values():
 						b.instance_id = self.schedulers[sched_id]['instance_id']
 					new_broks.update(tmp_broks)
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id)
-			except KeyError as exp: #Ok, con is not know, so we create it
+                        #Ok, con is not know, so we create it
+			except KeyError as exp: 
 				self.pynag_con_init(sched_id)
 			except Pyro.errors.ProtocolError as exp:
 				print exp
 				#we reinitialise the ccnnexion to pynag
 				self.pynag_con_init(sched_id)
-			except AttributeError as exp: #scheduler must not be initialized
+                        #scheduler must not #be initialized
+			except AttributeError as exp: 
 				print exp
-			except Pyro.errors.NamingError as exp:#scheduler must not have checks
+                        #scheduler must not have checks
+			except Pyro.errors.NamingError as exp:
 				print exp
-			except Exception,x: # What the F**k? We do not know what happenned, so.. bye bye :)
+			# What the F**k? We do not know what happenned,
+			#so.. bye bye :)
+			except Exception,x: 
 				print ''.join(Pyro.util.getPyroTraceback(x))
 				sys.exit(0)
 		#Ok, we've got new broks in new_broks
@@ -179,7 +190,6 @@ class Broker(Actionner):
 		#Do the plugins part
 		self.plugins_manager = Plugins()
 		self.plugins_manager.load()
-		#self.plugins_manager.init()
 		self.mods = self.plugins_manager.get_brokers()
 		for mod in self.mods:
 			mod.init()
@@ -191,18 +201,19 @@ class Broker(Actionner):
 
 		#Now main loop
 		i = 0
-		timeout = 1.0
+		#timeout = 1.0
 		while True:
 			i = i + 1
 			if not i % 50:
-				print "Loop ",i
-			begin_loop = time.time()
+				print "Loop ", i
+			#begin_loop = time.time()
 
-			#Now we check if arbiter speek to us in the daemon. If so, we listen for it
+			#Now we check if arbiter speek to us in the daemon.
+			#If so, we listen for it
 			#When it push us conf, we reinit connexions
 			self.watch_for_new_conf()
 
-			timeout = 1.0
+			#timeout = 1.0
 			#Now we can get new actions from schedulers
 			self.get_new_broks()
 			#TODO : sleep better...

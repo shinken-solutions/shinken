@@ -20,14 +20,14 @@ import pygraph
 
 from command import CommandCall
 #from pygraph import digraph
-from item import Item, Items
+from item import Items
 from schedulingitem import SchedulingItem
 from util import to_int, to_char, to_split, to_bool
-import time, random
+import time#, random
 from macroresolver import MacroResolver
 from check import Check
 from notification import Notification
-from brok import Brok
+#from brok import Brok
 
 class Host(SchedulingItem):
     id = 1 #0 is reserved for host (primary node for parents)
@@ -39,7 +39,8 @@ class Host(SchedulingItem):
     #required : is required in conf
     #default : default value if no set in conf
     #pythonize : function to call when transfort string to python object
-    #status_broker_name : if set, send to broker and put name of data. If None, use the prop name.
+    #status_broker_name : if set, send to broker and put name of data.
+    #If None, use the prop name.
     #Only for the inital call
     #broker_name : same for inital, but for status update call
     properties={'host_name': {'required': True, 'status_broker_name' : None, 'broker_name' : None},
@@ -201,11 +202,12 @@ class Host(SchedulingItem):
         state = True #guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['contacts', 'contactgroups', 'check_period', 'notification_interval']
+        special_properties = ['contacts', 'contactgroups', 'check_period', \
+                                  'notification_interval']
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
-                    print self.get_name()," : I do not have", prop
+                    print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
         #Ok now we manage special cases...
         if not hasattr(self, 'contacts') and not hasattr(self, 'contacgroups') and self.notifications_enabled == True:
@@ -286,7 +288,7 @@ class Host(SchedulingItem):
         #print "finnaly : ", self.act_depend_of
 
 
-    #Create notifications but without commands. It will be update juste before being send
+    #Create notifications but with command
     def create_notifications(self, type):
         notifications = []
         now = time.time()
@@ -297,9 +299,9 @@ class Host(SchedulingItem):
 
         for contact in self.contacts:
             for cmd in contact.host_notification_commands:
-                #create without real command, it will be update just before being send
                 n = Notification(type, 'scheduled', 'VOID', {'host' : self.id, 'contact' : contact.id, 'command': cmd}, 'host', t)
-                #The notif must be fill with current data, so we create the commmand now
+                #The notif must be fill with current data, 
+                #so we create the commmand now
                 command = n.ref['command']
                 n._command = m.resolve_command(command, self, None, contact, n)
                 #Maybe the contact do not want this notif? Arg!
@@ -311,22 +313,24 @@ class Host(SchedulingItem):
     #see if the notification is launchable (time is OK and contact is OK too)
     def is_notification_launchable(self, n, contact):
         now = time.time()
-        return now > n.t_to_go and self.state != 'UP' and  contact.want_host_notification(now, self.state)
+        return now > n.t_to_go and self.state != 'UP' and contact.want_host_notification(now, self.state)
             
 
     #We just send a notification, we need new ones in notification_interval
     def get_new_notification_from(self, n):
         now = time.time()
-        return Notification(n.type, 'scheduled','', {'host' : n.ref['host'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'host', now + self.notification_interval * 60)
+        return Notification(n.type, 'scheduled', '', {'host' : n.ref['host'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'host', now + self.notification_interval * 60)
 
 
     #Check if the notificaton is still necessery
     def still_need(self, n):
         now = time.time()
-        #if state != UP, the host still got a pb, so notification still necessery
+        #if state != UP, the host still got a pb
+        #, so notification still necessery
         if self.state != 'UP':
             return True
-        #state is UP but notif is in poller, so do not remove, will be done after
+        #state is UP but notif is in poller, 
+        #so do not remove, will be done after
         if n.status == 'inpoller':
             return True
         #we do not see why to save this notification, so...

@@ -76,7 +76,7 @@ class Merlindb_broker:
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         import MySQLdb
-        self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root",db = "merlin")
+        self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
         self.db_cursor = self.db.cursor ()
 
 
@@ -117,7 +117,8 @@ class Merlindb_broker:
         return query
 
     
-    #Create a update query of table with data, and use where data for the WHERE clause
+    #Create a update query of table with data, and use where data for
+    #the WHERE clause
     def create_update_query(self, table, data, where_data):
         query = "UPDATE %s set " % table
 		
@@ -127,7 +128,7 @@ class Merlindb_broker:
         for prop in data:
             i += 1
             val = data[prop]
-			#Boolean must be catch, because we want 0 or 1, not True or False
+            #Boolean must be catch, because we want 0 or 1, not True or False
             if isinstance(val, bool):
                 if val:
                     val = 1
@@ -160,8 +161,10 @@ class Merlindb_broker:
     
     
     #Ok, we are at launch and a scheduler want him only, OK...
-    #So ca create several queries with all tables we need to delete with our instance_id
-    #This brob must be send at the begining of a scheduler session, if not, BAD THINGS MAY HAPPENED :)
+    #So ca create several queries with all tables we need to delete with
+    #our instance_id
+    #This brob must be send at the begining of a scheduler session, 
+    #if not, BAD THINGS MAY HAPPENED :)
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
         tables = ['command', 'comment', 'contact', 'contactgroup', 'downtime', 'host', 
@@ -183,7 +186,8 @@ class Merlindb_broker:
         return [query]
 
 
-    #Initial service status is at start. We need an insert because we clean the base
+    #Initial service status is at start. We need an insert because we 
+    #clean the base
     def manage_initial_service_status_brok(self, b):
         #It's a initial entry, so we need insert
         query = self.create_insert_query('service', b.data)		
@@ -220,13 +224,15 @@ class Merlindb_broker:
         data = b.data
 
         #Here we've got a special case : in data, there is members
-        #and we do not want it in the INSERT query, so we crate a tmp_data without it
+        #and we do not want it in the INSERT query, so we crate a 
+        #tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         query = self.create_insert_query('hostgroup', tmp_data)
         res = [query]
 		
-        #Ok, the hostgroup table is uptodate, now we add relations between hosts and hostgroups
+        #Ok, the hostgroup table is uptodate, now we add relations 
+        #between hosts and hostgroups
         for (h_id, h_name) in b.data['members']:
             #First clean
             q_del = "DELETE FROM host_hostgroup WHERE host = '%s' and hostgroup='%s'" % (h_id, b.data['id'])
@@ -242,7 +248,8 @@ class Merlindb_broker:
         data = b.data
 
         #Here we've got a special case : in data, there is members
-        #and we do not want it in the INSERT query, so we crate a tmp_data without it
+        #and we do not want it in the INSERT query, so we create a
+        #tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         query = self.create_insert_query('servicegroup', tmp_data)
@@ -287,7 +294,8 @@ class Merlindb_broker:
         data = b.data
 
         #Here we've got a special case : in data, there is members
-        #and we do not want it in the INSERT query, so we crate a tmp_data without it
+        #and we do not want it in the INSERT query, so we create a
+        #tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         query = self.create_insert_query('contactgroup', tmp_data)
