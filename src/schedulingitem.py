@@ -261,7 +261,7 @@ class SchedulingItem(Item):
         #we raise dep checks
         #put the actual check in waitdep and we return all new checks
         if c.exit_status != 0 and c.status == 'waitconsume' and len(self.act_depend_of) != 0:
-            print self.get_name(), "I depend of someone, and I need a result"
+            #print self.get_name(), "I depend of someone, and I need a result"
             c.status = 'waitdep'
             #Make sure the check know about his dep
             #C is my check, and he wants dependancies
@@ -367,3 +367,36 @@ class SchedulingItem(Item):
                     else:
                         return []
         return []
+
+
+
+    #Create notifications
+    def create_notifications(self, type):
+        #if notif is disabled, not need to go thurser
+        print "Raise notification"
+        cls = self.__class__
+        if not self.notifications_enabled or self.is_in_downtime or not cls.enable_notifications:
+            return []
+        
+        notifications = []
+        now = time.time()
+        t = self.notification_period.get_next_valid_time_from_t(now)
+        m = MacroResolver()
+        
+        for contact in self.contacts:
+            #Get the propertie name for notif commands, like
+            #service_notification_commands for service
+            notif_commands_prop = cls.my_type+'_notification_commands'
+            notif_commands = getattr(contact, notif_commands_prop)
+            for cmd in notif_commands:
+                #TODO : remove occurences of my_type
+                n = Notification(type, 'scheduled', 'VOID', {cls.my_type : self.id, 'contact' : contact.id, 'command': cmd}, cls.my_type, t)
+                #The notif must be fill with current data, 
+                #so we create the commmand now
+                command = n.ref['command']
+                data = self.get_data_for_notifications(contact, n)
+                n._command = m.resolve_command(command, data)
+                #Maybe the contact do not want this notif? Arg!
+                if self.is_notification_launchable(n, contact):
+                    notifications.append(n)
+        return notifications

@@ -343,18 +343,18 @@ class Scheduler:
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
 
-        print "DBG:"
-        for c in self.checks.values():
-            if c.ref_type == 'host':
-                print c.id, ":", c.status, 'Depend_on_me:', len(c.depend_on_me), 'depend_on', c.depend_on        
+        #print "DBG:"
+        #for c in self.checks.values():
+        #    if c.ref_type == 'host':
+        #        print c.id, ":", c.status, 'Depend_on_me:', len(c.depend_on_me), 'depend_on', c.depend_on        
 
         #All 'finished' checks (no more dep) raise checks they depends on
         for c in self.checks.values():
             if c.status == 'havetoresolvedep':
-                print "I remove dep", c.id, "on the checks in ", c.depend_on_me
+                #print "I remove dep", c.id, "on the checks in ", c.depend_on_me
                 #self.checks[c.depend_on_me].depend_on.remove(c.id)
                 for dependant_checks in c.depend_on_me:
-                    print "So removing check", c.id, "in" , dependant_checks.id
+                    #print "So removing check", c.id, "in" , dependant_checks.id
                     #Ok, now dependant will no more wait c
                     dependant_checks.depend_on.remove(c.id)
                 #REMOVE OLD DEP CHECL -> zombie
@@ -363,7 +363,7 @@ class Scheduler:
         #Now, reintegr dep checks
         for c in self.checks.values():
             if c.status == 'waitdep' and len(c.depend_on) == 0:
-                print c.id, "OK we've got all dep!, now we can resolve check"
+                #print c.id, "OK we've got all dep!, now we can resolve check"
                 item = self.get_ref_item_from_action(c)
                 actions = item.consume_result(c)
                 self.get_and_register_check_result_brok(item)
@@ -379,7 +379,7 @@ class Scheduler:
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
         if checks_to_add != []:
-            print "We add new Dep checks", checks_to_add
+            #print "We add new Dep checks", checks_to_add
             for c in checks_to_add:
                 self.add(c)
 
@@ -511,7 +511,7 @@ class Scheduler:
                 if m_nb != 0:
                     print "Latency Moyenne:", m, m_nb,  m / m_nb
                 
-                #print "Notifications:", nb_notifications
+                print "Notifications:", nb_notifications
                 #for n in  self.actions.values():
                 #    if n.ref_type == 'service':
                 #        print 'Service notification', n
@@ -523,14 +523,14 @@ class Scheduler:
                 #    print s.get_name()+':'+str(s.in_checking)
                 #    for i in s.checks_in_progress:
                 #        print i, i.t_to_go
-                for s in self.hosts:
-                    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
-                    for i in s.checks_in_progress:
-                        print i#self.checks[i]
+                #for s in self.hosts:
+                #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
+                #    for i in s.checks_in_progress:
+                #        print i#self.checks[i]
 
-                for c in self.checks.values():
-                    if c.ref_type == 'host':
-                        print c.id, ":", c.status, 'Depend_on_me:', len(c.depend_on_me), 'depend_on', c.depend_on
+                #for c in self.checks.values():
+                #    if c.ref_type == 'host':
+                #        print c.id, ":", c.status, 'Depend_on_me:', len(c.depend_on_me), 'depend_on', c.depend_on
                 #hp=hpy()
                 #print hp.heap()
                 #print hp.heapu()

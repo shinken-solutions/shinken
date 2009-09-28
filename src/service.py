@@ -300,8 +300,8 @@ class Service(SchedulingItem):
     def set_state_from_exit_status(self, status):
         now = time.time()
         self.last_state_update = now
-
         self.last_state = self.state
+        
         if status == 0:
             self.state = 'OK'
         elif status == 1:
@@ -332,32 +332,9 @@ class Service(SchedulingItem):
         return False
 
 
-    #Create notifications
-    def create_notifications(self, type):
-        #if notif is disabled, not need to go thurser
-        cls = self.__class__
-        if not self.notifications_enabled or self.is_in_downtime or not cls.enable_notifications:
-            return []
-        
-        notifications = []
-        now = time.time()
-        t = self.notification_period.get_next_valid_time_from_t(now)
-        m = MacroResolver()
-        
-        for contact in self.contacts:
-            for cmd in contact.service_notification_commands:
-                print "SRV: Raise notification"
-                n = Notification(type, 'scheduled', 'VOID', {'service' : self.id, 'contact' : contact.id, 'command': cmd}, 'service', t)
-
-                #The notif must be fill with current data, 
-                #so we create the commmand now
-                command = n.ref['command']
-                data = [self.host, self, contact, n]
-                n._command = m.resolve_command(command, data)
-                #Maybe the contact do not want this notif? Arg!
-                if self.is_notification_launchable(n, contact):
-                    notifications.append(n)
-        return notifications
+    #Give data for notifications'n macros
+    def get_data_for_notifications(self, contact, n):
+        return [self.host, self, contact, n]
 
 
     #see if the notification is launchable (time is OK and contact is OK too)

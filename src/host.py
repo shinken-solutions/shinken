@@ -260,6 +260,8 @@ class Host(SchedulingItem):
             self.state = 'DOWN'
         else:
             self.state = 'UNDETERMINED'
+        if status in self.flap_detection_options:
+            self.add_flapping_change(self.state != self.last_state)
 
 
     #See if status is status. Can be low of high format (o/UP, d/DOWN, ...)
@@ -278,37 +280,14 @@ class Host(SchedulingItem):
 
     #fill act_depend_of with my parents (so network dep)
     def fill_parents_dependancie(self):
-        #print "Me", self.host_name, "is getting my parents"
-        #print "I-ve got my parents", self.parents
-        #print "Before", self.act_depend_of
         for parent in self.parents:
             if parent is not None:
-                #print "I add a daddy!", parent.host_name
                 self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None) )
-        #print "finnaly : ", self.act_depend_of
 
 
-    #Create notifications but with command
-    def create_notifications(self, type):
-        notifications = []
-        now = time.time()
-        t = self.notification_period.get_next_valid_time_from_t(now)
-        print "HOST: We are creating a notification for", time.asctime(time.localtime(t))
-
-        m = MacroResolver()
-
-        for contact in self.contacts:
-            for cmd in contact.host_notification_commands:
-                n = Notification(type, 'scheduled', 'VOID', {'host' : self.id, 'contact' : contact.id, 'command': cmd}, 'host', t)
-                #The notif must be fill with current data, 
-                #so we create the commmand now
-                command = n.ref['command']
-                data = [self, contact, n]
-                n._command = m.resolve_command(command, data)
-                #Maybe the contact do not want this notif? Arg!
-                if self.is_notification_launchable(n, contact):
-                    notifications.append(n)
-        return notifications
+    #Give data for notifications'n macros
+    def get_data_for_notifications(self, contact, n):
+        return [self, contact, n]
 
 
     #see if the notification is launchable (time is OK and contact is OK too)
@@ -354,7 +333,7 @@ class Host(SchedulingItem):
             if c_in_progress.t_to_go > time.time(): #Very far?
                 c_in_progress.t_to_go = time.time()
             c_in_progress.depend_on_me.append(ref_check)
-            print "****************** I prefer give you my previous check, really", c_in_progress.id
+            #print "****************** I prefer give you my previous check, really", c_in_progress.id
             return c_in_progress.id
         
         if not self.is_no_check_dependant():
