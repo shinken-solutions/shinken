@@ -17,17 +17,22 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#This class revolv Macro in commands by looking at the macros list
+#in Class of elements. It give a propertie that call be callable or not.
+#It not callable, it's a simple properties and remplace the macro with the value
+#If callable, it's a method that is call for getting the value. for exemple, to 
+#get the number of service in a host, you call a method to get the
+# len(host.services)
+
 import re
 from borg import Borg
 from singleton import Singleton
-#from host import Host
 import time
 from contact import Contact
 
 
 class MacroResolver(Borg):
-#    __metaclass__ = Singleton
-
+    #Global macros
     macros = {
         'TOTALHOSTSUP' : 'get_total_hosts_up',
         'TOTALHOSTSDOWN' : 'get_total_hosts_down',
@@ -58,6 +63,8 @@ class MacroResolver(Borg):
         }
 
 
+    #This shall be call ONE TIME. It just put links for elements
+    #by scheduler
     def init(self, conf):
         self.hosts = conf.hosts
         self.services = conf.services

@@ -18,7 +18,8 @@
 
 
 #This class is used for poller and reactionner to work.
-#The worker is a process launch by theses process and read Message in a Queue (self.s) (slave)
+#The worker is a process launch by theses process and read Message in a Queue
+#(self.s) (slave)
 #They launch the Check and then send the result in the Queue self.m (master)
 #they can die if they do not do anything (param timeout)
 from multiprocessing import Process, Queue
@@ -57,7 +58,6 @@ class Worker:
 
 
     def is_killable(self):
-        #print "M[%d]Is killable? %s %s %s" % (self._id, self._mortal , self._idletime , self._timeout)
         return self._mortal and self._idletime > self._timeout
 
 
@@ -82,7 +82,7 @@ class Worker:
     #s = Global Queue Master->Slave
     #m = Queue Slave->Master
     #c = Control Queue for the worker
-    def work(self, s,m,c):
+    def work(self, s, m, c):
         while True:
             msg = None
             cmsg = None
@@ -100,7 +100,6 @@ class Worker:
             #print "[%d] got %s" % (self._id, msg)
             #Here we work on the elt
             if msg is not None:
-                #print msg.str()
                 chk = msg.get_data()
                 self._idletime = 0
                 
@@ -108,7 +107,7 @@ class Worker:
                 chk.set_status('executed')
                 
                 #We answer to the master
-                msg = Message(id=self.id, type='Result',data=chk)
+                msg = Message(id=self.id, type='Result', data=chk)
                 m.put(msg)
                 
             try:

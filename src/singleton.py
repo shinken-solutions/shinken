@@ -17,13 +17,16 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#The classic Singleton class. So all instance of this class will be the same
+#instance in fact.
+
 class Singleton(type):
     def __init__(cls, name, bases, dict):
         print "Init de singleton"
         super(Singleton, cls).__init__(name, bases, dict)
         cls.instance = None 
 
-    def __call__(cls,*args,**kw):
+    def __call__(cls, *args, **kw):
         if cls.instance is None:
             cls.instance = super(Singleton, cls).__call__(*args, **kw)
             return cls.instance

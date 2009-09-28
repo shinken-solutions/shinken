@@ -17,8 +17,11 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#Tis is a simple message class for communications between actionners and
+#workers
+
+
 class Message:
-    """A simple message class"""
     _type = None
     _data = None
     _from = None
@@ -27,11 +30,17 @@ class Message:
         self._data = data
         self._from = id
 
+
     def get_type(self):
         return self._type
+
+
     def get_data(self):
         return self._data
+
     def get_from(self):
         return self._from
+
+
     def str(self):
         return "Message from %d, Type: %s Data: %s" % (self._from, self._type, self._data)

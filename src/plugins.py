@@ -26,7 +26,6 @@ import imp
 import sys
 
 #pluginpath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "plugins/")
-
 #Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html
 
 class Plugins():
@@ -34,6 +33,8 @@ class Plugins():
     def __init__(self):
         pass
 
+
+    #Lod all plugins
     def load(self):
         #We get all plugins names
         pluginpath = "./plugins"
@@ -48,6 +49,8 @@ class Plugins():
     #    for mod in self.imported_modules:
     #        mod.init()
 
+
+    #Get broker instance to five them after broks
     def get_brokers(self):
         brokers = []
         for mod in self.imported_modules:

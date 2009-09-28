@@ -20,7 +20,7 @@
 import Pyro.core
 
 from item import Item, Items
-from util import to_int, to_char, to_split, to_bool
+from util import to_int, to_bool
 
 class SchedulerLink(Item):
     id = 0
