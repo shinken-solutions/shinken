@@ -20,20 +20,17 @@ import time
 
 from pexpect import *
 from action import Action
-#from message import Message
+
 
 class Check(Action):
     __slots__ = ('id', 'is_a', 'type', '_in_timeout', 'status', 'exit_status',\
                   '_command', 'output', 'long_output', 'ref', 'ref_type', \
                      't_to_go', 'depend_on', 'depend_on_me', 'check_time', \
                      'execution_time')
-    #_status = None
-    #_command = None
-    #id = 0
+    #id = 0 #Is common to Actions
     def __init__(self, status, command, ref, ref_type, t_to_go, dep_check=None):
         self.is_a = 'check'
         self.type = ''
-        #self.id = self.__class__.id
         self.id = Action.id
         Action.id += 1
         self._in_timeout = False
@@ -60,7 +57,6 @@ class Check(Action):
         self.output = c.output
         self.long_output = c.long_output
         self.check_time = c.check_time
-        #print "Getting cehck time", c.check_time, 'and t to go', self.t_to_go
         self.execution_time = c.execution_time
         self.perf_data = c.perf_data
         
@@ -77,12 +73,9 @@ class Check(Action):
         #The others lines are long_output
         if len(elts) > 1:
             self.long_output = '\n'.join(elts[1:])
-        #print "Setting output:", self.output
-        #print "Setting longoutput", self.long_output
 
     
     def execute(self):
-        #print "Executing %s" % self._command
         child = spawn ('/bin/sh -c "%s"' % self._command)
         self.status = 'lanched'
         self.check_time = time.time()
@@ -90,12 +83,8 @@ class Check(Action):
         try:
             child.expect_exact(EOF, timeout=5)
             self.get_outputs(child.before)
-            #self.output = child.before
             child.terminate(force=True)
             self.exit_status = child.exitstatus
-            #if self.exit_status != 0:
-            #    print " ********************** DANGER DANGER DANGER !!!!!!!!! *********** %d" % self.exit_status
-            #print "Exit status:", child.exitstatus
             self.status = 'done'
         except TIMEOUT:
             print "On le kill"
@@ -105,7 +94,6 @@ class Check(Action):
 
 
     def is_launchable(self, t):
-        #print "Is_launchable?",t, self.t_to_go
         return t > self.t_to_go
     
     

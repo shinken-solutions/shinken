@@ -19,7 +19,7 @@
 
 from command import CommandCall
 from item import Item, Items
-from util import to_int, to_char, to_split, to_bool
+from util import to_split, to_bool
 
 class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
@@ -57,12 +57,14 @@ class Contact(Item):
         'CONTACTGROUPNAMES' : 'get_groupnames'
         }
 
+
     #For debugging purpose only (nice name)
     def get_name(self):
         return self.contact_name
 
 
-    #Search for notification_options with state and if t is in service_notification_period
+    #Search for notification_options with state and if t is
+    #in service_notification_period
     def want_service_notification(self, t, state):
         b = self.service_notification_period.is_time_valid(t)
         if 'n' in self.service_notification_options:
@@ -70,12 +72,12 @@ class Contact(Item):
         t = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
              'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's'}
         if state in t:
-            #print 'State:', t[state] in self.service_notification_options, 'b:', b,self
             return b and t[state] in self.service_notification_options
         return False
 
 
-    #Search for notification_options with state and if t is in host_notification_period
+    #Search for notification_options with state and if t is in
+    #host_notification_period
     def want_host_notification(self, t, state):
         b = self.host_notification_period.is_time_valid(t)
         if 'n' in self.host_notification_options:
@@ -104,11 +106,8 @@ class Contacts(Items):
     #We just search for each timeperiod the id of the tp
     #and replace the name by the id
     def linkify_c_by_tp(self, timeperiods):
-        for c in self:#.items:
-            #c = self.items[id]
-            #service notif period
+        for c in self:
             sntp_name = c.service_notification_period
-            #host notf period
             hntp_name = c.host_notification_period
 
             #The new member list, in id
@@ -121,15 +120,15 @@ class Contacts(Items):
 
     #Simplify hosts commands by commands id
     def linkify_c_by_cmd(self, commands):
-        for c in self:#.items:
+        for c in self:
             tmp = []
             for cmd in c.service_notification_commands.split(','):
-                tmp.append(CommandCall(commands,cmd))
+                tmp.append(CommandCall(commands, cmd))
             c.service_notification_commands = tmp
 
             tmp = []
             for cmd in c.host_notification_commands.split(','):
-                tmp.append(CommandCall(commands,cmd))
+                tmp.append(CommandCall(commands, cmd))
             c.host_notification_commands = tmp
 
 

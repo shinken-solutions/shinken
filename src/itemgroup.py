@@ -16,6 +16,9 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#And itemgroup is like a item, but it's a group if items :)
+
 from brok import Brok
 
 class Itemgroup:
@@ -32,22 +35,29 @@ class Itemgroup:
         pass
 
 
+    #Copy the groups properties EXCEPT the members
+    #members need to be fill after manually
     def copy_shell(self):
         cls = self.__class__
         old_id = cls.id
-        new_i = cls()
-        new_i.id = self.id
-        cls.id = old_id
+        new_i = cls() # create a new group
+        new_i.id = self.id # with the same id
+        cls.id = old_id #Reset the Class counter
         
+        #Copy all properties
         for prop in cls.properties:
             if prop is not 'members':
                 if self.has(prop):
                     val = getattr(self, prop)
                     setattr(new_i, prop, val)
+        #but no members
         new_i.members = []
         return new_i
                     
 
+    #Change the members like item1 ,item2 to ['item1' , 'item2']
+    #so a python list :)
+    #We also strip elements because spaces Stinks!
     def pythonize(self):
         mbrs = self.members.split(',')        
         self.members = []
@@ -68,7 +78,7 @@ class Itemgroup:
 
 
     def __iter__(self):
-        return self.members.__iter__()#values()
+        return self.members.__iter__()
 
 
     #a host group is correct if all members actually exists
@@ -100,7 +110,8 @@ class Itemgroup:
         #Here members is jsut a bunch of host, I need name in place
         data['members'] = []
         for i in self.members:
-            data['members'].append( (i.id, i.get_name()) )#it look like lisp! ((( ..))) 
+            #it look like lisp! ((( ..))), sorry....
+            data['members'].append( (i.id, i.get_name()) )
         b = Brok('initial_'+cls.my_type+'_status', data)
         return b
 
@@ -144,11 +155,10 @@ class Itemgroups:
 
 
     def pythonize(self):
-        for id in self.itemgroups:
-            ig = self.itemgroups[id]
+        for ig in self:
             ig.pythonize()
 
 
     def is_correct(self):
-        for id in self.itemgroups:
-            self.itemgroups[id].is_correct()
+        for ig in self:
+            ig.is_correct()

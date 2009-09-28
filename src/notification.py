@@ -22,7 +22,8 @@ from action import Action
 from brok import Brok
 
 class Notification(Action):
-    #id = 0
+    #id = 0 #Is in fact in the Action class to be common with Checks and 
+    #events handlers
     
     properties={'notification_type' : {'required': False, 'default':0, 'status_broker_name' : None},
                 'start_time' : {'required': False, 'default':0, 'status_broker_name' : None},
@@ -55,9 +56,10 @@ class Notification(Action):
     
     
     def __init__(self, type , status, command, ref, ref_type, t_to_go, \
-                 contact_name='', host_name='', service_description='',
-                 reason_type=1, state=0, ack_author='', ack_data='', escalated=0, contacts_notified=0,
-                 start_time=0, end_time=0, notification_type=0):
+                     contact_name='', host_name='', service_description='',
+                     reason_type=1, state=0, ack_author='', ack_data='', \
+                     escalated=0, contacts_notified=0, \
+                     start_time=0, end_time=0, notification_type=0):
         self.is_a = 'notification'
         self.type = type
 
@@ -73,7 +75,7 @@ class Notification(Action):
         self.ref_type = ref_type
         self.t_to_go = t_to_go
         
-        #For brok
+        #For brok part
         self.contact_name = contact_name
         self.host_name = host_name
         self.service_description = service_description
@@ -97,9 +99,6 @@ class Notification(Action):
             self.output = child.before
             child.terminate(force=True)
             self.exit_status = child.exitstatus
-            #if self.exit_status != 0:
-            #    print " ********************** DANGER DANGER DANGER !!!!!!!!! *********** %d" % self.exit_status
-            #print "Exit status:", child.exitstatus
             self.status = 'done'
         except TIMEOUT:
             print "On le kill"
@@ -108,7 +107,6 @@ class Notification(Action):
 
 
     def is_launchable(self, t):
-        #print "Is_launchable?",t, self.t_to_go
         return t > self.t_to_go
 
     

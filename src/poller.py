@@ -19,18 +19,19 @@
 
 #This class is an application for launch checks
 #The poller listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where actionner will take checks.
-#When already launch and have a conf, poller still listen to arbiter (one a timeout)
-#if arbiter whant it to have a new conf, poller forgot old cheduler (and checks into)
-#take new ones and do the (new) job.
+#the configuration gived by arbiter is schedulers where actionner will
+#take checks.
+#When already launch and have a conf, poller still listen to arbiter 
+#(one a timeout) if arbiter whant it to have a new conf, poller forgot
+#old cheduler (and checks into) take new ones and do the (new) job.
 
 from actionner import Actionner
 
 
 #Our main APP class
 class Poller (Actionner):
-	do_checks = True
-	do_actions = False
+	do_checks = True #I do checks
+	do_actions = False #but no actions
 	default_port = 7771
 
 

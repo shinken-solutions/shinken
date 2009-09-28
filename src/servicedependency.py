@@ -17,7 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from util import to_int, to_char, to_split, to_bool
+from util import to_split, to_bool
 from item import Item, Items
 
 class Servicedependency(Item):
@@ -47,12 +47,6 @@ class Servicedependency(Item):
     
     running_properties = {}
 
-#    #return a copy of a service, but give him a new id
-#    def copy(self):
-#        sd = deepcopy(self)
-#        sd.id = Servicedependency.id
-#        Servicedependency.id = Servicedependency.id + 1
-#        return sd
 
     #Give a nice name output, for debbuging purpose
     #(Yes, debbuging CAN happen...)
@@ -69,13 +63,13 @@ class Servicedependencies(Items):
 
     #We create new servicedep if necessery (host groups and co)
     def explode(self):
-        #print "Exploding Service dep"
         #The "old" services will be removed. All services with 
         #more than one host or a host group will be in it
         srvdep_to_remove = []
         
         #Then for every host create a copy of the service with just the host
-        servicedeps = self.items.keys() #because we are adding services, we can't just loop in it
+        #because we are adding services, we can't just loop in it
+        servicedeps = self.items.keys() 
         for id in servicedeps:
             sd = self.items[id]
             hnames = sd.dependent_host_name.split(',')
@@ -105,7 +99,7 @@ class Servicedependencies(Items):
     #We just search for each srvdep the id of the srv
     #and replace the name by the id
     def linkify_sd_by_s(self, hosts, services):
-        for sd in self:#.items:
+        for sd in self:
             try:
                 s_name = sd.dependent_service_description
                 hst_name = sd.dependent_host_name
@@ -128,7 +122,7 @@ class Servicedependencies(Items):
     #We just search for each srvdep the id of the srv
     #and replace the name by the id
     def linkify_sd_by_tp(self, timeperiods):
-        for sd in self:#.items:
+        for sd in self:
             try:
                 tp_name = sd.dependency_period
                 tp = timeperiods.find_by_name(tp_name)

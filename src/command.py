@@ -53,7 +53,6 @@ class CommandCall:
             self.valid = True
         else:
             self.valid = False
-        #print "Call:", call, 'To:', self.command, 'and', self.args
 
 
     def is_valid(self):
@@ -62,7 +61,7 @@ class CommandCall:
 
     def __str__(self):
         return str(self.__dict__)
-        #return "%d %s" % (self.command, self.args)
+
 
     def get_name(self):
         return self.call

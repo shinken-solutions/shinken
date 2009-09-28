@@ -84,7 +84,8 @@ class Servicegroups(Itemgroups):
         
     #We just search for each host the id of the host
     #and replace the name by the id
-    #TODO: very slow for hight services, so search with host list, not service one
+    #TODO: very slow for hight services, so search with host list,
+    #not service one
     def linkify_sg_by_srv(self, services):
         for id in self.itemgroups:
             mbrs = self.itemgroups[id].get_services().split(',')

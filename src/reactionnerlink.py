@@ -33,7 +33,6 @@ class ReactionnerLink(Item):
  
     running_properties = {'is_active' : {'default' : False},
                           'con' : {'default' : None}
-                          #self.is_alive = False
                           }
     macros = {}
 
@@ -58,7 +57,6 @@ class ReactionnerLink(Item):
             self.con.put_conf(conf)
         except Exception,x:
             print 'Connexion problem'#''.join(Pyro.util.getPyroTraceback(x))
-            #sys.exit(0)
 
 
     def is_alive(self):
@@ -80,6 +78,3 @@ class ReactionnerLinks(Items):
     name_property = "name"
     inner_class = ReactionnerLink
 
-#    def find_spare
-#    def sort(self, f):
-#        self.items.sort(f)

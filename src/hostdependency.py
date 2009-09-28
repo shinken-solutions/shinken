@@ -17,8 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#from itemgroup import Itemgroup, Itemgroups
-from util import to_int, to_char, to_split, to_bool
+from util import to_split, to_bool
 from item import Item, Items
 
 class Hostdependency(Item):
@@ -45,15 +44,6 @@ class Hostdependency(Item):
                 }
 
 
-#    #return a copy of a service, but give him a new id
-#    def copy(self):
-#        hd = deepcopy(self)
-#        hd.id = Hostdependency.id
-#        Hostdependency.id = Hostdependency.id + 1
-#        return hd
-
-
-
 class Hostdependencies(Items):
     def delete_hostsdep_by_id(self, ids):
         for id in ids:
@@ -67,7 +57,8 @@ class Hostdependencies(Items):
         hstdep_to_remove = []
         
         #Then for every host create a copy of the service with just the host
-        hostdeps = self.items.keys() #because we are adding services, we can't just loop in it
+        #because we are adding services, we can't just loop in it
+        hostdeps = self.items.keys()
         for id in hostdeps:
             hd = self.items[id]
             hnames = hd.dependent_host_name.split(',')
@@ -89,7 +80,7 @@ class Hostdependencies(Items):
     #We just search for each srvdep the id of the srv
     #and replace the name by the id
     def linkify_sd_by_tp(self, timeperiods):
-        for hd in self:#.items:
+        for hd in self:
             try:
                 tp_name = hd.dependency_period
                 tp = timeperiods.find_by_name(tp_name)
@@ -100,7 +91,7 @@ class Hostdependencies(Items):
 
     #We backport service dep to service. So SD is not need anymore
     def linkify_h_by_hd(self):
-        for hd in self:#.items:
+        for hd in self:
             h = hd.dependent_host_name
             if h is not None:
                 if hasattr(hd, 'dependency_period'):

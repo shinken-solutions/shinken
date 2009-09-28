@@ -133,7 +133,6 @@ class Timerange:
 
     def is_time_valid(self, t):
         sec_from_morning = get_sec_from_morning(t)
-        morning = get_day(t)
         return self.hstart*3600 + self.mstart* 60  <= sec_from_morning <= self.hend*3600 + self.mend* 60
             
         
@@ -163,20 +162,8 @@ class Daterange:
         return ''#str(self.__dict__)
 
 
-    def check_time_against_period(self, test_time):
-        pass
-
-
     def get_start_and_end_time(self):
         print "Not implemented"
-
-
-    def is_timerange_valid(self, t):
-        t = get_sec_from_morning(t)
-        for tr in self.timeranges:
-            if tr.is_time_valid(t):
-                return True
-        return False
 
 
     def is_time_valid(self, t):
@@ -197,6 +184,7 @@ class Daterange:
     def get_min_from_t(self, t):
         if self.is_time_valid(t):
             return t
+        t_day_epoch = get_day(t)
         tr_mins = self.get_min_sec_from_morning(t)
         return t_day_epoch + tr_mins
         
@@ -209,13 +197,13 @@ class Daterange:
             return False
 
 
-    def have_future_tiremange_valid(self, t):        
-        starts = []
-        for tr in self.timeranges:
-            tr_start = tr.hstart * 3600 + tr.mstart * 3600
-            if tr_start >= sec_from_morning:
-                return True
-        return False
+    #def have_future_tiremange_valid(self, t):        
+    #    starts = []
+    #    for tr in self.timeranges:
+    #        tr_start = tr.hstart * 3600 + tr.mstart * 3600
+    #        if tr_start >= sec_from_morning:
+    #            return True
+    #    return False
 
 
     def get_next_future_timerange_valid(self, t): 
@@ -303,8 +291,8 @@ class StandardDaterange(Daterange):
         now = time.localtime(ref)
         self.syear = now.tm_year
         self.month = now.tm_mon
-        month_start_id = now.tm_mon
-        month_start = Timeperiod.get_month_by_id(month_start_id)
+        #month_start_id = now.tm_mon
+        #month_start = Timeperiod.get_month_by_id(month_start_id)
         self.wday = now.tm_wday
         day_id = Timeperiod.get_weekday_id(self.day)
         today_morning = get_start_of_day(now.tm_year, now.tm_mon, now.tm_mday)
@@ -480,18 +468,6 @@ class Timeperiod:
         pass
 
 
-    def check_valid_for_today(self):
-        self.is_valid_today = False
-        for dr in self.dateranges:
-            dr.check_valid_for_today()
-            if dr.is_valid_today:
-                self.is_valid_today = True
-        
-        if self.has('exclude'):
-            for dr in self.exclude:
-                dr.check_valid_for_today()
-        
-
     def is_time_valid(self, t):
         if self.has('exclude'):
             for dr in self.exclude:
@@ -507,25 +483,13 @@ class Timeperiod:
     def get_min_from_t(self, t):
         mins_incl = []
         for dr in self.dateranges:
-            mins_incl.append(get_min_from_t(t))
+            mins_incl.append(dr.get_min_from_t(t))
         return min(mins_incl)
 
 
     #will give the first time > t which is not valid
     def get_not_in_min_from_t(self, f):
         pass
-
-
-    def get_next_valid_time(self):
-        now = time.mktime(time.localtime())
-        dr_mins = []
-        for dr in self.dateranges:
-            dr_mins.append(dr.get_next_valid_time())
-        local_min = min(dr_mins)
-        if local_min < now:
-            return 0
-        else:
-            return local_min
 
 
     def find_next_valid_time_from_cache(self, t):
@@ -604,11 +568,7 @@ class Timeperiod:
 
 
     def has(self, prop):
-        try:
-            getattr(self,prop)
-        except:
-            return False
-        return True
+        return hasattr(self, prop)
 
 
     def __str__(self):
@@ -625,7 +585,6 @@ class Timeperiod:
         
     def resolve_daterange(self, dateranges, entry):
         #print "Trying to resolve ", entry
-        values = None
 
         res = re.search('(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) / (\d+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
@@ -834,12 +793,6 @@ class Timeperiods(Items):
         for id in self.items:
             tp = self.items[id]
             tp.explode(self)
-
-
-    def check_valid_for_today(self):
-        for id in self.items:
-            tp = self.items[id]
-            tp.check_valid_for_today()
 
 
     def linkify(self):

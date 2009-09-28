@@ -33,7 +33,6 @@ class BrokerLink(Item):
  
     running_properties = {'is_active' : {'default' : False},
                           'con' : {'default' : None}
-                          #self.is_alive = False
                           }
     macros = {}
 
@@ -58,7 +57,6 @@ class BrokerLink(Item):
             self.con.put_conf(conf)
         except Exception,x:
             print "connexion problem"#''.join(Pyro.util.getPyroTraceback(x))
-            #sys.exit(0)
 
 
     def is_alive(self):
@@ -79,7 +77,3 @@ class BrokerLink(Item):
 class BrokerLinks(Items):
     name_property = "name"
     inner_class = BrokerLink
-
-#    def find_spare
-#    def sort(self, f):
-#        self.items.sort(f)
