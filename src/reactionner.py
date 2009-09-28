@@ -20,18 +20,19 @@
 #This class is an application for launch actions 
 #like notifications or event handlers
 #The actionner listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where actionner will take actions.
-#When already launch and have a conf, actionner still listen to arbiter (one a timeout)
-#if arbiter whant it to have a new conf, actionner forgot old chedulers (and actions into)
-#take new ones and do the (new) job.
+#the configuration gived by arbiter is schedulers where actionner will take 
+#actions.
+#When already launch and have a conf, actionner still listen to arbiter (one 
+#a timeout) if arbiter wants it to have a new conf, actionner forgot old 
+#chedulers (and actions into) take new ones and do the (new) job.
 
 from actionner import Actionner
 
 
 #Our main APP class
 class Reactionner (Actionner):
-	do_checks = False
-	do_actions = True
+	do_checks = False #I do not do checks
+	do_actions = True #just actions like notifications
 	default_port = 7769
 
 #lets go to the party

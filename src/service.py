@@ -352,7 +352,8 @@ class Service(SchedulingItem):
                 #The notif must be fill with current data, 
                 #so we create the commmand now
                 command = n.ref['command']
-                n._command = m.resolve_command(command, self.host_name, self, contact, n)
+                data = [self.host, self, contact, n]
+                n._command = m.resolve_command(command, data)
                 #Maybe the contact do not want this notif? Arg!
                 if self.is_notification_launchable(n, contact):
                     notifications.append(n)
@@ -415,7 +416,8 @@ class Service(SchedulingItem):
         if not self.is_no_check_dependant():
             #Get the command to launch
             m = MacroResolver()
-            command_line = m.resolve_command(self.check_command, self.host_name, self, None, None)
+            data = [self.host, self]
+            command_line = m.resolve_command(self.check_command, data)
             
             #Make the Check object and put the service in checking
             #print "Asking for a check with command:", command_line

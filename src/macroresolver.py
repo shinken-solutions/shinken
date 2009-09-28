@@ -26,9 +26,9 @@
 
 import re
 from borg import Borg
-from singleton import Singleton
+#from singleton import Singleton
 import time
-from contact import Contact
+#from contact import Contact
 
 
 class MacroResolver(Borg):
@@ -75,88 +75,71 @@ class MacroResolver(Borg):
         self.contactgroups = conf.contactgroups
 
 
+    #Return all macros of a string, so cut the $
+    #And create a dict with it:
+    #val : value, not set here
+    #type : type of macro, like class one, or ARGN one
     def get_macros(self, s):
-        #print "Checking Macros in", s
         p = re.compile(r'(\$)')
         elts = p.split(s)
-        #print "Elts:", elts
         macros = {}
         in_macro = False
         for elt in elts:
-            #print 'Debug:', elt, 'in macro?', in_macro
             if elt == '$':
                 in_macro = not in_macro
             elif in_macro:
                 macros[elt] = {'val' : '', 'type' : 'unknown'}
-        #print "Macros", macros
         return macros
                 
 
+    #Get a value from a propertie of a element
+    #Prop can ba a function or a propertie
+    #So we call it or no
     def get_value_from_element(self, elt, prop):
         try:
-            if callable(getattr(elt, prop)):
-                f = getattr(elt, prop)
-                #print "Calling ",f, "for", elt
-                return  f()
+            value = getattr(elt, prop)
+            if callable(value):
+                return  value()
             else:
-                #prop = macros[macro]['class'].macros[macro]
-                #print "Getting", prop, "for", elt
-                return getattr(elt, prop)
+                return value
         except AttributeError as exp:
             return str(exp)
 
 
-    #Resolve just a line with data
-    def resolve_macro(self, c_line, data):
-        macros = self.get_macros(c_line)
-        clss = [d.__class__ for d in data]
-        self.get_type_of_macro_new(macros, clss)
-        print "Got macros:", macros
-        for macro in macros:
-            if macros[macro]['type'] == 'class':
-                #print "Search for type", macros[macro]['class']
-                data.append(self)
-                for elt in data:
-                    if elt is not None and elt.__class__ == macros[macro]['class']:
-                        prop = macros[macro]['class'].macros[macro]
-                        macros[macro]['val'] = self.get_value_from_element(elt, prop)
-        print "New resolved macros", macros
-        for macro in macros:
-            #print "Changing", '$'+macro+'$', "by", macros[macro]['val']
-            c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
-        #print "Final command:", c_line
-        return c_line
-
-
-    def resolve_command(self, com, h, s, c, n):
-        #print "Trying to resolve command", com
-        #print "Args", com.args
+    #Resolve a command with macro by looking at data classes.macros
+    #And get macro from item properties.
+    def resolve_command(self, com, data):
         c_line = com.command.command_line
-        #print "Command line:", c_line
+        #Ok, we want the macros in the command line
         macros = self.get_macros(c_line)
-        self.get_type_of_macro(macros)
-        #print "Got macros:", macros
+        #Now we prepare the classes for looking at the class.macros
+        data.append(self) #For getting global MACROS
+        clss = [d.__class__ for d in data]
+        #Put in the macros the type of macro for all macros
+        self.get_type_of_macro(macros, clss)
+        #Now we get values from elements
         for macro in macros:
+            #If type ARGN, look at ARGN cutting
             if macros[macro]['type'] == 'ARGN':
                 macros[macro]['val'] = self.resolve_argn(macro, com.args)
                 macros[macro]['type'] = 'resolved'
+            #If class, get value from properties
             if macros[macro]['type'] == 'class':
-                #print "Search for type", macros[macro]['class']
-                for elt in [h, s, c, n, self]:
-                    #print "Type etl:", type(elt), elt
-                    if elt is not None and elt.__class__ == macros[macro]['class']:
-                        #print "Elt is a", macros[macro]['class']
-                        prop = macros[macro]['class'].macros[macro]
+                cls = macros[macro]['class']
+                for elt in data:
+                    if elt is not None and elt.__class__ == cls:
+                        prop = cls.macros[macro]
                         macros[macro]['val'] = self.get_value_from_element(elt, prop)
-        #print "New resolved macros", macros
+        #We resolved all we can, now replace the macro in the command call
         for macro in macros:
-            #print "Changing", '$'+macro+'$', "by", macros[macro]['val']
             c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
-        #print "Final command:", c_line
         return c_line
 
 
-    def get_type_of_macro_new(self, macros, clss):
+    #For all Macros in macros, set the type by looking at the
+    #MACRO name (ARGN? -> argn_type,
+    #HOSTBLABLA -> class one and set Host in class)
+    def get_type_of_macro(self, macros, clss):
         for macro in macros:
             if re.match('ARG\d', macro):
                 macros[macro]['type'] = 'ARGN'
@@ -164,44 +147,19 @@ class MacroResolver(Borg):
             elif re.match('USER\d', macro):
                 macros[macro]['type'] = 'USERN'
                 continue
-            
             for cls in clss:
                 if macro in cls.macros:
-                    #print "Got a class macro", macro, str(cls)
                     macros[macro]['type'] = 'class'
                     macros[macro]['class'] = cls
-            #elif macro['type'] = 'unknown
-        
-        
-    def get_type_of_macro(self, macros):
-        for macro in macros:
-            if re.match('ARG\d', macro):
-                macros[macro]['type'] = 'ARGN'
-                continue
-            elif re.match('USER\d', macro):
-                macros[macro]['type'] = 'USERN'
-                continue
-            
-            from service import Service
-            from host import Host
-            from contact import Contact
-            from notification import Notification
-            for cls in [Host, Service, Contact, Notification, MacroResolver]:
-                if macro in cls.macros:
-                    #print "Got a class macro", macro, str(cls)
-                    macros[macro]['type'] = 'class'
-                    macros[macro]['class'] = cls
-            #elif macro['type'] = 'unknown
 
 
+    #Resolv MACROS for the ARGN
     def resolve_argn(self, macro, args):
-        #print "Trying to resolve ARGN marco:", macro, "with", args
         #first, get number of arg
         id = None
         r = re.search('ARG(?P<id>\d+)', macro)
         if r is not None:
             id = int(r.group('id')) - 1
-            #print "ID:", id
             try:
                 return args[id]
             except IndexError:

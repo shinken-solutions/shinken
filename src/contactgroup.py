@@ -17,6 +17,9 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#Contactgroups are groups for contacts
+#They are just used for the config read and explode by elements
+
 from itemgroup import Itemgroup, Itemgroups
 
 class Contactgroup(Itemgroup):
@@ -35,8 +38,9 @@ class Contactgroup(Itemgroup):
         'CONTACTGROUPMEMBERS' : 'get_members'
         }
     
+
     def get_contacts(self):
-        return self.members#.split(',')
+        return self.members
 
     
     def get_contactgroup_members(self):

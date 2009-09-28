@@ -17,6 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#This class is use just for having a common id between actions and checks
 
 class Action:
     id = 0
