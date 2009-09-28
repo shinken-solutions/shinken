@@ -410,7 +410,7 @@ class Scheduler:
         for a in self.actions.values():
             item = self.get_ref_item_from_action(a)
             if not item.still_need(a):
-                    id_to_del.append(a.id)
+                id_to_del.append(a.id)
         #Ok, now we DEL
         for id in id_to_del:
             del self.actions[id]

@@ -358,7 +358,6 @@ class Service(SchedulingItem):
 
     #Check if the notificaton is still necessery
     def still_need(self, n):
-        #now = time.time()
         #if state != OK, te service still got a pb, 
         #so notification still necessery
         if self.state != 'OK':
@@ -371,9 +370,6 @@ class Service(SchedulingItem):
         return False
 
 
-    #Is in checking if and ony if there are still checks no consumed
-    def update_in_checking(self):
-        self.in_checking = (len(self.checks_in_progress) != 0)
 
 
     #return a check to check the service

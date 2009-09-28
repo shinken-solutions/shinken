@@ -238,6 +238,11 @@ class SchedulingItem(Item):
         self.update_in_checking()
 
 
+    #Is in checking if and ony if there are still checks no consumed
+    def update_in_checking(self):
+        self.in_checking = (len(self.checks_in_progress) != 0)
+
+
     #consume a check return and send action in return
     #main function of reaction of checks like raise notifications
     #Special case:
