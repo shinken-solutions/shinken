@@ -23,7 +23,7 @@ from item import Item
 #from util import to_int, to_char, to_split, to_bool
 import random
 import time
-#from check import Check
+from check import Check
 from notification import Notification
 from timeperiod import Timeperiod
 from macroresolver import MacroResolver
@@ -290,7 +290,7 @@ class SchedulingItem(Item):
 
         #C is a check and someone wait for it
         if c.status == 'waitconsume' and c.depend_on_me != []:
-            print c.id, self.get_name(), "OK, someone wait for me", c.depend_on_me
+            print c.id, self.get_name(), "OK, someone wait for me", len(c.depend_on_me)
             c.status = 'havetoresolvedep'
 
         #if finish, check need to be set to a zombie state to be removed
@@ -304,14 +304,14 @@ class SchedulingItem(Item):
         #C was waitdep, but now all dep are resolved, so check for deps
         if c.status == 'waitdep':
             if c.depend_on_me != []:
-                print self.get_name(), "OK, someone wait for me", c.depend_on_me
+                print self.get_name(), "OK, someone wait for me", len(c.depend_on_me)
                 c.status = 'havetoresolvedep'
             else:
-                print self.get_name(), "Great, noboby wait for me!"
+                #print self.get_name(), "Great, noboby wait for me!"
                 c.status = 'zombie'
             #Check deps
             no_action = self.is_no_action_dependant()
-            print "No action:", no_action
+            #print "No action:", no_action
 
         #If no_action is False, maybe we are in downtime,
         #so no_action become true
@@ -405,3 +405,37 @@ class SchedulingItem(Item):
                 if self.is_notification_launchable(n, contact):
                     notifications.append(n)
         return notifications
+
+
+    #return a check to check the host/service
+    def launch_check(self, t, ref_check = None):
+        c = None
+        cls = self.__class__
+
+        #if I'm already in checking, Why launch a new check?
+        #If ref_check_id is not None , this is a dependancy_ check
+        #If none, it might be a forced check, so OK, I do a new
+        if self.in_checking and ref_check != None:
+            #print "FUCK, I do not want to launch a new check, I alreay have one"
+            c_in_progress = self.checks_in_progress[0] #0 is OK because in_checking is True
+            if c_in_progress.t_to_go > time.time(): #Very far?
+                c_in_progress.t_to_go = time.time() #No, I want a check right NOW
+            c_in_progress.depend_on_me.append(ref_check)
+            return c_in_progress.id
+
+        if not self.is_no_check_dependant():
+            #Get the command to launch
+            m = MacroResolver()
+            data = self.get_data_for_checks()
+            command_line = m.resolve_command(self.check_command, data)
+            
+            #Make the Check object and put the service in checking
+            #print "Asking for a check with command:", command_line
+            c = Check('scheduled', command_line, self.id, cls.my_type, t, ref_check)
+            #We keep a trace of all checks in progress
+            #to know if we are in checking_or not
+            self.checks_in_progress.append(c)
+            #print self.get_name()+" we ask me for a check" + str(c.id)
+        self.update_in_checking()
+        #We need to return the check for scheduling adding
+        return c

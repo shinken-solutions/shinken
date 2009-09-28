@@ -17,17 +17,16 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import pygraph
+import time
 
 from command import CommandCall
-#from pygraph import digraph
 from item import Items
 from schedulingitem import SchedulingItem
 from util import to_int, to_char, to_split, to_bool
-import time#, random
 from macroresolver import MacroResolver
 from check import Check
 from notification import Notification
-#from brok import Brok
+
 
 class Host(SchedulingItem):
     id = 1 #0 is reserved for host (primary node for parents)
@@ -285,6 +284,11 @@ class Host(SchedulingItem):
                 self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None) )
 
 
+    #Give data for checks's macros
+    def get_data_for_checks(self):
+        return [self]
+
+
     #Give data for notifications'n macros
     def get_data_for_notifications(self, contact, n):
         return [self, contact, n]
@@ -315,38 +319,6 @@ class Host(SchedulingItem):
             return True
         #we do not see why to save this notification, so...
         return False
-
-
-    #return a check to check the host
-    def launch_check(self, t , ref_check = None):
-        c = None
-        
-        #if I'm already in checking, Why launch a new check?
-        #If ref_check_id is not None , this is a dependancy_ check
-        if self.in_checking and ref_check != None:
-            c_in_progress = self.checks_in_progress[0]
-            if c_in_progress.t_to_go > time.time(): #Very far?
-                c_in_progress.t_to_go = time.time()
-            c_in_progress.depend_on_me.append(ref_check)
-            #print "****************** I prefer give you my previous check, really", c_in_progress.id
-            return c_in_progress.id
-        
-        if not self.is_no_check_dependant():
-            #Get the command to launch
-            m = MacroResolver()
-            data = [self]
-            command_line = m.resolve_command(self.check_command, data)
-            
-            #Make the Check object and put the service in checking
-            #print "Asking for a check with command:", command_line
-            c = Check('scheduled',command_line, self.id, 'host', t, ref_check)
-            
-            #We keep a trace of all checks in progress
-            #to know if we are in checking_or not
-            self.checks_in_progress.append(c)
-        self.update_in_checking()
-        #We need to return the check for scheduling adding
-        return c
 
 
 

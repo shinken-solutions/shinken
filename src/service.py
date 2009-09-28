@@ -16,18 +16,17 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#import random
+
 import time
 
 from command import CommandCall
-#from copy import deepcopy
 from item import Items
 from schedulingitem import SchedulingItem
 from util import to_int, to_char, to_split, to_bool, strip_and_uniq
 from check import Check
 from notification import Notification
 from macroresolver import MacroResolver
-#from brok import Brok
+
 
 
 class Service(SchedulingItem):
@@ -272,7 +271,6 @@ class Service(SchedulingItem):
             print self.get_name()," : I've got no notification_interval but I've got notifications enabled"
             state = False
         if not hasattr(self, 'host') or self.host == None:
-            #if not self.has('host_name') and not self.has('hostgroup_name'):
             print self.get_name(),": I do not have and host"
             state = False
         return state
@@ -332,6 +330,11 @@ class Service(SchedulingItem):
         return False
 
 
+    #Give data for checks's macros
+    def get_data_for_checks(self):
+        return [self.host, self]
+
+
     #Give data for notifications'n macros
     def get_data_for_notifications(self, contact, n):
         return [self.host, self, contact, n]
@@ -368,40 +371,6 @@ class Service(SchedulingItem):
             return True
         #we do not see why to save this notification, so...
         return False
-
-
-
-
-    #return a check to check the service
-    def launch_check(self, t, ref_check = None):
-        c = None
-
-        #if I'm already in checking, Why launch a new check?
-        #If ref_check_id is not None , this is a dependancy_ check
-        if self.in_checking and ref_check != None:
-            print "FUCK, I do not want to launch a new check, I alreay have one"
-            c_in_progress = self.checks_in_progress[0]
-            if c_in_progress.t_to_go > time.time(): #Very far?
-                c_in_progress.t_to_go = time.time() #Ok, I want a check right NOW
-            c_in_progress.depend_on_me.append(ref_check)
-            return c_in_progress.id
-
-        if not self.is_no_check_dependant():
-            #Get the command to launch
-            m = MacroResolver()
-            data = [self.host, self]
-            command_line = m.resolve_command(self.check_command, data)
-            
-            #Make the Check object and put the service in checking
-            #print "Asking for a check with command:", command_line
-            c = Check('scheduled', command_line, self.id, 'service', t, ref_check)
-            #We keep a trace of all checks in progress
-            #to know if we are in checking_or not
-            self.checks_in_progress.append(c)
-            #print self.get_name()+" we ask me for a check" + str(c.id)
-        self.update_in_checking()
-        #We need to return the check for scheduling adding
-        return c
 
 
 
