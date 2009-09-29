@@ -152,7 +152,7 @@ class Scheduler:
         else:
             nb_actions_drops = 0
         
-        if nb_checks_drops !=0 or nb_broks_drops != 0 or nb_actions_drops != 0:
+        if nb_checks_drops != 0 or nb_broks_drops != 0 or nb_actions_drops != 0:
             print "WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops)
 
             
@@ -195,9 +195,10 @@ class Scheduler:
             for c in self.checks.values():
                 if c.status == 'scheduled' and c.is_launchable(now):
                     c.status = 'inpoller'
-                    #We do not send c, because it it link (c.ref) to host/service
-                    #and poller do not need it. It just need a shell with id,
-                    #command and defaults parameters. It's the goal of copy_shell
+                    #We do not send c, because it it link (c.ref) to 
+                    #host/service and poller do not need it. It just
+                    #need a shell with id, command and defaults
+                    #parameters. It's the goal of copy_shell
                     res.append(c.copy_shell())
 
         #If poller want to notify too
@@ -435,18 +436,18 @@ class Scheduler:
             ins,outs,exs = select.select(socks,[],[],timeout)
             if ins != []:
 		for s in socks:
-                        if s in ins:
-                            #If FIFO, read external command
-                            #if s == self.fifo:
-                            #    self.external_command.read_and_interpret()
-                            #    self.fifo = self.external_command.open()
-                            #Must be paquet from poller
-                            #else:
-                            self.daemon.handleRequests()
-                            apres = time.time()
-                            diff = apres-avant
-                            timeout = timeout - diff
-                            break    # no need to continue with the for loop
+                    if s in ins:
+                        #If FIFO, read external command
+                        #if s == self.fifo:
+                        #    self.external_command.read_and_interpret()
+                        #    self.fifo = self.external_command.open()
+                        #Must be paquet from poller
+                        #else:
+                        self.daemon.handleRequests()
+                        apres = time.time()
+                        diff = apres-avant
+                        timeout = timeout - diff
+                        break    # no need to continue with the for loop
             else: #Timeout
 		timeout = 1.0
                 #if (schedule_tick % 5) == 0:
