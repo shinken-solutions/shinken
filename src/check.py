@@ -29,6 +29,7 @@ class Check(Action):
                      'execution_time')
     #id = 0 #Is common to Actions
     def __init__(self, status, command, ref, ref_type, t_to_go, dep_check=None):
+    #def __init__(self, status, command, ref, t_to_go, dep_check=None):
         self.is_a = 'check'
         self.type = ''
         self.id = Action.id

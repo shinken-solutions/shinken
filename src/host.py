@@ -301,9 +301,9 @@ class Host(SchedulingItem):
             
 
     #We just send a notification, we need new ones in notification_interval
-    def get_new_notification_from(self, n):
-        now = time.time()
-        return Notification(n.type, 'scheduled', '', {'host' : n.ref['host'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'host', now + self.notification_interval * 60)
+    #def get_new_notification_from(self, n):
+    #    now = time.time()
+    #    return Notification(n.type, 'scheduled', '', {'host' : n.ref['host'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'host', now + self.notification_interval * 60)
 
 
     #Check if the notificaton is still necessery

@@ -395,23 +395,34 @@ class SchedulingItem(Item):
             notif_commands = getattr(contact, notif_commands_prop)
             for cmd in notif_commands:
                 #TODO : remove occurences of my_type
-                n = Notification(type, 'scheduled', 'VOID', {cls.my_type : self.id, 'contact' : contact.id, 'command': cmd}, cls.my_type, t)
+                n = Notification(type, 'scheduled', 'VOID', cmd, {cls.my_type : self.id, 'contact' : contact.id}, cls.my_type, t)
                 #The notif must be fill with current data, 
                 #so we create the commmand now
-                command = n.ref['command']
                 data = self.get_data_for_notifications(contact, n)
-                n._command = m.resolve_command(command, data)
+                n.command = m.resolve_command(cmd, data)
                 #Maybe the contact do not want this notif? Arg!
                 if self.is_notification_launchable(n, contact):
                     notifications.append(n)
         return notifications
 
 
+    #We just send a notification, we need new ones in notification_interval
+    def get_new_notification_from(self, n):
+        now = time.time()
+        cls = self.__class__
+        #a recovery notif is send ony one time
+        if n.type == 'RECOVERY':
+            return None
+        #TODO : resolv command...
+        new_n = Notification(n.type, 'scheduled','', n.command_call, {cls.my_type : n.ref[cls.my_type], 'contact' : n.ref['contact']}, cls.my_type, now + self.notification_interval * 60)
+        return new_n
+
+
     #return a check to check the host/service
     def launch_check(self, t, ref_check = None):
         c = None
         cls = self.__class__
-
+        
         #if I'm already in checking, Why launch a new check?
         #If ref_check_id is not None , this is a dependancy_ check
         #If none, it might be a forced check, so OK, I do a new

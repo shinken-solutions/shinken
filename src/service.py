@@ -350,13 +350,13 @@ class Service(SchedulingItem):
             
 
     #We just send a notification, we need new ones in notification_interval
-    def get_new_notification_from(self, n):
-        now = time.time()
-        #a recovery notif is send ony one time
-        if n.type == 'RECOVERY':
-            return None
-        new_n = Notification(n.type, 'scheduled','', {'service' : n.ref['service'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'service', now + self.notification_interval * 60)
-        return new_n
+    #def get_new_notification_from(self, n):
+    #    now = time.time()
+    #    #a recovery notif is send ony one time
+    #    if n.type == 'RECOVERY':
+    #        return None
+    #    new_n = Notification(n.type, 'scheduled','', {'service' : n.ref['service'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'service', now + self.notification_interval * 60)
+    #    return new_n
 
 
     #Check if the notificaton is still necessery

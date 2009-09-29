@@ -55,7 +55,7 @@ class Notification(Action):
         }
     
     
-    def __init__(self, type , status, command, ref, ref_type, t_to_go, \
+    def __init__(self, type , status, command, command_call, ref, ref_type, t_to_go, \
                      contact_name='', host_name='', service_description='',
                      reason_type=1, state=0, ack_author='', ack_data='', \
                      escalated=0, contacts_notified=0, \
@@ -65,11 +65,13 @@ class Notification(Action):
 
         self.id = Action.id
         Action.id += 1
+        
 
         self._in_timeout = False
         self.status = status
         self.exit_status = 3
-        self._command = command
+        self.command = command
+        self.command_call = command_call
         self.output = None
         self.ref = ref
         self.ref_type = ref_type
@@ -90,8 +92,8 @@ class Notification(Action):
         self.notification_type = notification_type
     
     def execute(self):
-        print "Notification %s" % self._command
-        child = spawn ('/bin/sh -c "%s"' % self._command)
+        print "Notification %s" % self.command
+        child = spawn ('/bin/sh -c "%s"' % self.command)
         self.status = 'lanched'
         
         try:
@@ -128,6 +130,13 @@ class Notification(Action):
 
     def get_id(self):
         return self.id
+
+
+    def get_return_from(self, n):
+        self.exit_status  = n.exit_status
+        #self.output = c.output
+        #self.check_time = c.check_time
+        #self.execution_time = c.execution_time
 
     
     #Fill data with info of item by looking at brok_type

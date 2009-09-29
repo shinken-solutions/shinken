@@ -229,7 +229,6 @@ class Scheduler:
 
     #Caled by poller and reactionner to send result
     def put_results(self, c):
-        #print "Get results"
         if c.is_a == 'notification':
             item = self.get_ref_item_from_action(c)
             a = item.get_new_notification_from(c)
@@ -242,7 +241,6 @@ class Scheduler:
         elif c.is_a == 'check':
             self.checks[c.id].get_return_from(c)
             self.checks[c.id].status = 'waitconsume'
-            #self.add(c)
         else:
             print "Type unknown"
 
@@ -342,11 +340,6 @@ class Scheduler:
                     elif  a.is_a == 'check':
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
-
-        #print "DBG:"
-        #for c in self.checks.values():
-        #    if c.ref_type == 'host':
-        #        print c.id, ":", c.status, 'Depend_on_me:', len(c.depend_on_me), 'depend_on', c.depend_on        
 
         #All 'finished' checks (no more dep) raise checks they depends on
         for c in self.checks.values():
