@@ -374,7 +374,6 @@ class SchedulingItem(Item):
         return []
 
 
-
     #Create notifications
     def create_notifications(self, type):
         #if notif is disabled, not need to go thurser
@@ -395,7 +394,8 @@ class SchedulingItem(Item):
             notif_commands = getattr(contact, notif_commands_prop)
             for cmd in notif_commands:
                 #TODO : remove occurences of my_type
-                n = Notification(type, 'scheduled', 'VOID', cmd, {cls.my_type : self.id, 'contact' : contact.id}, cls.my_type, t)
+                #n = Notification(type, 'scheduled', 'VOID', cmd, {cls.my_type : self.id, 'contact' : contact.id}, cls.my_type, t)
+                n = Notification(type, 'scheduled', 'VOID', cmd, self, t)
                 #The notif must be fill with current data, 
                 #so we create the commmand now
                 data = self.get_data_for_notifications(contact, n)
@@ -414,7 +414,7 @@ class SchedulingItem(Item):
         if n.type == 'RECOVERY':
             return None
         #TODO : resolv command...
-        new_n = Notification(n.type, 'scheduled','', n.command_call, {cls.my_type : n.ref[cls.my_type], 'contact' : n.ref['contact']}, cls.my_type, now + self.notification_interval * 60)
+        new_n = Notification(n.type, 'scheduled','', n.command_call, n.ref, now + self.notification_interval * 60)
         return new_n
 
 

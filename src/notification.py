@@ -55,16 +55,16 @@ class Notification(Action):
         }
     
     
-    def __init__(self, type , status, command, command_call, ref, ref_type, t_to_go, \
+    def __init__(self, type , status, command, command_call, ref, t_to_go, \
                      contact_name='', host_name='', service_description='',
                      reason_type=1, state=0, ack_author='', ack_data='', \
                      escalated=0, contacts_notified=0, \
-                     start_time=0, end_time=0, notification_type=0):
+                     start_time=0, end_time=0, notification_type=0, id=None):
         self.is_a = 'notification'
         self.type = type
-
-        self.id = Action.id
-        Action.id += 1
+        if id == None: #id != None is for copy call only
+            self.id = Action.id
+            Action.id += 1
         
 
         self._in_timeout = False
@@ -74,7 +74,7 @@ class Notification(Action):
         self.command_call = command_call
         self.output = None
         self.ref = ref
-        self.ref_type = ref_type
+        #self.ref_type = ref_type
         self.t_to_go = t_to_go
         
         #For brok part
@@ -90,6 +90,19 @@ class Notification(Action):
         self.start_time = start_time
         self.end_time = end_time
         self.notification_type = notification_type
+
+
+    #return a copy of the check but just what is important for execution
+    #So we remove the ref and all
+    def copy_shell(self):
+        #We create a dummy check with nothing in it, jsut defaults values
+        new_n = Notification('', '', '', '', '', '', id=self.id)
+        only_copy_prop = ['id', 'status', 'command', 't_to_go']
+        for prop in only_copy_prop:
+            val = getattr(self, prop)
+            setattr(new_n, prop, val)
+        return new_n
+
 
     
     def execute(self):
@@ -107,6 +120,16 @@ class Notification(Action):
             print "On le kill"
             self.status = 'timeout'
             child.terminate(force=True)
+
+
+    def get_return_from(self, c):
+        self.exit_status  = c.exit_status
+        self.output = c.output
+        #self.long_output = c.long_output
+        #self.check_time = c.check_time
+        #self.execution_time = c.execution_time
+        #self.perf_data = c.perf_data
+
 
 
     def is_launchable(self, t):

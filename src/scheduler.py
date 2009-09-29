@@ -74,24 +74,6 @@ class Scheduler:
         self.external_command.resolve_command(command)
 
 
-    #And action if for service or host.
-    #We just wuant the service of the host that is the ref
-    #BUT: ref is int or dict... so...
-    #TODO : clean this fucking ref...
-    def get_ref_item_from_action(self, action):
-        ref = action.ref
-        if action.ref_type == 'service':
-            if isinstance(ref, int):
-                return self.services[ref]
-            else:
-                return self.services[action.ref['service']]
-        if action.ref_type == 'host':
-            if isinstance(ref, int):
-                return self.hosts[action.ref]
-            else:
-                return self.hosts[action.ref['host']]
-
-
     #Schedulers have some queues. We can simplify call by adding
     #elements into the proper queue just by looking at their type
     #Brok -> self.broks
@@ -137,7 +119,7 @@ class Scheduler:
                 print "I have to del some checks..., sorry", to_del_checks
             for c in to_del_checks:
                 i = c.id
-                elt = c.ref#self.get_ref_item_from_action(c)
+                elt = c.ref
                 #First remove the link in host/service
                 elt.remove_in_progress_check(c)
                 #Then in dependant checks (I depend on, or check
@@ -221,20 +203,21 @@ class Scheduler:
         #If poller want to notify too
         if do_actions:
             for a in self.actions.values():
-                #contact = self.contacts.items[a.ref['contact']]
-                #contact = self.contacts[a.ref['contact']]
-                #item = self.get_ref_item_from_action(a)
                 if a.status == 'scheduled':
                     a.status = 'inpoller'
-                    res.append(a)
+                    res.append(a.copy_shell())
         return res
 
 
     #Caled by poller and reactionner to send result
     def put_results(self, c):
         if c.is_a == 'notification':
-            item = self.get_ref_item_from_action(c)
-            a = item.get_new_notification_from(c)
+            self.actions[c.id].get_return_from(c)
+            #print "\n\n\nGetting  a NOTIFICATION RETURN \n\n\n"
+            #print c.__dict__
+            #print self.actions[c.id].__dict__
+            item = self.actions[c.id].ref
+            a = item.get_new_notification_from(self.actions[c.id])
             if a is not None:
                 self.add(a)
                 #Get Brok from this new notification
@@ -328,7 +311,7 @@ class Scheduler:
             #print c
             if c.status == 'waitconsume':
                 #print "A check to consume", c.id
-                item = c.ref#self.get_ref_item_from_action(c)
+                item = c.ref
                 actions = item.consume_result(c)
                 #The update of the host/service must have changed, we brok it
                 self.get_and_register_check_result_brok(item)
@@ -360,7 +343,7 @@ class Scheduler:
         for c in self.checks.values():
             if c.status == 'waitdep' and len(c.depend_on) == 0:
                 #print c.id, "OK we've got all dep!, now we can resolve check"
-                item = c.ref#self.get_ref_item_from_action(c)
+                item = c.ref
                 actions = item.consume_result(c)
                 self.get_and_register_check_result_brok(item)
 
@@ -404,7 +387,7 @@ class Scheduler:
     def delete_unwanted_notifications(self):
         id_to_del = []
         for a in self.actions.values():
-            item = self.get_ref_item_from_action(a)
+            item = a.ref
             if not item.still_need(a):
                 id_to_del.append(a.id)
         #Ok, now we DEL
