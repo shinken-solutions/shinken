@@ -33,6 +33,20 @@ class Scheduler:
         self.must_run = True #When set to false by us, we die and 
                              #arbiter launch a new Scheduler
 
+        #Every N seconds we call functions like consume, del zombies
+        #etc. All of theses functions are in recurrent_works with the
+        #every tick to run. So must be integer and > 0
+        #The order is important, so make key a int.
+        #TODO : at load, change value by configuration one (like reaper time, etc)
+        self.recurrent_works = {
+            0 : (self.schedule, 1),
+            1 : (self.consume_results , 1),
+            2 : (self.delete_zombie_checks, 1),
+            3 : (self.delete_unwanted_notifications, 1),
+            4 : (self.check_freshness, 1),
+            5 : (self.clean_caches, 1)
+            }
+
 
     #Load conf for future use
     def load_conf(self, conf):
@@ -159,6 +173,7 @@ class Scheduler:
     #For tunning purpose we use caches but we do not whant them to explode
     #So we clean thems
     def clean_caches(self):
+        print "********** Clean caches *********"
         for tp in self.timeperiods:
             tp.clean_cache()
 
@@ -211,12 +226,11 @@ class Scheduler:
 
 
     #Caled by poller and reactionner to send result
+    #It'a a oneWayCall for reactionner/poller
+    #Do do not need to return
     def put_results(self, c):
         if c.is_a == 'notification':
             self.actions[c.id].get_return_from(c)
-            #print "\n\n\nGetting  a NOTIFICATION RETURN \n\n\n"
-            #print c.__dict__
-            #print self.actions[c.id].__dict__
             item = self.actions[c.id].ref
             a = item.get_new_notification_from(self.actions[c.id])
             if a is not None:
@@ -306,12 +320,10 @@ class Scheduler:
     #Called every 1sec to consume every result in services or hosts
     #with theses results, they are OK, CRITCAL, UP/DOWN, etc...
     def consume_results(self):
-        print "Consume results"
+        print "**********Consume*********"
         checks_to_add = []
         for c in self.checks.values():
-            #print c
             if c.status == 'waitconsume':
-                #print "A check to consume", c.id
                 item = c.ref
                 actions = item.consume_result(c)
                 #The update of the host/service must have changed, we brok it
@@ -331,10 +343,7 @@ class Scheduler:
         #All 'finished' checks (no more dep) raise checks they depends on
         for c in self.checks.values():
             if c.status == 'havetoresolvedep':
-                #print "I remove dep", c.id, "on the checks in ", c.depend_on_me
-                #self.checks[c.depend_on_me].depend_on.remove(c.id)
                 for dependant_checks in c.depend_on_me:
-                    #print "So removing check", c.id, "in" , dependant_checks.id
                     #Ok, now dependant will no more wait c
                     dependant_checks.depend_on.remove(c.id)
                 #REMOVE OLD DEP CHECL -> zombie
@@ -343,7 +352,6 @@ class Scheduler:
         #Now, reintegr dep checks
         for c in self.checks.values():
             if c.status == 'waitdep' and len(c.depend_on) == 0:
-                #print c.id, "OK we've got all dep!, now we can resolve check"
                 item = c.ref
                 actions = item.consume_result(c)
                 self.get_and_register_check_result_brok(item)
@@ -359,7 +367,6 @@ class Scheduler:
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
         if checks_to_add != []:
-            #print "We add new Dep checks", checks_to_add
             for c in checks_to_add:
                 self.add(c)
 
@@ -367,6 +374,7 @@ class Scheduler:
     #Called every 1sec to delete all checks in a zombie state
     #zombie = not usefull anymore
     def delete_zombie_checks(self):
+        print "**********Delete zombie****"
         id_to_del = []
         for c in self.checks.values():
             if c.status == 'zombie':
@@ -386,6 +394,7 @@ class Scheduler:
     #Notifications are re-scheduling, this function check if unwanted notif
     #are still here (problem notif when it is not)
     def delete_unwanted_notifications(self):
+        print "********** Delete unwanted******"
         id_to_del = []
         for a in self.actions.values():
             item = a.ref
@@ -398,6 +407,7 @@ class Scheduler:
 
     #Main schedule function to make the regular scheduling
     def schedule(self):
+        print "**********Schedule********"
         #ask for service and hosts their next check
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
@@ -408,6 +418,7 @@ class Scheduler:
 
     #Raise checks for no fresh states for services and hosts
     def check_freshness(self):
+        print "********** Check freshnesh******"
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
                 c = i.do_check_freshness()
@@ -423,11 +434,11 @@ class Scheduler:
         print "First scheduling"
         self.schedule()
 
-        #TODO : a better tick count
-        status_tick = 0
-        #schedule_tick = 0
-        
-        timeout = 1.0
+        #Ticks is for recurrent function call like consume
+        #del zombies etc
+        ticks = 0
+        timeout = 1.0 #For the select
+
         while self.must_run :
             socks = self.daemon.getServerSockets()
             avant = time.time()
@@ -450,30 +461,14 @@ class Scheduler:
                         break    # no need to continue with the for loop
             else: #Timeout
 		timeout = 1.0
-                #if (schedule_tick % 5) == 0:
-                print "**********Schedule********"
-                self.schedule()
-                #schedule_tick += 1
-                print "**********Consume*********"
-                self.consume_results()
-                print "**********Delete zombie****"
-                self.delete_zombie_checks()
-                print "********** Delete unwanted******"
-                self.delete_unwanted_notifications()
-                print "********** Delete freshnesh******"
-                self.check_freshness()
-                print "********** Clean caches *********"
-                self.clean_caches()
-
-                if (status_tick % 60) == 0:
-                    #print "********** Update status file******"
-                    self.update_status_file()
-                status_tick += 1
-
-                #print "************** Clean queues ************"
-                self.clean_queues()
-
-                #print "******* Fin loop********"
+                ticks += 1
+                #Do reccurent works like schedule, consume
+                #delete_zombie_checks
+                for i in self.recurrent_works:
+                    (f, nb_ticks) = self.recurrent_works[i]
+                    if ticks % nb_ticks == 0:
+                        print "I run function :", f
+                        f()
 
                 #stats
                 nb_scheduled = len([c for c in self.checks.values() if c.status=='scheduled'])
