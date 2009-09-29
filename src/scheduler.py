@@ -137,7 +137,7 @@ class Scheduler:
                 print "I have to del some checks..., sorry", to_del_checks
             for c in to_del_checks:
                 i = c.id
-                elt = self.get_ref_item_from_action(c)
+                elt = c.ref#self.get_ref_item_from_action(c)
                 #First remove the link in host/service
                 elt.remove_in_progress_check(c)
                 #Then in dependant checks (I depend on, or check
@@ -213,7 +213,10 @@ class Scheduler:
             for c in self.checks.values():
                 if c.status == 'scheduled' and c.is_launchable(now):
                     c.status = 'inpoller'
-                    res.append(c)
+                    #We do not send c, because it it link (c.ref) to host/service
+                    #and poller do not need it. It just need a shell with id,
+                    #command and defaults parameters. It's the goal of copy_shell
+                    res.append(c.copy_shell())
 
         #If poller want to notify too
         if do_actions:
@@ -325,7 +328,7 @@ class Scheduler:
             #print c
             if c.status == 'waitconsume':
                 #print "A check to consume", c.id
-                item = self.get_ref_item_from_action(c)
+                item = c.ref#self.get_ref_item_from_action(c)
                 actions = item.consume_result(c)
                 #The update of the host/service must have changed, we brok it
                 self.get_and_register_check_result_brok(item)
@@ -357,7 +360,7 @@ class Scheduler:
         for c in self.checks.values():
             if c.status == 'waitdep' and len(c.depend_on) == 0:
                 #print c.id, "OK we've got all dep!, now we can resolve check"
-                item = self.get_ref_item_from_action(c)
+                item = c.ref#self.get_ref_item_from_action(c)
                 actions = item.consume_result(c)
                 self.get_and_register_check_result_brok(item)
 

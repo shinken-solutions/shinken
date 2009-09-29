@@ -27,21 +27,41 @@ class Check(Action):
                   '_command', 'output', 'long_output', 'ref', 'ref_type', \
                      't_to_go', 'depend_on', 'depend_on_me', 'check_time', \
                      'execution_time')
+
+    properties={'is_a' : {'required': False, 'default':'check'},
+                'type' : {'required': False, 'default': ''},
+                '_in_timeout' : {'required': False, 'default': False},
+                'status' : {'required': False, 'default':''},
+                'exit_status' : {'required': False, 'default':3},
+                'state' : {'required': False, 'default':0},
+                'output' : {'required': False, 'default':''},
+                'long_output' : {'required': False, 'default':''},
+                'ref' : {'required': False, 'default': -1},
+                #'ref_type' : {'required': False, 'default':''},
+                't_to_go' : {'required': False, 'default': 0},
+                'depend_on' : {'required': False, 'default': []},
+                'dep_check' : {'required': False, 'default': []},
+                'check_time' : {'required': False, 'default': 0},
+                'execution_time' : {'required': False, 'default': 0},
+                'perf_data' : {'required': False, 'default':''}                
+                }
+
     #id = 0 #Is common to Actions
-    def __init__(self, status, command, ref, ref_type, t_to_go, dep_check=None):
+    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None):
     #def __init__(self, status, command, ref, t_to_go, dep_check=None):
         self.is_a = 'check'
         self.type = ''
-        self.id = Action.id
-        Action.id += 1
+        if id == None: #id != None is for copy call only
+            self.id = Action.id
+            Action.id += 1
         self._in_timeout = False
         self.status = status
         self.exit_status = 3
-        self._command = command
+        self.command = command
         self.output = ''
         self.long_output = ''
         self.ref = ref
-        self.ref_type = ref_type
+        #self.ref_type = ref_type
         self.t_to_go = t_to_go
         self.depend_on = []
         if dep_check is None:
@@ -51,6 +71,18 @@ class Check(Action):
         self.check_time = 0
         self.execution_time = 0
         self.perf_data = ''
+
+
+    #return a copy of the check but just what is important for execution
+    #So we remove the ref and all
+    def copy_shell(self):
+        #We create a dummy check with nothing in it, jsut defaults values
+        new_c = Check('', '', '', '', '', id=self.id)
+        only_copy_prop = ['id', 'status', 'command', 't_to_go']
+        for prop in only_copy_prop:
+            val = getattr(self, prop)
+            setattr(new_c, prop, val)
+        return new_c
 
     
     def get_return_from(self, c):
@@ -77,7 +109,7 @@ class Check(Action):
 
     
     def execute(self):
-        child = spawn ('/bin/sh -c "%s"' % self._command)
+        child = spawn ('/bin/sh -c "%s"' % self.command)
         self.status = 'lanched'
         self.check_time = time.time()
 
@@ -111,7 +143,7 @@ class Check(Action):
 
     
     def __str__(self):
-        return "Check %d status:%s command:%s ref:%s" % (self.id, self.status, self._command, self.ref)
+        return "Check %d status:%s command:%s ref:%s" % (self.id, self.status, self.command, self.ref)
 
 
     def get_id(self):

@@ -442,7 +442,7 @@ class SchedulingItem(Item):
             
             #Make the Check object and put the service in checking
             #print "Asking for a check with command:", command_line
-            c = Check('scheduled', command_line, self.id, cls.my_type, t, ref_check)
+            c = Check('scheduled', command_line, self, t, ref_check)
             #We keep a trace of all checks in progress
             #to know if we are in checking_or not
             self.checks_in_progress.append(c)
