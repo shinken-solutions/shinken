@@ -374,6 +374,13 @@ class SchedulingItem(Item):
         return []
 
 
+    #Just update the notification command by resolving Macros
+    def update_notification_command(self, n):
+        m = MacroResolver()
+        data = self.get_data_for_notifications(n.contact, n)
+        n.command = m.resolve_command(n.command_call, data)
+
+
     #Create notifications
     def create_notifications(self, type):
         #if notif is disabled, not need to go thurser
@@ -385,7 +392,7 @@ class SchedulingItem(Item):
         notifications = []
         now = time.time()
         t = self.notification_period.get_next_valid_time_from_t(now)
-        m = MacroResolver()
+        #m = MacroResolver()
         
         for contact in self.contacts:
             #Get the propertie name for notif commands, like
@@ -393,13 +400,12 @@ class SchedulingItem(Item):
             notif_commands_prop = cls.my_type+'_notification_commands'
             notif_commands = getattr(contact, notif_commands_prop)
             for cmd in notif_commands:
-                #TODO : remove occurences of my_type
-                #n = Notification(type, 'scheduled', 'VOID', cmd, {cls.my_type : self.id, 'contact' : contact.id}, cls.my_type, t)
-                n = Notification(type, 'scheduled', 'VOID', cmd, self, t)
+                n = Notification(type, 'scheduled', 'VOID', cmd, self, contact, t)
                 #The notif must be fill with current data, 
                 #so we create the commmand now
-                data = self.get_data_for_notifications(contact, n)
-                n.command = m.resolve_command(cmd, data)
+                self.update_notification_command(n)
+                #data = self.get_data_for_notifications(contact, n)
+                #n.command = m.resolve_command(cmd, data)
                 #Maybe the contact do not want this notif? Arg!
                 if self.is_notification_launchable(n, contact):
                     notifications.append(n)
@@ -414,7 +420,8 @@ class SchedulingItem(Item):
         if n.type == 'RECOVERY':
             return None
         #TODO : resolv command...
-        new_n = Notification(n.type, 'scheduled','', n.command_call, n.ref, now + self.notification_interval * 60)
+        notif_nb = n.notif_nb
+        new_n = Notification(n.type, 'scheduled','', n.command_call, n.ref, n.contact, now + self.notification_interval * 60, notif_nb + 1)
         return new_n
 
 

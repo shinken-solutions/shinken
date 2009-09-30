@@ -42,7 +42,8 @@ class Scheduler:
             0 : (self.schedule, 1),
             1 : (self.consume_results , 1),
             2 : (self.delete_zombie_checks, 1),
-            3 : (self.delete_unwanted_notifications, 1),
+            3 : (self.delete_zombie_actions, 1),
+            #3 : (self.delete_unwanted_notifications, 1),
             4 : (self.check_freshness, 1),
             5 : (self.clean_caches, 1)
             }
@@ -219,9 +220,16 @@ class Scheduler:
         #If poller want to notify too
         if do_actions:
             for a in self.actions.values():
-                if a.status == 'scheduled':
+                if a.status == 'scheduled' and a.is_launchable(now):
                     a.status = 'inpoller'
-                    res.append(a.copy_shell())
+                    #The first notif is clean at creation, but the others
+                    #are create just after the first return, so before the
+                    #notification_interval. At launch, the macors need to
+                    #be updated
+                    if a.notif_nb > 1:
+                        a.ref.update_notification_command(a)
+                    new_a = a.copy_shell()
+                    res.append(new_a)
         return res
 
 
@@ -238,7 +246,8 @@ class Scheduler:
                 #Get Brok from this new notification
                 b = a.get_initial_status_brok()
                 self.add(b)
-            del self.actions[c.id]
+            self.actions[c.id].status = 'zombie'
+            #del self.actions[c.id]
         elif c.is_a == 'check':
             self.checks[c.id].get_return_from(c)
             self.checks[c.id].status = 'waitconsume'
@@ -374,7 +383,7 @@ class Scheduler:
     #Called every 1sec to delete all checks in a zombie state
     #zombie = not usefull anymore
     def delete_zombie_checks(self):
-        print "**********Delete zombie****"
+        print "**********Delete zombies checks****"
         id_to_del = []
         for c in self.checks.values():
             if c.status == 'zombie':
@@ -382,6 +391,20 @@ class Scheduler:
         #une petite tape dans le doc et tu t'en vas, merci...
         for id in id_to_del:
             del self.checks[id] # ZANKUSEN!
+
+
+    #Called every 1sec to delete all actions in a zombie state
+    #zombie = not usefull anymore
+    def delete_zombie_actions(self):
+        print "**********Delete zombies actions****"
+        id_to_del = []
+        for a in self.actions.values():
+            if a.status == 'zombie':
+                id_to_del.append(a.id)
+        #une petite tape dans le doc et tu t'en vas, merci...
+        for id in id_to_del:
+            print "Delling an actions", id
+            del self.actions[id] # ZANKUSEN!
 
 
     #Use to update the status file.
@@ -393,16 +416,16 @@ class Scheduler:
 
     #Notifications are re-scheduling, this function check if unwanted notif
     #are still here (problem notif when it is not)
-    def delete_unwanted_notifications(self):
-        print "********** Delete unwanted******"
-        id_to_del = []
-        for a in self.actions.values():
-            item = a.ref
-            if not item.still_need(a):
-                id_to_del.append(a.id)
-        #Ok, now we DEL
-        for id in id_to_del:
-            del self.actions[id]
+    #def delete_unwanted_notifications(self):
+    #    print "********** Delete unwanted******"
+    #    id_to_del = []
+    #    for a in self.actions.values():
+    #        item = a.ref
+    #        if not item.still_need(a):
+    #            id_to_del.append(a.id)
+    #    #Ok, now we DEL
+    #    for id in id_to_del:
+    #        del self.actions[id]
 
 
     #Main schedule function to make the regular scheduling

@@ -55,11 +55,11 @@ class Notification(Action):
         }
     
     
-    def __init__(self, type , status, command, command_call, ref, t_to_go, \
+    def __init__(self, type , status, command, command_call, ref, contact, t_to_go, \
                      contact_name='', host_name='', service_description='',
                      reason_type=1, state=0, ack_author='', ack_data='', \
                      escalated=0, contacts_notified=0, \
-                     start_time=0, end_time=0, notification_type=0, id=None):
+                     start_time=0, end_time=0, notification_type=0, id=None, notif_nb=1):
         self.is_a = 'notification'
         self.type = type
         if id == None: #id != None is for copy call only
@@ -76,7 +76,9 @@ class Notification(Action):
         self.ref = ref
         #self.ref_type = ref_type
         self.t_to_go = t_to_go
-        
+        self.notif_nb = notif_nb
+        self.contact = contact
+
         #For brok part
         self.contact_name = contact_name
         self.host_name = host_name
@@ -96,7 +98,7 @@ class Notification(Action):
     #So we remove the ref and all
     def copy_shell(self):
         #We create a dummy check with nothing in it, jsut defaults values
-        new_n = Notification('', '', '', '', '', '', id=self.id)
+        new_n = Notification('', '', '', '', '', '', '', id=self.id)
         only_copy_prop = ['id', 'status', 'command', 't_to_go']
         for prop in only_copy_prop:
             val = getattr(self, prop)
