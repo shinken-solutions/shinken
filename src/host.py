@@ -115,6 +115,7 @@ class Host(SchedulingItem):
         'last_state_update' : {'default' : time.time()},
         'services' : {'default' : []},
         'checks_in_progress' : {'default' : []},
+        'notifications_in_progress' : {'default' : {}},
         'downtimes' : {'default' : []},
         'flapping_changes' : {'default' : []},
         'percent_state_change' : {'default' : 0.0, 'status_broker_name' : None},

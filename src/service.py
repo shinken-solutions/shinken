@@ -140,6 +140,7 @@ class Service(SchedulingItem):
         'chk_depend_of' : {'default' : []}, #dependencies for checks raise, so BEFORE checks
         'last_state_update' : {'default' : time.time()},
         'checks_in_progress' : {'default' : []},
+        'notifications_in_progress' : {'default' : {}},
         'downtimes' : {'default' : []},
         'flapping_changes' : {'default' : []},
         'flapping_comment_id' : {'default' : 0, 'status_broker_name' : None},

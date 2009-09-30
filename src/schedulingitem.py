@@ -243,6 +243,20 @@ class SchedulingItem(Item):
         self.in_checking = (len(self.checks_in_progress) != 0)
 
 
+    #Del just a notification that is retured
+    def remove_in_progress_notification(self, n):
+        if n.id in self.notifications_in_progress:
+            n.status = 'zombie'
+            del self.notifications_in_progress[n.id]
+
+
+    #We do not need ours currents pending notifications,
+    #so we zombify them and clean our list
+    def remove_in_progress_notifications(self):
+        for n in self.notifications_in_progress.values():
+            self.remove_in_progress_notification(n)
+    
+
     #consume a check return and send action in return
     #main function of reaction of checks like raise notifications
     #Special case:
@@ -338,6 +352,8 @@ class SchedulingItem(Item):
             if self.state_type == 'SOFT':
                 self.state_type = 'SOFT-RECOVERY'
             elif self.state_type == 'HARD':
+                #Ok, so current notifications are not need, we 'zombie' thems
+                self.remove_in_progress_notifications()
                 if not no_action:
                     return self.create_notifications('RECOVERY')
                 else:
@@ -383,11 +399,24 @@ class SchedulingItem(Item):
 
     #Create notifications
     def create_notifications(self, type):
+
         #if notif is disabled, not need to go thurser
-        print "Raise notification"
+
         cls = self.__class__
         if not self.notifications_enabled or self.is_in_downtime or not cls.enable_notifications:
             return []
+
+        #A recovery is usefull only if previous notif were send
+        if type == 'RECOVERY' and self.current_notification_number == 0:
+            return []
+
+        #Recovery make the counter of notif become 0
+        if type == 'RECOVERY':
+            self.current_notification_number = 0
+        else:
+            self.current_notification_number += 1
+
+        print "Raise notification of type", type, "for", self.get_name()
         
         notifications = []
         now = time.time()
@@ -409,6 +438,8 @@ class SchedulingItem(Item):
                 #Maybe the contact do not want this notif? Arg!
                 if self.is_notification_launchable(n, contact):
                     notifications.append(n)
+                #Add in ours queues
+                self.notifications_in_progress[n.id] = n
         return notifications
 
 
@@ -422,6 +453,7 @@ class SchedulingItem(Item):
         #TODO : resolv command...
         notif_nb = n.notif_nb
         new_n = Notification(n.type, 'scheduled','', n.command_call, n.ref, n.contact, now + self.notification_interval * 60, notif_nb + 1)
+        self.notifications_in_progress[new_n.id] = new_n
         return new_n
 
 

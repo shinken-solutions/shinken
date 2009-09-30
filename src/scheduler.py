@@ -163,6 +163,8 @@ class Scheduler:
             id_to_del_actions = [i for i in self.actions if i < id_max - max_actions]
             nb_actions_drops = len(id_to_del_actions)
             for i in id_to_del_actions:
+                item = self.actions[i].ref
+                item.remove_in_progress_notification(self.actions[i])
                 del self.actions[i]
         else:
             nb_actions_drops = 0
@@ -240,6 +242,7 @@ class Scheduler:
         if c.is_a == 'notification':
             self.actions[c.id].get_return_from(c)
             item = self.actions[c.id].ref
+            item.remove_in_progress_notification(c)
             a = item.get_new_notification_from(self.actions[c.id])
             if a is not None:
                 self.add(a)
@@ -510,6 +513,9 @@ class Scheduler:
                     print "Latency Moyenne:", m, m_nb,  m / m_nb
                 
                 print "Notifications:", nb_notifications
+                now = time.time()
+                for a in self.actions.values():
+                    print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, 'check in', int(a.ref.next_chk - now)
                 #for n in  self.actions.values():
                 #    if n.ref_type == 'service':
                 #        print 'Service notification', n
