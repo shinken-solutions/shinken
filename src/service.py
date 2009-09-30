@@ -360,17 +360,17 @@ class Service(SchedulingItem):
 
 
     #Check if the notificaton is still necessery
-    def still_need(self, n):
-        #if state != OK, te service still got a pb, 
-        #so notification still necessery
-        if self.state != 'OK':
-            return True
-        #state is OK but notif is in poller, 
-        #so do not remove, will be done after
-        if n.status == 'inpoller':
-            return True
-        #we do not see why to save this notification, so...
-        return False
+    #def still_need(self, n):
+    #    #if state != OK, te service still got a pb, 
+    #    #so notification still necessery
+    #    if self.state != 'OK':
+    #        return True
+    #    #state is OK but notif is in poller, 
+    #    #so do not remove, will be done after
+    #    if n.status == 'inpoller':
+    #        return True
+    #    #we do not see why to save this notification, so...
+    #    return False
 
 
 

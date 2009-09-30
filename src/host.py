@@ -307,18 +307,18 @@ class Host(SchedulingItem):
 
 
     #Check if the notificaton is still necessery
-    def still_need(self, n):
-        now = time.time()
-        #if state != UP, the host still got a pb
-        #, so notification still necessery
-        if self.state != 'UP':
-            return True
-        #state is UP but notif is in poller, 
-        #so do not remove, will be done after
-        if n.status == 'inpoller':
-            return True
-        #we do not see why to save this notification, so...
-        return False
+    #def still_need(self, n):
+    #    now = time.time()
+    #    #if state != UP, the host still got a pb
+    #    #, so notification still necessery
+    #    if self.state != 'UP':
+    #        return True
+    #    #state is UP but notif is in poller, 
+    #    #so do not remove, will be done after
+    #    if n.status == 'inpoller':
+    #        return True
+    #    #we do not see why to save this notification, so...
+    #    return False
 
 
 
