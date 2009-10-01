@@ -49,72 +49,6 @@ class Arbiter:
         pass
 
 
-    def send_conf_to_schedulers(self):
-        self.conf.schedulerlinks.items.values().sort(scheduler_no_spare_first)
-
-        for sched in self.conf.schedulerlinks.items.values():
-            print "sched", sched, "is alive ?", sched.is_alive()
-
-        for reactionner in self.conf.reactionners.items.values():
-            print "Reactionner", reactionner, "is alive ?", reactionner.is_alive()
-
-        for broker in self.conf.brokers.items.values():
-            print "Broker", broker, "is alive ?", broker.is_alive()
-
-        print "Dispatching ", len(self.conf.confs), "configurations"
-        for conf in self.conf.confs.values():
-            if not conf.is_assigned:
-                for sched in self.conf.schedulerlinks:
-                    if not sched.is_active and not conf.is_assigned:
-                        print sched.id
-                        try:
-                            sched.put_conf(conf)
-                            sched.is_active = True
-                            conf.is_assigned = True
-                            conf.assigned_to = sched
-                        except Pyro.errors.URIError as exp:
-                            print exp
-                        except Pyro.errors.ProtocolError as exp:
-                            print exp
-
-        #TODO : more python and change ID
-        tmp_conf = {}
-        tmp_conf['schedulers'] = {}
-        i = 0
-        for sched in self.conf.schedulerlinks:
-            tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : 0}
-            i += 1
-            
-        for reactionner in self.conf.reactionners.items.values():
-            reactionner.put_conf(tmp_conf)
-
-        for broker in self.conf.brokers.items.values():
-            broker.put_conf(tmp_conf)
-
-
-        #TODO : clean and link
-        #Now Poller
-        tmp_conf = {}
-        tmp_conf['schedulers'] = {}
-        i = 0
-        sched = self.conf.schedulerlinks[0]
-        tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address}
-        
-
-        for poller in self.conf.pollers.items.values():
-            poller.put_conf(tmp_conf)
-
-
-        nb_confs = len(self.conf.confs)
-        nb_assigned_confs = len([c for c in self.conf.confs.values() if c.is_assigned])
-
-        self.are_all_conf_assigned = nb_assigned_confs == nb_confs
-        if not self.are_all_conf_assigned:
-            print "WARNING : All configurations are not dispatched ", nb_confs - nb_assigned_confs, "are missing (only ", nb_assigned_confs ," assigned)"
-        else:
-            print "OK, all configuratiosn are dispatched :)"
-
-
     #Load the external commander
     def load_external_command(self, e):
         self.external_command = e
@@ -174,7 +108,6 @@ class Arbiter:
         self.confs = self.conf.cut_into_parts()
 
         print "****************** Send Configuration to schedulers******************"
-        #self.send_conf_to_schedulers()
         self.dispatcher = Dispatcher(self.conf)
         self.dispatcher.check_alive()
         self.dispatcher.check_dispatch()
