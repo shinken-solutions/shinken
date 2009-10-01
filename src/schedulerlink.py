@@ -49,7 +49,6 @@ class SchedulerLink(Item):
     def put_conf(self, conf):
         if self.con == None:
             self.create_connexion()
-
         self.con.put_conf(conf)
 
     def run_external_command(self, command):
@@ -68,9 +67,11 @@ class SchedulerLink(Item):
             self.con.ping()
             return True
         except Pyro.errors.URIError as exp:
+            self.con = None
             print exp
             return False
         except Pyro.errors.ProtocolError as exp:
+            self.con = None
             print exp
             return False
 

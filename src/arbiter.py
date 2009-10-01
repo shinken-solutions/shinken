@@ -40,7 +40,7 @@ from scheduler import Scheduler
 from config import Config
 #from macroresolver import MacroResolver
 from external_command import ExternalCommand
-
+from dispatcher import Dispatcher
 
 
 #Main Arbiter Class
@@ -174,7 +174,12 @@ class Arbiter:
         self.confs = self.conf.cut_into_parts()
 
         print "****************** Send Configuration to schedulers******************"
-        self.send_conf_to_schedulers()
+        #self.send_conf_to_schedulers()
+        self.dispatcher = Dispatcher(self.conf)
+        self.dispatcher.check_alive()
+        self.dispatcher.check_dispatch()
+        self.dispatcher.dispatch()
+
         
 	#Now create the external commander
 	e = ExternalCommand(self.conf, 'dispatcher')
@@ -209,8 +214,11 @@ class Arbiter:
 
             else:#Timeout
                 print "Timeout"
-                if not self.are_all_conf_assigned:
-                    self.send_conf_to_schedulers()
+                #if not self.are_all_conf_assigned:
+                self.dispatcher.check_alive()
+                self.dispatcher.check_dispatch()
+                self.dispatcher.dispatch()
+                #send_conf_to_schedulers()
                 timeout = 1.0
 						
             if timeout < 0:

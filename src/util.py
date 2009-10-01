@@ -96,6 +96,27 @@ def scheduler_no_spare_first(x, y):
         return 0
     else:
         return -1
+
+
+#-1 is x first, 0 equal, 1 is y first 
+def alive_then_spare_then_deads(x, y):
+    print "Alive_then for", x, y
+    #First are alive
+    if x.alive and not y.alive:
+        return -1
+    if y.alive and not x.alive:
+        return 0
+    #if not alive both, I really don't care...
+    if not x.alive and not y.alive:
+        return -1
+    #Ok, both are alive... now spare after no spare
+    if not x.spare:
+        return -1
+    #x is a spare, so y must be before, even if
+    #y is a spare
+    if not y.spare:
+        return 1
+    return 0
         
 
 
