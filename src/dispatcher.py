@@ -120,17 +120,13 @@ class Dispatcher:
                 if not sched.is_active:
                     every_one_need_conf = True
                     print "Dispatching conf", sched.id
-                    try:
-                        sched.put_conf(conf)
+                    is_sent = sched.put_conf(conf)
+                    if is_sent:
                         sched.conf = conf
                         sched.need_conf = False
                         sched.is_active = True
                         conf.is_assigned = True
                         conf.assigned_to = sched
-                    except Pyro.errors.URIError as exp:
-                        print exp
-                    except Pyro.errors.ProtocolError as exp:
-                        print exp
 
             #We pop conf to dispatch, so it must be no more conf...
             nb_missed = len(conf_to_dispatch)
@@ -155,16 +151,18 @@ class Dispatcher:
                 if reactionner.alive:
                     if every_one_need_conf or reactionner.need_conf:
                         print "Putting a REACTIONNER CONF" * 10
-                        reactionner.put_conf(tmp_conf)
-                        reactionner.is_active = True
-                        reactionner.need_conf = False
+                        is_sent = reactionner.put_conf(tmp_conf)
+                        if is_sent:
+                            reactionner.is_active = True
+                            reactionner.need_conf = False
 
             for broker in self.conf.brokers.items.values():
                 if broker.alive:
                     if every_one_need_conf or broker.need_conf:
-                        broker.put_conf(tmp_conf)
-                        broker.is_active = True
-                        broker.need_conf = False
+                        is_sent = broker.put_conf(tmp_conf)
+                        if is_sent:
+                            broker.is_active = True
+                            broker.need_conf = False
 
             #TODO : clean and link
             #Now Poller
@@ -178,7 +176,8 @@ class Dispatcher:
             for poller in self.conf.pollers.items.values():
                 if poller.alive:
                     if every_one_need_conf or poller.need_conf:
-                        poller.put_conf(tmp_conf)
-                        poller.is_active = True
-                        poller.need_conf = False
+                        is_sent = poller.put_conf(tmp_conf)
+                        if is_sent:
+                            poller.is_active = True
+                            poller.need_conf = False
 

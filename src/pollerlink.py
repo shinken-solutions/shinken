@@ -20,12 +20,11 @@
 #This class is the link between Arbiter and Poller. With It, arbiter
 #can see if a poller is alive, and can send it new configuration
 
-import Pyro.core
+from satellitelink import SatelliteLink
+from util import to_int, to_bool
+from item import Items
 
-from item import Item, Items
-from util import to_int#, to_char, to_split, to_bool
-
-class PollerLink(Item):
+class PollerLink(SatelliteLink):
     id = 0
     properties={'name' : {'required' : True },
                 'scheduler_name' : {'required' : True},
@@ -39,43 +38,6 @@ class PollerLink(Item):
                           }
     macros = {}
 
-
-    def clean(self):
-        pass
-
-
-    def create_connexion(self):
-        self.uri = "PYROLOC://"+self.address+":"+str(self.port)+"/ForArbiter"
-        self.con = Pyro.core.getProxyForURI(self.uri)
-
-
-    def put_conf(self, conf):
-        if self.con == None:
-            self.create_connexion()
-        print "Connexion is OK, now we put conf", conf
-            
-        try:
-            self.con.put_conf(conf)
-        except Exception, x:
-            print 'Connexion problem'#''.join(Pyro.util.getPyroTraceback(x))
-            #sys.exit(0)
-
-
-    def is_alive(self):
-        print "Trying to see if ", self.address+":"+str(self.port), "is alive"
-        try:
-            if self.con == None:
-                self.create_connexion()
-            self.con.ping()
-            return True
-        except Pyro.errors.URIError as exp:
-            print exp
-            self.con = None
-            return False
-        except Pyro.errors.ProtocolError as exp:
-            print exp
-            self.con = None
-            return False
 
 
 class PollerLinks(Items):
