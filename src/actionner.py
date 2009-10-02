@@ -96,6 +96,7 @@ class Actionner:
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
 		print "init de connexion avec", self.schedulers[id]['uri']
+		running_id = self.schedulers[id]['running_id']
 		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(self.schedulers[id]['uri'])
 		try:
 			new_run_id = self.schedulers[id]['con'].get_running_id()

@@ -52,15 +52,23 @@ class Dispatcher:
             sched.is_active = False
             sched.alive = False
             sched.conf = None
+            sched.need_conf = True
             self.elements.append(sched)
         for reactionner in self.reactionners:
             reactionner.is_active = False
             reactionner.alive = False
+            reactionner.need_conf = True
             self.elements.append(reactionner)
         for poller in self.pollers:
             poller.is_active = False
             poller.alive = False
+            poller.need_conf = True
             self.elements.append(poller)
+        for broker in self.brokers:
+            broker.is_active = False
+            broker.alive = False
+            broker.need_conf = True
+            self.elements.append(broker)
         self.dispatch_ok = False
         self.first_dispatch_done = False
 
@@ -70,23 +78,25 @@ class Dispatcher:
         for elt in self.elements:
             elt.alive = elt.is_alive()
             print "Element is alive?", elt.alive, "is active?", elt.is_active
-            
+            if not elt.alive:
+                elt.need_conf = True
 
 
     #Check if all active items are still alive
     #the result go into self.dispatch_ok
+    #TODO : finish need conf
     def check_dispatch(self):
         print "Check dispatch", self.dispatch_ok
         for elt in self.elements:
             print "Elt:", elt.__dict__, elt.is_active, elt.alive
-            if elt.is_active and not elt.alive:
+            if elt.is_active and not elt.alive or elt.need_conf:
                 self.dispatch_ok = False
                 print "Set dispatch False"
+                elt.is_active = False
                 if hasattr(elt, 'conf'):
                     if elt.conf != None:
                         elt.conf.assigned_to = None
                         elt.conf.is_assigned = False
-                    elt.is_active = False
                 else:
                     print 'No conf'
 
@@ -104,14 +114,16 @@ class Dispatcher:
             scheds = self.schedulerlinks.items.values()
             scheds.sort(alive_then_spare_then_deads)
             scheds.reverse() #pop is last, I need first
-            
+            every_one_need_conf = False
             for conf in conf_to_dispatch:
                 sched = scheds.pop()
                 if not sched.is_active:
+                    every_one_need_conf = True
                     print "Dispatching conf", sched.id
                     try:
                         sched.put_conf(conf)
                         sched.conf = conf
+                        sched.need_conf = False
                         sched.is_active = True
                         conf.is_assigned = True
                         conf.assigned_to = sched
@@ -128,7 +140,10 @@ class Dispatcher:
                 print "OK, all configurations are dispatched :)"
                 self.dispatch_ok = True
                 
+            #We put on the satellites only if every one need it (a new scheduler)
+            #Of if a specific satellite needs it
             #TODO : more python
+            #We create the conf for satellites : it's just schedulers
             tmp_conf = {}
             tmp_conf['schedulers'] = {}
             i = 0
@@ -137,11 +152,19 @@ class Dispatcher:
                 i += 1
             
             for reactionner in self.conf.reactionners.items.values():
-                reactionner.put_conf(tmp_conf)
+                if reactionner.alive:
+                    if every_one_need_conf or reactionner.need_conf:
+                        print "Putting a REACTIONNER CONF" * 10
+                        reactionner.put_conf(tmp_conf)
+                        reactionner.is_active = True
+                        reactionner.need_conf = False
 
             for broker in self.conf.brokers.items.values():
-                broker.put_conf(tmp_conf)
-
+                if broker.alive:
+                    if every_one_need_conf or broker.need_conf:
+                        broker.put_conf(tmp_conf)
+                        broker.is_active = True
+                        broker.need_conf = False
 
             #TODO : clean and link
             #Now Poller
@@ -153,6 +176,9 @@ class Dispatcher:
             
             
             for poller in self.conf.pollers.items.values():
-                poller.put_conf(tmp_conf)
-
+                if poller.alive:
+                    if every_one_need_conf or poller.need_conf:
+                        poller.put_conf(tmp_conf)
+                        poller.is_active = True
+                        poller.need_conf = False
 

@@ -68,9 +68,11 @@ class ReactionnerLink(Item):
             return True
         except Pyro.errors.URIError as exp:
             print exp
+            self.con = None
             return False
         except Pyro.errors.ProtocolError as exp:
             print exp
+            self.con = None
             return False
 
 
