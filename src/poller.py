@@ -25,11 +25,11 @@
 #(one a timeout) if arbiter whant it to have a new conf, poller forgot
 #old cheduler (and checks into) take new ones and do the (new) job.
 
-from actionner import Actionner
+from satellite import Satellite
 
 
 #Our main APP class
-class Poller (Actionner):
+class Poller (Satellite):
 	do_checks = True #I do checks
 	do_actions = False #but no actions
 	default_port = 7771

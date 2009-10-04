@@ -38,8 +38,7 @@ import Pyro.core
 #from worker import Worker
 #from util import get_sequence
 from plugins import Plugins
-from actionner import Actionner
-
+from satellite import Satellite
 
 #Interface for Arbiter, our big MASTER
 #It put us our conf
@@ -83,7 +82,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
 #Our main APP class
-class Broker(Actionner):
+class Broker(Satellite):
 	default_port = 7772
 	
 	def __init__(self):
@@ -98,6 +97,7 @@ class Broker(Actionner):
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
 		print "init de connexion avec", self.schedulers[id]['uri']
+		running_id = self.schedulers[id]['running_id']
 		uri = self.schedulers[id]['uri']
 		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(uri)
 		try:
@@ -224,4 +224,7 @@ class Broker(Actionner):
 #lets go to the party
 if __name__ == '__main__':
 	broker = Broker()
-	broker.main()
+	#broker.main()
+        import cProfile
+        command = """broker.main()"""
+        cProfile.runctx( command, globals(), locals(), filename="Broker.profile" )

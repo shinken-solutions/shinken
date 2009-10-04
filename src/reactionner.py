@@ -26,11 +26,11 @@
 #a timeout) if arbiter wants it to have a new conf, actionner forgot old 
 #chedulers (and actions into) take new ones and do the (new) job.
 
-from actionner import Actionner
+from satellite import Satellite
 
 
 #Our main APP class
-class Reactionner (Actionner):
+class Reactionner(Satellite):
 	do_checks = False #I do not do checks
 	do_actions = True #just actions like notifications
 	default_port = 7769

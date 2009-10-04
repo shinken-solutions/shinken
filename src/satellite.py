@@ -18,12 +18,12 @@
 
 
 #This class is an interface for reactionner and poller
-#The actionner listen configuration from Arbiter in a port (first argument)
+#The satallite listen configuration from Arbiter in a port (first argument)
 #the configuration gived by arbiter is schedulers where actionner will 
 #take actions.
 #When already launch and have a conf, actionner still listen to arbiter
 #(one a timeout)
-#if arbiter whant it to have a new conf, actionner forgot old schedulers
+#if arbiter whant it to have a new conf, satellite forgot old schedulers
 #(and actions into)
 #take new ones and do the (new) job.
 
@@ -77,7 +77,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
 #Our main APP class
-class Actionner:
+class Satellite:
 	def __init__(self):
 		#Bool to know if we have received conf from arbiter
 		self.have_conf = False

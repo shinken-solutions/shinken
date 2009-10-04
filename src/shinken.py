@@ -63,9 +63,10 @@ class IChecks(Pyro.core.ObjBase):
 		
 	#poller or reactionner ask us actions
         def get_checks(self , do_checks=False, do_actions=False):
-		print "We ask us checks"
+		#print "We ask us checks"
 		res = self.sched.get_to_run_checks(do_checks, do_actions)
-		print "Sending %d checks" % len(res)
+		#print "Sending %d checks" % len(res)
+		self.sched.nb_checks_send += len(res)
 		return res
 
 	
@@ -94,9 +95,10 @@ class IBroks(Pyro.core.ObjBase):
 		
 	#poller or reactionner ask us actions
 	def get_broks(self):
-		print "We ask us broks"
+		#print "We ask us broks"
 		res = self.sched.get_broks()
-		print "Sending %d broks" % len(res)#, res
+		#print "Sending %d broks" % len(res)#, res
+		self.sched.nb_broks_send += len(res)
 		return res
 
 
@@ -273,6 +275,7 @@ class Shinken:
 			if self.must_run:
 				self.load_conf()
 				
+
 
 #Here we go!
 if __name__ == '__main__':

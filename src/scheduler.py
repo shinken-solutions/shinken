@@ -48,6 +48,11 @@ class Scheduler:
             5 : (self.clean_caches, 1)
             }
 
+        #stats part
+        self.nb_checks_send = 0
+        self.nb_actions_send = 0
+        self.nb_broks_send = 0
+
 
     #Load conf for future use
     def load_conf(self, conf):
@@ -176,7 +181,7 @@ class Scheduler:
     #For tunning purpose we use caches but we do not whant them to explode
     #So we clean thems
     def clean_caches(self):
-        print "********** Clean caches *********"
+        #print "********** Clean caches *********"
         for tp in self.timeperiods:
             tp.clean_cache()
 
@@ -332,7 +337,7 @@ class Scheduler:
     #Called every 1sec to consume every result in services or hosts
     #with theses results, they are OK, CRITCAL, UP/DOWN, etc...
     def consume_results(self):
-        print "**********Consume*********"
+        #print "**********Consume*********"
         checks_to_add = []
         for c in self.checks.values():
             if c.status == 'waitconsume':
@@ -386,7 +391,7 @@ class Scheduler:
     #Called every 1sec to delete all checks in a zombie state
     #zombie = not usefull anymore
     def delete_zombie_checks(self):
-        print "**********Delete zombies checks****"
+        #print "**********Delete zombies checks****"
         id_to_del = []
         for c in self.checks.values():
             if c.status == 'zombie':
@@ -399,7 +404,7 @@ class Scheduler:
     #Called every 1sec to delete all actions in a zombie state
     #zombie = not usefull anymore
     def delete_zombie_actions(self):
-        print "**********Delete zombies actions****"
+        #print "**********Delete zombies actions****"
         id_to_del = []
         for a in self.actions.values():
             if a.status == 'zombie':
@@ -433,7 +438,7 @@ class Scheduler:
 
     #Main schedule function to make the regular scheduling
     def schedule(self):
-        print "**********Schedule********"
+        #print "**********Schedule********"
         #ask for service and hosts their next check
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
@@ -444,7 +449,7 @@ class Scheduler:
 
     #Raise checks for no fresh states for services and hosts
     def check_freshness(self):
-        print "********** Check freshnesh******"
+        #print "********** Check freshnesh******"
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
                 c = i.do_check_freshness()
@@ -493,7 +498,7 @@ class Scheduler:
                 for i in self.recurrent_works:
                     (f, nb_ticks) = self.recurrent_works[i]
                     if ticks % nb_ticks == 0:
-                        print "I run function :", f
+                        #print "I run function :", f.func_name
                         f()
 
                 #stats
@@ -516,6 +521,10 @@ class Scheduler:
                 now = time.time()
                 for a in self.actions.values():
                     print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, 'check in', int(a.ref.next_chk - now)
+                print "Nb checks send:", self.nb_checks_send
+                self.nb_checks_send = 0
+                print "Nb Broks send:", self.nb_broks_send
+                self.nb_broks_send = 0
                 #for n in  self.actions.values():
                 #    if n.ref_type == 'service':
                 #        print 'Service notification', n

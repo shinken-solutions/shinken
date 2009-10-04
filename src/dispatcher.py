@@ -86,9 +86,9 @@ class Dispatcher:
     #the result go into self.dispatch_ok
     #TODO : finish need conf
     def check_dispatch(self):
-        print "Check dispatch", self.dispatch_ok
+        #print "Check dispatch", self.dispatch_ok
         for elt in self.elements:
-            print "Elt:", elt.__dict__, elt.is_active, elt.alive
+            #print "Elt:", elt.__dict__, elt.is_active, elt.alive
             if elt.is_active and not elt.alive or elt.need_conf:
                 self.dispatch_ok = False
                 print "Set dispatch False"
