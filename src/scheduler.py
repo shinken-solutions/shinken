@@ -18,6 +18,9 @@
 
 
 import select, time, os
+import cPickle, zlib
+
+
 from check import Check
 from notification import Notification
 from status import StatusFile
@@ -45,7 +48,8 @@ class Scheduler:
             3 : (self.delete_zombie_actions, 1),
             #3 : (self.delete_unwanted_notifications, 1),
             4 : (self.check_freshness, 1),
-            5 : (self.clean_caches, 1)
+            5 : (self.clean_caches, 1),
+            6 : (self.update_retention_file, 10)
             }
 
         #stats part
@@ -59,7 +63,11 @@ class Scheduler:
         self.conf = conf
         self.hostgroups = conf.hostgroups
         self.services = conf.services
+        #We need reversed list for search in the retention
+        #file read
+        self.services.create_reversed_list()
         self.hosts = conf.hosts
+        self.hosts.create_reversed_list()
         self.contacts = conf.contacts
         self.contactgroups = conf.contactgroups
         self.servicegroups = conf.servicegroups
@@ -270,6 +278,74 @@ class Scheduler:
         #They are gone, we keep none!
         self.broks = {}
         return res
+    
+    
+    #Update the retention file and give it all of ours data in
+    #a dict so read can pickup what it wants
+    #For now compression is no use, but it can be add easylly 
+    #just uncomment :)
+    def update_retention_file(self):
+        try:
+            f = open(self.conf.state_retention_file, 'wb')
+            #Just put hosts/services becauses checks and notifications
+            #are already link into
+            all_data = {'hosts' : self.hosts, 'services' : self.services}
+            #s = cPickle.dumps(all_data)
+            #s_compress = zlib.compress(s)
+            cPickle.dump(all_data, f)
+            #f.write(s_compress)
+            f.close()
+        except IOError as exp:
+            print "Error, retention file creation failed", exp
+        print "Updating retention_file", self.conf.state_retention_file
+     
+   
+    #Load the retention file and get status from it. It do not get all checks in progress
+    #for the moment, just the status and the notifications.
+    def retention_load(self):
+        print "Reading from retention_file", self.conf.state_retention_file
+        try:
+            f = open(self.conf.state_retention_file, 'rb')
+            all_data = cPickle.load(f)
+        except EOFError:
+            return
+        finally:
+            f.close()
+            
+        #Now load interesting properties in hosts/services
+        #Taging prop that not be directly load
+        #Items will be with theirs status, but not in checking, so
+        #a new check will be launch like with a normal begining (random distributed
+        #scheduling)
+        not_loading = ['act_depend_of', 'chk_depend_of', 'checks_in_progress', \
+                           'downtimes', 'host', 'next_chk']
+
+        ret_hosts = all_data['hosts']
+        for ret_h in ret_hosts:
+            h = self.hosts.find_by_name(ret_h.host_name)
+            if h != None:
+                running_properties = h.__class__.running_properties
+                for prop in running_properties:
+                    if prop not in not_loading:
+                        setattr(h, prop, getattr(ret_h, prop))
+                        for a in h.notifications_in_progress.values():
+                            a.ref = h
+                            self.add(a)
+                        h.update_in_checking()
+
+        ret_services = all_data['services']
+        for ret_s in ret_services:
+            s = self.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
+            if s != None:
+                running_properties = s.__class__.running_properties
+                for prop in running_properties:
+                    if prop not in not_loading:
+                        setattr(s, prop, getattr(ret_s, prop))
+                        for a in s.notifications_in_progress.values():
+                            a.ref = s
+                            self.add(a)
+                        s.update_in_checking()
+        print "We've load data from retention"
 
 
     #Fill the self.broks with broks of self (process id, and co)
@@ -420,20 +496,6 @@ class Scheduler:
         #TODO : OPTIMIZE it because it sucks
         pass
         #self.status_file.create_or_update()
-            
-
-    #Notifications are re-scheduling, this function check if unwanted notif
-    #are still here (problem notif when it is not)
-    #def delete_unwanted_notifications(self):
-    #    print "********** Delete unwanted******"
-    #    id_to_del = []
-    #    for a in self.actions.values():
-    #        item = a.ref
-    #        if not item.still_need(a):
-    #            id_to_del.append(a.id)
-    #    #Ok, now we DEL
-    #    for id in id_to_del:
-    #        del self.actions[id]
 
 
     #Main schedule function to make the regular scheduling
@@ -459,6 +521,9 @@ class Scheduler:
 
     #Main function
     def run(self):
+        #First we see if we've got info in the retention file
+        self.retention_load()
+
         #Ok, now all is initilised, we can make the inital broks
         self.fill_initial_broks()
 

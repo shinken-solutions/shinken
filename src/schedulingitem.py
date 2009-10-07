@@ -267,7 +267,9 @@ class SchedulingItem(Item):
         now = time.time()
         OK_UP = self.__class__.ok_up #OK for service, UP for host
         
-        self.latency = c.check_time - c.t_to_go
+        #Latency can be <0 is we get a check from the retention file
+        #so if <0, set 0
+        self.latency = max(0, c.check_time - c.t_to_go)
         self.execution_time = c.execution_time
         self.last_chk = c.check_time
         self.output = c.output
