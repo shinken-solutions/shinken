@@ -32,6 +32,8 @@ import time
 
 
 class MacroResolver(Borg):
+
+    my_type = 'macroresolver'
     #Global macros
     macros = {
         'TOTALHOSTSUP' : 'get_total_hosts_up',
@@ -130,6 +132,17 @@ class MacroResolver(Borg):
                     if elt is not None and elt.__class__ == cls:
                         prop = cls.macros[macro]
                         macros[macro]['val'] = self.get_value_from_element(elt, prop)
+            if macros[macro]['type'] == 'CUSTOM':
+                cls_type = macros[macro]['class']
+                macro_name = re.split('_'+cls_type, macro)[1].upper()
+                #Ok, we've got the macro like MAC_ADDRESS for _HOSTMAC_ADDRESS
+                #Now we get the element in data that have the type HOST
+                #and we check if it gots the custom value
+                for elt in data:
+                    if elt is not None and elt.__class__.my_type.upper() == cls_type:
+                        if '_'+macro_name in elt.customs:
+                            macros[macro]['val'] = elt.customs['_'+macro_name]
+
         #We resolved all we can, now replace the macro in the command call
         for macro in macros:
             c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
@@ -146,6 +159,19 @@ class MacroResolver(Borg):
                 continue
             elif re.match('USER\d', macro):
                 macros[macro]['type'] = 'USERN'
+                continue
+            elif re.match('_HOST\w', macro):
+                macros[macro]['type'] = 'CUSTOM'
+                macros[macro]['class'] = 'HOST'
+                continue
+            elif re.match('_SERVICE\w', macro):
+                macros[macro]['type'] = 'CUSTOM'
+                macros[macro]['class'] = 'SERVICE'
+                #value of macro : re.split('_HOST', '_HOSTMAC_ADDRESS')[1]
+                continue
+            elif re.match('_CONTACT\w', macro):
+                macros[macro]['type'] = 'CUSTOM'
+                macros[macro]['class'] = 'CONTACT'
                 continue
             for cls in clss:
                 if macro in cls.macros:

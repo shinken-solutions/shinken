@@ -47,12 +47,18 @@ class Item(object):
             #eatch istance to have his own running prop!
 
         #[0] = +  -> new key-plus
-        #[0] = _  -> new custom entry
+        #[0] = _  -> new custom entry in UPPER case
         for key in params:
             if params[key][0] == '+':
-                self.plus[key] = params[key][1:] # we remove the +
+                #Special case : a _MACRO can be a plus. so add to plus
+                #but upper the key for the macro name
+                if key[0] == "_":
+                    self.plus[key.upper()] = params[key][1:] # we remove the +
+                else:
+                    self.plus[key] = params[key][1:] # we remove the +
             elif key[0] == "_":
-                self.customs[key] = params[key]
+                custom_name = key.upper()
+                self.customs[custom_name] = params[key]
             else:
                 setattr(self, key, params[key])
 

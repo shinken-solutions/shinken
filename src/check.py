@@ -109,6 +109,7 @@ class Check(Action):
 
     
     def execute(self):
+        #print "Launching command", self.command
         child = spawn ('/bin/sh -c "%s"' % self.command)
         self.status = 'lanched'
         self.check_time = time.time()

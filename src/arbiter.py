@@ -65,7 +65,7 @@ class Arbiter:
 
         print "****************** Inheritance *******************"
         self.conf.apply_inheritance()
-        
+
         print "****************** Explode ***********************"
         self.conf.explode()
 
