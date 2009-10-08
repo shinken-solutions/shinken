@@ -164,7 +164,7 @@ class Host(SchedulingItem):
               'HOSTDURATION' : 'get_duration',
               'HOSTDURATIONSEC' : 'get_duration_sec',
               'HOSTDOWNTIME' : 'get_downtime',
-              'HOSTPERCENTCHANGE' : 'get_percent_change',
+              'HOSTPERCENTCHANGE' : 'percent_state_change',
               'HOSTGROUPNAME' : 'get_groupname',
               'HOSTGROUPNAMES' : 'get_groupnames',
               'LASTHOSTCHECK' : 'last_chk',

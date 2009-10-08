@@ -78,7 +78,7 @@ class Hostgroup(Itemgroup):
 
 class Hostgroups(Itemgroups):
     name_property = "hostgroup_name" # is used for finding hostgroups
-    
+    inner_class = Hostgroup
 
     def get_members_by_name(self, hgname):
         id = self.find_id_by_name(hgname)

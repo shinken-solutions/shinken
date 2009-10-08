@@ -68,13 +68,24 @@ class MacroResolver(Borg):
     #This shall be call ONE TIME. It just put links for elements
     #by scheduler
     def init(self, conf):
+        # For searching class and elements for ondemand
+        #we need link to types
+        self.lists_on_demand = [] 
         self.hosts = conf.hosts
+        #For special void host_name handling...
+        self.host_class = self.hosts.inner_class
+        self.lists_on_demand.append(self.hosts)
         self.services = conf.services
         self.contacts = conf.contacts
+        self.lists_on_demand.append(self.contacts)
         self.hostgroups = conf.hostgroups
+        self.lists_on_demand.append(self.hostgroups)
         self.commands = conf.commands
         self.servicegroups = conf.servicegroups
+        self.lists_on_demand.append(self.servicegroups)
         self.contactgroups = conf.contactgroups
+        self.lists_on_demand.append(self.contactgroups)
+        
 
 
     #Return all macros of a string, so cut the $
@@ -142,7 +153,9 @@ class MacroResolver(Borg):
                     if elt is not None and elt.__class__.my_type.upper() == cls_type:
                         if '_'+macro_name in elt.customs:
                             macros[macro]['val'] = elt.customs['_'+macro_name]
-
+            if macros[macro]['type'] == 'ONDEMAND':
+                macros[macro]['val'] = self.resolve_ondemand(macro, data)
+                
         #We resolved all we can, now replace the macro in the command call
         for macro in macros:
             c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
@@ -152,14 +165,20 @@ class MacroResolver(Borg):
     #For all Macros in macros, set the type by looking at the
     #MACRO name (ARGN? -> argn_type,
     #HOSTBLABLA -> class one and set Host in class)
+    #_HOSTTOTO -> HOST CUSTOM MACRO TOTO
+    #$SERVICESTATEID:srv-1:Load$ -> MACRO SERVICESTATEID of 
+    #the service Load of host srv-1
     def get_type_of_macro(self, macros, clss):
         for macro in macros:
+            #ARGN Macros
             if re.match('ARG\d', macro):
                 macros[macro]['type'] = 'ARGN'
                 continue
+            #USERN macros
             elif re.match('USER\d', macro):
                 macros[macro]['type'] = 'USERN'
                 continue
+            #CUSTOM
             elif re.match('_HOST\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
                 macros[macro]['class'] = 'HOST'
@@ -173,6 +192,11 @@ class MacroResolver(Borg):
                 macros[macro]['type'] = 'CUSTOM'
                 macros[macro]['class'] = 'CONTACT'
                 continue
+            #On demand macro
+            elif len(macro.split(':')) > 1:
+                macros[macro]['type'] = 'ONDEMAND'
+                continue
+            #OK, classical macro...
             for cls in clss:
                 if macro in cls.macros:
                     macros[macro]['type'] = 'class'
@@ -191,6 +215,54 @@ class MacroResolver(Borg):
             except IndexError:
                 return ''
 
+
+    #Resolved on demande macro, quite hard on fact
+    def resolve_ondemand(self, macro, data):
+        #print "\nResolving macro", macro
+        elts = macro.split(':')
+        nb_parts = len(elts)
+        macro_name = elts[0]
+        #Len 3 == service, 2 = all others types...
+        if nb_parts == 3:
+            val = ''
+            #print "Got a Service on demand asking...", elts
+            (host_name, service_description) = (elts[1], elts[2])
+            #host_name can be void, so it's the host in data
+            #that is important. We use our self.host_class to
+            #find the host in the data :)
+            if host_name == '':
+                for elt in data:
+                    if elt is not None and elt.__class__ == self.host_class:
+                        host_name = elt.host_name
+            #Okn now we get service
+            s = self.services.find_srv_by_name_and_hostname(host_name, service_description)
+            if s != None:
+                cls = s.__class__
+                prop = cls.macros[macro_name]
+                val = self.get_value_from_element(s, prop)
+                #print "Got val:", val
+                return val
+        #Ok, service was easy, now hard part
+        else:
+            val = ''
+            elt_name = elts[1]
+            #Special case : elt_name can be void
+            #so it's the host where it apply
+            if elt_name == '':
+                for elt in data:
+                    if elt is not None and elt.__class__ == self.host_class:
+                        elt_name = elt.host_name
+            for list in self.lists_on_demand:
+                cls = list.inner_class
+                #We search our type by look at the macro
+                if macro_name in cls.macros:
+                    prop = cls.macros[macro_name]
+                    i = list.find_by_name(elt_name)
+                    if i != None:
+                        val = self.get_value_from_element(i, prop)
+            #print "Got val:", val
+            return val
+        return ''
 
     #Get Fri 15 May 11:42:39 CEST 2009
     def get_long_date_time(self):

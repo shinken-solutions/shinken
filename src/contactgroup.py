@@ -67,7 +67,7 @@ class Contactgroup(Itemgroup):
 
 class Contactgroups(Itemgroups):
     name_property = "contactgroup_name" # is used for finding contactgroup
-
+    inner_class = Contactgroup
 
     def get_members_by_name(self, cgname):
         id = self.find_id_by_name(cgname)

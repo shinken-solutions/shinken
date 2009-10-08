@@ -76,7 +76,7 @@ class Servicegroup(Itemgroup):
 
 class Servicegroups(Itemgroups):
     name_property = "servicegroup_name" # is used for finding servicegroup
-    
+    inner_class = Servicegroup
     
     def linkify(self, services):
         self.linkify_sg_by_srv(services)

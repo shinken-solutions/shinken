@@ -189,7 +189,7 @@ class Service(SchedulingItem):
         'SERVICEDURATION' : 'get_duration',
         'SERVICEDURATIONSEC' : 'get_duration_sec',
         'SERVICEDOWNTIME' : 'get_downtime',
-        'SERVICEPERCENTCHANGE' : 'get_percent_change',
+        'SERVICEPERCENTCHANGE' : 'percent_state_change',
         'SERVICEGROUPNAME' : 'get_groupname',
         'SERVICEGROUPNAMES' : 'get_groupnames',
         'LASTSERVICECHECK' : 'last_chk',
@@ -376,6 +376,7 @@ class Service(SchedulingItem):
 
 
 class Services(Items):
+    inner_class = Service #use for know what is in items
     #Create the reversed list for speedup search by host_name/name
     #We also tag service already in list : they are twins. It'a a bad things.
     #Hostgroups service have an ID higer thant host service. So it we tag 
