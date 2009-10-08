@@ -27,7 +27,7 @@ class ExternalCommand:
         'CHANGE_CONTACT_MODSATTR' : {'global' : True, 'args' : ['contact', None]},
         'CHANGE_CONTACT_MODHATTR' : {'global' : True, 'args' : ['contact', None]},
         'CHANGE_CONTACT_MODATTR' : {'global' : True, 'args' : ['contact', None]},
-        'CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD' : {'global' : False, 'args' : ['contact', 'time_period']},
+        'CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD' : {'global' : True, 'args' : ['contact', 'time_period']},
         'ADD_SVC_COMMENT'  : {'global' : False, 'args' : ['service', 'to_bool', 'author', None]},
         'ADD_HOST_COMMENT' : {'global' : False, 'args' : ['host', 'to_bool', 'author', None]},
         'ACKNOWLEDGE_SVC_PROBLEM' : {'global' : False, 'args' : ['service' , 'to_bool', 'to_bool', 'to_bool', 'author', None]},
@@ -350,7 +350,6 @@ class ExternalCommand:
                                 self.search_host_and_dispatch(tmp_host, command)
                                 return None
 
-
                 else:
                     in_service = False
                     srv_name = elts[i]
@@ -389,7 +388,7 @@ class ExternalCommand:
 
     #CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
-        pass
+        contact.host_notification_period = notification_timeperiod
 
     #ADD_SVC_COMMENT;<host_name>;<service_description>;<persistent>;<author>;<comment>
     def ADD_SVC_COMMENT(self, service, persistent, author, comment):
@@ -409,19 +408,19 @@ class ExternalCommand:
 
     #CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
-        pass
+        contact.service_notification_period = notification_timeperiod
 
     #CHANGE_CUSTOM_CONTACT_VAR;<contact_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_CONTACT_VAR(self, contact, varname, varvalue):
-        contact.customs[varname] = varvalue
+        contact.customs[varname.upper()] = varvalue
     
     #CHANGE_CUSTOM_HOST_VAR;<host_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_HOST_VAR(self, host, varname, varvalue):
-        host.customs[varname] = varvalue
+        host.customs[varname.upper()] = varvalue
 
     #CHANGE_CUSTOM_SVC_VAR;<host_name>;<service_description>;<varname>;<varvalue>
     def CHANGE_CUSTOM_SVC_VAR(self, service, varname, varvalue):
-        service.customs[varname] = varvalue
+        service.customs[varname.upper()] = varvalue
 
     #CHANGE_GLOBAL_HOST_EVENT_HANDLER;<event_handler_command>
     def CHANGE_GLOBAL_HOST_EVENT_HANDLER(self, event_handler_command):
@@ -437,6 +436,7 @@ class ExternalCommand:
 
     #CHANGE_HOST_CHECK_TIMEPERIOD;<host_name>;<timeperiod>
     def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod):
+        host.check_period = timeperiod
         pass
 
     #CHANGE_HOST_EVENT_HANDLER;<host_name>;<event_handler_command>
@@ -483,7 +483,7 @@ class ExternalCommand:
 
     #CHANGE_SVC_CHECK_TIMEPERIOD;<host_name>;<service_description>;<check_timeperiod>
     def CHANGE_SVC_CHECK_TIMEPERIOD(self, service, check_timeperiod):
-        pass
+        service.check_period = check_timeperiod
 
     #CHANGE_SVC_EVENT_HANDLER;<host_name>;<service_description>;<event_handler_command>
     def CHANGE_SVC_EVENT_HANDLER(self, service, event_handler_command):
@@ -495,7 +495,7 @@ class ExternalCommand:
 
     #CHANGE_SVC_NOTIFICATION_TIMEPERIOD;<host_name>;<service_description>;<notification_timeperiod>
     def CHANGE_SVC_NOTIFICATION_TIMEPERIOD(self, service, notification_timeperiod):
-        pass
+        service.notification_period = notification_timeperiod
 
     #DELAY_HOST_NOTIFICATION;<host_name>;<notification_time>
     def DELAY_HOST_NOTIFICATION(self, host, notification_time):
@@ -537,11 +537,13 @@ class ExternalCommand:
 
     #DISABLE_CONTACTGROUP_HOST_NOTIFICATIONS;<contactgroup_name>
     def DISABLE_CONTACTGROUP_HOST_NOTIFICATIONS(self, contactgroup):
-        pass
+        for contact in contactgroup:
+            self.DISABLE_CONTACT_HOST_NOTIFICATIONS(contact)
 
     #DISABLE_CONTACTGROUP_SVC_NOTIFICATIONS;<contactgroup_name>
     def DISABLE_CONTACTGROUP_SVC_NOTIFICATIONS(self, contactgroup):
-        pass
+        for contact in contactgroup:
+            self.DISABLE_CONTACT_SVC_NOTIFICATIONS(contact)
 
     #DISABLE_CONTACT_HOST_NOTIFICATIONS;<contact_name>
     def DISABLE_CONTACT_HOST_NOTIFICATIONS(self, contact):
@@ -573,27 +575,36 @@ class ExternalCommand:
 
     #DISABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            self.DISABLE_HOST_CHECK(host)
 
     #DISABLE_HOSTGROUP_HOST_NOTIFICATIONS;<hostgroup_name>
     def DISABLE_HOSTGROUP_HOST_NOTIFICATIONS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            self.DISABLE_HOST_NOTIFICATIONS(host)
 
     #DISABLE_HOSTGROUP_PASSIVE_HOST_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_PASSIVE_HOST_CHECKS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            self.DISABLE_PASSIVE_HOST_CHECKS(host)
 
     #DISABLE_HOSTGROUP_PASSIVE_SVC_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_PASSIVE_SVC_CHECKS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            for service in host.services:
+                self.DISABLE_PASSIVE_SVC_CHECKS(service)
 
     #DISABLE_HOSTGROUP_SVC_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_SVC_CHECKS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            for service in host.services:
+                self.DISABLE_SVC_CHECK(service)
 
     #DISABLE_HOSTGROUP_SVC_NOTIFICATIONS;<hostgroup_name>
     def DISABLE_HOSTGROUP_SVC_NOTIFICATIONS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            for service in host.services:
+                self.DISABLE_SVC_NOTIFICATIONS(service)
 
     #DISABLE_HOST_AND_CHILD_NOTIFICATIONS;<host_name>
     def DISABLE_HOST_AND_CHILD_NOTIFICATIONS(self, host):
@@ -660,27 +671,33 @@ class ExternalCommand:
 
     #DISABLE_SERVICEGROUP_HOST_CHECKS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_HOST_CHECKS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.DISABLE_HOST_CHECK(service.host)
 
     #DISABLE_SERVICEGROUP_HOST_NOTIFICATIONS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_HOST_NOTIFICATIONS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.DISABLE_HOST_NOTIFICATIONS(service.host)
 
     #DISABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.DISABLE_PASSIVE_HOST_CHECKS(service.host)
 
     #DISABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.DISABLE_PASSIVE_SVC_CHECKS(service)
 
     #DISABLE_SERVICEGROUP_SVC_CHECKS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_SVC_CHECKS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.DISABLE_SVC_CHECK(service)
 
     #DISABLE_SERVICEGROUP_SVC_NOTIFICATIONS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_SVC_NOTIFICATIONS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.DISABLE_SVC_NOTIFICATIONS(service)
 
     #DISABLE_SERVICE_FLAP_DETECTION;<host_name>;<service_description>
     def DISABLE_SERVICE_FLAP_DETECTION(self, service):
@@ -719,11 +736,13 @@ class ExternalCommand:
 
     #ENABLE_CONTACTGROUP_HOST_NOTIFICATIONS;<contactgroup_name>
     def ENABLE_CONTACTGROUP_HOST_NOTIFICATIONS(self, contactgroup):
-        pass
+        for contact in contactgroup:
+            self.ENABLE_CONTACT_HOST_NOTIFICATIONS(contact)
 
     #ENABLE_CONTACTGROUP_SVC_NOTIFICATIONS;<contactgroup_name>
     def ENABLE_CONTACTGROUP_SVC_NOTIFICATIONS(self, contactgroup):
-        pass
+        for contact in contactgroup:
+            self.ENABLE_CONTACT_SVC_NOTIFICATIONS(contact)
 
     #ENABLE_CONTACT_HOST_NOTIFICATIONS;<contact_name>
     def ENABLE_CONTACT_HOST_NOTIFICATIONS(self, contact):
@@ -755,27 +774,36 @@ class ExternalCommand:
 
     #ENABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def ENABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            self.ENABLE_HOST_CHECK(host)
 
     #ENABLE_HOSTGROUP_HOST_NOTIFICATIONS;<hostgroup_name>
     def ENABLE_HOSTGROUP_HOST_NOTIFICATIONS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            self.ENABLE_HOST_NOTIFICATIONS(host)
 
     #ENABLE_HOSTGROUP_PASSIVE_HOST_CHECKS;<hostgroup_name>
     def ENABLE_HOSTGROUP_PASSIVE_HOST_CHECKS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            self.ENABLE_PASSIVE_HOST_CHECKS(host)
 
     #ENABLE_HOSTGROUP_PASSIVE_SVC_CHECKS;<hostgroup_name>
     def ENABLE_HOSTGROUP_PASSIVE_SVC_CHECKS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            for service in host.services:
+                self.ENABLE_PASSIVE_SVC_CHECKS(service)
 
     #ENABLE_HOSTGROUP_SVC_CHECKS;<hostgroup_name>
     def ENABLE_HOSTGROUP_SVC_CHECKS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            for service in host.services:
+                self.ENABLE_SVC_CHECK(service)
 
     #ENABLE_HOSTGROUP_SVC_NOTIFICATIONS;<hostgroup_name>
     def ENABLE_HOSTGROUP_SVC_NOTIFICATIONS(self, hostgroup):
-        pass
+        for host in hostgroup:
+            for service in host.services:
+                self.ENABLE_SVC_NOTIFICATIONS(service)
 
     #ENABLE_HOST_AND_CHILD_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_AND_CHILD_NOTIFICATIONS(self, host):
@@ -843,27 +871,33 @@ class ExternalCommand:
     
     #ENABLE_SERVICEGROUP_HOST_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_HOST_CHECKS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.ENABLE_HOST_CHECK(service.host)
     
     #ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.ENABLE_HOST_NOTIFICATIONS(service.host)
     
     #ENABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.ENABLE_PASSIVE_HOST_CHECKS(service.host)
 
     #ENABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.ENABLE_PASSIVE_SVC_CHECKS(service)
 
     #ENABLE_SERVICEGROUP_SVC_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_SVC_CHECKS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.ENABLE_SVC_CHECK(service)
 
     #ENABLE_SERVICEGROUP_SVC_NOTIFICATIONS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_SVC_NOTIFICATIONS(self, servicegroup):
-        pass
+        for service in servicegroup:
+            self.ENABLE_SVC_NOTIFICATIONS(service)
 
     #ENABLE_SERVICE_FRESHNESS_CHECKS
     def ENABLE_SERVICE_FRESHNESS_CHECKS(self):
