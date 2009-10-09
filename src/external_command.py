@@ -195,7 +195,7 @@ class ExternalCommand:
         self.servicegroups = conf.servicegroups
         self.contactgroups = conf.contactgroups
         self.timeperiods = conf.timeperiods
-        self.pipe_path = '/tmp/my_fifo'
+        self.pipe_path = conf.command_file
         self.fifo = None
         if self.mode == 'dispatcher':
             self.confs = conf.confs
