@@ -307,10 +307,17 @@ class Scheduler:
         try:
             f = open(self.conf.state_retention_file, 'rb')
             all_data = cPickle.load(f)
-        except EOFError:
-            return
-        finally:
             f.close()
+        except EOFError as exp:
+            print exp
+            return
+        except ValueError as exp:
+            print exp
+            return
+        except IOError as exp:
+            print exp
+            return
+            
             
         #Now load interesting properties in hosts/services
         #Taging prop that not be directly load
