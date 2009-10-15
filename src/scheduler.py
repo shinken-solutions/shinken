@@ -23,6 +23,7 @@ import cPickle, zlib
 
 from check import Check
 from notification import Notification
+from eventhandler import EventHandler
 from status import StatusFile
 from brok import Brok
 from downtime import Downtime
@@ -121,6 +122,10 @@ class Scheduler:
         if isinstance(elt, Notification):
             self.actions[elt.id] = elt
             return
+        if isinstance(elt, EventHandler):
+            print "Add an event Handler", elt.id
+            self.actions[elt.id] = elt
+            return
         if isinstance(elt, Downtime):
             self.downtimes[elt.id] = elt
             return
@@ -172,13 +177,14 @@ class Scheduler:
 
         if len(self.actions) > max_actions:
             id_max = self.actions.keys()[-1]
-            #Actions are not refered in hosts/services :) so ...
             id_to_del_actions = [i for i in self.actions if i < id_max - max_actions]
             nb_actions_drops = len(id_to_del_actions)
             for i in id_to_del_actions:
-                item = self.actions[i].ref
-                item.remove_in_progress_notification(self.actions[i])
-                del self.actions[i]
+                #Remeber to delete reference of notification in service/host
+                if i.is_a == 'notification':
+                    item = self.actions[i].ref
+                    item.remove_in_progress_notification(self.actions[i])
+                    del self.actions[i]
         else:
             nb_actions_drops = 0
         
@@ -237,12 +243,13 @@ class Scheduler:
             for a in self.actions.values():
                 if a.status == 'scheduled' and a.is_launchable(now):
                     a.status = 'inpoller'
-                    #The first notif is clean at creation, but the others
-                    #are create just after the first return, so before the
-                    #notification_interval. At launch, the macors need to
-                    #be updated
-                    if a.notif_nb > 1:
-                        a.ref.update_notification_command(a)
+                    if a.is_a == 'notification':
+                        #The first notif is clean at creation, but the others
+                        #are create just after the first return, so before the
+                        #notification_interval. At launch, the macors need to
+                        #be updated
+                        if a.notif_nb > 1:
+                            a.ref.update_notification_command(a)
                     new_a = a.copy_shell()
                     res.append(new_a)
         return res
@@ -267,6 +274,9 @@ class Scheduler:
         elif c.is_a == 'check':
             self.checks[c.id].get_return_from(c)
             self.checks[c.id].status = 'waitconsume'
+        elif c.is_a == 'eventhandler':
+            #It just die
+            self.actions[c.id].status = 'zombie'
         else:
             print "Type unknown"
 
@@ -436,6 +446,8 @@ class Scheduler:
                         #Get Brok from this new notification
                         b = a.get_initial_status_brok()
                         self.add(b)
+                    elif a.is_a == 'eventhandler':
+                        self.add(a)
                     elif  a.is_a == 'check':
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
@@ -463,6 +475,8 @@ class Scheduler:
                         #Get Brok from this new notification
                         b = a.get_initial_status_brok()
                         self.add(b)
+                    elif a.is_a == 'eventhandler':
+                        self.add(a)
                     elif  a.is_a == 'check':
                         print "*******Adding dep checks*****"
                         checks_to_add.append(a)
@@ -592,7 +606,10 @@ class Scheduler:
                 print "Notifications:", nb_notifications
                 now = time.time()
                 for a in self.actions.values():
-                    print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, 'check in', int(a.ref.next_chk - now)
+                    if a.is_a == 'notification':
+                        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, 'check in', int(a.ref.next_chk - now)
+                    else:
+                        print "Event:", a.id, a.status
                 print "Nb checks send:", self.nb_checks_send
                 self.nb_checks_send = 0
                 print "Nb Broks send:", self.nb_broks_send

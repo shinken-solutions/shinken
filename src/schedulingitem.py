@@ -23,11 +23,12 @@ from item import Item
 #from util import to_int, to_char, to_split, to_bool
 import random
 import time
+
 from check import Check
 from notification import Notification
 from timeperiod import Timeperiod
 from macroresolver import MacroResolver
-
+from eventhandler import EventHandler
 
 
 
@@ -257,6 +258,25 @@ class SchedulingItem(Item):
             self.remove_in_progress_notification(n)
     
 
+    #Get a event handler if item got an event handler 
+    #command. It must be enabled locally and globally
+    def get_event_handlers(self):
+        cls = self.__class__
+        if self.event_handler == None or not self.event_handler_enabled or self.is_in_downtime or not cls.enable_event_handlers:
+            return []
+
+        print self.event_handler.__dict__
+        events = []
+        m = MacroResolver()
+        data = self.get_data_for_event_handler()
+        cmd = m.resolve_command(self.event_handler, data)
+        e = EventHandler(cmd)
+        print "Event handler call created"
+        print e.__dict__
+        events.append(e)
+        return events
+
+
     #consume a check return and send action in return
     #main function of reaction of checks like raise notifications
     #Special case:
@@ -354,41 +374,47 @@ class SchedulingItem(Item):
             if self.state_type == 'SOFT':
                 self.state_type = 'SOFT-RECOVERY'
             elif self.state_type == 'HARD':
+                #Ok, we can get event_handlers here
+                res = self.get_event_handlers()
                 #Ok, so current notifications are not need, we 'zombie' thems
                 self.remove_in_progress_notifications()
                 if not no_action:
-                    return self.create_notifications('RECOVERY')
-                else:
-                    return []
+                    res.extend(self.create_notifications('RECOVERY'))
+                return res
             return []
         
         #Volatile part
         #Only for service
         elif c.exit_status != 0 and hasattr(self, 'is_volatile') and self.is_volatile:
             self.state_type = 'HARD'
+            #Ok, event handlers here too
+            res = self.get_event_handlers()
             if not no_action:
-                return self.create_notifications('PROBLEM')
-            else:
-                return []
+                res.extend(self.create_notifications('PROBLEM'))
+            return res
         
         #If no OK in a OK -> going to SOFT
         elif c.exit_status != 0 and self.last_state == OK_UP:
+            #Oh? This is the typical go for a event handler :)
+            res = self.get_event_handlers()
             self.state_type = 'SOFT'
             self.attempt = 1
-            return []
+            return res
         
         #If no OK in a no OK : if hard, still hard, if soft,
         #check at self.max_check_attempts
         #when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
             if self.is_max_attempts() and self.state_type == 'SOFT':
+                #Ok here is when we just go to the hard state
+                #So event handlers here too
+                res = self.get_event_handlers()
                 self.state_type = 'HARD'
                 #raise notification only if self.notifications_enabled is True
                 if self.notifications_enabled:
                     if not no_action:
-                        return self.create_notifications('PROBLEM')
-                    else:
-                        return []
+                        res.extend(self.create_notifications('PROBLEM'))
+                return res
         return []
 
 
@@ -401,7 +427,6 @@ class SchedulingItem(Item):
 
     #Create notifications
     def create_notifications(self, type):
-
         #if notif is disabled, not need to go thurser
 
         cls = self.__class__

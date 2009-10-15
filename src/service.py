@@ -336,6 +336,11 @@ class Service(SchedulingItem):
         return [self.host, self]
 
 
+    #Give data for evetn handlers's macros
+    def get_data_for_event_handler(self):
+        return [self.host, self]
+
+
     #Give data for notifications'n macros
     def get_data_for_notifications(self, contact, n):
         return [self.host, self, contact, n]
@@ -431,10 +436,15 @@ class Services(Items):
 
 
     #Link the service with a command for the check command
+    #and event handlers
     def linkify_s_by_cmd(self, commands):
         for s in self:
             s.check_command = CommandCall(commands, s.check_command)
-
+        for s in self:
+            if s.event_handler != '':
+                s.event_handler = CommandCall(commands, s.event_handler)
+            else:
+                s.event_handler = None
 
     #Link service with timepriods (notifs and check)
     def linkify_s_by_tp(self, timeperiods):

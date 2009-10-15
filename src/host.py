@@ -289,6 +289,9 @@ class Host(SchedulingItem):
     def get_data_for_checks(self):
         return [self]
 
+    #Give data for event handler's macro
+    def get_data_for_event_handler(self):
+        return [self]
 
     #Give data for notifications'n macros
     def get_data_for_notifications(self, contact, n):
@@ -373,7 +376,11 @@ class Hosts(Items):
     def linkify_h_by_cmd(self, commands):
         for h in self:
             h.check_command = CommandCall(commands, h.check_command)
-
+        for h in self:
+            if h.event_handler != '':
+                h.event_handler = CommandCall(commands, h.event_handler)
+            else:
+                h.event_handler = None
 
     #Link with conacts
     def linkify_h_by_c(self, contacts):

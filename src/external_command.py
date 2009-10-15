@@ -455,7 +455,8 @@ class ExternalCommand:
 
     #CHANGE_HOST_EVENT_HANDLER;<host_name>;<event_handler_command>
     def CHANGE_HOST_EVENT_HANDLER(self, host, event_handler_command):
-        pass
+        host.event_handler = CommandCall(self.commands, event_handler_command)
+        self.sched.get_and_register_status_brok(host)
 
     #CHANGE_HOST_MODATTR;<host_name>;<value>
     def CHANGE_HOST_MODATTR(self, host, value):
@@ -503,7 +504,8 @@ class ExternalCommand:
 
     #CHANGE_SVC_EVENT_HANDLER;<host_name>;<service_description>;<event_handler_command>
     def CHANGE_SVC_EVENT_HANDLER(self, service, event_handler_command):
-        pass
+        service.event_handler = CommandCall(self.commands, event_handler_command)
+        self.sched.get_and_register_status_brok(service)
 
     #CHANGE_SVC_MODATTR;<host_name>;<service_description>;<value>
     def CHANGE_SVC_MODATTR(self, service, value):
