@@ -18,8 +18,10 @@
 
 
 import os, time
+
 from util import to_int, to_bool
 from downtime import Downtime
+from command import CommandCall
 
 class ExternalCommand:
 
@@ -231,6 +233,9 @@ class ExternalCommand:
         self.get_command_and_args(command)
 
 
+    #Ok the command is not for every one, so we search 
+    #by the hostname with schduler have the host. Then send
+    #it the command
     def search_host_and_dispatch(self, host_name, command):
         for cfg in self.confs.values():
             if cfg.hosts.find_by_name(host_name) is not None:
@@ -240,7 +245,11 @@ class ExternalCommand:
                     sched.run_external_command(command)
                 else:
                     print "Problem: a configuration is found, but is not assigned!"
+            else:
+                print "Sorry but the host", host_name, "was not found"
             
+
+    #The command is global, so sent it to every schedulers
     def dispatch_global_command(self, command):
         for sched in self.conf.schedulerlinks:
             print "Sending command", command, 'to sched', sched
@@ -321,7 +330,9 @@ class ExternalCommand:
                     elif type_searched == 'command':
                         c = self.commands.find_cmd_by_name(val)
                         if c is not None:
-                            args.append(c)
+                            args.append(val)#the find will be redone by
+                            #the commandCall creation, but != None
+                            #is usefull so a bad command will be catch
 
                     elif type_searched == 'host_group':
                         hg = self.host_groups.find_by_name(val)
@@ -389,6 +400,7 @@ class ExternalCommand:
     #CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
         contact.host_notification_period = notification_timeperiod
+        self.sched.get_and_register_status_brok(contact)
 
     #ADD_SVC_COMMENT;<host_name>;<service_description>;<persistent>;<author>;<comment>
     def ADD_SVC_COMMENT(self, service, persistent, author, comment):
@@ -409,6 +421,7 @@ class ExternalCommand:
     #CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
         contact.service_notification_period = notification_timeperiod
+        self.sched.get_and_register_status_brok(contact)
 
     #CHANGE_CUSTOM_CONTACT_VAR;<contact_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_CONTACT_VAR(self, contact, varname, varvalue):
@@ -432,12 +445,13 @@ class ExternalCommand:
     
     #CHANGE_HOST_CHECK_COMMAND;<host_name>;<check_command>
     def CHANGE_HOST_CHECK_COMMAND(self, host, check_command):
-        pass
+        host.check_command = CommandCall(self.commands, check_command)
+        self.sched.get_and_register_status_brok(host)
 
     #CHANGE_HOST_CHECK_TIMEPERIOD;<host_name>;<timeperiod>
     def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod):
         host.check_period = timeperiod
-        pass
+        self.sched.get_and_register_status_brok(service)
 
     #CHANGE_HOST_EVENT_HANDLER;<host_name>;<event_handler_command>
     def CHANGE_HOST_EVENT_HANDLER(self, host, event_handler_command):
@@ -479,11 +493,13 @@ class ExternalCommand:
 
     #CHANGE_SVC_CHECK_COMMAND;<host_name>;<service_description>;<check_command>
     def CHANGE_SVC_CHECK_COMMAND(self, service, check_command):
-        pass
+        service.check_command = CommandCall(self.commands, check_command)
+        self.sched.get_and_register_status_brok(service)
 
     #CHANGE_SVC_CHECK_TIMEPERIOD;<host_name>;<service_description>;<check_timeperiod>
     def CHANGE_SVC_CHECK_TIMEPERIOD(self, service, check_timeperiod):
         service.check_period = check_timeperiod
+        self.sched.get_and_register_status_brok(service)
 
     #CHANGE_SVC_EVENT_HANDLER;<host_name>;<service_description>;<event_handler_command>
     def CHANGE_SVC_EVENT_HANDLER(self, service, event_handler_command):
@@ -496,6 +512,7 @@ class ExternalCommand:
     #CHANGE_SVC_NOTIFICATION_TIMEPERIOD;<host_name>;<service_description>;<notification_timeperiod>
     def CHANGE_SVC_NOTIFICATION_TIMEPERIOD(self, service, notification_timeperiod):
         service.notification_period = notification_timeperiod
+        self.sched.get_and_register_status_brok(service)
 
     #DELAY_HOST_NOTIFICATION;<host_name>;<notification_time>
     def DELAY_HOST_NOTIFICATION(self, host, notification_time):

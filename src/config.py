@@ -734,7 +734,9 @@ class Config(Item):
 
             #Create ours classes
             cfg.hosts = Hosts(cfg.hosts)
+            cfg.hosts.create_reversed_list()
             cfg.services = Services(cfg.services)
+            cfg.services.create_reversed_list()
             #Fill host groups
             for ori_hg in self.hostgroups:
                 hg = cfg.hostgroups.find_by_name(ori_hg.get_name())
