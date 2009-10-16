@@ -287,6 +287,10 @@ class SchedulingItem(Item):
         now = time.time()
         OK_UP = self.__class__.ok_up #OK for service, UP for host
         
+        #We check for stalking if necessery
+        #so if check is here
+        self.manage_stalking(c)
+
         #Latency can be <0 is we get a check from the retention file
         #so if <0, set 0
         self.latency = max(0, c.check_time - c.t_to_go)

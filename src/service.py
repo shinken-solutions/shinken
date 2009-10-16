@@ -105,7 +105,7 @@ class Service(SchedulingItem):
             'notifications_enabled' : {'required':False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
             'contacts' : {'required':True},
             'contact_groups' : {'required':True},
-            'stalking_options' : {'required':False, 'default':'o,w,u,c', 'pythonize': to_split},
+            'stalking_options' : {'required':False, 'default':'', 'pythonize': to_split},
             'notes' : {'required':False, 'default':''},
             'notes_url' : {'required':False, 'default':''},
             'action_url' : {'required':False, 'default':''},
@@ -329,6 +329,27 @@ class Service(SchedulingItem):
         elif status == 'u' and self.state == 'UNKNOWN':
             return True
         return False
+
+
+    #Is stalking ?
+    #Launch if check is waitconsume==first time
+    #and if c.status is in self.stalking_options
+    def manage_stalking(self, c):
+        need_stalk = False
+        if c.status == 'waitconsume':
+            if c.exit_status==0 and 'o' in self.stalking_options:
+                need_stalk = True
+            elif c.exit_status==1 and 'w' in self.stalking_options:
+                need_stalk = True
+            elif c.exit_status==2 and 'c' in self.stalking_options:
+                need_stalk = True
+            elif c.exit_status==3 and 'u' in self.stalking_options:
+                need_stalk = True
+            if c.output == self.output:
+                need_stalk = False
+        if need_stalk:
+            #TODO : make a real log mangment
+            print "Stalking", self.get_name(), c.output
 
 
     #Give data for checks's macros

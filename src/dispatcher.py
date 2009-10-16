@@ -136,7 +136,8 @@ class Dispatcher:
                 print "OK, all configurations are dispatched :)"
                 self.dispatch_ok = True
                 
-            #We put on the satellites only if every one need it (a new scheduler)
+            #We put on the satellites only if every one need it 
+            #(a new scheduler)
             #Of if a specific satellite needs it
             #TODO : more python
             #We create the conf for satellites : it's just schedulers

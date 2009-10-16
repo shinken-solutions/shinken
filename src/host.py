@@ -75,7 +75,7 @@ class Host(SchedulingItem):
                 'notification_period': {'required': True},
                 'notification_options': {'required': False, 'default':'d,u,r,f', 'pythonize': to_split},
                 'notifications_enabled': {'required': False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
-                'stalking_options': {'required': False, 'default':'o,d,u', 'pythonize': to_split},
+                'stalking_options': {'required': False, 'default':'', 'pythonize': to_split},
                 'notes': {'required': False, 'default':''},
                 'notes_url': {'required': False, 'default':''},
                 'action_url': {'required': False, 'default':''},
@@ -276,6 +276,28 @@ class Host(SchedulingItem):
         elif status == 'u' and self.state == 'UNREACHABLE':
             return True
         return False
+
+
+    #Is stalking ?
+    #Launch if check is waitconsume==first time
+    #and if c.status is in self.stalking_options
+    def manage_stalking(self, c):
+        need_stalk = False
+        if c.status == 'waitconsume':
+            if c.exit_status==0 and 'o' in self.stalking_options:
+                need_stalk = True
+            elif c.exit_status==1 and 'd' in self.stalking_options:
+                need_stalk = True
+            elif c.exit_status==2 and 'd' in self.stalking_options:
+                need_stalk = True
+            elif c.exit_status==3 and 'u' in self.stalking_options:
+                need_stalk = True
+            if c.output != self.output:
+                need_stalk = False
+        if need_stalk:
+            #TODO : make a real log mangment
+            print "Stalking", self.output
+
 
 
     #fill act_depend_of with my parents (so network dep)
