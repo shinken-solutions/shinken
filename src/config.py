@@ -671,7 +671,8 @@ class Config(Item):
     #That can be need is macro in commands
     def cut_into_parts(self):
         #print "Scheduler configurated :", self.schedulerlinks
-        nb_parts = len([s for s in self.schedulerlinks if not s.spare and s.is_alive()])
+        #I do not care about alive or not. User must have set a spare if need it
+        nb_parts = len([s for s in self.schedulerlinks if not s.spare])# and s.is_alive()])
         #print "Cutting into", nb_parts, "parts"
 
         if nb_parts == 0:

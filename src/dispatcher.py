@@ -77,7 +77,7 @@ class Dispatcher:
     def check_alive(self):
         for elt in self.elements:
             elt.alive = elt.is_alive()
-            print "Element is alive?", elt.alive, "is active?", elt.is_active
+            print "Element", elt.name, " alive:", elt.alive, ", active:", elt.is_active
             if not elt.alive:
                 elt.need_conf = True
 
@@ -93,10 +93,12 @@ class Dispatcher:
                 self.dispatch_ok = False
                 print "Set dispatch False"
                 elt.is_active = False
+                #elt.need_conf = True
                 if hasattr(elt, 'conf'):
                     if elt.conf != None:
                         elt.conf.assigned_to = None
                         elt.conf.is_assigned = False
+                        elt.conf = None
                 else:
                     print 'No conf'
 
@@ -107,28 +109,45 @@ class Dispatcher:
         if not self.dispatch_ok:
             conf_to_dispatch = [cfg for cfg in self.conf.confs.values() if cfg.is_assigned==False]
             nb_conf = len(conf_to_dispatch)
-
+            print "Total config:", len(self.conf.confs)
             print "Dispatching ", nb_conf, "configurations"            
             #get scheds, alive and no spare first
-            print 'T', self.schedulerlinks.items.values().sort()
+            #print 'T', self.schedulerlinks.items.values().sort()
             scheds = self.schedulerlinks.items.values()
             scheds.sort(alive_then_spare_then_deads)
             scheds.reverse() #pop is last, I need first
             every_one_need_conf = False
             for conf in conf_to_dispatch:
-                sched = scheds.pop()
-                if not sched.is_active:
-                    every_one_need_conf = True
-                    print "Dispatching conf", sched.id
-                    is_sent = sched.put_conf(conf)
-                    if is_sent:
-                        sched.conf = conf
-                        sched.need_conf = False
-                        sched.is_active = True
-                        conf.is_assigned = True
-                        conf.assigned_to = sched
+                print "Dispatching one configuration"
+                #we need to loop until the conf is assigned
+                #or when there are no more schedulers available
+                need_loop = True
+                while need_loop:
+                    try:
+                        sched = scheds.pop()
+                        #if not sched.is_active:
+                        print "Trying to send conf to sched", sched.name
+                        if sched.need_conf:
+                            every_one_need_conf = True
+                            print "Dispatching conf", sched.id
+                            is_sent = sched.put_conf(conf)
+                            if is_sent:
+                                print "Dispatch OK of for conf in sched", sched.name
+                                sched.conf = conf
+                                sched.need_conf = False
+                                sched.is_active = True
+                                conf.is_assigned = True
+                                conf.assigned_to = sched
+                                #Ok, the conf is dispatch, no more loop for this
+                                #configuration
+                                need_loop = False
+                            else:
+                                print "Dispatch fault for sched", sched.name
+                    except IndexError: #No more schedulers.. not good, no loop
+                        need_loop = False
 
             #We pop conf to dispatch, so it must be no more conf...
+            conf_to_dispatch = [cfg for cfg in self.conf.confs.values() if cfg.is_assigned==False]
             nb_missed = len(conf_to_dispatch)
             if nb_missed > 0:
                 print "WARNING : All configurations are not dispatched ", nb_missed, "are missing"
