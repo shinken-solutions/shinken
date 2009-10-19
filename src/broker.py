@@ -227,4 +227,4 @@ if __name__ == '__main__':
 	#broker.main()
         import cProfile
         command = """broker.main()"""
-        cProfile.runctx( command, globals(), locals(), filename="Broker.profile" )
+        cProfile.runctx( command, globals(), locals(), filename="var/Broker.profile" )

@@ -50,7 +50,7 @@ class Scheduler:
             #3 : (self.delete_unwanted_notifications, 1),
             4 : (self.check_freshness, 1),
             5 : (self.clean_caches, 1),
-            6 : (self.update_retention_file, 10)
+            6 : (self.update_retention_file, 60)
             }
 
         #stats part

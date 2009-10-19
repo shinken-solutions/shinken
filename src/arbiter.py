@@ -58,7 +58,7 @@ class Arbiter:
     def main(self):
         print "Loading configuration"
         self.conf = Config()
-        self.conf.read_config("nagios.cfg")
+        self.conf.read_config("etc/nagios.cfg")
 
         print "****************** Create Template links **********"
         self.conf.linkify_templates()
@@ -164,4 +164,4 @@ if __name__ == '__main__':
         import cProfile
 	#p.main()
         command = """p.main()"""
-        cProfile.runctx( command, globals(), locals(), filename="Arbiter.profile" )
+        cProfile.runctx( command, globals(), locals(), filename="var/Arbiter.profile" )
