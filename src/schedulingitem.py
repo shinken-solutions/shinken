@@ -292,7 +292,7 @@ class SchedulingItem(Item):
         self.manage_stalking(c)
 
         #Latency can be <0 is we get a check from the retention file
-        #so if <0, set 0
+        #so if <0, set 0 
         self.latency = max(0, c.check_time - c.t_to_go)
         self.execution_time = c.execution_time
         self.last_chk = c.check_time
