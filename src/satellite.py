@@ -76,6 +76,25 @@ class IForArbiter(Pyro.core.ObjBase):
 		return True
 
 
+	#Use by arbiter to know if we have a conf or not
+	#can be usefull if we must do nothing but 
+	#we are not because it can KILL US! 
+	def have_conf(self):
+		return self.app.have_conf
+
+
+	#Call by arbiter if it thinks we are running but we must do not (like
+	#if I was a spare that take a conf but the master returns, I must die
+	#and wait a new conf)
+	#Us : No please...
+	#Arbiter : I don't care, hasta la vista baby!
+	#Us : ... <- Nothing! We are die! you don't follow 
+	#anything or what??
+	def wait_new_conf(self):
+		print "Arbiter want me to wait a new conf"
+		self.app.have_conf = False
+
+
 #Our main APP class
 class Satellite:
 	def __init__(self):
@@ -336,6 +355,13 @@ class Satellite:
 			if not i % 50:
 				print "Loop ", i
 			begin_loop = time.time()
+
+			#Maybe the arbiter ask us to wait for a new conf
+			#If true, we must restart all...
+			if self.have_conf == False:
+				self.wait_for_initial_conf()
+				for sched_id in self.schedulers:
+					self.pynag_con_init(sched_id)
 
 			#Now we check if arbiter speek to us in the daemon. If so, we listen for it
 			#When it push us conf, we reinit connexions

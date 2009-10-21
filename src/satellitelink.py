@@ -87,3 +87,37 @@ class SatelliteLink(Item):
             print exp
             return False
 
+
+    def wait_new_conf(self):
+        if self.con == None:
+            self.create_connexion()
+        #print "Connexion is OK, now we put conf", conf
+            
+        try:
+            self.con.wait_new_conf()
+            return True
+        except Pyro.errors.URIError as exp:
+            self.con = None
+            #print self.name, "FUCK !!!!!!!!!!!!", exp
+            return False
+        except Pyro.errors.ProtocolError as exp:
+            self.con = None
+            #print self.name, "FUCK !!!!!!!!!!!!", exp
+            return False
+
+    def have_conf(self):
+        if self.con == None:
+            self.create_connexion()
+        #print "Connexion is OK, now we put conf", conf
+            
+        try:
+            return self.con.have_conf()
+        except Pyro.errors.URIError as exp:
+            self.con = None
+            #print self.name, "FUCK !!!!!!!!!!!!", exp
+            return False
+        except Pyro.errors.ProtocolError as exp:
+            self.con = None
+            #print self.name, "FUCK !!!!!!!!!!!!", exp
+            return False
+

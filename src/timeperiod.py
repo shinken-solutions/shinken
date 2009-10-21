@@ -525,8 +525,12 @@ class Timeperiod:
         dr_mins = []
         for dr in self.dateranges:
             dr_mins.append(dr.get_next_valid_time_from_t(t))
-        local_min = min(dr_mins)
-        
+        #Min but not the None valus...
+        try:
+            local_min = min([t for t in dr_mins if t!=None])
+        except ValueError: #dr_mins if full of None, not good
+            local_min = None
+
         #Ok, we update the cache...
         self.cache[t] = local_min
         return local_min

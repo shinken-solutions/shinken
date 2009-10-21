@@ -151,6 +151,7 @@ class Arbiter:
                 self.dispatcher.check_alive()
                 self.dispatcher.check_dispatch()
                 self.dispatcher.dispatch()
+                self.dispatcher.check_bad_dispatch()
                 #send_conf_to_schedulers()
                 timeout = 1.0
 						

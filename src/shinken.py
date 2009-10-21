@@ -189,6 +189,25 @@ class IForArbiter(Pyro.core.ObjBase):
 	def ping(self):
 		return True
 
+	#Use by arbiter to know if we have a conf or not
+	#can be usefull if we must do nothing but 
+	#we are not because it can KILL US! 
+	def have_conf(self):
+		return self.app.have_conf
+
+
+	#Call by arbiter if it thinks we are running but we must do not (like
+	#if I was a spare that take a conf but the master returns, I must die
+	#and wait a new conf)
+	#Us : No please...
+	#Arbiter : I don't care, hasta la vista baby!
+	#Us : ... <- Nothing! We are die! you don't follow 
+	#anything or what??
+	def wait_new_conf(self):
+		print "Arbiter want me to wait a new conf"
+		self.app.have_conf = False
+		if hasattr(self.app, "sched"):
+                        self.app.sched.die()
 
 
 #Tha main app class
@@ -272,7 +291,6 @@ class Shinken:
 		print "Loading configuration"
 		self.conf.explode_global_conf()
 		self.conf.is_correct()
-		#self.conf.dump()
 		#Creating the Macroresolver Class & unique instance
 		m = MacroResolver()
 		m.init(self.conf)
@@ -303,7 +321,11 @@ class Shinken:
                         #Ok, we quit scheduler, but maybe it's just for
 			#reloading our configuration
 			if self.must_run:
-				self.load_conf()
+				if self.have_conf:
+					self.load_conf()
+				else:
+					self.wait_initial_conf()
+					self.load_conf()
 				
 
 

@@ -102,6 +102,29 @@ class Dispatcher:
                 else:
                     print 'No conf'
 
+
+    #Imagine a world where... oups...
+    #Imagine a master got the conf, network down
+    #a spare take it (good :) ). Like the Empire, the master
+    #strike back! It was still alive! (like Elvis). It still got conf
+    #and is running! not good!
+    #Bad dispatch : a link that say have a conf but I do not allow this
+    #so I ask it to wait a new conf and stop kidding.
+    def check_bad_dispatch(self):
+        for elt in self.elements:
+            if hasattr(elt, 'conf'):
+                #If element have a conf, I do not care, it's a good dispatch
+                #If die : I do not ask it something, it won't respond..
+                if elt.conf == None and elt.alive:
+                    print "Ask", elt.name , 'if it got conf'
+                    if elt.have_conf():
+                        print 'True!'
+                        elt.wait_new_conf()
+                        #I do not care about order not send or not. If not,
+                        #The nextr loop wil resent it
+                    else:
+                        print "No conf"
+
     
     #Manage the dispatch
     def dispatch(self):
