@@ -185,7 +185,7 @@ class Service(SchedulingItem):
         'SERVICEPROBLEMID' : None,
         'LASTSERVICEPROBLEMID' : None,
         'SERVICELATENCY' : 'latency',
-        'SERVICEEXECUTIONTIME' : 'exec_time',
+        'SERVICEEXECUTIONTIME' : 'execution_time',
         'SERVICEDURATION' : 'get_duration',
         'SERVICEDURATIONSEC' : 'get_duration_sec',
         'SERVICEDOWNTIME' : 'get_downtime',

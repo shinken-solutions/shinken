@@ -38,7 +38,12 @@ class Contact(Item):
                 'service_notification_commands' : {'required':True},
                 'email' : {'required' : False, 'default':'none', 'status_broker_name' : None},
                 'pager' : {'required' : False, 'default':'none', 'status_broker_name' : None},
-                'addressx' : {'required' : False, 'default':'none'},
+                'address1' : {'required' : False, 'default':'none'},
+                'address2' : {'required' : False, 'default':'none'},
+                'address3' : {'required' : False, 'default':'none'},
+                'address4' : {'required' : False, 'default':'none'},
+                'address5' : {'required' : False, 'default':'none'},
+                'address6' : {'required' : False, 'default':'none'},
                 'can_submit_commands' : {'required' : False, 'default':'0', 'pythonize': to_bool, 'status_broker_name' : None},
                 'retain_status_information' : {'required' : False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
                 'retain_nonstatus_information' : {'required' : False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None}
@@ -52,7 +57,12 @@ class Contact(Item):
         'CONTACTALIAS' : 'alias',
         'CONTACTEMAIL' : 'email',
         'CONTACTPAGER' : 'pager',
-        'CONTACTADDRESSn' : 'addressx',
+        'CONTACTADDRESS1' : 'address1',
+        'CONTACTADDRESS2' : 'address2',
+        'CONTACTADDRESS3' : 'address3',
+        'CONTACTADDRESS4' : 'address4',
+        'CONTACTADDRESS5' : 'address5',
+        'CONTACTADDRESS6' : 'address6',
         'CONTACTGROUPNAME' : 'get_groupname',
         'CONTACTGROUPNAMES' : 'get_groupnames'
         }

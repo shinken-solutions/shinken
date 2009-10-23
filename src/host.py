@@ -160,7 +160,7 @@ class Host(SchedulingItem):
               'HOSTPROBLEMID' : None,
               'LASTHOSTPROBLEMID' : None,
               'HOSTLATENCY' : 'latency',
-              'HOSTEXECUTIONTIME' : 'exec_time',
+              'HOSTEXECUTIONTIME' : 'execution_time',
               'HOSTDURATION' : 'get_duration',
               'HOSTDURATIONSEC' : 'get_duration_sec',
               'HOSTDOWNTIME' : 'get_downtime',
