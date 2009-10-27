@@ -54,6 +54,7 @@ class IForArbiter(Pyro.core.ObjBase):
 	#'schedulers' : schedulers dict (by id) with address and port
 	def put_conf(self, conf):
 		self.app.have_conf = True
+		self.app.have_new_conf = True
 		print "Sending us ", conf
 		#If we've got something in the schedulers, we do not want it anymore
 		self.schedulers.clear()
@@ -64,6 +65,7 @@ class IForArbiter(Pyro.core.ObjBase):
 			self.schedulers[sched_id]['uri'] = uri
 			self.schedulers[sched_id]['verifs'] = {}
 			self.schedulers[sched_id]['running_id'] = 0
+			self.schedulers[sched_id]['active'] = s['active']
 			#We cannot reinit connexions because this code in in a thread, and
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
@@ -100,6 +102,7 @@ class Satellite:
 	def __init__(self):
 		#Bool to know if we have received conf from arbiter
 		self.have_conf = False
+		self.have_new_conf = False
 		self.s = Queue() #Global Master -> Slave
 		self.m = Queue() #Slave -> Master
 
@@ -114,6 +117,12 @@ class Satellite:
 
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
+		#If sched is not active, I do not try to init
+		#it is just useless
+		is_active = self.schedulers[id]['active']
+		if not is_active:
+			return
+
 		print "init de connexion avec", self.schedulers[id]['uri']
 		running_id = self.schedulers[id]['running_id']
 		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(self.schedulers[id]['uri'])
@@ -149,7 +158,6 @@ class Satellite:
                         print "Scheduler is not initilised", exp
                         self.schedulers[id]['con'] = None
                         return
-
 		print "Connexion OK"
 
 
@@ -175,6 +183,10 @@ class Satellite:
 	def manage_return(self):
 		#Fot all schedulers, we check for waitforhomerun and we send back results
 		for sched_id in self.schedulers:
+			#If sched is not active, I do not try return
+			is_active = self.schedulers[sched_id]['active']
+			if not is_active:
+				continue
 			ret = []
 			verifs = self.schedulers[sched_id]['verifs']
                         #Get the id to return to shinken, so after make 
@@ -197,12 +209,14 @@ class Satellite:
 					if con is not None:#None = not initialized
 						con.put_results(ret)
 				except Pyro.errors.ProtocolError:
+					print "Init return 1"
 					self.pynag_con_init(sched_id)
 					return
 				except AttributeError as exp: #the scheduler must  not be initialized
 					print exp
 				except KeyError as exp: # sched is gone
                                         print exp
+					print "Init return 2"
                                         self.pynag_con_init(sched_id)
                                         return
 				except Exception,x:
@@ -257,8 +271,13 @@ class Satellite:
 			for sock in socks:
 				if sock in ins:
 					self.daemon.handleRequests()
-					for sched_id in self.schedulers:
-						self.pynag_con_init(sched_id)
+					#have_new_conf is set with put_conf
+					#so another handle will not make a con_init 
+					if self.have_new_conf:
+						for sched_id in self.schedulers:
+							print "Init watch_for_new_conf"
+							self.pynag_con_init(sched_id)
+						self.have_new_conf = False
 
 
 	#Create and launch a new worker, and put it into self.workers
@@ -292,6 +311,11 @@ class Satellite:
 		new_checks = []
 		#We check for new check in each schedulers and put the result in new_checks
 		for sched_id in self.schedulers:
+			#If sched is not active, I do not try return
+			is_active = self.schedulers[sched_id]['active']
+			if not is_active:
+				continue
+
 			try:
 				con = self.schedulers[sched_id]['con']
 				if con is not None: #None = not initilized
@@ -308,12 +332,15 @@ class Satellite:
 						v.sched_id = sched_id
 					new_checks.extend(tmp_verifs)
 				else: #no con? make the connexion
+					print "Init get_new 1"
 					self.pynag_con_init(sched_id)
                         #Ok, con is not know, so we create it
 			except KeyError as exp:
+				print "Init get new 2"
 				self.pynag_con_init(sched_id)
 			except Pyro.errors.ProtocolError as exp:
 				print exp
+				print "Init get new 3"
 				#we reinitialise the ccnnexion to pynag
 				self.pynag_con_init(sched_id)
                         #scheduler must not be initialized
@@ -343,6 +370,8 @@ class Satellite:
 	def main(self):
                 #Daemon init
 		Pyro.core.initServer()
+		Pyro.config.PYRO_COMPRESSION = 1
+		Pyro.config.PYRO_MULTITHREADED = 0
 
 		#Let the user give us a port, if not, take the default one
 		if len(sys.argv) == 2:
@@ -361,9 +390,12 @@ class Satellite:
                 #We wait for initial conf
 		self.wait_for_initial_conf()
 
+
                 #Connexion init with PyNag server
 		for sched_id in self.schedulers:
+			print "Init main"
 			self.pynag_con_init(sched_id)
+		self.have_new_conf = False
 
                 #Allocate Mortal Threads
 		for i in xrange(1, 5):
@@ -383,6 +415,7 @@ class Satellite:
 			if self.have_conf == False:
 				self.wait_for_initial_conf()
 				for sched_id in self.schedulers:
+					print "Init main2"
 					self.pynag_con_init(sched_id)
 
 			#Now we check if arbiter speek to us in the daemon. If so, we listen for it

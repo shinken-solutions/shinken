@@ -364,7 +364,6 @@ class ExternalCommand:
                         if self.mode == 'dispatcher':
                        	    self.search_host_and_dispatch(tmp_host, command)
                             return None
-
                 else:
                     in_service = False
                     srv_name = elts[i]

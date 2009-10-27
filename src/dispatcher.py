@@ -89,7 +89,8 @@ class Dispatcher:
         #print "Check dispatch", self.dispatch_ok
         for elt in self.elements:
             #print "Elt:", elt.__dict__, elt.is_active, elt.alive
-            if elt.is_active and not elt.alive or elt.need_conf:
+            if elt.is_active and not elt.alive or elt.need_conf :
+                print "ELT:", elt.name, elt.is_active, elt.alive, elt.need_conf
                 self.dispatch_ok = False
                 print "Set dispatch False"
                 elt.is_active = False
@@ -177,6 +178,13 @@ class Dispatcher:
             else:
                 print "OK, all configurations are dispatched :)"
                 self.dispatch_ok = True
+
+            #Sched without conf in a dispatch ok are set ti no need_conf
+            #so they do not raise dispatch where no use
+            if self.dispatch_ok:
+                for sched in self.schedulerlinks.items.values():
+                    if sched.conf == None:
+                        sched.need_conf = False
                 
             #We put on the satellites only if every one need it 
             #(a new scheduler)
@@ -187,7 +195,7 @@ class Dispatcher:
             tmp_conf['schedulers'] = {}
             i = 0
             for sched in self.conf.schedulerlinks:
-                tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id}
+                tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
                 i += 1
             
             for reactionner in self.conf.reactionners.items.values():
@@ -214,13 +222,9 @@ class Dispatcher:
             tmp_conf['schedulers'] = {}
             i = 0
 	    for sched in self.conf.schedulerlinks:
-                tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id}
+                tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None }
                 i += 1
 
-		#         sched = self.conf.schedulerlinks[0]
-         	#   tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address}
-            
-            
             for poller in self.conf.pollers.items.values():
                 if poller.alive:
                     if every_one_need_conf or poller.need_conf:
