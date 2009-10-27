@@ -27,6 +27,10 @@ import re, string, copy
 import pygraph
 import itertools
 
+#from pygraph.classes.digraph import digraph
+#from pygraph.algorithms.cycles import find_cycle
+from pygraph.algorithms.accessibility import accessibility
+
 from timeperiod import Timeperiod, Timeperiods
 from service import Service, Services
 from command import Command, Commands
@@ -637,7 +641,7 @@ class Config(Item):
         
         #Access_list from a node il all nodes that are connected
         #with it : it's a list of ours mini_packs
-        access_list = pygraph.algorithms.accessibility.accessibility(g)
+        access_list = accessibility(g)
 
         #now we read all mini_packs
         tmp_packs = [] # Ours mini_pack list
@@ -769,6 +773,7 @@ class Config(Item):
                     self.confs[i].other_elements[h.get_name()] = i
 
         #We tag conf with isntance_id
+	#TODO : fix ninja so it manage not just instance_id == 0 ....
         for i in self.confs:
-            self.confs[i].instance_id = i
+            self.confs[i].instance_id = 0#i
 

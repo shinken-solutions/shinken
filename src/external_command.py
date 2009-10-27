@@ -237,6 +237,7 @@ class ExternalCommand:
     #by the hostname with schduler have the host. Then send
     #it the command
     def search_host_and_dispatch(self, host_name, command):
+	print "Calling search_host_and_dispatch", 'for', host_name
         for cfg in self.confs.values():
             if cfg.hosts.find_by_name(host_name) is not None:
                 print "Host", host_name, "found in a configuration"
@@ -281,6 +282,8 @@ class ExternalCommand:
             print "This command is a global one, we resent it to all schedulers"
             self.dispatch_global_command(command)
             return None
+	print "Is bloabl?", c_name, ExternalCommand.commands[c_name]['global']
+	print "Mode:", self.mode
         print "This command have arguments:", ExternalCommand.commands[c_name]['args'], len(ExternalCommand.commands[c_name]['args'])
 
         args = []
@@ -354,12 +357,13 @@ class ExternalCommand:
                     elif type_searched == 'service':
                         in_service = True
                         tmp_host = elts[i].strip()
+			print "TMP HOST", tmp_host
                         if tmp_host[-1] == '\n':
                             tmp_host = tmp_host[:-1]
                             #If 
-                            if self.mode == 'dispatcher':
-                                self.search_host_and_dispatch(tmp_host, command)
-                                return None
+                        if self.mode == 'dispatcher':
+                       	    self.search_host_and_dispatch(tmp_host, command)
+                            return None
 
                 else:
                     in_service = False
@@ -720,7 +724,7 @@ class ExternalCommand:
 
     #DISABLE_SERVICE_FLAP_DETECTION;<host_name>;<service_description>
     def DISABLE_SERVICE_FLAP_DETECTION(self, service):
-        service.enable_flap_detection = False
+        service.flap_detection_enabled = False
         self.sched.get_and_register_status_brok(service)
 
     #DISABLE_SERVICE_FRESHNESS_CHECKS
@@ -736,12 +740,12 @@ class ExternalCommand:
 
     #DISABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def DISABLE_SVC_EVENT_HANDLER(self, service):
-        service.enable_event_handlers = False
+        service.event_handler_enabled = False
         self.sched.get_and_register_status_brok(service)
 
     #DISABLE_SVC_FLAP_DETECTION;<host_name>;<service_description>
     def DISABLE_SVC_FLAP_DETECTION(self, service):
-        service.enable_flap_detection = False
+        service.flap_detection_enabled = False
         self.sched.get_and_register_status_brok(service)
 
     #DISABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
@@ -931,7 +935,7 @@ class ExternalCommand:
 
     #ENABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def ENABLE_SVC_EVENT_HANDLER(self, service):
-        service.enable_event_handlers = True
+        service.event_handler_enabled = True
         self.sched.get_and_register_status_brok(service)
 
     #ENABLE_SVC_FLAP_DETECTION;<host_name>;<service_description>

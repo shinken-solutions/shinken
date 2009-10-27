@@ -25,6 +25,8 @@
 from multiprocessing import Process, Queue
 from message import Message
 
+import threading
+
 #Worker class
 class Worker:
     """The Worker class """
@@ -43,6 +45,8 @@ class Worker:
         self._timeout = timeout
         self._c = Queue() # Private Control queue for the Worker
         self._process = Process(target=self.work, args=(s, m, self._c))
+	#Thread version : not good in cpython :(
+        #self._process = threading.Thread(target=self.work, args=(s, m, self._c))
 
 
     def is_mortal(self):

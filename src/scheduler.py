@@ -50,7 +50,7 @@ class Scheduler:
             #3 : (self.delete_unwanted_notifications, 1),
             4 : (self.check_freshness, 1),
             5 : (self.clean_caches, 1),
-            6 : (self.update_retention_file, 60)
+            6 : (self.update_retention_file, 3600)
             }
 
         #stats part
@@ -550,7 +550,7 @@ class Scheduler:
 
         print "First scheduling"
         self.schedule()
-
+        print "Done"
         #Ticks is for recurrent function call like consume
         #del zombies etc
         ticks = 0

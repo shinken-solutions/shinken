@@ -527,7 +527,7 @@ class Timeperiod:
             dr_mins.append(dr.get_next_valid_time_from_t(t))
         #Min but not the None valus...
         try:
-            local_min = min([t for t in dr_mins if t!=None])
+            local_min = min([d for d in dr_mins if d!=None])
         except ValueError: #dr_mins if full of None, not good
             local_min = None
 

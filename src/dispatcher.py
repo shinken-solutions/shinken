@@ -202,6 +202,7 @@ class Dispatcher:
             for broker in self.conf.brokers.items.values():
                 if broker.alive:
                     if every_one_need_conf or broker.need_conf:
+			print "Putting a Broker conf"
                         is_sent = broker.put_conf(tmp_conf)
                         if is_sent:
                             broker.is_active = True
@@ -212,8 +213,12 @@ class Dispatcher:
             tmp_conf = {}
             tmp_conf['schedulers'] = {}
             i = 0
-            sched = self.conf.schedulerlinks[0]
-            tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address}
+	    for sched in self.conf.schedulerlinks:
+                tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id}
+                i += 1
+
+		#         sched = self.conf.schedulerlinks[0]
+         	#   tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address}
             
             
             for poller in self.conf.pollers.items.values():

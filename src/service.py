@@ -130,7 +130,7 @@ class Service(SchedulingItem):
         'last_state_change' :  {'default' : time.time(), 'status_broker_name' : None},
         'last_hard_state_change' :  {'default' : time.time(), 'status_broker_name' : None},
         'last_hard_state' :  {'default' : time.time(), 'status_broker_name' : None},
-        'state_type' : {'default' : 'SOFT'},
+        'state_type' : {'default' : 'HARD'},
         'state_type_id' : {'default' : 0, 'status_broker_name' : 'state_type', 'broker_name' : 'state_type'},
         'output' : {'default' : '', 'broker_name' : None},
         'long_output' : {'default' : '', 'broker_name' : None},

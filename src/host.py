@@ -16,9 +16,13 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import pygraph
+#import pygraph
 import time
 
+#from pygraph.digraph import digraph
+import pygraph
+
+from pygraph.algorithms.cycles import find_cycle
 from command import CommandCall
 from item import Items
 from schedulingitem import SchedulingItem
@@ -97,7 +101,7 @@ class Host(SchedulingItem):
         'attempt' : {'default' : 0, 'status_broker_name' : 'current_attempt', 'broker_name' : 'current_attempt'},
         'state' : {'default' : 'PENDING'},
         'state_id' :  {'default' : 0, 'status_broker_name' : 'current_state', 'broker_name' : 'current_state'},
-        'state_type' : {'default' : 'SOFT'},
+        'state_type' : {'default' : 'HARD'},
         'state_type_id' : {'default' : 0, 'status_broker_name' : 'state_type', 'broker_name' : 'state_type'},
         'current_event_id' :  {'default' : 0, 'status_broker_name' : None},
         'last_event_id' :  {'default' : 0, 'status_broker_name' : None},
@@ -472,7 +476,7 @@ class Hosts(Items):
             else: #host without parent are shinken childs
                 #print "Add relation between", 0, id
                 self.parents.add_edge(0, id)
-        print "Loop: ", pygraph.algorithms.cycles.find_cycle(self.parents)#.find_cycle()
+        print "Loop: ", find_cycle(self.parents)#.find_cycle()
         #print "Fin loop check"
         
         for h in self: #.items.values():

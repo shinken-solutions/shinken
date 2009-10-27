@@ -117,7 +117,9 @@ class Satellite:
 		print "init de connexion avec", self.schedulers[id]['uri']
 		running_id = self.schedulers[id]['running_id']
 		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(self.schedulers[id]['uri'])
+		#timeout of 5 s
 		try:
+			self.schedulers[id]['con']._setTimeout(5)
 			new_run_id = self.schedulers[id]['con'].get_running_id()
 		except Pyro.errors.ProtocolError, exp:
 			print exp
@@ -130,13 +132,24 @@ class Satellite:
 			print "Scheduler is not initilised", exp
 			self.schedulers[id]['con'] = None
 			return
+		except KeyError, exp:
+                        print "Scheduler is not initilised", exp
+                        self.schedulers[id]['con'] = None
+                        return
+
 		#The schedulers have been restart : it has a new run_id.
 		#So we clear all verifs, they are obsolete now.
 		if self.schedulers[id]['running_id'] != 0 and new_run_id != running_id:
 			self.schedulers[id]['verifs'].clear()
 		self.schedulers[id]['running_id'] = new_run_id
 		#We do not need result of put_results, there is no one
-		self.schedulers[id]['con']._setOneway('put_results')
+		try:
+			self.schedulers[id]['con']._setOneway('put_results')
+		except KeyError, exp:
+                        print "Scheduler is not initilised", exp
+                        self.schedulers[id]['con'] = None
+                        return
+
 		print "Connexion OK"
 
 
@@ -168,11 +181,15 @@ class Satellite:
 			#a big array with only them
 			id_to_return = [elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun']
 			for id in id_to_return:
-				v = verifs[id]
+				try:
+					v = verifs[id]
 				#We got v without the sched_id prop, so we
 				#remove it before resent it.
-				del v.sched_id
-				ret.append(v)
+					del v.sched_id
+					ret.append(v)
+				
+				except AttributeError as exp:
+					print exp
 			#Now ret have all verifs, we can return them
 			if ret is not []:
 				try:
@@ -184,6 +201,10 @@ class Satellite:
 					return
 				except AttributeError as exp: #the scheduler must  not be initialized
 					print exp
+				except KeyError as exp: # sched is gone
+                                        print exp
+                                        self.pynag_con_init(sched_id)
+                                        return
 				except Exception,x:
 					print ''.join(Pyro.util.getPyroTraceback(x))
 					sys.exit(0)
@@ -281,6 +302,7 @@ class Satellite:
                                         do_checks = self.__class__.do_checks
                                         do_actions = self.__class__.do_actions
 					tmp_verifs = con.get_checks(do_checks=do_checks, do_actions=do_actions)
+					print "Ask actions to", sched_id, "got", len(tmp_verifs)
 					#print "We've got new verifs" , tmp_verifs
 					for v in tmp_verifs:
 						v.sched_id = sched_id
@@ -368,16 +390,20 @@ class Satellite:
 			self.watch_for_new_conf()
 			
 			try:
+				#print "Timeout", timeout
 				msg = self.m.get(timeout=timeout)
 				after = time.time()
 				timeout -= after-begin_loop
-				
+
                                 #Manager the msg like check return
 				self.manage_msg(msg)
             
                                 #We add the time pass on the workers'idle time
 				for id in self.workers:
 					self.workers[id].add_idletime(after-begin_loop)
+
+				if timeout < 0: #for go in timeout
+					raise Empty
 					
 			except Empty as exp: #Time out Part
 				after = time.time()

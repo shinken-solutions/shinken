@@ -182,8 +182,10 @@ class Merlindb_broker:
     #Like pid, daemon mode, last activity, etc
     #We aleady clean database, so insert
     def manage_program_status_brok(self, b):
+	instance_id = b.data['instance_id']
+	del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
         query = self.create_insert_query('program_status', b.data)
-        return [query]
+        return [del_query,query]
 
 
     #Initial service status is at start. We need an insert because we 

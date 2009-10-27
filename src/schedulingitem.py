@@ -212,7 +212,6 @@ class SchedulingItem(Item):
         else: #TODO : if no retry_interval?
             interval = self.retry_interval * 60
 
-        
         #The next_chk is pass so we need a new one
         #so we got a check_interval
         if self.next_chk == 0:
@@ -220,7 +219,7 @@ class SchedulingItem(Item):
             time_add = interval/2 + r
         else:
             time_add = interval
-        
+       
         if force_time is None:
             self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
         else:

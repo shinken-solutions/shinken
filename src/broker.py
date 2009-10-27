@@ -110,6 +110,10 @@ class Broker(Satellite):
 			print "Scheduler is not initilised", exp
 			self.schedulers[id]['con'] = None
 			return
+		except KeyError , exp:
+                        print "Scheduler is not initilised", exp
+                        self.schedulers[id]['con'] = None
+                        return
 		#The schedulers have been restart : it has a new run_id.
 		#So we clear all verifs, they are obsolete now.
 		if self.schedulers[id]['running_id'] != 0 and new_run_id != running_id:
