@@ -17,7 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from satellitelink import SatelliteLink
+from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool
 from item import Items
 
@@ -35,9 +35,12 @@ class ReactionnerLink(SatelliteLink):
                           }
     macros = {}
 
+    def get_name(self):
+        return self.name
 
 
-class ReactionnerLinks(Items):
+
+class ReactionnerLinks(SatelliteLinks):#(Items):
     name_property = "name"
     inner_class = ReactionnerLink
 

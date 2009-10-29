@@ -36,6 +36,7 @@ from service import Service, Services
 from command import Command, Commands
 from host import Host, Hosts
 from hostgroup import Hostgroup, Hostgroups
+from pool import Pool, Pools
 from contact import Contact, Contacts
 from contactgroup import Contactgroup, Contactgroups
 from servicegroup import Servicegroup, Servicegroups
@@ -271,7 +272,8 @@ class Config(Item):
                     'scheduler' : [],
                     'reactionner' : [],
                     'broker' : [],
-                    'poller' : []
+                    'poller' : [],
+                    'pool' : []
                     }
         tmp = []
         tmp_type = 'void'
@@ -419,6 +421,13 @@ class Config(Item):
             pollerlinks.append(pl)
         self.pollers = PollerLinks(pollerlinks)
 
+        pools = []
+        for pool in objects['pool']:
+            p = Pool(pool)
+            p.clean()
+            pools.append(p)
+        self.pools = Pools(pools)
+
 
     #We use linkify to make the config more efficient : elements will be
     #linked, like pointers. For example, a host will have it's service,
@@ -456,7 +465,17 @@ class Config(Item):
 
         print "Servicedependancy"
         self.servicedependencies.linkify(self.hosts, self.services, self.timeperiods)
-        
+
+        print "Pools"
+        self.pools.linkify()
+
+        print "Schedulers and satellites"
+        #Link all links with pools
+        self.schedulerlinks.linkify(self.pools)
+        self.brokers.linkify(self.pools)
+        self.reactionners.linkify(self.pools)
+        self.pollers.linkify(self.pools)
+
 
     def dump(self):
         #print 'Parameters:', self
@@ -501,6 +520,10 @@ class Config(Item):
         print "Servicedependancy"
         self.servicedependencies.explode()
 
+        #Now the architecture part
+        print "Pools"
+        self.pools.explode()
+        
 
     #Remove elements will the same name, so twins :)
     def remove_twins(self):

@@ -18,7 +18,7 @@
 
 
 #Scheduler is like a satellite for dispatcher
-from satellitelink import SatelliteLink
+from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool
 from item import Items
 
@@ -37,6 +37,10 @@ class SchedulerLink(SatelliteLink):
     macros = {}
 
 
+    def get_name(self):
+        return self.name
+
+
     def run_external_command(self, command):
         if self.con == None:
             self.create_connexion()
@@ -46,7 +50,7 @@ class SchedulerLink(SatelliteLink):
 
 
 
-class SchedulerLinks(Items):
+class SchedulerLinks(SatelliteLinks):#(Items):
     name_property = "name"
     inner_class = SchedulerLink
 

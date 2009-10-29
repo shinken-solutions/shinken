@@ -20,7 +20,7 @@
 #This class is the link between Arbiter and Poller. With It, arbiter
 #can see if a poller is alive, and can send it new configuration
 
-from satellitelink import SatelliteLink
+from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool
 from item import Items
 
@@ -38,9 +38,12 @@ class PollerLink(SatelliteLink):
                           }
     macros = {}
 
+    def get_name(self):
+        return self.name
 
 
-class PollerLinks(Items):
+
+class PollerLinks(SatelliteLinks):#(Items):
     name_property = "name"
     inner_class = PollerLink
 

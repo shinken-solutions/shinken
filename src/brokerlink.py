@@ -17,7 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from satellitelink import SatelliteLink
+from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool
 from item import Items
 
@@ -35,8 +35,11 @@ class BrokerLink(SatelliteLink):
                           }
     macros = {}
 
+    def get_name(self):
+        return self.name
 
 
-class BrokerLinks(Items):
+
+class BrokerLinks(SatelliteLinks):#(Items):
     name_property = "name"
     inner_class = BrokerLink

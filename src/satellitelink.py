@@ -121,3 +121,20 @@ class SatelliteLink(Item):
             #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
 
+
+
+class SatelliteLinks(Items):
+    #name_property = "name"
+    #inner_class = SchedulerLink
+
+    #We must have a pool property, so we find our pool
+    def linkify(self, pools):
+        self.linkify_s_by_p(pools)
+
+        
+    def linkify_s_by_p(self, pools):
+        for s in self:
+            p_name = s.pool.strip()
+            p = pools.find_by_name(p_name)
+            s.pool = p
+            print "Me", s.get_name(), "is linked with pool", s.pool.get_name()
