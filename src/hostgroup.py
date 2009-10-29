@@ -107,7 +107,7 @@ class Hostgroups(Itemgroups):
 
     def linkify(self, hosts=None):
         self.linkify_hg_by_hst(hosts)
-
+        self.linkify_hg_by_pools()
     
     #We just search for each hostgroup the id of the hosts 
     #and replace the name by the id
@@ -120,6 +120,26 @@ class Hostgroups(Itemgroups):
                 new_mbrs.append(hosts.find_by_name(mbr))
             #We find the id, we remplace the names
             hg.replace_members(new_mbrs)
+
+
+    #More than an explode function, but we need to already
+    #have members so... Will be really linkify just after
+    #And we explode pool in ours members, but do not overide
+    #a host pool value if it's already set    
+    def linkify_hg_by_pools(self):
+        #Now we explode the pool value if we've got one
+        #The group pool must not overide a host one (warning?)
+        for hg in self:
+            if hasattr(hg, 'pool'):
+                for h in hg:
+                    if h.pool == None:#default value not hasattr(h, 'pool'):
+                        print "Apply a pool", hg.pool, "to host", h.get_name()
+                        h.pool = hg.pool
+                    else:
+                        if h.pool.strip() != hg.pool.strip():
+                            print "Warning : host", h.get_name(), "is not in the same pool than it's hostgroup", hg.get_name()
+
+
 
 
     #Add a host string to a hostgroup member
@@ -152,3 +172,5 @@ class Hostgroups(Itemgroups):
         for tmp_hg in self.itemgroups.values():
             del tmp_hg.rec_tag
             del tmp_hg.already_explode
+
+        

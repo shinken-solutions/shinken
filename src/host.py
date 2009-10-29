@@ -89,7 +89,9 @@ class Host(SchedulingItem):
                 'statusmap_image': {'required': False, 'default':''},
                 '2d_coords': {'required': False, 'default':''},
                 '3d_coords': {'required': False, 'default':''},
-                'failure_prediction_enabled': {'required' : False, 'default' : '0', 'pythonize': to_bool}
+                'failure_prediction_enabled': {'required' : False, 'default' : '0', 'pythonize': to_bool},
+                #New to shinken
+                'pool' : {'required': False, 'default':None}
                 }
 
     #properties set only for running purpose
@@ -362,11 +364,12 @@ class Hosts(Items):
     #hosts -> hosts (parents, etc)
     #hosts -> commands (check_command)
     #hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, pools=None):
         self.linkify_h_by_tp(timeperiods)
         self.linkify_h_by_h()
         self.linkify_h_by_cmd(commands)
         self.linkify_h_by_c(contacts)
+        self.linkify_h_by_pools(pools)
 
     #Simplify notif_period and check period by timeperiod id
     def linkify_h_by_tp(self, timeperiods):
@@ -420,8 +423,19 @@ class Hosts(Items):
                     new_contacts.append(c)
                 
                 h.contacts = new_contacts
+    
+    
+    def linkify_h_by_pools(self, pools):
+        for h in self:
+            #print h.get_name(), h.pool
+            if h.pool != None:
+                name = h.pool
+                p = pools.find_by_name(h.pool.strip())
+                h.pool = p
+                if p != None:
+                    print "Me", h.get_name(), "have a pool", p
 
-
+    
     #We look for hostgroups property in hosts and
     def explode(self, hostgroups, contactgroups):
         #Hostgroups property need to be fullfill for got the informations

@@ -441,7 +441,7 @@ class Config(Item):
 
         print "Hosts"
         #link hosts with timeperiodsand commands
-        self.hosts.linkify(self.timeperiods, self.commands, self.contacts)
+        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.pools)
 
         print "Service groups"
         #link servicegroups members with services
