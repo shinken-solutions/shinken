@@ -59,16 +59,34 @@ class Hostgroup(Itemgroup):
 
 
     #We fillfull properties with template ones if need
+    #Because hostgroup we call may not have it's members
+    #we call get_hosts_by_explosion on it
     def get_hosts_by_explosion(self, hostgroups):
+        #First we tag the hg so it will not be explode
+        #if a son of it already call it
+        self.already_explode = True
+        
+        #Now the recursiv part
+        #rec_tag is set to False avery HG we explode
+        #so if True here, it must be a loop in HG
+        #calls... not GOOD!
+        if self.rec_tag:
+            print "Error : we've got a loop in hostgroup definition", self.get_name()
+            if self.has('members'):
+                return self.members
+            else:
+                return ''
+        #Ok, not a loop, we tag it and continue
+        self.rec_tag = True
+
         hg_mbrs = self.get_hostgroup_members()
         for hg_mbr in hg_mbrs:
-            hg = hostgroups.find_by_name(hg_mbr)
+            hg = hostgroups.find_by_name(hg_mbr.strip())
             if hg is not None:
                 value = hg.get_hosts_by_explosion(hostgroups)
                 if value is not None:
                     self.add_string_member(value)
-            else:
-                pass
+
         if self.has('members'):
             return self.members
         else:
@@ -118,7 +136,19 @@ class Hostgroups(Itemgroups):
 
     #Use to fill members with hostgroup_members
     def explode(self):
+        #We do not want a same hg to be explode again and again
+        #so we tag it
+        for tmp_hg in self.itemgroups.values():
+            tmp_hg.already_explode = False
         for hg in self.itemgroups.values():
-            if hg.has('hostgroup_members'):
+            if hg.has('hostgroup_members') and not hg.already_explode:
+                #get_hosts_by_explosion is a recursive
+                #function, so we must tag hg so we do not loop
+                for tmp_hg in self.itemgroups.values():
+                    tmp_hg.rec_tag = False
                 hg.get_hosts_by_explosion(self)
 
+        #We clean the tags
+        for tmp_hg in self.itemgroups.values():
+            del tmp_hg.rec_tag
+            del tmp_hg.already_explode

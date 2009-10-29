@@ -42,6 +42,10 @@ class Contactgroup(Itemgroup):
     def get_contacts(self):
         return self.members
 
+
+    def get_name(self):
+        return self.contactgroup_name
+
     
     def get_contactgroup_members(self):
         if self.has('contactgroup_members'):
@@ -51,10 +55,29 @@ class Contactgroup(Itemgroup):
 
 
     #We fillfull properties with template ones if need
+    #Because hostgroup we call may not have it's members
+    #we call get_hosts_by_explosion on it
     def get_contacts_by_explosion(self, contactgroups):
+        #First we tag the hg so it will not be explode
+        #if a son of it already call it
+        self.already_explode = True
+        
+        #Now the recursiv part
+        #rec_tag is set to False avery CG we explode
+        #so if True here, it must be a loop in HG
+        #calls... not GOOD!
+        if self.rec_tag:
+            print "Error : we've got a loop in contactgroup definition", self.get_name()
+            if self.has('members'):
+                return self.members
+            else:
+                return ''
+        #Ok, not a loop, we tag it and continue
+        self.rec_tag = True
+
         cg_mbrs = self.get_contactgroup_members()
         for cg_mbr in cg_mbrs:
-            cg = contactgroups.find_by_name(cg_mbr)
+            cg = contactgroups.find_by_name(cg_mbr.strip())
             if cg is not None:
                 value = cg.get_contacts_by_explosion(contactgroups)
                 if value is not None:
@@ -113,7 +136,20 @@ class Contactgroups(Itemgroups):
 
     #Use to fill members with contactgroup_members
     def explode(self):
-        for id in self.itemgroups:
-            cg = self.itemgroups[id]
-            if cg.has('contactgroup_members'):
+        #We do not want a same hg to be explode again and again
+        #so we tag it
+        for tmp_cg in self.itemgroups.values():
+            tmp_cg.already_explode = False
+
+        for cg in self.itemgroups.values():
+            if cg.has('contactgroup_members') and not cg.already_explode:
+                #get_contacts_by_explosion is a recursive
+                #function, so we must tag hg so we do not loop
+                for tmp_cg in self.itemgroups.values():
+                    tmp_cg.rec_tag = False
                 cg.get_contacts_by_explosion(self)
+                
+        #We clean the tags
+        for tmp_sg in self.itemgroups.values():
+            del tmp_sg.rec_tag
+            del tmp_sg.already_explode
