@@ -131,11 +131,14 @@ class Pools(Itemgroups):
     def linkify(self):
         self.linkify_p_by_p()
         #prepare list of satallites:
+        #And confs
         for p in self.itemgroups.values():
             p.pollers = []
             p.schedulers = []
             p.reactionners = []
             p.brokers = []
+            p.packs = []
+            p.confs = {}
 
     
     #We just search for each hostgroup the id of the hosts 

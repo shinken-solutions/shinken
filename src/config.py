@@ -674,22 +674,49 @@ class Config(Item):
                 if connexion != h:
                     del access_list[connexion]
             tmp_packs.append(mini_pack)
-        
-        #create roundrobin iterator for id of cfg
-        rr = itertools.cycle(list(xrange(0, nb_packs)))
 
-        packs = {}
-        for i in xrange(0, nb_packs):
-            packs[i] = []
-        
-        #Now we explode the numerous packs into nb_packs reals packs:
-        #we 'load balance' thems in a roundrobin way
+
+        #Now we look if all elements of all packs have the
+        #same pool. If not, not good!
         for pack in tmp_packs:
-            i = rr.next()
+            tmp_pools = set()
             for elt in pack:
-                packs[i].append(elt)
+                tmp_pools.add(elt.pool)
+            if len(tmp_pools) > 1:
+                print "Error : the pool configuration of yours hosts if not good"
+                print tmp_pools
+            else:
+                p = tmp_pools.pop()
+                if p is not None:
+                    p.packs.append(pack)
+                else:
+                    #Put in default pool
+                    #TODO : default pool
+                    pass
 
-        return packs
+        #The load balancing is for a loop, so all
+        #hosts of a pool (in a pack) will be dispatch
+        #in the schedulers of this pool
+        for p in self.pools:
+            packs = {}
+            #create roundrobin iterator for id of cfg
+            #So dispatching is loadlanced in a pool
+            nb_schedulers = len([s for s in p.schedulers if not s.spare])
+            rr = itertools.cycle(list(xrange(0, 0 + nb_schedulers)))
+            
+            for i in xrange(0, nb_schedulers):
+                packs[i] = []
+        
+            #Now we explode the numerous packs into nb_packs reals packs:
+            #we 'load balance' thems in a roundrobin way
+            for pack in tmp_packs:
+                i = rr.next()
+                for elt in pack:
+                    packs[i].append(elt)
+            #Now in packs we have the number of packs [h1, h2, etc]
+            #equal to the number of schedulers.
+            p.packs = packs
+
 
 
     #Use the self.conf and make nb_parts new confs.
@@ -699,8 +726,7 @@ class Config(Item):
     def cut_into_parts(self):
         #print "Scheduler configurated :", self.schedulerlinks
         #I do not care about alive or not. User must have set a spare if need it
-        nb_parts = len([s for s in self.schedulerlinks if not s.spare])# and s.is_alive()])
-        #print "Cutting into", nb_parts, "parts"
+        nb_parts = len([s for s in self.schedulerlinks if not s.spare])
 
         if nb_parts == 0:
             nb_parts = 1
@@ -741,18 +767,24 @@ class Config(Item):
                                               #accepted the conf
 
         print "Creating packs"
-
-        #just create packs. There can be numerous ones
+        
+        #Just create packs. There can be numerous ones
         #In pack we've got hosts and service
-        packs = self.create_packs(nb_parts)
-
-        for i in packs:
-            pack = packs[i]
-            for h in pack:
-                self.confs[i].hosts.append(h)
-                for s in h.services:
-                    self.confs[i].services.append(s)
-
+        #packs are in the pools
+        self.create_packs(nb_parts)
+        
+        offset = 0
+        for p in self.pools:
+            for i in p.packs:
+                pack = p.packs[i]
+                for h in pack:
+                    self.confs[i+offset].hosts.append(h)
+                    for s in h.services:
+                        self.confs[i+offset].services.append(s)
+                #Now the conf can be link in the pool
+                p.confs[i+offset] = self.confs[i+offset]
+            offset += len(p.packs)
+        
         #We've nearly have hosts and services. Now we want REALS hosts (Class)
         #And we want groups too
         print "Finishing packs"
@@ -796,7 +828,7 @@ class Config(Item):
                     self.confs[i].other_elements[h.get_name()] = i
 
         #We tag conf with isntance_id
-	#TODO : fix ninja so it manage not just instance_id == 0 ....
+	#TODO : fix ninja/merlin so it manage not just instance_id == 0 ....
         for i in self.confs:
             self.confs[i].instance_id = 0#i
 

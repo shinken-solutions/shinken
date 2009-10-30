@@ -116,7 +116,6 @@ class Arbiter:
         self.dispatcher.check_alive()
         self.dispatcher.check_dispatch()
         self.dispatcher.dispatch()
-
         
 	#Now create the external commander
 	e = ExternalCommand(self.conf, 'dispatcher')
@@ -126,7 +125,8 @@ class Arbiter:
 	self.load_external_command(e)
 	
 	print "Configuration Loaded"
-
+        
+        #Main loop
 	self.run()
 	
 
