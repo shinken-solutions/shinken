@@ -104,6 +104,10 @@ class Arbiter:
         #print hp.heap()
         #print hp.heapu()
 
+        print "Dump pools"
+        for p in self.conf.pools:
+            print p.get_name(), p.__dict__
+
         print "****************** Cut into parts ******************"
         self.confs = self.conf.cut_into_parts()
 

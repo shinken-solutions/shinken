@@ -42,8 +42,11 @@ class PollerLink(SatelliteLink):
         return self.name
 
 
+    def register_to_my_pool(self):
+        self.pool.pollers.append(self)
 
-class PollerLinks(SatelliteLinks):#(Items):
+
+class PollerLinks(SatelliteLinks):
     name_property = "name"
     inner_class = PollerLink
 

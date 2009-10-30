@@ -39,6 +39,10 @@ class ReactionnerLink(SatelliteLink):
         return self.name
 
 
+    def register_to_my_pool(self):
+        self.pool.reactionners.append(self)
+
+
 
 class ReactionnerLinks(SatelliteLinks):#(Items):
     name_property = "name"

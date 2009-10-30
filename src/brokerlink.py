@@ -39,6 +39,9 @@ class BrokerLink(SatelliteLink):
         return self.name
 
 
+    def register_to_my_pool(self):
+        self.pool.brokers.append(self)
+
 
 class BrokerLinks(SatelliteLinks):#(Items):
     name_property = "name"

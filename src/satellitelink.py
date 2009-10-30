@@ -138,3 +138,5 @@ class SatelliteLinks(Items):
             p = pools.find_by_name(p_name)
             s.pool = p
             print "Me", s.get_name(), "is linked with pool", s.pool.get_name()
+            if p is not None:
+                s.register_to_my_pool()

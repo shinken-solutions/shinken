@@ -98,6 +98,24 @@ class Pool(Itemgroup):
             return ''
 
 
+    def get_schedulers(self):
+        r = []
+        for s in self.schedulers:
+            r.append(s)
+        return r
+
+
+    def get_all_schedulers(self):
+        r = []
+        for s in self.schedulers:
+            r.append(s)
+        for p in self.pools:
+            tmps = p.get_all_schedulers()
+            for s in tmps:
+                r.append(s)
+        return r
+
+
 
 class Pools(Itemgroups):
     name_property = "pool_name" # is used for finding hostgroups
@@ -112,6 +130,12 @@ class Pools(Itemgroups):
 
     def linkify(self):
         self.linkify_p_by_p()
+        #prepare list of satallites:
+        for p in self.itemgroups.values():
+            p.pollers = []
+            p.schedulers = []
+            p.reactionners = []
+            p.brokers = []
 
     
     #We just search for each hostgroup the id of the hosts 

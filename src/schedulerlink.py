@@ -49,6 +49,9 @@ class SchedulerLink(SatelliteLink):
         self.con.run_external_command(command)
 
 
+    def register_to_my_pool(self):
+        self.pool.schedulers.append(self)
+
 
 class SchedulerLinks(SatelliteLinks):#(Items):
     name_property = "name"
