@@ -675,29 +675,38 @@ class Config(Item):
                     del access_list[connexion]
             tmp_packs.append(mini_pack)
 
+        print "We've got", len(tmp_packs), "packs"
 
         #Now we look if all elements of all packs have the
         #same pool. If not, not good!
         for pack in tmp_packs:
             tmp_pools = set()
             for elt in pack:
-                tmp_pools.add(elt.pool)
+                if elt.pool!= None:
+                    tmp_pools.add(elt.pool)
             if len(tmp_pools) > 1:
                 print "Error : the pool configuration of yours hosts if not good"
-                print tmp_pools
-            else:
-                p = tmp_pools.pop()
-                if p is not None:
-                    p.packs.append(pack)
-                else:
-                    #Put in default pool
-                    #TODO : default pool
-                    pass
+                for h in pack:
+                    if h.pool == None:
+                        print h.get_name(), None
+                    else:
+                        print h.get_name(), h.pool.get_name()
+            if len(tmp_pools) == 1: # Ok, good
+                p = tmp_pools.pop() #There is just one element
+                print "Add to pool", p
+                p.packs.append(pack)
+            if len(tmp_pools) == 0: #Hum.. no pool value? So default Pool
+                #TODO : default pool is not hardcoded All !!
+                for tmp_p in self.pools:
+                    if tmp_p.get_name() == "All":
+                        print "I prefer add to default pool", tmp_p.get_name()
+                        tmp_p.packs.append(pack)
 
         #The load balancing is for a loop, so all
         #hosts of a pool (in a pack) will be dispatch
         #in the schedulers of this pool
         for p in self.pools:
+            print "Load balancing pool", p.get_name()
             packs = {}
             #create roundrobin iterator for id of cfg
             #So dispatching is loadlanced in a pool
@@ -709,9 +718,10 @@ class Config(Item):
         
             #Now we explode the numerous packs into nb_packs reals packs:
             #we 'load balance' thems in a roundrobin way
-            for pack in tmp_packs:
+            for pack in p.packs:#tmp_packs:
                 i = rr.next()
                 for elt in pack:
+                    print "Add element", elt.get_name()
                     packs[i].append(elt)
             #Now in packs we have the number of packs [h1, h2, etc]
             #equal to the number of schedulers.
