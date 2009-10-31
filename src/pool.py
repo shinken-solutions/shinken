@@ -19,7 +19,7 @@
 
 from itemgroup import Itemgroup, Itemgroups
 from brok import Brok
-
+from util import to_bool
 
 #It change from hostgroup Class because there is no members
 #propertie, just the pool_members that we rewrite on it.
@@ -35,7 +35,8 @@ class Pool(Itemgroup):
                 #'notes': {'required': False, 'default':'', 'status_broker_name' : None},
                 #'notes_url': {'required': False, 'default':'', 'status_broker_name' : None},
                 #'action_url': {'required': False, 'default':'', 'status_broker_name' : None},
-                'pool_members' : {'required': False}#No status_broker_name because it put hosts, not host_name
+                'pool_members' : {'required': False},#No status_broker_name because it put hosts, not host_name
+                'default' : {'required' : False, 'default' : 0, 'pythonize': to_bool}
                 }
 
     macros = {
@@ -61,6 +62,24 @@ class Pool(Itemgroup):
             return self.pool_members.split(',')
         else:
             return []
+
+
+    #Use to make pyton properties
+    #TODO : change itemgroup function pythonize?
+    def pythonize(self):
+        cls = self.__class__
+        for prop in cls.properties:
+            try:
+                tab = cls.properties[prop]
+                if 'pythonize' in tab:
+                    f = tab['pythonize']
+                    old_val = getattr(self, prop)
+                    new_val = f(old_val)
+                    #print "Changing ", old_val, "by", new_val
+                    setattr(self, prop, new_val)
+            except AttributeError as exp:
+                #print self.get_name(), ' : ', exp
+                pass # Will be catch at the is_correct moment
 
 
     #We fillfull properties with template ones if need

@@ -603,6 +603,7 @@ class Config(Item):
         self.services.pythonize()
         self.servicedependencies.pythonize()
         self.schedulerlinks.pythonize()
+        self.pools.pythonize()
 
 
     #Explode parameters like cached_service_check_horizon in the
@@ -677,6 +678,13 @@ class Config(Item):
 
         print "We've got", len(tmp_packs), "packs"
 
+        #Now We find the default pool (must be unique or
+        #BAD THINGS MAY HAPPEN
+        default_pool = None
+        for p in self.pools:
+            if hasattr(p, 'default') and p.default:
+                default_pool = p
+
         #Now we look if all elements of all packs have the
         #same pool. If not, not good!
         for pack in tmp_packs:
@@ -696,11 +704,11 @@ class Config(Item):
                 print "Add to pool", p
                 p.packs.append(pack)
             if len(tmp_pools) == 0: #Hum.. no pool value? So default Pool
-                #TODO : default pool is not hardcoded All !!
-                for tmp_p in self.pools:
-                    if tmp_p.get_name() == "All":
-                        print "I prefer add to default pool", tmp_p.get_name()
-                        tmp_p.packs.append(pack)
+                if default_pool != None:
+                    print "I prefer add to default pool", default_pool.get_name()
+                    default_pool.packs.append(pack)
+                else:
+                    print "Error : Hosts do not have a pool and you do not defined a default pool!"
 
         #The load balancing is for a loop, so all
         #hosts of a pool (in a pack) will be dispatch
@@ -838,7 +846,7 @@ class Config(Item):
                     self.confs[i].other_elements[h.get_name()] = i
 
         #We tag conf with isntance_id
-	#TODO : fix ninja/merlin so it manage not just instance_id == 0 ....
+	#TODO : fix ninja/merlin so it manage more than instance_id == 0 ....
         for i in self.confs:
             self.confs[i].instance_id = 0#i
 
