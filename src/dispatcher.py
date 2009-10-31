@@ -36,6 +36,7 @@ class Dispatcher:
     def __init__(self, conf):
         #Pointer to the whole conf
         self.conf = conf
+        self.pools = conf.pools
         #Direct pointer to importants elements for us
         self.schedulerlinks = self.conf.schedulerlinks
         self.reactionners = self.conf.reactionners
@@ -131,44 +132,44 @@ class Dispatcher:
     def dispatch(self):
         #Is no need to dispatch, do not dispatch :)
         if not self.dispatch_ok:
-            conf_to_dispatch = [cfg for cfg in self.conf.confs.values() if cfg.is_assigned==False]
-            nb_conf = len(conf_to_dispatch)
-            print "Total config:", len(self.conf.confs)
-            print "Dispatching ", nb_conf, "configurations"            
-            #get scheds, alive and no spare first
-            #print 'T', self.schedulerlinks.items.values().sort()
-            scheds = self.schedulerlinks.items.values()
-            scheds.sort(alive_then_spare_then_deads)
-            scheds.reverse() #pop is last, I need first
-            every_one_need_conf = False
-            for conf in conf_to_dispatch:
-                print "Dispatching one configuration"
+            for p in self.pools:
+                print "Dispatching Pool", p.get_name()
+                conf_to_dispatch = [cfg for cfg in p.confs.values() if cfg.is_assigned==False]
+                nb_conf = len(conf_to_dispatch)
+                print '[',p.get_name(),']','Dispatching ', nb_conf, '/', len(p.confs), 'cfgs'
+                #get scheds, alive and no spare first
+                scheds = p.schedulers
+                scheds.sort(alive_then_spare_then_deads)
+                scheds.reverse() #pop is last, I need first
+                every_one_need_conf = False
+                for conf in conf_to_dispatch:
+                    print '[',p.get_name(),']',"Dispatching one configuration"
                 #we need to loop until the conf is assigned
                 #or when there are no more schedulers available
-                need_loop = True
-                while need_loop:
-                    try:
-                        sched = scheds.pop()
+                    need_loop = True
+                    while need_loop:
+                        try:
+                            sched = scheds.pop()
                         #if not sched.is_active:
-                        print "Trying to send conf to sched", sched.name
-                        if sched.need_conf:
-                            every_one_need_conf = True
-                            print "Dispatching conf", sched.id
-                            is_sent = sched.put_conf(conf)
-                            if is_sent:
-                                print "Dispatch OK of for conf in sched", sched.name
-                                sched.conf = conf
-                                sched.need_conf = False
-                                sched.is_active = True
-                                conf.is_assigned = True
-                                conf.assigned_to = sched
+                            print '[',p.get_name(),']',"Trying to send conf to sched", sched.name
+                            if sched.need_conf:
+                                every_one_need_conf = True
+                                print '[',p.get_name(),']',"Dispatching conf", sched.id
+                                is_sent = sched.put_conf(conf)
+                                if is_sent:
+                                    print '[',p.get_name(),']',"Dispatch OK of for conf in sched", sched.name
+                                    sched.conf = conf
+                                    sched.need_conf = False
+                                    sched.is_active = True
+                                    conf.is_assigned = True
+                                    conf.assigned_to = sched
                                 #Ok, the conf is dispatch, no more loop for this
                                 #configuration
-                                need_loop = False
-                            else:
-                                print "Dispatch fault for sched", sched.name
-                    except IndexError: #No more schedulers.. not good, no loop
-                        need_loop = False
+                                    need_loop = False
+                                else:
+                                    print '[',p.get_name(),']', "Dispatch fault for sched", sched.name
+                        except IndexError: #No more schedulers.. not good, no loop
+                            need_loop = False
 
             #We pop conf to dispatch, so it must be no more conf...
             conf_to_dispatch = [cfg for cfg in self.conf.confs.values() if cfg.is_assigned==False]
