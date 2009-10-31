@@ -36,6 +36,7 @@ class Pool(Itemgroup):
                 #'notes_url': {'required': False, 'default':'', 'status_broker_name' : None},
                 #'action_url': {'required': False, 'default':'', 'status_broker_name' : None},
                 'pool_members' : {'required': False},#No status_broker_name because it put hosts, not host_name
+                'higher_pools' : {'required': False},
                 'default' : {'required' : False, 'default' : 0, 'pythonize': to_bool}
                 }
 
@@ -149,8 +150,7 @@ class Pools(Itemgroups):
 
     def linkify(self):
         self.linkify_p_by_p()
-        #prepare list of satallites:
-        #And confs
+        #prepare list of satallites and confs
         for p in self.itemgroups.values():
             p.pollers = []
             p.schedulers = []
@@ -160,8 +160,8 @@ class Pools(Itemgroups):
             p.confs = {}
 
     
-    #We just search for each hostgroup the id of the hosts 
-    #and replace the name by the id
+    #We just search for each pool the others pools
+    #and replace the name by the pool
     def linkify_p_by_p(self):
         for p in self.itemgroups.values():
             mbrs = p.get_pool_members()
@@ -177,6 +177,14 @@ class Pools(Itemgroups):
             for m in p.pool_members:
                 print "Member:", m.get_name()
 
+        #Now put higher pool in sub pools
+        #So after they can
+        for p in self.itemgroups.values():
+            p.higher_pools = []
+            
+        for p in self.itemgroups.values():
+            for sub_p in p.pool_members:
+                sub_p.higher_pools.append(p)
 
 #    #Add a host string to a hostgroup member
 #    #if the host group do not exist, create it

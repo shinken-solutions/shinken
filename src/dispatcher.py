@@ -79,7 +79,9 @@ class Dispatcher:
         for elt in self.elements:
             elt.alive = elt.is_alive()
             print "Element", elt.name, " alive:", elt.alive, ", active:", elt.is_active
-            if not elt.alive:
+            #Not alive need new need_conf
+            #and spare too if they do not have already a conf
+            if not elt.alive or elt.conf == None:
                 elt.need_conf = True
 
 
@@ -126,7 +128,7 @@ class Dispatcher:
                         #The nextr loop wil resent it
                     else:
                         print "No conf"
-
+    
     
     #Manage the dispatch
     def dispatch(self):
@@ -138,19 +140,35 @@ class Dispatcher:
                 nb_conf = len(conf_to_dispatch)
                 print '[',p.get_name(),']','Dispatching ', nb_conf, '/', len(p.confs), 'cfgs'
                 #get scheds, alive and no spare first
-                scheds = p.schedulers
+                scheds =  []
+                for s in p.schedulers:
+                    scheds.append(s)
+                #now the spare scheds of higher pools
+                #they are after the sched of pool, so
+                #they will be used after the spare of
+                #the pool
+                for higher_p in p.higher_pools:
+                    for s in higher_p.schedulers:
+                        if s.spare:
+                            scheds.append(s)
+                #Now we sort the scheds so we take master, then spare
+                #the dead, but we do not care about thems
                 scheds.sort(alive_then_spare_then_deads)
                 scheds.reverse() #pop is last, I need first
+                #DBG: dump
+                for s in scheds:
+                    print '[',p.get_name(),']',"Sched:",s.get_name()
+
+                #Now we do the job
                 every_one_need_conf = False
                 for conf in conf_to_dispatch:
                     print '[',p.get_name(),']',"Dispatching one configuration"
-                #we need to loop until the conf is assigned
-                #or when there are no more schedulers available
+                    #we need to loop until the conf is assigned
+                    #or when there are no more schedulers available
                     need_loop = True
                     while need_loop:
                         try:
                             sched = scheds.pop()
-                        #if not sched.is_active:
                             print '[',p.get_name(),']',"Trying to send conf to sched", sched.name
                             if sched.need_conf:
                                 every_one_need_conf = True
@@ -163,11 +181,13 @@ class Dispatcher:
                                     sched.is_active = True
                                     conf.is_assigned = True
                                     conf.assigned_to = sched
-                                #Ok, the conf is dispatch, no more loop for this
-                                #configuration
+                                    #Ok, the conf is dispatch, no more loop for this
+                                    #configuration
                                     need_loop = False
                                 else:
                                     print '[',p.get_name(),']', "Dispatch fault for sched", sched.name
+                            else:
+                                print '[',p.get_name(),']',sched.name, "do not need conf, sorry"
                         except IndexError: #No more schedulers.. not good, no loop
                             need_loop = False
 
@@ -186,7 +206,7 @@ class Dispatcher:
                 for sched in self.schedulerlinks.items.values():
                     if sched.conf == None:
                         sched.need_conf = False
-                
+            
             #We put on the satellites only if every one need it 
             #(a new scheduler)
             #Of if a specific satellite needs it
@@ -202,7 +222,7 @@ class Dispatcher:
             for reactionner in self.conf.reactionners.items.values():
                 if reactionner.alive:
                     if every_one_need_conf or reactionner.need_conf:
-                        print "Putting a REACTIONNER CONF" * 10
+                        print "Putting a Reactionner conf"
                         is_sent = reactionner.put_conf(tmp_conf)
                         if is_sent:
                             reactionner.is_active = True
@@ -217,18 +237,10 @@ class Dispatcher:
                             broker.is_active = True
                             broker.need_conf = False
 
-            #TODO : clean and link
-            #Now Poller
-            tmp_conf = {}
-            tmp_conf['schedulers'] = {}
-            i = 0
-	    for sched in self.conf.schedulerlinks:
-                tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None }
-                i += 1
-
             for poller in self.conf.pollers.items.values():
                 if poller.alive:
                     if every_one_need_conf or poller.need_conf:
+                        print "Putting a Poller conf"
                         is_sent = poller.put_conf(tmp_conf)
                         if is_sent:
                             poller.is_active = True
