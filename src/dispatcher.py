@@ -38,7 +38,7 @@ class Dispatcher:
         self.conf = conf
         self.realms = conf.realms
         #Direct pointer to importants elements for us
-        self.schedulerlinks = self.conf.schedulerlinks
+        self.schedulers = self.conf.schedulerlinks
         self.reactionners = self.conf.reactionners
         self.brokers = self.conf.brokers
         self.pollers = self.conf.pollers
@@ -49,7 +49,7 @@ class Dispatcher:
             cfg.is_assigned = False
             cfg.assigned_to = None
             #self.elements.append(cfg)
-        for sched in self.schedulerlinks:
+        for sched in self.schedulers:
             sched.is_active = False
             sched.alive = False
             sched.conf = None
@@ -134,21 +134,21 @@ class Dispatcher:
     def dispatch(self):
         #Is no need to dispatch, do not dispatch :)
         if not self.dispatch_ok:
-            for p in self.realms:
-                print "Dispatching Realm", p.get_name()
-                conf_to_dispatch = [cfg for cfg in p.confs.values() if cfg.is_assigned==False]
+            for r in self.realms:
+                print "Dispatching Realm", r.get_name()
+                conf_to_dispatch = [cfg for cfg in r.confs.values() if cfg.is_assigned==False]
                 nb_conf = len(conf_to_dispatch)
-                print '[',p.get_name(),']','Dispatching ', nb_conf, '/', len(p.confs), 'cfgs'
+                print '[',r.get_name(),']','Dispatching ', nb_conf, '/', len(r.confs), 'cfgs'
                 #get scheds, alive and no spare first
                 scheds =  []
-                for s in p.schedulers:
+                for s in r.schedulers:
                     scheds.append(s)
                 #now the spare scheds of higher realms
                 #they are after the sched of realm, so
                 #they will be used after the spare of
                 #the realm
-                for higher_p in p.higher_realms:
-                    for s in higher_p.schedulers:
+                for higher_r in r.higher_realms:
+                    for s in higher_r.schedulers:
                         if s.spare:
                             scheds.append(s)
                 #Now we sort the scheds so we take master, then spare
@@ -157,25 +157,25 @@ class Dispatcher:
                 scheds.reverse() #pop is last, I need first
                 #DBG: dump
                 for s in scheds:
-                    print '[',p.get_name(),']',"Sched:",s.get_name()
+                    print '[',r.get_name(),']',"Sched:",s.get_name()
 
                 #Now we do the job
                 every_one_need_conf = False
                 for conf in conf_to_dispatch:
-                    print '[',p.get_name(),']',"Dispatching one configuration"
+                    print '[',r.get_name(),']',"Dispatching one configuration"
                     #we need to loop until the conf is assigned
                     #or when there are no more schedulers available
                     need_loop = True
                     while need_loop:
                         try:
                             sched = scheds.pop()
-                            print '[',p.get_name(),']',"Trying to send conf to sched", sched.name
+                            print '[',r.get_name(),']',"Trying to send conf to sched", sched.name
                             if sched.need_conf:
                                 every_one_need_conf = True
-                                print '[',p.get_name(),']',"Dispatching conf", sched.id
+                                print '[',r.get_name(),']',"Dispatching conf", sched.id
                                 is_sent = sched.put_conf(conf)
                                 if is_sent:
-                                    print '[',p.get_name(),']',"Dispatch OK of for conf in sched", sched.name
+                                    print '[',r.get_name(),']',"Dispatch OK of for conf in sched", sched.name
                                     sched.conf = conf
                                     sched.need_conf = False
                                     sched.is_active = True
@@ -185,9 +185,9 @@ class Dispatcher:
                                     #configuration
                                     need_loop = False
                                 else:
-                                    print '[',p.get_name(),']', "Dispatch fault for sched", sched.name
+                                    print '[',r.get_name(),']', "Dispatch fault for sched", sched.name
                             else:
-                                print '[',p.get_name(),']',sched.name, "do not need conf, sorry"
+                                print '[',r.get_name(),']',sched.name, "do not need conf, sorry"
                         except IndexError: #No more schedulers.. not good, no loop
                             need_loop = False
 
@@ -203,7 +203,7 @@ class Dispatcher:
             #Sched without conf in a dispatch ok are set ti no need_conf
             #so they do not raise dispatch where no use
             if self.dispatch_ok:
-                for sched in self.schedulerlinks.items.values():
+                for sched in self.schedulers.items.values():
                     if sched.conf == None:
                         sched.need_conf = False
             
@@ -215,7 +215,7 @@ class Dispatcher:
             tmp_conf = {}
             tmp_conf['schedulers'] = {}
             i = 0
-            for sched in self.conf.schedulerlinks:
+            for sched in self.schedulers:
                 tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
                 i += 1
             
