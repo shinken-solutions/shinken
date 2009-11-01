@@ -81,7 +81,7 @@ class Dispatcher:
             print "Element", elt.name, " alive:", elt.alive, ", active:", elt.is_active
             #Not alive need new need_conf
             #and spare too if they do not have already a conf
-            if not elt.alive or elt.conf == None:
+            if not elt.alive or hasattr(elt, 'conf') and elt.conf == None:
                 elt.need_conf = True
 
 
