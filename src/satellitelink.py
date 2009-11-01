@@ -127,16 +127,16 @@ class SatelliteLinks(Items):
     #name_property = "name"
     #inner_class = SchedulerLink
 
-    #We must have a pool property, so we find our pool
-    def linkify(self, pools):
-        self.linkify_s_by_p(pools)
+    #We must have a realm property, so we find our realm
+    def linkify(self, realms):
+        self.linkify_s_by_p(realms)
 
         
-    def linkify_s_by_p(self, pools):
+    def linkify_s_by_p(self, realms):
         for s in self:
-            p_name = s.pool.strip()
-            p = pools.find_by_name(p_name)
-            s.pool = p
-            print "Me", s.get_name(), "is linked with pool", s.pool.get_name()
+            p_name = s.realm.strip()
+            p = realms.find_by_name(p_name)
+            s.realm = p
+            print "Me", s.get_name(), "is linked with realm", s.realm.get_name()
             if p is not None:
-                s.register_to_my_pool()
+                s.register_to_my_realm()

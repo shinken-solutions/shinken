@@ -39,8 +39,8 @@ class ReactionnerLink(SatelliteLink):
         return self.name
 
 
-    def register_to_my_pool(self):
-        self.pool.reactionners.append(self)
+    def register_to_my_realm(self):
+        self.realm.reactionners.append(self)
 
 
 

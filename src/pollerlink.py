@@ -42,8 +42,8 @@ class PollerLink(SatelliteLink):
         return self.name
 
 
-    def register_to_my_pool(self):
-        self.pool.pollers.append(self)
+    def register_to_my_realm(self):
+        self.realm.pollers.append(self)
 
 
 class PollerLinks(SatelliteLinks):

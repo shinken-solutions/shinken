@@ -91,7 +91,7 @@ class Host(SchedulingItem):
                 '3d_coords': {'required': False, 'default':''},
                 'failure_prediction_enabled': {'required' : False, 'default' : '0', 'pythonize': to_bool},
                 #New to shinken
-                'pool' : {'required': False, 'default':None}
+                'realm' : {'required': False, 'default':None}
                 }
 
     #properties set only for running purpose
@@ -364,12 +364,12 @@ class Hosts(Items):
     #hosts -> hosts (parents, etc)
     #hosts -> commands (check_command)
     #hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, pools=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None):
         self.linkify_h_by_tp(timeperiods)
         self.linkify_h_by_h()
         self.linkify_h_by_cmd(commands)
         self.linkify_h_by_c(contacts)
-        self.linkify_h_by_pools(pools)
+        self.linkify_h_by_realms(realms)
 
     #Simplify notif_period and check period by timeperiod id
     def linkify_h_by_tp(self, timeperiods):
@@ -425,15 +425,15 @@ class Hosts(Items):
                 h.contacts = new_contacts
     
     
-    def linkify_h_by_pools(self, pools):
+    def linkify_h_by_realms(self, realms):
         for h in self:
-            #print h.get_name(), h.pool
-            if h.pool != None:
-                name = h.pool
-                p = pools.find_by_name(h.pool.strip())
-                h.pool = p
+            #print h.get_name(), h.realm
+            if h.realm != None:
+                name = h.realm
+                p = realms.find_by_name(h.realm.strip())
+                h.realm = p
                 if p != None:
-                    print "Me", h.get_name(), "have a pool", p
+                    print "Me", h.get_name(), "have a realm", p
 
     
     #We look for hostgroups property in hosts and

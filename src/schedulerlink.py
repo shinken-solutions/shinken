@@ -49,8 +49,8 @@ class SchedulerLink(SatelliteLink):
         self.con.run_external_command(command)
 
 
-    def register_to_my_pool(self):
-        self.pool.schedulers.append(self)
+    def register_to_my_realm(self):
+        self.realm.schedulers.append(self)
 
 
 class SchedulerLinks(SatelliteLinks):#(Items):

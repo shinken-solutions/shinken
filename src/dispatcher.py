@@ -21,7 +21,7 @@
 #configurations to other elements like schedulers, reactionner, 
 #pollers and brokers. It is responsible for hight avaibility part. If an
 #element die and the element type have a spare, it send the confi of the 
-#dead to the spare,
+#dead to the spare
 
 
 import Pyro.core
@@ -36,7 +36,7 @@ class Dispatcher:
     def __init__(self, conf):
         #Pointer to the whole conf
         self.conf = conf
-        self.pools = conf.pools
+        self.realms = conf.realms
         #Direct pointer to importants elements for us
         self.schedulerlinks = self.conf.schedulerlinks
         self.reactionners = self.conf.reactionners
@@ -125,7 +125,7 @@ class Dispatcher:
                         print 'True!'
                         elt.wait_new_conf()
                         #I do not care about order not send or not. If not,
-                        #The nextr loop wil resent it
+                        #The next loop wil resent it
                     else:
                         print "No conf"
     
@@ -134,8 +134,8 @@ class Dispatcher:
     def dispatch(self):
         #Is no need to dispatch, do not dispatch :)
         if not self.dispatch_ok:
-            for p in self.pools:
-                print "Dispatching Pool", p.get_name()
+            for p in self.realms:
+                print "Dispatching Realm", p.get_name()
                 conf_to_dispatch = [cfg for cfg in p.confs.values() if cfg.is_assigned==False]
                 nb_conf = len(conf_to_dispatch)
                 print '[',p.get_name(),']','Dispatching ', nb_conf, '/', len(p.confs), 'cfgs'
@@ -143,11 +143,11 @@ class Dispatcher:
                 scheds =  []
                 for s in p.schedulers:
                     scheds.append(s)
-                #now the spare scheds of higher pools
-                #they are after the sched of pool, so
+                #now the spare scheds of higher realms
+                #they are after the sched of realm, so
                 #they will be used after the spare of
-                #the pool
-                for higher_p in p.higher_pools:
+                #the realm
+                for higher_p in p.higher_realms:
                     for s in higher_p.schedulers:
                         if s.spare:
                             scheds.append(s)
@@ -199,7 +199,7 @@ class Dispatcher:
             else:
                 print "OK, all configurations are dispatched :)"
                 self.dispatch_ok = True
-
+            
             #Sched without conf in a dispatch ok are set ti no need_conf
             #so they do not raise dispatch where no use
             if self.dispatch_ok:

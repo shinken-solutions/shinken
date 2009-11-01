@@ -39,8 +39,8 @@ class BrokerLink(SatelliteLink):
         return self.name
 
 
-    def register_to_my_pool(self):
-        self.pool.brokers.append(self)
+    def register_to_my_realm(self):
+        self.realm.brokers.append(self)
 
 
 class BrokerLinks(SatelliteLinks):#(Items):

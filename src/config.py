@@ -36,7 +36,7 @@ from service import Service, Services
 from command import Command, Commands
 from host import Host, Hosts
 from hostgroup import Hostgroup, Hostgroups
-from pool import Pool, Pools
+from realm import Realm, Realms
 from contact import Contact, Contacts
 from contactgroup import Contactgroup, Contactgroups
 from servicegroup import Servicegroup, Servicegroups
@@ -273,7 +273,7 @@ class Config(Item):
                     'reactionner' : [],
                     'broker' : [],
                     'poller' : [],
-                    'pool' : []
+                    'realm' : []
                     }
         tmp = []
         tmp_type = 'void'
@@ -421,12 +421,12 @@ class Config(Item):
             pollerlinks.append(pl)
         self.pollers = PollerLinks(pollerlinks)
 
-        pools = []
-        for pool in objects['pool']:
-            p = Pool(pool)
-            p.clean()
-            pools.append(p)
-        self.pools = Pools(pools)
+        realms = []
+        for realm in objects['realm']:
+            r = Realm(realm)
+            r.clean()
+            realms.append(r)
+        self.realms = Realms(realms)
 
 
     #We use linkify to make the config more efficient : elements will be
@@ -441,7 +441,7 @@ class Config(Item):
 
         print "Hosts"
         #link hosts with timeperiodsand commands
-        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.pools)
+        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms)
 
         print "Service groups"
         #link servicegroups members with services
@@ -466,15 +466,15 @@ class Config(Item):
         print "Servicedependancy"
         self.servicedependencies.linkify(self.hosts, self.services, self.timeperiods)
 
-        print "Pools"
-        self.pools.linkify()
+        print "Realms"
+        self.realms.linkify()
 
         print "Schedulers and satellites"
-        #Link all links with pools
-        self.schedulerlinks.linkify(self.pools)
-        self.brokers.linkify(self.pools)
-        self.reactionners.linkify(self.pools)
-        self.pollers.linkify(self.pools)
+        #Link all links with realms
+        self.schedulerlinks.linkify(self.realms)
+        self.brokers.linkify(self.realms)
+        self.reactionners.linkify(self.realms)
+        self.pollers.linkify(self.realms)
 
 
     def dump(self):
@@ -521,8 +521,8 @@ class Config(Item):
         self.servicedependencies.explode()
 
         #Now the architecture part
-        print "Pools"
-        self.pools.explode()
+        print "Realms"
+        self.realms.explode()
         
 
     #Remove elements will the same name, so twins :)
@@ -603,7 +603,7 @@ class Config(Item):
         self.services.pythonize()
         self.servicedependencies.pythonize()
         self.schedulerlinks.pythonize()
-        self.pools.pythonize()
+        self.realms.pythonize()
 
 
     #Explode parameters like cached_service_check_horizon in the
@@ -678,47 +678,47 @@ class Config(Item):
 
         print "We've got", len(tmp_packs), "packs"
 
-        #Now We find the default pool (must be unique or
+        #Now We find the default realm (must be unique or
         #BAD THINGS MAY HAPPEN
-        default_pool = None
-        for p in self.pools:
-            if hasattr(p, 'default') and p.default:
-                default_pool = p
+        default_realm = None
+        for r in self.realms:
+            if hasattr(r, 'default') and r.default:
+                default_realm = r
 
         #Now we look if all elements of all packs have the
-        #same pool. If not, not good!
+        #same realm. If not, not good!
         for pack in tmp_packs:
-            tmp_pools = set()
+            tmp_realms = set()
             for elt in pack:
-                if elt.pool!= None:
-                    tmp_pools.add(elt.pool)
-            if len(tmp_pools) > 1:
-                print "Error : the pool configuration of yours hosts if not good"
+                if elt.realm!= None:
+                    tmp_realms.add(elt.realm)
+            if len(tmp_realms) > 1:
+                print "Error : the realm configuration of yours hosts if not good"
                 for h in pack:
-                    if h.pool == None:
+                    if h.realm == None:
                         print h.get_name(), None
                     else:
-                        print h.get_name(), h.pool.get_name()
-            if len(tmp_pools) == 1: # Ok, good
-                p = tmp_pools.pop() #There is just one element
-                print "Add to pool", p
-                p.packs.append(pack)
-            if len(tmp_pools) == 0: #Hum.. no pool value? So default Pool
-                if default_pool != None:
-                    print "I prefer add to default pool", default_pool.get_name()
-                    default_pool.packs.append(pack)
+                        print h.get_name(), h.realm.get_name()
+            if len(tmp_realms) == 1: # Ok, good
+                r = tmp_realms.pop() #There is just one element
+                print "Add to realm", r
+                r.packs.append(pack)
+            if len(tmp_realms) == 0: #Hum.. no realm value? So default Realm
+                if default_realm != None:
+                    print "I prefer add to default realm", default_realm.get_name()
+                    default_realm.packs.append(pack)
                 else:
-                    print "Error : Hosts do not have a pool and you do not defined a default pool!"
+                    print "Error : Hosts do not have a realm and you do not defined a default realm!"
 
         #The load balancing is for a loop, so all
-        #hosts of a pool (in a pack) will be dispatch
-        #in the schedulers of this pool
-        for p in self.pools:
-            print "Load balancing pool", p.get_name()
+        #hosts of a realm (in a pack) will be dispatch
+        #in the schedulers of this realm
+        for r in self.realms:
+            print "Load balancing realm", r.get_name()
             packs = {}
             #create roundrobin iterator for id of cfg
-            #So dispatching is loadlanced in a pool
-            nb_schedulers = len([s for s in p.schedulers if not s.spare])
+            #So dispatching is loadlanced in a realm
+            nb_schedulers = len([s for s in r.schedulers if not s.spare])
             rr = itertools.cycle(list(xrange(0, 0 + nb_schedulers)))
             
             for i in xrange(0, nb_schedulers):
@@ -726,14 +726,14 @@ class Config(Item):
         
             #Now we explode the numerous packs into nb_packs reals packs:
             #we 'load balance' thems in a roundrobin way
-            for pack in p.packs:#tmp_packs:
+            for pack in r.packs:#tmp_packs:
                 i = rr.next()
                 for elt in pack:
                     print "Add element", elt.get_name()
                     packs[i].append(elt)
             #Now in packs we have the number of packs [h1, h2, etc]
             #equal to the number of schedulers.
-            p.packs = packs
+            r.packs = packs
 
 
 
@@ -788,20 +788,20 @@ class Config(Item):
         
         #Just create packs. There can be numerous ones
         #In pack we've got hosts and service
-        #packs are in the pools
+        #packs are in the realms
         self.create_packs(nb_parts)
         
         offset = 0
-        for p in self.pools:
-            for i in p.packs:
-                pack = p.packs[i]
+        for r in self.realms:
+            for i in r.packs:
+                pack = r.packs[i]
                 for h in pack:
                     self.confs[i+offset].hosts.append(h)
                     for s in h.services:
                         self.confs[i+offset].services.append(s)
-                #Now the conf can be link in the pool
-                p.confs[i+offset] = self.confs[i+offset]
-            offset += len(p.packs)
+                #Now the conf can be link in the realm
+                r.confs[i+offset] = self.confs[i+offset]
+            offset += len(r.packs)
         
         #We've nearly have hosts and services. Now we want REALS hosts (Class)
         #And we want groups too
