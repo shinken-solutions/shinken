@@ -55,6 +55,7 @@ class IForArbiter(Pyro.core.ObjBase):
 	#'schedulers' : schedulers dict (by id) with address and port
 	def put_conf(self, conf):
 		self.app.have_conf = True
+		self.app.have_new_conf = True
 		print "Sending us ", conf
 		#If we've got something in the schedulers, we do not
 		#want it anymore
@@ -88,7 +89,7 @@ class Broker(Satellite):
 	def __init__(self):
 		#Bool to know if we have received conf from arbiter
 		self.have_conf = False
-
+		self.have_new_conf = False
 		#Ours schedulers
 		self.schedulers = {}
 		self.mods = [] # for brokers from plugins

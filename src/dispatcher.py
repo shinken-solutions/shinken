@@ -227,7 +227,7 @@ class Dispatcher:
                         if is_sent:
                             reactionner.is_active = True
                             reactionner.need_conf = False
-
+            
             for broker in self.conf.brokers.items.values():
                 if broker.alive:
                     if every_one_need_conf or broker.need_conf:
@@ -236,7 +236,7 @@ class Dispatcher:
                         if is_sent:
                             broker.is_active = True
                             broker.need_conf = False
-
+            
             for poller in self.conf.pollers.items.values():
                 if poller.alive:
                     if every_one_need_conf or poller.need_conf:
