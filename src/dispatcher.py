@@ -102,15 +102,12 @@ class Dispatcher:
     #the result go into self.dispatch_ok
     #TODO : finish need conf
     def check_dispatch(self):
-        #print "Check dispatch", self.dispatch_ok
         for elt in self.elements:
-            #print "Elt:", elt.__dict__, elt.is_active, elt.alive
-            if (elt.is_active and not elt.alive) or elt.need_conf :
+            if (elt.is_active and not elt.alive):
                 print "ELT:", elt.name, elt.is_active, elt.alive, elt.need_conf
                 self.dispatch_ok = False
                 print "Set dispatch False"
                 elt.is_active = False
-                #elt.need_conf = True
                 if hasattr(elt, 'conf'):
                     if elt.conf != None:
                         elt.conf.assigned_to = None
@@ -119,12 +116,18 @@ class Dispatcher:
                 else:
                     print 'No conf'
 
-
         #Maybe satelite are alive, but do not still have a cfg but
         #I think so. It is not good. I ask a global redispatch for
         #the cfg_id I think is not corectly dispatched.
         for r in self.realms:
             for cfg_id in r.confs:
+                #DBG
+                sched = r.confs[cfg_id].assigned_to
+                if sched != None:
+                    print "CFG", cfg_id, "is managed by", sched.get_name()
+                else:
+                    print "CFG", cfg_id, "is unmanaged!!"
+                #END DBG
                 try:
                     for reactionner in r.to_reactionners_managed_by[cfg_id]:
                     #Fu%k. I thought that this reactionner manage it
@@ -273,6 +276,7 @@ class Dispatcher:
             if self.dispatch_ok:
                 for sched in self.schedulers.items.values():
                     if sched.conf == None:
+                        print "Tagging sched", sched.get_name(), "so it do not ask anymore for conf"
                         sched.need_conf = False
             
 
