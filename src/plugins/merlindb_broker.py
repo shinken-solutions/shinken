@@ -25,6 +25,8 @@
 
 
 import copy
+import MySQLdb
+from MySQLdb import IntegrityError
 
 #This text is print at the import
 print "I am Merlin Broker"
@@ -75,7 +77,6 @@ class Merlindb_broker:
     #Create the database connexion
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
-        import MySQLdb
         self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
         self.db_cursor = self.db.cursor ()
 
@@ -84,8 +85,11 @@ class Merlindb_broker:
     #TODO: finish catch
     def execute_query(self, query):
         #print "I run query", query, "\n"
-        self.db_cursor.execute(query)
-        self.db.commit ()
+        try:
+            self.db_cursor.execute(query)
+            self.db.commit ()
+        except IntegrityError as exp:
+            print "[Merlindb] Warning : a query raise an integrity error : %s, %s", (query, exp) 
 
 
     #Create a INSERT query in table with all data of data (a dict)

@@ -58,7 +58,7 @@ class Dispatcher:
         for reactionner in self.reactionners:
             reactionner.is_active = False
             reactionner.alive = False
-            reactionner.need_conf = True
+            reactionner.need_conf = False
             self.elements.append(reactionner)
         for poller in self.pollers:
             poller.is_active = False
@@ -105,7 +105,7 @@ class Dispatcher:
         #print "Check dispatch", self.dispatch_ok
         for elt in self.elements:
             #print "Elt:", elt.__dict__, elt.is_active, elt.alive
-            if elt.is_active and not elt.alive or elt.need_conf :
+            if (elt.is_active and not elt.alive) or elt.need_conf :
                 print "ELT:", elt.name, elt.is_active, elt.alive, elt.need_conf
                 self.dispatch_ok = False
                 print "Set dispatch False"
@@ -130,12 +130,14 @@ class Dispatcher:
                     #Fu%k. I thought that this reactionner manage it
                     #but ot doesn't. I ask a full redispatch of these cfg
                         if cfg_id not in reactionner.what_i_managed():
+                            self.dispatch_ok = False #so we will redispatch all
                             r.to_reactionners_nb_assigned[cfg_id] = 0
                             r.to_reactionners_need_dispatch[cfg_id]  = True
                             r.to_reactionners_managed_by[cfg_id] = []
                 #At the first pass, there is no cfg_id in to_reactionners_managed_by
                 except KeyError:
                     pass
+
 
     #Imagine a world where... oups...
     #Imagine a master got the conf, network down
@@ -153,6 +155,7 @@ class Dispatcher:
                     print "Ask", elt.name , 'if it got conf'
                     if elt.have_conf():
                         print 'True!'
+                        elt.active = False
                         elt.wait_new_conf()
                         #I do not care about order not send or not. If not,
                         #The next loop wil resent it
@@ -163,6 +166,7 @@ class Dispatcher:
         #them to remove it
         for reactionner in self.reactionners:
             cfg_ids = reactionner.what_i_managed()
+            id_to_delete = []
             for cfg_id in cfg_ids:
                 print "Reactionner", reactionner.name, "manage cfg id:", cfg_id
                 #Ok, we search for realm that have the conf
@@ -171,10 +175,18 @@ class Dispatcher:
                         #Ok we've got the realm, we check it's to_reactionners_managed_by
                         #to see if reactionner is in. If not, we remove he sched_id for it
                         if not reactionner in r.to_reactionners_managed_by[cfg_id]:
-                            print "I ask to remove cfg", cfg_id, "from", reactionner.name
-                            reactionner.remove_from_conf(cfg_id)
-
+                            id_to_delete.append(cfg_id)
+            #Maybe we removed all cfg_id of this reactionner
+            #We can make it idle, no active and wait_new_conf
+            if len(id_to_delete) == len(cfg_ids):
+                reactionner.active = False
+                reactionner.wait_new_conf()
+            else:#It is not fully idle, just less cfg
+                for id in id_to_delete:
+                    print "I ask to remove cfg", cfg_id, "from", reactionner.name
+                    reactionner.remove_from_conf(cfg_id)
     
+
     #Manage the dispatch
     def dispatch(self):
         #Is no need to dispatch, do not dispatch :)
@@ -289,6 +301,8 @@ class Dispatcher:
                                 print '[',r.get_name(),']',"Trying to send conf to reactionner", reactionner.name
                                 is_sent = reactionner.put_conf(cfg_for_reactionner)
                                 if is_sent:
+                                    reactionner.need_conf = False
+                                    reactionner.active = True
                                     print '[',r.get_name(),']',"Dispatch OK of for conf", cfg_id," in reactionner", reactionner.name
                                     nb_cfg_sent += 1
                                     r.to_reactionners_managed_by[cfg_id].append(reactionner)
@@ -313,15 +327,6 @@ class Dispatcher:
             for sched in self.schedulers:
                 tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
                 i += 1
-            
-            #for reactionner in self.conf.reactionners.items.values():
-            #    if reactionner.alive:
-            #        if every_one_need_conf or reactionner.need_conf:
-            #            print "Putting a Reactionner conf"
-            #            is_sent = reactionner.put_conf(tmp_conf)
-            #            if is_sent:
-            #                reactionner.is_active = True
-            #                reactionner.need_conf = False
             
             for broker in self.conf.brokers.items.values():
                 if broker.alive:
