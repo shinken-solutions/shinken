@@ -604,7 +604,9 @@ class Config(Item):
         self.servicedependencies.pythonize()
         self.schedulerlinks.pythonize()
         self.realms.pythonize()
-
+        self.reactionners.pythonize()
+        self.pollers.pythonize()
+        self.brokers.pythonize()
 
     #Explode parameters like cached_service_check_horizon in the
     #Service class in a cached_check_horizon manner
@@ -762,6 +764,7 @@ class Config(Item):
             
             #we need a deepcopy because each conf
             #will have new hostgroups
+            self.confs[i].id = i
             self.confs[i].commands = self.commands
             self.confs[i].timeperiods = self.timeperiods
             #Create hostgroups with just the name and same id, but no members

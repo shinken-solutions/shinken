@@ -53,6 +53,9 @@ class SchedulerLink(SatelliteLink):
         self.realm.schedulers.append(self)
 
 
+    def give_satellite_cfg(self):
+        return {'port' : self.port, 'address' : self.address, 'name' : self.name, 'instance_id' : self.id, 'active' : self.conf!=None}
+
 class SchedulerLinks(SatelliteLinks):#(Items):
     name_property = "name"
     inner_class = SchedulerLink

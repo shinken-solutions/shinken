@@ -136,6 +136,28 @@ class Realm(Itemgroup):
         return r
 
 
+    def count_reactionners(self):
+        self.nb_reactionners = 0
+        for reactionner in self.reactionners:
+            if not reactionner.spare:
+                self.nb_reactionners += 1
+        for realm in self.higher_realms:
+            for reactionner in realm.reactionners:
+                if not reactionner.spare:
+                    self.nb_reactionners += 1
+        print self.get_name(),"Count reactionners :", self.nb_reactionners
+
+
+    def fill_potential_reactionners(self):
+        self.potential_reactionners = []
+        for reactionner in self.reactionners:
+            self.potential_reactionners.append(reactionner)
+        for realm in self.higher_realms:
+            for reactionner in realm.reactionners:
+                self.potential_reactionners.append(reactionner)
+        print self.get_name(),"Add potential reactionners :", len(self.potential_reactionners)
+
+
 
 class Realms(Itemgroups):
     name_property = "realm_name" # is used for finding hostgroups

@@ -100,7 +100,6 @@ def scheduler_no_spare_first(x, y):
 
 #-1 is x first, 0 equal, 1 is y first 
 def alive_then_spare_then_deads(x, y):
-    print "Alive_then for", x, y
     #First are alive
     if x.alive and not y.alive:
         return -1

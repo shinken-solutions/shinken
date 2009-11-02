@@ -57,7 +57,7 @@ class IForArbiter(Pyro.core.ObjBase):
 		self.app.have_new_conf = True
 		print "Sending us ", conf
 		#If we've got something in the schedulers, we do not want it anymore
-		self.schedulers.clear()
+		#self.schedulers.clear()
 		for sched_id in conf['schedulers'] :
 			s = conf['schedulers'][sched_id]
 			self.schedulers[sched_id] = s
@@ -299,7 +299,7 @@ class Satellite:
                 tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
                 nb_queue += tmp_nb_queue
                 nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
-                print '[%d]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
+                print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
 		#We add new worker if the queue is > 80% of the worker number
             while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 30:
                 self.create_and_launch_worker()

@@ -73,7 +73,19 @@ class Dispatcher:
         self.dispatch_ok = False
         self.first_dispatch_done = False
 
-    
+
+        #Prepare the reactionners confs
+        for reactionner in self.reactionners:
+            reactionner.cfg = {'schedulers' : {}} #i : {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
+
+        #Now realm will have a cfg pool for reactionners
+        for r in self.realms:
+            r.to_reactionners = {}
+            r.to_reactionners_nb_assigned = {}
+            r.to_reactionners_need_dispatch = {}
+            r.count_reactionners()
+            r.fill_potential_reactionners()
+
     #checks alive elements
     def check_alive(self):
         for elt in self.elements:
@@ -184,6 +196,16 @@ class Dispatcher:
                                     #Ok, the conf is dispatch, no more loop for this
                                     #configuration
                                     need_loop = False
+                                    
+                                    #Now we generate the conf for reactionners:
+                                    cfg_id = conf.id
+                                    r.to_reactionners[cfg_id] = sched.give_satellite_cfg()
+                                    r.to_reactionners_nb_assigned[cfg_id] = 0
+                                    r.to_reactionners_need_dispatch[cfg_id]  = True
+                                    print "Now to_reactionners:", r.nb_reactionners
+                                    print r.to_reactionners
+                                    print r.to_reactionners_nb_assigned
+                                    print r.to_reactionners_need_dispatch
                                 else:
                                     print '[',r.get_name(),']', "Dispatch fault for sched", sched.name
                             else:
@@ -197,16 +219,52 @@ class Dispatcher:
             if nb_missed > 0:
                 print "WARNING : All configurations are not dispatched ", nb_missed, "are missing"
             else:
-                print "OK, all configurations are dispatched :)"
+                print "OK, all configurations are dispatched to schedulers :)"
                 self.dispatch_ok = True
             
-            #Sched without conf in a dispatch ok are set ti no need_conf
+            #Sched without conf in a dispatch ok are set to no need_conf
             #so they do not raise dispatch where no use
             if self.dispatch_ok:
                 for sched in self.schedulers.items.values():
                     if sched.conf == None:
                         sched.need_conf = False
             
+
+            #We put the reactionners conf with the new way
+            for r in self.realms:
+
+                for cfg in r.confs.values():
+                    cfg_id = cfg.id
+                    if r.to_reactionners_need_dispatch[cfg_id]:
+                        print "Dispatching", r.get_name(), "reactionners"
+                        cfg_for_reactionner_part = r.to_reactionners[cfg_id]
+                        cfg_for_reactionner = {'schedulers' : {cfg_id : cfg_for_reactionner_part}}
+                        print "Config for reactionners:", cfg_for_reactionner
+                        #make copies of potential_react lsit because we will pop items
+                        reactionners = []
+                        for reactionner in r.potential_reactionners:
+                            reactionners.append(reactionner)
+                        reactionners.sort(alive_then_spare_then_deads)
+                        reactionners.reverse() #pop is last, I need first
+
+                        #Now we dispatch cfg to evry one ask for it
+                        nb_cfg_sent = 0
+                        for reactionner in reactionners:
+                            if nb_cfg_sent < r.nb_reactionners:
+                                print '[',r.get_name(),']',"Trying to send conf to reactionner", reactionner.name
+                                is_sent = reactionner.put_conf(cfg_for_reactionner)
+                                if is_sent:
+                                    print '[',r.get_name(),']',"Dispatch OK of for conf", cfg_id," in reactionner", reactionner.name
+                                    nb_cfg_sent += 1
+                            else:
+                                #I've got enouth reactionner, the next one are spare for me
+                                print "Need to remove cfg", cfg_id, "from", reactionner.name
+                        r.to_reactionners_nb_assigned[cfg_id] = nb_cfg_sent
+                        if nb_cfg_sent == r.nb_reactionners:
+                            print "OK, no more reactionner sent need"
+                            r.to_reactionners_need_dispatch[cfg_id]  = False
+
+
             #We put on the satellites only if every one need it 
             #(a new scheduler)
             #Of if a specific satellite needs it
@@ -219,14 +277,14 @@ class Dispatcher:
                 tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
                 i += 1
             
-            for reactionner in self.conf.reactionners.items.values():
-                if reactionner.alive:
-                    if every_one_need_conf or reactionner.need_conf:
-                        print "Putting a Reactionner conf"
-                        is_sent = reactionner.put_conf(tmp_conf)
-                        if is_sent:
-                            reactionner.is_active = True
-                            reactionner.need_conf = False
+            #for reactionner in self.conf.reactionners.items.values():
+            #    if reactionner.alive:
+            #        if every_one_need_conf or reactionner.need_conf:
+            #            print "Putting a Reactionner conf"
+            #            is_sent = reactionner.put_conf(tmp_conf)
+            #            if is_sent:
+            #                reactionner.is_active = True
+            #                reactionner.need_conf = False
             
             for broker in self.conf.brokers.items.values():
                 if broker.alive:
