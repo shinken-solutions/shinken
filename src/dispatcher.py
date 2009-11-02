@@ -102,19 +102,41 @@ class Dispatcher:
     #the result go into self.dispatch_ok
     #TODO : finish need conf
     def check_dispatch(self):
+        #TODO: sup this loop and use the 2 loops below. It's far more readable to thinks
+        #about conf dispatch and not by node dead -> cfg unavalable. So after the active
+        #tag will no be usefull anymore I think.
         for elt in self.elements:
-            if (elt.is_active and not elt.alive):
-                print "ELT:", elt.name, elt.is_active, elt.alive, elt.need_conf
-                self.dispatch_ok = False
-                print "Set dispatch False"
-                elt.is_active = False
-                if hasattr(elt, 'conf'):
-                    if elt.conf != None:
-                        elt.conf.assigned_to = None
-                        elt.conf.is_assigned = False
-                        elt.conf = None
+            #skip sched because it is managed by the new way
+            if not hasattr(elt, 'conf'):
+                if (elt.is_active and not elt.alive):
+                    print "ELT:", elt.name, elt.is_active, elt.alive, elt.need_conf
+                    self.dispatch_ok = False
+                    print "Set dispatch False"
+                    elt.is_active = False
+                    if hasattr(elt, 'conf'):
+                        if elt.conf != None:
+                            elt.conf.assigned_to = None
+                            elt.conf.is_assigned = False
+                            elt.conf = None
+                    else:
+                        print 'No conf'
+
+        #We check for confs to be dispatched on alive scheds. If not dispatch, need dispatch :)
+        #and if dipatch on a failed node, remove the association, and need a new disaptch
+        for r in self.realms:
+            for cfg_id in r.confs:
+                sched = r.confs[cfg_id].assigned_to
+                if sched == None:
+                    print "CFG", cfg_id, "is unmanaged!!"
+                    self.dispatch_ok = False
                 else:
-                    print 'No conf'
+                    if not sched.alive:
+                        self.dispatch_ok = False #so we ask a new dispatching
+                        print "Sched", sched.name, "had the conf", cfg_id, "but is dead, I am not happy!"
+                        sched.conf.assigned_to = None
+                        sched.conf.is_assigned = False
+                        sched.conf = None
+                    #Else: ok the conf is managed by a living scheduler
 
         #Maybe satelite are alive, but do not still have a cfg but
         #I think so. It is not good. I ask a global redispatch for
