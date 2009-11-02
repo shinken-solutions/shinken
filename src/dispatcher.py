@@ -132,7 +132,7 @@ class Dispatcher:
                     for reactionner in r.to_reactionners_managed_by[cfg_id]:
                     #Fu%k. I thought that this reactionner manage it
                     #but ot doesn't. I ask a full redispatch of these cfg
-                        if cfg_id not in reactionner.what_i_managed():
+                        if reactionner.alive and cfg_id not in reactionner.what_i_managed():
                             self.dispatch_ok = False #so we will redispatch all
                             r.to_reactionners_nb_assigned[cfg_id] = 0
                             r.to_reactionners_need_dispatch[cfg_id]  = True
@@ -168,26 +168,27 @@ class Dispatcher:
         #I ask satellite witch sched_id they manage. If I am not agree, I ask
         #them to remove it
         for reactionner in self.reactionners:
-            cfg_ids = reactionner.what_i_managed()
-            id_to_delete = []
-            for cfg_id in cfg_ids:
-                print "Reactionner", reactionner.name, "manage cfg id:", cfg_id
+            if reactionner.alive:
+                cfg_ids = reactionner.what_i_managed()
+                id_to_delete = []
+                for cfg_id in cfg_ids:
+                    print "Reactionner", reactionner.name, "manage cfg id:", cfg_id
                 #Ok, we search for realm that have the conf
-                for r in self.realms:
-                    if cfg_id in r.confs:
+                    for r in self.realms:
+                        if cfg_id in r.confs:
                         #Ok we've got the realm, we check it's to_reactionners_managed_by
                         #to see if reactionner is in. If not, we remove he sched_id for it
-                        if not reactionner in r.to_reactionners_managed_by[cfg_id]:
-                            id_to_delete.append(cfg_id)
+                            if not reactionner in r.to_reactionners_managed_by[cfg_id]:
+                                id_to_delete.append(cfg_id)
             #Maybe we removed all cfg_id of this reactionner
             #We can make it idle, no active and wait_new_conf
-            if len(id_to_delete) == len(cfg_ids):
-                reactionner.active = False
-                reactionner.wait_new_conf()
-            else:#It is not fully idle, just less cfg
-                for id in id_to_delete:
-                    print "I ask to remove cfg", cfg_id, "from", reactionner.name
-                    reactionner.remove_from_conf(cfg_id)
+                if len(id_to_delete) == len(cfg_ids):
+                    reactionner.active = False
+                    reactionner.wait_new_conf()
+                else:#It is not fully idle, just less cfg
+                    for id in id_to_delete:
+                        print "I ask to remove cfg", cfg_id, "from", reactionner.name
+                        reactionner.remove_from_conf(cfg_id)
     
 
     #Manage the dispatch
