@@ -68,6 +68,7 @@ class IForArbiter(Pyro.core.ObjBase):
 			self.schedulers[sched_id]['broks'] = {}
 			self.schedulers[sched_id]['instance_id'] = s['instance_id']
 			self.schedulers[sched_id]['running_id'] = 0
+			self.schedulers[sched_id]['active'] = s['active']
 			#We cannot reinit connexions because this code in
 			#in a thread, and
 			#pyro do not allow thread to create new connexions...
@@ -97,6 +98,12 @@ class Broker(Satellite):
 
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
+                #If sched is not active, I do not try to init
+		#it is just useless
+		is_active = self.schedulers[id]['active']
+		if not is_active:
+			return
+
 		print "init de connexion avec", self.schedulers[id]['uri']
 		running_id = self.schedulers[id]['running_id']
 		uri = self.schedulers[id]['uri']
