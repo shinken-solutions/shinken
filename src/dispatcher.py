@@ -83,6 +83,7 @@ class Dispatcher:
             r.to_reactionners = {}
             r.to_reactionners_nb_assigned = {}
             r.to_reactionners_need_dispatch = {}
+            r.to_reactionners_managed_by = {}
             r.count_reactionners()
             r.fill_potential_reactionners()
 
@@ -119,6 +120,23 @@ class Dispatcher:
                     print 'No conf'
 
 
+        #Maybe satelite are alive, but do not still have a cfg but
+        #I think so. It is not good. I ask a global redispatch for
+        #the cfg_id I think is not corectly dispatched.
+        for r in self.realms:
+            for cfg_id in r.confs:
+                try:
+                    for reactionner in r.to_reactionners_managed_by[cfg_id]:
+                    #Fu%k. I thought that this reactionner manage it
+                    #but ot doesn't. I ask a full redispatch of these cfg
+                        if cfg_id not in reactionner.what_i_managed():
+                            r.to_reactionners_nb_assigned[cfg_id] = 0
+                            r.to_reactionners_need_dispatch[cfg_id]  = True
+                            r.to_reactionners_managed_by[cfg_id] = []
+                #At the first pass, there is no cfg_id in to_reactionners_managed_by
+                except KeyError:
+                    pass
+
     #Imagine a world where... oups...
     #Imagine a master got the conf, network down
     #a spare take it (good :) ). Like the Empire, the master
@@ -140,7 +158,22 @@ class Dispatcher:
                         #The next loop wil resent it
                     else:
                         print "No conf"
-    
+        
+        #I ask satellite witch sched_id they manage. If I am not agree, I ask
+        #them to remove it
+        for reactionner in self.reactionners:
+            cfg_ids = reactionner.what_i_managed()
+            for cfg_id in cfg_ids:
+                print "Reactionner", reactionner.name, "manage cfg id:", cfg_id
+                #Ok, we search for realm that have the conf
+                for r in self.realms:
+                    if cfg_id in r.confs:
+                        #Ok we've got the realm, we check it's to_reactionners_managed_by
+                        #to see if reactionner is in. If not, we remove he sched_id for it
+                        if not reactionner in r.to_reactionners_managed_by[cfg_id]:
+                            print "I ask to remove cfg", cfg_id, "from", reactionner.name
+                            reactionner.remove_from_conf(cfg_id)
+
     
     #Manage the dispatch
     def dispatch(self):
@@ -202,6 +235,7 @@ class Dispatcher:
                                     r.to_reactionners[cfg_id] = sched.give_satellite_cfg()
                                     r.to_reactionners_nb_assigned[cfg_id] = 0
                                     r.to_reactionners_need_dispatch[cfg_id]  = True
+                                    r.to_reactionners_managed_by[cfg_id] = []
                                     print "Now to_reactionners:", r.nb_reactionners
                                     print r.to_reactionners
                                     print r.to_reactionners_nb_assigned
@@ -232,7 +266,6 @@ class Dispatcher:
 
             #We put the reactionners conf with the new way
             for r in self.realms:
-
                 for cfg in r.confs.values():
                     cfg_id = cfg.id
                     if r.to_reactionners_need_dispatch[cfg_id]:
@@ -245,7 +278,9 @@ class Dispatcher:
                         for reactionner in r.potential_reactionners:
                             reactionners.append(reactionner)
                         reactionners.sort(alive_then_spare_then_deads)
-                        reactionners.reverse() #pop is last, I need first
+                        print "Order:"
+                        for reactionner in reactionners:
+                            print reactionner.name, ": is sprare?", reactionner.spare
 
                         #Now we dispatch cfg to evry one ask for it
                         nb_cfg_sent = 0
@@ -256,14 +291,16 @@ class Dispatcher:
                                 if is_sent:
                                     print '[',r.get_name(),']',"Dispatch OK of for conf", cfg_id," in reactionner", reactionner.name
                                     nb_cfg_sent += 1
-                            else:
-                                #I've got enouth reactionner, the next one are spare for me
-                                print "Need to remove cfg", cfg_id, "from", reactionner.name
+                                    r.to_reactionners_managed_by[cfg_id].append(reactionner)
+                            #else:
+                            #    #I've got enouth reactionner, the next one are spare for me
+                            #    print "Need to remove cfg", cfg_id, "from", reactionner.name
+                            #    reactionner.remove_from_conf(cfg_id)
                         r.to_reactionners_nb_assigned[cfg_id] = nb_cfg_sent
                         if nb_cfg_sent == r.nb_reactionners:
                             print "OK, no more reactionner sent need"
                             r.to_reactionners_need_dispatch[cfg_id]  = False
-
+                            
 
             #We put on the satellites only if every one need it 
             #(a new scheduler)

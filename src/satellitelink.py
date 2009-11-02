@@ -124,6 +124,39 @@ class SatelliteLink(Item):
             #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
 
+    def remove_from_conf(self, sched_id):
+        if self.con == None:
+            self.create_connexion()
+        #print "Connexion is OK, now we put conf", conf
+        try:
+            self.con.remove_from_conf(sched_id)
+            return True
+        except Pyro.errors.URIError as exp:
+            self.con = None
+            #print self.name, "FUCK !!!!!!!!!!!!", exp
+            return False
+        except Pyro.errors.ProtocolError as exp:
+            self.con = None
+            #print self.name, "FUCK !!!!!!!!!!!!", exp
+            return False
+
+    def what_i_managed(self):
+        if self.con == None:
+            self.create_connexion()
+        #print "Connexion is OK, now we put conf", conf
+        try:
+            return self.con.what_i_managed()
+        except Pyro.errors.URIError as exp:
+            self.con = None
+            #print self.name, "FUCK !!!!!!!!!!!!", exp
+            return []
+        except Pyro.errors.ProtocolError as exp:
+            self.con = None
+            #print self.name, "FUCK !!!!!!!!!!!!", exp
+            return []
+
+
+
 
 
 class SatelliteLinks(Items):

@@ -70,7 +70,19 @@ class IForArbiter(Pyro.core.ObjBase):
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
 		print "We have our schedulers :", self.schedulers
-		
+
+	#Arbiter ask us to do not manage a scheduler_id anymore
+	#I do it and don't ask why
+	def remove_from_conf(self, sched_id):
+		try:
+			del self.schedulers[sched_id]
+		except KeyError:
+			pass
+
+	#Arbiter ask me which sched_id I manage, If it is not ok with it
+	#It will ask me to remove one or more sched_id
+	def what_i_managed(self):
+		return self.schedulers.keys()
 
 	#Use for arbiter to know if we are alive
 	def ping(self):
