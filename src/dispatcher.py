@@ -152,7 +152,7 @@ class Dispatcher:
                     print "CFG", cfg_id, "is unmanaged!!"
                 #END DBG
                 try:
-                    for kind in ['reactionner']:
+                    for kind in ['reactionner', 'poller', 'broker']:
                         for satellite in r.to_satellites_managed_by[kind][cfg_id]:
                             #Maybe the sat was mark not alive, but still in
                             #to_satellites_managed_by that mean that a new dispatch
@@ -194,7 +194,7 @@ class Dispatcher:
         
         #I ask satellite witch sched_id they manage. If I am not agree, I ask
         #them to remove it
-        for satellite in self.reactionners:
+        for satellite in self.satellites:#reactionners:
             kind = satellite.get_my_type()
             if satellite.alive:
                 cfg_ids = satellite.what_i_managed()
@@ -280,7 +280,7 @@ class Dispatcher:
                                     
                                     #Now we generate the conf for reactionners:
                                     cfg_id = conf.id
-                                    for kind in ['reactionner']:
+                                    for kind in ['reactionner', 'poller', 'broker']:
                                         r.to_satellites[kind][cfg_id] = sched.give_satellite_cfg()
                                         r.to_satellites_nb_assigned[kind][cfg_id] = 0
                                         r.to_satellites_need_dispatch[kind][cfg_id]  = True
@@ -314,11 +314,11 @@ class Dispatcher:
                         sched.need_conf = False
             
 
-            #We put the reactionners conf with the new way
+            #We put the satellites conf with the "new" way so they see only what we want
             for r in self.realms:
                 for cfg in r.confs.values():
                     cfg_id = cfg.id
-                    for kind in ['reactionner']:
+                    for kind in ['reactionner', 'poller', 'broker']:
                         if r.to_satellites_need_dispatch[kind][cfg_id]:
                             print "Dispatching", r.get_name(), kind+'s'
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
@@ -326,7 +326,7 @@ class Dispatcher:
                             print "Config for ", kind+'s',":", cfg_for_satellite
                             #make copies of potential_react list for sort
                             satellites = []
-                            for satellite in r.get_potential_satellites_by_type(kind):#potential_reactionners:
+                            for satellite in r.get_potential_satellites_by_type(kind):
                                 satellites.append(satellite)
                             satellites.sort(alive_then_spare_then_deads)
                             print "Order:"
@@ -336,7 +336,7 @@ class Dispatcher:
                             #Now we dispatch cfg to evry one ask for it
                             nb_cfg_sent = 0
                             for satellite in satellites:
-                                if nb_cfg_sent < r.get_nb_of_must_have_satellites(kind):#nb_reactionners:
+                                if nb_cfg_sent < r.get_nb_of_must_have_satellites(kind):
                                     print '[',r.get_name(),']',"Trying to send conf to ", kind, satellite.name
                                     is_sent = satellite.put_conf(cfg_for_satellite)
                                     if is_sent:
@@ -348,7 +348,7 @@ class Dispatcher:
                             #else:
                             #    #I've got enouth satellite, the next one are spare for me
                             r.to_satellites_nb_assigned[kind][cfg_id] = nb_cfg_sent
-                            if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):#nb_reactionners:
+                            if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
                                 print "OK, no more", kind, "sent need"
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
                             
@@ -358,28 +358,28 @@ class Dispatcher:
             #Of if a specific satellite needs it
             #TODO : more python
             #We create the conf for satellites : it's just schedulers
-            tmp_conf = {}
-            tmp_conf['schedulers'] = {}
-            i = 0
-            for sched in self.schedulers:
-                tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
-                i += 1
+            #tmp_conf = {}
+            #tmp_conf['schedulers'] = {}
+            #i = 0
+            #for sched in self.schedulers:
+            #    tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
+            #    i += 1
             
-            for broker in self.conf.brokers.items.values():
-                if broker.alive:
-                    if every_one_need_conf or broker.need_conf:
-			print "Putting a Broker conf"
-                        is_sent = broker.put_conf(tmp_conf)
-                        if is_sent:
-                            broker.is_active = True
-                            broker.need_conf = False
+            #for broker in self.conf.brokers.items.values():
+            #    if broker.alive:
+            #        if every_one_need_conf or broker.need_conf:
+            #            print "Putting a Broker conf"
+            #            is_sent = broker.put_conf(tmp_conf)
+            #            if is_sent:
+            #                broker.is_active = True
+            #                broker.need_conf = False
             
-            for poller in self.conf.pollers.items.values():
-                if poller.alive:
-                    if every_one_need_conf or poller.need_conf:
-                        print "Putting a Poller conf"
-                        is_sent = poller.put_conf(tmp_conf)
-                        if is_sent:
-                            poller.is_active = True
-                            poller.need_conf = False
+            #for poller in self.conf.pollers.items.values():
+            #    if poller.alive:
+            #        if every_one_need_conf or poller.need_conf:
+            #            print "Putting a Poller conf"
+            #            is_sent = poller.put_conf(tmp_conf)
+            #            if is_sent:
+            #                poller.is_active = True
+            #                poller.need_conf = False
 

@@ -53,13 +53,15 @@ class IForArbiter(Pyro.core.ObjBase):
 	#function called by arbiter for giving us our conf
 	#conf must be a dict with:
 	#'schedulers' : schedulers dict (by id) with address and port
+	#TODO: catch case where Arbiter send somethign we already have
+	#(same id+add+port) -> just do nothing :)
 	def put_conf(self, conf):
 		self.app.have_conf = True
 		self.app.have_new_conf = True
 		print "Sending us ", conf
 		#If we've got something in the schedulers, we do not
 		#want it anymore
-		self.schedulers.clear()
+		#self.schedulers.clear()
 		for sched_id in conf['schedulers'] :
 			s = conf['schedulers'][sched_id]
 			self.schedulers[sched_id] = s
@@ -76,10 +78,43 @@ class IForArbiter(Pyro.core.ObjBase):
 		print "We have our schedulers :", self.schedulers
 		
 
+	#Arbiter ask us to do not manage a scheduler_id anymore
+	#I do it and don't ask why
+	def remove_from_conf(self, sched_id):
+		try:
+			del self.schedulers[sched_id]
+		except KeyError:
+			pass
+
+	#Arbiter ask me which sched_id I manage, If it is not ok with it
+	#It will ask me to remove one or more sched_id
+	def what_i_managed(self):
+		return self.schedulers.keys()
+
 	#Use for arbiter to know if we are alive
 	def ping(self):
 		print "We ask us for a ping"
 		return True
+
+
+	#Use by arbiter to know if we have a conf or not
+	#can be usefull if we must do nothing but 
+	#we are not because it can KILL US! 
+	def have_conf(self):
+		return self.app.have_conf
+
+
+	#Call by arbiter if it thinks we are running but we must do not (like
+	#if I was a spare that take a conf but the master returns, I must die
+	#and wait a new conf)
+	#Us : No please...
+	#Arbiter : I don't care, hasta la vista baby!
+	#Us : ... <- Nothing! We are die! you don't follow 
+	#anything or what??
+	def wait_new_conf(self):
+		print "Arbiter want me to wait a new conf"
+		self.schedulers.clear()
+		self.app.have_conf = False
 
 
 

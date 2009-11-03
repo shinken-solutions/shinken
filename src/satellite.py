@@ -52,6 +52,8 @@ class IForArbiter(Pyro.core.ObjBase):
 	#function called by arbiter for giving us our conf
 	#conf must be a dict with:
 	#'schedulers' : schedulers dict (by id) with address and port
+	#TODO: catch case where Arbiter send somethign we already have
+	#(same id+add+port) -> just do nothing :)
 	def put_conf(self, conf):
 		self.app.have_conf = True
 		self.app.have_new_conf = True
