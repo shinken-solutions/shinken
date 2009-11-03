@@ -81,6 +81,7 @@ class Dispatcher:
         #Prepare the satellites confs
         for satellite in self.satellites:
             satellite.prepare_for_conf()
+            print ""*5,satellite.name, "Spare?", satellite.spare, "manage_sub_realms?", satellite.manage_sub_realms
 
         #Now realm will have a cfg pool for satellites
         for r in self.realms:
@@ -153,9 +154,12 @@ class Dispatcher:
                 try:
                     for kind in ['reactionner']:
                         for satellite in r.to_satellites_managed_by[kind][cfg_id]:
-                            if satellite.alive and cfg_id not in satellite.what_i_managed():
-                                #Fu%k. I thought that this reactionner manage it
-                                #but ot doesn't. I ask a full redispatch of these cfg
+                            #Maybe the sat was mark not alive, but still in
+                            #to_satellites_managed_by that mean that a new dispatch
+                            #is need
+                            #Or maybe it is alive but I thought that this reactionner manage the conf
+                            #but ot doesn't. I ask a full redispatch of these cfg for both cases
+                            if not satellite.alive or (satellite.alive and cfg_id not in satellite.what_i_managed()):
                                 self.dispatch_ok = False #so we will redispatch all
                                 r.to_satellites_nb_assigned[kind][cfg_id] = 0
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = True
@@ -194,25 +198,29 @@ class Dispatcher:
             kind = satellite.get_my_type()
             if satellite.alive:
                 cfg_ids = satellite.what_i_managed()
-                id_to_delete = []
-                for cfg_id in cfg_ids:
-                    print kind, ":", satellite.name, "manage cfg id:", cfg_id
-                #Ok, we search for realm that have the conf
-                    for r in self.realms:
-                        if cfg_id in r.confs:
-                        #Ok we've got the realm, we check it's to_satellites_managed_by
-                        #to see if reactionner is in. If not, we remove he sched_id for it
-                            if not satellite in r.to_satellites_managed_by[kind][cfg_id]:
-                                id_to_delete.append(cfg_id)
-            #Maybe we removed all cfg_id of this reactionner
-            #We can make it idle, no active and wait_new_conf
-                if len(id_to_delete) == len(cfg_ids):
-                    satellite.active = False
-                    satellite.wait_new_conf()
-                else:#It is not fully idle, just less cfg
-                    for id in id_to_delete:
-                        print "I ask to remove cfg", cfg_id, "from", satellite.name
-                        satellite.remove_from_conf(cfg_id)
+                #I do nto care about satellites that do nothing, it already
+                #do what I want :)
+                if len(cfg_ids) != 0:
+                    id_to_delete = []
+                    for cfg_id in cfg_ids:
+                        print kind, ":", satellite.name, "manage cfg id:", cfg_id
+                        #Ok, we search for realm that have the conf
+                        for r in self.realms:
+                            if cfg_id in r.confs:
+                                #Ok we've got the realm, we check it's to_satellites_managed_by
+                                #to see if reactionner is in. If not, we remove he sched_id for it
+                                if not satellite in r.to_satellites_managed_by[kind][cfg_id]:
+                                    id_to_delete.append(cfg_id)
+                    #Maybe we removed all cfg_id of this reactionner
+                    #We can make it idle, no active and wait_new_conf
+                    if len(id_to_delete) == len(cfg_ids):
+                        satellite.active = False
+                        print "I ask", satellite.name, "to wait a enw conf"
+                        satellite.wait_new_conf()
+                    else:#It is not fully idle, just less cfg
+                        for id in id_to_delete:
+                            print "I ask to remove cfg", cfg_id, "from", satellite.name
+                            satellite.remove_from_conf(cfg_id)
     
 
     #Manage the dispatch

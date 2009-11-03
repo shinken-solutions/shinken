@@ -143,7 +143,7 @@ class Realm(Itemgroup):
                 self.nb_reactionners += 1
         for realm in self.higher_realms:
             for reactionner in realm.reactionners:
-                if not reactionner.spare:
+                if not reactionner.spare and reactionner.manage_sub_realms:
                     self.nb_reactionners += 1
         print self.get_name(),"Count reactionners :", self.nb_reactionners
 
@@ -154,7 +154,8 @@ class Realm(Itemgroup):
             self.potential_reactionners.append(reactionner)
         for realm in self.higher_realms:
             for reactionner in realm.reactionners:
-                self.potential_reactionners.append(reactionner)
+                if reactionner.manage_sub_realms:
+                    self.potential_reactionners.append(reactionner)
         print self.get_name(),"Add potential reactionners :", len(self.potential_reactionners)
 
 
@@ -165,7 +166,7 @@ class Realm(Itemgroup):
                 self.nb_pollers += 1
         for realm in self.higher_realms:
             for poller in realm.pollers:
-                if not poler.spare:
+                if not poller.spare and poller.manage_sub_realms:
                     self.nb_pollers += 1
         print self.get_name(),"Count pollers :", self.nb_pollers
 
@@ -176,8 +177,10 @@ class Realm(Itemgroup):
             self.potential_pollers.append(poller)
         for realm in self.higher_realms:
             for poller in realm.pollers:
-                self.potential_pollers.append(poller)
+                if poller.manage_sub_realms:
+                    self.potential_pollers.append(poller)
         print self.get_name(),"Add potential pollers :", len(self.potential_pollers)
+
 
     def count_brokers(self):
         self.nb_brokers = 0
@@ -186,7 +189,7 @@ class Realm(Itemgroup):
                 self.nb_brokers += 1
         for realm in self.higher_realms:
             for broker in realm.brokers:
-                if not poler.spare:
+                if not broker.spare and broker.manage_sub_realms:
                     self.nb_brokers += 1
         print self.get_name(),"Count brokers :", self.nb_brokers
 
@@ -197,7 +200,8 @@ class Realm(Itemgroup):
             self.potential_brokers.append(broker)
         for realm in self.higher_realms:
             for broker in realm.brokers:
-                self.potential_brokers.append(broker)
+                if broker.manage_sub_realms:
+                    self.potential_brokers.append(broker)
         print self.get_name(),"Add potential brokers :", len(self.potential_brokers)
 
         
@@ -232,21 +236,38 @@ class Realm(Itemgroup):
     def prepare_for_satellites_conf(self):
         self.to_satellites = {}
         self.to_satellites['reactionner'] = {}
+        self.to_satellites['poller'] = {}
+        self.to_satellites['broker'] = {}
 
         self.to_satellites_nb_assigned = {}
         self.to_satellites_nb_assigned['reactionner'] = {}
+        self.to_satellites_nb_assigned['poller'] = {}
+        self.to_satellites_nb_assigned['broker'] = {}
 
         self.to_satellites_nb_assigned = {}
         self.to_satellites_nb_assigned['reactionner'] = {}
+        self.to_satellites_nb_assigned['poller'] = {}
+        self.to_satellites_nb_assigned['broker'] = {}
 
         self.to_satellites_need_dispatch = {}
         self.to_satellites_need_dispatch['reactionner'] = {}
+        self.to_satellites_need_dispatch['poller'] = {}
+        self.to_satellites_need_dispatch['broker'] = {}
 
         self.to_satellites_managed_by = {}
         self.to_satellites_managed_by['reactionner'] = {}
+        self.to_satellites_managed_by['poller'] = {}
+        self.to_satellites_managed_by['broker'] = {}
 
         self.count_reactionners()
         self.fill_potential_reactionners()
+        for r in self.potential_reactionners:
+            print "Eligible", self.get_name(), r.name
+        self.count_pollers()
+        self.fill_potential_pollers()
+        self.count_brokers()
+        self.fill_potential_brokers()
+
 
 
 class Realms(Itemgroups):
@@ -297,17 +318,6 @@ class Realms(Itemgroups):
         for p in self.itemgroups.values():
             for sub_p in p.realm_members:
                 sub_p.higher_realms.append(p)
-
-#    #Add a host string to a hostgroup member
-#    #if the host group do not exist, create it
-#    def add_member(self, hname, hgname):
-#        id = self.find_id_by_name(hgname)
-#        #if the id do not exist, create the hg
-#        if id == None:
-#            hg = Hostgroup({'hostgroup_name' : hgname, 'alias' : hgname, 'members' :  hname})
-#            self.add(hg)
-#        else:
-#            self.itemgroups[id].add_string_member(hname)
 
 
     #Use to fill members with hostgroup_members

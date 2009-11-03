@@ -47,8 +47,6 @@ class SatelliteLink(Item):
 
 
 
-
-
     def create_connexion(self):
         self.uri = "PYROLOC://"+self.address+":"+str(self.port)+"/ForArbiter"
         self.con = Pyro.core.getProxyForURI(self.uri)

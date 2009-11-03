@@ -30,7 +30,9 @@ class PollerLink(SatelliteLink):
     properties={'name' : {'required' : True },
                 'scheduler_name' : {'required' : True},
                 'address' : {'required' : True},
-                'port' : {'required':  True, 'pythonize': to_int}
+                'port' : {'required':  True, 'pythonize': to_int},
+                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
+                'manage_sub_realms' : {'required':  False, 'default' : '0', 'pythonize': to_bool}
                 }
  
     running_properties = {'is_active' : {'default' : False},

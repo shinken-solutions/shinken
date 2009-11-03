@@ -565,6 +565,9 @@ class Config(Item):
         self.hosts.fill_default()
         self.contacts.fill_default()
         self.services.fill_default()
+        self.reactionners.fill_default()
+        self.pollers.fill_default()
+        self.brokers.fill_default()
 
 
     #Link templates with elements

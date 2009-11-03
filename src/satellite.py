@@ -106,6 +106,7 @@ class IForArbiter(Pyro.core.ObjBase):
 	#anything or what??
 	def wait_new_conf(self):
 		print "Arbiter want me to wait a new conf"
+		self.schedulers.clear()
 		self.app.have_conf = False
 
 
