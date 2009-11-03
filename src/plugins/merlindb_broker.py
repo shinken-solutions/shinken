@@ -89,7 +89,7 @@ class Merlindb_broker:
             self.db_cursor.execute(query)
             self.db.commit ()
         except IntegrityError as exp:
-            print "[Merlindb] Warning : a query raise an integrity error : %s, %s", (query, exp) 
+            print "[Merlindb] Warning : a query raise an integrity error : %s, %s" % (query, exp) 
 
 
     #Create a INSERT query in table with all data of data (a dict)
