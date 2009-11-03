@@ -151,14 +151,15 @@ class Dispatcher:
                     print "CFG", cfg_id, "is unmanaged!!"
                 #END DBG
                 try:
-                    for reactionner in r.to_satellites_managed_by['reactionner'][cfg_id]:
-                    #Fu%k. I thought that this reactionner manage it
-                    #but ot doesn't. I ask a full redispatch of these cfg
-                        if reactionner.alive and cfg_id not in reactionner.what_i_managed():
-                            self.dispatch_ok = False #so we will redispatch all
-                            r.to_satellites_nb_assigned['reactionner'][cfg_id] = 0
-                            r.to_satellites_need_dispatch['reactionner'][cfg_id]  = True
-                            r.to_satellites_managed_by['reactionner'][cfg_id] = []
+                    for kind in ['reactionner']:
+                        for satellite in r.to_satellites_managed_by[kind][cfg_id]:
+                            if satellite.alive and cfg_id not in satellite.what_i_managed():
+                                #Fu%k. I thought that this reactionner manage it
+                                #but ot doesn't. I ask a full redispatch of these cfg
+                                self.dispatch_ok = False #so we will redispatch all
+                                r.to_satellites_nb_assigned[kind][cfg_id] = 0
+                                r.to_satellites_need_dispatch[kind][cfg_id]  = True
+                                r.to_satellites_managed_by[kind][cfg_id] = []
                 #At the first pass, there is no cfg_id in to_satellites_managed_by
                 except KeyError:
                     pass
@@ -189,28 +190,29 @@ class Dispatcher:
         
         #I ask satellite witch sched_id they manage. If I am not agree, I ask
         #them to remove it
-        for reactionner in self.reactionners:
-            if reactionner.alive:
-                cfg_ids = reactionner.what_i_managed()
+        for satellite in self.reactionners:
+            kind = satellite.get_my_type()
+            if satellite.alive:
+                cfg_ids = satellite.what_i_managed()
                 id_to_delete = []
                 for cfg_id in cfg_ids:
-                    print "Reactionner", reactionner.name, "manage cfg id:", cfg_id
+                    print kind, ":", satellite.name, "manage cfg id:", cfg_id
                 #Ok, we search for realm that have the conf
                     for r in self.realms:
                         if cfg_id in r.confs:
                         #Ok we've got the realm, we check it's to_satellites_managed_by
                         #to see if reactionner is in. If not, we remove he sched_id for it
-                            if not reactionner in r.to_satellites_managed_by['reactionner'][cfg_id]:
+                            if not satellite in r.to_satellites_managed_by[kind][cfg_id]:
                                 id_to_delete.append(cfg_id)
             #Maybe we removed all cfg_id of this reactionner
             #We can make it idle, no active and wait_new_conf
                 if len(id_to_delete) == len(cfg_ids):
-                    reactionner.active = False
-                    reactionner.wait_new_conf()
+                    satellite.active = False
+                    satellite.wait_new_conf()
                 else:#It is not fully idle, just less cfg
                     for id in id_to_delete:
-                        print "I ask to remove cfg", cfg_id, "from", reactionner.name
-                        reactionner.remove_from_conf(cfg_id)
+                        print "I ask to remove cfg", cfg_id, "from", satellite.name
+                        satellite.remove_from_conf(cfg_id)
     
 
     #Manage the dispatch
@@ -270,14 +272,15 @@ class Dispatcher:
                                     
                                     #Now we generate the conf for reactionners:
                                     cfg_id = conf.id
-                                    r.to_satellites['reactionner'][cfg_id] = sched.give_satellite_cfg()
-                                    r.to_satellites_nb_assigned['reactionner'][cfg_id] = 0
-                                    r.to_satellites_need_dispatch['reactionner'][cfg_id]  = True
-                                    r.to_satellites_managed_by['reactionner'][cfg_id] = []
-                                    print "Now to_reactionners:", r.nb_reactionners
-                                    print r.to_satellites['reactionner']
-                                    print r.to_satellites_nb_assigned['reactionner']
-                                    print r.to_satellites_need_dispatch['reactionner']
+                                    for kind in ['reactionner']:
+                                        r.to_satellites[kind][cfg_id] = sched.give_satellite_cfg()
+                                        r.to_satellites_nb_assigned[kind][cfg_id] = 0
+                                        r.to_satellites_need_dispatch[kind][cfg_id]  = True
+                                        r.to_satellites_managed_by[kind][cfg_id] = []
+                                        print "Now to_satellites:"
+                                        print r.to_satellites[kind]
+                                        print r.to_satellites_nb_assigned[kind]
+                                        print r.to_satellites_need_dispatch[kind]
                                 else:
                                     print '[',r.get_name(),']', "Dispatch fault for sched", sched.name
                             else:
@@ -307,40 +310,39 @@ class Dispatcher:
             for r in self.realms:
                 for cfg in r.confs.values():
                     cfg_id = cfg.id
-                    if r.to_satellites_need_dispatch['reactionner'][cfg_id]:
-                        print "Dispatching", r.get_name(), "reactionners"
-                        cfg_for_reactionner_part = r.to_satellites['reactionner'][cfg_id]
-                        cfg_for_reactionner = {'schedulers' : {cfg_id : cfg_for_reactionner_part}}
-                        print "Config for reactionners:", cfg_for_reactionner
-                        #make copies of potential_react lsit because we will pop items
-                        reactionners = []
-                        for reactionner in r.potential_reactionners:
-                            reactionners.append(reactionner)
-                        reactionners.sort(alive_then_spare_then_deads)
-                        print "Order:"
-                        for reactionner in reactionners:
-                            print reactionner.name, ": is sprare?", reactionner.spare
+                    for kind in ['reactionner']:
+                        if r.to_satellites_need_dispatch[kind][cfg_id]:
+                            print "Dispatching", r.get_name(), kind+'s'
+                            cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
+                            cfg_for_satellite = {'schedulers' : {cfg_id : cfg_for_satellite_part}}
+                            print "Config for ", kind+'s',":", cfg_for_satellite
+                            #make copies of potential_react list for sort
+                            satellites = []
+                            for satellite in r.get_potential_satellites_by_type(kind):#potential_reactionners:
+                                satellites.append(satellite)
+                            satellites.sort(alive_then_spare_then_deads)
+                            print "Order:"
+                            for satellite in satellites:
+                                print satellite.name, ": is spare?", satellite.spare
 
-                        #Now we dispatch cfg to evry one ask for it
-                        nb_cfg_sent = 0
-                        for reactionner in reactionners:
-                            if nb_cfg_sent < r.nb_reactionners:
-                                print '[',r.get_name(),']',"Trying to send conf to reactionner", reactionner.name
-                                is_sent = reactionner.put_conf(cfg_for_reactionner)
-                                if is_sent:
-                                    reactionner.need_conf = False
-                                    reactionner.active = True
-                                    print '[',r.get_name(),']',"Dispatch OK of for conf", cfg_id," in reactionner", reactionner.name
-                                    nb_cfg_sent += 1
-                                    r.to_satellites_managed_by['reactionner'][cfg_id].append(reactionner)
+                            #Now we dispatch cfg to evry one ask for it
+                            nb_cfg_sent = 0
+                            for satellite in satellites:
+                                if nb_cfg_sent < r.get_nb_of_must_have_satellites(kind):#nb_reactionners:
+                                    print '[',r.get_name(),']',"Trying to send conf to ", kind, satellite.name
+                                    is_sent = satellite.put_conf(cfg_for_satellite)
+                                    if is_sent:
+                                        satellite.need_conf = False
+                                        satellite.active = True
+                                        print '[',r.get_name(),']',"Dispatch OK of for conf", cfg_id," in", kind, satellite.name
+                                        nb_cfg_sent += 1
+                                        r.to_satellites_managed_by[kind][cfg_id].append(satellite)
                             #else:
-                            #    #I've got enouth reactionner, the next one are spare for me
-                            #    print "Need to remove cfg", cfg_id, "from", reactionner.name
-                            #    reactionner.remove_from_conf(cfg_id)
-                        r.to_satellites_nb_assigned['reactionner'][cfg_id] = nb_cfg_sent
-                        if nb_cfg_sent == r.nb_reactionners:
-                            print "OK, no more reactionner sent need"
-                            r.to_satellites_need_dispatch['reactionner'][cfg_id]  = False
+                            #    #I've got enouth satellite, the next one are spare for me
+                            r.to_satellites_nb_assigned[kind][cfg_id] = nb_cfg_sent
+                            if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):#nb_reactionners:
+                                print "OK, no more", kind, "sent need"
+                                r.to_satellites_need_dispatch[kind][cfg_id]  = False
                             
 
             #We put on the satellites only if every one need it 

@@ -23,6 +23,7 @@ from item import Items
 
 class BrokerLink(SatelliteLink):
     id = 0
+    my_type = 'broker'
     properties={'name' : {'required' : True },
                 'scheduler_name' : {'required' : True},
                 'address' : {'required' : True},

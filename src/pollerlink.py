@@ -26,6 +26,7 @@ from item import Items
 
 class PollerLink(SatelliteLink):
     id = 0
+    my_type = 'poller'
     properties={'name' : {'required' : True },
                 'scheduler_name' : {'required' : True},
                 'address' : {'required' : True},
