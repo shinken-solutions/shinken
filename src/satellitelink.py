@@ -66,16 +66,13 @@ class SatelliteLink(Item):
             return True
         except Pyro.errors.URIError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
         except Pyro.errors.ProtocolError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
 
 
     def is_alive(self):
-        #print "Trying to see if ", self.address+":"+str(self.port), "is alive"
         try:
             if self.con == None:
                 self.create_connexion()
@@ -94,68 +91,57 @@ class SatelliteLink(Item):
     def wait_new_conf(self):
         if self.con == None:
             self.create_connexion()
-        #print "Connexion is OK, now we put conf", conf
-            
         try:
             self.con.wait_new_conf()
             return True
         except Pyro.errors.URIError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
         except Pyro.errors.ProtocolError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
 
     def have_conf(self):
         if self.con == None:
             self.create_connexion()
-        #print "Connexion is OK, now we put conf", conf
             
         try:
             return self.con.have_conf()
         except Pyro.errors.URIError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
         except Pyro.errors.ProtocolError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
 
     def remove_from_conf(self, sched_id):
         if self.con == None:
             self.create_connexion()
-        #print "Connexion is OK, now we put conf", conf
         try:
             self.con.remove_from_conf(sched_id)
             return True
         except Pyro.errors.URIError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
         except Pyro.errors.ProtocolError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return False
 
     def what_i_managed(self):
         if self.con == None:
             self.create_connexion()
-        #print "Connexion is OK, now we put conf", conf
         try:
             return self.con.what_i_managed()
         except Pyro.errors.URIError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return []
         except Pyro.errors.ProtocolError as exp:
             self.con = None
-            #print self.name, "FUCK !!!!!!!!!!!!", exp
             return []
 
 
+    def prepare_for_conf(self):
+        self.cfg = {'schedulers' : {}} #i : {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
 
 
 

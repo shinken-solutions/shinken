@@ -44,11 +44,12 @@ class Dispatcher:
         self.pollers = self.conf.pollers
         self.dispatch_queue = {'schedulers' : [], 'reactionners' : [],
                                'brokers' : [], 'pollers' : []}
-        self.elements = []
+        self.elements = [] #all elements, sched and satellites
+        self.satellites = [] #only satellites
+
         for cfg in self.conf.confs.values():
             cfg.is_assigned = False
             cfg.assigned_to = None
-            #self.elements.append(cfg)
         for sched in self.schedulers:
             sched.is_active = False
             sched.alive = False
@@ -60,32 +61,31 @@ class Dispatcher:
             reactionner.alive = False
             reactionner.need_conf = False
             self.elements.append(reactionner)
+            self.satellites.append(reactionner)
         for poller in self.pollers:
             poller.is_active = False
             poller.alive = False
             poller.need_conf = True
             self.elements.append(poller)
+            self.satellites.append(poller)
         for broker in self.brokers:
             broker.is_active = False
             broker.alive = False
             broker.need_conf = True
             self.elements.append(broker)
+            self.satellites.append(broker)
         self.dispatch_ok = False
         self.first_dispatch_done = False
 
 
-        #Prepare the reactionners confs
-        for reactionner in self.reactionners:
-            reactionner.cfg = {'schedulers' : {}} #i : {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
+        #Prepare the satellites confs
+        for satellite in self.satellites:
+            satellite.prepare_for_conf()
 
-        #Now realm will have a cfg pool for reactionners
+        #Now realm will have a cfg pool for satellites
         for r in self.realms:
-            r.to_reactionners = {}
-            r.to_reactionners_nb_assigned = {}
-            r.to_reactionners_need_dispatch = {}
-            r.to_reactionners_managed_by = {}
-            r.count_reactionners()
-            r.fill_potential_reactionners()
+            r.prepare_for_satellites_conf()
+
 
     #checks alive elements
     def check_alive(self):
@@ -151,15 +151,15 @@ class Dispatcher:
                     print "CFG", cfg_id, "is unmanaged!!"
                 #END DBG
                 try:
-                    for reactionner in r.to_reactionners_managed_by[cfg_id]:
+                    for reactionner in r.to_satellites_managed_by['reactionner'][cfg_id]:
                     #Fu%k. I thought that this reactionner manage it
                     #but ot doesn't. I ask a full redispatch of these cfg
                         if reactionner.alive and cfg_id not in reactionner.what_i_managed():
                             self.dispatch_ok = False #so we will redispatch all
-                            r.to_reactionners_nb_assigned[cfg_id] = 0
-                            r.to_reactionners_need_dispatch[cfg_id]  = True
-                            r.to_reactionners_managed_by[cfg_id] = []
-                #At the first pass, there is no cfg_id in to_reactionners_managed_by
+                            r.to_satellites_nb_assigned['reactionner'][cfg_id] = 0
+                            r.to_satellites_need_dispatch['reactionner'][cfg_id]  = True
+                            r.to_satellites_managed_by['reactionner'][cfg_id] = []
+                #At the first pass, there is no cfg_id in to_satellites_managed_by
                 except KeyError:
                     pass
 
@@ -198,9 +198,9 @@ class Dispatcher:
                 #Ok, we search for realm that have the conf
                     for r in self.realms:
                         if cfg_id in r.confs:
-                        #Ok we've got the realm, we check it's to_reactionners_managed_by
+                        #Ok we've got the realm, we check it's to_satellites_managed_by
                         #to see if reactionner is in. If not, we remove he sched_id for it
-                            if not reactionner in r.to_reactionners_managed_by[cfg_id]:
+                            if not reactionner in r.to_satellites_managed_by['reactionner'][cfg_id]:
                                 id_to_delete.append(cfg_id)
             #Maybe we removed all cfg_id of this reactionner
             #We can make it idle, no active and wait_new_conf
@@ -270,14 +270,14 @@ class Dispatcher:
                                     
                                     #Now we generate the conf for reactionners:
                                     cfg_id = conf.id
-                                    r.to_reactionners[cfg_id] = sched.give_satellite_cfg()
-                                    r.to_reactionners_nb_assigned[cfg_id] = 0
-                                    r.to_reactionners_need_dispatch[cfg_id]  = True
-                                    r.to_reactionners_managed_by[cfg_id] = []
+                                    r.to_satellites['reactionner'][cfg_id] = sched.give_satellite_cfg()
+                                    r.to_satellites_nb_assigned['reactionner'][cfg_id] = 0
+                                    r.to_satellites_need_dispatch['reactionner'][cfg_id]  = True
+                                    r.to_satellites_managed_by['reactionner'][cfg_id] = []
                                     print "Now to_reactionners:", r.nb_reactionners
-                                    print r.to_reactionners
-                                    print r.to_reactionners_nb_assigned
-                                    print r.to_reactionners_need_dispatch
+                                    print r.to_satellites['reactionner']
+                                    print r.to_satellites_nb_assigned['reactionner']
+                                    print r.to_satellites_need_dispatch['reactionner']
                                 else:
                                     print '[',r.get_name(),']', "Dispatch fault for sched", sched.name
                             else:
@@ -307,9 +307,9 @@ class Dispatcher:
             for r in self.realms:
                 for cfg in r.confs.values():
                     cfg_id = cfg.id
-                    if r.to_reactionners_need_dispatch[cfg_id]:
+                    if r.to_satellites_need_dispatch['reactionner'][cfg_id]:
                         print "Dispatching", r.get_name(), "reactionners"
-                        cfg_for_reactionner_part = r.to_reactionners[cfg_id]
+                        cfg_for_reactionner_part = r.to_satellites['reactionner'][cfg_id]
                         cfg_for_reactionner = {'schedulers' : {cfg_id : cfg_for_reactionner_part}}
                         print "Config for reactionners:", cfg_for_reactionner
                         #make copies of potential_react lsit because we will pop items
@@ -332,15 +332,15 @@ class Dispatcher:
                                     reactionner.active = True
                                     print '[',r.get_name(),']',"Dispatch OK of for conf", cfg_id," in reactionner", reactionner.name
                                     nb_cfg_sent += 1
-                                    r.to_reactionners_managed_by[cfg_id].append(reactionner)
+                                    r.to_satellites_managed_by['reactionner'][cfg_id].append(reactionner)
                             #else:
                             #    #I've got enouth reactionner, the next one are spare for me
                             #    print "Need to remove cfg", cfg_id, "from", reactionner.name
                             #    reactionner.remove_from_conf(cfg_id)
-                        r.to_reactionners_nb_assigned[cfg_id] = nb_cfg_sent
+                        r.to_satellites_nb_assigned['reactionner'][cfg_id] = nb_cfg_sent
                         if nb_cfg_sent == r.nb_reactionners:
                             print "OK, no more reactionner sent need"
-                            r.to_reactionners_need_dispatch[cfg_id]  = False
+                            r.to_satellites_need_dispatch['reactionner'][cfg_id]  = False
                             
 
             #We put on the satellites only if every one need it 

@@ -158,6 +158,88 @@ class Realm(Itemgroup):
         print self.get_name(),"Add potential reactionners :", len(self.potential_reactionners)
 
 
+    def count_pollers(self):
+        self.nb_pollers = 0
+        for poller in self.pollers:
+            if not poller.spare:
+                self.nb_pollers += 1
+        for realm in self.higher_realms:
+            for poller in realm.pollers:
+                if not poler.spare:
+                    self.nb_pollers += 1
+        print self.get_name(),"Count pollers :", self.nb_pollers
+
+
+    def fill_potential_pollers(self):
+        self.potential_pollers = []
+        for poller in self.pollers:
+            self.potential_pollers.append(poller)
+        for realm in self.higher_realms:
+            for poller in realm.pollers:
+                self.potential_pollers.append(poller)
+        print self.get_name(),"Add potential pollers :", len(self.potential_pollers)
+
+    def count_brokers(self):
+        self.nb_brokers = 0
+        for broker in self.brokers:
+            if not broker.spare:
+                self.nb_brokers += 1
+        for realm in self.higher_realms:
+            for broker in realm.brokers:
+                if not poler.spare:
+                    self.nb_brokers += 1
+        print self.get_name(),"Count brokers :", self.nb_brokers
+
+
+    def fill_potential_brokers(self):
+        self.potential_brokers = []
+        for broker in self.brokers:
+            self.potential_brokers.append(broker)
+        for realm in self.higher_realms:
+            for broker in realm.brokers:
+                self.potential_brokers.append(broker)
+        print self.get_name(),"Add potential brokers :", len(self.potential_brokers)
+
+        
+    #Return the list of satellites of a certain type
+    #like reactionner -> self.reactionners
+    def get_satellties_by_type(self, type):
+        if hasattr(self, type+'s'):
+            return getattr(self, type+'s')
+        else:
+            print "Sorry I do not have this kind of satellites : ", type
+            return []
+
+    #Return the list of potentials satellites of a certain type
+    #like reactionner -> self.potential_reactionners
+    def get_potential_satellites_by_type(self, type):
+        if hasattr(self, 'potential_'+type+'s'):
+            return getattr(self, 'potential_'+type+'s')
+        else:
+            print "Sorry I do not have this kind of satellites : ", type
+            return []
+
+
+    #Fill dict of realms for managing the satellites confs
+    def prepare_for_satellites_conf(self):
+        self.to_satellites = {}
+        self.to_satellites['reactionner'] = {}
+
+        self.to_satellites_nb_assigned = {}
+        self.to_satellites_nb_assigned['reactionner'] = {}
+
+        self.to_satellites_nb_assigned = {}
+        self.to_satellites_nb_assigned['reactionner'] = {}
+
+        self.to_satellites_need_dispatch = {}
+        self.to_satellites_need_dispatch['reactionner'] = {}
+
+        self.to_satellites_managed_by = {}
+        self.to_satellites_managed_by['reactionner'] = {}
+
+        self.count_reactionners()
+        self.fill_potential_reactionners()
+
 
 class Realms(Itemgroups):
     name_property = "realm_name" # is used for finding hostgroups
