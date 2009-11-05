@@ -17,7 +17,16 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from pexpect import *
+import os
+
+#Unix and windows do not have the same import
+if os.name == 'nt':
+    import subprocess, datetime, os, time, signal
+    import ctypes
+    TerminateProcess = ctypes.windll.kernel32.TerminateProcess
+else:
+    from pexpect import *
+
 from action import Action
 from brok import Brok
 

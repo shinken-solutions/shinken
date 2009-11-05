@@ -295,6 +295,13 @@ class Dispatcher:
                                 print '[',r.get_name(),']',sched.name, "do not need conf, sorry"
                         except IndexError: #No more schedulers.. not good, no loop
                             need_loop = False
+                            #The conf donot need to be dispatch
+                            cfg_id = conf.id
+                            for kind in ['reactionner', 'poller', 'broker']:
+                                r.to_satellites[kind][cfg_id] = None
+                                r.to_satellites_nb_assigned[kind][cfg_id] = 0
+                                r.to_satellites_need_dispatch[kind][cfg_id]  = False
+                                r.to_satellites_managed_by[kind][cfg_id] = []
 
             #We pop conf to dispatch, so it must be no more conf...
             conf_to_dispatch = [cfg for cfg in self.conf.confs.values() if cfg.is_assigned==False]

@@ -336,5 +336,6 @@ class Realms(Itemgroups):
 
         #We clean the tags
         for tmp_p in self.itemgroups.values():
-            del tmp_p.rec_tag
+            if hasattr(tmp_p, 'rec_tag'):
+                del tmp_p.rec_tag
             del tmp_p.already_explode

@@ -17,8 +17,16 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import os
 
-from pexpect import *
+#Unix and windows do not have the same import
+if os.name == 'nt':
+    import subprocess, datetime, os, time, signal
+    import ctypes
+    TerminateProcess = ctypes.windll.kernel32.TerminateProcess
+else:
+    from pexpect import *
+
 from action import Action
 
 
@@ -107,8 +115,45 @@ class Check(Action):
         if len(elts) > 1:
             self.long_output = '\n'.join(elts[1:])
 
-    
+            
     def execute(self):
+        if os.name == 'nt':
+            self.execute_windows()
+        else:
+            self.execute_unix()
+
+            
+    def execute_windows(self):
+        """call shell-command and either return its output or kill it
+        if it doesn't normally exit within timeout seconds and return None"""
+        timeout = 5
+        self.status = 'lanched'
+        self.check_time = time.time()
+        start = datetime.datetime.now()
+        try:
+            process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except WindowsError:
+            print "On le kill"
+            self.status = 'timeout'
+            self.execution_time = time.time() - self.check_time
+            return
+        while process.poll() is None:
+            time.sleep(0.01)
+            now = datetime.datetime.now()
+            if (now - start).seconds> timeout:
+                TerminateProcess(int(process._handle), -1)
+                print "On le kill"
+                self.status = 'timeout'
+                self.execution_time = time.time() - self.check_time
+                return
+        self.get_outputs(process.stdout.read())
+        self.exit_status = process.returncode
+        print "Output:", self.output, self.long_output, "exit status", self.exit_status
+        self.status = 'done'
+        self.execution_time = time.time() - self.check_time
+
+
+    def execute_unix(self):
         #print "Launching command", self.command
         child = spawn ('/bin/sh -c "%s"' % self.command)
         self.status = 'lanched'
