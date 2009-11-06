@@ -153,6 +153,15 @@ class Dispatcher:
                 #END DBG
                 try:
                     for kind in ['reactionner', 'poller', 'broker']:
+                        if len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind):
+                            print "Warning : Missing satellite", kind, "for conf :", cfg_id
+                            #TODO : less violent! Must resent to just who need?
+                            #must be catch by satellite who see that it already have the conf (hash)
+                            #and do nothing
+                            self.dispatch_ok = False #so we will redispatch all
+                            r.to_satellites_nb_assigned[kind][cfg_id] = 0
+                            r.to_satellites_need_dispatch[kind][cfg_id]  = True
+                            r.to_satellites_managed_by[kind][cfg_id] = []
                         for satellite in r.to_satellites_managed_by[kind][cfg_id]:
                             #Maybe the sat was mark not alive, but still in
                             #to_satellites_managed_by that mean that a new dispatch

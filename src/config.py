@@ -636,6 +636,9 @@ class Config(Item):
 
 
     #check if elements are correct or no (fill with defaults, etc)
+    #Warning : this function call be called from a Arbiter AND
+    #from and scheduler. The first one got everything, the second
+    #do not have the satellites.
     def is_correct(self):
         self.hosts.is_correct()
         self.hostgroups.is_correct()
@@ -643,9 +646,12 @@ class Config(Item):
         self.contactgroups.is_correct()
         self.schedulerlinks.is_correct()
         self.services.is_correct()
-        self.reactionners.is_correct()
-        self.pollers.is_correct()
-        self.brokers.is_correct()
+        if hasattr(self, 'reactionners'):
+            self.reactionners.is_correct()
+        if hasattr(self, 'pollers'):
+            self.pollers.is_correct()
+        if hasattr(self, 'brokers'):
+            self.brokers.is_correct()
 
 
     #We've got strings (like 1) but we want pthon elements, like True
