@@ -153,6 +153,8 @@ class Dispatcher:
                 #END DBG
                 try:
                     for kind in ['reactionner', 'poller', 'broker']:
+                        #We must have the good number of satellite or we are not happy
+                        #So we are sure to raise a dispatch every loop a satellite is missing
                         if len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind):
                             print "Warning : Missing satellite", kind, "for conf :", cfg_id
                             #TODO : less violent! Must resent to just who need?
