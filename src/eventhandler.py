@@ -102,23 +102,23 @@ class EventHandler(Action):
             self.long_output = '\n'.join(elts[1:])
 
     
-    def execute(self):
-        print "Launching EVENT HANDLER command", self.command
-        child = spawn ('/bin/sh -c "%s"' % self.command)
-        self.status = 'lanched'
-        self.check_time = time.time()
-
-        try:
-            child.expect_exact(EOF, timeout=5)
-            self.get_outputs(child.before)
-            child.terminate(force=True)
-            self.exit_status = child.exitstatus
-            self.status = 'done'
-        except TIMEOUT:
-            print "On le kill"
-            self.status = 'timeout'
-            child.terminate(force=True)
-        self.execution_time = time.time() - self.check_time
+#    def execute(self):
+#        print "Launching EVENT HANDLER command", self.command
+#        child = spawn ('/bin/sh -c "%s"' % self.command)
+#        self.status = 'lanched'
+#        self.check_time = time.time()
+#
+#        try:
+#            child.expect_exact(EOF, timeout=5)
+#            self.get_outputs(child.before)
+#            child.terminate(force=True)
+#            self.exit_status = child.exitstatus
+#            self.status = 'done'
+#        except TIMEOUT:
+#            print "On le kill"
+#            self.status = 'timeout'
+#            child.terminate(force=True)
+#        self.execution_time = time.time() - self.check_time
 
 
     def is_launchable(self, t):

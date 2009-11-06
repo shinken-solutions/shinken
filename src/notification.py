@@ -116,21 +116,21 @@ class Notification(Action):
 
 
     
-    def execute(self):
-        print "Notification %s" % self.command
-        child = spawn ('/bin/sh -c "%s"' % self.command)
-        self.status = 'lanched'
-        
-        try:
-            child.expect_exact(EOF, timeout=5)
-            self.output = child.before
-            child.terminate(force=True)
-            self.exit_status = child.exitstatus
-            self.status = 'done'
-        except TIMEOUT:
-            print "On le kill"
-            self.status = 'timeout'
-            child.terminate(force=True)
+#    def execute(self):
+#        print "Notification %s" % self.command
+#        child = spawn ('/bin/sh -c "%s"' % self.command)
+#        self.status = 'lanched'
+#        
+#        try:
+#            child.expect_exact(EOF, timeout=5)
+#            self.output = child.before
+#            child.terminate(force=True)
+#            self.exit_status = child.exitstatus
+#            self.status = 'done'
+#        except TIMEOUT:
+#            print "On le kill"
+#            self.status = 'timeout'
+#            child.terminate(force=True)
 
 
     def get_return_from(self, c):
