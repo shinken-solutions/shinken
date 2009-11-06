@@ -565,9 +565,59 @@ class Config(Item):
         self.hosts.fill_default()
         self.contacts.fill_default()
         self.services.fill_default()
+        #first we create missing sat, so no other sat will
+        #be created after this point
+        self.fill_default_satellites()
+        #now we have all elements, we can create a default 
+        #realm if need and it will be taged to sat that do
+        #not have an realm
+        self.fill_default_realm()
         self.reactionners.fill_default()
         self.pollers.fill_default()
         self.brokers.fill_default()
+        self.schedulerlinks.fill_default()
+
+
+        
+    #Will check if a realm is defined, if not
+    #Create a new one (default) and tag everyone that do not have
+    #a realm prop to be put in this realm
+    def fill_default_realm(self):
+        if len(self.realms) == 0:
+            #Create a default realm with default value =1
+            #so all hosts without realm wil be link with it
+            default = Realm({'realm_name' : 'Default', 'default' : '1'})
+            self.realms = Realms([default])
+            print "I make a new realm", self.realms
+            lists = [self.pollers, self.brokers, self.reactionners, self.schedulerlinks]
+            for l in lists:
+                for elt in l:
+                    if not hasattr(elt, 'realm'):
+                        elt.realm = 'Default'
+                        print "Tagging ", elt.get_name(), 'with', default.get_name()
+                    else:
+                        print "Not tagging",  elt.get_name(), ' because it gots:', elt.realm
+
+
+    #If a satellite is missing, we add them in the localhost
+    #with defaults values
+    def fill_default_satellites(self):
+        if len(self.schedulerlinks) == 0:
+            print "Warning : there is no scheduler, I add one in localhost:7768"
+            s = SchedulerLink({'name' : 'Default-Scheduler', 'address' : 'localhost', 'port' : '7768'})
+            self.schedulerlinks = SchedulerLinks([s])
+        if len(self.pollers) == 0:
+            print "Warning : there is no poller, I add one in localhost:7771"
+            p = PollerLink({'name' : 'Default-Poller', 'address' : 'localhost', 'port' : '7771'})
+            self.pollers = PollerLinks([p])
+        if len(self.reactionners) == 0:
+            print "Warning : there is no reactionner, I add one in localhost:7769"
+            r = ReactionnerLink({'name' : 'Default-Reactionner', 'address' : 'localhost', 'port' : '7769'})
+            self.reactionners = ReactionnerLinks([r])
+        if len(self.brokers) == 0:
+            print "Warning : there is no broker, I add one in localhost:7772"
+            b = BrokerLink({'name' : 'Default-Broker', 'address' : 'localhost', 'port' : '7772'})
+            self.brokers = BrokerLinks([b])
 
 
     #Link templates with elements
@@ -593,6 +643,9 @@ class Config(Item):
         self.contactgroups.is_correct()
         self.schedulerlinks.is_correct()
         self.services.is_correct()
+        self.reactionners.is_correct()
+        self.pollers.is_correct()
+        self.brokers.is_correct()
 
 
     #We've got strings (like 1) but we want pthon elements, like True

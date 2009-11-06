@@ -46,6 +46,25 @@ class SatelliteLink(Item):
         pass
 
 
+    #Check is required prop are set:
+    #contacts OR contactgroups is need
+    def is_correct(self):
+        state = True #guilty or not? :)
+        cls = self.__class__
+
+        special_properties = ['realm']
+        for prop in cls.properties:
+            if prop not in special_properties:
+                if not hasattr(self, prop) and cls.properties[prop]['required']:
+                    print self.get_name(), " : I do not have", prop
+                    state = False #Bad boy...
+        #Ok now we manage special cases...
+        if not hasattr(self, 'realm') or  hasattr(self, 'realm') and self.realm == None:
+            print self.get_name()," : I do not have a valid realm"
+            state = False
+        return state
+
+
 
     def create_connexion(self):
         self.uri = "PYROLOC://"+self.address+":"+str(self.port)+"/ForArbiter"
@@ -160,6 +179,6 @@ class SatelliteLinks(Items):
             p_name = s.realm.strip()
             p = realms.find_by_name(p_name)
             s.realm = p
-            print "Me", s.get_name(), "is linked with realm", s.realm.get_name()
             if p is not None:
+                print "Me", s.get_name(), "is linked with realm", s.realm.get_name()
                 s.register_to_my_realm()

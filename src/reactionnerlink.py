@@ -25,7 +25,6 @@ class ReactionnerLink(SatelliteLink):
     id = 0
     my_type = 'reactionner'
     properties={'name' : {'required' : True },
-                'scheduler_name' : {'required' : True},
                 'address' : {'required' : True},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},

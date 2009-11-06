@@ -274,6 +274,11 @@ class Realms(Itemgroups):
     name_property = "realm_name" # is used for finding hostgroups
     inner_class = Realm
 
+
+    def __len__(self):
+        return len(self.itemgroups)
+
+
     def get_members_by_name(self, pname):
         id = self.find_id_by_name(pname)
         if id == None:

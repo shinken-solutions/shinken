@@ -25,7 +25,6 @@ class BrokerLink(SatelliteLink):
     id = 0
     my_type = 'broker'
     properties={'name' : {'required' : True },
-                'scheduler_name' : {'required' : True},
                 'address' : {'required' : True},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
@@ -45,6 +44,6 @@ class BrokerLink(SatelliteLink):
         self.realm.brokers.append(self)
 
 
-class BrokerLinks(SatelliteLinks):#(Items):
+class BrokerLinks(SatelliteLinks):
     name_property = "name"
     inner_class = BrokerLink
