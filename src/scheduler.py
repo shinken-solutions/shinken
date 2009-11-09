@@ -37,6 +37,10 @@ class Scheduler:
         self.must_run = True #When set to false by us, we die and 
                              #arbiter launch a new Scheduler
 
+        self.waiting_results = [] #satellites returns us results
+        #and for not waiting them, we are putting them here and 
+        #consume thems later
+        
         #Every N seconds we call functions like consume, del zombies
         #etc. All of theses functions are in recurrent_works with the
         #every tick to run. So must be integer and > 0
@@ -48,15 +52,16 @@ class Scheduler:
             2 : (self.delete_zombie_checks, 1),
             3 : (self.delete_zombie_actions, 1),
             #3 : (self.delete_unwanted_notifications, 1),
-            4 : (self.check_freshness, 1),
+            4 : (self.check_freshness, 10),
             5 : (self.clean_caches, 1),
-            6 : (self.update_retention_file, 3600)
+            6 : (self.update_retention_file, 3600),
             }
 
         #stats part
         self.nb_checks_send = 0
         self.nb_actions_send = 0
         self.nb_broks_send = 0
+        self.nb_check_received = 0
 
 
     #Load conf for future use
@@ -255,9 +260,7 @@ class Scheduler:
         return res
 
 
-    #Caled by poller and reactionner to send result
-    #It'a a oneWayCall for reactionner/poller
-    #Do do not need to return
+    #Called by poller and reactionner to send result
     def put_results(self, c):
         if c.is_a == 'notification':
             self.actions[c.id].get_return_from(c)
@@ -272,8 +275,11 @@ class Scheduler:
             self.actions[c.id].status = 'zombie'
             #del self.actions[c.id]
         elif c.is_a == 'check':
-            self.checks[c.id].get_return_from(c)
-            self.checks[c.id].status = 'waitconsume'
+            try:
+                self.checks[c.id].get_return_from(c)
+                self.checks[c.id].status = 'waitconsume'
+            except KeyError as exp:
+                print "Warning : received an check of an unknow id!", exp
         elif c.is_a == 'eventhandler':
             #It just die
             self.actions[c.id].status = 'zombie'
@@ -430,6 +436,13 @@ class Scheduler:
     #Called every 1sec to consume every result in services or hosts
     #with theses results, they are OK, CRITCAL, UP/DOWN, etc...
     def consume_results(self):
+        #All results are in self.waiting_results
+        #We need to get thems first
+        for c in self.waiting_results:
+            self.put_results(c)
+        self.waiting_results = []
+        
+        #Then we consume thems
         #print "**********Consume*********"
         checks_to_add = []
         for c in self.checks.values():
@@ -556,6 +569,8 @@ class Scheduler:
         ticks = 0
         timeout = 1.0 #For the select
 
+        gogogo = time.time()
+
         while self.must_run :
             socks = self.daemon.getServerSockets()
             avant = time.time()
@@ -614,6 +629,10 @@ class Scheduler:
                 self.nb_checks_send = 0
                 print "Nb Broks send:", self.nb_broks_send
                 self.nb_broks_send = 0
+
+                time_elapsed = now - gogogo
+                print "Check average =", int(self.nb_check_received / time_elapsed), "checks/s"
+                
                 #for n in  self.actions.values():
                 #    if n.ref_type == 'service':
                 #        print 'Service notification', n

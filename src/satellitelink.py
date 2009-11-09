@@ -70,7 +70,7 @@ class SatelliteLink(Item):
         self.uri = "PYROLOC://"+self.address+":"+str(self.port)+"/ForArbiter"
         self.con = Pyro.core.getProxyForURI(self.uri)
         #Ok, set timeout to 5 sec
-        self.con._setTimeout(20)
+        self.con._setTimeout(60)
 
 
     def put_conf(self, conf):

@@ -101,8 +101,14 @@ class IChecks(Pyro.core.ObjBase):
 	
 	#poller or reactionner are putting us results
 	def put_results(self, results):
-		for c in results:
-			self.sched.put_results(c)
+		nb_received = len(results)
+		self.sched.nb_check_received += nb_received
+		print "Received %d results" % nb_received
+		self.sched.waiting_results.extend(results)
+		
+		#for c in results:
+		#	self.sched.put_results(c)
+		return True
 
 
 

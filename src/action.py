@@ -25,7 +25,7 @@ if os.name == 'nt':
     TerminateProcess = ctypes.windll.kernel32.TerminateProcess
 else:
     from pexpect import *
-
+    import subprocess, datetime, signal
 
 #This class is use just for having a common id between actions and checks
 
@@ -55,7 +55,7 @@ class Action:
         else:
             self.execute_unix()
 
-            
+ 
     def execute_windows(self):
         timeout = 5
         self.status = 'lanched'
@@ -84,20 +84,51 @@ class Action:
         self.execution_time = time.time() - self.check_time
 
 
+    #def execute_unix(self):
+    #    child = spawn ('/bin/sh -c "%s"' % self.command)
+    #    self.status = 'lanched'
+    #    self.check_time = time.time()
+
+    #    try:
+    #        child.expect_exact(EOF, timeout=5)
+    #        self.get_outputs(child.before)
+    #        child.terminate(force=True)
+    #        self.exit_status = child.exitstatus
+    #        self.status = 'done'
+    #    except TIMEOUT:
+    #        print "On le kill"
+    #        self.status = 'timeout'
+    #        child.terminate(force=True)
+    #    self.execution_time = time.time() - self.check_time
+
+
     def execute_unix(self):
-        child = spawn ('/bin/sh -c "%s"' % self.command)
+        timeout = 5
         self.status = 'lanched'
         self.check_time = time.time()
-
-        try:
-            child.expect_exact(EOF, timeout=5)
-            self.get_outputs(child.before)
-            child.terminate(force=True)
-            self.exit_status = child.exitstatus
-            self.status = 'done'
-        except TIMEOUT:
-            print "On le kill"
-            self.status = 'timeout'
-            child.terminate(force=True)
+        #self.command = '/bin/sh -c "%s"' % self.command
+        cmd = ['/bin/sh', '-c', self.command]
+        #print cmd
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        #We must wait, but checks are variable in time
+        #so we do not wait the same for an little check
+        #than a long ping. So we do like TCP : slow start with *2
+        #but do not wait more than 0.1s.
+        wait_time = 0.0001
+        while process.poll() is None:
+            wait_time = min(wait_time*2, 0.1)
+            time.sleep(wait_time)
+            now = time.time()
+            if (now - self.check_time) > timeout:
+                process.kill()
+                print "On le kill"
+                self.status = 'timeout'
+                self.execution_time = now - self.check_time
+                self.exit_status = 3
+                return
+        self.get_outputs(process.stdout.read())
+        self.exit_status = process.returncode
+        if self.exit_status != 0:
+            print "FUCK exit status", self.exit_status
+        self.status = 'done'
         self.execution_time = time.time() - self.check_time
-

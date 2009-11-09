@@ -36,7 +36,7 @@ class Worker:
     _idletime = None
     _timeout = None
     _c = None
-    def __init__(self, id, s, m, mortal=True, timeout=30):
+    def __init__(self, id, s, m, mortal=True, timeout=300):
         self.id = self.__class__.id
         self.__class__.id += 1
 

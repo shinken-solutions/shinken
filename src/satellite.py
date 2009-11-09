@@ -61,11 +61,19 @@ class IForArbiter(Pyro.core.ObjBase):
 		#If we've got something in the schedulers, we do not want it anymore
 		#self.schedulers.clear()
 		for sched_id in conf['schedulers'] :
+			already_got = False
+			if sched_id in self.schedulers:
+				print "We already got hte conf", sched_id
+				already_got = True
+				verifs = self.schedulers[sched_id]['verifs']
 			s = conf['schedulers'][sched_id]
 			self.schedulers[sched_id] = s
 			uri = "PYROLOC://%s:%d/Checks" % (s['address'], s['port'])
 			self.schedulers[sched_id]['uri'] = uri
-			self.schedulers[sched_id]['verifs'] = {}
+			if already_got:
+				self.schedulers[sched_id]['verifs'] = verifs
+			else:
+				self.schedulers[sched_id]['verifs'] = {}
 			self.schedulers[sched_id]['running_id'] = 0
 			self.schedulers[sched_id]['active'] = s['active']
 			#We cannot reinit connexions because this code in in a thread, and
@@ -143,7 +151,7 @@ class Satellite:
 		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(self.schedulers[id]['uri'])
 		#timeout of 5 s
 		try:
-			self.schedulers[id]['con']._setTimeout(5)
+			self.schedulers[id]['con']._setTimeout(120)
 			new_run_id = self.schedulers[id]['con'].get_running_id()
 		except Pyro.errors.ProtocolError, exp:
 			print exp
@@ -164,15 +172,16 @@ class Satellite:
 		#The schedulers have been restart : it has a new run_id.
 		#So we clear all verifs, they are obsolete now.
 		if self.schedulers[id]['running_id'] != 0 and new_run_id != running_id:
+			print "The running id of the scheduler changed, we must clear the verifs"
 			self.schedulers[id]['verifs'].clear()
 		self.schedulers[id]['running_id'] = new_run_id
 		#We do not need result of put_results, there is no one
-		try:
-			self.schedulers[id]['con']._setOneway('put_results')
-		except KeyError, exp:
-                        print "Scheduler is not initilised", exp
-                        self.schedulers[id]['con'] = None
-                        return
+		#try:
+		#	self.schedulers[id]['con']._setOneway('put_results')
+		#except KeyError, exp:
+                #        print "Scheduler is not initilised", exp
+                #        self.schedulers[id]['con'] = None
+                #        return
 		print "Connexion OK"
 
 
@@ -210,28 +219,29 @@ class Satellite:
 			for id in id_to_return:
 				try:
 					v = verifs[id]
-				#We got v without the sched_id prop, so we
-				#remove it before resent it.
-					del v.sched_id
+				        #We got v without the sched_id prop, so we
+				        #remove it before resent it. Maybe it's the second time
+					if hasattr(v, 'sched_id'):
+						del v.sched_id
 					ret.append(v)
 				
 				except AttributeError as exp:
 					print exp
 			#Now ret have all verifs, we can return them
+			send_ok = False
 			if ret is not []:
 				try:
 					con = self.schedulers[sched_id]['con']
 					if con is not None:#None = not initialized
-						con.put_results(ret)
-				except Pyro.errors.ProtocolError:
-					print "Init return 1"
+						send_ok = con.put_results(ret)
+				except Pyro.errors.ProtocolError as exp:
+					print exp
 					self.pynag_con_init(sched_id)
 					return
 				except AttributeError as exp: #the scheduler must  not be initialized
 					print exp
 				except KeyError as exp: # sched is gone
                                         print exp
-					print "Init return 2"
                                         self.pynag_con_init(sched_id)
                                         return
 				except Exception,x:
@@ -239,9 +249,12 @@ class Satellite:
 					sys.exit(0)
         
 			#We clean ONLY if the send is OK
-			for id in id_to_return:
-				del verifs[id]
-
+			if send_ok :
+				for id in id_to_return:
+					del verifs[id]
+			else:
+				self.pynag_con_init(sched_id)
+				print "Sent failed!"
 
 	#Use to wait conf from arbiter.
 	#It send us conf in our daemon. It put the have_conf prop
@@ -299,7 +312,7 @@ class Satellite:
 	#It can be mortal or not
 	def create_and_launch_worker(self, mortal=True):
 		w = Worker(1, self.s, self.m, mortal=mortal)
-		self.workers[w.id] = w#Worker(id, self.s, self.m, mortal=True)
+		self.workers[w.id] = w
 		print "Allocate : ", w.id
 		self.workers[w.id].start()
 
@@ -316,7 +329,7 @@ class Satellite:
                 nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
                 print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
 		#We add new worker if the queue is > 80% of the worker number
-            while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 30:
+            while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 4:
                 self.create_and_launch_worker()
 
 
@@ -420,9 +433,9 @@ class Satellite:
 		i = 0
 		timeout = 1.0
 		while True:
-			i = i + 1
-			if not i % 50:
-				print "Loop ", i
+			#i = i + 1
+			#if not i % 50:
+			#	print "Loop ", i
 			begin_loop = time.time()
 
 			#Maybe the arbiter ask us to wait for a new conf
@@ -433,7 +446,8 @@ class Satellite:
 					print "Init main2"
 					self.pynag_con_init(sched_id)
 
-			#Now we check if arbiter speek to us in the daemon. If so, we listen for it
+			#Now we check if arbiter speek to us in the daemon.
+                        #If so, we listen for it
 			#When it push us conf, we reinit connexions
 			self.watch_for_new_conf()
 			
@@ -451,6 +465,7 @@ class Satellite:
 					self.workers[id].add_idletime(after-begin_loop)
 
 				if timeout < 0: #for go in timeout
+					print "Time out", timeout
 					raise Empty
 					
 			except Empty as exp: #Time out Part

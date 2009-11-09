@@ -219,7 +219,7 @@ class SchedulingItem(Item):
             time_add = interval/2 + r
         else:
             time_add = interval
-       
+
         if force_time is None:
             self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
         else:
