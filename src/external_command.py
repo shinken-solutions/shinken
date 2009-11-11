@@ -215,8 +215,12 @@ class ExternalCommand:
                 
             if not os.path.exists(self.pipe_path):
                 os.umask(0)
-                os.mkfifo(self.pipe_path, 0660)
-                open(self.pipe_path, 'w+', os.O_NONBLOCK)
+                try :
+                    os.mkfifo(self.pipe_path, 0660)
+                    open(self.pipe_path, 'w+', os.O_NONBLOCK)
+                except OSError as exp:
+                    print "Error : pipe creation failed (",self.pipe_path,')', exp
+                    return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
         #print 'Fifo:', self.fifo
         return self.fifo

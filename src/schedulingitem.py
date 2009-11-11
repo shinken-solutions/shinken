@@ -95,9 +95,9 @@ class SchedulingItem(Item):
         cls = self.__class__
         if not self.in_checking:
             if cls.check_freshness:
-                if self.check_freshness:
+                if self.check_freshness and self.freshness_threshold != 0:
                     if self.last_state_update < now - self.freshness_threshold:
-                        print "Warning : ", self.get_name(), " is not so fresh! I raise a new check"
+                        print "Warning : ", self.get_name(), " is not so fresh! I raise a new check", self.check_freshness, self.freshness_threshold, self.last_state_update
                         return self.launch_check(now)
         return None
 
@@ -206,6 +206,11 @@ class SchedulingItem(Item):
         #print "Service check?", cls.execute_checks
         if (not self.active_checks_enabled or not cls.execute_checks) and not force:
             return None
+
+        #If I do not have an check_timeperiod and no force time, i do nothing
+        if (not hasattr(self, 'check_period') or self.check_period == None and force_time==None):
+            return None
+
         #Interval change is in a HARD state or not
         if self.state_type == 'HARD':
             interval = self.check_interval * 60
@@ -225,6 +230,11 @@ class SchedulingItem(Item):
         else:
             self.next_chk = force_time
 
+        #If next time is None, do not go
+        if self.next_chk == None:
+            #TODO : FUCK
+            print "Sorry, I do not launch the check for", self.get_name(), "because next_check is None"
+            
         #Get the command to launch
         return self.launch_check(self.next_chk)
 
@@ -291,8 +301,12 @@ class SchedulingItem(Item):
         self.manage_stalking(c)
 
         #Latency can be <0 is we get a check from the retention file
-        #so if <0, set 0 
-        self.latency = max(0, c.check_time - c.t_to_go)
+        #so if <0, set 0
+        try:
+            self.latency = max(0, c.check_time - c.t_to_go)
+        except TypeError:
+            #DBG
+            print "FUCK:", c.check_time, c.t_to_go, c.ref.get_name()
         self.execution_time = c.execution_time
         self.last_chk = c.check_time
         self.output = c.output
@@ -318,7 +332,7 @@ class SchedulingItem(Item):
                     c.depend_on.append(check)
                     to_del.append(check)
                 else:
-                    print c.id, self.get_name()," I depend on check", check.id
+                    #print c.id, self.get_name()," I depend on check", check.id
                     c.depend_on.append(check.id)
             for i in to_del:
                 checks.remove(i)
@@ -329,7 +343,7 @@ class SchedulingItem(Item):
 
         #C is a check and someone wait for it
         if c.status == 'waitconsume' and c.depend_on_me != []:
-            print c.id, self.get_name(), "OK, someone wait for me", len(c.depend_on_me)
+            #print c.id, self.get_name(), "OK, someone wait for me", len(c.depend_on_me)
             c.status = 'havetoresolvedep'
 
         #if finish, check need to be set to a zombie state to be removed
@@ -343,7 +357,7 @@ class SchedulingItem(Item):
         #C was waitdep, but now all dep are resolved, so check for deps
         if c.status == 'waitdep':
             if c.depend_on_me != []:
-                print self.get_name(), "OK, someone wait for me", len(c.depend_on_me)
+                #print self.get_name(), "OK, someone wait for me", len(c.depend_on_me)
                 c.status = 'havetoresolvedep'
             else:
                 #print self.get_name(), "Great, noboby wait for me!"

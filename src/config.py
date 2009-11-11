@@ -290,7 +290,8 @@ class Config(Item):
             #The old entry must be save before
             elif re.search("^define", line):
                 in_define = True
-                
+                if tmp_type not in objectscfg:
+                    objectscfg[tmp_type] = []
                 objectscfg[tmp_type].append(tmp)
                 tmp = []
                 #Get new type
@@ -769,7 +770,7 @@ class Config(Item):
                 r.packs.append(pack)
             if len(tmp_realms) == 0: #Hum.. no realm value? So default Realm
                 if default_realm != None:
-                    print "I prefer add to default realm", default_realm.get_name()
+                    #print "I prefer add to default realm", default_realm.get_name()
                     default_realm.packs.append(pack)
                 else:
                     print "Error : Hosts do not have a realm and you do not defined a default realm!"
@@ -793,7 +794,7 @@ class Config(Item):
             for pack in r.packs:#tmp_packs:
                 i = rr.next()
                 for elt in pack:
-                    print "Add element", elt.get_name()
+                    #print "Add element", elt.get_name()
                     packs[i].append(elt)
             #Now in packs we have the number of packs [h1, h2, etc]
             #equal to the number of schedulers.

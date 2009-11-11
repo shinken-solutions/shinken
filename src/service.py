@@ -310,7 +310,7 @@ class Service(SchedulingItem):
         elif status == 3:
             self.state = 'UNKNOWN'
         else:
-            self.state = 'UNDETERMINED'
+            self.state = 'CRITICAL'#exit code UNDETERMINED
         if status in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
 

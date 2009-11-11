@@ -209,7 +209,7 @@ class Host(SchedulingItem):
         cls = self.__class__
 
         special_properties = ['contacts', 'contactgroups', 'check_period', \
-                                  'notification_interval']
+                                  'notification_interval', 'check_period']
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
@@ -224,6 +224,11 @@ class Host(SchedulingItem):
             state = False
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
             print self.get_name()," : I've got no notification_interval but I've got notifications enabled"
+            state = False
+        #If active check is enabled with a check_interval!=0, we must have a check_timeperiod
+        if (hasattr(self, 'active_checks_enabled') and self.active_checks_enabled) and (not hasattr(self, 'check_period') or self.check_period == None) and (hasattr(self, 'check_interval') and self.check_interval!=0):
+            print self.active_checks_enabled, self.check_interval
+            print self.get_name()," : My check_timeperiod is not correct"
             state = False
         return state
 
@@ -265,7 +270,7 @@ class Host(SchedulingItem):
         elif status == 1 or status == 2 or status == 3:
             self.state = 'DOWN'
         else:
-            self.state = 'UNDETERMINED'
+            self.state = 'DOWN'#exit code UNDETERMINED
         if status in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
 

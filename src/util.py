@@ -61,9 +61,9 @@ def get_start_of_day(year, month_id, day):
     return start_time_epoch
 
 ################################# Pythonization ###########################
-
+#first change to foat so manage for example 25.0 to 25
 def to_int(val):
-    return int(val)
+    return int(float(val))
 
 def to_char(val):
     return val[0]

@@ -151,5 +151,6 @@ class Contactgroups(Itemgroups):
                 
         #We clean the tags
         for tmp_sg in self.itemgroups.values():
-            del tmp_sg.rec_tag
+            if hasattr(tmp_sg, 'rec_tag'):
+                del tmp_sg.rec_tag
             del tmp_sg.already_explode

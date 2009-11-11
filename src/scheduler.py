@@ -462,7 +462,7 @@ class Scheduler:
                     elif a.is_a == 'eventhandler':
                         self.add(a)
                     elif  a.is_a == 'check':
-                        print "*******Adding dep checks*****"
+                        #print "*******Adding dep checks*****"
                         checks_to_add.append(a)
 
         #All 'finished' checks (no more dep) raise checks they depends on

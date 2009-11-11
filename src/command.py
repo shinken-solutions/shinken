@@ -48,7 +48,7 @@ class CommandCall:
         tab = call.split('!')
         self.command = tab[0]
         self.args = tab[1:]
-        self.command = commands.find_cmd_by_name(self.command)
+        self.command = commands.find_cmd_by_name(self.command.strip())
         if self.command is not None:
             self.valid = True
         else:

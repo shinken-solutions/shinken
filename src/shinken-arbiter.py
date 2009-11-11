@@ -58,7 +58,7 @@ class Arbiter:
     def main(self):
         print "Loading configuration"
         self.conf = Config()
-        self.conf.read_config("etc/nagios.cfg")
+        self.conf.read_config("etc.orig/nagios.cfg")
 
         print "****************** Create Template links **********"
         self.conf.linkify_templates()
@@ -137,8 +137,8 @@ class Arbiter:
         while True :
             socks = []
             avant = time.time()
-            
-            socks.append(self.fifo)
+            if self.fifo != None:
+                socks.append(self.fifo)
             # 'foreign' event loop
             ins,outs,exs = select.select(socks,[],[],timeout)
             if ins != []:

@@ -170,7 +170,8 @@ class Hostgroups(Itemgroups):
 
         #We clean the tags
         for tmp_hg in self.itemgroups.values():
-            del tmp_hg.rec_tag
+            if hasattr(tmp_hg, 'rec_tag'):
+                del tmp_hg.rec_tag
             del tmp_hg.already_explode
 
         

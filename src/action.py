@@ -128,7 +128,5 @@ class Action:
                 return
         self.get_outputs(process.stdout.read())
         self.exit_status = process.returncode
-        if self.exit_status != 0:
-            print "FUCK exit status", self.exit_status
         self.status = 'done'
         self.execution_time = time.time() - self.check_time
