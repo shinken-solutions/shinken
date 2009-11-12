@@ -36,7 +36,7 @@ class Worker:
     _idletime = None
     _timeout = None
     _c = None
-    def __init__(self, id, s, m, mortal=True, timeout=300):
+    def __init__(self, id, s, m, mortal=True, timeout=10):
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -57,9 +57,12 @@ class Worker:
         self._process.start()
 
 
-    def join(self):
-        self._process.join()
+    def join(self, timeout=None):
+        self._process.join(timeout)
 
+
+    def is_alive(self):
+        self._process.is_alive()
 
     def is_killable(self):
         return self._mortal and self._idletime > self._timeout

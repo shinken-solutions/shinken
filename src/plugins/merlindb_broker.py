@@ -27,6 +27,7 @@
 import copy
 import MySQLdb
 from MySQLdb import IntegrityError
+from MySQLdb import ProgrammingError
 
 #This text is print at the import
 print "I am Merlin Broker"
@@ -90,7 +91,9 @@ class Merlindb_broker:
             self.db.commit ()
         except IntegrityError as exp:
             print "[Merlindb] Warning : a query raise an integrity error : %s, %s" % (query, exp) 
-
+        except ProgrammingError as exp:
+            print "[Merlindb] Warning : a query raise a programming error : %s, %s" % (query, exp) 
+        
 
     #Create a INSERT query in table with all data of data (a dict)
     def create_insert_query(self, table, data):
@@ -109,10 +112,10 @@ class Merlindb_broker:
                     val = 0
             if i == 1:
                 props_str = props_str + "%s " % prop
-                values_str = values_str + "'%s' " % val
+                values_str = values_str + "'%s' " % str(val).replace("'", "''")
             else:
                 props_str = props_str + ", %s " % prop
-                values_str = values_str + ", '%s' " % val
+                values_str = values_str + ", '%s' " % str(val).replace("'", "''")
 
         #Ok we've got data, let's finish the query
         props_str = props_str + ' )'
@@ -139,9 +142,9 @@ class Merlindb_broker:
                 else:
                     val = 0
             if i == 1:
-                query_folow += "%s='%s' " % (prop, val)
+                query_folow += "%s='%s' " % (prop, str(val).replace("'", "''"))
             else:
-                query_folow += ", %s='%s' " % (prop, val)
+                query_folow += ", %s='%s' " % (prop, str(val).replace("'", "''"))
                 
         #Ok for data, now WHERE, same things
         where_clause = " WHERE "

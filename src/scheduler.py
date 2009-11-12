@@ -318,6 +318,7 @@ class Scheduler:
    
     #Load the retention file and get status from it. It do not get all checks in progress
     #for the moment, just the status and the notifications.
+    #TODO : speed up because the service lookup si VERY slow
     def retention_load(self):
         print "Reading from retention_file", self.conf.state_retention_file
         try:

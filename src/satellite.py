@@ -196,7 +196,12 @@ class Satellite:
 
 		if msg.get_type() == 'Result':
 			id = msg.get_from()
-			self.workers[id].reset_idle()
+			try:
+				self.workers[id].reset_idle()
+			except KeyError as exp:
+				#message from a zombie, do not care about it
+				print exp
+				return
 			chk = msg.get_data()
 			sched_id = chk.sched_id
 			chk.set_status('waitforhomerun')
@@ -329,7 +334,7 @@ class Satellite:
                 nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
                 print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
 		#We add new worker if the queue is > 80% of the worker number
-            while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 4:
+            while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 100:
                 self.create_and_launch_worker()
 
 
@@ -475,7 +480,8 @@ class Satellite:
                                 #We join (old)zombies and we move new ones
 				#in the old list
 				for id in self.zombies:
-					self.workers[id].join()
+					if self.workers[id].is_alive():
+						self.workers[id].join(timeout=1)
 					del self.workers[id]
 				#We switch so zombie will be kill, and new
 				#ones wil go in newzombies
