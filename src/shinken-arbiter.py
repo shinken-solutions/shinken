@@ -58,7 +58,7 @@ class Arbiter:
     def main(self):
         print "Loading configuration"
         self.conf = Config()
-        self.conf.read_config("etc.orig/nagios.cfg")
+        self.conf.read_config("etc/nagios.cfg")
 
         print "****************** Create Template links **********"
         self.conf.linkify_templates()

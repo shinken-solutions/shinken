@@ -135,7 +135,10 @@ class Satellite:
 		self.workers = {} #dict of active workers
 		self.newzombies = [] #list of fresh new zombies, will be join the next loop
 		self.zombies = [] #list of quite old zombies, will be join now
-		
+
+		#For calculate the good worker number
+ 		self.nb_actions_procced = 0
+		self.total_process_time = 0
 
 
 	#initialise or re-initialise connexion with scheduler
@@ -206,6 +209,11 @@ class Satellite:
 			sched_id = chk.sched_id
 			chk.set_status('waitforhomerun')
 			self.schedulers[sched_id]['verifs'][chk.get_id()] = chk
+
+			#Now update the stat values so we can calculate the good
+			#worker number
+			self.nb_actions_procced += 1
+			self.total_process_time += chk.execution_time
 
 
         #Return the chk to scheduler and clean them
@@ -333,11 +341,27 @@ class Satellite:
                 nb_queue += tmp_nb_queue
                 nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
                 print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
-		#We add new worker if the queue is > 80% of the worker number
-            while nb_queue > 0.8 * len(self.workers) and len(self.workers) < 100:
-                self.create_and_launch_worker()
+	    try:
+		    #The average time for checks since the begining
+		    avg_check_time = self.total_process_time / self.nb_actions_procced
+		    #We wish workers so we can manage nb_queue elements we have
+		    #that take avg_check_time sec to execute
+		    #because  1/avg_check_time is the number of checks we can manage
+		    #in 1sec. So nb_queue/( 1/avg_check_time) is the number of workers
+		    #we need to manage this
+		    wish_worker = nb_queue * avg_check_time
+	    except ZeroDivisionError :
+		    wish_worker = 1
+	    wish_worker = int(wish_worker)+1
+	    print "I want at least", wish_worker, "workers"
+	    while wish_worker > len(self.workers) and len(self.workers) < 30:
+		    self.create_and_launch_worker()
+	    #TODO : if len(workers) > 2*wish, maybe we can kill a worker?
+	    
+	    #TODO2: nb_queue and avg_check_time are instant value, maybe we can
+	    #use a load1 avg
 
-
+		    
 	#We get new actions from schedulers, we create a Message ant we 
 	#put it in the s queue (from master to slave)
 	def get_new_actions(self):
@@ -431,7 +455,7 @@ class Satellite:
 		self.have_new_conf = False
 
                 #Allocate Mortal Threads
-		for i in xrange(1, 5):
+		for i in xrange(1, 1):
 			self.create_and_launch_worker() #create mortal worker
 
 		#Now main loop
