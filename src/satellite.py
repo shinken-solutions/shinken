@@ -36,6 +36,7 @@ import select
 
 from message import Message
 from worker import Worker
+from load import Load
 #from util import get_sequence
 
 
@@ -139,6 +140,7 @@ class Satellite:
 		#For calculate the good worker number
  		self.nb_actions_procced = 0
 		self.total_process_time = 0
+		self.wish_workers_load = Load()
 
 
 	#initialise or re-initialise connexion with scheduler
@@ -341,8 +343,10 @@ class Satellite:
                 nb_queue += tmp_nb_queue
                 nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
                 print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
+	    
 	    try:
 		    #The average time for checks since the begining
+		    #avg_check_time = self.total_process_time / self.nb_actions_procced
 		    avg_check_time = self.total_process_time / self.nb_actions_procced
 		    #We wish workers so we can manage nb_queue elements we have
 		    #that take avg_check_time sec to execute
@@ -352,8 +356,18 @@ class Satellite:
 		    wish_worker = nb_queue * avg_check_time
 	    except ZeroDivisionError :
 		    wish_worker = 1
-	    wish_worker = int(wish_worker)+1
-	    print "I want at least", wish_worker, "workers"
+
+	    print "DBG:", self.nb_actions_procced, "in", self.total_process_time,"s"
+	    #Now reset values
+	    self.total_process_time = 0
+	    self.nb_actions_procced = 0
+
+	    #wish_worker = int(wish_worker)+1
+	    self.wish_workers_load.update_load(wish_worker)
+	    wish_worker = int(self.wish_workers_load.get_load()) + 1
+
+	    print "I want at least", wish_worker, "workers", 'Load = ', self.wish_workers_load.get_load()
+
 	    while wish_worker > len(self.workers) and len(self.workers) < 30:
 		    self.create_and_launch_worker()
 	    #TODO : if len(workers) > 2*wish, maybe we can kill a worker?

@@ -38,11 +38,13 @@ import time, math
 
 
 class Load:
-    def __init__(self, m=1, val=0):
+    #m = number of minutes for the average
+    #val = initial_value
+    def __init__(self, m=1, initial_value=0):
         self.exp = 0 #first exp
         self.m = m #Number of minute of the avg
         self.last_update = 0 #last update of the value
-        self.val = val #first value
+        self.val = initial_value #first value
 
 
     def update_load(self, new_val):

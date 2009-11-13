@@ -107,9 +107,11 @@ class Action:
         self.status = 'lanched'
         self.check_time = time.time()
         #self.command = '/bin/sh -c "%s"' % self.command
-        cmd = ['/bin/sh', '-c', self.command]
+        #cmd = ['/bin/sh', '-c', self.command]
+        #Nagios do not use the /bin/sh -c command, so I don't do it too
+        #cmd = [self.command]
         #print cmd
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         #We must wait, but checks are variable in time
         #so we do not wait the same for an little check
         #than a long ping. So we do like TCP : slow start with *2
