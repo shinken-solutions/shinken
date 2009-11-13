@@ -57,7 +57,7 @@ class Action:
 
  
     def execute_windows(self):
-        timeout = 5
+        timeout = 10
         self.status = 'lanched'
         self.check_time = time.time()
         start = datetime.datetime.now()
@@ -103,7 +103,7 @@ class Action:
 
 
     def execute_unix(self):
-        timeout = 5
+        timeout = 10
         self.status = 'lanched'
         self.check_time = time.time()
         #self.command = '/bin/sh -c "%s"' % self.command
@@ -120,8 +120,10 @@ class Action:
             time.sleep(wait_time)
             now = time.time()
             if (now - self.check_time) > timeout:
-                process.kill()
-                print "On le kill"
+                #process.kill()
+                #HEAD SHOT
+                os.kill(process.pid, 9) 
+                print "On le kill", process.pid
                 self.status = 'timeout'
                 self.execution_time = now - self.check_time
                 self.exit_status = 3

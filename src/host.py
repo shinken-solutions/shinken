@@ -267,10 +267,13 @@ class Host(SchedulingItem):
         
         if status == 0:
             self.state = 'UP'
+            self.state_id = 0
         elif status == 1 or status == 2 or status == 3:
             self.state = 'DOWN'
+            self.state_id = 2
         else:
             self.state = 'DOWN'#exit code UNDETERMINED
+            self.state_id = 2
         if status in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
 

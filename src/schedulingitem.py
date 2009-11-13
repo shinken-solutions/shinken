@@ -306,7 +306,7 @@ class SchedulingItem(Item):
             self.latency = max(0, c.check_time - c.t_to_go)
         except TypeError:
             #DBG
-            print "FUCK:", c.check_time, c.t_to_go, c.ref.get_name()
+            print "ERROR FUCK:", c.check_time, c.t_to_go, c.ref.get_name()
         self.execution_time = c.execution_time
         self.last_chk = c.check_time
         self.output = c.output
