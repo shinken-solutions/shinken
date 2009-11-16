@@ -122,6 +122,10 @@ class Servicegroups(Itemgroups):
                     find = services.find_srv_by_name_and_hostname(host_name, service_desc)
                     new_mbrs.append(find)
                 seek += 1
+
+            #Make members uniq
+            new_mbrs = list(set(new_mbrs))
+
             #We find the id, we remplace the names
             self.itemgroups[id].replace_members(new_mbrs)
 

@@ -118,6 +118,9 @@ class Contactgroups(Itemgroups):
             for mbr in mbrs:
                 new_mbrs.append(contacts.find_by_name(mbr))
 
+            #Make members uniq
+            new_mbrs = list(set(new_mbrs))
+            
             #We find the id, we remplace the names
             self.itemgroups[id].replace_members(new_mbrs)
 

@@ -48,7 +48,7 @@ class Host(SchedulingItem):
     #broker_name : same for inital, but for status update call
     properties={'host_name': {'required': True, 'status_broker_name' : None, 'broker_name' : None},
                 'alias': {'required':  True, 'status_broker_name' : None},
-                'display_name': {'required': False, 'default':'none'},
+                'display_name': {'required': False, 'default':'none', 'status_broker_name' : None},
                 'address': {'required': True, 'status_broker_name' : None},
                 'parents': {'required': False, 'default': '' , 'pythonize': to_split},
                 'hostgroups': {'required': False, 'default' : ''},

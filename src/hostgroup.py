@@ -118,6 +118,10 @@ class Hostgroups(Itemgroups):
             new_mbrs = []
             for mbr in mbrs:
                 new_mbrs.append(hosts.find_by_name(mbr))
+                
+            #Make members uniq
+            new_mbrs = list(set(new_mbrs))
+
             #We find the id, we remplace the names
             hg.replace_members(new_mbrs)
 
