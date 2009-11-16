@@ -368,7 +368,7 @@ class Satellite:
 
 	    print "I want at least", wish_worker, "workers", 'Load = ', self.wish_workers_load.get_load()
 
-	    while wish_worker > len(self.workers) and len(self.workers) < 30:
+	    while wish_worker > len(self.workers) and len(self.workers) < 100:
 		    self.create_and_launch_worker()
 	    #TODO : if len(workers) > 2*wish, maybe we can kill a worker?
 	    

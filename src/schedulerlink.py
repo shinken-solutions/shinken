@@ -24,7 +24,7 @@ from item import Items
 
 class SchedulerLink(SatelliteLink):
     id = 0
-    properties={'name' : {'required' : True },#, 'pythonize': None},
+    properties={'scheduler_name' : {'required' : True },#, 'pythonize': None},
                 'address' : {'required' : True},#, 'pythonize': to_bool},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
@@ -38,7 +38,7 @@ class SchedulerLink(SatelliteLink):
 
 
     def get_name(self):
-        return self.name
+        return self.scheduler_name
 
 
     def run_external_command(self, command):
@@ -54,7 +54,7 @@ class SchedulerLink(SatelliteLink):
 
 
     def give_satellite_cfg(self):
-        return {'port' : self.port, 'address' : self.address, 'name' : self.name, 'instance_id' : self.id, 'active' : self.conf!=None}
+        return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.conf!=None}
 
 class SchedulerLinks(SatelliteLinks):#(Items):
     name_property = "name"

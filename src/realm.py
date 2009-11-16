@@ -214,6 +214,7 @@ class Realm(Itemgroup):
             print "Sorry I do not have this kind of satellites : ", type
             return []
 
+
     #Return the list of potentials satellites of a certain type
     #like reactionner -> self.potential_reactionners
     def get_potential_satellites_by_type(self, type):
@@ -223,6 +224,7 @@ class Realm(Itemgroup):
             print "Sorry I do not have this kind of satellites : ", type
             return []
 
+
     #Return the list of potentials satellites of a certain type
     #like reactionner -> self.nb_reactionners
     def get_nb_of_must_have_satellites(self, type):
@@ -231,6 +233,7 @@ class Realm(Itemgroup):
         else:
             print "Sorry I do not have this kind of satellites : ", type
             return 0
+
 
     #Fill dict of realms for managing the satellites confs
     def prepare_for_satellites_conf(self):
@@ -261,8 +264,6 @@ class Realm(Itemgroup):
 
         self.count_reactionners()
         self.fill_potential_reactionners()
-        for r in self.potential_reactionners:
-            print "Eligible", self.get_name(), r.name
         self.count_pollers()
         self.fill_potential_pollers()
         self.count_brokers()

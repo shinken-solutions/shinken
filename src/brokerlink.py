@@ -24,7 +24,7 @@ from item import Items
 class BrokerLink(SatelliteLink):
     id = 0
     my_type = 'broker'
-    properties={'name' : {'required' : True },
+    properties={'broker_name' : {'required' : True },
                 'address' : {'required' : True},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
@@ -37,7 +37,7 @@ class BrokerLink(SatelliteLink):
     macros = {}
 
     def get_name(self):
-        return self.name
+        return self.broker_name
 
 
     def register_to_my_realm(self):

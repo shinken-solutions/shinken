@@ -27,7 +27,7 @@ from item import Items
 class PollerLink(SatelliteLink):
     id = 0
     my_type = 'poller'
-    properties={'name' : {'required' : True },
+    properties={'poller_name' : {'required' : True },
                 'address' : {'required' : True},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
@@ -41,7 +41,7 @@ class PollerLink(SatelliteLink):
     macros = {}
 
     def get_name(self):
-        return self.name
+        return self.poller_name
 
 
     def register_to_my_realm(self):

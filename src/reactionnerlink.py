@@ -24,7 +24,7 @@ from item import Items
 class ReactionnerLink(SatelliteLink):
     id = 0
     my_type = 'reactionner'
-    properties={'name' : {'required' : True },
+    properties={'reactionner_name' : {'required' : True },
                 'address' : {'required' : True},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
@@ -37,7 +37,7 @@ class ReactionnerLink(SatelliteLink):
     macros = {}
 
     def get_name(self):
-        return self.name
+        return self.reactionner_name
 
 
     def register_to_my_realm(self):
