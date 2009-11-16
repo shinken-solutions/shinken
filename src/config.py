@@ -605,19 +605,19 @@ class Config(Item):
     def fill_default_satellites(self):
         if len(self.schedulerlinks) == 0:
             print "Warning : there is no scheduler, I add one in localhost:7768"
-            s = SchedulerLink({'name' : 'Default-Scheduler', 'address' : 'localhost', 'port' : '7768'})
+            s = SchedulerLink({'scheduler_name' : 'Default-Scheduler', 'address' : 'localhost', 'port' : '7768'})
             self.schedulerlinks = SchedulerLinks([s])
         if len(self.pollers) == 0:
             print "Warning : there is no poller, I add one in localhost:7771"
-            p = PollerLink({'name' : 'Default-Poller', 'address' : 'localhost', 'port' : '7771'})
+            p = PollerLink({'poller_name' : 'Default-Poller', 'address' : 'localhost', 'port' : '7771'})
             self.pollers = PollerLinks([p])
         if len(self.reactionners) == 0:
             print "Warning : there is no reactionner, I add one in localhost:7769"
-            r = ReactionnerLink({'name' : 'Default-Reactionner', 'address' : 'localhost', 'port' : '7769'})
+            r = ReactionnerLink({'reactionner_name' : 'Default-Reactionner', 'address' : 'localhost', 'port' : '7769'})
             self.reactionners = ReactionnerLinks([r])
         if len(self.brokers) == 0:
             print "Warning : there is no broker, I add one in localhost:7772"
-            b = BrokerLink({'name' : 'Default-Broker', 'address' : 'localhost', 'port' : '7772'})
+            b = BrokerLink({'broker_name' : 'Default-Broker', 'address' : 'localhost', 'port' : '7772'})
             self.brokers = BrokerLinks([b])
 
 
