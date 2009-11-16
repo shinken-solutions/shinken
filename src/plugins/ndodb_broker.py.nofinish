@@ -47,9 +47,6 @@ class Ndodb_broker:
                                 'last_alive' : {'name' : 'status_update_time', 'transform' : None},
                                 'is_running' : {'name' : 'is_currently_running', 'transform' : None}
                                 },
-            'hosts' : {'last_problem_id' : {'name' : None, 'transform' : None},
-                       {'current_state' : {'name' : None, 'transform' : None}
-                       }
             }
 
 
@@ -79,7 +76,7 @@ class Ndodb_broker:
             for q in queries :
                 self.execute_query(q)
             return
-        print "(merlindb)I don't manage this brok type", b
+        print "(ndodb)I don't manage this brok type", b
 
 
     #Create the database connexion
@@ -215,36 +212,29 @@ class Ndodb_broker:
         return [query]
 
 
-    #Initial service status is at start. We need an insert because we 
-    #clean the base
-    def manage_initial_service_status_brok(self, b):
-        #It's a initial entry, so we need insert
-        query = self.create_insert_query('service', b.data)		
-        return [query]
-
-
-    #A service check have just arrived, we UPDATE data info with this
-    def manage_service_check_result_brok(self, b):
-        data = b.data
-        #We just impact the service :)
-        where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
-        query = self.create_update_query('service', data, where_clause)
-        return [query]
-
-
-    #A full service status? Ok, update data
-    def manage_update_service_status_brok(self, b):
-        data = b.data
-        where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
-        query = self.create_update_query('service', data, where_clause)
-        return [query]
-
-
     #A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
         new_b = copy.deepcopy(b)
-        to_del = []
-        to_add = []
+        
+        data = new_b.data
+        print "DATA:", data
+        hosts_data = {'host_id' : data['id'], 'instance_id' : data['instance_id'], 
+                      'host_object_id' : data['id'], 'alias' : data['alias'],
+                      'display_name' : data['alias'], 'address' : data['address'],
+                      'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
+                      'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
+                      'first_notification_delay' : data['first_notification_delay'], 'notification_interval' : data['notification_interval'],
+                      'flap_detection_enabled' : data['flap_detection_enabled'], 'low_flap_threshold' : data['low_flap_threshold'],
+                      'high_flap_threshold' : data['high_flap_threshold'], 'process_performance_data' : data['process_performance_data'],
+                      'freshness_checks_enabled' : data['freshness_checks_enabled'], 'freshness_threshold' : data['freshness_threshold'],
+                      'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
+                      'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
+                      'obsess_over_host' : data['obsess_over_host'], 'failure_prediction_enabled' : data['failure_prediction_enabled'],
+                      'notes' : data['notes'], 'notes_url' : data['notes_url']
+            }
+
+        print "HOST DATA", hosts_data
+
         mapping = self.mapping['hosts']
         for prop in new_b.data:
             #ex : 'name' : 'program_start_time', 'transform'
