@@ -24,7 +24,6 @@ if os.name == 'nt':
     import ctypes
     TerminateProcess = ctypes.windll.kernel32.TerminateProcess
 else:
-    from pexpect import *
     import subprocess, datetime, signal
 
 #This class is use just for having a common id between actions and checks
@@ -111,7 +110,14 @@ class Action:
         #Nagios do not use the /bin/sh -c command, so I don't do it too
         #cmd = [self.command]
         #print cmd
-        process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except OSError as exp:
+            self.output = exp
+            self.exit_status = 2
+            self.status = 'done'
+            self.execution_time = time.time() - self.check_time
+            return
         #We must wait, but checks are variable in time
         #so we do not wait the same for an little check
         #than a long ping. So we do like TCP : slow start with *2
