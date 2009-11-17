@@ -131,7 +131,7 @@ class Action:
                 #process.kill()
                 #HEAD SHOT
                 os.kill(process.pid, 9) 
-                print "On le kill", process.pid
+                print "Kill", process.pid, self.command
                 self.status = 'timeout'
                 self.execution_time = now - self.check_time
                 self.exit_status = 3

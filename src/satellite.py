@@ -28,7 +28,7 @@
 #take new ones and do the (new) job.
 
 from Queue import Empty
-from multiprocessing import Queue
+from multiprocessing import Queue, Manager, active_children
 import time
 import sys
 import Pyro.core
@@ -129,6 +129,8 @@ class Satellite:
 		self.have_new_conf = False
 		self.s = Queue() #Global Master -> Slave
 		self.m = Queue() #Slave -> Master
+		self.manager = Manager()
+		self.return_messages = self.manager.list()
 
 		#Ours schedulers
 		self.schedulers = {}
@@ -141,7 +143,7 @@ class Satellite:
  		self.nb_actions_procced = 0
 		self.total_process_time = 0
 		self.wish_workers_load = Load()
-
+		self.avg_dead_workers = Load()
 
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
@@ -196,6 +198,7 @@ class Satellite:
 		if msg.get_type() == 'IWantToDie':
 			zombie = msg.get_from()
 			print "Got a ding wish from ", zombie
+			self.workers[zombie].terminate()
 			self.workers[zombie].join()
 		#Ok, it's a result. We get it, and fill verifs of the good sched_id
 
@@ -326,7 +329,7 @@ class Satellite:
 	#Create and launch a new worker, and put it into self.workers
 	#It can be mortal or not
 	def create_and_launch_worker(self, mortal=True):
-		w = Worker(1, self.s, self.m, mortal=mortal)
+		w = Worker(1, self.s, self.return_messages, mortal=mortal)
 		self.workers[w.id] = w
 		print "Allocate : ", w.id
 		self.workers[w.id].start()
@@ -336,6 +339,10 @@ class Satellite:
 	#Here we create new workers if the queue load (len of verifs) is too long
 	#here it's > 80% of workers
 	def adjust_worker_number_by_load(self):
+            act = active_children()
+            print "I've got", len(act), "childrens"
+	    nb_alive = len([c for c in act if c.is_alive()])
+	    print "Nb Alive :", nb_alive, "nb deads:", len(act) - nb_alive
             nb_queue = 0 # Len of actions in queue status, so the working queue
             for sched_id in self.schedulers:
                 verifs = self.schedulers[sched_id]['verifs']
@@ -343,7 +350,7 @@ class Satellite:
                 nb_queue += tmp_nb_queue
                 nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
                 print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
-	    
+		
 	    try:
 		    #The average time for checks since the begining
 		    #avg_check_time = self.total_process_time / self.nb_actions_procced
@@ -361,14 +368,16 @@ class Satellite:
 	    #Now reset values
 	    self.total_process_time = 0
 	    self.nb_actions_procced = 0
-
+	    print "New wish worker", wish_worker
+	    #Adjust wish workers with the dead workers we've just killed :
+	    #why create workers when we just kill some?
 	    #wish_worker = int(wish_worker)+1
 	    self.wish_workers_load.update_load(wish_worker)
-	    wish_worker = int(self.wish_workers_load.get_load()) + 1
+	    wish_worker = int(self.wish_workers_load.get_load() - self.avg_dead_workers.get_load()) + 1
 
-	    print "I want at least", wish_worker, "workers", 'Load = ', self.wish_workers_load.get_load()
+	    print "I want at least", wish_worker, "workers", 'Load = ', self.wish_workers_load.get_load(), "dead avg=", self.avg_dead_workers.get_load()
 
-	    while wish_worker > len(self.workers) and len(self.workers) < 100:
+	    while wish_worker > len(self.workers) and len(self.workers) < 4:
 		    self.create_and_launch_worker()
 	    #TODO : if len(workers) > 2*wish, maybe we can kill a worker?
 	    
@@ -496,12 +505,13 @@ class Satellite:
 			
 			try:
 				#print "Timeout", timeout
-				msg = self.m.get(timeout=timeout)
+				#msg = self.m.get(timeout=timeout)
+				time.sleep(timeout)
 				after = time.time()
 				timeout -= after-begin_loop
 
                                 #Manager the msg like check return
-				self.manage_msg(msg)
+				#self.manage_msg(msg)
             
                                 #We add the time pass on the workers'idle time
 				for id in self.workers:
@@ -515,11 +525,18 @@ class Satellite:
 				after = time.time()
 				timeout = 1.0
 				
+				#Manage all messages we've got in the last timeout
+				while(len(self.return_messages) != 0):
+					self.manage_msg(self.return_messages.pop())
+
                                 #We join (old)zombies and we move new ones
 				#in the old list
+				self.avg_dead_workers.update_load(len(self.zombies))
+				print "Killing average : ", self.avg_dead_workers, "workers"
 				for id in self.zombies:
-					if self.workers[id].is_alive():
-						self.workers[id].join(timeout=1)
+					#if self.workers[id].is_alive():
+					self.workers[id].terminate()
+					self.workers[id].join(timeout=1)
 					del self.workers[id]
 				#We switch so zombie will be kill, and new
 				#ones wil go in newzombies

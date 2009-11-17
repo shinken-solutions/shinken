@@ -36,7 +36,7 @@ class Worker:
     _idletime = None
     _timeout = None
     _c = None
-    def __init__(self, id, s, m, mortal=True, timeout=10):
+    def __init__(self, id, s, return_queue, mortal=True, timeout=60):
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -44,7 +44,7 @@ class Worker:
         self._idletime = 0
         self._timeout = timeout
         self._c = Queue() # Private Control queue for the Worker
-        self._process = Process(target=self.work, args=(s, m, self._c))
+        self._process = Process(target=self.work, args=(s, return_queue, self._c))
 	#Thread version : not good in cpython :(
         #self._process = threading.Thread(target=self.work, args=(s, m, self._c))
 
@@ -56,6 +56,14 @@ class Worker:
     def start(self):
         self._process.start()
 
+    #Kill the backgroup process
+    #AND close correctly the queue
+    #the queue have a thread, so close it too....
+    def terminate(self):
+        self._process.terminate()
+        self._c.close()
+        self._c.join_thread()
+        
 
     def join(self, timeout=None):
         self._process.join(timeout)
@@ -88,8 +96,9 @@ class Worker:
     #id = id of the worker
     #s = Global Queue Master->Slave
     #m = Queue Slave->Master
+    #return_queue = queue managed by manager
     #c = Control Queue for the worker
-    def work(self, s, m, c):
+    def work(self, s, return_queue, c):
         while True:
             msg = None
             cmsg = None
@@ -115,7 +124,8 @@ class Worker:
                 
                 #We answer to the master
                 msg = Message(id=self.id, type='Result', data=chk)
-                m.put(msg)
+                #m.put(msg)
+                return_queue.append(msg)
                 
             try:
                 cmsg = c.get(block=False)
