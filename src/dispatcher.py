@@ -301,7 +301,7 @@ class Dispatcher:
                                         print r.to_satellites_nb_assigned[kind]
                                         print r.to_satellites_need_dispatch[kind]
                                 else:
-                                    print '[',r.get_name(),']', "Dispatch fault for sched", sched.name
+                                    print '[',r.get_name(),']', "Dispatch fault for sched", sched.get_name()
                             else:
                                 print '[',r.get_name(),']',sched.get_name(), "do not need conf, sorry"
                         except IndexError: #No more schedulers.. not good, no loop

@@ -26,7 +26,9 @@ from brok import Brok
 class Item(object):
     def __init__(self, params={}):
         #We have our own id of My Class type :)
-        self.id = self.__class__.id
+        #use set attr for going into the slots
+        #instead of __dict__ :)
+        setattr(self, 'id', self.__class__.id)
         self.__class__.id += 1
 
         
@@ -424,6 +426,15 @@ class Items(object):
         tpls = [id for id in self.items if self.items[id].is_tpl()]
         for id in tpls:
             del self.items[id]
+        #Ok now delete useless in items
+        #TODO : move into item class
+        for i in self:
+            try:
+                del i.templates
+                del i.use
+                del i.plus
+            except AttributeError:
+                pass
         del self.templates
 
 

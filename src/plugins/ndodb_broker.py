@@ -68,7 +68,7 @@ class Ndodb_broker:
     def manage_brok(self, b):
         type = b.type
         manager = 'manage_'+type+'_brok'
-        print "(Ndo) I search manager:", manager
+        #print "(Ndo) I search manager:", manager
         if self.has(manager):
             f = getattr(self, manager)
             queries = f(b)
@@ -76,7 +76,7 @@ class Ndodb_broker:
             for q in queries :
                 self.execute_query(q)
             return
-        print "(ndodb)I don't manage this brok type", b
+        #print "(ndodb)I don't manage this brok type", b
 
 
     #Create the database connexion
@@ -90,7 +90,7 @@ class Ndodb_broker:
     #Just run the query
     #TODO: finish catch
     def execute_query(self, query):
-        print "I run query", query, "\n"
+        #print "I run query", query, "\n"
         self.db_cursor.execute(query)
         self.db.commit ()
 
@@ -99,7 +99,7 @@ class Ndodb_broker:
         query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='1'" % host_name
         self.db_cursor.execute(query)
         row = self.db_cursor.fetchone ()
-        if len(row) < 1:
+        if row == None or len(row) < 1:
             return 0
         else:
             return row[0]
@@ -109,7 +109,7 @@ class Ndodb_broker:
         query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='3'" % hostgroup_name
         self.db_cursor.execute(query)
         row = self.db_cursor.fetchone ()
-        if len(row) < 1:
+        if row == None or len(row) < 1:
             return 0
         else:
             return row[0]
@@ -119,7 +119,7 @@ class Ndodb_broker:
         query = "SELECT object_id from nagios_objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
         self.db_cursor.execute(query)
         row = self.db_cursor.fetchone ()
-        if len(row) < 1:
+        if row == None or len(row) < 1:
             return 0
         else:
             return row[0]
@@ -129,7 +129,7 @@ class Ndodb_broker:
         query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='4'" % servicegroup_name
         self.db_cursor.execute(query)
         row = self.db_cursor.fetchone ()
-        if len(row) < 1:
+        if row == None or len(row) < 1:
             return 0
         else:
             return row[0]
@@ -239,7 +239,7 @@ class Ndodb_broker:
         for prop in new_b.data:
             #ex : 'name' : 'program_start_time', 'transform'
             if prop in mapping:
-                print "Got a prop to change", prop
+                #print "Got a prop to change", prop
                 val = new_b.data[prop]
                 if mapping[prop]['transform'] != None:
                     f = mapping[prop]['transform']
@@ -318,9 +318,9 @@ class Ndodb_broker:
         host_id = self.get_host_object_id_by_name(data['host_name'])
         service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
 
-        print "DATA:", data
-        print "HOST ID:", host_id
-        print "SERVICE ID:", service_id
+        #print "DATA:", data
+        #print "HOST ID:", host_id
+        #print "SERVICE ID:", service_id
         services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'], 
                       'service_object_id' : service_id, 'host_object_id' : host_id,
                       'display_name' : data['display_name'], 
@@ -425,7 +425,7 @@ class Ndodb_broker:
     #Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
         data = b.data
-        print "DATA", data
+        #print "DATA", data
         host_id = self.get_host_object_id_by_name(data['host_name'])
         #Only the host is impacted
         where_clause = {'host_object_id' : host_id}
@@ -454,7 +454,7 @@ class Ndodb_broker:
     #Same than service result, but for host result
     def manage_service_check_result_brok(self, b):
         data = b.data
-        print "DATA", data
+        #print "DATA", data
         service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
         
         #Only the service is impacted
@@ -496,7 +496,7 @@ class Ndodb_broker:
     def manage_initial_contact_status_brok(self, b):
         new_b = copy.deepcopy(b)
         data = new_b.data
-        print "DATA:", data
+        #print "DATA:", data
 
         contacts_data = {'contact_id' : data['id'], 'instance_id' : data['instance_id'], 
                       'contact_object_id' : data['id'], 'contact_object_id' : data['id'],
@@ -529,7 +529,7 @@ class Ndodb_broker:
         #Ok, the hostgroups table is uptodate, now we add relations 
         #between hosts and hostgroups
         for (c_id, c_name) in b.data['members']:
-            print c_name
+            #print c_name
             contactgroup_members_data = {'instance_id' : data['instance_id'], 'contactgroup_id' : data['id'],
                                          'contact_object_id' : c_id}
             q = self.create_insert_query('contactgroup_members', contactgroup_members_data)

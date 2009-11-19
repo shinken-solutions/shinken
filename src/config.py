@@ -429,6 +429,7 @@ class Config(Item):
             realms.append(r)
         self.realms = Realms(realms)
 
+        
 
     #We use linkify to make the config more efficient : elements will be
     #linked, like pointers. For example, a host will have it's service,
@@ -634,6 +635,10 @@ class Config(Item):
         self.contacts.create_reversed_list()
         self.services.create_reversed_list()
         self.timeperiods.create_reversed_list()
+        #For services it's a special case
+        #we search for hosts, then for services
+        #it's quicker than search in al services
+        self.services.optimize_service_search(self.hosts)
 
 
     #check if elements are correct or no (fill with defaults, etc)
@@ -868,6 +873,7 @@ class Config(Item):
                 #Now the conf can be link in the realm
                 r.confs[i+offset] = self.confs[i+offset]
             offset += len(r.packs)
+            del r.packs
         
         #We've nearly have hosts and services. Now we want REALS hosts (Class)
         #And we want groups too
@@ -916,3 +922,127 @@ class Config(Item):
         for i in self.confs:
             self.confs[i].instance_id = 0#i
 
+
+
+    def debug(self):
+        #DBG:
+        for i in self.confs:
+            print "DBG conf", i
+            cfg = self.confs[i]
+            print cfg
+            import cPickle, time
+            t0 = time.time()
+            scheds = ''#cPickle.dumps(cfg.schedulerlinks)
+            t1 = time.time()
+            print "Scheds :", t1 - t0, len(scheds)
+
+            #for s in cfg.services:
+            #    print s.id, len(s.act_depend_of), len(s.chk_depend_of)
+            print self.__sizeof__()
+            for key in self.__dict__:
+                if hasattr(self.__dict__[key], '__sizeof__'):
+                    print key, self.__dict__[key].__sizeof__()
+                    elt = self.__dict__[key]
+                    if hasattr(elt, '__dict__'):
+                        for key2 in elt.__dict__:
+                            if key2 == 'templates':
+                                print 'Templates:', elt.templates
+                            if hasattr(elt, '__sizeof__'):
+                                print key,'/', key2, elt.__dict__[key2].__sizeof__()
+                            if hasattr(elt, '__len__'):
+                                print key,'/', key2, 'len', len(elt.__dict__[key2])
+
+            print "CFG part"*5
+            print cfg.__sizeof__()
+            for key in cfg.__dict__:
+                if hasattr(cfg.__dict__[key], '__sizeof__'):
+                    print key, cfg.__dict__[key].__sizeof__()
+                    elt = cfg.__dict__[key]
+                    if hasattr(elt, '__dict__'):
+                        for key2 in elt.__dict__:
+                            if key2 == 'templates':
+                                print 'Templates:', elt.templates
+                            if hasattr(elt, '__sizeof__'):
+                                print key,'/', key2, elt.__dict__[key2].__sizeof__()
+                            if hasattr(elt, '__len__'):
+                                print key,'/', key2, 'len', len(elt.__dict__[key2])
+
+            import gc
+            #print "nb of void list:", len([o for o in gc.get_objects() if o==[]])
+            print "Big dict", len([o for o in gc.get_objects() if isinstance(o, dict) and len(o) > 100])
+            print "Dict size:", sum((o.__sizeof__() for o in gc.get_objects() if isinstance(o, dict)))
+            print "Max size", max((o.__sizeof__() for o in gc.get_objects() if isinstance(o, dict)))
+            for l in [o for o in gc.get_objects() if isinstance(o, dict) and len(o) > 100]:
+                s = len(l)
+                print l.__sizeof__(), len(l)
+            print "Sur:", len([o for o in gc.get_objects() if isinstance(o, dict)]), "list"
+
+            #for o in [o for o in gc.get_objects() if isinstance(o, list)]:
+            #    print o
+
+            ts = time.time()
+            for i in xrange(1, 1500):
+                for j in xrange(1, 10):
+                    s = self.services.find_srv_by_name_and_hostname('srv-'+str(i), 'Service-'+str(j))
+            ts2 = time.time()
+            print "Search services:", ts2- ts
+
+            from guppy import hpy
+            hp = hpy()
+            print hp.heap()
+            
+            services = cPickle.dumps(cfg.services, protocol=2)
+            t2 = time.time()
+            print "Services :", t2 - t1, len(services)
+            hostgroups = cPickle.dumps(cfg.hostgroups)
+            t3 = time.time()
+            print "Hostgroupss :", t3 - t2, len(hostgroups)
+            contacts = cPickle.dumps(cfg.contacts)
+            t4 = time.time()
+            print "Contacts :", t4 - t3, len(contacts)
+            commands = cPickle.dumps(cfg.commands)
+            t5 = time.time()
+            print "Commands :", t5 - t4, len(commands)
+            timeperiods = cPickle.dumps(cfg.timeperiods)
+            t6 = time.time()
+            print "Hostgroupss :", t6 - t5, len(timeperiods)
+            servicegroups = cPickle.dumps(cfg.servicegroups)
+            t7 = time.time()
+            print "servicegroups :", t7 - t6, len(servicegroups)
+            contactgroups = cPickle.dumps(cfg.contactgroups)
+            t8 = time.time()
+            print "Hostgroupss :", t8 - t7, len(contactgroups)
+            hosts = cPickle.dumps(cfg.hosts)
+            t9 = time.time()
+            print "Hosts :", t9 - t8, len(hosts)
+            print "Sub All:", t9 - t0, len(services) + len(contactgroups) + len(servicegroups) + len(timeperiods) + len(commands) + len(contacts) + len(hostgroups) + len(hosts) + len(scheds)
+            all = cPickle.dumps(cfg, protocol=cPickle.HIGHEST_PROTOCOL)
+            t10 = time.time()
+            print "All :", t10 - t9, len(all)
+
+
+    def quick_debug(self):
+            import gc, time
+            #print "nb of void list:", len([o for o in gc.get_objects() if o==[]])
+            print "Big dict", len([o for o in gc.get_objects() if isinstance(o, dict) and len(o) > 100])
+            print "Dict size:", sum((o.__sizeof__() for o in gc.get_objects() if isinstance(o, dict)))
+            print "Max size", max((o.__sizeof__() for o in gc.get_objects() if isinstance(o, dict)))
+            for l in [o for o in gc.get_objects() if isinstance(o, dict) and len(o) > 100]:
+                s = len(l)
+                print l.__sizeof__(), len(l)
+            print "Sur:", len([o for o in gc.get_objects() if isinstance(o, dict)]), "list"
+
+            #for o in [o for o in gc.get_objects() if isinstance(o, list)]:
+            #    print o
+
+            ts = time.time()
+            for i in xrange(1, 1500):
+                for j in xrange(1, 10):
+                    s = self.services.find_srv_by_name_and_hostname('srv-'+str(i), 'Service-'+str(j))
+            ts2 = time.time()
+            print "Search services:", ts2- ts
+
+            from guppy import hpy
+            hp = hpy()
+            print hp.heap()
+            

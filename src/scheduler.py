@@ -72,6 +72,7 @@ class Scheduler:
         #We need reversed list for search in the retention
         #file read
         self.services.create_reversed_list()
+        self.services.optimize_service_search(conf.hosts)
         self.hosts = conf.hosts
         self.hosts.create_reversed_list()
         self.contacts = conf.contacts
@@ -602,6 +603,9 @@ class Scheduler:
                     if ticks % nb_ticks == 0:
                         #print "I run function :", f.func_name
                         f()
+
+                #if  ticks % 10 == 0:
+                #    self.conf.quick_debug()
 
                 #stats
                 nb_scheduled = len([c for c in self.checks.values() if c.status=='scheduled'])

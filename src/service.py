@@ -57,7 +57,7 @@ class Service(SchedulingItem):
                      'current_notification_number', 'current_notification_id', \
                      'check_flapping_recovery_notification', 'scheduled_downtime_depth', \
                      'pending_flex_downtime', 'timeout', 'start_time', 'end_time', 'early_timeout', \
-                     'return_code', 'perf_data'                 
+                     'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'host'
                  )
 
     id = 1 # Every service have a unique ID, and 0 is always special in database and co...
@@ -165,7 +165,8 @@ class Service(SchedulingItem):
         'early_timeout' : {'default' : 0, 'broker_name' : None},
         'return_code' : {'default' : 0, 'broker_name' : None},
         'perf_data' : {'default' : '', 'broker_name' : None},
-        'host' : {'default' : None}
+        'host' : {'default' : None},
+        'customs' : {'default' : {}}
         }
 
     #Mapping between Macros and properties (can be prop or a function)
@@ -229,7 +230,7 @@ class Service(SchedulingItem):
             res.append(getattr(self, prop))
         for prop in cls.running_properties:
             res.append(getattr(self, prop))
-        #We reverse because we whant to recreate
+        #We reverse because we want to recreate
         #By check at properties in the same order
         res.reverse()
         return res
@@ -401,6 +402,10 @@ class Services(Items):
                     self.reversed_list[key] = s.id
                 else:
                     self.twins.append(s.id)
+        #For service, the reversed_list is not used for
+        #search, so we del it
+        del self.reversed_list
+                    
 
 
     #TODO : finish serach to use reversed
@@ -425,6 +430,12 @@ class Services(Items):
 
     #Search a service by it's name and hot_name
     def find_srv_by_name_and_hostname(self, host_name, name):
+        if hasattr(self, 'hosts'):
+            h = self.hosts.find_by_name(host_name)
+            if h == None:
+                return None
+            return h.find_service_by_name(name)
+
         id = self.find_srv_id_by_name_and_hostname(host_name, name)
         if id is not None:
             return self.items[id]
@@ -442,6 +453,13 @@ class Services(Items):
         self.linkify_s_by_cmd(commands)
         self.linkify_s_by_tp(timeperiods)
         self.linkify_s_by_c(contacts)
+
+
+    #We can link services with hosts so
+    #We can search in O(hosts) instead
+    #of O(services) for common cases
+    def optimize_service_search(self, hosts):
+        self.hosts = hosts
 
 
     #We just search for each host the id of the host

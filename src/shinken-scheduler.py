@@ -251,6 +251,10 @@ class Shinken:
 		self.must_run = True
 		self.wait_initial_conf()
 		print "Ok we've got conf"
+
+		#Interface for Broks and Checks
+		self.ichecks = None
+		self.ibroks = None
 		
 
 	#We wait (block) for arbiter to send us conf
@@ -287,21 +291,37 @@ class Shinken:
 	def load_conf(self):
 		#create scheduler with ref of our daemon
 		self.sched = Scheduler(self.poller_daemon)
-		#give it an interface
-		self.uri = self.poller_daemon.connect(IChecks(self.sched),"Checks")
-		print "The object's uri is:",self.uri
 		
-		self.uri2 = self.poller_daemon.connect(IBroks(self.sched),"Broks")
-		print "The object's uri2 is:",self.uri2
+		#give it an interface
+		#But first remove previous interface if exists
+		if self.ichecks != None:
+			print "Deconnecting previous Check Interface from daemon"
+			self.poller_daemon.disconnect(self.ichecks)
+		self.ichecks = IChecks(self.sched)
+		self.uri = self.poller_daemon.connect(self.ichecks,"Checks")
+		print "The Checks Interface uri is:",self.uri
+		
+		#Same fro Broks
+		if self.ibroks != None:
+			print "Deconnecting previous Broks Interface from daemon"
+			self.poller_daemon.disconnect(self.ibroks)
+		self.ibroks = IBroks(self.sched)
+		self.uri2 = self.poller_daemon.connect(self.ibroks,"Broks")
+		print "The Broks Interface uri is:",self.uri2
 
 		print "Loading configuration"
 		self.conf.explode_global_conf()
 		self.conf.is_correct()
+
+
+
 		#Creating the Macroresolver Class & unique instance
 		m = MacroResolver()
 		m.init(self.conf)
 		#we give sched it's conf
 		self.sched.load_conf(self.conf)
+
+		#self.conf.quick_debug()
 		
 		#Now create the external commander
 		#it's a applyer : it role is not to dispatch commands,

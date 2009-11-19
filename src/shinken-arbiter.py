@@ -111,6 +111,8 @@ class Arbiter:
         print "****************** Cut into parts ******************"
         self.confs = self.conf.cut_into_parts()
 
+        #self.conf.debug()
+
         print "****************** Send Configuration to schedulers******************"
         self.dispatcher = Dispatcher(self.conf)
         self.dispatcher.check_alive()
