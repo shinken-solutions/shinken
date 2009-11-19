@@ -105,11 +105,8 @@ class Action:
         timeout = 10
         self.status = 'lanched'
         self.check_time = time.time()
-        #self.command = '/bin/sh -c "%s"' % self.command
         #cmd = ['/bin/sh', '-c', self.command]
         #Nagios do not use the /bin/sh -c command, so I don't do it too
-        #cmd = [self.command]
-        #print cmd
         try:
             process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except OSError as exp:

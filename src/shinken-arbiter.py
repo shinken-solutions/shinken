@@ -58,6 +58,9 @@ class Arbiter:
     def main(self):
         print "Loading configuration"
         self.conf = Config()
+        #The config Class must have the USERN macro
+        #There are 256 of them, so we create online
+        Config.fill_usern_macros()
         self.conf.read_config("etc/nagios.cfg")
 
         print "****************** Create Template links **********"

@@ -176,13 +176,7 @@ class IForArbiter(Pyro.core.ObjBase):
 		print "Get conf:", self.app.conf
 		self.app.have_conf = True
 		print "Have conf?", self.app.have_conf
-
 		print "Just apres reception"
-                #from guppy import hpy
-                #hp=hpy()
-                #print hp.heap()
-                #print hp.heapu()
-
 		
                 #if app already have a scheduler, we must say him to 
                 #DIE Mouahahah
@@ -225,6 +219,9 @@ class Shinken:
 	#then create the interface for arbiter
 	#Then, it wait for a first configuration
 	def __init__(self):
+		#Config Class must be filled with USERN Macro
+		Config.fill_usern_macros()
+
 		#create the server
 		Pyro.config.PYRO_COMPRESSION = 1
 		Pyro.config.PYRO_MULTITHREADED = 0

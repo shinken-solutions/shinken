@@ -56,6 +56,7 @@ from util import to_int, to_char, to_bool
 
 class Config(Item):
     cache_path = "objects.cache"
+    my_type = "config"
 
     #Properties: 
     #required : if True, there is not default, and the config must put them
@@ -189,6 +190,7 @@ class Config(Item):
                 'debug_level' : {'required':False, 'default':'0'},
                 'debug_verbosity' : {'required':False, 'default':'1'},
                 'max_debug_file_size' : {'required':False, 'default':'10000', 'pythonize': to_int}
+                #'$USERn$ : {'required':False, 'default':''} # Add at run in __init__
     }
 
 
@@ -208,11 +210,25 @@ class Config(Item):
         'SERVICEPERFDATAFILE' : '',
         'ADMINEMAIL' : '',
         'ADMINPAGER' : ''
+        #'USERn' : '$USERn$' # Add at run in __init__
         }
 
 
     def __init__(self):
         self.params = {}
+
+
+    def fill_usern_macros(cls):
+        #Now the ressource file part
+        properties = cls.properties
+        macros = cls.macros
+        for n in xrange(1, 256):
+            n = str(n)
+            properties['$USER'+n+'$'] = {'required':False, 'default':''}
+            macros['USER'+n] = '$USER'+n+'$'
+    #Set this a Class method
+    fill_usern_macros = classmethod(fill_usern_macros)
+
 
 
     def load_params(self, params):
@@ -244,7 +260,7 @@ class Config(Item):
         for line in buf:
             res += line
             line = line[:-1]
-            if re.search("^cfg_file", line):
+            if re.search("^cfg_file", line) or re.search("^resource_file", line):
                 elts = line.split('=')
                 try:
                     fd = open(elts[1])
@@ -824,7 +840,7 @@ class Config(Item):
         for i in xrange(0, nb_parts):
             print "Create Conf:", i, '/', nb_parts -1
             self.confs[i] = Config()
-            
+
             #Now we copy all properties of conf into the new ones
             for prop in Config.properties:
                 val = getattr(self, prop)

@@ -70,6 +70,7 @@ class MacroResolver(Borg):
     def init(self, conf):
         # For searching class and elements for ondemand
         #we need link to types
+        self.conf = conf
         self.lists_on_demand = [] 
         self.hosts = conf.hosts
         #For special void host_name handling...
@@ -127,6 +128,7 @@ class MacroResolver(Borg):
         macros = self.get_macros(c_line)
         #Now we prepare the classes for looking at the class.macros
         data.append(self) #For getting global MACROS
+        data.append(self.conf) # For USERN macros
         clss = [d.__class__ for d in data]
         #Put in the macros the type of macro for all macros
         self.get_type_of_macro(macros, clss)
@@ -175,9 +177,9 @@ class MacroResolver(Borg):
                 macros[macro]['type'] = 'ARGN'
                 continue
             #USERN macros
-            elif re.match('USER\d', macro):
-                macros[macro]['type'] = 'USERN'
-                continue
+            #elif re.match('USER\d', macro):
+            #    macros[macro]['type'] = 'USERN'
+            #    continue
             #CUSTOM
             elif re.match('_HOST\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
@@ -201,6 +203,7 @@ class MacroResolver(Borg):
                 if macro in cls.macros:
                     macros[macro]['type'] = 'class'
                     macros[macro]['class'] = cls
+                    continue
 
 
     #Resolv MACROS for the ARGN
