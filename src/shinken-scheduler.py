@@ -53,7 +53,7 @@
 #and a new one is created.
 #The scheduler create list of checks and actions for poller
 #and reactionner.
-#import os
+import os
 #import re
 import time
 import sys
@@ -61,6 +61,8 @@ import Pyro.core
 #import signal
 import select
 import random
+import getopt
+import ConfigParser
 
 from check import Check
 #from util import get_sequence
@@ -68,7 +70,11 @@ from scheduler import Scheduler
 from config import Config
 from macroresolver import MacroResolver
 from external_command import ExternalCommand
+from daemon import create_daemon, check_parallele_run, change_user
 
+
+VERSION = "0.1beta"
+default_config_file = "/home/nap/shinken/src/etc/schedulerd.cfg"
 
 
 #Interface for Workers
@@ -218,21 +224,26 @@ class Shinken:
 	#Create a Pyro server (port = arvg 1)
 	#then create the interface for arbiter
 	#Then, it wait for a first configuration
-	def __init__(self):
+	def __init__(self, conf):
 		#Config Class must be filled with USERN Macro
 		Config.fill_usern_macros()
-
+		
 		#create the server
+		Pyro.config.PYRO_STORAGE = conf['workdir']
 		Pyro.config.PYRO_COMPRESSION = 1
 		Pyro.config.PYRO_MULTITHREADED = 0
 		Pyro.core.initServer()
 	
-		if len(sys.argv) == 2:
-			self.port = int(sys.argv[1])
+		if 'port' in conf:
+			self.port = conf['port']
 		else:
 			self.port = self.__class__.default_port
 		print "Port:", self.port
-		self.poller_daemon = Pyro.core.Daemon(port=self.port)
+		if 'host' in conf:
+			self.host = conf['host']
+		else:
+			self.host = '0.0.0.0'
+		self.poller_daemon = Pyro.core.Daemon(host=self.host, port=self.port)
 		if self.poller_daemon.port != self.port:
 			print "Sorry, the port %d is not free" % self.port
 			sys.exit(1)
@@ -351,12 +362,114 @@ class Shinken:
 					self.load_conf()
 				
 
+################### Process launch part
+def usage(name):
+    print "Shinken Schduler Daemon, version %s, from Gabes Jean, naparuba@gmail.com" % VERSION
+    print "Usage: %s [options] [-c configfile]" % name
+    print "Options:"
+    print " -c, --config"
+    print "\tConfig file. Default : %s " % default_config_file
+    print " -d, --daemon"
+    print "\tRun in daemon mode"
+    print " -r, --replace"
+    print "\tReplace previous running scheduler"
+    print " -h, --help"
+    print "\tPrint detailed help screen"
+    print " --debug"
+    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
+
+
+
+#if __name__ == '__main__':
+#	p = Shinken()
+#        import cProfile
+#	#p.main()
+#        command = """p.main()"""
+#        cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
+
+
+
+
+def parse_config(config_file):
+    res = {}
+    config = ConfigParser.ConfigParser()
+    config.read(config_file)
+    if config._sections == {}:
+        print "Bad or missing config file : %s " % config_file
+        sys.exit(2)
+    res['workdir'] = config.get('daemon', 'workdir')
+    workdir = res['workdir']
+    res['port'] = int(config.get('daemon', 'port'))
+    res['host'] = config.get('daemon', 'host')
+    res['maxfd'] = int(config.get('daemon', 'maxfd'))
+    res['pidfile'] = config.get('daemon', 'pidfile')
+    res['user'] = config.get('daemon', 'user')
+    res['group'] = config.get('daemon', 'group')
+    res['idontcareaboutsecurity'] = config.getboolean('daemon', 'idontcareaboutsecurity')
+    return res
+
+
+
 
 #Here we go!
-if __name__ == '__main__':
-	p = Shinken()
-        import cProfile
-	#p.main()
-        command = """p.main()"""
-        cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
+if __name__ == "__main__":
+    #Manage the options
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hrdc::w", ["help", "replace", "daemon", "config=", "debug=", "easter"])
+    except getopt.GetoptError, err:
+        # print help information and exit:
+        print str(err) # will print something like "option -a not recognized"
+        usage(sys.argv[0])
+        sys.exit(2)
+    #Default params
+    config_file = default_config_file
+    daemon=False
+    replace=False
+    debug=False
+    debug_file=None
+    insane = False
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            usage(sys.argv[0])
+            sys.exit()
+	elif o in ("-r", "--replace"):
+            replace = True
+        elif o in ("-c", "--config"):
+            config_file = a
+        elif o in ("-d", "--daemon"):
+            daemon = True
+	elif o in ("--debug"):
+            debug = True
+	    debug_file = a
+        else:
+            print "Sorry, the option",o, a, "is unknown"
+	    usage(sys.argv[0])
+            sys.exit()
+
+    
+    #Ok, now we load the config
+    conf = parse_config(config_file)
+    #Check if another Scheduler is not running (with the same conf)
+    check_parallele_run(replace=replace, pidfile=conf['pidfile'])
+    #If the admin don't care about security, I allow root running
+    if 'idontcareaboutsecurity' in conf and conf['idontcareaboutsecurity']:
+	    insane = True
+    #Try to change the user (not nt for the moment)
+    #TODO: change user on nt
+    if os.name != 'nt':
+	    change_user(conf['user'], conf['group'], insane)
+    else:
+	    print "Sorry, you can't change user on this system"
+    #Now the daemon part if need
+    if daemon:
+	    create_daemon(maxfd_conf=conf['maxfd'], workdir=conf['workdir'], pidfile=conf['pidfile'], debug=debug, debug_file=debug_file)
+
+    #TODO : signal managment
+    #atexit.register(unlink, pidfile=conf['pidfile'])
+
+    p = Shinken(conf)
+    #import cProfile
+    p.main()
+    #command = """p.main()"""
+    #cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
 
