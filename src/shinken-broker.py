@@ -34,11 +34,22 @@ import Pyro.core
 #import select
 #import copy
 
+import sys, os
+import getopt
+import ConfigParser
+
+from satellite import Satellite
+from daemon import create_daemon, check_parallele_run, change_user
+
+VERSION = "0.1beta"
+default_config_file = "/home/nap/shinken/src/etc/brokerd.cfg"
+
+
 #from message import Message
 #from worker import Worker
 #from util import get_sequence
 from plugins import Plugins
-from satellite import Satellite
+
 
 #Interface for Arbiter, our big MASTER
 #It put us our conf
@@ -122,13 +133,16 @@ class IForArbiter(Pyro.core.ObjBase):
 class Broker(Satellite):
 	default_port = 7772
 	
-	def __init__(self):
+	def __init__(self, conf):
 		#Bool to know if we have received conf from arbiter
 		self.have_conf = False
 		self.have_new_conf = False
 		#Ours schedulers
 		self.schedulers = {}
 		self.mods = [] # for brokers from plugins
+
+		#Keep the conf
+		self.conf = conf
 
 
 	#initialise or re-initialise connexion with scheduler
@@ -215,15 +229,23 @@ class Broker(Satellite):
 
 	#Main function, will loop forever
 	def main(self):
+
+		Pyro.config.PYRO_STORAGE = self.conf['workdir']
                 #Daemon init
 		Pyro.core.initServer()
 
-		if len(sys.argv) == 2:
-			self.port = int(sys.argv[1])
+		if 'port' in self.conf:
+			self.port = conf['port']
 		else:
 			self.port = self.__class__.default_port
 		print "Port:", self.port
-		self.daemon = Pyro.core.Daemon(port=self.port)
+		if 'host' in self.conf:
+			self.host = conf['host']
+		else:
+			self.host = '0.0.0.0'
+
+		print "Port:", self.port
+		self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)
 		#If the port is not free, pyro take an other. I don't like that!
 		if self.daemon.port != self.port:
 			print "Sorry, the port %d was not free" % self.port
@@ -235,7 +257,7 @@ class Broker(Satellite):
 
 
 		#Do the plugins part
-		self.plugins_manager = Plugins()
+		self.plugins_manager = Plugins(self.conf['pluginspath'])
 		self.plugins_manager.load()
 		self.mods = self.plugins_manager.get_brokers()
 		for mod in self.mods:
@@ -268,10 +290,105 @@ class Broker(Satellite):
 
 
 
+################### Process launch part
+def usage(name):
+    print "Shinken Broker Daemon, version %s, from Gabes Jean, naparuba@gmail.com" % VERSION
+    print "Usage: %s [options] [-c configfile]" % name
+    print "Options:"
+    print " -c, --config"
+    print "\tConfig file. Default : %s " % default_config_file
+    print " -d, --daemon"
+    print "\tRun in daemon mode"
+    print " -r, --replace"
+    print "\tReplace previous running scheduler"
+    print " -h, --help"
+    print "\tPrint detailed help screen"
+    print " --debug"
+    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
+
+
+
+def parse_config(config_file):
+    res = {}
+    config = ConfigParser.ConfigParser()
+    config.read(config_file)
+    if config._sections == {}:
+        print "Bad or missing config file : %s " % config_file
+        sys.exit(2)
+    res['workdir'] = config.get('daemon', 'workdir')
+    workdir = res['workdir']
+    res['port'] = int(config.get('daemon', 'port'))
+    res['host'] = config.get('daemon', 'host')
+    res['maxfd'] = int(config.get('daemon', 'maxfd'))
+    res['pidfile'] = config.get('daemon', 'pidfile')
+    res['user'] = config.get('daemon', 'user')
+    res['group'] = config.get('daemon', 'group')
+    res['idontcareaboutsecurity'] = config.getboolean('daemon', 'idontcareaboutsecurity')
+    res['pluginspath'] = config.get('daemon', 'pluginspath')
+    return res
+
+
+
 #lets go to the party
-if __name__ == '__main__':
-	broker = Broker()
-	#broker.main()
-        import cProfile
-        command = """broker.main()"""
-        cProfile.runctx( command, globals(), locals(), filename="var/Broker.profile" )
+if __name__ == "__main__":
+    #Manage the options
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hrdc::w", ["help", "replace", "daemon", "config=", "debug=", "easter"])
+    except getopt.GetoptError, err:
+        # print help information and exit:
+        print str(err) # will print something like "option -a not recognized"
+        usage(sys.argv[0])
+        sys.exit(2)
+    #Default params
+    config_file = default_config_file
+    daemon=False
+    replace=False
+    debug=False
+    debug_file=None
+    insane = False
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            usage(sys.argv[0])
+            sys.exit()
+	elif o in ("-r", "--replace"):
+            replace = True
+        elif o in ("-c", "--config"):
+            config_file = a
+        elif o in ("-d", "--daemon"):
+            daemon = True
+	elif o in ("--debug"):
+            debug = True
+	    debug_file = a
+        else:
+            print "Sorry, the option",o, a, "is unknown"
+	    usage(sys.argv[0])
+            sys.exit()
+
+    
+    #Ok, now we load the config
+    conf = parse_config(config_file)
+    #Check if another Scheduler is not running (with the same conf)
+    check_parallele_run(replace=replace, pidfile=conf['pidfile'])
+    #If the admin don't care about security, I allow root running
+    if 'idontcareaboutsecurity' in conf and conf['idontcareaboutsecurity']:
+	    insane = True
+    #Try to change the user (not nt for the moment)
+    #TODO: change user on nt
+    if os.name != 'nt':
+	    change_user(conf['user'], conf['group'], insane)
+    else:
+	    print "Sorry, you can't change user on this system"
+    #Now the daemon part if need
+    if daemon:
+	    create_daemon(maxfd_conf=conf['maxfd'], workdir=conf['workdir'], pidfile=conf['pidfile'], debug=debug, debug_file=debug_file)
+
+    #TODO : signal managment
+    #atexit.register(unlink, pidfile=conf['pidfile'])
+
+    p = Broker(conf)
+    #import cProfile
+    p.main()
+    #command = """p.main()"""
+    #cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
+
+

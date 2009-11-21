@@ -30,19 +30,19 @@ import sys
 
 class Plugins():
 
-    def __init__(self):
-        pass
+    def __init__(self, pluginpath):
+        self.pluginpath = pluginpath
 
 
     #Lod all plugins
     def load(self):
         #We get all plugins names
-        pluginpath = "./plugins"
-        pluginfiles = [fname[:-3] for fname in os.listdir(pluginpath) if fname.endswith(".py")]
+        #pluginpath = "./plugins"
+        pluginfiles = [fname[:-3] for fname in os.listdir(self.pluginpath) if fname.endswith(".py")]
         
         #Now we try to load thems
-        if not pluginpath in sys.path:
-            sys.path.append(pluginpath)
+        if not self.pluginpath in sys.path:
+            sys.path.append(self.pluginpath)
         self.imported_modules = [__import__(fname) for fname in pluginfiles]
 
     #def init(self):

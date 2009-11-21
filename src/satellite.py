@@ -123,7 +123,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
 #Our main APP class
 class Satellite:
-	def __init__(self):
+	def __init__(self, conf):
 		#Bool to know if we have received conf from arbiter
 		self.have_conf = False
 		self.have_new_conf = False
@@ -131,6 +131,9 @@ class Satellite:
 		self.m = Queue() #Slave -> Master
 		self.manager = Manager()
 		self.return_messages = self.manager.list()
+
+		#Conf
+		self.conf = conf
 
 		#Ours schedulers
 		self.schedulers = {}
@@ -448,19 +451,25 @@ class Satellite:
 
 	#Main function, will loop forever
 	def main(self):
-                #Daemon init
-		Pyro.core.initServer()
 		Pyro.config.PYRO_COMPRESSION = 1
 		Pyro.config.PYRO_MULTITHREADED = 0
+		Pyro.config.PYRO_STORAGE = self.conf['workdir']
+                #Daemon init
+		Pyro.core.initServer()
 
-		#Let the user give us a port, if not, take the default one
-		if len(sys.argv) == 2:
-			self.port = int(sys.argv[1])
+		if 'port' in self.conf:
+			self.port = self.conf['port']
 		else:
 			self.port = self.__class__.default_port
 		print "Port:", self.port
+		if 'host' in self.conf:
+			self.host = self.conf['host']
+		else:
+			self.host = '0.0.0.0'
 
-		self.daemon = Pyro.core.Daemon(port=self.port)
+		print "Port:", self.port
+		self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)
+
 		#If the port is not free, pyro take an other. I don't like that!
 		if self.daemon.port != self.port:
 			print "Sorry, the port %d was not free" % self.port

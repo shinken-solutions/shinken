@@ -54,18 +54,15 @@
 #The scheduler create list of checks and actions for poller
 #and reactionner.
 import os
-#import re
 import time
 import sys
 import Pyro.core
-#import signal
 import select
 import random
 import getopt
 import ConfigParser
 
 from check import Check
-#from util import get_sequence
 from scheduler import Scheduler
 from config import Config
 from macroresolver import MacroResolver
@@ -364,7 +361,7 @@ class Shinken:
 
 ################### Process launch part
 def usage(name):
-    print "Shinken Schduler Daemon, version %s, from Gabes Jean, naparuba@gmail.com" % VERSION
+    print "Shinken Scheduler Daemon, version %s, from Gabes Jean, naparuba@gmail.com" % VERSION
     print "Usage: %s [options] [-c configfile]" % name
     print "Options:"
     print " -c, --config"

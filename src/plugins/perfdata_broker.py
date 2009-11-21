@@ -47,7 +47,7 @@ class Perfdata_broker:
     #Conf from arbiter!
     def init(self):
         print "I open the service-perfdata file"
-        self.file = open('var/service-perfdata','a')
+        self.file = open('./service-perfdata','a')
     
 
     #Get a brok, parse it, and put in in database
