@@ -170,8 +170,9 @@ class SatelliteLinks(Items):
     #inner_class = SchedulerLink
 
     #We must have a realm property, so we find our realm
-    def linkify(self, realms):
+    def linkify(self, realms, plugins):
         self.linkify_s_by_p(realms)
+        self.linkify_s_by_plug(plugins)
 
         
     def linkify_s_by_p(self, realms):
@@ -182,3 +183,16 @@ class SatelliteLinks(Items):
             if p is not None:
                 print "Me", s.get_name(), "is linked with realm", s.realm.get_name()
                 s.register_to_my_realm()
+
+
+    def linkify_s_by_plug(self, plugins):
+        for s in self:
+            new_plugins = []
+            for plug_name in s.plugins:
+                plug = plugins.find_by_name(plug_name.strip())
+                if plug != None:
+                    new_plugins.append(plug)
+                else:
+                    print "Error : the plugin %s is unknow for %s" % (plug_name, s.get_name())
+            s.plugins = new_plugins
+

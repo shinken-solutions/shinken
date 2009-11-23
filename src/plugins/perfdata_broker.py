@@ -30,16 +30,23 @@ print "I am Perfdata Broker"
 
 
 #called by the plugin manager to get a broker
-def get_broker():
-    broker = Perfdata_broker()
+def get_broker(plugin):
+    print "Get a Perfdata broker for plugin %s" % plugin.get_name()
+    #Catch errors
+    path = plugin.path
+    broker = Perfdata_broker(path)
     return broker
+
+
+def get_type():
+    return 'service_perfdata'
 
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Perfdata_broker:
-    def __init__(self):
-        pass
+    def __init__(self, path):
+        self.path = path
 
 
     #Called by Broker so we can do init stuff
@@ -47,7 +54,7 @@ class Perfdata_broker:
     #Conf from arbiter!
     def init(self):
         print "I open the service-perfdata file"
-        self.file = open('./service-perfdata','a')
+        self.file = open(self.path,'a')
     
 
     #Get a brok, parse it, and put in in database

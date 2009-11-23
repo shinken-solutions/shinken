@@ -34,16 +34,30 @@ print "I am Merlin Broker"
 
 
 #called by the plugin manager to get a broker
-def get_broker():
-    broker = Merlindb_broker()
+def get_broker(plugin):
+    print "Get a Merlin broker for plugin %s" % plugin.get_name()
+    #TODO : catch errors
+    host = plugin.host
+    user = plugin.user
+    password = plugin.password
+    database = plugin.database
+    broker = Merlindb_broker(host, user, password, database)
     return broker
+
+
+def get_type():
+    return 'merlindb_mysql'
+
 
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Merlindb_broker:
-    def __init__(self):
-        pass
+    def __init__(self, host, user, password, database):
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
 
 
     #The classic has : do we have a prop or not?
@@ -55,7 +69,7 @@ class Merlindb_broker:
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
-        print "I connect to database, thanks"
+        print "I connect to Merlin database"
         self.connect_database()
     
 
@@ -78,7 +92,9 @@ class Merlindb_broker:
     #Create the database connexion
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
-        self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
+        #self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
+        self.db = MySQLdb.connect (host = self.host, user = self.user, \
+                                       passwd = self.password, db = self.database)
         self.db_cursor = self.db.cursor ()
 
 

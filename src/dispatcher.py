@@ -340,8 +340,8 @@ class Dispatcher:
                         if r.to_satellites_need_dispatch[kind][cfg_id]:
                             print "Dispatching", r.get_name(), kind+'s'
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
-                            cfg_for_satellite = {'schedulers' : {cfg_id : cfg_for_satellite_part}}
-                            print "Config for ", kind+'s',":", cfg_for_satellite
+
+                            print "Sched Config part for ", kind+'s',":", cfg_for_satellite_part
                             #make copies of potential_react list for sort
                             satellites = []
                             for satellite in r.get_potential_satellites_by_type(kind):
@@ -351,11 +351,13 @@ class Dispatcher:
                             for satellite in satellites:
                                 print satellite.get_name(), ": is spare?", satellite.spare
 
-                            #Now we dispatch cfg to evry one ask for it
+                            #Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
                             for satellite in satellites:
                                 if nb_cfg_sent < r.get_nb_of_must_have_satellites(kind):
                                     print '[',r.get_name(),']',"Trying to send conf to ", kind, satellite.get_name()
+                                    cfg_for_satellite = {'schedulers' : {cfg_id : cfg_for_satellite_part}}
+                                    cfg_for_satellite['plugins'] = satellite.plugins
                                     is_sent = satellite.put_conf(cfg_for_satellite)
                                     if is_sent:
                                         satellite.need_conf = False

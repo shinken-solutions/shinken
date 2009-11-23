@@ -31,16 +31,26 @@ print "I am Ndo Broker"
 
 
 #called by the plugin manager to get a broker
-def get_broker():
-    broker = Ndodb_broker()
+def get_broker(plugin):
+    print "Get a ndoDB broker for plugin %s" % plugin.get_name()
+    #TODO : catch errors
+    host = plugin.host
+    user = plugin.user
+    password = plugin.password
+    database = plugin.database
+    broker = Ndodb_broker(host, user, password, database)
     return broker
+
+
+def get_type():
+    return 'ndodb_mysql'
 
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Ndodb_broker:
-    def __init__(self):
-    #Mapping for name of dataand transform function
+    def __init__(self, host, user, password, database):
+        #Mapping for name of dataand transform function
         self.mapping = {
             'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : None},
                                 'pid' : {'name' : 'process_id', 'transform' : None},
@@ -48,6 +58,12 @@ class Ndodb_broker:
                                 'is_running' : {'name' : 'is_currently_running', 'transform' : None}
                                 },
             }
+
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
+
 
 
     #The classic has : do we have a prop or not?
@@ -59,7 +75,7 @@ class Ndodb_broker:
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
-        print "I connect to database, thanks"
+        print "I connect to NDO database"
         self.connect_database()
     
 
@@ -83,7 +99,8 @@ class Ndodb_broker:
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         import MySQLdb
-        self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "ndo")
+        self.db = MySQLdb.connect (host = self.host, user = self.user, \
+                                       passwd = self.password, db = self.database)
         self.db_cursor = self.db.cursor ()
 
 

@@ -21,7 +21,7 @@
 #can see if a poller is alive, and can send it new configuration
 
 from satellitelink import SatelliteLink, SatelliteLinks
-from util import to_int, to_bool
+from util import to_int, to_bool, to_split
 from item import Items
 
 class PollerLink(SatelliteLink):
@@ -31,7 +31,8 @@ class PollerLink(SatelliteLink):
                 'address' : {'required' : True},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
-                'manage_sub_realms' : {'required':  False, 'default' : '0', 'pythonize': to_bool}
+                'manage_sub_realms' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
+                'plugins' : {'required' : False, 'default' : '', 'pythonize' : to_split}
                 }
  
     running_properties = {'is_active' : {'default' : False},

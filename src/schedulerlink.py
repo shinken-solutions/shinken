@@ -19,7 +19,7 @@
 
 #Scheduler is like a satellite for dispatcher
 from satellitelink import SatelliteLink, SatelliteLinks
-from util import to_int, to_bool
+from util import to_int, to_bool, to_split
 from item import Items
 
 class SchedulerLink(SatelliteLink):
@@ -28,6 +28,7 @@ class SchedulerLink(SatelliteLink):
                 'address' : {'required' : True},#, 'pythonize': to_bool},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
+                'plugins' : {'required' : False, 'default' : '', 'pythonize' : to_split}
                 }
  
     running_properties = {'is_active' : {'default' : False},

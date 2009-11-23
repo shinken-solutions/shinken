@@ -87,6 +87,10 @@ class IForArbiter(Pyro.core.ObjBase):
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
 		print "We have our schedulers :", self.schedulers
+		if not self.app.have_plugins:
+			self.app.plugins = conf['plugins']
+			self.app.have_plugins = True
+			print "We received plugins", self.app.plugins
 		
 
 	#Arbiter ask us to do not manage a scheduler_id anymore
@@ -174,6 +178,10 @@ class Broker(Satellite):
 		#Ours schedulers
 		self.schedulers = {}
 		self.mods = [] # for brokers from plugins
+		
+		#Plugins are load one time
+		self.have_plugins = False
+		self.plugins = []
 
 
 	#initialise or re-initialise connexion with scheduler
@@ -276,8 +284,8 @@ class Broker(Satellite):
                 #We wait for initial conf
 		self.wait_for_initial_conf()
 
-		#Do the plugins part
-		self.plugins_manager = PluginsManager('broker', self.pluginspath)
+		#Do the plugins part, we have our plugins in self.plugins
+		self.plugins_manager = PluginsManager('broker', self.pluginspath, self.plugins)
 		self.plugins_manager.load()
 		self.mods = self.plugins_manager.get_brokers()
 		for mod in self.mods:

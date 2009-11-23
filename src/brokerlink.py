@@ -18,7 +18,7 @@
 
 
 from satellitelink import SatelliteLink, SatelliteLinks
-from util import to_int, to_bool
+from util import to_int, to_bool, to_split
 from item import Items
 
 class BrokerLink(SatelliteLink):
@@ -28,7 +28,8 @@ class BrokerLink(SatelliteLink):
                 'address' : {'required' : True},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
-                'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool}
+                'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool},
+                'plugins' : {'required':  False, 'default' : '', 'pythonize' : to_split}
                 }
  
     running_properties = {'is_active' : {'default' : False},
@@ -47,3 +48,5 @@ class BrokerLink(SatelliteLink):
 class BrokerLinks(SatelliteLinks):
     name_property = "name"
     inner_class = BrokerLink
+
+    

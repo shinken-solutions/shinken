@@ -30,9 +30,11 @@ import sys
 
 class PluginsManager():
 
-    def __init__(self, plugins_type, plugins_path):
+    def __init__(self, plugins_type, plugins_path, plugins):
         self.plugins_path = plugins_path
         self.plugins_type = plugins_type
+        self.plugins = plugins
+        self.allowed_types = [plug.plugin_type for plug in self.plugins]
 
 
     #Lod all plugins
@@ -44,12 +46,24 @@ class PluginsManager():
         if not self.plugins_path in sys.path:
             sys.path.append(self.plugins_path)
         self.imported_modules = [__import__(fname) for fname in plugins_files]
+        self.plugins_assoc = []
+        for plugin in self.plugins:
+            plugin_type = plugin.plugin_type
+            is_find = False
+            for mod in self.imported_modules:
+                if mod.get_type() == plugin_type:
+                    self.plugins_assoc.append((plugin, mod))
+                    is_find = True
+            if not is_find:
+                #No plugin is suitable, we Raise a Warning
+                print "Warning : the plugin type %s for %s was not found in plugins!" % (plugin_type, plugin.get_name())
     
-    
+
     #Get broker instance to five them after broks
     def get_brokers(self):
         brokers = []
-        for mod in self.imported_modules:
-            b = mod.get_broker()
+        for (plugin, mod) in self.plugins_assoc:
+            b = mod.get_broker(plugin)
             brokers.append(b)
+        print "Load", len(brokers), "brokers"
         return brokers

@@ -48,6 +48,7 @@ from schedulerlink import SchedulerLink, SchedulerLinks
 from reactionnerlink import ReactionnerLink, ReactionnerLinks
 from brokerlink import BrokerLink, BrokerLinks
 from pollerlink import PollerLink, PollerLinks
+from plugin import Plugin, Plugins
 
 from util import to_int, to_char, to_bool
 #import psyco
@@ -289,7 +290,8 @@ class Config(Item):
                     'reactionner' : [],
                     'broker' : [],
                     'poller' : [],
-                    'realm' : []
+                    'realm' : [],
+                    'plugin' : []
                     }
         tmp = []
         tmp_type = 'void'
@@ -445,6 +447,13 @@ class Config(Item):
             realms.append(r)
         self.realms = Realms(realms)
 
+        plugins = []
+        for plugin in objects['plugin']:
+            p = Plugin(plugin)
+            p.clean()
+            plugins.append(p)
+        self.plugins = Plugins(plugins)
+
         
 
     #We use linkify to make the config more efficient : elements will be
@@ -489,10 +498,10 @@ class Config(Item):
 
         print "Schedulers and satellites"
         #Link all links with realms
-        self.schedulerlinks.linkify(self.realms)
-        self.brokers.linkify(self.realms)
-        self.reactionners.linkify(self.realms)
-        self.pollers.linkify(self.realms)
+        self.schedulerlinks.linkify(self.realms, self.plugins)
+        self.brokers.linkify(self.realms, self.plugins)
+        self.reactionners.linkify(self.realms, self.plugins)
+        self.pollers.linkify(self.realms, self.plugins)
 
 
     def dump(self):
@@ -651,6 +660,7 @@ class Config(Item):
         self.contacts.create_reversed_list()
         self.services.create_reversed_list()
         self.timeperiods.create_reversed_list()
+        self.plugins.create_reversed_list()
         #For services it's a special case
         #we search for hosts, then for services
         #it's quicker than search in al services
