@@ -28,28 +28,24 @@ import sys
 #pluginpath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "plugins/")
 #Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html
 
-class Plugins():
+class PluginsManager():
 
-    def __init__(self, pluginpath):
-        self.pluginpath = pluginpath
+    def __init__(self, plugins_type, plugins_path):
+        self.plugins_path = plugins_path
+        self.plugins_type = plugins_type
 
 
     #Lod all plugins
     def load(self):
-        #We get all plugins names
-        #pluginpath = "./plugins"
-        pluginfiles = [fname[:-3] for fname in os.listdir(self.pluginpath) if fname.endswith(".py")]
+        #We get all plugins file of our type (end with broker.py for example)
+        plugins_files = [fname[:-3] for fname in os.listdir(self.plugins_path) if fname.endswith(self.plugins_type+".py")]
         
         #Now we try to load thems
-        if not self.pluginpath in sys.path:
-            sys.path.append(self.pluginpath)
-        self.imported_modules = [__import__(fname) for fname in pluginfiles]
-
-    #def init(self):
-    #    for mod in self.imported_modules:
-    #        mod.init()
-
-
+        if not self.plugins_path in sys.path:
+            sys.path.append(self.plugins_path)
+        self.imported_modules = [__import__(fname) for fname in plugins_files]
+    
+    
     #Get broker instance to five them after broks
     def get_brokers(self):
         brokers = []

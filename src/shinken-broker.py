@@ -48,7 +48,7 @@ VERSION = "0.1beta"
 #from message import Message
 #from worker import Worker
 #from util import get_sequence
-from plugins import Plugins
+from pluginsmanager import PluginsManager
 
 
 #Interface for Arbiter, our big MASTER
@@ -276,14 +276,12 @@ class Broker(Satellite):
                 #We wait for initial conf
 		self.wait_for_initial_conf()
 
-
 		#Do the plugins part
-		self.plugins_manager = Plugins(self.pluginspath)
+		self.plugins_manager = PluginsManager('broker', self.pluginspath)
 		self.plugins_manager.load()
 		self.mods = self.plugins_manager.get_brokers()
 		for mod in self.mods:
 			mod.init()
-
 
                 #Connexion init with PyNag server
 		for sched_id in self.schedulers:
