@@ -29,6 +29,7 @@
 
 from Queue import Empty
 from multiprocessing import Queue, Manager, active_children
+import os
 import time
 import sys
 import Pyro.core
@@ -38,6 +39,7 @@ from message import Message
 from worker import Worker
 from load import Load
 #from util import get_sequence
+from daemon import Daemon
 
 
 #Interface for Arbiter, our big MASTER
@@ -122,8 +124,32 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
 #Our main APP class
-class Satellite:
-	def __init__(self, conf):
+class Satellite(Daemon):
+	def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+
+		#The config reading part
+		self.config_file = config_file
+		#Read teh config file if exist
+		#if not, default properties are used
+		self.parse_config_file()
+
+                #Check if another Scheduler is not running (with the same conf)
+		self.check_parallele_run(do_replace)
+                
+                #If the admin don't care about security, I allow root running
+		insane = not self.idontcareaboutsecurity
+
+                #Try to change the user (not nt for the moment)
+                #TODO: change user on nt
+		if os.name != 'nt':
+			self.change_user(insane)
+		else:
+			print "Sorry, you can't change user on this system"
+                #Now the daemon part if need
+		if is_daemon:
+			self.create_daemon(do_debug=debug, debug_file=debug_file)
+
+		#Now the specific stuff
 		#Bool to know if we have received conf from arbiter
 		self.have_conf = False
 		self.have_new_conf = False
@@ -131,9 +157,6 @@ class Satellite:
 		self.m = Queue() #Slave -> Master
 		self.manager = Manager()
 		self.return_messages = self.manager.list()
-
-		#Conf
-		self.conf = conf
 
 		#Ours schedulers
 		self.schedulers = {}
@@ -147,6 +170,7 @@ class Satellite:
 		self.total_process_time = 0
 		self.wish_workers_load = Load()
 		self.avg_dead_workers = Load()
+
 
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
@@ -453,19 +477,9 @@ class Satellite:
 	def main(self):
 		Pyro.config.PYRO_COMPRESSION = 1
 		Pyro.config.PYRO_MULTITHREADED = 0
-		Pyro.config.PYRO_STORAGE = self.conf['workdir']
+		Pyro.config.PYRO_STORAGE = self.workdir
                 #Daemon init
 		Pyro.core.initServer()
-
-		if 'port' in self.conf:
-			self.port = self.conf['port']
-		else:
-			self.port = self.__class__.default_port
-		print "Port:", self.port
-		if 'host' in self.conf:
-			self.host = self.conf['host']
-		else:
-			self.host = '0.0.0.0'
 
 		print "Port:", self.port
 		self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)

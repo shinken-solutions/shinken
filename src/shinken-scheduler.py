@@ -67,11 +67,12 @@ from scheduler import Scheduler
 from config import Config
 from macroresolver import MacroResolver
 from external_command import ExternalCommand
-from daemon import create_daemon, check_parallele_run, change_user
+from daemon import Daemon#create_daemon, check_parallele_run, change_user
+from util import to_int, to_bool
 
 
 VERSION = "0.1beta"
-default_config_file = "/home/nap/shinken/src/etc/schedulerd.cfg"
+default_config_file = None#"/home/nap/shinken/src/etc/schedulerd.cfg"
 
 
 #Interface for Workers
@@ -214,32 +215,59 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
 #Tha main app class
-class Shinken:
-	default_port = 7768
+class Shinken(Daemon):
+	#default_port = 7768
+
+	properties = {
+		'workdir' : {'default' : '/home/nap/shinken/src/var', 'pythonize' : None},
+		'pidfile' : {'default' : '/home/nap/shinken/src/var/schedulerd.pid', 'pythonize' : None},
+		'port' : {'default' : '7768', 'pythonize' : to_int},
+		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
+		'user' : {'default' : 'nap', 'pythonize' : None},
+		'group' : {'default' : 'nap', 'pythonize' : None},
+		'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool}
+		}
 
 	#Create the shinken class:
 	#Create a Pyro server (port = arvg 1)
 	#then create the interface for arbiter
 	#Then, it wait for a first configuration
-	def __init__(self, conf):
+	def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+
+		self.config_file = config_file
+		#Read teh config file if exist
+		#if not, default properties are used
+		self.parse_config_file()
+
+                #Check if another Scheduler is not running (with the same conf)
+		self.check_parallele_run(do_replace)
+                
+                #If the admin don't care about security, I allow root running
+		insane = not self.idontcareaboutsecurity
+
+                #Try to change the user (not nt for the moment)
+                #TODO: change user on nt
+		if os.name != 'nt':
+			self.change_user(insane)
+		else:
+			print "Sorry, you can't change user on this system"
+                #Now the daemon part if need
+		if is_daemon:
+			self.create_daemon(do_debug=debug, debug_file=debug_file)
+
+                #TODO : signal managment
+                #atexit.register(unlink, pidfile=conf['pidfile'])
+
 		#Config Class must be filled with USERN Macro
 		Config.fill_usern_macros()
 		
 		#create the server
-		Pyro.config.PYRO_STORAGE = conf['workdir']
+		Pyro.config.PYRO_STORAGE = self.workdir
 		Pyro.config.PYRO_COMPRESSION = 1
 		Pyro.config.PYRO_MULTITHREADED = 0
 		Pyro.core.initServer()
 	
-		if 'port' in conf:
-			self.port = conf['port']
-		else:
-			self.port = self.__class__.default_port
-		print "Port:", self.port
-		if 'host' in conf:
-			self.host = conf['host']
-		else:
-			self.host = '0.0.0.0'
+		print "Listening on:", self.host, ":", self.port
 		self.poller_daemon = Pyro.core.Daemon(host=self.host, port=self.port)
 		if self.poller_daemon.port != self.port:
 			print "Sorry, the port %d is not free" % self.port
@@ -248,9 +276,7 @@ class Shinken:
 		#Now the interface
 		i_for_arbiter = IForArbiter(self)
 		self.uri2 = self.poller_daemon.connect(i_for_arbiter,"ForArbiter")
-		print "The daemon runs on port:", self.poller_daemon.port
-		print "The arbiter daemon runs on port:", self.poller_daemon.port
-		print "The object's uri2 is:", self.uri2
+		print "The Arbiter Interface is at:", self.uri2
 		
 		#Ok, now the conf
 		self.must_run = True
@@ -365,7 +391,7 @@ def usage(name):
     print "Usage: %s [options] [-c configfile]" % name
     print "Options:"
     print " -c, --config"
-    print "\tConfig file. Default : %s " % default_config_file
+    print "\tConfig file."
     print " -d, --daemon"
     print "\tRun in daemon mode"
     print " -r, --replace"
@@ -387,24 +413,6 @@ def usage(name):
 
 
 
-def parse_config(config_file):
-    res = {}
-    config = ConfigParser.ConfigParser()
-    config.read(config_file)
-    if config._sections == {}:
-        print "Bad or missing config file : %s " % config_file
-        sys.exit(2)
-    res['workdir'] = config.get('daemon', 'workdir')
-    workdir = res['workdir']
-    res['port'] = int(config.get('daemon', 'port'))
-    res['host'] = config.get('daemon', 'host')
-    res['maxfd'] = int(config.get('daemon', 'maxfd'))
-    res['pidfile'] = config.get('daemon', 'pidfile')
-    res['user'] = config.get('daemon', 'user')
-    res['group'] = config.get('daemon', 'group')
-    res['idontcareaboutsecurity'] = config.getboolean('daemon', 'idontcareaboutsecurity')
-    return res
-
 
 
 
@@ -420,21 +428,20 @@ if __name__ == "__main__":
         sys.exit(2)
     #Default params
     config_file = default_config_file
-    daemon=False
-    replace=False
+    is_daemon=False
+    do_replace=False
     debug=False
     debug_file=None
-    insane = False
     for o, a in opts:
         if o in ("-h", "--help"):
             usage(sys.argv[0])
             sys.exit()
 	elif o in ("-r", "--replace"):
-            replace = True
+            do_replace = True
         elif o in ("-c", "--config"):
             config_file = a
         elif o in ("-d", "--daemon"):
-            daemon = True
+            is_daemon = True
 	elif o in ("--debug"):
             debug = True
 	    debug_file = a
@@ -443,28 +450,10 @@ if __name__ == "__main__":
 	    usage(sys.argv[0])
             sys.exit()
 
-    
+    p = Shinken(config_file, is_daemon, do_replace, debug, debug_file)
     #Ok, now we load the config
-    conf = parse_config(config_file)
-    #Check if another Scheduler is not running (with the same conf)
-    check_parallele_run(replace=replace, pidfile=conf['pidfile'])
-    #If the admin don't care about security, I allow root running
-    if 'idontcareaboutsecurity' in conf and conf['idontcareaboutsecurity']:
-	    insane = True
-    #Try to change the user (not nt for the moment)
-    #TODO: change user on nt
-    if os.name != 'nt':
-	    change_user(conf['user'], conf['group'], insane)
-    else:
-	    print "Sorry, you can't change user on this system"
-    #Now the daemon part if need
-    if daemon:
-	    create_daemon(maxfd_conf=conf['maxfd'], workdir=conf['workdir'], pidfile=conf['pidfile'], debug=debug, debug_file=debug_file)
 
-    #TODO : signal managment
-    #atexit.register(unlink, pidfile=conf['pidfile'])
-
-    p = Shinken(conf)
+    #p = Shinken(conf)
     #import cProfile
     p.main()
     #command = """p.main()"""
