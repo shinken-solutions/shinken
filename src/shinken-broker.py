@@ -41,6 +41,7 @@ import getopt
 from satellite import Satellite
 from daemon import Daemon
 from util import to_int, to_bool
+from plugin import Plugin, Plugins
 
 VERSION = "0.1beta"
 
@@ -138,7 +139,7 @@ class Broker(Satellite):
 	#default_port = 7772
 	properties = {
 		'workdir' : {'default' : '/home/nap/shinken/src/var', 'pythonize' : None},
-		'pidfile' : {'default' : '/home/nap/shinken/src/var/schedulerd.pid', 'pythonize' : None},
+		'pidfile' : {'default' : '/home/nap/shinken/src/var/brokerd.pid', 'pythonize' : None},
 		'port' : {'default' : '7772', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
 		'user' : {'default' : 'nap', 'pythonize' : None},
@@ -149,7 +150,7 @@ class Broker(Satellite):
 	
 
 	def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-
+		self.print_header()
 		#The config reading part
 		self.config_file = config_file
 		#Read teh config file if exist
@@ -168,6 +169,7 @@ class Broker(Satellite):
 			self.change_user(insane)
 		else:
 			print "Sorry, you can't change user on this system"
+
                 #Now the daemon part if need
 		if is_daemon:
 			self.create_daemon(do_debug=debug, debug_file=debug_file)

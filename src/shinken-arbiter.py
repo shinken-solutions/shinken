@@ -24,29 +24,51 @@
 #it send it's conf to another if available.
 #It also read order form users (nagios.cmd) and send orders to schedulers.
 
-#import os
+import os
 import re
 import time
-#import sys
+import sys
 import Pyro.core
 #import signal
 import select
+import getopt
 #import random
 #import copy
 
 #from check import Check
-from util import scheduler_no_spare_first
+from util import scheduler_no_spare_first, to_int, to_bool
 from scheduler import Scheduler
 from config import Config
 #from macroresolver import MacroResolver
 from external_command import ExternalCommand
 from dispatcher import Dispatcher
+from daemon import Daemon
+from plugin import Plugin, Plugins
+
+VERSION = "0.1beta"
 
 
 #Main Arbiter Class
-class Arbiter:
-    def __init__(self):
-        pass
+class Arbiter(Daemon):
+
+
+    properties = {
+        'workdir' : {'default' : '/home/nap/shinken/src/var', 'pythonize' : None},
+        'pidfile' : {'default' : '/home/nap/shinken/src/var/arbiterd.pid', 'pythonize' : None},
+        #'port' : {'default' : '7768', 'pythonize' : to_int},
+        #'host' : {'default' : '0.0.0.0', 'pythonize' : None},
+        'user' : {'default' : 'nap', 'pythonize' : None},
+        'group' : {'default' : 'nap', 'pythonize' : None},
+        'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool}
+        }
+
+
+    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+        self.config_file = config_file
+        self.is_daemon = is_daemon
+        self.do_replace = do_replace
+        self.debug = debug
+        self.debug_file = debug_file
 
 
     #Load the external commander
@@ -56,12 +78,13 @@ class Arbiter:
         
         
     def main(self):
+        self.print_header()
         print "Loading configuration"
         self.conf = Config()
         #The config Class must have the USERN macro
         #There are 256 of them, so we create online
         Config.fill_usern_macros()
-        self.conf.read_config("etc/nagios.cfg")
+        self.conf.read_config(self.config_file)
 
         print "****************** Create Template links **********"
         self.conf.linkify_templates()
@@ -116,6 +139,34 @@ class Arbiter:
 
         #self.conf.debug()
 
+        #Ok, here we must check if we go on or not.
+        #TODO : check OK or not
+        self.pidfile = self.conf.lock_file
+        self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
+        self.user = self.conf.nagios_user
+        self.group = self.conf.nagios_group
+        self.workdir = os.path.expanduser('~')
+        
+        #If we go, we must go in daemon or not
+        #Check if another Scheduler is not running (with the same conf)
+        self.check_parallele_run(do_replace)
+                
+        #If the admin don't care about security, I allow root running
+        insane = not self.idontcareaboutsecurity
+
+
+        #Try to change the user (not nt for the moment)
+        #TODO: change user on nt
+        if os.name != 'nt':
+            self.change_user(insane)
+        else:
+            print "Sorry, you can't change user on this system"
+        
+        #Now the daemon part if need
+        if is_daemon:
+            self.create_daemon(do_debug=debug, debug_file=debug_file)
+
+
         print "****************** Send Configuration to schedulers******************"
         self.dispatcher = Dispatcher(self.conf)
         self.dispatcher.check_alive()
@@ -169,9 +220,92 @@ class Arbiter:
 
 
 
-if __name__ == '__main__':
-	p = Arbiter()
-        import cProfile
+#if __name__ == '__main__':
+#	p = Arbiter()
+#        import cProfile
 	#p.main()
-        command = """p.main()"""
-        cProfile.runctx( command, globals(), locals(), filename="var/Arbiter.profile" )
+#        command = """p.main()"""
+#        cProfile.runctx( command, globals(), locals(), filename="var/Arbiter.profile" )
+
+
+
+
+################### Process launch part
+def usage(name):
+    print "Shinken Arbiter Daemon, version %s, from Gabes Jean, naparuba@gmail.com" % VERSION
+    print "Usage: %s [options] -c configfile" % name
+    print "Options:"
+    print " -c, --config"
+    print "\tConfig file (your nagios.cfg)."
+    print " -d, --daemon"
+    print "\tRun in daemon mode"
+    print " -r, --replace"
+    print "\tReplace previous running scheduler"
+    print " -h, --help"
+    print "\tPrint detailed help screen"
+    print " --debug"
+    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
+
+
+
+#if __name__ == '__main__':
+#	p = Shinken()
+#        import cProfile
+#	#p.main()
+#        command = """p.main()"""
+#        cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
+
+
+
+
+
+
+
+#Here we go!
+if __name__ == "__main__":
+    #Manage the options
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hrdc::w", ["help", "replace", "daemon", "config=", "debug=", "easter"])
+    except getopt.GetoptError, err:
+        # print help information and exit:
+        print str(err) # will print something like "option -a not recognized"
+        usage(sys.argv[0])
+        sys.exit(2)
+    #Default params
+    config_file = None
+    is_daemon=False
+    do_replace=False
+    debug=False
+    debug_file=None
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            usage(sys.argv[0])
+            sys.exit()
+	elif o in ("-r", "--replace"):
+            do_replace = True
+        elif o in ("-c", "--config"):
+            config_file = a
+        elif o in ("-d", "--daemon"):
+            is_daemon = True
+	elif o in ("--debug"):
+            debug = True
+	    debug_file = a
+        else:
+            print "Sorry, the option",o, a, "is unknown"
+	    usage(sys.argv[0])
+            sys.exit()
+
+    if config_file == None:
+        print "Error : config file is need"
+        usage(sys.argv[0])
+        sys.exit()
+
+    p = Arbiter(config_file, is_daemon, do_replace, debug, debug_file)
+    #Ok, now we load the config
+
+    #p = Shinken(conf)
+    #import cProfile
+    p.main()
+    #command = """p.main()"""
+    #cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
+

@@ -31,6 +31,7 @@ import ConfigParser
 
 from satellite import Satellite
 from util import to_int, to_bool
+from plugin import Plugin, Plugins
 
 VERSION = "0.1beta"
 
@@ -43,7 +44,7 @@ class Poller (Satellite):
 	
 	properties = {
 		'workdir' : {'default' : '/home/nap/shinken/src/var', 'pythonize' : None},
-		'pidfile' : {'default' : '/home/nap/shinken/src/var/schedulerd.pid', 'pythonize' : None},
+		'pidfile' : {'default' : '/home/nap/shinken/src/var/pollerd.pid', 'pythonize' : None},
 		'port' : {'default' : '7771', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
 		'user' : {'default' : 'nap', 'pythonize' : None},

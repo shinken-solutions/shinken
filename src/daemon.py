@@ -31,7 +31,7 @@ else:
     REDIRECT_TO = "/dev/null"
 
 UMASK = 0
-
+VERSION = "0.1Beta"
 
 class Daemon:
     #the instances will have their own init
@@ -193,3 +193,10 @@ class Daemon:
                     value = properties[prop]['pythonize'](value)
                 setattr(self, prop, value)
                 print "Using default value :", prop, value
+
+
+    def print_header(self):
+        print "Shinken %s" % VERSION
+        print "Copyright (c) 2009 Gabes Jean (naparuba@gmail.com)"
+        print "Last Modified: 25-11-2009"
+        print "License: AGPL"

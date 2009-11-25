@@ -44,7 +44,7 @@ class Reactionner(Satellite):
 
 	properties = {
 		'workdir' : {'default' : '/home/nap/shinken/src/var', 'pythonize' : None},
-		'pidfile' : {'default' : '/home/nap/shinken/src/var/schedulerd.pid', 'pythonize' : None},
+		'pidfile' : {'default' : '/home/nap/shinken/src/var/reactionnerd.pid', 'pythonize' : None},
 		'port' : {'default' : '7769', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
 		'user' : {'default' : 'nap', 'pythonize' : None},

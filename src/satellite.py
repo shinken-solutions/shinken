@@ -126,7 +126,7 @@ class IForArbiter(Pyro.core.ObjBase):
 #Our main APP class
 class Satellite(Daemon):
 	def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-
+		self.print_header()
 		#The config reading part
 		self.config_file = config_file
 		#Read teh config file if exist
@@ -145,6 +145,8 @@ class Satellite(Daemon):
 			self.change_user(insane)
 		else:
 			print "Sorry, you can't change user on this system"
+
+
                 #Now the daemon part if need
 		if is_daemon:
 			self.create_daemon(do_debug=debug, debug_file=debug_file)

@@ -69,10 +69,10 @@ from macroresolver import MacroResolver
 from external_command import ExternalCommand
 from daemon import Daemon#create_daemon, check_parallele_run, change_user
 from util import to_int, to_bool
-
+from plugin import Plugin, Plugins
 
 VERSION = "0.1beta"
-default_config_file = None#"/home/nap/shinken/src/etc/schedulerd.cfg"
+
 
 
 #Interface for Workers
@@ -233,7 +233,7 @@ class Shinken(Daemon):
 	#then create the interface for arbiter
 	#Then, it wait for a first configuration
 	def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-
+		self.print_header()
 		self.config_file = config_file
 		#Read teh config file if exist
 		#if not, default properties are used
@@ -254,6 +254,7 @@ class Shinken(Daemon):
                 #Now the daemon part if need
 		if is_daemon:
 			self.create_daemon(do_debug=debug, debug_file=debug_file)
+
 
                 #TODO : signal managment
                 #atexit.register(unlink, pidfile=conf['pidfile'])
@@ -427,7 +428,7 @@ if __name__ == "__main__":
         usage(sys.argv[0])
         sys.exit(2)
     #Default params
-    config_file = default_config_file
+    config_file = None
     is_daemon=False
     do_replace=False
     debug=False

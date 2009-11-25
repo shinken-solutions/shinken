@@ -190,8 +190,11 @@ class Config(Item):
                 'debug_file' : {'required':False, 'default':'/tmp/debug.txt'},
                 'debug_level' : {'required':False, 'default':'0'},
                 'debug_verbosity' : {'required':False, 'default':'1'},
-                'max_debug_file_size' : {'required':False, 'default':'10000', 'pythonize': to_int}
+                'max_debug_file_size' : {'required':False, 'default':'10000', 'pythonize': to_int},
                 #'$USERn$ : {'required':False, 'default':''} # Add at run in __init__
+                
+                #SHINKEN SPECIFIC
+                'idontcareaboutsecurity' : {'required':False, 'default':'0', 'pythonize': to_bool},
     }
 
 
