@@ -55,6 +55,7 @@ class Scheduler:
             4 : (self.check_freshness, 10),
             5 : (self.clean_caches, 1),
             6 : (self.update_retention_file, 3600),
+            7 : (self.check_orphaned, 1)
             }
 
         #stats part
@@ -553,6 +554,20 @@ class Scheduler:
                 c = i.do_check_freshness()
                 if c is not None:
                     self.add(c)
+
+
+    #Check for orphaned checks : checks that never returns back
+    #so if inpoller and t_to_go < now - 300s : pb!
+    def check_orphaned(self):
+        now = int(time.time())
+        for c in self.checks.values():
+            if c.status == 'inpoller' and c.t_to_go < now - 300:
+                print "Warning : the results of check", c.id, "never came back. I'm reenable it for polling"
+                c.status == 'scheduled'
+        for a in self.actions.values():
+            if a.status == 'inpoller' and a.t_to_go < now - 300:
+                print "Warning : the results of action", a.id, "never came back. I'm reenable it for polling"
+                a.status == 'scheduled'
 
 
     #Main function

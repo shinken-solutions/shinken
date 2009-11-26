@@ -160,7 +160,7 @@ class SatelliteLink(Item):
 
 
     def prepare_for_conf(self):
-        self.cfg = {'schedulers' : {}} #i : {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
+        self.cfg = { 'schedulers' : {}} #i : {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
 
 
     def get_my_type(self):

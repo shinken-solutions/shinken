@@ -121,6 +121,7 @@ class IForArbiter(Pyro.core.ObjBase):
 		print "Arbiter want me to wait a new conf"
 		self.schedulers.clear()
 		self.app.have_conf = False
+		self.app.init_stats()
 
 
 #Our main APP class
@@ -167,12 +168,23 @@ class Satellite(Daemon):
 		self.newzombies = [] #list of fresh new zombies, will be join the next loop
 		self.zombies = [] #list of quite old zombies, will be join now
 
-		#For calculate the good worker number
- 		self.nb_actions_procced = 0
-		self.total_process_time = 0
-		self.wish_workers_load = Load()
-		self.avg_dead_workers = Load()
+		#Init stats like Load for workers
+		self.init_stats()
 
+
+	def init_stats(self):
+		#For calculate the good worker number
+                self.nb_actions_procced = 0
+                self.total_process_time = 0
+                self.wish_workers_load = Load()
+                self.avg_dead_workers = Load()
+
+                #For calculate the good timeout to get actions (1s or more)
+                self.avg_received_actions = Load()
+                self.avg_sent_actions = Load()
+                self.wait_ratio = Load()
+
+		
 
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
@@ -252,6 +264,7 @@ class Satellite(Daemon):
 
         #Return the chk to scheduler and clean them
 	def manage_return(self):
+		total_sent = 0
 		#Fot all schedulers, we check for waitforhomerun and we send back results
 		for sched_id in self.schedulers:
 			#If sched is not active, I do not try return
@@ -274,6 +287,7 @@ class Satellite(Daemon):
 				
 				except AttributeError as exp:
 					print exp
+			
 			#Now ret have all verifs, we can return them
 			send_ok = False
 			if ret is not []:
@@ -299,9 +313,15 @@ class Satellite(Daemon):
 			if send_ok :
 				for id in id_to_return:
 					del verifs[id]
+				total_sent += len(id_to_return)
 			else:
 				self.pynag_con_init(sched_id)
 				print "Sent failed!"
+
+		#Just update the average sent actions
+		self.avg_sent_actions.update_load(total_sent)
+		print "AVG SENT:", self.avg_sent_actions.get_load()
+
 
 	#Use to wait conf from arbiter.
 	#It send us conf in our daemon. It put the have_conf prop
@@ -369,7 +389,25 @@ class Satellite(Daemon):
 	#here it's > 80% of workers
 	def adjust_worker_number_by_load(self):
             act = active_children()
-            print "I've got", len(act), "childrens"
+            print "I've got", len(act), "childrens :"
+	    for c in act:
+		    print "Nom:",c.name, c.pid, c.is_alive()
+	    #First we check for no alive children
+	    w_to_del = []
+	    for w in self.workers.values():
+		    #If a worker go down and we do not ask him, it's not
+		    #good : we can think having a worker and it's not True
+		    #So we del it If not in newzombie (will be kil very soon :) )
+		    if not w.is_alive() and w.id not in self.zombies:
+			    print "Warning : the worker %s goes down unexpectly!" % w.id
+			    print "Die?", w.is_alive(), w.id not in self.zombies
+			    w.terminate()
+			    w.join(timeout=1)
+			    w_to_del.append(w.id)
+	    for id in w_to_del:
+		    del self.workers[id]
+			    
+	    #Ok now the rest
 	    nb_alive = len([c for c in act if c.is_alive()])
 	    print "Nb Alive :", nb_alive, "nb deads:", len(act) - nb_alive
             nb_queue = 0 # Len of actions in queue status, so the working queue
@@ -473,6 +511,9 @@ class Satellite(Daemon):
 			verifs[id] = chk
 			msg = Message(id=0, type='Do', data=verifs[id])
 			self.s.put(msg)
+		#We just update avg new actions
+		self.avg_received_actions.update_load(len(new_checks))
+		print "AVG received:", self.avg_received_actions.get_load()
 
 
 	#Main function, will loop forever
@@ -550,6 +591,7 @@ class Satellite(Daemon):
 				after = time.time()
 				timeout = 1.0
 				
+				print " ======================== "
 				#Manage all messages we've got in the last timeout
 				while(len(self.return_messages) != 0):
 					self.manage_msg(self.return_messages.pop())
@@ -557,7 +599,7 @@ class Satellite(Daemon):
                                 #We join (old)zombies and we move new ones
 				#in the old list
 				self.avg_dead_workers.update_load(len(self.zombies))
-				print "Killing average : ", self.avg_dead_workers, "workers"
+				print "Killing average : ", self.avg_dead_workers.get_load(), "workers"
 				for id in self.zombies:
 					#if self.workers[id].is_alive():
 					self.workers[id].terminate()
@@ -571,13 +613,18 @@ class Satellite(Daemon):
 				#Maybe we do not have enouth workers, we check for it
 				#and launch new ones if need
 				self.adjust_worker_number_by_load()
-                
+				
 				#Now we can get new actions from schedulers
 				self.get_new_actions()
 				
                                 #We send all finished checks
 				self.manage_return()
-            
+				
+				if self.avg_sent_actions.get_load() != 0:
+					self.wait_ratio.update_load(self.avg_received_actions.get_load()/self.avg_sent_actions.get_load())
+				print "Wait ratio:", self.wait_ratio.get_load()
+
+
 				#We add the time pass on the workers
 				for id in self.workers:
 					self.workers[id].add_idletime(after-begin_loop)
@@ -586,6 +633,7 @@ class Satellite(Daemon):
                                 #We look for cleaning workers
 				for id in self.workers:
 					if self.workers[id].is_killable():
+						print "Worker %d is killable (timeout)" % id
 						msg = Message(id=0, type='Die')
 						self.workers[id].send_message(msg)
 						self.workers[id].set_zombie()
@@ -593,4 +641,5 @@ class Satellite(Daemon):
 				#Cleaning the workers
 				for id in delworkers:
 					self.newzombies.append(id)
+				print "Nwe Zombies :", self.newzombies
 

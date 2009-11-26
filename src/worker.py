@@ -70,7 +70,7 @@ class Worker:
 
 
     def is_alive(self):
-        self._process.is_alive()
+        return self._process.is_alive()
 
     def is_killable(self):
         return self._mortal and self._idletime > self._timeout
