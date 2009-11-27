@@ -236,9 +236,17 @@ class Broker(Satellite):
 	#Get a brok. Our role is to put it in the plugins
 	#THEY MUST DO NOT CHANGE data of b !!!
 	def manage_brok(self, b):
+		to_del = []
 		#Call all plugins if they catch the call
 		for mod in self.mods:
-			mod.manage_brok(b)
+			try:
+				mod.manage_brok(b)
+			except Exception as exp:
+				print "Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),exp)
+				to_del.append(mod)
+		#Now remove mod that raise an exception
+		for mod in to_del:
+			self.mods.remove(mod)
 
 
 	#We get new broks from schedulers

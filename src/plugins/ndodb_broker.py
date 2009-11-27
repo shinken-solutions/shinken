@@ -25,7 +25,7 @@
 
 
 import copy
-import MySQLdb
+#import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError
 
@@ -41,7 +41,7 @@ def get_broker(plugin):
     user = plugin.user
     password = plugin.password
     database = plugin.database
-    broker = Ndodb_broker(host, user, password, database)
+    broker = Ndodb_broker(plugin.get_name(), host, user, password, database)
     return broker
 
 
@@ -52,7 +52,7 @@ def get_type():
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Ndodb_broker:
-    def __init__(self, host, user, password, database):
+    def __init__(self, name, host, user, password, database):
         #Mapping for name of dataand transform function
         self.mapping = {
             'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : None},
@@ -61,7 +61,7 @@ class Ndodb_broker:
                                 'is_running' : {'name' : 'is_currently_running', 'transform' : None}
                                 },
             }
-
+        self.name = name
         self.host = host
         self.user = user
         self.password = password
@@ -73,6 +73,9 @@ class Ndodb_broker:
     def has(self, prop):
         return hasattr(self, prop)
 
+
+    def get_name(self):
+        return self.name
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init

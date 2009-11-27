@@ -41,7 +41,7 @@ def get_broker(plugin):
     user = plugin.user
     password = plugin.password
     database = plugin.database
-    broker = Merlindb_broker(host, user, password, database)
+    broker = Merlindb_broker(plugin.get_name(), host, user, password, database)
     return broker
 
 
@@ -53,7 +53,8 @@ def get_type():
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Merlindb_broker:
-    def __init__(self, host, user, password, database):
+    def __init__(self, name, host, user, password, database):
+        self.name = name
         self.host = host
         self.user = user
         self.password = password
@@ -63,6 +64,10 @@ class Merlindb_broker:
     #The classic has : do we have a prop or not?
     def has(self, prop):
         return hasattr(self, prop)
+
+
+    def get_name(self):
+        return self.name
 
 
     #Called by Broker so we can do init stuff

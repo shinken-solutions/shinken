@@ -34,7 +34,7 @@ def get_broker(plugin):
     print "Get a Perfdata broker for plugin %s" % plugin.get_name()
     #Catch errors
     path = plugin.path
-    broker = Perfdata_broker(path)
+    broker = Perfdata_broker(plugin.get_name(), path)
     return broker
 
 
@@ -45,8 +45,9 @@ def get_type():
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Perfdata_broker:
-    def __init__(self, path):
+    def __init__(self, name, path):
         self.path = path
+        self.name = name
 
 
     #Called by Broker so we can do init stuff
@@ -56,6 +57,10 @@ class Perfdata_broker:
         print "I open the service-perfdata file"
         self.file = open(self.path,'a')
     
+
+    def get_name(self):
+        return self.name
+
 
     #Get a brok, parse it, and put in in database
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
