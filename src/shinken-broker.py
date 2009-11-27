@@ -243,6 +243,7 @@ class Broker(Satellite):
 				mod.manage_brok(b)
 			except Exception as exp:
 				print "Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),exp)
+				print "DBG:", type(exp)
 				to_del.append(mod)
 		#Now remove mod that raise an exception
 		for mod in to_del:

@@ -636,12 +636,15 @@ class Satellite(Daemon):
 				self.avg_dead_workers.update_load(len(self.zombies))
 				print "Killing average : ", self.avg_dead_workers.get_load(), "workers"
 				for id in self.zombies:
+					try:
 					#if self.workers[id].is_alive():
-					self.workers[id].terminate()
-					self.workers[id].join(timeout=1)
-					del self.workers[id]
-					queue = w.return_queue
-					self.return_messages.remove(queue)
+						self.workers[id].terminate()
+						self.workers[id].join(timeout=1)
+						del self.workers[id]
+						queue = self.workers[id].return_queue
+						self.return_messages.remove(queue)
+					except KeyError: #The worker must be already del
+						pass
 				#We switch so zombie will be kill, and new
 				#ones wil go in newzombies
 				self.zombies = self.newzombies
