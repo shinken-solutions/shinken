@@ -160,7 +160,12 @@ class SatelliteLink(Item):
 
 
     def prepare_for_conf(self):
-        self.cfg = { 'schedulers' : {}} #i : {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
+        self.cfg = { 'global' : {}, 'schedulers' : {}}
+        #cfg_for_satellite['plugins'] = satellite.plugins
+        properties = self.__class__.properties
+        for prop in properties:
+            if 'to_send' in properties[prop] and properties[prop]['to_send']:
+                self.cfg['global'][prop] = getattr(self, prop)
 
 
     def get_my_type(self):

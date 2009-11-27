@@ -356,9 +356,10 @@ class Dispatcher:
                             for satellite in satellites:
                                 if nb_cfg_sent < r.get_nb_of_must_have_satellites(kind):
                                     print '[',r.get_name(),']',"Trying to send conf to ", kind, satellite.get_name()
-                                    cfg_for_satellite = {'schedulers' : {cfg_id : cfg_for_satellite_part}}
-                                    cfg_for_satellite['plugins'] = satellite.plugins
-                                    is_sent = satellite.put_conf(cfg_for_satellite)
+                                    #cfg_for_satellite = {'schedulers' : {cfg_id : cfg_for_satellite_part}}
+                                    satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part
+                                    #cfg_for_satellite['plugins'] = satellite.plugins
+                                    is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
                                     if is_sent:
                                         satellite.need_conf = False
                                         satellite.active = True

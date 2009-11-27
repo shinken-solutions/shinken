@@ -82,6 +82,9 @@ class IForArbiter(Pyro.core.ObjBase):
 			#We cannot reinit connexions because this code in in a thread, and
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
+		#Now the limit part
+		self.app.max_workers = conf['global']['max_workers']
+		self.app.min_workers = conf['global']['min_workers']
 		print "We have our schedulers :", self.schedulers
 
 	#Arbiter ask us to do not manage a scheduler_id anymore
@@ -473,8 +476,8 @@ class Satellite(Daemon):
 	    wish_worker = int(self.wish_workers_load.get_load() - self.avg_dead_workers.get_load()) + 1
 
 	    print "I want at least", wish_worker, "workers", 'Load = ', self.wish_workers_load.get_load(), "dead avg=", self.avg_dead_workers.get_load()
-
-	    while wish_worker > len(self.workers) and len(self.workers) < 4:
+	    #I want at least min_workers or wish_workers (the biggest) but not more than max_workers
+	    while len(self.workers) < self.min_workers or (wish_worker > len(self.workers) and len(self.workers) < self.max_workers):
 		    self.create_and_launch_worker()
 	    #TODO : if len(workers) > 2*wish, maybe we can kill a worker?
 	    

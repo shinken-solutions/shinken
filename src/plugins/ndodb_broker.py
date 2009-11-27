@@ -25,6 +25,9 @@
 
 
 import copy
+import MySQLdb
+from MySQLdb import IntegrityError
+from MySQLdb import ProgrammingError
 
 #This text is print at the import
 print "I am Ndo Broker"
@@ -108,8 +111,13 @@ class Ndodb_broker:
     #TODO: finish catch
     def execute_query(self, query):
         #print "I run query", query, "\n"
-        self.db_cursor.execute(query)
-        self.db.commit ()
+        try:
+            self.db_cursor.execute(query)
+            self.db.commit ()
+        except IntegrityError as exp:
+            print "[Ndodb] Warning : a query raise an integrity error : %s, %s" % (query, exp) 
+        except ProgrammingError as exp:
+            print "[Ndodb] Warning : a query raise a programming error : %s, %s" % (query, exp) 
 
 
     def get_host_object_id_by_name(self, host_name):

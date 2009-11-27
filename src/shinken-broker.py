@@ -89,7 +89,7 @@ class IForArbiter(Pyro.core.ObjBase):
 			#So we do it just after.
 		print "We have our schedulers :", self.schedulers
 		if not self.app.have_plugins:
-			self.app.plugins = conf['plugins']
+			self.app.plugins = conf['global']['plugins']
 			self.app.have_plugins = True
 			print "We received plugins", self.app.plugins
 		
@@ -322,13 +322,13 @@ class Broker(Satellite):
 			#Now we check if arbiter speek to us in the daemon.
 			#If so, we listen for it
 			#When it push us conf, we reinit connexions
-			self.watch_for_new_conf()
+			self.watch_for_new_conf(1)
 
 			#timeout = 1.0
 			#Now we can get new actions from schedulers
 			self.get_new_broks()
 			#TODO : sleep better...
-			time.sleep(1)
+			#time.sleep(1)
 
 
 

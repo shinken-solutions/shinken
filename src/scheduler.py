@@ -55,7 +55,7 @@ class Scheduler:
             4 : (self.check_freshness, 10),
             5 : (self.clean_caches, 1),
             6 : (self.update_retention_file, 3600),
-            7 : (self.check_orphaned, 1)
+            7 : (self.check_orphaned, 60)
             }
 
         #stats part
