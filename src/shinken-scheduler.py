@@ -234,6 +234,11 @@ class Shinken(Daemon):
 	#Then, it wait for a first configuration
 	def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
 		self.print_header()
+
+		#From daemon to manage signal. Call self.manage_signal if
+		#exists, a dummy function otherwise
+		self.set_exit_handler()
+
 		self.config_file = config_file
 		#Read teh config file if exist
 		#if not, default properties are used
@@ -287,6 +292,16 @@ class Shinken(Daemon):
 		#Interface for Broks and Checks
 		self.ichecks = None
 		self.ibroks = None
+
+
+	#Manage signal function
+	#TODO : manage more than just quit
+	#Frame is just garbage
+	def manage_signal(self, sig, frame):
+		print "\nExiting with signal", sig
+		self.poller_daemon.shutdown(True)
+		sys.exit(0)
+
 		
 
 	#We wait (block) for arbiter to send us conf

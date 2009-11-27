@@ -70,6 +70,10 @@ class Arbiter(Daemon):
         self.debug = debug
         self.debug_file = debug_file
 
+        #From daemon to manage signal. Call self.manage_signal if
+        #exists, a dummy function otherwise
+        self.set_exit_handler()
+
 
     #Load the external commander
     def load_external_command(self, e):

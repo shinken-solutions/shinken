@@ -128,6 +128,11 @@ class IForArbiter(Pyro.core.ObjBase):
 class Satellite(Daemon):
 	def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
 		self.print_header()
+
+		#From daemon to manage signal. Call self.manage_signal if
+		#exists, a dummy function otherwise
+		self.set_exit_handler()
+
 		#The config reading part
 		self.config_file = config_file
 		#Read teh config file if exist
@@ -159,7 +164,7 @@ class Satellite(Daemon):
 		self.s = Queue() #Global Master -> Slave
 		self.m = Queue() #Slave -> Master
 		self.manager = Manager()
-		self.return_messages = self.manager.list()
+		self.return_messages = []#self.manager.list()
 
 		#Ours schedulers
 		self.schedulers = {}
@@ -357,8 +362,9 @@ class Satellite(Daemon):
 	#We do not want to loose time about it, so it's not a bloking 
 	#wait, timeout = 0s
 	#If it send us a new conf, we reinit the connexions of all schedulers
-	def watch_for_new_conf(self):
-		timeout_daemon = 0.0
+	def watch_for_new_conf(self, timeout_daemon):
+		#timeout_daemon = 0.0
+		print "Select :", timeout_daemon
 		socks = self.daemon.getServerSockets()
 		# 'foreign' event loop
 		ins,outs,exs = select.select(socks,[],[],timeout_daemon)
@@ -378,10 +384,32 @@ class Satellite(Daemon):
 	#Create and launch a new worker, and put it into self.workers
 	#It can be mortal or not
 	def create_and_launch_worker(self, mortal=True):
-		w = Worker(1, self.s, self.return_messages, mortal=mortal)
+		queue = self.manager.list()
+		self.return_messages.append(queue)
+		w = Worker(1, self.s, queue, mortal=mortal)
 		self.workers[w.id] = w
 		print "Allocate : ", w.id
 		self.workers[w.id].start()
+
+
+	#Manage signal function
+	#TODO : manage more than just quit
+	#Frame is just garbage
+	def manage_signal(self, sig, frame):
+		print "\nExiting with signal", sig
+		for w in self.workers.values():
+			try:
+				w.terminate()
+				w.join(timeout=1)
+				queue = w.return_queue
+				self.return_messages.remove(queue)
+			except AttributeError: #A already die worker
+				pass
+			except AssertionError: #In a worker
+				pass
+		self.daemon.disconnect(self.interface)
+		self.daemon.shutdown(True)
+		sys.exit(0)
 
 
 	#Workers are process. We need to clean them some time (see zombie part)
@@ -400,9 +428,11 @@ class Satellite(Daemon):
 		    #So we del it If not in newzombie (will be kil very soon :) )
 		    if not w.is_alive() and w.id not in self.zombies:
 			    print "Warning : the worker %s goes down unexpectly!" % w.id
-			    print "Die?", w.is_alive(), w.id not in self.zombies
+			    print "Why Die?", w.is_alive(), w.id not in self.zombies
 			    w.terminate()
 			    w.join(timeout=1)
+			    queue = w.return_queue
+			    self.return_messages.remove(queue)
 			    w_to_del.append(w.id)
 	    for id in w_to_del:
 		    del self.workers[id]
@@ -531,7 +561,8 @@ class Satellite(Daemon):
 		if self.daemon.port != self.port:
 			print "Sorry, the port %d was not free" % self.port
 			sys.exit(1)
-		self.uri2 = self.daemon.connect(IForArbiter(self),"ForArbiter")
+		self.interface = IForArbiter(self)
+		self.uri2 = self.daemon.connect(self.interface,"ForArbiter")
 
                 #We wait for initial conf
 		self.wait_for_initial_conf()
@@ -567,12 +598,12 @@ class Satellite(Daemon):
 			#Now we check if arbiter speek to us in the daemon.
                         #If so, we listen for it
 			#When it push us conf, we reinit connexions
-			self.watch_for_new_conf()
+			self.watch_for_new_conf(timeout)
 			
 			try:
 				#print "Timeout", timeout
 				#msg = self.m.get(timeout=timeout)
-				time.sleep(timeout)
+				#time.sleep(timeout)
 				after = time.time()
 				timeout -= after-begin_loop
 
@@ -593,8 +624,9 @@ class Satellite(Daemon):
 				
 				print " ======================== "
 				#Manage all messages we've got in the last timeout
-				while(len(self.return_messages) != 0):
-					self.manage_msg(self.return_messages.pop())
+				for queue in self.return_messages:
+					while(len(queue) != 0):
+						self.manage_msg(queue.pop())
 
                                 #We join (old)zombies and we move new ones
 				#in the old list
@@ -605,6 +637,8 @@ class Satellite(Daemon):
 					self.workers[id].terminate()
 					self.workers[id].join(timeout=1)
 					del self.workers[id]
+					queue = w.return_queue
+					self.return_messages.remove(queue)
 				#We switch so zombie will be kill, and new
 				#ones wil go in newzombies
 				self.zombies = self.newzombies

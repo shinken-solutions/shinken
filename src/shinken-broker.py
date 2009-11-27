@@ -151,6 +151,11 @@ class Broker(Satellite):
 
 	def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
 		self.print_header()
+
+		#From daemon to manage signal. Call self.manage_signal if
+		#exists, a dummy function otherwise
+		self.set_exit_handler()
+
 		#The config reading part
 		self.config_file = config_file
 		#Read teh config file if exist
@@ -184,6 +189,14 @@ class Broker(Satellite):
 		#Plugins are load one time
 		self.have_plugins = False
 		self.plugins = []
+
+	#Manage signal function
+	#TODO : manage more than just quit
+	#Frame is just garbage
+	def manage_signal(self, sig, frame):
+		print "\nExiting with signal", sig
+		self.daemon.shutdown(True)
+		sys.exit(0)
 
 
 	#initialise or re-initialise connexion with scheduler

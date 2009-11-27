@@ -45,8 +45,10 @@ class Worker:
         self._timeout = timeout
         self._c = Queue() # Private Control queue for the Worker
         self._process = Process(target=self.work, args=(s, return_queue, self._c))
+        self.return_queue = return_queue
 	#Thread version : not good in cpython :(
-        #self._process = threading.Thread(target=self.work, args=(s, m, self._c))
+        #self._process = threading.Thread(target=self.work, args=(s, return_queue, self._c))
+
 
 
     def is_mortal(self):
@@ -125,7 +127,11 @@ class Worker:
                 #We answer to the master
                 msg = Message(id=self.id, type='Result', data=chk)
                 #m.put(msg)
-                return_queue.append(msg)
+                try:
+                    return_queue.append(msg)
+                except IOError as exp:
+                    print "[%d]Exiting: %s" % (self.id, exp)
+                    break
                 
             try:
                 cmsg = c.get(block=False)
