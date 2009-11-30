@@ -25,14 +25,15 @@
 
 
 import copy
+import os
 #import MySQLdb
-from cx_Oracle import IntegrityError
-from cx_Oracle import ProgrammingError
-from cx_Oracle import DatabaseError
-from cx_Oracle import InternalError
-from cx_Oracle import DataError
-from cx_Oracle import OperationalError
-
+connect_function = None
+IntegrityError_exp = None
+ProgrammingError_exp = None
+DatabaseError_exp = None
+InternalError_exp = None
+DataError_exp = None
+OperationalError_exp = None
 
 #This text is print at the import
 print "I am Ndo Broker for Oracle"
@@ -40,13 +41,40 @@ print "I am Ndo Broker for Oracle"
 
 #called by the plugin manager to get a broker
 def get_broker(plugin):
+    global connect_function
+    global IntegrityError_exp, ProgrammingError_exp, DatabaseError_exp
+    global InternalError_exp, DataError_exp, OperationalError_exp
+    
+    #first try the import
+    try:
+        print "importing Oracle"
+        from cx_Oracle import connect
+        connect_function = connect
+        from cx_Oracle import IntegrityError
+        IntegrityError_exp = IntegrityError
+        from cx_Oracle import ProgrammingError
+        ProgrammingError_exp = ProgrammingError
+        from cx_Oracle import DatabaseError
+        DatabaseError_exp = DatabaseError
+        from cx_Oracle import InternalError
+        InternalError_exp = InternalError
+        from cx_Oracle import DataError
+        DataError_exp = DataError
+        from cx_Oracle import OperationalError
+        OperationalError_exp = OperationalError
+    except ImportError as exp:
+        print "Warning : the plugin type %s is unavalable : %s" % (get_type(), exp)
+        return None
     print "Get a ndoDB broker for plugin %s" % plugin.get_name()
     #TODO : catch errors
-    host = plugin.host
+    if hasattr(plugin, 'oracle_home'):
+        os.environ['ORACLE_HOME'] = plugin.oracle_home
+        print "INFO: setting Oracle_HOME :", plugin.oracle_home
+    
     user = plugin.user
     password = plugin.password
     database = plugin.database
-    broker = Ndodb_Oracle_broker(plugin.get_name(), host, user, password, database)
+    broker = Ndodb_Oracle_broker(plugin.get_name(), user, password, database)
     return broker
 
 
@@ -57,7 +85,7 @@ def get_type():
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Ndodb_Oracle_broker:
-    def __init__(self, name, host, user, password, database):
+    def __init__(self, name, user, password, database):
         #Mapping for name of dataand transform function
         self.mapping = {
             'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : None},
@@ -67,7 +95,6 @@ class Ndodb_Oracle_broker:
                                 },
             }
         self.name = name
-        self.host = host
         self.user = user
         self.password = password
         self.database = database
@@ -109,9 +136,9 @@ class Ndodb_Oracle_broker:
     #Create the database connexion
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
-        connstr='system/password@XE'
-        import cx_Oracle
-        self.db = cx_Oracle.connect(connstr)
+        connstr='%s/%s@%s' % (self.user, self.password, self.database)
+
+        self.db = connect_function(connstr)
         self.db_cursor = self.db.cursor()
         self.db_cursor.arraysize=50
 
@@ -119,21 +146,21 @@ class Ndodb_Oracle_broker:
     #Just run the query
     #TODO: finish catch
     def execute_query(self, query):
-        print "I run Oracle query", query, "\n"
+        #print "I run Oracle query", query, "\n"
         try:
             self.db_cursor.execute(query)
             self.db.commit ()
-        except IntegrityError as exp:
+        except IntegrityError_exp as exp:
             print "[Ndodb] Warning : a query raise an integrity error : %s, %s" % (query, exp) 
-        except ProgrammingError as exp:
+        except ProgrammingError_exp as exp:
             print "[Ndodb] Warning : a query raise a programming error : %s, %s" % (query, exp) 
-        except DatabaseError as exp:
+        except DatabaseError_exp as exp:
             print "[Ndodb] Warning : a query raise a database error : %s, %s" % (query, exp) 
-        except InternalError as exp:
+        except InternalError_exp as exp:
             print "[Ndodb] Warning : a query raise an internal error : %s, %s" % (query, exp) 
-        except DataError as exp:
+        except DataError_exp as exp:
             print "[Ndodb] Warning : a query raise a data error : %s, %s" % (query, exp)
-        except OperationalError as exp:
+        except OperationalError_exp as exp:
             print "[Ndodb] Warning : a query raise an operational error : %s, %s" % (query, exp)
         except Exception as exp:
              print "[Ndodb] Warning : a query raise an unknow error : %s, %s" % (query, exp)

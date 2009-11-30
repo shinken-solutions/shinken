@@ -64,6 +64,7 @@ class PluginsManager():
         brokers = []
         for (plugin, mod) in self.plugins_assoc:
             b = mod.get_broker(plugin)
-            brokers.append(b)
+            if b != None: #None = Bad thing happened :)
+                brokers.append(b)
         print "Load", len(brokers), "brokers"
         return brokers
