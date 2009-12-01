@@ -41,7 +41,11 @@ def get_broker(plugin):
     user = plugin.user
     password = plugin.password
     database = plugin.database
-    broker = Ndodb_broker(plugin.get_name(), host, user, password, database)
+    if hasattr( plugin, 'character_set'):
+        character_set = plugin.character_set
+    else:
+        character_set = 'utf8'
+    broker = Ndodb_broker(plugin.get_name(), host, user, password, database, character_set)
     return broker
 
 
@@ -52,7 +56,7 @@ def get_type():
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Ndodb_broker:
-    def __init__(self, name, host, user, password, database):
+    def __init__(self, name, host, user, password, database, character_set):
         #Mapping for name of dataand transform function
         self.mapping = {
             'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : None},
@@ -66,6 +70,7 @@ class Ndodb_broker:
         self.user = user
         self.password = password
         self.database = database
+        self.character_set = character_set
 
 
 
@@ -76,6 +81,7 @@ class Ndodb_broker:
 
     def get_name(self):
         return self.name
+
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
@@ -107,7 +113,12 @@ class Ndodb_broker:
         import MySQLdb
         self.db = MySQLdb.connect (host = self.host, user = self.user, \
                                        passwd = self.password, db = self.database)
+        self.db.set_character_set(self.character_set)
         self.db_cursor = self.db.cursor ()
+        self.db_cursor.execute('SET NAMES %s;' % self.character_set)
+        self.db_cursor.execute('SET CHARACTER SET %s;' % self.character_set)
+        self.db_cursor.execute('SET character_set_connection=%s;' % self.character_set)
+        #Thanks http://www.dasprids.de/blog/2007/12/17/python-mysqldb-and-utf-8 for utf8 code :)
 
 
     #Just run the query

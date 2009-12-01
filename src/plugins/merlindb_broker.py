@@ -41,7 +41,11 @@ def get_broker(plugin):
     user = plugin.user
     password = plugin.password
     database = plugin.database
-    broker = Merlindb_broker(plugin.get_name(), host, user, password, database)
+    if hasattr( plugin, 'character_set'):
+        character_set = plugin.character_set
+    else:
+        character_set = 'utf8'
+    broker = Merlindb_broker(plugin.get_name(), host, user, password, database, character_set)
     return broker
 
 
@@ -53,12 +57,13 @@ def get_type():
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Merlindb_broker:
-    def __init__(self, name, host, user, password, database):
+    def __init__(self, name, host, user, password, database, character_set):
         self.name = name
         self.host = host
         self.user = user
         self.password = password
         self.database = database
+        self.character_set = character_set
 
 
     #The classic has : do we have a prop or not?
@@ -100,7 +105,11 @@ class Merlindb_broker:
         #self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
         self.db = MySQLdb.connect (host = self.host, user = self.user, \
                                        passwd = self.password, db = self.database)
+        self.db.set_character_set(self.character_set)
         self.db_cursor = self.db.cursor ()
+        self.db_cursor.execute('SET NAMES %s;' % self.character_set)
+        self.db_cursor.execute('SET CHARACTER SET %s;' % self.character_set)
+        self.db_cursor.execute('SET character_set_connection=%s;' % self.character_set)
 
 
     #Just run the query
