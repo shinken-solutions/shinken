@@ -22,10 +22,12 @@
 #(self.s) (slave)
 #They launch the Check and then send the result in the Queue self.m (master)
 #they can die if they do not do anything (param timeout)
+from Queue import Empty
 from multiprocessing import Process, Queue
 from message import Message
 
 import threading
+import time, sys
 
 #Worker class
 class Worker:
@@ -36,7 +38,7 @@ class Worker:
     _idletime = None
     _timeout = None
     _c = None
-    def __init__(self, id, s, return_queue, mortal=True, timeout=60):
+    def __init__(self, id, s, return_queue, mortal=True, timeout=300):
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -95,44 +97,81 @@ class Worker:
         self._mortal = False
         
 
+    #Get new checks if less than nb_checks_max
+    #If no new checks got and no check in queue,
+    #sleep for 1 sec
+    def get_new_checks(self):
+        try:
+            while(len(self.checks) < self.nb_checks_max):
+                #print "I", self.id, "wait for a message"
+                msg = self.s.get(block=False)
+                if msg is not None:
+                    self.checks.append(msg.get_data())
+                #print "I", self.id, "I've got a message!"
+        except Empty as exp:
+            if len(self.checks) == 0:
+                self._idletime = self._idletime + 1
+                time.sleep(1)
+
+    #Launch checks that are in status
+    def launch_new_checks(self):
+        #queue
+        for chk in self.checks:
+            if chk.status == 'queue':
+                self._idletime = 0
+                chk.execute()
+
+
+    #Check the status of checks
+    #if done, return message finished :)
+    def manage_finished_checks(self):
+        wait_time = 1
+        for chk in self.checks:
+            #print chk.status
+            if chk.status == 'lanched':
+                #TODO : get the min of wait_time
+                chk.check_finished()
+                if chk.status != 'done' and chk.status != 'timeout':
+                    wait_time = min(wait_time, chk.wait_time)
+
+        #Little seep
+        time.sleep(wait_time)
+
+        to_del = []
+        for chk in self.checks:
+            if chk.status == 'done' or chk.status == 'timeout':
+                to_del.append(chk)
+                #We answer to the master
+                msg = Message(id=self.id, type='Result', data=chk)
+                try:
+                    self.return_queue.append(msg)
+                except IOError as exp:
+                    print "[%d]Exiting: %s" % (self.id, exp)
+                    sys.exit(2)
+        for chk in to_del:
+            self.checks.remove(chk)
+            
+
     #id = id of the worker
     #s = Global Queue Master->Slave
     #m = Queue Slave->Master
     #return_queue = queue managed by manager
     #c = Control Queue for the worker
     def work(self, s, return_queue, c):
+        self.nb_checks_max = 512
+        self.checks = []
+        self.return_queue = return_queue
+        self.s = s
+        #print "I am working"
         while True:
             msg = None
             cmsg = None
             
-            try:
-                #print "I", self.id, "wait for a message"
-                msg = s.get(timeout=1.0)
-                #print "I", self.id, "I've got a message!"
-            except:
-                #print "Empty Queue", self._id
-                msg = None
-                #print "[%d] idle up %s" % (self._id, self._idletime)
-                self._idletime = self._idletime + 1
-            
-            #print "[%d] got %s" % (self._id, msg)
-            #Here we work on the elt
-            if msg is not None:
-                chk = msg.get_data()
-                self._idletime = 0
-                
-                chk.execute()
-                chk.set_status('executed')
-                
-                #We answer to the master
-                msg = Message(id=self.id, type='Result', data=chk)
-                #m.put(msg)
-                try:
-                    return_queue.append(msg)
-                except IOError as exp:
-                    print "[%d]Exiting: %s" % (self.id, exp)
-                    break
-                
+            self.get_new_checks()
+            self.launch_new_checks()
+            self.manage_finished_checks()
+
+            #Now get order from master
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':

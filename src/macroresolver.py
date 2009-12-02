@@ -86,7 +86,9 @@ class MacroResolver(Borg):
         self.lists_on_demand.append(self.servicegroups)
         self.contactgroups = conf.contactgroups
         self.lists_on_demand.append(self.contactgroups)
-        
+
+        #Try cache :)
+        #self.cache = {}
 
 
     #Return all macros of a string, so cut the $
@@ -94,6 +96,9 @@ class MacroResolver(Borg):
     #val : value, not set here
     #type : type of macro, like class one, or ARGN one
     def get_macros(self, s):
+        #if s in self.cache:
+        #    return self.cache[s]
+
         p = re.compile(r'(\$)')
         elts = p.split(s)
         macros = {}
@@ -103,6 +108,8 @@ class MacroResolver(Borg):
                 in_macro = not in_macro
             elif in_macro:
                 macros[elt] = {'val' : '', 'type' : 'unknown'}
+
+        #self.cache[s] = macros
         return macros
                 
 
@@ -161,6 +168,7 @@ class MacroResolver(Borg):
         #We resolved all we can, now replace the macro in the command call
         for macro in macros:
             c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
+
         return c_line
 
 

@@ -167,7 +167,7 @@ class Satellite(Daemon):
 		self.s = Queue() #Global Master -> Slave
 		self.m = Queue() #Slave -> Master
 		self.manager = Manager()
-		self.return_messages = []#self.manager.list()
+		self.return_messages = self.manager.list()
 
 		#Ours schedulers
 		self.schedulers = {}
@@ -387,9 +387,9 @@ class Satellite(Daemon):
 	#Create and launch a new worker, and put it into self.workers
 	#It can be mortal or not
 	def create_and_launch_worker(self, mortal=True):
-		queue = self.manager.list()
-		self.return_messages.append(queue)
-		w = Worker(1, self.s, queue, mortal=mortal)
+		#queue = self.manager.list()
+		#self.return_messages.append(queue)
+		w = Worker(1, self.s, self.return_messages, mortal=mortal)
 		self.workers[w.id] = w
 		print "Allocate : ", w.id
 		self.workers[w.id].start()
@@ -404,8 +404,8 @@ class Satellite(Daemon):
 			try:
 				w.terminate()
 				w.join(timeout=1)
-				queue = w.return_queue
-				self.return_messages.remove(queue)
+				#queue = w.return_queue
+				#self.return_messages.remove(queue)
 			except AttributeError: #A already die worker
 				pass
 			except AssertionError: #In a worker
@@ -420,9 +420,9 @@ class Satellite(Daemon):
 	#here it's > 80% of workers
 	def adjust_worker_number_by_load(self):
             act = active_children()
-            print "I've got", len(act), "childrens :"
-	    for c in act:
-		    print "Nom:",c.name, c.pid, c.is_alive()
+            #print "I've got", len(act), "childrens :"
+	    #for c in act:
+	    #	    print "Nom:",c.name, c.pid, c.is_alive()
 	    #First we check for no alive children
 	    w_to_del = []
 	    for w in self.workers.values():
@@ -434,15 +434,15 @@ class Satellite(Daemon):
 			    print "Why Die?", w.is_alive(), w.id not in self.zombies
 			    w.terminate()
 			    w.join(timeout=1)
-			    queue = w.return_queue
-			    self.return_messages.remove(queue)
+			    #queue = w.return_queue
+			    #self.return_messages.remove(queue)
 			    w_to_del.append(w.id)
 	    for id in w_to_del:
 		    del self.workers[id]
 			    
 	    #Ok now the rest
-	    nb_alive = len([c for c in act if c.is_alive()])
-	    print "Nb Alive :", nb_alive, "nb deads:", len(act) - nb_alive
+	    #nb_alive = len([c for c in act if c.is_alive()])
+	    #print "Nb Alive :", nb_alive, "nb deads:", len(act) - nb_alive
             nb_queue = 0 # Len of actions in queue status, so the working queue
             for sched_id in self.schedulers:
                 verifs = self.schedulers[sched_id]['verifs']
@@ -578,7 +578,7 @@ class Satellite(Daemon):
 		self.have_new_conf = False
 
                 #Allocate Mortal Threads
-		for i in xrange(1, 1):
+		for i in xrange(1, self.min_workers):
 			self.create_and_launch_worker() #create mortal worker
 
 		#Now main loop
@@ -627,9 +627,9 @@ class Satellite(Daemon):
 				
 				print " ======================== "
 				#Manage all messages we've got in the last timeout
-				for queue in self.return_messages:
-					while(len(queue) != 0):
-						self.manage_msg(queue.pop())
+				#for queue in self.return_messages:
+				while(len(self.return_messages) != 0):
+					self.manage_msg(self.return_messages.pop())
 
                                 #We join (old)zombies and we move new ones
 				#in the old list
@@ -641,8 +641,8 @@ class Satellite(Daemon):
 						self.workers[id].terminate()
 						self.workers[id].join(timeout=1)
 						del self.workers[id]
-						queue = self.workers[id].return_queue
-						self.return_messages.remove(queue)
+						#queue = self.workers[id].return_queue
+						#self.return_messages.remove(queue)
 					except KeyError: #The worker must be already del
 						pass
 				#We switch so zombie will be kill, and new

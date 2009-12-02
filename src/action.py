@@ -56,10 +56,10 @@ class Action:
 
  
     def execute_windows(self):
-        timeout = 10
+        self.timeout = 10
         self.status = 'lanched'
         self.check_time = time.time()
-        start = datetime.datetime.now()
+        self.wait_time = 0.0001
         try:
             process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except WindowsError:
@@ -67,20 +67,6 @@ class Action:
             self.status = 'timeout'
             self.execution_time = time.time() - self.check_time
             return
-        while process.poll() is None:
-            time.sleep(0.01)
-            now = datetime.datetime.now()
-            if (now - start).seconds> timeout:
-                TerminateProcess(int(process._handle), -1)
-                print "On le kill"
-                self.status = 'timeout'
-                self.execution_time = time.time() - self.check_time
-                return
-        self.get_outputs(process.stdout.read())
-        self.exit_status = process.returncode
-        print "Output:", self.output, self.long_output, "exit status", self.exit_status
-        self.status = 'done'
-        self.execution_time = time.time() - self.check_time
 
 
     #def execute_unix(self):
@@ -102,39 +88,77 @@ class Action:
 
 
     def execute_unix(self):
-        timeout = 10
+        self.timeout = 10
         self.status = 'lanched'
         self.check_time = time.time()
+        self.wait_time = 0.0001
         #cmd = ['/bin/sh', '-c', self.command]
         #Nagios do not use the /bin/sh -c command, so I don't do it too
         try:
-            process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except OSError as exp:
             self.output = exp
             self.exit_status = 2
             self.status = 'done'
             self.execution_time = time.time() - self.check_time
             return
+
+
+    def check_finished(self):
+        if os.name == 'nt':
+            self.check_finished_windows()
+        else:
+            self.check_finished_unix()
+    
+
+    def check_finished_unix(self):
         #We must wait, but checks are variable in time
         #so we do not wait the same for an little check
         #than a long ping. So we do like TCP : slow start with *2
         #but do not wait more than 0.1s.
-        wait_time = 0.0001
-        while process.poll() is None:
-            wait_time = min(wait_time*2, 0.1)
-            time.sleep(wait_time)
+        if self.process.poll() is None:
+            self.wait_time = min(self.wait_time*2, 0.1)
+            #time.sleep(wait_time)
             now = time.time()
-            if (now - self.check_time) > timeout:
+            if (now - self.check_time) > self.timeout:
                 #process.kill()
                 #HEAD SHOT
-                os.kill(process.pid, 9) 
-                print "Kill", process.pid, self.command
+                os.kill(self.process.pid, 9) 
+                print "Kill", self.process.pid, self.command
                 self.status = 'timeout'
                 self.execution_time = now - self.check_time
                 self.exit_status = 3
                 return
-        self.get_outputs(process.stdout.read())
-        self.exit_status = process.returncode
+            return
+        self.get_outputs(self.process.stdout.read())
+        self.exit_status = self.process.returncode
+        #if self.exit_status != 0:
+        #    print "DBG:", self.command, self.exit_status, self.output
+        self.status = 'done'
+        self.execution_time = time.time() - self.check_time
+
+
+    def check_finished_windows(self):
+        #We must wait, but checks are variable in time
+        #so we do not wait the same for an little check
+        #than a long ping. So we do like TCP : slow start with *2
+        #but do not wait more than 0.1s.
+        if self.process.poll() is None:
+            self.wait_time = min(self.wait_time*2, 0.1)
+            #time.sleep(wait_time)
+            now = time.time()
+            if (now - self.check_time) > self.timeout:
+                #process.kill()
+                #HEAD SHOT
+                TerminateProcess(int(self.process._handle), -1)
+                print "Kill", self.process.pid, self.command
+                self.status = 'timeout'
+                self.execution_time = now - self.check_time
+                self.exit_status = 3
+                return
+            return
+        self.get_outputs(self.process.stdout.read())
+        self.exit_status = self.process.returncode
         #if self.exit_status != 0:
         #    print "DBG:", self.command, self.exit_status, self.output
         self.status = 'done'
