@@ -158,7 +158,7 @@ class Worker:
     #return_queue = queue managed by manager
     #c = Control Queue for the worker
     def work(self, s, return_queue, c):
-        self.nb_checks_max = 512
+        self.nb_checks_max = 256
         self.checks = []
         self.return_queue = return_queue
         self.s = s
