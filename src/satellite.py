@@ -97,10 +97,12 @@ class IForArbiter(Pyro.core.ObjBase):
 		except KeyError:
 			pass
 
+
 	#Arbiter ask me which sched_id I manage, If it is not ok with it
 	#It will ask me to remove one or more sched_id
 	def what_i_managed(self):
 		return self.schedulers.keys()
+
 
 	#Use for arbiter to know if we are alive
 	def ping(self):
@@ -169,31 +171,23 @@ class Satellite(Daemon):
 		self.s = Queue() #Global Master -> Slave
 		#self.m = Queue() #Slave -> Master
 		self.manager = Manager()
-		self.return_messages = self.manager.list()
-
+		self.returns_queue = self.manager.list()
+		
 		#Ours schedulers
 		self.schedulers = {}
-
+		
 		self.workers = {} #dict of active workers
-		self.newzombies = [] #list of fresh new zombies, will be join the next loop
-		self.zombies = [] #list of quite old zombies, will be join now
-
-		#The actions processing part
-		self.nb_actions_max = 1024
-		self.nb_actions_in_progress = 0
 		self.high_water_mark = 0.9
 		
 		#Init stats like Load for workers
 		self.init_stats()
-
+		
 
 	def init_stats(self):
 		#For calculate the good worker number
-                self.nb_actions_procced = 0
-                self.total_process_time = 0
                 self.wish_workers_load = Load()
                 self.avg_dead_workers = Load()
-
+		
                 #For calculate the good timeout to get actions (1s or more)
                 self.avg_received_actions = Load()
                 self.avg_sent_actions = Load()
@@ -244,36 +238,15 @@ class Satellite(Daemon):
 
 
         #Manage messages from Workers
-	def manage_msg(self, msg):
-		#Ok, a worker whant to die. It's sad, but we must kill him!!!
-		if msg.get_type() == 'IWantToDie':
-			zombie = msg.get_from()
-			print "Got a ding wish from ", zombie
-			self.workers[zombie].terminate()
-			self.workers[zombie].join()
+	def manage_action_return(self, action):
 		#Ok, it's a result. We get it, and fill verifs of the good sched_id
-
-		if msg.get_type() == 'Result':
-			id = msg.get_from()
-			try:
-				self.workers[id].reset_idle()
-			except KeyError as exp:
-				#message from a zombie, do not care about it
-				print exp
-				return
-			chk = msg.get_data()
-			sched_id = chk.sched_id
-			chk.set_status('waitforhomerun')
-			self.schedulers[sched_id]['verifs'][chk.get_id()] = chk
-
-			#Now update the stat values so we can calculate the good
-			#worker number
-			self.nb_actions_procced += 1
-			self.total_process_time += chk.execution_time
-
-
+		sched_id = action.sched_id
+		action.set_status('waitforhomerun')
+		self.schedulers[sched_id]['verifs'][action.get_id()] = action
+		
+		
         #Return the chk to scheduler and clean them
-	def manage_return(self):
+	def manage_returns(self):
 		total_sent = 0
 		#Fot all schedulers, we check for waitforhomerun and we send back results
 		for sched_id in self.schedulers:
@@ -393,7 +366,7 @@ class Satellite(Daemon):
 	def create_and_launch_worker(self, mortal=True):
 		#queue = self.manager.list()
 		#self.return_messages.append(queue)
-		w = Worker(1, self.s, self.return_messages, self.processes_by_worker, mortal=mortal)
+		w = Worker(1, self.s, self.returns_queue, self.processes_by_worker, mortal=mortal)
 		self.workers[w.id] = w
 		print "Allocating new Worker : ", w.id
 		self.workers[w.id].start()
@@ -613,7 +586,7 @@ class Satellite(Daemon):
 				#old ones : are they still in queue (s)? If True, we 
 				#must wait more or at least have more workers
 				print "Len Queue", self.s.qsize()
-				print "Len return", len(self.return_messages)
+				print "Len return", len(self.returns_queue)
 				
 				wait_ratio = self.wait_ratio.get_load()
 				if self.s.qsize() != 0 and wait_ratio < 5:
@@ -640,19 +613,19 @@ class Satellite(Daemon):
 
 				#Manage all messages we've got in the last timeout
 				#for queue in self.return_messages:
-				while(len(self.return_messages) != 0):
-					self.manage_msg(self.return_messages.pop())
-					
+				while(len(self.returns_queue) != 0):
+					self.manage_action_return(self.returns_queue.pop())
+				
 				for sched_id in self.schedulers:
 					verifs = self.schedulers[sched_id]['verifs']
 					tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].status == 'queue'])
 					nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].status == 'waitforhomerun'])
-					print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d In progress:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, self.nb_actions_in_progress, nb_waitforhomerun)            
+					print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
 
 				#Now we can get new actions from schedulers
 				self.get_new_actions()
 				
                                 #We send all finished checks
-				self.manage_return()
+				self.manage_returns()
 				
 				

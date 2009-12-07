@@ -22,6 +22,7 @@
 #(self.s) (slave)
 #They launch the Check and then send the result in the Queue self.m (master)
 #they can die if they do not do anything (param timeout)
+
 from Queue import Empty
 from multiprocessing import Process, Queue
 from message import Message
@@ -37,7 +38,7 @@ class Worker:
     _idletime = None
     _timeout = None
     _c = None
-    def __init__(self, id, s, return_queue, processes_by_worker, mortal=True, timeout=300):
+    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300):
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -46,11 +47,10 @@ class Worker:
         self._timeout = timeout
         self.processes_by_worker = processes_by_worker
         self._c = Queue() # Private Control queue for the Worker
-        self._process = Process(target=self.work, args=(s, return_queue, self._c))
-        self.return_queue = return_queue
+        self._process = Process(target=self.work, args=(s, returns_queue, self._c))
+        self.returns_queue = returns_queue
 	#Thread version : not good in cpython :(
-        #self._process = threading.Thread(target=self.work, args=(s, return_queue, self._c))
-
+        #self._process = threading.Thread(target=self.work, args=(s, returns_queue, self._c))
 
 
     def is_mortal(self):
@@ -59,6 +59,7 @@ class Worker:
 
     def start(self):
         self._process.start()
+
 
     #Kill the backgroup process
     #AND close correctly the queue
@@ -75,6 +76,7 @@ class Worker:
 
     def is_alive(self):
         return self._process.is_alive()
+
 
     def is_killable(self):
         return self._mortal and self._idletime > self._timeout
@@ -137,24 +139,15 @@ class Worker:
             if action.status == 'done' or action.status == 'timeout':
                 to_del.append(action)
                 #We answer to the master
-                msg = Message(id=self.id, type='Result', data=action)
+                #msg = Message(id=self.id, type='Result', data=action)
                 try:
-                    self.return_queue.append(msg)
+                    self.returns_queue.append(action)#msg)
                 except IOError as exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
                     sys.exit(2)               
-        #Little seep
-        #print "I want to sleep", wait_time
+        #Little sleep
         self.wait_time = wait_time
 
-        #wait_time = 1
-        #for chk in self.checks:
-            #print chk.status
-        #    if chk.status == 'lanched':
-                #TODO : get the min of wait_time
-        #        chk.check_finished()
-        #        if chk.status != 'done' and chk.status != 'timeout':
-        #            wait_time = min(wait_time, chk.wait_time)
         for chk in to_del:
             self.checks.remove(chk)
 
@@ -167,13 +160,11 @@ class Worker:
     #m = Queue Slave->Master
     #return_queue = queue managed by manager
     #c = Control Queue for the worker
-    def work(self, s, return_queue, c):
+    def work(self, s, returns_queue, c):
         timeout = 1.0
-        #self.nb_checks_max = 256
         self.checks = []
-        self.return_queue = return_queue
+        self.returns_queue = returns_queue
         self.s = s
-        #print "I am working"
         while True:
             begin = time.time()
             msg = None
@@ -200,5 +191,3 @@ class Worker:
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0
-                #print "Timeout"
-                #print "[%d] Load: %d/%d" % (self.id, len(self.checks), self.nb_checks_max)
