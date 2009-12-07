@@ -199,7 +199,8 @@ class Satellite(Daemon):
                 self.avg_sent_actions = Load()
                 self.wait_ratio = Load(initial_value=1)
 		self.load = Load(initial_value=1)
-
+		self.over_load = Load()
+		
 
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
@@ -418,75 +419,43 @@ class Satellite(Daemon):
 		sys.exit(0)
 
 
-	#Workers are process. We need to clean them some time (see zombie part)
-	#Here we create new workers if the queue load (len of verifs) is too long
-	#here it's > 80% of workers
-	def adjust_worker_number_by_load(self):
+	#workers are processes, they can die in a numerous of ways
+	#like :
+	#*99.99% : bug in code
+	#*0.005 % : a mix between a stupid admin (or an admin without coffee),
+	#and a kill command
+	#*0.005% : alien attack of course
+	#So they need to be detected, and restart if need
+	def check_and_del_zombie_workers(self):
+            #Active children make a join with every one, useful :)
             act = active_children()
-            #print "I've got", len(act), "childrens :"
-	    #for c in act:
-	    #	    print "Nom:",c.name, c.pid, c.is_alive()
-	    #First we check for no alive children
+
 	    w_to_del = []
 	    for w in self.workers.values():
 		    #If a worker go down and we do not ask him, it's not
 		    #good : we can think having a worker and it's not True
-		    #So we del it If not in newzombie (will be kil very soon :) )
-		    if not w.is_alive() and w.id not in self.zombies:
+		    #So we del it
+		    if not w.is_alive():
 			    print "Warning : the worker %s goes down unexpectly!" % w.id
-			    print "Why Die?", w.is_alive(), w.id not in self.zombies
+			    #AIM
 			    w.terminate()
+			    #PRESS FIRE
 			    w.join(timeout=1)
-			    #queue = w.return_queue
-			    #self.return_messages.remove(queue)
 			    w_to_del.append(w.id)
+	    #OK, now really del workers
 	    for id in w_to_del:
+		    #<B>HEAD SHOT!</B>
 		    del self.workers[id]
-			    
-	    #Ok now the rest
-	    #nb_alive = len([c for c in act if c.is_alive()])
-	    #print "Nb Alive :", nb_alive, "nb deads:", len(act) - nb_alive
-            nb_queue = 0 # Len of actions in queue status, so the working queue
-            for sched_id in self.schedulers:
-                verifs = self.schedulers[sched_id]['verifs']
-                tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
-                nb_queue += tmp_nb_queue
-                nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
-                print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
 		
-	    try:
-		    #The average time for checks since the begining
-		    #avg_check_time = self.total_process_time / self.nb_actions_procced
-		    avg_check_time = self.total_process_time / self.nb_actions_procced
-		    #We wish workers so we can manage nb_queue elements we have
-		    #that take avg_check_time sec to execute
-		    #because  1/avg_check_time is the number of checks we can manage
-		    #in 1sec. So nb_queue/( 1/avg_check_time) is the number of workers
-		    #we need to manage this
-		    wish_worker = nb_queue * avg_check_time
-	    except ZeroDivisionError :
-		    wish_worker = 1
 
-	    print "DBG:", self.nb_actions_procced, "in", self.total_process_time,"s"
-	    #Now reset values
-	    self.total_process_time = 0
-	    self.nb_actions_procced = 0
-	    print "New wish worker", wish_worker
-	    #Adjust wish workers with the dead workers we've just killed :
-	    #why create workers when we just kill some?
-	    #wish_worker = int(wish_worker)+1
-	    self.wish_workers_load.update_load(wish_worker)
-	    wish_worker = int(self.wish_workers_load.get_load() - self.avg_dead_workers.get_load()) + 1
-
-	    print "I want at least", wish_worker, "workers", 'Load = ', self.wish_workers_load.get_load(), "dead avg=", self.avg_dead_workers.get_load()
+	#Here we create new workers if the queue load (len of verifs) is too long
+	def adjust_worker_number_by_load(self):
+            #TODO : get a real value for a load
+            wish_worker = 1
 	    #I want at least min_workers or wish_workers (the biggest) but not more than max_workers
 	    while len(self.workers) < self.min_workers or (wish_worker > len(self.workers) and len(self.workers) < self.max_workers):
 		    self.create_and_launch_worker()
 	    #TODO : if len(workers) > 2*wish, maybe we can kill a worker?
-	    
-	    #TODO2: nb_queue and avg_check_time are instant value, maybe we can
-	    #use a load1 avg
-
 
 
 	#We get new actions from schedulers, we create a Message ant we 
@@ -610,12 +579,8 @@ class Satellite(Daemon):
                         #If so, we listen for it
 			#When it push us conf, we reinit connexions
 			#Sleep in waiting a new conf :)
-			self.wait_time = 0.1
-			print "Begin to watch new conf for", self.wait_time
-			self.watch_for_new_conf(self.wait_time)
+			self.watch_for_new_conf(timeout)
 
-			#TODO: check DIE workers!
-			
 			try:
 				#print "Timeout", timeout
 				#msg = self.m.get(timeout=timeout)
@@ -635,51 +600,31 @@ class Satellite(Daemon):
 					raise Empty
 					
 			except Empty as exp: #Time out Part
+				print " ======================== "
 				after = time.time()
 				timeout = 1.0
 				
-				print " ======================== "
-				#Manage all messages we've got in the last timeout
-				#for queue in self.return_messages:
-				while(len(self.return_messages) != 0):
-					self.manage_msg(self.return_messages.pop())
-					
-				
-				#Maybe we do not have enouth workers, we check for it
-				#and launch new ones if need
-				#self.adjust_worker_number_by_load()
-				for sched_id in self.schedulers:
-					verifs = self.schedulers[sched_id]['verifs']
-					tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
-					nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
-					print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d In progress:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, self.nb_actions_in_progress, nb_waitforhomerun)            
+				#Check if zombies workers are among us :)
+				#If so : KILL THEM ALL!!!
+				self.check_and_del_zombie_workers()
 
-				current_load = self.nb_actions_in_progress / float(self.nb_actions_max)
-				print 'Current load:', current_load
-				self.load.update_load(current_load)
-				print 'AVG Load:', self.load.get_load()
+
+				#Before return or get new actions, see how we manage
+				#old ones : are they still in queue (s)? If True, we 
+				#must wait more or at least have more workers
+				print "Len Queue", self.s.qsize()
+				print "Len return", len(self.return_messages)
 				
 				wait_ratio = self.wait_ratio.get_load()
-				if self.load.get_load() > self.high_water_mark and wait_ratio < 5:
+				if self.s.qsize() != 0 and wait_ratio < 5:
 					print "I decide to up wait ratio"
-					self.wait_ratio.update_load(wait_ratio * 5)
+					self.wait_ratio.update_load(wait_ratio * 2)
 				else:
 					#Go to 1 on normal run, if wait_ratio was >5, 
 					#it make it come near 5 because if < 5, go up :)
 					self.wait_ratio.update_load(1)
-
 				wait_ratio = self.wait_ratio.get_load()
 				print "Wait ratio:", wait_ratio
-
-				#Now we can get new actions from schedulers
-				self.get_new_actions()
-				
-                                #We send all finished checks
-				self.manage_return()
-				
-				#if self.avg_sent_actions.get_load() != 0:
-				#	self.wait_ratio.update_load(self.avg_received_actions.get_load()/self.avg_sent_actions.get_load())
-				#wait_ratio = self.wait_ratio.get_load()
 
 				#We can wait more than 1s if need,
 				#no more than 5s, but no less than 1
@@ -688,4 +633,26 @@ class Satellite(Daemon):
 				timeout = max(1, timeout)
 				#No more than 5
 				timeout = min(5, timeout)
+
+				#Maybe we do not have enouth workers, we check for it
+				#and launch new ones if need
+				self.adjust_worker_number_by_load()
+
+				#Manage all messages we've got in the last timeout
+				#for queue in self.return_messages:
+				while(len(self.return_messages) != 0):
+					self.manage_msg(self.return_messages.pop())
+					
+				for sched_id in self.schedulers:
+					verifs = self.schedulers[sched_id]['verifs']
+					tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].status == 'queue'])
+					nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].status == 'waitforhomerun'])
+					print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d In progress:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, self.nb_actions_in_progress, nb_waitforhomerun)            
+
+				#Now we can get new actions from schedulers
+				self.get_new_actions()
+				
+                                #We send all finished checks
+				self.manage_return()
+				
 				
