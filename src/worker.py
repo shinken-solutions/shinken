@@ -31,20 +31,20 @@ import time, sys
 
 #Worker class
 class Worker:
-    """The Worker class """
     id = 0#None
     _process = None
     _mortal = None
     _idletime = None
     _timeout = None
     _c = None
-    def __init__(self, id, s, return_queue, mortal=True, timeout=300):
+    def __init__(self, id, s, return_queue, processes_by_worker, mortal=True, timeout=300):
         self.id = self.__class__.id
         self.__class__.id += 1
 
         self._mortal = mortal
         self._idletime = 0
         self._timeout = timeout
+        self.processes_by_worker = processes_by_worker
         self._c = Queue() # Private Control queue for the Worker
         self._process = Process(target=self.work, args=(s, return_queue, self._c))
         self.return_queue = return_queue
@@ -102,7 +102,7 @@ class Worker:
     #sleep for 1 sec
     def get_new_checks(self):
         try:
-            while(len(self.checks) < self.nb_checks_max):
+            while(len(self.checks) < self.processes_by_worker):
                 #print "I", self.id, "wait for a message"
                 msg = self.s.get(block=False)
                 if msg is not None:
@@ -112,6 +112,7 @@ class Worker:
             if len(self.checks) == 0:
                 self._idletime = self._idletime + 1
                 time.sleep(1)
+
 
     #Launch checks that are in status
     def launch_new_checks(self):
@@ -125,31 +126,40 @@ class Worker:
     #Check the status of checks
     #if done, return message finished :)
     def manage_finished_checks(self):
-        wait_time = 1
-        for chk in self.checks:
-            #print chk.status
-            if chk.status == 'lanched':
-                #TODO : get the min of wait_time
-                chk.check_finished()
-                if chk.status != 'done' and chk.status != 'timeout':
-                    wait_time = min(wait_time, chk.wait_time)
-
-        #Little seep
-        time.sleep(wait_time)
-
         to_del = []
-        for chk in self.checks:
-            if chk.status == 'done' or chk.status == 'timeout':
-                to_del.append(chk)
+        wait_time = 1
+        now = time.time()
+        for action in self.checks:
+            if action.status == 'lanched' and action.last_poll < now - action.wait_time:
+                action.check_finished()
+                wait_time = min(wait_time, action.wait_time)
+                #If action done, we can launch a new one
+            if action.status == 'done' or action.status == 'timeout':
+                to_del.append(action)
                 #We answer to the master
-                msg = Message(id=self.id, type='Result', data=chk)
+                msg = Message(id=self.id, type='Result', data=action)
                 try:
                     self.return_queue.append(msg)
                 except IOError as exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
-                    sys.exit(2)
+                    sys.exit(2)               
+        #Little seep
+        #print "I want to sleep", wait_time
+        self.wait_time = wait_time
+
+        #wait_time = 1
+        #for chk in self.checks:
+            #print chk.status
+        #    if chk.status == 'lanched':
+                #TODO : get the min of wait_time
+        #        chk.check_finished()
+        #        if chk.status != 'done' and chk.status != 'timeout':
+        #            wait_time = min(wait_time, chk.wait_time)
         for chk in to_del:
             self.checks.remove(chk)
+
+        #Little seep
+        time.sleep(wait_time)
             
 
     #id = id of the worker
@@ -158,12 +168,14 @@ class Worker:
     #return_queue = queue managed by manager
     #c = Control Queue for the worker
     def work(self, s, return_queue, c):
-        self.nb_checks_max = 256
+        timeout = 1.0
+        #self.nb_checks_max = 256
         self.checks = []
         self.return_queue = return_queue
         self.s = s
         #print "I am working"
         while True:
+            begin = time.time()
             msg = None
             cmsg = None
             
@@ -184,3 +196,9 @@ class Worker:
                 print "[%d]Timeout, Arakiri" % self.id
                 #The master must be dead and we are loonely, we must die
                 break
+            
+            timeout -= time.time() - begin
+            if timeout < 0:
+                timeout = 1.0
+                #print "Timeout"
+                #print "[%d] Load: %d/%d" % (self.id, len(self.checks), self.nb_checks_max)

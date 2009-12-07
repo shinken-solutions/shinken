@@ -85,7 +85,9 @@ class IForArbiter(Pyro.core.ObjBase):
 		#Now the limit part
 		self.app.max_workers = conf['global']['max_workers']
 		self.app.min_workers = conf['global']['min_workers']
+		self.app.processes_by_worker = conf['global']['processes_by_worker']
 		print "We have our schedulers :", self.schedulers
+
 
 	#Arbiter ask us to do not manage a scheduler_id anymore
 	#I do it and don't ask why
@@ -165,7 +167,7 @@ class Satellite(Daemon):
 		self.have_conf = False
 		self.have_new_conf = False
 		self.s = Queue() #Global Master -> Slave
-		self.m = Queue() #Slave -> Master
+		#self.m = Queue() #Slave -> Master
 		self.manager = Manager()
 		self.return_messages = self.manager.list()
 
@@ -176,6 +178,11 @@ class Satellite(Daemon):
 		self.newzombies = [] #list of fresh new zombies, will be join the next loop
 		self.zombies = [] #list of quite old zombies, will be join now
 
+		#The actions processing part
+		self.nb_actions_max = 1024
+		self.nb_actions_in_progress = 0
+		self.high_water_mark = 0.9
+		
 		#Init stats like Load for workers
 		self.init_stats()
 
@@ -190,9 +197,9 @@ class Satellite(Daemon):
                 #For calculate the good timeout to get actions (1s or more)
                 self.avg_received_actions = Load()
                 self.avg_sent_actions = Load()
-                self.wait_ratio = Load()
+                self.wait_ratio = Load(initial_value=1)
+		self.load = Load(initial_value=1)
 
-		
 
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
@@ -231,13 +238,7 @@ class Satellite(Daemon):
 			print "The running id of the scheduler changed, we must clear the verifs"
 			self.schedulers[id]['verifs'].clear()
 		self.schedulers[id]['running_id'] = new_run_id
-		#We do not need result of put_results, there is no one
-		#try:
-		#	self.schedulers[id]['con']._setOneway('put_results')
-		#except KeyError, exp:
-                #        print "Scheduler is not initilised", exp
-                #        self.schedulers[id]['con'] = None
-                #        return
+
 		print "Connexion OK"
 
 
@@ -367,10 +368,12 @@ class Satellite(Daemon):
 	#If it send us a new conf, we reinit the connexions of all schedulers
 	def watch_for_new_conf(self, timeout_daemon):
 		#timeout_daemon = 0.0
-		print "Select :", timeout_daemon
+		t0 = time.time()
+		#print "Select :", timeout_daemon
 		socks = self.daemon.getServerSockets()
 		# 'foreign' event loop
 		ins,outs,exs = select.select(socks,[],[],timeout_daemon)
+		#print "End Select:", time.time() -t0
 		if ins != []:
 			for sock in socks:
 				if sock in ins:
@@ -389,9 +392,9 @@ class Satellite(Daemon):
 	def create_and_launch_worker(self, mortal=True):
 		#queue = self.manager.list()
 		#self.return_messages.append(queue)
-		w = Worker(1, self.s, self.return_messages, mortal=mortal)
+		w = Worker(1, self.s, self.return_messages, self.processes_by_worker, mortal=mortal)
 		self.workers[w.id] = w
-		print "Allocate : ", w.id
+		print "Allocating new Worker : ", w.id
 		self.workers[w.id].start()
 
 
@@ -484,7 +487,8 @@ class Satellite(Daemon):
 	    #TODO2: nb_queue and avg_check_time are instant value, maybe we can
 	    #use a load1 avg
 
-		    
+
+
 	#We get new actions from schedulers, we create a Message ant we 
 	#put it in the s queue (from master to slave)
 	def get_new_actions(self):
@@ -585,6 +589,8 @@ class Satellite(Daemon):
 		i = 0
 		timeout = 1.0
 		while True:
+			
+			#print "Loop"
 			#i = i + 1
 			#if not i % 50:
 			#	print "Loop ", i
@@ -593,7 +599,9 @@ class Satellite(Daemon):
 			#Maybe the arbiter ask us to wait for a new conf
 			#If true, we must restart all...
 			if self.have_conf == False:
+				print "Begin wait initial"
 				self.wait_for_initial_conf()
+				print "End wiat initial"
 				for sched_id in self.schedulers:
 					print "Init main2"
 					self.pynag_con_init(sched_id)
@@ -601,7 +609,12 @@ class Satellite(Daemon):
 			#Now we check if arbiter speek to us in the daemon.
                         #If so, we listen for it
 			#When it push us conf, we reinit connexions
-			self.watch_for_new_conf(timeout)
+			#Sleep in waiting a new conf :)
+			self.wait_time = 0.1
+			print "Begin to watch new conf for", self.wait_time
+			self.watch_for_new_conf(self.wait_time)
+
+			#TODO: check DIE workers!
 			
 			try:
 				#print "Timeout", timeout
@@ -612,10 +625,10 @@ class Satellite(Daemon):
 
                                 #Manager the msg like check return
 				#self.manage_msg(msg)
-            
+				
                                 #We add the time pass on the workers'idle time
-				for id in self.workers:
-					self.workers[id].add_idletime(after-begin_loop)
+				#for id in self.workers:
+				#	self.workers[id].add_idletime(after-begin_loop)
 
 				if timeout < 0: #for go in timeout
 					print "Time out", timeout
@@ -630,56 +643,49 @@ class Satellite(Daemon):
 				#for queue in self.return_messages:
 				while(len(self.return_messages) != 0):
 					self.manage_msg(self.return_messages.pop())
-
-                                #We join (old)zombies and we move new ones
-				#in the old list
-				self.avg_dead_workers.update_load(len(self.zombies))
-				print "Killing average : ", self.avg_dead_workers.get_load(), "workers"
-				for id in self.zombies:
-					try:
-					#if self.workers[id].is_alive():
-						self.workers[id].terminate()
-						self.workers[id].join(timeout=1)
-						del self.workers[id]
-						#queue = self.workers[id].return_queue
-						#self.return_messages.remove(queue)
-					except KeyError: #The worker must be already del
-						pass
-				#We switch so zombie will be kill, and new
-				#ones wil go in newzombies
-				self.zombies = self.newzombies
-				self.newzombies = []
-
+					
+				
 				#Maybe we do not have enouth workers, we check for it
 				#and launch new ones if need
-				self.adjust_worker_number_by_load()
+				#self.adjust_worker_number_by_load()
+				for sched_id in self.schedulers:
+					verifs = self.schedulers[sched_id]['verifs']
+					tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'queue'])
+					nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun'])
+					print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d In progress:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, self.nb_actions_in_progress, nb_waitforhomerun)            
+
+				current_load = self.nb_actions_in_progress / float(self.nb_actions_max)
+				print 'Current load:', current_load
+				self.load.update_load(current_load)
+				print 'AVG Load:', self.load.get_load()
 				
+				wait_ratio = self.wait_ratio.get_load()
+				if self.load.get_load() > self.high_water_mark and wait_ratio < 5:
+					print "I decide to up wait ratio"
+					self.wait_ratio.update_load(wait_ratio * 5)
+				else:
+					#Go to 1 on normal run, if wait_ratio was >5, 
+					#it make it come near 5 because if < 5, go up :)
+					self.wait_ratio.update_load(1)
+
+				wait_ratio = self.wait_ratio.get_load()
+				print "Wait ratio:", wait_ratio
+
 				#Now we can get new actions from schedulers
 				self.get_new_actions()
 				
                                 #We send all finished checks
 				self.manage_return()
 				
-				if self.avg_sent_actions.get_load() != 0:
-					self.wait_ratio.update_load(self.avg_received_actions.get_load()/self.avg_sent_actions.get_load())
-				print "Wait ratio:", self.wait_ratio.get_load()
+				#if self.avg_sent_actions.get_load() != 0:
+				#	self.wait_ratio.update_load(self.avg_received_actions.get_load()/self.avg_sent_actions.get_load())
+				#wait_ratio = self.wait_ratio.get_load()
 
-
-				#We add the time pass on the workers
-				for id in self.workers:
-					self.workers[id].add_idletime(after-begin_loop)
-            
-				delworkers = []
-                                #We look for cleaning workers
-				for id in self.workers:
-					if self.workers[id].is_killable():
-						print "Worker %d is killable (timeout)" % id
-						msg = Message(id=0, type='Die')
-						self.workers[id].send_message(msg)
-						self.workers[id].set_zombie()
-						delworkers.append(id)
-				#Cleaning the workers
-				for id in delworkers:
-					self.newzombies.append(id)
-				print "Nwe Zombies :", self.newzombies
-
+				#We can wait more than 1s if need,
+				#no more than 5s, but no less than 1
+				timeout = timeout * wait_ratio
+				#No less than 1
+				timeout = max(1, timeout)
+				#No more than 5
+				timeout = min(5, timeout)
+				

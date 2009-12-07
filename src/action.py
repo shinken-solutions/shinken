@@ -56,10 +56,11 @@ class Action:
 
  
     def execute_windows(self):
-        self.timeout = 10
+        #self.timeout = 20
         self.status = 'lanched'
         self.check_time = time.time()
         self.wait_time = 0.0001
+        self.last_poll = self.check_time
         try:
             process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except WindowsError:
@@ -69,34 +70,17 @@ class Action:
             return
 
 
-    #def execute_unix(self):
-    #    child = spawn ('/bin/sh -c "%s"' % self.command)
-    #    self.status = 'lanched'
-    #    self.check_time = time.time()
-
-    #    try:
-    #        child.expect_exact(EOF, timeout=5)
-    #        self.get_outputs(child.before)
-    #        child.terminate(force=True)
-    #        self.exit_status = child.exitstatus
-    #        self.status = 'done'
-    #    except TIMEOUT:
-    #        print "On le kill"
-    #        self.status = 'timeout'
-    #        child.terminate(force=True)
-    #    self.execution_time = time.time() - self.check_time
-
-
     def execute_unix(self):
-        self.timeout = 10
         self.status = 'lanched'
         self.check_time = time.time()
+        self.last_poll = self.check_time
         self.wait_time = 0.0001
         #cmd = ['/bin/sh', '-c', self.command]
         #Nagios do not use the /bin/sh -c command, so I don't do it too
         try:
             self.process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except OSError as exp:
+            print "FUCK:", exp
             self.output = exp
             self.exit_status = 2
             self.status = 'done'
@@ -116,6 +100,7 @@ class Action:
         #so we do not wait the same for an little check
         #than a long ping. So we do like TCP : slow start with *2
         #but do not wait more than 0.1s.
+        self.last_poll = time.time()
         if self.process.poll() is None:
             self.wait_time = min(self.wait_time*2, 0.1)
             #time.sleep(wait_time)
@@ -124,7 +109,7 @@ class Action:
                 #process.kill()
                 #HEAD SHOT
                 os.kill(self.process.pid, 9) 
-                print "Kill", self.process.pid, self.command
+                #print "Kill", self.process.pid, self.command, now - self.check_time
                 self.status = 'timeout'
                 self.execution_time = now - self.check_time
                 self.exit_status = 3
@@ -143,6 +128,7 @@ class Action:
         #so we do not wait the same for an little check
         #than a long ping. So we do like TCP : slow start with *2
         #but do not wait more than 0.1s.
+        self.last_poll = time.time()
         if self.process.poll() is None:
             self.wait_time = min(self.wait_time*2, 0.1)
             #time.sleep(wait_time)
@@ -151,7 +137,7 @@ class Action:
                 #process.kill()
                 #HEAD SHOT
                 TerminateProcess(int(self.process._handle), -1)
-                print "Kill", self.process.pid, self.command
+                #print "Kill", self.process.pid, self.command
                 self.status = 'timeout'
                 self.execution_time = now - self.check_time
                 self.exit_status = 3

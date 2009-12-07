@@ -55,14 +55,14 @@ class Check(Action):
                 }
 
     #id = 0 #Is common to Actions
-    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None):
-    #def __init__(self, status, command, ref, t_to_go, dep_check=None):
+    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10):
         self.is_a = 'check'
         self.type = ''
         if id == None: #id != None is for copy call only
             self.id = Action.id
             Action.id += 1
         self._in_timeout = False
+        self.timeout = timeout
         self.status = status
         self.exit_status = 3
         self.command = command
@@ -86,7 +86,7 @@ class Check(Action):
     def copy_shell(self):
         #We create a dummy check with nothing in it, jsut defaults values
         new_c = Check('', '', '', '', '', id=self.id)
-        only_copy_prop = ['id', 'status', 'command', 't_to_go']
+        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout']
         for prop in only_copy_prop:
             val = getattr(self, prop)
             setattr(new_c, prop, val)

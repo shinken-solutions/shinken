@@ -48,7 +48,7 @@ class EventHandler(Action):
                 }
 
     #id = 0 #Is common to Actions
-    def __init__(self, command, id=None):
+    def __init__(self, command, id=None, timeout=10):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
@@ -56,6 +56,7 @@ class EventHandler(Action):
             self.id = Action.id
             Action.id += 1
         self._in_timeout = False
+        self.timeout = timeout
         self.exit_status = 3
         self.command = command
         self.output = ''
@@ -72,7 +73,7 @@ class EventHandler(Action):
     def copy_shell(self):
         #We create a dummy check with nothing in it, jsut defaults values
         new_n = EventHandler('', id=self.id)
-        only_copy_prop = ['id', 'status', 'command', 't_to_go']
+        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout']
         for prop in only_copy_prop:
             val = getattr(self, prop)
             setattr(new_n, prop, val)

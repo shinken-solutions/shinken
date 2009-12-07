@@ -279,7 +279,7 @@ class SchedulingItem(Item):
         m = MacroResolver()
         data = self.get_data_for_event_handler()
         cmd = m.resolve_command(self.event_handler, data)
-        e = EventHandler(cmd)
+        e = EventHandler(cmd, timeout=cls.event_handler_timeout)
         print "Event handler call created"
         print e.__dict__
         events.append(e)
@@ -473,7 +473,7 @@ class SchedulingItem(Item):
             notif_commands_prop = cls.my_type+'_notification_commands'
             notif_commands = getattr(contact, notif_commands_prop)
             for cmd in notif_commands:
-                n = Notification(type, 'scheduled', 'VOID', cmd, self, contact, t)
+                n = Notification(type, 'scheduled', 'VOID', cmd, self, contact, t, timeout=cls.notification_timeout)
                 #The notif must be fill with current data, 
                 #so we create the commmand now
                 self.update_notification_command(n)
@@ -496,7 +496,7 @@ class SchedulingItem(Item):
             return None
         #TODO : resolv command...
         notif_nb = n.notif_nb
-        new_n = Notification(n.type, 'scheduled','', n.command_call, n.ref, n.contact, now + self.notification_interval * 60, notif_nb + 1)
+        new_n = Notification(n.type, 'scheduled','', n.command_call, n.ref, n.contact, now + self.notification_interval * 60, notif_nb + 1, timeout=cls.notification_timeout)
         self.notifications_in_progress[new_n.id] = new_n
         return new_n
 
@@ -525,7 +525,7 @@ class SchedulingItem(Item):
             
             #Make the Check object and put the service in checking
             #print "Asking for a check with command:", command_line
-            c = Check('scheduled', command_line, self, t, ref_check)
+            c = Check('scheduled', command_line, self, t, ref_check, timeout=cls.check_timeout)
             #We keep a trace of all checks in progress
             #to know if we are in checking_or not
             self.checks_in_progress.append(c)

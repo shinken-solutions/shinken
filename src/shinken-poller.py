@@ -105,8 +105,8 @@ if __name__ == "__main__":
             sys.exit()
 
     p = Poller(config_file, is_daemon, do_replace, debug, debug_file)
-    #import cProfile
-    p.main()
-    #command = """p.main()"""
-    #cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
+    import cProfile
+    #p.main()
+    command = """p.main()"""
+    cProfile.runctx( command, globals(), locals(), filename="var/Poller.profile" )
 

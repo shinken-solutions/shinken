@@ -68,7 +68,7 @@ class Notification(Action):
                      contact_name='', host_name='', service_description='',
                      reason_type=1, state=0, ack_author='', ack_data='', \
                      escalated=0, contacts_notified=0, \
-                     start_time=0, end_time=0, notification_type=0, id=None, notif_nb=1):
+                     start_time=0, end_time=0, notification_type=0, id=None, notif_nb=1, timeout=10):
         self.is_a = 'notification'
         self.type = type
         if id == None: #id != None is for copy call only
@@ -77,6 +77,7 @@ class Notification(Action):
         
 
         self._in_timeout = False
+        self.timeout = timeout
         self.status = status
         self.exit_status = 3
         self.command = command
@@ -108,7 +109,7 @@ class Notification(Action):
     def copy_shell(self):
         #We create a dummy check with nothing in it, jsut defaults values
         new_n = Notification('', '', '', '', '', '', '', id=self.id)
-        only_copy_prop = ['id', 'status', 'command', 't_to_go']
+        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout']
         for prop in only_copy_prop:
             val = getattr(self, prop)
             setattr(new_n, prop, val)
