@@ -18,7 +18,7 @@
 
 
 #This class is an interface for reactionner and poller
-#The satallite listen configuration from Arbiter in a port (first argument)
+#The satallite listen configuration from Arbiter in a port
 #the configuration gived by arbiter is schedulers where actionner will 
 #take actions.
 #When already launch and have a conf, actionner still listen to arbiter
@@ -34,19 +34,19 @@ import time
 import sys
 import Pyro.core
 import select
+import cPickle
 
 from message import Message
 from worker import Worker
 from load import Load
-#from util import get_sequence
 from daemon import Daemon
 
 
 #Interface for Arbiter, our big MASTER
 #It put us our conf
 class IForArbiter(Pyro.core.ObjBase):
-	#We keep app link because we are just here for it
-	def __init__(self, app):
+        #We keep app link because we are just here for it
+       	def __init__(self, app):
 		Pyro.core.ObjBase.__init__(self)
 		self.app = app
 		self.schedulers = app.schedulers
@@ -62,21 +62,20 @@ class IForArbiter(Pyro.core.ObjBase):
 		self.app.have_new_conf = True
 		print "Sending us ", conf
 		#If we've got something in the schedulers, we do not want it anymore
-		#self.schedulers.clear()
 		for sched_id in conf['schedulers'] :
 			already_got = False
 			if sched_id in self.schedulers:
 				print "We already got hte conf", sched_id
 				already_got = True
-				verifs = self.schedulers[sched_id]['verifs']
+				wait_homerun = self.schedulers[sched_id]['wait_homerun']
 			s = conf['schedulers'][sched_id]
 			self.schedulers[sched_id] = s
 			uri = "PYROLOC://%s:%d/Checks" % (s['address'], s['port'])
 			self.schedulers[sched_id]['uri'] = uri
 			if already_got:
-				self.schedulers[sched_id]['verifs'] = verifs
+				self.schedulers[sched_id]['wait_homerun'] = wait_homerun
 			else:
-				self.schedulers[sched_id]['verifs'] = {}
+				self.schedulers[sched_id]['wait_homerun'] = {}
 			self.schedulers[sched_id]['running_id'] = 0
 			self.schedulers[sched_id]['active'] = s['active']
 			#We cannot reinit connexions because this code in in a thread, and
@@ -123,7 +122,7 @@ class IForArbiter(Pyro.core.ObjBase):
 	#Us : No please...
 	#Arbiter : I don't care, hasta la vista baby!
 	#Us : ... <- Nothing! We are die! you don't follow 
-	#anything or what??
+	#anything or what?? Reading code is not a job for eyes only...
 	def wait_new_conf(self):
 		print "Arbiter want me to wait a new conf"
 		self.schedulers.clear()
@@ -177,133 +176,93 @@ class Satellite(Daemon):
 		self.schedulers = {}
 		
 		self.workers = {} #dict of active workers
-		self.high_water_mark = 0.9
+		
+		self.nb_actions_in_workers = 0
 		
 		#Init stats like Load for workers
-		self.init_stats()
-		
-
-	def init_stats(self):
-		#For calculate the good worker number
-                self.wish_workers_load = Load()
-                self.avg_dead_workers = Load()
-		
-                #For calculate the good timeout to get actions (1s or more)
-                self.avg_received_actions = Load()
-                self.avg_sent_actions = Load()
                 self.wait_ratio = Load(initial_value=1)
-		self.load = Load(initial_value=1)
-		self.over_load = Load()
 		
 
 	#initialise or re-initialise connexion with scheduler
 	def pynag_con_init(self, id):
+		sched = self.schedulers[id]
 		#If sched is not active, I do not try to init
 		#it is just useless
-		is_active = self.schedulers[id]['active']
-		if not is_active:
+		if not sched['active']:
 			return
 
-		print "init de connexion avec", self.schedulers[id]['uri']
-		running_id = self.schedulers[id]['running_id']
-		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(self.schedulers[id]['uri'])
-		#timeout of 5 s
+		print "Init de connexion with", sched['uri']
+		running_id = sched['running_id']
+		sched['con'] = Pyro.core.getProxyForURI(sched['uri'])
+
+		#timeout of 120 s
+		#and get the running id
 		try:
-			self.schedulers[id]['con']._setTimeout(120)
-			new_run_id = self.schedulers[id]['con'].get_running_id()
-		except Pyro.errors.ProtocolError, exp:
-			print exp
-			return
-		except Pyro.errors.NamingError, exp:
+			sched['con']._setTimeout(120)
+			new_run_id = sched['con'].get_running_id()
+		except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError) as exp:
 			print "Scheduler is not initilised", exp
-			self.schedulers[id]['con'] = None
+			sched['con'] = None
 			return
-		except PicklingError, exp:
-			print "Scheduler is not initilised", exp
-			self.schedulers[id]['con'] = None
-			return
-		except KeyError, exp:
-                        print "Scheduler is not initilised", exp
-                        self.schedulers[id]['con'] = None
-                        return
 
 		#The schedulers have been restart : it has a new run_id.
 		#So we clear all verifs, they are obsolete now.
-		if self.schedulers[id]['running_id'] != 0 and new_run_id != running_id:
-			print "The running id of the scheduler changed, we must clear the verifs"
-			self.schedulers[id]['verifs'].clear()
-		self.schedulers[id]['running_id'] = new_run_id
-
+		if sched['running_id'] != 0 and new_run_id != running_id:
+			print "The running id of the scheduler changed, we must clear it's actions"
+			sched['wait_homerun'].clear()
+		sched['running_id'] = new_run_id
 		print "Connexion OK"
 
 
-        #Manage messages from Workers
+        #Manage action return from Workers
+	#We just put them into the sched they are for
+	#and we clean unused properties like sched_id
 	def manage_action_return(self, action):
 		#Ok, it's a result. We get it, and fill verifs of the good sched_id
 		sched_id = action.sched_id
+		#Now we now where to put action, we do not need sched_id anymore
+		del action.sched_id
 		action.set_status('waitforhomerun')
-		self.schedulers[sched_id]['verifs'][action.get_id()] = action
+		self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
+		#We update stats
+		self.nb_actions_in_workers =- 1
 		
-		
+
         #Return the chk to scheduler and clean them
 	def manage_returns(self):
 		total_sent = 0
 		#Fot all schedulers, we check for waitforhomerun and we send back results
 		for sched_id in self.schedulers:
+			sched = self.schedulers[sched_id]
 			#If sched is not active, I do not try return
-			is_active = self.schedulers[sched_id]['active']
-			if not is_active:
+			if not sched['active']:
 				continue
-			ret = []
-			verifs = self.schedulers[sched_id]['verifs']
-                        #Get the id to return to shinken, so after make 
-			#a big array with only them
-			id_to_return = [elt for elt in verifs.keys() if verifs[elt].get_status() == 'waitforhomerun']
-			for id in id_to_return:
-				try:
-					v = verifs[id]
-				        #We got v without the sched_id prop, so we
-				        #remove it before resent it. Maybe it's the second time
-					if hasattr(v, 'sched_id'):
-						del v.sched_id
-					ret.append(v)
-				
-				except AttributeError as exp:
-					print exp
-			
 			#Now ret have all verifs, we can return them
 			send_ok = False
+			ret = sched['wait_homerun'].values()
 			if ret is not []:
 				try:
-					con = self.schedulers[sched_id]['con']
-					if con is not None:#None = not initialized
+					con = sched['con']
+					if con is not None: #None = not initialized
 						send_ok = con.put_results(ret)
-				except Pyro.errors.ProtocolError as exp:
+				#Not connected or sched is gone
+				except (Pyro.errors.ProtocolError, KeyError) as exp:
 					print exp
 					self.pynag_con_init(sched_id)
 					return
 				except AttributeError as exp: #the scheduler must  not be initialized
 					print exp
-				except KeyError as exp: # sched is gone
-                                        print exp
-                                        self.pynag_con_init(sched_id)
-                                        return
-				except Exception,x:
-					print ''.join(Pyro.util.getPyroTraceback(x))
+				except Exception as exp:
+					print ''.join(Pyro.util.getPyroTraceback(exp))
 					sys.exit(0)
-        
+			
 			#We clean ONLY if the send is OK
 			if send_ok :
-				for id in id_to_return:
-					del verifs[id]
-				total_sent += len(id_to_return)
+				sched['wait_homerun'].clear()
 			else:
 				self.pynag_con_init(sched_id)
 				print "Sent failed!"
 
-		#Just update the average sent actions
-		self.avg_sent_actions.update_load(total_sent)
-		print "AVG SENT:", self.avg_sent_actions.get_load()
 
 
 	#Use to wait conf from arbiter.
@@ -341,13 +300,8 @@ class Satellite(Daemon):
 	#wait, timeout = 0s
 	#If it send us a new conf, we reinit the connexions of all schedulers
 	def watch_for_new_conf(self, timeout_daemon):
-		#timeout_daemon = 0.0
-		t0 = time.time()
-		#print "Select :", timeout_daemon
 		socks = self.daemon.getServerSockets()
-		# 'foreign' event loop
 		ins,outs,exs = select.select(socks,[],[],timeout_daemon)
-		#print "End Select:", time.time() -t0
 		if ins != []:
 			for sock in socks:
 				if sock in ins:
@@ -364,8 +318,6 @@ class Satellite(Daemon):
 	#Create and launch a new worker, and put it into self.workers
 	#It can be mortal or not
 	def create_and_launch_worker(self, mortal=True):
-		#queue = self.manager.list()
-		#self.return_messages.append(queue)
 		w = Worker(1, self.s, self.returns_queue, self.processes_by_worker, mortal=mortal)
 		self.workers[w.id] = w
 		print "Allocating new Worker : ", w.id
@@ -394,10 +346,10 @@ class Satellite(Daemon):
 
 	#workers are processes, they can die in a numerous of ways
 	#like :
-	#*99.99% : bug in code
+	#*99.99% : bug in code, sorry :p
 	#*0.005 % : a mix between a stupid admin (or an admin without coffee),
 	#and a kill command
-	#*0.005% : alien attack of course
+	#*0.005% : alien attack
 	#So they need to be detected, and restart if need
 	def check_and_del_zombie_workers(self):
             #Active children make a join with every one, useful :)
@@ -434,65 +386,51 @@ class Satellite(Daemon):
 	#We get new actions from schedulers, we create a Message ant we 
 	#put it in the s queue (from master to slave)
 	def get_new_actions(self):
-		new_checks = []
+                #Here are the differences between a 
+		#poller and a reactionner:
+		#Poller will only do checks,
+		#reactionner do actions
+		do_checks = self.__class__.do_checks
+		do_actions = self.__class__.do_actions
+
 		#We check for new check in each schedulers and put the result in new_checks
 		for sched_id in self.schedulers:
+			sched = self.schedulers[sched_id]
 			#If sched is not active, I do not try return
-			is_active = self.schedulers[sched_id]['active']
-			if not is_active:
+			if not sched['active']:
 				continue
 
 			try:
-				con = self.schedulers[sched_id]['con']
+				con = sched['con']
 				if con is not None: #None = not initilized
-                                        #Here are the differences between a 
-					#poller and a reactionner:
-                                        #Poller will only do checks,
-					#reactionner do actions
-                                        do_checks = self.__class__.do_checks
-                                        do_actions = self.__class__.do_actions
-					tmp_verifs = con.get_checks(do_checks=do_checks, do_actions=do_actions)
-					print "Ask actions to", sched_id, "got", len(tmp_verifs)
-					#print "We've got new verifs" , tmp_verifs
-					for v in tmp_verifs:
-						v.sched_id = sched_id
-					new_checks.extend(tmp_verifs)
+					#OK, go for it :)
+					tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions)
+					print "Ask actions to", sched_id, "got", len(tmp)
+					#We 'tag' them with sched_id and put into queue for workers
+					for a in tmp:
+						a.sched_id = sched_id
+						a.set_status('queue')
+						msg = Message(id=0, type='Do', data=a)
+						self.s.put(msg)
+						#Update stats
+						self.nb_actions_in_workers += 1
 				else: #no con? make the connexion
-					print "Init get_new 1"
 					self.pynag_con_init(sched_id)
                         #Ok, con is not know, so we create it
-			except KeyError as exp:
-				print "Init get new 2"
-				self.pynag_con_init(sched_id)
-			except Pyro.errors.ProtocolError as exp:
+			#Or maybe is the connexion lsot, we recreate it
+			except (KeyError, Pyro.errors.ProtocolError) as exp:
 				print exp
-				print "Init get new 3"
-				#we reinitialise the ccnnexion to pynag
 				self.pynag_con_init(sched_id)
                         #scheduler must not be initialized
-			except AttributeError as exp:
+                        #or scheduler must not have checks
+			except (AttributeError, Pyro.errors.NamingError) as exp:
 				print exp
-                        #scheduler must not have checks
-			except Pyro.errors.NamingError as exp:
-				print exp
-			# What the F**k? We do not know what happenned,
+			#What the F**k? We do not know what happenned,
 			#so.. bye bye :)
-			except Exception,x:
-				print ''.join(Pyro.util.getPyroTraceback(x))
+			except Exception as exp:
+				print ''.join(Pyro.util.getPyroTraceback(exp))
 				sys.exit(0)
-		#Ok, we've got new actions in new_checks
-		#so we put them in queue state and we put in in the
-		#working queue for workers
-		for chk in new_checks:
-			chk.set_status('queue')
-			verifs = self.schedulers[chk.sched_id]['verifs']
-			id = chk.get_id()
-			verifs[id] = chk
-			msg = Message(id=0, type='Do', data=verifs[id])
-			self.s.put(msg)
-		#We just update avg new actions
-		self.avg_received_actions.update_load(len(new_checks))
-		print "AVG received:", self.avg_received_actions.get_load()
+			
 
 
 	#Main function, will loop forever
@@ -581,13 +519,17 @@ class Satellite(Daemon):
 				#If so : KILL THEM ALL!!!
 				self.check_and_del_zombie_workers()
 
+				print self.nb_actions_in_workers
+				print self.s.qsize()
+				for sched_id in self.schedulers:
+					sched = self.schedulers[sched_id]
+				        #In workers we've got actions send to queue - queue size
+					print '[%d][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % (sched_id, sched['name'],len(self.workers), self.s.qsize(), self.nb_actions_in_workers - self.s.qsize(), len(self.returns_queue))
+
 
 				#Before return or get new actions, see how we manage
 				#old ones : are they still in queue (s)? If True, we 
 				#must wait more or at least have more workers
-				print "Len Queue", self.s.qsize()
-				print "Len return", len(self.returns_queue)
-				
 				wait_ratio = self.wait_ratio.get_load()
 				if self.s.qsize() != 0 and wait_ratio < 5:
 					print "I decide to up wait ratio"
@@ -616,11 +558,6 @@ class Satellite(Daemon):
 				while(len(self.returns_queue) != 0):
 					self.manage_action_return(self.returns_queue.pop())
 				
-				for sched_id in self.schedulers:
-					verifs = self.schedulers[sched_id]['verifs']
-					tmp_nb_queue = len([elt for elt in verifs.keys() if verifs[elt].status == 'queue'])
-					nb_waitforhomerun = len([elt for elt in verifs.keys() if verifs[elt].status == 'waitforhomerun'])
-					print '[%d][%s]Stats : Workers:%d Check %d (Queued:%d ReturnWait:%d)' % (sched_id, self.schedulers[sched_id]['name'],len(self.workers), len(verifs), tmp_nb_queue, nb_waitforhomerun)            
 
 				#Now we can get new actions from schedulers
 				self.get_new_actions()
