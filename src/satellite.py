@@ -85,6 +85,7 @@ class IForArbiter(Pyro.core.ObjBase):
         self.app.max_workers = conf['global']['max_workers']
         self.app.min_workers = conf['global']['min_workers']
         self.app.processes_by_worker = conf['global']['processes_by_worker']
+	self.app.polling_interval = conf['global']['polling_interval']
         print "We have our schedulers :", self.schedulers
 
 
@@ -463,7 +464,7 @@ class Satellite(Daemon):
             self.create_and_launch_worker() #create mortal worker
 
         #Now main loop
-        timeout = 1.0
+        timeout = self.polling_interval #default 1.0
         while True:
             begin_loop = time.time()
 
@@ -494,7 +495,7 @@ class Satellite(Daemon):
             except Empty as exp: #Time out Part
                 print " ======================== "
                 after = time.time()
-                timeout = 1.0
+                timeout = self.polling_interval
                 
                 #Check if zombies workers are among us :)
                 #If so : KILL THEM ALL!!!
@@ -513,21 +514,22 @@ class Satellite(Daemon):
                 #old ones : are they still in queue (s)? If True, we 
                 #must wait more or at least have more workers
                 wait_ratio = self.wait_ratio.get_load()
-                if self.s.qsize() != 0 and wait_ratio < 5:
+                if self.s.qsize() != 0 and wait_ratio < 5*self.polling_interval:
                     print "I decide to up wait ratio"
                     self.wait_ratio.update_load(wait_ratio * 2)
                 else:
-                    #Go to 1 on normal run, if wait_ratio was >5, 
+                    #Go to self.polling_interval on normal run, if wait_ratio
+                    #was >5*self.polling_interval, 
                     #it make it come near 5 because if < 5, go up :)
-                    self.wait_ratio.update_load(1)
+                    self.wait_ratio.update_load(self.polling_interval)
                 wait_ratio = self.wait_ratio.get_load()
                 print "Wait ratio:", wait_ratio
 
                 #We can wait more than 1s if need,
                 #no more than 5s, but no less than 1
                 timeout = timeout * wait_ratio
-                timeout = max(1, timeout)
-                timeout = min(5, timeout)
+                timeout = max(self.polling_interval, timeout)
+                timeout = min(5*self.polling_interval, timeout)
 
                 #Maybe we do not have enouth workers, we check for it
                 #and launch new ones if need

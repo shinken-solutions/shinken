@@ -37,6 +37,7 @@ class PollerLink(SatelliteLink):
                 'min_workers' : {'required' : False, 'default' : '1', 'pythonize' : to_int, 'to_send' : True},
                 'max_workers' : {'required' : False, 'default' : '30', 'pythonize' : to_int, 'to_send' : True},
                 'processes_by_worker' : {'required' : False, 'default' : '256', 'pythonize' : to_int, 'to_send' : True},
+                'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
                 }
  
     running_properties = {'is_active' : {'default' : False},

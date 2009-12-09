@@ -816,19 +816,26 @@ class Config(Item):
             print "Load balancing realm", r.get_name()
             packs = {}
             #create roundrobin iterator for id of cfg
-            #So dispatching is loadlanced in a realm
-            nb_schedulers = len([s for s in r.schedulers if not s.spare])
-            rr = itertools.cycle(list(xrange(0, 0 + nb_schedulers)))
+            #So dispatching is loadbalanced in a realm
+            #but add a entry in the roundrobin tourniquet for 
+            #every weight point schedulers (so Weight round robin)
+            weight_list = []
+            no_spare_schedulers = [s for s in r.schedulers if not s.spare]
+            nb_schedulers = len(no_spare_schedulers)
+            for s in no_spare_schedulers:
+                for i in xrange(0, s.weight):
+                    weight_list.append(s.id)
+            rr = itertools.cycle(weight_list)
             
+            #we must have nb_schedulers packs)
             for i in xrange(0, nb_schedulers):
                 packs[i] = []
         
             #Now we explode the numerous packs into nb_packs reals packs:
             #we 'load balance' thems in a roundrobin way
-            for pack in r.packs:#tmp_packs:
+            for pack in r.packs:
                 i = rr.next()
                 for elt in pack:
-                    #print "Add element", elt.get_name()
                     packs[i].append(elt)
             #Now in packs we have the number of packs [h1, h2, etc]
             #equal to the number of schedulers.

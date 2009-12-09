@@ -29,7 +29,8 @@ class BrokerLink(SatelliteLink):
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
                 'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool},
-                'plugins' : {'required':  False, 'default' : '', 'pythonize' : to_split, 'to_send' : True}
+                'plugins' : {'required':  False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
+                'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
                 }
  
     running_properties = {'is_active' : {'default' : False},
