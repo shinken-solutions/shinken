@@ -57,7 +57,8 @@ class Service(SchedulingItem):
                      'current_notification_number', 'current_notification_id', \
                      'check_flapping_recovery_notification', 'scheduled_downtime_depth', \
                      'pending_flex_downtime', 'timeout', 'start_time', 'end_time', 'early_timeout', \
-                     'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'host'
+                     'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'host', \
+                     'inverse_ok_critical', 'critical_is_warning'
                  )
 
     id = 1 # Every service have a unique ID, and 0 is always special in database and co...
@@ -112,7 +113,11 @@ class Service(SchedulingItem):
             'icon_image' : {'required':False, 'default':''},
             'icon_image_alt' : {'required':False, 'default':''},
             'failure_prediction_enabled' : {'required':False, 'default':'0', 'pythonize': to_bool},
-            'parallelize_check' : {'required':False, 'default':'1', 'pythonize': to_bool}
+            'parallelize_check' : {'required':False, 'default':'1', 'pythonize': to_bool},
+
+            #Shinken specific
+            'inverse_ok_critical' : {'required':False, 'default':'0', 'pythonize': to_bool},
+            'critical_is_warning' : {'required':False, 'default':'0', 'pythonize': to_bool},
             }
     
     #properties used in the running state
@@ -297,11 +302,25 @@ class Service(SchedulingItem):
 
     #Set state with status return by the check
     #and update flapping state
+    #We've got special cases:
+    #critical_is_warning : critical become warning for some hosts
+    #(like QUALIFICATION HOSTS)
+    #inverse_ok_critical : CRITICAL become OK, OK CRITICAL. It's usefull
+    #for a passive cluster service 
     def set_state_from_exit_status(self, status):
         now = time.time()
         self.last_state_update = now
         self.last_state = self.state
         
+        #CRITICAL can become Warning, and before OK<->CRITICAL
+        if self.critical_is_warning and status == 2:
+            status = 1
+        #Now switch OK<->CRITICAL
+        if self.inverse_ok_critical and status == 2:
+            status = 0
+        if self.inverse_ok_critical and status == 0:
+            status = 2
+
         if status == 0:
             self.state = 'OK'
             self.state_id = 0
@@ -533,7 +552,7 @@ class Services(Items):
     #So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
         for prop in ['contacts', 'contact_groups', 'notification_interval', \
-                         'notification_period']:
+                         'notification_period', 'critical_is_warning']:
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):
@@ -548,7 +567,6 @@ class Services(Items):
         #if not, it check all host templates for a value
         for prop in Service.properties:
             self.apply_partial_inheritance(prop)
-
 
         #Then implicit inheritance
         #self.apply_implicit_inheritance(hosts)

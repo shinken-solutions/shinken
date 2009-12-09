@@ -61,7 +61,7 @@ class Host(SchedulingItem):
                      'check_flapping_recovery_notification', 'scheduled_downtime_depth', \
                      'pending_flex_downtime', 'timeout', 'start_time', 'end_time', 'early_timeout', \
                      'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'services', \
-                     'realm'
+                     'realm','inverse_ok_critical', 'critical_is_warning'
                  )
 
     id = 1 #0 is reserved for host (primary node for parents)
@@ -122,7 +122,11 @@ class Host(SchedulingItem):
                 '3d_coords': {'required': False, 'default':''},
                 'failure_prediction_enabled': {'required' : False, 'default' : '0', 'pythonize': to_bool},
                 #New to shinken
-                'realm' : {'required': False, 'default':None}
+                'realm' : {'required': False, 'default':None},
+                #Shinken specific
+                
+                #Here just for inplicit inheritance in fact
+                'critical_is_warning' : {'required':False, 'default':'0', 'pythonize': to_bool},
                 }
 
     #properties set only for running purpose
