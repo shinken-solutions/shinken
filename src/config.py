@@ -23,7 +23,7 @@
 #them into independant parts. The main user of this is Arbiter, but schedulers
 #use it too (but far less)
 
-import re, string, copy
+import re, string, copy, os
 import pygraph
 import itertools
 
@@ -272,6 +272,17 @@ class Config(Item):
                     fd.close()
                 except IOError ,exp:
                     print exp
+            elif re.search("^cfg_dir", line):
+                elts = line.split('=')
+                for root, dirs, files in os.walk(elts[1]):
+                    for file in files:
+                        if re.search("\.cfg$", file):
+                            try:
+                                fd = open(os.path.join(root, file))
+                                res += fd.read()
+                                fd.close()
+                            except IOError, exp:
+                                print exp
         #print "Got", res
         self.read_config_buf(res)
         
@@ -299,12 +310,27 @@ class Config(Item):
         tmp = []
         tmp_type = 'void'
         in_define = False
+        continuation_line = False
+        tmp_line = ''
         lines = buf.split('\n')
         for line in lines:
             line = line.split(';')[0]
+            #A backslash means, there is more to come
+            if re.search("\\\s*$", line):
+                continuation_line = True
+                line = re.sub("\\\s*$", "", line)
+                line = re.sub("^\s+", " ", line)
+                tmp_line += line
+                continue
+            elif continuation_line:
+                #Now the continuation line is complete
+                line = re.sub("^\s+", "", line)
+                line = tmp_line + line
+                tmp_line = ''
+                continuation_line = False
             if re.search("}", line):
                 in_define = False
-            if re.search("^#|^$|}", line):
+            if re.search("^#|^\s*$|^\s*}", line):
                 pass
                         
             #A define must be catch and the type save
