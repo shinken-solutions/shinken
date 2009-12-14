@@ -24,12 +24,7 @@
 #use it too (but far less)
 
 import re, string, copy, os
-import pygraph
 import itertools
-
-#from pygraph.classes.digraph import digraph
-#from pygraph.algorithms.cycles import find_cycle
-from pygraph.algorithms.accessibility import accessibility
 
 from timeperiod import Timeperiod, Timeperiods
 from service import Service, Services
@@ -49,6 +44,7 @@ from reactionnerlink import ReactionnerLink, ReactionnerLinks
 from brokerlink import BrokerLink, BrokerLinks
 from pollerlink import PollerLink, PollerLinks
 from plugin import Plugin, Plugins
+from graph import Graph
 
 from util import to_int, to_char, to_bool
 #import psyco
@@ -753,7 +749,7 @@ class Config(Item):
     #services are link to the host. Dependencies are managed
     def create_packs(self, nb_packs):
         #We create a grah with host in nodes
-        g = pygraph.digraph()
+        g = Graph()
         g.add_nodes(self.hosts)
         
         #links will be used for relations between hosts
@@ -782,6 +778,7 @@ class Config(Item):
             #The othe type of dep
             for (dep, tmp, tmp2, tmp3) in s.chk_depend_of:
                 links.add((dep.host, s.host))
+        
         #Now we create links in the graph. With links (set)
         #We are sure to call the less add_edge
         for (dep, h) in links:
@@ -790,18 +787,7 @@ class Config(Item):
         
         #Access_list from a node il all nodes that are connected
         #with it : it's a list of ours mini_packs
-        access_list = accessibility(g)
-
-        #now we read all mini_packs
-        tmp_packs = [] # Ours mini_pack list
-        while(access_list != {}):
-            (h, mini_pack) = access_list.popitem()
-            for connexion in mini_pack:
-                if connexion != h:
-                    del access_list[connexion]
-            tmp_packs.append(mini_pack)
-
-        print "We've got", len(tmp_packs), "packs"
+        tmp_packs = g.get_accessibility_packs()
 
         #Now We find the default realm (must be unique or
         #BAD THINGS MAY HAPPEN

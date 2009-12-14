@@ -1,5 +1,2 @@
-python-pyorbit
-python-pexpect
-sudo apt-get install python-setuptools
-sudo easy_install python-graph
-
+python >= 2.6
+pyro

@@ -16,13 +16,8 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#import pygraph
 import time
 
-#from pygraph.digraph import digraph
-import pygraph
-
-from pygraph.algorithms.cycles import find_cycle
 from command import CommandCall
 from item import Items
 from schedulingitem import SchedulingItem
@@ -30,7 +25,7 @@ from util import to_int, to_char, to_split, to_bool
 from macroresolver import MacroResolver
 from check import Check
 from notification import Notification
-
+from graph import Graph
 
 class Host(SchedulingItem):
     __slots__ = ('id', 'host_name', \
@@ -533,7 +528,7 @@ class Hosts(Items):
                         hostgroups.add_member(hname, hg.strip())
         
         #We add contacts of contact groups into the contacts prop
-        for h in self:#.items:
+        for h in self:
             if hasattr(h, 'contact_groups'):
                 cgnames = h.contact_groups.split(',')
                 for cgname in cgnames:
@@ -552,36 +547,18 @@ class Hosts(Items):
     #Depencies at the host level: host parent
     def apply_dependancies(self):
         #Create parent graph
-        parents = pygraph.digraph()
-        #0 is shinken node
-        parents.add_node(0)
-        for h in self:#.items.values():
-            id = h.id
-            if id not in parents:
-                parents.add_node(id)
-            #If there are parents, we update the parents node
-            if len(h.parents) >= 1:
-                for parent in h.parents:
-                    if parent is not None:
-                        parent_id = parent.id
-                        if parent_id not in parents:
-                            parents.add_node(parent_id)
-                        parents.add_edge(parent_id, id)
-                        #print "Add relation between", parent_id, id
-            else: #host without parent are shinken childs
-                #print "Add relation between", 0, id
-                parents.add_edge(0, id)
-        print "Loop: ", find_cycle(parents)#.find_cycle()
-        #print "Fin loop check"
+        parents = Graph()
         
-        for h in self: #.items.values():
+        #With all hosts
+        for h in self:
+            parents.add_node(h)
+            
+        for h in self:
+            for p in h.parents:
+                parents.add_edge(p, h)
+
+        print "Host in a loop: ", parents.loop_check()
+        
+        for h in self:
             h.fill_parents_dependancie()
             
-        #Debug
-        #dot = self.parents.write(fmt='dot')
-        #f = open('graph.dot', 'w')
-        #f.write(dot)
-        #f.close()
-        #import os
-        # Draw as a png (note: this requires the graphiz 'dot' program to be installed)
-        #os.system('dot graph.dot -Tpng > hosts.png')
