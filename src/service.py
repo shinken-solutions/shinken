@@ -58,7 +58,7 @@ class Service(SchedulingItem):
                      'check_flapping_recovery_notification', 'scheduled_downtime_depth', \
                      'pending_flex_downtime', 'timeout', 'start_time', 'end_time', 'early_timeout', \
                      'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'host', \
-                     'inverse_ok_critical', 'critical_is_warning'
+                     'inverse_ok_critical', 'critical_is_warning', 'hot_period'
                  )
 
     id = 1 # Every service have a unique ID, and 0 is always special in database and co...
@@ -118,6 +118,7 @@ class Service(SchedulingItem):
             #Shinken specific
             'inverse_ok_critical' : {'required':False, 'default':'0', 'pythonize': to_bool},
             'critical_is_warning' : {'required':False, 'default':'0', 'pythonize': to_bool},
+            'hot_period' : {'required':False, 'default':''},
             }
     
     #properties used in the running state
@@ -314,7 +315,10 @@ class Service(SchedulingItem):
         
         #CRITICAL can become Warning, and before OK<->CRITICAL
         if self.critical_is_warning and status == 2:
-            status = 1
+            #We do it only if we are not in a hot_period
+            if self.hot_period == None or not self.hot_period.is_time_valid(now):
+                status = 1
+
         #Now switch OK<->CRITICAL
         if self.inverse_ok_critical and status == 2:
             status = 0
@@ -526,6 +530,13 @@ class Services(Items):
                 s.check_period = ctp
             except:
                 pass #problem will be check at is_correct fucntion
+            try:
+                #Hot timeperiod
+                htp_name = s.hot_period
+                htp = timeperiods.find_by_name(htp_name)
+                s.hot_period = htp
+            except:
+                pass #problem will be check at is_correct fucntion
 
 
     #Make link between service and it's contacts
@@ -552,7 +563,7 @@ class Services(Items):
     #So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
         for prop in ['contacts', 'contact_groups', 'notification_interval', \
-                         'notification_period', 'critical_is_warning']:
+                         'notification_period', 'critical_is_warning', 'hot_period']:
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):

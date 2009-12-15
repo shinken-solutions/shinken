@@ -56,7 +56,7 @@ class Host(SchedulingItem):
                      'check_flapping_recovery_notification', 'scheduled_downtime_depth', \
                      'pending_flex_downtime', 'timeout', 'start_time', 'end_time', 'early_timeout', \
                      'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'services', \
-                     'realm','inverse_ok_critical', 'critical_is_warning'
+                     'realm','inverse_ok_critical', 'critical_is_warning', 'hot_period'
                  )
 
     id = 1 #0 is reserved for host (primary node for parents)
@@ -122,6 +122,7 @@ class Host(SchedulingItem):
                 
                 #Here just for inplicit inheritance in fact
                 'critical_is_warning' : {'required':False, 'default':'0', 'pythonize': to_bool},
+                'hot_period' : {'required':False, 'default':''},
                 }
 
     #properties set only for running purpose
@@ -450,7 +451,6 @@ class Hosts(Items):
     #Simplify notif_period and check period by timeperiod id
     def linkify_h_by_tp(self, timeperiods):
         for h in self:
-            #print "Linify ", h
             try:
                 #notif period
                 ntp_name = h.notification_period
@@ -460,6 +460,10 @@ class Hosts(Items):
                 ctp_name = h.check_period
                 ctp = timeperiods.find_by_name(ctp_name)
                 h.check_period = ctp
+                #hot period
+                htp_name = h.hot_period
+                htp = timeperiods.find_by_name(htp_name)
+                h.hot_period = htp
             except AttributeError as exp:
                 pass #Will be catch at the is_correct moment
     
