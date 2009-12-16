@@ -153,7 +153,7 @@ class Contactgroups(Itemgroups):
                 cg.get_contacts_by_explosion(self)
                 
         #We clean the tags
-        for tmp_sg in self.itemgroups.values():
-            if hasattr(tmp_sg, 'rec_tag'):
-                del tmp_sg.rec_tag
-            del tmp_sg.already_explode
+        for tmp_cg in self.itemgroups.values():
+            if hasattr(tmp_cg, 'rec_tag'):
+                del tmp_cg.rec_tag
+            del tmp_cg.already_explode

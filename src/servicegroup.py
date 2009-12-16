@@ -30,7 +30,7 @@ class Servicegroup(Itemgroup):
                 'notes': {'required': False, 'default':'', 'status_broker_name' : None},
                 'notes_url': {'required': False, 'default':'', 'status_broker_name' : None},
                 'action_url': {'required': False, 'default':'', 'status_broker_name' : None},
-                'members' : {'required': True}#No status_broker_name because it put hosts, not host_name
+                'members' : {'required': False, 'default':''}#No status_broker_name because it put hosts, not host_name
                 }
 
 
@@ -160,5 +160,6 @@ class Servicegroups(Itemgroups):
 
         #We clean the tags
         for tmp_sg in self.itemgroups.values():
-            del tmp_sg.rec_tag
+            if hasattr(tmp_sg, 'rec_tag'):
+                del tmp_sg.rec_tag
             del tmp_sg.already_explode

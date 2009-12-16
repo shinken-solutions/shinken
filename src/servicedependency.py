@@ -72,6 +72,8 @@ class Servicedependencies(Items):
         servicedeps = self.items.keys() 
         for id in servicedeps:
             sd = self.items[id]
+            if not hasattr(sd, 'dependent_host_name'):
+                sd.dependent_host_name = sd.host_name
             hnames = sd.dependent_host_name.split(',')
             snames = sd.dependent_service_description.split(',')
             couples = []

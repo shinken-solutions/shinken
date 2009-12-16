@@ -31,7 +31,7 @@ class Hostgroup(Itemgroup):
                 'notes': {'required': False, 'default':'', 'status_broker_name' : None},
                 'notes_url': {'required': False, 'default':'', 'status_broker_name' : None},
                 'action_url': {'required': False, 'default':'', 'status_broker_name' : None},
-                'members' : {'required': True}#No status_broker_name because it put hosts, not host_name
+                'members' : {'required': False, 'default':''}#No status_broker_name because it put hosts, not host_name
                 }
 
     macros = {

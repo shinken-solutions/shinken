@@ -70,7 +70,10 @@ class Itemgroup:
 
 
     def add_string_member(self, member):
-        self.members += ','+member
+        if hasattr(self, 'members'):
+            self.members += ','+member
+        else:
+            self.members = member
 
 
     def __str__(self):
