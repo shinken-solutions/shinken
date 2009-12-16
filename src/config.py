@@ -367,117 +367,45 @@ class Config(Item):
                     objects[type].append(tmp)
         
         #We create dict of objects
-        timeperiods = []
-        for timeperiodcfg in objects['timeperiod']:
-            t = Timeperiod(timeperiodcfg)
-            t.clean()
-            timeperiods.append(t)
-        self.timeperiods = Timeperiods(timeperiods)
-        
-        services = []
-        for servicecfg in objects['service']:
-            s = Service(servicecfg)
-            s.clean()
-            services.append(s)
-        self.services = Services(services)
+        #Type: 'name in objects' : {Class of object, Class of objects, 
+        #'property for self for the objects(config)'
+        types_creations = {'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
+                           'service' : (Service, Services, 'services'),
+                           'servicegroup' : (Servicegroup, Servicegroups, 'servicegroups'),
+                           'command' : (Command, Commands, 'commands'),
+                           'host' : (Host, Hosts, 'hosts'),
+                           'hostgroup' : (Hostgroup, Hostgroups, 'hostgroups'),
+                           'contact' : (Contact, Contacts, 'contacts'),
+                           'contactgroup' : (Contactgroup, Contactgroups, 'contactgroups'),
+                           'servicedependency' : (Servicedependency, Servicedependencies, 'servicedependencies'),
+                           'hostdependency' : (Hostdependency, Hostdependencies, 'hostdependencies'),
+                           'scheduler' : (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
+                           'reactionner' : (ReactionnerLink, ReactionnerLinks, 'reactionners'),
+                           'broker' : (BrokerLink, BrokerLinks, 'brokers'),
+                           'poller' : (PollerLink, PollerLinks, 'pollers'),
+                           'realm' : (Realm, Realms, 'realms'),
+                           'plugin' : (Plugin, Plugins, 'plugins'),
+                           }
+        #Ex: the above code do for timeperiods:
+        #timeperiods = []
+        #for timeperiodcfg in objects['timeperiod']:
+        #    t = Timeperiod(timeperiodcfg)
+        #    t.clean()
+        #    timeperiods.append(t)
+        #self.timeperiods = Timeperiods(timeperiods)
 
-        servicegroups = []
-        for servicegroupcfg in objects['servicegroup']:
-            sg = Servicegroup(servicegroupcfg)
-            sg.clean()
-            servicegroups.append(sg)
-        self.servicegroups = Servicegroups(servicegroups)
-        
-        commands = []
-        for commandcfg in objects['command']:
-            c = Command(commandcfg)
-            c.clean()
-            commands.append(c)
-        self.commands = Commands(commands)
-        
-        hosts = []
-        for hostcfg in objects['host']:
-            h = Host(hostcfg)
-            h.clean()
-            hosts.append(h)
-        self.hosts = Hosts(hosts)
+        for t in types_creations:
+            (cls, clss, prop) = types_creations[t]
+            #List where we put objects
+            lst = []
+            for obj_cfg in objects[t]:
+                #We create teh object
+                o = cls(obj_cfg)
+                o.clean()
+                lst.append(o)
+            #we create the objects Class and we set it in prop
+            setattr(self, prop, clss(lst))
 
-        hostgroups = []
-        for hostgroupcfg in objects['hostgroup']:
-            hg = Hostgroup(hostgroupcfg)
-            hg.clean()
-            hostgroups.append(hg)
-        self.hostgroups = Hostgroups(hostgroups)
-        
-        contacts = []
-        for contactcfg in objects['contact']:
-            c = Contact(contactcfg)
-            c.clean()
-            contacts.append(c)
-        self.contacts = Contacts(contacts)
-        
-        contactgroups = []
-        for contactgroupcfg in objects['contactgroup']:
-            cg = Contactgroup(contactgroupcfg)
-            cg.clean()
-            contactgroups.append(cg)
-        self.contactgroups = Contactgroups(contactgroups)
-
-        servicedependencies = []
-        for servicedependencycfg in objects['servicedependency']:
-            sd = Servicedependency(servicedependencycfg)
-            sd.clean()
-            servicedependencies.append(sd)
-        self.servicedependencies = Servicedependencies(servicedependencies)
-
-        hostdependencies = []
-        for hostdependencycfg in objects['hostdependency']:
-            hd = Hostdependency(hostdependencycfg)
-            hd.clean()
-            hostdependencies.append(hd)
-        self.hostdependencies = Hostdependencies(hostdependencies)
-
-        schedulerlinks = []
-        for sched_link in objects['scheduler']:
-            sl = SchedulerLink(sched_link)
-            sl.clean()
-            schedulerlinks.append(sl)
-        self.schedulerlinks = SchedulerLinks(schedulerlinks)
-
-        reactionners = []
-        for reactionner_link in objects['reactionner']:
-            ral = ReactionnerLink(reactionner_link)
-            ral.clean()
-            reactionners.append(ral)
-        self.reactionners = ReactionnerLinks(reactionners)
-
-        brokers = []
-        for broker_link in objects['broker']:
-            rbl = BrokerLink(broker_link)
-            rbl.clean()
-            brokers.append(rbl)
-        self.brokers = BrokerLinks(brokers)
-
-        pollerlinks = []
-        for poller_link in objects['poller']:
-            pl = PollerLink(poller_link)
-            pl.clean()
-            pollerlinks.append(pl)
-        self.pollers = PollerLinks(pollerlinks)
-
-        realms = []
-        for realm in objects['realm']:
-            r = Realm(realm)
-            r.clean()
-            realms.append(r)
-        self.realms = Realms(realms)
-
-        plugins = []
-        for plugin in objects['plugin']:
-            p = Plugin(plugin)
-            p.clean()
-            plugins.append(p)
-        self.plugins = Plugins(plugins)
 
         
 
