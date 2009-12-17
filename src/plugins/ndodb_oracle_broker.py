@@ -303,9 +303,11 @@ class Ndodb_Oracle_broker:
     #Program status is .. status of program? :)
     #Like pid, daemon mode, last activity, etc
     #We aleady clean database, so insert
+
+    #TODO: fill nagios_instances
     def manage_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
-        to_del = []
+        to_del = ['instance_name']
         to_add = []
         mapping = self.mapping['program_status']
         for prop in new_b.data:

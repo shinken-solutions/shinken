@@ -91,6 +91,8 @@ class Scheduler:
         self.instance_id = conf.instance_id #From Arbiter. Use for 
                                             #Broker to disting betweens
                                             #schedulers
+        #self for instance_name
+        self.instance_name = conf.instance_name
 
 
     #Oh... Arbiter want us to die... For launch a new Scheduler
@@ -411,6 +413,7 @@ class Scheduler:
     def get_program_status_brok(self):
         now = time.time()
         data = {"is_running" : 1,
+                "instance_name": self.instance_name,
                 "last_alive" : now,
                 "program_start" : now,
                 "pid" : os.getpid(),

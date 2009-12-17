@@ -277,6 +277,8 @@ class Dispatcher:
                             if sched.need_conf:
                                 every_one_need_conf = True
                                 print '[',r.get_name(),']',"Dispatching conf", sched.id
+                                #We tag conf with the instance_name = scheduler_name
+                                conf.instance_name = sched.scheduler_name
                                 is_sent = sched.put_conf(conf)
                                 if is_sent:
                                     print '[',r.get_name(),']',"Dispatch OK of for conf in sched", sched.get_name()
