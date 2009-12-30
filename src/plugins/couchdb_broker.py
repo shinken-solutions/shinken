@@ -168,6 +168,8 @@ class Couchdb_broker:
 
         #We take the original doc to update it
         doc = db[key]
+        #TODO : find a better way of not having too much revisions...
+        db.delete(doc)
 
         #Now stringify datas
         for prop in data:

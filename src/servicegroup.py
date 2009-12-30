@@ -44,7 +44,10 @@ class Servicegroup(Itemgroup):
     
     
     def get_services(self):
-        return self.members
+        if self.has('members'):
+            return self.members
+        else:
+            return ''
 
 
     def get_name(self):

@@ -48,7 +48,10 @@ class Hostgroup(Itemgroup):
 
 
     def get_hosts(self):
-        return self.members
+        if self.has('members'):
+            return self.members
+        else:
+            return ''
 
 
     def get_hostgroup_members(self):
