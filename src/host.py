@@ -56,7 +56,7 @@ class Host(SchedulingItem):
                      'check_flapping_recovery_notification', 'scheduled_downtime_depth', \
                      'pending_flex_downtime', 'timeout', 'start_time', 'end_time', 'early_timeout', \
                      'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'services', \
-                     'realm','inverse_ok_critical', 'critical_is_warning', 'hot_period'
+                     'realm', 'resultmodulations'
                  )
 
     id = 1 #0 is reserved for host (primary node for parents)
@@ -118,11 +118,9 @@ class Host(SchedulingItem):
                 'failure_prediction_enabled': {'required' : False, 'default' : '0', 'pythonize': to_bool},
                 #New to shinken
                 'realm' : {'required': False, 'default':None},
-                #Shinken specific
                 
-                #Here just for inplicit inheritance in fact
-                'critical_is_warning' : {'required':False, 'default':'0', 'pythonize': to_bool},
-                'hot_period' : {'required':False, 'default':''},
+                #Shinken specific
+                'resultmodulations' : {'required':False, 'default':''},
                 }
 
     #properties set only for running purpose
@@ -441,12 +439,14 @@ class Hosts(Items):
     #hosts -> hosts (parents, etc)
     #hosts -> commands (check_command)
     #hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None):
         self.linkify_h_by_tp(timeperiods)
         self.linkify_h_by_h()
         self.linkify_h_by_cmd(commands)
         self.linkify_h_by_c(contacts)
         self.linkify_h_by_realms(realms)
+        self.linkify_h_by_rm(resultmodulations)
+
 
     #Simplify notif_period and check period by timeperiod id
     def linkify_h_by_tp(self, timeperiods):
@@ -460,10 +460,6 @@ class Hosts(Items):
                 ctp_name = h.check_period
                 ctp = timeperiods.find_by_name(ctp_name)
                 h.check_period = ctp
-                #hot period
-                htp_name = h.hot_period
-                htp = timeperiods.find_by_name(htp_name)
-                h.hot_period = htp
             except AttributeError as exp:
                 pass #Will be catch at the is_correct moment
     
@@ -514,6 +510,19 @@ class Hosts(Items):
                 h.realm = p
                 if p != None:
                     print "Me", h.get_name(), "have a realm", p
+
+
+    #Make link between service and it's resultmodulations
+    def linkify_h_by_rm(self, resultmodulations):
+        for h in self:
+            if hasattr(h, 'resultmodulations'):
+                resultmodulations_tab = h.resultmodulations.split(',')
+                new_resultmodulations = []
+                for rm_name in resultmodulations_tab:
+                    rm_name = rm_name.strip()
+                    rm = resultmodulations.find_by_name(rm_name)
+                    new_resultmodulations.append(rm)
+                h.resultmodulations = new_resultmodulations
 
     
     #We look for hostgroups property in hosts and

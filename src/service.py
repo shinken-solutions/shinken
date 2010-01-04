@@ -28,7 +28,6 @@ from notification import Notification
 from macroresolver import MacroResolver
 
 
-
 class Service(SchedulingItem):
     __slots__ = ('id', 'host_name', 'hostgroup_name', 'service_description',\
                      'display_name', 'servicegroups', 'is_volatile', 'check_command', \
@@ -58,7 +57,7 @@ class Service(SchedulingItem):
                      'check_flapping_recovery_notification', 'scheduled_downtime_depth', \
                      'pending_flex_downtime', 'timeout', 'start_time', 'end_time', 'early_timeout', \
                      'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'host', \
-                     'inverse_ok_critical', 'critical_is_warning', 'hot_period'
+                     'resultmodulations'
                  )
 
     id = 1 # Every service have a unique ID, and 0 is always special in database and co...
@@ -116,9 +115,7 @@ class Service(SchedulingItem):
             'parallelize_check' : {'required':False, 'default':'1', 'pythonize': to_bool},
 
             #Shinken specific
-            'inverse_ok_critical' : {'required':False, 'default':'0', 'pythonize': to_bool},
-            'critical_is_warning' : {'required':False, 'default':'0', 'pythonize': to_bool},
-            'hot_period' : {'required':False, 'default':''},
+            'resultmodulations' : {'required':False, 'default': ''},
             }
     
     #properties used in the running state
@@ -313,18 +310,6 @@ class Service(SchedulingItem):
         self.last_state_update = now
         self.last_state = self.state
         
-        #CRITICAL can become Warning, and before OK<->CRITICAL
-        if self.critical_is_warning and status == 2:
-            #We do it only if we are not in a hot_period
-            if self.hot_period == None or not self.hot_period.is_time_valid(now):
-                status = 1
-
-        #Now switch OK<->CRITICAL
-        if self.inverse_ok_critical and status == 2:
-            status = 0
-        if self.inverse_ok_critical and status == 0:
-            status = 2
-
         if status == 0:
             self.state = 'OK'
             self.state_id = 0
@@ -471,11 +456,12 @@ class Services(Items):
     #service -> command
     #service -> timepriods
     #service -> contacts
-    def linkify(self, hosts, commands, timeperiods, contacts):
+    def linkify(self, hosts, commands, timeperiods, contacts, resultmodulations):
         self.linkify_s_by_hst(hosts)
         self.linkify_s_by_cmd(commands)
         self.linkify_s_by_tp(timeperiods)
         self.linkify_s_by_c(contacts)
+        self.linkify_s_by_rm(resultmodulations)
 
 
     #We can link services with hosts so
@@ -530,13 +516,6 @@ class Services(Items):
                 s.check_period = ctp
             except:
                 pass #problem will be check at is_correct fucntion
-            try:
-                #Hot timeperiod
-                htp_name = s.hot_period
-                htp = timeperiods.find_by_name(htp_name)
-                s.hot_period = htp
-            except:
-                pass #problem will be check at is_correct fucntion
 
 
     #Make link between service and it's contacts
@@ -552,6 +531,19 @@ class Services(Items):
                 s.contacts = new_contacts
 
 
+    #Make link between service and it's resultmodulations
+    def linkify_s_by_rm(self, resultmodulations):
+        for s in self:
+            if hasattr(s, 'resultmodulations'):
+                resultmodulations_tab = s.resultmodulations.split(',')
+                new_resultmodulations = []
+                for rm_name in resultmodulations_tab:
+                    rm_name = rm_name.strip()
+                    rm = resultmodulations.find_by_name(rm_name)
+                    new_resultmodulations.append(rm)
+                s.resultmodulations = new_resultmodulations
+
+
     #Delete services by ids
     def delete_services_by_id(self, ids):
         for id in ids:
@@ -563,7 +555,7 @@ class Services(Items):
     #So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
         for prop in ['contacts', 'contact_groups', 'notification_interval', \
-                         'notification_period', 'critical_is_warning', 'hot_period']:
+                         'notification_period', 'resultmodulations']:
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):

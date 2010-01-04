@@ -29,6 +29,7 @@ import itertools
 from timeperiod import Timeperiod, Timeperiods
 from service import Service, Services
 from command import Command, Commands
+from resultmodulation import Resultmodulation, Resultmodulations
 from host import Host, Hosts
 from hostgroup import Hostgroup, Hostgroups
 from realm import Realm, Realms
@@ -300,7 +301,8 @@ class Config(Item):
                     'broker' : [],
                     'poller' : [],
                     'realm' : [],
-                    'plugin' : []
+                    'plugin' : [],
+                    'resultmodulation' : []
                     }
         tmp = []
         tmp_type = 'void'
@@ -384,6 +386,7 @@ class Config(Item):
                            'poller' : (PollerLink, PollerLinks, 'pollers'),
                            'realm' : (Realm, Realms, 'realms'),
                            'plugin' : (Plugin, Plugins, 'plugins'),
+                           'resultmodulation' : (Resultmodulation, Resultmodulations, 'resultmodulations'),
                            }
         #Ex: the above code do for timeperiods:
         #timeperiods = []
@@ -420,15 +423,15 @@ class Config(Item):
 
         print "Hosts"
         #link hosts with timeperiodsand commands
-        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms)
+        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms, self.resultmodulations)
 
         print "Service groups"
         #link servicegroups members with services
         self.servicegroups.linkify(self.services)
 
         print "Services"
-        #link services with hosts, commands, timeperiods and contacts
-        self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts)
+        #link services with hosts, commands, timeperiods, contacts and resultmodulations
+        self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations)
 
         print "Contactgroups"
         #link contacgroups with contacts
@@ -444,6 +447,9 @@ class Config(Item):
 
         print "Servicedependancy"
         self.servicedependencies.linkify(self.hosts, self.services, self.timeperiods)
+
+        print "Resultmodulations"
+        self.resultmodulations.linkify(self.timeperiods)
 
         print "Realms"
         self.realms.linkify()
@@ -544,6 +550,7 @@ class Config(Item):
         self.hosts.fill_default()
         self.contacts.fill_default()
         self.services.fill_default()
+        self.resultmodulations.fill_default()
         #first we create missing sat, so no other sat will
         #be created after this point
         self.fill_default_satellites()
@@ -613,6 +620,7 @@ class Config(Item):
         self.services.create_reversed_list()
         self.timeperiods.create_reversed_list()
         self.plugins.create_reversed_list()
+        self.resultmodulations.create_reversed_list()
         #For services it's a special case
         #we search for hosts, then for services
         #it's quicker than search in al services
@@ -648,11 +656,13 @@ class Config(Item):
         self.contacts.pythonize()
         self.services.pythonize()
         self.servicedependencies.pythonize()
+        self.resultmodulations.pythonize()
         self.schedulerlinks.pythonize()
         self.realms.pythonize()
         self.reactionners.pythonize()
         self.pollers.pythonize()
         self.brokers.pythonize()
+
 
     #Explode parameters like cached_service_check_horizon in the
     #Service class in a cached_check_horizon manner

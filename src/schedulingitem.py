@@ -312,6 +312,12 @@ class SchedulingItem(Item):
         self.output = c.output
         self.long_output = c.long_output
         self.perf_data = c.perf_data
+
+        #Before set state, module thems
+        for rm in self.resultmodulations:
+            if rm != None:
+                (c.exit_status, self.output, self.long_output) = rm.module_return(c.exit_status, self.output, self.long_output)
+        
         self.set_state_from_exit_status(c.exit_status)
         self.add_attempt()
 
