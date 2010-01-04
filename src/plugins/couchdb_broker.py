@@ -93,7 +93,7 @@ class Couchdb_broker:
     def manage_brok(self, b):
         type = b.type
         #We will transform data of b, so copy it
-        new_b = copy.copy(b)
+        new_b = copy.deepcopy(b)
 
         manager = 'manage_'+type+'_brok'
         #print "(couchdb) I search manager:", manager
