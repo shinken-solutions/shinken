@@ -43,7 +43,7 @@ from config import Config
 from external_command import ExternalCommand
 from dispatcher import Dispatcher
 from daemon import Daemon
-from plugin import Plugin, Plugins
+#from plugin import Plugin, Plugins
 
 VERSION = "0.1beta"
 

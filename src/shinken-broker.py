@@ -41,7 +41,7 @@ import getopt
 from satellite import Satellite
 from daemon import Daemon
 from util import to_int, to_bool
-from plugin import Plugin, Plugins
+from module import Module, Modules
 
 VERSION = "0.1beta"
 
@@ -49,7 +49,7 @@ VERSION = "0.1beta"
 #from message import Message
 #from worker import Worker
 #from util import get_sequence
-from pluginsmanager import PluginsManager
+from modulesmanager import ModulesManager
 
 
 #Interface for Arbiter, our big MASTER
@@ -88,10 +88,10 @@ class IForArbiter(Pyro.core.ObjBase):
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
 		print "We have our schedulers :", self.schedulers
-		if not self.app.have_plugins:
-			self.app.plugins = conf['global']['plugins']
-			self.app.have_plugins = True
-			print "We received plugins", self.app.plugins
+		if not self.app.have_modules:
+			self.app.modules = conf['global']['modules']
+			self.app.have_modules = True
+			print "We received modules", self.app.modules
 		
 
 	#Arbiter ask us to do not manage a scheduler_id anymore
@@ -145,7 +145,7 @@ class Broker(Satellite):
 		'user' : {'default' : 'nap', 'pythonize' : None},
 		'group' : {'default' : 'nap', 'pythonize' : None},
 		'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
-		'pluginspath' : {'default' :'/home/nap/shinken/src/plugins' , 'pythonize' : None}
+		'modulespath' : {'default' :'/home/nap/shinken/src/modules' , 'pythonize' : None}
 		}
 	
 
@@ -184,11 +184,11 @@ class Broker(Satellite):
 		self.have_new_conf = False
 		#Ours schedulers
 		self.schedulers = {}
-		self.mods = [] # for brokers from plugins
+		self.mods = [] # for brokers from modules
 		
-		#Plugins are load one time
-		self.have_plugins = False
-		self.plugins = []
+		#Modules are load one time
+		self.have_modules = False
+		self.modules = []
 
 	#Manage signal function
 	#TODO : manage more than just quit
@@ -233,11 +233,11 @@ class Broker(Satellite):
 		print "Connexion OK"
 
 
-	#Get a brok. Our role is to put it in the plugins
+	#Get a brok. Our role is to put it in the modules
 	#THEY MUST DO NOT CHANGE data of b !!!
 	def manage_brok(self, b):
 		to_del = []
-		#Call all plugins if they catch the call
+		#Call all modules if they catch the call
 		for mod in self.mods:
 			try:
 				mod.manage_brok(b)
@@ -308,10 +308,10 @@ class Broker(Satellite):
                 #We wait for initial conf
 		self.wait_for_initial_conf()
 
-		#Do the plugins part, we have our plugins in self.plugins
-		self.plugins_manager = PluginsManager('broker', self.pluginspath, self.plugins)
-		self.plugins_manager.load()
-		self.mods = self.plugins_manager.get_brokers()
+		#Do the modules part, we have our modules in self.modules
+		self.modules_manager = ModulesManager('broker', self.modulespath, self.modules)
+		self.modules_manager.load()
+		self.mods = self.modules_manager.get_brokers()
 		for mod in self.mods:
 			mod.init()
 

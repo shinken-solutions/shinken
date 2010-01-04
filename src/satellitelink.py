@@ -161,7 +161,7 @@ class SatelliteLink(Item):
 
     def prepare_for_conf(self):
         self.cfg = { 'global' : {}, 'schedulers' : {}}
-        #cfg_for_satellite['plugins'] = satellite.plugins
+        #cfg_for_satellite['modules'] = satellite.modules
         properties = self.__class__.properties
         for prop in properties:
             if 'to_send' in properties[prop] and properties[prop]['to_send']:
@@ -177,9 +177,9 @@ class SatelliteLinks(Items):
     #inner_class = SchedulerLink
 
     #We must have a realm property, so we find our realm
-    def linkify(self, realms, plugins):
+    def linkify(self, realms, modules):
         self.linkify_s_by_p(realms)
-        self.linkify_s_by_plug(plugins)
+        self.linkify_s_by_plug(modules)
 
         
     def linkify_s_by_p(self, realms):
@@ -192,14 +192,14 @@ class SatelliteLinks(Items):
                 s.register_to_my_realm()
 
 
-    def linkify_s_by_plug(self, plugins):
+    def linkify_s_by_plug(self, modules):
         for s in self:
-            new_plugins = []
-            for plug_name in s.plugins:
-                plug = plugins.find_by_name(plug_name.strip())
+            new_modules = []
+            for plug_name in s.modules:
+                plug = modules.find_by_name(plug_name.strip())
                 if plug != None:
-                    new_plugins.append(plug)
+                    new_modules.append(plug)
                 else:
-                    print "Error : the plugin %s is unknow for %s" % (plug_name, s.get_name())
-            s.plugins = new_plugins
+                    print "Error : the module %s is unknow for %s" % (plug_name, s.get_name())
+            s.modules = new_modules
 

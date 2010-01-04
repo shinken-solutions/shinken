@@ -31,7 +31,7 @@ import ConfigParser
 
 from satellite import Satellite
 from util import to_int, to_bool
-from plugin import Plugin, Plugins
+from module import Module, Modules
 
 VERSION = "0.1beta"
 

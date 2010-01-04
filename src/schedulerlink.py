@@ -28,7 +28,7 @@ class SchedulerLink(SatelliteLink):
                 'address' : {'required' : True},#, 'pythonize': to_bool},
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
-                'plugins' : {'required' : False, 'default' : '', 'pythonize' : to_split},
+                'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split},
                 'weight': {'required':  False, 'default' : '1', 'pythonize': to_int},
                 }
  

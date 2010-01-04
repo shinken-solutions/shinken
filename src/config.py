@@ -44,7 +44,7 @@ from schedulerlink import SchedulerLink, SchedulerLinks
 from reactionnerlink import ReactionnerLink, ReactionnerLinks
 from brokerlink import BrokerLink, BrokerLinks
 from pollerlink import PollerLink, PollerLinks
-from plugin import Plugin, Plugins
+from module import Module, Modules
 from graph import Graph
 
 from util import to_int, to_char, to_bool
@@ -301,7 +301,7 @@ class Config(Item):
                     'broker' : [],
                     'poller' : [],
                     'realm' : [],
-                    'plugin' : [],
+                    'module' : [],
                     'resultmodulation' : []
                     }
         tmp = []
@@ -385,7 +385,7 @@ class Config(Item):
                            'broker' : (BrokerLink, BrokerLinks, 'brokers'),
                            'poller' : (PollerLink, PollerLinks, 'pollers'),
                            'realm' : (Realm, Realms, 'realms'),
-                           'plugin' : (Plugin, Plugins, 'plugins'),
+                           'module' : (Module, Modules, 'modules'),
                            'resultmodulation' : (Resultmodulation, Resultmodulations, 'resultmodulations'),
                            }
         #Ex: the above code do for timeperiods:
@@ -456,10 +456,10 @@ class Config(Item):
 
         print "Schedulers and satellites"
         #Link all links with realms
-        self.schedulerlinks.linkify(self.realms, self.plugins)
-        self.brokers.linkify(self.realms, self.plugins)
-        self.reactionners.linkify(self.realms, self.plugins)
-        self.pollers.linkify(self.realms, self.plugins)
+        self.schedulerlinks.linkify(self.realms, self.modules)
+        self.brokers.linkify(self.realms, self.modules)
+        self.reactionners.linkify(self.realms, self.modules)
+        self.pollers.linkify(self.realms, self.modules)
 
 
     def dump(self):
@@ -619,7 +619,7 @@ class Config(Item):
         self.contacts.create_reversed_list()
         self.services.create_reversed_list()
         self.timeperiods.create_reversed_list()
-        self.plugins.create_reversed_list()
+        self.modules.create_reversed_list()
         self.resultmodulations.create_reversed_list()
         #For services it's a special case
         #we search for hosts, then for services

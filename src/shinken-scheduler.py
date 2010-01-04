@@ -69,7 +69,7 @@ from macroresolver import MacroResolver
 from external_command import ExternalCommand
 from daemon import Daemon#create_daemon, check_parallele_run, change_user
 from util import to_int, to_bool
-from plugin import Plugin, Plugins
+from module import Module, Modules
 
 VERSION = "0.1beta"
 

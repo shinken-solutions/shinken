@@ -360,7 +360,7 @@ class Dispatcher:
                                     print '[',r.get_name(),']',"Trying to send conf to ", kind, satellite.get_name()
                                     #cfg_for_satellite = {'schedulers' : {cfg_id : cfg_for_satellite_part}}
                                     satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part
-                                    #cfg_for_satellite['plugins'] = satellite.plugins
+                                    #cfg_for_satellite['modules'] = satellite.modules
                                     is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
                                     if is_sent:
                                         satellite.need_conf = False

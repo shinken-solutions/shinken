@@ -18,12 +18,12 @@
 
 from item import Item, Items
 
-class Plugin(Item):
+class Module(Item):
     id = 1#0 is always special in database, so we do not take risk here
-    my_type = 'plugin'
+    my_type = 'module'
 
-    properties={'plugin_name' : {'required':True},
-                'plugin_type' : {'required':True}
+    properties={'module_name' : {'required':True},
+                'module_type' : {'required':True}
                 }
 
     running_properties = {}
@@ -34,12 +34,12 @@ class Plugin(Item):
 
     #For debugging purpose only (nice name)
     def get_name(self):
-        return self.plugin_name
+        return self.module_name
 
 
-class Plugins(Items):
-    name_property = "plugin_name"
-    inner_class = Plugin
+class Modules(Items):
+    name_property = "module_name"
+    inner_class = Module
 
     def linkify(self):
         pass

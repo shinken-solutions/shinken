@@ -29,7 +29,7 @@ class ReactionnerLink(SatelliteLink):
                 'port' : {'required':  True, 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
                 'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool},
-                'plugins' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
+                'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
                 'min_workers' : {'required' : False, 'default' : '1', 'pythonize' : to_int, 'to_send' : True},
                 'max_workers' : {'required' : False, 'default' : '30', 'pythonize' : to_int, 'to_send' : True},
                 'processes_by_worker' : {'required' : False, 'default' : '256', 'pythonize' : to_int, 'to_send' : True},
