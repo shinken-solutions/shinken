@@ -180,6 +180,14 @@ class Daterange:
             return False
 
 
+    def is_time_day_invalid(self, t):
+        (start_time, end_time) = self.get_start_and_end_time(t)
+        if start_time <= t <= end_time:
+            return False
+        else:
+            return True
+
+
     #def have_future_tiremange_valid(self, t):        
     #    starts = []
     #    for tr in self.timeranges:
@@ -202,6 +210,25 @@ class Daterange:
             return None
 
 
+    def get_next_future_timerange_invalid(self, t): 
+        print 'get_next_future_timerange_invalid', t
+        sec_from_morning = get_sec_from_morning(t)
+        print 'sec from morning', sec_from_morning
+        ends = []
+        for tr in self.timeranges:
+            tr_start = tr.hstart * 3600 + tr.mstart * 60
+            if tr_start >= sec_from_morning:
+                ends.append(tr_start)
+            tr_end = tr.hend * 3600 + tr.mend * 60
+            if tr_end >= sec_from_morning:
+                ends.append(tr_end)
+        print "Ends:", ends
+        if ends != []:
+            return min(ends)
+        else:
+            return None
+
+
     def get_next_valid_day(self, t):
         if self.get_next_future_timerange_valid(t) is None:
             #this day is finish, we check for next period
@@ -215,10 +242,11 @@ class Daterange:
         return None
 
 
+
     def get_next_valid_time_from_t(self, t):
         if self.is_time_valid(t):
             return t
-
+        
         #First we search fot the day of t
         t_day = self.get_next_valid_day(t)
         sec_from_morning = self.get_min_sec_from_morning()
@@ -246,6 +274,66 @@ class Daterange:
         else:
             #I'm not find any valid time
             return None
+
+
+    def get_next_invalid_day(self, t):
+        print 'get_next_invalid_day'
+        if self.is_time_day_invalid(t):
+            return t
+        next_future_timerange_invalid = self.get_next_future_timerange_invalid(t)
+        if next_future_timerange_invalid is None:
+            print 'get_next_future_timerange_invalid is None'
+            #this day is finish, we check for next period
+            (start_time, end_time) = self.get_start_and_end_time(get_day(t)+86400)
+        else:
+            print 'get_next_future_timerange_invalid is', next_future_timerange_invalid
+            (start_time, end_time) = self.get_start_and_end_time(t)
+        print 'Start:', time.asctime(time.localtime(start_time))
+        print 'End:', time.asctime(time.localtime(end_time))
+        if self.is_time_day_invalid(t):
+            return t
+        if t <= end_time:
+            return end_time
+        return None
+
+
+    def get_next_invalid_time_from_t(self, t):
+        print 'DR:get_next_invalid_time_from_t', time.asctime(time.localtime(t))
+        if not self.is_time_valid(t):
+            print "DR: cool, t is invalid",  time.asctime(time.localtime(t))
+            return t
+        else:
+            print "DR: Arg, t is valid", time.asctime(time.localtime(t))
+        
+        #First we search fot the day of t
+        t_day = self.get_next_invalid_day(t)
+        print "Get next invalid day:", time.asctime(time.localtime(t_day))
+        sec_from_morning = self.get_min_sec_from_morning()
+
+        #We search for the min of all tr.start > sec_from_morning
+        starts = []
+        for tr in self.timeranges:
+            tr_start = tr.hstart * 3600 + tr.mstart * 3600
+            if tr_start >= sec_from_morning:
+                starts.append(tr_start)
+
+        #tr can't be valid, or it will be return at the begining
+        sec_from_morning = self.get_next_future_timerange_valid(t)
+        if sec_from_morning is not None:
+            if t_day is not None and sec_from_morning is not None:
+                return t_day + sec_from_morning
+
+        #Then we search for the next day of t
+        #The sec will be the min of the day
+        t = get_day(t)+86400
+        t_day2 = self.get_next_valid_day(t)
+        sec_from_morning = self.get_next_future_timerange_valid(t_day2)
+        if t_day2 is not None and sec_from_morning is not None:
+            return t_day2 + sec_from_morning
+        else:
+            #I'm not find any valid time
+            return None
+
             
 
 

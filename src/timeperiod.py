@@ -87,6 +87,7 @@ class Timeperiod:
         Timeperiod.id = Timeperiod.id + 1
         self.unresolved = []
         self.dateranges = []
+        self.exclude = ''
         for key in params:
             if key in ['name', 'alias', 'timeperiod_name', 'exclude']:
                 setattr(self, key, params[key])
@@ -152,22 +153,45 @@ class Timeperiod:
     def get_next_valid_time_from_t(self, t):
         #first find from cache
         t = int(t)
+        original_t = t
+        
         res_from_cache = self.find_next_valid_time_from_cache(t)
         if res_from_cache is not None:
             return res_from_cache
-        
-        #Ok, not in cache...
-        dr_mins = []
-        for dr in self.dateranges:
-            dr_mins.append(dr.get_next_valid_time_from_t(t))
-        #Min but not the None valus...
-        try:
-            local_min = min([d for d in dr_mins if d!=None])
-        except ValueError: #dr_mins if full of None, not good
-            local_min = None
+
+        still_loop = True
+
+        local_min = None
+        #Loop for all minutes...
+        while still_loop:
+            #Ok, not in cache...
+            dr_mins = []
+            for dr in self.dateranges:
+                dr_mins.append(dr.get_next_valid_time_from_t(t))
+
+            #Min but not the None valus...
+            try:
+                local_min = min([d for d in dr_mins if d!=None])
+            except ValueError: #dr_mins if full of None, not good
+                local_min = None
+
+            #We do not loop unless the local_min is not valid
+            still_loop = False
+            
+            #if we've got a real value, we check it with the exclude
+            if local_min != None:
+                #Now check if local_min is not valid
+                for tp in self.exclude:
+                    if tp.is_time_valid(local_min):
+                        still_loop = True
+                        t = local_min + 60
+                        #No loop more than one year
+                        if t > original_t + 60*24*366 + 1:
+                            still_loop = False
+                            local_min = None
 
         #Ok, we update the cache...
-        self.cache[t] = local_min
+        self.cache[original_t] = local_min
         return local_min
 
     
@@ -184,6 +208,10 @@ class Timeperiod:
             start = time.asctime(time.localtime(start))
             end = time.asctime(time.localtime(end))
             s += "\nStart and end:"+str((start, end))
+        s += '\nExclude'
+        for elt in self.exclude:
+            s += str(elt)
+                    
         return s
 
         
@@ -378,14 +406,19 @@ class Timeperiod:
     #Will make tp in exclude with id of the timeperiods
     def linkify(self, timeperiods):
         new_exclude = []
-        if self.has('exclude'):
-            #print "I have excluded"
+        if self.has('exclude') and self.exclude != '':
+            print "I have excluded"
+            print self.get_name(), self.exclude
             excluded_tps = self.exclude.split(',')
             #print "I will exclude from:", excluded_tps
             for tp_name in excluded_tps:
-                new_exclude.append(timeperiods.find_id_by_name(tp_name))
+                tp = timeperiods.find_by_name(tp_name.strip())
+                if tp != None:
+                    new_exclude.append(tp)
+                else:
+                    print "Error : the timeperiod", tp_name, "is unknown!"
         self.exclude = new_exclude
-        
+        print "New exclude", self.exclude
 
 
 class Timeperiods(Items):
@@ -460,6 +493,15 @@ if __name__ == '__main__':
         #print "Next valid", time.asctime(time.localtime(t.get_next_valid_time()))
         print str(t)+'\n\n'
     t=Timeperiod()
-    t.resolve_daterange(t.dateranges, 'day -1 - 5 00:00-10:00')
-    for i in xrange(1, 1000):
-        t_next = t.get_next_valid_time_from_t(now + i*60)
+    t.resolve_daterange(t.dateranges, 'day 1 - 5 01:00-12:00')
+    t.resolve_daterange(t.dateranges, 'day 7 - 15 11:00-16:00')
+    t2 = Timeperiod()
+    t2.resolve_daterange(t2.dateranges, 'day 6 - 8 00:00-12:00,16:30-23:00')
+    t.exclude = [t2]
+    for i in xrange(1, 2):
+        print 'day -1 - 5 00:00-12:00'
+        print 'day 1 - 5 00:00-12:00'
+        print 'day 4 - 7 00:00-11:00,16:30-23:00'
+        t_next = t.get_next_valid_time_from_t(now)
+        print "Get next valid for now ==>", time.asctime(time.localtime(t_next)),"<=="
+        print str(t)+'\n\n'
