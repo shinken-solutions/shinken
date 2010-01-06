@@ -75,6 +75,14 @@ class Timerange:
     def get_sec_from_morning(self):
         return self.hstart*3600 + self.mstart*60
 
+
+    def get_first_sec_out_from_morning(self):
+        #If start at 0:0, the min out is the end
+        if self.hstart == 0 and self.mstart == 0:
+            return self.hend*3600 + self.mend*60
+        return 0
+
+
     def is_time_valid(self, t):
         sec_from_morning = get_sec_from_morning(t)
         return self.hstart*3600 + self.mstart* 60  <= sec_from_morning <= self.hend*3600 + self.mend* 60
@@ -164,6 +172,13 @@ class Daterange:
         return min(mins)
 
 
+    def get_min_sec_out_from_morning(self):
+        mins = []
+        for tr in self.timeranges:
+            mins.append(tr.get_first_sec_out_from_morning())
+        return min(mins)
+
+
     def get_min_from_t(self, t):
         if self.is_time_valid(t):
             return t
@@ -211,9 +226,9 @@ class Daterange:
 
 
     def get_next_future_timerange_invalid(self, t): 
-        print 'get_next_future_timerange_invalid', t
+        #print 'Call for get_next_future_timerange_invalid from ', time.asctime(time.localtime(t))
         sec_from_morning = get_sec_from_morning(t)
-        print 'sec from morning', sec_from_morning
+        #print 'sec from morning', sec_from_morning
         ends = []
         for tr in self.timeranges:
             tr_start = tr.hstart * 3600 + tr.mstart * 60
@@ -222,7 +237,7 @@ class Daterange:
             tr_end = tr.hend * 3600 + tr.mend * 60
             if tr_end >= sec_from_morning:
                 ends.append(tr_end)
-        print "Ends:", ends
+        #print "Ends:", ends
         if ends != []:
             return min(ends)
         else:
@@ -238,7 +253,7 @@ class Daterange:
         if t <= start_time:
             return start_time
         if self.is_time_day_valid(t):
-            return t
+            return get_day(t)
         return None
 
 
@@ -247,9 +262,13 @@ class Daterange:
         if self.is_time_valid(t):
             return t
         
+        #print "DR:", time.asctime(time.localtime(t))
         #First we search fot the day of t
         t_day = self.get_next_valid_day(t)
         sec_from_morning = self.get_min_sec_from_morning()
+        
+        #print "DR: next day", time.asctime(time.localtime(t_day))
+        #print "DR: sec from morning", time.asctime(time.localtime(sec_from_morning))
 
         #We search for the min of all tr.start > sec_from_morning
         starts = []
@@ -260,6 +279,7 @@ class Daterange:
 
         #tr can't be valid, or it will be return at the begining
         sec_from_morning = self.get_next_future_timerange_valid(t)
+        #print "DR: sec from morning", time.asctime(time.localtime(sec_from_morning))
         if sec_from_morning is not None:
             if t_day is not None and sec_from_morning is not None:
                 return t_day + sec_from_morning
@@ -277,48 +297,54 @@ class Daterange:
 
 
     def get_next_invalid_day(self, t):
-        print 'get_next_invalid_day'
+        #print 'DR: get_next_invalid_day'
         if self.is_time_day_invalid(t):
             return t
         next_future_timerange_invalid = self.get_next_future_timerange_invalid(t)
+        #If today there is no more unavalable timerange, search the next day
         if next_future_timerange_invalid is None:
-            print 'get_next_future_timerange_invalid is None'
+            #print 'DR: get_next_future_timerange_invalid is None'
             #this day is finish, we check for next period
             (start_time, end_time) = self.get_start_and_end_time(get_day(t)+86400)
         else:
-            print 'get_next_future_timerange_invalid is', next_future_timerange_invalid
+            #print 'DR: get_next_future_timerange_invalid is', time.asctime(time.localtime(next_future_timerange_invalid))
             (start_time, end_time) = self.get_start_and_end_time(t)
-        print 'Start:', time.asctime(time.localtime(start_time))
-        print 'End:', time.asctime(time.localtime(end_time))
-        if self.is_time_day_invalid(t):
-            return t
-        if t <= end_time:
-            return end_time
+            #res = get_day(t) + next_future_timerange_invalid
+            #print "Early return"
+            #return res
+        #print 'DR:Start:', time.asctime(time.localtime(start_time))
+        #print 'DR:End:', time.asctime(time.localtime(end_time))
+        if start_time <= t <= end_time:
+            return get_day(t)
+        if start_time >= t :
+            return start_time
         return None
 
 
     def get_next_invalid_time_from_t(self, t):
-        print 'DR:get_next_invalid_time_from_t', time.asctime(time.localtime(t))
+        #print 'DR:get_next_invalid_time_from_t', time.asctime(time.localtime(t))
         if not self.is_time_valid(t):
-            print "DR: cool, t is invalid",  time.asctime(time.localtime(t))
+            #print "DR: cool, t is invalid",  time.asctime(time.localtime(t))
             return t
-        else:
-            print "DR: Arg, t is valid", time.asctime(time.localtime(t))
+        #else:
+        #    print "DR: Arg, t is valid", time.asctime(time.localtime(t))
         
         #First we search fot the day of t
         t_day = self.get_next_invalid_day(t)
-        print "Get next invalid day:", time.asctime(time.localtime(t_day))
-        sec_from_morning = self.get_min_sec_from_morning()
+        #print "Get next invalid day:", time.asctime(time.localtime(t_day))
+        sec_from_morning = self.get_min_sec_out_from_morning()
+        
+        #print "sec from morning:", sec_from_morning
 
         #We search for the min of all tr.start > sec_from_morning
-        starts = []
-        for tr in self.timeranges:
-            tr_start = tr.hstart * 3600 + tr.mstart * 3600
-            if tr_start >= sec_from_morning:
-                starts.append(tr_start)
-
+        #starts = []
+        #for tr in self.timeranges:
+        #    tr_start = tr.hstart * 3600 + tr.mstart * 3600
+        #    if tr_start >= sec_from_morning:
+        #        starts.append(tr_start)
+        
         #tr can't be valid, or it will be return at the begining
-        sec_from_morning = self.get_next_future_timerange_valid(t)
+        sec_from_morning = self.get_next_future_timerange_invalid(t)
         if sec_from_morning is not None:
             if t_day is not None and sec_from_morning is not None:
                 return t_day + sec_from_morning
@@ -326,8 +352,8 @@ class Daterange:
         #Then we search for the next day of t
         #The sec will be the min of the day
         t = get_day(t)+86400
-        t_day2 = self.get_next_valid_day(t)
-        sec_from_morning = self.get_next_future_timerange_valid(t_day2)
+        t_day2 = self.get_next_invalid_day(t)
+        sec_from_morning = self.get_next_future_timerange_invalid(t_day2)
         if t_day2 is not None and sec_from_morning is not None:
             return t_day2 + sec_from_morning
         else:

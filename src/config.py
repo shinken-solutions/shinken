@@ -644,6 +644,7 @@ class Config(Item):
             self.pollers.is_correct()
         if hasattr(self, 'brokers'):
             self.brokers.is_correct()
+        self.timeperiods.is_correct()
 
 
     #We've got strings (like 1) but we want pthon elements, like True

@@ -155,6 +155,8 @@ class Timeperiod:
         t = int(t)
         original_t = t
         
+        #print self.get_name(), "Check valid time for", time.asctime(time.localtime(t))
+
         res_from_cache = self.find_next_valid_time_from_cache(t)
         if res_from_cache is not None:
             return res_from_cache
@@ -164,16 +166,23 @@ class Timeperiod:
         local_min = None
         #Loop for all minutes...
         while still_loop:
+            #print self.get_name(), '\nLoop'
             #Ok, not in cache...
             dr_mins = []
             for dr in self.dateranges:
                 dr_mins.append(dr.get_next_valid_time_from_t(t))
+            
+            #print self.get_name(), 'Mins:', dr_mins
+            #for o in dr_mins:
+            #    print self.get_name(), '\t',time.asctime(time.localtime(o))
 
             #Min but not the None valus...
             try:
                 local_min = min([d for d in dr_mins if d!=None])
             except ValueError: #dr_mins if full of None, not good
                 local_min = None
+
+            #print self.get_name(), 'Local min:', local_min
 
             #We do not loop unless the local_min is not valid
             still_loop = False
@@ -182,17 +191,93 @@ class Timeperiod:
             if local_min != None:
                 #Now check if local_min is not valid
                 for tp in self.exclude:
+                    #print self.get_name(), "Check in TP"
                     if tp.is_time_valid(local_min):
                         still_loop = True
-                        t = local_min + 60
-                        #No loop more than one year
-                        if t > original_t + 60*24*366 + 1:
-                            still_loop = False
-                            local_min = None
+                        #t = local_min + 60
+                        #print self.get_name(), "TP pas content:", tp.get_name(), time.asctime(time.localtime(local_min))
+                        local_min = tp.get_next_invalid_time_from_t(local_min+60)
+                        #print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
+                    #else:
+                    #    print self.get_name(), "Tp ca lui va", tp.get_name()
+                        
+            if local_min == None:
+                still_loop = False
+            else:
+                #print 'Local min', local_min
+                t = local_min
+                #No loop more than one year
+                if t > original_t + 3600*24*366 + 1:
+                    still_loop = False
+                    local_min = None
 
         #Ok, we update the cache...
         self.cache[original_t] = local_min
         return local_min
+
+
+    def get_next_invalid_time_from_t(self, t):
+        #print '\n\n', self.get_name(), 'search for next invalid from', time.asctime(time.localtime(t))
+        t = int(t)
+        original_t = t
+        still_loop = True
+        
+        if not self.is_time_valid(t):
+            return t
+        
+        local_min = t
+        res = None
+        #Loop for all minutes...
+        while still_loop:
+            #Ok, not in cache...
+            #print self.get_name(), "Begin loop with", time.asctime(time.localtime(local_min))
+            next_exclude = None
+            for dr in self.exclude:
+                m = dr.get_next_valid_time_from_t(local_min)
+                if m != None:
+                    #print time.asctime(time.localtime(m))
+                    if next_exclude == None or m <= next_exclude:
+                        next_exclude = m
+
+            #Maybe the min of exclude is not valid, it is the min we can find.
+            if next_exclude !=None and not self.is_time_valid(next_exclude):
+                #print self.get_name(), "find a possible early exit for invalid ! with", time.asctime(time.localtime(next_exclude)) 
+                res = next_exclude
+                still_loop = False
+
+            #But maybe we can find a better solution with next invalid of standart dateranges
+            #print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
+            for dr in self.dateranges:
+                #print self.get_name(), "Search a next invalid from DR", time.asctime(time.localtime(local_min))
+                m = dr.get_next_invalid_time_from_t(local_min)
+                #print self.get_name(), "Dr give me next invalid", time.asctime(time.localtime(m))
+                if m != None:
+                    #print time.asctime(time.localtime(m))
+                    local_min = m
+            
+            #print self.get_name(), 'Invalid: local min', time.asctime(time.localtime(local_min))
+            #We do not loop unless the local_min is not valid
+            still_loop = False
+            
+            #if we've got a real value, we check it with the exclude
+            if local_min != None:
+                #Now check if local_min is not valid
+                for tp in self.exclude:
+                    #print self.get_name(),"we check for invalid", time.asctime(time.localtime(local_min)), 'with tp', tp.name
+                    if tp.is_time_valid(local_min):
+                        still_loop = True
+                        #local_min + 60
+                        local_min = tp.get_next_invalid_time_from_t(local_min+60)
+                        #No loop more than one year
+                        if local_min > original_t + 60*24*366 + 1:
+                            still_loop = False
+                            res = None
+                if not still_loop:#We find a possible value
+                    #We take the result the minimal possible
+                    if res == None or local_min < res:
+                        res = local_min
+
+        return res
 
     
     def has(self, prop):
@@ -421,6 +506,15 @@ class Timeperiod:
         print "New exclude", self.exclude
 
 
+    def check_exclude_rec(self):
+        if self.rec_tag:
+            print "Error :", self.get_name(), "is in a loop in exclude parameter"
+            return
+        self.rec_tag = True
+        for tp in self.exclude:
+            tp.check_exclude_rec()
+
+
 class Timeperiods(Items):
     name_property = "timeperiod_name"
     inner_class = Timeperiod
@@ -437,6 +531,26 @@ class Timeperiods(Items):
             tp = self.items[id]
             tp.linkify(self)
 
+
+    #check for loop in definition
+    def is_correct(self):
+        #We do not want a same hg to be explode again and again
+        #so we tag it
+        for tp in self.items.values():
+            tp.rec_tag = False
+
+        for tp in self.items.values():
+            for tmp_tp in self.items.values():
+                tmp_tp.rec_tag = False
+            tp.check_exclude_rec()
+
+        #We clean the tags
+        for tp in self.items.values():
+            del tp.rec_tag
+
+
+        
+            
 
 
 if __name__ == '__main__':
@@ -477,6 +591,7 @@ if __name__ == '__main__':
         print "**********************"
         print entry
         t=Timeperiod()
+        t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, entry)
         #t.exclude = []
         #t.resolve_daterange(t.exclude, 'monday 00:00-19:00')
@@ -492,16 +607,27 @@ if __name__ == '__main__':
         #print "End date:", t.get_end_time()
         #print "Next valid", time.asctime(time.localtime(t.get_next_valid_time()))
         print str(t)+'\n\n'
-    t=Timeperiod()
-    t.resolve_daterange(t.dateranges, 'day 1 - 5 01:00-12:00')
-    t.resolve_daterange(t.dateranges, 'day 7 - 15 11:00-16:00')
+
+    print "*************************************************************"
+    t3 = Timeperiod()
+    t3.timeperiod_name = 't3'
+    t3.resolve_daterange(t3.dateranges, 'day 1 - 10 10:30-15:00')
+    t3.exclude = []
+
     t2 = Timeperiod()
-    t2.resolve_daterange(t2.dateranges, 'day 6 - 8 00:00-12:00,16:30-23:00')
+    t2.timeperiod_name = 't2'
+    t2.resolve_daterange(t2.dateranges, 'day 1 - 10 12:00-17:00')
+    t2.exclude = [t3]
+
+
+    t = Timeperiod()
+    t.timeperiod_name = 't'
+    t.resolve_daterange(t.dateranges, 'day 1 - 10 14:00-15:00')
     t.exclude = [t2]
-    for i in xrange(1, 2):
-        print 'day -1 - 5 00:00-12:00'
-        print 'day 1 - 5 00:00-12:00'
-        print 'day 4 - 7 00:00-11:00,16:30-23:00'
-        t_next = t.get_next_valid_time_from_t(now)
-        print "Get next valid for now ==>", time.asctime(time.localtime(t_next)),"<=="
-        print str(t)+'\n\n'
+
+    print "Mon T",str(t)+'\n\n'
+    t_next = t.get_next_valid_time_from_t(now)
+    t_no_next = t.get_next_invalid_time_from_t(now)
+    print "Get next valid for now ==>", time.asctime(time.localtime(t_next)),"<=="
+    print "Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)),"<=="
+
