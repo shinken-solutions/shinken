@@ -137,7 +137,7 @@ class Service(SchedulingItem):
         'last_time_warning' :  {'default' : int(time.time()), 'broker_name' : None},
         'last_time_critical' :  {'default' : int(time.time()), 'broker_name' : None},
         'last_time_unknown' :  {'default' : int(time.time()), 'broker_name' : None},
-        'duration_sec' :  {'default' : 0, 'status_broker_name' : None},
+        'duration_sec' :  {'default' : 0},
         'state_type' : {'default' : 'HARD'},
         'state_type_id' : {'default' : 0, 'status_broker_name' : 'state_type', 'broker_name' : 'state_type'},
         'output' : {'default' : '', 'broker_name' : None},
