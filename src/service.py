@@ -133,6 +133,11 @@ class Service(SchedulingItem):
         'last_state_change' :  {'default' : time.time(), 'status_broker_name' : None},
         'last_hard_state_change' :  {'default' : time.time(), 'status_broker_name' : None},
         'last_hard_state' :  {'default' : time.time(), 'status_broker_name' : None},
+        'last_time_ok' :  {'default' : int(time.time()), 'broker_name' : None},
+        'last_time_warning' :  {'default' : int(time.time()), 'broker_name' : None},
+        'last_time_critical' :  {'default' : int(time.time()), 'broker_name' : None},
+        'last_time_unknown' :  {'default' : int(time.time()), 'broker_name' : None},
+        'duration_sec' :  {'default' : 0, 'status_broker_name' : None},
         'state_type' : {'default' : 'HARD'},
         'state_type_id' : {'default' : 0, 'status_broker_name' : 'state_type', 'broker_name' : 'state_type'},
         'output' : {'default' : '', 'broker_name' : None},
@@ -198,10 +203,10 @@ class Service(SchedulingItem):
         'SERVICEGROUPNAMES' : 'get_groupnames',
         'LASTSERVICECHECK' : 'last_chk',
         'LASTSERVICESTATECHANGE' : 'last_state_change',
-        'LASTSERVICEOK' : 'last_service_ok',
-        'LASTSERVICEWARNING' : 'last_service_warning',
-        'LASTSERVICEUNKNOWN' : 'last_service_unknown',
-        'LASTSERVICECRITICAL' : 'last_service_critical',
+        'LASTSERVICEOK' : 'last_time_ok',
+        'LASTSERVICEWARNING' : 'last_time_warning',
+        'LASTSERVICEUNKNOWN' : 'last_time_unknown',
+        'LASTSERVICECRITICAL' : 'last_time_critical',
         'SERVICEOUTPUT' : 'output',
         'LONGSERVICEOUTPUT' : 'long_output',
         'SERVICEPERFDATA' : 'perf_data',
@@ -313,20 +318,28 @@ class Service(SchedulingItem):
         if status == 0:
             self.state = 'OK'
             self.state_id = 0
+            self.last_time_ok = int(self.last_state_update)
         elif status == 1:
             self.state = 'WARNING'
             self.state_id = 1
+            self.last_time_warning = int(self.last_state_update)
         elif status == 2:
             self.state = 'CRITICAL'
             self.state_id = 2
+            self.last_time_critical = int(self.last_state_update)
         elif status == 3:
             self.state = 'UNKNOWN'
             self.state_id = 3
+            self.last_time_unknown = int(self.last_state_update)
         else:
             self.state = 'CRITICAL'#exit code UNDETERMINED
             self.state_id = 2
+            self.last_time_critical = int(self.last_state_update)
         if status in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
+        if self.state != self.last_state:
+            self.last_state_change = self.last_state_update
+        self.duration_sec = now - self.last_state_change
 
 
     #Return True if status is the state (like OK) or small form like 'o'
@@ -388,6 +401,17 @@ class Service(SchedulingItem):
             return self.state != 'OK' and  contact.want_service_notification(now, self.state)
         else:
             return self.state == 'OK' and  contact.want_service_notification(now, self.state)
+
+
+    def get_duration_sec(self):
+        return str(int(self.duration_sec))
+
+
+    def get_duration(self):
+        m, s = divmod(self.get_duration_sec, 60)
+        h, m = divmod(m, 60)
+        return "%02dh %02dm %02ds" % (h, m, s)
+
             
 
 class Services(Items):

@@ -772,7 +772,11 @@ class Config(Item):
             weight_list = []
             no_spare_schedulers = [s for s in r.schedulers if not s.spare]
             nb_schedulers = len(no_spare_schedulers)
+            packindex = 0
+            packindices = {}
             for s in no_spare_schedulers:
+                packindices[s.id] = packindex
+                packindex += 1
                 for i in xrange(0, s.weight):
                     weight_list.append(s.id)
             rr = itertools.cycle(weight_list)
@@ -780,13 +784,13 @@ class Config(Item):
             #we must have nb_schedulers packs)
             for i in xrange(0, nb_schedulers):
                 packs[i] = []
-        
+                
             #Now we explode the numerous packs into nb_packs reals packs:
             #we 'load balance' thems in a roundrobin way
             for pack in r.packs:
                 i = rr.next()
                 for elt in pack:
-                    packs[i].append(elt)
+                    packs[packindices[i]].append(elt)
             #Now in packs we have the number of packs [h1, h2, etc]
             #equal to the number of schedulers.
             r.packs = packs

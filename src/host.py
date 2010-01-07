@@ -140,6 +140,10 @@ class Host(SchedulingItem):
         'last_state_change' :  {'default' : time.time(), 'status_broker_name' : None},
         'last_hard_state_change' :  {'default' : time.time(), 'status_broker_name' : None},
         'last_hard_state' :  {'default' : time.time(), 'status_broker_name' : None},
+        'last_time_up' :  {'default' : int(time.time()), 'broker_name' : None},
+        'last_time_down' :  {'default' : int(time.time()), 'broker_name' : None},
+        'last_time_unreachable' :  {'default' : int(time.time()), 'broker_name' : None},
+        'duration_sec' :  {'default' : 0},
         'output' : {'default' : '', 'broker_name' : None},
         'long_output' : {'default' : '', 'broker_name' : None},
         'is_flapping' : {'default' : False, 'status_broker_name' : None},
@@ -205,9 +209,9 @@ class Host(SchedulingItem):
               'HOSTGROUPNAMES' : 'get_groupnames',
               'LASTHOSTCHECK' : 'last_chk',
               'LASTHOSTSTATECHANGE' : 'last_state_change',
-              'LASTHOSTUP' : 'last_host_up',
-              'LASTHOSTDOWN' : 'last_host_down',
-              'LASTHOSTUNREACHABLE' : 'last_host_unreachable',
+              'LASTHOSTUP' : 'last_time_up',
+              'LASTHOSTDOWN' : 'last_time_down',
+              'LASTHOSTUNREACHABLE' : 'last_time_unreachable',
               'HOSTOUTPUT' : 'output',
               'LONGHOSTOUTPUT' : 'long_output',
               'HOSTPERFDATA' : 'perf_data',
@@ -305,6 +309,22 @@ class Host(SchedulingItem):
         return str(len(self.services))
 
 
+    def get_total_services_ok(self):
+        return str(len([s for s in self.services if s.state_id == 0]))
+
+
+    def get_total_services_warning(self):
+        return str(len([s for s in self.services if s.state_id == 1]))
+
+
+    def get_total_services_critical(self):
+        return str(len([s for s in self.services if s.state_id == 2]))
+
+
+    def get_total_services_unknown(self):
+        return str(len([s for s in self.services if s.state_id == 3]))
+
+
     #For debugging purpose only (nice name)
     def get_name(self):
         return self.host_name
@@ -335,14 +355,20 @@ class Host(SchedulingItem):
         if status == 0:
             self.state = 'UP'
             self.state_id = 0
+            self.last_time_up = int(self.last_state_update)
         elif status == 1 or status == 2 or status == 3:
             self.state = 'DOWN'
             self.state_id = 2
+            self.last_time_down = int(self.last_state_update)
         else:
             self.state = 'DOWN'#exit code UNDETERMINED
             self.state_id = 2
+            self.last_time_down = int(self.last_state_update)
         if status in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
+        if self.state != self.last_state:
+            self.last_state_change = self.last_state_update
+        self.duration_sec = now - self.last_state_change
 
 
     #See if status is status. Can be low of high format (o/UP, d/DOWN, ...)
@@ -427,6 +453,14 @@ class Host(SchedulingItem):
     #    #we do not see why to save this notification, so...
     #    return False
 
+    def get_duration_sec(self):
+        return str(int(self.duration_sec))
+
+
+    def get_duration(self):
+        m, s = divmod(self.get_duration_sec, 60)
+        h, m = divmod(m, 60)
+        return "%02dh %02dm %02ds" % (h, m, s)
 
 
 

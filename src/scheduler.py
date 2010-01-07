@@ -337,6 +337,7 @@ class Scheduler:
             return
         except IOError as exp:
             print exp
+            return
         except IndexError as exp:
             print "WARNING: Sorry, the ressource file is not compatible"
             return
