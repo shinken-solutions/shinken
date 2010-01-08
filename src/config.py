@@ -752,7 +752,7 @@ class Config(Item):
                 r = tmp_realms.pop() #There is just one element
                 print "Add to realm", r
                 r.packs.append(pack)
-            if len(tmp_realms) == 0: #Hum.. no realm value? So default Realm
+            elif len(tmp_realms) == 0: #Hum.. no realm value? So default Realm
                 if default_realm != None:
                     #print "I prefer add to default realm", default_realm.get_name()
                     default_realm.packs.append(pack)
@@ -772,6 +772,16 @@ class Config(Item):
             weight_list = []
             no_spare_schedulers = [s for s in r.schedulers if not s.spare]
             nb_schedulers = len(no_spare_schedulers)
+            
+            #Maybe there is no scheduler in the realm, it's can be a
+            #big problem if there are elements in packs
+            nb_elements = len([elt for elt in [pack for pack in r.packs]])
+            print "Number of hosts in the realm :", nb_elements
+            if nb_schedulers == 0 and nb_elements != 0:
+                print "ERROR : The realm", r.get_name(), "have hosts but no scheduler!"
+                r.packs = [] #Dumb pack
+                continue
+            
             packindex = 0
             packindices = {}
             for s in no_spare_schedulers:
@@ -779,6 +789,7 @@ class Config(Item):
                 packindex += 1
                 for i in xrange(0, s.weight):
                     weight_list.append(s.id)
+
             rr = itertools.cycle(weight_list)
             
             #we must have nb_schedulers packs)
