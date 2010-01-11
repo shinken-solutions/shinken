@@ -116,6 +116,8 @@ class Service(SchedulingItem):
 
             #Shinken specific
             'resultmodulations' : {'required':False, 'default': ''},
+            'escalations' : {'required':False, 'default': ''},
+                
             }
     
     #properties used in the running state
@@ -480,12 +482,13 @@ class Services(Items):
     #service -> command
     #service -> timepriods
     #service -> contacts
-    def linkify(self, hosts, commands, timeperiods, contacts, resultmodulations):
+    def linkify(self, hosts, commands, timeperiods, contacts, resultmodulations, escalations):
         self.linkify_s_by_hst(hosts)
         self.linkify_s_by_cmd(commands)
         self.linkify_s_by_tp(timeperiods)
         self.linkify_s_by_c(contacts)
         self.linkify_s_by_rm(resultmodulations)
+        self.linkify_s_by_es(escalations)
 
 
     #We can link services with hosts so
@@ -566,6 +569,20 @@ class Services(Items):
                     rm = resultmodulations.find_by_name(rm_name)
                     new_resultmodulations.append(rm)
                 s.resultmodulations = new_resultmodulations
+
+
+
+    #Make link between service and it's escalations
+    def linkify_s_by_es(self, escalations):
+        for s in self:
+            if hasattr(s, 'escalations'):
+                escalations_tab = s.escalations.split(',')
+                new_escalations = []
+                for es_name in escalations_tab:
+                    es_name = es_name.strip()
+                    es = escalations.find_by_name(es_name)
+                    new_escalations.append(es)
+                s.escalations = new_escalations
 
 
     #Delete services by ids

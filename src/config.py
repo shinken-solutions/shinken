@@ -30,6 +30,7 @@ from timeperiod import Timeperiod, Timeperiods
 from service import Service, Services
 from command import Command, Commands
 from resultmodulation import Resultmodulation, Resultmodulations
+from escalation import Escalation, Escalations
 from host import Host, Hosts
 from hostgroup import Hostgroup, Hostgroups
 from realm import Realm, Realms
@@ -303,7 +304,8 @@ class Config(Item):
                     'poller' : [],
                     'realm' : [],
                     'module' : [],
-                    'resultmodulation' : []
+                    'resultmodulation' : [],
+                    'escalation' : []
                     }
         tmp = []
         tmp_type = 'void'
@@ -388,6 +390,7 @@ class Config(Item):
                            'realm' : (Realm, Realms, 'realms'),
                            'module' : (Module, Modules, 'modules'),
                            'resultmodulation' : (Resultmodulation, Resultmodulations, 'resultmodulations'),
+                           'escalation' : (Escalation, Escalations, 'escalations'),
                            }
         #Ex: the above code do for timeperiods:
         #timeperiods = []
@@ -415,7 +418,7 @@ class Config(Item):
     #We use linkify to make the config more efficient : elements will be
     #linked, like pointers. For example, a host will have it's service,
     #and contacts directly in it's properties
-    #REMEMBER: lnify AFTER explode...
+    #REMEMBER: linkify AFTER explode...
     def linkify(self):
         #Do the simplify AFTER explode groups
         print "Hostgroups"
@@ -424,11 +427,11 @@ class Config(Item):
 
         print "Hosts"
         #link hosts with timeperiodsand commands
-        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms, self.resultmodulations)
+        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms, self.resultmodulations, self.escalations)
 
         print "Services"
         #link services with hosts, commands, timeperiods, contacts and resultmodulations
-        self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations)
+        self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations)
 
         print "Service groups"
         #link servicegroups members with services
@@ -451,6 +454,9 @@ class Config(Item):
 
         print "Resultmodulations"
         self.resultmodulations.linkify(self.timeperiods)
+
+        print "Escalations"
+        self.escalations.linkify(self.timeperiods)
 
         print "Realms"
         self.realms.linkify()
@@ -631,6 +637,7 @@ class Config(Item):
         self.timeperiods.create_reversed_list()
         self.modules.create_reversed_list()
         self.resultmodulations.create_reversed_list()
+        self.escalations.create_reversed_list()
         #For services it's a special case
         #we search for hosts, then for services
         #it's quicker than search in al services

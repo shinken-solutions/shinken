@@ -121,6 +121,7 @@ class Host(SchedulingItem):
                 
                 #Shinken specific
                 'resultmodulations' : {'required':False, 'default':''},
+                'escalations' : {'required':False, 'default':''},
                 }
 
     #properties set only for running purpose
@@ -473,13 +474,14 @@ class Hosts(Items):
     #hosts -> hosts (parents, etc)
     #hosts -> commands (check_command)
     #hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, escalations=None):
         self.linkify_h_by_tp(timeperiods)
         self.linkify_h_by_h()
         self.linkify_h_by_cmd(commands)
         self.linkify_h_by_c(contacts)
         self.linkify_h_by_realms(realms)
         self.linkify_h_by_rm(resultmodulations)
+        self.linkify_h_by_es(escalations)
 
 
     #Simplify notif_period and check period by timeperiod id
@@ -557,6 +559,19 @@ class Hosts(Items):
                     rm = resultmodulations.find_by_name(rm_name)
                     new_resultmodulations.append(rm)
                 h.resultmodulations = new_resultmodulations
+
+
+    #Make link between service and it's escalations
+    def linkify_h_by_es(self, escalations):
+        for h in self:
+            if hasattr(h, 'escalations'):
+                escalations_tab = h.escalations.split(',')
+                new_escalations = []
+                for es_name in escalations_tab:
+                    es_name = es_name.strip()
+                    es = escalations.find_by_name(es_name)
+                    new_escalations.append(es)
+                h.escalations = new_escalations
 
     
     #We look for hostgroups property in hosts and
