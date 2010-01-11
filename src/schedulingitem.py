@@ -318,9 +318,6 @@ class SchedulingItem(Item):
             if rm != None:
                 (c.exit_status, self.output, self.long_output) = rm.module_return(c.exit_status, self.output, self.long_output)
         
-        self.set_state_from_exit_status(c.exit_status)
-        self.add_attempt()
-
         #If we got a bad result on a normal check, and we have dep,
         #we raise dep checks
         #put the actual check in waitdep and we return all new checks
@@ -343,6 +340,9 @@ class SchedulingItem(Item):
             for i in to_del:
                 checks.remove(i)
             return checks
+
+        self.set_state_from_exit_status(c.exit_status)
+        self.add_attempt()
 
         #The check is consume, uptade the in_checking propertie
         self.remove_in_progress_check(c)
@@ -417,11 +417,16 @@ class SchedulingItem(Item):
             return res
         
         #If no OK in a OK -> going to SOFT
-        elif c.exit_status != 0 and self.last_state == OK_UP:
+        elif c.exit_status != 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
+            if self.is_max_attempts():
+                # if max_attempts == 1
+                self.state_type = 'HARD'
+                self.attempt = 1
+            else:
+                self.state_type = 'SOFT'
+                self.attempt = 1
             #Oh? This is the typical go for a event handler :)
             res = self.get_event_handlers()
-            self.state_type = 'SOFT'
-            self.attempt = 1
             return res
         
         #If no OK in a no OK : if hard, still hard, if soft,
