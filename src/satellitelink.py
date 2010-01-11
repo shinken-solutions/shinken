@@ -77,7 +77,7 @@ class SatelliteLink(Item):
         if self.con == None:
             self.create_connexion()
         #print "Connexion is OK, now we put conf", conf
-        print "Try to put conf:", conf
+        #print "Try to put conf:", conf
         try:
             self.con.put_conf(conf)
             return True

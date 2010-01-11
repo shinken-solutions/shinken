@@ -192,6 +192,7 @@ class Config(Item):
                 
                 #SHINKEN SPECIFIC
                 'idontcareaboutsecurity' : {'required':False, 'default':'0', 'pythonize': to_bool},
+                'conf_is_correct' : {'required' : False, 'default' : '1', 'pythonize': to_bool},
     }
 
 
@@ -425,13 +426,13 @@ class Config(Item):
         #link hosts with timeperiodsand commands
         self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms, self.resultmodulations)
 
-        print "Service groups"
-        #link servicegroups members with services
-        self.servicegroups.linkify(self.services)
-
         print "Services"
         #link services with hosts, commands, timeperiods, contacts and resultmodulations
         self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations)
+
+        print "Service groups"
+        #link servicegroups members with services
+        self.servicegroups.linkify(self.services)
 
         print "Contactgroups"
         #link contacgroups with contacts
@@ -465,7 +466,13 @@ class Config(Item):
     def dump(self):
         #print 'Parameters:', self
         #print 'Hostgroups:',self.hostgroups,'\n'
-        print 'Services:', self.services
+        #print 'Services:', self.services
+        print 'Hosts:'
+        for h in self.hosts:
+            print '\t',h.get_name()
+        print 'Services:'
+        for s in self.services:
+            print '\t',s.get_name()
         #print 'Templates:', self.hosts_tpl
         #print 'Hosts:',self.hosts,'\n'
         #print 'Contacts:', self.contacts
@@ -475,7 +482,7 @@ class Config(Item):
         #print 'Commands:', self.commands
         #print "Number of services:", len(self.services.items)
         #print "Service Dep", self.servicedependencies
-        print "Schedulers", self.schedulerlinks
+        #print "Schedulers", self.schedulerlinks
 
 
     #Use to fill groups values on hosts and create new services
@@ -548,8 +555,11 @@ class Config(Item):
         #Fill default for config (self)
         super(Config, self).fill_default()
         self.hosts.fill_default()
+        self.hostgroups.fill_default()
         self.contacts.fill_default()
+        self.contactgroups.fill_default()
         self.services.fill_default()
+        self.servicegroups.fill_default()
         self.resultmodulations.fill_default()
         #first we create missing sat, so no other sat will
         #be created after this point
@@ -632,19 +642,22 @@ class Config(Item):
     #from and scheduler. The first one got everything, the second
     #do not have the satellites.
     def is_correct(self):
-        self.hosts.is_correct()
-        self.hostgroups.is_correct()
-        self.contacts.is_correct()
-        self.contactgroups.is_correct()
-        self.schedulerlinks.is_correct()
-        self.services.is_correct()
+        r = self.conf_is_correct
+        r &= self.hosts.is_correct()
+        r &= self.hostgroups.is_correct()
+        r &= self.contacts.is_correct()
+        r &= self.contactgroups.is_correct()
+        r &= self.schedulerlinks.is_correct()
+        r &= self.services.is_correct()
+        r &= self.servicegroups.is_correct()
         if hasattr(self, 'reactionners'):
-            self.reactionners.is_correct()
+            r &= self.reactionners.is_correct()
         if hasattr(self, 'pollers'):
-            self.pollers.is_correct()
+            r &= self.pollers.is_correct()
         if hasattr(self, 'brokers'):
-            self.brokers.is_correct()
-        self.timeperiods.is_correct()
+            r &= self.brokers.is_correct()
+        r &= self.timeperiods.is_correct()
+        self.conf_is_correct = r
 
 
     #We've got strings (like 1) but we want pthon elements, like True

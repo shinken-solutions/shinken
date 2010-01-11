@@ -29,7 +29,9 @@ class Contactgroup(Itemgroup):
     properties={'id': {'required': False, 'default': 0, 'status_broker_name' : None},
                 'contactgroup_name': {'required': True, 'status_broker_name' : None},
                 'alias': {'required':  True, 'status_broker_name' : None},
-                'members' : {'required': True}#No status_broker_name because it put hosts, not host_name
+                'members' : {'required': True},#No status_broker_name because it put hosts, not host_name
+                #Shinken specific
+                'unknown_members' : {'required': False, 'default': []}
                 }
 
 
@@ -116,7 +118,12 @@ class Contactgroups(Itemgroups):
             #The new member list, in id
             new_mbrs = []
             for mbr in mbrs:
-                new_mbrs.append(contacts.find_by_name(mbr))
+                m = contacts.find_by_name(mbr)
+                #Maybe the contact is missing, if so, must be put in unknown_members
+                if m != None:
+                    new_mbrs.append(m)
+                else:
+                    self.itemgroups[id].unknown_members.append(mbr)
 
             #Make members uniq
             new_mbrs = list(set(new_mbrs))

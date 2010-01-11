@@ -503,16 +503,16 @@ class Timeperiod:
                 else:
                     print "Error : the timeperiod", tp_name, "is unknown!"
         self.exclude = new_exclude
-        print "New exclude", self.exclude
 
 
     def check_exclude_rec(self):
         if self.rec_tag:
             print "Error :", self.get_name(), "is in a loop in exclude parameter"
-            return
+            return False
         self.rec_tag = True
         for tp in self.exclude:
             tp.check_exclude_rec()
+        return True
 
 
 class Timeperiods(Items):
@@ -534,6 +534,7 @@ class Timeperiods(Items):
 
     #check for loop in definition
     def is_correct(self):
+        r = True
         #We do not want a same hg to be explode again and again
         #so we tag it
         for tp in self.items.values():
@@ -542,12 +543,13 @@ class Timeperiods(Items):
         for tp in self.items.values():
             for tmp_tp in self.items.values():
                 tmp_tp.rec_tag = False
-            tp.check_exclude_rec()
+            r &= tp.check_exclude_rec()
 
         #We clean the tags
         for tp in self.items.values():
             del tp.rec_tag
 
+        return r
 
         
             

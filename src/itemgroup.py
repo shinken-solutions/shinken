@@ -72,6 +72,18 @@ class Itemgroup:
         self.members = members
 
 
+    #If a prop is absent and is not required, put the default value
+    def fill_default(self):
+        cls = self.__class__
+        properties = cls.properties
+        not_required = [prop for prop in properties \
+                            if not properties[prop]['required']]
+        for prop in not_required:
+            if not hasattr(self, prop):
+                value = properties[prop]['default']
+                setattr(self, prop, value)
+
+
     def add_string_member(self, member):
         if hasattr(self, 'members'):
             self.members += ','+member
@@ -87,11 +99,14 @@ class Itemgroup:
         return self.members.__iter__()
 
 
-    #a host group is correct if all members actually exists
+    #a item group is correct if all members actually exists,
+    #so if unknown_members is still []
     def is_correct(self):
-        if not None in self.members:
+        if self.unknown_members == []:
             return True
         else:
+            for m in self.unknown_members:
+                print "Error : the", self.__class__.my_type, self.get_name(), "got a unknown member" , m
             return False
 
 
@@ -156,6 +171,11 @@ class Itemgroups:
         return self.itemgroups.itervalues()
 
 
+    #If a prop is absent and is not required, put the default value
+    def fill_default(self):
+        for i in self:
+            i.fill_default()
+
 
     def add(self, ig):
         self.itemgroups[ig.id] = ig
@@ -167,5 +187,7 @@ class Itemgroups:
 
 
     def is_correct(self):
+        r = True
         for ig in self:
-            ig.is_correct()
+            r &= ig.is_correct()
+        return r

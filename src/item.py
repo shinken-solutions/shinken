@@ -413,11 +413,10 @@ class Items(object):
 
 
     def is_correct(self):
-        for i in self:#.items:
-            #i = self.items[id]
-            i.is_correct()
-            #if not i.is_correct():
-            #    print "An item is not correct:", i.get_name()
+        r = True
+        for i in self:
+            r &= i.is_correct()
+        return r
 
 
     #We remove useless properties and templates

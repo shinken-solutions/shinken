@@ -30,7 +30,9 @@ class Servicegroup(Itemgroup):
                 'notes': {'required': False, 'default':'', 'status_broker_name' : None},
                 'notes_url': {'required': False, 'default':'', 'status_broker_name' : None},
                 'action_url': {'required': False, 'default':'', 'status_broker_name' : None},
-                'members' : {'required': False, 'default':''}#No status_broker_name because it put hosts, not host_name
+                'members' : {'required': False, 'default':''},#No status_broker_name because it put hosts, not host_name
+                #Shinken specific
+                'unknown_members' : {'required': False, 'default': []}
                 }
 
 
@@ -119,11 +121,15 @@ class Servicegroups(Itemgroups):
             host_name = ''
             for mbr in mbrs:
                 if seek % 2 == 0:
-                    host_name = mbr
+                    host_name = mbr.strip()
                 else:
-                    service_desc = mbr
+                    service_desc = mbr.strip()
+                    print "Finding", host_name, service_desc
                     find = services.find_srv_by_name_and_hostname(host_name, service_desc)
-                    new_mbrs.append(find)
+                    if find != None:
+                        new_mbrs.append(find)
+                    else:
+                        self.itemgroups[id].unknown_members.append('%s,%s' % (host_name,service_desc))
                 seek += 1
 
             #Make members uniq

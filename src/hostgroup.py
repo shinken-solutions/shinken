@@ -31,7 +31,9 @@ class Hostgroup(Itemgroup):
                 'notes': {'required': False, 'default':'', 'status_broker_name' : None},
                 'notes_url': {'required': False, 'default':'', 'status_broker_name' : None},
                 'action_url': {'required': False, 'default':'', 'status_broker_name' : None},
-                'members' : {'required': False, 'default':''}#No status_broker_name because it put hosts, not host_name
+                'members' : {'required': False, 'default':''}, #No status_broker_name because it put hosts, not host_name
+                #Shinken specific
+                'unknown_members' : {'required': False, 'default': []}
                 }
 
     macros = {
@@ -111,6 +113,7 @@ class Hostgroups(Itemgroups):
     def linkify(self, hosts=None):
         self.linkify_hg_by_hst(hosts)
         self.linkify_hg_by_realms()
+
     
     #We just search for each hostgroup the id of the hosts 
     #and replace the name by the id
@@ -120,7 +123,11 @@ class Hostgroups(Itemgroups):
             #The new member list, in id
             new_mbrs = []
             for mbr in mbrs:
-                new_mbrs.append(hosts.find_by_name(mbr))
+                h = hosts.find_by_name(mbr)
+                if h != None:
+                    new_mbrs.append(h)
+                else:
+                    hg.unknown_members.append(mbr)
                 
             #Make members uniq
             new_mbrs = list(set(new_mbrs))
@@ -139,12 +146,13 @@ class Hostgroups(Itemgroups):
         for hg in self:
             if hasattr(hg, 'realm'):
                 for h in hg:
-                    if h.realm == None:#default value not hasattr(h, 'realm'):
-                        print "Apply a realm", hg.realm, "to host", h.get_name()
-                        h.realm = hg.realm
-                    else:
-                        if h.realm.strip() != hg.realm.strip():
-                            print "Warning : host", h.get_name(), "is not in the same realm than it's hostgroup", hg.get_name()
+                    if h != None:
+                        if h.realm == None:#default value not hasattr(h, 'realm'):
+                            print "Apply a realm", hg.realm, "to host", h.get_name()
+                            h.realm = hg.realm
+                        else:
+                            if h.realm.strip() != hg.realm.strip():
+                                print "Warning : host", h.get_name(), "is not in the same realm than it's hostgroup", hg.get_name()
 
 
 

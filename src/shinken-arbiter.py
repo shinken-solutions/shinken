@@ -129,6 +129,14 @@ class Arbiter(Daemon):
         print "****************** Correct ?******************"
         self.conf.is_correct()
 
+        #If the conf is not correct, we must get out now
+        if not self.conf.conf_is_correct:
+            print "Configuration is incorrect, sorry, I bail out"
+            sys.exit(1)
+
+        
+        #self.conf.dump()
+
         #from guppy import hpy
         #hp=hpy()
         #print hp.heap()
