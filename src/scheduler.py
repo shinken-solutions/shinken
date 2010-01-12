@@ -87,7 +87,7 @@ class Scheduler:
         self.downtimes = {}
         self.broks = {}
 
-        self.status_file = StatusFile(self)        #External status file
+        #self.status_file = StatusFile(self)        #External status file
         self.instance_id = conf.instance_id #From Arbiter. Use for 
                                             #Broker to disting betweens
                                             #schedulers

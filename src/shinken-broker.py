@@ -27,7 +27,7 @@
 #take new ones and do the (new) job.
 
 from Queue import Empty
-#from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue
 import time
 import sys
 import Pyro.core
@@ -192,6 +192,8 @@ class Broker(Satellite):
 
 		#All broks to manage
 		self.broks = []
+		self.external_queues = []
+		self.external_process = []
 
 
 	#Manage signal function
@@ -243,12 +245,13 @@ class Broker(Satellite):
 		to_del = []
 		#Call all modules if they catch the call
 		for mod in self.mods:
-			try:
-				mod.manage_brok(b)
-			except Exception as exp:
-				print "Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),exp)
-				print "DBG:", type(exp)
-				to_del.append(mod)
+			if not hasattr(mod, 'is_external') or not callable(mod.is_external) or not mod.is_external():
+				try:
+					mod.manage_brok(b)
+				except Exception as exp:
+					print "Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),exp)
+					print "DBG:", type(exp)
+					to_del.append(mod)
 		#Now remove mod that raise an exception
 		for mod in to_del:
 			self.mods.remove(mod)
@@ -270,6 +273,10 @@ class Broker(Satellite):
 					#Ok now put in queue brobs for manage by
 					#internal modules
 					self.broks.extend(tmp_broks.values())
+					#and for external queues
+					for b in tmp_broks.values():
+						for q in self.external_queues:
+							q.put(b)
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id)
                         #Ok, con is not know, so we create it
@@ -315,7 +322,17 @@ class Broker(Satellite):
 		self.modules_manager.load()
 		self.mods = self.modules_manager.get_brokers()
 		for mod in self.mods:
-			mod.init()
+			print "Doing mod", mod, mod.__dict__
+			if hasattr(mod, 'is_external') and callable(mod.is_external) and mod.is_external():
+				print "Is external!"
+				q = Queue()
+				self.external_queues.append(q)
+				mod.init(q)
+				p = Process(target=mod.main, args=())
+				p.start()
+				self.external_process.append(p)
+			else:
+				mod.init()
 
                 #Connexion init with PyNag server
 		for sched_id in self.schedulers:

@@ -58,7 +58,7 @@ class Host(SchedulingItem):
                      'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'services', \
                      'realm', 'resultmodulations'
                  )
-
+    
     id = 1 #0 is reserved for host (primary node for parents)
     ok_up = 'UP'
     my_type = 'host'

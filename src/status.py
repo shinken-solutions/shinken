@@ -203,9 +203,15 @@ class StatusFile:
                
                    
 
-    def __init__(self, scheduler):
-        self.conf = scheduler.conf
-        self.scheduler = scheduler
+    def __init__(self, path, hosts, services, contacts):
+        #self.conf = scheduler.conf
+        #self.scheduler = scheduler
+        self.path = path
+        self.hosts = hosts
+        self.services = services
+        self.contacts = contacts
+
+
 
     
     def create_output(self, elt):
@@ -219,8 +225,9 @@ class StatusFile:
                     else:
                         prop = type_map[display]['prop']
                         
-                    if prop is not None:
+                    if prop is not None and hasattr(elt, prop):
                         value = getattr(elt, prop)
+
                         #Maybe it's not a value, but a function link
                         if callable(value):
                             value = value()
@@ -235,29 +242,35 @@ class StatusFile:
                                 f = getattr(value, f)
                                 value = f()
                     else:
-                        value = type_map[display]['default']
+                        try:
+                            value = type_map[display]['default']
+                        except KeyError:  #Fuck!
+                            value = ''
                     output += '\t' + display + '=' + str(value) + '\n'
                         
         return output
 
 
     def create_or_update(self):
+        self.fd = open(self.path, 'w')
         output = ''
         now = time.time()
         output += 'info {\n' + '\tcreated=' + str(now) + '\n' + '\tversion=3.0.2\n\t}\n'
         
-        for h in self.conf.hosts:
+        for h in self.hosts.values():
             tmp = self.create_output(h)
             output += 'hoststatus {\n' + tmp + '\t}\n'
 
-        for s in self.conf.services:
+        for s in self.services.values():
             tmp = self.create_output(s)
             output += 'servicestatus {\n' + tmp + '\t}\n'
 
-        for c in self.conf.contacts:
+        for c in self.contacts.values():
             tmp = self.create_output(c)
             output += 'contactstatus {\n' + tmp + '\t}\n'
 
 
         #print "Create output :", output
-        
+        self.fd.write(output)
+        self.fd.flush()
+        self.fd.close()
