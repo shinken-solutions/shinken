@@ -190,6 +190,10 @@ class Broker(Satellite):
 		self.have_modules = False
 		self.modules = []
 
+		#All broks to manage
+		self.broks = []
+
+
 	#Manage signal function
 	#TODO : manage more than just quit
 	#Frame is just garbage
@@ -252,7 +256,7 @@ class Broker(Satellite):
 
 	#We get new broks from schedulers
 	def get_new_broks(self):
-		new_broks = {}
+
 		#We check for new check in each schedulers and put
 		#the result in new_checks
 		for sched_id in self.schedulers:
@@ -262,7 +266,10 @@ class Broker(Satellite):
 					tmp_broks = con.get_broks()
 					for b in tmp_broks.values():
 						b.instance_id = self.schedulers[sched_id]['instance_id']
-					new_broks.update(tmp_broks)
+					
+					#Ok now put in queue brobs for manage by
+					#internal modules
+					self.broks.extend(tmp_broks.values())
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id)
                         #Ok, con is not know, so we create it
@@ -283,11 +290,6 @@ class Broker(Satellite):
 			except Exception,x: 
 				print ''.join(Pyro.util.getPyroTraceback(x))
 				sys.exit(0)
-		#Ok, we've got new broks in new_broks
-		#print "New Broks:", new_broks
-		for b in new_broks.values():
-			#Ok, we can get the brok, and doing something with it
-			self.manage_brok(b)
 
 
 	#Main function, will loop forever
@@ -331,11 +333,36 @@ class Broker(Satellite):
 			#Now we check if arbiter speek to us in the daemon.
 			#If so, we listen for it
 			#When it push us conf, we reinit connexions
-			self.watch_for_new_conf(1)
-
-			#timeout = 1.0
-			#Now we can get new actions from schedulers
+			self.watch_for_new_conf(0.0)
+			
+			#Now we can get new broks from schedulers in self.broks
 			self.get_new_broks()
+			
+		        #We must had new broks at the end of the list, so we reverse the list
+			self.broks.reverse()			
+			
+			start = time.time()
+			while(len(self.broks) != 0):
+				now = time.time()
+				#Do not 'manage' more than 1s, we must get new broks
+				#every 1s
+				if now - start > 1:
+					break
+
+				b = self.broks.pop()
+			        #Ok, we can get the brok, and doing something with it
+				self.manage_brok(b)
+				
+				#Ok we manage brok, but we still want to listen to arbiter
+				self.watch_for_new_conf(0.0)
+
+		        #Restore the good sense
+			self.broks.reverse()
+			
+			#Maybe we do not have something to do, so we wait a little
+			if len(self.broks) == 0:
+				self.watch_for_new_conf(1.0)
+
 			#TODO : sleep better...
 			#time.sleep(1)
 
