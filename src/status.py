@@ -273,8 +273,10 @@ class StatusFile:
 
 
         #print "Create output :", output
-        temp_fh, temp_status_file = tempfile.mkstemp(dir=os.path.dirname(self.path))
-        os.write(temp_fh, output)
-        os.close(temp_fh)
-        os.rename(temp_status_file, self.path)
-
+        try :
+            temp_fh, temp_status_file = tempfile.mkstemp(dir=os.path.dirname(self.path))
+            os.write(temp_fh, output)
+            os.close(temp_fh)
+            os.rename(temp_status_file, self.path)
+        except OSError as exp:
+            return exp

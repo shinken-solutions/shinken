@@ -27,7 +27,7 @@
 #take new ones and do the (new) job.
 
 from Queue import Empty
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, active_children
 import time
 import sys
 import Pyro.core
@@ -299,6 +299,33 @@ class Broker(Satellite):
 				sys.exit(0)
 
 
+
+
+	#modules can have process, and they can die
+	def check_and_del_zombie_modules(self):
+                #Active children make a join with every one, useful :)
+		act = active_children()
+		m_to_del = []
+		for mod in self.mods:
+			if hasattr(mod, '_process'):
+				p = mod._process
+				q = mod._queue
+				if not mod._process.is_alive():
+					print "Warning : the external module %s goes down unexpectly!" % mod.get_name()
+                                        #AIM ... Press FIRE ... <B>HEAD SHOT!</B>
+					p.terminate()
+					q.close()
+					q.join_thread()
+					p.join(timeout=1)
+					self.external_queues.remove(q)
+					self.external_process.remove(p)
+					m_to_del.append(mod)
+                #OK, now really del the module
+		#TODO : deinit module
+		for mod in m_to_del:
+			self.mods.remove(mod)
+
+
 	#Main function, will loop forever
 	def main(self):
 
@@ -330,6 +357,8 @@ class Broker(Satellite):
 				mod.init(q)
 				p = Process(target=mod.main, args=())
 				p.start()
+				mod._process = p
+				mod._queue = q
 				self.external_process.append(p)
 			else:
 				mod.init()
@@ -346,6 +375,9 @@ class Broker(Satellite):
 			if not i % 50:
 				print "Loop ", i
 			#begin_loop = time.time()
+
+			#Begin to clean modules
+			self.check_and_del_zombie_modules()
 
 			#Now we check if arbiter speek to us in the daemon.
 			#If so, we listen for it

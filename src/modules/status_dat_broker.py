@@ -40,7 +40,8 @@ def get_broker(plugin):
     print "Get a Host Perfdata broker for plugin %s" % plugin.get_name()
     #Catch errors
     path = plugin.path
-    broker = Status_dat_broker(plugin.get_name(), path)
+    update_interval = int(plugin.status_update_interval)
+    broker = Status_dat_broker(plugin.get_name(), path, update_interval)
     return broker
 
 
@@ -52,9 +53,10 @@ def get_type():
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Status_dat_broker:
-    def __init__(self, name, path):
+    def __init__(self, name, path, update_interval):
         self.path = path
         self.name = name
+        self.update_interval = update_interval
         
 
     #Called by Broker so we can do init stuff
@@ -88,7 +90,6 @@ class Status_dat_broker:
         if hasattr(self, manager):
             f = getattr(self, manager)
             f(b)
-
 
 
     def manage_program_status_brok(self, b):
@@ -182,9 +183,13 @@ class Status_dat_broker:
             b = self.q.get() # can block here :)
             self.manage_brok(b)
             
-            if time.time() - last_generation > 5:
+            if time.time() - last_generation > self.update_interval:
                 print "Generating status file!"
-                self.status.create_or_update()
+                r = self.status.create_or_update()
+                #if we get an error (an exception in fact) we bail out
+                if r != None:
+                    print "[status_dat] Error :", r
+                    break
                 last_generation = time.time()
             
 
