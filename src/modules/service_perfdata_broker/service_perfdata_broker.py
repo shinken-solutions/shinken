@@ -25,22 +25,6 @@
 #It will need just a new file, and a new manager :)
 
 
-#This text is print at the import
-#print "I am Service Perfdata Broker"
-
-
-#called by the plugin manager to get a broker
-#def get_broker(plugin):
-#    print "Get a Service Perfdata broker for plugin %s" % plugin.get_name()
-#    #Catch errors
-#    path = plugin.path
-#    broker = Service_perfdata_broker(plugin.get_name(), path)
-#    return broker
-
-
-#def get_type():
-#    return 'service_perfdata'
-
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database

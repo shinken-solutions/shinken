@@ -26,25 +26,6 @@
 
 import copy
 import sqlite3
-#from MySQLdb import IntegrityError
-#from MySQLdb import ProgrammingError
-
-#This text is print at the import
-#print "I am Merlin Sqlite Broker"
-
-
-#called by the plugin manager to get a broker
-#def get_broker(plugin):
-#    print "Get a Merlin sqlite broker for plugin %s" % plugin.get_name()
-    #TODO : catch errors
-#    database_path = plugin.database_path
-#    broker = Merlindb_sqlite_broker(plugin.get_name(), database_path)
-#    return broker
-
-
-#def get_type():
-#    return 'merlindb_sqlite'
-
 
 
 #Class for the Merlindb Broker

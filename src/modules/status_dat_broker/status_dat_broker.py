@@ -31,23 +31,6 @@ from service import Service
 from contact import Contact
 from status import StatusFile
 
-#This text is print at the import
-#print "I am Status Dat Broker"
-
-
-#called by the plugin manager to get a broker
-#def get_broker(plugin):
-#    print "Get a Host Perfdata broker for plugin %s" % plugin.get_name()
-#    #Catch errors
-#    path = plugin.path
-#    update_interval = int(plugin.status_update_interval)
-#    broker = Status_dat_broker(plugin.get_name(), path, update_interval)
-#    return broker
-
-
-#def get_type():
-#    return 'status_dat'
-
 
 
 #Class for the Merlindb Broker
