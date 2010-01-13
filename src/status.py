@@ -19,6 +19,8 @@
 
 #File for create the status.dat file
 import time
+import os
+import tempfile
 
 from service import Service
 from host import Host
@@ -252,7 +254,7 @@ class StatusFile:
 
 
     def create_or_update(self):
-        self.fd = open(self.path, 'w')
+
         output = ''
         now = time.time()
         output += 'info {\n' + '\tcreated=' + str(now) + '\n' + '\tversion=3.0.2\n\t}\n'
@@ -271,6 +273,8 @@ class StatusFile:
 
 
         #print "Create output :", output
-        self.fd.write(output)
-        self.fd.flush()
-        self.fd.close()
+        temp_fh, temp_status_file = tempfile.mkstemp(dir=os.path.dirname(self.path))
+        os.write(temp_fh, output)
+        os.close(temp_fh)
+        os.rename(temp_status_file, self.path)
+
