@@ -29,37 +29,11 @@ import copy
 couchdb = None
 socket = None
 
-#This text is print at the import
-print "I am Couchdb Broker"
-
-
-#called by the plugin manager to get a broker
-def get_broker(plugin):
-    global couchdb
-    global socket
-
-    print "Get a Couchdb broker for plugin %s" % plugin.get_name()
-    #first try the import
-    try:
-        import couchdb as couchdb_imp
-        couchdb = couchdb_imp
-        import socket as socket_imp # For Nagle HACK
-        socket = socket_imp
-    except ImportError as exp:
-        print "Warning : the plugin type %s is unavalable : %s" % (get_type(), exp)
-        return None
-    print "Get a couchdb for plugin %s" % plugin.get_name()
-
-    #TODO : catch errors
-    host = plugin.host
-    user = plugin.user
-    password = plugin.password
-    broker = Couchdb_broker(plugin.get_name(), host, user, password)
-    return broker
-
-
-def get_type():
-    return 'couchdb'
+#Failed import will be catch by __init__.py
+import couchdb as couchdb_imp
+couchdb = couchdb_imp
+import socket as socket_imp # For Nagle HACK
+socket = socket_imp
 
 
 

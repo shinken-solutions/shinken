@@ -25,67 +25,15 @@
 
 
 import copy
-import os
 #import MySQLdb
-connect_function = None
-IntegrityError_exp = None
-ProgrammingError_exp = None
-DatabaseError_exp = None
-InternalError_exp = None
-DataError_exp = None
-OperationalError_exp = None
-
-#This text is print at the import
-print "I am Ndo Broker for Oracle"
-
-
-#called by the plugin manager to get a broker
-def get_broker(plugin):
-    global connect_function
-    global IntegrityError_exp, ProgrammingError_exp, DatabaseError_exp
-    global InternalError_exp, DataError_exp, OperationalError_exp
-    
-    #first try the import
-    try:
-        print "importing Oracle"
-        from cx_Oracle import connect
-        connect_function = connect
-        from cx_Oracle import IntegrityError
-        IntegrityError_exp = IntegrityError
-        from cx_Oracle import ProgrammingError
-        ProgrammingError_exp = ProgrammingError
-        from cx_Oracle import DatabaseError
-        DatabaseError_exp = DatabaseError
-        from cx_Oracle import InternalError
-        InternalError_exp = InternalError
-        from cx_Oracle import DataError
-        DataError_exp = DataError
-        from cx_Oracle import OperationalError
-        OperationalError_exp = OperationalError
-    except ImportError as exp:
-        print "Warning : the plugin type %s is unavalable : %s" % (get_type(), exp)
-        return None
-    print "Get a ndoDB broker for plugin %s" % plugin.get_name()
-    #TODO : catch errors
-    if hasattr(plugin, 'oracle_home'):
-        os.environ['ORACLE_HOME'] = plugin.oracle_home
-        print "INFO: setting Oracle_HOME :", plugin.oracle_home
-    
-    user = plugin.user
-    password = plugin.password
-    database = plugin.database
-    broker = Ndodb_Oracle_broker(plugin.get_name(), user, password, database)
-    return broker
-
-
-def get_type():
-    return 'ndodb_oracle'
+from MySQLdb import IntegrityError
+from MySQLdb import ProgrammingError
 
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Ndodb_Oracle_broker:
-    def __init__(self, name, user, password, database):
+class Ndodb_broker:
+    def __init__(self, name, host, user, password, database, character_set):
         #Mapping for name of dataand transform function
         self.mapping = {
             'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : None},
@@ -95,9 +43,11 @@ class Ndodb_Oracle_broker:
                                 },
             }
         self.name = name
+        self.host = host
         self.user = user
         self.password = password
         self.database = database
+        self.character_set = character_set
 
 
 
@@ -109,11 +59,12 @@ class Ndodb_Oracle_broker:
     def get_name(self):
         return self.name
 
+
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
-        print "I connect to NDO database with Oracle"
+        print "I connect to NDO database"
         self.connect_database()
     
 
@@ -136,39 +87,32 @@ class Ndodb_Oracle_broker:
     #Create the database connexion
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
-        connstr='%s/%s@%s' % (self.user, self.password, self.database)
-
-        self.db = connect_function(connstr)
-        self.db_cursor = self.db.cursor()
-        self.db_cursor.arraysize=50
+        import MySQLdb
+        self.db = MySQLdb.connect (host = self.host, user = self.user, \
+                                       passwd = self.password, db = self.database)
+        self.db.set_character_set(self.character_set)
+        self.db_cursor = self.db.cursor ()
+        self.db_cursor.execute('SET NAMES %s;' % self.character_set)
+        self.db_cursor.execute('SET CHARACTER SET %s;' % self.character_set)
+        self.db_cursor.execute('SET character_set_connection=%s;' % self.character_set)
+        #Thanks http://www.dasprids.de/blog/2007/12/17/python-mysqldb-and-utf-8 for utf8 code :)
 
 
     #Just run the query
     #TODO: finish catch
     def execute_query(self, query):
-        #print "I run Oracle query", query, "\n"
+        #print "I run query", query, "\n"
         try:
             self.db_cursor.execute(query)
             self.db.commit ()
-        except IntegrityError_exp as exp:
+        except IntegrityError as exp:
             print "[Ndodb] Warning : a query raise an integrity error : %s, %s" % (query, exp) 
-        except ProgrammingError_exp as exp:
+        except ProgrammingError as exp:
             print "[Ndodb] Warning : a query raise a programming error : %s, %s" % (query, exp) 
-        except DatabaseError_exp as exp:
-            print "[Ndodb] Warning : a query raise a database error : %s, %s" % (query, exp) 
-        except InternalError_exp as exp:
-            print "[Ndodb] Warning : a query raise an internal error : %s, %s" % (query, exp) 
-        except DataError_exp as exp:
-            print "[Ndodb] Warning : a query raise a data error : %s, %s" % (query, exp)
-        except OperationalError_exp as exp:
-            print "[Ndodb] Warning : a query raise an operational error : %s, %s" % (query, exp)
-        except Exception as exp:
-             print "[Ndodb] Warning : a query raise an unknow error : %s, %s" % (query, exp)
-             print exp.__dict__
 
 
     def get_host_object_id_by_name(self, host_name):
-        query = "SELECT id from objects where name1='%s' and objecttype_id='1'" % host_name
+        query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='1'" % host_name
         self.db_cursor.execute(query)
         row = self.db_cursor.fetchone ()
         if row == None or len(row) < 1:
@@ -178,7 +122,7 @@ class Ndodb_Oracle_broker:
 
 
     def get_hostgroup_object_id_by_name(self, hostgroup_name):
-        query = "SELECT id from objects where name1='%s' and objecttype_id='3'" % hostgroup_name
+        query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='3'" % hostgroup_name
         self.db_cursor.execute(query)
         row = self.db_cursor.fetchone ()
         if row == None or len(row) < 1:
@@ -188,7 +132,7 @@ class Ndodb_Oracle_broker:
 
 
     def get_service_object_id_by_name(self, host_name, service_description):
-        query = "SELECT id from objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
+        query = "SELECT object_id from nagios_objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
         self.db_cursor.execute(query)
         row = self.db_cursor.fetchone ()
         if row == None or len(row) < 1:
@@ -198,7 +142,7 @@ class Ndodb_Oracle_broker:
 
 
     def get_servicegroup_object_id_by_name(self, servicegroup_name):
-        query = "SELECT id from objects where name1='%s' and objecttype_id='4'" % servicegroup_name
+        query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='4'" % servicegroup_name
         self.db_cursor.execute(query)
         row = self.db_cursor.fetchone ()
         if row == None or len(row) < 1:
@@ -210,7 +154,7 @@ class Ndodb_Oracle_broker:
 
     #Create a INSERT query in table with all data of data (a dict)
     def create_insert_query(self, table, data):
-        query = "INSERT INTO %s " % (''+table)
+        query = "INSERT INTO %s " % ('nagios_'+table)
         props_str = ' ('
         values_str = ' ('
         i = 0 #for the ',' problem... look like C here...
@@ -240,7 +184,7 @@ class Ndodb_Oracle_broker:
     #Create a update query of table with data, and use where data for
     #the WHERE clause
     def create_update_query(self, table, data, where_data):
-        query = "UPDATE %s set " % (''+table)
+        query = "UPDATE %s set " % ('nagios_'+table)
 		
         #First data manage
         query_folow = ''
@@ -295,7 +239,7 @@ class Ndodb_Oracle_broker:
                   'servicestatus']
         res = []
         for table in tables:
-            q = "DELETE FROM %s WHERE instance_id = '%s' " % (''+table, instance_id)
+            q = "DELETE FROM %s WHERE instance_id = '%s' " % ('nagios_'+table, instance_id)
             res.append(q)
         return res
 
@@ -304,7 +248,7 @@ class Ndodb_Oracle_broker:
     #Like pid, daemon mode, last activity, etc
     #We aleady clean database, so insert
 
-    #TODO: fill nagios_instances
+    #TODO : fill nagios_instances
     def manage_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
         to_del = ['instance_name']
@@ -345,7 +289,7 @@ class Ndodb_Oracle_broker:
         host_id = self.get_host_object_id_by_name(data['host_name'])
         
         #print "DATA:", data
-        hosts_data = {'id' : data['id'], 'instance_id' : data['instance_id'], 
+        hosts_data = {'host_id' : data['id'], 'instance_id' : data['instance_id'], 
                       'host_object_id' : host_id, 'alias' : data['alias'],
                       'display_name' : data['display_name'], 'address' : data['address'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
@@ -395,7 +339,7 @@ class Ndodb_Oracle_broker:
         #print "DATA:", data
         #print "HOST ID:", host_id
         #print "SERVICE ID:", service_id
-        services_data = {'id' : data['id'], 'instance_id' : data['instance_id'], 
+        services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'], 
                       'service_object_id' : service_id, 'host_object_id' : host_id,
                       'display_name' : data['display_name'], 
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
@@ -443,7 +387,7 @@ class Ndodb_Oracle_broker:
         
         hostgroup_id = self.get_hostgroup_object_id_by_name(data['hostgroup_name'])
         
-        hostgroups_data = {'id' : data['id'], 'instance_id' :  data['instance_id'],
+        hostgroups_data = {'hostgroup_id' : data['id'], 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'hostgroup_object_id' : hostgroup_id,
                            'alias' : data['alias']
             }
@@ -478,7 +422,7 @@ class Ndodb_Oracle_broker:
         servicegroup_id = self.get_servicegroup_object_id_by_name(data['servicegroup_name'])
 
 
-        servicegroups_data = {'id' : data['id'], 'instance_id' :  data['instance_id'],
+        servicegroups_data = {'servicegroup_id' : data['id'], 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'servicegroup_object_id' : servicegroup_id,
                            'alias' : data['alias']
             }
@@ -592,7 +536,7 @@ class Ndodb_Oracle_broker:
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
         
-        contactgroups_data = {'id' : data['id'], 'instance_id' :  data['instance_id'],
+        contactgroups_data = {'contactgroup_id' : data['id'], 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'contactgroup_object_id' : data['id'],
                            'alias' : data['alias']
             }

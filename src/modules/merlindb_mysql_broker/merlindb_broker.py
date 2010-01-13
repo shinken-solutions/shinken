@@ -29,29 +29,6 @@ import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError
 
-#This text is print at the import
-print "I am Merlin Broker"
-
-
-#called by the plugin manager to get a broker
-def get_broker(plugin):
-    print "Get a Merlin broker for plugin %s" % plugin.get_name()
-    #TODO : catch errors
-    host = plugin.host
-    user = plugin.user
-    password = plugin.password
-    database = plugin.database
-    if hasattr( plugin, 'character_set'):
-        character_set = plugin.character_set
-    else:
-        character_set = 'utf8'
-    broker = Merlindb_broker(plugin.get_name(), host, user, password, database, character_set)
-    return broker
-
-
-def get_type():
-    return 'merlindb_mysql'
-
 
 
 #Class for the Merlindb Broker

@@ -41,13 +41,21 @@ class ModulesManager():
     def load(self):
         #We get all modules file of our type (end with broker.py for example)
         modules_files = [fname[:-3] for fname in os.listdir(self.modules_path) if fname.endswith(self.modules_type+".py")]
+        
         #And directories (no remove of .py)
-        #modules_files.extend([fname for fname in os.listdir(self.modules_path) if fname.endswith(self.modules_type)])
+        modules_files.extend([fname for fname in os.listdir(self.modules_path) if fname.endswith(self.modules_type)])
         
         #Now we try to load thems
         if not self.modules_path in sys.path:
             sys.path.append(self.modules_path)
-        self.imported_modules = [__import__(fname) for fname in modules_files]
+        
+        self.imported_modules = []
+        for fname in modules_files:
+            try:
+                self.imported_modules.append(__import__(fname))
+            except ImportError as exp:
+                print "Warning :", exp
+
         self.modules_assoc = []
         for module in self.modules:
             module_type = module.module_type

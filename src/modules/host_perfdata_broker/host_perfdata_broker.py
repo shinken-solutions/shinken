@@ -25,26 +25,10 @@
 #It will need just a new file, and a new manager :)
 
 
-#This text is print at the import
-print "I am Service Perfdata Broker"
-
-
-#called by the plugin manager to get a broker
-def get_broker(plugin):
-    print "Get a Service Perfdata broker for plugin %s" % plugin.get_name()
-    #Catch errors
-    path = plugin.path
-    broker = Service_perfdata_broker(plugin.get_name(), path)
-    return broker
-
-
-def get_type():
-    return 'service_perfdata'
-
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Service_perfdata_broker:
+class Host_perfdata_broker:
     def __init__(self, name, path):
         self.path = path
         self.name = name
@@ -54,7 +38,7 @@ class Service_perfdata_broker:
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
-        print "I open the service-perfdata file"
+        print "I open the host-perfdata file"
         self.file = open(self.path,'a')
     
 
@@ -74,8 +58,8 @@ class Service_perfdata_broker:
 
     #We've got a 0, 1, 2 or 3 (or something else? ->3
     #And want a real OK, WARNING, CRITICAL, etc...
-    def resolve_service_state(self, state):
-        states = {0 : 'OK', 1 : 'WARNING', 2 : 'CRITICAL', 3 : 'UNKNOWN'}
+    def resolve_host_state(self, state):
+        states = {0 : 'UP', 1 : 'DOWN', 2 : 'DOWN', 3 : 'UNKNOWN'}
         if state in states:
             return states[state]
         else:
@@ -83,13 +67,13 @@ class Service_perfdata_broker:
 
 
     #A service check have just arrived, we UPDATE data info with this
-    def manage_service_check_result_brok(self, b):
+    def manage_host_check_result_brok(self, b):
         data = b.data
         #The original model
-        #"$TIMET\t$HOSTNAME\t$SERVICEDESC\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
-        current_state = self.resolve_service_state(data['current_state'])
-        s = "%s\t%s\t%s\t%s\t%s\t%s\n" % (int(data['last_check']),data['host_name'], \
-                                          data['service_description'], data['output'], \
+        #"$TIMET\t$HOSTNAME\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
+        current_state = self.resolve_host_state(data['current_state'])
+        s = "%s\t%s\t%s\t%s\t%s\n" % (int(data['last_check']),data['host_name'], \
+                                          data['output'], \
                                           current_state, data['perf_data'] )
 
         self.file.write(s)
