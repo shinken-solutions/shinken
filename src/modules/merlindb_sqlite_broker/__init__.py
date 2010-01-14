@@ -27,7 +27,7 @@ properties = {
 
 
 #called by the plugin manager to get a broker
-def get_broker(plugin):
+def get_instance(plugin):
     print "Get a Merlin sqlite broker for plugin %s" % plugin.get_name()
 
     #First try to import
@@ -39,10 +39,6 @@ def get_broker(plugin):
 
    #TODO : catch errors
     database_path = plugin.database_path
-    broker = Merlindb_sqlite_broker(plugin.get_name(), database_path)
-    return broker
-
-
-def get_type():
-    return properties['type']
+    instance = Merlindb_sqlite_broker(plugin.get_name(), database_path)
+    return instance
 

@@ -26,7 +26,7 @@ properties = {
     }
 
 #called by the plugin manager to get a broker
-def get_broker(plugin):
+def get_instance(plugin):
 
     print "Get a Couchdb broker for plugin %s" % plugin.get_name()
 
@@ -41,9 +41,6 @@ def get_broker(plugin):
     host = plugin.host
     user = plugin.user
     password = plugin.password
-    broker = Couchdb_broker(plugin.get_name(), host, user, password)
-    return broker
+    instance = Couchdb_broker(plugin.get_name(), host, user, password)
+    return instance
 
-
-def get_type():
-    return properties['type']

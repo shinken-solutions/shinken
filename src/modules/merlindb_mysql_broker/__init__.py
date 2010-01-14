@@ -26,7 +26,7 @@ properties = {
 
 
 #called by the plugin manager to get a broker
-def get_broker(plugin):
+def get_instance(plugin):
     print "Get a Merlin broker for plugin %s" % plugin.get_name()
 
     
@@ -47,9 +47,6 @@ def get_broker(plugin):
         character_set = plugin.character_set
     else:
         character_set = 'utf8'
-    broker = Merlindb_broker(plugin.get_name(), host, user, password, database, character_set)
-    return broker
+    instance = Merlindb_broker(plugin.get_name(), host, user, password, database, character_set)
+    return instance
 
-
-def get_type():
-    return properties['type']

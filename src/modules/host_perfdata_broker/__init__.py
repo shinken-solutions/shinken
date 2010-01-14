@@ -27,7 +27,7 @@ properties = {
 
 
 #called by the plugin manager to get a broker
-def get_broker(plugin):
+def get_instance(plugin):
     print "Get a Host Perfdata broker for plugin %s" % plugin.get_name()
 
     #First try to import
@@ -40,10 +40,7 @@ def get_broker(plugin):
 
     #Catch errors
     path = plugin.path
-    broker = Host_perfdata_broker(plugin.get_name(), path)
-    return broker
+    instance = Host_perfdata_broker(plugin.get_name(), path)
+    return instance
 
-
-def get_type():
-    return properties['type']
 

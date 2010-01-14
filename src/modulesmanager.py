@@ -44,7 +44,7 @@ class ModulesManager():
         #We get all modules file of our type (end with broker.py for example)
         modules_files = [fname[:-3] for fname in os.listdir(self.modules_path) if fname.endswith(self.modules_type+".py")]
         
-        #And directories (no remove of .py)
+        #And directories (no remove of .py but still with broker for example at the end)
         modules_files.extend([fname for fname in os.listdir(self.modules_path) if fname.endswith(self.modules_type)])
         
         #Now we try to load thems
@@ -71,22 +71,20 @@ class ModulesManager():
                 print "Warning : the module type %s for %s was not found in modules!" % (module_type, module.get_name())
     
 
-    #Get broker instance to five them after broks
+    #Get modules instance to give them after broks
     def get_instances(self):
-        self.brokers = []
+        self.instances = []
         for (module, mod) in self.modules_assoc:
-            b = mod.get_broker(module)
-            if b != None: #None = Bad thing happened :)
+            inst = mod.get_instance(module)
+            if inst != None: #None = Bad thing happened :)
                 #the instance need the properties of the module
-                b.properties = mod.properties
-                self.brokers.append(b)
+                inst.properties = mod.properties
+                self.instances.append(inst)
 
-        print "Load", len(self.brokers), "module instances"
+        print "Load", len(self.instances), "module instances"
 
-        for inst in self.brokers:
-            print "Doing mod instance", inst, inst.__dict__
+        for inst in self.instances:
             if 'external' in inst.properties and inst.properties['external']:
-                print "Is external!"
                 inst.properties['to_queue'] = Queue()
                 inst.properties['from_queue'] = Queue()
                 inst.init()
@@ -96,7 +94,7 @@ class ModulesManager():
                 inst.properties['external'] = False
                 inst.init()
 
-        return self.brokers
+        return self.instances
 
     def remove_instance(self, inst):
         #External instances need to be close before (process + queues)
@@ -109,13 +107,13 @@ class ModulesManager():
             inst.properties['from_queue'].join_thread()
 
         #Then do not listen anymore about it
-        self.brokers.remove(inst)
+        self.instances.remove(inst)
 
 
     def check_alive_instances(self):
         to_del = []
         #Only for external
-        for inst in self.brokers:
+        for inst in self.instances:
             if inst.properties['external'] and not inst.properties['process'].is_alive():
                 print "Error : the external module %s goes down unexpectly!" % inst.get_name()
                 to_del.append(inst)
@@ -125,16 +123,16 @@ class ModulesManager():
 
 
     def get_internal_instances(self):
-        return [inst for inst in self.brokers if not inst.properties['external']]
+        return [inst for inst in self.instances if not inst.properties['external']]
 
 
     def get_external_instances(self):
-        return [inst for inst in self.brokers if inst.properties['external']]
+        return [inst for inst in self.instances if inst.properties['external']]
 
 
     def get_external_to_queues(self):
-        return [inst.properties['to_queue'] for inst in self.brokers if inst.properties['external']]
+        return [inst.properties['to_queue'] for inst in self.instances if inst.properties['external']]
 
 
     def get_external_from_queues(self):
-        return [inst.properties['from_queue'] for inst in self.brokers if inst.properties['external']]
+        return [inst.properties['from_queue'] for inst in self.instances if inst.properties['external']]

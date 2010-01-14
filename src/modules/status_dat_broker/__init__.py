@@ -28,7 +28,7 @@ properties = {
 
 
 #called by the plugin manager to get a broker
-def get_broker(plugin):
+def get_instance(plugin):
     print "Get a Host Perfdata broker for plugin %s" % plugin.get_name()
 
     print plugin.__dict__
@@ -42,10 +42,6 @@ def get_broker(plugin):
     #Catch errors
     path = plugin.path
     update_interval = int(plugin.status_update_interval)
-    broker = Status_dat_broker(plugin.get_name(), path, update_interval)
-    return broker
-
-
-def get_type():
-    return properties['type']
+    instance = Status_dat_broker(plugin.get_name(), path, update_interval)
+    return instance
 

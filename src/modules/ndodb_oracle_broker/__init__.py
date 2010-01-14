@@ -29,7 +29,7 @@ properties = {
 
 
 #called by the plugin manager to get a broker
-def get_broker(plugin):
+def get_instance(plugin):
     #Try to import all need modules
     try:
         from ndodb_oracle_broker import Ndodb_Oracle_broker
@@ -45,9 +45,6 @@ def get_broker(plugin):
     user = plugin.user
     password = plugin.password
     database = plugin.database
-    broker = Ndodb_Oracle_broker(plugin.get_name(), user, password, database)
-    return broker
+    instance = Ndodb_Oracle_broker(plugin.get_name(), user, password, database)
+    return instance
 
-
-def get_type():
-    return properties['type']
