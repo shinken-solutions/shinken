@@ -21,6 +21,11 @@
 print "I am Merlin Sqlite Broker"
 
 
+properties = {
+    'type' : 'merlindb_sqlite',
+    }
+
+
 #called by the plugin manager to get a broker
 def get_broker(plugin):
     print "Get a Merlin sqlite broker for plugin %s" % plugin.get_name()
@@ -39,5 +44,5 @@ def get_broker(plugin):
 
 
 def get_type():
-    return 'merlindb_sqlite'
+    return properties['type']
 

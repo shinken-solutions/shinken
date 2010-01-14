@@ -61,7 +61,7 @@ class ModulesManager():
             module_type = module.module_type
             is_find = False
             for mod in self.imported_modules:
-                if mod.get_type() == module_type:
+                if mod.properties['type'] == module_type:
                     self.modules_assoc.append((module, mod))
                     is_find = True
             if not is_find:
@@ -70,11 +70,30 @@ class ModulesManager():
     
 
     #Get broker instance to five them after broks
-    def get_brokers(self):
+    def get_instances(self):
         brokers = []
         for (module, mod) in self.modules_assoc:
             b = mod.get_broker(module)
             if b != None: #None = Bad thing happened :)
+                #the instance need the properties of the module
+                b.properties = mod.properties
                 brokers.append(b)
-        print "Load", len(brokers), "brokers"
+
+        print "Load", len(brokers), "module instances"
+
+#        for inst in brokers:
+#            print "Doing mod instance", inst, inst.__dict__
+#            if hasattr(inst, 'is_external') and callable(inst.is_external) and inst.is_external():
+#                print "Is external!"
+#                q = Queue()
+#                self.external_queues.append(q)
+#                inst.init(q)
+#                p = Process(target=inst.main, args=())
+#                p.start()
+#                inst._process = p
+#                inst._queue = q
+#                self.external_process.append(p)
+#            else:
+#                inst.init()
+
         return brokers

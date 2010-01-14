@@ -21,6 +21,11 @@
 print "I am Ndo Mysql Broker"
 
 
+properties = {
+    'type' : 'ndodb_mysql',
+    }
+
+
 #called by the plugin manager to get a broker
 def get_broker(plugin):
     
@@ -48,4 +53,4 @@ def get_broker(plugin):
 
 
 def get_type():
-    return 'ndodb_mysql'
+    return properties['type']

@@ -21,6 +21,11 @@
 print "I am Service Perfdata Broker"
 
 
+properties = {
+    'type' : 'service_perfdata',
+    }
+
+
 #called by the plugin manager to get a broker
 def get_broker(plugin):
     print "Get a Service Perfdata broker for plugin %s" % plugin.get_name()
@@ -40,4 +45,4 @@ def get_broker(plugin):
 
 
 def get_type():
-    return 'service_perfdata'
+    return properties['type']

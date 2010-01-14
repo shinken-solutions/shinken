@@ -184,7 +184,7 @@ class Broker(Satellite):
 		self.have_new_conf = False
 		#Ours schedulers
 		self.schedulers = {}
-		self.mods = [] # for brokers from modules
+		self.mod_instances = [] # for brokers from modules
 		
 		#Modules are load one time
 		self.have_modules = False
@@ -244,7 +244,7 @@ class Broker(Satellite):
 	def manage_brok(self, b):
 		to_del = []
 		#Call all modules if they catch the call
-		for mod in self.mods:
+		for mod in self.mod_instances:
 			if not hasattr(mod, 'is_external') or not callable(mod.is_external) or not mod.is_external():
 				try:
 					mod.manage_brok(b)
@@ -254,7 +254,7 @@ class Broker(Satellite):
 					to_del.append(mod)
 		#Now remove mod that raise an exception
 		for mod in to_del:
-			self.mods.remove(mod)
+			self.mod_instances.remove(mod)
 
 
 	#We get new broks from schedulers
@@ -306,7 +306,7 @@ class Broker(Satellite):
                 #Active children make a join with every one, useful :)
 		act = active_children()
 		m_to_del = []
-		for mod in self.mods:
+		for mod in self.mod_instances:
 			if hasattr(mod, '_process'):
 				p = mod._process
 				q = mod._queue
@@ -323,7 +323,7 @@ class Broker(Satellite):
                 #OK, now really del the module
 		#TODO : deinit module
 		for mod in m_to_del:
-			self.mods.remove(mod)
+			self.mod_instances.remove(mod)
 
 
 	#Main function, will loop forever
@@ -347,21 +347,21 @@ class Broker(Satellite):
 		#Do the modules part, we have our modules in self.modules
 		self.modules_manager = ModulesManager('broker', self.modulespath, self.modules)
 		self.modules_manager.load()
-		self.mods = self.modules_manager.get_brokers()
-		for mod in self.mods:
-			print "Doing mod", mod, mod.__dict__
-			if hasattr(mod, 'is_external') and callable(mod.is_external) and mod.is_external():
+		self.mod_instances = self.modules_manager.get_instances()
+		for inst in self.mod_instances:
+			print "Doing mod instance", inst, inst.__dict__
+			if hasattr(inst, 'is_external') and callable(inst.is_external) and inst.is_external():
 				print "Is external!"
 				q = Queue()
 				self.external_queues.append(q)
-				mod.init(q)
-				p = Process(target=mod.main, args=())
+				inst.init(q)
+				p = Process(target=inst.main, args=())
 				p.start()
-				mod._process = p
-				mod._queue = q
+				inst._process = p
+				inst._queue = q
 				self.external_process.append(p)
 			else:
-				mod.init()
+				inst.init()
 
                 #Connexion init with PyNag server
 		for sched_id in self.schedulers:

@@ -21,6 +21,9 @@
 #This text is print at the import
 print "I am Couchdb Broker"
 
+properties = {
+    'type' : 'couchdb',
+    }
 
 #called by the plugin manager to get a broker
 def get_broker(plugin):
@@ -43,4 +46,4 @@ def get_broker(plugin):
 
 
 def get_type():
-    return 'couchdb'
+    return properties['type']

@@ -21,10 +21,17 @@
 print "I am Status Dat Broker"
 
 
+properties = {
+    'type' : 'status_dat',
+    'external' : True
+    }
+
+
 #called by the plugin manager to get a broker
 def get_broker(plugin):
     print "Get a Host Perfdata broker for plugin %s" % plugin.get_name()
 
+    print plugin.__dict__
     #First try to import
     try:
         from status_dat_broker import Status_dat_broker
@@ -40,5 +47,5 @@ def get_broker(plugin):
 
 
 def get_type():
-    return 'status_dat'
+    return properties['type']
 

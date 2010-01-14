@@ -23,6 +23,11 @@ import os
 print "I am Ndo Broker for Oracle"
 
 
+properties = {
+    'type' : 'ndodb_oracle',
+    }
+
+
 #called by the plugin manager to get a broker
 def get_broker(plugin):
     #Try to import all need modules
@@ -45,4 +50,4 @@ def get_broker(plugin):
 
 
 def get_type():
-    return 'ndodb_oracle'
+    return properties['type']

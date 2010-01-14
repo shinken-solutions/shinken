@@ -21,6 +21,11 @@
 print "I am Host Perfdata Broker"
 
 
+properties = {
+    'type' : 'host_perfdata',
+    }
+
+
 #called by the plugin manager to get a broker
 def get_broker(plugin):
     print "Get a Host Perfdata broker for plugin %s" % plugin.get_name()
@@ -40,5 +45,5 @@ def get_broker(plugin):
 
 
 def get_type():
-    return 'host_perfdata'
+    return properties['type']
 
