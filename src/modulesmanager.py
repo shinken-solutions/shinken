@@ -25,6 +25,8 @@ import os.path
 import imp
 import sys
 
+from multiprocessing import Process, Queue, active_children
+
 #modulepath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "modules/")
 #Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html
 
@@ -71,29 +73,68 @@ class ModulesManager():
 
     #Get broker instance to five them after broks
     def get_instances(self):
-        brokers = []
+        self.brokers = []
         for (module, mod) in self.modules_assoc:
             b = mod.get_broker(module)
             if b != None: #None = Bad thing happened :)
                 #the instance need the properties of the module
                 b.properties = mod.properties
-                brokers.append(b)
+                self.brokers.append(b)
 
-        print "Load", len(brokers), "module instances"
+        print "Load", len(self.brokers), "module instances"
 
-#        for inst in brokers:
-#            print "Doing mod instance", inst, inst.__dict__
-#            if hasattr(inst, 'is_external') and callable(inst.is_external) and inst.is_external():
-#                print "Is external!"
-#                q = Queue()
-#                self.external_queues.append(q)
-#                inst.init(q)
-#                p = Process(target=inst.main, args=())
-#                p.start()
-#                inst._process = p
-#                inst._queue = q
-#                self.external_process.append(p)
-#            else:
-#                inst.init()
+        for inst in self.brokers:
+            print "Doing mod instance", inst, inst.__dict__
+            if 'external' in inst.properties and inst.properties['external']:
+                print "Is external!"
+                inst.properties['to_queue'] = Queue()
+                inst.properties['from_queue'] = Queue()
+                inst.init()
+                inst.properties['process'] = Process(target=inst.main, args=())
+                inst.properties['process'].start()
+            else:
+                inst.properties['external'] = False
+                inst.init()
 
-        return brokers
+        return self.brokers
+
+    def remove_instance(self, inst):
+        #External instances need to be close before (process + queues)
+        if inst.properties['external']:
+            inst.properties['process'].terminate()
+            inst.properties['process'].join(timeout=1)
+            inst.properties['to_queue'].close()
+            inst.properties['to_queue'].join_thread()
+            inst.properties['from_queue'].close()
+            inst.properties['from_queue'].join_thread()
+
+        #Then do not listen anymore about it
+        self.brokers.remove(inst)
+
+
+    def check_alive_instances(self):
+        to_del = []
+        #Only for external
+        for inst in self.brokers:
+            if inst.properties['external'] and not inst.properties['process'].is_alive():
+                print "Error : the external module %s goes down unexpectly!" % inst.get_name()
+                to_del.append(inst)
+
+        for inst in to_del:
+            self.remove_instance(inst)
+
+
+    def get_internal_instances(self):
+        return [inst for inst in self.brokers if not inst.properties['external']]
+
+
+    def get_external_instances(self):
+        return [inst for inst in self.brokers if inst.properties['external']]
+
+
+    def get_external_to_queues(self):
+        return [inst.properties['to_queue'] for inst in self.brokers if inst.properties['external']]
+
+
+    def get_external_from_queues(self):
+        return [inst.properties['from_queue'] for inst in self.brokers if inst.properties['external']]

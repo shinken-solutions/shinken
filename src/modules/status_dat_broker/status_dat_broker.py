@@ -41,13 +41,16 @@ class Status_dat_broker:
         self.name = name
         self.update_interval = update_interval
         
+        #Warning :
+        #self.properties will be add by the modulesmanager !!
+        
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
-    def init(self, q):
+    def init(self):
         print "I am init"
-        self.q = q
+        self.q = self.properties['to_queue']
     
         #Our datas
         self.hosts = {}

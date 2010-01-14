@@ -27,7 +27,7 @@
 #take new ones and do the (new) job.
 
 from Queue import Empty
-from multiprocessing import Process, Queue, active_children
+from multiprocessing import active_children
 import time
 import sys
 import Pyro.core
@@ -192,8 +192,8 @@ class Broker(Satellite):
 
 		#All broks to manage
 		self.broks = []
-		self.external_queues = []
-		self.external_process = []
+		#self.external_queues = []
+		#self.external_process = []
 
 
 	#Manage signal function
@@ -244,17 +244,16 @@ class Broker(Satellite):
 	def manage_brok(self, b):
 		to_del = []
 		#Call all modules if they catch the call
-		for mod in self.mod_instances:
-			if not hasattr(mod, 'is_external') or not callable(mod.is_external) or not mod.is_external():
-				try:
-					mod.manage_brok(b)
-				except Exception as exp:
-					print "Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),exp)
-					print "DBG:", type(exp)
-					to_del.append(mod)
+		for mod in self.modules_manager.get_internal_instances():
+			try:
+				mod.manage_brok(b)
+			except Exception as exp:
+				print "Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),exp)
+				print "DBG:", type(exp)
+				to_del.append(mod)
 		#Now remove mod that raise an exception
 		for mod in to_del:
-			self.mod_instances.remove(mod)
+			self.modules_manager.remove_instance(mod)
 
 
 	#We get new broks from schedulers
@@ -275,7 +274,7 @@ class Broker(Satellite):
 					self.broks.extend(tmp_broks.values())
 					#and for external queues
 					for b in tmp_broks.values():
-						for q in self.external_queues:
+						for q in self.modules_manager.get_external_to_queues():
 							q.put(b)
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id)
@@ -305,25 +304,26 @@ class Broker(Satellite):
 	def check_and_del_zombie_modules(self):
                 #Active children make a join with every one, useful :)
 		act = active_children()
-		m_to_del = []
-		for mod in self.mod_instances:
-			if hasattr(mod, '_process'):
-				p = mod._process
-				q = mod._queue
-				if not mod._process.is_alive():
-					print "Warning : the external module %s goes down unexpectly!" % mod.get_name()
-                                        #AIM ... Press FIRE ... <B>HEAD SHOT!</B>
-					p.terminate()
-					q.close()
-					q.join_thread()
-					p.join(timeout=1)
-					self.external_queues.remove(q)
-					self.external_process.remove(p)
-					m_to_del.append(mod)
-                #OK, now really del the module
-		#TODO : deinit module
-		for mod in m_to_del:
-			self.mod_instances.remove(mod)
+		self.modules_manager.check_alive_instances()
+#		m_to_del = []
+#		for mod in self.mod_instances:
+#			if hasattr(mod, '_process'):
+#				p = mod._process
+#				q = mod._queue
+#				if not mod._process.is_alive():
+#					print "Warning : the external module %s goes down unexpectly!" % mod.get_name()
+#                                        #AIM ... Press FIRE ... <B>HEAD SHOT!</B>
+#					p.terminate()
+#					q.close()
+#					q.join_thread()
+#					p.join(timeout=1)
+#					self.external_queues.remove(q)
+#					self.external_process.remove(p)
+#					m_to_del.append(mod)
+#                #OK, now really del the module
+#		#TODO : deinit module
+#		for mod in m_to_del:
+#			self.mod_instances.remove(mod)
 
 
 	#Main function, will loop forever
@@ -348,20 +348,20 @@ class Broker(Satellite):
 		self.modules_manager = ModulesManager('broker', self.modulespath, self.modules)
 		self.modules_manager.load()
 		self.mod_instances = self.modules_manager.get_instances()
-		for inst in self.mod_instances:
-			print "Doing mod instance", inst, inst.__dict__
-			if hasattr(inst, 'is_external') and callable(inst.is_external) and inst.is_external():
-				print "Is external!"
-				q = Queue()
-				self.external_queues.append(q)
-				inst.init(q)
-				p = Process(target=inst.main, args=())
-				p.start()
-				inst._process = p
-				inst._queue = q
-				self.external_process.append(p)
-			else:
-				inst.init()
+#		for inst in self.mod_instances:
+#			print "Doing mod instance", inst, inst.__dict__
+#			if hasattr(inst, 'is_external') and callable(inst.is_external) and inst.is_external():
+#				print "Is external!"
+#				q = Queue()
+#				self.external_queues.append(q)
+#				inst.init(q)
+#				p = Process(target=inst.main, args=())
+#				p.start()
+#				inst._process = p
+#				inst._queue = q
+#				self.external_process.append(p)
+#			else:
+#				inst.init()
 
                 #Connexion init with PyNag server
 		for sched_id in self.schedulers:
