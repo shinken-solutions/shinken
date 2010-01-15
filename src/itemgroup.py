@@ -59,7 +59,7 @@ class Itemgroup:
     #so a python list :)
     #We also strip elements because spaces Stinks!
     def pythonize(self):
-        if hasattr(self, 'members'):
+        if hasattr(self, 'members') and self.members != '':
             mbrs = self.members.split(',')
         else:
             mbrs = []
