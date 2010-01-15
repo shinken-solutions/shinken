@@ -675,6 +675,7 @@ class Config(Item):
         self.hostgroups.pythonize()
         self.contactgroups.pythonize()
         self.contacts.pythonize()
+        self.servicegroups.pythonize()
         self.services.pythonize()
         self.servicedependencies.pythonize()
         self.resultmodulations.pythonize()

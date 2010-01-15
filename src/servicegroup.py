@@ -113,7 +113,7 @@ class Servicegroups(Itemgroups):
     #not service one
     def linkify_sg_by_srv(self, services):
         for id in self.itemgroups:
-            mbrs = self.itemgroups[id].get_services().split(',')
+            mbrs = self.itemgroups[id].get_services()
 
             #The new member list, in id
             new_mbrs = []
