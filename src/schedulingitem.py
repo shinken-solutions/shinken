@@ -435,9 +435,9 @@ class SchedulingItem(Item):
         elif c.exit_status != 0 and self.last_state != OK_UP:
             if self.is_max_attempts() and self.state_type == 'SOFT':
                 #Ok here is when we just go to the hard state
+                self.state_type = 'HARD'
                 #So event handlers here too
                 res = self.get_event_handlers()
-                self.state_type = 'HARD'
                 #raise notification only if self.notifications_enabled is True
                 if self.notifications_enabled:
                     if not no_action:
