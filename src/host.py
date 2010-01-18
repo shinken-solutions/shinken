@@ -430,7 +430,11 @@ class Host(SchedulingItem):
     #see if the notification is launchable (time is OK and contact is OK too)
     def is_notification_launchable(self, n, contact):
         now = time.time()
-        return now > n.t_to_go and self.state != 'UP' and contact.want_host_notification(now, self.state)
+        if n.type == 'PROBLEM':
+            return self.state != 'UP' and contact.want_host_notification(now, self.state, n.type)
+        elif n.type == 'RECOVERY':
+            return self.state == 'UP' and contact.want_host_notification(now, self.state, n.type)
+        #return now > n.t_to_go and self.state != 'UP' and contact.want_host_notification(now, self.state, n.type)
             
 
     #We just send a notification, we need new ones in notification_interval
