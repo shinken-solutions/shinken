@@ -505,6 +505,9 @@ class SchedulingItem(Item):
         #a recovery notif is send ony one time
         if n.type == 'RECOVERY':
             return None
+        #notification_interval 0 means: one notification is enough
+        if self.notification_interval == 0:
+            return None
         #TODO : resolv command...
         notif_nb = n.notif_nb
         new_n = Notification(n.type, 'scheduled','', n.command_call, n.ref, n.contact, now + self.notification_interval * 60, notif_nb + 1, timeout=cls.notification_timeout)
