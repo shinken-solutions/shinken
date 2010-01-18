@@ -26,15 +26,16 @@ class BrokerLink(SatelliteLink):
     my_type = 'broker'
     properties={'broker_name' : {'required' : True },
                 'address' : {'required' : True},
-                'port' : {'required':  True, 'pythonize': to_int},
+                'port' : {'required':  False, 'default': '7772', 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
                 'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool},
+                'manage_arbiters' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'to_send' : True},
                 'modules' : {'required':  False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
                 'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
                 }
  
     running_properties = {'is_active' : {'default' : False},
-                          'con' : {'default' : None}
+                          'con' : {'default' : None},
                           }
     macros = {}
 

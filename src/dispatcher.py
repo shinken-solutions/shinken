@@ -33,11 +33,13 @@ from util import scheduler_no_spare_first, alive_then_spare_then_deads
 class Dispatcher:
     #Load all elements, set them no assigned
     # and add them to elements, so loop will be easier :)
-    def __init__(self, conf):
+    def __init__(self, conf, arbiter):
+        self.arbiter = arbiter
         #Pointer to the whole conf
         self.conf = conf
         self.realms = conf.realms
         #Direct pointer to importants elements for us
+        self.arbiters = self.conf.arbiterlinks
         self.schedulers = self.conf.schedulerlinks
         self.reactionners = self.conf.reactionners
         self.brokers = self.conf.brokers
@@ -291,7 +293,7 @@ class Dispatcher:
                                     #configuration
                                     need_loop = False
                                     
-                                    #Now we generate the conf for reactionners:
+                                    #Now we generate the conf for satellites:
                                     cfg_id = conf.id
                                     for kind in ['reactionner', 'poller', 'broker']:
                                         r.to_satellites[kind][cfg_id] = sched.give_satellite_cfg()
@@ -334,6 +336,10 @@ class Dispatcher:
                         sched.need_conf = False
             
 
+            arbiters_cfg = {}
+            for arb in self.arbiters:
+                arbiters_cfg[arb.id] = arb.give_satellite_cfg()
+
             #We put the satellites conf with the "new" way so they see only what we want
             for r in self.realms:
                 for cfg in r.confs.values():
@@ -352,7 +358,7 @@ class Dispatcher:
                             print "Order:"
                             for satellite in satellites:
                                 print satellite.get_name(), ": is spare?", satellite.spare
-
+                            
                             #Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
                             for satellite in satellites:
@@ -360,6 +366,8 @@ class Dispatcher:
                                     print '[',r.get_name(),']',"Trying to send conf to ", kind, satellite.get_name()
                                     #cfg_for_satellite = {'schedulers' : {cfg_id : cfg_for_satellite_part}}
                                     satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part
+                                    if satellite.manage_arbiters:
+                                        satellite.cfg['arbiters'] = arbiters_cfg
                                     #cfg_for_satellite['modules'] = satellite.modules
                                     is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
                                     if is_sent:

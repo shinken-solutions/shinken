@@ -26,14 +26,15 @@ class SchedulerLink(SatelliteLink):
     id = 0
     properties={'scheduler_name' : {'required' : True },#, 'pythonize': None},
                 'address' : {'required' : True},#, 'pythonize': to_bool},
-                'port' : {'required':  True, 'pythonize': to_int},
+                'port' : {'required':  False, 'default' : '7768', 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
                 'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split},
                 'weight': {'required':  False, 'default' : '1', 'pythonize': to_int},
+                'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
                 }
  
     running_properties = {'is_active' : {'default' : False},
-                          'con' : {'default' : None}
+                          'con' : {'default' : None},
                           #self.is_alive = False
                           }
     macros = {}

@@ -65,7 +65,6 @@ class SatelliteLink(Item):
         return state
 
 
-
     def create_connexion(self):
         self.uri = "PYROLOC://"+self.address+":"+str(self.port)+"/ForArbiter"
         self.con = Pyro.core.getProxyForURI(self.uri)
@@ -160,7 +159,7 @@ class SatelliteLink(Item):
 
 
     def prepare_for_conf(self):
-        self.cfg = { 'global' : {}, 'schedulers' : {}}
+        self.cfg = { 'global' : {}, 'schedulers' : {}, 'arbiters' : {}}
         #cfg_for_satellite['modules'] = satellite.modules
         properties = self.__class__.properties
         for prop in properties:

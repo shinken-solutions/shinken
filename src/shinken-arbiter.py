@@ -32,7 +32,7 @@ import Pyro.core
 #import signal
 import select
 import getopt
-#import random
+import random
 #import copy
 
 #from check import Check
@@ -47,6 +47,36 @@ from log import Log
 #from plugin import Plugin, Plugins
 
 VERSION = "0.1beta"
+
+
+#Interface for Brokers
+#They connect here and get all broks (data for brokers)
+#datas must be ORDERED! (initial status BEFORE update...)
+class IBroks(Pyro.core.ObjBase):
+	#we keep sched link
+	def __init__(self, arbiter):
+                Pyro.core.ObjBase.__init__(self)
+		self.arbiter = arbiter
+		self.running_id = random.random()
+
+
+	#Broker need to void it's broks?
+	def get_running_id(self):
+		return self.running_id
+
+		
+	#poller or reactionner ask us actions
+	def get_broks(self):
+		#print "We ask us broks"
+		res = self.arbiter.get_broks()
+		#print "Sending %d broks" % len(res)#, res
+		self.arbiter.nb_broks_send += len(res)
+		return res
+
+
+	#Ping? Pong!
+	def ping(self):
+		return None
 
 
 #Main Arbiter Class
@@ -75,6 +105,8 @@ class Arbiter(Daemon):
         #exists, a dummy function otherwise
         self.set_exit_handler()
         self.broks = {}
+        self.is_master = False
+        self.me = None
 
 
     #Use for adding broks
@@ -101,7 +133,7 @@ class Arbiter(Daemon):
         #There are 256 of them, so we create online
         Config.fill_usern_macros()
         self.conf.read_config(self.config_file)
-
+        
         print "****************** Create Template links **********"
         self.conf.linkify_templates()
 
@@ -154,9 +186,21 @@ class Arbiter(Daemon):
         #print hp.heap()
         #print hp.heapu()
 
-        print "Dump realms"
-        for r in self.conf.realms:
-            print r.get_name(), r.__dict__
+        #Search wich Arbiterlink I am
+        for arb in self.conf.arbiterlinks:
+            if arb.is_me():
+                self.me = arb
+                print "I find my own arbiterlink :", arb.get_name()
+
+        if self.me == None:
+            print "Error : I cannot find my own Arbiter object, I bail out"
+            sys.exit(1)
+        
+        print "Am I the master?", not self.me.spare
+        
+        #print "Dump realms"
+        #for r in self.conf.realms:
+        #    print r.get_name(), r.__dict__
 
         print "****************** Cut into parts ******************"
         self.confs = self.conf.cut_into_parts()
@@ -190,9 +234,26 @@ class Arbiter(Daemon):
         if is_daemon:
             self.create_daemon(do_debug=debug, debug_file=debug_file)
 
+        print "******************* Opening of the net daemon **********************"
+        #Now open the daemon port for Broks and other Arbiter sends
+        Pyro.config.PYRO_STORAGE = self.workdir
+        Pyro.config.PYRO_COMPRESSION = 1
+        Pyro.config.PYRO_MULTITHREADED = 0
+        Pyro.core.initServer()
+	
+        print "Listening on:", self.me.address, ":", self.me.port
+        self.poller_daemon = Pyro.core.Daemon(host=self.me.address, port=self.me.port)
+        if self.poller_daemon.port != self.me.port:
+            print "Sorry, the port %d is not free" % self.me.port
+            sys.exit(1)
+
+        self.ibroks = IBroks(self)
+        self.uri = self.poller_daemon.connect(self.ibroks,"Broks")
+        print "The Broks Interface uri is:", self.uri
+
 
         print "****************** Send Configuration to schedulers******************"
-        self.dispatcher = Dispatcher(self.conf)
+        self.dispatcher = Dispatcher(self.conf, self.me)
         self.dispatcher.check_alive()
         self.dispatcher.check_dispatch()
         self.dispatcher.dispatch()
@@ -216,6 +277,8 @@ class Arbiter(Daemon):
         timeout = 1.0
         while True :
             socks = []
+            daemon_sockets = self.poller_daemon.getServerSockets()
+            socks.extend(daemon_sockets)
             avant = time.time()
             if self.fifo != None:
                 socks.append(self.fifo)
@@ -224,6 +287,12 @@ class Arbiter(Daemon):
             if ins != []:
                 for s in socks:
                     if s in ins:
+                        if s in daemon_sockets:
+                            self.poller_daemon.handleRequests()
+                            apres = time.time()
+                            diff = apres-avant
+                            timeout = timeout - diff
+                            break    # no need to continue with the for loop
                         #If FIFO, read external command
                         if s == self.fifo:
                             self.external_command.read_and_interpret()

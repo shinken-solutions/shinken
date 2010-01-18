@@ -55,7 +55,7 @@ class IForArbiter(Pyro.core.ObjBase):
 		Pyro.core.ObjBase.__init__(self)
 		self.app = app
 		self.schedulers = app.schedulers
-
+		self.arbiters = app.arbiters
 
 	#function called by arbiter for giving us our conf
 	#conf must be a dict with:
@@ -83,6 +83,15 @@ class IForArbiter(Pyro.core.ObjBase):
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
 		print "We have our schedulers :", self.schedulers
+		print "TOTO"
+		for arb_id in conf['arbiters'] :
+			a = conf['arbiters'][arb_id]
+			self.arbiters[arb_id] = a
+			uri = "PYROLOC://%s:%d/Broks" % (a['address'], a['port'])
+			self.arbiters[arb_id]['uri'] = uri
+			self.arbiters[arb_id]['broks'] = {}
+			self.arbiters[arb_id]['running_id'] = 0			
+		print "We have our arbiters :", self.arbiters
 		if not self.app.have_modules:
 			self.app.modules = conf['global']['modules']
 			self.app.have_modules = True
@@ -180,6 +189,9 @@ class Broker(Satellite):
 		#Ours schedulers
 		self.schedulers = {}
 		self.mod_instances = [] # for brokers from modules
+
+		#Our arbiters
+		self.arbiters = {}
 		
 		#Modules are load one time
 		self.have_modules = False

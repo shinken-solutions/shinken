@@ -41,6 +41,7 @@ from item import Item
 from macroresolver import MacroResolver
 from servicedependency import Servicedependency, Servicedependencies
 from hostdependency import Hostdependency, Hostdependencies
+from arbiterlink import ArbiterLink, ArbiterLinks
 from schedulerlink import SchedulerLink, SchedulerLinks
 from reactionnerlink import ReactionnerLink, ReactionnerLinks
 from brokerlink import BrokerLink, BrokerLinks
@@ -298,6 +299,7 @@ class Config(Item):
                     'servicegroup' : [],
                     'servicedependency' : [],
                     'hostdependency' : [],
+                    'arbiter' : [],
                     'scheduler' : [],
                     'reactionner' : [],
                     'broker' : [],
@@ -383,6 +385,7 @@ class Config(Item):
                            'contactgroup' : (Contactgroup, Contactgroups, 'contactgroups'),
                            'servicedependency' : (Servicedependency, Servicedependencies, 'servicedependencies'),
                            'hostdependency' : (Hostdependency, Hostdependencies, 'hostdependencies'),
+                           'arbiter' : (ArbiterLink, ArbiterLinks, 'arbiterlinks'),
                            'scheduler' : (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
                            'reactionner' : (ReactionnerLink, ReactionnerLinks, 'reactionners'),
                            'broker' : (BrokerLink, BrokerLinks, 'brokers'),
@@ -463,6 +466,7 @@ class Config(Item):
 
         print "Schedulers and satellites"
         #Link all links with realms
+        self.arbiterlinks.linkify(self.modules)
         self.schedulerlinks.linkify(self.realms, self.modules)
         self.brokers.linkify(self.realms, self.modules)
         self.reactionners.linkify(self.realms, self.modules)
@@ -578,7 +582,7 @@ class Config(Item):
         self.pollers.fill_default()
         self.brokers.fill_default()
         self.schedulerlinks.fill_default()
-
+        self.arbiterlinks.fill_default()
 
         
     #Will check if a realm is defined, if not
@@ -604,6 +608,10 @@ class Config(Item):
     #If a satellite is missing, we add them in the localhost
     #with defaults values
     def fill_default_satellites(self):
+        if len(self.arbiterlinks) == 0:
+             print "Warning : there is no arbiter, I add one in localhost:7770"
+             a = ArbiterLink({'arbiter_name' : 'Default-Arbiter', 'host_name' : socket.gethostname(), 'address' : 'localhost', 'port' : '7770', 'spare' : '0'})
+             self.arbiterlinks = ArbiterLinks([a])
         if len(self.schedulerlinks) == 0:
             print "Warning : there is no scheduler, I add one in localhost:7768"
             s = SchedulerLink({'scheduler_name' : 'Default-Scheduler', 'address' : 'localhost', 'port' : '7768'})
@@ -618,7 +626,7 @@ class Config(Item):
             self.reactionners = ReactionnerLinks([r])
         if len(self.brokers) == 0:
             print "Warning : there is no broker, I add one in localhost:7772"
-            b = BrokerLink({'broker_name' : 'Default-Broker', 'address' : 'localhost', 'port' : '7772'})
+            b = BrokerLink({'broker_name' : 'Default-Broker', 'address' : 'localhost', 'port' : '7772', 'manage_arbiters' : '1'})
             self.brokers = BrokerLinks([b])
 
 
@@ -657,6 +665,10 @@ class Config(Item):
         r &= self.schedulerlinks.is_correct()
         r &= self.services.is_correct()
         r &= self.servicegroups.is_correct()
+        if hasattr(self, 'arbiterlinks'):
+            r &= self.arbiterlinks.is_correct()
+        if hasattr(self, 'schedulerlinks'):
+            r &= self.schedulerlinks.is_correct()
         if hasattr(self, 'reactionners'):
             r &= self.reactionners.is_correct()
         if hasattr(self, 'pollers'):
@@ -679,6 +691,7 @@ class Config(Item):
         self.services.pythonize()
         self.servicedependencies.pythonize()
         self.resultmodulations.pythonize()
+        self.arbiterlinks.pythonize()
         self.schedulerlinks.pythonize()
         self.realms.pythonize()
         self.reactionners.pythonize()

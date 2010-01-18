@@ -26,7 +26,7 @@ class ReactionnerLink(SatelliteLink):
     my_type = 'reactionner'
     properties={'reactionner_name' : {'required' : True },
                 'address' : {'required' : True},
-                'port' : {'required':  True, 'pythonize': to_int},
+                'port' : {'required':  False, 'default' : '7769', 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
                 'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool},
                 'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
@@ -34,10 +34,11 @@ class ReactionnerLink(SatelliteLink):
                 'max_workers' : {'required' : False, 'default' : '30', 'pythonize' : to_int, 'to_send' : True},
                 'processes_by_worker' : {'required' : False, 'default' : '256', 'pythonize' : to_int, 'to_send' : True},
                 'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
+                'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
                 }
  
     running_properties = {'is_active' : {'default' : False},
-                          'con' : {'default' : None}
+                          'con' : {'default' : None},
                           }
     macros = {}
 
