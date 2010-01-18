@@ -461,7 +461,7 @@ class Ndodb_Oracle_broker:
         #between hosts and hostgroups
         for (s_id, s_name) in b.data['members']:
             servicegroup_members_data = {'instance_id' : data['instance_id'], 'servicegroup_id' : data['id'],
-                                         'service_object_id' : c_id}
+                                         'service_object_id' : s_id}
             q = self.create_insert_query('servicegroup_members', servicegroup_members_data)
             res.append(q)
         return res

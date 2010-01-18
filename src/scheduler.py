@@ -27,7 +27,7 @@ from eventhandler import EventHandler
 from status import StatusFile
 from brok import Brok
 from downtime import Downtime
-
+from log import Log
 
 #from guppy import hpy
 
@@ -63,6 +63,10 @@ class Scheduler:
         self.nb_actions_send = 0
         self.nb_broks_send = 0
         self.nb_check_received = 0
+
+        #The log part
+        self.log = Log()
+        self.log.load_obj(self)
 
 
     #Load conf for future use
@@ -283,12 +287,12 @@ class Scheduler:
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
             except KeyError as exp:
-                print "Warning : received an check of an unknow id!", exp
+                Log().log("Warning : received an check of an unknown id! %s" % str(exp))
         elif c.is_a == 'eventhandler':
             #It just die
             self.actions[c.id].status = 'zombie'
         else:
-            print "Type unknown"
+            Log().log("Error : the received result type in unknown ! %s" % str(c.is_a))
 
 
     #Call by brokers to have broks
@@ -316,15 +320,16 @@ class Scheduler:
             #f.write(s_compress)
             f.close()
         except IOError as exp:
-            print "Error, retention file creation failed", exp
-        print "Updating retention_file", self.conf.state_retention_file
+            Log().log("Error: retention file creation failed, %s" % str(exp))
+            return
+        Log().log("Updating retention_file %s" % self.conf.state_retention_file)
      
    
     #Load the retention file and get status from it. It do not get all checks in progress
     #for the moment, just the status and the notifications.
     #TODO : speed up because the service lookup si VERY slow
     def retention_load(self):
-        print "Reading from retention_file", self.conf.state_retention_file
+        Log().log("Reading from retention_file %s" % self.conf.state_retention_file)
         try:
             f = open(self.conf.state_retention_file, 'rb')
             all_data = cPickle.load(f)
@@ -339,7 +344,8 @@ class Scheduler:
             print exp
             return
         except IndexError as exp:
-            print "WARNING: Sorry, the ressource file is not compatible"
+            s = "WARNING: Sorry, the ressource file is not compatible"
+            Log().log(s)
             return
             
             
@@ -376,7 +382,7 @@ class Scheduler:
                             a.ref = s
                             self.add(a)
                         s.update_in_checking()
-        print "We've load data from retention"
+        Log().log("We've load data from retention")
 
 
     #Fill the self.broks with broks of self (process id, and co)
@@ -400,7 +406,7 @@ class Scheduler:
                 b = i.get_initial_status_brok()
                 self.add(b)
 
-        print "Created initial Broks:", len(self.broks)
+        Log().log("Created initial Broks: %d" % len(self.broks))
         
     
     #Crate a brok with program status info
@@ -500,7 +506,7 @@ class Scheduler:
                     elif a.is_a == 'eventhandler':
                         self.add(a)
                     elif  a.is_a == 'check':
-                        print "*******Adding dep checks*****"
+                        #print "*******Adding dep checks*****"
                         checks_to_add.append(a)
         if checks_to_add != []:
             for c in checks_to_add:
@@ -515,7 +521,7 @@ class Scheduler:
         for c in self.checks.values():
             if c.status == 'zombie':
                 id_to_del.append(c.id)
-        #une petite tape dans le doc et tu t'en vas, merci...
+        #une petite tape dans le dot et tu t'en vas, merci...
         for id in id_to_del:
             del self.checks[id] # ZANKUSEN!
 
@@ -530,7 +536,7 @@ class Scheduler:
                 id_to_del.append(a.id)
         #une petite tape dans le doc et tu t'en vas, merci...
         for id in id_to_del:
-            print "Delling an actions", id
+            Log().log("Deleting an action : %d" % id)
             del self.actions[id] # ZANKUSEN!
 
 
@@ -568,11 +574,11 @@ class Scheduler:
         now = int(time.time())
         for c in self.checks.values():
             if c.status == 'inpoller' and c.t_to_go < now - 300:
-                print "Warning : the results of check", c.id, "never came back. I'm reenable it for polling"
+                Log().log("Warning : the results of check %d never came back. I'm reenable it for polling" % c.id)
                 c.status == 'scheduled'
         for a in self.actions.values():
             if a.status == 'inpoller' and a.t_to_go < now - 300:
-                print "Warning : the results of action", a.id, "never came back. I'm reenable it for polling"
+                Log().log("Warning : the results of action %d never came back. I'm reenable it for polling" % a.id)
                 a.status == 'scheduled'
 
 
@@ -584,9 +590,9 @@ class Scheduler:
         #Ok, now all is initilised, we can make the inital broks
         self.fill_initial_broks()
 
-        print "First scheduling"
+        Log().log("First scheduling")
         self.schedule()
-        print "Done"
+        Log().log("Done")
         #Ticks is for recurrent function call like consume
         #del zombies etc
         ticks = 0

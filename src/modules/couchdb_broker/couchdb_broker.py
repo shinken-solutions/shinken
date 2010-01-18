@@ -97,7 +97,7 @@ class Couchdb_broker:
         tables = ['commands', 'comments', 'contacts', 'contactgroups', 'downtimes', 'hosts', 
                   'hostdependencies', 'hostescalations', 'hostgroups', 'notifications', 'program_status', 
                   'scheduled_downtimes', 'services',  'serviceescalations',
-                  'servicegroups', 'timeperiods', 'host_hostgroup', 'contact_contactgroup']
+                  'servicegroups', 'timeperiods', 'host_hostgroup', 'contact_contactgroup', 'service_servicegroup']
 
         #OK, now we store ours dbs
         self.dbs = {}

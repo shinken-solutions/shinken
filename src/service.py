@@ -26,7 +26,7 @@ from util import to_int, to_char, to_split, to_bool, strip_and_uniq
 from check import Check
 from notification import Notification
 from macroresolver import MacroResolver
-
+from log import Log
 
 class Service(SchedulingItem):
     __slots__ = ('id', 'host_name', 'hostgroup_name', 'service_description',\
@@ -269,21 +269,21 @@ class Service(SchedulingItem):
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
-                    print self.get_name(), " : I do not have", prop
+                    Log().log('%s : I do not have %s' % (self.get_name(), prop))
                     state = False #Bad boy...
 
         #Ok now we manage special cases...
         if not hasattr(self, 'contacts') and not hasattr(self, 'contacgroups') and  self.notifications_enabled == True:
-            print self.get_name()," : I do not have contacts nor contacgroups"
+            Log().log('%s : I do not have contacts nor contacgroups' % self.get_name())
             state = False
         if not hasattr(self, 'check_command') or not self.check_command.is_valid():
-            print self.get_name()," : my check_command is invalid"
+            Log().log('%s : my check_command is invalid' % self.get_name())
             state = False
         if not hasattr(self, 'notification_interval') and  self.notifications_enabled == True:
-            print self.get_name()," : I've got no notification_interval but I've got notifications enabled"
+            Log().log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if not hasattr(self, 'host') or self.host == None:
-            print self.get_name(),": I do not have and host"
+            Log().log("%s : I do not have and host" % self.get_name())
             state = False
         return state
 
@@ -377,8 +377,7 @@ class Service(SchedulingItem):
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
-            #TODO : make a real log mangment
-            print "Stalking", self.get_name(), c.output
+            Log().log("Stalking %s : %s" % (self.get_name(), c.output))
 
 
     #Give data for checks's macros

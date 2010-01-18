@@ -43,6 +43,7 @@ from config import Config
 from external_command import ExternalCommand
 from dispatcher import Dispatcher
 from daemon import Daemon
+from log import Log
 #from plugin import Plugin, Plugins
 
 VERSION = "0.1beta"
@@ -73,6 +74,12 @@ class Arbiter(Daemon):
         #From daemon to manage signal. Call self.manage_signal if
         #exists, a dummy function otherwise
         self.set_exit_handler()
+        self.broks = {}
+
+
+    #Use for adding broks
+    def add(self, b):
+        self.broks[b.id] = b
 
 
     #Load the external commander
@@ -83,6 +90,11 @@ class Arbiter(Daemon):
         
     def main(self):
         self.print_header()
+
+        #Log will be broks
+        self.log = Log()
+        self.log.load_obj(self)
+        
         print "Loading configuration"
         self.conf = Config()
         #The config Class must have the USERN macro

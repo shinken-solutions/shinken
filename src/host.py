@@ -26,6 +26,7 @@ from macroresolver import MacroResolver
 from check import Check
 from notification import Notification
 from graph import Graph
+from log import Log
 
 class Host(SchedulingItem):
     __slots__ = ('id', 'host_name', \
@@ -277,22 +278,21 @@ class Host(SchedulingItem):
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
-                    print self.get_name(), " : I do not have", prop
+                    Log().log("%s : I do not have %s" % (self.get_name(), prop))
                     state = False #Bad boy...
         #Ok now we manage special cases...
         if not hasattr(self, 'contacts') and not hasattr(self, 'contacgroups') and self.notifications_enabled == True:
-            print self.get_name()," : I do not have contacts nor contacgroups"
+            Log().log("%s : I do not have contacts nor contacgroups" % self.get_name())
             state = False
         if not hasattr(self, 'check_command') or not self.check_command.is_valid():
-            print self.get_name()," : my check_command is invalid"
+            Log().log("%s : my check_command is invalid" % self.get_name())
             state = False
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
-            print self.get_name()," : I've got no notification_interval but I've got notifications enabled"
+            Log().log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         #If active check is enabled with a check_interval!=0, we must have a check_timeperiod
         if (hasattr(self, 'active_checks_enabled') and self.active_checks_enabled) and (not hasattr(self, 'check_period') or self.check_period == None) and (hasattr(self, 'check_interval') and self.check_interval!=0):
-            print self.active_checks_enabled, self.check_interval
-            print self.get_name()," : My check_timeperiod is not correct"
+            Log().log("%s : My check_timeperiod is not correct" % self.get_name())
             state = False
         return state
 
@@ -403,8 +403,7 @@ class Host(SchedulingItem):
             if c.output != self.output:
                 need_stalk = False
         if need_stalk:
-            #TODO : make a real log mangment
-            print "Stalking", self.output
+            Log().log("Stalking %s : %s", self.get_name(), self.output)
 
 
 
@@ -619,7 +618,7 @@ class Hosts(Items):
             for p in h.parents:
                 parents.add_edge(p, h)
 
-        print "Host in a loop: ", parents.loop_check()
+        Log().log("Hosts in a loop: %s" % parents.loop_check())
         
         for h in self:
             h.fill_parents_dependancie()
