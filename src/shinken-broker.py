@@ -90,6 +90,7 @@ class IForArbiter(Pyro.core.ObjBase):
 			uri = "PYROLOC://%s:%d/Broks" % (a['address'], a['port'])
 			self.arbiters[arb_id]['uri'] = uri
 			self.arbiters[arb_id]['broks'] = {}
+			self.arbiters[arb_id]['instance_id'] = 0 #No use so all to 0
 			self.arbiters[arb_id]['running_id'] = 0			
 		print "We have our arbiters :", self.arbiters
 		if not self.app.have_modules:
@@ -210,37 +211,47 @@ class Broker(Satellite):
 		sys.exit(0)
 
 
-	#initialise or re-initialise connexion with scheduler
-	def pynag_con_init(self, id):
-                #If sched is not active, I do not try to init
-		#it is just useless
-		is_active = self.schedulers[id]['active']
-		if not is_active:
+	#initialise or re-initialise connexion with scheduler or
+	#arbiter if type == arbiter
+	def pynag_con_init(self, id, type='scheduler'):
+		if type == 'scheduler':
+			links = self.schedulers
+		elif type == 'arbiter':
+			links = self.arbiters
+		else:
+			print 'Type unknown for connexion! %s' % type
 			return
+		
+		if type == 'scheduler':
+                        #If sched is not active, I do not try to init
+		        #it is just useless
+			is_active = links[id]['active']
+			if not is_active:
+				return
 
-		print "init de connexion avec", self.schedulers[id]['uri']
-		running_id = self.schedulers[id]['running_id']
-		uri = self.schedulers[id]['uri']
-		self.schedulers[id]['con'] = Pyro.core.getProxyForURI(uri)
+		print "init de connexion avec", links[id]['uri']
+		running_id = links[id]['running_id']
+		uri = links[id]['uri']
+		links[id]['con'] = Pyro.core.getProxyForURI(uri)
 		try:
-			self.schedulers[id]['con'].ping()
-			new_run_id = self.schedulers[id]['con'].get_running_id()
+			links[id]['con'].ping()
+			new_run_id = links[id]['con'].get_running_id()
 		except Pyro.errors.ProtocolError, exp:
 			print exp
 			return
 		except Pyro.errors.NamingError, exp:
-			print "Scheduler is not initilised", exp
-			self.schedulers[id]['con'] = None
+			print "%s is not initilised" %(type, exp)
+			links[id]['con'] = None
 			return
 		except KeyError , exp:
-                        print "Scheduler is not initilised", exp
-                        self.schedulers[id]['con'] = None
+                        print "%s is not initilised" % (type, exp)
+                        links[id]['con'] = None
                         return
 		#The schedulers have been restart : it has a new run_id.
 		#So we clear all verifs, they are obsolete now.
-		if self.schedulers[id]['running_id'] != 0 and new_run_id != running_id:
-			self.schedulers[id]['broks'].clear()
-		self.schedulers[id]['running_id'] = new_run_id
+		if links[id]['running_id'] != 0 and new_run_id != running_id:
+			links[id]['broks'].clear()
+		links[id]['running_id'] = new_run_id
 		print "Connexion OK"
 
 
@@ -262,17 +273,24 @@ class Broker(Satellite):
 
 
 	#We get new broks from schedulers
-	def get_new_broks(self):
-
+	def get_new_broks(self, type='scheduler'):
+		if type == 'scheduler':
+			links = self.schedulers
+		elif type == 'arbiter':
+			links = self.arbiters
+		else:
+			print 'Type unknown for connexion! %s' % type
+			return
+		
 		#We check for new check in each schedulers and put
 		#the result in new_checks
-		for sched_id in self.schedulers:
+		for sched_id in links:
 			try:
-				con = self.schedulers[sched_id]['con']
+				con = links[sched_id]['con']
 				if con is not None: #None = not initilized
 					tmp_broks = con.get_broks()
 					for b in tmp_broks.values():
-						b.instance_id = self.schedulers[sched_id]['instance_id']
+						b.instance_id = links[sched_id]['instance_id']
 					
 					#Ok now put in queue brobs for manage by
 					#internal modules
@@ -282,14 +300,15 @@ class Broker(Satellite):
 						for q in self.modules_manager.get_external_to_queues():
 							q.put(b)
 				else: #no con? make the connexion
-					self.pynag_con_init(sched_id)
+					self.pynag_con_init(sched_id, type=type)
                         #Ok, con is not know, so we create it
 			except KeyError as exp: 
-				self.pynag_con_init(sched_id)
+				#print exp
+				self.pynag_con_init(sched_id, type=type)
 			except Pyro.errors.ProtocolError as exp:
 				print exp
 				#we reinitialise the ccnnexion to pynag
-				self.pynag_con_init(sched_id)
+				self.pynag_con_init(sched_id, type=type)
                         #scheduler must not #be initialized
 			except AttributeError as exp: 
 				print exp
@@ -335,9 +354,12 @@ class Broker(Satellite):
 		self.modules_manager.load()
 		self.mod_instances = self.modules_manager.get_instances()
 
-                #Connexion init with PyNag server
+                #Connexion init with Schedulers
 		for sched_id in self.schedulers:
-			self.pynag_con_init(sched_id)
+			self.pynag_con_init(sched_id, type='scheduler')
+
+		for arb_id in self.arbiters:
+			self.pynag_con_init(arb_id, type='arbiter')
 
 		#Now main loop
 		i = 0
@@ -357,7 +379,9 @@ class Broker(Satellite):
 			self.watch_for_new_conf(0.0)
 			
 			#Now we can get new broks from schedulers in self.broks
-			self.get_new_broks()
+			self.get_new_broks(type='scheduler')
+			#And from arbiters
+			self.get_new_broks(type='arbiter')
 			
 		        #We must had new broks at the end of the list, so we reverse the list
 			self.broks.reverse()			

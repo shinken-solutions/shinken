@@ -214,9 +214,12 @@ class Daemon:
             signal.signal(signal.SIGTERM, func)
 
 
+    def get_header(self):
+        return ["Shinken %s" % VERSION,
+                "Copyright (c) 2009 Gabes Jean (naparuba@gmail.com)",
+                "Last Modified: 25-11-2009",
+                "License: AGPL"]
 
     def print_header(self):
-        print "Shinken %s" % VERSION
-        print "Copyright (c) 2009 Gabes Jean (naparuba@gmail.com)"
-        print "Last Modified: 25-11-2009"
-        print "License: AGPL"
+        for line in self.get_header():
+            print line

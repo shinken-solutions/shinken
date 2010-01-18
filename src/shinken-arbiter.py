@@ -108,10 +108,21 @@ class Arbiter(Daemon):
         self.is_master = False
         self.me = None
 
+        self.nb_broks_send = 0
+
 
     #Use for adding broks
     def add(self, b):
         self.broks[b.id] = b
+
+
+    #Call by brokers to have broks
+    #We give them, and clean them!
+    def get_broks(self):
+        res = self.broks
+        #They are gone, we keep none!
+        self.broks = {}
+        return res
 
 
     #Load the external commander
@@ -121,11 +132,15 @@ class Arbiter(Daemon):
         
         
     def main(self):
-        self.print_header()
+
 
         #Log will be broks
         self.log = Log()
-        self.log.load_obj(self)
+        self.log.load_obj(self, 'arbiter')
+
+        self.print_header()
+        for line in self.get_header():
+            self.log.log(line)#, format = 'TOTO %s\n')
         
         print "Loading configuration"
         self.conf = Config()
@@ -307,6 +322,11 @@ class Arbiter(Daemon):
                 self.dispatcher.check_bad_dispatch()
                 #send_conf_to_schedulers()
                 timeout = 1.0
+
+                print "Nb Broks send:", self.nb_broks_send
+                #Log().log("Nb Broks send: %d" % self.nb_broks_send)
+                self.nb_broks_send = 0
+                
 						
             if timeout < 0:
                 timeout = 1.0

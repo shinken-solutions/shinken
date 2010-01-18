@@ -64,9 +64,10 @@ class Scheduler:
         self.nb_broks_send = 0
         self.nb_check_received = 0
 
-        #The log part
+        #Log init
         self.log = Log()
         self.log.load_obj(self)
+		
 
 
     #Load conf for future use

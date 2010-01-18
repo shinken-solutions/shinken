@@ -24,14 +24,21 @@ from brok import Brok
 class Log(Borg):
 
     #We load the object where we will put log broks
-    #with the 'add' method 
-    def load_obj(self, obj):
+    #with the 'add' method
+    def load_obj(self, obj, name = None):
         self.obj = obj
+        self.name = name
 
     #We enter a log message, we format it, and we add the log brok
-    def log(self, message):
-        #We format the log in UTF-8
-        s = u'[%d] %s\n' % (int(time.time()), message)
+    def log(self, message, format = None):
+        if format == None:
+            if self.name == None:
+            #We format the log in UTF-8
+                s = u'[%d] %s\n' % (int(time.time()), message.decode('UTF-8'))
+            else:
+                s = u'[%d] [%s] %s\n' % (int(time.time()), self.name, message.decode('UTF-8'))
+        else:
+            s = format % message
 
         print s
         #Wecreate and add the brok

@@ -33,6 +33,7 @@ print "I am simple log Broker"
 
 properties = {
     'type' : 'simple_log',
+    'external' : True,
     }
 
 
@@ -59,6 +60,7 @@ class Simple_log_broker:
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
+        self.q = self.properties['to_queue']
         print "I open the log file"
         self.file = open(self.path,'a')
     
@@ -80,7 +82,12 @@ class Simple_log_broker:
     #A service check have just arrived, we UPDATE data info with this
     def manage_log_brok(self, b):
         data = b.data
-        self.file.write(data['log'])
+        self.file.write(data['log'].encode('UTF-8'))
         self.file.flush()
 
 
+    def main(self):
+        while True:
+            b = self.q.get() # can block here :)
+            self.manage_brok(b)
+                        
