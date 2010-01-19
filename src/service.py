@@ -438,9 +438,9 @@ class Service(SchedulingItem):
     def is_notification_launchable(self, n, contact):
         now = time.time()
         if n.type == 'PROBLEM':
-            return self.state != 'OK' and  contact.want_service_notification(now, self.state)
+            return self.state != 'OK' and  contact.want_service_notification(now, self.state, n.type)
         else:
-            return self.state == 'OK' and  contact.want_service_notification(now, self.state)
+            return self.state == 'OK' and  contact.want_service_notification(now, self.state, n.type)
 
 
     def get_duration_sec(self):

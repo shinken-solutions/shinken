@@ -448,9 +448,9 @@ class SchedulingItem(Item):
         elif c.exit_status != 0 and self.last_state != OK_UP:
             if self.is_max_attempts() and self.state_type == 'SOFT':
                 #Ok here is when we just go to the hard state
+                self.state_type = 'HARD'
                 #So event handlers here too
                 res = self.get_event_handlers()
-                self.state_type = 'HARD'
                 #raise notification only if self.notifications_enabled is True
                 if self.notifications_enabled:
                     if not no_action:
@@ -521,6 +521,9 @@ class SchedulingItem(Item):
         cls = self.__class__
         #a recovery notif is send ony one time
         if n.type == 'RECOVERY':
+            return None
+        #notification_interval 0 means: one notification is enough
+        if self.notification_interval == 0:
             return None
         #TODO : resolv command...
         notif_nb = n.notif_nb

@@ -75,27 +75,49 @@ class Contact(Item):
 
     #Search for notification_options with state and if t is
     #in service_notification_period
-    def want_service_notification(self, t, state):
+    def want_service_notification(self, t, state, type):
         b = self.service_notification_period.is_time_valid(t)
         if 'n' in self.service_notification_options:
             return False
         t = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
              'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's'}
-        if state in t:
-            return b and t[state] in self.service_notification_options
+        if type == 'PROBLEM':
+            if state in t:
+                return b and t[state] in self.service_notification_options
+        elif type == 'RECOVERY':
+            if type in t:
+                return b and t[type] in self.service_notification_options
+        elif type == 'ACKNOWLEDGEMENT':
+            pass
+        elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
+            pass 
+        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or 'DOWNTIMECANCELLED':
+            pass # later...
+
         return False
 
 
     #Search for notification_options with state and if t is in
     #host_notification_period
-    def want_host_notification(self, t, state):
+    def want_host_notification(self, t, state, type):
         b = self.host_notification_period.is_time_valid(t)
         if 'n' in self.host_notification_options:
             return False
-        t = {'DOWN' : 'd', 'UNREABLE' : 'u', 'RECOVERY' : 'r',
+        t = {'DOWN' : 'd', 'UNREACHABLE' : 'u', 'RECOVERY' : 'r',
              'FLAPPING' : 'f', 'DOWNTIME' : 's'}
-        if state in t:
-            return b and t[state] in self.host_notification_options
+        if type == 'PROBLEM':
+            if state in t:
+                return b and t[state] in self.host_notification_options
+        elif type == 'RECOVERY':
+            if type in t:
+                return b and t[type] in self.host_notification_options
+        elif type == 'ACKNOWLEDGEMENT':
+            pass
+        elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
+            pass 
+        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or 'DOWNTIMECANCELLED':
+            pass # later...
+
         return False
 
 
