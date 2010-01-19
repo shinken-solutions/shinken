@@ -21,7 +21,7 @@ import time
 from command import CommandCall
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool
+from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format
 from macroresolver import MacroResolver
 from check import Check
 from notification import Notification
@@ -386,6 +386,43 @@ class Host(SchedulingItem):
         return False
 
 
+    #Add a log entry with a HOST ALERT like:
+    #HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
+    def raise_alert_log_entry(self):
+        Log().log('HOST ALERT: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.state_id, self.output))
+
+
+    #Add a log entry with a Freshness alert like:
+    #Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
+    #I'm forcing an immediate check of the host.
+    def raise_freshness_log_entry(self, t_stale_by, t_threshold):
+        Log().log("Warning: The results of host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the host." \
+                      % (self.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
+            
+
+    #Raise a log entry with a Notification alert like
+    #HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
+    def raise_notification_log_entry(self, contact, command):
+        if self.__class_.log_notifications:
+            Log().log("HOST NOTIFICATION: %s;%s;%s;%s;%s" % (contact.get_name(), self.get_name(), self.state, \
+                                                                 command.get_name(), self.output))
+
+
+    #Raise a log entry with FLAPPING START alert like
+    #HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
+    def raise_flapping_start_log_entry(self, change_ratio, threshold):
+        Log().log("HOST FLAPPING ALERT: %s;STARTED; Host appears to have started flapping (%.1f% change >= %.1% threshold)" % \
+                      (self.get_name(), change_ratio, threshold))
+
+
+    #Raise a log entry with FLAPPING STOP alert like
+    #HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
+    def raise_flapping_stop_log_entry(self, change_ratio, threshold):
+        Log().log("HOST FLAPPING ALERT: %s;STOPPED; Host appears to have stopped flapping (%.1f% change < %.1% threshold)" % \
+                      (self.get_name(), change_ratio, threshold))
+
+
+
     #Is stalking ?
     #Launch if check is waitconsume==first time
     #and if c.status is in self.stalking_options
@@ -404,7 +441,6 @@ class Host(SchedulingItem):
                 need_stalk = False
         if need_stalk:
             Log().log("Stalking %s : %s", self.get_name(), self.output)
-
 
 
     #fill act_depend_of with my parents (so network dep)

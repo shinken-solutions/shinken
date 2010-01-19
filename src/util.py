@@ -60,6 +60,16 @@ def get_start_of_day(year, month_id, day):
     start_time_epoch = time.mktime(start_time)
     return start_time_epoch
 
+
+#change a time in seconds like 3600 into a format : 0d 1h 0m 0s
+def format_t_into_dhms_format(t):
+    s = t
+    m,s=divmod(s,60)
+    h,m=divmod(m,60)
+    d,h=divmod(h,24)
+    return '%sd %sh %sm %ss' % (d, h, m, s)
+
+
 ################################# Pythonization ###########################
 #first change to foat so manage for example 25.0 to 25
 def to_int(val):

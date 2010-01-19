@@ -22,7 +22,7 @@ import time
 from command import CommandCall
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, strip_and_uniq
+from util import to_int, to_char, to_split, to_bool, strip_and_uniq, format_t_into_dhms_format
 from check import Check
 from notification import Notification
 from macroresolver import MacroResolver
@@ -307,11 +307,6 @@ class Service(SchedulingItem):
 
     #Set state with status return by the check
     #and update flapping state
-    #We've got special cases:
-    #critical_is_warning : critical become warning for some hosts
-    #(like QUALIFICATION HOSTS)
-    #inverse_ok_critical : CRITICAL become OK, OK CRITICAL. It's usefull
-    #for a passive cluster service 
     def set_state_from_exit_status(self, status):
         now = time.time()
         self.last_state_update = now
@@ -325,6 +320,7 @@ class Service(SchedulingItem):
             self.state = 'WARNING'
             self.state_id = 1
             self.last_time_warning = int(self.last_state_update)
+            
         elif status == 2:
             self.state = 'CRITICAL'
             self.state_id = 2
@@ -337,10 +333,13 @@ class Service(SchedulingItem):
             self.state = 'CRITICAL'#exit code UNDETERMINED
             self.state_id = 2
             self.last_time_critical = int(self.last_state_update)
+
         if status in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
+
         if self.state != self.last_state:
             self.last_state_change = self.last_state_update
+
         self.duration_sec = now - self.last_state_change
 
 
@@ -358,6 +357,42 @@ class Service(SchedulingItem):
         elif status == 'u' and self.state == 'UNKNOWN':
             return True
         return False
+
+
+    #Add a log entry with a SERVICE ALERT like:
+    #SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
+    def raise_alert_log_entry(self):
+        Log().log('SERVICE ALERT: %s;%s;%s;%s;%d;%s' % (self.host.get_name(), self.get_name(), self.state, self.state_type, self.state_id, self.output))
+
+
+    #Add a log entry with a Freshness alert like:
+    #Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
+    #I'm forcing an immediate check of the host.
+    def raise_freshness_log_entry(self, t_stale_by, t_threshold):
+        Log().log("Warning: The results of service '%s' on host '%' are stale by %s (threshold=%s).  I'm forcing an immediate check of the service." \
+                      % (self.get_name(), self.host.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
+
+
+    #Raise a log entry with a Notification alert like
+    #SERVICE NOTIFICATION: superadmin;server;Load;OK;notify-by-rss;no output
+    def raise_notification_log_entry(self, contact, command):
+        if self.__class_.log_notifications:
+            Log().log("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s" % (contact.get_name(), self.host.get_name(), self.get_name(), self.state, \
+                                                                       command.get_name(), self.output))
+
+        
+    #Raise a log entry with FLAPPING START alert like
+    #SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
+    def raise_flapping_start_log_entry(self, change_ratio, threshold):
+        Log().log("SERVICE FLAPPING ALERT: %s;%s;STARTED; Service appears to have started flapping (%.1f% change >= %.1% threshold)" % \
+                      (self.host.get_name(), self.get_name(), change_ratio, threshold))
+
+
+    #Raise a log entry with FLAPPING STOP alert like
+    #SERVICE FLAPPING ALERT: server;LOAD;STOPPED; Service appears to have stopped flapping (23.0% change < 25.0% threshold)
+    def raise_flapping_stop_log_entry(self, change_ratio, threshold):
+        Log().log("SERVICE FLAPPING ALERT: %s;%s;STOPPED; Service appears to have stopped flapping (%.1f% change < %.1% threshold)" % \
+                      (self.host.get_name(), self.get_name(), change_ratio, threshold))
 
 
     #Is stalking ?

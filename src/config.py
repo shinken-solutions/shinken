@@ -23,7 +23,7 @@
 #them into independant parts. The main user of this is Arbiter, but schedulers
 #use it too (but far less)
 
-import re, string, copy, os
+import re, string, copy, os, socket
 import itertools
 
 from timeperiod import Timeperiod, Timeperiods
@@ -195,6 +195,7 @@ class Config(Item):
                 #SHINKEN SPECIFIC
                 'idontcareaboutsecurity' : {'required':False, 'default':'0', 'pythonize': to_bool},
                 'conf_is_correct' : {'required' : False, 'default' : '1', 'pythonize': to_bool},
+                
     }
 
 

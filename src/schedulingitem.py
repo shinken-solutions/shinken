@@ -69,8 +69,12 @@ class SchedulingItem(Item):
         #Now we check is flapping change
         if self.is_flapping and r < low_flap_threshold:
             self.is_flapping = False
+            #We also raise a log entry
+            self.raise_flapping_stop_log_entry(r, low_flap_threshold)
         if not self.is_flapping and r >= high_flap_threshold:
             self.is_flapping = True
+            #We also raise a log entry
+            self.raise_flapping_start_log_entry(r, high_flap_threshold)
         self.percent_state_change = r
 
 
@@ -97,7 +101,9 @@ class SchedulingItem(Item):
             if cls.check_freshness:
                 if self.check_freshness and self.freshness_threshold != 0:
                     if self.last_state_update < now - self.freshness_threshold:
-                        print "Warning : ", self.get_name(), " is not so fresh! I raise a new check", self.check_freshness, self.freshness_threshold, self.last_state_update
+                        #Raise a log
+                        self.raise_freshness_log_entry(int(now-self.last_state_update), int(now-self.freshness_threshold))
+                        #And a new check
                         return self.launch_check(now)
         return None
 
@@ -414,6 +420,8 @@ class SchedulingItem(Item):
             res = self.get_event_handlers()
             if not no_action:
                 res.extend(self.create_notifications('PROBLEM'))
+            #status != 0 so add a log entry
+            self.raise_alert_log_entry()
             return res
         
         #If no OK in a OK -> going to SOFT
@@ -427,6 +435,8 @@ class SchedulingItem(Item):
                 self.attempt = 1
             #Oh? This is the typical go for a event handler :)
             res = self.get_event_handlers()
+            #status != 0 so add a log entry
+            self.raise_alert_log_entry()
             return res
         
         #If no OK in a no OK : if hard, still hard, if soft,
@@ -442,6 +452,8 @@ class SchedulingItem(Item):
                 if self.notifications_enabled:
                     if not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
+                #status != 0 so add a log entry
+                self.raise_alert_log_entry()
                 return res
         return []
 
@@ -493,6 +505,8 @@ class SchedulingItem(Item):
                 #Maybe the contact do not want this notif? Arg!
                 if self.is_notification_launchable(n, contact):
                     notifications.append(n)
+                    #And we can add the log entry
+                    self.raise_notification_log_entry(contact, cmd)
                 #Add in ours queues
                 self.notifications_in_progress[n.id] = n
         return notifications

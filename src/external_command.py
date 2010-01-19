@@ -22,6 +22,7 @@ import os, time
 from util import to_int, to_bool
 from downtime import Downtime
 from command import CommandCall
+from log import Log
 
 class ExternalCommand:
 
@@ -234,6 +235,9 @@ class ExternalCommand:
 
     
     def resolve_command(self, command):
+        #Only log if we are in the Arbiter
+        if self.mode == 'dispatcher':
+            Log().log('EXTERNAL COMMAND: '+command)
         self.get_command_and_args(command)
 
 
@@ -251,7 +255,8 @@ class ExternalCommand:
                 else:
                     print "Problem: a configuration is found, but is not assigned!"
             else:
-                print "Sorry but the host", host_name, "was not found"
+                Log().log("Warning:  Passive check result was received for host '%s', but the host could not be found!" % host_name)
+                #print "Sorry but the host", host_name, "was not found"
             
 
     #The command is global, so sent it to every schedulers
@@ -377,6 +382,8 @@ class ExternalCommand:
                     s = self.services.find_srv_by_name_and_hostname(tmp_host, srv_name)
                     if s is not None:
                         args.append(s)
+                    else: #error, must be logged
+                        Log().log("Warning: a command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
                 i += 1
 
         except IndexError:
@@ -958,6 +965,9 @@ class ExternalCommand:
     #TODO : say that check is PASSIVE 
     #PROCESS_HOST_CHECK_RESULT;<host_name>;<status_code>;<plugin_output>
     def PROCESS_HOST_CHECK_RESULT(self, host, status_code, plugin_output):
+        #raise a PASSIVE check only if needed
+        if self.conf.log_passive_checks:
+            Log().log('PASSIVE HOST CHECK: %s;%d;%s' % (host.get_name(), status_code, plugin_output))
         now = time.time()
         cls = host.__class__
         #If globally disable OR locally, do not launch
@@ -974,6 +984,9 @@ class ExternalCommand:
 
     #PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
+        #raise a PASSIVE check only if needed
+        if self.conf.log_passive_checks:
+            Log().log('PASSIVE SERVICE CHECK: %s;%s;%d;%s' % (service.host.get_name(), service.get_name(), return_code, plugin_output))
         now = time.time()
         cls = service.__class__
         #If globally disable OR locally, do not launch
