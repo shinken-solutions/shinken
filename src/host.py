@@ -422,6 +422,11 @@ class Host(SchedulingItem):
                       (self.get_name(), change_ratio, threshold))
 
 
+    #If there is no valid time for next check, raise a log entry
+    def raise_no_next_check_log_entry(self):
+        Log().log("Warning : I cannot schedule the check for the host '%s' because there is not future valid time" % \
+                      (self.get_name()))
+
 
     #Is stalking ?
     #Launch if check is waitconsume==first time

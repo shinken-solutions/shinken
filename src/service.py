@@ -394,6 +394,11 @@ class Service(SchedulingItem):
         Log().log("SERVICE FLAPPING ALERT: %s;%s;STOPPED; Service appears to have stopped flapping (%.1f% change < %.1% threshold)" % \
                       (self.host.get_name(), self.get_name(), change_ratio, threshold))
 
+    #If there is no valid time for next check, raise a log entry
+    def raise_no_next_check_log_entry(self):
+        Log().log("Warning : I cannot schedule the check for the service '%s' on host '%s' because there is not future valid time" % \
+                      (self.get_name(), self.host.get_name()))
+
 
     #Is stalking ?
     #Launch if check is waitconsume==first time

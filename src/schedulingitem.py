@@ -241,9 +241,9 @@ class SchedulingItem(Item):
 
         #If next time is None, do not go
         if self.next_chk == None:
-            #TODO : FUCK
-            print "Sorry, I do not launch the check for", self.get_name(), "because next_check is None"
-            
+            self.raise_no_next_check_log_entry()
+            return None
+
         #Get the command to launch
         return self.launch_check(self.next_chk)
 
