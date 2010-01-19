@@ -112,7 +112,7 @@ class Item(object):
     #We load every usefull parameter so no need to access global conf later
     #Must be called after a change in a gloabl conf parameter
     def load_global_conf(cls, conf):
-        print "Load global conf=========================="
+        #print "Load global conf=========================="
         #conf have properties, if 'enable_notifications' : 
         #{ [...] 'class_inherit' : [(Host, None), (Service, None),
         # (Contact, None)]}

@@ -94,9 +94,10 @@ class Arbiter(Daemon):
         }
 
 
-    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+    def __init__(self, config_file, is_daemon, verify_only, do_replace, debug, debug_file):
         self.config_file = config_file
         self.is_daemon = is_daemon
+	self.verify_only = verify_only
         self.do_replace = do_replace
         self.debug = debug
         self.debug_file = debug_file
@@ -136,7 +137,7 @@ class Arbiter(Daemon):
 
         #Log will be broks
         self.log = Log()
-        self.log.load_obj(self, 'arbiter')
+        self.log.load_obj(self)
 
         self.print_header()
         for line in self.get_header():
@@ -149,43 +150,49 @@ class Arbiter(Daemon):
         Config.fill_usern_macros()
         self.conf.read_config(self.config_file)
         
-        print "****************** Create Template links **********"
+	#Maybe conf is already invalid
+        if not self.conf.conf_is_correct:
+            print "***> One or more problems was encountered while processing the config files..."
+            sys.exit(1)
+
+
+	#print "****************** Create Template links **********"
         self.conf.linkify_templates()
 
-        print "****************** Inheritance *******************"
+        #print "****************** Inheritance *******************"
         self.conf.apply_inheritance()
 
-        print "****************** Explode ***********************"
+        #print "****************** Explode ***********************"
         self.conf.explode()
 
-        print "***************** Create Name reversed list ******"
+        #print "***************** Create Name reversed list ******"
         self.conf.create_reversed_list()
 
-        print "***************** Cleaning Twins *****************"
+        #print "***************** Cleaning Twins *****************"
         self.conf.remove_twins()
 
-        print "****************** Implicit inheritance *******************"
+        #print "****************** Implicit inheritance *******************"
         self.conf.apply_implicit_inheritance()
 
-        print "****************** Fill default ******************"
+        #print "****************** Fill default ******************"
         self.conf.fill_default()
         
-        print "****************** Clean templates ******************"
+        #print "****************** Clean templates ******************"
         self.conf.clean_useless()
         
-        print "****************** Pythonize ******************"
+        #print "****************** Pythonize ******************"
         self.conf.pythonize()
         
-        print "****************** Linkify ******************"
+        #print "****************** Linkify ******************"
         self.conf.linkify()
         
-        print "*************** applying dependancies ************"
+        #print "*************** applying dependancies ************"
         self.conf.apply_dependancies()
         
-        print "************** Exlode global conf ****************"
+        #print "************** Exlode global conf ****************"
         self.conf.explode_global_conf()
         
-        print "****************** Correct ?******************"
+        #print "****************** Correct ?******************"
         self.conf.is_correct()
 
         #If the conf is not correct, we must get out now
@@ -193,6 +200,11 @@ class Arbiter(Daemon):
             print "Configuration is incorrect, sorry, I bail out"
             sys.exit(1)
 
+	Log().log('Things look okay - No serious problems were detected during the pre-flight check')
+
+	#Exit if we are just here for config checking
+	if self.verify_only:
+	    sys.exit(0)
         
         #self.conf.dump()
 
@@ -205,23 +217,22 @@ class Arbiter(Daemon):
         for arb in self.conf.arbiterlinks:
             if arb.is_me():
                 self.me = arb
-                print "I find my own arbiterlink :", arb.get_name()
+                print "I am the arbiter :", arb.get_name()
+		print "Am I the master?", not self.me.spare
 
         if self.me == None:
             print "Error : I cannot find my own Arbiter object, I bail out"
             sys.exit(1)
         
-        print "Am I the master?", not self.me.spare
-        
         #print "Dump realms"
         #for r in self.conf.realms:
         #    print r.get_name(), r.__dict__
-
-        print "****************** Cut into parts ******************"
+	print "\n"
+	Log().log("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
-
+	
         #self.conf.debug()
-
+	
         #Ok, here we must check if we go on or not.
         #TODO : check OK or not
         self.pidfile = self.conf.lock_file
@@ -243,31 +254,31 @@ class Arbiter(Daemon):
         if os.name != 'nt':
             self.change_user(insane)
         else:
-            print "Sorry, you can't change user on this system"
+            Log().log("Warning : you can't change user on this system")
         
         #Now the daemon part if need
-        if is_daemon:
+	if is_daemon:
             self.create_daemon(do_debug=debug, debug_file=debug_file)
 
-        print "******************* Opening of the net daemon **********************"
+        Log().log("Opening of the network port")
         #Now open the daemon port for Broks and other Arbiter sends
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0
         Pyro.core.initServer()
 	
-        print "Listening on:", self.me.address, ":", self.me.port
+        Log().log("Listening on %s:%d" % (self.me.address, self.me.port))
         self.poller_daemon = Pyro.core.Daemon(host=self.me.address, port=self.me.port)
         if self.poller_daemon.port != self.me.port:
-            print "Sorry, the port %d is not free" % self.me.port
+            Log().log("Error : the port %d is not free!" % self.me.port)
             sys.exit(1)
 
         self.ibroks = IBroks(self)
         self.uri = self.poller_daemon.connect(self.ibroks,"Broks")
-        print "The Broks Interface uri is:", self.uri
+        #print "The Broks Interface uri is:", self.uri
 
 
-        print "****************** Send Configuration to schedulers******************"
+        Log().log("Begin to dispatch configurations to satellites")
         self.dispatcher = Dispatcher(self.conf, self.me)
         self.dispatcher.check_alive()
         self.dispatcher.check_dispatch()
@@ -280,7 +291,7 @@ class Arbiter(Daemon):
         #if necessery
 	self.load_external_command(e)
 	
-	print "Configuration Loaded"
+	Log().log("Configuration Loaded")
         
         #Main loop
 	self.run()
@@ -314,7 +325,7 @@ class Arbiter(Daemon):
                             self.fifo = self.external_command.open()
 
             else:#Timeout
-                print "Timeout"
+                #print "Timeout"
                 #if not self.are_all_conf_assigned:
                 self.dispatcher.check_alive()
                 self.dispatcher.check_dispatch()
@@ -378,7 +389,7 @@ def usage(name):
 if __name__ == "__main__":
     #Manage the options
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hrdc::w", ["help", "replace", "daemon", "config=", "debug=", "easter"])
+        opts, args = getopt.getopt(sys.argv[1:], "hvrdc::w", ["help", "verify-config", "replace", "daemon", "config=", "debug=", "easter"])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -386,6 +397,7 @@ if __name__ == "__main__":
         sys.exit(2)
     #Default params
     config_file = None
+    verify_only = False
     is_daemon=False
     do_replace=False
     debug=False
@@ -394,6 +406,8 @@ if __name__ == "__main__":
         if o in ("-h", "--help"):
             usage(sys.argv[0])
             sys.exit()
+	elif o in ("-v", "--verify-config"):
+            verify_only = True
 	elif o in ("-r", "--replace"):
             do_replace = True
         elif o in ("-c", "--config"):
@@ -413,7 +427,7 @@ if __name__ == "__main__":
         usage(sys.argv[0])
         sys.exit()
 
-    p = Arbiter(config_file, is_daemon, do_replace, debug, debug_file)
+    p = Arbiter(config_file, is_daemon, do_replace, verify_only, debug, debug_file)
     #Ok, now we load the config
 
     #p = Shinken(conf)

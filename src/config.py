@@ -48,6 +48,7 @@ from brokerlink import BrokerLink, BrokerLinks
 from pollerlink import PollerLink, PollerLinks
 from module import Module, Modules
 from graph import Graph
+from log import Log
 
 from util import to_int, to_char, to_bool
 #import psyco
@@ -194,7 +195,7 @@ class Config(Item):
                 
                 #SHINKEN SPECIFIC
                 'idontcareaboutsecurity' : {'required':False, 'default':'0', 'pythonize': to_bool},
-                'conf_is_correct' : {'required' : False, 'default' : '1', 'pythonize': to_bool},
+                #'conf_is_correct' : {'required' : False, 'default' : '1', 'pythonize': to_bool},
                 
     }
 
@@ -221,6 +222,8 @@ class Config(Item):
 
     def __init__(self):
         self.params = {}
+        #By default the conf is correct
+        self.conf_is_correct = True
 
 
     def fill_usern_macros(cls):
@@ -269,21 +272,27 @@ class Config(Item):
                 elts = line.split('=')
                 try:
                     fd = open(elts[1])
+                    Log().log("Processing object config file '%s'" % elts[1])
                     res += fd.read()
                     fd.close()
                 except IOError ,exp:
-                    print exp
+                    Log().log("Error: Cannot open config file '%s' for reading: %s" % (elts[1], exp))
+                    #The configuation is invalid because we have a bad file!
+                    self.conf_is_correct = False
             elif re.search("^cfg_dir", line):
                 elts = line.split('=')
                 for root, dirs, files in os.walk(elts[1]):
                     for file in files:
                         if re.search("\.cfg$", file):
                             try:
+                                
                                 fd = open(os.path.join(root, file))
                                 res += fd.read()
                                 fd.close()
                             except IOError, exp:
-                                print exp
+                                Log().log("Error: Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
+                                #The configuation is invalid because we have a bad file!
+                                self.conf_is_correct = False
         self.read_config_buf(res)
         
 
@@ -333,7 +342,7 @@ class Config(Item):
                 continuation_line = False
             if re.search("}", line):
                 in_define = False
-            if re.search("^#|^\s*$|^\s*}", line):
+            if re.search("^\s*\t*#|^\s*$|^\s*}", line):
                 pass
                         
             #A define must be catch and the type save
@@ -357,7 +366,7 @@ class Config(Item):
         objectscfg[tmp_type].append(tmp)
         objects = {}
         
-        print "Params", params
+        #print "Params", params
         self.load_params(params)
         
         for type in objectscfg:
@@ -425,47 +434,47 @@ class Config(Item):
     #REMEMBER: linkify AFTER explode...
     def linkify(self):
         #Do the simplify AFTER explode groups
-        print "Hostgroups"
+        #print "Hostgroups"
         #link hostgroups with hosts
         self.hostgroups.linkify(self.hosts)
 
-        print "Hosts"
+        #print "Hosts"
         #link hosts with timeperiodsand commands
         self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms, self.resultmodulations, self.escalations)
 
-        print "Services"
+        #print "Services"
         #link services with hosts, commands, timeperiods, contacts and resultmodulations
         self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations)
 
-        print "Service groups"
+        #print "Service groups"
         #link servicegroups members with services
         self.servicegroups.linkify(self.services)
 
-        print "Contactgroups"
+        #print "Contactgroups"
         #link contacgroups with contacts
         self.contactgroups.linkify(self.contacts)
 
-        print "Contacts"
+        #print "Contacts"
         #link contacts with timeperiods and commands
         self.contacts.linkify(self.timeperiods, self.commands)
 
-        print "Timeperiods"
+        #print "Timeperiods"
         #link timeperiods with timeperiods (exclude part)
         self.timeperiods.linkify()
 
-        print "Servicedependancy"
+        #print "Servicedependancy"
         self.servicedependencies.linkify(self.hosts, self.services, self.timeperiods)
 
-        print "Resultmodulations"
+        #print "Resultmodulations"
         self.resultmodulations.linkify(self.timeperiods)
 
-        print "Escalations"
+        #print "Escalations"
         self.escalations.linkify(self.timeperiods)
 
-        print "Realms"
+        #print "Realms"
         self.realms.linkify()
 
-        print "Schedulers and satellites"
+        #print "Schedulers and satellites"
         #Link all links with realms
         self.arbiterlinks.linkify(self.modules)
         self.schedulerlinks.linkify(self.realms, self.modules)
@@ -500,31 +509,31 @@ class Config(Item):
     #(for host group ones)
     def explode(self):
         #first elements, after groups
-        print "Contacts"
+        #print "Contacts"
         self.contacts.explode(self.contactgroups)
-        print "Contactgroups"
+        #print "Contactgroups"
         self.contactgroups.explode()
 
-        print "Hosts"
+        #print "Hosts"
         self.hosts.explode(self.hostgroups, self.contactgroups)
-        print "Hostgroups"
+        #print "Hostgroups"
         self.hostgroups.explode()
 
-        print "Services"
-        print "Initialy got nb of services : %d" % len(self.services.items)
+        #print "Services"
+        #print "Initialy got nb of services : %d" % len(self.services.items)
         self.services.explode(self.hostgroups, self.contactgroups, self.servicegroups)
         #print "finally got nb of services : %d" % len(self.services.items)
-        print "Servicegroups"
+        #print "Servicegroups"
         self.servicegroups.explode()
 
-        print "Timeperiods"
+        #print "Timeperiods"
         self.timeperiods.explode()
 
-        print "Servicedependancy"
+        #print "Servicedependancy"
         self.servicedependencies.explode()
 
         #Now the architecture part
-        print "Realms"
+        #print "Realms"
         self.realms.explode()
         
 
@@ -547,17 +556,17 @@ class Config(Item):
     #So elements wil have their configured properties
     def apply_inheritance(self):
         #inheritance properties by template
-        print "Hosts"
+        #print "Hosts"
         self.hosts.apply_inheritance()
-        print "Contacts"
+        #print "Contacts"
         self.contacts.apply_inheritance()
-        print "Services"
+        #print "Services"
         self.services.apply_inheritance(self.hosts)
 
 
     #Use to apply implicit inheritance
     def apply_implicit_inheritance(self):
-        print "Services"
+        #print "Services"
         self.services.apply_implicit_inheritance(self.hosts)
 
 
@@ -595,38 +604,36 @@ class Config(Item):
             #so all hosts without realm wil be link with it
             default = Realm({'realm_name' : 'Default', 'default' : '1'})
             self.realms = Realms([default])
-            print "I make a new realm", self.realms
+            Log().log("Notice : the is no defined realms, so I add a new one", default.get_name())
             lists = [self.pollers, self.brokers, self.reactionners, self.schedulerlinks]
             for l in lists:
                 for elt in l:
                     if not hasattr(elt, 'realm'):
                         elt.realm = 'Default'
-                        print "Tagging ", elt.get_name(), 'with', default.get_name()
-                    else:
-                        print "Not tagging",  elt.get_name(), ' because it gots:', elt.realm
-
+                        Log().log("Notice : Tagging %s with realm %s" % (elt.get_name(), default.get_name()))
+                        
 
     #If a satellite is missing, we add them in the localhost
     #with defaults values
     def fill_default_satellites(self):
         if len(self.arbiterlinks) == 0:
-             print "Warning : there is no arbiter, I add one in localhost:7770"
-             a = ArbiterLink({'arbiter_name' : 'Default-Arbiter', 'host_name' : socket.gethostname(), 'address' : 'localhost', 'port' : '7770', 'spare' : '0'})
-             self.arbiterlinks = ArbiterLinks([a])
+            Log().log("Warning : there is no arbiter, I add one in localhost:7770")
+            a = ArbiterLink({'arbiter_name' : 'Default-Arbiter', 'host_name' : socket.gethostname(), 'address' : 'localhost', 'port' : '7770', 'spare' : '0'})
+            self.arbiterlinks = ArbiterLinks([a])
         if len(self.schedulerlinks) == 0:
-            print "Warning : there is no scheduler, I add one in localhost:7768"
+            Log().log("Warning : there is no scheduler, I add one in localhost:7768")
             s = SchedulerLink({'scheduler_name' : 'Default-Scheduler', 'address' : 'localhost', 'port' : '7768'})
             self.schedulerlinks = SchedulerLinks([s])
         if len(self.pollers) == 0:
-            print "Warning : there is no poller, I add one in localhost:7771"
+            Log().log("Warning : there is no poller, I add one in localhost:7771")
             p = PollerLink({'poller_name' : 'Default-Poller', 'address' : 'localhost', 'port' : '7771'})
             self.pollers = PollerLinks([p])
         if len(self.reactionners) == 0:
-            print "Warning : there is no reactionner, I add one in localhost:7769"
+            Log().log("Warning : there is no reactionner, I add one in localhost:7769")
             r = ReactionnerLink({'reactionner_name' : 'Default-Reactionner', 'address' : 'localhost', 'port' : '7769'})
             self.reactionners = ReactionnerLinks([r])
         if len(self.brokers) == 0:
-            print "Warning : there is no broker, I add one in localhost:7772"
+            Log().log("Warning : there is no broker, I add one in localhost:7772")
             b = BrokerLink({'broker_name' : 'Default-Broker', 'address' : 'localhost', 'port' : '7772', 'manage_arbiters' : '1'})
             self.brokers = BrokerLinks([b])
 
@@ -658,25 +665,92 @@ class Config(Item):
     #from and scheduler. The first one got everything, the second
     #do not have the satellites.
     def is_correct(self):
+        Log().log('Running pre-flight check on configuration data...')
         r = self.conf_is_correct
+        #Hosts
+        Log().log('Checking hosts...')
         r &= self.hosts.is_correct()
+        Log().log('\tChecked %d hosts' % len(self.hosts))
+        
+        #Hostgroups
+        Log().log('Checking hostgroups...')
         r &= self.hostgroups.is_correct()
+        Log().log('\tChecked %d hostgroups' % len(self.hostgroups))
+
+        #Contacts
+        Log().log('Checking contacts...')
         r &= self.contacts.is_correct()
+        Log().log('\tChecked %d contacts' % len(self.contacts))
+
+        #Contactgroups
+        Log().log('Checking contactgroups')
         r &= self.contactgroups.is_correct()
-        r &= self.schedulerlinks.is_correct()
+        Log().log('\tChecked %d contactgroups' % len(self.contactgroups))
+
+        #Services
+        Log().log('Checking services')
         r &= self.services.is_correct()
+        Log().log('\tChecked %d services' % len(self.services))
+        
+        #Servicegroups
+        Log().log('Checking servicegroups')
         r &= self.servicegroups.is_correct()
+        Log().log('\tChecked %d servicegroups' % len(self.servicegroups))
+
+        #Servicedependencies
+        if hasattr(self, 'servicedependencies'):
+            Log().log('Checking servicedependencies')
+            r &= self.servicedependencies.is_correct()
+            Log().log('\tChecked %d servicedependencies' % len(self.servicedependencies))
+
+        #Hostdependencies
+        if hasattr(self, 'hostdependencies'):
+            Log().log('Checking hostdependencies')
+            r &= self.hostdependencies.is_correct()
+            Log().log('\tChecked %d hostdependencies' % len(self.hostdependencies))
+
+
+        #Arbiters
         if hasattr(self, 'arbiterlinks'):
+            Log().log('Checking arbiters')
             r &= self.arbiterlinks.is_correct()
+            Log().log('\tChecked %d arbiters' % len(self.arbiterlinks))
+
+        #Schedulers
         if hasattr(self, 'schedulerlinks'):
+            Log().log('Checking schedulers')
             r &= self.schedulerlinks.is_correct()
+            Log().log('\tChecked %d schedulers' % len(self.schedulerlinks))
+
+        #Reactionners
         if hasattr(self, 'reactionners'):
+            Log().log('Checking reactionners')
             r &= self.reactionners.is_correct()
+            Log().log('\tChecked %d reactionners' % len(self.reactionners))
+
+        #Pollers
         if hasattr(self, 'pollers'):
+            Log().log('Checking pollers')
             r &= self.pollers.is_correct()
+            Log().log('\tChecked %d reactionners' % len(self.pollers))
+
+        #Brokers
         if hasattr(self, 'brokers'):
+            Log().log('Checking brokers')
             r &= self.brokers.is_correct()
+            Log().log('\tChecked %d brokers' % len(self.brokers))
+        
+        #Timeperiods
+        Log().log('Checking timeperiods')
         r &= self.timeperiods.is_correct()
+        Log().log('\tChecked %d timeperiods' % len(self.timeperiods))
+
+        #Resultmodulations
+        if hasattr(self, 'resultmodulations'):
+            Log().log('Checking resultmodulations')
+            r &= self.resultmodulations.is_correct()
+            Log().log('\tChecked %d resultmodulations' % len(self.resultmodulations))
+        
         self.conf_is_correct = r
 
 
@@ -777,28 +851,29 @@ class Config(Item):
                 if elt.realm!= None:
                     tmp_realms.add(elt.realm)
             if len(tmp_realms) > 1:
-                print "Error : the realm configuration of yours hosts if not good"
+                Log().log("Error : the realm configuration of yours hosts if not good because there a more than one realm in one pack (host relations) :")
                 for h in pack:
                     if h.realm == None:
-                        print h.get_name(), None
+                        Log().log('Error : the host %s do not have a realm' % h.get_name())
                     else:
-                        print h.get_name(), h.realm.get_name()
+                        Log().log('Error : the host %s is in the realm %s' % (h.get_name(), h.realm.get_name()))
             if len(tmp_realms) == 1: # Ok, good
                 r = tmp_realms.pop() #There is just one element
-                print "Add to realm", r
                 r.packs.append(pack)
             elif len(tmp_realms) == 0: #Hum.. no realm value? So default Realm
                 if default_realm != None:
                     #print "I prefer add to default realm", default_realm.get_name()
                     default_realm.packs.append(pack)
                 else:
-                    print "Error : Hosts do not have a realm and you do not defined a default realm!"
+                    Log().log("Error : some hosts do not have a realm and you do not defined a default realm!")
+                    for h in pack:
+                        Log().log('Host in this pack : %s ' % h.get_name())
 
         #The load balancing is for a loop, so all
         #hosts of a realm (in a pack) will be dispatch
         #in the schedulers of this realm
         for r in self.realms:
-            print "Load balancing realm", r.get_name()
+            #print "Load balancing realm", r.get_name()
             packs = {}
             #create roundrobin iterator for id of cfg
             #So dispatching is loadbalanced in a realm
@@ -811,10 +886,13 @@ class Config(Item):
             #Maybe there is no scheduler in the realm, it's can be a
             #big problem if there are elements in packs
             nb_elements = len([elt for elt in [pack for pack in r.packs]])
-            print "Number of hosts in the realm :", nb_elements
+            Log().log("Number of hosts in the realm %s : %d" %(r.get_name(), nb_elements))
+
             if nb_schedulers == 0 and nb_elements != 0:
-                print "ERROR : The realm", r.get_name(), "have hosts but no scheduler!"
+                Log().log("ERROR : The realm %s have hosts but no scheduler!" %r.get_name())
                 r.packs = [] #Dumb pack
+                #The conf is incorrect
+                self.conf_is_correct = False
                 continue
             
             packindex = 0
@@ -855,10 +933,10 @@ class Config(Item):
         if nb_parts == 0:
             nb_parts = 1
 
-        print "Creating confs"
+        #print "Creating confs"
         self.confs = {}
         for i in xrange(0, nb_parts):
-            print "Create Conf:", i, '/', nb_parts -1
+            #print "Create Conf:", i, '/', nb_parts -1
             self.confs[i] = Config()
 
             #Now we copy all properties of conf into the new ones
@@ -891,7 +969,7 @@ class Config(Item):
             self.confs[i].is_assigned = False #if a scheduler have
                                               #accepted the conf
 
-        print "Creating packs"
+        Log().log("Creating packs for realms")
         
         #Just create packs. There can be numerous ones
         #In pack we've got hosts and service
@@ -913,9 +991,9 @@ class Config(Item):
         
         #We've nearly have hosts and services. Now we want REALS hosts (Class)
         #And we want groups too
-        print "Finishing packs"
+        #print "Finishing packs"
         for i in self.confs:
-            print "Finishing pack Nb:", i
+            #print "Finishing pack Nb:", i
             cfg = self.confs[i]
 
             #Create ours classes

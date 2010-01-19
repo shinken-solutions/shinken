@@ -31,6 +31,7 @@ class Log(Borg):
 
     #We enter a log message, we format it, and we add the log brok
     def log(self, message, format = None):
+        print message
         if format == None:
             if self.name == None:
             #We format the log in UTF-8
@@ -40,7 +41,6 @@ class Log(Borg):
         else:
             s = format % message
 
-        print s
         #Wecreate and add the brok
         b = Brok('log', {'log' : s})
         self.obj.add(b)

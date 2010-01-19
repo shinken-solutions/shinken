@@ -83,7 +83,7 @@ class Dispatcher:
         #Prepare the satellites confs
         for satellite in self.satellites:
             satellite.prepare_for_conf()
-            print ""*5,satellite.get_name(), "Spare?", satellite.spare, "manage_sub_realms?", satellite.manage_sub_realms
+            #print ""*5,satellite.get_name(), "Spare?", satellite.spare, "manage_sub_realms?", satellite.manage_sub_realms
 
         #Now realm will have a cfg pool for satellites
         for r in self.realms:
@@ -94,7 +94,7 @@ class Dispatcher:
     def check_alive(self):
         for elt in self.elements:
             elt.alive = elt.is_alive()
-            print "Element", elt.get_name(), " alive:", elt.alive, ", active:", elt.is_active
+            #print "Element", elt.get_name(), " alive:", elt.alive, ", active:", elt.is_active
             #Not alive need new need_conf
             #and spare too if they do not have already a conf
             if not elt.alive or hasattr(elt, 'conf') and elt.conf == None:
@@ -112,17 +112,18 @@ class Dispatcher:
             #skip sched because it is managed by the new way
             if not hasattr(elt, 'conf'):
                 if (elt.is_active and not elt.alive):
-                    print "ELT:", elt.get_name(), elt.is_active, elt.alive, elt.need_conf
+                    Log().log('The satellite %s have a configuration in charge, but seem to be dead! I run a new confguration dispatch' % \
+                                  elt.get_name())
                     self.dispatch_ok = False
-                    print "Set dispatch False"
+                    #print "Set dispatch False"
                     elt.is_active = False
                     if hasattr(elt, 'conf'):
                         if elt.conf != None:
                             elt.conf.assigned_to = None
                             elt.conf.is_assigned = False
                             elt.conf = None
-                    else:
-                        print 'No conf'
+                    #else:
+                    #    print 'No conf'
 
         #We check for confs to be dispatched on alive scheds. If not dispatch, need dispatch :)
         #and if dipatch on a failed node, remove the association, and need a new disaptch
@@ -130,12 +131,13 @@ class Dispatcher:
             for cfg_id in r.confs:
                 sched = r.confs[cfg_id].assigned_to
                 if sched == None:
-                    Log().log("Scheduler configuration N%d is unmanaged!!" % cfg_id)
+                    if self.first_dispatch_done:
+                        Log().log("Scheduler configuration %d is unmanaged!!" % cfg_id)
                     self.dispatch_ok = False
                 else:
                     if not sched.alive:
                         self.dispatch_ok = False #so we ask a new dispatching
-                        Log().log("Scheduler %s had the configuration N%d but is dead, I am not happy." % (sched.get_name(), cfg_id))
+                        Log().log("Scheduler %s had the configuration %d but is dead, I am not happy." % (sched.get_name(), cfg_id))
                         sched.conf.assigned_to = None
                         sched.conf.is_assigned = False
                         sched.conf = None
@@ -149,9 +151,11 @@ class Dispatcher:
                 #DBG
                 sched = r.confs[cfg_id].assigned_to
                 if sched != None:
-                    print "CFG", cfg_id, "is managed by", sched.get_name()
+                    #print "CFG", cfg_id, "is managed by", sched.get_name()
+                    pass
                 else:
-                    Log().log("Scheduler configuration N%d is unmanaged!!" % cfg_id)
+                    if self.first_dispatch_done:
+                        Log().log("Scheduler configuration %d is unmanaged!!" % cfg_id)
                 #END DBG
                 try:
                     for kind in ['reactionner', 'poller', 'broker']:
@@ -196,15 +200,15 @@ class Dispatcher:
                 #If element have a conf, I do not care, it's a good dispatch
                 #If die : I do not ask it something, it won't respond..
                 if elt.conf == None and elt.alive:
-                    print "Ask", elt.get_name() , 'if it got conf'
+                    #print "Ask", elt.get_name() , 'if it got conf'
                     if elt.have_conf():
                         Log().log('The element %s have a conf and should have too! I ask it to idle now' % elt.get_name())
                         elt.active = False
                         elt.wait_new_conf()
                         #I do not care about order not send or not. If not,
                         #The next loop wil resent it
-                    else:
-                        print "No conf"
+                    #else:
+                    #    print "No conf"
         
         #I ask satellite witch sched_id they manage. If I am not agree, I ask
         #them to remove it
@@ -217,7 +221,7 @@ class Dispatcher:
                 if len(cfg_ids) != 0:
                     id_to_delete = []
                     for cfg_id in cfg_ids:
-                        print kind, ":", satellite.get_name(), "manage cfg id:", cfg_id
+                        #DBG print kind, ":", satellite.get_name(), "manage cfg id:", cfg_id
                         #Ok, we search for realm that have the conf
                         for r in self.realms:
                             if cfg_id in r.confs:
@@ -239,6 +243,9 @@ class Dispatcher:
 
     #Manage the dispatch
     def dispatch(self):
+        #Ok, we pass at least one time in dispatch, so now errors are True errors
+        self.first_dispatch_done = True
+
         #Is no need to dispatch, do not dispatch :)
         if not self.dispatch_ok:
             for r in self.realms:
@@ -264,8 +271,12 @@ class Dispatcher:
                 scheds.reverse() #pop is last, I need first
 
                 #DBG: dump
-                for s in scheds:
-                    print '[',r.get_name(),']',"Sched:",s.get_name()
+                print_sched = [s.get_name() for s in scheds]
+                print_sched.reverse()
+                print_string = '[%s] Schedulers order : ' % r.get_name()
+                for s in print_sched:
+                    print_string += '%s ' % s
+                Log().log(print_string)
 
                 #Now we do the job
                 every_one_need_conf = False
@@ -280,7 +291,7 @@ class Dispatcher:
                             Log().log('[%s] Trying to send conf to scheduler %s' % (r.get_name(), sched.get_name()))
                             if sched.need_conf:
                                 every_one_need_conf = True
-                                Log().log('[%s] Dispatching configuration N%d' % (r.get_name(), sched.id))
+                                Log().log('[%s] Dispatching configuration %d' % (r.get_name(), sched.id))
                                 #We tag conf with the instance_name = scheduler_name
                                 conf.instance_name = sched.scheduler_name
                                 is_sent = sched.put_conf(conf)
@@ -302,10 +313,6 @@ class Dispatcher:
                                         r.to_satellites_nb_assigned[kind][cfg_id] = 0
                                         r.to_satellites_need_dispatch[kind][cfg_id]  = True
                                         r.to_satellites_managed_by[kind][cfg_id] = []
-                                        print "Now to_satellites:"
-                                        print r.to_satellites[kind]
-                                        print r.to_satellites_nb_assigned[kind]
-                                        print r.to_satellites_need_dispatch[kind]
                                 else:
                                     Log().log('[%s] Warning : Dispatch fault for scheduler %s' %(r.get_name(), sched.get_name()))
                             else:
@@ -334,7 +341,7 @@ class Dispatcher:
             if self.dispatch_ok:
                 for sched in self.schedulers.items.values():
                     if sched.conf == None:
-                        print "Tagging sched", sched.get_name(), "so it do not ask anymore for conf"
+                        #print "Tagging sched", sched.get_name(), "so it do not ask anymore for conf"
                         sched.need_conf = False
             
 
@@ -351,15 +358,17 @@ class Dispatcher:
                             Log().log('[%s] Dispatching %s' % (r.get_name(),kind) + 's')
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
                             
-                            print "Sched Config part for ", kind+'s',":", cfg_for_satellite_part
+                            #print "Sched Config part for ", kind+'s',":", cfg_for_satellite_part
                             #make copies of potential_react list for sort
                             satellites = []
                             for satellite in r.get_potential_satellites_by_type(kind):
                                 satellites.append(satellite)
                             satellites.sort(alive_then_spare_then_deads)
-                            Log().log("[%s] Satellite order :" % r.get_name())
+                            satellite_string = "[%s] %s satellite order : " % (r.get_name(), kind)
                             for satellite in satellites:
-                                Log().log("\t %s : is spare? %s" % (satellite.get_name(), str(satellite.spare)))
+                                satellite_string += '%s (spare:%s), ' % (satellite.get_name(), str(satellite.spare))
+
+                            Log().log(satellite_string)
                             
                             #Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
@@ -385,34 +394,3 @@ class Dispatcher:
                                 Log().log("[%s] OK, no more %s sent need" % (r.get_name(), kind))
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
                             
-
-            #We put on the satellites only if every one need it 
-            #(a new scheduler)
-            #Of if a specific satellite needs it
-            #TODO : more python
-            #We create the conf for satellites : it's just schedulers
-            #tmp_conf = {}
-            #tmp_conf['schedulers'] = {}
-            #i = 0
-            #for sched in self.schedulers:
-            #    tmp_conf['schedulers'][i] = {'port' : sched.port, 'address' : sched.address, 'name' : sched.name, 'instance_id' : sched.id, 'active' : sched.conf!=None}
-            #    i += 1
-            
-            #for broker in self.conf.brokers.items.values():
-            #    if broker.alive:
-            #        if every_one_need_conf or broker.need_conf:
-            #            print "Putting a Broker conf"
-            #            is_sent = broker.put_conf(tmp_conf)
-            #            if is_sent:
-            #                broker.is_active = True
-            #                broker.need_conf = False
-            
-            #for poller in self.conf.pollers.items.values():
-            #    if poller.alive:
-            #        if every_one_need_conf or poller.need_conf:
-            #            print "Putting a Poller conf"
-            #            is_sent = poller.put_conf(tmp_conf)
-            #            if is_sent:
-            #                poller.is_active = True
-            #                poller.need_conf = False
-

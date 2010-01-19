@@ -102,7 +102,7 @@ class SatelliteLink(Item):
             return False
         except Pyro.errors.ProtocolError as exp:
             self.con = None
-            print exp
+            #print exp
             return False
 
 

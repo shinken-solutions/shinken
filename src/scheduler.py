@@ -67,7 +67,14 @@ class Scheduler:
         #Log init
         self.log = Log()
         self.log.load_obj(self)
-		
+
+        self.instance_id = 0 # Temporary set. Will be erase later
+        #Ours queues
+        self.checks = {}
+        self.actions = {}
+        self.downtimes = {}
+        self.broks = {}
+
 
 
     #Load conf for future use
@@ -86,11 +93,6 @@ class Scheduler:
         self.servicegroups = conf.servicegroups
         self.timeperiods = conf.timeperiods
         self.commands = conf.commands
-        #Ours queues
-        self.checks = {}
-        self.actions = {}
-        self.downtimes = {}
-        self.broks = {}
 
         #self.status_file = StatusFile(self)        #External status file
         self.instance_id = conf.instance_id #From Arbiter. Use for 

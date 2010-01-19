@@ -171,6 +171,10 @@ class Itemgroups:
         return self.itemgroups.itervalues()
 
 
+    def __len__(self):
+        return len(self.itemgroups)
+
+
     #If a prop is absent and is not required, put the default value
     def fill_default(self):
         for i in self:

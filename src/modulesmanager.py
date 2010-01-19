@@ -83,16 +83,24 @@ class ModulesManager():
 
         print "Load", len(self.instances), "module instances"
 
+        to_del = []
         for inst in self.instances:
-            if 'external' in inst.properties and inst.properties['external']:
-                inst.properties['to_queue'] = Queue()
-                inst.properties['from_queue'] = Queue()
-                inst.init()
-                inst.properties['process'] = Process(target=inst.main, args=())
-                inst.properties['process'].start()
-            else:
-                inst.properties['external'] = False
-                inst.init()
+            try:
+                if 'external' in inst.properties and inst.properties['external']:
+                    inst.properties['to_queue'] = Queue()
+                    inst.properties['from_queue'] = Queue()
+                    inst.init()
+                    inst.properties['process'] = Process(target=inst.main, args=())
+                    inst.properties['process'].start()
+                else:
+                    inst.properties['external'] = False
+                    inst.init()
+            except Exception as exp:
+                print "Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(exp))
+                to_del.append(inst)
+
+        for inst in to_del:
+            self.instances.remove(inst)
 
         return self.instances
 
