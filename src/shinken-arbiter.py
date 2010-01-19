@@ -230,6 +230,12 @@ class Arbiter(Daemon):
 	print "\n"
 	Log().log("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
+
+        #If the conf can be incorrect here if the cut into parts see errors like
+	#a realm with hosts and not scehdulers for it
+        if not self.conf.conf_is_correct:
+            print "Configuration is incorrect, sorry, I bail out"
+            sys.exit(1)
 	
         #self.conf.debug()
 	
