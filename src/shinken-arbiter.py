@@ -94,7 +94,7 @@ class Arbiter(Daemon):
         }
 
 
-    def __init__(self, config_file, is_daemon, verify_only, do_replace, debug, debug_file):
+    def __init__(self, config_file, is_daemon, do_replace, verify_only, debug, debug_file):
         self.config_file = config_file
         self.is_daemon = is_daemon
 	self.verify_only = verify_only
@@ -202,10 +202,7 @@ class Arbiter(Daemon):
 
 	Log().log('Things look okay - No serious problems were detected during the pre-flight check')
 
-	#Exit if we are just here for config checking
-	if self.verify_only:
-	    sys.exit(0)
-        
+
         #self.conf.dump()
 
         #from guppy import hpy
@@ -236,6 +233,10 @@ class Arbiter(Daemon):
         if not self.conf.conf_is_correct:
             print "Configuration is incorrect, sorry, I bail out"
             sys.exit(1)
+
+	#Exit if we are just here for config checking
+	if self.verify_only:
+	    sys.exit(0)
 	
         #self.conf.debug()
 	
