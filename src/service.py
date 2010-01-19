@@ -222,10 +222,9 @@ class Service(SchedulingItem):
         'SERVICENOTES' : 'notes'
         }
 
-    #Give a nice name output, for debbuging purpose
-    #(Yes, debbuging CAN happen...)
+    #Give a nice name output
     def get_name(self):
-        return self.host_name+'/'+self.service_description
+        return self.service_description
 
     
     #Call by picle for dataify service

@@ -75,7 +75,6 @@ class Couchdb_broker:
             f = getattr(self, manager)
             f(new_b)
             return
-        print "(couchdb)I don't manage this brok type", b
 
 
     #Create the database connexion

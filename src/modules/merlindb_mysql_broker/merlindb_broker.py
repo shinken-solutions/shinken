@@ -73,7 +73,6 @@ class Merlindb_broker:
             for q in queries :
                 self.execute_query(q)
             return
-        print "(merlindb)I don't manage this brok type", b
 
 
     #Create the database connexion
