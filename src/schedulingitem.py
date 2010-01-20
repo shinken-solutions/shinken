@@ -523,13 +523,17 @@ class SchedulingItem(Item):
     def get_new_notification_from(self, n):
         now = time.time()
         cls = self.__class__
+
         #a recovery notif is send ony one time
         if n.type == 'RECOVERY':
             return None
+
         #notification_interval 0 means: one notification is enough
         if self.notification_interval == 0:
             return None
-        #TODO : resolv command...
+
+        #We do not need to resolv the command. I will be ask by scheduler when
+        #the notification will be ready to go, so status will be uptodate
         notif_nb = n.notif_nb
         new_n = Notification(n.type, 'scheduled','', n.command_call, n.ref, n.contact, now + self.notification_interval * 60, notif_nb + 1, timeout=cls.notification_timeout)
         self.notifications_in_progress[new_n.id] = new_n
