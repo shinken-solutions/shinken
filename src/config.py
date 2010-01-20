@@ -469,7 +469,7 @@ class Config(Item):
         self.resultmodulations.linkify(self.timeperiods)
 
         #print "Escalations"
-        self.escalations.linkify(self.timeperiods)
+        self.escalations.linkify(self.timeperiods, self.contacts)
 
         #print "Realms"
         self.realms.linkify()
@@ -529,8 +529,12 @@ class Config(Item):
         #print "Timeperiods"
         self.timeperiods.explode()
 
+        self.hostdependencies.explode()
+
         #print "Servicedependancy"
         self.servicedependencies.explode()
+
+        self.escalations.explode(self.contactgroups)
 
         #Now the architecture part
         #print "Realms"

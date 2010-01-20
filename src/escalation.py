@@ -28,15 +28,17 @@ class Escalation(Item):
                 'last_notification' : {'required': True, 'pythonize' : to_int},
                 'notification_interval' : {'required' : True, 'pythonize' : to_int},
                 'escalation_period' : {'required': False},
-                'escalation_options' : {'required': False, 'default': 'd,u,r,w,c', 'pythonize' : to_split}
+                'escalation_options' : {'required': False, 'default': 'd,u,r,w,c', 'pythonize' : to_split},
+                'contacts' : {'required':True},
+                'contact_groups' : {'required':True},
                 }
-
+    
     running_properties = {}
-
+    
     
     macros = {}
-
-
+    
+    
     #For debugging purpose only (nice name)
     def get_name(self):
         return self.escalation_name
@@ -46,9 +48,9 @@ class Escalations(Items):
     name_property = "escalation_name"
     inner_class = Escalation
 
-    def linkify(self, timeperiods):
+    def linkify(self, timeperiods, contacts):
         self.linkify_es_by_tp(timeperiods)
-
+        self.linkify_es_by_c(contacts)
     
     #We just search for each timeperiod the tp
     #and replace the name by the tp
@@ -61,7 +63,33 @@ class Escalations(Items):
             
             es.escalation_period = tp
 
+    #Make link between escalation and it's contacts
+    def linkify_es_by_c(self, contacts):
+        for es in self:
+            if hasattr(es, 'contacts'):
+                contacts_tab = es.contacts.split(',')
+                new_contacts = []
+                for c_name in contacts_tab:
+                    c_name = c_name.strip()
+                    c = contacts.find_by_name(c_name)
+                    new_contacts.append(c)
+                es.contacts = new_contacts
+
+            
 
     #We look for contacts property in contacts and
-    def explode(self):
-        pass
+    def explode(self, contactgroups):
+        #We adding all contacts of the contactgroups into the contacts property
+        for es in self:
+            if hasattr(es, 'contact_groups'):
+                cgnames = es.contact_groups.split(',')
+                for cgname in cgnames:
+                    cgname = cgname.strip()
+                    cnames = contactgroups.get_members_by_name(cgname)
+                    #We add hosts in the service host_name
+                    if cnames != []:
+                        if hasattr(s, 'contacts'):
+                            es.contacts += ','+cnames
+                        else:
+                            es.contacts = cnames
+

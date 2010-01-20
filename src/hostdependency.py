@@ -69,7 +69,7 @@ class Hostdependencies(Items):
                     new_hd.dependent_host_name = hname
                     self.items[new_hd.id] = new_hd
                 hstdep_to_remove.append(id)        
-        self.delete_hostsdep_by_id(hst_to_remove)
+        self.delete_hostsdep_by_id(hstdep_to_remove)
 
 
     def linkify(self, hosts, timeperiods):
