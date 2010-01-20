@@ -490,7 +490,11 @@ class SchedulingItem(Item):
         
         notifications = []
         now = time.time()
-        t = self.notification_period.get_next_valid_time_from_t(now)
+        t_wished = now
+        #if first notification, we must add first_notification_delay
+        if self.current_notification_number == 1:
+            t_wished = now + self.first_notification_delay
+        t = self.notification_period.get_next_valid_time_from_t(t_wished)
         #m = MacroResolver()
         
         for contact in self.contacts:
