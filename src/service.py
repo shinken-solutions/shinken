@@ -374,10 +374,13 @@ class Service(SchedulingItem):
 
     #Raise a log entry with a Notification alert like
     #SERVICE NOTIFICATION: superadmin;server;Load;OK;notify-by-rss;no output
-    def raise_notification_log_entry(self, contact, command):
+    def raise_notification_log_entry(self, n):
+        contact = n.contact
+        command = n.command_call
         if self.__class__.log_notifications:
             Log().log("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s" % (contact.get_name(), self.host.get_name(), self.get_name(), self.state, \
                                                                        command.get_name(), self.output))
+
 
     #Raise a log entry with a Eventhandler alert like
     #SERVICE EVENT HANDLER: test_host_0;test_ok_0;OK;SOFT;4;eventhandler

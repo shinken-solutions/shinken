@@ -390,11 +390,19 @@ class SchedulingItem(Item):
 
         res = []
 
-        #OK following a previous OK. perfect
+        #OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
-            #self.add_attempt()
-            self.attempt = 1
-            self.state_type = 'HARD'
+            #action in return can be notification or other checks (dependancies)
+            if (self.state_type == 'SOFT') and self.last_state != 'PENDING':
+                if self.is_max_attempts() and self.state_type == 'SOFT':
+                    self.state_type = 'HARD'
+                else:
+                    self.state_type = 'SOFT'
+            else:
+                self.attempt = 1
+                self.state_type = 'HARD'
+            return []
+
 
         #OK following a NON-OK. 
         elif c.exit_status == 0 and (self.last_state != OK_UP and self.last_state != 'PENDING'):
@@ -427,12 +435,14 @@ class SchedulingItem(Item):
             #in a hard state
             self.attempt = 1
             self.state_type = 'HARD'
+            #status != 0 so add a log entry (before actions that can also raise log
+            #it is smarter to log error before notification)
             self.raise_alert_log_entry()
             self.remove_in_progress_notifications()
             if self.notifications_enabled and not no_action:
                 res.extend(self.create_notifications('PROBLEM'))
             #Ok, event handlers here too
-            res = self.get_event_handlers()
+            res.extend(self.get_event_handlers())
 
         #NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
@@ -444,7 +454,7 @@ class SchedulingItem(Item):
                 if self.notifications_enabled and not no_action:
                     res.extend(self.create_notifications('PROBLEM'))
                 #Oh? This is the typical go for a event handler :)
-                res = self.get_event_handlers()
+                res.extend(self.get_event_handlers())
             else:
                 #This is the first NON-OK result. Initiate the SOFT-sequence
                 #Also launch the event handler, he might fix it.
@@ -468,18 +478,18 @@ class SchedulingItem(Item):
                     if self.notifications_enabled and not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
                     #So event handlers here too
-                    res = self.get_event_handlers()
+                    res.extend(self.get_event_handlers())
                 else:
                     self.raise_alert_log_entry()
                     #eventhandler is launched each time during the soft state
-                    res = self.get_event_handlers()
+                    res.extend(self.get_event_handlers())
             else:
                 #Send notifications whenever the state has changed. (W -> C)
                 if self.state != self.last_state:
                     self.raise_alert_log_entry()
                     self.remove_in_progress_notifications()
                     if self.notifications_enabled and not no_action:
-                        res = self.create_notifications('PROBLEM')
+                        res.extend(self.create_notifications('PROBLEM'))
 
         # res is filled with eventhandler and notification
         # now would be the time to add self.oscp...
@@ -493,10 +503,28 @@ class SchedulingItem(Item):
         n.command = m.resolve_command(n.command_call, data)
 
 
-    #Create notifications
-    def create_notifications(self, type):
-        #if notif is disabled, not need to go thurser
+    #See if an escalation is eligible
+    def is_escalable(self, t):
+        #Check is an escalation match the current_notification_number
+        for es in self.escalations:
+            if es.is_eligible(t, self.state, self.current_notification_number):
+                return True
+        return False
 
+
+    #Get all contacts (uniq) from eligible escalations
+    def get_escalable_contacts(self, t):
+        contacts = set()
+        for es in self.escalations:
+            if es.is_eligible(t, self.state, self.current_notification_number):
+                contacts.update(es.contacts)
+        return list(contacts)
+
+
+    #Create notifications
+    def create_notifications(self, type, t_wished = None):
+        #if notif is disabled, not need to go thurser
+        #print "Ask for notification creation of type", type, "current level", self.current_notification_number
         cls = self.__class__
         if not self.notifications_enabled or self.is_in_downtime or not cls.enable_notifications:
             return []
@@ -508,61 +536,105 @@ class SchedulingItem(Item):
         #Recovery make the counter of notif become 0
         if type == 'RECOVERY':
             self.current_notification_number = 0
-        else:
-            self.current_notification_number += 1
+        #If not recovery and it's the first launch, we upgrade the level
+        #all other upgrade will be done by get_new_notifications_from
+        elif self.current_notification_number == 0:
+            self.current_notification_number = 1
 
-        print "Raise notification of type", type, "for", self.get_name()
+        #print "Raise notification of type", type, "for", self.get_name()
         
         notifications = []
         now = time.time()
-        t_wished = now
-        #if first notification, we must add first_notification_delay
-        if self.current_notification_number == 1:
-            t_wished = now + self.first_notification_delay
-        t = self.notification_period.get_next_valid_time_from_t(t_wished)
-        #m = MacroResolver()
-        
-        for contact in self.contacts:
+        #t_wished==None for the first notification launch after consume
+        #here we must look at the self.notification_period
+        if t_wished == None:
+            t_wished = now
+            #if first notification, we must add first_notification_delay
+            #TODO : useless check isn't it?
+            if self.current_notification_number == 1:
+                t_wished = now + self.first_notification_delay
+            t = self.notification_period.get_next_valid_time_from_t(t_wished)
+        else:
+            #We folow our order
+            t = t_wished
+
+
+        if self.is_escalable(t):
+            contacts = self.get_escalable_contacts(t)
+            #print "Get contacts from escalations on level:", self.current_notification_number
+            for c in contacts:
+                print c.get_name()
+        else:
+            contacts = self.contacts
+            for c in contacts:
+                print c.get_name()
+            
+        for contact in contacts:
             #Get the propertie name for notif commands, like
             #service_notification_commands for service
             notif_commands_prop = cls.my_type+'_notification_commands'
             notif_commands = getattr(contact, notif_commands_prop)
             for cmd in notif_commands:
-                n = Notification(type, 'scheduled', 'VOID', cmd, self, contact, t, timeout=cls.notification_timeout)
-                #The notif must be fill with current data, 
-                #so we create the commmand now
-                self.update_notification_command(n)
+                n = Notification(type, 'scheduled', 'VOID', cmd, self, contact, t, \
+                                     timeout=cls.notification_timeout, notif_nb=self.current_notification_number )
+                    
                 #data = self.get_data_for_notifications(contact, n)
                 #n.command = m.resolve_command(cmd, data)
                 #Maybe the contact do not want this notif? Arg!
                 if self.is_notification_launchable(n, contact):
+                    #The notif must be fill with current data, 
+                    #so we create the commmand now but only if it's the first 
+                    #And we can add the log entry now
+                    if self.current_notification_number == 1:
+                        self.update_notification_command(n)
+                        self.raise_notification_log_entry(n)
+
                     notifications.append(n)
-                    #And we can add the log entry
-                    self.raise_notification_log_entry(contact, cmd)
+                    #print "DBG: Create a new notification from :", n.id, n.type, n.status, n.ref.get_name(), n.ref.state, 'level:%d' % n.notif_nb
+
                 #Add in ours queues
                 self.notifications_in_progress[n.id] = n
         return notifications
 
 
     #We just send a notification, we need new ones in notification_interval
-    def get_new_notification_from(self, n):
+    def get_new_notifications_from(self, n):
         now = time.time()
         cls = self.__class__
 
+        #print "Get a new notification from :", n.id, n.type, n.status, n.ref.get_name(), n.ref.state, 'level:%d' % n.notif_nb
+        #print "And my level is", self.current_notification_number
         #a recovery notif is send ony one time
         if n.type == 'RECOVERY':
-            return None
+            return []
 
         #notification_interval 0 means: one notification is enough
         if self.notification_interval == 0:
-            return None
+            return []
 
         #We do not need to resolv the command. I will be ask by scheduler when
         #the notification will be ready to go, so status will be uptodate
         notif_nb = n.notif_nb
-        new_n = Notification(n.type, 'scheduled','', n.command_call, n.ref, n.contact, now + self.notification_interval * 60, notif_nb + 1, timeout=cls.notification_timeout)
-        self.notifications_in_progress[new_n.id] = new_n
-        return new_n
+        #print "Received a notification level:", notif_nb
+
+        #Maybe we already receive a notification of this level and manage to launch all
+        #notification for the new level. If so, we do not launch new ones
+        if notif_nb < self.current_notification_number:
+            #print "DBG: I already manage the level, so we do not launch new notifications"
+            return []
+
+        #Ok, here we are in the same level of our notification return, so we must
+        #raise new ones on self.notification_interval with the good new level
+        self.current_notification_number += 1
+
+        #We will end new notification_escalation at
+        t = now + self.notification_interval * 60
+        
+        #Create an return notifications we will raise with the same type and
+        #at time we want
+        notifications = self.create_notifications(n.type, t_wished=t)
+        
+        return notifications
 
 
     #return a check to check the host/service

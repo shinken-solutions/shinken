@@ -43,24 +43,35 @@ class Escalation(Item):
     def get_name(self):
         return self.escalation_name
 
+
     #Return True if :
     #*time in in escalation_period or we do not have escalation_period
     #*status is in escalation_options
     #*the notification number is in our interval [[first_notification .. last_notification]]
     def is_eligible(self, t, status, notif_number):
+        small_states = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
+             'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's',
+             'DOWN' : 'd', 'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'}
+
+        print self.get_name(), 'ask for eligible with', status, small_states[status], self.escalation_period.is_time_valid(t), 'level:%d' % notif_number
+
         #Begin with the easy cases
         if notif_number < self.first_notification:
+            print "Bad notif number, too early", self.first_notification
             return False
         
         #self.last_notification = 0 mean no end
         if self.last_notification != 0 and notif_number > self.last_notification:
+            print 'notif number too late', self.last_notification
             return False
 
-        if status not in self.escalation_options:
+        if status in small_states and small_states[status] not in self.escalation_options:
+            print "Bad status", small_states[status], 'not in', self.escalation_options
             return False
         
         #Maybe the time is not in our escalation_period
         if self.escalation_period != None and not self.escalation_period.is_time_valid(t):
+            print "Bad time, no luck"
             return False
 
         #Ok, I do not see why not escalade. So it's True :)

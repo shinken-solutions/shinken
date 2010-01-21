@@ -206,6 +206,7 @@ class Scheduler:
         
         if nb_checks_drops != 0 or nb_broks_drops != 0 or nb_actions_drops != 0:
             print "WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops)
+            Log().log("WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
 
             
     #For tunning purpose we use caches but we do not whant them to explode
@@ -264,8 +265,10 @@ class Scheduler:
                         #are create just after the first return, so before the
                         #notification_interval. At launch, the macors need to
                         #be updated
+                        #And we can add now the log entry
                         if a.notif_nb > 1:
                             a.ref.update_notification_command(a)
+                            a.ref.raise_notification_log_entry(a)
                     new_a = a.copy_shell()
                     res.append(new_a)
         return res
@@ -277,12 +280,13 @@ class Scheduler:
             self.actions[c.id].get_return_from(c)
             item = self.actions[c.id].ref
             item.remove_in_progress_notification(c)
-            a = item.get_new_notification_from(self.actions[c.id])
-            if a is not None:
-                self.add(a)
-                #Get Brok from this new notification
-                b = a.get_initial_status_brok()
-                self.add(b)
+            l = item.get_new_notifications_from(self.actions[c.id])
+            for a in l:
+                if a is not None:
+                    self.add(a)
+                    #Get Brok from this new notification
+                    b = a.get_initial_status_brok()
+                    self.add(b)
             self.actions[c.id].status = 'zombie'
             #del self.actions[c.id]
         elif c.is_a == 'check':
@@ -539,7 +543,6 @@ class Scheduler:
                 id_to_del.append(a.id)
         #une petite tape dans le doc et tu t'en vas, merci...
         for id in id_to_del:
-            Log().log("Deleting an action : %d" % id)
             del self.actions[id] # ZANKUSEN!
 
 
@@ -657,7 +660,7 @@ class Scheduler:
                 now = time.time()
                 for a in self.actions.values():
                     if a.is_a == 'notification':
-                        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, 'check in', int(a.ref.next_chk - now)
+                        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, 'level:%d' % a.notif_nb, 'launch in', int(a.t_to_go - now)
                     else:
                         print "Event:", a.id, a.status
                 print "Nb checks send:", self.nb_checks_send

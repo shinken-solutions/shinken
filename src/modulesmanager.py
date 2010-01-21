@@ -75,11 +75,14 @@ class ModulesManager():
     def get_instances(self):
         self.instances = []
         for (module, mod) in self.modules_assoc:
-            inst = mod.get_instance(module)
-            if inst != None: #None = Bad thing happened :)
-                #the instance need the properties of the module
-                inst.properties = mod.properties
-                self.instances.append(inst)
+            try:
+                inst = mod.get_instance(module)
+                if inst != None: #None = Bad thing happened :)
+                    #the instance need the properties of the module
+                    inst.properties = mod.properties
+                    self.instances.append(inst)
+            except Exception as exp:
+                print "Error : the module %s raised an exception %s, I remove it!" % (module.get_name(), str(exp))
 
         print "Load", len(self.instances), "module instances"
 

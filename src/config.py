@@ -779,6 +779,7 @@ class Config(Item):
         self.services.pythonize()
         self.servicedependencies.pythonize()
         self.resultmodulations.pythonize()
+        self.escalations.pythonize()
         self.arbiterlinks.pythonize()
         self.schedulerlinks.pythonize()
         self.realms.pythonize()
