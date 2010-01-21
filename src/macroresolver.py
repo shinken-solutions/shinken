@@ -122,7 +122,7 @@ class MacroResolver(Borg):
             if callable(value):
                 return str(value())
             else:
-                return (value)
+                return str(value)
         except AttributeError as exp:
             return str(exp)
 
