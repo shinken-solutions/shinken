@@ -411,11 +411,11 @@ class SchedulingItem(Item):
                 #OK following a HARD NON-OK
                 self.raise_alert_log_entry()
                 #Eventhandler and notifications get OK;HARD;maxattempts
-                res = self.get_event_handlers()
                 #Ok, so current notifications are not need, we 'zombie' thems
                 self.remove_in_progress_notifications()
                 if self.notifications_enabled and not no_action:
                     res.extend(self.create_notifications('RECOVERY'))
+                res = self.get_event_handlers()
                 #Internally it is a hard OK
                 self.state_type = 'HARD'
                 self.attempt = 1
@@ -428,11 +428,11 @@ class SchedulingItem(Item):
             self.attempt = 1
             self.state_type = 'HARD'
             self.raise_alert_log_entry()
-            #Ok, event handlers here too
-            res = self.get_event_handlers()
             self.remove_in_progress_notifications()
             if self.notifications_enabled and not no_action:
                 res.extend(self.create_notifications('PROBLEM'))
+            #Ok, event handlers here too
+            res = self.get_event_handlers()
 
         #NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
@@ -440,11 +440,11 @@ class SchedulingItem(Item):
                 # if max_attempts == 1 we're already in deep trouble
                 self.state_type = 'HARD'
                 self.raise_alert_log_entry()
-                #Oh? This is the typical go for a event handler :)
-                res = self.get_event_handlers()
                 self.remove_in_progress_notifications()
                 if self.notifications_enabled and not no_action:
                     res.extend(self.create_notifications('PROBLEM'))
+                #Oh? This is the typical go for a event handler :)
+                res = self.get_event_handlers()
             else:
                 #This is the first NON-OK result. Initiate the SOFT-sequence
                 #Also launch the event handler, he might fix it.
@@ -463,12 +463,12 @@ class SchedulingItem(Item):
                     #Ok here is when we just go to the hard state
                     self.state_type = 'HARD'
                     self.raise_alert_log_entry()
-                    #So event handlers here too
-                    res = self.get_event_handlers()
                     #raise notification only if self.notifications_enabled is True
                     self.remove_in_progress_notifications()
                     if self.notifications_enabled and not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
+                    #So event handlers here too
+                    res = self.get_event_handlers()
                 else:
                     self.raise_alert_log_entry()
                     #eventhandler is launched each time during the soft state
