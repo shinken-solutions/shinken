@@ -291,6 +291,7 @@ class SchedulingItem(Item):
         e = EventHandler(cmd, timeout=cls.event_handler_timeout)
         print "Event handler call created"
         print e.__dict__
+        self.raise_event_handler_log_entry(self.event_handler)
         events.append(e)
         return events
 
@@ -351,7 +352,6 @@ class SchedulingItem(Item):
             return checks
 
         self.set_state_from_exit_status(c.exit_status)
-        self.add_attempt()
 
         #The check is consume, uptade the in_checking propertie
         self.remove_in_progress_check(c)
@@ -400,14 +400,16 @@ class SchedulingItem(Item):
         elif c.exit_status == 0 and (self.last_state != OK_UP and self.last_state != 'PENDING'):
             if self.state_type == 'SOFT':
                 #OK following a NON-OK still in SOFT state
-                #Eventhandler gets OK;SOFT;++attempt, no notification needed
                 self.add_attempt()
+                self.raise_alert_log_entry()
+                #Eventhandler gets OK;SOFT;++attempt, no notification needed
                 res = self.get_event_handlers()
                 #Internally it is a hard OK
                 self.state_type = 'HARD'
                 self.attempt = 1
             elif self.state_type == 'HARD':
                 #OK following a HARD NON-OK
+                self.raise_alert_log_entry()
                 #Eventhandler and notifications get OK;HARD;maxattempts
                 res = self.get_event_handlers()
                 #Ok, so current notifications are not need, we 'zombie' thems
@@ -425,6 +427,7 @@ class SchedulingItem(Item):
             #in a hard state
             self.attempt = 1
             self.state_type = 'HARD'
+            self.raise_alert_log_entry()
             #Ok, event handlers here too
             res = self.get_event_handlers()
             self.remove_in_progress_notifications()
@@ -436,6 +439,7 @@ class SchedulingItem(Item):
             if self.is_max_attempts():
                 # if max_attempts == 1 we're already in deep trouble
                 self.state_type = 'HARD'
+                self.raise_alert_log_entry()
                 #Oh? This is the typical go for a event handler :)
                 res = self.get_event_handlers()
                 self.remove_in_progress_notifications()
@@ -446,6 +450,7 @@ class SchedulingItem(Item):
                 #Also launch the event handler, he might fix it.
                 self.attempt = 1
                 self.state_type = 'SOFT'
+                self.raise_alert_log_entry()
                 res = self.get_event_handlers()
 
         #If no OK in a no OK : if hard, still hard, if soft,
@@ -457,6 +462,7 @@ class SchedulingItem(Item):
                 if self.is_max_attempts():
                     #Ok here is when we just go to the hard state
                     self.state_type = 'HARD'
+                    self.raise_alert_log_entry()
                     #So event handlers here too
                     res = self.get_event_handlers()
                     #raise notification only if self.notifications_enabled is True
@@ -464,15 +470,16 @@ class SchedulingItem(Item):
                     if self.notifications_enabled and not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
                 else:
+                    self.raise_alert_log_entry()
                     #eventhandler is launched each time during the soft state
                     res = self.get_event_handlers()
             else:
                 #Send notifications whenever the state has changed. (W -> C)
                 if self.state != self.last_state:
+                    self.raise_alert_log_entry()
                     self.remove_in_progress_notifications()
                     if self.notifications_enabled and not no_action:
                         res = self.create_notifications('PROBLEM')
-
 
         # res is filled with eventhandler and notification
         # now would be the time to add self.oscp...
