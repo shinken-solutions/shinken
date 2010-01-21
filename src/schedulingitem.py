@@ -591,9 +591,9 @@ class SchedulingItem(Item):
 
                     notifications.append(n)
                     #print "DBG: Create a new notification from :", n.id, n.type, n.status, n.ref.get_name(), n.ref.state, 'level:%d' % n.notif_nb
+                    #Add in ours queues
+                    self.notifications_in_progress[n.id] = n
 
-                #Add in ours queues
-                self.notifications_in_progress[n.id] = n
         return notifications
 
 
