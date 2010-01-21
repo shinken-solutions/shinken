@@ -389,7 +389,7 @@ class Host(SchedulingItem):
     #Add a log entry with a HOST ALERT like:
     #HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        Log().log('HOST ALERT: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.state_id, self.output))
+        Log().log('HOST ALERT: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.attempt, self.output))
 
 
     #Add a log entry with a Freshness alert like:
@@ -403,9 +403,16 @@ class Host(SchedulingItem):
     #Raise a log entry with a Notification alert like
     #HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
     def raise_notification_log_entry(self, contact, command):
-        if self.__class_.log_notifications:
+        if self.__class__.log_notifications:
             Log().log("HOST NOTIFICATION: %s;%s;%s;%s;%s" % (contact.get_name(), self.get_name(), self.state, \
                                                                  command.get_name(), self.output))
+
+    #Raise a log entry with a Eventhandler alert like
+    #HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
+    def raise_event_handler_log_entry(self, command):
+        if self.__class__.log_event_handlers:
+            Log().log("HOST EVENT HANDLER: %s;%s;%s;%s;%s" % (self.get_name(), self.state, self.state_type, self.attempt, \
+                                                                 command.get_name()))
 
 
     #Raise a log entry with FLAPPING START alert like

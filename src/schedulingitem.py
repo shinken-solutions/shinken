@@ -291,6 +291,7 @@ class SchedulingItem(Item):
         e = EventHandler(cmd, timeout=cls.event_handler_timeout)
         print "Event handler call created"
         print e.__dict__
+        self.raise_event_handler_log_entry(self.event_handler)
         events.append(e)
         return events
 
@@ -351,7 +352,6 @@ class SchedulingItem(Item):
             return checks
 
         self.set_state_from_exit_status(c.exit_status)
-        self.add_attempt()
 
         #The check is consume, uptade the in_checking propertie
         self.remove_in_progress_check(c)
@@ -388,77 +388,102 @@ class SchedulingItem(Item):
                 if dt.is_in_downtime():
                     no_action = True
 
-        #If ok in ok : it can be hard of soft recovery
+        res = []
+
+        #OK following a previous OK. perfect
         if c.exit_status == 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
-            #action in return can be notification or other checks (dependancies)
-            if (self.state_type == 'SOFT' or self.state_type == 'SOFT-RECOVERY') and self.last_state != 'PENDING':
-                if self.is_max_attempts() and (self.state_type == 'SOFT' or self.state_type == 'SOFT-RECOVERY'):
-                    self.state_type = 'HARD'
-                else:
-                    self.state_type = 'SOFT-RECOVERY'
-            else:
-                self.attempt = 1
-                self.state_type = 'HARD'
-            return []
-        
-        #If OK on a no OK : if SOFT-> SOFT recovery, if hard, still hard
+            #self.add_attempt()
+            self.attempt = 1
+            self.state_type = 'HARD'
+
+        #OK following a NON-OK. 
         elif c.exit_status == 0 and (self.last_state != OK_UP and self.last_state != 'PENDING'):
             if self.state_type == 'SOFT':
-                self.state_type = 'SOFT-RECOVERY'
-            elif self.state_type == 'HARD':
-                #Ok, we can get event_handlers here
+                #OK following a NON-OK still in SOFT state
+                self.add_attempt()
+                self.raise_alert_log_entry()
+                #Eventhandler gets OK;SOFT;++attempt, no notification needed
                 res = self.get_event_handlers()
+                #Internally it is a hard OK
+                self.state_type = 'HARD'
+                self.attempt = 1
+            elif self.state_type == 'HARD':
+                #OK following a HARD NON-OK
+                self.raise_alert_log_entry()
+                #Eventhandler and notifications get OK;HARD;maxattempts
                 #Ok, so current notifications are not need, we 'zombie' thems
                 self.remove_in_progress_notifications()
-                if not no_action:
+                if self.notifications_enabled and not no_action:
                     res.extend(self.create_notifications('RECOVERY'))
-                return res
-            return []
-        
+                res = self.get_event_handlers()
+                #Internally it is a hard OK
+                self.state_type = 'HARD'
+                self.attempt = 1
+
         #Volatile part
         #Only for service
         elif c.exit_status != 0 and hasattr(self, 'is_volatile') and self.is_volatile:
+            #There are no repeated attempts, so the first non-ok results
+            #in a hard state
+            self.attempt = 1
             self.state_type = 'HARD'
+            self.raise_alert_log_entry()
+            self.remove_in_progress_notifications()
+            if self.notifications_enabled and not no_action:
+                res.extend(self.create_notifications('PROBLEM'))
             #Ok, event handlers here too
             res = self.get_event_handlers()
-            if not no_action:
-                res.extend(self.create_notifications('PROBLEM'))
-            #status != 0 so add a log entry
-            self.raise_alert_log_entry()
-            return res
-        
-        #If no OK in a OK -> going to SOFT
+
+        #NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
             if self.is_max_attempts():
-                # if max_attempts == 1
+                # if max_attempts == 1 we're already in deep trouble
                 self.state_type = 'HARD'
-                self.attempt = 1
+                self.raise_alert_log_entry()
+                self.remove_in_progress_notifications()
+                if self.notifications_enabled and not no_action:
+                    res.extend(self.create_notifications('PROBLEM'))
+                #Oh? This is the typical go for a event handler :)
+                res = self.get_event_handlers()
             else:
-                self.state_type = 'SOFT'
+                #This is the first NON-OK result. Initiate the SOFT-sequence
+                #Also launch the event handler, he might fix it.
                 self.attempt = 1
-            #Oh? This is the typical go for a event handler :)
-            res = self.get_event_handlers()
-            #status != 0 so add a log entry
-            self.raise_alert_log_entry()
-            return res
-        
+                self.state_type = 'SOFT'
+                self.raise_alert_log_entry()
+                res = self.get_event_handlers()
+
         #If no OK in a no OK : if hard, still hard, if soft,
         #check at self.max_check_attempts
         #when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
-            if self.is_max_attempts() and self.state_type == 'SOFT':
-                #Ok here is when we just go to the hard state
-                self.state_type = 'HARD'
-                #So event handlers here too
-                res = self.get_event_handlers()
-                #raise notification only if self.notifications_enabled is True
-                if self.notifications_enabled:
-                    if not no_action:
+            if self.state_type == 'SOFT':
+                self.add_attempt()
+                if self.is_max_attempts():
+                    #Ok here is when we just go to the hard state
+                    self.state_type = 'HARD'
+                    self.raise_alert_log_entry()
+                    #raise notification only if self.notifications_enabled is True
+                    self.remove_in_progress_notifications()
+                    if self.notifications_enabled and not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
-                #status != 0 so add a log entry
-                self.raise_alert_log_entry()
-                return res
-        return []
+                    #So event handlers here too
+                    res = self.get_event_handlers()
+                else:
+                    self.raise_alert_log_entry()
+                    #eventhandler is launched each time during the soft state
+                    res = self.get_event_handlers()
+            else:
+                #Send notifications whenever the state has changed. (W -> C)
+                if self.state != self.last_state:
+                    self.raise_alert_log_entry()
+                    self.remove_in_progress_notifications()
+                    if self.notifications_enabled and not no_action:
+                        res = self.create_notifications('PROBLEM')
+
+        # res is filled with eventhandler and notification
+        # now would be the time to add self.oscp...
+        return res
 
 
     #Just update the notification command by resolving Macros

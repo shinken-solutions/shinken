@@ -120,9 +120,9 @@ class MacroResolver(Borg):
         try:
             value = getattr(elt, prop)
             if callable(value):
-                return  value()
+                return str(value())
             else:
-                return value
+                return str(value)
         except AttributeError as exp:
             return str(exp)
 
