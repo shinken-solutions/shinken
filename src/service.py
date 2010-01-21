@@ -619,7 +619,8 @@ class Services(Items):
                 for es_name in escalations_tab:
                     es_name = es_name.strip()
                     es = escalations.find_by_name(es_name)
-                    new_escalations.append(es)
+                    if es != None:
+                        new_escalations.append(es)
                 s.escalations = new_escalations
 
 

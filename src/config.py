@@ -31,6 +31,8 @@ from service import Service, Services
 from command import Command, Commands
 from resultmodulation import Resultmodulation, Resultmodulations
 from escalation import Escalation, Escalations
+from serviceescalation import Serviceescalation, Serviceescalations
+from hostescalation import Hostescalation, Hostescalations
 from host import Host, Hosts
 from hostgroup import Hostgroup, Hostgroups
 from realm import Realm, Realms
@@ -317,7 +319,9 @@ class Config(Item):
                     'realm' : [],
                     'module' : [],
                     'resultmodulation' : [],
-                    'escalation' : []
+                    'escalation' : [],
+                    'serviceescalation' : [],
+                    'hostescalation' : [],
                     }
         tmp = []
         tmp_type = 'void'
@@ -404,6 +408,8 @@ class Config(Item):
                            'module' : (Module, Modules, 'modules'),
                            'resultmodulation' : (Resultmodulation, Resultmodulations, 'resultmodulations'),
                            'escalation' : (Escalation, Escalations, 'escalations'),
+                           'serviceescalation' : (Serviceescalation, Serviceescalations, 'serviceescalations'),
+                           'hostescalation' : (Hostescalation, Hostescalations, 'hostescalations'),
                            }
         #Ex: the above code do for timeperiods:
         #timeperiods = []
@@ -469,7 +475,7 @@ class Config(Item):
         self.resultmodulations.linkify(self.timeperiods)
 
         #print "Escalations"
-        self.escalations.linkify(self.timeperiods, self.contacts)
+        self.escalations.linkify(self.timeperiods, self.contacts, self.services, self.hosts)
 
         #print "Realms"
         self.realms.linkify()
@@ -534,7 +540,10 @@ class Config(Item):
         #print "Servicedependancy"
         self.servicedependencies.explode()
 
-        self.escalations.explode(self.contactgroups)
+        #Serviceescalations hostescalations will create new escalations
+        self.serviceescalations.explode(self.escalations)
+        self.hostescalations.explode(self.escalations)
+        self.escalations.explode(self.hostgroups, self.contactgroups)
 
         #Now the architecture part
         #print "Realms"
