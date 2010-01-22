@@ -487,26 +487,7 @@ class Host(SchedulingItem):
         #return now > n.t_to_go and self.state != 'UP' and contact.want_host_notification(now, self.state, n.type)
             
 
-    #We just send a notification, we need new ones in notification_interval
-    #def get_new_notification_from(self, n):
-    #    now = time.time()
-    #    return Notification(n.type, 'scheduled', '', {'host' : n.ref['host'], 'contact' : n.ref['contact'], 'command': n.ref['command']}, 'host', now + self.notification_interval * 60)
-
-
-    #Check if the notificaton is still necessery
-    #def still_need(self, n):
-    #    now = time.time()
-    #    #if state != UP, the host still got a pb
-    #    #, so notification still necessery
-    #    if self.state != 'UP':
-    #        return True
-    #    #state is UP but notif is in poller, 
-    #    #so do not remove, will be done after
-    #    if n.status == 'inpoller':
-    #        return True
-    #    #we do not see why to save this notification, so...
-    #    return False
-
+    #MACRO PART
     def get_duration_sec(self):
         return str(int(self.duration_sec))
 
@@ -528,30 +509,20 @@ class Hosts(Items):
     #hosts -> commands (check_command)
     #hosts -> contacts
     def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, escalations=None):
-        self.linkify_h_by_tp(timeperiods)
+        self.linkify_with_timeperiods(timeperiods, 'notification_period')
+        self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_h_by_h()
-        self.linkify_h_by_cmd(commands)
-        self.linkify_h_by_c(contacts)
+        self.linkify_one_command_with_commands(commands, 'check_command')
+        self.linkify_one_command_with_commands(commands, 'event_handler')
+        
+        self.linkify_with_contacts(contacts)
         self.linkify_h_by_realms(realms)
-        self.linkify_h_by_rm(resultmodulations)
-        self.linkify_h_by_es(escalations)
-
-
-    #Simplify notif_period and check period by timeperiod id
-    def linkify_h_by_tp(self, timeperiods):
-        for h in self:
-            try:
-                #notif period
-                ntp_name = h.notification_period
-                ntp = timeperiods.find_by_name(ntp_name)
-                h.notification_period = ntp
-                #check period
-                ctp_name = h.check_period
-                ctp = timeperiods.find_by_name(ctp_name)
-                h.check_period = ctp
-            except AttributeError as exp:
-                pass #Will be catch at the is_correct moment
-    
+        self.linkify_with_resultmodulations(resultmodulations)
+        #WARNING: all escalations will not be link here
+        #(just the escalation here, not serviceesca or hostesca).
+        #This last one will be link in escalations linkify.
+        self.linkify_with_escalations(escalations)
+        
 
     #Link host with hosts (parents)
     def linkify_h_by_h(self):
@@ -566,30 +537,6 @@ class Hosts(Items):
             h.parents = new_parents
 
     
-    #Link hosts with commands
-    def linkify_h_by_cmd(self, commands):
-        for h in self:
-            h.check_command = CommandCall(commands, h.check_command)
-        for h in self:
-            if h.event_handler != '':
-                h.event_handler = CommandCall(commands, h.event_handler)
-            else:
-                h.event_handler = None
-
-    #Link with conacts
-    def linkify_h_by_c(self, contacts):
-        for h in self:
-            if hasattr(h, 'contacts'):
-                contacts_tab = h.contacts.split(',')
-                new_contacts = []
-                for c_name in contacts_tab:
-                    c_name = c_name.strip()
-                    c = contacts.find_by_name(c_name)
-                    new_contacts.append(c)
-                
-                h.contacts = new_contacts
-    
-    
     def linkify_h_by_realms(self, realms):
         for h in self:
             #print h.get_name(), h.realm
@@ -598,34 +545,7 @@ class Hosts(Items):
                 p = realms.find_by_name(h.realm.strip())
                 h.realm = p
                 if p != None:
-                    print "Me", h.get_name(), "have a realm", p
-
-
-    #Make link between service and it's resultmodulations
-    def linkify_h_by_rm(self, resultmodulations):
-        for h in self:
-            if hasattr(h, 'resultmodulations'):
-                resultmodulations_tab = h.resultmodulations.split(',')
-                new_resultmodulations = []
-                for rm_name in resultmodulations_tab:
-                    rm_name = rm_name.strip()
-                    rm = resultmodulations.find_by_name(rm_name)
-                    new_resultmodulations.append(rm)
-                h.resultmodulations = new_resultmodulations
-
-
-    #Make link between service and it's escalations
-    def linkify_h_by_es(self, escalations):
-        for h in self:
-            if hasattr(h, 'escalations'):
-                escalations_tab = h.escalations.split(',')
-                new_escalations = []
-                for es_name in escalations_tab:
-                    es_name = es_name.strip()
-                    es = escalations.find_by_name(es_name)
-                    if es != None:
-                        new_escalations.append(es)
-                h.escalations = new_escalations
+                    print "Host", h.get_name(), "is in the realm", p.get_name()
 
     
     #We look for hostgroups property in hosts and
@@ -634,7 +554,7 @@ class Hosts(Items):
         #self.apply_partial_inheritance('hostgroups')
         #self.apply_partial_inheritance('contact_groups')
         
-        #Explode host in the hostgroups
+        #Register host in the hostgroups
         for h in self:
             if not h.is_tpl():
                 hname = h.host_name
@@ -642,20 +562,11 @@ class Hosts(Items):
                     hgs = h.hostgroups.split(',')
                     for hg in hgs:
                         hostgroups.add_member(hname, hg.strip())
-        
-        #We add contacts of contact groups into the contacts prop
-        for h in self:
-            if hasattr(h, 'contact_groups'):
-                cgnames = h.contact_groups.split(',')
-                for cgname in cgnames:
-                    cgname = cgname.strip()
-                    cnames = contactgroups.get_members_by_name(cgname)
-                    #We add hosts in the service host_name
-                    if cnames != []:
-                        if hasattr(h, 'contacts'):
-                            h.contacts += ','+cnames
-                        else:
-                            h.contacts = cnames
+
+        #items::explode_contact_groups_into_contacts
+        #take all contacts from our contact_groups into our contact property
+        self.explode_contact_groups_into_contacts(contactgroups)
+
 
         
     #Create depenancies:

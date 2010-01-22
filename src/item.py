@@ -22,6 +22,8 @@
 from copy import copy
 from brok import Brok
 
+from util import strip_and_uniq
+from command import CommandCall
 
 class Item(object):
     def __init__(self, params={}):
@@ -485,3 +487,132 @@ class Items(object):
             print 'Warning: the', type, i.get_name(), 'is already defined.'
             del self.items[id] #bye bye
         del self.twins #no more need
+
+
+
+    #We've got a contacts property with , separated contacts names
+    #and we want have a list of Contacts
+    def linkify_with_contacts(self, contacts):
+        for i in self:
+            if hasattr(i, 'contacts'):
+                contacts_tab = i.contacts.split(',')
+                contacts_tab = strip_and_uniq(contacts_tab)
+                new_contacts = []
+                for c_name in contacts_tab:
+                    c = contacts.find_by_name(c_name)
+                    if c != None:
+                        new_contacts.append(c)
+                    else: #TODO: What?
+                        pass
+                #Get the list, but first make elements uniq
+                i.contacts = list(set(new_contacts))
+
+
+    #Make link between service and it's escalations
+    def linkify_with_escalations(self, escalations):
+        for i in self:
+            if hasattr(i, 'escalations'):
+                print i.get_name(), i.escalations
+                escalations_tab = i.escalations.split(',')
+                escalations_tab = strip_and_uniq(escalations_tab)
+                new_escalations = []
+                for es_name in escalations_tab:
+                    es = escalations.find_by_name(es_name)
+                    if es != None:
+                        new_escalations.append(es)
+                    else: #TODO what?
+                        pass
+                i.escalations = new_escalations
+                print i.get_name(), i.escalations
+
+
+    #Make link between item and it's resultmodulations
+    def linkify_with_resultmodulations(self, resultmodulations):
+        for i in self:
+            if hasattr(i, 'resultmodulations'):
+                resultmodulations_tab = i.resultmodulations.split(',')
+                resultmodulations_tab = strip_and_uniq(resultmodulations_tab)
+                new_resultmodulations = []
+                for rm_name in resultmodulations_tab:
+                    rm = resultmodulations.find_by_name(rm_name)
+                    if rm != None:
+                        new_resultmodulations.append(rm)
+                    else: #TODO WHAT?
+                        pass
+                i.resultmodulations = new_resultmodulations
+
+
+    #If we've got a contact_groups properties, we search for all
+    #theses groups and ask them their contacts, and then add them
+    #all into our contacts property
+    def explode_contact_groups_into_contacts(self, contactgroups):
+        for i in self:
+            if hasattr(i, 'contact_groups'):
+                cgnames = i.contact_groups.split(',')
+                cgnames = strip_and_uniq(cgnames)
+                for cgname in cgnames:
+                    cnames = contactgroups.get_members_by_name(cgname)
+                    #We add contacts into our contacts
+                    if cnames != []:
+                        if hasattr(i, 'contacts'):
+                            i.contacts += ','+cnames
+                        else:
+                            i.contacts = cnames
+
+    #Link a timeperiod property (prop)
+    def linkify_with_timeperiods(self, timeperiods, prop):
+        for i in self:
+            if hasattr(i, prop):
+                tpname = getattr(i, prop)
+                tp = timeperiods.find_by_name(tpname)
+                #TODO: catch None?
+                setattr(i, prop, tp)
+
+
+    #Link one command property
+    def linkify_one_command_with_commands(self, commands, prop):
+        for i in self:
+            if hasattr(i, prop):
+                command = getattr(i, prop).strip()
+                if command != '':
+                    cmdCall = CommandCall(commands, command)
+                    #TODO: catch None?
+                    setattr(i, prop, cmdCall)
+                else:
+                    setattr(i, prop, None)
+
+
+    #Link a command list (commands with , between) in real CommandCalls
+    def linkify_command_list_with_commands(self, commands, prop):
+        for i in self:
+            if hasattr(i, prop):
+                coms = getattr(i, prop).split(',')
+                coms = strip_and_uniq(coms)
+                com_list = []
+                for com in coms:
+                    if com != '':
+                        cmdCall = CommandCall(commands, com)
+                        #TODO: catch None?
+                        com_list.append(cmdCall)
+                    else: # TODO: catch?
+                        pass
+                setattr(i, prop, com_list)
+
+
+    #If we've got a hostgroup_name property, we search for all
+    #theses groups and ask them their hosts, and then add them
+    #all into our host_name property
+    def explode_host_groups_into_hosts(self, hostgroups):
+        for i in self:
+            if hasattr(i, 'hostgroup_name'):
+                hgnames = i.hostgroup_name.split(',')
+                hgnames = strip_and_uniq(hgnames)
+                for hgname in hgnames:
+                    hnames = hostgroups.get_members_by_name(hgname)
+                    #We add hosts into our host_name
+                    if hnames != []:
+                        if hasattr(i, 'host_name'):
+                            i.host_name += ',' + str(hnames)
+                        else:
+                            i.host_name = str(hnames)
+

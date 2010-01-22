@@ -155,8 +155,6 @@ class Hostgroups(Itemgroups):
                                 print "Warning : host", h.get_name(), "is not in the same realm than it's hostgroup", hg.get_name()
 
 
-
-
     #Add a host string to a hostgroup member
     #if the host group do not exist, create it
     def add_member(self, hname, hgname):

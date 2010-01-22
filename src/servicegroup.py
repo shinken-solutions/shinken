@@ -124,7 +124,6 @@ class Servicegroups(Itemgroups):
                     host_name = mbr.strip()
                 else:
                     service_desc = mbr.strip()
-                    print "Finding", host_name, service_desc
                     find = services.find_srv_by_name_and_hostname(host_name, service_desc)
                     if find != None:
                         new_mbrs.append(find)

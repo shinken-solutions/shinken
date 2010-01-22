@@ -531,21 +531,26 @@ class Services(Items):
     #service -> timepriods
     #service -> contacts
     def linkify(self, hosts, commands, timeperiods, contacts, resultmodulations, escalations):
+        self.linkify_with_timeperiods(timeperiods, 'notification_period')
+        self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_s_by_hst(hosts)
-        self.linkify_s_by_cmd(commands)
-        self.linkify_s_by_tp(timeperiods)
-        self.linkify_s_by_c(contacts)
-        self.linkify_s_by_rm(resultmodulations)
-        self.linkify_s_by_es(escalations)
-
-
+        self.linkify_one_command_with_commands(commands, 'check_command')
+        self.linkify_one_command_with_commands(commands, 'event_handler')
+        self.linkify_with_contacts(contacts)
+        self.linkify_with_resultmodulations(resultmodulations)
+        #WARNING: all escalations will not be link here
+        #(just the escalation here, not serviceesca or hostesca).
+        #This last one will be link in escalations linkify.
+        self.linkify_with_escalations(escalations)
+    
+    
     #We can link services with hosts so
     #We can search in O(hosts) instead
     #of O(services) for common cases
     def optimize_service_search(self, hosts):
         self.hosts = hosts
-
-
+    
+    
     #We just search for each host the id of the host
     #and replace the name by the id
     #+ inform the host we are a service of him
@@ -561,77 +566,6 @@ class Services(Items):
                     hst.add_service_link(s)
             except AttributeError as exp:
                 pass #Will be catch at the is_correct moment
-
-
-    #Link the service with a command for the check command
-    #and event handlers
-    def linkify_s_by_cmd(self, commands):
-        for s in self:
-            s.check_command = CommandCall(commands, s.check_command)
-        for s in self:
-            if s.event_handler != '':
-                s.event_handler = CommandCall(commands, s.event_handler)
-            else:
-                s.event_handler = None
-
-    #Link service with timepriods (notifs and check)
-    def linkify_s_by_tp(self, timeperiods):
-        for s in self:
-            try:
-                #notif period
-                ntp_name = s.notification_period
-                ntp = timeperiods.find_by_name(ntp_name)
-                s.notification_period = ntp
-            except:
-                pass
-            try:
-                #Check period
-                ctp_name = s.check_period
-                ctp = timeperiods.find_by_name(ctp_name)
-                s.check_period = ctp
-            except:
-                pass #problem will be check at is_correct fucntion
-
-
-    #Make link between service and it's contacts
-    def linkify_s_by_c(self, contacts):
-        for s in self:
-            if hasattr(s, 'contacts'):
-                contacts_tab = s.contacts.split(',')
-                new_contacts = []
-                for c_name in contacts_tab:
-                    c_name = c_name.strip()
-                    c = contacts.find_by_name(c_name)
-                    new_contacts.append(c)
-                s.contacts = new_contacts
-
-
-    #Make link between service and it's resultmodulations
-    def linkify_s_by_rm(self, resultmodulations):
-        for s in self:
-            if hasattr(s, 'resultmodulations'):
-                resultmodulations_tab = s.resultmodulations.split(',')
-                new_resultmodulations = []
-                for rm_name in resultmodulations_tab:
-                    rm_name = rm_name.strip()
-                    rm = resultmodulations.find_by_name(rm_name)
-                    new_resultmodulations.append(rm)
-                s.resultmodulations = new_resultmodulations
-
-
-
-    #Make link between service and it's escalations
-    def linkify_s_by_es(self, escalations):
-        for s in self:
-            if hasattr(s, 'escalations'):
-                escalations_tab = s.escalations.split(',')
-                new_escalations = []
-                for es_name in escalations_tab:
-                    es_name = es_name.strip()
-                    es = escalations.find_by_name(es_name)
-                    if es != None:
-                        new_escalations.append(es)
-                s.escalations = new_escalations
 
 
     #Delete services by ids
@@ -684,42 +618,19 @@ class Services(Items):
         #more than one host or a host group will be in it
         srv_to_remove = []
         
-        #We adding all hosts of the hostgroups into the host_name property
-        #because we add the hostgroup one AFTER the host, they are before and 
-        #hostgroup one will NOT be created
-        for s in self:
-            if hasattr(s, 'hostgroup_name'):
-                hgnames = s.hostgroup_name.split(',')
-                for hgname in hgnames:
-                    hgname = hgname.strip()
-                    hnames = hostgroups.get_members_by_name(hgname)
-                    #We add hosts in the service host_name
-                    if hasattr(s, 'host_name') and hnames != []:
-                        s.host_name += ',' + str(hnames)
-                    else:
-                        s.host_name = str(hnames)
 
-
-        #We adding all hosts of the hostgroups into the host_name property
-        #because we add the hostgroup one AFTER the host, they are before and 
-        #hostgroup one will NOT be created
-        for s in self:
-            if hasattr(s, 'contact_groups'):
-                cgnames = s.contact_groups.split(',')
-                for cgname in cgnames:
-                    cgname = cgname.strip()
-                    cnames = contactgroups.get_members_by_name(cgname)
-                    #We add hosts in the service host_name
-                    if cnames != []:
-                        if hasattr(s, 'contacts'):
-                            s.contacts += ','+cnames
-                        else:
-                            s.contacts = cnames
+        #items::explode_host_groups_into_hosts
+        #take all hosts from our hostgroup_name into our host_name property
+        self.explode_host_groups_into_hosts(hostgroups)
+        
+        #items::explode_contact_groups_into_contacts
+        #take all contacts from our contact_groups into our contact property
+        self.explode_contact_groups_into_contacts(contactgroups)
  
         #Then for every host create a copy of the service with just the host
         #because we are adding services, we can't just loop in it
         service_to_check = self.items.keys()
-
+        
         for id in service_to_check:
             s = self.items[id]
             if not s.is_tpl(): #Exploding template is useless

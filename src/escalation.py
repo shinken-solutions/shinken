@@ -85,40 +85,14 @@ class Escalations(Items):
     inner_class = Escalation
 
     def linkify(self, timeperiods, contacts, services, hosts):
-        self.linkify_es_by_tp(timeperiods)
-        self.linkify_es_by_c(contacts)
+        self.linkify_with_timeperiods(timeperiods, 'escalation_period')
+        self.linkify_with_contacts(contacts)
         self.linkify_es_by_s(services)
         self.linkify_es_by_h(hosts)
 
 
     def add_escalation(self, es):
         self.items[es.id] = es
-
-    
-    #We just search for each timeperiod the tp
-    #and replace the name by the tp
-    def linkify_es_by_tp(self, timeperiods):
-        for es in self:
-            tp_name = es.escalation_period
-
-            #The new member list, in id
-            tp = timeperiods.find_by_name(tp_name)
-
-            es.escalation_period = tp
-
-    #Make link between escalation and it's contacts
-    def linkify_es_by_c(self, contacts):
-        for es in self:
-            if hasattr(es, 'contacts'):
-                contacts_tab = es.contacts.split(',')
-                contacts_tab = strip_and_uniq(contacts_tab)
-                new_contacts = []
-                for c_name in contacts_tab:
-                    c = contacts.find_by_name(c_name)
-                    if c != None:
-                        #print "Link with contact", c.get_name()
-                        new_contacts.append(c)
-                es.contacts = new_contacts
     
 
     #Will register esclations into service.escalations
@@ -160,36 +134,12 @@ class Escalations(Items):
     
     #We look for contacts property in contacts and
     def explode(self, hostgroups, contactgroups):
-        #We adding all hosts of the hostgroups into the host_name property
-        for se in self:
-            if hasattr(se, 'hostgroup_name'):
-                #print "Exploding hostgroups", se.hostgroup_name
-                hgnames = se.hostgroup_name.split(',')
-                for hgname in hgnames:
-                    hgname = hgname.strip()
-                    hnames = hostgroups.get_members_by_name(hgname)
-                    #We add hosts in the service host_name
-                    if hasattr(se, 'host_name') and hnames != []:
-                        se.host_name += ',' + str(hnames)
-                    else:
-                        se.host_name = str(hnames)
-                #print "Finally got: host_name", se.host_name
 
-        #We adding all hosts of the hostgroups into the host_name property
-        #because we add the hostgroup one AFTER the host, they are before and 
-        #hostgroup one will NOT be created
-        for s in self:
-            if hasattr(s, 'contact_groups'):
-                #print "Exploding Contact groups", s.contact_groups
-                cgnames = s.contact_groups.split(',')
-                for cgname in cgnames:
-                    cgname = cgname.strip()
-                    cnames = contactgroups.get_members_by_name(cgname)
-                    #We add hosts in the service host_name
-                    if cnames != []:
-                        if hasattr(s, 'contacts'):
-                            s.contacts += ','+cnames
-                        else:
-                            s.contacts = cnames
-                #print "Finally got: contacts", se.contacts
-        
+        #items::explode_host_groups_into_hosts
+        #take all hosts from our hostgroup_name into our host_name property
+        self.explode_host_groups_into_hosts(hostgroups)
+
+        #items::explode_contact_groups_into_contacts
+        #take all contacts from our contact_groups into our contact property
+        self.explode_contact_groups_into_contacts(contactgroups)
+

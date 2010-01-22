@@ -181,43 +181,18 @@ class Contacts(Items):
     inner_class = Contact
 
     def linkify(self, timeperiods, commands):
-        self.linkify_c_by_tp(timeperiods)
-        self.linkify_c_by_cmd(commands)
+        self.linkify_with_timeperiods(timeperiods, 'service_notification_period')
+        self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
+        self.linkify_command_list_with_commands(commands, 'service_notification_commands')
+        self.linkify_command_list_with_commands(commands, 'host_notification_commands')
 
-    
-    #We just search for each timeperiod the id of the tp
-    #and replace the name by the id
-    def linkify_c_by_tp(self, timeperiods):
-        for c in self:
-            sntp_name = c.service_notification_period
-            hntp_name = c.host_notification_period
-
-            #The new member list, in id
-            sntp = timeperiods.find_by_name(sntp_name)
-            hntp = timeperiods.find_by_name(hntp_name)
-            
-            c.service_notification_period = sntp
-            c.host_notification_period = hntp
-
-
-    #Simplify hosts commands by commands id
-    def linkify_c_by_cmd(self, commands):
-        for c in self:
-            tmp = []
-            for cmd in c.service_notification_commands.split(','):
-                tmp.append(CommandCall(commands, cmd))
-            c.service_notification_commands = tmp
-
-            tmp = []
-            for cmd in c.host_notification_commands.split(','):
-                tmp.append(CommandCall(commands, cmd))
-            c.host_notification_commands = tmp
-
-
+        
     #We look for contacts property in contacts and
     def explode(self, contactgroups):
         #Contactgroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('contactgroups')
+        
+        #Register ourself into the contactsgroups we are in
         for c in self:
             if not c.is_tpl():
                 cname = c.contact_name

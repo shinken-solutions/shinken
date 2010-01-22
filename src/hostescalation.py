@@ -50,33 +50,6 @@ class Hostescalations(Items):
     name_property = ""
     inner_class = Hostescalation
 
-    def linkify(self, timeperiods, contacts):
-        self.linkify_es_by_tp(timeperiods)
-        self.linkify_es_by_c(contacts)
-    
-    #We just search for each timeperiod the tp
-    #and replace the name by the tp
-    def linkify_es_by_tp(self, timeperiods):
-        for es in self:
-            tp_name = es.escalation_period
-
-            #The new member list, in id
-            tp = timeperiods.find_by_name(tp_name)
-            
-            es.escalation_period = tp
-
-    #Make link between escalation and it's contacts
-    def linkify_es_by_c(self, contacts):
-        for es in self:
-            if hasattr(es, 'contacts'):
-                contacts_tab = es.contacts.split(',')
-                new_contacts = []
-                for c_name in contacts_tab:
-                    c_name = c_name.strip()
-                    c = contacts.find_by_name(c_name)
-                    new_contacts.append(c)
-                es.contacts = new_contacts
-
             
     #We look for contacts property in contacts and
     def explode(self, escalations):
@@ -87,7 +60,9 @@ class Hostescalations(Items):
             for prop in properties:
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)
-            #print "Creation an escalation with :", creation_dict
             s = Escalation(creation_dict)
             escalations.add_escalation(s)
 
+        print "All escalations"
+        for es in escalations:
+            print es
