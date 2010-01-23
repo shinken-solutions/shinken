@@ -175,7 +175,7 @@ class ExternalCommand:
         'START_OBSESSING_OVER_HOST' : {'global' : False, 'args' : ['host']},
         'START_OBSESSING_OVER_HOST_CHECKS' : {'global' : True, 'args' : []},
         'START_OBSESSING_OVER_SVC' : {'global' : False, 'args' : ['service']},
-        'start_OBSESSING_OVER_SVC_CHECKS' : {'global' : True, 'args' : []},
+        'START_OBSESSING_OVER_SVC_CHECKS' : {'global' : True, 'args' : []},
         'STOP_ACCEPTING_PASSIVE_HOST_CHECKS' : {'global' : True, 'args' : []},
         'STOP_ACCEPTING_PASSIVE_SVC_CHECKS' : {'global' : True, 'args' : []},
         'STOP_EXECUTING_HOST_CHECKS' : {'global' : True, 'args' : []},
