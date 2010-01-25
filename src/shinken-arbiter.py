@@ -200,8 +200,6 @@ class Arbiter(Daemon):
             print "Configuration is incorrect, sorry, I bail out"
             sys.exit(1)
 
-	Log().log('Things look okay - No serious problems were detected during the pre-flight check')
-
 
         #self.conf.dump()
 
@@ -233,6 +231,8 @@ class Arbiter(Daemon):
         if not self.conf.conf_is_correct:
             print "Configuration is incorrect, sorry, I bail out"
             sys.exit(1)
+
+	Log().log('Things look okay - No serious problems were detected during the pre-flight check')
 
 	#Exit if we are just here for config checking
 	if self.verify_only:

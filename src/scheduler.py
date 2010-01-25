@@ -55,7 +55,9 @@ class Scheduler:
             4 : (self.check_freshness, 10),
             5 : (self.clean_caches, 1),
             6 : (self.update_retention_file, 3600),
-            7 : (self.check_orphaned, 60)
+            7 : (self.check_orphaned, 60),
+            #For NagVis like tools : udpdate our status every 10s
+            8 : (self.get_and_register_update_program_status_brok, 10) 
             }
 
         #stats part
@@ -422,10 +424,17 @@ class Scheduler:
         self.add(b)
 
 
+    #Crate a brok with program status info
+    def get_and_register_update_program_status_brok(self):
+        b = self.get_program_status_brok()
+        b.type = 'update_program_status'
+        self.add(b)
+        
+
     #Get a brok with program status
     #TODO : GET REAL VALUES
     def get_program_status_brok(self):
-        now = time.time()
+        now = int(time.time())
         data = {"is_running" : 1,
                 "instance_name": self.instance_name,
                 "last_alive" : now,
@@ -654,7 +663,7 @@ class Scheduler:
                     m += s.latency
                     m_nb += 1
                 if m_nb != 0:
-                    print "Latency Moyenne:", m, m_nb,  m / m_nb
+                    print "Average latency:", m, m_nb,  m / m_nb
                 
                 print "Notifications:", nb_notifications
                 now = time.time()

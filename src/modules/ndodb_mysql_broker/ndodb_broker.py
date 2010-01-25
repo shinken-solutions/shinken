@@ -25,10 +25,14 @@
 
 
 import copy
+import time
 #import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError
 
+
+def de_unixify(t):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
@@ -36,9 +40,9 @@ class Ndodb_broker:
     def __init__(self, name, host, user, password, database, character_set):
         #Mapping for name of dataand transform function
         self.mapping = {
-            'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : None},
+            'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : de_unixify},
                                 'pid' : {'name' : 'process_id', 'transform' : None},
-                                'last_alive' : {'name' : 'status_update_time', 'transform' : None},
+                                'last_alive' : {'name' : 'status_update_time', 'transform' : de_unixify},
                                 'is_running' : {'name' : 'is_currently_running', 'transform' : None}
                                 },
             }
@@ -269,8 +273,35 @@ class Ndodb_broker:
             del new_b.data[prop]
         for (name, val) in to_add:
             new_b.data[name] = val
+        print "RUN QUERY:", new_b.data
         query = self.create_insert_query('programstatus', new_b.data)
         return [query]
+
+    #TODO : fill nagios_instances
+    def manage_update_program_status_brok(self, b):
+        new_b = copy.deepcopy(b)
+        to_del = ['instance_name']
+        to_add = []
+        mapping = self.mapping['program_status']
+        for prop in new_b.data:
+            #ex : 'name' : 'program_start_time', 'transform'
+            if prop in mapping:
+                #print "Got a prop to change", prop
+                val = new_b.data[prop]
+                if mapping[prop]['transform'] != None:
+                    f = mapping[prop]['transform']
+                    val = f(val)
+                new_name = mapping[prop]['name']
+                to_add.append((new_name, val))
+                to_del.append(prop)
+        for prop in to_del:
+            del new_b.data[prop]
+        for (name, val) in to_add:
+            new_b.data[name] = val
+        where_clause = {'instance_id' : new_b.data['instance_id']}
+        query = self.create_update_query('programstatus', new_b.data, where_clause)
+        return [query]
+
 
 
     #A host have just be create, database is clean, we INSERT it
