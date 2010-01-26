@@ -94,8 +94,9 @@ class Arbiter(Daemon):
         }
 
 
-    def __init__(self, config_file, is_daemon, do_replace, verify_only, debug, debug_file):
-        self.config_file = config_file
+    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
+        self.config_file = config_files[0]
+	self.config_files = config_files
         self.is_daemon = is_daemon
 	self.verify_only = verify_only
         self.do_replace = do_replace
@@ -148,7 +149,7 @@ class Arbiter(Daemon):
         #The config Class must have the USERN macro
         #There are 256 of them, so we create online
         Config.fill_usern_macros()
-        self.conf.read_config(self.config_file)
+        self.conf.read_config(self.config_files)
         
 	#Maybe conf is already invalid
         if not self.conf.conf_is_correct:
@@ -364,10 +365,10 @@ class Arbiter(Daemon):
 ################### Process launch part
 def usage(name):
     print "Shinken Arbiter Daemon, version %s, from Gabes Jean, naparuba@gmail.com" % VERSION
-    print "Usage: %s [options] -c configfile" % name
+    print "Usage: %s [options] -c configfile [-c additionnal_config_file]" % name
     print "Options:"
     print " -c, --config"
-    print "\tConfig file (your nagios.cfg)."
+    print "\tConfig file (your nagios.cfg). Multiple -c can be used, it will be like if all files was just one"
     print " -d, --daemon"
     print "\tRun in daemon mode"
     print " -r, --replace"
@@ -376,9 +377,9 @@ def usage(name):
     print "\tPrint detailed help screen"
     print " --debug"
     print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-
-
-
+    
+    
+    
 #if __name__ == '__main__':
 #	p = Shinken()
 #        import cProfile
@@ -403,12 +404,13 @@ if __name__ == "__main__":
         usage(sys.argv[0])
         sys.exit(2)
     #Default params
-    config_file = None
+    config_files = []
     verify_only = False
     is_daemon=False
     do_replace=False
     debug=False
     debug_file=None
+    print "opts", opts
     for o, a in opts:
         if o in ("-h", "--help"):
             usage(sys.argv[0])
@@ -418,7 +420,7 @@ if __name__ == "__main__":
 	elif o in ("-r", "--replace"):
             do_replace = True
         elif o in ("-c", "--config"):
-            config_file = a
+            config_files.append(a)
         elif o in ("-d", "--daemon"):
             is_daemon = True
 	elif o in ("--debug"):
@@ -429,12 +431,12 @@ if __name__ == "__main__":
 	    usage(sys.argv[0])
             sys.exit()
 
-    if config_file == None:
+    if len(config_files) == 0:
         print "Error : config file is need"
         usage(sys.argv[0])
         sys.exit()
 
-    p = Arbiter(config_file, is_daemon, do_replace, verify_only, debug, debug_file)
+    p = Arbiter(config_files, is_daemon, do_replace, verify_only, debug, debug_file)
     #Ok, now we load the config
 
     #p = Shinken(conf)

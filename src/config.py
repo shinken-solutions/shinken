@@ -259,42 +259,53 @@ class Config(Item):
         return ' '.join(values)
 
 
-    def read_config(self, file):
-        print "Opening config file", file
+    
+
+    def read_config(self, files):
         #just a first pass to get the cfg_file and all files in a buf
         res = ''
-        fd = open(file)
-        buf = fd.readlines()
-        fd.close()
 
-        for line in buf:
-            res += line
-            line = line[:-1]
-            if re.search("^cfg_file", line) or re.search("^resource_file", line):
-                elts = line.split('=')
-                try:
-                    fd = open(elts[1])
-                    Log().log("Processing object config file '%s'" % elts[1])
-                    res += fd.read()
-                    fd.close()
-                except IOError ,exp:
-                    Log().log("Error: Cannot open config file '%s' for reading: %s" % (elts[1], exp))
+        for file in files:
+            print "Opening configuration file", file
+            try:
+                fd = open(file)
+                buf = fd.readlines()
+                fd.close()
+            except IOError ,exp:
+                Log().log("Error: Cannot open config file '%s' for reading: %s" % (elts[1], exp))
+                #The configuation is invalid because we have a bad file!
+                self.conf_is_correct = False
+                continue
+            
+            for line in buf:
+                res += line
+                line = line[:-1]
+                if re.search("^cfg_file", line) or re.search("^resource_file", line):
+                    elts = line.split('=')
+                    try:
+                        fd = open(elts[1])
+                        Log().log("Processing object config file '%s'" % elts[1])
+                        res += fd.read()
+                        fd.close()
+                    except IOError ,exp:
+                        Log().log("Error: Cannot open config file '%s' for reading: %s" % (elts[1], exp))
                     #The configuation is invalid because we have a bad file!
-                    self.conf_is_correct = False
-            elif re.search("^cfg_dir", line):
-                elts = line.split('=')
-                for root, dirs, files in os.walk(elts[1]):
-                    for file in files:
-                        if re.search("\.cfg$", file):
-                            try:
+                        self.conf_is_correct = False
+                elif re.search("^cfg_dir", line):
+                    elts = line.split('=')
+                    for root, dirs, files in os.walk(elts[1]):
+                        for file in files:
+                            if re.search("\.cfg$", file):
+                                try:
                                 
-                                fd = open(os.path.join(root, file))
-                                res += fd.read()
-                                fd.close()
-                            except IOError, exp:
-                                Log().log("Error: Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
+                                    fd = open(os.path.join(root, file))
+                                    res += fd.read()
+                                    fd.close()
+                                except IOError, exp:
+                                    Log().log("Error: Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
                                 #The configuation is invalid because we have a bad file!
-                                self.conf_is_correct = False
+                                    self.conf_is_correct = False
+
         self.read_config_buf(res)
         
 
