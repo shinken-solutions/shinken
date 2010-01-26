@@ -25,29 +25,29 @@ class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'contact'
 
-    properties={'contact_name' : {'required':True, 'status_broker_name' : None},
-                'alias' : {'required':False, 'default':'none', 'status_broker_name' : None},
-                'contactgroups' : {'required':False, 'default':''},
-                'host_notifications_enabled' : {'required':False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
-                'service_notifications_enabled' : {'required':False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
-                'host_notification_period' : {'required':True},
-                'service_notification_period' : {'required':True},
-                'host_notification_options' : {'required':True, 'pythonize': to_split},
-                'service_notification_options' : {'required':True, 'pythonize': to_split},
-                'host_notification_commands' : {'required':True},
-                'service_notification_commands' : {'required':True},
-                'email' : {'required' : False, 'default':'none', 'status_broker_name' : None},
-                'pager' : {'required' : False, 'default':'none', 'status_broker_name' : None},
-                'address1' : {'required' : False, 'default':'none'},
-                'address2' : {'required' : False, 'default':'none'},
-                'address3' : {'required' : False, 'default':'none'},
-                'address4' : {'required' : False, 'default':'none'},
-                'address5' : {'required' : False, 'default':'none'},
-                'address6' : {'required' : False, 'default':'none'},
-                'can_submit_commands' : {'required' : False, 'default':'0', 'pythonize': to_bool, 'status_broker_name' : None},
-                'retain_status_information' : {'required' : False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None},
-                'retain_nonstatus_information' : {'required' : False, 'default':'1', 'pythonize': to_bool, 'status_broker_name' : None}
-                }
+    properties={
+        'contact_name' : {'required' : True, 'fill_brok' : ['full_status']},
+        'alias' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
+        'contactgroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'host_notifications_enabled' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
+        'service_notifications_enabled' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
+        'host_notification_period' : {'required' : True, 'fill_brok' : ['full_status']},
+        'service_notification_period' : {'required' : True, 'fill_brok' : ['full_status']},
+        'host_notification_options' : {'required' : True, 'pythonize' : to_split, 'fill_brok' : ['full_status']},
+        'service_notification_options' : {'required' : True, 'pythonize' : to_split, 'fill_brok' : ['full_status']},
+        'host_notification_commands' : {'required' : True, 'fill_brok' : ['full_status']},
+        'service_notification_commands' : {'required' : True, 'fill_brok' : ['full_status']},
+        'email' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
+        'pager' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
+        'address1' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
+        'address2' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
+        'address3' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
+        'address4' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
+        'address5' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
+        'address6' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
+        'can_submit_commands' : {'required' : False, 'default' : '0', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
+        'retain_status_information' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
+        }
 
     running_properties = {}
 

@@ -34,20 +34,21 @@ class Notification(Action):
     #id = 0 #Is in fact in the Action class to be common with Checks and 
     #events handlers
     
-    properties={'notification_type' : {'required': False, 'default':0, 'status_broker_name' : None},
-                'start_time' : {'required': False, 'default':0, 'status_broker_name' : None},
-                'end_time' : {'required': False, 'default':0, 'status_broker_name' : None},
-                'contact_name' : {'required': False, 'default':'', 'status_broker_name' : None},
-                'host_name' : {'required': False, 'default':'', 'status_broker_name' : None},
-                'service_description' : {'required': False, 'default':'', 'status_broker_name' : None},
-                'reason_type' : {'required': False, 'default':0, 'status_broker_name' : None},
-                'state' : {'required': False, 'default':0, 'status_broker_name' : None},
-                'output' : {'required': False, 'default':'', 'status_broker_name' : None},
-                'ack_author' : {'required': False, 'default':'', 'status_broker_name' : None},
-                'ack_data' : {'required': False, 'default':'', 'status_broker_name' : None},
-                'escalated' : {'required': False, 'default':0, 'status_broker_name' : None},
-                'contacts_notified' : {'required': False, 'default':0, 'status_broker_name' : None}
-                }
+    properties={
+        'notification_type' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
+        'start_time' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
+        'end_time' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
+        'contact_name' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'host_name' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'service_description' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'reason_type' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
+        'state' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
+        'output' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'ack_author' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'ack_data' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'escalated' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
+        'contacts_notified' : {'required': False, 'default':0, 'fill_brok' : ['full_status']},
+        }
 
     macros = {
         'NOTIFICATIONTYPE' : 'type',
@@ -181,19 +182,16 @@ class Notification(Action):
         cls = self.__class__
         #Now config properties
         for prop in cls.properties:
-            if brok_type in cls.properties[prop]:
-                broker_name = cls.properties[prop][brok_type]
-                if broker_name is None:
+            if hasattr(prop, 'fill_brok'):
+                if brok_type in cls.properties[prop]['fill_brok']:
                     data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
 
 
     #Get a brok with initial status
     def get_initial_status_brok(self):
         data = {'id' : self.id}
         
-        self.fill_data_brok_from(data, 'status_broker_name')
+        self.fill_data_brok_from(data, 'full_status')
         b = Brok('notification_raise', data)
         return b
 

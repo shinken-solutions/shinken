@@ -26,14 +26,14 @@ class Contactgroup(Itemgroup):
     id = 1
     my_type = 'contactgroup'
 
-    properties={'id': {'required': False, 'default': 0, 'status_broker_name' : None},
-                'contactgroup_name': {'required': True, 'status_broker_name' : None},
-                'alias': {'required':  True, 'status_broker_name' : None},
-                'members' : {'required': True},#No status_broker_name because it put hosts, not host_name
-                #Shinken specific
-                'unknown_members' : {'required': False, 'default': []}
-                }
-
+    properties={
+        'id' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
+        'contactgroup_name' : {'required' : True, 'fill_brok' : ['full_status']},
+        'alias' : {'required' : True, 'fill_brok' : ['full_status']},
+        'members' : {'required' : True, 'fill_brok' : ['full_status']},
+        #Shinken specific 
+        'unknown_members' : {'required': False, 'default': []}
+        }
 
     macros = {
         'CONTACTGROUPALIAS' : 'alias',

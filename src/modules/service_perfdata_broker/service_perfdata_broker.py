@@ -71,8 +71,8 @@ class Service_perfdata_broker:
         data = b.data
         #The original model
         #"$TIMET\t$HOSTNAME\t$SERVICEDESC\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
-        current_state = self.resolve_service_state(data['current_state'])
-        s = "%s\t%s\t%s\t%s\t%s\t%s\n" % (int(data['last_check']),data['host_name'], \
+        current_state = self.resolve_service_state(data['state_id'])
+        s = "%s\t%s\t%s\t%s\t%s\t%s\n" % (int(data['last_chk']),data['host_name'], \
                                           data['service_description'], data['output'], \
                                           current_state, data['perf_data'] )
 

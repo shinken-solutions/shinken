@@ -270,20 +270,21 @@ class Item(object):
         cls = self.__class__
         #Now config properties
         for prop in cls.properties:
-            if brok_type in cls.properties[prop]:
-                broker_name = cls.properties[prop][brok_type]
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
+            #Is this property intended for brokking?
+            if 'fill_brok' in cls.properties[prop]:
+                if brok_type in cls.properties[prop]['fill_brok']:
+                    if hasattr(self, prop):
+                        data[prop] = getattr(self, prop)
+                    elif 'default' in cls.properties[prop]:
+                        data[prop] = cls.properties[prop]['default']
         #We've got prop in running_properties too
         for prop in cls.running_properties:
-            if brok_type in cls.running_properties[prop]:
-                broker_name = cls.running_properties[prop][brok_type]
-                if broker_name is None:
-                    data[prop] = getattr(self, prop)
-                else:
-                    data[broker_name] = getattr(self, prop)
+            if 'fill_brok' in cls.running_properties[prop]:
+                if brok_type in cls.running_properties[prop]['fill_brok']:
+                    if hasattr(self, prop):
+                        data[prop] = getattr(self, prop)
+                    elif 'default' in cls.properties[prop]:
+                        data[prop] = cls.running_properties[prop]['default']
 
 
     #Get a brok with initial status
@@ -292,7 +293,7 @@ class Item(object):
         my_type = cls.my_type
         data = {'id' : self.id}
         
-        self.fill_data_brok_from(data, 'status_broker_name')
+        self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_'+my_type+'_status', data)
         return b
 
@@ -303,7 +304,7 @@ class Item(object):
         my_type = cls.my_type
         
         data = {'id' : self.id}
-        self.fill_data_brok_from(data, 'status_broker_name')
+        self.fill_data_brok_from(data, 'full_status')
         b = Brok('update_'+my_type+'_status', data)
         return b
 
@@ -314,7 +315,7 @@ class Item(object):
         my_type = cls.my_type
 
         data = {}
-        self.fill_data_brok_from(data, 'broker_name')
+        self.fill_data_brok_from(data, 'check_result')
         b = Brok(my_type+'_check_result', data)
         return b
 

@@ -121,14 +121,10 @@ class Itemgroup:
         data = {}
         #Now config properties
         for prop in cls.properties:
-            if 'status_broker_name' in cls.properties[prop]:
-                broker_name = cls.properties[prop]['status_broker_name']
+            if 'fill_brok' in cls.properties[prop]:
                 if self.has(prop):
-                    if broker_name is None:
-                        data[prop] = getattr(self, prop)
-                    else:
-                        data[broker_name] = getattr(self, prop)
-        #Here members is jsut a bunch of host, I need name in place
+                    data[prop] = getattr(self, prop)
+        #Here members is just a bunch of host, I need name in place
         data['members'] = []
         for i in self.members:
             #it look like lisp! ((( ..))), sorry....

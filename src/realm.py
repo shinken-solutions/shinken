@@ -29,12 +29,12 @@ class Realm(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'realm'
 
-    properties={'id': {'required': False, 'default': 0, 'status_broker_name' : None},
-                'realm_name': {'required': True, 'status_broker_name' : None},
-                #'alias': {'required':  True, 'status_broker_name' : None},
-                #'notes': {'required': False, 'default':'', 'status_broker_name' : None},
-                #'notes_url': {'required': False, 'default':'', 'status_broker_name' : None},
-                #'action_url': {'required': False, 'default':'', 'status_broker_name' : None},
+    properties={'id': {'required': False, 'default': 0, 'fill_brok' : ['full_status']},
+                'realm_name': {'required': True, 'fill_brok' : ['full_status']},
+                #'alias': {'required':  True, 'fill_brok' : ['full_status']},
+                #'notes': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
+                #'notes_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
+                #'action_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
                 'realm_members' : {'required': False},#No status_broker_name because it put hosts, not host_name
                 'higher_realms' : {'required': False},
                 'default' : {'required' : False, 'default' : 0, 'pythonize': to_bool}

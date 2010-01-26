@@ -25,16 +25,17 @@ class Hostgroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'hostgroup'
 
-    properties={'id': {'required': False, 'default': 0, 'status_broker_name' : None},
-                'hostgroup_name': {'required': True, 'status_broker_name' : None},
-                'alias': {'required':  True, 'status_broker_name' : None},
-                'notes': {'required': False, 'default':'', 'status_broker_name' : None},
-                'notes_url': {'required': False, 'default':'', 'status_broker_name' : None},
-                'action_url': {'required': False, 'default':'', 'status_broker_name' : None},
-                'members' : {'required': False, 'default':''}, #No status_broker_name because it put hosts, not host_name
-                #Shinken specific
-                'unknown_members' : {'required': False, 'default': []}
-                }
+    properties={
+        'id' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
+        'hostgroup_name' : {'required' : True, 'fill_brok' : ['full_status']},
+        'alias' : {'required' : True, 'fill_brok' : ['full_status']},
+        'notes' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'notes_url' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'action_url' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'members' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        #Shinken specific 
+        'unknown_members' : {'required': False, 'default': []}
+        }
 
     macros = {
         'HOSTGROUPALIAS' : 'alias',
