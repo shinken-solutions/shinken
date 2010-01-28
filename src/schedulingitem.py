@@ -411,7 +411,7 @@ class SchedulingItem(Item):
                 self.add_attempt()
                 self.raise_alert_log_entry()
                 #Eventhandler gets OK;SOFT;++attempt, no notification needed
-                res = self.get_event_handlers()
+                res.extend(self.get_event_handlers())
                 #Internally it is a hard OK
                 self.state_type = 'HARD'
                 self.attempt = 1
@@ -423,7 +423,7 @@ class SchedulingItem(Item):
                 self.remove_in_progress_notifications()
                 if self.notifications_enabled and not no_action:
                     res.extend(self.create_notifications('RECOVERY'))
-                res = self.get_event_handlers()
+                res.extend(self.get_event_handlers())
                 #Internally it is a hard OK
                 self.state_type = 'HARD'
                 self.attempt = 1
@@ -461,7 +461,7 @@ class SchedulingItem(Item):
                 self.attempt = 1
                 self.state_type = 'SOFT'
                 self.raise_alert_log_entry()
-                res = self.get_event_handlers()
+                res.extend(self.get_event_handlers())
 
         #If no OK in a no OK : if hard, still hard, if soft,
         #check at self.max_check_attempts
