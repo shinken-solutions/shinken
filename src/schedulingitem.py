@@ -317,6 +317,7 @@ class SchedulingItem(Item):
         except TypeError:
             #DBG
             print "ERROR FUCK:", c.check_time, c.t_to_go, c.ref.get_name()
+        self.has_been_checked = 1
         self.execution_time = c.execution_time
         self.last_chk = c.check_time
         self.output = c.output
@@ -411,7 +412,7 @@ class SchedulingItem(Item):
                 self.add_attempt()
                 self.raise_alert_log_entry()
                 #Eventhandler gets OK;SOFT;++attempt, no notification needed
-                res = self.get_event_handlers()
+                res.extend(self.get_event_handlers())
                 #Internally it is a hard OK
                 self.state_type = 'HARD'
                 self.attempt = 1
@@ -423,7 +424,7 @@ class SchedulingItem(Item):
                 self.remove_in_progress_notifications()
                 if self.notifications_enabled and not no_action:
                     res.extend(self.create_notifications('RECOVERY'))
-                res = self.get_event_handlers()
+                res.extend(self.get_event_handlers())
                 #Internally it is a hard OK
                 self.state_type = 'HARD'
                 self.attempt = 1
@@ -461,7 +462,7 @@ class SchedulingItem(Item):
                 self.attempt = 1
                 self.state_type = 'SOFT'
                 self.raise_alert_log_entry()
-                res = self.get_event_handlers()
+                res.extend(self.create_notifications('PROBLEM'))
 
         #If no OK in a no OK : if hard, still hard, if soft,
         #check at self.max_check_attempts
@@ -585,7 +586,7 @@ class SchedulingItem(Item):
                     #The notif must be fill with current data, 
                     #so we create the commmand now but only if it's the first 
                     #And we can add the log entry now
-                    if self.current_notification_number == 1:
+                    if self.current_notification_number == 1 or type == 'RECOVERY':
                         self.update_notification_command(n)
                         self.raise_notification_log_entry(n)
 

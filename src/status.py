@@ -222,7 +222,7 @@ class StatusFile:
             if elt_type == elt.__class__:
                 type_map = StatusFile.out_map[elt_type]
                 for display in type_map:
-                    if 'prop' not in type_map[display]:
+                    if 'prop' not in type_map[display] or type_map[display]['prop'] is None:
                         prop = display
                     else:
                         prop = type_map[display]['prop']
@@ -277,6 +277,7 @@ class StatusFile:
             temp_fh, temp_status_file = tempfile.mkstemp(dir=os.path.dirname(self.path))
             os.write(temp_fh, output)
             os.close(temp_fh)
+            os.chmod(temp_status_file, 0640)
             os.rename(temp_status_file, self.path)
         except OSError as exp:
             return exp

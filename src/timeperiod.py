@@ -75,12 +75,19 @@ from memoized import memoized
 from daterange import Daterange,CalendarDaterange,StandardDaterange,MonthWeekDayDaterange
 from daterange import MonthDateDaterange,WeekDayDaterange,MonthDayDaterange
 from daterange import Timerange
+from brok import Brok
 
 
 class Timeperiod:
     id = 0
 
     my_type = 'timeperiod'
+
+    properties={
+        'timeperiod_name' : {'required' : True, 'fill_brok' : ['full_status']},
+        'alias' : {'required' : False, 'fill_brok' : ['full_status']},
+        }
+
     
     def __init__(self, params={}):
         self.id = Timeperiod.id
@@ -515,6 +522,31 @@ class Timeperiod:
         return True
 
 
+    def fill_data_brok_from(self, data, brok_type):
+        cls = self.__class__
+        #Now config properties
+        for prop in cls.properties:
+            #Is this property intended for brokking?
+            if 'fill_brok' in cls.properties[prop]:
+                if brok_type in cls.properties[prop]['fill_brok']:
+                    if hasattr(self, prop):
+                        data[prop] = getattr(self, prop)
+                    elif 'default' in cls.properties[prop]:
+                        data[prop] = cls.properties[prop]['default']
+
+
+    #Get a brok with initial status
+    def get_initial_status_brok(self):
+        cls = self.__class__
+        my_type = cls.my_type
+        data = {'id' : self.id}
+
+        self.fill_data_brok_from(data, 'full_status')
+        b = Brok('initial_'+my_type+'_status', data)
+        return b
+
+
+
 class Timeperiods(Items):
     name_property = "timeperiod_name"
     inner_class = Timeperiod
@@ -551,8 +583,6 @@ class Timeperiods(Items):
 
         return r
 
-        
-            
 
 
 if __name__ == '__main__':

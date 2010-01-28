@@ -30,14 +30,16 @@ from host import Host
 from service import Service
 from contact import Contact
 from status import StatusFile
+from objectscache import ObjectsCacheFile
 
 
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Status_dat_broker:
-    def __init__(self, name, path, update_interval):
+    def __init__(self, name, path, opath, update_interval):
         self.path = path
+        self.opath = opath
         self.name = name
         self.update_interval = update_interval
         
@@ -58,6 +60,7 @@ class Status_dat_broker:
         self.contacts = {}
 
         self.status = StatusFile(self.path, self.hosts, self.services, self.contacts)
+        self.objects_cache = ObjectsCacheFile(self.opath, self.hosts, self.services, self.contacts)
     
 
     def is_external(self):
@@ -109,10 +112,10 @@ class Status_dat_broker:
     def manage_initial_contact_status_brok(self, b):
         data = b.data
         c_id = data['id']
-        print "Creating Contact:", c_id, data
+        #print "Creating Contact:", c_id, data
         c = Contact({})
         self.update_element(c, data)
-        print "C:", c
+        #print "C:", c
         self.contacts[c_id] = c
 
 
@@ -165,11 +168,15 @@ class Status_dat_broker:
 
     def main(self):
         last_generation = time.time()
+        objects_cache_written = False
         while True:
             b = self.q.get() # can block here :)
             self.manage_brok(b)
             
             if time.time() - last_generation > self.update_interval:
+                if not objects_cache_written:
+                    self.objects_cache.create_or_update()
+                    objects_cache_written = True
                 print "Generating status file!"
                 r = self.status.create_or_update()
                 #if we get an error (an exception in fact) we bail out

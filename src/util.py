@@ -97,6 +97,10 @@ def from_bool_to_string(b):
     else:
         return '0'
 
+def from_list_to_split(val):
+    val = ','.join(['%s' % v for v in val])
+    return val
+
 
 ###################### Sorting ################
 def scheduler_no_spare_first(x, y):

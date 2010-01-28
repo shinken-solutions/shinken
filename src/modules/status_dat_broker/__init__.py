@@ -40,8 +40,9 @@ def get_instance(plugin):
         return None
 
     #Catch errors
-    path = plugin.path
+    path = plugin.status_file
+    opath = plugin.object_cache_file
     update_interval = int(plugin.status_update_interval)
-    instance = Status_dat_broker(plugin.get_name(), path, update_interval)
+    instance = Status_dat_broker(plugin.get_name(), path, opath, update_interval)
     return instance
 
