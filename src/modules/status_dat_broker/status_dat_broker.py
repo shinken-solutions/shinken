@@ -165,7 +165,12 @@ class Status_dat_broker:
 
         
     def update_element(self, e, data):
+        #print "........%s........" % type(e)
         for prop in data:
+            #if hasattr(e, prop):
+            #    print "%-20s\t%s\t->\t%s" % (prop, getattr(e, prop), data[prop])
+            #else:
+            #    print "%-20s\t%s\t->\t%s" % (prop, "-", data[prop])
             setattr(e, prop, data[prop])
 
 

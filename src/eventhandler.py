@@ -139,7 +139,7 @@ class EventHandler(Action):
 
     
     def __str__(self):
-        return "Check %d status:%s command:%s ref:%s" % (self.id, self.status, self.command, self.ref)
+        return "Check %d status:%s command:%s" % (self.id, self.status, self.command)
 
 
     def get_id(self):
