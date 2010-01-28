@@ -38,13 +38,13 @@ class StatusFile:
             'notification_period' : {'prop' : 'notification_period', 'depythonize' : 'get_name'},
             'check_interval'  : {},
             'retry_interval' : {},
-            'event_handler' : {'prop' : None, 'default' : ''},
+            'event_handler' : {'depythonize' : 'get_name', 'default' : ''},
             'has_been_checked' : {'prop' : None, 'default' : '0'},
             'should_be_scheduled' : {'prop' : None, 'default' : '0'},
             'check_execution_time' : {'prop' : None, 'default' : '0'},
             'check_latency' : {'prop' : 'latency'},
             'check_type' : {'prop' : None, 'default' : '0'},
-            'current_state' : {'prop' : 'state'},
+            'current_state' : {'prop' : 'state_id'},
             'last_hard_state' : {'prop' : None, 'default' : '0'},
             'last_event_id' : {'prop' : None, 'default' : '0'},
             'current_event_id' : {'prop' : None, 'default' : '0'},
@@ -95,13 +95,13 @@ class StatusFile:
             'notification_period' : {'depythonize' : 'get_name'},
             'check_interval' : {},
             'retry_interval' : {},
-            'event_handler' : {'prop' : None, 'default' : ''},
+            'event_handler' : {'depythonize' : 'get_name', 'default' : ''},
             'has_been_checked' : {'prop' : None, 'default' : '0'},
             'should_be_scheduled' : {'prop' : None, 'default' : '0'},
             'check_execution_time' : {'prop' : None, 'default' : '0'},
             'check_latency' : {'prop' : 'latency'},
             'check_type' : {'prop' : None, 'default' : '0'},
-            'current_state' : {'prop' : 'state'},
+            'current_state' : {'prop' : 'state_id'},
             'last_hard_state' : {'prop' : None, 'default' : '0'},
             'last_event_id' : {'prop' : None, 'default' : '0'},
             'current_event_id' : {'prop' : None, 'default' : '0'},
@@ -222,6 +222,7 @@ class StatusFile:
             if elt_type == elt.__class__:
                 type_map = StatusFile.out_map[elt_type]
                 for display in type_map:
+                    value = None
                     if 'prop' not in type_map[display] or type_map[display]['prop'] is None:
                         prop = display
                     else:
@@ -241,9 +242,11 @@ class StatusFile:
                             else:
                                 #print "Elt: ", elt, "prop", prop
                                 #ok not a direct function, maybe a functin provided by value...
-                                f = getattr(value, f)
-                                value = f()
-                    else:
+                                if value is not None:
+                                    f = getattr(value, f)
+                                    value = f()
+
+                    if value == None:
                         try:
                             value = type_map[display]['default']
                         except KeyError:  #Fuck!
