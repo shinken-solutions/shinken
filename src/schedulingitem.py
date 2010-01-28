@@ -462,7 +462,7 @@ class SchedulingItem(Item):
                 self.attempt = 1
                 self.state_type = 'SOFT'
                 self.raise_alert_log_entry()
-                res.extend(self.create_notifications('PROBLEM'))
+                res.extend(self.get_event_handlers())
 
         #If no OK in a no OK : if hard, still hard, if soft,
         #check at self.max_check_attempts
