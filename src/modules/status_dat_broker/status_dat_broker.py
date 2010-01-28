@@ -76,7 +76,10 @@ class Status_dat_broker:
     def manage_brok(self, b):
         type = b.type
         manager = 'manage_'+type+'_brok'
+        print "------------------------------------------- i receive", manager
         if hasattr(self, manager):
+            print "------------------------------------------- i manage", manager
+            print b
             f = getattr(self, manager)
             f(b)
 
@@ -89,11 +92,11 @@ class Status_dat_broker:
     def manage_initial_host_status_brok(self, b):
         data = b.data
         h_id = data['id']
-        #print "Creating host:", h_id, data
+        print "Creating host:", h_id, data
         h = Host({})
         for prop in data:
             setattr(h, prop, data[prop])
-        #print "H:", h
+        print "H:", h
         self.hosts[h_id] = h
 
 
@@ -101,10 +104,10 @@ class Status_dat_broker:
     def manage_initial_service_status_brok(self, b):
         data = b.data
         s_id = data['id']
-        #print "Creating Service:", s_id, data
+        print "Creating Service:", s_id, data
         s = Service({})
         self.update_element(s, data)
-        #print "S:", s
+        print "S:", s
         self.services[s_id] = s
 
 

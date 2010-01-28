@@ -57,7 +57,7 @@ class Service(SchedulingItem):
                      'check_flapping_recovery_notification', 'scheduled_downtime_depth', \
                      'pending_flex_downtime', 'timeout', 'start_time', 'end_time', 'early_timeout', \
                      'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'host', \
-                     'resultmodulations'
+                     'resultmodulations', 'last_update'
                  )
 
     id = 1 # Every service have a unique ID, and 0 is always special in database and co...
@@ -114,7 +114,7 @@ class Service(SchedulingItem):
         'parallelize_check' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
 
         #Shinken specific
-        'resultmodulations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'resultmodulations' : {'required' : False, 'default' : ''}, #TODO : fix brok and deepcopy a patern is not allowed
         'escalations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         }
     
@@ -144,11 +144,11 @@ class Service(SchedulingItem):
         'long_output' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
         'is_flapping' : {'default' : False, 'fill_brok' : ['full_status']},
         'is_in_downtime' : {'default' : False, 'fill_brok' : ['full_status']},
-        'act_depend_of' : {'default' : [], 'fill_brok' : ['full_status']}, #dependencies for actions like notif of event handler, so AFTER check return
-        'chk_depend_of' : {'default' : [], 'fill_brok' : ['full_status']}, #dependencies for checks raise, so BEFORE checks
+        'act_depend_of' : {'default' : [] }, #dependencies for actions like notif of event handler, so AFTER check return
+        'chk_depend_of' : {'default' : []}, #dependencies for checks raise, so BEFORE checks
         'last_state_update' : {'default' : time.time(), 'fill_brok' : ['full_status']},
-        'checks_in_progress' : {'default' : [], 'fill_brok' : ['full_status']},
-        'notifications_in_progress' : {'default' : {}, 'fill_brok' : ['full_status']},
+        'checks_in_progress' : {'default' : []}, # no brok because checks are too linked
+        'notifications_in_progress' : {'default' : {}}, # no broks because notifications are too linked
         'downtimes' : {'default' : [], 'fill_brok' : ['full_status']},
         'flapping_changes' : {'default' : [], 'fill_brok' : ['full_status']},
         'flapping_comment_id' : {'default' : 0, 'fill_brok' : ['full_status']},
@@ -173,7 +173,7 @@ class Service(SchedulingItem):
         'early_timeout' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'return_code' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
-        'host' : {'default' : None, 'fill_brok' : ['full_status']},
+        'host' : {'default' : None},
         'customs' : {'default' : {}}
         }
 
@@ -300,6 +300,11 @@ class Service(SchedulingItem):
 
     def add_service_chk_dependancy(self, srv, status, timeperiod):
         self.chk_depend_of.append( (srv, status, 'logic_dep', timeperiod) )
+
+
+    #Set unreachable : our host is DOWN, but it mean nothing for a service
+    def set_unreachable(self):
+        pass
 
 
     #Set state with status return by the check

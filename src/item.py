@@ -313,7 +313,7 @@ class Item(object):
     def get_check_result_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-
+        
         data = {}
         self.fill_data_brok_from(data, 'check_result')
         b = Brok(my_type+'_check_result', data)

@@ -53,7 +53,6 @@ DataError_exp = DataError
 from cx_Oracle import OperationalError
 OperationalError_exp = OperationalError
 
-
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
 
@@ -370,7 +369,7 @@ class Ndodb_Oracle_broker:
                            'host_object_id' : host_id,
                            'normal_check_interval' : data['check_interval'],
                            'retry_check_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
-                           'current_state' : data['current_state'], 'state_type' : data['state_type'],
+                           'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
                            'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
                            'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data']
@@ -420,7 +419,7 @@ class Ndodb_Oracle_broker:
                               'service_object_id' : service_id,
                               'normal_check_interval' : data['check_interval'],
                               'retry_check_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
-                              'current_state' : data['current_state'], 'state_type' : data['state_type'],
+                              'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                               'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
                               'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
                               'obsess_over_service' : data['obsess_over_service'],'process_performance_data' : data['process_perf_data']
@@ -507,8 +506,8 @@ class Ndodb_Oracle_broker:
         #Only the host is impacted
         where_clause = {'host_object_id' : host_id}
         host_check_data = {'instance_id' : data['instance_id'],
-                           'check_type' : 0, 'is_raw_check' : 0, 'current_check_attempt' : data['current_attempt'],
-                           'state' : data['current_state'], 'state_type' : data['state_type'],
+                           'check_type' : 0, 'is_raw_check' : 0, 'current_check_attempt' : data['attempt'],
+                           'state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'start_time' : data['start_time'], 'start_time_usec' : 0,
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
                            'return_code' : data['return_code'], 'output' : data['output'],
@@ -518,8 +517,8 @@ class Ndodb_Oracle_broker:
 
         #Now servicestatus
         hoststatus_data = {'instance_id' : data['instance_id'],
-                           'check_type' : 0, 'current_check_attempt' : data['current_attempt'],
-                           'current_state' : data['current_state'], 'state_type' : data['state_type'],
+                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                           'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
                            'output' : data['output'], 'perfdata' : data['perf_data']
         }
@@ -537,8 +536,8 @@ class Ndodb_Oracle_broker:
         #Only the service is impacted
         where_clause = {'service_object_id' : service_id}
         service_check_data = {'instance_id' : data['instance_id'],
-                           'check_type' : 0, 'current_check_attempt' : data['current_attempt'],
-                           'state' : data['current_state'], 'state_type' : data['state_type'],
+                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                           'state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'start_time' : data['start_time'], 'start_time_usec' : 0,
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
                            'return_code' : data['return_code'], 'output' : data['output'],
@@ -548,8 +547,8 @@ class Ndodb_Oracle_broker:
 
         #Now servicestatus
         servicestatus_data = {'instance_id' : data['instance_id'],
-                           'check_type' : 0, 'current_check_attempt' : data['current_attempt'],
-                           'current_state' : data['current_state'], 'state_type' : data['state_type'],
+                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                           'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
                            'output' : data['output'], 'perfdata' : data['perf_data']
         }
@@ -563,9 +562,20 @@ class Ndodb_Oracle_broker:
     #Ok the host is updated
     def manage_update_host_status_brok(self, b):
         data = b.data
-        #Only this host
+        hosts_data = {'instance_id' : data['instance_id'],
+                      'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
+                      'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
+                      'first_notification_delay' : data['first_notification_delay'], 'notification_interval' : data['notification_interval'],
+                      'flap_detection_enabled' : data['flap_detection_enabled'], 'low_flap_threshold' : data['low_flap_threshold'],
+                      'high_flap_threshold' : data['high_flap_threshold'], 'process_performance_data' : data['process_perf_data'],
+                      'freshness_checks_enabled' : data['check_freshness'], 'freshness_threshold' : data['freshness_threshold'],
+                      'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
+                      'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
+                      'obsess_over_host' : data['obsess_over_host'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
+                      }
+                      #Only this host
         where_clause = {'host_name' : data['host_name']}
-        query = self.create_update_query('host', data, where_clause)
+        query = self.create_update_query('host', hosts_data, where_clause)
         return [query]
 
 

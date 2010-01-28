@@ -76,7 +76,7 @@ class Host(SchedulingItem):
         'alias' : {'required' : True, 'fill_brok' : ['full_status']},
         'display_name' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
         'address' : {'required' : True, 'fill_brok' : ['full_status']},
-        'parents' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'fill_brok' : ['full_status']},
+        'parents' : {'required' : False, 'default' : '', 'pythonize' : to_split}, #TODO : find a way to brok it?
         'hostgroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'check_command' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'initial_state' : {'required' : False, 'default' : 'u', 'pythonize' : to_char, 'fill_brok' : ['full_status']},
@@ -117,10 +117,11 @@ class Host(SchedulingItem):
         '3d_coords' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'failure_prediction_enabled' : {'required' : False, 'default' : '0', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
         #New to shinken
-        'realm' : {'required' : False, 'default' : None, 'fill_brok' : ['full_status']},
+        'realm' : {'required' : False, 'default' : None}, #no 'fill_brok' because realm are link with every one, it's too dangerous
+        #so picle things like connexions to schedulers, etc.
 
         #Shinken specific
-        'resultmodulations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'resultmodulations' : {'required' : False, 'default' : ''}, #TODO : fix brok and deepcopy a patern is not allowed
         'escalations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         }
 
@@ -151,12 +152,13 @@ class Host(SchedulingItem):
         'is_flapping' : {'default' : False, 'fill_brok' : ['full_status']},
         'is_in_downtime' : {'default' : False, 'fill_brok' : ['full_status']},
         'flapping_comment_id' : {'default' : 0, 'fill_brok' : ['full_status']},
-        'act_depend_of' : {'default' : [], 'fill_brok' : ['full_status']}, #dependencies for actions like notif of event handler, so AFTER check return
-        'chk_depend_of' : {'default' : [], 'fill_brok' : ['full_status']}, #dependencies for checks raise, so BEFORE checks
+        #No broks for _depend_of because of to much links to hsots/services
+        'act_depend_of' : {'default' : []}, #dependencies for actions like notif of event handler, so AFTER check return
+        'chk_depend_of' : {'default' : []}, #dependencies for checks raise, so BEFORE checks
         'last_state_update' : {'default' : time.time(), 'fill_brok' : ['full_status']},
-        'services' : {'default' : [], 'fill_brok' : ['full_status']},
-        'checks_in_progress' : {'default' : [], 'fill_brok' : ['full_status']},
-        'notifications_in_progress' : {'default' : {}, 'fill_brok' : ['full_status']},
+        'services' : {'default' : []}, #no brok ,to much links
+        'checks_in_progress' : {'default' : []},#No broks, it's just internal, and checks have too links
+        'notifications_in_progress' : {'default' : {}},#No broks, it's just internal, and checks have too links
         'downtimes' : {'default' : [], 'fill_brok' : ['full_status']},
         'flapping_changes' : {'default' : [], 'fill_brok' : ['full_status']},
         'percent_state_change' : {'default' : 0.0, 'fill_brok' : ['full_status']},
@@ -180,7 +182,6 @@ class Host(SchedulingItem):
         'early_timeout' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'return_code' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
-        'services' : {'default' : [], 'fill_brok' : ['full_status']},
         'customs' : {'default' : {}},
         }
 
@@ -345,6 +346,15 @@ class Host(SchedulingItem):
     def add_service_link(self, service):
         self.services.append(service)
 
+
+    #Set unreachable : all our parents are down!
+    #We have a special state, but state was already set, we just need to
+    #update it. We are still DOWN, but state id is 2
+    def set_unreachable(self):
+        now = time.time()
+        self.state_id = 2
+        self.last_time_unreachable = int(now)
+
     
     #set the state in UP, DOWN, or UNDETERMINED
     #with the status of a check. Also update last_state
@@ -359,11 +369,11 @@ class Host(SchedulingItem):
             self.last_time_up = int(self.last_state_update)
         elif status == 1 or status == 2 or status == 3:
             self.state = 'DOWN'
-            self.state_id = 2
+            self.state_id = 1
             self.last_time_down = int(self.last_state_update)
         else:
             self.state = 'DOWN'#exit code UNDETERMINED
-            self.state_id = 2
+            self.state_id = 1
             self.last_time_down = int(self.last_state_update)
         if status in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)

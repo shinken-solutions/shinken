@@ -41,6 +41,14 @@ from util import to_int, to_bool
 from module import Module, Modules
 from modulesmanager import ModulesManager
 
+
+#Load to be used by modules
+from resultmodulation import Resultmodulation
+from escalation import Escalation
+from timeperiod import Timeperiod
+from contact import Contact
+from command import Command, CommandCall
+
 VERSION = "0.1beta"
 
 
@@ -240,11 +248,11 @@ class Broker(Satellite):
 			print exp
 			return
 		except Pyro.errors.NamingError, exp:
-			print "%s is not initilised" %(type, exp)
+			print "%s is not initilised : %s" %(type, exp)
 			links[id]['con'] = None
 			return
 		except KeyError , exp:
-                        print "%s is not initilised" % (type, exp)
+                        print "%s is not initilised %s" % (type, exp)
                         links[id]['con'] = None
                         return
 		#The schedulers have been restart : it has a new run_id.
@@ -264,6 +272,7 @@ class Broker(Satellite):
 			try:
 				mod.manage_brok(b)
 			except Exception as exp:
+				print exp.__dict__
 				print "Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),exp)
 				print "DBG:", type(exp)
 				to_del.append(mod)

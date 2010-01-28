@@ -82,7 +82,7 @@ class Merlindb_sqlite_broker:
     #Just run the query
     #TODO: finish catch
     def execute_query(self, query):
-        #print "I run query", query, "\n"
+        print "I run query", query, "\n"
         #try:
         self.db_cursor.execute(query)
         self.db.commit ()
@@ -199,8 +199,11 @@ class Merlindb_sqlite_broker:
     #Initial service status is at start. We need an insert because we 
     #clean the base
     def manage_initial_service_status_brok(self, b):
+        data = copy.deepcopy(b.data)
+        del data['3d_coords']
+
         #It's a initial entry, so we need insert
-        query = self.create_insert_query('service', b.data)		
+        query = self.create_insert_query('service', data)		
         return [query]
 
 
@@ -215,7 +218,10 @@ class Merlindb_sqlite_broker:
 
     #A full service status? Ok, update data
     def manage_update_service_status_brok(self, b):
-        data = b.data
+        data = copy.deepcopy(b.data)
+        del data['3d_coords']
+        del data['2d_coords']
+
         where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
         query = self.create_update_query('service', data, where_clause)
         return [query]
@@ -223,7 +229,11 @@ class Merlindb_sqlite_broker:
 
     #A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
-        query = self.create_insert_query('host', b.data)
+        data = copy.deepcopy(b.data)
+        del data['3d_coords']
+        del data['2d_coords']
+
+        query = self.create_insert_query('host', data)
         return [query]
 
 
@@ -236,7 +246,7 @@ class Merlindb_sqlite_broker:
         #Here we've got a special case : in data, there is members
         #and we do not want it in the INSERT query, so we crate a 
         #tmp_data without it
-        tmp_data = copy.copy(data)
+        tmp_data = copy.deepcopy(data)
         del tmp_data['members']
         query = self.create_insert_query('hostgroup', tmp_data)
         res = [query]
@@ -260,7 +270,7 @@ class Merlindb_sqlite_broker:
         #Here we've got a special case : in data, there is members
         #and we do not want it in the INSERT query, so we create a
         #tmp_data without it
-        tmp_data = copy.copy(data)
+        tmp_data = copy.deepcopy(data)
         del tmp_data['members']
         query = self.create_insert_query('servicegroup', tmp_data)
         res = [query]
@@ -287,7 +297,10 @@ class Merlindb_sqlite_broker:
 
     #Ok the host is updated
     def manage_update_host_status_brok(self, b):
-        data = b.data
+        data = copy.deepcopy(b.data)
+        del data['3d_coords']
+        del data['2d_coords']
+        
         #Only this host
         where_clause = {'host_name' : data['host_name']}
         query = self.create_update_query('host', data, where_clause)
@@ -306,7 +319,7 @@ class Merlindb_sqlite_broker:
         #Here we've got a special case : in data, there is members
         #and we do not want it in the INSERT query, so we create a
         #tmp_data without it
-        tmp_data = copy.copy(data)
+        tmp_data = copy.deepcopy(data)
         del tmp_data['members']
         query = self.create_insert_query('contactgroup', tmp_data)
         res = [query]

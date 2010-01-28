@@ -628,7 +628,7 @@ class Config(Item):
             #so all hosts without realm wil be link with it
             default = Realm({'realm_name' : 'Default', 'default' : '1'})
             self.realms = Realms([default])
-            Log().log("Notice : the is no defined realms, so I add a new one", default.get_name())
+            Log().log("Notice : the is no defined realms, so I add a new one %s" % default.get_name())
             lists = [self.pollers, self.brokers, self.reactionners, self.schedulerlinks]
             for l in lists:
                 for elt in l:

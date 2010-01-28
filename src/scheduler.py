@@ -572,7 +572,7 @@ class Scheduler:
                 c = i.schedule()
                 if c is not None:
                     self.add(c)
-
+                    
 
     #Raise checks for no fresh states for services and hosts
     def check_freshness(self):

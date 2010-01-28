@@ -46,29 +46,29 @@ class Notification(Action):
         'output' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'ack_author' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'ack_data' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'escalated' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
+        'escalated' : {'required' : False, 'default' : False, 'fill_brok' : ['full_status']},
         'contacts_notified' : {'required': False, 'default':0, 'fill_brok' : ['full_status']},
         }
 
     macros = {
         'NOTIFICATIONTYPE' : 'type',
         'NOTIFICATIONRECIPIENTS' : 'recipients',
-        'NOTIFICATIONISESCALATED' : 'is_escaladed',
+        'NOTIFICATIONISESCALATED' : 'escaladed',
         'NOTIFICATIONAUTHOR' : 'author',
         'NOTIFICATIONAUTHORNAME' : 'author_name',
         'NOTIFICATIONAUTHORALIAS' : 'author_alias',
         'NOTIFICATIONCOMMENT' : 'comment',
         'HOSTNOTIFICATIONNUMBER' : 'number',
-        'HOSTNOTIFICATIONID' : 'get_id',
+        'HOSTNOTIFICATIONID' : 'id',
         'SERVICENOTIFICATIONNUMBER' : 'number',
-        'SERVICENOTIFICATIONID' : 'get_id'
+        'SERVICENOTIFICATIONID' : 'id'
         }
     
     
     def __init__(self, type , status, command, command_call, ref, contact, t_to_go, \
                      contact_name='', host_name='', service_description='',
                      reason_type=1, state=0, ack_author='', ack_data='', \
-                     escalated=0, contacts_notified=0, \
+                     escalated=False, contacts_notified=0, \
                      start_time=0, end_time=0, notification_type=0, id=None, notif_nb=1, timeout=10):
         self.is_a = 'notification'
         self.type = type

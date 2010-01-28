@@ -126,7 +126,7 @@ class SchedulingItem(Item):
                     if dep.is_state(s):
                         return True
             #more complicated: if none of the states are match, the host is down
-            else:
+            else: #network_dep
                 p_is_down = False
                 dep_match = [dep.is_state(s) for s in status] 
                 if True in dep_match:#the parent match a case, so he is down
@@ -137,6 +137,28 @@ class SchedulingItem(Item):
             return False
         else:# every parents are dead, so... It's not my fault :)
             return True
+
+    #We check if we are no action just because of ours parents (or host for
+    #service)
+    #TODO : factorize with previous check?
+    def check_and_set_unreachability(self):
+        parent_is_down = []
+        #We must have all parents raised to be unreachable
+        for (dep, status, type, tp) in self.act_depend_of:
+            #For logic_dep, only one state raise put no action
+            if type == 'network_dep':
+                p_is_down = False
+                dep_match = [dep.is_state(s) for s in status]
+                if True in dep_match:#the parent match a case, so he is down
+                    p_is_down = True
+                parent_is_down.append(p_is_down)
+        #if a parent is not down, no dep can explain the pb
+        if False in parent_is_down:
+            return
+        else:# every parents are dead, so... It's not my fault :)
+            self.set_unreachable()
+            return
+
 
 
     #Use to know if I raise dependency for soneone else (with status)
@@ -380,7 +402,10 @@ class SchedulingItem(Item):
                 c.status = 'zombie'
             #Check deps
             no_action = self.is_no_action_dependant()
-            #print "No action:", no_action
+            #We recheck just for network_dep. Maybe we are just unreachable
+            #and we need to overide the state_id
+            self.check_and_set_unreachability()
+            
 
         #If no_action is False, maybe we are in downtime,
         #so no_action become true

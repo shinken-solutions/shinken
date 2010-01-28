@@ -29,7 +29,7 @@ properties = {
 
 #called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Host Perfdata broker for plugin %s" % plugin.get_name()
+    print "Get a Status Dat broker for plugin %s" % plugin.get_name()
 
     print plugin.__dict__
     #First try to import

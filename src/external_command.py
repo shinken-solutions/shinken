@@ -950,7 +950,7 @@ class ExternalCommand:
 
     #ENABLE_SVC_FLAP_DETECTION;<host_name>;<service_description>
     def ENABLE_SVC_FLAP_DETECTION(self, service):
-        service.enable_flap_detection = True
+        service.flap_detection_enabled = True
         self.sched.get_and_register_status_brok(service)
 
     #ENABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
@@ -1144,7 +1144,7 @@ class ExternalCommand:
 
     #START_OBSESSING_OVER_HOST;<host_name>
     def START_OBSESSING_OVER_HOST(self, host):
-        host.obsess_over = True
+        host.obsess_over_host = True
         self.sched.get_and_register_status_brok(host)
 
     #START_OBSESSING_OVER_HOST_CHECKS
@@ -1154,7 +1154,7 @@ class ExternalCommand:
 
     #START_OBSESSING_OVER_SVC;<host_name>;<service_description>
     def START_OBSESSING_OVER_SVC(self, service):
-        service.obsess_over = True
+        service.obsess_over_service = True
         self.sched.get_and_register_status_brok(service)
 
     #START_OBSESSING_OVER_SVC_CHECKS
@@ -1189,7 +1189,7 @@ class ExternalCommand:
 
     #STOP_OBSESSING_OVER_HOST;<host_name>
     def STOP_OBSESSING_OVER_HOST(self, host):
-        host.obsess_over = False
+        host.obsess_over_host = False
         self.sched.get_and_register_status_brok(host)
 
     #STOP_OBSESSING_OVER_HOST_CHECKS
@@ -1200,7 +1200,7 @@ class ExternalCommand:
 
     #STOP_OBSESSING_OVER_SVC;<host_name>;<service_description>
     def STOP_OBSESSING_OVER_SVC(self, service):
-        service.obsess_over = False
+        service.obsess_over_service = False
         self.sched.get_and_register_status_brok(service)
 
     #STOP_OBSESSING_OVER_SVC_CHECKS
