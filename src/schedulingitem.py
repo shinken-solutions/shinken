@@ -522,11 +522,27 @@ class SchedulingItem(Item):
         return res
 
 
+    #Called by scheduler when a notification is ok to be send
+    #(so fuilly prepared to be send to reactionner). Here we update the command with
+    #status of now, and we add the contact to set of contact we notified. And we raise the log
+    #entry
+    def prepare_notification_for_sending(self, n):
+        #The command need to be uptodate
+        self.update_notification_command(n)
+        #Ok, we add if need this contact to contacts that have been notified
+        self.notified_contacts.add(n.contact)
+        #We send a notification, we need to log it
+        self.raise_notification_log_entry(n)
+
+
     #Just update the notification command by resolving Macros
+    #And because we are just launching the notification, we can say
+    #taht this contact have been notified
     def update_notification_command(self, n):
         m = MacroResolver()
         data = self.get_data_for_notifications(n.contact, n)
         n.command = m.resolve_command(n.command_call, data)
+
 
 
     #See if an escalation is eligible
@@ -584,16 +600,25 @@ class SchedulingItem(Item):
             #We folow our order
             t = t_wished
 
-
-        if self.is_escalable(t):
-            contacts = self.get_escalable_contacts(t)
-            #print "Get contacts from escalations on level:", self.current_notification_number
+        #We check our contacts:
+        #for a PROBLEM, we check for escalations if we have some
+        #for a RECOVERY, we just send it to everyone we already send notifications
+        if type == 'RECOVERY':
+            contacts = list(self.notified_contacts)
+            print "Get contacts for a RECOVERY, so we already send notification to:"
             for c in contacts:
-                print c.get_name()
+                    print c.get_name()
         else:
-            contacts = self.contacts
-            for c in contacts:
-                print c.get_name()
+            #Check is an escalation match. If yes, get all contacts from escalations
+            if self.is_escalable(t):
+                contacts = self.get_escalable_contacts(t)                
+                for c in contacts:
+                    print c.get_name()
+            #elese take normal contacts
+            else:
+                contacts = self.contacts
+                for c in contacts:
+                    print c.get_name()
             
         for contact in contacts:
             #Get the propertie name for notif commands, like
@@ -607,13 +632,12 @@ class SchedulingItem(Item):
                 #data = self.get_data_for_notifications(contact, n)
                 #n.command = m.resolve_command(cmd, data)
                 #Maybe the contact do not want this notif? Arg!
-                if self.is_notification_launchable(n, contact):
+                if self.is_notification_launchable(n, contact):                    
                     #The notif must be fill with current data, 
                     #so we create the commmand now but only if it's the first 
                     #And we can add the log entry now
                     if self.current_notification_number == 1 or type == 'RECOVERY':
-                        self.update_notification_command(n)
-                        self.raise_notification_log_entry(n)
+                        self.prepare_notification_for_sending(n)
 
                     notifications.append(n)
                     #print "DBG: Create a new notification from :", n.id, n.type, n.status, n.ref.get_name(), n.ref.state, 'level:%d' % n.notif_nb
@@ -631,7 +655,9 @@ class SchedulingItem(Item):
         #print "Get a new notification from :", n.id, n.type, n.status, n.ref.get_name(), n.ref.state, 'level:%d' % n.notif_nb
         #print "And my level is", self.current_notification_number
         #a recovery notif is send ony one time
+        #plus reset the self.notified_contacts so begin to fill with new ones
         if n.type == 'RECOVERY':
+            self.notified_contacts.clear()
             return []
 
         #notification_interval 0 means: one notification is enough

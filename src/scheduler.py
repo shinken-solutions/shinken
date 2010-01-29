@@ -269,8 +269,7 @@ class Scheduler:
                         #be updated
                         #And we can add now the log entry
                         if a.notif_nb > 1:
-                            a.ref.update_notification_command(a)
-                            a.ref.raise_notification_log_entry(a)
+                            a.ref.prepare_notification_for_sending(a)
                     new_a = a.copy_shell()
                     res.append(new_a)
         return res
@@ -279,17 +278,20 @@ class Scheduler:
     #Called by poller and reactionner to send result
     def put_results(self, c):
         if c.is_a == 'notification':
-            self.actions[c.id].get_return_from(c)
-            item = self.actions[c.id].ref
-            item.remove_in_progress_notification(c)
-            l = item.get_new_notifications_from(self.actions[c.id])
-            for a in l:
-                if a is not None:
-                    self.add(a)
+            try:
+                self.actions[c.id].get_return_from(c)
+                item = self.actions[c.id].ref
+                item.remove_in_progress_notification(c)
+                l = item.get_new_notifications_from(self.actions[c.id])
+                for a in l:
+                    if a is not None:
+                        self.add(a)
                     #Get Brok from this new notification
-                    b = a.get_initial_status_brok()
-                    self.add(b)
-            self.actions[c.id].status = 'zombie'
+                        b = a.get_initial_status_brok()
+                        self.add(b)
+                self.actions[c.id].status = 'zombie'
+            except KeyError as exp:
+                Log().log("Warning : received an notification of an unknown id! %s" % str(exp))
             #del self.actions[c.id]
         elif c.is_a == 'check':
             try:
@@ -670,7 +672,7 @@ class Scheduler:
                 now = time.time()
                 for a in self.actions.values():
                     if a.is_a == 'notification':
-                        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, 'level:%d' % a.notif_nb, 'launch in', int(a.t_to_go - now)
+                        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, a.contact.get_name(), 'level:%d' % a.notif_nb, 'launch in', int(a.t_to_go - now)
                     else:
                         print "Event:", a.id, a.status
                 print "Nb checks send:", self.nb_checks_send

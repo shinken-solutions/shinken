@@ -98,8 +98,8 @@ class Host(SchedulingItem):
         'process_perf_data' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
         'retain_status_information' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
         'retain_nonstatus_information' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'contacts' : {'required' : True, 'fill_brok' : ['full_status']},
-        'contact_groups' : {'required' : True, 'fill_brok' : ['full_status']},
+        'contacts' : {'required' : True, 'default' : '', 'fill_brok' : ['full_status']},
+        'contact_groups' : {'required' : True, 'default' : '', 'fill_brok' : ['full_status']},
         'notification_interval' : {'required' : False, 'default' : '60', 'pythonize' : to_int, 'fill_brok' : ['full_status']},
         'first_notification_delay' : {'required' : False, 'default' : '0', 'pythonize' : to_int, 'fill_brok' : ['full_status']},
         'notification_period' : {'required' : True, 'fill_brok' : ['full_status']},
@@ -183,6 +183,7 @@ class Host(SchedulingItem):
         'return_code' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
         'customs' : {'default' : {}},
+        'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
         }
 
     #Hosts macros and prop that give the information
@@ -274,7 +275,7 @@ class Host(SchedulingItem):
         state = True #guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['contacts', 'contactgroups', 'check_period', \
+        special_properties = ['contacts', 'contact_groups', 'check_period', \
                                   'notification_interval', 'check_period']
         for prop in cls.properties:
             if prop not in special_properties:

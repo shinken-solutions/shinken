@@ -103,10 +103,9 @@ class Item(object):
     def fill_default(self):
         cls = self.__class__
         properties = cls.properties
-        not_required = [prop for prop in properties \
-                            if not properties[prop]['required']]
-        for prop in not_required:
-            if not hasattr(self, prop):
+
+        for prop in properties:
+            if not hasattr(self, prop) and 'default' in properties[prop]:
                 value = properties[prop]['default']
                 setattr(self, prop, value)
 

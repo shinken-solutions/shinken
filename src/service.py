@@ -174,7 +174,8 @@ class Service(SchedulingItem):
         'return_code' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
         'host' : {'default' : None},
-        'customs' : {'default' : {}}
+        'customs' : {'default' : {}},
+        'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
         }
 
     #Mapping between Macros and properties (can be prop or a function)
@@ -260,7 +261,7 @@ class Service(SchedulingItem):
         state = True #guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['contacts', 'contactgroups', 'check_period', \
+        special_properties = ['contacts', 'contact_groups', 'check_period', \
                                   'notification_interval', 'host_name', \
                                   'hostgroup_name']
         for prop in cls.properties:
