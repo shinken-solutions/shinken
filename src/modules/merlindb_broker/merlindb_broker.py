@@ -195,6 +195,11 @@ class Merlindb_broker:
                 'perf_data' : {'transform' : None},
                 'host_name' : {'transform' : None},
                 },
+            'host_next_schedule' : {
+                'instance_id' : {'transform' : None},
+                'next_chk' : {'transform' : None, 'name' : 'next_check'},
+                'host_name' : {'transform' : None},
+                },
             #Service
             'initial_service_status' : {
                 'id' : {'transform' : None},
@@ -332,6 +337,12 @@ class Merlindb_broker:
                 'timeout' : {'transform' : None},
                 'state_id' : {'transform' : None, 'name' : 'current_state'},
                 'perf_data' : {'transform' : None},
+                },
+            'service_next_schedule' : {
+                'next_chk' : {'transform' : None, 'name' : 'next_check'},
+                'service_description' : {'transform' : None},
+                'instance_id' : {'transform' : None},
+                'host_name' : {'transform' : None},
                 },
 
             #Contact
@@ -606,6 +617,16 @@ class Merlindb_broker:
         return [query]
 
 
+    #A new service schedule have just arrived, we UPDATE data info with this
+    def manage_service_next_schedule_brok(self, b):
+        data = b.data
+        #We just impact the service :)
+        where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
+        query = self.create_update_query('service', data, where_clause)
+        return [query]
+
+
+
     #A full service status? Ok, update data
     def manage_update_service_status_brok(self, b):
         data = b.data
@@ -674,6 +695,15 @@ class Merlindb_broker:
     #Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
         b.data['last_update'] = time.time()
+        data = b.data
+        #Only the host is impacted
+        where_clause = {'host_name' : data['host_name']}
+        query = self.create_update_query('host', data, where_clause)
+        return [query]
+
+
+    #Same than service result, but for host new scheduling
+    def manage_host_next_schedule_brok(self, b):
         data = b.data
         #Only the host is impacted
         where_clause = {'host_name' : data['host_name']}

@@ -363,11 +363,12 @@ class SchedulingItem(Item):
             to_del = []
             for check in checks:
                 #C is a int? Ok, in fact it's a check that is
-                #already in progress
+                #already in progress, so we do not need to return it to scheduler
                 if isinstance(check, int):
                     c.depend_on.append(check)
                     to_del.append(check)
                 else:
+                    #We get a new check, scheduler must be warning about it to folow it
                     #print c.id, self.get_name()," I depend on check", check.id
                     c.depend_on.append(check.id)
             for i in to_del:

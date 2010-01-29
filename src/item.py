@@ -318,6 +318,18 @@ class Item(object):
         b = Brok(my_type+'_check_result', data)
         return b
 
+    
+    #Get brok about the new schedule (next_check)
+    def get_next_schedule_brok(self):
+        cls = self.__class__
+        my_type = cls.my_type
+
+        data = {}
+        self.fill_data_brok_from(data, 'next_schedule')
+        b = Brok(my_type+'_next_schedule', data)
+        return b
+
+
             
 
 class Items(object):

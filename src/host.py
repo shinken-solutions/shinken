@@ -72,7 +72,7 @@ class Host(SchedulingItem):
     #fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
     #Only for the inital call
     properties={
-        'host_name' : {'required' : True, 'fill_brok' : ['full_status', 'check_result']},
+        'host_name' : {'required' : True, 'fill_brok' : ['full_status', 'check_result', 'next_schedule']},
         'alias' : {'required' : True, 'fill_brok' : ['full_status']},
         'display_name' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
         'address' : {'required' : True, 'fill_brok' : ['full_status']},
@@ -129,7 +129,7 @@ class Host(SchedulingItem):
     #properties set only for running purpose
     running_properties = {
         'last_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
-        'next_chk' : {'default' : 0, 'fill_brok' : ['full_status']},
+        'next_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'next_schedule']},
         'in_checking' : {'default' : False, 'fill_brok' : ['full_status']},
         'latency' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'attempt' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},

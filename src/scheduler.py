@@ -131,6 +131,10 @@ class Scheduler:
         #For checks and notif, add is also an update function
         if isinstance(elt, Check):
             self.checks[elt.id] = elt
+            #A new check mean the host/service change it's next_check
+            #need to be refresh
+            b = elt.ref.get_next_schedule_brok()
+            self.add(b)
             return
         if isinstance(elt, Brok):
             #For brok, we TAG brok with our instance_id
@@ -139,6 +143,9 @@ class Scheduler:
             return
         if isinstance(elt, Notification):
             self.actions[elt.id] = elt
+            #A notification ask for a brok
+            b = elt.get_initial_status_brok()
+            self.add(b)
             return
         if isinstance(elt, EventHandler):
             print "Add an event Handler", elt.id
@@ -286,9 +293,6 @@ class Scheduler:
                 for a in l:
                     if a is not None:
                         self.add(a)
-                    #Get Brok from this new notification
-                        b = a.get_initial_status_brok()
-                        self.add(b)
                 self.actions[c.id].status = 'zombie'
             except KeyError as exp:
                 Log().log("Warning : received an notification of an unknown id! %s" % str(exp))
@@ -490,9 +494,6 @@ class Scheduler:
                 for a in actions:
                     if a.is_a == 'notification':
                         self.add(a)
-                        #Get Brok from this new notification
-                        b = a.get_initial_status_brok()
-                        self.add(b)
                     elif a.is_a == 'eventhandler':
                         self.add(a)
                     elif  a.is_a == 'check':
@@ -519,9 +520,6 @@ class Scheduler:
                 for a in actions:
                     if a.is_a == 'notification':
                         self.add(a)
-                        #Get Brok from this new notification
-                        b = a.get_initial_status_brok()
-                        self.add(b)
                     elif a.is_a == 'eventhandler':
                         self.add(a)
                     elif  a.is_a == 'check':

@@ -71,9 +71,9 @@ class Service(SchedulingItem):
     #pythonize : function to call when transfort string to python object
     #fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
     properties={
-        'host_name' : {'required' : True, 'fill_brok' : ['full_status', 'check_result']},
+        'host_name' : {'required' : True, 'fill_brok' : ['full_status', 'check_result', 'next_schedule']},
         'hostgroup_name' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'service_description' : {'required' : True, 'fill_brok' : ['full_status', 'check_result']},
+        'service_description' : {'required' : True, 'fill_brok' : ['full_status', 'check_result', 'next_schedule']},
         'display_name' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'servicegroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'is_volatile' : {'required' : False, 'default' : '0', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
@@ -121,7 +121,7 @@ class Service(SchedulingItem):
     #properties used in the running state
     running_properties = {
         'last_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
-        'next_chk' : {'default' : 0, 'fill_brok' : ['full_status']},
+        'next_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'next_schedule']},
         'in_checking' : {'default' : False, 'fill_brok' : ['full_status']},
         'latency' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'attempt' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
