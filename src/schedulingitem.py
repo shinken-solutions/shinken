@@ -428,8 +428,6 @@ class SchedulingItem(Item):
             else:
                 self.attempt = 1
                 self.state_type = 'HARD'
-            return []
-
 
         #OK following a NON-OK. 
         elif c.exit_status == 0 and (self.last_state != OK_UP and self.last_state != 'PENDING'):
@@ -517,6 +515,12 @@ class SchedulingItem(Item):
                     self.remove_in_progress_notifications()
                     if self.notifications_enabled and not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
+
+        #now is the time to update state_type_id
+        if self.state_type == 'HARD':
+            self.state_type_id = 1
+        else:
+            self.state_type_id = 0
 
         # res is filled with eventhandler and notification
         # now would be the time to add self.oscp...
