@@ -70,6 +70,21 @@ class ArbiterLink(SatelliteLink):
         return {'port' : self.port, 'address' : self.address, 'name' : self.arbiter_name}
 
 
+    def do_not_run(self):
+        if self.con == None:
+            self.create_connexion()
+        try:
+            self.con.do_not_run()
+            return True
+        except Pyro.errors.URIError as exp:
+            self.con = None
+            return False
+        except Pyro.errors.ProtocolError as exp:
+            self.con = None
+            return False
+
+
+
 class ArbiterLinks(SatelliteLinks):
     name_property = "name"
     inner_class = ArbiterLink

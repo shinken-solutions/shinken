@@ -25,6 +25,8 @@
 
 import re, string, copy, os, socket
 import itertools
+import time
+import random
 
 from timeperiod import Timeperiod, Timeperiods
 from service import Service, Services
@@ -226,6 +228,10 @@ class Config(Item):
         self.params = {}
         #By default the conf is correct
         self.conf_is_correct = True
+        #We tag the conf with a magic_hash, a random value to
+        #idify this conf
+        random.seed(time.time())
+        self.magic_hash = random.randint(1, 100000)
 
 
     def fill_usern_macros(cls):

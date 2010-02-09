@@ -100,11 +100,30 @@ class Dispatcher:
             if not elt.alive or hasattr(elt, 'conf') and elt.conf == None:
                 elt.need_conf = True
 
+        for arb in self.arbiters:
+            #If not me...
+            print "Alive for", arb, self.arbiter
+            if arb != self.arbiter:
+                arb.alive = arb.is_alive()
+                print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
+
 
     #Check if all active items are still alive
     #the result go into self.dispatch_ok
     #TODO : finish need conf
     def check_dispatch(self):
+        #Check if the other arbiter have a conf
+        for arb in self.arbiters:
+            #If not me...
+            if arb != self.arbiter:
+                if not arb.have_conf(self.conf.magic_hash):
+                    arb.put_conf(self.conf)
+                else:
+                    #Ok, he already have the conf. I remember him that
+                    #he do not have to run, I'm stil alive!
+                    arb.do_not_run()
+
+
         #TODO: sup this loop and use the 2 loops below. It's far more readable to thinks
         #about conf dispatch and not by node dead -> cfg unavalable. So after the active
         #tag will no be usefull anymore I think.

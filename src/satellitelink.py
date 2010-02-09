@@ -119,18 +119,25 @@ class SatelliteLink(Item):
             self.con = None
             return False
 
-    def have_conf(self):
+
+    #To know if the satellite have a conf (magic_hash = None)
+    #OR to know if the satellite have THIS conf (magic_hash != None)
+    def have_conf(self, magic_hash=None):
         if self.con == None:
             self.create_connexion()
             
         try:
-            return self.con.have_conf()
+            if magic_hash == None:
+                return self.con.have_conf()
+            else:
+                return self.con.have_conf(magic_hash)
         except Pyro.errors.URIError as exp:
             self.con = None
             return False
         except Pyro.errors.ProtocolError as exp:
             self.con = None
             return False
+
 
     def remove_from_conf(self, sched_id):
         if self.con == None:
