@@ -18,13 +18,13 @@
 
 import time
 
-from command import CommandCall
+#from command import CommandCall
 from item import Items
 from schedulingitem import SchedulingItem
 from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format
-from macroresolver import MacroResolver
-from check import Check
-from notification import Notification
+#from macroresolver import MacroResolver
+#from check import Check
+#from notification import Notification
 from graph import Graph
 from log import Log
 
@@ -454,13 +454,13 @@ class Host(SchedulingItem):
     def manage_stalking(self, c):
         need_stalk = False
         if c.status == 'waitconsume':
-            if c.exit_status==0 and 'o' in self.stalking_options:
+            if c.exit_status == 0 and 'o' in self.stalking_options:
                 need_stalk = True
-            elif c.exit_status==1 and 'd' in self.stalking_options:
+            elif c.exit_status == 1 and 'd' in self.stalking_options:
                 need_stalk = True
-            elif c.exit_status==2 and 'd' in self.stalking_options:
+            elif c.exit_status == 2 and 'd' in self.stalking_options:
                 need_stalk = True
-            elif c.exit_status==3 and 'u' in self.stalking_options:
+            elif c.exit_status == 3 and 'u' in self.stalking_options:
                 need_stalk = True
             if c.output != self.output:
                 need_stalk = False
@@ -552,7 +552,6 @@ class Hosts(Items):
         for h in self:
             #print h.get_name(), h.realm
             if h.realm != None:
-                name = h.realm
                 p = realms.find_by_name(h.realm.strip())
                 h.realm = p
                 if p != None:

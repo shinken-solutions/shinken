@@ -247,7 +247,7 @@ class Timeperiod:
                         next_exclude = m
 
             #Maybe the min of exclude is not valid, it is the min we can find.
-            if next_exclude !=None and not self.is_time_valid(next_exclude):
+            if next_exclude != None and not self.is_time_valid(next_exclude):
                 #print self.get_name(), "find a possible early exit for invalid ! with", time.asctime(time.localtime(next_exclude)) 
                 res = next_exclude
                 still_loop = False
@@ -622,7 +622,7 @@ if __name__ == '__main__':
     for entry in test:
         print "**********************"
         print entry
-        t=Timeperiod()
+        t = Timeperiod()
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, entry)
         #t.exclude = []
@@ -657,7 +657,7 @@ if __name__ == '__main__':
     t.resolve_daterange(t.dateranges, 'day 1 - 10 14:00-15:00')
     t.exclude = [t2]
 
-    print "Mon T",str(t)+'\n\n'
+    print "Mon T", str(t)+'\n\n'
     t_next = t.get_next_valid_time_from_t(now)
     t_no_next = t.get_next_invalid_time_from_t(now)
     print "Get next valid for now ==>", time.asctime(time.localtime(t_next)),"<=="

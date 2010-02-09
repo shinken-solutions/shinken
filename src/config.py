@@ -277,8 +277,8 @@ class Config(Item):
                 fd = open(file)
                 buf = fd.readlines()
                 fd.close()
-            except IOError ,exp:
-                Log().log("Error: Cannot open config file '%s' for reading: %s" % (elts[1], exp))
+            except IOError, exp:
+                Log().log("Error: Cannot open config file '%s' for reading: %s" % (file, exp))
                 #The configuation is invalid because we have a bad file!
                 self.conf_is_correct = False
                 continue
@@ -293,7 +293,7 @@ class Config(Item):
                         Log().log("Processing object config file '%s'" % elts[1])
                         res += fd.read()
                         fd.close()
-                    except IOError ,exp:
+                    except IOError, exp:
                         Log().log("Error: Cannot open config file '%s' for reading: %s" % (elts[1], exp))
                     #The configuation is invalid because we have a bad file!
                         self.conf_is_correct = False
@@ -512,10 +512,10 @@ class Config(Item):
         #print 'Services:', self.services
         print 'Hosts:'
         for h in self.hosts:
-            print '\t',h.get_name()
+            print '\t', h.get_name()
         print 'Services:'
         for s in self.services:
-            print '\t',s.get_name()
+            print '\t', s.get_name()
         #print 'Templates:', self.hosts_tpl
         #print 'Hosts:',self.hosts,'\n'
         #print 'Contacts:', self.contacts
@@ -879,7 +879,7 @@ class Config(Item):
         for pack in tmp_packs:
             tmp_realms = set()
             for elt in pack:
-                if elt.realm!= None:
+                if elt.realm != None:
                     tmp_realms.add(elt.realm)
             if len(tmp_realms) > 1:
                 Log().log("Error : the realm configuration of yours hosts if not good because there a more than one realm in one pack (host relations) :")
