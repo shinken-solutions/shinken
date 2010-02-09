@@ -443,6 +443,7 @@ class Scheduler:
     def get_program_status_brok(self):
         now = int(time.time())
         data = {"is_running" : 1,
+                "instance_id" : self.instance_id,
                 "instance_name": self.instance_name,
                 "last_alive" : now,
                 "program_start" : now,

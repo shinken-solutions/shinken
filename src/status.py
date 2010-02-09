@@ -25,12 +25,14 @@ import tempfile
 from service import Service
 from host import Host
 from contact import Contact
+from config import Config
 
 from util import from_bool_to_string
 
 
 class StatusFile:
-    out_map = {Host : {
+    out_map = {
+        Host : {
             'host_name' : {},#'host_name',
             'modified_attributes' : {'prop' : None, 'default' : '0'},
             'check_command' : {'depythonize' : 'get_name'},
@@ -60,7 +62,7 @@ class StatusFile:
             'max_attempts' :  {'prop' : 'max_check_attempts'},
             'current_event_id' : {'prop' : None, 'default' : '0'},
             'last_event_id' : {'prop' : None, 'default' : '0'},
-            'state_type' : {},
+            'state_type' : {'prop' : 'state_type_id', 'default' : '0'},
             'last_state_change' : {'prop' : None, 'default' : '0'},
             'last_hard_state_change' : {'prop' : None, 'default' : '0'},
             'last_time_up' : {'prop' : None, 'default' : '0'},
@@ -72,7 +74,7 @@ class StatusFile:
             'current_notification_number' : {'prop' : None, 'default' : '0'},
             'current_notification_id' : {'prop' : None, 'default' : '0'},
             'notifications_enabled' : {'depythonize' : from_bool_to_string},
-            'problem_has_been_acknowledged' : {'prop' : None, 'default' : '0'},
+            'problem_has_been_acknowledged' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
             'acknowledgement_type' : {'prop' : None, 'default' : '0'},
             'active_checks_enabled' : {'depythonize' : from_bool_to_string},
             'passive_checks_enabled' : {'depythonize' : from_bool_to_string},
@@ -86,7 +88,7 @@ class StatusFile:
             'percent_state_change' : {},
             'scheduled_downtime_depth' : {'prop' : None, 'default' : '0'}
             },
-               Service : {
+        Service : {
             'host_name' : {},
             'service_description' : {},
             'modified_attributes' : {'prop' : None, 'default' : '0'},
@@ -111,7 +113,7 @@ class StatusFile:
             'max_attempts' : {'prop' : 'max_check_attempts'},
             'current_event_id' : {'prop' : None, 'default' : '0'},
             'last_event_id' : {'prop' : None, 'default' : '0'},
-            'state_type' : {},
+            'state_type' : {'prop' : 'state_type_id', 'default' : '0'},
             'last_state_change' : {'prop' : None, 'default' : '0'},
             'last_hard_state_change' : {'prop' : None, 'default' : '0'},
             'last_time_ok' : {'prop' : None, 'default' : '0'},
@@ -133,7 +135,7 @@ class StatusFile:
             'active_checks_enabled' : {'depythonize' : from_bool_to_string},
             'passive_checks_enabled' : {'depythonize' : from_bool_to_string},
             'event_handler_enabled' : {'depythonize' : from_bool_to_string},
-            'problem_has_been_acknowledged' : {'prop' : None, 'default' : '0'},
+            'problem_has_been_acknowledged' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
             'acknowledgement_type' : {'prop' : None, 'default' : '0'},
             'flap_detection_enabled' : {'depythonize' : from_bool_to_string},
             'failure_prediction_enabled' : {'depythonize' : from_bool_to_string},
@@ -144,8 +146,7 @@ class StatusFile:
             'percent_state_change' : {},
             'scheduled_downtime_depth' : {'prop' : None, 'default' : '0'}
             },
-              
-               Contact : {
+        Contact : {
             'contact_name' : {},
             'modified_attributes' : {'prop' : None, 'default' : '0'},
             'modified_host_attributes' : {'prop' : None, 'default' : '0'},
@@ -156,63 +157,62 @@ class StatusFile:
             'last_service_notification' : {'prop' : None, 'default' : '0'},
             'host_notifications_enabled' : {'depythonize' : from_bool_to_string},
             'service_notifications_enabled' : {'depythonize' : from_bool_to_string}
-            }#,
-
-#               Scheduler : {
-#            'modified_host_attributes' : {'prop' : None, 'default' : '0'},
-#            'modified_service_attributes' : {'prop' : None, 'default' : '0'},
-#            'nagios_pid' : {'prop' : None, 'default' : '0'},
-#            'daemon_mode' : {'prop' : None, 'default' : '0'},
-#            'program_start' : {'prop' : None, 'default' : '0'},
-#            'last_command_check' : {'prop' : None, 'default' : '0'},
-#            'last_log_rotation' : {'prop' : None, 'default' : '0'},
-#            'enable_notifications' : {'prop' : None, 'default' : '0'},
-#            'active_service_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'passive_service_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'active_host_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'passive_host_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'enable_event_handlers' : {'prop' : None, 'default' : '0'},
-#            'obsess_over_services' : {'prop' : None, 'default' : '0'},
-#            'obsess_over_hosts' : {'prop' : None, 'default' : '0'},
-#            'check_service_freshness' : {'prop' : None, 'default' : '0'},
-#            'check_host_freshness' : {'prop' : None, 'default' : '0'},
-#            'enable_flap_detection' : {'prop' : None, 'default' : '0'},
-#            'enable_failure_prediction' : {'prop' : None, 'default' : '0'},
-#            'process_performance_data' : {'prop' : None, 'default' : '0'},
-#            'global_host_event_handler' : {'prop' : None, 'default' : '0'},
-#            'global_service_event_handler' : {'prop' : None, 'default' : '0'},
-#            'next_comment_id' : {'prop' : None, 'default' : '0'},
-#            'next_downtime_id' : {'prop' : None, 'default' : '0'},
-#            'next_event_id' : {'prop' : None, 'default' : '0'},
-#            'next_problem_id' : {'prop' : None, 'default' : '0'},
-#            'next_notification_id'  : {'prop' : None, 'default' : '0'},
-#            'total_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
-#            'used_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
-#            'high_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
-#            'active_scheduled_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'active_ondemand_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'passive_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'active_scheduled_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'active_ondemand_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'passive_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'cached_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'cached_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'external_command_stats' : {'prop' : None, 'default' : '0'},
-#            'parallel_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'serial_host_check_stats' : {'prop' : None, 'default' : '0'}
-#            }
+            },
+        Config : {
+            'modified_host_attributes' : {'prop' : None, 'default' : '0'},
+            'modified_service_attributes' : {'prop' : None, 'default' : '0'},
+            'nagios_pid' : {'prop' : 'pid', 'default' : '0'},
+            'daemon_mode' : {'prop' : None, 'default' : '0'},
+            'program_start' : {'prop' : None, 'default' : '0'},
+            'last_command_check' : {'prop' : None, 'default' : '0'},
+            'last_log_rotation' : {'prop' : None, 'default' : '0'},
+            'enable_notifications' : {'prop' : None, 'default' : '0'},
+            'active_service_checks_enabled' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
+            'passive_service_checks_enabled' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
+            'active_host_checks_enabled' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
+            'passive_host_checks_enabled' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
+            'enable_event_handlers' : {'prop' : 'event_handlers_enabled', 'default' : '0', 'depythonize' : from_bool_to_string},
+            'obsess_over_services' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
+            'obsess_over_hosts' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
+            'check_service_freshness' : {'prop' : None, 'default' : '0'},
+            'check_host_freshness' : {'prop' : None, 'default' : '0'},
+            'enable_flap_detection' : {'prop' : None, 'default' : '0'},
+            'enable_failure_prediction' : {'prop' : None, 'default' : '0'},
+            'process_performance_data' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
+            'global_host_event_handler' : {'prop' : None, 'default' : '0'},
+            'global_service_event_handler' : {'prop' : None, 'default' : '0'},
+            'next_comment_id' : {'prop' : None, 'default' : '0'},
+            'next_downtime_id' : {'prop' : None, 'default' : '0'},
+            'next_event_id' : {'prop' : None, 'default' : '0'},
+            'next_problem_id' : {'prop' : None, 'default' : '0'},
+            'next_notification_id'  : {'prop' : None, 'default' : '0'},
+            'total_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
+            'used_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
+            'high_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
+            'active_scheduled_host_check_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'active_ondemand_host_check_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'passive_host_check_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'active_scheduled_service_check_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'active_ondemand_service_check_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'passive_service_check_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'cached_host_check_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'cached_service_check_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'external_command_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'parallel_host_check_stats' : {'prop' : None, 'default' : '0,0,0'},
+            'serial_host_check_stats' : {'prop' : None, 'default' : '0,0,0'}
+            },
     }
                
                    
 
-    def __init__(self, path, hosts, services, contacts):
+    def __init__(self, path, configs, hosts, services, contacts):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
         self.path = path
+        self.configs = configs
         self.hosts = hosts
         self.services = services
         self.contacts = contacts
-
 
 
     
@@ -258,10 +258,21 @@ class StatusFile:
 
     def create_or_update(self):
 
-        output = ''
+        output = '''########################################
+#          SHINKEN STATUS FILE
+#
+# THIS FILE IS AUTOMATICALLY GENERATED
+# BY SHINKEN.  DO NOT MODIFY THIS FILE!
+########################################
+
+'''
         now = time.time()
         output += 'info {\n' + '\tcreated=' + str(now) + '\n' + '\tversion=3.0.2\n\t}\n'
         
+        for c in self.configs.values():
+            tmp = self.create_output(c)
+            output += 'programstatus {\n' + tmp + '\t}\n'
+
         for h in self.hosts.values():
             tmp = self.create_output(h)
             output += 'hoststatus {\n' + tmp + '\t}\n'

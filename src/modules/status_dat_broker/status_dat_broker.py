@@ -31,6 +31,7 @@ from service import Service
 from contact import Contact
 from status import StatusFile
 from objectscache import ObjectsCacheFile
+from config import Config
 
 
 
@@ -55,11 +56,12 @@ class Status_dat_broker:
         self.q = self.properties['to_queue']
     
         #Our datas
+        self.configs = {}
         self.hosts = {}
         self.services = {}
         self.contacts = {}
 
-        self.status = StatusFile(self.path, self.hosts, self.services, self.contacts)
+        self.status = StatusFile(self.path, self.configs, self.hosts, self.services, self.contacts)
         self.objects_cache = ObjectsCacheFile(self.opath, self.hosts, self.services, self.contacts)
     
 
@@ -85,7 +87,14 @@ class Status_dat_broker:
 
 
     def manage_program_status_brok(self, b):
-        pass
+        data = b.data
+        c_id = data['instance_id']
+        #print "Creating config:", c_id, data
+        c = Config()
+        for prop in data:
+            setattr(c, prop, data[prop])
+        #print "CFG:", c
+        self.configs[c_id] = c
 
 
     #A service check have just arrived, we UPDATE data info with this
@@ -131,6 +140,10 @@ class Status_dat_broker:
             #print "S:", s
 
 
+    def manage_service_next_schedule_brok(self, b):
+        self.manage_service_check_result_brok(b)
+
+
     #In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
         self.manage_service_check_result_brok(b)
@@ -143,6 +156,10 @@ class Status_dat_broker:
             self.update_element(h, data)
             #print "H:", h
 
+
+    # this brok should arrive within a second after the host_check_result_brok
+    def manage_host_next_schedule_brok(self, b):
+        self.manage_host_check_result_brok(b)
 
     #In fact, an update of a service is like a check return
     def manage_update_host_status_brok(self, b):

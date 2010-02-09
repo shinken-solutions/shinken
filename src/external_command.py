@@ -302,7 +302,7 @@ class ExternalCommand:
         try:
             for elt in elts[1:]:
                 print "Searching for a new arg:", elt, i
-                val = elts[i].strip()
+                val = elt.strip()
                 if val[-1] == '\n':
                     val = val[:-1]
 
@@ -365,7 +365,7 @@ class ExternalCommand:
                     #to get the two parts
                     elif type_searched == 'service':
                         in_service = True
-                        tmp_host = elts[i].strip()
+                        tmp_host = elt.strip()
 			print "TMP HOST", tmp_host
                         if tmp_host[-1] == '\n':
                             tmp_host = tmp_host[:-1]
@@ -373,9 +373,11 @@ class ExternalCommand:
                         if self.mode == 'dispatcher':
                        	    self.search_host_and_dispatch(tmp_host, command)
                             return None
+                    
+                    i += 1
                 else:
                     in_service = False
-                    srv_name = elts[i]
+                    srv_name = elt
                     if srv_name[-1] == '\n':
                         srv_name = srv_name[:-1]
                     print "Got service full", tmp_host, srv_name
@@ -384,7 +386,6 @@ class ExternalCommand:
                         args.append(s)
                     else: #error, must be logged
                         Log().log("Warning: a command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
-                i += 1
 
         except IndexError:
             print "Sorry, the arguments are not corrects"

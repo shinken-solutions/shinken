@@ -42,7 +42,7 @@ class Downtime:
             self.end_time = end_time
         else:
             self.end_time = self.start_time + duration
-        if trigger_downtime is not None:
+        if trigger_downtime != 0:
             trigger_downtime.trigger_me(self)
         self.author = author
         self.comment = comment
