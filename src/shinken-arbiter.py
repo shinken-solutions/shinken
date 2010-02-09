@@ -25,26 +25,23 @@
 #It also read order form users (nagios.cmd) and send orders to schedulers.
 
 import os
-import re
+#import re
 import time
 import sys
 import Pyro.core
-#import signal
 import select
 import getopt
 import random
-#import copy
 
-#from check import Check
-from util import scheduler_no_spare_first, to_int, to_bool
-from scheduler import Scheduler
+
+from util import to_bool
+#from scheduler import Scheduler
 from config import Config
-#from macroresolver import MacroResolver
 from external_command import ExternalCommand
 from dispatcher import Dispatcher
 from daemon import Daemon
 from log import Log
-#from plugin import Plugin, Plugins
+
 
 VERSION = "0.1beta"
 
@@ -56,8 +53,8 @@ class IBroks(Pyro.core.ObjBase):
     #we keep sched link
     def __init__(self, arbiter):
         Pyro.core.ObjBase.__init__(self)
-	self.arbiter = arbiter
-	self.running_id = random.random()
+        self.arbiter = arbiter
+        self.running_id = random.random()
 
 
     #Broker need to void it's broks?
@@ -70,8 +67,8 @@ class IBroks(Pyro.core.ObjBase):
         #print "We ask us broks"
         res = self.arbiter.get_broks()
 	#print "Sending %d broks" % len(res)#, res
-	self.arbiter.nb_broks_send += len(res)
-	return res
+        self.arbiter.nb_broks_send += len(res)
+        return res
 
 
 	#Ping? Pong!
@@ -146,9 +143,9 @@ class Arbiter(Daemon):
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
         self.config_file = config_files[0]
-	self.config_files = config_files
+        self.config_files = config_files
         self.is_daemon = is_daemon
-	self.verify_only = verify_only
+        self.verify_only = verify_only
         self.do_replace = do_replace
         self.debug = debug
         self.debug_file = debug_file
@@ -193,7 +190,7 @@ class Arbiter(Daemon):
             self.log.log(line)#, format = 'TOTO %s\n')
 	    
 	#Use to know if we must still be alive or not
-	self.must_run = True
+        self.must_run = True
         
         print "Loading configuration"
         self.conf = Config()
@@ -267,7 +264,7 @@ class Arbiter(Daemon):
                 arb.need_conf = False
                 self.me = arb
                 print "I am the arbiter :", arb.get_name()
-		print "Am I the master?", not self.me.spare
+                print "Am I the master?", not self.me.spare
             else: #not me
                 arb.need_conf = True
 
@@ -278,13 +275,13 @@ class Arbiter(Daemon):
 
 
 	#If I am a spare, I must wait a (true) conf from Arbiter Master
-	self.wait_conf = self.me.spare
+        self.wait_conf = self.me.spare
         
         #print "Dump realms"
         #for r in self.conf.realms:
         #    print r.get_name(), r.__dict__
-	print "\n"
-	Log().log("Cutting the hosts and services into parts")
+        print "\n"
+        Log().log("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
 
         #If the conf can be incorrect here if the cut into parts see errors like
@@ -293,11 +290,11 @@ class Arbiter(Daemon):
             print "Configuration is incorrect, sorry, I bail out"
             sys.exit(1)
 
-	Log().log('Things look okay - No serious problems were detected during the pre-flight check')
+        Log().log('Things look okay - No serious problems were detected during the pre-flight check')
 
 	#Exit if we are just here for config checking
-	if self.verify_only:
-	    sys.exit(0)
+        if self.verify_only:
+            sys.exit(0)
 	
         #self.conf.debug()
 	
@@ -325,7 +322,7 @@ class Arbiter(Daemon):
             Log().log("Warning : you can't change user on this system")
         
         #Now the daemon part if need
-	if is_daemon:
+        if is_daemon:
             self.create_daemon(do_debug=debug, debug_file=debug_file)
 
         Log().log("Opening of the network port")
@@ -348,7 +345,7 @@ class Arbiter(Daemon):
         #print "The Broks Interface uri is:", self.uri
 
 
-	Log().log("Configuration Loaded")
+        Log().log("Configuration Loaded")
 
         #Main loop
         while True:
@@ -374,13 +371,13 @@ class Arbiter(Daemon):
     #We wait (block) for arbiter to send us conf
     def wait_initial_conf(self):
         self.have_conf = False
-	print "Waiting for configuration from master"
-	timeout = 1.0
-	while not self.have_conf :
+        print "Waiting for configuration from master"
+        timeout = 1.0
+        while not self.have_conf :
             socks = self.poller_daemon.getServerSockets()
             avant = time.time()
             # 'foreign' event loop
-            ins,outs,exs = select.select(socks,[],[],timeout)
+            ins, outs, exs = select.select(socks, [], [], timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:
@@ -401,15 +398,15 @@ class Arbiter(Daemon):
 
     #We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
-	print "Waiting for master death"
-	timeout = 1.0
+        print "Waiting for master death"
+        timeout = 1.0
         is_master_dead = False
         self.last_master_speack = time.time()
-	while not is_master_dead:
+        while not is_master_dead:
             socks = self.poller_daemon.getServerSockets()
             avant = time.time()
             # 'foreign' event loop
-            ins,outs,exs = select.select(socks,[],[],timeout)
+            ins, outs, exs = select.select(socks, [], [], timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:
@@ -442,18 +439,18 @@ class Arbiter(Daemon):
             if arb.is_me():
                 self.me = arb
 
-	Log().log("Begin to dispatch configurations to satellites")
+        Log().log("Begin to dispatch configurations to satellites")
         self.dispatcher = Dispatcher(self.conf, self.me)
         self.dispatcher.check_alive()
         self.dispatcher.check_dispatch()
         self.dispatcher.dispatch()
         
 	#Now create the external commander
-	e = ExternalCommand(self.conf, 'dispatcher')
+        e = ExternalCommand(self.conf, 'dispatcher')
 	
 	#Scheduler need to know about external command to activate it 
         #if necessery
-	self.load_external_command(e)
+        self.load_external_command(e)
 	
 
         print "Run baby, run..."
@@ -466,7 +463,7 @@ class Arbiter(Daemon):
             if self.fifo != None:
                 socks.append(self.fifo)
             # 'foreign' event loop
-            ins,outs,exs = select.select(socks,[],[],timeout)
+            ins, outs, exs = select.select(socks, [], [], timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:
@@ -553,29 +550,29 @@ if __name__ == "__main__":
     #Default params
     config_files = []
     verify_only = False
-    is_daemon=False
-    do_replace=False
-    debug=False
-    debug_file=None
+    is_daemon = False
+    do_replace = False
+    debug = False
+    debug_file = None
     print "opts", opts
     for o, a in opts:
         if o in ("-h", "--help"):
             usage(sys.argv[0])
             sys.exit()
-	elif o in ("-v", "--verify-config"):
+        elif o in ("-v", "--verify-config"):
             verify_only = True
-	elif o in ("-r", "--replace"):
+        elif o in ("-r", "--replace"):
             do_replace = True
         elif o in ("-c", "--config"):
             config_files.append(a)
         elif o in ("-d", "--daemon"):
             is_daemon = True
-	elif o in ("--debug"):
+        elif o in ("--debug"):
             debug = True
-	    debug_file = a
+            debug_file = a
         else:
-            print "Sorry, the option",o, a, "is unknown"
-	    usage(sys.argv[0])
+            print "Sorry, the option", o, a, "is unknown"
+            usage(sys.argv[0])
             sys.exit()
 
     if len(config_files) == 0:
