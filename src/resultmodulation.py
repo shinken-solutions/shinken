@@ -23,20 +23,20 @@ import time
 import re
 
 from item import Item, Items
-from util import to_split, to_bool
+from util import to_split
 
 class Resultmodulation(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'resultmodulation'
 
-    properties={'resultmodulation_name' : {'required':True},
-                'exit_codes_match' : {'required':False, 'default':'', 'pythonize' : to_split},
-                'output_match' : {'required':False, 'default':None},
-                'exit_code_modulation' : {'required':False, 'default':None},
-                'output_modulation' : {'required':False, 'default':None},
-                'longoutput_modulation' : {'required':False, 'default':None},
-                'modulation_period' : {'required':False, 'default':None},
-                }
+    properties = {'resultmodulation_name' : {'required':True},
+                  'exit_codes_match' : {'required':False, 'default':'', 'pythonize' : to_split},
+                  'output_match' : {'required':False, 'default':None},
+                  'exit_code_modulation' : {'required':False, 'default':None},
+                  'output_modulation' : {'required':False, 'default':None},
+                  'longoutput_modulation' : {'required':False, 'default':None},
+                  'modulation_period' : {'required':False, 'default':None},
+                  }
 
     running_properties = {}
     
@@ -58,7 +58,7 @@ class Resultmodulation(Item):
         #Only if in modulation_period of modulation_period == None
         if self.modulation_period == None or self.modulation_period.is_time_valid(time.time()):
             #Try to change the exit code only if a new one is defined
-            if self.exit_code_modulation!=None:
+            if self.exit_code_modulation != None:
                 #First with the exit_code_match
                 if return_code in self.exit_codes_match:
                     return_code = self.exit_code_modulation
