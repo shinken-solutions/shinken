@@ -16,9 +16,19 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from brok import Brok
 
-class Command:
+
+class Command(object):
     id = 0
+    my_type = "command"
+
+    properties={
+        'command_name' : {'required' : True, 'fill_brok' : ['full_status']},
+        'command_line' : {'required' : True, 'fill_brok' : ['full_status']},
+        }
+
+
     def __init__(self, params={}):
         self.id = self.__class__.id
         self.__class__.id += 1
@@ -33,6 +43,28 @@ class Command:
 
     def __str__(self):
         return str(self.__dict__)
+
+    #Get a brok with initial status
+    def get_initial_status_brok(self):
+        cls = self.__class__
+        my_type = cls.my_type
+        data = {'id' : self.id}
+
+        self.fill_data_brok_from(data, 'full_status')
+        b = Brok('initial_'+my_type+'_status', data)
+        return b
+
+    def fill_data_brok_from(self, data, brok_type):
+        cls = self.__class__
+        #Now config properties
+        for prop in cls.properties:
+            #Is this property intended for brokking?
+            if 'fill_brok' in cls.properties[prop]:
+                if brok_type in cls.properties[prop]['fill_brok']:
+                    if hasattr(self, prop):
+                        data[prop] = getattr(self, prop)
+                    elif 'default' in cls.properties[prop]:
+                        data[prop] = cls.properties[prop]['default']
 
 
 
@@ -67,11 +99,15 @@ class CommandCall:
         return self.call
 
 
-class Commands:
+class Commands(object):
     def __init__(self, commands):
         self.commands = {}
         for c in commands:
             self.commands[c.id] = c
+
+
+    def __iter__(self):
+        return self.commands.itervalues()
 
     
     def __str__(self):

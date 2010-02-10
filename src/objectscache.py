@@ -25,9 +25,19 @@ import tempfile
 from service import Service
 from host import Host
 from contact import Contact
+from hostgroup import Hostgroup
+from servicegroup import Servicegroup
+from contactgroup import Contactgroup
+from timeperiod import Timeperiod
+from command import Command
 
 from util import from_bool_to_string,from_list_to_split
 
+#This is a dirty hack. Service.get_name only returns service_description.
+#For the servicegroup config we need more. host_name + service_description
+def get_full_name(self):
+    return [self.host_name, self.service_description]
+Service.get_full_name = get_full_name
 
 class ObjectsCacheFile:
     #prop : is the internal name if it is different than the name in the output file
@@ -129,6 +139,35 @@ class ObjectsCacheFile:
             'retain_nonstatus_information' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
             },
 
+        Hostgroup : {
+            'hostgroup_name' : {'required' : True},
+            'alias' : {'required' : False},
+            'members' : {'required' : False, 'depythonize' : 'get_name'},
+        },
+
+        Servicegroup : {
+            'servicegroup_name' : {'required' : True},
+            'alias' : {'required' : False},
+            'members' : {'required' : False, 'depythonize' : 'get_full_name'},
+        },
+
+        Contactgroup : {
+            'contactgroup_name' : {'required' : True},
+            'alias' : {'required' : False},
+            'members' : {'required' : False, 'depythonize' : 'get_name'},
+        },
+
+        Timeperiod : {
+            'timeperiod_name' : {'required' : True},
+            'alias' : {'required' : False},
+        },
+
+        Command : {
+            'command_name' : {'required' : True},
+            'command_line' : {'required' : True},
+        },
+
+
 #               Scheduler : {
 #            'modified_host_attributes' : {'prop' : None, 'default' : '0'},
 #            'modified_service_attributes' : {'prop' : None, 'default' : '0'},
@@ -176,13 +215,18 @@ class ObjectsCacheFile:
                
                    
 
-    def __init__(self, path, hosts, services, contacts):
+    def __init__(self, path, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
         self.path = path
         self.hosts = hosts
         self.services = services
         self.contacts = contacts
+        self.hostgroups = hostgroups
+        self.servicegroups = servicegroups
+        self.contactgroups = contactgroups
+        self.timeperiods = timeperiods
+        self.commands = commands
 
 
     def create_output(self, elt):
@@ -208,14 +252,18 @@ class ObjectsCacheFile:
                     if 'depythonize' in type_map[display]:
                         f = type_map[display]['depythonize']
                         if callable(f):
+                            #for example "from_list_to_split". value is an array and f takes the array as an argument
                             value = f(value)
                         else:
                             if isinstance(value, list):
-                                # ex. list of commands. command.call,command.call,command.call
-                                value = ','.join(['%s' % getattr(item, str(f)) for item in value])
+                                #depythonize's argument might be an attribute or a method
+                                #example: members is an array of hosts and we want get_name() of each element
+                                value = [getattr(item, str(f))() for item in value if callable(getattr(item, str(f))) ] \
+                                      + [getattr(item, str(f)) for item in value if not callable(getattr(item, str(f))) ]
+                                #at least servicegroups are nested [host,service],.. The need some flattening
+                                value = ','.join(['%s' % y for x in value if isinstance(x, list) for y in x] + \
+                                    ['%s' % x for x in value if not isinstance(x, list)])
                             else:
-                                print "Elt: ", elt, "prop", prop, "type", type(elt)
-                                print "val:", value, "type", type(value)
                                 #ok not a direct function, maybe a functin provided by value...
                                 f = getattr(value, f)
                                 if callable(f):
@@ -253,19 +301,40 @@ class ObjectsCacheFile:
         output += '########################################\n\n'
         #print "Create output :", output
         
+        for tp in self.timeperiods.values():
+            tmp = self.create_output(tp)
+            output += 'define timeperiod {\n' + tmp + '\t}\n\n'
+
+        for cmd in self.commands.values():
+            print "+++++++++++++++++++++++++++++++++++++++++++++++++"
+            print cmd
+            print "+++++++++++++++++++++++++++++++++++++++++++++++++"
+            tmp = self.create_output(cmd)
+            output += 'define command {\n' + tmp + '\t}\n\n'
+
+        for cg in self.contactgroups.values():
+            tmp = self.create_output(cg)
+            output += 'define contactgroup {\n' + tmp + '\t}\n\n'
+
+        for hg in self.hostgroups.values():
+            tmp = self.create_output(hg)
+            output += 'define hostgroup {\n' + tmp + '\t}\n\n'
+
+        for sg in self.servicegroups.values():
+            tmp = self.create_output(sg)
+            output += 'define servicegroup {\n' + tmp + '\t}\n\n'
+
+        for c in self.contacts.values():
+            tmp = self.create_output(c)
+            output += 'define contact {\n' + tmp + '\t}\n\n'
+
         for h in self.hosts.values():
             tmp = self.create_output(h)
             output += 'define host {\n' + tmp + '\t}\n\n'
 
         for s in self.services.values():
-            print "cache service", s
             tmp = self.create_output(s)
             output += 'define service {\n' + tmp + '\t}\n\n'
-
-        for c in self.contacts.values():
-            print "cache contact", c
-            tmp = self.create_output(c)
-            output += 'define contact {\n' + tmp + '\t}\n\n'
 
 
         #print "Create output :", output

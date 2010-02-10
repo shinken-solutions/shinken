@@ -27,8 +27,13 @@
 import time
 
 from host import Host
+from hostgroup import Hostgroup
 from service import Service
+from servicegroup import Servicegroup
 from contact import Contact
+from contactgroup import Contactgroup
+from timeperiod import Timeperiod
+from command import Command
 from status import StatusFile
 from objectscache import ObjectsCacheFile
 from config import Config
@@ -60,9 +65,14 @@ class Status_dat_broker:
         self.hosts = {}
         self.services = {}
         self.contacts = {}
+        self.hostgroups = {}
+        self.servicegroups = {}
+        self.contactgroups = {}
+        self.timeperiods = {}
+        self.commands = {}
 
         self.status = StatusFile(self.path, self.configs, self.hosts, self.services, self.contacts)
-        self.objects_cache = ObjectsCacheFile(self.opath, self.hosts, self.services, self.contacts)
+        self.objects_cache = ObjectsCacheFile(self.opath, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
     
 
     def is_external(self):
@@ -97,7 +107,6 @@ class Status_dat_broker:
         self.configs[c_id] = c
 
 
-    #A service check have just arrived, we UPDATE data info with this
     def manage_initial_host_status_brok(self, b):
         data = b.data
         h_id = data['id']
@@ -109,7 +118,23 @@ class Status_dat_broker:
         self.hosts[h_id] = h
 
 
-    #A service check have just arrived, we UPDATE data info with this
+    def manage_initial_hostgroup_status_brok(self, b):
+        data = b.data
+        hg_id = data['id']
+        members = data['members']
+        del data['members']
+        print "Creating hostgroup:", hg_id, data
+        hg = Hostgroup()
+        for prop in data:
+            setattr(hg, prop, data[prop])
+        setattr(hg, 'members', [])
+        for (h_id, h_name) in members:
+            if h_id in self.hosts:
+                hg.members.append(self.hosts[h_id])
+        print "HG:", hg
+        self.hostgroups[hg_id] = hg
+
+
     def manage_initial_service_status_brok(self, b):
         data = b.data
         s_id = data['id']
@@ -120,7 +145,23 @@ class Status_dat_broker:
         self.services[s_id] = s
 
 
-    #A service check have just arrived, we UPDATE data info with this
+    def manage_initial_servicegroup_status_brok(self, b):
+        data = b.data
+        sg_id = data['id']
+        members = data['members']
+        del data['members']
+        print "Creating servicegroup:", sg_id, data
+        sg = Servicegroup()
+        for prop in data:
+            setattr(sg, prop, data[prop])
+        setattr(sg, 'members', [])
+        for (s_id, s_name) in members:
+            if s_id in self.services:
+                sg.members.append(self.services[s_id])
+        print "SG:", sg
+        self.servicegroups[sg_id] = sg
+
+
     def manage_initial_contact_status_brok(self, b):
         data = b.data
         c_id = data['id']
@@ -131,7 +172,42 @@ class Status_dat_broker:
         self.contacts[c_id] = c
 
 
+    def manage_initial_contactgroup_status_brok(self, b):
+        data = b.data
+        cg_id = data['id']
+        members = data['members']
+        del data['members']
+        print "Creating contactgroup:", cg_id, data
+        cg = Contactgroup()
+        for prop in data:
+            setattr(cg, prop, data[prop])
+        setattr(cg, 'members', [])
+        for (c_id, c_name) in members:
+            if c_id in self.contacts:
+                cg.members.append(self.contacts[c_id])
+        print "CG:", cg
+        self.contactgroups[cg_id] = cg
 
+    def manage_initial_timeperiod_status_brok(self, b):
+        data = b.data
+        tp_id = data['id']
+        print "Creating Timeperiod:", tp_id, data
+        tp = Timeperiod({})
+        self.update_element(tp, data)
+        print "TP:", tp
+        self.timeperiods[tp_id] = tp
+
+    def manage_initial_command_status_brok(self, b):
+        data = b.data
+        c_id = data['id']
+        print "Creating Command:", c_id, data
+        c = Command({})
+        self.update_element(c, data)
+        print "CMD:", c
+        self.commands[c_id] = c
+
+
+    #A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
         s = self.find_service(data['host_name'], data['service_description'])
@@ -140,6 +216,7 @@ class Status_dat_broker:
             #print "S:", s
 
 
+    #A service check update have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         self.manage_service_check_result_brok(b)
 
@@ -161,7 +238,7 @@ class Status_dat_broker:
     def manage_host_next_schedule_brok(self, b):
         self.manage_host_check_result_brok(b)
 
-    #In fact, an update of a service is like a check return
+    #In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
         self.manage_host_check_result_brok(b)
 
