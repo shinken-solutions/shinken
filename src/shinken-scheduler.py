@@ -172,21 +172,22 @@ class IForArbiter(Pyro.core.ObjBase):
         self.app.sched.run_external_command(command)
 
 
-    #Arbiter is sending us a new conf. Ok, we take it, and if
-    #app has a scheduler, we ask it to die, so the new conf 
-    #will be load, and a new scheduler created
+    #Arbiter is sending us a new conf. We check if we do not already have it.
+    #If not, we take it, and if app has a scheduler, we ask it to die,
+    #so the new conf  will be load, and a new scheduler created
     def put_conf(self, conf):
-        self.app.conf = conf#cPickle.loads(conf)
-        print "Get conf:", self.app.conf
-        self.app.have_conf = True
-        print "Have conf?", self.app.have_conf
-        print "Just apres reception"
+        if not self.app.have_conf or self.app.conf.magic_hash != conf.magic_hash:
+            self.app.conf = conf
+            print "Get conf:", self.app.conf
+            self.app.have_conf = True
+            print "Have conf?", self.app.have_conf
+            print "Just apres reception"
 		
-        #if app already have a scheduler, we must say him to 
-        #DIE Mouahahah
-        #So It will quit, and will load a new conf (and create a brand new scheduler)
-        if hasattr(self.app, "sched"):
-            self.app.sched.die()
+            #if app already have a scheduler, we must say him to 
+            #DIE Mouahahah
+            #So It will quit, and will load a new conf (and create a brand new scheduler)
+            if hasattr(self.app, "sched"):
+                self.app.sched.die()
 			
 
     #Arbiter want to know if we are alive
