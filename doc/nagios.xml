@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "all-entities.ent">
+  %all.entities;
+]
+>
+
+<book lang="en">
+ 
+<bookinfo>
+<title>Nagios Version 3.x Documentation</title>
+    <author><firstname>Ethan</firstname><surname>Galstad</surname>
+      <affiliation><orgname>Nagios Enterprises</orgname></affiliation>
+    </author>
+  <othercredit>
+    <firstname>Sébastien</firstname>
+    <surname>Guilbaud</surname>
+    <contrib>HTML to Docbook transformation</contrib>
+  </othercredit>
+  <othercredit>
+    <firstname>Olivier</firstname>
+    <surname>Jan</surname>
+    <contrib>HTML to Docbook transformation</contrib>
+  </othercredit>
+
+  <edition>Docbook edition</edition>
+  <pubdate>2008</pubdate>
+  <copyright><year>1999</year>
+    <year>2000</year>
+    <year>2001</year>
+    <year>2002</year>
+    <year>2003</year>
+    <year>2004</year>
+    <year>2005</year>
+    <year>2006</year>
+    <year>2007</year>
+   <holder>Ethan Galstad</holder>
+	<holder>Nagios Enterprises</holder>
+	</copyright>
+
+<keywordset>
+  <keyword>supervision</keyword>
+  <keyword>Nagios</keyword>
+  <keyword>Linux</keyword>
+</keywordset>
+
+<legalnotice>
+<para>Nagios and the Nagios logo are registered trademarks of Ethan Galstad. All other trademarks, servicemarks, registered trademarks, and registered servicemarks mentioned herein may be the property of their respective owner(s). The information contained herein is provided <quote>AS IS</quote> with <quote>NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE.</quote></para>
+</legalnotice>
+
+<legalnotice>
+<para>Nagios is licensed under the terms of the GNU General Public License Version 2 as published by the Free Software Foundation. This gives you legal permission to copy, distribute and/or modify Nagios under certain conditions. Read the 'LICENSE' file in the Nagios distribution or read the online version of the license for more details.</para>
+<para>Nagios is provided <quote>AS IS</quote> with <quote>NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE.</quote></para>
+</legalnotice>
+
+<revhistory>
+<revision><revnumber>2</revnumber><date>2008-11-28</date><authorinitials>sg, oj</authorinitials><revremark>First docbook beta release</revremark>
+</revision>
+<revision><revnumber>1</revnumber><date>2008-11-13</date><authorinitials>eg</authorinitials><revremark>First Release</revremark>
+</revision>
+</revhistory>
+
+</bookinfo>
+
+<xi:include href="About.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="GettingStarted.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="ConfiguringNagios.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="RunningNagios.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="TheBasics.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="SecurityAndPerformanceTuning.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="IntegrationWithOtherSoftware.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="NagiosAddons.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="Development.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+</book>
+

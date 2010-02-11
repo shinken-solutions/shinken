@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="gettingstarted-beginners">
+  <title>Advice for Beginners</title>
+
+<remark>Chapitre terminé</remark>
+  
+  <para>
+  Congratulations on choosing Nagios! Nagios is quite powerful and
+  flexible, but it can take a lot of work to get it configured just the way
+  you'd like. Once you become familiar with how it works and what it can do
+  for you, you'll never want to be without it&nbsp;:-) Here are some important
+  things to keep in mind for first-time Nagios users:
+  </para>
+
+  <orderedlist>
+    <listitem>
+      <para>
+      <emphasis role="bold">Relax - it's going to take some
+      time.</emphasis> Don't expect to be able to get things working exactly
+      the way you want them right off the bat. it's not that easy. Setting up
+      Nagios can involve a bit of work - partly because of the options that
+      Nagios offers, partly because you need to know what to monitor on your
+      network (and how best to do it).
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>
+      <emphasis role="bold">Use the quickstart instructions.</emphasis>
+      The <link linkend="gettingstarted-quickstart">Quickstart installation 
+      guide</link> is designed to get most new users up and running with a 
+      basic Nagios setup fairly quickly. Within 20 minutes you can have Nagios 
+      installed and monitoring your local system. Once that's complete, you can 
+      move on to learning how to configure Nagios to do more.
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>
+      <emphasis role="bold">Read the documentation.</emphasis> Nagios
+      can be tricky to configure when you've got a good grasp of what's going
+      on, and nearly impossible if you don't. Make sure you read the
+      documentation (particularly the sections on <quote>Configuring Nagios</quote> and
+      <quote>The Basics</quote>). Save the advanced topics for when you've got a good
+      understanding of the basics.
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>
+      <emphasis role="bold">Seek the help of others.</emphasis> If
+      you've read the documentation, reviewed the sample config files, and are
+      still having problems, send an email message describing your problems to
+      the <email>nagios-users</email> mailing list. Due to the amount of
+      work that I have to do for this project, I am unable to answer most of
+      the questions that get sent directly to me, so your best source of help
+      is going to be the mailing list. If you've done some background reading
+      and you provide a good problem description, odds are that someone will
+      give you some pointers on getting things working properly. More
+      information on subscribing to the mailing lists or searching the list archives 
+      can be found at <ulink url="&url-nagios;support/">&url-nagios;support/</ulink>.
+      </para>
+    </listitem>
+  </orderedlist>
+</chapter>
+

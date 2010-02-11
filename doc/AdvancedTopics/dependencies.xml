@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="advancedtopics-dependencies" xreflabel="Host and Service Dependencies">
+	<title>Host and Service Dependencies</title>
+	<section>
+		<title>Introduction</title>
+		<para>Service and host dependencies are an advanced feature of Nagios that allow you to control the
+		behavior of hosts and services based on the status of one or more other hosts or services. I'll explain
+		how dependencies work, along with the differences between host and service dependencies.</para>
+	</section>
+	<section>
+		<title>Service Dependencies Overview</title>
+		<para>There are a few things you should know about service dependencies:</para>
+		<orderedlist>
+			<listitem>
+				<para>A service can be dependent on one or more other services</para>
+			</listitem>
+			<listitem>
+				<para>A service can be dependent on services which are not associated with the same host</para>
+			</listitem>
+			<listitem>
+				<para>Service dependencies are not inherited (unless specifically configured to)</para>
+			</listitem>
+			<listitem>
+				<para>Service dependencies can be used to cause service check execution and service notifications
+				to be suppressed under different circumstances (OK, WARNING, UNKNOWN, and/or CRITICAL states)</para>
+			</listitem>
+			<listitem>
+				<para>Service dependencies might only be valid during specific 
+				<link linkend="thebasics-timeperiods">timeperiods</link>
+				</para>
+			</listitem>
+		</orderedlist>
+	</section>
+	<section>
+		<title>Defining Service Dependencies</title>
+		<para>First, the basics. You create service dependencies by adding <link linkend="configuringnagios-objectdefinitions-servicedependency">service dependency definitions</link> 
+		in your <link linkend="configuringnagios-configobject">object config file(s)</link>. In each definition you specify the 
+		<emphasis>dependent</emphasis> service, the service you are <emphasis>depending on</emphasis>, and the criteria (if any) that cause the execution and
+		notification dependencies to fail (these are described later).</para>
+		<para>You can create several dependencies for a given service, but you must add a separate service dependency 
+		definition for each dependency you create.</para>
+	</section>
+	<section>
+		<title>Example Service Dependencies</title>
+		<para>The image below shows an example logical layout of service notification and execution dependencies. 
+		Different services are dependent on other services for notifications and check execution.</para>
+		<para>
+		<informalfigure>
+		<mediaobject>
+	          <imageobject>
+	            <imagedata fileref="images/service-dependencies.png" format="PNG"/>
+	          </imageobject>
+	        </mediaobject>
+	    </informalfigure>
+		</para>
+		<para>In this example, the dependency definitions for <emphasis>Service F</emphasis> on <emphasis>Host C</emphasis> would be defined as follows:</para>
+		<programlisting>
+		define servicedependency{
+		        host_name                       Host B
+		        service_description             Service D
+		        dependent_host_name             Host C
+		        dependent_service_description   Service F
+		        execution_failure_criteria      o
+		        notification_failure_criteria   w,u
+		        }
+
+		define servicedependency{
+		        host_name                       Host B
+		        service_description             Service E
+		        dependent_host_name             Host C
+		        dependent_service_description   Service F
+		        execution_failure_criteria      n
+		        notification_failure_criteria   w,u,c
+		        }
+
+		define servicedependency{
+		        host_name                       Host B
+		        service_description             Service C
+		        dependent_host_name             Host C
+		        dependent_service_description   Service F
+		        execution_failure_criteria      w
+		        notification_failure_criteria   c
+		        }
+		</programlisting>
+		<para>The other dependency definitions shown in the image above would be defined as follows:</para>
+		<programlisting>
+		define servicedependency{
+		        host_name                       Host A
+		        service_description             Service A
+		        dependent_host_name             Host B
+		        dependent_service_description   Service D
+		        execution_failure_criteria      u
+		        notification_failure_criteria   n
+		        }
+
+		define servicedependency{
+		        host_name                       Host A
+		        service_description             Service B
+		        dependent_host_name             Host B
+		        dependent_service_description   Service E
+		        execution_failure_criteria      w,u
+		        notification_failure_criteria   c
+		        }
+
+		define servicedependency{
+		        host_name                       Host B
+		        service_description             Service C
+		        dependent_host_name             Host B
+		        dependent_service_description   Service E
+		        execution_failure_criteria      n
+		        notification_failure_criteria   w,u,c
+		        }
+		</programlisting>
+	</section>
+	<section>
+		<title>How Service Dependencies Are Tested</title>
+		<para>Before Nagios executes a service check or sends notifications out for a service, it will check to 
+		see if the service has any dependencies. If it doesn't have any dependencies, the check is executed or 
+		the notification is sent out as it normally would be. If the service <emphasis>does</emphasis> have one or more dependencies, Nagios
+		will check each dependency entry as follows:</para>
+		<orderedlist>
+			<listitem>
+				<para>Nagios gets the current status<link linkend="advancedtopics-dependencies-hard_dependencies">*</link> of the service that is being <emphasis>depended upon</emphasis>.</para>
+			</listitem>
+			<listitem>
+				<para>Nagios compares the current status of the service that is being <emphasis>depended upon</emphasis> against either 
+				the execution or notification failure options in the dependency definition (whichever one is relevant
+				at the time).</para>
+			</listitem>
+			<listitem>
+				<para>If the current status of the service that is being <emphasis>depended upon</emphasis> matches one of the failure 
+				options, the dependency is said to have failed and Nagios will break out of the dependency check loop.</para>
+			</listitem>
+			<listitem>
+				<para>If the current state of the service that is being <emphasis>depended upon</emphasis> does not match any of the 
+				failure options for the dependency entry, the dependency is said to have passed and Nagios will
+				go on and check the next dependency entry.</para>
+			</listitem>
+		</orderedlist>
+		<para>This cycle continues until either all dependencies for the service have been checked or until one 
+		dependency check fails.</para>
+		<note><para>
+			<anchor id="advancedtopics-dependencies-hard_dependencies"/>* One important thing to note is that by default, Nagios will use
+			the most current <link linkend="thebasics-statetypes">hard state</link> of the service(s) that is/are
+			being depended upon when it does the dependeny checks. If you want Nagios to use the most current state
+			of the services (regardless of whether its a soft or hard state), enable the
+			<link linkend="configuringnagios-configmain-soft_state_dependencies">soft_state_dependencies</link> option.</para></note>
+	</section>
+	<section>
+		<title>Execution Dependencies</title>
+		<para>Execution dependencies are used to restrict when <link linkend="thebasics-activechecks">active checks</link> 
+		of a service can be performed. <link linkend="thebasics-passivechecks">Passive checks</link> are not restricted
+		by execution dependencies.</para>
+		<para>If all of the execution dependency tests for the service passed, Nagios will execute the check of the service 
+		as it normally would. If even just one of the execution dependencies for a service fails, Nagios will temporarily 
+		prevent the execution of checks for that (dependent) service. At some point in the future the execution dependency 
+		tests for the service may all pass. If this happens, Nagios will start checking the service again as it normally
+		would. More information on the check scheduling logic can be found <link linkend="advancedtopics-checkscheduling">here</link>.</para>
+		<para>In the example above, <emphasis role="bold">Service E</emphasis> would have failed execution dependencies if <emphasis role="bold">Service B</emphasis> is in a WARNING or 
+		UNKNOWN state. If this was the case, the service check would not be performed and the check would be scheduled 
+		for (potential) execution at a later time.</para>
+	</section>
+	<section>
+		<title>Notification Dependencies</title>
+		<para>If all of the notification dependency tests for the service <emphasis>passed</emphasis>, Nagios will send notifications out for 
+		the service as it normally would. If even just one of the notification dependencies for a service fails, Nagios 
+		will temporarily repress notifications for that (dependent) service. At some point in the future the notification 
+		dependency tests for the service may all pass. If this happens, Nagios will start sending out notifications again 
+		as it normally would for the service. More information on the notification logic can be found 
+		<link linkend="thebasics-notifications">here</link>.</para>
+		<para>In the example above, <emphasis role="bold">Service F</emphasis> would have failed notification dependencies if <emphasis role="bold">Service C</emphasis> is in a CRITICAL
+		state, <emphasis>and/or</emphasis> <emphasis role="bold">Service D</emphasis> is in a WARNING or UNKNOWN state, <emphasis>and/or</emphasis> if <emphasis role="bold">Service E</emphasis> is in a WARNING, UNKNOWN, or 
+		CRITICAL state. If this were the case, notifications for the service would not be sent out.</para>
+	</section>
+	<section>
+		<title>Dependency Inheritance</title>
+		<para>As mentioned before, service dependencies are not inherited by default. In the example above you can see
+		that Service F is dependent on Service E. However, it does not automatically inherit Service E's dependencies on
+		Service B and Service C. In order to make Service F dependent on Service C we had to add another service dependency
+		definition. There is no dependency definition for Service B, so Service F is not dependent on Service B.</para>
+		<para>If you do wish to make service dependencies inheritable, you must use the inherits_parent directive in 
+		the <link linkend="configuringnagios-objectdefinitions-servicedependency">service dependency</link> definition. When this directive is enabled, it indicates that
+		the dependency inherits dependencies of the service that is being depended upon (also referred to as the master 
+		service). In other words, if the master service is dependent upon other services and any one of those dependencies
+		fail, this dependency will also fail.</para>
+		<para>In the example above, imagine that you want to add a new dependency for service F to make it dependent 
+		on service A. You could create a new dependency definition that specified service F as the dependent service 
+		and service A as being the master service (i.e. the service that is being dependend on). You could alternatively
+		modify the dependency definition for services D and F to look like this:</para>
+		<programlisting>
+		define servicedependency{
+		        host_name                       Host B
+		        service_description             Service D
+		        dependent_host_name             Host C
+		        dependent_service_description   Service F
+		        execution_failure_criteria      o
+		        notification_failure_criteria   n
+		        inherits_parent         1
+		        }
+		</programlisting>
+
+		<para>Since the inherits_parent directive is enabled, the dependency between services A and D will be tested
+		when the dependency between services F and D are being tested.</para>
+		<para>Dependencies can have multiple levels of inheritence. If the dependency definition between A and D had
+		its inherits_parent directive enable and service A was dependent on some other service (let's call it service G), the 
+		service F would be dependent on services D, A, and G (each with potentially different criteria).</para>
+	</section>
+	<section>
+		<title>Host Dependencies</title>
+		<para>As you'd probably expect, host dependencies work in a similiar fashion to service dependencies. 
+		The difference is that they're for hosts, not services.</para>
+		<tip><para>Do not confuse host dependencies with parent/child host relationships. You should be using 
+		parent/child host relationships (defined with the parents directive in <link linkend="configuringnagios-objectdefinitions-host">host</link> definitions) 
+		for most cases, rather than host dependencies. A description of how parent/child host relationships work can be 
+		found in the documentation on <link linkend="thebasics-networkreachability">network reachability</link>.</para></tip>
+		<para>Here are the basics about host dependencies:</para>
+		<orderedlist>
+			<listitem>
+				<para>A host can be dependent on one or more other host</para>
+			</listitem>
+			<listitem>
+				<para>Host dependencies are not inherited (unless specifically configured to)</para>
+			</listitem>
+			<listitem>
+				<para>Host dependencies can be used to cause host check execution and host notifications to
+				be suppressed under different circumstances (UP, DOWN, and/or UNREACHABLE states)</para>
+			</listitem>
+			<listitem>
+				<para>Host dependencies might only be valid during specific 
+				<link linkend="thebasics-timeperiods">timeperiods</link>
+				</para>
+			</listitem>
+		</orderedlist>
+	</section>
+	<section>
+		<title>Example Host Dependencies</title>
+		<para>The image below shows an example of the logical layout of host notification dependencies. Different 
+		hosts are dependent on other hosts for notifications.</para>
+		<para>
+		<informalfigure>
+		<mediaobject>
+	          <imageobject>
+	            <imagedata fileref="images/host-dependencies.png" format="PNG"/>
+	          </imageobject>
+	        </mediaobject>
+	    </informalfigure>
+		</para>
+		<para>In the example above, the dependency definitions for Host C would be defined as follows:</para>
+		<programlisting>
+		define hostdependency{
+		        host_name                       Host A
+		        dependent_host_name             Host C
+		        notification_failure_criteria   d
+		        }
+
+		define hostdependency{
+		        host_name                       Host B
+		        dependent_host_name             Host C
+		        notification_failure_criteria   d,u
+		        }
+		</programlisting>
+		<para>As with service dependencies, host dependencies are not inherited. In the example image you can 
+		see that Host C does not inherit the host dependencies of Host B. In order for Host C to be dependent on
+		Host A, a new host dependency definition must be defined.</para>
+		<para>Host notification dependencies work in a similiar manner to service notification dependencies. If 
+		<emphasis>all</emphasis> of the notification dependency tests for the host <emphasis>pass</emphasis>, Nagios will send notifications out for the host
+		as it normally would. If even just one of the notification dependencies for a host fails, Nagios will 
+		temporarily repress notifications for that (dependent) host. At some point in the future the notification 
+		dependency tests for the host may all pass. If this happens, Nagios will start sending out notifications
+		again as it normally would for the host. More information on the notification logic can be found 
+		<link linkend="thebasics-notifications">here</link>.</para>
+	</section>
+
+</chapter>
+

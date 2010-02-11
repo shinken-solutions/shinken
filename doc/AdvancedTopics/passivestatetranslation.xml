@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="advancedtopics-passivestatetranslation"
+         xreflabel="Passive Host State Translation">
+  <title>Passive Host State Translation</title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>When Nagios receives passive host checks from remote sources (i.e
+    other Nagios instances in distributed or failover setups), the host state
+    reported by the remote source may not accurately reflect the state of the
+    host from Nagios' view. As distributed and failover monitoring
+    installations are fairly common, it is important to provide a mechanism
+    for ensuring accurate host states between different instances of
+    Nagios.</para>
+  </section>
+
+  <section>
+    <title>Different World Views</title>
+
+    <para>The image below shows a simplified view of a failover monitoring
+    setup.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><emphasis>Nagios-A</emphasis> is the primary monitoring server,
+        and is actively monitoring all switches and routers.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>Nagios-B</emphasis> and <emphasis>Nagios-C</emphasis> are backup monitoring servers, and are
+        receiving passive check results from <emphasis>Nagios-A</emphasis></para>
+      </listitem>
+
+      <listitem>
+        <para>Both <emphasis>Router-C</emphasis> and <emphasis>Router-D</emphasis> have suffered failures and are
+        offline.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para><informalfigure><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/passivehosttranslation.png" format="PNG"/>
+        </imageobject>
+      </mediaobject></informalfigure></para>
+
+    <para>What states are <emphasis>Router-C</emphasis> and <emphasis>Router-D</emphasis> currently in? The answer
+    depends on which Nagios instance you ask.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><emphasis>Nagios-A</emphasis> sees <emphasis>Router-D</emphasis> as DOWN and <emphasis>Router-C</emphasis> as
+        UNREACHABLE</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>Nagios-B</emphasis> should see <emphasis>Router-C</emphasis> as DOWN and <emphasis>Router-D</emphasis> as
+        UNREACHABLE</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>Nagios-C</emphasis> should see both routers as being DOWN.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Each Nagios instance has a different view of the network. The backup
+    monitoring servers should not blindly accept passive host states from the
+    primary monitoring server, or they will have incorrect information on the
+    current state of the network.</para>
+
+    <para>Without translating passive host check results from the primary
+    monitoring server (<emphasis>Nagios-A</emphasis>), <emphasis>Nagios-C</emphasis> would see <emphasis>Router-D</emphasis> as UNREACHABLE,
+    when it is really DOWN based on its viewpoint. Similarly, the
+    DOWN/UNREACHABLE states (from the viewpoint of <emphasis>Nagios-A</emphasis>) for <emphasis>Router-C</emphasis> and
+    <emphasis>Router-D</emphasis> should be flipped from the viewpoint of <emphasis>Nagios-B</emphasis>.</para>
+
+    <note>
+      <para>There may be some situations where you do not want Nagios to
+      translate DOWN/UNREACHABLE states from remote sources to their <quote>correct</quote>
+      state from the viewpoint of the local Nagios instance. For example, in
+      distributed monitoring environments you may want the central Nagios
+      instance to know how distributed instances see their respective portions
+      of the network.</para>
+    </note>
+  </section>
+
+  <section>
+    <title>Enabling State Translation</title>
+
+    <para>By default, Nagios will not automatically translate DOWN/UNREACHABLE
+    states from passive check results. You will need to enable this feature if
+    you need and want it.</para>
+
+    <para>The automatic translation of passive host check states is controlled
+    by the <link
+    linkend="configuringnagios-configmain-translate_passive_host_checks">translate_passive_host_checks</link>
+    variable. Enable it and Nagios will automatically translate DOWN and
+    UNREACHABLE states from remote sources to their correct state for the
+    local instance of Nagios.</para>
+  </section>
+</chapter>

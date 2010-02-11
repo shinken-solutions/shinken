@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="gettingstarted-monitoring-routers" xreflabel="Monitoring routers/switches">
+  <title>Monitoring Routers and Switches</title>
+
+  <abstract>
+    <para>This document describes how you can monitor the status of network
+    switches and routers. Some cheaper "unmanaged" switches and hubs don't
+    have <acronym>IP</acronym> addresses and are essentially invisible on your
+    network, so there's not any way to monitor them. More expensive switches
+    and routers have addresses assigned to them and can be monitored by
+    pinging them or using &protocol-snmp; to query status
+    information.</para>
+  </abstract>
+
+  <section>
+    <title>Introduction</title>
+
+    <para><inlinemediaobject>
+        <imageobject>
+          <imagedata fileref="images/switch.png" format="PNG"/>
+        </imageobject>
+      </inlinemediaobject></para>
+
+    <para>I'll describe how you can monitor the following things on managed
+    switches, hubs, and routers:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Packet loss, round trip average</para>
+      </listitem>
+
+      <listitem>
+        <para>&protocol-snmp; status information</para>
+      </listitem>
+
+      <listitem>
+        <para>Bandwidth / traffic rate</para>
+      </listitem>
+    </itemizedlist>
+
+    <note>
+      <para>These instructions assume that you've installed Nagios according
+      to the <link linkend="gettingstarted-quickstart">quickstart guide</link>. The sample
+      configuration entries below reference objects that are defined in the
+      sample config files (<filename>commands.cfg</filename>,
+      <filename>templates.cfg</filename>, etc.) that are installed when you
+      follow the quickstart.</para>
+    </note>
+  </section>
+
+  <section>
+    <title>Overview</title>
+
+    <para><informalfigure><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/monitoring-routers.png" format="PNG"/>
+        </imageobject>
+      </mediaobject></informalfigure></para>
+
+    <para>Monitoring switches and routers can either be easy or more involved
+    - depending on what equipment you have and what you want to monitor. As
+    they are critical infrastructure components, you'll no doubt want to
+    monitor them in at least some basic manner.</para>
+
+    <para>Switches and routers can be monitored easily by "pinging" them to
+    determine packet loss, <acronym>RTA</acronym>, etc. If your switch
+    supports &protocol-snmp;, you can monitor port status, etc. with
+    the &plugin-snmp; plugin and bandwidth (if you're using
+    <application><acronym>MRTG</acronym></application>) with the
+    &plugin-mrtgtraf; plugin.</para>
+
+    <para>The &plugin-snmp; plugin will only get compiled and
+    installed if you have the net-snmp and net-snmp-utils packages installed
+    on your system. Make sure the plugin exists in
+    <filename class="directory">/usr/local/nagios/libexec</filename> before you continue. If it
+    doesn't, install <application>net-snmp</application> and
+    <application>net-snmp-utils</application> and recompile/reinstall the
+    Nagios plugins.</para>
+  </section>
+
+  <section>
+    <title>Steps</title>
+
+    <para>There are several steps you'll need to follow in order to monitor a
+    new router or switch. They are:</para>
+
+    <procedure>
+      <step>
+        <para>Perform first-time prerequisites</para>
+      </step>
+
+      <step>
+        <para>Create new host and service definitions for monitoring the
+        device</para>
+      </step>
+
+      <step>
+        <para>Restart the Nagios daemon</para>
+      </step>
+    </procedure>
+  </section>
+
+  <section>
+    <title>What's Already Done For You</title>
+
+    <para>To make your life a bit easier, a few configuration tasks have
+    already been done for you:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Two command definitions (<emphasis>check_snmp</emphasis> and
+        <emphasis>check_local_mrtgtraf</emphasis>) have been added to the
+        <filename>commands.cfg</filename> file. These allows you to use the
+        &plugin-snmp; and &plugin-mrtgtraf;
+        plugins to monitor network routers.</para>
+      </listitem>
+
+      <listitem>
+        <para>A switch host template (called
+        <emphasis>generic-switch</emphasis>) has already been created in the
+        <filename>templates.cfg</filename> file. This allows you to add new
+        router/switch host definitions in a simple manner.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The above-mentioned config files can be found in the
+    <filename class="directory">/usr/local/nagios/etc/objects/</filename> directory. You can
+    modify the definitions in these and other definitions to suit your needs
+    better if you'd like. However, I'd recommend waiting until you're more
+    familiar with configuring Nagios before doing so. For the time being, just
+    follow the directions outlined below and you'll be monitoring your network
+    routers/switches in no time.</para>
+  </section>
+
+  <section>
+    <title>Prerequisites</title>
+
+    <para>The first time you configure Nagios to monitor a network switch,
+    you'll need to do a bit of extra work. Remember, you only need to do this
+    for the *first* switch you monitor.</para>
+
+    <para>Edit the main Nagios config file.</para>
+
+    <screen><prompt>linux:~ # </prompt><userinput>vi /usr/local/nagios/etc/nagios.cfg</userinput></screen>
+
+    <para>Remove the leading pound (#) sign from the following line in the
+    main configuration file:</para>
+
+    <programlisting>#cfg_file=/usr/local/nagios/etc/objects/switch.cfg</programlisting>
+
+    <para>Save the file and exit.</para>
+
+    <para>What did you just do? You told Nagios to look to the
+    <filename>/usr/local/nagios/etc/objects/switch.cfg</filename> to find
+    additional object definitions. That's where you'll be adding host and
+    service definitions for routers and switches. That configuration file
+    already contains some sample host, hostgroup, and service definitions. For
+    the *first* router/switch you monitor, you can simply modify the sample
+    host and service definitions in that file, rather than creating new
+    ones.</para>
+  </section>
+
+  <section>
+    <title>Configuring Nagios</title>
+
+    <para>You'll need to create some <link linkend="configuringnagios-objectdefinitions">object definitions</link> 
+    in order to monitor a new router/switch.</para>
+
+    <para>Open the <filename>switch.cfg</filename> file for editing.</para>
+
+    <screen><prompt>linux:~ # </prompt><userinput>vi /usr/local/nagios/etc/objects/switch.cfg</userinput></screen>
+
+    <para>Add a new <link linkend="configuringnagios-objectdefinitions-host">host</link>
+    definition for the switch that you're going to monitor. If this is the
+    *first* switch you're monitoring, you can simply modify the sample host
+    definition in <filename>switch.cfg</filename>. Change the
+    <varname>host_name</varname>, <varname>alias</varname>, and
+    <varname>address</varname> fields to appropriate values for the
+    switch.</para>
+
+    <programlisting>
+define host{
+    use        generic-switch         ; Inherit default values from a template
+    host_name  linksys-srw224p        ; The name we're giving to this switch
+    alias      Linksys SRW224P Switch ; A longer name associated with the switch
+    address    192.168.1.253          ; IP address of the switch
+    hostgroups allhosts,switches      ; Host groups this switch is associated with
+    }
+</programlisting>
+  </section>
+
+  <section>
+    <title>Monitoring Services</title>
+
+    <para>Now you can add some service definitions (to the same configuration
+    file) to monitor different aspects of the switch. If this is the *first*
+    switch you're monitoring, you can simply modify the sample service
+    definition in <filename>switch.cfg</filename>.</para>
+
+    <note>
+      <para>Replace <quote><replaceable>linksys-srw224p</replaceable></quote> in the example
+      definitions below with the name you specified in the
+      <varname>host_name</varname> directive of the host definition you just
+      added.</para>
+    </note>
+  </section>
+
+  <section>
+    <title>Monitoring Packet Loss and RTA</title>
+
+    <para>Add the following service definition in order to monitor packet loss
+    and round trip average between the Nagios host and the switch every 5
+    minutes under normal conditions.</para>
+<programlistingco>
+	<areaspec>
+	<area id="gettingstarted-monitoring-routers-ex-plrta-use" coords='3 65'/>
+	<area id="gettingstarted-monitoring-routers-ex-plrta-host_name" coords='4 65'/>
+	<area id="gettingstarted-monitoring-routers-ex-plrta-service_description" coords='5 65'/>
+	<area id="gettingstarted-monitoring-routers-ex-plrta-check_command" coords='6 65'/>
+	<area id="gettingstarted-monitoring-routers-ex-plrta-normal_check_interval" coords='7 65'/>
+	<area id="gettingstarted-monitoring-routers-ex-plrta-retry_check_interval" coords='8 65'/>
+	</areaspec>
+
+<programlisting>
+define service{
+   use                    generic-service
+   host_name              linksys-srw224p
+   service_description    PING
+   check_command          check_ping!200.0,20%!600.0,60%
+   normal_check_interval  5
+   retry_check_interval   1
+}
+</programlisting>
+<calloutlist>
+<callout arearefs="gettingstarted-monitoring-routers-ex-plrta-use">
+<para>Inherit values from a template</para>
+</callout>
+<callout arearefs="gettingstarted-monitoring-routers-ex-plrta-host_name">
+<para>The name of the host the service is associated with</para>
+</callout>
+<callout arearefs="gettingstarted-monitoring-routers-ex-plrta-service_description">
+<para>The service description</para>
+</callout>
+<callout arearefs="gettingstarted-monitoring-routers-ex-plrta-check_command">
+<para>The command used to monitor the service</para>
+</callout>
+<callout arearefs="gettingstarted-monitoring-routers-ex-plrta-normal_check_interval">
+<para>Check the service every 5 minutes under normal conditions</para>
+</callout>
+<callout arearefs="gettingstarted-monitoring-routers-ex-plrta-retry_check_interval">
+<para>Re-check the service every minute until its final/hard state is determined</para>
+</callout>
+</calloutlist>
+</programlistingco>
+
+
+    <para>This service will be:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>CRITICAL if the round trip average (<acronym>RTA</acronym>) is
+        greater than 600 milliseconds or the packet loss is 60% or more</para>
+      </listitem>
+
+      <listitem>
+        <para>WARNING if the <acronym>RTA</acronym> is greater than 200 ms or
+        the packet loss is 20% or more</para>
+      </listitem>
+
+      <listitem>
+        <para>OK if the <acronym>RTA</acronym> is less than 200 ms and the
+        packet loss is less than 20%</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title>Monitoring SNMP Status Information</title>
+
+    <para>If your switch or router supports &protocol-snmp;, you can
+    monitor a lot of information by using the &plugin-snmp;
+    plugin. If it doesn't, skip this section.</para>
+
+    <para>Add the following service definition to monitor the uptime of the
+    switch.</para>
+
+    <programlisting>
+define service{
+    use                  generic-service ; Inherit values from a template
+    host_name            linksys-srw224p
+    service_description  Uptime
+    check_command        check_snmp!-C public -o sysUpTime.0
+    }
+</programlisting>
+
+    <para>In the <varname>check_command</varname> directive of the service
+    definition above, the <option>-C public</option> tells the plugin that the
+    &protocol-snmp; community name to be used is
+    <varname>public</varname> and the <computeroutput>-o
+    sysUpTime.0</computeroutput> indicates which <acronym>OID</acronym> should
+    be checked.</para>
+
+    <para>If you want to ensure that a specific port/interface on the switch
+    is in an up state, you could add a service definition like this:</para>
+
+    <programlisting>
+define service{
+    use                 generic-service ; Inherit values from a template
+    host_name           linksys-srw224p
+    service_description Port 1 Link Status
+    check_command       check_snmp!-C public -o ifOperStatus.1 -r 1 -m RFC1213-MIB
+    }
+</programlisting>
+
+    <para>
+    In the example above, the <computeroutput>-o ifOperStatus.1</computeroutput>
+    refers to the <acronym>OID</acronym> for the operational status of port 1 on the switch.
+    </para>
+    <para>
+    The <option>-r 1</option> option tells the &plugin-snmp; plugin to return an OK
+    state if <computeroutput>1</computeroutput> is found in the &protocol-snmp; result 
+    (1 indicates an "up" state on the port) and CRITICAL if it isn't found.
+    </para>
+    <para>
+    The <option>-m RFC1213-MIB</option> is optional and tells the &plugin-snmp; plugin
+    to only load the <quote>RFC1213-MIB</quote> instead of every single
+    <acronym>MIB</acronym> that's installed on your system, which can help
+    speed things up.</para>
+
+    <para>That's it for the &protocol-snmp; monitoring example. There
+    are a million things that can be monitored via &protocol-snmp;, so
+    its up to you to decide what you need and want to monitor. Good
+    luck!</para>
+
+    <tip>
+      <para>You can usually find the <acronym>OID</acronym>s that can be
+      monitored on a switch by running the following command (replace
+      <emphasis>192.168.1.253</emphasis> with the IP address of the switch):
+      <command>snmpwalk -v1 -c public 192.168.1.253 -m ALL .1</command></para>
+    </tip>
+  </section>
+
+  <section>
+    <title>Monitoring Bandwidth / Traffic Rate</title>
+
+    <para>If you're monitoring bandwidth usage on your switches or routers
+    using <ulink url="http://oss.oetiker.ch/mrtg/"><application>MRTG</application></ulink>,
+    you can have Nagios alert you when traffic rates exceed thresholds you
+    specify. The &plugin-mrtgtraf; plugin (which is included
+    in the Nagios plugins distribution) allows you to do this.</para>
+
+    <para>You'll need to let the &plugin-mrtgtraf; plugin know
+    what log file the <application>MRTG</application> data
+    is being stored in, along with thresholds, etc. In my example, I'm
+    monitoring one of the ports on a Linksys switch. The
+    <application>MRTG</application> log file is stored in
+    <filename>/var/lib/mrtg/192.168.1.253_1.log</filename>. Here's the service
+    definition I use to monitor the bandwidth data that's stored in the log
+    file...</para>
+
+    <programlisting>
+define service{
+   use                 generic-service ; Inherit values from a template
+   host_name           linksys-srw224p
+   service_description Port 1 Bandwidth Usage
+   check_command       check_local_mrtgtraf!/var/lib/mrtg/192.168.1.253_1.log!AVG!1000000,2000000!5000000,5000000!10
+}
+</programlisting>
+
+    <para>In the example above, the <filename>/var/lib/mrtg/192.168.1.253_1.log</filename>
+    option that gets passed to the <emphasis>check_local_mrtgtraf</emphasis> command tells the
+    plugin which <application>MRTG</application> log file to read from.
+    </para>
+    <para>
+    The <acronym>AVG</acronym> option tells it that it should
+    use average bandwidth statistics. The <option>1000000,2000000</option>
+    options are the warning thresholds (in bytes) for incoming traffic rates.
+    </para>
+    <para>
+    The <option>5000000,5000000</option> are critical thresholds (in bytes)
+    for outgoing traffic rates. The <option>10</option> option causes the
+    plugin to return a CRITICAL state if the
+    <application>MRTG</application> log file is older than
+    10 minutes (it should be updated every 5 minutes).</para>
+
+    <para>Save the file.</para>
+  </section>
+
+  <section>
+    <title>Restarting Nagios</title>
+
+    <para>Once you've added the new host and service definitions to the
+    <filename>switch.cfg</filename> file, you're ready to start monitoring the
+    router/switch. To do this, you'll need to <link
+    linkend="runningnagios-verifyconfig">verify your configuration</link> and <link
+    linkend="runningnagios-startstop">restart Nagios</link>.</para>
+
+    <para>If the verification process produces any errors messages, fix your
+    configuration file before continuing. Make sure that you don't (re)start
+    Nagios until the verification process completes without any errors!</para>
+  </section>
+</chapter>
+

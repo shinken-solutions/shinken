@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="nagiosaddons-addons" xreflabel="Nagios Addons">
+  <title>Nagios Addons</title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>There are a lot of <quote>addon</quote> software packages that are available for
+    Nagios. Addons can be used to extend Nagios' functionality or integrate
+    Nagios with other applications.</para>
+
+    <para>Addons are available for:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Managing the config files through a web interface</para>
+      </listitem>
+
+      <listitem>
+        <para>Monitoring remote hosts (*NIX, Windows, etc.)</para>
+      </listitem>
+
+      <listitem>
+        <para>Submitting passive checks from remote hosts</para>
+      </listitem>
+
+      <listitem>
+        <para>Simplifying/extending the notification logic</para>
+      </listitem>
+
+      <listitem>
+        <para>...and much more</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>You can find many addons for Nagios by visiting:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><ulink url="&url-nagios;">Nagios.org</ulink></para>
+      </listitem>
+
+      <listitem>
+        <para><ulink
+        url="http://www.sourceforge.net/">SourceForge.net</ulink></para>
+      </listitem>
+
+      <listitem>
+        <para><ulink
+        url="&url-nagiosexchange;/">NagiosExchange.org</ulink></para>
+      </listitem>
+    </itemizedlist>
+
+    <para>I'll give a brief introduction to a few of the addons that I've
+    developed for Nagios...</para>
+  </section>
+
+  <section>
+    <title><anchor id="nagiosaddons-addons-nrpe" xreflabel="NRPE daemon" />&name-nrpe;</title>
+
+    <para><informalfigure><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/nrpe.png" format="PNG"/>
+        </imageobject>
+      </mediaobject></informalfigure>&name-nrpe; is an addon that allows you to execute <xref
+    linkend="thebasics-plugins" /> on remote Linux/Unix hosts. This is useful
+    if you need to monitor local resources/attributes like disk usage, CPU
+    load, memory usage, etc. on a remote host. Similiar functionality can be
+    accomplished by using the &plugin-byssh; plugin, although it can impose a
+    higher CPU load on the monitoring machine - especially if you are
+    monitoring hundreds or thousands of hosts.</para>
+
+    <para>The &name-nrpe; addon and documentation can be found at <ulink
+    url="&url-nagios;">&url-nagios;</ulink>.</para>
+  </section>
+
+  <section>
+    <title><anchor id="nagiosaddons-addons-nsca" xreflabel="NSCA daemon" />&name-nsca;</title>
+
+    <para><informalfigure><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/nsca.png" format="PNG"/>
+        </imageobject>
+      </mediaobject></informalfigure>&name-nsca; is an addon that allows you to send <xref
+    linkend="thebasics-passivechecks" /> results from remote Linux/Unix hosts
+    to the Nagios daemon running on the monitoring server. This is very useful
+    in <xref linkend="advancedtopics-distributed" /> and <xref
+    linkend="advancedtopics-redundancy" /> setups.</para>
+
+    <para>The &name-nrpe; addon and documentation can be found at <ulink
+    url="&url-nagios;">&url-nagios;</ulink>. 
+    </para>
+  </section>
+
+  <section>
+    <title><anchor id="nagiosaddons-addons-ndoutils" />NDOUtils</title>
+
+    <para><informalfigure><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/ndoutils.png" />
+        </imageobject>
+      </mediaobject></informalfigure>NDOUtils is an addon that allows you to store all
+    status information from Nagios in a MySQL database. Multiple instances of
+    Nagios can all store their information in a central database for
+    centralized reporting. This will likely serve as the basis for a new
+    PHP-based web interface for Nagios in the future.</para>
+
+    <para>The NDOUtils addon and documentation can be found at <ulink
+    url="&url-nagios;">&url-nagios;</ulink>.</para>
+  </section>
+</chapter>
+

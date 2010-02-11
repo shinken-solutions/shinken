@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="thebasics-statetypes" xreflabel="State Types">
+  <title>State Types</title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>The current state of monitored services and hosts is determined by
+    two components:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The status of the service or host (i.e. OK, WARNING, UP, DOWN,
+        etc.)</para>
+      </listitem>
+
+      <listitem>
+        <para>Tye type of state the service or host is in</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>There are two state types in Nagios - SOFT states and HARD states.
+    These state types are a crucial part of the monitoring logic, as they are
+    used to determine when <link linkend="advancedtopics-eventhandlers">event
+    handlers</link> are executed and when <link
+    linkend="thebasics-notifications">notifications</link> are initially sent
+    out.</para>
+
+    <para>This document describes the difference between SOFT and HARD states,
+    how they occur, and what happens when they occur.</para>
+  </section>
+
+  <section>
+    <title>Service and Host Check Retries</title>
+
+    <para>In order to prevent false alarms from transient problems, Nagios
+    allows you to define how many times a service or host should be
+    (re)checked before it is considered to have a "real" problem. This is
+    controlled by the max_check_attempts option in the host and service
+    definitions. Understanding how hosts and services are (re)checked in order
+    to determine if a real problem exists is important in understanding how
+    state types work.</para>
+  </section>
+
+  <section>
+    <title>Soft States</title>
+
+    <para>Soft states occur in the following situations...</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>When a service or host check results in a non-OK or non-UP state
+        and the service check has not yet been (re)checked the number of times
+        specified by the max_check_attempts directive in the service or host
+        definition. This is called a soft error.</para>
+      </listitem>
+
+      <listitem>
+        <para>When a service or host recovers from a soft error. This is
+        considered a soft recovery.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The following things occur when hosts or services experience SOFT
+    state changes:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The SOFT state is logged.</para>
+      </listitem>
+
+      <listitem>
+        <para>Event handlers are executed to handle the SOFT state.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>SOFT states are only logged if you enabled the <link
+    linkend="configuringnagios-configmain-log_service_retries">log_service_retries</link>
+    or <link
+    linkend="configuringnagios-configmain-log_host_retries">log_host_retries</link>
+    options in your main configuration file.</para>
+
+    <para>The only important thing that really happens during a soft state is
+    the execution of event handlers. Using event handlers can be particularly
+    useful if you want to try and proactively fix a problem before it turns
+    into a HARD state. The <link
+    linkend="thebasics-macrolist-hoststatetype">$HOSTSTATETYPE$</link> or
+    <link
+    linkend="thebasics-macrolist-servicestatetype">$SERVICESTATETYPE$</link>
+    macros will have a value of "SOFT" when event handlers are executed, which
+    allows your event handler scripts to know when they should take corrective
+    action. More information on event handlers can be found <link
+    linkend="advancedtopics-eventhandlers">here</link>.</para>
+  </section>
+
+  <section>
+    <title>Hard States</title>
+
+    <para>Hard states occur for hosts and services in the following
+    situations:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>When a host or service check results in a non-UP or non-OK state
+        and it has been (re)checked the number of times specified by the
+        max_check_attempts option in the host or service definition. This is a
+        hard error state.</para>
+      </listitem>
+
+      <listitem>
+        <para>When a host or service transitions from one hard error state to
+        another error state (e.g. WARNING to CRITICAL).</para>
+      </listitem>
+
+      <listitem>
+        <para>When a service check results in a non-OK state and its
+        corresponding host is either DOWN or UNREACHABLE.</para>
+      </listitem>
+
+      <listitem>
+        <para>When a host or service recovers from a hard error state. This is
+        considered to be a hard recovery.</para>
+      </listitem>
+
+      <listitem>
+        <para>When a <link linkend="thebasics-passivechecks">passive host
+        check</link> is received. Passive host checks are treated as HARD
+        unless the <link
+        linkend="configuringnagios-configmain-passive_host_checks_are_soft">passive_host_checks_are_soft</link>
+        option is enabled.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The following things occur when hosts or services experience HARD
+    state changes:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The HARD state is logged.</para>
+      </listitem>
+
+      <listitem>
+        <para>Event handlers are executed to handle the HARD state.</para>
+      </listitem>
+
+      <listitem>
+        <para>Contacts are notifified of the host or service problem or
+        recovery.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The <link
+    linkend="thebasics-macrolist-hoststatetype">$HOSTSTATETYPE$</link> or
+    <link
+    linkend="thebasics-macrolist-servicestatetype">$SERVICESTATETYPE$</link>
+    macros will have a value of "HARD" when event handlers are executed, which
+    allows your event handler scripts to know when they should take corrective
+    action. More information on event handlers can be found <link
+    linkend="advancedtopics-eventhandlers">here</link>.</para>
+  </section>
+
+  <section>
+    <title>Example</title>
+
+    <para>Here's an example of how state types are determined, when state
+    changes occur, and when event handlers and notifications are sent out. The
+    table below shows consecutive checks of a service over time. The service
+    has a max_check_attempts value of 3.</para>
+
+    <informaltable frame="all">
+      <tgroup cols="6">
+        <thead>
+          <row>
+            <entry><para>Time</para></entry>
+
+            <entry><para>Check #</para></entry>
+
+            <entry><para>State</para></entry>
+
+            <entry><para>State Type</para></entry>
+
+            <entry><para>State Change</para></entry>
+
+            <entry><para>Notes</para></entry>
+          </row>
+		</thead>
+		<tbody>
+          <row>
+            <entry><para>0</para></entry>
+
+            <entry><para>1</para></entry>
+
+            <entry><para>OK</para></entry>
+
+            <entry><para>HARD</para></entry>
+
+            <entry><para>No</para></entry>
+
+            <entry><para>Initial state of the service</para></entry>
+          </row>
+
+          <row>
+            <entry><para>1</para></entry>
+
+            <entry><para>1</para></entry>
+
+            <entry><para>CRITICAL</para></entry>
+
+            <entry><para>SOFT</para></entry>
+
+            <entry><para>Yes</para></entry>
+
+            <entry><para>First detection of a non-OK state. Event handlers
+            execute.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>2</para></entry>
+
+            <entry><para>2</para></entry>
+
+            <entry><para>WARNING</para></entry>
+
+            <entry><para>SOFT</para></entry>
+
+            <entry><para>Yes</para></entry>
+
+            <entry><para>Service continues to be in a non-OK state. Event
+            handlers execute.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>3</para></entry>
+
+            <entry><para>3</para></entry>
+
+            <entry><para>CRITICAL</para></entry>
+
+            <entry><para>HARD</para></entry>
+
+            <entry><para>Yes</para></entry>
+
+            <entry><para>Max check attempts has been reached, so service goes
+            into a HARD state. Event handlers execute and a problem
+            notification is sent out. Check # is reset to 1 immediately after
+            this happens.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>4</para></entry>
+
+            <entry><para>1</para></entry>
+
+            <entry><para>WARNING</para></entry>
+
+            <entry><para>HARD</para></entry>
+
+            <entry><para>Yes</para></entry>
+
+            <entry><para>Service changes to a HARD WARNING state. Event
+            handlers execute and a problem notification is sent
+            out.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>5</para></entry>
+
+            <entry><para>1</para></entry>
+
+            <entry><para>WARNING</para></entry>
+
+            <entry><para>HARD</para></entry>
+
+            <entry><para>No</para></entry>
+
+            <entry><para>Service stabilizes in a HARD problem state. Depending
+            on what the notification interval for the service is, another
+            notification might be sent out.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>6</para></entry>
+
+            <entry><para>1</para></entry>
+
+            <entry><para>OK</para></entry>
+
+            <entry><para>HARD</para></entry>
+
+            <entry><para>Yes</para></entry>
+
+            <entry><para>Service experiences a HARD recovery. Event handlers
+            execute and a recovery notification is sent out.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>7</para></entry>
+
+            <entry><para>1</para></entry>
+
+            <entry><para>OK</para></entry>
+
+            <entry><para>HARD</para></entry>
+
+            <entry><para>No</para></entry>
+
+            <entry><para>Service is still OK.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>8</para></entry>
+
+            <entry><para>1</para></entry>
+
+            <entry><para>UNKNOWN</para></entry>
+
+            <entry><para>SOFT</para></entry>
+
+            <entry><para>Yes</para></entry>
+
+            <entry><para>Service is detected as changing to a SOFT non-OK
+            state. Event handlers execute.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>9</para></entry>
+
+            <entry><para>2</para></entry>
+
+            <entry><para>OK</para></entry>
+
+            <entry><para>SOFT</para></entry>
+
+            <entry><para>Yes</para></entry>
+
+            <entry><para>Service experiences a SOFT recovery. Event handlers
+            execute, but notification are not sent, as this wasn't a "real"
+            problem. State type is set HARD and check # is reset to 1
+            immediately after this happens.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>10</para></entry>
+
+            <entry><para>1</para></entry>
+
+            <entry><para>OK</para></entry>
+
+            <entry><para>HARD</para></entry>
+
+            <entry><para>No</para></entry>
+
+            <entry><para>Service stabilizes in an OK state.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
+</chapter>

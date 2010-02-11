@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="gettingstarted-monitoring-printers"
+         xreflabel="Monitoring network printers">
+  <title>Monitoring Network Printers</title>
+
+  <abstract>
+    <para>This document describes how you can monitor the status of networked
+    printers. Specifically, <productname class="trade">HP</productname>
+    printers that have internal/external <productname
+    class="registered">JetDirect</productname> cards/devices, or other print
+    servers (like the <productname class="trade">Troy</productname>
+    <productname class="registered">PocketPro 100S</productname> or the
+    <productname class="trade">Netgear</productname> <productname
+    class="registered">PS101</productname>) that support the JetDirect
+    protocol.</para>
+  </abstract>
+
+  <section>
+    <title>Introduction</title>
+
+    <para><inlinemediaobject>
+        <imageobject>
+          <imagedata fileref="images/printer.png" format="PNG"/>
+        </imageobject>
+      </inlinemediaobject></para>
+
+    <para>The &plugin-hpjd; plugin (which is part of the
+    standard Nagios plugins
+    distribution) allows you to monitor the status of JetDirect-capable
+    printers which have &protocol-snmp; enabled. The plugin is capable
+    of detecting the following printer states:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Paper Jam</para>
+      </listitem>
+
+      <listitem>
+        <para>Out of Paper</para>
+      </listitem>
+
+      <listitem>
+        <para>Printer Offline</para>
+      </listitem>
+
+      <listitem>
+        <para>Intervention Required</para>
+      </listitem>
+
+      <listitem>
+        <para>Toner Low</para>
+      </listitem>
+
+      <listitem>
+        <para>Insufficient Memory</para>
+      </listitem>
+
+      <listitem>
+        <para>Open Door</para>
+      </listitem>
+
+      <listitem>
+        <para>Output Tray is Full</para>
+      </listitem>
+
+      <listitem>
+        <para>and more...</para>
+      </listitem>
+    </itemizedlist>
+
+    <note>
+      <para>These instructions assume that you've installed Nagios according
+      to the <link linkend="gettingstarted-quickstart">quickstart guide</link>. The sample
+      configuration entries below reference objects that are defined in the
+      sample config files (<filename>commands.cfg</filename>,
+      <filename>templates.cfg</filename>, etc.) that are installed if you
+      follow the quickstart.</para>
+    </note>
+  </section>
+
+  <section>
+    <title>Overview</title>
+
+    <para><informalfigure><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/monitoring-printers.png" format="PNG"/>
+        </imageobject>
+      </mediaobject></informalfigure></para>
+
+    <para>Monitoring the status of a networked printer is pretty simple.
+    JetDirect-enabled printers usually have &protocol-snmp; enabled,
+    which allows Nagios to monitor their status using the
+    &plugin-hpjd; plugin.</para>
+
+    <para>The &plugin-hpjd; plugin will only get compiled and
+    installed if you have the <application>net-snmp</application> and
+    <application>net-snmp-utils</application> packages installed on your
+    system. Make sure the plugin exists in <filename
+    class="directory">/usr/local/nagios/libexec</filename> before you
+    continue. If it doesn't, install <application>net-snmp</application> and
+    <application>net-snmp-utils</application> and recompile/reinstall the
+    Nagios plugins.</para>
+  </section>
+
+  <section>
+    <title>Steps</title>
+
+    <para>There are several steps you'll need to follow in order to monitor a
+    new network printer. They are:</para>
+
+    <procedure>
+      <step>
+        <para>Perform first-time prerequisites</para>
+      </step>
+
+      <step>
+        <para>Create new host and service definitions for monitoring the
+        printer</para>
+      </step>
+
+      <step>
+        <para>Restart the Nagios daemon</para>
+      </step>
+    </procedure>
+  </section>
+
+  <section>
+    <title>What's Already Done For You</title>
+
+    <para>To make your life a bit easier, a few configuration tasks have
+    already been done for you:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>A <emphasis>check_hpjd</emphasis> command definition has been
+        added to the <filename>commands.cfg</filename> file. This allows you
+        to use the &plugin-hpjd; plugin to monitor network
+        printers.</para>
+      </listitem>
+
+      <listitem>
+        <para>A printer host template (called
+        <emphasis>generic-printer</emphasis>) has already been created in the
+        <filename>templates.cfg</filename> file. This allows you to add new
+        printer host definitions in a simple manner.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The above-mentioned config files can be found in the <filename
+    class="directory">/usr/local/nagios/etc/objects/</filename> directory. You
+    can modify the definitions in these and other definitions to suit your
+    needs better if you'd like. However, I'd recommend waiting until you're
+    more familiar with configuring Nagios before doing so. For the time being,
+    just follow the directions outlined below and you'll be monitoring your
+    network printers in no time.</para>
+  </section>
+
+  <section>
+    <title>Prerequisites</title>
+
+    <para>The first time you configure Nagios to monitor a network printer,
+    you'll need to do a bit of extra work. Remember, you only need to do this
+    for the *first* printer you monitor.</para>
+
+    <para>Edit the main Nagios config file.</para>
+
+    <screen><prompt>linux:~ # </prompt><userinput>vi /usr/local/nagios/etc/nagios.cfg</userinput></screen>
+
+    <para>Remove the leading pound (#) sign from the following line in the
+    main configuration file:</para>
+
+    <programlisting>
+#cfg_file=/usr/local/nagios/etc/objects/printer.cfg
+</programlisting>
+
+    <para>Save the file and exit.</para>
+
+    <para>What did you just do? You told Nagios to look to the
+    <filename>/usr/local/nagios/etc/objects/printer.cfg</filename> to find
+    additional object definitions. That's where you'll be adding host and
+    service definitions for the printer. That configuration file already
+    contains some sample host, hostgroup, and service definitions. For the
+    *first* printer you monitor, you can simply modify the sample host and
+    service definitions in that file, rather than creating new ones.</para>
+  </section>
+
+  <section>
+    <title>Configuring Nagios</title>
+
+    <para>You'll need to create some <link
+    linkend="configuringnagios-objectdefinitions">object definitions</link> in
+    order to monitor a new printer.</para>
+
+    <para>Open the <filename>printer.cfg</filename> file for editing.</para>
+
+    
+    	<screen>
+	<prompt>linux:~ # </prompt><userinput>vi /usr/local/nagios/etc/objects/printer.cfg</userinput>
+	</screen>
+
+    <para>Add a new <link
+    linkend="configuringnagios-objectdefinitions-host">host</link> definition
+    for the networked printer that you're going to monitor. If this is the
+    *first* printer you're monitoring, you can simply modify the sample host
+    definition in <filename>printer.cfg</filename>. Change the
+    <varname>host_name</varname>, <varname>alias</varname>, and
+    <varname>address</varname> fields to appropriate values for the
+    printer.</para>
+
+    <programlisting>
+define host{
+    use         generic-printer     ; Inherit default values from a template
+    host_name   hplj2605dn          ; The name we're giving to this printer
+    alias       HP LaserJet 2605dn  ; A longer name associated with the printer
+    address     192.168.1.30        ; IP address of the printer
+    hostgroups  allhosts            ; Host groups this printer is associated with
+}
+</programlisting>
+
+    <para>Now you can add some service definitions (to the same configuration
+    file) to monitor different aspects of the printer. If this is the *first*
+    printer you're monitoring, you can simply modify the sample service
+    definition in <filename>printer.cfg</filename>.</para>
+
+    <note>
+      <para>Replace "hplj2605dn" in the example
+      definitions below with the name you specified in the
+      <varname>host_name</varname> directive of the host definition you just
+      added.</para>
+    </note>
+
+    <para>Add the following service definition to check the status of the
+    printer. The service uses the &plugin-hpjd; plugin to
+    check the status of the printer every 10 minutes by default. The
+    &protocol-snmp; community string used to query the printer is
+    "public" in this example.</para>
+
+    <programlisting>
+define service{
+    use                   generic-service        ; Inherit values from a template
+    host_name             hplj2605dn             ; The name of the host the service is associated with
+    service_description   Printer Status         ; The service description
+    check_command         check_hpjd!-C public   ; The command used to monitor the service
+    normal_check_interval 10  ; Check the service every 10 minutes under normal conditions
+    retry_check_interval  1   ; Re-check the service every minute until its final/hard state is determined
+}
+</programlisting>
+
+    <para>Add the following service definition to ping the printer every 10
+    minutes by default. This is useful for monitoring <acronym>RTA</acronym>,
+    packet loss, and general network connectivity.</para>
+
+    <programlisting>
+define service{
+        use                     generic-service
+        host_name               hplj2605dn
+        service_description     PING
+        check_command           check_ping!3000.0,80%!5000.0,100%
+        normal_check_interval   10
+        retry_check_interval    1
+}
+</programlisting>
+
+    <para>Save the file.</para>
+  </section>
+
+  <section>
+    <title>Restarting Nagios</title>
+
+    <para>Once you've added the new host and service definitions to the
+    <filename>printer.cfg</filename> file, you're ready to start monitoring
+    the printer. To do this, you'll need to <link
+    linkend="runningnagios-verifyconfig">verify your configuration</link> and
+    <link linkend="runningnagios-startstop">restart Nagios</link>.</para>
+
+    <para>If the verification process produces any errors messages, fix your
+    configuration file before continuing. Make sure that you don't (re)start
+    Nagios until the verification process completes without any errors!</para>
+  </section>
+</chapter>

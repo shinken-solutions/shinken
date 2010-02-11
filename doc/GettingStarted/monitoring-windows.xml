@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="gettingstarted-monitoring-windows"
+         xreflabel="Monitoring Windows machines">
+  <title>Monitoring Windows Machines</title>
+
+  <abstract>
+    <para>This document describes how you can monitor "private" services and
+    attributes of Windows machines, such as:</para>
+
+    <para><itemizedlist>
+        <listitem>
+          <para>Memory usage</para>
+        </listitem>
+
+        <listitem>
+          <para>CPU load</para>
+        </listitem>
+
+        <listitem>
+          <para>Disk usage</para>
+        </listitem>
+
+        <listitem>
+          <para>Service states</para>
+        </listitem>
+
+        <listitem>
+          <para>Running processes</para>
+        </listitem>
+
+        <listitem>
+          <para>etc.</para>
+        </listitem>
+      </itemizedlist></para>
+  </abstract>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>Publicly available services that are provided by Windows machines
+    (&protocol-http;, &protocol-ftp;, &protocol-pop3;, etc.) can be monitored easily by following the
+    documentation on <xref
+    linkend="gettingstarted-monitoring-publicservices" />.</para>
+
+    <note>
+      <para>These instructions assume that you've installed Nagios according
+      to the <link linkend="gettingstarted-quickstart">quickstart guide</link>. The sample
+      configuration entries below reference objects that are defined in the
+      sample config files (<filename>commands.cfg</filename>,
+      <filename>templates.cfg</filename>, etc.) that are installed if you
+      follow the quickstart.</para>
+    </note>
+  </section>
+
+  <section>
+    <title>Overview</title>
+
+    <para><informalfigure><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/monitoring-windows.png" format="PNG"/>
+        </imageobject>
+      </mediaobject></informalfigure>Monitoring private services or attributes of a
+    Windows machine requires that you install an agent on it. This agent acts
+    as a proxy between the Nagios plugin that does the monitoring and the
+    actual service or attribute of the Windows machine. Without installing an
+    agent on the Windows box, Nagios would be unable to monitor private
+    services or attributes of the Windows box.</para>
+
+    <para>For this example, we will be installing the <ulink
+    url="&url-sourceforge-projects;nscplus">NSClient++</ulink> addon on
+    the Windows machine and using the &plugin-nt; plugin to
+    communicate with the NSClient++ addon. The &plugin-nt;
+    plugin should already be installed on the Nagios server if you followed
+    the quickstart guide.</para>
+
+    <para>Other Windows agents (like <ulink
+    url="&url-sourceforge-projects;nc-net">NC_Net</ulink>) could be used
+    instead of NSClient++ if you wish - provided you change command and
+    service definitions, etc. a bit. For the sake of simplicity I will only
+    cover using the NSClient++ addon in these instructions.</para>
+  </section>
+
+  <section>
+    <title>Steps</title>
+
+    <para>There are several steps you'll need to follow in order to monitor a
+    new Windows machine. They are:</para>
+
+    <procedure>
+      <step>
+        <para>Perform first-time prerequisites</para>
+      </step>
+
+      <step>
+        <para>Install a monitoring agent on the Windows machine</para>
+      </step>
+
+      <step>
+        <para>Create new host and service definitions for monitoring the
+        Windows machine</para>
+      </step>
+
+      <step>
+        <para>Restart the Nagios daemon</para>
+      </step>
+    </procedure>
+  </section>
+
+  <section>
+    <title>What's Already Done For You</title>
+
+    <para>To make your life a bit easier, a few configuration tasks have
+    already been done for you:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>A &plugin-nt; command definition has been added
+        to the <filename>commands.cfg</filename> file. This allows you to use
+        the &plugin-nt; plugin to monitor Window
+        services.</para>
+      </listitem>
+
+      <listitem>
+        <para>A Windows server host template (called
+        <varname>windows-server</varname>) has already been created in the
+        <filename>templates.cfg</filename> file. This allows you to add new
+        Windows host definitions in a simple manner.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The above-mentioned config files can be found in the <filename
+    class="directory">/usr/local/nagios/etc/objects/</filename> directory. You
+    can modify the definitions in these and other definitions to suit your
+    needs better if you'd like. However, I'd recommend waiting until you're
+    more familiar with configuring Nagios before doing so. For the time being,
+    just follow the directions outlined below and you'll be monitoring your
+    Windows boxes in no time.</para>
+  </section>
+
+  <section>
+    <title>Prerequisites</title>
+
+    <para>The first time you configure Nagios to monitor a Windows machine,
+    you'll need to do a bit of extra work. Remember, you only need to do this
+    for the *first* Windows machine you monitor.</para>
+
+    <para>Edit the main Nagios config file.</para>
+
+    <screen><prompt>linux:~ # </prompt><userinput>vi /usr/local/nagios/etc/nagios.cfg</userinput></screen>
+
+    <para>Remove the leading pound (#) sign from the following line in the
+    main configuration file:</para>
+
+    <programlisting>#cfg_file=/usr/local/nagios/etc/objects/windows.cfg</programlisting>
+
+    <para>Save the file and exit.</para>
+
+    <para>What did you just do? You told Nagios to look to the
+    <filename>/usr/local/nagios/etc/objects/windows.cfg</filename> to find
+    additional object definitions. That's where you'll be adding Windows host
+    and service definitions. That configuration file already contains some
+    sample host, hostgroup, and service definitions. For the *first* Windows
+    machine you monitor, you can simply modify the sample host and service
+    definitions in that file, rather than creating new ones.</para>
+  </section>
+
+  <section>
+    <title>Installing the Windows Agent</title>
+
+    <para>Before you can begin monitoring private services and attributes of
+    Windows machines, you'll need to install an agent on those machines. I
+    recommend using the NSClient++ addon, which can be found at <ulink
+    url="&url-sourceforge-projects;nscplus">&url-sourceforge-projects;nscplus</ulink>.
+    These instructions will take you through a basic installation of the
+    NSClient++ addon, as well as the configuration of Nagios for monitoring
+    the Windows machine.</para>
+
+    <procedure>
+      <step>
+        <para>Download the latest stable version of the NSClient++ addon from
+        <ulink
+        url="&url-sourceforge-projects;nscplus">&url-sourceforge-projects;nscplus</ulink></para>
+      </step>
+
+      <step>
+        <para>Unzip the NSClient++ files into a new C:\NSClient++
+        directory</para>
+      </step>
+
+      <step>
+        <para>Open a command prompt and change to the C:\NSClient++
+        directory</para>
+      </step>
+
+      <step>
+        <para>Register the NSClient++ system service with the following
+        command:</para>
+
+        <screen><prompt>C:\&gt; </prompt><userinput>nsclient++ /install</userinput></screen>
+      </step>
+
+      <step>
+        <para>Install the NSClient++ systray with the following command
+        ('SysTray' is case-sensitive):</para>
+
+        <screen>
+<prompt>C:\&gt; </prompt><userinput>nsclient++ SysTray</userinput>
+</screen>
+      </step>
+
+      <step>
+        <para>Open the services manager and make sure the NSClientpp service
+        is allowed to interact with the desktop (see the 'Log On' tab of the
+        services manager). If it isn't already allowed to interact with the
+        desktop, check the box to allow it to.</para>
+
+        <para><screenshot>
+        <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/nscpp.png" format="PNG"/>
+            </imageobject>
+        </mediaobject>
+         </screenshot></para>
+      </step>
+
+      <step>
+        <para>Edit the <filename>NSC.INI file</filename> (located in the
+        <filename class="directory">C:\NSClient++</filename> directory) and
+        make the following changes:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Uncomment all the modules listed in the [modules] section,
+            except for <varname>CheckWMI.dll</varname> and
+            <varname>RemoteConfiguration.dll</varname></para>
+          </listitem>
+
+          <listitem>
+            <para>Optionally require a password for clients by changing the
+            <varname>password</varname> option in the [Settings]
+            section.</para>
+          </listitem>
+
+          <listitem>
+            <para>Uncomment the <varname>allowed_hosts</varname> option in the
+            [Settings] section. Add the IP address of the Nagios server to
+            this line, or leave it blank to allow all hosts to connect.</para>
+          </listitem>
+
+          <listitem>
+            <para>Make sure the <varname>port</varname> option in the
+            [NSClient] section is uncommented and set to '12489' (the default
+            port).</para>
+          </listitem>
+        </itemizedlist>
+      </step>
+
+      <step>
+        <para>Start the NSClient++ service with the following command:</para>
+
+        <screen><prompt>C:\&gt; </prompt><userinput>nsclient++ /start</userinput></screen>
+      </step>
+
+      <step>
+        <para>If installed properly, a new icon should appear in your system
+        tray. It will be a yellow circle with a black 'M' inside.</para>
+      </step>
+
+      <step>
+        <para>Success! The Windows server can now be added to the Nagios
+        monitoring configuration...</para>
+      </step>
+    </procedure>
+  </section>
+
+  <section>
+    <title>Configuring Nagios</title>
+
+    <para>Now it's time to define some <link
+    linkend="configuringnagios-objectdefinitions">object definitions</link> in
+    your Nagios configuration files in order to monitor the new Windows
+    machine.</para>
+
+    <para>Open the <filename>windows.cfg</filename> file for editing.</para>
+
+    <screen><prompt>linux:~ # </prompt><userinput>vi /usr/local/nagios/etc/objects/windows.cfg</userinput></screen>
+
+    <para>Add a new <link
+    linkend="configuringnagios-objectdefinitions-host">host</link> definition
+    for the Windows machine that you're going to monitor. If this is the
+    *first* Windows machine you're monitoring, you can simply modify the
+    sample host definition in <filename>windows.cfg</filename>. Change the
+    <varname>host_name</varname>, <varname>alias</varname>, and
+    <varname>address</varname> fields to appropriate values for the Windows
+    box.</para>
+
+    <programlisting>
+define host{
+    use     windows-server  ; Inherit default values from a Windows server template (make sure you keep this line!)
+    host_name       winserver
+    alias       My Windows Server
+    address     192.168.1.2
+    }
+</programlisting>
+
+    <para>Good. Now you can add some service definitions (to the same
+    configuration file) in order to tell Nagios to monitor different aspects
+    of the Windows machine. If this is the *first* Windows machine you're
+    monitoring, you can simply modify the sample service definitions in
+    <filename>windows.cfg</filename>.</para>
+
+    <note>
+      <para>Replace <quote><varname><replaceable>winserver</replaceable></varname></quote> in the example definitions
+      below with the name you specified in the <varname>host_name</varname>
+      directive of the host definition you just added.</para>
+    </note>
+
+    <para>Add the following service definition to monitor the version of the
+    NSClient++ addon that is running on the Windows server. This is useful
+    when it comes time to upgrade your Windows servers to a newer version of
+    the addon, as you'll be able to tell which Windows machines still need to
+    be upgraded to the latest version of NSClient++.</para>
+
+    <programlisting>
+define service{
+    use         generic-service
+    host_name           winserver
+    service_description NSClient++ Version
+    check_command       check_nt!CLIENTVERSION
+    }
+</programlisting>
+
+    <para>Add the following service definition to monitor the uptime of the
+    Windows server.</para>
+
+    <programlisting>
+define service{
+    use         generic-service
+    host_name           winserver
+    service_description Uptime
+    check_command       check_nt!UPTIME
+    }
+</programlisting>
+
+    <para>Add the following service definition to monitor the CPU utilization
+    on the Windows server and generate a CRITICAL alert if the 5-minute CPU
+    load is 90% or more or a WARNING alert if the 5-minute load is 80% or
+    greater.</para>
+
+    <programlisting>
+define service{
+    use         generic-service
+    host_name           winserver
+    service_description CPU Load
+    check_command       check_nt!CPULOAD!-l 5,80,90
+    }
+</programlisting>
+
+    <para>Add the following service definition to monitor memory usage on the
+    Windows server and generate a CRITICAL alert if memory usage is 90% or
+    more or a WARNING alert if memory usage is 80% or greater.</para>
+
+    <programlisting>
+define service{
+    use         generic-service
+    host_name           winserver
+    service_description Memory Usage
+    check_command       check_nt!MEMUSE!-w 80 -c 90
+    }
+</programlisting>
+
+    <para>Add the following service definition to monitor usage of the C:\
+    drive on the Windows server and generate a CRITICAL alert if disk usage is
+    90% or more or a WARNING alert if disk usage is 80% or greater.</para>
+
+    <programlisting>
+define service{
+    use         generic-service
+    host_name           winserver
+    service_description C:\ Drive Space
+    check_command       check_nt!USEDDISKSPACE!-l c -w 80 -c 90
+    }
+</programlisting>
+
+    <para>Add the following service definition to monitor the W3SVC service
+    state on the Windows machine and generate a CRITICAL alert if the service
+    is stopped.</para>
+
+    <programlisting>
+define service{
+    use         generic-service
+    host_name           winserver
+    service_description W3SVC
+    check_command       check_nt!SERVICESTATE!-d SHOWALL -l W3SVC
+    }
+</programlisting>
+
+    <para>Add the following service definition to monitor the Explorer.exe
+    process on the Windows machine and generate a CRITICAL alert if the
+    process is not running.</para>
+
+    <programlisting>
+define service{
+    use         generic-service
+    host_name           winserver
+    service_description Explorer
+    check_command       check_nt!PROCSTATE!-d SHOWALL -l Explorer.exe
+    }
+</programlisting>
+
+    <para>That's it for now. You've added some basic services that should be
+    monitored on the Windows box. Save the configuration file.</para>
+  </section>
+
+  <section>
+    <title>Password Protection</title>
+
+    <para>If you specified a password in the NSClient++ configuration file on
+    the Windows machine, you'll need to modify the &plugin-nt;
+    command definition to include the password. Open the
+    <filename>commands.cfg</filename> file for editing.</para>
+
+    <screen><prompt>linux:~ # </prompt><userinput>vi /usr/local/nagios/etc/commands.cfg</userinput></screen>
+
+    <para>Change the definition of the &plugin-nt; command to
+    include the "<option>-s</option> &lt;PASSWORD&gt;" argument (where
+    PASSWORD is the password you specified on the Windows machine) like
+    this:</para>
+
+    <programlisting>
+define command{
+    command_name    check_nt
+    command_line    $USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -s PASSWORD -v $ARG1$ $ARG2$
+    }
+</programlisting>
+
+    <para>Save the file.</para>
+  </section>
+
+  <section>
+    <title>Restarting Nagios</title>
+
+    <para>You're done with modifying the Nagios configuration, so you'll need
+    to <link linkend="runningnagios-verifyconfig">verify your configuration
+    files</link> and <link linkend="runningnagios-startstop">restart
+    Nagios</link>.</para>
+
+    <para>If the verification process produces any errors messages, fix your
+    configuration file before continuing. Make sure that you don't (re)start
+    Nagios until the verification process completes without any errors!</para>
+  </section>
+</chapter>

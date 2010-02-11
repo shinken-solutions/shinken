@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!ENTITY name-nrpe "NRPE">
+<!ENTITY name-nsca "NSCA">
+<!ENTITY name-nsclient "NSClient++">
+<!ENTITY name-nagios "Nagios">
+<!ENTITY name-opensuse "openSUSE">
+<!ENTITY name-fedora "Fedora">
+<!ENTITY name-ubuntu "Ubuntu">

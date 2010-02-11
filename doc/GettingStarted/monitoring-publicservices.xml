@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="gettingstarted-monitoring-publicservices" xreflabel="Monitoring publicly available services (HTTP, FTP, SSH, etc.)">
+  <title>Monitoring Publicly Available Services</title>
+  <abstract>
+    <para>This document describes how you can monitor publicly available
+    services, applications and protocols. By <quote>public</quote> I mean services that are
+    accessible across the network - either the local network or the greater
+    Internet. Examples of public services include &protocol-http;, &protocol-pop3;, &protocol-imap;, &protocol-ftp;, and
+    &protocol-ssh;. There are many more public services that you probably use on a daily
+    basis. These services and applications, as well as their underlying
+    protocols, can usually be monitored by Nagios without any special access
+    requirements.</para>
+  </abstract>
+  <section>
+    <title>Introduction</title>
+    <para>Private services, in contrast, cannot be monitored with Nagios
+    without an intermediary agent of some kind. Examples of private services
+    associated with hosts are things like CPU load, memory usage, disk usage,
+    current user count, process information, etc. These private services or
+    attributes of hosts are not usually exposed to external clients. This
+    situation requires that an intermediary monitoring agent be installed on
+    any host that you need to monitor such information on. More information on
+    monitoring private services on different types of hosts can be found in
+    the documentation on:</para>
+    <itemizedlist>
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-windows">Monitoring Windows machines</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-netware">Monitoring Netware servers</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-linux">Monitoring Linux/Unix machines</link></para>
+      </listitem>
+    </itemizedlist>
+
+    <tip>
+      <para>Occassionally you will find that information on private services
+      and applications can be monitored with &protocol-snmp;. The &protocol-snmp; agent allows you
+      to remotely monitor otherwise private (and inaccessible) information
+      about the host. For more information about monitoring services using
+      &protocol-snmp;, check out the documentation on <link linkend="gettingstarted-monitoring-routers">Monitoring routers/switches</link>.</para>
+    </tip>
+    <note>
+      <para>These instructions assume that you've installed Nagios according
+      to the <link linkend="gettingstarted-quickstart">quickstart guide</link>. The sample
+      configuration entries below reference objects that are defined in the
+      sample <filename>commands.cfg</filename> and
+      <filename>localhost.cfg</filename> config files.</para>
+    </note>
+  </section>
+  <section>
+    <title>Plugins For Monitoring Services</title>
+    <para>When you find yourself needing to monitor a particular application,
+    service, or protocol, chances are good that a <link
+    linkend="thebasics-plugins">plugin</link> exists to monitor it. The official
+    Nagios plugins distribution comes with plugins that can be used to monitor
+    a variety of services and protocols. There are also a large number of
+    contributed plugins that can be found in the <filename class="directory">contrib/</filename>
+    subdirectory of the plugin distribution. The <ulink
+    url="&url-nagiosexchange;">NagiosExchange.org</ulink> website
+    hosts a number of additional plugins that have been written by users, so
+    check it out when you have a chance.</para>
+    <para>If you don't happen to find an appropriate plugin for monitoring
+    what you need, you can always write your own. Plugins are easy to write,
+    so don't let this thought scare you off. Read the documentation on <link
+    linkend="development-pluginapi">developing plugins</link> for more
+    information.</para>
+    <para>I'll walk you through monitoring some basic services that you'll
+    probably use sooner or later. Each of these services can be monitored
+    using one of the plugins that gets installed as part of the Nagios plugins
+    distribution. Let's get started...</para>
+  </section>
+  <section>
+    <title>Creating A Host Definition</title>
+
+    <para>Before you can monitor a service, you first need to define a
+    <link linkend="configuringnagios-objectdefinitions-host">host</link> that 
+    is associated with the service. You can place host definitions in any 
+    object configuration file specified by a 
+    <link linkend="configuringnagios-configmain-cfg_file">cfg_file</link>
+    directive or placed in a directory specified by a 
+    <link linkend="configuringnagios-configmain-cfg_dir">cfg_dir</link> directive. If you have
+    already created a host definition, you can skip this step.</para>
+
+    <para>For this example, lets say you want to monitor a variety of services
+    on a remote host. Let's call that host <emphasis>remotehost</emphasis>.
+    The host definition can be placed in its own file or added to an already
+    exiting object configuration file. Here's what the host definition for
+    <emphasis>remotehost</emphasis> might look like:</para>
+
+    <programlisting>
+define host{
+    use           generic-host        ; Inherit default values from a template
+    host_name     remotehost          ; The name we're giving to this host
+    alias         Some Remote Host    ; A longer name associated with the host
+    address       192.168.1.50        ; IP address of the host
+    hostgroups    allhosts            ; Host groups this host is associated with
+    }
+</programlisting>
+
+    <para>Now that a definition has been added for the host that will be
+    monitored, we can start defining services that should be monitored. As
+    with host definitions, service definitions can be placed in any object
+    configuration file.</para>
+  </section>
+
+  <section>
+    <title>Creating Service Definitions</title>
+
+    <para>For each service you want to monitor, you need to define a <link
+    linkend="configuringnagios-objectdefinitions-service">service</link> in Nagios that is
+    associated with the host definition you just created. You can place
+    service definitions in any object configuration file specified by a <link
+    linkend="configuringnagios-configmain-cfg_file">cfg_file</link> directive or placed in a
+    directory specified by a <link linkend="configuringnagios-configmain-cfg_dir">cfg_dir</link> directive.</para>
+
+    <para>Some example service definitions for monitoring common public
+    service (&protocol-http;, &protocol-ftp;, etc) are given below.</para>
+  </section>
+
+  <section>
+    <title>Monitoring HTTP</title>
+
+    <para>Chances are you're going to want to monitor web servers at some
+    point - either yours or someone else's. The &plugin-http;
+    plugin is designed to do just that. It understands the &protocol-http; protocol and
+    can monitor response time, error codes, strings in the returned HTML,
+    server certificates, and much more.</para>
+
+    <para>The <filename>commands.cfg</filename> file contains a command
+    definition for using the &plugin-http; plugin. It looks
+    like this:</para>
+
+    <programlisting>
+define command{
+    name            check_http
+    command_name    check_http
+    command_line    $USER1$/check_http -I $HOSTADDRESS$ $ARG1$
+    }
+</programlisting>
+
+    <para>A simple service definition for monitoring the &protocol-http; service on the
+    <emphasis>remotehost</emphasis> machine might look like this:</para>
+
+    <programlisting>
+define service{
+    use                 generic-service     ; Inherit default values from a template
+    host_name           remotehost
+    service_description HTTP
+    check_command       check_http
+    }
+</programlisting>
+
+    <para>This simple service definition will monitor the &protocol-http; service running
+    on <emphasis>remotehost</emphasis>. It will produce alerts if the web
+    server doesn't respond within 10 seconds or if it returns &protocol-http; errors
+    codes (403, 404, etc.). That's all you need for basic monitoring. Pretty
+    simple, huh?</para>
+
+    <tip>
+      <para>For more advanced monitoring, run the &plugin-http; plugin manually with
+      <option>--help</option> as a command-line argument to see all the
+      options you can give the plugin. This <option>--help</option> syntax
+      works with all of the plugins I'll cover in this document.</para>
+    </tip>
+
+    <para>A more advanced definition for monitoring the &protocol-http; service is shown
+    below. This service definition will check to see if the
+    /download/index.php URI contains the string "latest-version.tar.gz". It
+    will produce an error if the string isn't found, the URI isn't valid, or
+    the web server takes longer than 5 seconds to respond.</para>
+
+    <programlisting>
+define service{
+    use                 generic-service   ; Inherit default values from a template
+    host_name           remotehost
+    service_description Product Download Link
+    check_command       check_http!-u /download/index.php -t 5 -s "latest-version.tar.gz"
+    }
+</programlisting>
+  </section>
+
+  <section>
+    <title>Monitoring FTP</title>
+
+    <para>When you need to monitor &protocol-ftp; servers, you can use the
+    &plugin-ftp; plugin. The <filename>commands.cfg</filename>
+    file contains a command definition for using the
+    &plugin-ftp; plugin, which looks like this:</para>
+
+    <programlisting>
+define command{
+    command_name    check_ftp
+    command_line    $USER1$/check_ftp -H $HOSTADDRESS$ $ARG1$
+    }
+</programlisting>
+
+    <para>A simple service definition for monitoring the &protocol-ftp; server on
+    <emphasis>remotehost</emphasis> would look like this:</para>
+
+    <programlisting>
+define service{
+    use                   generic-service  ; Inherit default values from a template
+    host_name             remotehost
+    service_description   FTP
+    check_command         check_ftp
+    }
+</programlisting>
+
+    <para>This service definition will monitor the &protocol-ftp; service and generate
+    alerts if the &protocol-ftp; server doesn't respond within 10 seconds.</para>
+
+    <para>A more advanced service definition is shown below. This service will
+    check the &protocol-ftp; server running on port 1023 on
+    <emphasis>remotehost</emphasis>. It will generate an alert if the server
+    doesn't respond within 5 seconds or if the server response doesn't contain
+    the string <quote>Pure-FTPd [TLS]</quote>.</para>
+
+    <programlisting>
+define service{
+    use                   generic-service   ; Inherit default values from a template
+    host_name             remotehost
+    service_description   Special FTP 
+    check_command         check_ftp!-p 1023 -t 5 -e "Pure-FTPd [TLS]"
+    }
+</programlisting>
+  </section>
+
+  <section>
+    <title>Monitoring SSH</title>
+
+    <para>When you need to monitor &protocol-ssh; servers, you can use the
+    &plugin-ssh; plugin. The <filename>commands.cfg</filename>
+    file contains a command definition for using the
+    &plugin-ssh; plugin, which looks like this:</para>
+
+    <programlisting>
+define command{
+    command_name    check_ssh
+    command_line    $USER1$/check_ssh $ARG1$ $HOSTADDRESS$
+    }
+</programlisting>
+
+    <para>A simple service definition for monitoring the &protocol-ssh; server on
+    <emphasis>remotehost</emphasis> would look like this:</para>
+
+    <programlisting>
+define service{
+    use                  generic-service  ; Inherit default values from a template
+    host_name            remotehost
+    service_description  SSH
+    check_command        check_ssh
+    }
+</programlisting>
+
+    <para>This service definition will monitor the &protocol-ssh; service and generate
+    alerts if the &protocol-ssh; server doesn't respond within 10 seconds.</para>
+
+    <para>A more advanced service definition is shown below. This service will
+    check the &protocol-ssh; server and generate an alert if the server doesn't respond
+    within 5 seconds or if the server version string string doesn't match
+    <quote>OpenSSH_4.2</quote>.</para>
+
+    <programlisting>
+define service{
+    use                 generic-service   ; Inherit default values from a template
+    host_name           remotehost
+    service_description SSH Version Check 
+    check_command       check_ssh!-t 5 -r "OpenSSH_4.2"
+    }
+</programlisting>
+  </section>
+
+  <section>
+    <title>Monitoring SMTP</title>
+
+    <para>The &plugin-smtp; plugin can be using for monitoring
+    your email servers. The <filename>commands.cfg</filename> file contains a
+    command definition for using the &plugin-smtp; plugin,
+    which looks like this:</para>
+
+    <programlisting>
+define command{
+    command_name    check_smtp
+    command_line    $USER1$/check_smtp -H $HOSTADDRESS$ $ARG1$
+    }
+</programlisting>
+
+    <para>A simple service definition for monitoring the &protocol-smtp; server on
+    <emphasis>remotehost</emphasis> would look like this:</para>
+
+    <programlisting>
+define service{
+    use                  generic-service  ; Inherit default values from a template
+    host_name            remotehost
+    service_description  SMTP
+    check_command        check_smtp
+    }
+</programlisting>
+
+    <para>This service definition will monitor the &protocol-smtp; service and generate
+    alerts if the &protocol-smtp; server doesn't respond within 10 seconds.</para>
+
+    <para>A more advanced service definition is shown below. This service will
+    check the &protocol-smtp; server and generate an alert if the server doesn't respond
+    within 5 seconds or if the response from the server doesn't contain
+    "mygreatmailserver.com".</para>
+
+    <programlisting>
+define service{
+    use                  generic-service  ; Inherit default values from a template
+    host_name            remotehost
+    service_description  SMTP Response Check 
+    check_command        check_smtp!-t 5 -e "mygreatmailserver.com"
+    }
+</programlisting>
+  </section>
+
+  <section>
+    <title>Monitoring POP3</title>
+
+    <para>The &plugin-pop; plugin can be using for monitoring
+    the &protocol-pop3; service on your email servers. The
+    <filename>commands.cfg</filename> file contains a command definition for
+    using the &plugin-pop; plugin, which looks like
+    this:</para>
+
+    <programlisting>
+define command{
+    command_name    check_pop
+    command_line    $USER1$/check_pop -H $HOSTADDRESS$ $ARG1$
+    }
+</programlisting>
+
+    <para>A simple service definition for monitoring the &protocol-pop3; service on
+    <emphasis>remotehost</emphasis> would look like this:</para>
+
+    <programlisting>
+define service{
+    use                  generic-service  ; Inherit default values from a template
+    host_name            remotehost
+    service_description  POP3
+    check_command        check_pop
+    }
+</programlisting>
+
+    <para>This service definition will monitor the &protocol-pop3; service and generate
+    alerts if the &protocol-pop3; server doesn't respond within 10 seconds.</para>
+
+    <para>A more advanced service definition is shown below. This service will
+    check the &protocol-pop3; service and generate an alert if the server doesn't respond
+    within 5 seconds or if the response from the server doesn't contain
+    "mygreatmailserver.com".</para>
+
+    <programlisting>
+define service{
+    use                  generic-service  ; Inherit default values from a template
+    host_name            remotehost
+    service_description  POP3 Response Check 
+    check_command        check_pop!-t 5 -e "mygreatmailserver.com"
+    }
+</programlisting>
+  </section>
+
+  <section>
+    <title>Monitoring IMAP</title>
+
+    <para>The &plugin-imap; plugin can be using for monitoring
+    &protocol-imap4; service on your email servers. The <filename>commands.cfg</filename>
+    file contains a command definition for using the
+    &plugin-imap; plugin, which looks like this:</para>
+
+    <programlisting>
+define command{
+    command_name    check_imap
+    command_line    $USER1$/check_imap -H $HOSTADDRESS$ $ARG1$
+    }
+</programlisting>
+
+    <para>A simple service definition for monitoring the &protocol-imap4; service on
+    <emphasis>remotehost</emphasis> would look like this:</para>
+
+    <programlisting>
+define service{
+    use                  generic-service  ; Inherit default values from a template
+    host_name            remotehost
+    service_description  IMAP
+    check_command        check_imap
+    }
+</programlisting>
+
+    <para>This service definition will monitor the &protocol-imap4; service and generate
+    alerts if the &protocol-imap; server doesn't respond within 10 seconds.</para>
+
+    <para>A more advanced service definition is shown below. This service will
+    check the IAMP4 service and generate an alert if the server doesn't
+    respond within 5 seconds or if the response from the server doesn't
+    contain <quote>mygreatmailserver.com</quote>.</para>
+
+    <programlisting>
+define service{
+    use                  generic-service  ; Inherit default values from a template
+    host_name            remotehost
+    service_description  IMAP4 Response Check 
+    check_command        check_imap!-t 5 -e "mygreatmailserver.com"
+    }
+</programlisting>
+  </section>
+
+  <section>
+    <title>Restarting Nagios</title>
+
+    <para>Once you've added the new host and service definitions to your
+    object configuration file(s), you're ready to start monitoring them. To do
+    this, you'll need to <link linkend="runningnagios-verifyconfig">verify your
+    configuration</link> and <link linkend="runningnagios-startstop">restart
+    Nagios</link>.</para>
+
+    <para>If the verification process produces any errors messages, fix your
+    configuration file before continuing. Make sure that you don't (re)start
+    Nagios until the verification process completes without any errors!</para>
+  </section>
+</chapter>
+

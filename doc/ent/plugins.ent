@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!ENTITY plugin-nagios "<command>check_nagios</command>">
+
+<!ENTITY plugin-hpjd "<command>check_hpjd</command>">
+
+<!ENTITY plugin-nrpe "<command>check_nrpe</command>">
+
+<!ENTITY plugin-dns "<command>check_dns</command>">
+
+<!ENTITY plugin-dummy "<command>check_dummy</command>">
+
+<!ENTITY plugin-ping "<command>check_ping</command>">
+
+<!ENTITY plugin-nt "<command>check_nt</command>">
+
+<!ENTITY plugin-snmp "<command>check_snmp</command>">
+
+<!ENTITY plugin-rpc "<command>check_rpc</command>">
+
+<!ENTITY plugin-http "<command>check_http</command>">
+
+<!ENTITY plugin-byssh "<command>check_by_ssh</command>">
+
+<!ENTITY plugin-ssh "<command>check_ssh</command>">
+
+<!ENTITY plugin-cluster "<command>check_cluster</command>">
+
+<!ENTITY plugin-fping "<command>check_fping</command>">
+
+<!ENTITY plugin-mrtgtraf "<command>check_mrtgtraf</command>">
+
+<!ENTITY plugin-ftp "<command>check_ftp</command>">
+
+<!ENTITY plugin-smtp "<command>check_smtp</command>">
+
+<!ENTITY plugin-pop "<command>check_pop</command>">
+
+<!ENTITY plugin-imap "<command>check_imap</command>">

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="gettingstarted-quickstart" xreflabel="Quickstart installation guide">
+  <title>Quickstart Installation Guides</title>
+  <remark>Chapitre finalisé</remark>
+  <abstract>
+    <para>
+      These quickstart guides are intended to provide you with simple
+      instructions on how to install Nagios from source (code) and have
+      it monitoring your local machine inside of 20 minutes. No advanced
+      installation options are discussed here - just the basics that will
+      work for 95% of users who want to get started.
+   </para>
+  </abstract>
+  <section>
+    <title>Guides</title>
+    <para>
+      Quickstart installation guides are currently available for the
+      following Linux distributions:
+   </para>
+    <itemizedlist>
+      <listitem>
+        <para><link linkend="gettingstarted-quickstart-fedora">&name-fedora; Quickstart</link></para>
+      </listitem>
+      <listitem>
+        <para><link linkend="gettingstarted-quickstart-opensuse">&name-opensuse; Quickstart</link></para>
+      </listitem>
+      <listitem>
+        <para><link linkend="gettingstarted-quickstart-ubuntu">&name-ubuntu; Quickstart</link></para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      You can also find additional quickstart guides on the
+      <ulink url="&url-nagios-community;">NagiosCommunity.org wiki</ulink>.
+      Can't find a quickstart for your particular OS ? Write one and post
+      it to the wiki for others!
+   </para>
+    <para>
+      If you are installing Nagios on an operating system or Linux
+      distribution that isn't listed above, read the 
+      <link linkend="gettingstarted-quickstart-fedora">&name-fedora; Quickstart</link> for
+      an overview of what you'll need to do. Command names, paths, etc.
+      vary widely across different OSes/distributions, so you'll likely
+      need to tweak the installation docs a bit to work for your
+      particular case.
+   </para>
+  </section>
+  <section>
+    <title>Post-Installation Modifications</title>
+    <para>
+      Once you get Nagios installed and running properly, you'll no doubt
+      want to start monitoring more than just your local machine. Check
+      out the following docs for how to go about monitoring other
+      things...
+   </para>
+    <itemizedlist>
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-windows">Monitoring Windows machines</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-linux">Monitoring Linux/Unix machines</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-netware">Monitoring Netware servers</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-routers">Monitoring routers/switches</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-printers">Monitoring network printers</link></para>
+      </listitem>
+            
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-publicservices">Monitoring publicly available services (&protocol-http;, &protocol-ftp;, &protocol-ssh;, etc.)</link></para>
+      </listitem>
+    </itemizedlist>
+  </section>
+</chapter>
+
+

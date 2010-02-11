@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "all-entities.ent">
+  %all.entities;
+]
+>
+<part id="part-advancedtopics">
+<title>Advanced Topics</title>
+
+<xi:include href="AdvancedTopics/extcommands.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/eventhandlers.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/volatileservices.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/freshness.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/distributed.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/redundancy.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/flapping.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/escalations.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/oncallrotation.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/clusters.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/dependencies.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/stalking.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/perfdata.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/downtime.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/embeddedperl.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/adaptive.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/dependencychecks.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/cachedchecks.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/passivestatetranslation.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/checkscheduling.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/cgiincludes.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/objectinheritance.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="AdvancedTopics/objecttricks.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+</part>

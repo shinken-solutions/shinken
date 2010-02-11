@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="securityandperformancetuning-tuning"
+         xreflabel="Tuning Nagios For Maximum Performance">
+  <title>Tuning Nagios For Maximum Performance</title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para><inlinemediaobject>
+        <imageobject>
+          <imagedata fileref="images/tuning.png" format="PNG"/>
+        </imageobject>
+      </inlinemediaobject> So you've finally got Nagios up and running and you
+    want to know how you can tweak it a bit. Tuning Nagios to increase
+    performance can be necessary when you start monitoring a large number
+    (&gt; 1,000) of hosts and services. Here are a few things to look at for
+    optimizing Nagios...</para>
+  </section>
+
+  <section>
+    <title>Optimization Tips:</title>
+
+    <orderedlist>
+      <listitem>
+        <para>Graph performance statistics with
+        <productname>MRTG</productname>. In order to keep track of how well
+        your Nagios installation handles load over time and how your
+        configuration changes affect it, you should be graphing several
+        important statistics with <productname>MRTG</productname>. This is
+        really, really, really useful when it comes to tuning the performance
+        of a Nagios installation. Really. Information on how to do this can be
+        found <xref
+        linkend="securityandperformancetuning-mrtggraphs" />here.</para>
+      </listitem>
+
+      <listitem>
+        <para>Use large installation tweaks. Enabling the <link
+        linkend="configuringnagios-configmain-use_large_installation_tweaks">use_large_installation_tweaks</link>
+        option may provide you with better performance. Read more about what
+        this option does <xref
+        linkend="securityandperformancetuning-largeinstalltweaks" />here.</para>
+      </listitem>
+
+      <listitem>
+        <para>Disable environment macros. Macros are normally made available
+        to check, notification, event handler, etc. commands as environment
+        variables. This can be a problem in a large Nagios installation, as it
+        consumes some additional memory and (more importantly) more CPU. If
+        your scripts don't need to access the macros as environment variables
+        (e.g. you pass all necessary macros on the command line), you don't
+        need this feature. You can prevent macros from being made available as
+        environment variables by using the <link
+        linkend="configuringnagios-configmain-enable_environment_macros">enable_environment_macros</link>
+        option.</para>
+      </listitem>
+
+      <listitem>
+        <para>Check Result Reaper Frequency. The <link
+        linkend="configuringnagios-configmain-check_result_reaper_frequency">check_result_reaper_frequency</link>
+        variable determines how often Nagios should check for host and service
+        check results that need to be processed. The maximum amount of time it
+        can spend processing those results is determined by the max reaper
+        time (see below). If your reaper frequency is too high (too
+        infrequent), you might see high latencies for host and service
+        checks.</para>
+      </listitem>
+
+      <listitem>
+        <para>Max Reaper Time. The <link
+        linkend="configuringnagios-configmain-max_check_result_reaper_time">max_check_result_reaper_time</link>
+        variables determines the maximum amount of time the Nagios daemon can
+        spend processing the results of host and service checks before moving
+        on to other things - like executing new host and service checks. Too
+        high of a value can result in large latencies for your host and
+        service checks. Too low of a value can have the same effect. If you're
+        experiencing high latencies, adjust this variable and see what effect
+        it has. Again, you should be <xref
+        linkend="securityandperformancetuning-mrtggraphs" />graphing
+        statistics in order to make this determination.</para>
+      </listitem>
+
+      <listitem>
+        <para>Adjust buffer slots. You may need to adjust the value of the
+        <link
+        linkend="configuringnagios-configmain-external_command_buffer_slots">external_command_buffer_slots</link>
+        option. Graphing buffer slot statistics with <xref
+        linkend="securityandperformancetuning-mrtggraphs" />MRTG (see above)
+        is critical in determining what values you should use for this
+        option.</para>
+      </listitem>
+
+      <listitem>
+        <para>Check service latencies to determine best value for maximum
+        concurrent checks. Nagios can restrict the number of maximum
+        concurrently executing service checks to the value you specify with
+        the <link
+        linkend="configuringnagios-configmain-max_concurrent_checks">max_concurrent_checks</link>
+        option. This is good because it gives you some control over how much
+        load Nagios will impose on your monitoring host, but it can also slow
+        things down. If you are seeing high latency values (&gt; 10 or 15
+        seconds) for the majority of your service checks (via the <link
+        linkend="thebasics-cgis-extinfo_cgi">extinfo CGI</link>), you are
+        probably starving Nagios of the checks it needs. That's not Nagios's
+        fault - its yours. Under ideal conditions, all service checks would
+        have a latency of 0, meaning they were executed at the exact time that
+        they were scheduled to be executed. However, it is normal for some
+        checks to have small latency values. I would recommend taking the
+        minimum number of maximum concurrent checks reported when running
+        Nagios with the -s command line argument and doubling it. Keep
+        increasing it until the average check latency for your services is
+        fairly low. More information on service check scheduling can be found
+        <xref linkend="advancedtopics-checkscheduling" />here.</para>
+      </listitem>
+
+      <listitem>
+        <para>Use passive checks when possible. The overhead needed to process
+        the results of <xref linkend="thebasics-passivechecks" />passive
+        service checks is much lower than that of <quote>normal</quote> active checks, so
+        make use of that piece of info if you're monitoring a slew of
+        services. It should be noted that passive service checks are only
+        really useful if you have some external application doing some type of
+        monitoring or reporting, so if you're having Nagios do all the work,
+        this won't help things.</para>
+      </listitem>
+
+      <listitem>
+        <para>Avoid using interpreted plugins. One thing that will
+        significantly reduce the load on your monitoring host is the use of
+        compiled (C/C++, etc.) plugins rather than interpreted script (Perl,
+        etc) plugins. While Perl scripts and such are easy to write and work
+        well, the fact that they are compiled/interpreted at every execution
+        instance can significantly increase the load on your monitoring host
+        if you have a lot of service checks. If you want to use Perl plugins,
+        consider compiling them into true executables using perlcc(1) (a
+        utility which is part of the standard Perl distribution) or compiling
+        Nagios with an embedded Perl interpreter (see below).</para>
+      </listitem>
+
+      <listitem>
+        <para>Use the embedded Perl interpreter. If you're using a lot of Perl
+        scripts for service checks, etc., you will probably find that
+        compiling the <link linkend="advancedtopics-embeddedperl">embedded
+        Perl interpreter</link> into the Nagios binary will speed things
+        up.</para>
+      </listitem>
+
+      <listitem>
+        <para>Optimize host check commands. If you're checking host states
+        using the &plugin-ping; plugin you'll find that host checks will be
+        performed much faster if you break up the checks. Instead of
+        specifying a max_attempts value of 1 in the host definition and having
+        the &plugin-ping; plugin send 10 &protocol-icmp; packets to the host, it would be
+        much faster to set the max_attempts value to 10 and only send out 1
+        &protocol-icmp; packet each time. This is due to the fact that Nagios can often
+        determine the status of a host after executing the plugin once, so you
+        want to make the first check as fast as possible. This method does
+        have its pitfalls in some situations (i.e. hosts that are slow to
+        respond may be assumed to be down), but you'll see faster host checks
+        if you use it. Another option would be to use a faster plugin (i.e.
+        &plugin-fping;) as the host_check_command instead of &plugin-ping;.</para>
+      </listitem>
+
+      <listitem>
+        <para>Schedule regular host checks. Scheduling regular checks of hosts
+        can actually help performance in Nagios. This is due to the way the
+        <xref linkend="advancedtopics-cachedchecks" />cached check logic works
+        (see below). Prior to Nagios 3, regularly scheduled host checks used
+        to result in a big performance hit. This is no longer the case, as
+        host checks are run in parallel - just like service checks. To
+        schedule regular checks of a host, set the check_interval directive in
+        the <link linkend="configuringnagios-objectdefinitions-host">host
+        definition</link> to something greater than 0.</para>
+      </listitem>
+
+      <listitem>
+        <para>Enable cached host checks. Beginning in Nagios 3, on-demand host
+        checks can benefit from caching. On-demand host checks are performed
+        whenever Nagios detects a service state change. These on-demand checks
+        are executed because Nagios wants to know if the host associated with
+        the service changed state. By enabling cached host checks, you can
+        optimize performance. In some cases, Nagios may be able to used the
+        old/cached state of the host, rather than actually executing a host
+        check command. This can speed things up and reduce load on monitoring
+        server. In order for cached checks to be effective, you need to
+        schedule regular checks of your hosts (see above). More information on
+        cached checks can be found <xref
+        linkend="advancedtopics-cachedchecks" />here.</para>
+      </listitem>
+
+      <listitem>
+        <para>Don't use agressive host checking. Unless you're having problems
+        with Nagios recognizing host recoveries, I would recommend not
+        enabling the <link
+        linkend="configuringnagios-configmain-use_aggressive_host_checking">use_aggressive_host_checking</link>
+        option. With this option turned off host checks will execute much
+        faster, resulting in speedier processing of service check results.
+        However, host recoveries can be missed under certain circumstances
+        when this it turned off. For example, if a host recovers and all of
+        the services associated with that host stay in non-OK states (and
+        don't "wobble" between different non-OK states), Nagios may miss the
+        fact that the host has recovered. A few people may need to enable this
+        option, but the majority don't and I would recommendnot using it
+        unless you find it necessary...</para>
+      </listitem>
+
+      <listitem>
+        <para>External command optimizations. If you're processing a lot of
+        external commands (i.e. passive checks in a <xref
+        linkend="advancedtopics-distributed" />distributed setup, you'll
+        probably want to set the <link
+        linkend="configuringnagios-configmain-command_check_interval">command_check_interval</link>
+        variable to -1. This will cause Nagios to check for external commands
+        as often as possible. You should also consider increasing the number
+        of available <link
+        linkend="configuringnagios-configmain-external_command_buffer_slots">external
+        command buffer slots</link>. Buffers slots are used to hold external
+        commands that have been read from the <link
+        linkend="configuringnagios-configmain-check_external_commands">external
+        command file</link> (by a separate thread) before they are processed
+        by the Nagios daemon. If your Nagios daemon is receiving a lot of
+        passive checks or external commands, you could end up in a situation
+        where the buffers are always full. This results in child processes
+        (external scripts, &name-nsca; daemon, etc.) blocking when they attempt to
+        write to the external command file. I would highly recommend that you
+        graph external command buffer slot usage using MRTG and the nagiostats
+        utility as described <xref
+        linkend="securityandperformancetuning-mrtggraphs" />here, so you
+        understand the typical external command buffer usage of your Nagios
+        installation.</para>
+      </listitem>
+
+      <listitem>
+        <para>Optimize hardware for maximum performance.</para><note><para>Hardware
+        performance shouldn't be an issue unless:</para>
+
+        <orderedlist>
+          <listitem>
+            <para>you're monitoring thousands of services</para>
+          </listitem>
+
+          <listitem>
+            <para>you're doing a lot of post-processing of performance data,
+            etc. Your system configuration and your hardware setup are going
+            to directly affect how your operating system performs, so they'll
+            affect how Nagios performs. The most common hardware optimization
+            you can make is with your hard drives. CPU and memory speed are
+            obviously factors that affect performance, but disk access is
+            going to be your biggest bottleneck. Don't store plugins, the
+            status log, etc on slow drives (i.e. old IDE drives or NFS
+            mounts). If you've got them, use UltraSCSI drives or fast IDE
+            drives. An important note for IDE/Linux users is that many Linux
+            installations do not attempt to optimize disk access. If you don't
+            change the disk access parameters (by using a utility like
+            <command>hdparm</command>), you'll loose out on a lot of the
+            speedy features of the new IDE drives.</para>
+          </listitem>
+        </orderedlist>
+        </note>
+      </listitem>
+    </orderedlist>
+  </section>
+</chapter>

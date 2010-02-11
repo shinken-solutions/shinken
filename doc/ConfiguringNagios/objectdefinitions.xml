@@ -1,0 +1,4479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="configuringnagios-objectdefinitions" xreflabel="Object Definitions">
+  <title>Object Definitions</title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>One of the features of Nagios' object configuration format is that you can create object
+    definitions that inherit properties from other object definitions. An explanation of how object
+    inheritence works can be found <link linkend="advancedtopics-objectinheritance">here</link>. 
+    I strongly suggest that you familiarize yourself with object inheritence once you read over
+    the documentation presented below, as it will make the job of creating and maintaining object 
+    definitions much easier than it otherwise would be. Also, read up on the 
+    <link linkend="advancedtopics-objecttricks">object tricks</link> that offer shortcuts for
+    otherwise tedious configuration tasks.
+    </para>
+    
+    <note>
+      <para>When creating and/or editing configuration files, keep the following in mind:</para>
+
+    <orderedlist>
+      <listitem>
+        <para>Lines that start with a '<computeroutput>#</computeroutput>' character are 
+	taken to be comments and are not processed</para>
+      </listitem>
+      <listitem>
+        <para>Directive names are case-sensitive</para>
+      </listitem>
+    </orderedlist>
+    </note>
+  </section>
+
+  <section>
+    <title><anchor id="configuringnagios-objectdefinitions-retention_notes" />Retention Notes</title>
+
+    <para>It is important to point out that several directives in host, service, and contact 
+    definitions may not be picked up by Nagios when you change them in your configuration files.
+    Object directives that can exhibit this behavior are marked with an asterisk
+    (<link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>). 
+    The reason for this behavior is due to the fact that Nagios chooses to honor values stored in the 
+    <link linkend="configuringnagios-configmain-state_retention_file">state retention file</link> 
+    over values found in the config files, assuming you have 
+    <link linkend="configuringnagios-configmain-retain_state_information">state retention</link>
+    enabled on a program-wide basis and the value of the directive is changed during runtime with an
+    <link linkend="configuringnagios-configmain-check_external_commands">external command</link>.</para>
+
+    <para>One way to get around this problem is to disable the retention of non-status 
+    information using the retain_nonstatus_information directive in the host, service, and
+    contact definitions. Disabling this directive will cause Nagios to take the initial 
+    values for these directives from your config files, rather than from the state retention
+    file when it (re)starts.
+    </para>
+  </section>
+
+  <section>
+    <title>Sample Configuration Files</title>
+
+    <note>
+      <para>Sample object configuration files are installed in the 
+      <filename class="directory">/usr/local/nagios/etc/</filename> directory when you
+      follow the <link linkend="gettingstarted-quickstart">quickstart installation guide</link>.
+      </para>
+    </note>
+  </section>
+
+  <section>
+    <title>Object Types</title>
+
+    <para>
+    <link linkend="configuringnagios-objectdefinitions-host">Host definitions</link> 
+    <link linkend="configuringnagios-objectdefinitions-hostgroup">Host group definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-service">Service definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-servicegroup">Service group definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-contact">Contact definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-contactgroup">Contact group definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-timeperiod">Time period definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-command">Command definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-servicedependency">Service dependency definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-serviceescalation">Service escalation definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-hostdependency">Host dependency definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-hostescalation">Host escalation definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-hostextinfo">Extended host information definitions</link>
+    <link linkend="configuringnagios-objectdefinitions-serviceextinfo">Extended service information definitions</link>
+    </para>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-host" />Host Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>A host definition is used to define a physical server,
+        workstation, device, etc. that resides on your network.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define host{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>alias</para></entry>
+                <entry><para><emphasis>alias</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>display_name</para></entry>
+                <entry><para><emphasis>display_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>address</para></entry>
+                <entry><para><emphasis>address</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>parents</para></entry>
+                <entry ><para><emphasis>host_names</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>hostgroups</para></entry>
+                <entry><para><emphasis>hostgroup_names</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>check_command</para></entry>
+                <entry><para><emphasis>command_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>initial_state</para></entry>
+                <entry><para>[o,d,u]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>max_check_attempts</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>check_interval</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>retry_interval</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>active_checks_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>passive_checks_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>check_period</para></entry>
+                <entry><para><emphasis>timeperiod_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>obsess_over_host</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>check_freshness</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>freshness_threshold</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>event_handler</para></entry>
+                <entry><para><emphasis>command_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>event_handler_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>low_flap_threshold</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>high_flap_threshold</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>flap_detection_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>flap_detection_options</para></entry>
+                <entry><para>[o,d,u]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>process_perf_data</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>retain_status_information</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>retain_nonstatus_information</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>contacts</para></entry>
+                <entry><para><emphasis>contacts</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>contact_groups</para></entry>
+                <entry><para><emphasis>contact_groups</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_interval</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>first_notification_delay</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_period</para></entry>
+                <entry><para><emphasis>timeperiod_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_options</para></entry>
+                <entry><para>[d,u,r,f,s]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notifications_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>stalking_options</para></entry>
+                <entry><para>[o,d,u]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes</para></entry>
+                <entry><para><emphasis>note_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>action_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>icon_image</para></entry>
+                <entry><para><emphasis>image_file</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>icon_image_alt</para></entry>
+                <entry><para><emphasis>alt_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>vrml_image</para></entry>
+                <entry><para><emphasis>image_file</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>statusmap_image</para></entry>
+                <entry><para><emphasis>image_file</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>2d_coords</para></entry>
+                <entry><para><emphasis>x_coord,y_coord</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>3d_coords</para></entry>
+                <entry><para><emphasis>x_coord,y_coord,z_coord</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <para>
+	<programlisting>
+define host{
+      host_name                      bogus-router
+      alias                          Bogus Router #1
+      address                        192.168.1.254
+      parents                        server-backbone
+      check_command                  check-host-alive
+      check_interval                 5
+      retry_interval                 1
+      max_check_attempts             5
+      check_period                   24x7
+      process_perf_data              0
+      retain_nonstatus_information   0
+      contact_groups                 router-admins
+      notification_interval          30
+      notification_period            24x7
+      notification_options           d,u,r
+}
+	</programlisting></para>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			host_name
+		</term>
+		<listitem>
+		<para>
+		This directive is used to
+                define a short name used to identify the host. It is used in
+                host group and service definitions to reference this
+                particular host. Hosts can have multiple services (which are
+                monitored) associated with them. When used properly, the
+                $HOSTNAME$ <link linkend="thebasics-macros">macro</link>
+                will contain this short name.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			alias
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define a longer name or description used to identify the host.
+                It is provided in order to allow you to more easily identify a
+                particular host. When used properly, the $HOSTALIAS$ 
+		<link linkend="thebasics-macros">macro</link>
+                will contain this alias/description.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			address
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define the address of the host. Normally, this is an IP
+                address, although it could really be anything you want (so
+                long as it can be used to check the status of the host). You
+                can use a FQDN to identify the host instead of an IP address,
+                but if &protocol-dns; services are not availble this could cause
+                problems. When used properly, the $HOSTADDRESS$ 
+		<link linkend="thebasics-macros">macro</link>
+                will contain this address.</para><note><para>If you do not specify an
+                address directive in a host definition, the name of the host
+                will be used as its address.</para></note><caution><para>A word of caution about doing
+                this, however - if &protocol-dns; fails, most of your service checks will
+                fail because the plugins will be unable to resolve the host
+                name.</para></caution>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			display_name
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define an alternate name that should be displayed in the web
+                interface for this host. If not specified, this defaults to
+                the value you specify for the <emphasis>host_name</emphasis>
+                directive.</para><note><para>The current CGIs do not use this option,
+                although future versions of the web interface will.
+               </para></note>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			parents
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define a comma-delimited list of short names of the "parent"
+                hosts for this particular host. Parent hosts are typically
+                routers, switches, firewalls, etc. that lie between the
+                monitoring host and a remote hosts. A router, switch, etc.
+                which is closest to the remote host is considered to be that
+                host's "parent". Read the "Determining Status and Reachability
+                of Network Hosts" document located 
+		<link linkend="thebasics-networkreachability">here</link>
+                for more information. If this host is on the same network
+                segment as the host doing the monitoring (without any
+                intermediate routers, etc.) the host is considered to be on
+                the local network and will not have a parent host. Leave this
+                value blank if the host does not have a parent host (i.e. it
+                is on the same segment as the Nagios host). The order in which
+                you specify parent hosts has no effect on how things are
+                monitored.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			hostgroups
+		</term>
+		<listitem>
+		<para>This directive is used to
+                identify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-hostgroup">hostgroup(s)</link> that the host belongs
+                to. Multiple hostgroups should be separated by commas. This
+                directive may be used as an alternative to (or in addition to)
+                using the <emphasis>members</emphasis> directive in 
+		<link linkend="configuringnagios-objectdefinitions-hostgroup">hostgroup</link> definitions.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			check_command
+		</term>
+		<listitem>
+		<para>This directive is used to
+                specify the <emphasis>short name</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-command">command</link> that should be used to check
+                if the host is up or down. Typically, this command would try
+                and ping the host to see if it is "alive". The command must
+                return a status of OK (0) or Nagios will assume the host is
+                down. If you leave this argument blank, the host will
+                <emphasis>not</emphasis> be actively checked. Thus, Nagios
+                will likely always assume the host is up (it may show up as
+                being in a "PENDING" state in the web interface). This is
+                useful if you are monitoring printers or other devices that
+                are frequently turned off. The maximum amount of time that the
+                notification command can run is controlled by the 
+		<link linkend="configuringnagios-configmain-host_check_timeout">host_check_timeout</link>
+                option.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			initial_state
+		</term>
+		<listitem>
+		<para>By default Nagios will assume that all hosts are in UP states 
+		when in starts. You can override the initial state for a host by using 
+		this directive.
+                Valid options are: <emphasis role="strong">o</emphasis> = UP,
+                <emphasis role="strong">d</emphasis> = DOWN, and 
+		<emphasis role="bold">u</emphasis> = UNREACHABLE.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			max_check_attempts
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define the number of times that Nagios will retry the host
+                check command if it returns any state other than an OK state.
+                Setting this value to 1 will cause Nagios to generate an alert
+                without retrying the host check again.</para><note><para>If you do not
+                want to check the status of the host, you must still set this
+                to a minimum value of 1. To bypass the host check, just leave
+                the <varname>check_command</varname> option blank.
+               </para></note>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			check_interval
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define the number of <quote>time units</quote> between regularly scheduled
+                checks of the host. Unless you've changed the 
+		<link linkend="configuringnagios-configmain-interval_length">interval_length</link>
+                directive from the default value of 60, this number will mean
+                minutes. More information on this value can be found in the
+                <link linkend="advancedtopics-checkscheduling">check scheduling</link> documentation.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			retry_interval
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define the number of <quote>time units</quote> to wait before scheduling a
+                re-check of the hosts. Hosts are rescheduled at the retry
+                interval when they have changed to a non-UP state. Once the
+                host has been retried <emphasis role="bold">max_check_attempts</emphasis> 
+		times without a change in its status, it will revert to being scheduled at its
+                <quote>normal</quote> rate as defined by the <emphasis role="bold">check_interval</emphasis> 
+		value. Unless you've changed the 
+		<link linkend="configuringnagios-configmain-interval_length">interval_length</link>
+                directive from the default value of 60, this number will mean
+                minutes. More information on this value can be found in the
+                <link linkend="advancedtopics-checkscheduling">check cheduling</link> documentation.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			active_checks_enabled<link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine whether or not active checks (either regularly
+                scheduled or on-demand) of this host are enabled. Values: 0 =
+                disable active host checks, 1 = enable active host checks.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			passive_checks_enabled <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine whether or not passive checks are enabled for this
+                host. Values: 0 = disable passive host checks, 1 = enable
+                passive host checks.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			check_period
+		</term>
+		<listitem>
+		<para>This directive is used to specify the short name of the 
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> 
+		during which active checks of this host can be made.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			obsess_over_host <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive determines
+                whether or not checks for the host will be <quote>obsessed</quote> over
+                using the <link linkend="configuringnagios-configmain-ochp_command">ochp_command</link>.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			check_freshness <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine whether or not <link linkend="advancedtopics-freshness">freshness checks</link> 
+		are enabled for this host. Values: 0 = disable freshness checks, 1 = enable freshness checks.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			freshness_threshold
+		</term>
+		<listitem>
+		<para>This directive is used to
+                specify the freshness threshold (in seconds) for this host. If
+                you set this directive to a value of 0, Nagios will determine
+                a freshness threshold to use automatically.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			event_handler
+		</term>
+		<listitem>
+		<para>This directive is used to
+                specify the <emphasis>short name</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-command">command</link>
+		that should be run whenever a change in the state of the host is detected 
+		(i.e. whenever it goes down or recovers). Read the documentation on 
+		<link linkend="advancedtopics-eventhandlers">event handlers</link> for 
+		a more detailed explanation of how to write scripts for handling events. 
+		The maximum amount of time that the event handler command can run is controlled by the
+                <link linkend="configuringnagios-configmain-event_handler_timeout">event_handler_timeout</link>
+                option.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			event_handler_enabled <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine whether or not the event handler for this host is
+                enabled. Values: 0 = disable host event handler, 1 = enable
+                host event handler.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			low_flap_threshold
+		</term>
+		<listitem>
+		<para>This directive is used to
+                specify the low state change threshold used in flap detection
+                for this host. More information on flap detection can be found
+                <link linkend="advancedtopics-flapping">here</link>.
+                If you set this directive to a value of 0, the program-wide
+                value specified by the <link linkend="configuringnagios-configmain-low_host_flap_threshold">low_host_flap_threshold</link>
+                directive will be used.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			high_flap_threshold
+		</term>
+		<listitem>
+		<para>This directive is used to
+                specify the high state change threshold used in flap detection
+                for this host. More information on flap detection can be found
+                <link linkend="advancedtopics-flapping">here</link>.
+                If you set this directive to a value of 0, the program-wide
+                value specified by the <link linkend="configuringnagios-configmain-high_host_flap_threshold">high_host_flap_threshold</link>
+                directive will be used.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			flap_detection_enabled <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine whether or not flap detection is enabled for this
+                host. More information on flap detection can be found <link linkend="advancedtopics-flapping">here</link>.
+                Values: 0 = disable host flap detection, 1 = enable host flap
+                detection.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			flap_detection_options
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine what host states the <link linkend="advancedtopics-flapping">flap
+                detection logic</link> will use for this host. Valid options
+                are a combination of one or more of the following: <emphasis role="bold">o</emphasis> = UP states, 
+		<emphasis role="bold">d</emphasis> = DOWN states, <emphasis role="bold">u</emphasis> = UNREACHABLE states.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			process_perf_data <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine whether or not the processing of performance data is
+                enabled for this host. Values: 0 = disable performance data
+                processing, 1 = enable performance data processing.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			retain_status_information
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine whether or not status-related information about the
+                host is retained across program restarts. This is only useful
+                if you have enabled state retention using the <link linkend="configuringnagios-configmain-retain_state_information">retain_state_information</link>
+                directive. Value: 0 = disable status information retention, 1
+                = enable status information retention.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			retain_nonstatus_information
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine whether or not non-status information about the host
+                is retained across program restarts. This is only useful if
+                you have enabled state retention using the <link linkend="configuringnagios-configmain-retain_state_information">retain_state_information</link>
+                directive. Value: 0 = disable non-status information
+                retention, 1 = enable non-status information retention.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contacts
+		</term>
+		<listitem>
+		<para>This is a list of the
+                <emphasis>short names</emphasis> of the <link linkend="configuringnagios-objectdefinitions-contact">contacts</link> that should be notified
+                whenever there are problems (or recoveries) with this host.
+                Multiple contacts should be separated by commas. Useful if you
+                want notifications to go to just a few people and don't want
+                to configure <link linkend="configuringnagios-objectdefinitions-contactgroup">contact
+                groups</link>. You must specify at least one contact or
+                contact group in each host definition.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contact_groups
+		</term>
+		<listitem>
+		<para>This is a list of the
+                <emphasis>short names</emphasis> of the <link linkend="configuringnagios-objectdefinitions-contactgroup">contact groups</link> that should be
+                notified whenever there are problems (or recoveries) with this
+                host. Multiple contact groups should be separated by commas.
+                You must specify at least one contact or contact group in each
+                host definition.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_interval
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define the number of <quote>time units</quote> to wait before re-notifying
+                a contact that this service is <emphasis>still</emphasis> down
+                or unreachable. Unless you've changed the <link linkend="configuringnagios-configmain-interval_length">interval_length</link>
+                directive from the default value of 60, this number will mean
+                minutes. If you set this value to 0, Nagios will
+                <emphasis>not</emphasis> re-notify contacts about problems for
+                this host - only one problem notification will be sent out.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			first_notification_delay
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define the number of <quote>time units</quote> to wait before sending out
+                the first problem notification when this host enters a non-UP
+                state. Unless you've changed the <link linkend="configuringnagios-configmain-interval_length">interval_length</link>
+                directive from the default value of 60, this number will mean
+                minutes. If you set this value to 0, Nagios will start sending
+                out notifications immediately.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_period
+		</term>
+		<listitem>
+		<para>This directive is used to
+                specify the short name of the <link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> during which notifications of events for this
+                host can be sent out to contacts. If a host goes down, becomes
+                unreachable, or recoveries during a time which is not covered
+                by the time period, no notifications will be sent out.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_options
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine when notifications for the host should be sent out.
+                Valid options are a combination of one or more of the
+                following: <emphasis role="strong">d</emphasis> = send
+                notifications on a DOWN state, <emphasis role="bold">u</emphasis> = send notifications on an
+                UNREACHABLE state, <emphasis role="strong">r</emphasis> = send
+                notifications on recoveries (OK state), <emphasis role="bold">f</emphasis> = send notifications when the host
+                starts and stops <link linkend="advancedtopics-flapping">flapping</link>,
+                and <emphasis role="strong">s</emphasis> = send notifications
+                when <link linkend="advancedtopics-downtime">scheduled
+                downtime</link> starts and ends. If you specify <emphasis role="bold">n</emphasis> (none) as an option, no host
+                notifications will be sent out. If you do not specify any
+                notification options, Nagios will assume that you want
+                notifications to be sent out for all possible states.
+		<informalexample><para>
+                If you specify <emphasis role="strong">d,r</emphasis> in this
+                field, notifications will only be sent out when the host goes
+                DOWN and when it recovers from a DOWN state.</para></informalexample>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notifications_enabled <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to
+                determine whether or not notifications for this host are
+                enabled. Values: 0 = disable host notifications, 1 = enable
+                host notifications.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			talking_options
+		</term>
+		<listitem>
+		<para>This directive determines
+                which host states "stalking" is enabled for. Valid options are
+                a combination of one or more of the following: <emphasis role="bold">o</emphasis> = stalk on UP states, <emphasis role="bold">d</emphasis> = stalk on DOWN states, and
+                <emphasis role="strong">u</emphasis> = stalk on UNREACHABLE
+                states. More information on state stalking can be found <link linkend="advancedtopics-stalking">here</link>.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define an optional string of notes pertaining to the host. If
+                you specify a note here, you will see the it in the <link linkend="thebasics-cgis-extinfo_cgi">extended
+                information</link> CGI (when you are viewing information
+                about the specified host).</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes_url
+		</term>
+		<listitem>
+		<para>This variable is used to
+                define an optional URL that can be used to provide more
+                information about the host. If you specify an URL, you will
+                see a red folder icon in the CGIs (when you are viewing host
+                information) that links to the URL you specify here. Any valid
+                URL can be used. If you plan on using relative paths, the base
+                path will the the same as what is used to access the CGIs
+                (i.e. <emphasis>/cgi-bin/nagios/</emphasis>). This can be very
+                useful if you want to make detailed information on the host,
+                emergency contact methods, etc. available to other support
+                staff.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			action_url
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define an optional URL that can be used to provide more
+                actions to be performed on the host. If you specify an URL,
+                you will see a red <quote>splat</quote> icon in the CGIs (when you are
+                viewing host information) that links to the URL you specify
+                here. Any valid URL can be used. If you plan on using relative
+                paths, the base path will the the same as what is used to
+                access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			icon_image
+		</term>
+		<listitem>
+		<para>This variable is used to
+                define the name of a GIF, PNG, or JPG image that should be
+                associated with this host. This image will be displayed in the
+                various places in the CGIs. The image will look best if it is
+                40x40 pixels in size. Images for hosts are assumed to be in
+                the <emphasis role="strong">logos/</emphasis> subdirectory in
+                your HTML images directory (i.e.
+                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			icon_image_alt
+		</term>
+		<listitem>
+		<para>This variable is used to
+                define an optional string that is used in the ALT tag of the
+                image specified by the <emphasis>&lt;icon_image&gt;</emphasis>
+                argument.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			vrml_image
+		</term>
+		<listitem>
+		<para>This variable is used to
+                define the name of a GIF, PNG, or JPG image that should be
+                associated with this host. This image will be used as the
+                texture map for the specified host in the <link linkend="thebasics-cgis-statuswrl_cgi">statuswrl</link>
+                CGI. Unlike the image you use for the
+                <emphasis>&lt;icon_image&gt;</emphasis> variable, this one
+                should probably <emphasis>not</emphasis> have any
+                transparency. If it does, the host object will look a bit
+                wierd. Images for hosts are assumed to be in the <emphasis role="bold">logos/</emphasis> subdirectory in your HTML
+                images directory (i.e.
+                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			statusmap_image
+		</term>
+		<listitem>
+		<para>This variable is used to
+                define the name of an image that should be associated with
+                this host in the <link linkend="thebasics-cgis-statusmap_cgi">statusmap</link>
+                CGI. You can specify a JPEG, PNG, and GIF image if you want,
+                although I would strongly suggest using a GD2 format image, as
+                other image formats will result in a lot of wasted CPU time
+                when the statusmap image is generated. GD2 images can be
+                created from PNG images by using the <emphasis role="bold">pngtogd2</emphasis> utility supplied with Thomas
+                Boutell's <ulink url="&url-gd;">gd
+                library</ulink>. The GD2 images should be created in
+                <emphasis>uncompressed</emphasis> format in order to minimize
+                CPU load when the statusmap CGI is generating the network map
+                image. The image will look best if it is 40x40 pixels in size.
+                You can leave these option blank if you are not using the
+                statusmap CGI. Images for hosts are assumed to be in the
+                <emphasis role="strong">logos/</emphasis> subdirectory in your
+                HTML images directory (i.e.
+                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			2d_coords
+		</term>
+		<listitem>
+		<para>This variable is used to
+                define coordinates to use when drawing the host in the <link linkend="thebasics-cgis-statusmap_cgi">statusmap</link>
+                CGI. Coordinates should be given in positive integers, as they
+                correspond to physical pixels in the generated image. The
+                origin for drawing (0,0) is in the upper left hand corner of
+                the image and extends in the positive x direction (to the
+                right) along the top of the image and in the positive y
+                direction (down) along the left hand side of the image. For
+                reference, the size of the icons drawn is usually about 40x40
+                pixels (text takes a little extra space). The coordinates you
+                specify here are for the upper left hand corner of the host
+                icon that is drawn.</para><note><para>Don't worry about what the maximum x
+                and y coordinates that you can use are. The CGI will
+                automatically calculate the maximum dimensions of the image it
+                creates based on the largest x and y coordinates you specify.
+               </para></note>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			3d_coords
+		</term>
+		<listitem>
+		<para>This variable is used to
+                define coordinates to use when drawing the host in the <link linkend="thebasics-cgis-statuswrl_cgi">statuswrl</link>
+                CGI. Coordinates can be positive or negative real numbers. The
+                origin for drawing is (0.0,0.0,0.0). For reference, the size
+                of the host cubes drawn is 0.5 units on each side (text takes
+                a little more space). The coordinates you specify here are
+                used as the center of the host cube.</para>
+		</listitem>
+	</varlistentry>
+	<!--
+	<varlistentry>
+		<term>
+		</term>
+		<listitem>
+		</listitem>
+	</varlistentry>
+	-->
+	</variablelist>
+	
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-hostgroup" />Host
+      Group Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>A host group definition is used to group one or more hosts
+        together for simplifying configuration with <link linkend="advancedtopics-objecttricks">object tricks</link> or display
+        purposes in the <link linkend="thebasics-cgis">CGIs</link>.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are
+          optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define hostgroup{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>hostgroup_name</para></entry>
+                <entry><para><emphasis>hostgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>alias</para></entry>
+                <entry><para><emphasis>alias</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>members</para></entry>
+                <entry><para><emphasis>hosts</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>hostgroup_members</para></entry>
+                <entry><para><emphasis>hostgroups</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes</para></entry>
+                <entry><para><emphasis>note_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>action_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"
+               ><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+	<programlisting>
+define hostgroup{
+      hostgroup_name          novell-servers
+      alias                   Novell Servers
+      members                 netware1,netware2,netware3,netware4
+}
+	</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+	
+	<variablelist>
+	<varlistentry>
+		<term>
+			hostgroup_name
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define a short name used to identify the host group.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			alias
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define is a longer name or description used to identify the
+                host group. It is provided in order to allow you to more
+                easily identify a particular host group.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			members
+		</term>
+		<listitem>
+		<para>This is a list of the <emphasis>short names</emphasis> of 
+		<link linkend="configuringnagios-objectdefinitions-host">hosts</link> that 
+		should be included in this group. Multiple host names should be separated by 
+		commas. This directive may be used as an alternative to (or in addition to)
+                the <emphasis>hostgroups</emphasis> directive in 
+		<link linkend="configuringnagios-objectdefinitions-host">host definitions</link>.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			hostgroup_members
+		</term>
+		<listitem>
+		<para>This optional directive can be used to include hosts from other 
+		<quote>sub</quote> host groups in this host group. Specify a comma-delimited list 
+		of short names of other host groups whose members should be included 
+		in this group.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional string of notes pertaining 
+		to the host. If you specify a note here, you will see the it in the 
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> 
+		CGI (when you are viewing information about the specified host).
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes_url
+		</term>
+		<listitem>
+		<para>This variable is used to define an optional URL that can be used to
+		provide more information about the host group. If you specify an URL, you
+                will see a red folder icon in the CGIs (when you are viewing hostgroup 
+		information) that links to the URL you specify here. Any valid URL can 
+		be used. If you plan on using relative paths, the base path will the the 
+		same as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+                This can be very useful if you want to make detailed information on the
+		host group, emergency contact methods, etc. available to other support staff.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			action_url
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional URL that can be used to provide
+		more actions to be performed on the host group. If you specify an URL, you will 
+		see a red <quote>splat</quote> icon in the CGIs (when you are viewing hostgroup information) 
+		that links to the URL you specify here. Any valid URL can be used. If you plan 
+		on using relative paths, the base path will the the same as what is used to access
+		the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+		</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+      </section>
+    </section>
+
+    <section>
+      <title><anchor
+      id="configuringnagios-objectdefinitions-service" />Service Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>A service definition is used to identify a <quote>service</quote> that runs
+        on a host. The term <quote>service</quote> is used very loosely. It can mean an
+        actual service that runs on the host (POP, &protocol-smtp;, &protocol-http;, etc.) or some
+        other type of metric associated with the host (response to a ping,
+        number of logged in users, free disk space, etc.). The different
+        arguments to a service definition are outlined below.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define service{</para></entry>
+
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>hostgroup_name</para></entry>
+                <entry><para><emphasis>hostgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_description</para></entry>
+                <entry><para><emphasis>service_description</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>display_name</para></entry>
+                <entry><para><emphasis>display_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>servicegroups</para></entry>
+                <entry><para>servicegroup_names</para></entry>
+              </row>
+
+              <row>
+                <entry><para>is_volatile</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>check_command</para></entry>
+                <entry><para><emphasis>command_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>initial_state</para></entry>
+                <entry><para>[o,w,u,c]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>max_check_attempts</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>check_interval</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>retry_interval</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>active_checks_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>passive_checks_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>check_period</para></entry>
+                <entry><para><emphasis>timeperiod_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>obsess_over_service</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>check_freshness</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>freshness_threshold</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>event_handler</para></entry>
+                <entry><para><emphasis>command_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>event_handler_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>low_flap_threshold</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>high_flap_threshold</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>flap_detection_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>flap_detection_options</para></entry>
+                <entry><para>[o,w,c,u]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>process_perf_data</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>retain_status_information</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>retain_nonstatus_information</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_interval</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>first_notification_delay</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_period</para></entry>
+                <entry><para><emphasis>timeperiod_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_options</para></entry>
+                <entry><para>[w,u,c,r,f,s]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notifications_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>contacts</para></entry>
+                <entry><para><emphasis>contacts</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>contact_groups</para></entry>
+                <entry><para><emphasis>contact_groups</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>stalking_options</para></entry>
+                <entry><para>[o,w,u,c]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes</para></entry>
+                <entry><para><emphasis>note_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>action_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>icon_image</para></entry>
+                <entry><para><emphasis>image_file</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>icon_image_alt</para></entry>
+                <entry><para><emphasis>alt_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>
+define service{
+      host_name               linux-server
+      service_description     check-disk-sda1
+      check_command           check-disk!/dev/sda1
+      max_check_attempts      5
+      check_interval          5
+      retry_interval          3
+      check_period            24x7
+      notification_interval   30
+      notification_period     24x7
+      notification_options    w,c,r
+      contact_groups          linux-admins
+}
+	</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions:</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			host_name
+		</term>
+		<listitem>
+		<para>This directive is used to specify the <emphasis>short name(s)</emphasis> of 
+		the <link linkend="configuringnagios-objectdefinitions-host">host(s)</link> that the service 
+		"runs" on or is associated with. Multiple hosts should be separated by commas.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			hostgroup_name
+		</term>
+		<listitem>
+		<para>This directive is used to specify the <emphasis>short name(s)</emphasis> of 
+		the <link linkend="configuringnagios-objectdefinitions-hostgroup">hostgroup(s)</link> 
+		that the service "runs" on or is associated with. Multiple hostgroups should be
+                separated by commas. The hostgroup_name may be used instead of, or in addition to, the
+		host_name directive.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			service_description
+		</term>
+		<listitem>
+		<para>This directive is used to define the description of the service, which may 
+		contain spaces, dashes, and colons (semicolons, apostrophes, and quotation marks 
+		should be avoided). No two services associated with the same host can have the
+		same description. Services are uniquely identified with their <emphasis>host_name</emphasis>
+                and <emphasis>service_description</emphasis> directives.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			display_name
+		</term>
+		<listitem>
+		<para>This directive is used to define an alternate name that should be displayed 
+		in the web interface for this service. If not specified, this defaults to the value 
+		you specify for the <emphasis>service_description</emphasis> directive.</para>
+		<note><para>The  current CGIs do not use this option, although future versions
+                of the web interface will.</para></note>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			servicegroups
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-servicegroup">servicegroup(s)</link> that
+		the service belongs to. Multiple servicegroups should be separated by commas. 
+		This directive may be used as an alternative to using the <emphasis>members</emphasis> 
+		directive in <link linkend="configuringnagios-objectdefinitions-servicegroup">servicegroup</link> 
+		definitions.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			is_volatile
+		</term>
+		<listitem>
+		<para>This directive is used to denote whether the service is "volatile". Services are
+                normally <emphasis>not</emphasis> volatile. More information  on volatile service and how 
+		they differ from normal services can be found <link linkend="advancedtopics-volatileservices">here</link>.
+                Value: 0 = service is not volatile, 1 = service is volatile.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			check_command
+		</term>
+		<listitem>
+		<para>This directive is used to specify the <emphasis>short name</emphasis> of the
+		<link linkend="configuringnagios-objectdefinitions-command">command</link> that Nagios 
+		will run in order to check the status of the service. The maximum amount of time
+                that the service check command can run is controlled by the
+                <link linkend="configuringnagios-configmain-service_check_timeout">service_check_timeout</link>
+                option.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			initial_state
+		</term>
+		<listitem>
+		<para>By default Nagios will assume that all services are in OK states when in starts.
+		You can override the initial state for a service by using this directive. 
+		Valid options are: 
+		<itemizedlist>
+		<listitem><para><emphasis role="bold">o</emphasis> = OK</para></listitem>
+		<listitem><para><emphasis role="bold">w</emphasis> = WARNING</para></listitem>
+		<listitem><para><emphasis role="bold">u</emphasis> = UNKNOWN</para></listitem>
+		<listitem><para><emphasis role="bold">c</emphasis> = CRITICAL.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			max_check_attempts
+		</term>
+		<listitem>
+		<para>This directive is used to define the number of times that Nagios will retry the 
+		service check command if it returns any state other than an OK state. Setting this value 
+		to 1 will cause Nagios to generate an alert  without retrying the service check again.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			check_interval
+		</term>
+		<listitem>
+		<para>This directive is used to define the number of <quote>time units</quote> to wait before scheduling
+                the next <quote>regular</quote> check of the service. <quote>Regular</quote> checks are those that occur when the 
+		service is in an OK state or when the service is in a non-OK state, but has already been
+                rechecked <emphasis role="bold">max_check_attempts</emphasis> number of times. Unless you've 
+		changed the <link linkend="configuringnagios-configmain-interval_length">interval_length</link>
+                directive from the default value of 60, this number will mean minutes. More information on 
+		this value can be found in the  <link linkend="advancedtopics-checkscheduling">check scheduling</link>
+		documentation.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			retry_interval
+		</term>
+		<listitem>
+		<para>This directive is used to define the number of <quote>time units</quote> to wait before 
+		scheduling a re-check of the service. Services are rescheduled at the retry interval 
+		when they have changed to a non-OK state. Once the service has been retried 
+		<emphasis role="bold">max_check_attempts</emphasis> times without a change in its 
+		status, it will revert to being scheduled at its <quote>normal</quote> rate as defined by the 
+		<emphasis role="bold">check_interval</emphasis> value. Unless you've
+                changed the <link linkend="configuringnagios-configmain-interval_length">interval_length</link>
+                directive from the default value of 60, this number will mean minutes. More information 
+		on this value can be found in the <link linkend="advancedtopics-checkscheduling">check scheduling</link>
+		documentation.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			active_checks_enabled<link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not active checks of this service are
+                enabled. Values:
+		<itemizedlist>
+		<listitem><para>0 = disable active service checks</para></listitem>
+		<listitem><para>1 = enable active service checks.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			passive_checks_enabled <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not passive checks of this service are
+                enabled. Values: 
+		<itemizedlist>
+		<listitem><para>0 = disable passive service checks</para></listitem>
+		<listitem><para>1 = enable passive service checks.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			check_period
+		</term>
+		<listitem>
+		<para>This directive is used to specify the short name of the 
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> 
+		during which active checks of this service can be made.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			obsess_over_service <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive determines whether or not checks for the service will be <quote>obsessed</quote> over
+                using the <link linkend="configuringnagios-configmain-ocsp_command">ocsp_command</link>.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			check_freshness <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not 
+		<link linkend="advancedtopics-freshness">freshness checks</link> are enabled for this
+		service. Values: 
+		<itemizedlist>
+		<listitem><para>0 = disable freshness checks</para></listitem>
+		<listitem><para>1 = enable freshness checks</para></listitem>
+		</itemizedlist>
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			freshness_threshold
+		</term>
+		<listitem>
+		<para>This directive is used to specify the freshness threshold (in seconds) for 
+		this service. If you set this directive to a value of 0, Nagios will determine a
+		freshness threshold to use automatically.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			event_handler
+		</term>
+		<listitem>
+		<para>This directive is used to specify the <emphasis>short name</emphasis> of the
+		<link linkend="configuringnagios-objectdefinitions-command">command</link> that should be
+		run whenever a change in the state of the service is detected (i.e. whenever it goes down or recovers).
+		Read the documentation on <link linkend="advancedtopics-eventhandlers">event handlers</link>
+		for a more detailed explanation of how to write scripts for handling events. The maximum amount of
+		time  that the event handler command can run is controlled by the
+                <link linkend="configuringnagios-configmain-event_handler_timeout">event_handler_timeout</link>
+                option.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			event_handler_enabled <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not the event handler for this service 
+		is enabled. Values:
+		<itemizedlist>
+		<listitem><para>0 = disable service event handler</para></listitem>
+		<listitem><para>1 = enable service event handler.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			low_flap_threshold
+		</term>
+		<listitem>
+		<para>This directive is used to specify the low state change threshold used in flap detection
+                for this service. More information on flap detection can be found 
+		<link linkend="advancedtopics-flapping">here</link>.
+                If you set this directive to a value of 0, the program-wide value specified by the 
+		<link linkend="configuringnagios-configmain-low_service_flap_threshold">low_service_flap_threshold</link>
+                directive will be used.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			high_flap_threshold
+		</term>
+		<listitem>
+		<para>This directive is used to specify the high state change threshold used in flap detection
+                for this service. More information on flap detection can be found 
+		<link linkend="advancedtopics-flapping">here</link>. If you set this directive to a value of 0, the
+		program-wide value specified by the 
+		<link linkend="configuringnagios-configmain-high_service_flap_threshold">high_service_flap_threshold</link>
+                directive will be used.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			flap_detection_enabled <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not flap detection is enabled for this
+                service. More information on flap detection can be found <link linkend="advancedtopics-flapping">here</link>.
+                Values: 
+		<itemizedlist>
+		<listitem><para>0 = disable service flap detection</para></listitem>
+		<listitem><para>1 = enable service flap detection.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			flap_detection_options
+		</term>
+		<listitem>
+		<para>This directive is used to determine what service states the <link linkend="advancedtopics-flapping">flap
+                detection logic</link> will use for this service. Valid options are a combination of one or more of the following :
+		<itemizedlist>
+		<listitem><para><emphasis role="strong">o</emphasis> = OK states</para></listitem>
+		<listitem><para><emphasis role="bold">w</emphasis> = WARNING states</para></listitem>
+		<listitem><para><emphasis role="bold">c</emphasis> = CRITICAL states</para></listitem>
+		<listitem><para><emphasis role="bold">u</emphasis> = UNKNOWN states.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			process_perf_data <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not the processing of performance data is
+                enabled for this service. Values: 
+		<itemizedlist>
+		<listitem><para>0 = disable performance data processing</para></listitem>
+		<listitem><para>1 = enable performance data processing</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			retain_status_information
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not status-related information about the
+                service is retained across program restarts. This is only useful if you have enabled state retention 
+		using the <link linkend="configuringnagios-configmain-retain_state_information">retain_state_information</link>
+                directive. Value:
+		<itemizedlist>
+		<listitem><para>0 = disable status information retention</para></listitem>
+		<listitem><para>1 = enable status information retention.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			retain_nonstatus_information
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not non-status information about the
+                service is retained across program restarts. This is only useful if you have enabled state retention 
+		using the <link linkend="configuringnagios-configmain-retain_state_information">retain_state_information</link>
+                directive. Value: 
+		<itemizedlist>
+		<listitem><para>0 = disable non-status information retention</para></listitem>
+		<listitem><para>1 = enable non-status information retention</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_interval
+		</term>
+		<listitem>
+		<para>This directive is used to define the number of <quote>time units</quote> to wait before re-notifying
+                a contact that this service is <emphasis>still</emphasis> in a non-OK state. Unless you've
+		changed the <link linkend="configuringnagios-configmain-interval_length">interval_length</link>
+                directive from the default value of 60, this number will mean minutes. If you set this value 
+		to 0, Nagios will  <emphasis>not</emphasis> re-notify contacts about problems for
+                this service - only one problem notification will be sent out.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			first_notification_delay
+		</term>
+		<listitem>
+		<para>This directive is used to define the number of <quote>time units</quote> to wait before sending out
+                the first problem notification when this service enters a non-OK state. Unless you've changed the
+		<link linkend="configuringnagios-configmain-interval_length">interval_length</link>
+                directive from the default value of 60, this number will mean minutes. If you set this value 
+		to 0, Nagios will start sending out notifications immediately.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_period
+		</term>
+		<listitem>
+		<para>This directive is used to specify the short name of the 
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> 
+		during which notifications of events for this service can be sent out to contacts. 
+		No service notifications will be sent out during times which is not covered by the time period.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_options
+		</term>
+		<listitem>
+		<para>This directive is used to determine when notifications for the service should be sent
+                out. Valid options are a combination of one or more of the  following:
+		<itemizedlist>
+		<listitem><para><emphasis role="strong">w</emphasis> = send notifications on a WARNING state</para></listitem> 
+		<listitem><para><emphasis role="bold">u</emphasis> = send notifications on an UNKNOWN state</para></listitem> 
+		<listitem><para><emphasis role="strong">c</emphasis> = send notifications on a CRITICAL state</para></listitem>
+		<listitem><para><emphasis role="bold">r</emphasis> = send notifications on recoveries (OK state)</para></listitem>
+		<listitem><para><emphasis role="strong">f</emphasis> = send notifications when the service starts and stops <link linkend="advancedtopics-flapping">flapping</link></para></listitem>
+		<listitem><para><emphasis role="strong">s</emphasis> = send notifications when <link linkend="advancedtopics-downtime">scheduled downtime</link> starts and ends</para></listitem> 
+		<listitem><para><emphasis role="bold">n</emphasis> (none) as an option, no service notifications will be sent out. If you do not specify any notification options, Nagios will assume that you want notifications to be sent out for all possible states</para></listitem>
+		</itemizedlist>
+	
+		<informalexample>
+		<para>
+                If you specify <emphasis role="strong">w,r</emphasis> in this field, notifications will 
+		only be sent out when the service goes into a WARNING state and when it recovers from 
+		a WARNING state.
+		</para>
+		</informalexample>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notifications_enabled <link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not notifications for this service are
+                enabled. Values: 
+		<itemizedlist>
+		<listitem><para>i0 = disable service notifications</para></listitem>
+		<listitem><para>1 = enable service notifications.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contacts
+		</term>
+		<listitem>
+		<para>This is a list of the <emphasis>short names</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-contact">contacts</link> that 
+		should be notified whenever there are problems (or recoveries) with this service.
+                Multiple contacts should be separated by commas. Useful if you  want notifications to
+		go to just a few people and don't want to configure 
+		<link linkend="configuringnagios-objectdefinitions-contactgroup">contact groups</link>.
+		You must specify at least one contact or contact group in each service definition.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contact_groups
+		</term>
+		<listitem>
+		<para>This is a list of the <emphasis>short names</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-contactgroup">contact groups</link> 
+		that should be notified whenever there are problems (or recoveries) with this
+                service. Multiple contact groups should be separated by commas. You must specify 
+		at least one contact or contact group in each service definition.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			stalking_options
+		</term>
+		<listitem>
+		<para>This directive determines which service states "stalking" is enabled for. Valid options
+                are a combination of one or more of the following :
+		<itemizedlist>
+		<listitem><para>o = stalk on OK states</para></listitem>
+		<listitem><para>w = stalk on WARNING states</para></listitem>
+                <listitem><para>u = stalk on UNKNOWN states</para></listitem>
+		<listitem><para>c = stalk on CRITICAL states</para></listitem>
+		</itemizedlist>
+		More information on state stalking can be found <link linkend="advancedtopics-stalking">here</link>.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional string of notes pertaining to the 
+		service. If you specify a note here, you will see the it in the
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGI (when you 
+		are viewing information about the specified service).
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes_url
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional URL that can be used to provide more
+                information about the service. If you specify an URL, you will see a red folder icon in
+		the CGIs (when you are viewing service information) that links to the URL you specify here.
+                Any valid URL can be used. If you plan on using relative paths, the base path will the 
+		the same as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+                This can be very useful if you want to make detailed information on the service, emergency 
+		contact methods, etc. available to other support staff.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			action_url
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional URL that can be used to provide more
+                actions to be performed on the service. If you specify an URL, you will see a red <quote>splat</quote>
+		icon in the CGIs (when you are viewing service information) that links to the URL you specify
+                here. Any valid URL can be used. If you plan on using relative paths, the base path will 
+		the the same as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			icon_image
+		</term>
+		<listitem>
+		<para>This variable is used to define the name of a GIF, PNG, or JPG image that 
+		should be associated with this service. This image will be displayed in the 
+		<link linkend="thebasics-cgis-status_cgi">status</link> and 
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGIs. The image will 
+		look best if it is 40x40 pixels in size. Images for services are assumed to be in the 
+		<emphasis role="strong">logos/</emphasis> subdirectory in your HTML images directory 
+		(i.e. <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			icon_image_alt
+		</term>
+		<listitem>
+		<para>This variable is used to define an optional string that is used in the ALT tag of the
+                image specified by the <emphasis>&lt;icon_image&gt;</emphasis> argument. The ALT tag is 
+		used in the <link linkend="thebasics-cgis-status_cgi">status</link>,
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> and 
+		<link linkend="thebasics-cgis-statusmap_cgi">statusmap</link> CGIs.
+		</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+        
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-servicegroup" />Service Group Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>A service group definition is used to group one or more services together for simplifying 
+	configuration with <link linkend="advancedtopics-objecttricks">object tricks</link> or 
+	display purposes in the <link linkend="thebasics-cgis">CGIs</link>.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define servicegroup{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>servicegroup_name</para></entry>
+                <entry><para><emphasis>servicegroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>alias</para></entry>
+                <entry><para><emphasis>alias</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>members</para></entry>
+                <entry><para><emphasis>services</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>servicegroup_members</para></entry>
+                <entry><para><emphasis>servicegroups</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes</para></entry>
+                <entry><para><emphasis>note_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>action_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>        
+define servicegroup{
+      servicegroup_name       dbservices
+      alias                   Database Services
+      members                 ms1,SQL Server,ms1,SQL Serverc Agent,ms1,SQL DTC
+}
+</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions:</title>
+	<variablelist>
+		<varlistentry>
+		<term>
+			servicegroup_name
+		</term>
+		<listitem>
+		<para>This directive is used to define a short name used to 
+		identify the service group.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			alias
+		</term>
+		<listitem>
+		<para>This directive is used to define is a longer name or 
+		description used to identify the service group. It is provided 
+		in order to allow you to more easily identify a particular 
+		service group.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			members
+		</term>
+		<listitem>
+		<para>This is a list of the <emphasis>descriptions</emphasis> of
+		<link linkend="configuringnagios-objectdefinitions-service">services</link> 
+		(and the names of their corresponding hosts) that should be included in 
+		this group. Host and service names should be separated by commas. 
+		This directive may be used as an alternative to the <emphasis>servicegroups</emphasis> 
+		directive in <link linkend="configuringnagios-objectdefinitions-service">service definitions</link>. 
+		The format of the member directive is as follows (note that a host name must 
+		precede a service name/description):
+		<programlisting>
+members=&lt;host1&gt;,&lt;service1&gt;,&lt;host2&gt;,&lt;service2&gt;,...,&lt;host<emphasis>n</emphasis>&gt;,&lt;service<emphasis>n</emphasis>&gt;
+		</programlisting>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			servicegroup_members
+		</term>
+		<listitem>
+		<para>This optional directive can be used to include services from other 
+		<quote>sub</quote> service groups in this service group. Specify a comma-delimited list
+                of short names of other service groups whose members should be included in
+		this group.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional string of notes
+		pertaining to the service group. If you specify a note here, you will
+		see the it in the <link linkend="thebasics-cgis-extinfo_cgi">extended information</link>
+		CGI (when you are viewing information about the specified service group).
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes_url
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional URL that can be used to
+		provide more information about the service group. If you specify an URL, you
+		will see a red folder icon in the CGIs (when you are viewing service group
+		information) that links to the URL you specify here. Any valid URL can be
+		used. If you plan on using relative paths, the base path will the the same
+		as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>). 
+		This can be very useful if you want to make detailed information on the service
+                group, emergency contact methods, etc. available to other support staff.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			action_url
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional URL that can be used to 
+		provide more actions to be performed on the service group. If you specify an URL, you
+		will see a red <quote>splat</quote> icon in the CGIs (when you are viewing service group information) 
+		that links to the URL you specify here. Any valid URL can be used. If you plan on using 
+		relative paths, the base path will the the same as what is used to access the CGIs 
+		(i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+		</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+
+	</section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-contact" />Contact  Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>A contact definition is used to identify someone who should be
+        contacted in the event of a problem on your network. The different
+        arguments to a contact definition are described below.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are
+          optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define contact{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>contact_name</para></entry>
+                <entry><para><emphasis>contact_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>alias</para></entry>
+                <entry><para><emphasis>alias</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>contactgroups</para></entry>
+                <entry><para><emphasis>contactgroup_names</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>host_notifications_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_notifications_enabled</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>host_notification_period</para></entry>
+                <entry><para><emphasis>timeperiod_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_notification_period</para></entry>
+                <entry><para><emphasis>timeperiod_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>host_notification_options</para></entry>
+                <entry><para>[d,u,r,f,s,n]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_notification_options</para></entry>
+                <entry><para>[w,u,c,r,f,s,n]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>host_notification_commands</para></entry>
+                <entry><para><emphasis>command_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_notification_commands</para></entry>
+                <entry><para><emphasis>command_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>email</para></entry>
+                <entry><para><emphasis>email_address</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>pager</para></entry>
+                <entry><para><emphasis>pager_number or pager_email_gateway</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>address<emphasis>x</emphasis></para></entry>
+                <entry><para><emphasis>additional_contact_address</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>can_submit_commands</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>retain_status_information</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>retain_nonstatus_information</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>
+define contact{
+      contact_name                    jdoe
+      alias                           John Doe
+      host_notifications_enabled      1
+      service_notifications_enabled   1
+      service_notification_period     24x7
+      host_notification_period        24x7
+      service_notification_options    w,u,c,r
+      host_notification_options       d,u,r
+      service_notification_commands   notify-by-email
+      host_notification_commands      host-notify-by-email
+      email                           jdoe@localhost.localdomain
+      pager                           555-5555@pagergateway.localhost.localdomain
+      address1                        xxxxx.xyyy@icq.com
+      address2                        555-555-5555
+      can_submit_commands             1
+}
+	</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			contact_name
+		</term>
+		<listitem>
+		<para>This directive is used to define a short name used to identify the contact. It is referenced in 
+		<link linkend="configuringnagios-objectdefinitions-contactgroup">contact group</link> definitions. 
+		Under the right circumstances, the $CONTACTNAME$ <link linkend="thebasics-macros">macro</link>
+                will contain this value.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			alias
+		</term>
+		<listitem>
+		<para>This directive is used to define a longer name or description for the contact. Under the
+                rights circumstances, the $CONTACTALIAS$ <link linkend="thebasics-macros">macro</link> will contain
+		this value. If not specified, the <emphasis>contact_name</emphasis> will be used as the alias.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contactgroups
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the
+		<link linkend="configuringnagios-objectdefinitions-contactgroup">contactgroup(s)</link> that the
+		contact belongs to. Multiple contactgroups should be separated by commas. This directive may 
+		be used as an alternative to (or in addition to) using the <emphasis>members</emphasis> directive
+                in <link linkend="configuringnagios-objectdefinitions-contactgroup">contactgroup</link>
+                definitions.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			host_notifications_enabled
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not the contact will receive notifications 
+		about host problems and recoveries. Values :
+		<itemizedlist>
+		<listitem><para>0 = don't send notifications</para></listitem>
+		<listitem><para>1 = send notifications</para></listitem>
+		</itemizedlist>
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			service_notifications_enabled
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not the contact will receive
+                notifications about service problems and recoveries. Values: 
+		<itemizedlist>
+		<listitem><para>0 = don't send notifications</para></listitem>
+		<listitem><para>1 = send notifications</para></listitem>
+		</itemizedlist>
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			host_notification_period
+		</term>
+		<listitem>
+		<para>This directive is used to specify the short name of the
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> 
+		during which the contact can be notified about host problems or recoveries.
+		You can think of this as an <quote>on call</quote> time for host notifications for the contact.
+		Read the documentation on <link linkend="thebasics-timeperiods">time periods</link>
+		for more information on how this works and potential problems that may result 
+		from improper use.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			service_notification_period
+		</term>
+		<listitem>
+		<para>This directive is used to specify the short name of the
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> 
+		during which the contact can be notified about service problems or recoveries. 
+		You can think of this as an <quote>on call</quote> time for service notifications for the contact. 
+		Read the documentation on <link linkend="thebasics-timeperiods">time periods</link>
+		for more information on how this works and potential problems that may result from improper use.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			host_notification_commands
+		</term>
+		<listitem>
+		<para>This directive is used to define a list of the <emphasis>short names</emphasis> of the
+                <link linkend="configuringnagios-objectdefinitions-command">commands</link> used to notify the
+                contact of a <emphasis>host</emphasis> problem or recovery. Multiple notification commands 
+		should be separated by commas. All notification commands are executed when the contact needs
+                to be notified. The maximum amount of time that a notification command can run is controlled by the 
+		<link linkend="configuringnagios-configmain-notification_timeout">notification_timeout</link>
+                option.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			host_notification_options
+		</term>
+		<listitem>
+		<para>This directive is used to define the host states for which notifications can be sent out
+                to this contact. Valid options are a combination of one or more of the following:
+		<itemizedlist>
+		<listitem><para>d = notify on DOWN host states</para></listitem>
+		<listitem><para>u = notify on UNREACHABLE host states</para></listitem>
+		<listitem><para>r = notify on host recoveries (UP states)</para></listitem>
+		<listitem><para>f = notify when the host starts and stops <link linkend="advancedtopics-flapping">flapping</link>,</para></listitem>
+                <listitem><para>s = send notifications when host or service <link linkend="advancedtopics-downtime">scheduled downtime</link> starts and ends. If you specify <emphasis role="bold">n</emphasis> (none) as an option, the contact will not receive any type of host notifications.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			service_notification_options
+		</term>
+		<listitem>
+		<para>This directive is used to define the service states for which notifications can be sent out to this 
+		contact. Valid options are a combination of one or more of the following:
+		<itemizedlist>
+		<listitem><para>w = notify on WARNING service states</para></listitem>
+		<listitem><para>u = notify on UNKNOWN service states</para></listitem>
+                <listitem><para>c = notify on CRITICAL service states</para></listitem>
+		<listitem><para>r = notify on service recoveries (OK states)</para></listitem>
+		<listitem><para>f = notify when the service starts and stops <link linkend="advancedtopics-flapping">flapping</link>.</para></listitem>
+                <listitem><para>n = (none) : the contact will not receive any type of service notifications.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			service_notification_commands
+		</term>
+		<listitem>
+		<para>This directive is used to define a list of the <emphasis>short names</emphasis> of the
+                <link linkend="configuringnagios-objectdefinitions-command">commands</link> used to notify the
+                contact of a <emphasis>service</emphasis> problem or recovery. Multiple notification commands
+		should be separated by commas. All notification commands are executed when the contact needs
+                to be notified. The maximum amount of time that a notification command can run is controlled by the
+		<link linkend="configuringnagios-configmain-notification_timeout">notification_timeout</link>
+                option.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			email
+		</term>
+		<listitem>
+		<para>This directive is used to define an email address for the contact. Depending on how you
+                configure your notification commands, it can be used to sendout an alert email to the contact. 
+		Under the right circumstances, the $CONTACTEMAIL$ <link linkend="thebasics-macros">macro</link>
+                will contain this value.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			pager
+		</term>
+		<listitem>
+		<para>This directive is used to define a pager number for the contact. It can also be an email
+                address to a pager gateway (i.e. <ulink url="mailto:pagejoe@pagenet.com">pagejoe@pagenet.com</ulink>).
+                Depending on how you configure your notification commands, it can be used to send out an alert 
+		page to the contact. Under the right circumstances, the $CONTACTPAGER$ 
+		<link linkend="thebasics-macros">macro</link> will contain this value.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			address<emphasis>x</emphasis>
+		</term>
+		<listitem>
+		<para>Address directives are used to define additional <quote>addresses</quote> for the contact. These
+                addresses can be anything - cell phone numbers, instant messaging addresses, etc. Depending 
+		on how you configure your notification commands, they can be used to send out an alert o
+                the contact. Up to six addresses can be defined using these directives (<emphasis>address1</emphasis>
+		through <emphasis>address6</emphasis>). The $CONTACTADDRESS<emphasis>x</emphasis>$ 
+		<link linkend="thebasics-macros">macro</link> will contain this value.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			can_submit_commands
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not the contact can submit 
+		<link linkend="advancedtopics-extcommands">external commands</link> to Nagios from the CGIs.
+		Values:
+		<itemizedlist>
+		<listitem><para>0 = don't allow contact to submit commands</para></listitem>
+		<listitem><para>1 = allow contact to submit commands.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			retain_status_information
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not status-related information about the contact is
+		retained across program restarts. This is only useful if you have enabled state retention using the 
+		<link linkend="configuringnagios-configmain-retain_state_information">retain_state_information</link>
+                directive. Value :
+		<itemizedlist>
+		<listitem><para>0 = disable status information retention</para></listitem>
+		<listitem><para>1 = enable status information retention.</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			retain_nonstatus_information
+		</term>
+		<listitem>
+		<para>This directive is used to determine whether or not non-status information about the
+                contact is retained across program restarts. This is only useful if you have enabled state retention using 
+		the <link linkend="configuringnagios-configmain-retain_state_information">retain_state_information</link>
+                directive. Value :
+		<itemizedlist>
+		<listitem><para>0 = disable non-status information retention</para></listitem>
+                <listitem><para>1 = enable non-status information retention</para></listitem>
+		</itemizedlist>
+		</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-contactgroup" />Contact Group Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>A contact group definition is used to group one or more 
+	<link linkend="configuringnagios-objectdefinitions-contact">contacts</link> together for the purpose 
+	of sending out alert/recovery <link linkend="thebasics-notifications">notifications</link>.</para>
+      </section>
+
+      <section>
+        <title>Definition Format:</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define contactgroup{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>contactgroup_name</para></entry>
+                <entry><para><emphasis>contactgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>alias</para></entry>
+                <entry><para><emphasis>alias</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>members</para></entry>
+                <entry><para><emphasis>contacts</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>contactgroup_members</para></entry>
+                <entry><para><emphasis>contactgroups</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition:</title>
+
+        <programlisting>        
+define contactgroup{
+      contactgroup_name       novell-admins
+      alias                   Novell Administrators
+      members                 jdoe,rtobert,tzach
+}</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions:</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			contactgroup_name
+		</term>
+		<listitem>
+		<para>This directive is a short name used to identify the contact group.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			alias
+		</term>
+		<listitem>
+		<para>This directive is used to define a longer name or description used to identify
+		the contact group.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			members
+		</term>
+		<listitem>
+		<para>This directive is used to define a list of the <emphasis>short names</emphasis> of 
+		<link linkend="configuringnagios-objectdefinitions-contact">contacts</link> that should be 
+		included in this group. Multiple contact names should be separated by commas. This directive 
+		may be used as an alternative to (or in addition to) using the <emphasis>contactgroups</emphasis>
+                directive in <link linkend="configuringnagios-objectdefinitions-contact">contact</link>
+                definitions.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contactgroup_members
+		</term>
+		<listitem>
+		<para>This optional directive can be used to include contacts from other <quote>sub</quote> contact
+                groups in this contact group. Specify a comma-delimited list of short names of other 
+		contact groups whose members should be included in this group.
+		</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-timeperiod" xreflabel="Time Period Definition" />Time Period Definition</title>
+
+      <section>
+        <title>Description</title>
+        <para>
+	A time period is a list of times during various days that are
+        considered to be <quote>valid</quote> times for notifications and service checks.
+        It consists of time ranges for each day of the week that <quote>rotate</quote> once
+        the week has come to an end. Different types of exceptions to the
+        normal weekly time are supported, including: specific weekdays, days
+        of generic months, days of specific months, and calendar dates.
+	</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define timeperiod{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>timeperiod_name</para></entry>
+                <entry><para><emphasis>timeperiod_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>alias</para></entry>
+                <entry><para><emphasis>alias</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>[weekday]</para></entry>
+                <entry><para><emphasis>timeranges</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>[exception]</para></entry>
+                <entry><para><emphasis>timeranges</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>exclude</para></entry>
+                <entry><para>[<emphasis>timeperiod1,timeperiod2,...,timeperiodn</emphasis>]</para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definitions</title>
+
+                <programlisting>
+define timeperiod{
+      timeperiod_name         nonworkhours
+      alias                   Non-Work Hours
+      sunday                  00:00-24:00              ; Every Sunday of every week
+      monday                  00:00-09:00,17:00-24:00  ; Every Monday of every week
+      tuesday                 00:00-09:00,17:00-24:00  ; Every Tuesday of every week
+      wednesday               00:00-09:00,17:00-24:00  ; Every Wednesday of every week
+      thursday                00:00-09:00,17:00-24:00  ; Every Thursday of every week
+      friday                  00:00-09:00,17:00-24:00  ; Every Friday of every week
+      saturday                00:00-24:00              ; Every Saturday of every week
+}
+
+define timeperiod{
+      timeperiod_name         misc-single-days
+      alias                   Misc Single Days
+      1999-01-28              00:00-24:00              ; January 28th, 1999
+      monday 3                00:00-24:00              ; 3rd Monday of every month
+      day 2                   00:00-24:00              ; 2nd day of every month
+      february 10             00:00-24:00              ; February 10th of every year
+      february -1             00:00-24:00              ; Last day in February of every year
+      friday -2               00:00-24:00              ; 2nd to last Friday of every month
+      thursday -1 november    00:00-24:00              ; Last Thursday in November of every year
+}
+
+define timeperiod{
+      timeperiod_name                 misc-date-ranges
+      alias                           Misc Date Ranges
+      2007-01-01 - 2008-02-01         00:00-24:00      ; January 1st, 2007 to February 1st, 2008
+      monday 3 - thursday 4           00:00-24:00      ; 3rd Monday to 4th Thursday of every month
+      day 1 - 15                      00:00-24:00      ; 1st to 15th day of every month
+      day 20 - -1                     00:00-24:00      ; 20th to the last day of every month
+      july 10 - 15                    00:00-24:00      ; July 10th to July 15th of every year
+      april 10 - may 15               00:00-24:00      ; April 10th to May 15th of every year
+      tuesday 1 april - friday 2 may  00:00-24:00      ; 1st Tuesday in April to 2nd Friday in May of every year
+}
+
+define timeperiod{
+      timeperiod_name                      misc-skip-ranges
+      alias                                Misc Skip Ranges
+      2007-01-01 - 2008-02-01 / 3          00:00-24:00    ; Every 3 days from January 1st, 2007 to February 1st, 2008
+      2008-04-01 / 7                       00:00-24:00    ; Every 7 days from April 1st, 2008 (continuing forever)
+      monday 3 - thursday 4 / 2            00:00-24:00    ; Every other day from 3rd Monday to 4th Thursday of every month
+      day 1 - 15 / 5                       00:00-24:00    ; Every 5 days from the 1st to the 15th day of every month
+      july 10 - 15 / 2                     00:00-24:00    ; Every other day from July 10th to July 15th of every year
+      tuesday 1 april - friday 2 may / 6   00:00-24:00    ; Every 6 days from the 1st Tuesday in April to the 2nd Friday in May of every year
+}
+</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+
+	<variablelist>
+		<varlistentry>
+			<term>
+				timeperiod_name
+			</term>
+			<listitem>
+			<para>This directives is the short name used to identify the time period.</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>
+				alias
+			</term>
+			<listitem>
+			<para>This directive is a longer name or description used to identify the time period. </para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>
+				[weekday]
+			</term>
+			<listitem>
+			<para>The weekday directives (<quote><emphasis>sunday</emphasis></quote> through
+			<quote><emphasis>saturday</emphasis></quote>)are comma-delimited lists of
+			time ranges that are <quote>valid</quote> times for a particular day of the
+			week. Notice that there are seven different days for which you
+			can define time ranges (Sunday through Saturday). Each time
+			range is in the form of <emphasis role="bold">HH:MM-HH:MM</emphasis>, where 
+			hours are Specified on a 24 hour clock. 
+			For example, <emphasis role="bold">00:15-24:00</emphasis> means 12:15am 
+			in the morning for this day until 12:00am midnight (a 23 hour, 45
+			minute total time range). If you wish to exclude an entire day
+			from the timeperiod, simply do not include it in the
+			timeperiod definition.
+			</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>
+				[exception]
+			</term>
+			<listitem>
+			<para>You can specify several different types of exceptions to the standard rotating weekday
+			schedule. Exceptions can take a number of different forms including single days of a specific
+			or generic month, single weekdays in a month, or single calendar dates. You can also specify
+			a range of days/dates and even specify skip intervals to obtain functionality described by 
+			<quote>every 3 days between these dates</quote>. Rather than list all the possible formats for exception
+			strings, I'll let you look at the example timeperiod definitions above to see what's 
+			possible. :-) 
+			Weekdays and different types of exceptions all have different levels of precedence, so 
+			its important to understand how they can affect each other. More information on this
+			can be found in the documentation on <link linkend="thebasics-timeperiods">timeperiods</link>.
+			</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>
+				exclude
+			</term>
+			<listitem>
+			<para>This directive is used to specify the short names of other timeperiod 
+			definitions whose time ranges should be excluded from this timeperiod. Multiple
+			timeperiod names should be separated with a comma.
+			</para>
+			</listitem>
+		</varlistentry>
+	</variablelist>
+	
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-command" />Command Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>A command definition is just that. It defines a command.
+        Commands that can be defined include service checks, service
+        notifications, service event handlers, host checks, host
+        notifications, and host event handlers. Command definitions can
+        contain <link linkend="thebasics-macros">macros</link>, but you must
+        make sure that you include only those macros that are <quote>valid</quote> for the
+        circumstances when the command will be used. More information on what
+        macros are available and when they are <quote>valid</quote> can be found
+	<link linkend="thebasics-macros">here</link>. The different arguments to a
+        command definition are outlined below.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define command{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>command_name</para></entry>
+                <entry><para><emphasis>command_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>command_line</para></entry>
+                <entry><para><emphasis>command_line</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2"
+                namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>        
+define command{
+        command_name   check_pop
+        command_line   /usr/local/nagios/libexec/check_pop -H $HOSTADDRESS$    
+}
+	</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			command_name
+		</term>
+		<listitem>
+		<para>This directive is the short name used to identify the command. It is referenced in
+                <link linkend="configuringnagios-objectdefinitions-contact">contact</link>, 
+		<link linkend="configuringnagios-objectdefinitions-host">host</link>, and 
+		<link linkend="configuringnagios-objectdefinitions-service">service</link> definitions 
+		(in notification, check, and event handler directives), among other places.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			command_line
+		</term>
+		<listitem>
+		<para>This directive is used to define what is actually executed by Nagios when the command 
+		is used for service or host checks, notifications, or 
+		<link linkend="advancedtopics-eventhandlers">event handlers</link>. Before the command 
+		line is executed, all valid <link linkend="thebasics-macros">macros</link> are replaced with 
+		their respective values. See the documentation on macros for determining when you can use 
+		different macros. Note that the command line is <emphasis>not</emphasis> surrounded in quotes. 
+		Also, if you want to pass a dollar sign ($) on the command line, you have to escape it with
+		another dollar sign.
+		</para>
+		<note><para>
+		You may not include a <emphasis role="bold">semicolon</emphasis> (;) in the 
+		<emphasis>command_line</emphasis> directive, because everything after it will be ignored 
+		as a config file comment. You can work around this limitation by setting one of the 
+		<link linkend="thebasics-macrolist-user">$USER$</link>  macros in your
+		<link linkend="configuringnagios-configmain-resource_file">resource file</link> 
+		to a semicolon and then referencing the appropriate $USER$ macro in the 
+		<emphasis>command_line</emphasis> directive in place of the semicolon.
+		</para></note>
+		<para>
+		If you want to pass arguments to commands during runtime, you can use 
+		<link linkend="thebasics-macrolist-arg">$ARGn$ macros</link> in the 
+		<emphasis>command_line</emphasis> directive of the command definition and then 
+		separate individual arguments from the command name (and from each other) using
+		bang (!) characters in the object definition directive (host check command, service
+		event handler command, etc.) that references the command. More information on how
+                arguments in command definitions are processed during runtime can be found in the
+		documentation on <link linkend="thebasics-macros">macros</link>.
+		</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-servicedependency" />Service Dependency Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>Service dependencies are an advanced feature of Nagios that
+        allow you to suppress notifications and active checks of services
+        based on the status of one or more other services. Service
+        dependencies are optional and are mainly targeted at advanced users
+        who have complicated monitoring setups. More information on how
+        service dependencies work (read this!) can be found 
+	<link linkend="advancedtopics-dependencies">here</link>.
+	</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note><para>Directives in red are required, while those in black are
+        optional. However, you must supply at least one type of criteria for
+        the definition to be of much use.</para></note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define servicedependency{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>dependent_host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>dependent_hostgroup_name</para></entry>
+                <entry><para><emphasis>hostgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>dependent_service_description</para></entry>
+                <entry><para><emphasis>service_description</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>hostgroup_name</para></entry>
+                <entry><para><emphasis>hostgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_description</para></entry>
+                <entry><para><emphasis>service_description</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>inherits_parent</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>execution_failure_criteria</para></entry>
+                <entry><para>[o,w,u,c,p,n]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_failure_criteria</para></entry>
+                <entry><para>[o,w,u,c,p,n]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>dependency_period</para></entry>
+                <entry><para>timeperiod_name</para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>
+define servicedependency{
+      host_name                       WWW1
+      service_description             Apache Web Server
+      dependent_host_name             WWW1
+      dependent_service_description   Main Web Site
+      execution_failure_criteria      n
+      notification_failure_criteria   w,u,c
+}
+</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			dependent_host
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-host">host(s)</link> that the
+                <emphasis>dependent</emphasis> service <quote>runs</quote> on or is associated with.
+		Multiple hosts should be separated by commas. Leaving this directive blank can be used to create
+		<link linkend="advancedtopics-objecttricks-same_host_dependency"><quote>same host</quote> dependencies</link>.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			dependent_hostgroup
+		</term>
+		<listitem>
+		<para>This directive is used to specify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-hostgroup">hostgroup(s)</link> that the
+                <emphasis>dependent</emphasis> service "runs" on or is associated with. 
+		Multiple hostgroups should be separated by commas. The <varname>dependent_hostgroup</varname>
+		may be used instead of, or in addition to, the <varname>dependent_host</varname> directive.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			dependent_service_description
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>description</emphasis> of the
+                <emphasis>dependent</emphasis> <link linkend="configuringnagios-objectdefinitions-service">service</link>.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			host_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-host">host(s)</link> that the service 
+		<emphasis>that is being depended upon</emphasis> (also referred to as the master service) "runs"
+		on or is associated with. Multiple hosts should be separated by commas.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			hostgroup_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-host">hostgroup(s)</link> that the service
+                <emphasis>that is being depended upon</emphasis> (also referred to as the master service) 
+		"runs" on or is associated with. Multiple hostgroups should be separated by commas. The
+                <varname>hostgroup_name</varname> may be used instead of, or in addition to, the
+                <varname>host_name</varname> directive.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			service_description
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>description</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-service">service</link> <emphasis>that
+		is being depended upon</emphasis> (also referred to as the master service).
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			inherits_parent
+		</term>
+		<listitem>
+		<para>This directive indicates whether or not the dependency inherits dependencies of the
+                service <emphasis>that is being depended upon</emphasis> (also referred to as the master service).
+		In other words, if the master service is dependent upon other services and any one of
+                those dependencies fail, this dependency will also fail.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			execution_failure_criteria
+		</term>
+		<listitem>
+		<para>This directive is used to specify the criteria that determine when the dependent service
+                should <emphasis>not</emphasis> be actively checked. If the <emphasis>master</emphasis> service
+		is in one of the failure states we specify, the <emphasis>dependent</emphasis> service
+                will not be actively checked. Valid options are a combination of one or more of the following 
+		(multiple options are separated with commas): 
+		<itemizedlist>
+		<listitem><para><emphasis role="strong">o</emphasis> = fail on an OK state</para></listitem>
+		<listitem><para><emphasis role="strong">w</emphasis> = fail on a WARNING state</para></listitem>
+		<listitem><para><emphasis role="strong">u</emphasis> = fail on an UNKNOWN state</para></listitem>
+		<listitem><para><emphasis role="strong">c</emphasis> = fail on a CRITICAL state</para></listitem>
+		<listitem><para><emphasis role="strong">p</emphasis> = fail on a pending state (e.g. the service has not yet been checked).</para></listitem> 
+		<listitem><para><emphasis role="strong">n</emphasis> (none) : the execution dependency will never fail and checks of the
+                dependent service will always be actively checked (if other conditions allow for it to be).</para></listitem> 
+		</itemizedlist>
+		<informalexample><para>If you specify <emphasis role="strong">o,c,u</emphasis> in this field, the
+                <emphasis>dependent</emphasis> service will not be actively checked if the <emphasis>master</emphasis>
+		service is in either an OK, a CRITICAL, or an UNKNOWN state.
+		</para></informalexample>
+		</para>
+		</listitem>
+	</varlistentry> 
+	<varlistentry>
+		<term>
+			notification_failure_criteria
+		</term>
+		<listitem>
+		<para>This directive is used to define the criteria that determine when notifications for the
+                dependent service should <emphasis>not</emphasis> be sent out.
+                If the <emphasis>master</emphasis> service is in one of the failure states we specify, notifications for the
+                <emphasis>dependent</emphasis> service will not be sent to contacts. Valid options are a combination 
+		of one or more of the following:
+		<itemizedlist>
+		<listitem><para><emphasis role="strong">o</emphasis> = fail on an OK state</para></listitem>
+		<listitem><para><emphasis role="strong">w</emphasis> = fail on a WARNING state</para></listitem>
+		<listitem><para><emphasis role="strong">u</emphasis> = fail on an UNKNOWN state</para></listitem>
+		<listitem><para><emphasis role="strong">c</emphasis> = fail on a CRITICAL state</para></listitem>
+		<listitem><para><emphasis role="strong">p</emphasis> = fail on a pending state (e.g. the service has not yet been
+                checked).</para></listitem>
+		<listitem><para> <emphasis role="strong">n</emphasis> = (none) : the notification dependency will never
+                fail and notifications for the dependent service will always be sent out.</para></listitem>
+		</itemizedlist>
+		<informalexample>
+		<para>
+		If you specify <emphasis role="bold">w</emphasis> in this field, the notifications
+                for the <emphasis>dependent</emphasis> service will not be  sent out if the <emphasis>master</emphasis> service is in a
+                WARNING state.
+		</para>
+		</informalexample>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			dependency_period
+		</term>
+		<listitem>
+		<para>This directive is used to specify the short name of the 
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link>
+		during which this dependency is valid. If this directive is not specified, the 
+		dependency is considered to be valid during all times.</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-serviceescalation" />Service Escalation Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>Service escalations are completely optional and are used to
+        escalate notifications for a particular service. More information on
+        how notification escalations work can be found <link linkend="advancedtopics-escalations">here</link>.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define serviceescalation{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>hostgroup_name</para></entry>
+                <entry><para><emphasis>hostgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_description</para></entry>
+                <entry><para><emphasis>service_description</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>contacts</para></entry>
+                <entry><para><emphasis>contacts</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>contact_groups</para></entry>
+               <entry><para><emphasis>contactgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>first_notification</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>last_notification</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_interval</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>escalation_period</para></entry>
+                <entry><para>timeperiod_name</para></entry>
+              </row>
+
+              <row>
+                <entry><para>escalation_options</para></entry>
+                <entry><para>[w,u,c,r]</para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>
+define serviceescalation{
+      host_name               nt-3
+      service_description     Processor Load
+      first_notification      4
+      last_notification       0
+      notification_interval   30
+      contact_groups          all-nt-admins,themanagers
+}
+	</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			host_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-host">host(s)</link> that the 
+		<link linkend="configuringnagios-objectdefinitions-service">service</link> escalation should 
+		apply to or is associated with.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			hostgroup_name
+		</term>
+		<listitem>
+		<para>This directive is used to specify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-hostgroup">hostgroup(s)</link> that the
+		service escalation should apply to or is associated with. Multiple hostgroups should be 
+		separated by commas. The <varname>hostgroup_name</varname> may be used instead of, or in 
+		addition to, the <varname>host_name</varname> directive.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			service_description
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>description</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-service">service</link> the escalation 
+		should apply to.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			first_notification
+		</term>
+		<listitem>
+		<para>This directive is a number that identifies the <emphasis>first</emphasis> notification
+                for which this escalation is effective. For instance, if you set this value to 3, this 
+		escalation will only be used if the service is in a non-OK state long enough for a third
+                notification to go out.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			last_notification
+		</term>
+		<listitem>
+		<para>This directive is a number that identifies the <emphasis>last</emphasis> notification for
+                which this escalation is effective. For instance, if you set this value to 5, this escalation 
+		will not be used if more than five notifications are sent out for the service. Setting this
+                value to 0 means to keep using this escalation entry forever (no matter how many notifications go out).
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contacts
+		</term>
+		<listitem>
+		<para>This is a list of the <emphasis>short names</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-contact">contacts</link> that 
+		should be notified whenever there are problems (or recoveries) with this service.
+                Multiple contacts should be separated by commas. Useful if you want notifications to 
+		go to just a few people and don't want to configure 
+		<link linkend="configuringnagios-objectdefinitions-contactgroup">contact groups</link>.
+		You must specify at least one contact or contact group in each service escalation definition.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contact_groups
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-contactgroup">contact group</link> 
+		that should be notified when the service notification is escalated. Multiple
+                contact groups should be separated by commas. You must specify at least one contact
+		or contact group in each service escalation definition.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_interval
+		</term>
+		<listitem>
+		<para>This directive is used to determine the interval at which notifications should be made
+                while this escalation is valid. If you specify a value of 0 for the interval, Nagios will 
+		send the first notification when this escalation definition is valid, but will then prevent any
+                more problem notifications from being sent out for the host. Notifications are sent out again 
+		until the host recovers. This is useful if you want to stop having notifications sent out
+                after a certain amount of time.</para>
+		<note><para>If multiple escalation entries for a host overlap for one or more notification
+                ranges, the smallest notification interval from all escalation  entries is used.</para></note>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			escalation_period
+		</term>
+		<listitem>
+		<para>This directive is used to specify the short name of the 
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> during 
+		which this escalation is valid. If this directive is not specified, the escalation is 
+		considered to be valid during all times.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			escalation_options
+		</term>
+		<listitem>
+		<para>This directive is used to define the criteria that determine when this service
+                escalation is used. The escalation is used only if the service is in one of the states
+		specified in this directive. If this directive is not specified in a service escalation, the
+                escalation is considered to be valid during all service states.
+		Valid options are a combination of one or more of the following: 
+		<itemizedlist>
+		<listitem><para><emphasis role="strong">r</emphasis> = escalate on an OK (recovery) state</para></listitem>
+		<listitem><para><emphasis role="strong">w</emphasis> = escalate on a WARNING state</para></listitem>
+		<listitem><para><emphasis role="strong">u</emphasis> = escalate on an UNKNOWN state</para></listitem>
+		<listitem><para><emphasis role="strong">c</emphasis> = escalate on a CRITICAL state </para></listitem>
+		</itemizedlist>
+		<informalexample><para>If you specify <emphasis role="bold">w</emphasis> in this field, the
+		escalation will only be used if the service is in a WARNING state.</para></informalexample>
+		</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+	</section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-hostdependency" />Host Dependency Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>Host dependencies are an advanced feature of Nagios that allow
+        you to suppress notifications for hosts based on the status of one or
+        more other hosts. Host dependencies are optional and are mainly
+        targeted at advanced users who have complicated monitoring setups.
+        More information on how host dependencies work (read this!) can be
+        found <link linkend="advancedtopics-dependencies">here</link>.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are
+          optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define hostdependency{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>dependent_host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>dependent_hostgroup_name</para></entry>
+                <entry><para><emphasis>hostgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>hostgroup_name</para></entry>
+                <entry><para><emphasis>hostgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>inherits_parent</para></entry>
+                <entry><para>[0/1]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>execution_failure_criteria</para></entry>
+                <entry><para>[o,d,u,p,n]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_failure_criteria</para></entry>
+                <entry><para>[o,d,u,p,n]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>dependency_period</para></entry>
+                <entry><para>timeperiod_name</para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>
+define hostdependency{
+      host_name                       WWW1
+      dependent_host_name             DBASE1
+      notification_failure_criteria   d,u
+}
+      </programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			dependent_host_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the <emphasis>dependent</emphasis>
+		<link linkend="configuringnagios-objectdefinitions-host">host(s)</link>. Multiple hosts should be separated by commas.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			dependent_hostgroup_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the <emphasis>dependent</emphasis> 
+		<link linkend="configuringnagios-objectdefinitions-host">hostgroup(s)</link>. Multiple hostgroups should
+                be separated by commas. The dependent_hostgroup_name may be used instead of, or in addition to, the dependent_host_name
+                directive.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			host_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-host">host(s)</link> 
+		<emphasis>that is being depended upon</emphasis> (also referred to as the master host).
+                Multiple hosts should be separated by commas.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			hostgroup_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-host">hostgroup(s)</link> 
+		<emphasis>that is being depended upon</emphasis> (also referred to as the master
+                host). Multiple hostgroups should be separated by commas. The hostgroup_name may 
+		be used instead of, or in addition to, the host_name directive.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			inherits_parent
+		</term>
+		<listitem>
+		<para>This directive indicates whether or not the dependency inherits dependencies of the
+                host <emphasis>that is being depended upon</emphasis> (also referred to as the master host).
+		In other words, if the master host is dependent upon other hosts and any one of those
+                dependencies fail, this dependency will also fail.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			execution_failure_criteria
+		</term>
+		<listitem>
+		<para>This directive is used to specify the criteria that determine when the dependent host
+                should <emphasis>not</emphasis> be actively checked. If the <emphasis>master</emphasis> host 
+		is in one of the failure states we specify, the <emphasis>dependent</emphasis> host
+                will not be actively checked. Valid options are a combination of one or more of the following 
+		(multiple options are separated with commas):
+		<itemizedlist>
+		<listitem><para><emphasis role="strong">o</emphasis> = fail on an UP state</para></listitem>
+		<listitem><para><emphasis role="strong">d</emphasis> = fail on a DOWN state</para></listitem>
+		<listitem><para><emphasis role="strong">u</emphasis> = fail on an UNREACHABLE state</para></listitem>
+		<listitem><para><emphasis role="bold">p</emphasis> = fail on a pending state (e.g. the host has not yet been checked)</para></listitem>
+		<listitem><para><emphasis role="bold">n</emphasis> (none) : the execution dependency will never fail 
+		and the dependent host will always be actively checked (if other conditions allow for it to be).</para></listitem>
+		</itemizedlist>
+                <informalexample><para>If you specify <emphasis role="strong">u,d</emphasis>
+                in this field, the <emphasis>dependent</emphasis> host will not be actively checked if the 
+		<emphasis>master</emphasis> host is in either an UNREACHABLE or DOWN state.
+		</para></informalexample>
+                </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_failure_criteria
+		</term>
+		<listitem>
+		<para>This directive is used to define the criteria that determine when notifications for the
+                dependent host should <emphasis>not</emphasis> be sent out. If the <emphasis>master</emphasis>
+		host is in one of the failure states we specify, notifications for the
+                <emphasis>dependent</emphasis> host will not be sent to contacts. Valid options are a 
+		combination of one or more of the following:
+		<itemizedlist>
+		<listitem><para><emphasis role="strong">o</emphasis> = fail on an UP state</para></listitem>
+		<listitem><para><emphasis role="strong">d</emphasis> = fail on a DOWN state</para></listitem>
+		<listitem><para><emphasis role="strong">u</emphasis> = fail on an UNREACHABLE state</para></listitem>
+		<listitem><para><emphasis role="strong">p</emphasis> = fail on a pending state (e.g. the host has not yet been checked)</para></listitem>
+		<listitem><para><emphasis role="strong">n</emphasis> = (none) : the notification dependency will never fail and notifications
+		for the dependent host will always be sent out.</para></listitem>
+		</itemizedlist>
+		<informalexample><para>If you specify <emphasis role="bold">d</emphasis> in this field, the 
+		notifications for the <emphasis>dependent</emphasis> host will not be sent out if the 
+		<emphasis>master</emphasis> host is in a DOWN state.</para></informalexample>
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_failure_criteria
+		</term>
+		<listitem>
+		<para>This directive is used to specify the short name of the 
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> during 
+		which this dependency is valid. If this directive is not specified, the dependency is
+		considered to be valid during all times.</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-hostescalation" />Host Escalation Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>Host escalations are completely optional and are used to escalate notifications for a particular 
+	host. More information on how notification escalations work can be found 
+	<link linkend="advancedtopics-escalations">here</link>.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define  hostescalation{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>hostgroup_name</para></entry>
+                <entry><para><emphasis>hostgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>contacts</para></entry>
+                <entry><para><emphasis>contacts</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>contact_groups</para></entry>
+                <entry><para><emphasis>contactgroup_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>first_notification</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>last_notification</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>notification_interval</para></entry>
+                <entry><para>#</para></entry>
+              </row>
+
+              <row>
+                <entry><para>escalation_period</para></entry>
+                <entry><para>timeperiod_name</para></entry>
+              </row>
+
+              <row>
+                <entry><para>escalation_options</para></entry>
+                <entry><para>[d,u,r]</para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>
+define hostescalation{
+        host_name               router-34
+        first_notification      5
+        last_notification       8
+        notification_interval   60
+        contact_groups          all-router-admins
+}
+	</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			host_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-host">host</link> that the escalation 
+		should apply to.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			hostgroup_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name(s)</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-hostgroup">hostgroup(s)</link> that 
+		the escalation should apply to. Multiple hostgroups should be separated by commas. 
+		If this is used, the escalation will apply to all hosts that are members of the specified hostgroup(s).
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			first_notification
+		</term>
+		<listitem>
+		<para>This directive is a number that identifies the <emphasis>first</emphasis> notification
+                for which this escalation is effective. For instance, if you set this value to 3, this 
+		escalation will only be used if the host is down or unreachable long enough for a third
+                notification to go out.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			last_notification
+		</term>
+		<listitem>
+		<para>This directive is a number that identifies the <emphasis>last</emphasis> 
+		notification for which this escalation is effective. For instance, if you set
+                this value to 5, this escalation will not be used if more than five notifications 
+		are sent out for the host. Setting this value to 0 means to keep using this 
+		escalation entry forever (no matter how many notifications go out).</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contacts
+		</term>
+		<listitem>
+		<para>This is a list of the <emphasis>short names</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-contact">contacts</link> that should 
+		be notified whenever there are problems (or recoveries) with this host.
+                Multiple contacts should be separated by commas. Useful if you want notifications 
+		to go to just a few people and don't want to configure 
+		<link linkend="configuringnagios-objectdefinitions-contactgroup">contact groups</link>. 
+		You must specify at least one contact or contact group in each host escalation definition.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			contact_groups
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-contactgroup">contact group</link> 
+		that should be  notified when the host notification is escalated. Multiple contact 
+		groups should be separated by commas. You must specify at least one contact or 
+		contact group in each host escalation definition.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notification_interval
+		</term>
+		<listitem>
+		<para>This directive is used to determine the interval at which notifications 
+		should be made while this escalation is valid. If you specify a value of 0
+                for the interval, Nagios will send the first notification when this escalation 
+		definition is valid, but will then prevent any more problem notifications 
+		from being sent out for the host. Notifications are sent out again until the
+		host recovers. This is useful if you want to stop having notifications sent out
+                after a certain amount of time.</para>
+		<note><para>If multiple escalation entries for a host overlap for one or 
+		more notification ranges, the smallest notification interval from all escalation
+                entries is used.</para></note>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			escalation_period
+		</term>
+		<listitem>
+		<para>This directive is used to specify the short name of the 
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link>
+		during which this escalation is valid. If this directive is not specified, the 
+		escalation is considered to be valid during all times.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			escalation_options
+		</term>
+		<listitem>
+		<para>This directive is used to define the criteria that determine when this host 
+		escalation is used. The escalation is used only if the host is in one of the
+		states specified in this directive. If this directive is not specified in a host
+		escalation, the escalation is considered to be valid during all host states. 
+		Valid options are a combination of one or more of the following :
+		<itemizedlist>
+		<listitem><para><emphasis role="bold">r</emphasis> = escalate on an UP (recovery) state</para></listitem>
+		<listitem><para><emphasis role="strong">d</emphasis> = escalate on a DOWN state</para></listitem>
+		<listitem><para><emphasis role="strong">u</emphasis> = escalate on an UNREACHABLE state</para></listitem>
+		</itemizedlist>
+		<informalexample>
+		<para>
+		If you specify <emphasis role="strong">d</emphasis> in this field, the
+                escalation will only be used if the host is in a DOWN state.
+		</para>
+		</informalexample>
+               </para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-hostextinfo" />Extended Host Information Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>Extended host information entries are basically used to make the output from the 
+	<link linkend="thebasics-cgis-status_cgi">status</link>, <link linkend="thebasics-cgis-statusmap_cgi">statusmap</link>, 
+	<link linkend="thebasics-cgis-statuswrl_cgi">statuswrl</link>, and
+        <link linkend="thebasics-cgis-extinfo_cgi">extinfo</link> CGIs look pretty. They have no
+	effect on monitoring and are completely optional.</para>
+
+        <tip>
+          <para>As of Nagios 3.x, all directives contained in extended host
+          information definitions are also available in
+	  <link linkend="configuringnagios-objectdefinitions-host">host definitions</link>. 
+	  Thus, you can choose to define the directives below in your host definitions if 
+	  it makes your configuration simpler. Separate extended host information definitions
+	  will continue to be supported for backward compatability.</para>
+        </tip>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note><para>Variables in red are required, while those in black are
+        optional. However, you need to supply at least one optional variable
+        in each definition for it to be of much use.</para></note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define hostextinfo{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes</para></entry>
+                <entry><para><emphasis>note_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>action_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>icon_image</para></entry>
+                <entry><para><emphasis>image_file</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>icon_image_alt</para></entry>
+                <entry><para><emphasis>alt_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>vrml_image</para></entry>
+                <entry><para><emphasis>image_file</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>statusmap_image</para></entry>
+                <entry><para><emphasis>image_file</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>2d_coords</para></entry>
+                <entry><para><emphasis>x_coord,y_coord</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>3d_coords</para></entry>
+                <entry><para><emphasis>x_coord,y_coord,z_coord</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition:</title>
+
+        <programlisting>
+define hostextinfo{
+        host_name       netware1
+        notes           This is the primary Netware file server
+        notes_url       http://webserver.localhost.localdomain/hostinfo.pl?host=netware1
+        icon_image      novell40.png
+        icon_image_alt  IntranetWare 4.11
+        vrml_image      novell40.png
+        statusmap_image novell40.gd2
+        2d_coords       100,250
+        3d_coords       100.0,50.0,75.0
+}
+	</programlisting>
+      </section>
+
+      <section>
+        <title>Variable Descriptions</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			host_name
+		</term>
+		<listitem>
+		<para>This variable is used to identify the <emphasis>short name</emphasis> of the 
+		<link linkend="configuringnagios-objectdefinitions-host">host</link> which the data 
+		is associated with.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes
+		</term>
+		<listitem>
+		<para>This directive is used to
+                define an optional string of notes pertaining to the host. If you specify a note here, you
+		will see the it in the <link linkend="thebasics-cgis-extinfo_cgi">extended information</link>
+		CGI (when you are viewing information about the specified host).</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes_url
+		</term>
+		<listitem>
+		<para>This variable is used to define an optional URL that can be used to provide 
+		more information about the host. If you specify an URL, you will see a link that says 
+		<quote><guimenu>Extra Host Notes</guimenu></quote> in the 
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGI 
+		(when you are viewing information about the specified host). Any valid URL can
+		be used. If you plan on using relative paths, the base path will the the same
+                as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>). 
+		This can be very useful if you want to make detailed information on the host,
+                emergency contact methods, etc. available to other support staff.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			action_url
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional URL that can be used to provide more
+                actions to be performed on the host. If you specify an URL, you will see a link that says 
+		<quote><guimenu>Extra Host Actions</guimenu></quote> in the
+		<link linkend="thebasics-cgis-extinfo_cgi">extended  information</link> CGI 
+		(when you are viewing information about the specified host). Any valid URL can be used.
+		If you plan on using relative paths, the base path will the the same as what is used 
+		to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			icon_image
+		</term>
+		<listitem>
+		<para>This variable is used to define the name of a GIF, PNG, or JPG image that 
+		should be associated with this host. This image will be displayed in the
+                <link linkend="thebasics-cgis-status_cgi">status</link> and 
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGIs.
+		The image will look best if it is 40x40 pixels in size. Images for hosts are assumed to 
+		be in the <emphasis role="strong">logos/</emphasis> subdirectory in your HTML images 
+		directory (i.e. <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			icon_image_alt
+		</term>
+		<listitem>
+		<para>This variable is used to define an optional string that is used in the ALT tag 
+		of the image specified by the <emphasis>&lt;icon_image&gt;</emphasis> argument. The 
+		ALT tag is used in the <link linkend="thebasics-cgis-status_cgi">status</link>, 
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> and 
+		<link linkend="thebasics-cgis-statusmap_cgi">statusmap</link> CGIs.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			vrml_image
+		</term>
+		<listitem>
+		<para>This variable is used to define the name of a GIF, PNG, or JPG image that should be
+                associated with this host. This image will be used as the texture map for the specified host 
+		in the <link linkend="thebasics-cgis-statuswrl_cgi">statuswrl</link> CGI. 
+		Unlike the image you use for the <emphasis>&lt;icon_image&gt;</emphasis> variable, this one
+                should probably <emphasis>not</emphasis> have any transparency. If it does, the host object
+		will look a bit weird. Images for hosts are assumed to be in the 
+		<emphasis role="bold">logos/</emphasis> subdirectory in your HTML images directory (i.e.
+                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			statusmap_image
+		</term>
+		<listitem>
+		<para>This variable is used to define the name of an image that should be associated with
+                this host in the <link linkend="thebasics-cgis-statusmap_cgi">statusmap</link> CGI. 
+		You can specify a JPEG, PNG, and GIF image if you want, although I would strongly suggest 
+		using a GD2 format image, as other image formats will result in a lot of wasted CPU time
+                when the statusmap image is generated. GD2 images can be created from PNG images by using 
+		the <emphasis role="bold">pngtogd2</emphasis> utility supplied with Thomas Boutell's 
+		<ulink url="&url-gd;">gd library</ulink>. The GD2 images should be created in
+		<emphasis>uncompressed</emphasis> format in order to minimize CPU load when the statusmap 
+		CGI is generating the network map image. The image will look best if it is 40x40 pixels 
+		in size.
+                You can leave these option blank if you are not using the statusmap CGI. Images for hosts
+		are assumed to be in the <emphasis role="strong">logos/</emphasis> subdirectory in your HTML 
+		images directory (i.e. <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			2d_coords
+		</term>
+		<listitem>
+		<para>This variable is used to define coordinates to use when drawing the host in the
+		<link linkend="thebasics-cgis-statusmap_cgi">statusmap</link> CGI. Coordinates should
+		be given in positive integers, as they correspond to physical pixels in the generated
+		image. The origin for drawing (0,0) is in the upper left hand corner of  the image and
+		extends in the positive x direction (to the right) along the top of the image and in
+		the positive y direction (down) along the left hand side of the image. For reference, the
+		size of the icons drawn is usually about 40x40 pixels (text takes a little extra space).
+		The coordinates you specify here are for the upper left hand corner of the host
+                icon that is drawn.</para>
+		<note><para>Don't worry about what the maximum x and y coordinates that you can use are.
+		The CGI will automatically calculate the maximum dimensions of the image it creates based
+		on the largest x and y coordinates you specify.
+               </para></note>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			3d_coords
+		</term>
+		<listitem>
+		<para>This variable is used to define coordinates to use when drawing the host in the
+		<link linkend="thebasics-cgis-statuswrl_cgi">statuswrl</link> CGI. Coordinates can
+		be positive or negative real numbers. The origin for drawing is (0.0,0.0,0.0).
+		For reference, the size of the host cubes drawn is 0.5 units on each side (text 
+		takes a little more space). The coordinates you specify here are used as the center
+		of the host cube.</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+	
+      </section>
+    </section>
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-serviceextinfo" />Extended Service Information Definition</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>Extended service information entries are basically used to make
+        the output from the <link linkend="thebasics-cgis-status_cgi">status</link> and <link
+        linkend="thebasics-cgis-extinfo_cgi">extinfo</link> CGIs look pretty. They have no effect on
+        monitoring and are completely optional.</para>
+
+        <tip>
+          <para>As of Nagios 3.x, all directives contained in extended service
+          information definitions are also available in <link
+          linkend="configuringnagios-objectdefinitions-service">service definitions</link>. Thus, you can choose to
+          define the directives below in your service definitions if it makes
+          your configuration simpler. Separate extended service information
+          definitions will continue to be supported for backward
+          compatability.</para>
+        </tip>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note><para>Variables in red are required, while those in black are
+        optional. However, you need to supply at least one optional variable
+        in each definition for it to be of much use.</para></note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define serviceextinfo{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>host_name</para></entry>
+                <entry><para><emphasis>host_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_description</para></entry>
+                <entry><para><emphasis>service_description</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes</para></entry>
+                <entry><para><emphasis>note_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>notes_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>action_url</para></entry>
+                <entry><para><emphasis>url</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>icon_image</para></entry>
+                <entry><para><emphasis>image_file</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>icon_image_alt</para></entry>
+                <entry><para><emphasis>alt_string</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>
+define serviceextinfo{
+        host_name               linux2
+        service_description     Log Anomalies
+        notes                   Security-related log anomalies on secondary Linux server
+        notes_url               http://webserver.localhost.localdomain/serviceinfo.pl?host=linux2&amp;service=Log+Anomalies
+        icon_image              security.png
+        icon_image_alt          Security-Related Alerts
+}
+	</programlisting>
+      </section>
+
+      <section>
+        <title>Variable Descriptions</title>
+
+	<variablelist>
+	<varlistentry>
+		<term>
+			host_name
+		</term>
+		<listitem>
+		<para>This directive is used to identify the <emphasis>short name</emphasis> of the host
+		that the <link linkend="configuringnagios-objectdefinitions-service">service</link> is 
+		associated with.
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			service_description
+		</term>
+		<listitem>
+		<para>This directive is description of the
+		<link linkend="configuringnagios-objectdefinitions-service">service</link>
+                which the data is associated with.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional string of notes pertaining to
+		the service. If you specify a note here, you will see the it in the
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGI 
+		(when you are viewing information about the specified service).</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			notes_url
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional URL that can be used to provide more
+                information about the service. If you specify an URL, you will see a link that says 
+		<quote><guimenu>Extra Service Notes</guimenu></quote> in the 
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGI (when you 
+		are viewing information about the specified service). Any valid URL can be used. If
+                you plan on using relative paths, the base path will the the same as what is used to
+		access the CGIs (i.e.  <emphasis>/cgi-bin/nagios/</emphasis>). This can be very
+                useful if you want to make detailed information on the service, emergency contact 
+		methods, etc. available to other support staff.</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			action_url
+		</term>
+		<listitem>
+		<para>This directive is used to define an optional URL that can be used to provide more
+                actions to be performed on the service. If you specify an URL, you will see a link that says 
+		<quote><guimenu>Extra Service Actions</guimenu></quote> in the
+		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGI (when you 
+		are viewing information about the specified service). Any valid URL can be used. If
+                you plan on using relative paths, the base path will the the same as what is used to
+		access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			icon_image
+		</term>
+		<listitem>
+		<para>This variable is used to define the name of a GIF, PNG, or JPG image that
+		should be associated with this host. This image will be displayed in the
+                <link linkend="thebasics-cgis-status_cgi">status</link>
+                and <link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGIs.
+		The image will look best if it is 40x40 pixels in size. Images for hosts are
+		assumed to be in  the <emphasis role="strong">logos/</emphasis> subdirectory in
+                your HTML images directory (i.e.
+                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+               </para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>
+			icon_image_alt
+		</term>
+		<listitem>
+		<para>This variable is used to define an optional string that is used in the ALT tag of the
+                image specified by the <emphasis>&lt;icon_image&gt;</emphasis> argument. The ALT tag is used in
+		the <link linkend="thebasics-cgis-status_cgi">status</link>,
+                <link linkend="thebasics-cgis-extinfo_cgi">extended information</link> and 
+		<link linkend="thebasics-cgis-statusmap_cgi">statusmap</link> CGIs.</para>
+		</listitem>
+	</varlistentry>
+	</variablelist>
+      </section>
+    </section>
+  </section>
+</chapter>
+

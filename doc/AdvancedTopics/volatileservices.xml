@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="advancedtopics-volatileservices" xreflabel="Volatile Services">
+  <title>Volatile Services</title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>Nagios has the ability to distinguish between <quote>normal</quote> services and
+    "volatile" services. The is_volatile option in each service definition
+    allows you to specify whether a specific service is volatile or not. For
+    most people, the majority of all monitored services will be non-volatile
+    (i.e. <quote>normal</quote>). However, volatile services can be very useful when used
+    properly...</para>
+  </section>
+
+  <section>
+    <title>What Are They Useful For?</title>
+
+    <para>Volatile services are useful for monitoring...</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Things that automatically reset themselves to an "OK" state each
+        time they are checked</para>
+      </listitem>
+
+      <listitem>
+        <para>Events such as security alerts which require attention every
+        time there is a problem (and not just the first time)</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title>What's So Special About Volatile Services?</title>
+
+    <para>Volatile services differ from <quote>normal</quote> services in three important
+    ways. Each time they are checked when they are in a <link
+    linkend="thebasics-statetypes">hard</link> non-OK state, and the check
+    returns a non-OK state (i.e. no state change has occurred)...</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The non-OK service state is logged</para>
+      </listitem>
+
+      <listitem>
+        <para>Contacts are notified about the problem (if that's <link
+        linkend="thebasics-notifications">what should be done</link>).</para>
+
+        <note>
+          <para>Notification intervals are ignored for volatile
+          services.</para>
+        </note>
+      </listitem>
+
+      <listitem>
+        <para>The <link linkend="advancedtopics-eventhandlers">event
+        handler</link> for the service is run (if one has been defined)</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>These events normally only occur for services when they are in a
+    non-OK state and a hard state change has just occurred. In other words,
+    they only happen the first time that a service goes into a non-OK state.
+    If future checks of the service result in the same non-OK state, no hard
+    state change occurs and none of the events mentioned take place
+    again.</para>
+
+    <tip>
+      <para>If you are only interested in logging, consider using <link
+      linkend="advancedtopics-stalking">stalking</link> options
+      instead.</para>
+    </tip>
+  </section>
+
+  <section>
+    <title>The Power Of Two</title>
+
+    <para>If you combine the features of volatile services and <link
+    linkend="thebasics-passivechecks">passive service checks</link>, you can
+    do some very useful things. Examples of this include handling &protocol-snmp; traps,
+    security alerts, etc.</para>
+
+    <para>How about an example... Let's say you're running <ulink
+    url="&url-sourceforge-projects;sentrytools/">PortSentry</ulink> to
+    detect port scans on your machine and automatically firewall potential
+    intruders. If you want to let Nagios know about port scans, you could do
+    the following...</para>
+
+    <section>
+      <title>Nagios Configuration</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Create a service definition called Port Scans and associate it
+          with the host that PortSentry is running on.</para>
+        </listitem>
+
+        <listitem>
+          <para>Set the <varname>max_check_attempts</varname> directive in the
+          service definition to 1. This will tell Nagios to immediate force
+          the service into a <link linkend="thebasics-statetypes">hard
+          state</link> when a non-OK state is reported.</para>
+        </listitem>
+
+        <listitem>
+          <para>Set the <varname>active_checks_enabled</varname> directive in
+          the service definition to 0. This prevents Nagios from actively
+          checking the service.</para>
+        </listitem>
+
+        <listitem>
+          <para>Set the <varname>passive_checks_enabled</varname> directive in
+          the service definition to 1. This enables passive checks for the
+          service.</para>
+        </listitem>
+
+        <listitem>
+          <para>Set this <varname>is_volatile</varname> directive in the
+          service definition to 1.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>PortSentry Configuration</title>
+
+      <para>Edit your PortSentry configuration file
+      (<filename>portsentry.conf</filename>) and define a command for the
+      KILL_RUN_CMD directive as follows:</para>
+
+      <programlisting>KILL_RUN_CMD="/usr/local/Nagios/libexec/eventhandlers/submit_check_result <replaceable>host_name</replaceable> 'Port Scans' 2 'Port scan from host $TARGET$ on port $PORT$.  Host has been firewalled.'"</programlisting>
+
+      <para>Make sure to replace host_name with the short name of the host
+      that the service is associated with.</para>
+    </section>
+
+    <section>
+      <title>Port Scan Script</title>
+
+      <para>Create a shell script in the <filename
+      class="directory">/usr/local/nagios/libexec/eventhandlers</filename>
+      directory named <command>submit_check_result</command>. The contents of
+      the shell script should be something similiar to the following...</para>
+
+      <programlisting>#!/bin/sh
+
+		# Write a command to the Nagios command file to cause
+		# it to process a service check result
+
+		echocmd="/bin/echo"
+
+		CommandFile="/usr/local/nagios/var/rw/nagios.cmd"
+
+		# get the current date/time in seconds since UNIX epoch
+		datetime=`date +%s`
+
+		# create the command line to add to the command file
+		cmdline="[$datetime] PROCESS_SERVICE_CHECK_RESULT;$1;$2;$3;$4"
+
+		# append the command to the end of the command file
+		`$echocmd $cmdline &gt;&gt; $CommandFile`</programlisting>
+
+      <para>What will happen when PortSentry detects a port scan on the
+      machine in the future?</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>PortSentry will firewall the host (this is a function of the
+          PortSentry software)</para>
+        </listitem>
+
+        <listitem>
+          <para>PortSentry will execute the
+          <command>submit_check_result</command> shell script and send a
+          passive check result to Nagios</para>
+        </listitem>
+
+        <listitem>
+          <para>Nagios will read the external command file and see the passive
+          service check submitted by PortSentry</para>
+        </listitem>
+
+        <listitem>
+          <para>Nagios will put the Port Scans service in a hard CRITICAL
+          state and send notifications to contacts</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Pretty neat, huh?</para>
+    </section>
+  </section>
+</chapter>

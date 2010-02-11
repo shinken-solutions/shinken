@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="advancedtopics-objecttricks" xreflabel="Time-Saving Tricks For Object Definitions">
+	<title>Time-Saving Tricks For Object Definitions</title>
+	<abstract>
+		<para>
+		or..."How To Preserve Your Sanity"</para>
+	</abstract>
+	<section>
+		<title>Introduction</title>
+		<para>This documentation attempts to explain how you can exploit the (somewhat) hidden 
+		features of <link linkend="configuringnagios-objectdefinitions">template-based object definitions</link>
+		to save your sanity. How so, you ask? Several types of objects allow you to specify multiple 
+		host names and/or hostgroup names in definitions, allowing you to "copy" the object defintion
+		to multiple hosts or services. I'll cover each type of object that supports these features
+		seperately. For starters, the object types which support this time-saving feature are as follows:</para>
+		<itemizedlist>
+			<listitem>
+				<para>
+					<link linkend="advancedtopics-objecttricks-service">Services</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="advancedtopics-objecttricks-serviceescalation">Service escalations</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="advancedtopics-objecttricks-servicedependency">Service dependencies</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="advancedtopics-objecttricks-hostescalation">Host escalations</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="advancedtopics-objecttricks-hostdependency">Host dependencies</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="advancedtopics-objecttricks-hostgroup">Hostgroups</link>
+				</para>
+			</listitem>
+		</itemizedlist>
+		<para>Object types that are not listed above (i.e. timeperiods, commands, etc.) do not support the 
+		features I'm about to describe.</para>
+	</section>
+	<section>
+		<title>Regular Expression Matching</title>
+		<para>The examples I give below use <quote>standard</quote> matching of object names. If you wish, you can 
+		enable regular expression matching for object names by using the 
+		<link linkend="configuringnagios-configmain-use_regexp_matching">use_regexp_matching</link> 
+		config option. By default, regular expression matching will only be used in object names
+		that contain *, ?, +, or \.. If you want regular expression matching to be used on all
+		object names, enable the 
+		<link linkend="configuringnagios-configmain-use_true_regexp_matching">use_true_regexp_matching</link> 
+		config option.
+		Regular expressions can be used in any of the fields used in the examples below 
+		(host names, hostgroup names, service names, and servicegroup names).</para>
+		<note>
+			<para>Be careful when enabling regular expression matching - you may have to
+		change your config file, since some directives that you might not want to be interpreted 
+		as a regular expression just might be ! Any problems should become evident once you verify 
+		your configuration. 
+		</para>
+		</note>
+	</section>
+	<section>
+		<title>
+			<anchor id="advancedtopics-objecttricks-service"/>Service Definitions</title>
+		<section>
+			<title>Multiple Hosts:</title>
+			<para>If you want to create identical 
+			<link linkend="configuringnagios-objectdefinitions-service">services</link> that
+			are assigned to multiple hosts, you can specify multiple hosts in the <varname>host_name</varname> directive.
+			The definition below would create a service called SOMESERVICE on hosts HOST1 through HOSTN.
+			All the instances of the SOMESERVICE service would be identical (i.e. have the same
+			check command, max check attempts, notification period, etc.).</para>
+			<programlisting>
+define service{
+    host_name                HOST1,HOST2,HOST3,...,HOSTN
+    service_description      SOMESERVICE
+    other service directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Hosts In Multiple Hostgroups:</title>
+			<para>If you want to create identical services that are assigned to all hosts in one or
+			more hostgroups, you can do so by creating a single service definition. How ? The 
+			<varname>hostgroup_name</varname> directive allows you to specify the name of one or more
+			hostgroups that the service should be created for. The definition below would create a 
+			service called SOMESERVICE on all hosts that are members of hostgroups HOSTGROUP1 
+			through HOSTGROUPN. All the instances of the SOMESERVICE service would be identical 
+			(i.e. have the same check command, max check attempts, notification period, etc.).</para>
+			<programlisting>
+define service{
+    hostgroup_name          HOSTGROUP1,HOSTGROUP2,...,HOSTGROUPN
+    service_description     SOMESERVICE
+    other service directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Hosts:</title>
+			<para>If you want to create identical services that are assigned to all hosts 
+			that are defined in your configuration files, you can use a wildcard in the <varname>host_name</varname>
+			directive. The definition below would create a service called SOMESERVICE on all hosts 
+			that are defined in your configuration files. All the instances of the SOMESERVICE service
+			would be identical (i.e. have the same check command, max check attempts, notification
+			period, etc.).</para>
+			<programlisting>
+define service{
+    host_name               *
+    service_description     SOMESERVICE
+    other service directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>Excluding Hosts:</title>
+			<para>If you want to create identical services on numerous hosts or hostgroups, but 
+			would like to exclude some hosts from the definition, this can be accomplished by
+			preceding the host or hostgroup with a ! symbol.</para>
+			<programlisting>
+define service{
+    host_name             HOST1,HOST2,!HOST3,!HOST4,...,HOSTN
+    hostgroup_name        HOSTGROUP1,HOSTGROUP2,!HOSTGROUP3,!HOSTGROUP4,...,HOSTGROUPN
+    service_description   SOMESERVICE
+    other service directives ...
+}
+			</programlisting>
+		</section>
+	</section>
+	<section>
+		<title>
+			<anchor id="advancedtopics-objecttricks-serviceescalation"/>Service Escalation Definitions</title>
+		<section>
+			<title>Multiple Hosts:</title>
+			<para>If you want to create 
+			<link linkend="configuringnagios-objectdefinitions-serviceescalation">service escalations</link>
+			for services of the same name/description that are assigned to multiple hosts, you can
+			specify multiple hosts in the <varname>host_name</varname> directive. The definition below 
+			would create a service escalation for services called SOMESERVICE on hosts HOST1 through
+			HOSTN. All the instances of the service escalation would be identical (i.e. have 
+			the same contact groups, notification interval, etc.).</para>
+			<programlisting>
+define serviceescalation{
+    host_name               HOST1,HOST2,HOST3,...,HOSTN
+    service_description     SOMESERVICE
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Hosts In Multiple Hostgroups:</title>
+			<para>If you want to create service escalations for services of the same name/description
+			that are assigned to all hosts in in one or more hostgroups, you can do use the 
+			<varname>hostgroup_name</varname> directive. The definition below would create a service 
+			escalation for services called SOMESERVICE on all hosts that are members of hostgroups
+			HOSTGROUP1 through HOSTGROUPN. All the instances of the service escalation would 
+			be identical (i.e. have the same contact groups, notification interval, etc.).</para>
+			<programlisting>
+define serviceescalation{
+    hostgroup_name          HOSTGROUP1,HOSTGROUP2,...,HOSTGROUPN
+    service_description     SOMESERVICE
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Hosts:</title>
+			<para>If you want to create identical service escalations for services of the same
+			name/description that are assigned to all hosts that are defined in your configuration
+			files, you can use a wildcard in the <varname>host_name</varname> directive. 
+			The definition below would create a service escalation for all services called 
+			SOMESERVICE on all hosts that are defined in your configuration files. All the 
+			instances of the service escalation would be identical (i.e. have the same 
+			contact groups, notification interval, etc.).</para>
+			<programlisting>
+define serviceescalation{
+    host_name               *
+    service_description     SOMESERVICE
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>Excluding Hosts:</title>
+			<para>If you want to create identical services escalations for services on numerous 
+			hosts or hostgroups, but would like to exclude some hosts from the definition, this
+			can be accomplished by preceding the host or hostgroup with a ! symbol.</para>
+			<programlisting>
+define serviceescalation{
+    host_name             HOST1,HOST2,!HOST3,!HOST4,...,HOSTN
+    hostgroup_name        HOSTGROUP1,HOSTGROUP2,!HOSTGROUP3,!HOSTGROUP4,...,HOSTGROUPN
+    service_description   SOMESERVICE
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Services On Same Host:</title>
+			<para>If you want to create 
+			<link linkend="configuringnagios-objectdefinitions-serviceescalation">service escalations</link> 
+			for all services assigned to a particular host, you can use a wildcard in the
+			<varname>service_description</varname> directive. The definition below would create a 
+			service escalation for all services on host HOST1. All the instances of the service
+			escalation would be identical (i.e. have the same contact groups, notification 
+			interval, etc.).</para>
+			<para>If you feel like being particularly adventurous, you can specify a wildcard 
+			in both the <varname>host_name</varname> and <varname>service_description</varname> directives. 
+			Doing so would create a service escalation for all services that you've defined in
+			your configuration files.</para>
+			<programlisting>
+define serviceescalation{
+    host_name               HOST1
+    service_description     *
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>Multiple Services On Same Host:</title>
+			<para>If you want to create 
+			<link linkend="configuringnagios-objectdefinitions-serviceescalation">service escalations</link>
+			for all multiple services assigned to a particular host, you can use a specify more than
+			one service description in the <varname>service_description</varname> directive.
+			The definition below would create a service escalation for services SERVICE1 through 
+			SERVICEN on host HOST1. All the instances of the service escalation would be 
+			identical (i.e. have the same contact groups, notification interval, etc.).</para>
+			<programlisting>
+define serviceescalation{
+    host_name               HOST1
+    service_description     SERVICE1,SERVICE2,...,SERVICEN
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Services In Multiple Servicegroups:</title>
+			<para>If you want to create service escalations for all services that belong in 
+			one or more servicegroups, you can do use the <varname>servicegroup_name</varname> directive.
+			The definition below would create service escalations for all services that are 
+			members of servicegroups SERVICEGROUP1 through SERVICEGROUPN. 
+			All the instances of the service escalation would be identical (i.e. have the
+			same contact groups, notification interval, etc.).</para>
+			<programlisting>
+define serviceescalation{
+    servicegroup_name          SERVICEGROUP1,SERVICEGROUP2,...,SERVICEGROUPN
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+	</section>
+	<section>
+		<title>
+			<anchor id="advancedtopics-objecttricks-servicedependency"/>Service Dependency Definitions</title>
+		<section>
+			<title>Multiple Hosts:</title>
+			<para>If you want to create 
+			<link linkend="configuringnagios-objectdefinitions-servicedependency">service dependencies</link> 
+			for services of the same name/description that are assigned to multiple hosts, you can
+			specify multiple hosts in the <varname>host_name</varname> and or <varname>dependent_host_name</varname> 
+			directives. In the example below, service SERVICE2 on hosts HOST3 and HOST4 would be 
+			dependent on service SERVICE1 on hosts HOST1 and HOST2. All the instances of the service
+			dependencies would be identical except for the host names (i.e. have the same 
+			notification failure criteria, etc.).</para>
+			<programlisting>
+define servicedependency{
+    host_name                       HOST1,HOST2
+    service_description             SERVICE1
+    dependent_host_name             HOST3,HOST4
+    dependent_service_description   SERVICE2
+    other dependency directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Hosts In Multiple Hostgroups:</title>
+			<para>If you want to create service dependencies for services of the same 
+			name/description that are assigned to all hosts in in one or more hostgroups, you can 
+			do use the <varname>hostgroup_name</varname> and/or <varname>dependent_hostgroup_name</varname> 
+			directives. In the example below, service SERVICE2 on all hosts in hostgroups HOSTGROUP3 
+			and HOSTGROUP4 would be dependent on service SERVICE1 on all hosts in hostgroups HOSTGROUP1
+			and HOSTGROUP2. Assuming there were five hosts in each of the hostgroups, this
+			definition would be equivalent to creating 100 single service dependency definitions !
+			All the instances of the service dependency would be identical except for the 
+			host names (i.e. have the same notification failure criteria, etc.).</para>
+			<programlisting>
+define servicedependency{
+    hostgroup_name                  HOSTGROUP1,HOSTGROUP2
+    service_description             SERVICE1
+    dependent_hostgroup_name        HOSTGROUP3,HOSTGROUP4
+    dependent_service_description   SERVICE2
+    other dependency directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Services On A Host:</title>
+			<para>If you want to create service dependencies for all services assigned to a 
+			particular host, you can use a wildcard in the <varname>service_description</varname> and/or 
+			<varname>dependent_service_description</varname> directives. In the example below, all
+			services on host HOST2 would be dependent on all services on host HOST1. All 
+			the instances of the service dependencies would be identical (i.e. have the
+			same notification failure criteria, etc.).</para>
+			<programlisting>
+define servicedependency{
+    host_name                       HOST1
+    service_description             *
+    dependent_host_name             HOST2
+    dependent_service_description   *
+    other dependency directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>Multiple Services On A Host:</title>
+			<para>If you want to create service dependencies for multiple services assigned to 
+			a particular host, you can specify more than one service description in the 
+			<varname>service_description</varname> and/or <varname>dependent_service_description</varname> 
+			directives as follows:</para>
+			<programlisting>
+define servicedependency{
+    host_name                       HOST1
+    service_description             SERVICE1,SERVICE2,...,SERVICEN
+    dependent_host_name             HOST2
+    dependent_service_description   SERVICE1,SERVICE2,...,SERVICEN
+    other dependency directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Services In Multiple Servicegroups:</title>
+			<para>If you want to create service dependencies for all services that belong in 
+			one or more servicegroups, you can do use the <varname>servicegroup_name</varname> and/or 
+			<varname>dependent_servicegroup_name</varname> directive as follows:</para>
+			<programlisting>
+define servicedependency{
+    servicegroup_name               SERVICEGROUP1,SERVICEGROUP2,...,SERVICEGROUPN
+    dependent_servicegroup_name     SERVICEGROUP3,SERVICEGROUP4,...SERVICEGROUPN
+    other dependency directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>
+				<anchor id="advancedtopics-objecttricks-same_host_dependency"/>Same Host Dependencies:</title>
+			<para>If you want to create service dependencies for multiple services that are 
+			dependent on services on the same host, leave the <varname>dependent_host_name</varname> and 
+			<varname>dependent_hostgroup_name</varname> directives empty. 
+			The example below assumes that hosts HOST1 and HOST2 have at least the following 
+			four services associated with them: SERVICE1, SERVICE2, SERVICE3, and SERVICE4. 
+			In this example, SERVICE3 and SERVICE4 on HOST1 will be dependent on both SERVICE1 and 
+			SERVICE2 on HOST1. Similiarly, SERVICE3 and SERVICE4 on HOST2 will be dependent on
+			both SERVICE1 and SERVICE2 on HOST2.</para>
+			<programlisting>
+define servicedependency{
+    host_name                       HOST1,HOST2
+    service_description             SERVICE1,SERVICE2
+    dependent_service_description   SERVICE3,SERVICE4
+    other dependency directives ...
+}
+			</programlisting>
+		</section>
+	</section>
+	<section>
+		<title>
+			<anchor id="advancedtopics-objecttricks-hostescalation"/>Host Escalation Definitions</title>
+		<section>
+			<title>Multiple Hosts:</title>
+			<para>If you want to create 
+			<link linkend="configuringnagios-objectdefinitions-hostescalation">host escalations</link> 
+			for multiple hosts, you can specify multiple hosts in the <varname>host_name</varname> directive.
+			The definition below would create a host escalation for hosts HOST1 through HOSTN. All
+			the instances of the host escalation would be identical (i.e. have the same contact 
+			groups, notification interval, etc.).</para>
+			<programlisting>
+define hostescalation{
+    host_name              HOST1,HOST2,HOST3,...,HOSTN
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Hosts In Multiple Hostgroups:</title>
+			<para>If you want to create host escalations for all hosts in in one or more
+			hostgroups, you can do use the <varname>hostgroup_name</varname> directive. 
+			The definition below would create a host escalation on all hosts that are
+			members of hostgroups HOSTGROUP1 through HOSTGROUPN. All the instances of the
+			host escalation would be identical (i.e. have the same contact groups, notification 
+			interval, etc.).</para>
+			<programlisting>
+define hostescalation{
+    hostgroup_name            HOSTGROUP1,HOSTGROUP2,...,HOSTGROUPN
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Hosts:</title>
+			<para>If you want to create identical host escalations for all hosts that are defined
+			in your configuration files, you can use a wildcard in the <varname>host_name</varname> directive.
+			The definition below would create a hosts escalation for all hosts that are defined in 
+			your configuration files. All the instances of the host escalation would be 
+			identical (i.e. have the same contact groups, notification interval, etc.).</para>
+			<programlisting>
+define hostescalation{
+    host_name               *
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>Excluding Hosts:</title>
+			<para>If you want to create identical host escalations on numerous hosts or hostgroups, but 
+			would like to exclude some hosts from the definition, this can be accomplished by
+			preceding the host or hostgroup with a ! symbol.</para>
+			<programlisting>
+define hostescalation{
+    host_name             HOST1,HOST2,!HOST3,!HOST4,...,HOSTN
+    hostgroup_name        HOSTGROUP1,HOSTGROUP2,!HOSTGROUP3,!HOSTGROUP4,...,HOSTGROUPN
+    other escalation directives ...
+}
+			</programlisting>
+		</section>
+	</section>
+	<section>
+		<title>
+			<anchor id="advancedtopics-objecttricks-hostdependency"/>Host Dependency Definitions</title>
+		<section>
+			<title>Multiple Hosts:</title>
+			<para>If you want to create 
+			<link linkend="configuringnagios-objectdefinitions-hostdependency">host dependencies</link> 
+			for multiple hosts, you can specify multiple hosts in the <varname>host_name</varname> 
+			and/or <varname>dependent_host_name</varname> directives. The definition below would be equivalent 
+			to creating six seperate host dependencies. In the example above, hosts HOST3, HOST4 
+			and HOST5 would be dependent upon both HOST1 and HOST2. All the instances 
+			of the host dependencies would be identical except for the host names (i.e. have 
+			the same notification failure criteria, etc.).</para>
+			<programlisting>
+define hostdependency{
+    host_name               HOST1,HOST2
+    dependent_host_name     HOST3,HOST4,HOST5
+    other dependency directives ...
+}
+			</programlisting>
+		</section>
+		<section>
+			<title>All Hosts In Multiple Hostgroups:</title>
+			<para>If you want to create host escalations for all hosts in in one or more 
+			hostgroups, you can do use the <varname>hostgroup_name</varname> and /or 
+			<varname>dependent_hostgroup_name</varname> directives. In the example below, all hosts in
+			hostgroups HOSTGROUP3 and HOSTGROUP4 would be dependent on all hosts in hostgroups
+			HOSTGROUP1 and HOSTGROUP2. All the instances of the host dependencies would be
+			identical except for host names (i.e. have the same notification failure criteria, etc.).</para>
+			<programlisting>
+define hostdependency{
+    hostgroup_name                  HOSTGROUP1,HOSTGROUP2
+    dependent_hostgroup_name        HOSTGROUP3,HOSTGROUP4
+    other dependency directives ...
+}
+			</programlisting>
+		</section>
+	</section>
+	<section>
+		<title>
+			<anchor id="advancedtopics-objecttricks-hostgroup"/>Hostgroups</title>
+		<section>
+			<title>All Hosts:</title>
+			<para>If you want to create a hostgroup that has all hosts that are defined in your 
+			configuration files as members, you can use a wildcard in the <varname>members</varname>
+			directive. The definition below would create a hostgroup called HOSTGROUP1 that has 
+			all all hosts that are defined in your configuration files as members.</para>
+			<programlisting>
+define hostgroup{
+    hostgroup_name          HOSTGROUP1
+    members                 *
+    other hostgroup directives ...
+}
+			</programlisting>
+		</section>
+	</section>
+</chapter>

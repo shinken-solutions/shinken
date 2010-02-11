@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="configuringnagios-configobject" xreflabel="Object Configuration Overview">
+	<title>Object Configuration Overview</title>
+	
+	<section>
+		<title>What Are Objects?</title>
+		
+		<para>Objects are all the elements that are involved in the monitoring and
+		notification logic. Types of objects include:</para>
+		
+		<itemizedlist>
+			<listitem>
+				<para>Services</para>
+			</listitem>
+			<listitem>
+				<para>Service Groups</para>
+			</listitem>
+			<listitem>
+				<para>Hosts</para>
+			</listitem>
+			<listitem>
+				<para>Host Groups</para>
+			</listitem>
+			<listitem>
+				<para>Contacts</para>
+			</listitem>
+			<listitem>
+				<para>Contact Groups</para>
+			</listitem>
+			<listitem>
+				<para>Commands</para>
+			</listitem>
+			<listitem>
+				<para>Time Periods</para>
+			</listitem>
+			<listitem>
+				<para>Notification Escalations</para>
+			</listitem>
+			<listitem>
+				<para>Notification and Execution Dependencies</para>
+			</listitem>
+		</itemizedlist>
+		
+		<para>More information on what objects are and how they relate to each
+		other can be found below. </para>
+	</section>
+	
+	<section>
+		<title>Where Are Objects Defined?</title>
+		
+		<para>Objects can be defined in one or more configuration files and/or directories 
+		that you specify using the <link linkend="configuringnagios-configmain-cfg_file">cfg_file</link>
+		and/or <link linkend="configuringnagios-configmain-cfg_dir">cfg_dir</link> directives in the main
+		configuration file.</para>
+		
+		<tip>
+			<para>When you follow the <xref linkend="gettingstarted-quickstart" />, several sample object
+			configuration files are placed in <filename class="directory">/usr/local/nagios/etc/objects/</filename>.
+			You can use these sample files to see how object inheritance works and
+			learn how to define your own object definitions.</para>
+		</tip>
+	</section>
+	
+	<section>
+		<title>How Are Objects Defined?</title>
+		
+		<para>Objects are defined in a flexible template format, which can make it much easier 
+		to manage your Nagios configuration in the long term. Basic information on how to define 
+		objects in your configuration files can be found 
+		<link linkend="configuringnagios-objectdefinitions">here</link>.</para>
+		
+		<para>Once you get familiar with the basics of how to define objects, you should read up on 
+		<link linkend="advancedtopics-objectinheritance">object inheritance</link>, as it will make 
+		your configuration more robust for the future. Seasoned users can exploit some advanced 
+		features of object definitions as described in the documentation on 
+		<link linkend="advancedtopics-objecttricks">object tricks</link>.</para>
+	</section>
+	
+	<section>
+		<title>
+			<anchor id="configuringnagios-configobject-objectoverview" />Objects Explained</title>
+		
+		<para>Some of the main object types are explained in greater detail below...</para>
+		
+		
+		<section>
+		<title>Hosts</title>
+			<para>
+				<link linkend="configuringnagios-objectdefinitions-host">Hosts</link> 
+								are one of the central objects in the monitoring logic. Important
+								attributes of hosts are	as follows:
+							<itemizedlist mark="opencircle">
+								<listitem>
+									<para>
+									Hosts are usually physical devices on your network
+									(servers, workstations, routers, switches, printers,
+									etc).
+									</para>
+					</listitem>
+				
+					<listitem>
+						<para>Hosts have an address of some kind (e.g. an IP or MAC
+									address).</para>
+					</listitem>
+				
+					<listitem>
+						<para>Hosts have one or more more services associated with
+									them.</para>
+					</listitem>
+				
+					<listitem>
+						<para>Hosts can have parent/child relationships with other
+									hosts, often representing real-world network connections,
+									which is used in the <link linkend="thebasics-networkreachability">network
+									reachability</link> logic.</para>
+					</listitem>
+				</itemizedlist>
+			</para>
+		</section>
+		<section>
+		<title>Host Groups</title>
+			<para>
+				<link linkend="configuringnagios-objectdefinitions-hostgroup">Host Groups</link> 
+								are groups of one or more hosts. Host groups can make it easier to (1) view the status 
+								of related hosts in the Nagios web interface and (2) simplify your configuration through
+								the use of <link linkend="advancedtopics-objecttricks">object tricks</link>.
+								</para>
+		</section>
+	
+<!--		
+						<para>
+								<inlinemediaobject>
+									<imageobject>
+										<imagedata fileref="images/objects-hosts.png" format="PNG"/>
+									</imageobject>
+								</inlinemediaobject>
+						</para>
+-->
+		<section>
+		<title>Services</title>
+			<para>
+				<link linkend="configuringnagios-objectdefinitions-service">Services</link> are one of the
+								central objects in the monitoring logic. Services are associated
+								with hosts and can be:</para>
+			<itemizedlist>
+				<listitem>
+					<para>Attributes of a host (CPU load, disk usage, uptime,
+									etc.)</para>
+				</listitem>
+		
+				<listitem>
+					<para>Services provided by the host (&protocol-http;, &protocol-pop3;, &protocol-ftp;, &protocol-ssh;,
+									etc.)</para>
+				</listitem>
+		
+				<listitem>
+					<para>Other things associated with the host (&protocol-dns; records,
+									etc.)</para>
+				</listitem>
+			</itemizedlist>
+		</section>
+		<section>
+		<title>Service Groups</title>
+			<para>
+				<link linkend="configuringnagios-objectdefinitions-servicegroup">Service Groups</link> 
+								are groups of one or more services. Service groups can make it easier
+								to (1) view the status of related services in the Nagios web
+								interface and (2) simplify your configuration through the use of
+								<link linkend="advancedtopics-objecttricks">object tricks</link>.
+							</para>
+<!--		
+							<para>
+								<inlinemediaobject>
+									<imageobject>
+										<imagedata fileref="images/objects-services.png" format="PNG"/>
+									</imageobject>
+								</inlinemediaobject>
+							</para>
+-->
+		</section>
+		<section>
+		<title>Contacts</title>
+			<para>
+				<link linkend="configuringnagios-objectdefinitions-contact">Contacts</link> 
+								are people involved in the notification process:</para>
+			<itemizedlist>
+				<listitem>
+					<para>Contacts have one or more notification methods (cellphone,
+									pager, email, instant messaging, etc.)</para>
+				</listitem>
+		
+				<listitem>
+					<para>Contacts receive notifications for hosts and service
+									they are responsible for</para>
+				</listitem>
+			</itemizedlist>
+		</section>
+		<section>
+		<title>Contact Groups</title>
+			<para>
+				<link linkend="configuringnagios-objectdefinitions-contactgroup">Contact Groups</link> 
+								are groups of one or more contacts. Contact groups can make it easier
+								to define all the people who get notified when certain host or
+								service problems occur.</para>
+		</section>
+<!--		
+							<para>
+								<inlinemediaobject>
+									<imageobject>
+										<imagedata fileref="images/objects-contacts.png" format="PNG"/>
+									</imageobject>
+								</inlinemediaobject>
+							</para>
+-->
+		<section>
+		<title>Timeperiods</title>
+			<para>
+				<link linkend="configuringnagios-objectdefinitions-timeperiod">Timeperiods</link> 
+								are are used to  control:</para>
+			<itemizedlist>
+				<listitem>
+					<para>When hosts and services can be monitored</para>
+				</listitem>
+		
+				<listitem>
+					<para>When contacts can receive notifications</para>
+				</listitem>
+			</itemizedlist>
+			<para>Information on how timeperiods work can be found 
+							<link linkend="thebasics-timeperiods">here</link>.
+							</para>
+		</section>
+<!--		
+							<para>
+								<inlinemediaobject>
+									<imageobject>
+										<imagedata fileref="images/objects-timeperiods.png" format="PNG"/>
+									</imageobject>
+								</inlinemediaobject>
+							</para>
+-->
+		<section>
+		<title>Commands</title>
+			<para>
+				<link linkend="configuringnagios-objectdefinitions-command">Commands</link> are used to tell
+								Nagios what programs, scripts, etc. it should execute to perform:
+							</para>
+			<itemizedlist>
+				<listitem>
+					<para>Host and service checks</para>
+				</listitem>
+		
+				<listitem>
+					<para>Notifications</para>
+				</listitem>
+		
+				<listitem>
+					<para>Event handlers</para>
+				</listitem>
+		
+				<listitem>
+					<para>and more...</para>
+				</listitem>
+			</itemizedlist>
+		</section>
+<!--		
+							<para>
+								<inlinemediaobject>
+									<imageobject>
+										<imagedata fileref="images/objects-commands.png" format="PNG"/>
+									</imageobject>
+								</inlinemediaobject>
+							</para>
+-->
+
+	</section>
+</chapter>
+

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.docbook.org/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="securityandperformancetuning-cgisecurity" xreflabel="Enhanced CGI Security and Authentication">
+  <title>Enhanced CGI Security and Authentication</title>
+
+    <section>
+      <title>Introduction</title>
+
+      <para><inlinemediaobject>
+          <imageobject>
+            <imagedata fileref="images/security.png" format="PNG"/>
+          </imageobject>
+        </inlinemediaobject>This is intended to be an introduction for
+      implementation of stronger authentication and server security focused
+      around the CGI web interface.</para>
+
+      <para>There are many ways to enhance the security of your monitoring
+      server and Nagios environment. This should not be taken as the end all
+      approach to security. Instead, think of it as an introduction to some of
+      the techniques you can use to tighten the security of your system. As
+      always, you should do your research and use the best techniques
+      available. Treat your monitoring server as it were the most important
+      server in your network and you shall be rewarded.</para>
+    </section>
+
+    <section>
+      <title>Additional Techniques</title>
+
+      <itemizedlist>
+        <listitem>
+          <para><emphasis role="bold">Stronger Authentication using Digest
+          Authentication</emphasis>. If you have followed the <link
+            linkend="gettingstarted-quickstart">quickstart
+          guides</link>, chances are that you are using Apache's <ulink
+          url="&url-apache-docs;2.2/mod/mod_auth_basic.html">Basic
+          Authentication</ulink>. Basic Authentication will send your username
+          and password in "clear text" with every http request. Consider using
+          a more secure method of authentication such as <ulink
+          url="&url-apache-docs;2.2/mod/mod_auth_digest.html">Digest
+          Authentication</ulink> which creates a MD5 Hash of your username and
+          password to send with each request.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Forcing <acronym>TLS</acronym>/<acronym>SSL</acronym> for all Web
+          Communication</emphasis>. Apache provides <ulink
+          url="&url-wikipedia;Transport_Layer_Security"><acronym>TLS</acronym>/<acronym>SSL</acronym></ulink>
+          through the <ulink
+          url="&url-apache-docs;2.2/mod/mod_ssl.html">mod_ssl</ulink>
+          module. <acronym>TLS</acronym>/<acronym>SSL</acronym> provides a secure tunnel between the client and
+          server that prevents eavesdropping and tampering using strong
+          publickey/privatekey cryptography.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Locking Down Apache Using Access
+          Controls</emphasis>. Consider locking down access to the Nagios box
+          to your IP address, IP address range, or IP subnet. If you require
+          access outside your network you could use <acronym>VPN</acronym> or &protocol-ssh; Tunnels. This
+          is a easy and strong to limit access to &protocol-http;/&protocol-https; on your
+          system.</para>
+        </listitem>
+      </itemizedlist>
+
+      <section>
+        <title>Implementing Digest Authentication</title>
+
+        <para>The implementation of Digest Authentication is simple. You will
+        have to create the new type of password file using the <ulink
+        url="&url-apache-docs;2.2/programs/htdigest.html">'htdigest'</ulink>
+        tool, then modify the Apache configuration for nagios (typically
+        <filename>/etc/httpd/conf.d/nagios.conf</filename>).</para>
+
+        <para>Create a new passwords file using the <ulink
+        url="&url-apache-docs;2.2/programs/htdigest.html">'htdigest'</ulink>
+        tool. The difference that you will notice if you are familiar with
+        <ulink
+        url="&url-apache-docs;2.2/programs/htpasswd.html">'htpasswd'</ulink>
+        tools is the requirement to supply a 'realm' argument. Where 'realm'
+        in this case refers to the value of the 'AuthName' directive in the Apache configuration.</para>
+
+        <screen><prompt>linux:~ # </prompt><userinput>htdigest -c /usr/local/nagios/etc/.digest_pw "Nagios Access" nagiosadmin</userinput></screen>
+
+        <para>Next, edit the Apache configuration file for Nagios (typically
+        <filename>/etc/httpd/conf.d/nagios.conf</filename>) using the
+        following example.</para>
+
+        <programlisting>
+	## BEGIN APACHE CONFIG SNIPPET - NAGIOS.CONF
+	ScriptAlias /nagios/cgi-bin "/usr/local/nagios/sbin"
+	&lt;Directory "/usr/local/nagios/sbin"&gt;
+	   Options ExecCGI
+	   AllowOverride None
+	   Order allow,deny
+	   Allow from all
+	   AuthType Digest
+	   AuthName "Nagios Access"
+	   AuthUserFile /usr/local/nagios/etc/.digest_pw
+	   Require valid-user
+	&lt;/Directory&gt;
+
+	Alias /nagios "/usr/local/nagios/share"
+	&lt;Directory "/usr/local/nagios/share"&gt;
+	   Options None
+	   AllowOverride None
+	   Order allow,deny
+	   Allow from all
+	   AuthType Digest
+	   AuthName "Nagios Access"
+	   AuthUserFile /usr/local/nagios/etc/.digest_pw
+	   Require valid-user
+	&lt;/Directory&gt;
+	## END APACHE CONFIG SNIPPETS
+</programlisting>
+
+        <para>Then, restart the Apache service so the new settings can take
+        effect.</para>
+
+        <screen><prompt>linux:~ # </prompt><userinput>/etc/init.d/httpd restart</userinput></screen>
+      </section>
+
+      <section>
+        <title>Implementing Forced <acronym>TLS</acronym>/<acronym>SSL</acronym></title>
+
+        <para>Make sure you've installed Apache and OpenSSL. By default you
+        should have <ulink
+        url="&url-apache-docs;2.2/mod/mod_ssl.html">mod_ssl</ulink>
+        support if you are still having trouble you may find help reading
+        Apache's <ulink url="&url-apache-docs;2.0/ssl"><acronym>TLS</acronym>/<acronym>SSL</acronym>
+        Encryption Documentation</ulink>.</para>
+
+        <para>Next, verify that <acronym>TLS</acronym>/<acronym>SSL</acronym> support is working by visiting your
+        Nagios Web Interface using &protocol-https; (https://your.domain/nagios). If it
+        is working you can continue on to the next steps that will force using
+        &protocol-https; and block all &protocol-http; requests for the Nagios Web Interface. If you
+        are having trouble visit Apache's<ulink
+        url="&url-apache-docs;2.0/ssl"><acronym>TLS</acronym>/<acronym>SSL</acronym> Encryption
+        Documentation</ulink>and<ulink
+        url="http://www.google.com">Google</ulink>for troubleshooting your
+        specific Apache installation. Next, edit the Apache configuration file
+        for Nagios (typically
+        <filename>/etc/httpd/conf.d/nagios.conf</filename>) by adding the
+        <varname>SSLRequireSSL</varname> directive to both the
+        <filename class="directory">sbin</filename> and <filename class="directory">share</filename>
+        directories.</para>
+
+        <programlisting>
+			## BEGIN APACHE CONFIG SNIPPET - NAGIOS.CONF
+			ScriptAlias /nagios/cgi-bin "/usr/local/nagios/sbin"
+			&lt;Directory "/usr/local/nagios/sbin"&gt;
+			   ...
+			   SSLRequireSSL
+			   ...
+			&lt;/Directory&gt;
+
+			Alias /nagios "/usr/local/nagios/share"
+			&lt;Directory "/usr/local/nagios/share"&gt;
+			   ...
+			   SSLRequireSSL
+			   ...
+			&lt;/Directory&gt;
+			## END APACHE CONFIG SNIPPETS
+	</programlisting>
+
+        <para>Restart the Apache service so the new settings can take
+        effect.</para>
+
+        <screen><prompt>linux:~ # </prompt><userinput>/etc/init.d/httpd restart</userinput></screen>
+      </section>
+
+      <section>
+        <title>Implementing IP subnet lockdown</title>
+
+        <para>The following example will show how to lock down Nagios CGIs to
+        a specific IP address, IP address range, or IP subnet using Apache's
+        <ulink url="&url-apache-docs;2.2/howto/access.html">access
+        controls</ulink>. Edit the Apache configuration file for Nagios
+        (typically <filename>/etc/httpd/conf.d/nagios.conf</filename>) by
+        using the <varname>Allow</varname>, <varname>Deny</varname>, and
+        <varname>Order</varname> directives using the following as an
+        example.</para>
+
+        <programlisting>
+			## BEGIN APACHE CONFIG SNIPPET - NAGIOS.CONF
+			ScriptAlias /nagios/cgi-bin "/usr/local/nagios/sbin"
+			&lt;Directory "/usr/local/nagios/sbin"&gt;
+			   ...
+			   AllowOverride None
+			   Order deny,allow
+			   Deny from all
+			   Allow from 127.0.0.1 10.0.0.25		# Allow single IP addresses
+			   Allow from 10.0.0.0/255.255.255.0		# Allow network/netmask pair
+			   Allow from 10.0.0.0/24			# Allow network/nnn CIDR spec
+			   ...
+			&lt;/Directory&gt;
+
+			Alias /nagios "/usr/local/nagios/share"
+			&lt;Directory "/usr/local/nagios/share"&gt;
+			   ...
+			   AllowOverride None
+			   Order deny,allow
+			   Deny from all
+			   Allow from 127.0.0.1 10.0.0.25		# Allow single IP addresses
+			   Allow from 10.0.0.0/255.255.255.0		# Allow network/netmask pair
+			   Allow from 10.0.0.0/24			# Allow network/nnn CIDR spec
+			   ...
+			&lt;/Directory&gt;
+			## END APACHE CONFIG SNIPPET
+	</programlisting>
+      </section>
+    </section>
+
+    <section>
+      <title>Important Notes</title>
+
+      <itemizedlist>
+        <listitem>
+          <para><emphasis role="bold">Digest Authentication sends data in the
+          clear but not your username and password</emphasis>.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Digest Authentication is not as
+          universally supported as Basic Authentication</emphasis>.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold"><acronym>TLS</acronym>/<acronym>SSL</acronym> has potential for <quote><ulink
+          url="&url-wikipedia;Man-in-the-middle_attack">man-in-the-middle
+          attacks</ulink></quote></emphasis>. <acronym>MITM</acronym> attacks are vulnerable if an
+          attacker is able to insert itself between the server and client such
+          as in a Phishing attack, ISP monitoring, or corporate <acronym>LAN</acronym> firewall
+          certificate resigning. So read up on certificate
+          verification!</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Apache access controls only protect the
+          &protocol-http;/&protocol-https; protocols</emphasis>. Look into <ulink
+          url="http://www.netfilter.org/projects/iptables/index.html">IPtables</ulink>
+          for strong system wide firewall control.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Most importantly, Security is a moving
+          target so stay informed and do research</emphasis>! Perhaps by
+          listening to a Podcast such as "<ulink
+          url="http://www.grc.com/securitynow.htm">Security
+          Now!</ulink>".</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+</chapter>
+

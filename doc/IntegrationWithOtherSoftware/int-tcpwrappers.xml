@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="integrationwithothersoftware-int-tcpwrappers"
+         xreflabel="TCP Wrappers Integration">
+  <title>TCP Wrappers Integration</title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para><informalfigure><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/tcpwrappers.png" />
+        </imageobject>
+      </mediaobject></informalfigure>This document explains how to easily generate alerts
+    in Nagios for connection attempts that are rejected by TCP wrappers. For
+    example, if an unauthorized host attempts to connect to your &protocol-ssh; server,
+    you can receive an alert in Nagios that contains the name of the host that
+    was rejected. If you implement this on your Linux/Unix boxes, you'll be
+    surprised how many port scans you can detect across your network.</para>
+
+    <para>These directions assume:</para>
+
+    <orderedlist>
+      <listitem>
+        <para>You are already familiar with <xref
+        linkend="thebasics-passivechecks" /> and how they work.</para>
+      </listitem>
+
+      <listitem>
+        <para>You are already familiar with <xref
+        linkend="advancedtopics-volatileservices" /> and how they work.</para>
+      </listitem>
+
+      <listitem>
+        <para>The host which you are generating alerts for (i.e. the host you
+        are using TCP wrappers on) is a remote host (called firestorm in this
+        example). If you want to generate alerts on the same host that Nagios
+        is running you will need to make a few modifications to the examples I
+        provide.</para>
+      </listitem>
+
+      <listitem>
+        <para>You have installed the <xref linkend="nagiosaddons-addons-nsca" /> on your
+        monitoring server and the &name-nsca; client (<command>send_nsca</command>) on the remote
+        machine that you are generating TCP wrapper alerts from.</para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title>Defining A Service</title>
+
+    <para>If you haven't done so already, create a <link linkend="configuringnagios-objectdefinitions-host">host definition</link> for the remote host
+    (firestorm).</para>
+
+    <para>Next, define a service in one of your <link linkend="configuringnagios-configobject">object configuration files</link> for
+    the TCP wrapper alerts on host firestorm. The service definition might
+    look something like this:</para>
+
+		<programlisting>define service{
+            host_name                       firestorm
+            service_description             TCP Wrappers
+            is_volatile                     1
+            active_checks_enabled           0
+            passive_checks_enabled          1
+            max_check_attempts              1
+            check_command                   check_none
+            ...
+            }</programlisting>
+
+
+    <para>There are some important things to note about the above service
+    definition:</para>
+
+    <orderedlist>
+      <listitem>
+        <para>The volatile option enabled. We want this option enabled because
+        we want a notification to be generated for every alert that comes
+        in.</para>
+      </listitem>
+
+      <listitem>
+        <para>Active checks of the service as disabled, while passive checks
+        are enabled. This means that the service will never be actively
+        checked by Nagios - all alert information will have to be received
+        passively from an external source.</para>
+      </listitem>
+
+      <listitem>
+        <para>The <varname>max_check_attempts</varname> value is set to <computeroutput>1</computeroutput>. This guarantees you
+        will get a notification when the first alert is generated.</para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title>Configuring TCP Wrappers</title>
+
+    <para>Now you're going to have to modify the /etc/hosts.deny file on
+    firestorm. In order to have the TCP wrappers send an alert to the
+    monitoring host whenever a connection attempt is denied, you'll have to
+    add a line similiar to the following:</para>
+
+    <programlisting>ALL: ALL: RFC931: twist (/usr/local/nagios/libexec/eventhandlers/handle_tcp_wrapper %h %d)&amp;</programlisting>
+
+    <para>This line assumes that there is a script called handle_tcp_wrapper
+    in the <filename class="directory">/usr/local/nagios/libexec/eventhandlers/</filename> directory on firestorm.
+    We'll write that script next.</para>
+  </section>
+
+  <section>
+    <title>Writing The Script</title>
+
+    <para>The last thing you need to do is write the handle_tcp_wrapper script
+    on firestorm that will send the alert back to the Nagios server. It might
+    look something like this:</para>
+
+    <programlisting>
+    	#!/bin/sh
+	/usr/local/nagios/libexec/eventhandlers/submit_check_result firestorm "TCP Wrappers" 2 "Denied $2-$1" &gt; /dev/null 2&gt; /dev/null
+	</programlisting>
+	<para>Notice that the <command>handle_tcp_wrapper</command> script calls the 
+	<command>submit_check_result</command> script to actually send the alert back to 
+	the monitoring host. Assuming your Nagios server is called monitor, the 
+	<command>submit_check_result</command> script might look like this: 
+	</para>
+	<programlisting>
+#!/bin/sh
+# Arguments
+#	$1 = name of host in service definition
+#	$2 = name/description of service in service definition
+#	$3 = return code
+#	$4 = outputs
+
+/bin/echo -e "$1\t$2\t$3\t$4\n" | /usr/local/nagios/bin/send_nsca monitor -c /usr/local/nagios/etc/send_nsca.cfg
+	</programlisting>
+  </section>
+
+  <section>
+    <title>Finishing Up</title>
+
+    <para>You've now configured everything you need to, so all you have to do
+    is restart the inetd process on firestorm and restart Nagios on your
+    monitoring server. That's it! When the TCP wrappers on firestorm deny a
+    connection attempt, you should be getting alerts in Nagios. The plugin
+    output for the alert will look something like the following:
+
+    <computeroutput>Denied sshd2-sdn-ar-002mnminnP321.dialsprint.net</computeroutput>
+    </para>
+  </section>
+</chapter>
+

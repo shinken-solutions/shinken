@@ -1,0 +1,871 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.docbook.org/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="about-whatsnew" xreflabel="What's New in Nagios 3">
+  <title>What's New in Nagios 3</title>
+
+  <important>
+    <para>Make sure you read through the documentation and the <acronym>FAQ</acronym>s at <ulink url="&url-nagios;">nagios.org</ulink> before 
+    sending a question to the mailing lists.
+    </para>
+  </important>
+
+  <section>
+    <title>Change Log</title>
+
+    <para>The change log for Nagios can be found online at 
+    <ulink url="&url-nagios;development/changelog.php">&url-nagios;development/changelog.php</ulink> 
+    or in the <emphasis role="strong">Changelog</emphasis> file in the root
+    directory of the source code distribution.
+    </para>
+  </section>
+
+  <section>
+    <title>Changes and New Features</title>
+
+    <section>
+      <title>Documentation</title>
+
+      <itemizedlist>
+        <listitem>
+          <para><emphasis role="bold">Doc updates</emphasis> - I'm slowly
+          making my way through rewriting most all portions of the
+          documentation. This is going to take a while, as (1) there's a lot
+          of documentation and (2) writing documentation is not my favorite
+          thing in the world. Expect some portions of the docs to be different
+          than others for a while. I hope the changes I'm making will make
+          things clearer/easier for new and seasoned Nagios users
+          alike.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Macros</title>
+
+      <itemizedlist>
+        <listitem>
+          <para><emphasis role="bold">New macros</emphasis> - New macros have
+          been added, including: <varname>$TEMPPATH$</varname>, <varname>$LONGHOSTOUTPUT$</varname>,
+          <varname>$LONGSERVICEOUTPUT$</varname>, <varname>$HOSTNOTIFICATIONID$</varname>, <varname>$SERVICENOTIFICATIONID$</varname>,
+          <varname>$HOSTEVENTID$</varname>, <varname>$SERVICEEVENTID$</varname>, <varname>$SERVICEISVOLATILE$</varname>,
+          <varname>$LASTHOSTEVENTID$</varname>, <varname>$LASTSERVICEEVENTID$</varname>, <varname>$HOSTDISPLAYNAME$</varname>,
+          <varname>$SERVICEDISPLAYNAME$</varname>, <varname>$MAXHOSTATTEMPTS$</varname>, <varname>$MAXSERVICEATTEMPTS$</varname>,
+          <varname>$TOTALHOSTSERVICES$</varname>, <varname>$TOTALHOSTSERVICESOK$</varname>,
+          <varname>$TOTALHOSTSERVICESWARNING$</varname>, <varname>$TOTALHOSTSERVICESUNKNOWN$</varname>,
+          <varname>$TOTALHOSTSERVICESCRITICAL$</varname>, <varname>$CONTACTGROUPNAME$</varname>,
+          <varname>$CONTACTGROUPNAMES$</varname>, <varname>$CONTACTGROUPALIAS$</varname>, <varname>$CONTACTGROUPMEMBERS$</varname>,
+          <varname>$NOTIFICATIONRECIPIENTS$</varname>, <varname>$NOTIFICATIONISESCALATED$</varname>,
+          <varname>$NOTIFICATIONAUTHOR$</varname>, <varname>$NOTIFICATIONAUTHORNAME$</varname>,
+          <varname>$NOTIFICATIONAUTHORALIAS$</varname>, <varname>$NOTIFICATIONCOMMENT$</varname>, <varname>$EVENTSTARTTIME$</varname>,
+          <varname>$HOSTPROBLEMID$</varname>, <varname>$LASTHOSTPROBLEMID$</varname>, <varname>$SERVICEPROBLEMID$</varname>,
+          <varname>$LASTSERVICEPROBLEMID$</varname>, <varname>$LASTHOSSTATE$</varname>, <varname>$LASTHOSTSTATEID$</varname>,
+          <varname>$LASTSERVICESTATE$</varname>, <varname>$LASTSERVICESTATEID$</varname>. Two special on-demand time
+          macros have also been added: <varname>$ISVALIDTIME:$</varname> and
+          <varname>$NEXTVALIDTIME:$</varname>.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Removed macros</emphasis> - The old
+          <varname>$NOTIFICATIONNUMBER$</varname> macro has been deprecated in favor of new
+          <varname>$HOSTNOTIFICATIONNUMBER$</varname> and <varname>$SERVICENOTIFICATIONNUMBER$</varname>
+          macros.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Changes</emphasis> - The <varname>$HOSTNOTES$</varname> and
+          <varname>$SERVICENOTES$</varname> macros may now contain macros themselves, just like
+          the <varname>$HOSTNOTESURL$</varname>, <varname>$HOSTACTIONURL$</varname>, <varname>$SERVICENOTESURL$</varname> and
+          <varname>$SERVICEACTIONURL$</varname> macros.</para>
+        </listitem>
+
+        <listitem>
+          <para>Macros are normally available as environment variables when
+          check, event handler, notification, and other commands are run. This
+          can be rather CPU intensive in large Nagios installations, so you
+          can disable this behavior with the 
+	  <link linkend="configuringnagios-configmain-enable_environment_macros">enable_environment_macros</link>
+          option.</para>
+        </listitem>
+
+        <listitem>
+          <para>Macro information can be found <link linkend="thebasics-macros">here</link>.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Scheduled Downtime</title>
+
+      <itemizedlist>
+        <listitem>
+          <para><link linkend="advancedtopics-downtime">Scheduled downtime</link> entries
+          are no longer stored in their own file (previously specified with a
+          <varname>downtime_file</varname> directive in the main
+          configuration file). Current and retained scheduled downtime entries
+          are now stored in the 
+	  <link linkend="configuringnagios-configmain-status_file">status file</link> and 
+	  <link linkend="configuringnagios-configmain-state_retention_file">retention file</link>,
+          respectively.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Comments</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Host and service comments are no longer stored in their own
+          file (previously specified with a <varname>comment_file</varname>
+          directive in the main configuration file). Current and retained
+          comments are now stored in the 
+	  <link linkend="configuringnagios-configmain-status_file">status file</link> and 
+	  <link linkend="configuringnagios-configmain-state_retention_file">retention file</link>,
+          respectively.</para>
+        </listitem>
+        <listitem>
+          <para>Acknowledgement comments that are marked as non-persistent are
+          now only deleted when the acknowledgement is removed. They were
+          previously automatically deleted when Nagios restarted, which was
+          not ideal.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>State Retention Data</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Status information for individual contacts is now retained
+          across program restarts.</para>
+        </listitem>
+ 
+	<listitem>
+          <para>Comment and downtime IDs are now retained across program
+          restarts and should be unique unless the retention data is deleted
+          or ignored.</para>
+        </listitem>
+  
+	<listitem>
+          <para>Added <link
+          linkend="configuringnagios-configmain-retained_host_attribute_mask">retained_host_attribute_mask</link>
+          and <link
+          linkend="configuringnagios-configmain-retained_service_attribute_mask">retained_service_attribute_mask</link>
+          variables to control what host/service attributes are retained
+          globally across program restarts.</para>
+        </listitem>
+  
+	<listitem>
+          <para>Added <link
+          linkend="configuringnagios-configmain-retained_process_host_attribute_mask">retained_process_host_attribute_mask</link>
+          and <link
+          linkend="configuringnagios-configmain-retained_process_service_attribute_mask">retained_process_service_attribute_mask</link>
+          variables to control what process attributes are retained across
+          program restarts.</para>
+        </listitem>
+ 
+	<listitem>
+          <para>Added <link
+          linkend="configuringnagios-configmain-retained_contact_host_attribute_mask">retained_contact_host_attribute_mask</link>
+          and <link
+          linkend="configuringnagios-configmain-retained_contact_service_attribute_mask">retained_contact_service_attribute_mask</link>
+          variables to control what contact attributes are retained globally
+          across program restarts.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Flap Detection</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Added <varname>flap_detection_options</varname> directive to
+          host and service definitions to allow you to specify what
+          host/service states should be used by the flap detection logic (by
+          default all states are used).</para>
+        </listitem>
+  
+	<listitem>
+          <para>Percent state change and state history are now retained and
+          recorded even when flap detection is disabled.</para>
+        </listitem>
+ 
+	<listitem>
+          <para>Hosts and services are immediately checked for flapping when
+          flap detection is enabled program-wide.</para>
+        </listitem>
+  
+	<listitem>
+          <para>Hosts and services that are flapping when flap detection is
+          disabled program-wide are now logged.</para>
+        </listitem>
+ 
+	<listitem>
+          <para>More information on flap detection can be found 
+	  <link linkend="advancedtopics-flapping">here</link>.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>External Commands</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Added a new <command>PROCESS_FILE</command> external command to allow
+	  processing of external commands found in an external (regular) file.
+	  Useful for processing large amounts of passive checks with long output, or
+	  for scripting regular commands. More information can be found 
+	  <ulink url="&url-nagios;developerinfo/externalcommands/commandinfo.php?command_id=131">here</ulink>.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>Custom commands may now be submitted to Nagios. Custom command
+          names are prefixed with an underscore and are not processed
+          internally by the Nagios daemon. They may, however, be processed by
+          a loaded <acronym>NEB</acronym> module.</para>
+        </listitem>
+
+        <listitem>
+          <para>
+	  The <link linkend="configuringnagios-configmain-check_external_commands">check_external_commands</link>
+          option is now enabled by default, which means Nagios is configured to check for external
+	  commands "out of the box". All 2.x and earlier versions of Nagios had this option
+	  disabled by default.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Status Data</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Contact status information (last notification times,
+          notifications enabled/disabled, etc.) is now saved in the
+	  <link linkend="configuringnagios-configmain-status_file">status</link> and
+	  <link linkend="configuringnagios-configmain-state_retention_file">retention</link>
+	  files, although it is not processed by the CGIs.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Embedded Perl</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Added new 
+	  <link linkend="configuringnagios-configmain-enable_embedded_perl">enable_embedded_perl</link>
+          and <link linkend="configuringnagios-configmain-use_embedded_perl_implicitly">use_embedded_perl_implicitly</link>
+          variables to control use of the embedded Perl interpreter.</para>
+        </listitem>
+
+        <listitem>
+          <para>Perl scripts/plugins can now explicitly tell Nagios whether or
+          not they should be run under the embedded Perl interpreter. This is
+          useful if you have troublesome scripts that don't function well
+          under the ePN.</para>
+        </listitem>
+
+        <listitem>
+          <para>More information about these new options can be found 
+	  <link linkend="advancedtopics-embeddedperl">here</link>.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Adaptive Monitoring</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>The check timeperiod for hosts and services can now be modified on-the-fly
+	  with the appropriate external command (<command>CHANGE_HOST_CHECK_TIMEPERIOD</command> or 
+	  <command>CHANGE_SVC_CHECK_TIMEPERIOD</command>). 
+	  Look <ulink url="&url-nagios;developerinfo/externalcommands/commandlist.php?category_id=13">here</ulink>
+          for available adaptive monitoring commands.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Notifications</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>A <varname>first_notification_delay</varname> option has
+          been added to host and service definitions to (what else) introduce
+          a delay between when a host/service problem first occurs and when
+          the first problem notification goes out. In previous versions you
+          had to use some mighty config-fu with escalations to accomplish
+          this. Now this feature is available to normal mortals.</para>
+        </listitem>
+
+        <listitem>
+          <para>Notifications are now sent out for hosts/services that are
+          flapping when flap detection is disabled on a host- or
+          service-specific basis or on a program-wide basis. The
+          <varname>$NOTIFICATIONTYPE$</varname> macro will be set
+	  to <quote>FLAPPINGDISABLED</quote> in this situation.</para>
+        </listitem>
+
+        <listitem>
+          <para>Notifications can now be sent out when scheduled downtime
+          start, ends, and is cancelled for hosts and services. The
+          <varname>$NOTIFICATIONTYPE$</varname> macro will be set to
+	  <quote>DOWNTIMESTART</quote>, <quote>DOWNTIMEEND</quote>, or
+	  <quote>DOWNTIMECANCELLED</quote>, respectively. In order to
+	  receive notifications on scheduled downtime events, specify <quote>s</quote> or
+          <quote>downtime</quote> in your contact, host, and/or service notification
+          options.</para>
+        </listitem>
+
+        <listitem>
+          <para>More information on notifications can be found <link
+          linkend="thebasics-notifications">here</link>.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Object Definitions</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Service dependencies can now be created to easily define "same
+          host" dependencies for different services on one or more hosts.
+          (<link linkend="advancedtopics-objecttricks-same_host_dependency">Read more</link>)
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>Extended host and service definitions (hostextinfo and
+          serviceextinfo, respectively) have been deprecated. All values that
+          from extended definitions have been merged with host or service
+          definitions, as appropriate. Nagios 3 will continue to read and
+          process older extended information definitions, but will log a
+          warning. Future versions of Nagios (4.x and later) will not support
+          separate extended info definitions.</para>
+        </listitem>
+
+        <listitem>
+          <para>New <varname>hostgroup_members</varname>,
+          <varname>servicegroup_members</varname>, and
+          <varname>contactgroup_members</varname> directives have been added
+          to hostgroup, servicegroup, and contactgroups definitions,
+          respectively. This allows you to include hosts, services, or
+          contacts from sub-groups in your group definitions.</para>
+        </listitem>
+
+        <listitem>
+          <para>New <emphasis>notes</emphasis>,
+          <varname>notes_url</varname>, and <varname>action_url</varname>
+          have been added to hostgroup and servicegroup definition.</para>
+        </listitem>
+
+        <listitem>
+          <para>Contact definitions have the new
+          <varname>host_notifications_enabled</varname>,
+          <varname>service_notifications_enabled</varname>, and
+          <varname>can_submit_commands</varname> directives to better
+          control notifications and determine whether or not they can submit
+          commands through the web interface.</para>
+        </listitem>
+
+        <listitem>
+          <para>Host and service dependencies now support an optional
+          <varname>dependency_period</varname> directive. This allows you to
+          limit the times during which dependencies are valid.</para>
+        </listitem>
+
+        <listitem>
+          <para>The <varname>parallelize</varname> directive in service
+          definitions is now deprecated and no longer used. All service checks
+          are run in parallel in Nagios 3.</para>
+        </listitem>
+
+        <listitem>
+          <para>There are no longer any inherent limitations on the length of
+          host names or service descriptions.</para>
+        </listitem>
+
+        <listitem>
+          <para>Extended regular expressions are now used if you enable the
+          <link
+          linkend="configuringnagios-configmain-use_regexp_matching">use_regexp_matching</link>
+          config option. Regular expression matching is only used in certain
+          object definition directives that contain <emphasis role="strong">*</emphasis>, 
+	  <emphasis role="strong">?</emphasis>, <emphasis role="strong">+</emphasis>, or 
+	  <emphasis role="strong">\.</emphasis>.</para>
+        </listitem>
+
+        <listitem>
+          <para>A new <varname>initial_state</varname> directive has been
+          added to host and service definitions, so you can tell Nagios that a
+          host/service should default to a specific state when Nagios starts,
+          rather than UP or OK (which is still the default).</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Object Inheritance</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>You can now inherit object variables/values from multiple
+          templates by specifying more than one template name in the
+          <emphasis>use</emphasis> directive of object definitions. This can
+          allow for some very powerful (and complex) inheritance setups.
+          (<link linkend="advancedtopics-objectinheritance-multiple_templates">Read more</link>)
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>Services now inherit contact groups, notification interval,
+          and notification period from their associated host if not otherwise
+          specified. (<link linkend="advancedtopics-objectinheritance-implied_inheritance">Read more</link>)
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>Host and service escalations now inherit contact groups,
+          notification interval, and escalation timeperiod from their
+          associated host or service if not otherwise specified. 
+	  (<link linkend="advancedtopics-objectinheritance-implied_inheritance">Read more</link>)
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>String variables in host, service, and contact definitions can
+          now be prevented from being inherited by specifying a value of
+          <quote>null</quote> (without quotes) for the value of the variable. (<link
+          linkend="advancedtopics-objectinheritance-cancel_string">Read more</link>)</para>
+        </listitem>
+
+        <listitem>
+          <para>Most string variables in local object definitions can now be
+          appended to the string values that are inherited. This is quite
+          handy in large configurations. 
+	  (<link linkend="advancedtopics-objectinheritance-add_string">Read more</link>)
+	  </para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Performance Improvements</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Add ability to precache object config files and exclude
+          circular path detection checks from verification process. This can
+          speed up Nagios start time immensely in large environments! Read
+          more <link linkend="securityandperformancetuning-faststartup">here</link>.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>A new 
+	  <link linkend="configuringnagios-configmain-use_large_installation_tweaks">use_large_installation_tweaks</link>
+          option has been added that should improve performance in large Nagios installations. 
+	  Read more about this <link linkend="securityandperformancetuning-largeinstalltweaks">here</link>.</para>
+        </listitem>
+
+        <listitem>
+          <para>A number of internal improvements have been made with regards
+          to how Nagios deals with internal data structures and object (e.g.
+          host and service) relationships. These improvements should result in
+          a speedup for larger installations.</para>
+        </listitem>
+
+        <listitem>
+          <para>New <link linkend="configuringnagios-configmain-external_command_buffer_slots">external_command_buffer_slots</link>
+          option has been added to allow you to more easily scale Nagios in large environments. For best
+	  results you should consider using <link linkend="securityandperformancetuning-mrtggraphs">MRTG to graph</link>
+	  Nagios' usage of buffer slots over time.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Plugin Output</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Multiline plugin output is now supported for host and service
+          checks. Hooray! The plugin <acronym>API</acronym> has been updated to support
+	  multiple lines of output in a manner that retains backward compatability with
+          older plugins. Additional lines of output (aside from the first
+          line) are now stored in new <varname>$LONGHOSTOUTPUT$</varname>
+	  and <varname>$LONGSERVICEOUTPUT$</varname> macros.</para>
+        </listitem>
+
+        <listitem>
+          <para>The maximum length of plugin output has been increased to 4K
+          (from around 350 bytes in previous versions). This 4K limit has been
+          arbitrarily chosen to protect again runaway plugins that dump back
+          too much data to Nagios.</para>
+        </listitem>
+
+        <listitem>
+          <para>More information on the plugins, multiline output, and max
+          plugin output length can be found <link linkend="development-pluginapi">here</link>.
+	  </para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Service Checks</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Nagios now checks for orphaned service checks by default.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added a new 
+	  <link linkend="configuringnagios-configmain-enable_predictive_service_dependency_checks">enable_predictive_service_dependency_checks</link>
+          option to control whether or not Nagios will initiate predictive check of service that are being depended upon (in dependency
+          definitions). Predictive checks help ensure that the dependency logic is as accurate as possible.
+	  (<link linkend="advancedtopics-dependencychecks">Read more</link>)</para>
+        </listitem>
+
+        <listitem>
+          <para>A new cached service check feature has been implemented that
+          can significantly improve performance for many people Instead of
+          executing a plugin to check the status of a service, Nagios can
+          often use a cached service check result instead. More information on
+          this can be found <link linkend="advancedtopics-cachedchecks">here</link>.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Host Checks</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Host checks are now run in parallel! Host checks used to be
+          run in a serial fashion, which meant they were a major holdup in
+          terms of performance. No longer! 
+	  (<link linkend="thebasics-hostchecks">Read more</link>)</para>
+        </listitem>
+
+        <listitem>
+          <para>Host check retries are now performed like service check
+          retries. That is to say, host definitions now have a new
+          <varname>retry_interval</varname> that specifies how much time to
+          wait before trying the host check again. :-)</para>
+        </listitem>
+
+        <listitem>
+          <para>Regularly scheduled host checks now longer hinder performance.
+          In fact, they can help to increase performance with the new cached
+          check logic (see below).</para>
+        </listitem>
+
+        <listitem>
+          <para>Added a new
+	  <link linkend="configuringnagios-configmain-check_for_orphaned_hosts">check_for_orphaned_hosts</link>
+          option to enable checks of orphaned host checks. This is need now that host checks are run in parallel.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>Added a new 
+	  <link linkend="configuringnagios-configmain-enable_predictive_host_dependency_checks">enable_predictive_host_dependency_checks</link>
+          option to control whether or not Nagios will initiate predictive check of hosts that are being depended upon (in dependency
+          definitions). Predictive checks help ensure that the dependency logic is as accurate as possible. 
+	  (<link linkend="advancedtopics-dependencychecks">Read more</link>)</para>
+        </listitem>
+
+        <listitem>
+          <para>A new cached host check feature has been implemented that can
+          significantly improve performance for many people Instead of
+          executing a plugin to check the status of a host, Nagios can often
+          use a cached host check result instead. More information on this can
+          be found <link linkend="advancedtopics-cachedchecks">here</link>.</para>
+        </listitem>
+
+        <listitem>
+          <para>Passive host checks that have a DOWN or UNREACHABLE result can
+          now be automatically translated to their proper state from the point
+          of view of the Nagios instance that receives them. This is very
+          useful in failover and distributed monitoring setups. More
+          information on passive host check state translation can be found
+          <link linkend="advancedtopics-passivestatetranslation">here</link>.</para>
+        </listitem>
+
+        <listitem>
+          <para>Passive host checks normally put a host into a HARD state.
+          This can now be changed by enabling the 
+	  <link linkend="configuringnagios-configmain-passive_host_checks_are_soft">passive_host_checks_are_soft</link>
+          option.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Freshness checks</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>A new 
+	  <link linkend="configuringnagios-configmain-additional_freshness_latency">additional_freshness_latency</link>
+          option has been added to allow to you specify the number of seconds
+          that should be added to any host or service freshness threshold that
+          is automatically calculated by Nagios.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>IPC</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>The IPC mechanism that is used to transfer host/service check
+          results back to the Nagios daemon from (grand)child processes has
+          changed! This should help to reduce load/latency issues related to
+          processing large numbers of passive checks in distributed monitoring
+          environments.</para>
+        </listitem>
+
+        <listitem>
+          <para>Check results are now transferred by writing check results to
+          files in directory specified by the 
+	  <link linkend="configuringnagios-configmain-check_result_path">check_result_path</link>
+          option. Files that are older that the 
+	  <link linkend="configuringnagios-configmain-max_check_result_file_age">max_check_result_file_age</link>
+          option will be mercilessly deleted without further processing.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Timeperiods</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Timeperiods were overdue for a major overhaul and have finally
+          been extended to allow for date exceptions, skip dates (every 3
+          days), etc! This should help you out when defining notification
+          timeperiods for pager rotations.</para>
+        </listitem>
+
+        <listitem>
+          <para>More information on the new timeperiod directives can be found
+          <link linkend="configuringnagios-objectdefinitions-timeperiod">here</link> and
+          <link linkend="thebasics-timeperiods">here</link>.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Event Broker</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Updated <acronym>NEB</acronym> <acronym>API</acronym> version</para>
+        </listitem>
+
+        <listitem>
+          <para>Modified callback for adaptive program status data</para>
+        </listitem>
+
+        <listitem>
+          <para>Added callback for adaptive contact status data</para>
+        </listitem>
+
+        <listitem>
+          <para>Added precheck callbacks for hosts and services to allow
+          modules to cancel/override internal host/service checks.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Web Interface</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Hostgroup and servicegroup summaries now show
+          important/unimportant problem breakdowns liek the TAC CGI.</para>
+        </listitem>
+
+        <listitem>
+          <para>Minor layout changes to host and service detail views in
+          extinfo CGI.</para>
+        </listitem>
+
+        <listitem>
+          <para>New check statistics and have been added to the 
+	  <quote>Performance Info</quote> screen.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added <ulink url="&url-splunk;">Splunk</ulink>
+          integration options to various CGIs. Integration is controlled by
+          the
+	  <link linkend="configuringnagios-configcgi-enable_splunk_integration">enable_splunk_integration</link>
+          and <link linkend="configuringnagios-configcgi-splunk_url">splunk_url</link>
+          options in the CGI config file.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added new 
+	  <link linkend="configuringnagios-configcgi-notes_url_target">notes_url_target</link> and
+          <link linkend="configuringnagios-configcgi-action_url_target">action_url_target</link>
+          options to control what frame notes and action URLs are opened in.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added new 
+	  <link linkend="configuringnagios-configcgi-lock_author_names">lock_author_names</link>
+          option to prevent alteration of author names when users submit
+          comments, acknowledgements, and scheduled downtime.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Debugging Info</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>The <varname>DEBUGx</varname> compile options available in the configure script
+          have been removed.</para>
+        </listitem>
+
+        <listitem>
+          <para>Debugging information can now be written to a separate debug
+          file, which is automatically rotated when it reaches a user-defined
+          size. This should make debugging problems much easier, as you don't
+          need to recompiled Nagios. Full support for writing debugging
+          information to file is being added during the alpha development
+          phase, so it may not be complete when you try it.</para>
+        </listitem>
+
+        <listitem>
+          <para>Variables that affect the debug log in 
+	  <link linkend="configuringnagios-configmain-debug_file">debug_file</link>,
+	  <link linkend="configuringnagios-configmain-debug_level">debug_level</link>,
+	  <link linkend="configuringnagios-configmain-debug_verbosity">debug_verbosity</link>, and
+          <link linkend="configuringnagios-configmain-max_debug_file_size">max_debug_file_size</link>.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Misc</title>
+
+      <itemizedlist>
+        <listitem>
+          <para><emphasis role="bold">Temp path variable</emphasis> - A new
+          <link linkend="configuringnagios-configmain-temp_path">temp_path</link> variable
+          has been added to specify a scratch directory that Nagios can use
+          for temporary scratch space.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Unique notification and event ID numbers</emphasis> - A
+	  unique ID number is now assigned to each host and service notification. Another
+	  unique ID is now assigned to all host and service state changes as well.
+	  The unique IDs can be accessed using the following respective macros:
+          <varname>$HOSTNOTIFICATIONID$</varname>, <varname>$SERVICENOTIFICATIONID$</varname>,
+	  <varname>$HOSTEVENTID$</varname>, <varname>$SERVICEEVENTID$</varname>,
+	  <varname>$LASTHOSTEVENTID$</varname>, <varname>$LASTSERVICEEVENTID$</varname>.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">New macros</emphasis> - A few new macros
+          (other than those already mentioned elsewhere above) have been added.
+	  They include <varname>$HOSTGROUPNAMES$</varname>, <varname>$SERVICEGROUPNAMES$</varname>,
+          <varname>$HOSTACKAUTHORNAME$</varname>, <varname>$HOSTACKAUTHORALIAS$</varname>,
+	  <varname>$SERVICEACKAUTHORNAME$</varname>, and <varname>$SERVICEACKAUTHORALIAS$</varname>.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="strong">Reaper frequency</emphasis> - The old
+	  <varname>service_reaper_frequency</varname> variable has been renamed to
+	  <link linkend="configuringnagios-configmain-check_result_reaper_frequency">check_result_reaper_frequency</link>,
+          as it is now also used to process host check results.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Max reaper time</emphasis> - A new
+          <link linkend="configuringnagios-configmain-max_check_result_reaper_time">max_check_result_reaper_time</link>
+          variable has been added to limit the amount of time a single reaper event is allowed to run.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Fractional intervals</emphasis>-
+          Fractional notification and check intervals (e.g. <quote>3.5</quote> minutes) are
+          now supported in host, service, host escalation, and service
+          escalation definitions.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Escaped command arguments</emphasis> -
+          You can now pass bang (!) characters in your command arguments by
+          escaping them with a backslash (\). If you need to include
+          backslashes in your command arguments, they should also be escaped
+          with a backslash.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Multiline system command output</emphasis> - Nagios
+	  will now read multiple lines out output from system commands it runs
+	  (notification scripts, etc.), up to 4K. This matches the limits on plugin
+	  output mentioned earliar. Output from system commands is not directly
+	  processed by Nagios, but support for it is there nonetheless.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Better scheduling information</emphasis> - More
+	  detailed information is given when Nagios is executed with the <option>-s</option>
+	  command line option. This information can be used to help
+	  <link linkend="securityandperformancetuning-faststartup">reduce</link>
+	  the time it takes to start/restart Nagios.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Aggregated status file updates</emphasis> - The
+	  old <varname>aggregate_status_updates</varname> option has been
+          removed. All status file updates are now aggregated at a minimum
+          interval of 1 second.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">New performance data file mode</emphasis> - A new 
+	  <quote><option>p</option></quote> option has been added to the 
+	  <link linkend="configuringnagios-configmain-host_perfdata_file_mode">host_perfdata_file_mode</link>
+          and <link linkend="configuringnagios-configmain-service_perfdata_file_mode">service_perfdata_file_mode</link>
+          options. This new mode will open the file in non-blocking read/write mode, which is
+	  useful for pipes.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis role="bold">Timezone offset</emphasis> - A new
+          <link linkend="configuringnagios-configmain-use_timezone">use_timezone</link>
+          option has been added to allow you to run different instances of
+          Nagios in timezones different from the local zone.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+</chapter>

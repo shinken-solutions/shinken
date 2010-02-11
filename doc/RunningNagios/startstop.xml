@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="runningnagios-startstop" xreflabel="Starting and Stopping Nagios">
+  <title>Starting and Stopping Nagios</title>
+
+  <para>There's more than one way to start, stop, and restart Nagios. Here are
+  some of the more common ones...
+  </para>
+
+  <tip><para>Always make sure you <xref linkend="runningnagios-verifyconfig"/> before you
+  (re)start Nagios.</para></tip>
+
+  <section>
+    <title>Starting Nagios</title>
+
+    <orderedlist>
+      <listitem>
+        <para>Init Script: The easiest way to start the Nagios daemon is by
+        using the init script like so:</para>
+    <screen><prompt>linux:~ # </prompt><userinput>/etc/rc.d/init.d/nagios start</userinput></screen>
+      </listitem>
+
+      <listitem>
+        <para>Manually: You can start the Nagios daemon manually with the <option>-d</option>
+        command line option like so:</para>
+                        <screen><prompt>linux:~ # </prompt><userinput>/usr/local/nagios/bin/nagios -d /usr/local/nagios/etc/nagios.cfg</userinput></screen>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title>Restarting Nagios</title>
+
+    <para>Restarting/reloading is nececessary when you modify your
+    configuration files and want those changes to take effect.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>Init Script: The easiest way to restart the Nagios daemon is by
+        using the init script like so:</para>
+                        <screen><prompt>linux:~ # </prompt><userinput>/etc/rc.d/init.d/nagios reload</userinput></screen>
+      </listitem>
+
+      <listitem>
+        <para>Web Interface: You can restart the Nagios through the web
+        interface by clicking the <guimenu>Process Info</guimenu> navigation link and selecting
+        <guimenuitem>Restart the Nagios process</guimenuitem>:
+        <screenshot>
+        <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/stoprestart.png" format="PNG"/>
+      </imageobject>
+    </mediaobject></screenshot></para>
+      </listitem>
+
+      <listitem>
+        <para>Manually: You can restart the Nagios process by sending it a
+        SIGHUP signal like so:</para>
+                        <screen><prompt>linux:~ # </prompt><userinput>kill -HUP &lt;nagios_pid&gt;</userinput></screen>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title>Stopping Nagios</title>
+
+    <orderedlist>
+      <listitem>
+        <para>Init Script: The easiest way to stop the Nagios daemon is by
+        using the init script like so:</para>
+
+                <screen><prompt>linux:~ # </prompt><userinput>/etc/rc.d/init.d/nagios stop</userinput></screen>
+      </listitem>
+
+      <listitem>
+        <para>Web Interface: You can stop the Nagios through the web interface
+        by clicking the <guimenu>Process Info</guimenu> navigation link and selecting <guimenuitem>Shutdown
+        the Nagios process</guimenuitem>:
+                    <screenshot><mediaobject>
+      <imageobject>
+        <imagedata fileref="images/stoprestart.png" format="PNG"/>
+      </imageobject>
+    </mediaobject></screenshot></para>
+      </listitem>
+
+      <listitem>
+        <para>Manually: You can stop the Nagios process by sending it a
+        SIGTERM signal like so:</para>
+        <screen><prompt>linux:~ # </prompt><userinput>kill &lt;nagios_pid&gt;</userinput></screen>
+      </listitem>
+    </orderedlist>
+  </section>
+</chapter>
+

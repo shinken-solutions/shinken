@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="development-pluginapi" xreflabel="Nagios Plugin API">
+	<title>Nagios Plugin API</title>
+	<section>
+		<title>Other Resources</title>
+		<para>If you're looking at writing your own plugins for Nagios, please make sure to
+		visit these other resources:</para>
+		<itemizedlist>
+			<listitem>
+				<para>The official <ulink url="&url-sourceforge-projects;nagiosplug/">Nagios
+				plugin project website</ulink>
+				</para>
+			</listitem>
+			<listitem>
+				<para>The official <ulink url="http://nagiosplug.sourceforge.net/developer-guidelines.html">
+				Nagios plugin development guidelines</ulink>
+				</para>
+			</listitem>
+		</itemizedlist>
+	</section>
+	<section>
+		<title>Plugin Overview</title>
+		<para>Scripts and executables must do two things (at a minimum) in order to function as Nagios plugins:</para>
+		<itemizedlist>
+			<listitem>
+				<para>Exit with one of several possible return values</para>
+			</listitem>
+			<listitem>
+				<para>Return at least one line of text output to <varname>STDOUT</varname></para>
+			</listitem>
+		</itemizedlist>
+		<para>The inner workings of your plugin are unimportant to Nagios. Your plugin could check the status 
+		of a TCP port, run a database query, check disk free space, or do whatever else it needs to check
+		something. The details will depend on what needs to be checked - that's up to you.</para>
+	</section>
+	<section>
+		<title>Return Code</title>
+		<para>Nagios determines the status of a host or service by evaluating the return code from plugins. 
+		The following tables shows a list of valid return codes, along with their corresponding service or host states.</para>
+		<informaltable frame="all">
+			<tgroup cols="3">
+				<thead>
+					<row>
+						<entry>
+							<para>Plugin Return Code</para>
+						</entry>
+						<entry>
+							<para>Service State</para>
+						</entry>
+						<entry>
+							<para>Host State</para>
+						</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>
+							<para>0</para>
+						</entry>
+						<entry>
+							<para>OK</para>
+						</entry>
+						<entry>
+							<para>UP</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>1</para>
+						</entry>
+						<entry>
+							<para>WARNING</para>
+						</entry>
+						<entry>
+							<para>UP or DOWN/UNREACHABLE*</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>2</para>
+						</entry>
+						<entry>
+							<para>CRITICAL</para>
+						</entry>
+						<entry>
+							<para>DOWN/UNREACHABLE</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>3</para>
+						</entry>
+						<entry>
+							<para>UNKNOWN</para>
+						</entry>
+						<entry>
+							<para>DOWN/UNREACHABLE</para>
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</informaltable>
+		<note><para>If the <link linkend="configuringnagios-configmain-use_aggressive_host_checking">use_aggressive_host_checking</link> option is enabled, return codes 
+		of 1 will result in a host state of DOWN or UNREACHABLE. Otherwise return codes of 1 will result in a
+		host state of UP. The process by which Nagios determines whether or not a host is DOWN or UNREACHABLE 
+		is discussed <link linkend="thebasics-networkreachability">here</link>.</para></note>
+	</section>
+	<section>
+		<title>Plugin Output Spec</title>
+		<para>At a minimum, plugins should return at least one of text output. Beginning with Nagios 3, plugins 
+		can optionally return multiple lines of output. Plugins may also return optional performance data that 
+		can be processed by external applications. The basic format for plugin output is shown below:</para>
+		<para>TEXT OUTPUT | OPTIONAL PERFDATALONG TEXT LINE 1LONG TEXT LINE 2...LONG TEXT LINE N | PERFDATA LINE 2PERFDATA LINE 3...PERFDATA LINE N</para>
+		<para>The performance data (shown in orange) is optional. If a plugin returns performance data in 
+		its output, it must separate the performance data from the other text output using a pipe (|) symbol. 
+		Additional lines of long text output (shown in blue) are also optional.</para>
+	</section>
+	<section>
+		<title>Plugin Output Examples</title>
+		<para>Let's see some examples of possible plugin output...</para>
+		<para><emphasis role="bold">Case 1: One line of output (text only)</emphasis></para><para>Assume we have a plugin that returns one line of output 
+		that looks like this:</para>
+		<screen>DISK OK - free space: / 3326 MB (56%);</screen>
+		<para>If this plugin was used to perform a service check, the entire line of output will be stored 
+		in the <link linkend="thebasics-macrolist-serviceoutput"><varname>$SERVICEOUTPUT$</varname></link> macro.</para>
+		<para><emphasis role="bold">Case 2: One line of output (text and perfdata)</emphasis></para><para>A plugin can return optional performance data 
+		for use by external applications. To do this, the performance data must be separated from the 
+		text output with a pipe (|) symbol like such:</para>
+		<screen>DISK OK - free space: / 3326 MB (56%);</screen>
+		<screen> | </screen>
+		<screen>/=2643MB;5948;5958;0;5968</screen>
+		<para>If this plugin was used to perform a service check, the red portion of output (left of the pipe separator) will be stored in the <link linkend="thebasics-macrolist-serviceoutput">$SERVICEOUTPUT$</link> macro and the orange portion of output (right of the pipe separator) will be stored in the 
+		<link linkend="thebasics-macrolist-serviceperfdata">$SERVICEPERFDATA$</link> macro.</para>
+		<para><emphasis role="bold">Case 3: Multiple lines of output (text and perfdata)</emphasis></para><para>A plugin optionally return multiple lines
+		of both text output and perfdata, like such:</para>
+		<screen>DISK OK - free space: / 3326 MB (56%); | /=2643MB;5948;5958;0;5968/ 15272 MB (77%);/boot 68 MB (69%);/home 69357 MB (27%);/var/log 819 MB (84%); | /boot=68MB;88;93;0;98/home=69357MB;253404;253409;0;253414 /var/log=818MB;970;975;0;980</screen>
+		<para>If this plugin was used to perform a service check, the red portion of first line of output 
+		(left of the pipe separator) will be stored in the <link linkend="thebasics-macrolist-serviceoutput">$SERVICEOUTPUT$</link> macro. 
+		The orange portions of the first and subsequent lines are concatenated (with spaces) are stored 
+		in the <link linkend="thebasics-macrolist-serviceperfdata">$SERVICEPERFDATA$</link> macro. The blue portions of the 2nd - 5th lines 
+		of output will be concatenated (with escaped newlines) and stored in 
+		<link linkend="thebasics-macrolist-longserviceoutput">$LONGSERVICEOUTPUT$</link> the macro.</para>
+		<para>The final contents of each macro are listed below:</para>
+		<informaltable frame="all">
+			<tgroup cols="2">
+				<thead>
+					<row>
+						<entry>
+							<para>Macro</para>
+						</entry>
+						<entry>
+							<para>Value</para>
+						</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>
+							<para>$SERVICEOUTPUT$</para>
+						</entry>
+						<entry>
+							<para>DISK OK - free space: / 3326 MB (56%);</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>$SERVICEPERFDATA$</para>
+						</entry>
+						<entry>
+							<para>/=2643MB;5948;5958;0;5968 /boot=68MB;88;93;0;98 /home=69357MB;253404;253409;0;253414 /var/log=818MB;970;975;0;980</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>$LONGSERVICEOUTPUT$</para>
+						</entry>
+						<entry>
+							<para>/ 15272 MB (77%);\n/boot 68 MB (69%);\n/var/log 819 MB (84%);</para>
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</informaltable>
+		<para>With regards to multiple lines of output, you have the following options for returning performance data:</para>
+		<itemizedlist>
+			<listitem>
+				<para>You can choose to return no performance data whatsoever</para>
+			</listitem>
+			<listitem>
+				<para>You can return performance data on the first line only</para>
+			</listitem>
+			<listitem>
+				<para>You can return performance data only in subsequent lines (after the first)</para>
+			</listitem>
+			<listitem>
+				<para>You can return performance data in both the first line and subsequent lines (as shown above)</para>
+			</listitem>
+		</itemizedlist>
+	</section>
+	<section>
+		<title>Plugin Output Length Restrictions</title>
+		<para>Nagios will only read the first 4 KB of data that a plugin returns. This is done in order to
+		prevent runaway plugins from dumping megs or gigs of data back to Nagios. This 4 KB output limit is 
+		fairly easy to change if you need. Simply edit the value of the MAX_PLUGIN_OUTPUT_LENGTH definition in 
+		the include/nagios.h.in file of the source code distribution and recompile Nagios. There's nothing 
+		else you need to change!</para>
+	</section>
+	<section>
+		<title>Examples</title>
+		<para>If you're looking for some example plugins to study, I would recommend that you download the 
+		official Nagios plugins and look through the code for various C, Perl, and shell script plugins.
+		Information on obtaining the official Nagios plugins can be found <link linkend="thebasics-plugins">here</link>.</para>
+	</section>
+	<section>
+		<title>Perl Plugins</title>
+		<para>Nagios features an optional <link linkend="advancedtopics-embeddedperl">embedded Perl 
+		interpreter</link> which can speed up the execution of Perl plugins. More information 
+		on developing Perl plugins for use with the embedded Perl interpreter can be found 
+		<link linkend="advancedtopics-embeddedperl">here</link>.</para>
+	</section>
+</chapter>
+

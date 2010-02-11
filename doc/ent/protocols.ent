@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!ENTITY protocol-http "<systemitem role='protocol'>HTTP</systemitem>">
+
+<!ENTITY protocol-https "<systemitem role='protocol'>HTTPS</systemitem>">
+
+<!ENTITY protocol-smtp "<systemitem role='protocol'>SMTP</systemitem>">
+
+<!ENTITY protocol-dns "<systemitem role='protocol'>DNS</systemitem>">
+
+<!ENTITY protocol-pop3 "<systemitem role='protocol'>POP3</systemitem>">
+
+<!ENTITY protocol-imap "<systemitem role='protocol'>IMAP</systemitem>">
+
+<!ENTITY protocol-imap4 "<systemitem role='protocol'>IMAP4</systemitem>">
+
+<!ENTITY protocol-ftp "<systemitem role='protocol'>FTP</systemitem>">
+
+<!ENTITY protocol-ssh "<systemitem role='protocol'>SSH</systemitem>">
+
+<!ENTITY protocol-dhcp "<systemitem role='protocol'>DHCP</systemitem>">
+
+<!ENTITY protocol-ntp "<systemitem role='protocol'>NTP</systemitem>">
+
+<!ENTITY protocol-snmp "<systemitem role='protocol'>SNMP</systemitem>">
+
+<!ENTITY protocol-icmp "<systemitem role='protocol'>ICMP</systemitem>">

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+cf http://dev.mysql.com/doc/mysqldoc-guide/en/entities.html
+  
+-->
+<!ENTITY % protocols.entities   SYSTEM "ent/protocols.ent">
+<!ENTITY % plugins.entities   SYSTEM "ent/plugins.ent">
+<!ENTITY % urls.entities   SYSTEM "ent/urls.ent">
+<!ENTITY % names.entities   SYSTEM "ent/names.ent">
+
+%protocols.entities;
+%plugins.entities;
+%urls.entities;
+%names.entities;

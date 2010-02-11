@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="thebasics-macros" xreflabel="Understanding Macros and How They Work">
+	<title>Understanding Macros and How They Work</title>
+	<section>
+		<title>Macros</title>
+		<para>One of the main features that make Nagios so flexible is the ability to use macros
+		in command defintions. Macros allow you to reference information from hosts, services, and
+		other sources in your commands.</para>
+	</section>
+	<section>
+		<title>Macro Substitution - How Macros Work</title>
+		<para>Before Nagios executes a command, it will replace any macros it finds in the 
+		command definition with their corresponding values. This macro substitution occurs for 
+		all types of commands that Nagios executes - host and service checks, notifications, event
+		handlers, etc.</para>
+		<para>Certain macros may themselves contain other macros. These include the <code>$HOSTNOTES$</code>,
+		<code>$HOSTNOTESURL$</code>, <code>$HOSTACTIONURL$</code>, <code>$SERVICENOTES$</code>, 
+		<code>$SERVICENOTESURL$</code>, and <code>$SERVICEACTIONURL$</code> macros.</para>
+	</section>
+	<section>
+		<title>Example 1: Host Address Macro</title>
+		<para>
+		When you use host and service macros in command definitions, they refer to values for the host or
+		service for which the command is being run. Let's try an example. Assuming we are using a host
+		definition and a check_ping command defined like this:
+		</para>
+		<programlisting>
+		define host{
+		        host_name               linuxbox
+		        address         192.168.1.2
+		        check_command   check_ping
+		        ...
+		        }
+		       
+		define command{
+		        command_name    check_ping
+		        command_line    /usr/local/nagios/libexec/check_ping -H $HOSTADDRESS$ -w 100.0,90% -c 200.0,60%
+		        }
+		</programlisting>
+		<para>the expanded/final command line to be executed for the host's check command would look like this:</para>
+		<para><code>/usr/local/nagios/libexec/check_ping -H 192.168.1.2 -w 100.0,90% -c 200.0,60%</code></para>
+		<para>Pretty simple, right? The beauty in this is that you can use a single command definition to check 
+		an unlimited number of hosts. Each host can be checked with the same command definition because each host's 
+		address is automatically substituted in the command line before execution.</para>
+	</section>
+	<section>
+		<title>Example 2: Command Argument Macros</title>
+		<para>You can pass arguments to commands as well, which is quite handy if you'd like to keep your
+		command definitions rather generic. Arguments are specified in the object (i.e. host or service)
+		definition, by separating them from the command name with exclamation points (!) like so:</para>
+		<programlisting>
+		define service{
+		        host_name               linuxbox
+		        service_description     PING
+		        check_command   check_ping!200.0,80%!400.0,40%
+		        ...
+		        }
+		</programlisting>
+		<para>In the example above, the service check command has two arguments (which can be 
+		referenced with <link linkend="thebasics-macrolist-arg">$ARGn$</link> macros). The $ARG1$ macro will 
+		be "200.0,80%" and <code>$ARG2$</code> will be "400.0,40%" (both without quotes). 
+		Assuming we are using the host definition given earlier and a &plugin-ping; 
+		command defined like this:</para>
+		<programlisting>
+		define command{
+		        command_name    check_ping
+		        command_line    /usr/local/nagios/libexec/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$
+		        
+		</programlisting>
+		<para>the expanded/final command line to be executed for the service's check command would look like this:</para>
+		<para><code>/usr/local/nagios/libexec/check_ping -H 192.168.1.2 -w 200.0,80% -c 400.0,40%</code></para>
+		<para><tip><para>If you need to pass bang (!) characters in your command arguments, you can do so by escaping 
+		them with a backslash (\). If you need to include backslashes in your command arguments, they should
+		also be escaped with a backslash.</para></tip></para>
+	</section>
+	<section>
+		<title>On-Demand Macros</title>
+		<para>Normally when you use host and service macros in command definitions, they refer to values
+		for the host or service for which the command is being run. For instance, if a host check
+		command is being executed for a host named "linuxbox", all the 
+		<link linkend="thebasics-macrolist">standard host macros</link> will refer to values for
+		that host ("linuxbox").</para>
+		<para>If you would like to reference values for another host or service in a command 
+		(for which the command is not being run), you can use what are called "on-demand" macros. 
+		On-demand macros look like normal macros, except for the fact that they contain an identifier 
+		for the host or service from which they should get their value. Here's the basic format 
+		for on-demand macros:</para>
+		<itemizedlist>
+			<listitem>
+				<para><code>$HOSTMACRONAME:host_name$</code></para>
+			</listitem>
+			<listitem>
+				<para><code>$SERVICEMACRONAME:host_name:service_description$</code></para>
+			</listitem>
+		</itemizedlist>
+		<para>Replace <code>HOSTMACRONAME</code> and <code>SERVICEMACRONAME</code> with the name of one of the 
+		standard host of service macros found <link linkend="thebasics-macrolist">here</link>.</para>
+		<para>Note that the macro name is separated from the host or service identifier by a colon (:). 
+		For on-demand service macros, the service identifier consists of both a host name and a service
+		description - these are separated by a colon (:) as well.</para>
+		<para><tip><para>On-demand service macros can contain an empty host name field. In this case 
+		the name of the host associated with the service will automatically be used.</para></tip></para>
+		<para>Examples of on-demand host and service macros follow:</para>
+		<para><code>$HOSTDOWNTIME:myhost$                        &lt;--- On-demand host macro</code></para>
+		<para><code>$SERVICESTATEID:novellserver:DS Database$    &lt;--- On-demand service macro</code></para>
+		<para><code>$SERVICESTATEID::CPU Load$                   &lt;--- On-demand service macro with blank host name field</code></para>
+		<para>On-demand macros are also available for hostgroup, servicegroup, contact, and contactgroup macros. For example:</para>
+		<para><code>$CONTACTEMAIL:john$                          &lt;--- On-demand contact macro</code></para>
+		<para><code>$CONTACTGROUPMEMBERS:linux-admins$           &lt;--- On-demand contactgroup macro</code></para>
+		<para><code>$HOSTGROUPALIAS:linux-servers$               &lt;--- On-demand hostgroup macro</code></para>
+		<para><code>$SERVICEGROUPALIAS:DNS-Cluster$              &lt;--- On-demand servicegroup macro</code></para>
+	</section>
+	<section>
+		<title>On-Demand Group Macros</title>
+		<para>You can obtain the values of a macro across all contacts, hosts, or services in a specific group 
+		by using a special format for your on-demand macro declaration. You do this by referencing a specific 
+		host group, service group, or contact group name in an on-demand macro, like so:</para>
+		<itemizedlist>
+			<listitem>
+				<para><code>$HOSTMACRONAME:hostgroup_name:delimiter$</code></para>
+			</listitem>
+			<listitem>
+				<para><code>$SERVICEMACRONAME:servicegroup_name:delimiter$</code></para>
+			</listitem>
+			<listitem>
+				<para><code>$CONTACTMACRONAME:contactgroup_name:delimiter$</code></para>
+			</listitem>
+		</itemizedlist>
+		<para>Replace <code>HOSTMACRONAME</code>, <code>SERVICEMACRONAME</code>, and <code>CONTACTMACRONAME</code> with 
+		the name of one of the standard host, service, or contact macros found 
+		<link linkend="thebasics-macrolist">here</link>. The delimiter you specify is 
+		used to separate macro values for each group member.</para>
+		<para>For example, the following macro will return a comma-separated list of host 
+		state ids for hosts that are members of the hg1 hostgroup:</para>
+		<para><code>$HOSTSTATEID:hg1:,$</code></para>
+		<para>This macro definition will return something that looks like this:</para>
+		<para><code>0,2,1,1,0,0,2</code></para>
+	</section>
+	<section>
+		<title>Custom Variable Macros</title>
+		<para>Any <link linkend="configuringnagios-customobjectvars">custom object variables</link>
+		that you define in host, service, or contact definitions are also available as macros.
+		Custom variable macros are named as follows:</para>
+		<itemizedlist>
+			<listitem>
+				<para><code>$_HOSTvarname$</code></para>
+			</listitem>
+			<listitem>
+				<para><code>$_SERVICEvarname$</code></para>
+			</listitem>
+			<listitem>
+				<para><code>$_CONTACTvarname$</code></para>
+			</listitem>
+		</itemizedlist>
+		<para>Take the following host definition with a custom variable called "<code>_MACADDRESS</code>"...</para>
+		<programlisting>
+		define host{
+		        host_name               linuxbox
+		        address         192.168.1.1
+		        _MACADDRESS     00:01:02:03:04:05
+		        ...
+		        }
+		</programlisting>
+		<para>The <code>_MACADDRESS</code> custom variable would be available in a macro 
+		called <code>$_HOSTMACADDRESS$</code>. More information on custom object variables and how they 
+		can be used in macros can be found <link linkend="configuringnagios-customobjectvars">here</link>.</para>
+	</section>
+	<section>
+		<title>Macro Cleansing</title>
+		<para>Some macros are stripped of potentially dangerous shell metacharacters before being
+		substituted into commands to be executed. Which characters are stripped from the macros
+		depends on the setting of the <link linkend="configuringnagios-configmain-illegal_macro_output_chars">illegal_macro_output_chars</link> directive. 
+		The following macros are stripped of potentially dangerous characters:</para>
+		<orderedlist>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-hostoutput">$HOSTOUTPUT$</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-longhostoutput">$LONGHOSTOUTPUT$</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-hostperfdata">$HOSTPERFDATA$</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-hostackauthor">$HOSTACKAUTHOR$</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-hostackcomment">$HOSTACKCOMMENT$</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-serviceoutput">$SERVICEOUTPUT$</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-longserviceoutput">$LONGSERVICEOUTPUT$</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-serviceperfdata">$SERVICEPERFDATA$</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-serviceackauthor">$SERVICEACKAUTHOR$</link>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<link linkend="thebasics-macrolist-serviceackcomment">$SERVICEACKCOMMENT$</link>
+				</para>
+			</listitem>
+		</orderedlist>
+	</section>
+	<section>
+		<title>Macros as Environment Variables</title>
+		<para>Most macros are made available as environment variables for easy reference by scripts or
+		commands that are executed by Nagios. For purposes of security and sanity, <link linkend="thebasics-macrolist-user">$USERn$</link>
+		and "on-demand" host and service macros are not made available as environment variables.</para>
+		<para>Environment variables that contain standard macros are named the same as their corresponding 
+		macro names (listed <link linkend="thebasics-macrolist">here</link>), with "NAGIOS_" prepended to 
+		their names. For example, the <link linkend="thebasics-macrolist-hostname">$HOSTNAME$</link> macro would 
+		be available as an environment variable named "NAGIOS_HOSTNAME".</para>
+	</section>
+	<section>
+		<title>Available Macros</title>
+		<para>A list of all the macros that are available in Nagios, as well as a chart of when they can be
+		used, can be found <link linkend="thebasics-macrolist">here</link>.</para>
+	</section>
+</chapter>
+

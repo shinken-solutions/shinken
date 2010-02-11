@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="gettingstarted-quickstart-opensuse" xreflabel="openSUSE quickstart">
+  <title>&name-opensuse; Quickstart</title>
+
+  <abstract>
+    <para>This guide is intended to provide you with simple instructions on
+    how to install Nagios from source (code) on &name-opensuse; and have it
+    monitoring your local machine inside of 20 minutes. No advanced
+    installation options are discussed here - just the basics that will work
+    for 95% of users who want to get started.</para>
+
+    <para>These instructions were written based on an &name-opensuse; 10.2
+    installation.</para>
+  </abstract>
+
+  <section>
+    <title>Required Packages</title>
+
+    <para>Make sure you've installed the following packages on your &name-opensuse;
+    installation before continuing. You can use <command>yast</command> to install packages under
+    &name-opensuse;.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>apache2</para>
+      </listitem>
+
+      <listitem>
+        <para>C/C++ development libraries</para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title>Create Account Information</title>
+
+    <para>Become the root user.</para>
+
+<screen>
+<prompt>linux:~ $ </prompt><userinput>su -l</userinput>
+</screen>
+
+    <para>Create a new nagios user account and give it a password.</para>
+
+    <screen>
+<prompt>linux:~ # </prompt><userinput>/usr/sbin/useradd -m nagios</userinput>
+<prompt>linux:~ # </prompt><userinput>passwd nagios</userinput>
+</screen>
+
+    <para>Create a new nagios group. Add the nagios user to the group.</para>
+
+    <screen>
+<prompt>linux:~ # </prompt><userinput>/usr/sbin/groupadd nagios</userinput>
+<prompt>linux:~ # </prompt><userinput>/usr/sbin/usermod -G nagios nagios</userinput>
+</screen>
+
+    <para>Create a new nagcmd group for allowing external commands to be
+    submitted through the web interface. Add both the nagios user and the
+    apache user to the group.</para>
+
+    <screen>
+<prompt>linux:~ # </prompt><userinput>/usr/sbin/groupadd nagcmd</userinput>
+<prompt>linux:~ # </prompt><userinput>/usr/sbin/usermod -G nagcmd nagios</userinput>
+<prompt>linux:~ # </prompt><userinput>/usr/sbin/usermod -G nagcmd wwwrun</userinput>
+</screen>
+  </section>
+
+  <section>
+    <title>Download Nagios and the Plugins</title>
+
+    <para>Create a directory for storing the downloads.</para>
+
+    <screen>
+<prompt>linux:~ # </prompt><userinput>mkdir ~/downloads</userinput>
+<prompt>linux:~ # </prompt><userinput>cd ~/downloads</userinput>
+</screen>
+
+    <para>Download the source code tarballs of both Nagios and the Nagios
+    plugins (visit <ulink
+    url="&url-nagios;download/">&url-nagios;download/</ulink>
+    for links to the latest versions). At the time of writing, the latest
+    versions of Nagios and the Nagios plugins were 3.0.3 and 1.4.11,
+    respectively.</para>
+        <screen>
+<prompt>linux:~ # </prompt><userinput>wget http://osdn.dl.sourceforge.net/sourceforge/nagios/nagios-3.0.2.tar.gz</userinput>
+<prompt>linux:~ # </prompt><userinput>wget http://osdn.dl.sourceforge.net/sourceforge/nagiosplug/nagios-plugins-1.4.11.tar.gz</userinput>
+</screen>
+  </section>
+
+  <section>
+    <title>Compile and Install Nagios</title>
+
+    <para>Extract the Nagios source code tarball.</para>
+
+        <screen>
+<prompt>linux:~ # </prompt><userinput>cd ~/downloads</userinput>
+<prompt>linux:~ # </prompt><userinput>tar xzf nagios-3.0.2.tar.gz</userinput>
+<prompt>linux:~ # </prompt><userinput>cd nagios-3.0.2</userinput>
+</screen>
+
+    <para>Run the Nagios configure script, passing the name of the group you
+    created earlier like so:</para>
+          <screen>
+<prompt>linux:~ # </prompt><userinput>./configure --with-command-group=nagcmd</userinput>
+</screen>
+
+    <para>Compile the Nagios source code.</para>
+          <screen>
+<prompt>linux:~ # </prompt><userinput>make all</userinput>
+</screen>
+    <para>Install binaries, init script, sample config files and set
+    permissions on the external command directory.</para>
+    
+              <screen>
+<prompt>linux:~ # </prompt><userinput>make install</userinput>
+<prompt>linux:~ # </prompt><userinput>make install-init</userinput>
+<prompt>linux:~ # </prompt><userinput>make install-config</userinput>
+<prompt>linux:~ # </prompt><userinput>make install-commandmode</userinput>
+</screen>
+
+    <para>Don't start Nagios yet - there's still more that needs to be
+    done...</para>
+  </section>
+
+  <section>
+    <title>Customize Configuration</title>
+
+    <para>Sample <link linkend="configuringnagios-config">configuration files</link>
+    have now been installed in the <filename class="directory">/usr/local/nagios/etc</filename> directory. These
+    sample files should work fine for getting started with Nagios. You'll need
+    to make just one change before you proceed...</para>
+
+    <para>Edit the <filename>/usr/local/nagios/etc/objects/contacts.cfg</filename> config file with
+    your favorite editor and change the email address associated with the
+    nagiosadmin contact definition to the address you'd like to use for
+    receiving alerts.</para>
+              <screen>
+<prompt>linux:~ # </prompt><userinput>vi /usr/local/nagios/etc/objects/contacts.cfg</userinput>
+</screen>
+  </section>
+
+  <section>
+    <title>Configure the Web Interface</title>
+
+    <para>Install the Nagios web config file in the Apache conf.d
+    directory.</para>
+
+              <screen>
+<prompt>linux:~ # </prompt><userinput>make install-webconf</userinput>
+</screen>
+    <para>Create a nagiosadmin account for logging into the Nagios web
+    interface. Remember the password you assign to this account - you'll need
+    it later.</para>
+
+                  <screen>
+<prompt>linux:~ # </prompt><userinput>htpasswd2 -c /usr/local/nagios/etc/htpasswd.users nagiosadmin</userinput>
+</screen>
+
+    <para>Restart Apache to make the new settings take effect.</para>
+
+                  <screen>
+<prompt>linux:~ # </prompt><userinput>service apache2 restart</userinput>
+</screen>
+  </section>
+
+  <section>
+    <title>Compile and Install the Nagios Plugins</title>
+
+    <para>Extract the Nagios plugins source code tarball.</para>
+
+                      <screen>
+<prompt>linux:~ # </prompt><userinput>cd ~/downloads</userinput>
+<prompt>linux:~ # </prompt><userinput>tar xzf nagios-plugins-1.4.11.tar.gz</userinput>
+<prompt>linux:~ # </prompt><userinput>cd nagios-plugins-1.4.11</userinput>
+</screen>
+
+    <para>Compile and install the plugins.</para>
+
+                          <screen>
+<prompt>linux:~ # </prompt><userinput>./configure --with-nagios-user=nagios --with-nagios-group=nagios</userinput>
+<prompt>linux:~ # </prompt><userinput>make</userinput>
+<prompt>linux:~ # </prompt><userinput>make install</userinput>
+</screen>
+  </section>
+
+  <section>
+    <title>Start Nagios</title>
+
+    <para>Add Nagios to the list of system services and have it automatically
+    start when the system boots.</para>
+
+                              <screen>
+<prompt>linux:~ # </prompt><userinput>chkconfig --add nagios</userinput>
+<prompt>linux:~ # </prompt><userinput>chkconfig nagios on</userinput>
+</screen>
+
+    <para>Verify the sample Nagios configuration files.</para>
+
+                              <screen>
+<prompt>linux:~ # </prompt><userinput>/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg</userinput>
+
+</screen>
+    <para>If there are no errors, start Nagios.</para>
+
+                                  <screen>
+<prompt>linux:~ # </prompt><userinput>service nagios start</userinput>
+</screen>
+  </section>
+
+  <section>
+    <title>Login to the Web Interface</title>
+
+    <para>You should now be able to access the Nagios web interface at the URL
+    below. You'll be prompted for the username (nagiosadmin) and password you
+    specified earlier.</para>
+
+    <para>http://localhost/nagios/</para>
+
+    <para>Click on the <guimenuitem>Service Detail</guimenuitem> navbar link to see details of what's
+    being monitored on your local machine. It will take a few minutes for
+    Nagios to check all the services associated with your machine, as the
+    checks are spread out over time.</para>
+  </section>
+
+  <section>
+    <title>Other Modifications</title>
+
+    <para>Make sure your machine's firewall rules are configured to allow
+    access to the web server if you want to access the Nagios interface
+    remotely.</para>
+
+    <para>You can do this by:</para>
+
+    <orderedlist>
+      <listitem>
+        <para>Opening the control center</para>
+      </listitem>
+
+      <listitem>
+        <para>Select <guimenuitem>Open Administrator Settings</guimenuitem> to open the YaST
+        administrator control center</para>
+      </listitem>
+
+      <listitem>
+        <para>Select <guimenuitem>Firewall</guimenuitem> from the <guimenu>Security and Users</guimenu> category</para>
+      </listitem>
+
+      <listitem>
+        <para>Click the <guimenuitem>Allowed Services</guimenuitem> option in the Firewall
+        Configuration window</para>
+      </listitem>
+
+      <listitem>
+        <para>Add <guimenuitem>HTTP Server</guimenuitem> to the allowed services list for the <guimenuitem>External
+        Zone</guimenuitem></para>
+      </listitem>
+
+      <listitem>
+        <para>Click <guibutton>Next</guibutton> and <guibutton>Accept</guibutton> to activate the new firewall
+        settings</para>
+      </listitem>
+    </orderedlist>
+
+    <para>Configuring email notifications is outside the scope of this
+    documentation. Refer to your system documentation, search the web, or look
+    to the <ulink
+    url="&url-nagios-community;">NagiosCommunity.org wiki</ulink>
+    for specific instructions on configuring your &name-opensuse; system to send
+    email messages to external addresses.</para>
+  </section>
+</chapter>
+

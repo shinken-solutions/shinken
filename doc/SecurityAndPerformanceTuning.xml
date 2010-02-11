@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "all-entities.ent">
+  %all.entities;
+]
+>
+<part id="part-securityandperformancetuning">
+<title>Security and Performance Tuning</title>
+
+<xi:include href="SecurityAndPerformanceTuning/security.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="SecurityAndPerformanceTuning/cgisecurity.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="SecurityAndPerformanceTuning/tuning.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="SecurityAndPerformanceTuning/faststartup.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="SecurityAndPerformanceTuning/largeinstalltweaks.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="SecurityAndPerformanceTuning/nagiostats.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="SecurityAndPerformanceTuning/mrtggraphs.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+</part>

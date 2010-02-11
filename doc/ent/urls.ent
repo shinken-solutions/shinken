@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!ENTITY url-nagios "http://www.nagios.org/">
+
+<!ENTITY url-nagios-community "http://www.nagioscommunity.org/wiki">
+
+<!ENTITY url-novell-coolsolutions "http://www.novell.com/coolsolutions/">
+
+<!ENTITY url-sourceforge-projects "http://sourceforge.net/projects/">
+
+<!ENTITY url-apache-docs "http://httpd.apache.org/docs/">
+
+<!ENTITY url-splunk "http://www.splunk.com/">
+
+<!ENTITY url-gd "http://www.boutell.com/gd/">
+
+<!ENTITY url-nagiosexchange "http://www.nagiosexchange.org">
+
+<!ENTITY url-wikipedia "http://en.wikipedia.org/wiki/">
+

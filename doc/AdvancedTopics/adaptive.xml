@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="advancedtopics-adaptative" xreflabel="Adaptive Monitoring">
+  <title>Adaptive Monitoring</title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>Nagios allows you to change certain commands and host and service
+    check attributes during runtime. I'll refer to this feature as <quote>adaptive
+    monitoring</quote>. Please note that the adaptive monitoring features found in
+    Nagios will probably not be of much use to 99% of users, but they do allow
+    you to do some neat things.</para>
+  </section>
+
+  <section>
+    <title>What Can Be Changed?</title>
+
+    <para>The following service check attributes can be changed during
+    runtime:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Check command (and command arguments)</para>
+      </listitem>
+
+      <listitem>
+        <para>Check interval</para>
+      </listitem>
+
+      <listitem>
+        <para>Max check attempts</para>
+      </listitem>
+
+      <listitem>
+        <para>Check timeperiod</para>
+      </listitem>
+
+      <listitem>
+        <para>Event handler command (and command arguments)</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The following host check attributes can be changed during
+    runtime:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Check command (and command arguments)</para>
+      </listitem>
+
+      <listitem>
+        <para>Check interval</para>
+      </listitem>
+
+      <listitem>
+        <para>Max check attempts</para>
+      </listitem>
+
+      <listitem>
+        <para>Check timeperiod</para>
+      </listitem>
+
+      <listitem>
+        <para>Event handler command (and command arguments)</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The following global attributes can be changed during
+    runtime:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Global host event handler command (and command arguments)</para>
+      </listitem>
+
+      <listitem>
+        <para>Global service event handler command (and command
+        arguments)</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title>External Commands For Adaptive Monitoring</title>
+
+    <para>In order to change global or host- or service-specific attributes
+    during runtime, you must submit the appropriate <link
+    linkend="advancedtopics-extcommands">external command</link> to Nagios via
+    the <link linkend="advancedtopics-extcommands">external command
+    file</link>. The table below lists the different attributes that may be
+    changed during runtime, along with the external command to accomplish the
+    job.</para>
+
+    <para>A full listing of external commands that can be used for adaptive
+    monitoring (along with examples of how to use them) can be found online at
+    the following URL: <ulink
+    url="&url-nagios;developerinfo/externalcommands/">&url-nagios;developerinfo/externalcommands/</ulink></para>
+
+    <note>
+      <itemizedlist>
+        <listitem>
+          <para>When changing check commands, check timeperiods, or event
+          handler commands, it is important to note that the new values for
+          these options must have been defined before Nagios was started. Any
+          request to change a command or timeperiod to one which had not been
+          defined when Nagios was started is ignored.</para>
+        </listitem>
+
+        <listitem>
+          <para>You can specify command arguments along with the actual
+          command name - just seperate individual arguments from the command
+          name (and from each other) using bang (!) characters. More
+          information on how arguments in command definitions are processed
+          during runtime can be found in the documentation on <link
+          linkend="thebasics-macros">macros</link>.</para>
+        </listitem>
+      </itemizedlist>
+    </note>
+  </section>
+</chapter>

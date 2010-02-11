@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="gettingstarted-monitoring-linux" xreflabel="Monitoring Linux/Unix machines">
+  <title>Monitoring Linux/Unix Machines</title>
+
+  <abstract>
+    <para>This document describes how you can monitor "private" services and
+    attributes of Linux/UNIX servers, such as:</para>
+
+    <para><itemizedlist>
+        <listitem>
+          <para>CPU load</para>
+        </listitem>
+
+        <listitem>
+          <para>Memory usage</para>
+        </listitem>
+
+        <listitem>
+          <para>Disk usage</para>
+        </listitem>
+
+        <listitem>
+          <para>Logged in users</para>
+        </listitem>
+
+        <listitem>
+          <para>Running processes</para>
+        </listitem>
+
+        <listitem>
+          <para>etc.</para>
+        </listitem>
+      </itemizedlist></para>
+  </abstract>
+  <section>
+    <title>Introduction</title>
+
+    <para>Publicly available services that are provided by Linux servers
+    (&protocol-http;, &protocol-ftp;, &protocol-ssh;, &protocol-smtp;, etc.) can be monitored easily by following the
+    documentation on <link linkend="gettingstarted-monitoring-publicservices">Monitoring publicly available services</link>.</para>
+    <note>
+      <para>These instructions assume that you've installed Nagios according
+      to the <link linkend="gettingstarted-quickstart">quickstart guide</link>. The sample
+      configuration entries below reference objects that are defined in the
+      sample config files (<filename>commands.cfg</filename>,
+      <filename>templates.cfg</filename>, etc.) that are installed if you
+      follow the quickstart.</para>
+    </note>
+  </section>
+  <section>
+    <title>Overview</title>
+    <note>
+      <para>[This document has not been completed. I would recommend you read
+      the documentation on the <link linkend="nagiosaddons-addons-nrpe">&name-nrpe;
+      addon</link> for instructions on how to monitor a remote Linux/Unix
+      server.]</para>
+    </note>
+    <para>There are several different ways to monitor attributes or remote
+    Linux/Unix servers. One is by using shared &protocol-ssh; keys and the
+    &plugin-byssh; plugin to execute plugins on remote
+    servers. This method will not be covered here, but can result in high load
+    on your monitoring server if you are monitoring hundreds or thousands of
+    services. The overhead of setting up/destroying &protocol-ssh; connections is the
+    cause of this.</para>
+    <para><informalfigure><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/nrpe.png" format="PNG"/>
+        </imageobject>
+      </mediaobject></informalfigure></para>
+    <para>Another common method of monitoring remote Linux/Unix hosts is to
+    use the <link linkend="nagiosaddons-addons-nrpe">&name-nrpe; addon</link>. &name-nrpe; allows you
+    to execute plugins on remote Linux/Unix hosts. This is useful if you need
+    to monitor local resources/attributes like disk usage, CPU load, memory
+    usage, etc. on a remote host.</para>
+  </section>
+</chapter>
+

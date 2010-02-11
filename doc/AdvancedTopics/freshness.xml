@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="advancedtopics-freshness" xreflabel="Service and Host Freshness Checks">
+	<title>Service and Host Freshness Checks</title>
+	<section>
+		<title>Introduction</title>
+		<para>Nagios supports a feature that does <quote>freshness</quote> checking on the results of host 
+		and service checks. The purpose of freshness checking is to ensure that host and service 
+		checks are being provided passively by external applications on a regular basis.</para>
+		<para>Freshness checking is useful when you want to ensure that
+		<link linkend="thebasics-passivechecks">passive checks</link> are being received 
+		as frequently as you want. This can be very useful in 
+		<link linkend="advancedtopics-distributed">distributed</link> and 
+		<link linkend="advancedtopics-redundancy">failover</link> monitoring environments.</para>
+	</section>
+	<section>
+		<title>How Does Freshness Checking Work?</title>
+		<para>
+			        <inlinemediaobject>
+		      <imageobject>
+		        <imagedata fileref="images/freshness.png" format="PNG"/>
+		      </imageobject>
+		    </inlinemediaobject>
+		Nagios periodically checks the freshness of the results for all hosts services that
+		have freshness checking enabled.</para>
+		<itemizedlist>
+			<listitem>
+				<para>A freshness threshold is calculated for each host or service.</para>
+			</listitem>
+			<listitem>
+				<para>For each host/service, the age of its last check result is compared 
+				with the freshness threshold.</para>
+			</listitem>
+			<listitem>
+				<para>If the age of the last check result is greater than the freshness 
+				threshold, the check result is considered <quote>stale</quote>.</para>
+			</listitem>
+			<listitem>
+				<para>If the check results is found to be stale, Nagios will force an
+				<link linkend="thebasics-activechecks">active check</link> of the host
+				or service by executing the command specified by in the host or service definition.</para>
+			</listitem>
+		</itemizedlist>
+		<tip><para>An active check is executed even if active checks are disabled on a program-wide
+		or host- or service-specific basis.</para></tip>
+		<para>For example, if you have a freshness threshold of 60 for one of your services, Nagios
+		will consider that service to be stale if its last check result is older than 60 seconds.</para>
+	</section>
+	<section>
+		<title>Enabling Freshness Checking</title>
+		<para>Here's what you need to do to enable freshness checking...</para>
+		<itemizedlist>
+			<listitem>
+				<para>Enable freshness checking on a program-wide basis with the 
+				<link linkend="configuringnagios-configmain-check_service_freshness">check_service_freshness</link> 
+				and <link linkend="configuringnagios-configmain-check_host_freshness">check_host_freshness</link> directives.</para>
+			</listitem>
+			<listitem>
+				<para>Use <link linkend="configuringnagios-configmain-service_freshness_check_interval">service_freshness_check_interval</link> 
+				and <link linkend="configuringnagios-configmain-host_freshness_check_interval">host_freshness_check_interval</link> options to tell Nagios 
+				how often in should check the freshness of service and host results.</para>
+			</listitem>
+			<listitem>
+				<para>Enable freshness checking on a host- and service-specific basis by setting
+				the <varname>check_freshness</varname> option in your host and service definitions
+				to a value of 1.</para>
+			</listitem>
+			<listitem>
+				<para>Configure freshness thresholds by setting the 
+				<varname>freshness_threshold</varname> option in your host and service definitions.</para>
+			</listitem>
+			<listitem>
+				<para>Configure the <varname>check_command</varname> option in your host
+				or service definitions to reflect a valid command that should be used to
+				actively check the host or service when it is detected as stale.</para>
+			</listitem>
+			<listitem>
+				<para>The <varname>check_period</varname> option in your host and service
+				definitions is used when Nagios determines when a host or service can be
+				checked for freshness, so make sure it is set to a valid timeperiod.</para>
+			</listitem>
+		</itemizedlist>
+		<tip><para>If you do not specify a host- or service-specific <varname>freshness_threshold</varname> value 
+		(or you set it to zero), Nagios will automatically calculate a threshold automatically, based 
+		on a how often you monitor that particular host or service. I would recommended that you 
+		explicitly specify a freshness threshold, rather than let Nagios pick one for you.</para></tip>
+	</section>
+	<section>
+		<title>Example</title>
+		<para>An example of a service that might require freshness checking might be one that 
+		reports the status of your nightly backup jobs. Perhaps you have a external script that
+		submit the results of the backup job to Nagios once the backup is completed. 
+		In this case, all of the checks/results for the service are provided by an external 
+		application using passive checks. In order to ensure that the status of the backup job
+		gets reported every day, you may want to enable freshness checking for the service.
+		If the external script doesn't submit the results of the backup job, you can have Nagios 
+		fake a critical result by doing something like this...</para>
+		<para>Here's what the definition for the service might look like (some required 
+		options are omitted)...</para>
+		<programlisting>define service{
+		        host_name               backup-server
+		        service_description     ArcServe Backup Job
+		        active_checks_enabled   0               ; active checks are NOT enabled
+		        passive_checks_enabled  1               ; passive checks are enabled (this is how results are reported)
+		        check_freshness         1
+		        freshness_threshold     93600           ; 26 hour threshold, since backups may not always finish at the same time
+		        check_command           no-backup-report        ; this command is run only if the service results are <quote>stale</quote>
+		        ...other options...
+		        }</programlisting>
+		<para>Notice that active checks are disabled for the service. This is because the
+		results for the service are only made by an external application using passive checks. 
+		Freshness checking is enabled and the freshness threshold has been set to 26 hours.
+		This is a bit longer than 24 hours because backup jobs sometimes run late from day to 
+		day (depending on how much data there is to backup, how much network traffic is 
+		present, etc.). The <code>no-backup-report</code> command is executed only if the results of the
+		service are determined to be stale. The definition of the <code>no-backup-report</code> command 
+		might look like this...</para>
+		<programlisting>define command{
+		        command_name    no-backup-report
+		        command_line    /usr/local/nagios/libexec/check_dummy 2 "CRITICAL: Results of backup job were not reported!"
+		        }</programlisting>
+		<para>If Nagios detects that the service results are stale, it will run the 
+		<code>no-backup-report</code> command as an active service check. This causes the &plugin-dummy; 
+		plugin to be executed, which returns a critical state to Nagios. The service will then go into to
+		a critical state (if it isn't already there) and someone will probably get notified of the problem.</para>
+	</section>
+</chapter>
+

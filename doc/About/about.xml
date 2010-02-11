@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="about">
+  <title>About Nagios</title>
+
+  <section>
+    <title><anchor id="whatis" />What Is This?</title>
+
+    <para>Nagios is a system and network monitoring application. It watches
+    hosts and services that you specify, alerting you when things go bad and
+    when they get better.</para>
+
+    <para>Nagios was originally designed to run under <ulink
+    url="http://www.linux.com/">Linux</ulink>, although it should work under
+    most other unices as well.</para>
+
+    <para>Some of the many features of Nagios include:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Monitoring of network services (&protocol-smtp;, &protocol-pop3;, &protocol-http;, &protocol-ntp;, PING,
+        etc.)</para>
+      </listitem>
+
+      <listitem>
+        <para>Monitoring of host resources (processor load, disk usage,
+        etc.)</para>
+      </listitem>
+
+      <listitem>
+        <para>Simple plugin design that allows users to easily develop their
+        own service checks</para>
+      </listitem>
+
+      <listitem>
+        <para>Parallelized service checks</para>
+      </listitem>
+
+      <listitem>
+        <para>Ability to define network host hierarchy using "parent" hosts,
+        allowing detection of and distinction between hosts that are down and
+        those that are unreachable</para>
+      </listitem>
+
+      <listitem>
+        <para>Contact notifications when service or host problems occur and
+        get resolved (via email, pager, or user-defined method)</para>
+      </listitem>
+
+      <listitem>
+        <para>Ability to define event handlers to be run during service or
+        host events for proactive problem resolution</para>
+      </listitem>
+
+      <listitem>
+        <para>Automatic log file rotation</para>
+      </listitem>
+
+      <listitem>
+        <para>Support for implementing redundant monitoring hosts</para>
+      </listitem>
+
+      <listitem>
+        <para>Optional web interface for viewing current network status,
+        notification and problem history, log file, etc.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title><anchor id="about-requirements" />System Requirements</title>
+
+    <para>The only requirement of running Nagios is a machine running Linux
+    (or UNIX variant) and a C compiler. You will probably also want to have
+    TCP/IP configured, as most service checks will be performed over the
+    network.</para>
+
+    <para>You are not required to use the CGIs included with Nagios. However,
+    if you do decide to use them, you will need to have the following software
+    installed...</para>
+
+    <orderedlist>
+      <listitem>
+        <para>A web server (preferrably <ulink
+        url="http://www.apache.org/">Apache</ulink>)</para>
+      </listitem>
+
+      <listitem>
+        <para>Thomas Boutell's <ulink url="&url-gd;">gd
+        library</ulink> version 1.6.3 or higher (required by the <link
+        linkend="thebasics-cgis-statusmap_cgi">statusmap</link> and <link linkend="thebasics-cgis-trends_cgi">trends</link>
+        CGIs)</para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title><anchor id="about-licensing" />Licensing</title>
+
+    <para>Nagios is licensed under the terms of the <ulink
+    url="http://www.gnu.org/copyleft/gpl.html">GNU General Public
+    License</ulink> Version 2 as published by the <ulink
+    url="http://www.fsf.org/">Free Software Foundation</ulink>. This gives you
+    legal permission to copy, distribute and/or modify Nagios under certain
+    conditions. Read the 'LICENSE' file in the Nagios distribution or read the
+    <ulink url="http://www.gnu.org/copyleft/gpl.html">online version of the
+    license</ulink> for more details.</para>
+
+    <para>Nagios is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+    WARRANTY OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
+    PURPOSE.</para>
+  </section>
+
+  <section>
+    <title><anchor id="about-acknowledgements" />Acknowledgements</title>
+
+    <para>Several people have contributed to Nagios by either reporting bugs,
+    suggesting improvements, writing plugins, etc. A list of some of the many
+    contributors to the development of Nagios can be found at <ulink
+    url="&url-nagios;">&url-nagios;</ulink>.</para>
+  </section>
+
+  <section>
+    <title><anchor id="about-downloading" />Downloading The Latest Version</title>
+
+    <para>You can check for new versions of Nagios at <ulink
+    url="&url-nagios;">&url-nagios;</ulink>.</para>
+  </section>
+
+  <section>
+    <title><anchor id="about-support" />Support</title>
+
+    <para><ulink url="&url-nagios;support/">Support
+    options</ulink></para>
+  </section>
+</chapter>
+

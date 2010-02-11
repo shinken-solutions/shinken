@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="advancedtopics-objectinheritance" xreflabel="Object Inheritance">
+  <title>Object Inheritance</title>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>This documentation attempts to explain object inheritance and how it
+    can be used in your <link linkend="configuringnagios-objectdefinitions">object
+    definitions</link>.</para>
+
+    <para>If you are confused about how recursion and inheritance work after
+    reading this, take a look at the sample object config files provided in
+    the Nagios distribution. If that still doesn't help, drop an email message
+    with a <emphasis>detailed</emphasis> description of your problem to the
+    <emphasis>nagios-users</emphasis> mailing list.</para>
+  </section>
+
+  <section>
+    <title>Basics</title>
+
+    <para>There are three variables affecting recursion and inheritance that
+    are present in all object definitions. They are indicated in red as
+    follows...</para>
+
+    <programlisting>        define someobjecttype{
+		                object-specific variables ...
+		                name            template_name
+		                use             name_of_template_to_use
+		                register        [0/1]
+		                }</programlisting>
+
+    <para>The first variable is <varname>name</varname>. Its just a "template"
+    name that can be referenced in other object definitions so they can
+    inherit the objects properties/variables. Template names must be unique
+    amongst objects of the same type, so you can't have two or more host
+    definitions that have "hosttemplate" as their template name.</para>
+
+    <para>The second variable is <varname>use</varname>. This is where you
+    specify the name of the template object that you want to inherit
+    properties/variables from. The name you specify for this variable must be
+    defined as another object's template named (using the name
+    variable).</para>
+
+    <para>The third variable is <varname>register</varname>. This variable is
+    used to indicate whether or not the object definition should be
+    "registered" with Nagios. By default, all object definitions are
+    registered. If you are using a partial object definition as a template,
+    you would want to prevent it from being registered (an example of this is
+    provided later). Values are as follows: 0 = do NOT register object
+    definition, 1 = register object definition (this is the default). This
+    variable is NOT inherited; every (partial) object definition used as a
+    template must explicitly set the <varname>register</varname> directive to
+    be 0. This prevents the need to override an inherited
+    <varname>register</varname> directive with a value of 1 for every object
+    that should be registered.</para>
+  </section>
+
+  <section>
+    <title>Local Variables vs. Inherited Variables</title>
+
+    <para>One important thing to understand with inheritance is that <quote>local</quote>
+    object variables always take precedence over variables defined in the
+    template object. Take a look at the following example of two host
+    definitions (not all required variables have been supplied):</para>
+
+    <programlisting>       define host{
+		                host_name               bighost1
+		                check_command           check-host-alive
+		                notification_options    d,u,r
+		                max_check_attempts      5
+		                name                    hosttemplate1
+		                }
+
+		        define host{
+		                host_name               bighost2
+		                max_check_attempts      3
+		                use                     hosttemplate1
+		                }</programlisting>
+
+    <para>You'll note that the definition for host
+    <emphasis>bighost1</emphasis> has been defined as having
+    <emphasis>hosttemplate1</emphasis> as its template name. The definition
+    for host <emphasis>bighost2</emphasis> is using the definition of
+    <emphasis>bighost1</emphasis> as its template object. Once Nagios
+    processes this data, the resulting definition of host
+    <emphasis>bighost2</emphasis> would be equivalent to this
+    definition:</para>
+
+    <programlisting>        define host{
+		                host_name               bighost2
+		                check_command           check-host-alive
+		                notification_options    d,u,r
+		                max_check_attempts      3
+		                }</programlisting>
+
+    <para>You can see that the <varname>check_command</varname> and
+    <varname>notification_options</varname> variables were inherited from the
+    template object (where host <emphasis>bighost1</emphasis> was defined).
+    However, the <emphasis>host_name</emphasis> and
+    <emphasis>max_check_attempts</emphasis> variables were not inherited from
+    the template object because they were defined locally. Remember, locally
+    defined variables override variables that would normally be inherited from
+    a template object. That should be a fairly easy concept to
+    understand.</para>
+
+    <tip>
+      <para>If you would like local string variables to be appended to
+      inherited string values, you can do so. Read more about how to
+      accomplish this <link linkend="advancedtopics-objectinheritance-add_string">below</link>.</para>
+    </tip>
+  </section>
+
+  <section>
+    <title>Inheritance Chaining</title>
+
+    <para>Objects can inherit properties/variables from multiple levels of
+    template objects. Take the following example:</para>
+
+    <programlisting>        define host{
+		                host_name               bighost1
+		                check_command           check-host-alive
+		                notification_options    d,u,r
+		                max_check_attempts      5
+		                name                    hosttemplate1
+		                }
+
+		        define host{
+		                host_name               bighost2
+		                max_check_attempts      3
+		                use                     hosttemplate1
+		                name                    hosttemplate2
+		                }
+
+		        define host{
+		                host_name               bighost3
+		                use                     hosttemplate2
+		                }</programlisting>
+
+    <para>You'll notice that the definition of host
+    <emphasis>bighost3</emphasis> inherits variables from the definition of
+    host <emphasis>bighost2</emphasis>, which in turn inherits variables from
+    the definition of host <emphasis>bighost1</emphasis>. Once Nagios
+    processes this configuration data, the resulting host definitions are
+    equivalent to the following:</para>
+
+    <programlisting>        define host{
+		                host_name               bighost1
+		                check_command           check-host-alive
+		                notification_options    d,u,r
+		                max_check_attempts      5
+		                }
+
+		        define host{
+		                host_name               bighost2
+		                check_command           check-host-alive
+		                notification_options    d,u,r
+		                max_check_attempts      3
+		                }
+
+		        define host{
+		                host_name               bighost3
+		                check_command           check-host-alive
+		                notification_options    d,u,r
+		                max_check_attempts      3
+		                }</programlisting>
+
+    <para>There is no inherent limit on how <quote>deep</quote> inheritance can go, but
+    you'll probably want to limit yourself to at most a few levels in order to
+    maintain sanity.</para>
+  </section>
+
+  <section>
+    <title>Using Incomplete Object Definitions as Templates</title>
+
+    <para>It is possible to use imcomplete object definitions as templates for
+    use by other object definitions. By "incomplete" definition, I mean that
+    all required variables in the object have not been supplied in the object
+    definition. It may sound odd to use incomplete definitions as templates,
+    but it is in fact recommended that you use them. Why? Well, they can serve
+    as a set of defaults for use in all other object definitions. Take the
+    following example:</para>
+
+    <programlisting>        define host{
+		                check_command           check-host-alive
+		                notification_options    d,u,r
+		                max_check_attempts      5
+		                name                    generichosttemplate
+		                register                        0
+		                }
+
+		        define host{
+		                host_name               bighost1
+		                address                 192.168.1.3
+		                use                     generichosthosttemplate
+		                }
+
+		        define host{
+		                host_name               bighost2
+		                address                 192.168.1.4
+		                use                     generichosthosttemplate
+		                }</programlisting>
+
+    <para>Notice that the first host definition is incomplete because it is
+    missing the required <varname>host_name</varname> variable. We don't need
+    to supply a host name because we just want to use this definition as a
+    generic host template. In order to prevent this definition from being
+    registered with Nagios as a normal host, we set the
+    <varname>register</varname> variable to 0.</para>
+
+    <para>The definitions of hosts <emphasis>bighost1</emphasis> and
+    <emphasis>bighost2</emphasis> inherit their values from the generic host
+    definition. The only variable we've chosed to override is the
+    <varname>address</varname> variable. This means that both hosts will have
+    the exact same properties, except for their <varname>host_name</varname>
+    and <varname>address</varname> variables. Once Nagios processes the config
+    data in the example, the resulting host definitions would be equivalent to
+    specifying the following:</para>
+
+    <programlisting>        define host{
+		                host_name               bighost1
+		                address                 192.168.1.3
+		                check_command           check-host-alive
+		                notification_options    d,u,r
+		                max_check_attempts      5
+		                }
+
+		        define host{
+		                host_name               bighost2
+		                address                 192.168.1.4
+		                check_command           check-host-alive
+		                notification_options    d,u,r
+		                max_check_attempts      5
+		                }</programlisting>
+
+    <para>At the very least, using a template definition for default variables
+    will save you a lot of typing. It'll also save you a lot of headaches
+    later if you want to change the default values of variables for a large
+    number of hosts.</para>
+  </section>
+
+  <section>
+    <title>Custom Object Variables</title>
+
+    <para>Any <link linkend="configuringnagios-customobjectvars">custom object
+    variables</link> that you define in your host, service, or contact
+    definition templates will be inherited just like other standard variables.
+    Take the following example:</para>
+
+    <programlisting>       define host{
+		                _customvar1             somevalue  ; &lt;-- Custom host variable
+		                _snmp_community         public  ; &lt;-- Custom host variable
+		                name                    generichosttemplate
+		                register                        0
+		                }
+
+		        define host{
+		                host_name               bighost1
+		                address                 192.168.1.3
+		                use                     generichosthosttemplate
+		                }</programlisting>
+
+    <para>The host <emphasis>bighost1</emphasis> will inherit the custom host
+    variables <varname>_customvar1</varname> and
+    <varname>_snmp_community</varname>, as well as their respective values,
+    from the <emphasis>generichosttemplate</emphasis> definition. The
+    effective result is a definition for <emphasis>bighost1</emphasis> that
+    looks like this:</para>
+
+    <programlisting>         define host{
+		                host_name               bighost1
+		                address                 192.168.1.3
+		                _customvar1             somevalue
+		                _snmp_community         public
+		                }</programlisting>
+  </section>
+
+  <section>
+    <title><anchor id="advancedtopics-objectinheritance-cancel_string" />Cancelling Inheritance of String
+    Values</title>
+
+    <para>In some cases you may not want your host, service, or contact
+    definitions to inherit values of string variables from the templates they
+    reference. If this is the case, you can specify <emphasis
+    role="bold"><quote>null</quote></emphasis> (without quotes) as the value of the
+    variable that you do not want to inherit. Take the following
+    example:</para>
+
+    <programlisting>        define host{
+		                event_handler           my-event-handler-command
+		                name                    generichosttemplate
+		                register                        0
+		                }
+
+		        define host{
+		                host_name               bighost1
+		                address                 192.168.1.3
+		                event_handler   null
+		                use                     generichosthosttemplate
+		                }</programlisting>
+
+    <para>In this case, the host <emphasis>bighost1</emphasis> will not
+    inherit the value of the <varname>event_handler</varname> variable that is
+    defined in the <emphasis>generichosttemplate</emphasis>. The resulting
+    effective definition of <emphasis>bighost1</emphasis> is the
+    following:</para>
+
+    <programlisting>        define host{
+		                host_name               bighost1
+		                address                 192.168.1.3
+		                }</programlisting>
+  </section>
+
+  <section>
+    <title><anchor id="advancedtopics-objectinheritance-add_string" />Additive Inheritance of String
+    Values</title>
+
+    <para>Nagios gives preference to local variables instead of values
+    inherited from templates. In most cases local variable values override
+    those that are defined in templates. In some cases it makes sense to allow
+    Nagios to use the values of inherited and local variables together.</para>
+
+    <para>This "additive inheritance" can be accomplished by prepending the
+    local variable value with a plus sign (+). This features is only available
+    for standard (non-custom) variables that contain string values. Take the
+    following example:</para>
+
+    <programlisting>define host{
+	                hostgroups              all-servers
+	                name                    generichosttemplate
+	                register                        0
+	                }
+
+	        define host{
+	                host_name                       linuxserver1
+	                hostgroups            +linux-servers,web-servers
+	                use                    generichosthosttemplate
+	                }</programlisting>
+
+    <para>In this case, the host <emphasis>linuxserver1</emphasis> will append
+    the value of its local <varname>hostgroups</varname> variable to that from
+    generichosttemplate. The resulting effective definition of
+    <emphasis>linuxserver1</emphasis> is the following:</para>
+
+    <programlisting>define host{
+	                host_name                       linuxserver1
+	                hostgroups        all-servers,linux-servers,web-servers
+	                }</programlisting>
+  </section>
+
+  <section>
+    <title><anchor id="advancedtopics-objectinheritance-implied_inheritance" />Implied Inheritance</title>
+
+    <para>Normally you have to either explicitly specify the value of a
+    required variable in an object definition or inherit it from a template.
+    There are a few exceptions to this rule, where Nagios will assume that you
+    want to use a value that instead comes from a related object. For example,
+    the values of some service variables will be copied from the host the
+    service is associated with if you don't otherwise specify them.</para>
+
+    <para>The following table lists the object variables that will be
+    implicitly inherited from related objects if you don't explicitly specify
+    their value in your object definition or inherit them from a
+    template.</para>
+
+    <informaltable>
+    <tgroup cols="3">
+      <colspec colname="col_0" />
+
+      <colspec colname="col_1" />
+
+      <colspec colname="col_2" />
+
+      <thead>
+        <row rowsep="1">
+          <entry colsep="1" rowsep="1"><para>Object Type</para></entry>
+
+          <entry colsep="1" rowsep="1"><para>Object Variable</para></entry>
+
+          <entry colsep="1" rowsep="1"><para>Implied Source</para></entry>
+        </row>
+		</thead>
+		<tbody>
+        <row rowsep="1">
+          <entry colsep="1" morerows="2" nameend="col_0"
+          namest="col_0" rowsep="1"><para><emphasis
+          role="bold">Services</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>contact_groups</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>contact_groups</emphasis> in the
+          associated host definition</para></entry>
+        </row>
+
+        <row rowsep="1">
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_interval</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_interval</emphasis> in the
+          associated host definition</para></entry>
+        </row>
+
+        <row rowsep="1">
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_period</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_period</emphasis> in the
+          associated host definition</para></entry>
+        </row>
+
+        <row rowsep="1">
+          <entry colsep="1" morerows="2" nameend="col_0"
+          namest="col_0" rowsep="1"><para><emphasis role="bold">Host
+          Escalations</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>contact_groups</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>contact_groups</emphasis> in the
+          associated host definition</para></entry>
+        </row>
+
+        <row rowsep="1">
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_interval</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_interval</emphasis> in the
+          associated host definition</para></entry>
+        </row>
+
+        <row rowsep="1">
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>escalation_period</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_period</emphasis> in the
+          associated host definition</para></entry>
+        </row>
+
+        <row rowsep="1">
+          <entry colsep="1" morerows="2" nameend="col_0"
+          namest="col_0" rowsep="1"><para><emphasis role="bold">Service
+          Escalations</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>contact_groups</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>contact_groups</emphasis> in the
+          associated service definition</para></entry>
+        </row>
+
+        <row rowsep="1">
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_interval</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_interval</emphasis> in the
+          associated service definition</para></entry>
+        </row>
+
+        <row rowsep="1">
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>escalation_period</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>notification_period</emphasis> in the
+          associated service definition</para></entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+  </section>
+
+  <section>
+    <title><anchor id="advancedtopics-objectinheritance-impliedescalations" />Implied/Additive Inheritance in
+    Escalations</title>
+
+    <para>Service and host escalation definitions can make use of a special
+    rule that combines the features of implied and additive inheritance. If
+    escalations 1) do not inherit the values of their
+    <varname>contact_groups</varname> or <varname>contacts</varname>
+    directives from another escalation template and 2) their
+    <varname>contact_groups</varname> or <varname>contacts</varname>
+    directives begin with a plus sign (+), then the values of their
+    corresponding host or service definition's
+    <varname>contact_groups</varname> or <varname>contacts</varname>
+    directives will be used in the additive inheritance logic.</para>
+
+    <para>Confused? Here's an example:</para>
+
+    <programlisting>define host{
+	        name            linux-server
+	        contact_groups  linux-admins
+	        ...
+	        }
+
+	define hostescalation{
+	        host_name               linux-server
+	        contact_groups  +management
+	        ...
+	        }</programlisting>
+
+    <para>This is a much simpler equivalent to:</para>
+
+    <programlisting>define hostescalation{
+	        host_name               linux-server
+	        contact_groups  linux-admins,management
+	        ...
+	        }</programlisting>
+  </section>
+
+  <section>
+    <title><anchor id="advancedtopics-objectinheritance-multiple_templates" />Multiple Inheritance
+    Sources</title>
+
+    <para>Thus far, all examples of inheritance have shown object definitions
+    inheriting variables/values from just a single source. You are also able
+    to inherit variables/values from multiple sources for more complex
+    configurations, as shown below.</para>
+
+    <informaltable frame="all">
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para># Generic host template</para> <programlisting>define host{
+	        name                  	generic-host
+	        active_checks_enabled 	1
+	        check_interval          10 
+                ...
+        	register                0
+        	}</programlisting> <para># Development web server
+            template</para><programlisting>define host{       
+            name                    development-server       
+            check_interval          15  
+            notification_options    d,u,r
+        	...
+            register                        0    
+              }</programlisting> <para># Development web server</para>
+            <programlisting>define host{
+	        use                    generic-host,development-server
+	        host_name              devweb1
+	       ...     
+            }</programlisting></entry>
+
+            <entry><para> <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref="images/multiple-templates1.png" format="PNG"/>
+                </imageobject>
+              </inlinemediaobject></para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <para>In the example above, devweb1 is inheriting variables/values from
+    two sources: generic-host and development-server. You'll notice that a
+    check_interval variable is defined in both sources. Since generic-host was
+    the first template specified in devweb1's use directive, its value for the
+    <varname>check_interval</varname> variable is inherited by the devweb1
+    host. After inheritance, the effective definition of devweb1 would be as
+    follows:</para>
+
+    <para># Development web server</para>
+
+    <programlisting>define host{
+	        host_name               devweb1
+	        active_checks_enabled   1
+	        check_interval          10
+	        notification_options    d,u,r
+	        ...
+	        }</programlisting>
+  </section>
+
+  <section>
+    <title>Precedence With Multiple Inheritance Sources</title>
+
+    <para>When you use multiple inheritance sources, it is important to know
+    how Nagios handles variables that are defined in multiple sources. In
+    these cases Nagios will use the variable/value from the first source that
+    is specified in the use directive. Since inheritance sources can
+    themselves inherit variables/values from one or more other sources, it can
+    get tricky to figure out what variable/value pairs take precedence.</para>
+
+    <informaltable frame="all">
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>Consider the following host definition that
+            references three templates:</para><para># Development web server
+            <programlisting>define host{
+        use        1, 4, 8
+        host_name  devweb1
+		...	
+		        }</programlisting></para><para>If some of those referenced
+            templates themselves inherit variables/values from one or more
+            other templates, the precendence rules are shown to the
+            right.</para><para>Testing, trial, and error will help you better
+            understand exactly how things work in complex inheritance
+            situations like this. :-)</para></entry>
+
+            <entry><para> <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref="images/multiple-templates2.png" format="PNG"/>
+                </imageobject>
+              </inlinemediaobject></para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
+</chapter>
+

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="thebasics-timeperiods" xreflabel="Time Periods">
+  <title>Time Periods</title>
+<abstract>
+  <para>or...<quote>Is This a Good Time?</quote></para>
+</abstract>
+  <section>
+    <title>Introduction</title>
+
+    <para><inlinemediaobject>
+        <imageobject>
+          <imagedata fileref="images/objects-timeperiods.png" format="PNG"/>
+        </imageobject>
+      </inlinemediaobject> <link
+    linkend="configuringnagios-objectdefinitions-timeperiod">Timeperiod</link>
+    definitions allow you to control when various aspects of the monitoring
+    and alerting logic can operate. For instance, you can restrict:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>When regularly scheduled host and service checks can be
+        performed</para>
+      </listitem>
+
+      <listitem>
+        <para>When notifications can be sent out</para>
+      </listitem>
+
+      <listitem>
+        <para>When notification escalations can be used</para>
+      </listitem>
+
+      <listitem>
+        <para>When dependencies are valid</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title>Precedence in Time Periods</title>
+
+    <para>Timeperod <link
+    linkend="configuringnagios-objectdefinitions-timeperiod">definitions</link>
+    may contain multiple types of directives, including weekdays, days of the
+    month, and calendar dates. Different types of directives have different
+    precendence levels and may override other directives in your timeperiod
+    definitions. The order of precedence for different types of directives (in
+    descending order) is as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Calendar date (2008-01-01)</para>
+      </listitem>
+
+      <listitem>
+        <para>Specific month date (January 1st)</para>
+      </listitem>
+
+      <listitem>
+        <para>Generic month date (Day 15)</para>
+      </listitem>
+
+      <listitem>
+        <para>Offset weekday of specific month (2nd Tuesday in
+        December)</para>
+      </listitem>
+
+      <listitem>
+        <para>Offset weekday (3rd Monday)</para>
+      </listitem>
+
+      <listitem>
+        <para>Normal weekday (Tuesday)</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Examples of different timeperiod directives can be found <link
+    linkend="configuringnagios-objectdefinitions-timeperiod">here</link>.</para>
+  </section>
+
+  <section>
+    <title>How Time Periods Work With Host and Service Checks</title>
+
+    <para>Host and service definitions have an optional
+    <varname>check_period</varname> directive that allows you to specify a
+    timeperiod that should be used to restrict when regularly scheduled,
+    active checks of the host or service can be made.</para>
+
+    <para>If you do not use the <varname>check_period directive</varname> to
+    specify a timeperiod, Nagios will be able to schedule active checks of the
+    host or service anytime it needs to. This is essentially a 24x7 monitoring
+    scenario.</para>
+
+    <para>Specifying a timeperiod in the <varname>check_period
+    directive</varname> allows you to restrict the time that Nagios perform
+    regularly scheduled, active checks of the host or service. When Nagios
+    attempts to reschedule a host or service check, it will make sure that the
+    next check falls within a valid time range within the defined timeperiod.
+    If it doesn't, Nagios will adjust the next check time to coincide with the
+    next <quote>valid</quote> time in the specified timeperiod. This means that the host or
+    service may not get checked again for another hour, day, or week,
+    etc.</para>
+
+    <note><para>On-demand checks and passive checks are not restricted by the
+    timeperiod you specify in the <varname>check_period directive</varname>.
+    Only regularly scheduled active checks are restricted.</para></note>
+
+    <para>Unless you have a good reason not to do so, I would recommend that
+    you monitor all your hosts and services using timeperiods that cover a
+    24x7 time range. If you don't do this, you can run into some problems
+    during "blackout" times (times that are not valid in the timeperiod
+    definition):</para>
+
+    <orderedlist>
+      <listitem>
+        <para>The status of the host or service will appear unchanged during
+        the blackout time.</para>
+      </listitem>
+
+      <listitem>
+        <para>Contacts will mostly likely not get re-notified of problems with
+        a host or service during blackout times.</para>
+      </listitem>
+
+      <listitem>
+        <para>If a host or service recovers during a blackout time, contacts
+        will not be immediately notified of the recovery.</para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title>How Time Periods Work With Contact Notifications</title>
+
+    <para>By specifying a timeperiod in the
+    <varname>notification_period</varname> directive of a host or service
+    definition, you can control when Nagios is allowed to send notifications
+    out regarding problems or recoveries for that host or service. When a host
+    notification is about to get sent out, Nagios will make sure that the
+    current time is within a valid range in the
+    <varname>notification_period</varname> timeperiod. If it is a valid time,
+    then Nagios will attempt to notify each contact of the problem or
+    recovery.</para>
+
+    <para>You can also use timeperiods to control when notifications can be
+    sent out to individual contacts. By using the
+    <varname>service_notification_period</varname> and
+    <varname>host_notification_period</varname> directives in <link
+    linkend="configuringnagios-objectdefinitions-contact">contact
+    definitions</link>, you're able to essentially define an <quote>on call</quote> period
+    for each contact. Contacts will only receive host and service
+    notifications during the times you specify in the notification period
+    directives.</para>
+
+    <para>Examples of how to create timeperiod definitions for use for on-call
+    rotations can be found <xref
+    linkend="advancedtopics-oncallrotation" />here.</para>
+  </section>
+
+  <section>
+    <title>How Time Periods Work With Notification Escalations</title>
+
+    <para>Service and host <xref linkend="advancedtopics-escalations" />
+    notification escalations have an optional escalation_period directive that
+    allows you to specify a timeperiod when the escalation is valid and can be
+    used. If you do not use the <varname>escalation_period</varname> directive
+    in an escalation definition, the escalation is considered valid at all
+    times. If you specify a timeperiod in the
+    <varname>escalation_period</varname> directive, Nagios will only use the
+    escalation definition during times that are valid in the timeperiod
+    definition.</para>
+  </section>
+
+  <section>
+    <title>How Time Periods Work With Dependencies</title>
+
+    <para>Service and host <xref
+    linkend="advancedtopics-dependencies" />dependencies have an optional
+    <varname>dependency_period</varname> directive that allows you to specify
+    a timeperiod when the dependendies are valid and can be used. If you do
+    not use the <varname>dependency_period</varname> directive in a dependency
+    definition, the dependency can be used at any time. If you specify a
+    timeperiod in the <varname>dependency_period</varname> directive, Nagios
+    will only use the dependency definition during times that are valid in the
+    timeperiod definition.</para>
+  </section>
+</chapter>

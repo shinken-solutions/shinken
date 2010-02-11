@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="advancedtopics-escalations" xreflabel="Notification Escalations">
+	<title>Notification Escalations</title>
+
+	<section>
+		<title>Introduction</title>
+		<para>
+			<inlinemediaobject>
+				<imageobject>
+					<imagedata fileref="images/objects-contacts.png" format="PNG"/>
+				</imageobject>
+			</inlinemediaobject>Nagios
+    supports optional escalation of contact notifications for hosts and
+    services. Escalation of host and service notifications is accomplished by
+    defining <link linkend="configuringnagios-objectdefinitions-hostescalation">host escalations</link> and 
+    <link linkend="configuringnagios-objectdefinitions-serviceescalation">service escalations</link> in your <xref linkend="configuringnagios-configobject"/>.</para>
+
+		<note>
+			<para>The examples I provide below all make use of service escalation
+      definitions, but host escalations work the same way. Except, of course,
+      that they're for hosts instead of services. :-)</para>
+		</note>
+	</section>
+
+	<section>
+		<title>When Are Notifications Escalated?</title>
+
+		<para>Notifications are escalated if and only if one or more escalation
+    definitions matches the current notification that is being sent out. If a
+    host or service notification does not have any valid escalation
+    definitions that applies to it, the contact group(s) specified in either
+    the host group or service definition will be used for the notification.
+    Look at the example below:</para>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      3
+		        last_notification       5
+		        notification_interval   90
+		        contact_groups          nt-admins,managers
+	        }
+		</programlisting>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      6
+		        last_notification       10
+		        notification_interval   60
+		        contact_groups          nt-admins,managers,everyone
+	        }
+		</programlisting>
+
+		<para>Notice that there are "holes" in the notification escalation
+    definitions. In particular, notifications 1 and 2 are not handled by the
+    escalations, nor are any notifications beyond 10. For the first and second
+    notification, as well as all notifications beyond the tenth one, the
+    default contact groups specified in the service definition are used. For
+    all the examples I'll be using, I'll be assuming that the default contact
+    groups for the service definition is called nt-admins.</para>
+	</section>
+
+	<section>
+		<title>Contact Groups</title>
+
+		<para>When defining notification escalations, it is important to keep in
+    mind that any contact groups that were members of "lower" escalations
+    (i.e. those with lower notification number ranges) should also be included
+    in "higher" escalation definitions. This should be done to ensure that
+    anyone who gets notified of a problem continues to get notified as the
+    problem is escalated. Example:</para>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      3
+		        last_notification       5
+		        notification_interval   90
+		        contact_groups          nt-admins,managers
+	        }
+		</programlisting>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      6
+		        last_notification       0
+		        notification_interval   60
+		        contact_groups          nt-admins,managers,everyone
+	        }
+		</programlisting>
+
+		<para>The first (or "lowest") escalation level includes both the nt-admins
+    and managers contact groups. The last (or "highest") escalation level
+    includes the nt-admins, managers, and everyone contact groups. Notice that
+    the nt-admins contact group is included in both escalation definitions.
+    This is done so that they continue to get paged if there are still
+    problems after the first two service notifications are sent out. The
+    managers contact group first appears in the "lower" escalation definition
+    - they are first notified when the third problem notification gets sent
+    out. We want the managers group to continue to be notified if the problem
+    continues past five notifications, so they are also included in the
+    "higher" escalation definition.</para>
+	</section>
+
+	<section>
+		<title>Overlapping Escalation Ranges</title>
+
+		<para>Notification escalation definitions can have notification ranges
+    that overlap. Take the following example:</para>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      3
+		        last_notification       5
+		        notification_interval   20
+		        contact_groups          nt-admins,managers
+	        }
+		</programlisting>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      4
+		        last_notification       0
+		        notification_interval   30
+		        contact_groups          on-call-support
+	        }
+		</programlisting>
+
+		<para>In the example above:</para>
+
+		<itemizedlist>
+			<listitem>
+				<para>The nt-admins and managers contact groups get notified on the third notification</para>
+			</listitem>
+
+			<listitem>
+				<para>All three contact groups get notified on the fourth and fifth notifications</para>
+			</listitem>
+
+			<listitem>
+				<para>Only the on-call-support contact group gets notified on the sixth (or higher) notification</para>
+			</listitem>
+		</itemizedlist>
+	</section>
+
+	<section>
+		<title>Recovery Notifications</title>
+
+		<para>Recovery notifications are slightly different than problem
+    notifications when it comes to escalations. Take the following
+    example:</para>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      3
+		        last_notification       5
+		        notification_interval   20
+		        contact_groups          nt-admins,managers
+	        }
+		</programlisting>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      4
+		        last_notification       0
+		        notification_interval   30
+		        contact_groups          on-call-support
+	        }
+		</programlisting>
+
+		<para>If, after three problem notifications, a recovery notification is
+    sent out for the service, who gets notified? The recovery is actually the
+    fourth notification that gets sent out. However, the escalation code is
+    smart enough to realize that only those people who were notified about the
+    problem on the third notification should be notified about the recovery.
+    In this case, the nt-admins and managers contact groups would be notified
+    of the recovery.</para>
+	</section>
+
+	<section>
+		<title>Notification Intervals</title>
+
+		<para>You can change the frequency at which escalated notifications are
+    sent out for a particular host or service by using the
+    notification_interval option of the hostgroup or service escalation
+    definition. Example:</para>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      3
+		        last_notification       5
+		        notification_interval   45
+		        contact_groups          nt-admins,managers
+	        }
+		</programlisting>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      6
+		        last_notification       0
+		        notification_interval   60
+		        contact_groups          nt-admins,managers,everyone
+	        }
+		</programlisting>
+
+		<para>In this example we see that the default notification interval for
+    the services is 240 minutes (this is the value in the service definition).
+    When the service notification is escalated on the 3rd, 4th, and 5th
+    notifications, an interval of 45 minutes will be used between
+    notifications. On the 6th and subsequent notifications, the notification
+    interval will be 60 minutes, as specified in the second escalation
+    definition.</para>
+
+		<para>Since it is possible to have overlapping escalation definitions for
+    a particular hostgroup or service, and the fact that a host can be a
+    member of multiple hostgroups, Nagios has to make a decision on what to do
+    as far as the notification interval is concerned when escalation
+    definitions overlap. In any case where there are multiple valid escalation
+    definitions for a particular notification, Nagios will choose the smallest
+    notification interval. Take the following example:</para>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      3
+		        last_notification       5
+		        notification_interval   45
+		        contact_groups          nt-admins,managers
+	        }
+		</programlisting>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      4
+		        last_notification       0
+		        notification_interval   60
+		        contact_groups          nt-admins,managers,everyone
+	        }
+		</programlisting>
+
+		<para>We see that the two escalation definitions overlap on the 4th and
+    5th notifications. For these notifications, Nagios will use a notification
+    interval of 45 minutes, since it is the smallest interval present in any
+    valid escalation definitions for those notifications.</para>
+
+		<para>One last note about notification intervals deals with intervals of
+    0. An interval of 0 means that Nagios should only sent a notification out
+    for the first valid notification during that escalation definition. All
+    subsequent notifications for the hostgroup or service will be suppressed.
+    Take this example:</para>
+
+		<programlisting>
+		define serviceescalation{
+		       host_name               webserver
+		        service_description     HTTP
+		        first_notification      3
+		        last_notification       5
+		        notification_interval   45
+		        contact_groups          nt-admins,managers
+	        }
+		</programlisting>
+
+		<programlisting>
+		define serviceescalation{
+		        host_name               webserver
+		        service_description     HTTP
+		        first_notification      3
+		        last_notification       5
+		        notification_interval   45
+		        contact_groups          nt-admins,managers
+	        }
+		</programlisting>
+
+		<programlisting>
+		define serviceescalation{
+			host_name               webserver
+		        service_description     HTTP
+		        first_notification      7
+		        last_notification       0
+		        notification_interval   30
+		        contact_groups          nt-admins,managers
+	        }
+		</programlisting>
+
+		<para>In the example above, the maximum number of problem notifications
+    that could be sent out about the service would be four. This is because
+    the notification interval of 0 in the second escalation definition
+    indicates that only one notification should be sent out (starting with and
+    including the 4th notification) and all subsequent notifications should be
+    repressed. Because of this, the third service escalation definition has no
+    effect whatsoever, as there will never be more than four
+    notifications.</para>
+	</section>
+
+	<section>
+		<title>Time Period Restrictions</title>
+
+		<para>Under normal circumstances, escalations can be used at any time that
+    a notification could normally be sent out for the host or service. This
+    "notification time window" is determined by the <varname>notification_period</varname>
+    directive in the <link linkend="configuringnagios-objectdefinitions-host">host</link> or 
+    <link linkend="configuringnagios-objectdefinitions-service">service</link> definition.</para>
+
+		<para>You can optionally restrict escalations so that they are only used
+    during specific time periods by using the
+    <varname>escalation_period</varname> directive in the host or service
+    escalation definition. If you use the <varname>escalation_period</varname> directive to
+    specify a <xref linkend="configuringnagios-objectdefinitions-timeperiod"/> during
+    which the escalation can be used, the escalation will only be used during
+    that time. If you do not specify any <varname>escalation_period</varname> directive, the
+    escalation can be used at any time within the "notification time window"
+    for the host or service.</para>
+
+		<note>
+			<para>Escalated notifications are still subject to the normal time
+    restrictions imposed by the <varname>notification_period</varname>
+    directive in a host or service definition, so the timeperiod you specify
+    in an escalation definition should be a subset of that larger
+    "notification time window".</para>
+		</note>
+	</section>
+
+	<section>
+		<title>State Restrictions</title>
+
+		<para>If you would like to restrict the escalation definition so that it
+    is only used when the host or service is in a particular state, you can
+    use the <varname>escalation_options</varname> directive in the host or service escalation
+    definition. If you do not use the <varname>escalation_options</varname> directive, the
+    escalation can be used when the host or service is in any state.</para>
+	</section>
+</chapter>
+

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="configuringnagios-config" xreflabel="Configuration Overview">
+	<title>Configuration Overview</title>
+	
+	<section>
+		<title>Introduction</title>
+		
+		<para>There are several different configuration files that you're going to
+		need to create or edit before you start monitoring anything. Be patient!
+		Configuring Nagios can take quite a while, especially if you're first-time
+		user. Once you figure out how things work, it'll all be well worth your
+		time. :-)
+		</para>
+		
+		<note>
+			<para>Sample configuration files are installed in the
+			<filename class="directory">/usr/local/nagios/etc/</filename> 
+			directory when you follow the <xref linkend="gettingstarted-quickstart"/>.			</para>
+		</note>
+	</section>
+	
+	<section>
+		<title>Main Configuration File</title>
+		
+		<para>The main configuration file contains a number of directives that
+		affect how the Nagios daemon operates. This config file is read by both
+		the Nagios daemon and the <acronym>CGIs</acronym>. This is where you're going to
+		want to get started in your configuration adventures.
+		</para>
+		
+		<para>Documentation for the main configuration file can be found 
+		<xref linkend="configuringnagios-configmain"/>.
+		</para>
+	</section>
+	
+	<section>
+		<title>Resource File(s)</title>
+		
+		<para>
+		<informalfigure>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/configoverview.png" format="PNG"/>
+			</imageobject>
+		</mediaobject>
+		</informalfigure>
+		Resource files can be used to store user-defined macros.
+		The main point of having resource files is to use them to store sensitive
+		configuration information (like passwords), without making them available
+		to the CGIs.
+		</para>
+		
+		<para>You can specify one or more optional resource files by using the
+		<link linkend="configuringnagios-configmain-resource_file">resource_file</link> 
+		directive in your main configuration file.
+		</para>
+	</section>
+	
+	<section>
+		<title>Object Definition Files</title>
+		
+		<para>Object definition files are used to define hosts, services,
+		hostgroups, contacts, contactgroups, commands, etc. This is where you
+		define all the things you want monitor and how you want to monitor them.
+		</para>
+		
+		<para>You can specify one or more object definition files by using the
+		<link linkend="configuringnagios-configmain-cfg_file">cfg_file</link> and/or 
+		<link linkend="configuringnagios-configmain-cfg_dir">cfg_dir</link>
+		directives in your main configuration file.
+		</para>
+		
+		<para>An introduction to object definitions, and how they relate to each
+		other, can be found <link linkend="configuringnagios-configobject">here</link>.
+		</para>
+	</section>
+	
+	<section>
+		<title>CGI Configuration File</title>
+		
+		<para>The CGI configuration file contains a number of directives that
+		affect the operation of the <link linkend="thebasics-cgis">CGIs</link>.
+		It also contains a reference the main configuration file, so the CGIs know
+		how you've configured Nagios and where your object defintions are stored.
+		</para>
+		
+		<para>Documentation for the CGI configuration file can be found 
+		in the <xref linkend="configuringnagios-configcgi"/>.</para>
+	</section>
+</chapter>
+

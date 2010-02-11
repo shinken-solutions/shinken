@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="configuringnagios-customobjectvars" xreflabel="Custom Object Variables">
+	<title>Custom Object Variables</title>
+	<section>
+		<title>Introduction</title>
+		<para>Users often request that new variables be added to host, service, and contact
+		definitions. These include variables for &protocol-snmp; community, MAC address, AIM
+		username, Skype number, and street address. The list is endless. The problem that I see
+		with doing this is that it makes Nagios less generic and more infrastructure-specific.
+		Nagios was intended to be flexible, which meant things needed to be designed in a generic manner.
+		Host definitions in Nagios, for example, have a generic "address" variable that can contain
+		anything from an IP address to human-readable driving directions - whatever is appropriate for
+		the user's setup.</para>
+		<para>Still, there needs to be a method for admins to store information about their infrastructure
+		components in their Nagios configuration without imposing a set of specific variables on others.
+		Nagios attempts to solve this problem by allowing users to define custom variables in their object
+		definitions. Custom variables allow users to define additional properties in their host, service, and
+		contact definitions, and use their values in notifications, event handlers, and host and
+		service checks.</para>
+	</section>
+	<section>
+		<title>Custom Variable Basics</title>
+		<para>There are a few important things that you should note about custom variables:</para>
+		<itemizedlist>
+			<listitem>
+				<para>Custom variable names must begin with an underscore (_) to prevent name
+				collision with standard variables</para>
+			</listitem>
+			<listitem>
+				<para>Custom variable names are case-insensitive</para>
+			</listitem>
+			<listitem>
+				<para>Custom variables are <link linkend="advancedtopics-objectinheritance">inherited</link>
+				from object templates like normal variables</para>
+			</listitem>
+			<listitem>
+				<para>Scripts can reference custom variable values with
+				<link linkend="thebasics-macros">macros and environment variables</link>
+				</para>
+			</listitem>
+		</itemizedlist>
+	</section>
+	<section>
+		<title>Examples</title>
+		<para>Here's an example of how custom variables can be defined in different types of object definitions:</para>
+		<programlisting>
+define host{
+   host_name       linuxserver
+   _mac_address    00:06:5B:A6:AD:AA ; &lt;-- Custom MAC_ADDRESS variable
+   _rack_number    R32               ; &lt;-- Custom RACK_NUMBER variable
+...
+}
+		</programlisting>
+
+		<programlisting>
+define service{
+   host_name        linuxserver
+   description      Memory Usage
+   _SNMP_community  public         ; &lt;-- Custom SNMP_COMMUNITY variable
+   _TechContact     Jane Doe       ; &lt;-- Custom TECHCONTACT variable
+   ....
+}
+		</programlisting>
+
+		<programlisting>
+define contact{
+   contact_name    john
+   _AIM_username   john16        ; &lt;-- Custom AIM_USERNAME variable
+   _YahooID        john32        ; &lt;-- Custom YAHOOID variable
+   ...
+}
+		</programlisting>
+	</section>
+	<section>
+		<title>Custom Variables As Macros</title>
+		<para>Custom variable values can be referenced in scripts and executables that Nagios runs 
+		for checks, notifications, etc. by using 
+		<link linkend="thebasics-macros">macros</link> or environment variables.</para>
+		<para>In order to prevent name collision among custom variables from different object
+		types, Nagios prepends <quote>_HOST</quote>, <quote>_SERVICE</quote>, or
+		<quote>_CONTACT</quote> to the beginning of custom host, service, or contact
+		variables, respectively, in macro and environment variable names. The table below
+		shows the corresponding macro and environment variable names for the custom variables
+		that were defined in the example above.</para>
+		<informaltable frame="all">
+			<tgroup cols="4">
+			<colspec colnum="1" colwidth="12*"/>
+			<colspec colnum="2" colwidth="20*"/>
+			<colspec colnum="3" colwidth="32*"/>
+			<colspec colnum="4" colwidth="36*"/>
+				<thead>
+					<row>
+						<entry>
+							<para>Object Type</para>
+						</entry>
+						<entry>
+							<para>Variable Name</para>
+						</entry>
+						<entry>
+							<para>Macro Name</para>
+						</entry>
+						<entry>
+							<para>Environment Variable</para>
+						</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>
+							<para>Host</para>
+						</entry>
+						<entry>
+							<para>MAC_ADDRESS</para>
+						</entry>
+						<entry>
+							<para>$_HOSTMAC_ADDRESS$</para>
+						</entry>
+						<entry>
+							<para>NAGIOS__HOSTMAC_ADDRESS</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>Host</para>
+						</entry>
+						<entry>
+							<para>RACK_NUMBER</para>
+						</entry>
+						<entry>
+							<para>$_HOSTRACK_NUMBER$</para>
+						</entry>
+						<entry>
+							<para>NAGIOS__HOSTRACK_NUMBER</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>Service</para>
+						</entry>
+						<entry>
+							<para>SNMP_COMMUNITY</para>
+						</entry>
+						<entry>
+							<para>$_SERVICESNMP_COMMUNITY$</para>
+						</entry>
+						<entry>
+							<para>NAGIOS__SERVICESNMP_COMMUNITY</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>Service</para>
+						</entry>
+						<entry>
+							<para>TECHCONTACT</para>
+						</entry>
+						<entry>
+							<para>$_SERVICETECHCONTACT$</para>
+						</entry>
+						<entry>
+							<para>NAGIOS__SERVICETECHCONTACT</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>Contact</para>
+						</entry>
+						<entry>
+							<para>AIM_USERNAME</para>
+						</entry>
+						<entry>
+							<para>$_CONTACTAIM_USERNAME$</para>
+						</entry>
+						<entry>
+							<para>NAGIOS__CONTACTAIM_USERNAME</para>
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<para>Contact</para>
+						</entry>
+						<entry>
+							<para>YAHOOID</para>
+						</entry>
+						<entry>
+							<para>$_CONTACTYAHOOID$</para>
+						</entry>
+						<entry>
+							<para>NAGIOS__CONTACTYAHOOID</para>
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</informaltable>
+	</section>
+	<section>
+		<title>Custom Variables And Inheritance</title>
+		<para>Custom object variables are <link linkend="advancedtopics-objectinheritance">inherited</link> 
+		just like standard host, service, or contact variables.</para>
+	</section>
+</chapter>
+
