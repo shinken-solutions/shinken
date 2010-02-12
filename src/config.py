@@ -447,6 +447,7 @@ class Config(Item):
                 lst.append(o)
             #we create the objects Class and we set it in prop
             setattr(self, prop, clss(lst))
+            
 
 
         
