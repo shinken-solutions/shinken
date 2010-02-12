@@ -826,6 +826,7 @@ class Config(Item):
     #It create a graph. All hosts are connected to theyre
     #parents, and host witouht parent are connected to host 'root'
     #services are link to the host. Dependencies are managed
+    #REF: doc/pack-creation.png
     def create_packs(self, nb_packs):
         #We create a grah with host in nodes
         g = Graph()
@@ -904,6 +905,7 @@ class Config(Item):
         #The load balancing is for a loop, so all
         #hosts of a realm (in a pack) will be dispatch
         #in the schedulers of this realm
+        #REF: doc/pack-agregation.png
         for r in self.realms:
             #print "Load balancing realm", r.get_name()
             packs = {}
@@ -965,7 +967,9 @@ class Config(Item):
         if nb_parts == 0:
             nb_parts = 1
 
-        #print "Creating confs"
+        #We create dummy configurations for schedulers : they are clone of the master
+        #conf but without hosts and services (because they are dispatched between
+        #theses configurations)
         self.confs = {}
         for i in xrange(0, nb_parts):
             #print "Create Conf:", i, '/', nb_parts -1
@@ -1006,8 +1010,11 @@ class Config(Item):
         #Just create packs. There can be numerous ones
         #In pack we've got hosts and service
         #packs are in the realms
+        #REF: doc/pack-creation.png
         self.create_packs(nb_parts)
-        
+
+        #We've got all big packs andget elements into to configurations
+        #REF: doc/pack-agregation.png
         offset = 0
         for r in self.realms:
             for i in r.packs:

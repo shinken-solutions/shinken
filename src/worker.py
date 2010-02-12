@@ -102,6 +102,7 @@ class Worker:
     #Get new checks if less than nb_checks_max
     #If no new checks got and no check in queue,
     #sleep for 1 sec
+    #REF: doc/shinken-action-queues.png (3)
     def get_new_checks(self):
         try:
             while(len(self.checks) < self.processes_by_worker):
@@ -117,6 +118,7 @@ class Worker:
 
 
     #Launch checks that are in status
+    #REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
         #queue
         for chk in self.checks:
@@ -127,6 +129,7 @@ class Worker:
 
     #Check the status of checks
     #if done, return message finished :)
+    #REF: doc/shinken-action-queues.png (5)
     def manage_finished_checks(self):
         to_del = []
         wait_time = 1
@@ -169,9 +172,12 @@ class Worker:
             begin = time.time()
             msg = None
             cmsg = None
-            
+
+            #REF: doc/shinken-action-queues.png (3)
             self.get_new_checks()
+            #REF: doc/shinken-action-queues.png (4)
             self.launch_new_checks()
+            #REF: doc/shinken-action-queues.png (5)
             self.manage_finished_checks()
 
             #Now get order from master

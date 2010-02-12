@@ -70,6 +70,7 @@ class IForArbiter(Pyro.core.ObjBase):
 	#'schedulers' : schedulers dict (by id) with address and port
 	#TODO: catch case where Arbiter send somethign we already have
 	#(same id+add+port) -> just do nothing :)
+	#REF : doc/shinken-conf-dispatching.png (4)
 	def put_conf(self, conf):
 		self.app.have_conf = True
 		self.app.have_new_conf = True
@@ -265,6 +266,7 @@ class Broker(Satellite):
 
 	#Get a brok. Our role is to put it in the modules
 	#THEY MUST DO NOT CHANGE data of b !!!
+	#REF: doc/broker-modules.png (4-5)
 	def manage_brok(self, b):
 		to_del = []
 		#Call all modules if they catch the call
@@ -282,6 +284,7 @@ class Broker(Satellite):
 
 
 	#We get new broks from schedulers
+	#REF: doc/broker-modules.png (2)
 	def get_new_broks(self, type='scheduler'):
 		if type == 'scheduler':
 			links = self.schedulers
@@ -305,6 +308,7 @@ class Broker(Satellite):
 					#internal modules
 					self.broks.extend(tmp_broks.values())
 					#and for external queues
+					#REF: doc/broker-modules.png (3)
 					for b in tmp_broks.values():
 						for q in self.modules_manager.get_external_to_queues():
 							q.put(b)
@@ -359,9 +363,11 @@ class Broker(Satellite):
 		self.wait_for_initial_conf()
 
 		#Do the modules part, we have our modules in self.modules
+		#REF: doc/broker-modules.png (1)
 		self.modules_manager = ModulesManager('broker', self.modulespath, self.modules)
 		self.modules_manager.load()
 		self.mod_instances = self.modules_manager.get_instances()
+
 
                 #Connexion init with Schedulers
 		for sched_id in self.schedulers:
@@ -405,6 +411,7 @@ class Broker(Satellite):
 
 				b = self.broks.pop()
 			        #Ok, we can get the brok, and doing something with it
+				#REF: doc/broker-modules.png (4-5)
 				self.manage_brok(b)
 				
 				#Ok we manage brok, but we still want to listen to arbiter

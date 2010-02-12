@@ -197,6 +197,7 @@ class Arbiter(Daemon):
         #The config Class must have the USERN macro
         #There are 256 of them, so we create online
         Config.fill_usern_macros()
+        #REF: doc/shinken-conf-dispatching.png (1)
         self.conf.read_config(self.config_files)
         
 	#Maybe conf is already invalid
@@ -281,6 +282,8 @@ class Arbiter(Daemon):
         #for r in self.conf.realms:
         #    print r.get_name(), r.__dict__
         print "\n"
+        
+        #REF: doc/shinken-conf-dispatching.png (2)
         Log().log("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
 
@@ -443,6 +446,7 @@ class Arbiter(Daemon):
         self.dispatcher = Dispatcher(self.conf, self.me)
         self.dispatcher.check_alive()
         self.dispatcher.check_dispatch()
+        #REF: doc/shinken-conf-dispatching.png (3)
         self.dispatcher.dispatch()
         
 	#Now create the external commander
@@ -481,6 +485,7 @@ class Arbiter(Daemon):
             else:#Timeout
                 self.dispatcher.check_alive()
                 self.dispatcher.check_dispatch()
+                #REF: doc/shinken-conf-dispatching.png (3)
                 self.dispatcher.dispatch()
                 self.dispatcher.check_bad_dispatch()
                 #send_conf_to_schedulers()

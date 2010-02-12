@@ -229,6 +229,7 @@ class Satellite(Daemon):
         
 
     #Return the chk to scheduler and clean them
+    #REF: doc/shinken-action-queues.png (6)
     def manage_returns(self):
         total_sent = 0
         #Fot all schedulers, we check for waitforhomerun and we send back results
@@ -384,6 +385,7 @@ class Satellite(Daemon):
 
     #We get new actions from schedulers, we create a Message ant we 
     #put it in the s queue (from master to slave)
+    #REF: doc/shinken-action-queues.png (1)
     def get_new_actions(self):
         #Here are the differences between a 
         #poller and a reactionner:
@@ -406,6 +408,7 @@ class Satellite(Daemon):
                     tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions)
                     print "Ask actions to", sched_id, "got", len(tmp)
                     #We 'tag' them with sched_id and put into queue for workers
+                    #REF: doc/shinken-action-queues.png (2)
                     for a in tmp:
                         a.sched_id = sched_id
                         a.set_status('queue')
@@ -544,6 +547,7 @@ class Satellite(Daemon):
                 self.get_new_actions()
                 
                 #We send all finished checks
+                #REF: doc/shinken-action-queues.png (6)
                 self.manage_returns()
                 
                 

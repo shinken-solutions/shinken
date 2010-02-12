@@ -97,6 +97,7 @@ class Dispatcher:
             #print "Element", elt.get_name(), " alive:", elt.alive, ", active:", elt.is_active
             #Not alive need new need_conf
             #and spare too if they do not have already a conf
+            #REF: doc/shinken-scheduler-lost.png (1)
             if not elt.alive or hasattr(elt, 'conf') and elt.conf == None:
                 elt.need_conf = True
 
@@ -261,6 +262,7 @@ class Dispatcher:
     
 
     #Manage the dispatch
+    #REF: doc/shinken-conf-dispatching.png (3)
     def dispatch(self):
         #Ok, we pass at least one time in dispatch, so now errors are True errors
         self.first_dispatch_done = True
@@ -313,6 +315,8 @@ class Dispatcher:
                                 Log().log('[%s] Dispatching configuration %d' % (r.get_name(), sched.id))
                                 #We tag conf with the instance_name = scheduler_name
                                 conf.instance_name = sched.scheduler_name
+                                #REF: doc/shinken-conf-dispatching.png (3)
+                                #REF: doc/shinken-scheduler-lost.png (2)
                                 is_sent = sched.put_conf(conf)
                                 if is_sent:
                                     Log().log('[%s] Dispatch OK of for conf in scheduler %s' % (r.get_name(), sched.get_name()))
