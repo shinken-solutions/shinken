@@ -1067,6 +1067,7 @@ class ExternalCommand:
         dt = Downtime(host, start_time, end_time, fixed, trigger_id, duration, author, comment)
         host.add_downtime(dt)
         self.sched.add(dt)
+        self.sched.get_and_register_status_brok(host)
 
     #SCHEDULE_HOST_SVC_CHECKS;<host_name>;<check_time>
     def SCHEDULE_HOST_SVC_CHECKS(self, host, check_time):
@@ -1098,6 +1099,7 @@ class ExternalCommand:
         dt = Downtime(service, start_time, end_time, fixed, trigger_id, duration, author, comment)
         service.add_downtime(dt)
         self.sched.add(dt)
+        self.sched.get_and_register_status_brok(service)
 
     #SEND_CUSTOM_HOST_NOTIFICATION;<host_name>;<options>;<author>;<comment>
     def SEND_CUSTOM_HOST_NOTIFICATION(self, host, options, author, comment):

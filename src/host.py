@@ -447,6 +447,26 @@ class Host(SchedulingItem):
         Log().log("Warning : I cannot schedule the check for the host '%s' because there is not future valid time" % \
                       (self.get_name()))
 
+    #Raise a log entry when a downtime begins
+    #HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
+    def raise_enter_downtime_log_entry(self):
+        Log().log("HOST DOWNTIME ALERT: %s;STARTED; Host has entered a period of scheduled downtime" % \
+                      (self.get_name()))
+
+
+    #Raise a log entry when a downtime has finished
+    #HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
+    def raise_exit_downtime_log_entry(self):
+        Log().log("HOST DOWNTIME ALERT: %s;STOPPED; Host has exited from a period of scheduled downtime" % \
+                      (self.get_name()))
+
+
+    #Raise a log entry when a downtime prematurely ends
+    #HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
+    def raise_cancel_downtime_log_entry(self):
+        Log().log("HOST DOWNTIME ALERT: %s;CANCELLED; Scheduled downtime for host has been cancelled." % \
+                      (self.get_name()))
+
 
     #Is stalking ?
     #Launch if check is waitconsume==first time

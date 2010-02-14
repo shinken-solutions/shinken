@@ -350,7 +350,7 @@ class SchedulingItem(Item):
         for rm in self.resultmodulations:
             if rm != None:
                 (c.exit_status, self.output, self.long_output) = rm.module_return(c.exit_status, self.output, self.long_output)
-        
+
         #If we got a bad result on a normal check, and we have dep,
         #we raise dep checks
         #put the actual check in waitdep and we return all new checks
@@ -410,10 +410,10 @@ class SchedulingItem(Item):
 
         #If no_action is False, maybe we are in downtime,
         #so no_action become true
-        if no_action == False:
-            for dt in self.downtimes:
-                if dt.is_in_downtime():
-                    no_action = True
+        #if no_action == False:
+        #    for dt in self.downtimes:
+        #        if dt.is_in_downtime():
+        #            no_action = True
 
         res = []
 

@@ -25,6 +25,7 @@ import tempfile
 from service import Service
 from host import Host
 from contact import Contact
+from downtime import Downtime
 from config import Config
 
 from util import from_bool_to_string
@@ -201,6 +202,19 @@ class StatusFile:
             'parallel_host_check_stats' : {'prop' : None, 'default' : '0,0,0'},
             'serial_host_check_stats' : {'prop' : None, 'default' : '0,0,0'}
             },
+        Downtime : {
+            'host_name' : {},
+            'service_description' : {},
+            'downtime_id' : {'prop' : 'id', 'default' : '0'},
+            'entry_time' : {'prop' : None, 'default' : '0'},
+            'start_time' : {'prop' : None, 'default' : '0'},
+            'end_time' : {'prop' : None, 'default' : '0'},
+            'triggered_by' : {'prop' : None, 'default' : '0'},
+            'fixed' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
+            'duration' : {'prop' : None, 'default' : '0'},
+            'author' : {'prop' : None, 'default' : '0'},
+            'comment' : {'prop' : None, 'default' : '0'},
+        },
     }
                
                    
@@ -267,24 +281,38 @@ class StatusFile:
 
 '''
         now = time.time()
-        output += 'info {\n' + '\tcreated=' + str(now) + '\n' + '\tversion=3.0.2\n\t}\n'
+        output += 'info {\n' + '\tcreated=' + str(now) + '\n' + '\tversion=3.0.2\n\t}\n\n'
         
         for c in self.configs.values():
             tmp = self.create_output(c)
-            output += 'programstatus {\n' + tmp + '\t}\n'
+            output += 'programstatus {\n' + tmp + '\t}\n\n'
 
         for h in self.hosts.values():
             tmp = self.create_output(h)
-            output += 'hoststatus {\n' + tmp + '\t}\n'
+            output += 'hoststatus {\n' + tmp + '\t}\n\n'
 
         for s in self.services.values():
             tmp = self.create_output(s)
-            output += 'servicestatus {\n' + tmp + '\t}\n'
+            output += 'servicestatus {\n' + tmp + '\t}\n\n'
 
         for c in self.contacts.values():
             tmp = self.create_output(c)
-            output += 'contactstatus {\n' + tmp + '\t}\n'
+            output += 'contactstatus {\n' + tmp + '\t}\n\n'
 
+        for s in self.services.values():
+            for dt in s.downtimes:
+              #this is just a workaround until a data-driven solution is found
+              dt.host_name = dt.ref.host_name
+              if (hasattr(dt.ref, 'service_description')):
+                  dt.service_description = dt.ref.service_description
+              tmp = self.create_output(dt)
+              output += dt.ref.my_type + 'downtime {\n' + tmp + '\t}\n\n'
+
+        for h in self.hosts.values():
+            for dt in h.downtimes:
+              dt.host_name = dt.ref.host_name
+              tmp = self.create_output(dt)
+              output += dt.ref.my_type + 'downtime {\n' + tmp + '\t}\n\n'
 
         #print "Create output :", output
         try :

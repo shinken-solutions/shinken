@@ -488,6 +488,12 @@ class Scheduler:
         for c in self.checks.values():
             if c.status == 'waitconsume':
                 item = c.ref
+                for dt in item.downtimes:
+                    #activate flexible downtimes 
+                    if dt.fixed == False and dt.active == False and dt.start_time <= c.check_time and c.exit_status != 0:
+                        dt.enter()
+                        self.get_and_register_status_brok(item)
+
                 actions = item.consume_result(c)
                 #The update of the host/service must have changed, we brok it
                 self.get_and_register_check_result_brok(item)
@@ -565,8 +571,23 @@ class Scheduler:
         #self.status_file.create_or_update()
 
 
+    def update_downtimes(self):
+        now = time.time()
+        for dt in self.downtimes.values():
+            #remove expired downtimes
+            if dt.end_time < now:
+                dt.exit()
+                self.get_and_register_status_brok(dt.ref)
+                self.del_downtime(dt.id)
+            #activate fixed downtimes when their time has come
+            elif now >= dt.start_time and dt.fixed and not dt.active:
+                dt.enter()
+                self.get_and_register_status_brok(dt.ref)
+
+
     #Main schedule function to make the regular scheduling
     def schedule(self):
+        self.update_downtimes()
         #print "**********Schedule********"
         #ask for service and hosts their next check
         for type_tab in [self.services, self.hosts]:

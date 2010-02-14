@@ -20,7 +20,7 @@
 import time
 
 class Downtime:
-    id = 0
+    id = 1
 
     #Schedules downtime for a specified service. If the "fixed" argument is set
     #to one (1), downtime will start and end at the times specified by the
@@ -37,15 +37,30 @@ class Downtime:
         self.__class__.id += 1
         self.ref = ref #pointer to srv or host we are apply
         self.trigger_me = [] #The trigger i need to activate
+        self.entry_time = int(time.time())
+        self.fixed = fixed
         self.start_time = start_time
+        self.duration = duration
         if fixed:
             self.end_time = end_time
+            self.duration = end_time - start_time
         else:
-            self.end_time = self.start_time + duration
+            #downtime is in standby between start_time and end_time
+            self.end_time = end_time
+            #later, when a non-ok event happens, end_time will be recalculated as now+duration
         if trigger_downtime != 0:
             trigger_downtime.trigger_me(self)
         self.author = author
         self.comment = comment
+        self.active = False
+
+
+    def __str__(self):
+        if self.active == True:
+            active = "active"
+        else:
+            active = "inactive"
+        return "%s Downtime id=%d %s - %s" % (active, self.id, time.ctime(self.start_time), time.ctime(self.end_time))
 
 
     def trigger_me(self, other_downtime):
@@ -53,5 +68,43 @@ class Downtime:
 
 
     def is_in_downtime(self):
-        now = time.time()
-        return self.start_time <= now <= self.end_time
+        return self.active
+        #now = time.time()
+        #return self.start_time <= now <= self.end_time
+
+
+    #The referenced host/service object enters now a (or another) scheduled
+    #downtime. Write a log message only if it was not already in a downtime
+    def enter(self):
+        self.active = True
+        if self.fixed == False:
+            now = time.time()
+            self.end_time = now + self.duration
+            #todo: what about start_time? will it be adjusted?
+        if self.ref.scheduled_downtime_depth == 0:
+            self.ref.raise_enter_downtime_log_entry()
+        self.ref.scheduled_downtime_depth += 1
+        self.ref.is_in_downtime = True
+
+
+    #The end of the downtime was reached.
+    def exit(self):
+        if self.active == True:
+            #This was a fixed or a flexible+triggered downtime
+            self.active = False
+            self.ref.scheduled_downtime_depth -= 1
+            if self.ref.scheduled_downtime_depth == 0:
+                self.ref.raise_exit_downtime_log_entry()
+                self.ref.is_in_downtime = False
+        else:
+            #This was probably a flexible downtime which was not triggered
+            pass
+
+
+    #A scheduled downtime was prematurely cancelled
+    def cancel(self):
+        self.active = False
+        self.ref.scheduled_downtime_depth -= 1
+        if self.ref.scheduled_downtime_depth == 0:
+            self.ref.raise_exit_downtime_log_entry()
+            self.ref.is_in_downtime = False

@@ -407,10 +407,32 @@ class Service(SchedulingItem):
         Log().log("SERVICE FLAPPING ALERT: %s;%s;STOPPED; Service appears to have stopped flapping (%.1f% change < %.1% threshold)" % \
                       (self.host.get_name(), self.get_name(), change_ratio, threshold))
 
+
     #If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
         Log().log("Warning : I cannot schedule the check for the service '%s' on host '%s' because there is not future valid time" % \
                       (self.get_name(), self.host.get_name()))
+
+
+    #Raise a log entry when a downtime begins
+    #SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime
+    def raise_enter_downtime_log_entry(self):
+        Log().log("SERVICE DOWNTIME ALERT: %s;%s;STARTED; Service has entered a period of scheduled downtime" % \
+                      (self.host.get_name(), self.get_name()))
+
+
+    #Raise a log entry when a downtime has finished
+    #SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STOPPED; Service has exited from a period of scheduled downtime
+    def raise_exit_downtime_log_entry(self):
+        Log().log("SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service has exited from a period of scheduled downtime" % \
+                      (self.host.get_name(), self.get_name()))
+
+
+    #Raise a log entry when a downtime prematurely ends
+    #SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;CANCELLED; Service has entered a period of scheduled downtime
+    def raise_cancel_downtime_log_entry(self):
+        Log().log("SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; Scheduled downtime for service has been cancelled." % \
+                      (self.host.get_name(), self.get_name()))
 
 
     #Is stalking ?
