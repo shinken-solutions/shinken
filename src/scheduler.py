@@ -47,17 +47,18 @@ class Scheduler:
         #The order is important, so make key a int.
         #TODO : at load, change value by configuration one (like reaper time, etc)
         self.recurrent_works = {
-            0 : (self.schedule, 1),
-            1 : (self.consume_results , 1),
-            2 : (self.delete_zombie_checks, 1),
-            3 : (self.delete_zombie_actions, 1),
+            0 : (self.update_downtimes, 1),
+            1 : (self.schedule, 1),
+            2 : (self.consume_results , 1),
+            3 : (self.delete_zombie_checks, 1),
+            4 : (self.delete_zombie_actions, 1),
             #3 : (self.delete_unwanted_notifications, 1),
-            4 : (self.check_freshness, 10),
-            5 : (self.clean_caches, 1),
-            6 : (self.update_retention_file, 3600),
-            7 : (self.check_orphaned, 60),
+            5 : (self.check_freshness, 10),
+            6 : (self.clean_caches, 1),
+            7 : (self.update_retention_file, 3600),
+            8 : (self.check_orphaned, 60),
             #For NagVis like tools : udpdate our status every 10s
-            8 : (self.get_and_register_update_program_status_brok, 10) 
+            9 : (self.get_and_register_update_program_status_brok, 10) 
             }
 
         #stats part
@@ -576,6 +577,8 @@ class Scheduler:
         #self.status_file.create_or_update()
 
 
+    #Check for downtimes start and stop, and register 
+    #them if need
     def update_downtimes(self):
         now = time.time()
         for dt in self.downtimes.values():
@@ -592,8 +595,6 @@ class Scheduler:
 
     #Main schedule function to make the regular scheduling
     def schedule(self):
-        self.update_downtimes()
-        #print "**********Schedule********"
         #ask for service and hosts their next check
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
