@@ -362,6 +362,11 @@ class Scheduler:
             s = "WARNING: Sorry, the ressource file is not compatible"
             Log().log(s)
             return
+        except TypeError as exp:
+            s = "WARNING: Sorry, the ressource file is not compatible"
+            Log().log(s)
+            return
+
             
             
         #Now load interesting properties in hosts/services

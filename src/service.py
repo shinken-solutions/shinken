@@ -19,6 +19,7 @@
 
 import time
 
+from autoslots import AutoSlots
 from command import CommandCall
 from item import Items
 from schedulingitem import SchedulingItem
@@ -29,36 +30,9 @@ from macroresolver import MacroResolver
 from log import Log
 
 class Service(SchedulingItem):
-    __slots__ = ('id', 'host_name', 'hostgroup_name', 'service_description',\
-                     'display_name', 'servicegroups', 'is_volatile', 'check_command', \
-                     'initial_state', 'max_check_attempts', 'check_interval',\
-                     'retry_interval', 'active_checks_enabled', 'passive_checks_enabled',\
-                     'check_period', 'obsess_over_service', 'check_freshness',\
-                     'freshness_threshold', 'event_handler', 'event_handler_enabled', \
-                     'low_flap_threshold', 'high_flap_threshold', 'flap_detection_enabled', \
-                     'flap_detection_options', 'process_perf_data', 'retain_status_information', \
-                     'retain_nonstatus_information', 'notification_interval', \
-                     'first_notification_delay', 'notification_period', 'notification_options', \
-                     'notifications_enabled', 'contacts', 'contact_groups', 'stalking_options', \
-                     'notes', 'notes_url', 'action_url', 'icon_image', 'icon_image_alt', \
-                     'failure_prediction_enabled', 'parallelize_check' ,\
-                     #Now the running part
-                     'last_chk', 'next_chk', 'in_checking', 'latency', 'attempt', 'state', \
-                     'state_id', 'current_event_id', 'last_event_id', 'last_state_id', \
-                     'last_state_change', 'last_hard_state_change', 'last_hard_state', \
-                     'state_type', 'state_type_id', 'output', 'long_output', 'is_flapping', \
-                     'is_in_downtime', 'act_depend_of', 'chk_depend_of', 'last_state_update', \
-                     'checks_in_progress', 'downtimes', 'flapping_changes', \
-                     'flapping_comment_id', 'percent_state_change', \
-                     'problem_has_been_acknowledged', 'acknowledgement_type', 'check_type', \
-                     'has_been_checked', 'should_be_scheduled', 'last_problem_id', \
-                     'current_problem_id', 'execution_time', 'last_notification', \
-                     'current_notification_number', 'current_notification_id', \
-                     'check_flapping_recovery_notification', 'scheduled_downtime_depth', \
-                     'pending_flex_downtime', 'timeout', 'start_time', 'end_time', 'early_timeout', \
-                     'return_code', 'perf_data', 'notifications_in_progress', 'customs', 'host', \
-                     'resultmodulations', 'last_update'
-                 )
+    #AutoSlots create the __slots__ with properties and
+    #running_properties names
+    __metaclass__ = AutoSlots
 
     id = 1 # Every service have a unique ID, and 0 is always special in database and co...
     ok_up = 'OK' # The host and service do not have the same 0 value, now yes :)
@@ -70,6 +44,7 @@ class Service(SchedulingItem):
     #default : default value if no set in conf
     #pythonize : function to call when transfort string to python object
     #fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
+    #no_slots : do not take this property for __slots__
     properties={
         'host_name' : {'required' : True, 'fill_brok' : ['full_status', 'check_result', 'next_schedule']},
         'hostgroup_name' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},

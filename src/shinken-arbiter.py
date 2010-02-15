@@ -251,7 +251,8 @@ class Arbiter(Daemon):
             sys.exit(1)
 
 
-        #self.conf.dump()
+
+        self.conf.dump()
 
         #from guppy import hpy
         #hp=hpy()
@@ -559,7 +560,6 @@ if __name__ == "__main__":
     do_replace = False
     debug = False
     debug_file = None
-    print "opts", opts
     for o, a in opts:
         if o in ("-h", "--help"):
             usage(sys.argv[0])

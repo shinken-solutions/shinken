@@ -511,12 +511,13 @@ class Config(Item):
         #print 'Parameters:', self
         #print 'Hostgroups:',self.hostgroups,'\n'
         #print 'Services:', self.services
+        print "Slots", Service.__slots__
         print 'Hosts:'
         for h in self.hosts:
-            print '\t', h.get_name()
+            print '\t', h.get_name(), h.__dict__
         print 'Services:'
         for s in self.services:
-            print '\t', s.get_name()
+            print '\t', s.get_name(), s.__dict__
         #print 'Templates:', self.hosts_tpl
         #print 'Hosts:',self.hosts,'\n'
         #print 'Contacts:', self.contacts

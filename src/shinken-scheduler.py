@@ -368,7 +368,8 @@ class Shinken(Daemon):
         m.init(self.conf)
         #we give sched it's conf
         self.sched.load_conf(self.conf)
-
+        
+        #self.conf.dump()
         #self.conf.quick_debug()
 		
         #Now create the external commander
