@@ -27,6 +27,7 @@ from eventhandler import EventHandler
 from status import StatusFile
 from brok import Brok
 from downtime import Downtime
+from comment import Comment
 from log import Log
 
 #from guppy import hpy
@@ -47,7 +48,7 @@ class Scheduler:
         #The order is important, so make key a int.
         #TODO : at load, change value by configuration one (like reaper time, etc)
         self.recurrent_works = {
-            0 : (self.update_downtimes, 1),
+            0 : (self.update_downtimes_and_comments, 1),
             1 : (self.schedule, 1),
             2 : (self.consume_results , 1),
             3 : (self.delete_zombie_checks, 1),
@@ -76,6 +77,7 @@ class Scheduler:
         self.checks = {}
         self.actions = {}
         self.downtimes = {}
+        self.comments = {}
         self.broks = {}
 
 
@@ -154,6 +156,12 @@ class Scheduler:
             return
         if isinstance(elt, Downtime):
             self.downtimes[elt.id] = elt
+            self.add(elt.extra_comment)
+            return
+        if isinstance(elt, Comment):
+            self.comments[elt.id] = elt
+            b = elt.ref.get_update_status_brok()
+            self.add(b)
             return
 
 
@@ -243,9 +251,16 @@ class Scheduler:
 
     #We do not want this downtime id
     def del_downtime(self, dt_id):
-        dt = self.downtimes[dt_id]
-        dt.ref.del_downtime(dt_id)
-        del self.downtimes[dt.id]
+        if dt_id in self.downtimes:
+            self.downtimes[dt_id].ref.del_downtime(dt_id)
+            del self.downtimes[dt_id]
+
+
+    #We do not want this comment id
+    def del_comment(self, c_id):
+        if c_id in self.comments:
+            self.comments[c_id].ref.del_comment(c_id)
+            del self.comments[c_id]
 
 
     #Called by poller to get checks
@@ -495,8 +510,8 @@ class Scheduler:
             if c.status == 'waitconsume':
                 item = c.ref
                 for dt in item.downtimes:
-                    #activate flexible downtimes 
-                    if dt.fixed == False and dt.active == False and dt.start_time <= c.check_time and c.exit_status != 0:
+                    #activate flexible downtimes (do not activate triggered downtimes)
+                    if dt.fixed == False and dt.is_in_effect == False and dt.start_time <= c.check_time and c.exit_status != 0 and dt.trigger_id == 0:
                         dt.enter()
                         self.get_and_register_status_brok(item)
 
@@ -579,18 +594,39 @@ class Scheduler:
 
     #Check for downtimes start and stop, and register 
     #them if need
-    def update_downtimes(self):
+    def update_downtimes_and_comments(self):
+        broks = []
         now = time.time()
+
+        #A loop where those downtimes are removed
+        #which were marked for deletion (mostly by dt.exit())
         for dt in self.downtimes.values():
-            #remove expired downtimes
-            if dt.end_time < now:
-                dt.exit()
-                self.get_and_register_status_brok(dt.ref)
+            if dt.can_be_deleted == True:
+                ref = dt.ref
                 self.del_downtime(dt.id)
-            #activate fixed downtimes when their time has come
-            elif now >= dt.start_time and dt.fixed and not dt.active:
+                broks.append(ref.get_update_status_brok())
+
+        #Downtimes are usually accompanied by a comment.
+        #An exiting downtime also invalidates it's comment.
+        for c in self.comments.values():
+            if c.can_be_deleted == True:
+                ref = c.ref
+                self.del_comment(c.id)
+                broks.append(ref.get_update_status_brok())
+
+        #Check start and stop times
+        for dt in self.downtimes.values():
+            print dt
+            if dt.end_time < now:
+                #this one has expired
+                dt.exit()
+            elif now >= dt.start_time and dt.fixed and not dt.is_in_effect:
+                #this one has to start now
                 dt.enter()
-                self.get_and_register_status_brok(dt.ref)
+                broks.append(dt.ref.get_update_status_brok())
+
+        for b in broks:
+            self.add(b)
 
 
     #Main schedule function to make the regular scheduling

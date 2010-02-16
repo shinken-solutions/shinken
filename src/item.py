@@ -259,8 +259,23 @@ class Item(object):
         for dt in self.downtimes:
             if dt.id == downtime_id:
                 d_to_del = dt
+                dt.can_be_deleted = True
         if d_to_del is not None:
             self.downtimes.remove(d_to_del)
+
+
+    def add_comment(self, comment):
+        self.comments.append(comment)
+
+
+    def del_comment(self, comment_id):
+        c_to_del = None
+        for c in self.comments:
+            if c.id == comment_id:
+                c_to_del = c
+                c.can_be_deleted = True
+        if c_to_del is not None:
+            self.comments.remove(c_to_del)
 
 
     #Fill data with info of item by looking at brok_type

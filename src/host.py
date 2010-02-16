@@ -134,6 +134,7 @@ class Host(SchedulingItem):
         'checks_in_progress' : {'default' : []},#No broks, it's just internal, and checks have too links
         'notifications_in_progress' : {'default' : {}},#No broks, it's just internal, and checks have too links
         'downtimes' : {'default' : [], 'fill_brok' : ['full_status']},
+        'comments' : {'default' : [], 'fill_brok' : ['full_status']},
         'flapping_changes' : {'default' : [], 'fill_brok' : ['full_status']},
         'percent_state_change' : {'default' : 0.0, 'fill_brok' : ['full_status']},
         'problem_has_been_acknowledged' : {'default' : False, 'fill_brok' : ['full_status']},

@@ -26,6 +26,7 @@ from service import Service
 from host import Host
 from contact import Contact
 from downtime import Downtime
+from comment import Comment
 from config import Config
 
 from util import from_bool_to_string
@@ -209,11 +210,23 @@ class StatusFile:
             'entry_time' : {'prop' : None, 'default' : '0'},
             'start_time' : {'prop' : None, 'default' : '0'},
             'end_time' : {'prop' : None, 'default' : '0'},
-            'triggered_by' : {'prop' : None, 'default' : '0'},
+            'triggered_by' : {'prop' : 'trigger_id', 'default' : '0'},
             'fixed' : {'prop' : None, 'default' : '0', 'depythonize' : from_bool_to_string},
             'duration' : {'prop' : None, 'default' : '0'},
             'author' : {'prop' : None, 'default' : '0'},
             'comment' : {'prop' : None, 'default' : '0'},
+        },
+        Comment : {
+            'host_name' : {},
+            'service_description' : {},
+            'comment_id' : {'prop' : 'id', 'default' : '0'},
+            'source' : {'prop' : None, 'default' : '0'},
+            'entry_type' : {'prop' : None, 'default' : '0'},
+            'persistent' : {'prop' : None, 'depythonize' : from_bool_to_string},
+            'expires' : {'prop' : None, 'depythonize' : from_bool_to_string},
+            'expire_time' : {'prop' : None, 'default' : '0'},
+            'author' : {'prop' : None},
+            'comment_data' : {'prop' : 'comment'},
         },
     }
                
@@ -299,18 +312,33 @@ class StatusFile:
             tmp = self.create_output(c)
             output += 'contactstatus {\n' + tmp + '\t}\n\n'
 
+        for h in self.hosts.values():
+            for c in h.comments:
+              c.host_name = c.ref.host_name
+              tmp = self.create_output(c)
+              output += c.ref.my_type + 'comment {\n' + tmp + '\t}\n\n'
+
+        for s in self.services.values():
+            for c in s.comments:
+              #this is just a workaround until a data-driven solution is found
+              c.host_name = c.ref.host_name
+              if (hasattr(c.ref, 'service_description')):
+                  c.service_description = c.ref.service_description
+              tmp = self.create_output(c)
+              output += c.ref.my_type + 'comment {\n' + tmp + '\t}\n\n'
+
+        for h in self.hosts.values():
+            for dt in h.downtimes:
+              dt.host_name = dt.ref.host_name
+              tmp = self.create_output(dt)
+              output += dt.ref.my_type + 'downtime {\n' + tmp + '\t}\n\n'
+
         for s in self.services.values():
             for dt in s.downtimes:
               #this is just a workaround until a data-driven solution is found
               dt.host_name = dt.ref.host_name
               if (hasattr(dt.ref, 'service_description')):
                   dt.service_description = dt.ref.service_description
-              tmp = self.create_output(dt)
-              output += dt.ref.my_type + 'downtime {\n' + tmp + '\t}\n\n'
-
-        for h in self.hosts.values():
-            for dt in h.downtimes:
-              dt.host_name = dt.ref.host_name
               tmp = self.create_output(dt)
               output += dt.ref.my_type + 'downtime {\n' + tmp + '\t}\n\n'
 
