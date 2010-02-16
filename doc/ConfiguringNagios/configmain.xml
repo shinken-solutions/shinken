@@ -478,8 +478,8 @@ cfg_file=/usr/local/nagios/etc/commands.cfg</literallayout></para>
     </section>
 
     <section>
-      <title><anchor id="configuringnagios-configmain-enable_notifications"
-      xreflabel="Notifications Option" />Bypass security checks</title>
+      <title><anchor id="configuringnagios-configmain-idontcareaboutsecurity"
+      xreflabel="Security Option" />Bypass security checks</title>
 
       <informaltable colsep="0" frame="none" rowsep="0">
         <tgroup cols="2">
