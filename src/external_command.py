@@ -543,27 +543,33 @@ class ExternalCommand:
 
     #DEL_ALL_HOST_COMMENTS;<host_name>
     def DEL_ALL_HOST_COMMENTS(self, host):
-        pass
+        for c in host.comments:
+            self.DEL_HOST_COMMENT(c.id)
     
     #DEL_ALL_SVC_COMMENTS;<host_name>;<service_description>
     def DEL_ALL_SVC_COMMENTS(self, service):
-        pass    
+        for c in service.comments:
+            self.DEL_SVC_COMMENT(c.id)
 
     #DEL_HOST_COMMENT;<comment_id>
     def DEL_HOST_COMMENT(self, comment_id):
-        pass
+        if comment_id in self.sched.comments:
+            self.sched.comments[comment_id].can_be_deleted = True
 
     #DEL_HOST_DOWNTIME;<downtime_id>
     def DEL_HOST_DOWNTIME(self, downtime_id):
-        pass
+        if downtime_id in self.sched.downtimes:
+            self.sched.downtimes[downtime_id].cancel()
 
     #DEL_SVC_COMMENT;<comment_id>
     def DEL_SVC_COMMENT(self, comment_id):
-        pass
+        if comment_id in self.sched.comments:
+            self.sched.comments[comment_id].can_be_deleted = True
 
     #DEL_SVC_DOWNTIME;<downtime_id>
     def DEL_SVC_DOWNTIME(self, downtime_id):
-        pass
+        if downtime_id in self.sched.downtimes:
+            self.sched.downtimes[downtime_id].cancel()
 
     #DISABLE_ALL_NOTIFICATIONS_BEYOND_HOST;<host_name>
     def DISABLE_ALL_NOTIFICATIONS_BEYOND_HOST(self, host):
@@ -1068,6 +1074,8 @@ class ExternalCommand:
         host.add_downtime(dt)
         self.sched.add(dt)
         self.sched.get_and_register_status_brok(host)
+        if trigger_id != 0 and trigger_id in self.sched.downtimes:
+            self.sched.downtimes[trigger_id].trigger_me(dt)
 
     #SCHEDULE_HOST_SVC_CHECKS;<host_name>;<check_time>
     def SCHEDULE_HOST_SVC_CHECKS(self, host, check_time):
@@ -1100,6 +1108,8 @@ class ExternalCommand:
         service.add_downtime(dt)
         self.sched.add(dt)
         self.sched.get_and_register_status_brok(service)
+        if trigger_id != 0 and trigger_id in self.sched.downtimes:
+            self.sched.downtimes[trigger_id].trigger_me(dt)
 
     #SEND_CUSTOM_HOST_NOTIFICATION;<host_name>;<options>;<author>;<comment>
     def SEND_CUSTOM_HOST_NOTIFICATION(self, host, options, author, comment):

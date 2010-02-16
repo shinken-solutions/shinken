@@ -125,6 +125,7 @@ class Service(SchedulingItem):
         'checks_in_progress' : {'default' : []}, # no brok because checks are too linked
         'notifications_in_progress' : {'default' : {}}, # no broks because notifications are too linked
         'downtimes' : {'default' : [], 'fill_brok' : ['full_status']},
+        'comments' : {'default' : [], 'fill_brok' : ['full_status']},
         'flapping_changes' : {'default' : [], 'fill_brok' : ['full_status']},
         'flapping_comment_id' : {'default' : 0, 'fill_brok' : ['full_status']},
         'percent_state_change' : {'default' : 0.0, 'fill_brok' : ['full_status']},
