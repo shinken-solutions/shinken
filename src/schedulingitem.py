@@ -446,7 +446,7 @@ class SchedulingItem(Item):
                 #Eventhandler and notifications get OK;HARD;maxattempts
                 #Ok, so current notifications are not need, we 'zombie' thems
                 self.remove_in_progress_notifications()
-                if self.notifications_enabled and not no_action:
+                if not no_action:
                     res.extend(self.create_notifications('RECOVERY'))
                 res.extend(self.get_event_handlers())
                 #Internally it is a hard OK
@@ -464,7 +464,7 @@ class SchedulingItem(Item):
             #it is smarter to log error before notification)
             self.raise_alert_log_entry()
             self.remove_in_progress_notifications()
-            if self.notifications_enabled and not no_action:
+            if not no_action:
                 res.extend(self.create_notifications('PROBLEM'))
             #Ok, event handlers here too
             res.extend(self.get_event_handlers())
@@ -476,7 +476,7 @@ class SchedulingItem(Item):
                 self.state_type = 'HARD'
                 self.raise_alert_log_entry()
                 self.remove_in_progress_notifications()
-                if self.notifications_enabled and not no_action:
+                if not no_action:
                     res.extend(self.create_notifications('PROBLEM'))
                 #Oh? This is the typical go for a event handler :)
                 res.extend(self.get_event_handlers())
@@ -500,7 +500,7 @@ class SchedulingItem(Item):
                     self.raise_alert_log_entry()
                     #raise notification only if self.notifications_enabled is True
                     self.remove_in_progress_notifications()
-                    if self.notifications_enabled and not no_action:
+                    if not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
                     #So event handlers here too
                     res.extend(self.get_event_handlers())
@@ -513,7 +513,7 @@ class SchedulingItem(Item):
                 if self.state != self.last_state:
                     self.raise_alert_log_entry()
                     self.remove_in_progress_notifications()
-                    if self.notifications_enabled and not no_action:
+                    if not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
 
         #now is the time to update state_type_id
