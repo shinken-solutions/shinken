@@ -91,8 +91,9 @@ class Contact(Item):
             pass
         elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
             pass 
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or 'DOWNTIMECANCELLED':
-            pass # later...
+        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND':
+            #No notification when a downtime was cancelled
+            return b and 's' in self.service_notification_options
 
         return False
 
@@ -115,8 +116,8 @@ class Contact(Item):
             pass
         elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
             pass 
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or 'DOWNTIMECANCELLED':
-            pass # later...
+        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND':
+            return b and 's' in self.host_notification_options
 
         return False
 

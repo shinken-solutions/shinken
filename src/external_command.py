@@ -237,7 +237,7 @@ class ExternalCommand:
     def resolve_command(self, command):
         #Only log if we are in the Arbiter
         if self.mode == 'dispatcher':
-            Log().log('EXTERNAL COMMAND: '+command)
+            Log().log('EXTERNAL COMMAND: '+command.rstrip())
         self.get_command_and_args(command)
 
 

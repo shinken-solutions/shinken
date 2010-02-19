@@ -45,13 +45,17 @@ class Downtime:
         self.trigger_id = trigger_id
         if self.trigger_id != 0: # triggered plus fixed makes no sense
             self.fixed = False
+        self.end_time = end_time
         if fixed:
-            self.end_time = end_time
             self.duration = end_time - start_time
-        else:
-            #downtime is in standby between start_time and end_time
-            self.end_time = end_time
-            #later, when a non-ok event happens, end_time will be recalculated as now+duration
+        #This is important for flexible downtimes. Here start_time and
+        #end_time mean: in this time interval it is possible to trigger
+        #the beginning of the downtime which lasts for duration.
+        #Later, when a non-ok event happens, real_end_time will be
+        #recalculated from now+duration
+        #end_time will be displayed in the web interface, but real_end_time
+        #is used internally
+        self.real_end_time = end_time
         self.author = author
         self.comment = comment
         self.is_in_effect = False    # fixed: start_time has been reached, flexible: non-ok checkresult
@@ -83,37 +87,49 @@ class Downtime:
     #The referenced host/service object enters now a (or another) scheduled
     #downtime. Write a log message only if it was not already in a downtime
     def enter(self):
+        res = []
         self.is_in_effect = True
         if self.fixed == False:
             now = time.time()
-            self.end_time = now + self.duration
-            #todo: what about start_time? will it be adjusted?
+            self.real_end_time = now + self.duration
         if self.ref.scheduled_downtime_depth == 0:
             self.ref.raise_enter_downtime_log_entry()
+            res.extend(self.ref.create_notifications('DOWNTIMESTART'))
         self.ref.scheduled_downtime_depth += 1
         self.ref.is_in_downtime = True
         for dt in self.activate_me:
-            dt.enter()
+            res.extend(dt.enter())
+        return res
 
 
     #The end of the downtime was reached.
     def exit(self):
+        res = []
         if self.is_in_effect == True:
             #This was a fixed or a flexible+triggered downtime
             self.is_in_effect = False
             self.ref.scheduled_downtime_depth -= 1
             if self.ref.scheduled_downtime_depth == 0:
                 self.ref.raise_exit_downtime_log_entry()
+                res.extend(self.ref.create_notifications('DOWNTIMEEND'))
                 self.ref.is_in_downtime = False
         else:
             #This was probably a flexible downtime which was not triggered
+            #In this case it silently disappears
             pass
         self.del_automatic_comment()
         self.can_be_deleted = True
+        #when a downtime ends and the service was critical 
+        #a notification is sent with the next critical check
+        #So we should set a flag here which signals consume_result
+        #to send a notification
+        self.ref.i_was_down = True
+        return res
 
 
     #A scheduled downtime was prematurely cancelled
     def cancel(self):
+        res = []
         self.is_in_effect = False
         self.ref.scheduled_downtime_depth -= 1
         if self.ref.scheduled_downtime_depth == 0:
@@ -121,9 +137,13 @@ class Downtime:
             self.ref.is_in_downtime = False
         self.del_automatic_comment()
         self.can_be_deleted = True
+        self.ref.i_was_down = True
+        #Nagios does not notify on cancelled downtimes
+        #res.extend(self.ref.create_notifications('DOWNTIMECANCELLED'))
         #Also cancel other downtimes triggered by me
         for dt in self.activate_me:
-            dt.cancel()
+            res.extend(dt.cancel())
+        return res
 
 
     #Scheduling a downtime creates a comment automatically

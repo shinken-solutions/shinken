@@ -509,25 +509,15 @@ class Scheduler:
         for c in self.checks.values():
             if c.status == 'waitconsume':
                 item = c.ref
-                for dt in item.downtimes:
-                    #activate flexible downtimes (do not activate triggered downtimes)
-                    if dt.fixed == False and dt.is_in_effect == False and dt.start_time <= c.check_time and c.exit_status != 0 and dt.trigger_id == 0:
-                        dt.enter()
-                        self.get_and_register_status_brok(item)
-
                 actions = item.consume_result(c)
-                #The update of the host/service must have changed, we brok it
-                self.get_and_register_check_result_brok(item)
 
                 #Now we manage the actions we must do
                 for a in actions:
-                    if a.is_a == 'notification':
-                        self.add(a)
-                    elif a.is_a == 'eventhandler':
-                        self.add(a)
-                    elif  a.is_a == 'check':
+                    if isinstance(a, Check):
                         #print "*******Adding dep checks*****"
                         checks_to_add.append(a)
+                    else:
+                        self.add(a)
 
         #All 'finished' checks (no more dep) raise checks they depends on
         for c in self.checks.values():
@@ -543,17 +533,14 @@ class Scheduler:
             if c.status == 'waitdep' and len(c.depend_on) == 0:
                 item = c.ref
                 actions = item.consume_result(c)
-                self.get_and_register_check_result_brok(item)
 
                 #Now we manage the actions we must do
                 for a in actions:
-                    if a.is_a == 'notification':
-                        self.add(a)
-                    elif a.is_a == 'eventhandler':
-                        self.add(a)
-                    elif  a.is_a == 'check':
+                    if isinstance(a, Check):
                         #print "*******Adding dep checks*****"
                         checks_to_add.append(a)
+                    else:
+                        self.add(a)
         if checks_to_add != []:
             for c in checks_to_add:
                 self.add(c)
@@ -617,12 +604,12 @@ class Scheduler:
         #Check start and stop times
         for dt in self.downtimes.values():
             print dt
-            if dt.end_time < now:
+            if dt.real_end_time < now:
                 #this one has expired
-                dt.exit()
+                broks.extend(dt.exit()) # returns downtimestop notifications
             elif now >= dt.start_time and dt.fixed and not dt.is_in_effect:
                 #this one has to start now
-                dt.enter()
+                broks.extend(dt.enter()) # returns downtimestart notifications
                 broks.append(dt.ref.get_update_status_brok())
 
         for b in broks:

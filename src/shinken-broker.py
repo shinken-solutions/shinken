@@ -393,10 +393,10 @@ class Broker(Satellite):
 			#When it push us conf, we reinit connexions
 			self.watch_for_new_conf(0.0)
 			
-			#Now we can get new broks from schedulers in self.broks
-			self.get_new_broks(type='scheduler')
-			#And from arbiters
+			#Now we can get new broks from arbiters in self.broks
 			self.get_new_broks(type='arbiter')
+			#And from schedulers
+			self.get_new_broks(type='scheduler')
 			
 		        #We must had new broks at the end of the list, so we reverse the list
 			self.broks.reverse()			

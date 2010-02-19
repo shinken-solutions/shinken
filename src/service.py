@@ -357,9 +357,13 @@ class Service(SchedulingItem):
     def raise_notification_log_entry(self, n):
         contact = n.contact
         command = n.command_call
+        if n.type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED', 'CUSTOM', 'ACKNOWLEDGEMENT', 'FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
+            state = '%s (%s)' % (n.type, self.state)
+        else:
+            state = self.state
         if self.__class__.log_notifications:
-            Log().log("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s" % (contact.get_name(), self.host.get_name(), self.get_name(), self.state, \
-                                                                       command.get_name(), self.output))
+            Log().log("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s" % (contact.get_name(), self.host.get_name(), self.get_name(), state, \
+                command.get_name(), self.output))
 
 
     #Raise a log entry with a Eventhandler alert like
@@ -448,11 +452,7 @@ class Service(SchedulingItem):
 
     #see if the notification is launchable (time is OK and contact is OK too)
     def is_notification_launchable(self, n, contact):
-        now = time.time()
-        if n.type == 'PROBLEM':
-            return self.state != 'OK' and  contact.want_service_notification(now, self.state, n.type)
-        else:
-            return self.state == 'OK' and  contact.want_service_notification(now, self.state, n.type)
+        return contact.want_service_notification(self.last_chk, self.state, n.type)
 
 
     def get_duration_sec(self):

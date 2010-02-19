@@ -31,7 +31,6 @@ from macroresolver import MacroResolver
 from eventhandler import EventHandler
 
 
-
 class SchedulingItem(Item):
     #Add a flapping change, but no more than 20 states
     #Then update the self.is_flapping bool by calling update_flapping
@@ -302,7 +301,7 @@ class SchedulingItem(Item):
     #command. It must be enabled locally and globally
     def get_event_handlers(self):
         cls = self.__class__
-        if self.event_handler == None or not self.event_handler_enabled or self.is_in_downtime or not cls.enable_event_handlers:
+        if self.event_handler == None or not self.event_handler_enabled or not cls.enable_event_handlers:
             return []
 
         print self.event_handler.__dict__
@@ -316,6 +315,21 @@ class SchedulingItem(Item):
         self.raise_event_handler_log_entry(self.event_handler)
         events.append(e)
         return events
+
+
+    #Whenever a non-ok hard state is reached, we must check whether this
+    #host/service has a flexible downtime waiting to be activated
+    def check_for_flexible_downtime(self):
+        res = []
+        status_updated = False
+        for dt in self.downtimes:
+            #activate flexible downtimes (do not activate triggered downtimes)
+            if dt.fixed == False and dt.is_in_effect == False and dt.start_time <= self.last_chk and self.state_id != 0 and dt.trigger_id == 0:
+                res.extend(dt.enter()) # returns downtimestart notifications
+                status_updated = True
+        if status_updated == True:
+            res.append(self.get_update_status_brok())
+        return res
 
 
     #consume a check return and send action in return
@@ -406,14 +420,6 @@ class SchedulingItem(Item):
             #We recheck just for network_dep. Maybe we are just unreachable
             #and we need to overide the state_id
             self.check_and_set_unreachability()
-            
-
-        #If no_action is False, maybe we are in downtime,
-        #so no_action become true
-        #if no_action == False:
-        #    for dt in self.downtimes:
-        #        if dt.is_in_downtime():
-        #            no_action = True
 
         res = []
 
@@ -463,6 +469,7 @@ class SchedulingItem(Item):
             #status != 0 so add a log entry (before actions that can also raise log
             #it is smarter to log error before notification)
             self.raise_alert_log_entry()
+            res.extend(self.check_for_flexible_downtime())
             self.remove_in_progress_notifications()
             if not no_action:
                 res.extend(self.create_notifications('PROBLEM'))
@@ -476,6 +483,7 @@ class SchedulingItem(Item):
                 self.state_type = 'HARD'
                 self.raise_alert_log_entry()
                 self.remove_in_progress_notifications()
+                res.extend(self.check_for_flexible_downtime())
                 if not no_action:
                     res.extend(self.create_notifications('PROBLEM'))
                 #Oh? This is the typical go for a event handler :)
@@ -498,8 +506,12 @@ class SchedulingItem(Item):
                     #Ok here is when we just go to the hard state
                     self.state_type = 'HARD'
                     self.raise_alert_log_entry()
-                    #raise notification only if self.notifications_enabled is True
                     self.remove_in_progress_notifications()
+                    #There is a request in the Nagios trac to enter downtimes
+                    #on soft states which does make sense. If this becomes
+                    #the default behavior, just move the following line
+                    #into the else-branch below.
+                    res.extend(self.check_for_flexible_downtime())
                     if not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
                     #So event handlers here too
@@ -515,12 +527,24 @@ class SchedulingItem(Item):
                     self.remove_in_progress_notifications()
                     if not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
+                elif hasattr(self, 'i_was_down') and self.i_was_down == True:
+                    #during the last check i was in a downtime. but now
+                    #the status is still critical and notifications 
+                    #are possible again. send an alert immediately
+                    self.remove_in_progress_notifications()
+                    if not no_action:
+                        res.extend(self.create_notifications('PROBLEM'))
+
+        if hasattr(self, 'i_was_down') and self.i_was_down == True:
+            delattr(self, 'i_was_down')
 
         #now is the time to update state_type_id
         if self.state_type == 'HARD':
             self.state_type_id = 1
         else:
             self.state_type_id = 0
+
+        res.append(self.get_check_result_brok())
 
         # res is filled with eventhandler and notification
         # now would be the time to add self.oscp...
@@ -573,7 +597,7 @@ class SchedulingItem(Item):
         #if notif is disabled, not need to go thurser
         #print "Ask for notification creation of type", type, "current level", self.current_notification_number
         cls = self.__class__
-        if not self.notifications_enabled or self.is_in_downtime or not cls.enable_notifications:
+        if not self.notifications_enabled or (self.is_in_downtime and not (type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED')) or not cls.enable_notifications:
             return []
 
         #A recovery is usefull only if previous notif were send
@@ -663,6 +687,10 @@ class SchedulingItem(Item):
         #plus reset the self.notified_contacts so begin to fill with new ones
         if n.type == 'RECOVERY':
             self.notified_contacts.clear()
+            return []
+
+        #These are singular events. It makes no sense to repeat them.
+        if n.type == 'DOWNTIMESTART' or n.type == 'DOWNTIMEEND' or n.type == 'DOWNTIMECANCEL':
             return []
 
         #notification_interval 0 means: one notification is enough

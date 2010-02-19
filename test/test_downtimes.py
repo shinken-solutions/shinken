@@ -74,7 +74,7 @@ class TestConfig(unittest.TestCase):
         self.assert_(self.conf.conf_is_correct)
 
 
-    def test_schedule_flexible_svc_downtime_and_statusdat(self):
+    def test_schedule_flexible_svc_downtime(self):
         # schedule a 2-minute downtime
         # downtime must not be active
         # consume a good result, sleep for a minute
@@ -89,14 +89,19 @@ class TestConfig(unittest.TestCase):
         self.sched.run_external_command(cmd)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
         time.sleep(20)
 
         print "downtime was scheduled. check its inactivity and the comment"
-        self.assert_(svc.downtimes[0] in self.sched.downtimes.values() and len(self.sched.downtimes) == 1)
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(svc.downtimes) == 1)
+        self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
         self.assert_(not svc.downtimes[0].fixed)
         self.assert_(not svc.downtimes[0].is_in_effect)
         self.assert_(not svc.downtimes[0].can_be_deleted)
-        self.assert_(svc.comments[0] in self.sched.comments.values() and len(self.sched.comments) == 1)
+        self.assert_(len(self.sched.comments) == 1)
+        self.assert_(len(svc.comments) == 1)
+        self.assert_(svc.comments[0] in self.sched.comments.values())
         self.assert_(svc.downtimes[0].comment_id == svc.comments[0].id)
 
         svc.update_in_checking()
@@ -105,6 +110,23 @@ class TestConfig(unittest.TestCase):
         self.sched.consume_results()
 
         print "good check was launched, downtime must still be inactive"
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(svc.downtimes) == 1)
+        self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
+        self.assert_(not svc.is_in_downtime)
+        self.assert_(not svc.downtimes[0].fixed)
+        self.assert_(not svc.downtimes[0].is_in_effect)
+        self.assert_(not svc.downtimes[0].can_be_deleted)
+        time.sleep(61)
+
+        self.fake_check(svc, 2, 'BAD')
+        self.sched.consume_results()
+
+        print "bad check was launched (SOFT;1), downtime must still be inactive"
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(svc.downtimes) == 1)
+        self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
+        self.assert_(not svc.is_in_downtime)
         self.assert_(not svc.downtimes[0].fixed)
         self.assert_(not svc.downtimes[0].is_in_effect)
         self.assert_(not svc.downtimes[0].can_be_deleted)
@@ -114,18 +136,62 @@ class TestConfig(unittest.TestCase):
         self.fake_check(svc, 2, 'BAD')
         self.sched.consume_results()
 
-        print "bad check was launched, downtime must now be active"
+        print "bad check was launched (HARD;2), downtime must now be active"
         print svc.downtimes[0]
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(svc.downtimes) == 1)
+        self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
+        self.assert_(svc.is_in_downtime)
         self.assert_(not svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
         self.assert_(not svc.downtimes[0].can_be_deleted)
+
+        scheduled_downtime_depth = svc.scheduled_downtime_depth
+        cmd = "[%lu] DEL_SVC_DOWNTIME;%d" % (now, svc.downtimes[0].id)
+        self.sched.run_external_command(cmd)
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(svc.downtimes) == 1)
+        self.assert_(not svc.is_in_downtime)
+        self.assert_(svc.scheduled_downtime_depth < scheduled_downtime_depth)
+        self.assert_(not svc.downtimes[0].fixed)
+        self.assert_(not svc.downtimes[0].is_in_effect)
+        self.assert_(svc.downtimes[0].can_be_deleted)
+        self.assert_(len(self.sched.comments) == 1)
+        self.assert_(len(svc.comments) == 1)
+        time.sleep(61)
+
+        # now a notification must be sent
+        self.fake_check(svc, 2, 'BAD')
+        self.sched.consume_results()
+        # downtimes must have been deleted now
+        self.assert_(len(self.sched.downtimes) == 0)
+        self.assert_(len(svc.downtimes) == 0)
+        self.assert_(len(self.sched.comments) == 0)
+        self.assert_(len(svc.comments) == 0)
+
 
 
         for brok in self.sched.broks.values():
             if brok.type == 'log':
                 print "LOG:", brok.data['log']
 
+        for a in self.sched.actions.values():
+            print a
 
+
+    def x_test_notification_after_cancel_flexible_svc_downtime(self):
+        # schedule flexible downtime
+        # good check
+        # bad check -> SOFT;1 
+        #  eventhandler SOFT;1
+        # bad check -> HARD;2 
+        #  downtime alert
+        #  eventhandler HARD;2
+        # cancel downtime
+        # bad check -> HARD;2
+        #  notification critical
+        # 
+        pass
 
 if __name__ == '__main__':
     unittest.main()

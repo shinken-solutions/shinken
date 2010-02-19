@@ -391,8 +391,12 @@ class Host(SchedulingItem):
     def raise_notification_log_entry(self, n):
         contact = n.contact
         command = n.command_call
+        if n.type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'CUSTOM', 'ACKNOWLEDGEMENT', 'FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
+            state = '%s (%s)' % (n.type, self.state)
+        else:
+            state = self.state
         if self.__class__.log_notifications:
-            Log().log("HOST NOTIFICATION: %s;%s;%s;%s;%s" % (contact.get_name(), self.get_name(), self.state, \
+            Log().log("HOST NOTIFICATION: %s;%s;%s;%s;%s" % (contact.get_name(), self.get_name(), state, \
                                                                  command.get_name(), self.output))
 
     #Raise a log entry with a Eventhandler alert like
@@ -485,13 +489,8 @@ class Host(SchedulingItem):
 
     #see if the notification is launchable (time is OK and contact is OK too)
     def is_notification_launchable(self, n, contact):
-        now = time.time()
-        if n.type == 'PROBLEM':
-            return self.state != 'UP' and contact.want_host_notification(now, self.state, n.type)
-        elif n.type == 'RECOVERY':
-            return self.state == 'UP' and contact.want_host_notification(now, self.state, n.type)
-        #return now > n.t_to_go and self.state != 'UP' and contact.want_host_notification(now, self.state, n.type)
-            
+        return contact.want_host_notification(self.last_chk, self.state, n.type)
+
 
     #MACRO PART
     def get_duration_sec(self):
