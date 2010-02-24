@@ -33,15 +33,14 @@ class AutoSlots(type):
     #Some properties name are not alowed in __slots__ like 2d_coords of
     #Host, so we must tag them in properties with no_slots
     def __new__(cls, name, bases, dct):
-        slots = dict.fromkeys(dct.get('__slots__', []))
+        #Thanks to Bertrand Mathieu to the set idea
+        slots = dct.get('__slots__', set())
         #Now get properties from properties and running_properties
         if 'properties' in dct:
-            for prop in dct['properties']:
-                if not 'no_slots' in dct['properties'][prop] or not dct['properties'][prop]['no_slots']:
-                    slots[prop] = None
+            props = dct['properties']
+            slots.update((p for p in props if not 'no_slots' in props[p] or not props[p]['no_slots']))
         if 'running_properties' in dct:
-            for prop in dct['running_properties']:
-                if not 'no_slots' in dct['running_properties'][prop] or not dct['running_properties'][prop]['no_slots']:
-                    slots[prop] = None
-        dct['__slots__'] = list(set(slots.keys()))
+            props = dct['running_properties']
+            slots.update((p for p in props if not 'no_slots' in props[p] or not props[p]['no_slots']))
+        dct['__slots__'] = tuple(slots)
         return type.__new__(cls, name, bases, dct)
