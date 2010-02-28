@@ -115,6 +115,7 @@ class Action:
                 self.exit_status = 3
                 return
             return
+        (stdoutdata, stderrdata) = self.process.communicate()
         self.get_outputs(self.process.stdout.read())
         self.exit_status = self.process.returncode
         #if self.exit_status != 0:
