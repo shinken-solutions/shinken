@@ -78,7 +78,7 @@ class Action:
         #cmd = ['/bin/sh', '-c', self.command]
         #Nagios do not use the /bin/sh -c command, so I don't do it too
         try:
-            self.process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
         except OSError as exp:
             print "FUCK:", exp
             self.output = exp
@@ -115,7 +115,8 @@ class Action:
                 self.exit_status = 3
                 return
             return
-        self.get_outputs(self.process.stdout.read())
+        (stdoutdata, stderrdata) = self.process.communicate()
+        self.get_outputs(stdoutdata)
         self.exit_status = self.process.returncode
         #if self.exit_status != 0:
         #    print "DBG:", self.command, self.exit_status, self.output
