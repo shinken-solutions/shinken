@@ -73,6 +73,8 @@ class Status_dat_broker:
 
         self.status = StatusFile(self.path, self.configs, self.hosts, self.services, self.contacts)
         self.objects_cache = ObjectsCacheFile(self.opath, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
+
+        self.number_of_objects = 0
     
 
     def is_external(self):
@@ -116,6 +118,7 @@ class Status_dat_broker:
             setattr(h, prop, data[prop])
         print "H:", h
         self.hosts[h_id] = h
+        self.number_of_objects += 1
 
 
     def manage_initial_hostgroup_status_brok(self, b):
@@ -133,6 +136,7 @@ class Status_dat_broker:
                 hg.members.append(self.hosts[h_id])
         print "HG:", hg
         self.hostgroups[hg_id] = hg
+        self.number_of_objects += 1
 
 
     def manage_initial_service_status_brok(self, b):
@@ -143,6 +147,7 @@ class Status_dat_broker:
         self.update_element(s, data)
         print "S:", s
         self.services[s_id] = s
+        self.number_of_objects += 1
 
 
     def manage_initial_servicegroup_status_brok(self, b):
@@ -160,6 +165,7 @@ class Status_dat_broker:
                 sg.members.append(self.services[s_id])
         print "SG:", sg
         self.servicegroups[sg_id] = sg
+        self.number_of_objects += 1
 
 
     def manage_initial_contact_status_brok(self, b):
@@ -170,6 +176,7 @@ class Status_dat_broker:
         self.update_element(c, data)
         #print "C:", c
         self.contacts[c_id] = c
+        self.number_of_objects += 1
 
 
     def manage_initial_contactgroup_status_brok(self, b):
@@ -187,6 +194,8 @@ class Status_dat_broker:
                 cg.members.append(self.contacts[c_id])
         print "CG:", cg
         self.contactgroups[cg_id] = cg
+        self.number_of_objects += 1
+
 
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
@@ -196,6 +205,8 @@ class Status_dat_broker:
         self.update_element(tp, data)
         print "TP:", tp
         self.timeperiods[tp_id] = tp
+        self.number_of_objects += 1
+
 
     def manage_initial_command_status_brok(self, b):
         data = b.data
@@ -205,6 +216,7 @@ class Status_dat_broker:
         self.update_element(c, data)
         print "CMD:", c
         self.commands[c_id] = c
+        self.number_of_objects += 1
 
 
     #A service check have just arrived, we UPDATE data info with this
@@ -271,13 +283,19 @@ class Status_dat_broker:
     def main(self):
         last_generation = time.time()
         objects_cache_written = False
+        number_of_objects_written = 0
         while True:
             b = self.q.get() # can block here :)
             self.manage_brok(b)
             
             if time.time() - last_generation > self.update_interval:
-                if not objects_cache_written:
+                if not objects_cache_written or self.number_of_objects > number_of_objects_written:
+                    #with really big configurations it can take longer than
+                    #status_update_interval to send all objects to this broker
+                    #if more objects are received, write objects.cache again
+                    print "Generating objects file!"
                     self.objects_cache.create_or_update()
+                    number_of_objects_written = self.number_of_objects
                     objects_cache_written = True
                 print "Generating status file!"
                 r = self.status.create_or_update()

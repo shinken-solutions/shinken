@@ -169,7 +169,7 @@ class MacroResolver(Borg):
         for macro in macros:
             c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
 
-        return c_line
+        return c_line.strip()
 
 
     #For all Macros in macros, set the type by looking at the
