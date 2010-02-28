@@ -163,6 +163,7 @@ class TestConfig(unittest.TestCase):
         # now a notification must be sent
         self.fake_check(svc, 2, 'BAD')
         self.sched.consume_results()
+        self.sched.update_downtimes_and_comments()
         # downtimes must have been deleted now
         self.assert_(len(self.sched.downtimes) == 0)
         self.assert_(len(svc.downtimes) == 0)
