@@ -718,13 +718,13 @@ class Scheduler:
                 if m_nb != 0:
                     print "Average latency:", m, m_nb,  m / m_nb
                 
-                print "Notifications:", nb_notifications
+                #print "Notifications:", nb_notifications
                 now = time.time()
-                for a in self.actions.values():
-                    if a.is_a == 'notification':
-                        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, a.contact.get_name(), 'level:%d' % a.notif_nb, 'launch in', int(a.t_to_go - now)
-                    else:
-                        print "Event:", a.id, a.status
+                #for a in self.actions.values():
+                #    if a.is_a == 'notification':
+                #        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, a.contact.get_name(), 'level:%d' % a.notif_nb, 'launch in', int(a.t_to_go - now)
+                #    else:
+                #        print "Event:", a.id, a.status
                 print "Nb checks send:", self.nb_checks_send
                 self.nb_checks_send = 0
                 print "Nb Broks send:", self.nb_broks_send

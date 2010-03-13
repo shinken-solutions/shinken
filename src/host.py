@@ -271,6 +271,8 @@ class Host(SchedulingItem):
         if (hasattr(self, 'active_checks_enabled') and self.active_checks_enabled) and (not hasattr(self, 'check_period') or self.check_period == None) and (hasattr(self, 'check_interval') and self.check_interval!=0):
             Log().log("%s : My check_timeperiod is not correct" % self.get_name())
             state = False
+        if not hasattr(self, 'check_period'):
+            self.check_period = None
         return state
 
 
@@ -582,11 +584,13 @@ class Hosts(Items):
         
         #With all hosts
         for h in self:
-            parents.add_node(h)
+            if h != None:
+                parents.add_node(h)
             
         for h in self:
             for p in h.parents:
-                parents.add_edge(p, h)
+                if p != None:
+                    parents.add_edge(p, h)
 
         Log().log("Hosts in a loop: %s" % parents.loop_check())
         

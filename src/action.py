@@ -17,6 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, time
+import shlex
 
 #Unix and windows do not have the same import
 if os.name == 'nt':
@@ -62,7 +63,7 @@ class Action:
         self.wait_time = 0.0001
         self.last_poll = self.check_time
         try:
-            process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except WindowsError:
             print "On le kill"
             self.status = 'timeout'
@@ -78,7 +79,7 @@ class Action:
         #cmd = ['/bin/sh', '-c', self.command]
         #Nagios do not use the /bin/sh -c command, so I don't do it too
         try:
-            self.process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+            self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
         except OSError as exp:
             print "FUCK:", exp
             self.output = exp

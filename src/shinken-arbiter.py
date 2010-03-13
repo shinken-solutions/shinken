@@ -252,7 +252,7 @@ class Arbiter(Daemon):
 
 
 
-        self.conf.dump()
+        #self.conf.dump()
 
         #from guppy import hpy
         #hp=hpy()
@@ -308,7 +308,7 @@ class Arbiter(Daemon):
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
         self.user = self.conf.nagios_user
         self.group = self.conf.nagios_group
-        self.workdir = os.path.expanduser('~')
+        self.workdir = os.path.expanduser('~'+self.user)
         
         #If we go, we must go in daemon or not
         #Check if another Scheduler is not running (with the same conf)

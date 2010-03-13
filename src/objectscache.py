@@ -242,7 +242,7 @@ class ObjectsCacheFile:
                 else:
                     prop = type_map[display]['prop']
                     
-                if prop is not None and hasattr(elt, prop):
+                if prop is not None and hasattr(elt, prop) and getattr(elt, prop) != None:
                     value = getattr(elt, prop)
                 
                     #Maybe it's not a value, but a function link

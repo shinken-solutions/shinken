@@ -35,9 +35,9 @@ class Log(Borg):
         if format == None:
             if self.name == None:
             #We format the log in UTF-8
-                s = u'[%d] %s\n' % (int(time.time()), message.decode('UTF-8'))
+                s = u'[%d] %s\n' % (int(time.time()), message.decode('UTF-8', 'replace'))
             else:
-                s = u'[%d] [%s] %s\n' % (int(time.time()), self.name, message.decode('UTF-8'))
+                s = u'[%d] [%s] %s\n' % (int(time.time()), self.name, message.decode('UTF-8', 'replace'))
         else:
             s = format % message
 

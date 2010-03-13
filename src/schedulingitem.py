@@ -249,7 +249,7 @@ class SchedulingItem(Item):
         if self.next_chk == 0:
             #At the start, we cannot have a interval more than cls.max_check_spread
             #is service_max_check_spread or host_max_check_spread in config
-            interval = min(interval, cls.max_check_spread)
+            interval = min(interval, cls.max_check_spread * 60)
             r = interval * (random.random() - 0.5)
             time_add = interval/2 + r
         else:

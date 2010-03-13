@@ -259,6 +259,8 @@ class Service(SchedulingItem):
         if not hasattr(self, 'host') or self.host == None:
             Log().log("%s : I do not have and host" % self.get_name())
             state = False
+        if not hasattr(self, 'check_period'):
+            self.check_period = None
         return state
 
 
@@ -348,7 +350,7 @@ class Service(SchedulingItem):
     #Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     #I'm forcing an immediate check of the host.
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
-        Log().log("Warning: The results of service '%s' on host '%' are stale by %s (threshold=%s).  I'm forcing an immediate check of the service." \
+        Log().log("Warning: The results of service '%s' on host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the service." \
                       % (self.get_name(), self.host.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
 
 

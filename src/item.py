@@ -539,7 +539,7 @@ class Items(object):
     def linkify_with_escalations(self, escalations):
         for i in self:
             if hasattr(i, 'escalations'):
-                print i.get_name(), 'going to link escalations', i.escalations
+                #print i.get_name(), 'going to link escalations', i.escalations
                 escalations_tab = i.escalations.split(',')
                 escalations_tab = strip_and_uniq(escalations_tab)
                 new_escalations = []
@@ -550,7 +550,7 @@ class Items(object):
                     else: #TODO what?
                         pass
                 i.escalations = new_escalations
-                print i.get_name(), 'finallygot escalation', i.escalations
+                #print i.get_name(), 'finallygot escalation', i.escalations
 
 
     #Make link between item and it's resultmodulations
