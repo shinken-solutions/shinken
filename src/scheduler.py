@@ -434,10 +434,10 @@ class Scheduler:
 
         #We cant initial_status from all this types
         #The order is important, service need host...
-        initial_status_types = [self.hosts, self.hostgroups,  \
-                                self.services, self.servicegroups, \
-                                self.timeperiods, self.commands, \
-                                self.contacts, self.contactgroups]
+        initial_status_types = [self.timeperiods, self.commands, \
+                                    self.contacts, self.contactgroups, \
+                                    self.hosts, self.hostgroups,  \
+                                    self.services, self.servicegroups]
 
         for tab in initial_status_types:
             for i in tab:

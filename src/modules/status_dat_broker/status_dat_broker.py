@@ -112,11 +112,20 @@ class Status_dat_broker:
     def manage_initial_host_status_brok(self, b):
         data = b.data
         h_id = data['id']
-        print "Creating host:", h_id, data
+        #print "Creating host:", h_id, data
         h = Host({})
         for prop in data:
             setattr(h, prop, data[prop])
-        print "H:", h
+
+        h.check_period = self.get_timeperiod(h.check_period)
+        h.notification_period = self.get_timeperiod(h.notification_period)
+        
+        h.contacts = self.get_contacts(h.contacts)
+
+        #Escalations is not use for status_dat
+        del h.escalations
+                
+        #print "H:", h
         self.hosts[h_id] = h
         self.number_of_objects += 1
 
@@ -126,7 +135,7 @@ class Status_dat_broker:
         hg_id = data['id']
         members = data['members']
         del data['members']
-        print "Creating hostgroup:", hg_id, data
+        #print "Creating hostgroup:", hg_id, data
         hg = Hostgroup()
         for prop in data:
             setattr(hg, prop, data[prop])
@@ -134,7 +143,7 @@ class Status_dat_broker:
         for (h_id, h_name) in members:
             if h_id in self.hosts:
                 hg.members.append(self.hosts[h_id])
-        print "HG:", hg
+        #print "HG:", hg
         self.hostgroups[hg_id] = hg
         self.number_of_objects += 1
 
@@ -142,12 +151,21 @@ class Status_dat_broker:
     def manage_initial_service_status_brok(self, b):
         data = b.data
         s_id = data['id']
-        print "Creating Service:", s_id, data
+        #print "Creating Service:", s_id, data
         s = Service({})
         self.update_element(s, data)
-        print "S:", s
+
+        s.check_period = self.get_timeperiod(s.check_period)
+        s.notification_period = self.get_timeperiod(s.notification_period)
+
+        s.contacts = self.get_contacts(s.contacts)
+
+        del s.escalations
+
+        #print "S:", s
         self.services[s_id] = s
         self.number_of_objects += 1
+
 
 
     def manage_initial_servicegroup_status_brok(self, b):
@@ -174,6 +192,8 @@ class Status_dat_broker:
         #print "Creating Contact:", c_id, data
         c = Contact({})
         self.update_element(c, data)
+        
+        
         #print "C:", c
         self.contacts[c_id] = c
         self.number_of_objects += 1
@@ -237,6 +257,13 @@ class Status_dat_broker:
     def manage_update_service_status_brok(self, b):
         self.manage_service_check_result_brok(b)
 
+        #In the status, we've got duplicated item, we must relink thems
+        s.check_period = self.get_timeperiod(s.check_period)
+        s.notification_period = self.get_timeperiod(s.notification_period)
+        s.contacts = self.get_contacts(s.contacts)
+        del s.escalations
+
+
 
     def manage_host_check_result_brok(self, b):
         data = b.data
@@ -254,6 +281,38 @@ class Status_dat_broker:
     def manage_update_host_status_brok(self, b):
         self.manage_host_check_result_brok(b)
 
+        #In the status, we've got duplicated item, we must relink thems
+        h.check_period = self.get_timeperiod(h.check_period)
+        h.notification_period = self.get_timeperiod(h.notification_period)
+        h.contacts = self.get_contacts(h.contacts)
+        #Escalations is not use for status_dat
+        del h.escalations
+
+
+
+    #The contacts must not be duplicated
+    def get_contacts(self, cs):
+        r = []
+        for c in cs:
+            if c != None:
+                find_c = self.find_contact(c.get_name())
+                if find_c != None:
+                    r.append(find_c)
+                else:
+                    print "Error : search for a contact %s that do not exists!" % c.get_name()
+        return r
+
+
+    #The timeperiods must not be duplicated
+    def get_timeperiod(self, t):
+        if t != None:
+            find_t = self.find_timeperiod(t.get_name())
+            if find_t != None:
+                return find_t
+            else:
+                print "Error : search for a timeperiod %s that do not exists!" % t.get_name()
+        else:
+            return None
 
 
     def find_host(self, host_name):
@@ -267,6 +326,20 @@ class Status_dat_broker:
         for s in self.services.values():
             if s.host_name == host_name and s.service_description == service_description:
                 return s
+        return None
+
+
+    def find_timeperiod(self, timeperiod_name):
+        for t in self.timeperiods.values():
+            if t.timeperiod_name == timeperiod_name:
+                return t
+        return None
+
+
+    def find_contact(self, contact_name):
+        for c in self.contacts.values():
+            if c.contact_name == contact_name:
+                return c
         return None
 
         
@@ -289,6 +362,9 @@ class Status_dat_broker:
             self.manage_brok(b)
             
             if time.time() - last_generation > self.update_interval:
+                #from guppy import hpy
+                #hp=hpy()
+                #print hp.heap()
                 if not objects_cache_written or self.number_of_objects > number_of_objects_written:
                     #with really big configurations it can take longer than
                     #status_update_interval to send all objects to this broker
