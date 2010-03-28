@@ -527,7 +527,7 @@ class SchedulingItem(Item):
                     self.remove_in_progress_notifications()
                     if not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
-                elif hasattr(self, 'i_was_down') and self.i_was_down == True:
+                elif self.in_downtime_during_last_check == True:
                     #during the last check i was in a downtime. but now
                     #the status is still critical and notifications 
                     #are possible again. send an alert immediately
@@ -535,8 +535,8 @@ class SchedulingItem(Item):
                     if not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
 
-        if hasattr(self, 'i_was_down') and self.i_was_down == True:
-            delattr(self, 'i_was_down')
+        #Reset this flag. If it was true, actions were already taken
+        self.in_downtime_during_last_check == False
 
         #now is the time to update state_type_id
         if self.state_type == 'HARD':

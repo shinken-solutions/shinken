@@ -159,6 +159,7 @@ class Host(SchedulingItem):
         'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
         'customs' : {'default' : {}},
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
+        'in_downtime_during_last_check' : {'default' : False},
         }
 
     #Hosts macros and prop that give the information
