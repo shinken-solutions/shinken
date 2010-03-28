@@ -589,8 +589,8 @@ if __name__ == "__main__":
     #Ok, now we load the config
 
     #p = Shinken(conf)
-    #import cProfile
-    p.main()
-    #command = """p.main()"""
-    #cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
+    import cProfile
+    #p.main()
+    command = """p.main()"""
+    cProfile.runctx( command, globals(), locals(), filename="/tmp/Arbiter.profile" )
 
