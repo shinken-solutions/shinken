@@ -73,14 +73,14 @@ class TestConfig(unittest.TestCase):
 
 
     def show_logs(self):
-        for brok in self.sched.broks.values():
+        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 print "LOGID", brok.id
                 print "LOG:", brok.data['log']
 
 
     def show_actions(self):
-        for a in self.sched.actions.values():
+        for a in sorted(self.sched.actions.values(), lambda x, y: x.id - y.id):
             print "ACTION:", a
 
 
@@ -364,11 +364,11 @@ class TestConfig(unittest.TestCase):
         self.assert_(self.count_actions() == 3)
 
         print "clear logs and actions and recover the service"
-        #self.clear_logs()
-        #self.clear_actions()
-        #self.assert_(self.count_logs() == 0)
-        #self.assert_(self.count_actions() == 0)
-        #self.scheduler_loop(1, svc, 0, 'OK')
+        self.clear_logs()
+        self.clear_actions()
+        self.assert_(self.count_logs() == 0)
+        self.assert_(self.count_actions() == 0)
+        self.scheduler_loop(2, svc, 0, 'OK')
         # count actions and notifications
         self.show_logs()
         self.show_actions()
@@ -377,6 +377,38 @@ class TestConfig(unittest.TestCase):
         # notification, eventhandler
         self.assert_(self.count_actions() == 2)
         print "------------------------------------------------------"
+        
+        self.clear_logs()
+        self.clear_actions()
+        self.assert_(self.count_logs() == 0)
+        self.assert_(self.count_actions() == 0)
+        duration = 600
+        now = time.time()
+        # flexible downtime valid for the next 2 minutes
+        cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        time.sleep(20)
+        self.sched.update_downtimes_and_comments()
+
+        print "downtime was scheduled. check its inactivity and the comment"
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(host.downtimes) == 1)
+        self.assert_(host.downtimes[0] in self.sched.downtimes.values())
+        self.assert_(host.downtimes[0].fixed)
+        self.assert_(host.downtimes[0].is_in_effect)
+        self.assert_(not host.downtimes[0].can_be_deleted)
+        self.assert_(len(self.sched.comments) == 1)
+        self.assert_(len(host.comments) == 1)
+        self.assert_(host.comments[0] in self.sched.comments.values())
+        self.assert_(host.downtimes[0].comment_id == host.comments[0].id)
+        self.scheduler_loop(5, host, 2, 'DOWN')
+        print "host is down and in hard state. and inside a downtime"
+        self.show_logs()
+        self.show_actions()
+        # start downtime, soft 1, soft 2, hard 3, 
+        self.assert_(self.count_logs() == 4)
+        # nothing
+        self.assert_(self.count_actions() == 0)
 
         # send host into downtime
         # run host checks with result down
@@ -390,6 +422,7 @@ class TestConfig(unittest.TestCase):
         # todo
         # checks return 1=warn. this means normally up
         # set use_aggressive_host_checking which treats warn as down
+
 
 
     def test_notification_after_cancel_flexible_svc_downtime(self):
