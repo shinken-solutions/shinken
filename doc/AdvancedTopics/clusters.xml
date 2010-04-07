@@ -100,21 +100,21 @@
 	}</programlisting>
 		<para>It is important to notice that we are passing a comma-delimited list of on-demand service state 
 		<link linkend="thebasics-macros">macros</link> to the <code>$ARG4$</code> macro in the cluster check command. 
-		That's important! Nagios will fill those on-demand macros in with the current service state IDs (numerical values, rather 
+		That's important! Shinken will fill those on-demand macros in with the current service state IDs (numerical values, rather 
 		than text strings) of the individual members of the cluster.</para>
 	</section>
 	<section>
 		<title>Monitoring Host Clusters</title>
 		<para>Monitoring host clusters is very similiar to monitoring service clusters. Obviously, the main difference
 		is that the cluster members are hosts and not services. In order to monitor the status of a host cluster, you
-		must define a service that uses the &plugin-cluster; plugin. The service should not be associated with any of the hosts in the cluster, as this will cause problems with notifications for the cluster if that host goes down. A good idea might be to associate the service with the host that Nagios is running on. After all, if the host that Nagios is running on goes down, then Nagios isn't running anymore, so there isn't anything you can do as far as monitoring (unless you've setup <link linkend="advancedtopics-redundancy">redundant monitoring hosts</link>)...</para>
+		must define a service that uses the &plugin-cluster; plugin. The service should not be associated with any of the hosts in the cluster, as this will cause problems with notifications for the cluster if that host goes down. A good idea might be to associate the service with the host that Shinken is running on. After all, if the host that Shinken is running on goes down, then Shinken isn't running anymore, so there isn't anything you can do as far as monitoring (unless you've setup <link linkend="advancedtopics-redundancy">redundant monitoring hosts</link>)...</para>
 		<para>Anyway, let's assume that you have a <code>check_host_cluster</code> command defined as follows:</para>
 		<programlisting>define command{
 	command_name    check_host_cluster
 	command_line    /usr/local/nagios/libexec/check_cluster --host -l $ARG1$ -w $ARG2$ -c $ARG3$ -d $ARG4$
 	}</programlisting>
 		<para>Let's say you have three hosts (named "host1", "host2" and "host3") in the host cluster. If you want 
-		Nagios to generate a warning alert if one host in the cluster is not UP or a critical alert if two or more 
+		Shinken to generate a warning alert if one host in the cluster is not UP or a critical alert if two or more 
 		hosts are not UP, the the service you define to monitor the host cluster might look something like this:</para>
 		<programlisting>define service{
        ...
@@ -123,9 +123,9 @@
         }</programlisting>
 		<para>It is important to notice that we are passing a comma-delimited list of on-demand host state 
 		<link linkend="thebasics-macros">macros</link> to the <code>$ARG4$</code> macro in the cluster check command. 
-		That's important! Nagios will fill those on-demand macros in with the current host state IDs (numerical values, rather
+		That's important! Shinken will fill those on-demand macros in with the current host state IDs (numerical values, rather
 		than text strings) of the individual members of the cluster.</para>
-		<para>That's it! Nagios will periodically check the status of the host cluster and send notifications to you when
+		<para>That's it! Shinken will periodically check the status of the host cluster and send notifications to you when
 		its status is degraded (assuming you've enabled notification for the service). Note that for thehost definitions
 		of each cluster member, you will most likely want to disable notifications when the host goes down . Remeber that 
 		you don't care as much about the status of any individual host as you do the overall status of the cluster.

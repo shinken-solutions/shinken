@@ -121,35 +121,35 @@
 	</section>
 	<section>
 		<title>How Service Dependencies Are Tested</title>
-		<para>Before Nagios executes a service check or sends notifications out for a service, it will check to 
+		<para>Before Shinken executes a service check or sends notifications out for a service, it will check to 
 		see if the service has any dependencies. If it doesn't have any dependencies, the check is executed or 
-		the notification is sent out as it normally would be. If the service <emphasis>does</emphasis> have one or more dependencies, Nagios
+		the notification is sent out as it normally would be. If the service <emphasis>does</emphasis> have one or more dependencies, Shinken
 		will check each dependency entry as follows:</para>
 		<orderedlist>
 			<listitem>
-				<para>Nagios gets the current status<link linkend="advancedtopics-dependencies-hard_dependencies">*</link> of the service that is being <emphasis>depended upon</emphasis>.</para>
+				<para>Shinken gets the current status<link linkend="advancedtopics-dependencies-hard_dependencies">*</link> of the service that is being <emphasis>depended upon</emphasis>.</para>
 			</listitem>
 			<listitem>
-				<para>Nagios compares the current status of the service that is being <emphasis>depended upon</emphasis> against either 
+				<para>Shinken compares the current status of the service that is being <emphasis>depended upon</emphasis> against either 
 				the execution or notification failure options in the dependency definition (whichever one is relevant
 				at the time).</para>
 			</listitem>
 			<listitem>
 				<para>If the current status of the service that is being <emphasis>depended upon</emphasis> matches one of the failure 
-				options, the dependency is said to have failed and Nagios will break out of the dependency check loop.</para>
+				options, the dependency is said to have failed and Shinken will break out of the dependency check loop.</para>
 			</listitem>
 			<listitem>
 				<para>If the current state of the service that is being <emphasis>depended upon</emphasis> does not match any of the 
-				failure options for the dependency entry, the dependency is said to have passed and Nagios will
+				failure options for the dependency entry, the dependency is said to have passed and Shinken will
 				go on and check the next dependency entry.</para>
 			</listitem>
 		</orderedlist>
 		<para>This cycle continues until either all dependencies for the service have been checked or until one 
 		dependency check fails.</para>
 		<note><para>
-			<anchor id="advancedtopics-dependencies-hard_dependencies"/>* One important thing to note is that by default, Nagios will use
+			<anchor id="advancedtopics-dependencies-hard_dependencies"/>* One important thing to note is that by default, Shinken will use
 			the most current <link linkend="thebasics-statetypes">hard state</link> of the service(s) that is/are
-			being depended upon when it does the dependeny checks. If you want Nagios to use the most current state
+			being depended upon when it does the dependeny checks. If you want Shinken to use the most current state
 			of the services (regardless of whether its a soft or hard state), enable the
 			<link linkend="configuringnagios-configmain-soft_state_dependencies">soft_state_dependencies</link> option.</para></note>
 	</section>
@@ -158,10 +158,10 @@
 		<para>Execution dependencies are used to restrict when <link linkend="thebasics-activechecks">active checks</link> 
 		of a service can be performed. <link linkend="thebasics-passivechecks">Passive checks</link> are not restricted
 		by execution dependencies.</para>
-		<para>If all of the execution dependency tests for the service passed, Nagios will execute the check of the service 
-		as it normally would. If even just one of the execution dependencies for a service fails, Nagios will temporarily 
+		<para>If all of the execution dependency tests for the service passed, Shinken will execute the check of the service 
+		as it normally would. If even just one of the execution dependencies for a service fails, Shinken will temporarily 
 		prevent the execution of checks for that (dependent) service. At some point in the future the execution dependency 
-		tests for the service may all pass. If this happens, Nagios will start checking the service again as it normally
+		tests for the service may all pass. If this happens, Shinken will start checking the service again as it normally
 		would. More information on the check scheduling logic can be found <link linkend="advancedtopics-checkscheduling">here</link>.</para>
 		<para>In the example above, <emphasis role="bold">Service E</emphasis> would have failed execution dependencies if <emphasis role="bold">Service B</emphasis> is in a WARNING or 
 		UNKNOWN state. If this was the case, the service check would not be performed and the check would be scheduled 
@@ -169,10 +169,10 @@
 	</section>
 	<section>
 		<title>Notification Dependencies</title>
-		<para>If all of the notification dependency tests for the service <emphasis>passed</emphasis>, Nagios will send notifications out for 
-		the service as it normally would. If even just one of the notification dependencies for a service fails, Nagios 
+		<para>If all of the notification dependency tests for the service <emphasis>passed</emphasis>, Shinken will send notifications out for 
+		the service as it normally would. If even just one of the notification dependencies for a service fails, Shinken 
 		will temporarily repress notifications for that (dependent) service. At some point in the future the notification 
-		dependency tests for the service may all pass. If this happens, Nagios will start sending out notifications again 
+		dependency tests for the service may all pass. If this happens, Shinken will start sending out notifications again 
 		as it normally would for the service. More information on the notification logic can be found 
 		<link linkend="thebasics-notifications">here</link>.</para>
 		<para>In the example above, <emphasis role="bold">Service F</emphasis> would have failed notification dependencies if <emphasis role="bold">Service C</emphasis> is in a CRITICAL
@@ -270,10 +270,10 @@
 		see that Host C does not inherit the host dependencies of Host B. In order for Host C to be dependent on
 		Host A, a new host dependency definition must be defined.</para>
 		<para>Host notification dependencies work in a similiar manner to service notification dependencies. If 
-		<emphasis>all</emphasis> of the notification dependency tests for the host <emphasis>pass</emphasis>, Nagios will send notifications out for the host
-		as it normally would. If even just one of the notification dependencies for a host fails, Nagios will 
+		<emphasis>all</emphasis> of the notification dependency tests for the host <emphasis>pass</emphasis>, Shinken will send notifications out for the host
+		as it normally would. If even just one of the notification dependencies for a host fails, Shinken will 
 		temporarily repress notifications for that (dependent) host. At some point in the future the notification 
-		dependency tests for the host may all pass. If this happens, Nagios will start sending out notifications
+		dependency tests for the host may all pass. If this happens, Shinken will start sending out notifications
 		again as it normally would for the host. More information on the notification logic can be found 
 		<link linkend="thebasics-notifications">here</link>.</para>
 	</section>

@@ -18,7 +18,7 @@
 
     <para>If you are confused about how recursion and inheritance work after
     reading this, take a look at the sample object config files provided in
-    the Nagios distribution. If that still doesn't help, drop an email message
+    the Shinken distribution. If that still doesn't help, drop an email message
     with a <emphasis>detailed</emphasis> description of your problem to the
     <emphasis>nagios-users</emphasis> mailing list.</para>
   </section>
@@ -51,7 +51,7 @@
 
     <para>The third variable is <varname>register</varname>. This variable is
     used to indicate whether or not the object definition should be
-    "registered" with Nagios. By default, all object definitions are
+    "registered" with Shinken. By default, all object definitions are
     registered. If you are using a partial object definition as a template,
     you would want to prevent it from being registered (an example of this is
     provided later). Values are as follows: 0 = do NOT register object
@@ -89,7 +89,7 @@
     <emphasis>bighost1</emphasis> has been defined as having
     <emphasis>hosttemplate1</emphasis> as its template name. The definition
     for host <emphasis>bighost2</emphasis> is using the definition of
-    <emphasis>bighost1</emphasis> as its template object. Once Nagios
+    <emphasis>bighost1</emphasis> as its template object. Once Shinken
     processes this data, the resulting definition of host
     <emphasis>bighost2</emphasis> would be equivalent to this
     definition:</para>
@@ -147,7 +147,7 @@
     <para>You'll notice that the definition of host
     <emphasis>bighost3</emphasis> inherits variables from the definition of
     host <emphasis>bighost2</emphasis>, which in turn inherits variables from
-    the definition of host <emphasis>bighost1</emphasis>. Once Nagios
+    the definition of host <emphasis>bighost1</emphasis>. Once Shinken
     processes this configuration data, the resulting host definitions are
     equivalent to the following:</para>
 
@@ -212,7 +212,7 @@
     missing the required <varname>host_name</varname> variable. We don't need
     to supply a host name because we just want to use this definition as a
     generic host template. In order to prevent this definition from being
-    registered with Nagios as a normal host, we set the
+    registered with Shinken as a normal host, we set the
     <varname>register</varname> variable to 0.</para>
 
     <para>The definitions of hosts <emphasis>bighost1</emphasis> and
@@ -220,7 +220,7 @@
     definition. The only variable we've chosed to override is the
     <varname>address</varname> variable. This means that both hosts will have
     the exact same properties, except for their <varname>host_name</varname>
-    and <varname>address</varname> variables. Once Nagios processes the config
+    and <varname>address</varname> variables. Once Shinken processes the config
     data in the example, the resulting host definitions would be equivalent to
     specifying the following:</para>
 
@@ -322,10 +322,10 @@
     <title><anchor id="advancedtopics-objectinheritance-add_string" />Additive Inheritance of String
     Values</title>
 
-    <para>Nagios gives preference to local variables instead of values
+    <para>Shinken gives preference to local variables instead of values
     inherited from templates. In most cases local variable values override
     those that are defined in templates. In some cases it makes sense to allow
-    Nagios to use the values of inherited and local variables together.</para>
+    Shinken to use the values of inherited and local variables together.</para>
 
     <para>This "additive inheritance" can be accomplished by prepending the
     local variable value with a plus sign (+). This features is only available
@@ -360,7 +360,7 @@
 
     <para>Normally you have to either explicitly specify the value of a
     required variable in an object definition or inherit it from a template.
-    There are a few exceptions to this rule, where Nagios will assume that you
+    There are a few exceptions to this rule, where Shinken will assume that you
     want to use a value that instead comes from a related object. For example,
     the values of some service variables will be copied from the host the
     service is associated with if you don't otherwise specify them.</para>
@@ -589,8 +589,8 @@
     <title>Precedence With Multiple Inheritance Sources</title>
 
     <para>When you use multiple inheritance sources, it is important to know
-    how Nagios handles variables that are defined in multiple sources. In
-    these cases Nagios will use the variable/value from the first source that
+    how Shinken handles variables that are defined in multiple sources. In
+    these cases Shinken will use the variable/value from the first source that
     is specified in the use directive. Since inheritance sources can
     themselves inherit variables/values from one or more other sources, it can
     get tricky to figure out what variable/value pairs take precedence.</para>
