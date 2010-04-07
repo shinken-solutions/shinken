@@ -152,6 +152,7 @@ class Service(SchedulingItem):
         'host' : {'default' : None},
         'customs' : {'default' : {}},
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
+        'in_downtime_during_last_check' : {'default' : False}, 
         }
 
     #Mapping between Macros and properties (can be prop or a function)

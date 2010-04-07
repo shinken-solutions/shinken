@@ -277,6 +277,7 @@ class Config(Item):
                 fd = open(file)
                 buf = fd.readlines()
                 fd.close()
+                config_base_dir = os.path.dirname(file)
             except IOError, exp:
                 Log().log("Error: Cannot open config file '%s' for reading: %s" % (file, exp))
                 #The configuation is invalid because we have a bad file!
@@ -288,22 +289,30 @@ class Config(Item):
                 line = line[:-1]
                 if re.search("^cfg_file", line) or re.search("^resource_file", line):
                     elts = line.split('=')
+                    if os.path.isabs(elts[1]):
+                        cfg_file_name = elts[1]
+                    else:
+                        cfg_file_name = os.path.join(config_base_dir, elts[1])
                     try:
-                        fd = open(elts[1])
-                        Log().log("Processing object config file '%s'" % elts[1])
+                        fd = open(cfg_file_name)
+                        Log().log("Processing object config file '%s'" % cfg_file_name)
                         res += fd.read()
                         fd.close()
                     except IOError, exp:
-                        Log().log("Error: Cannot open config file '%s' for reading: %s" % (elts[1], exp))
+                        Log().log("Error: Cannot open config file '%s' for reading: %s" % (cfg_file_name, exp))
                     #The configuation is invalid because we have a bad file!
                         self.conf_is_correct = False
                 elif re.search("^cfg_dir", line):
                     elts = line.split('=')
-                    for root, dirs, files in os.walk(elts[1]):
+                    if os.path.isabs(elts[1]):
+                        cfg_file_name = elts[1]
+                    else:
+                        cfg_dir_name = os.path.join(config_base_dir, elts[1])
+                    for root, dirs, files in os.walk(cfg_dir_name):
                         for file in files:
                             if re.search("\.cfg$", file):
                                 try:
-                                
+
                                     fd = open(os.path.join(root, file))
                                     res += fd.read()
                                     fd.close()

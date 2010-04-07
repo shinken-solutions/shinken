@@ -123,7 +123,7 @@ class Downtime:
         #a notification is sent with the next critical check
         #So we should set a flag here which signals consume_result
         #to send a notification
-        self.ref.i_was_down = True
+        self.ref.in_downtime_during_last_check = True
         return res
 
 
@@ -137,7 +137,7 @@ class Downtime:
             self.ref.is_in_downtime = False
         self.del_automatic_comment()
         self.can_be_deleted = True
-        self.ref.i_was_down = True
+        self.ref.in_downtime_during_last_check = True
         #Nagios does not notify on cancelled downtimes
         #res.extend(self.ref.create_notifications('DOWNTIMECANCELLED'))
         #Also cancel other downtimes triggered by me

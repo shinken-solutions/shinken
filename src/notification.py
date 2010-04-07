@@ -162,7 +162,8 @@ class Notification(Action):
 
     
     def __str__(self):
-        return ''#str(self.__dict__)
+        return "Notification %d status:%s command:%s ref:%s" % (self.id, self.status, self.command, self.ref)
+        #return ''#str(self.__dict__)
 
 
     def get_id(self):
