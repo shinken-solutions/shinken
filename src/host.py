@@ -124,7 +124,6 @@ class Host(SchedulingItem):
         'output' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
         'long_output' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
         'is_flapping' : {'default' : False, 'fill_brok' : ['full_status']},
-        'is_in_downtime' : {'default' : False, 'fill_brok' : ['full_status']},
         'flapping_comment_id' : {'default' : 0, 'fill_brok' : ['full_status']},
         #No broks for _depend_of because of to much links to hsots/services
         'act_depend_of' : {'default' : []}, #dependencies for actions like notif of event handler, so AFTER check return
@@ -159,7 +158,8 @@ class Host(SchedulingItem):
         'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
         'customs' : {'default' : {}},
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
-        'in_downtime_during_last_check' : {'default' : False},
+        'in_scheduled_downtime' : {'default' : False},
+        'in_scheduled_downtime_during_last_check' : {'default' : False},
         }
 
     #Hosts macros and prop that give the information
@@ -375,6 +375,15 @@ class Host(SchedulingItem):
         return False
 
 
+    #The last time when the state was not UP
+    def last_time_non_ok_or_up(self):
+        if self.last_time_down > self.last_time_up:
+            last_time_non_up = self.last_time_down
+        else:
+            last_time_non_up = 0
+        return last_time_non_up
+
+
     #Add a log entry with a HOST ALERT like:
     #HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
@@ -505,6 +514,80 @@ class Host(SchedulingItem):
         h, m = divmod(m, 60)
         return "%02dh %02dm %02ds" % (h, m, s)
 
+
+    def check_notification_viability(self, type, t_wished = None):
+        now = time.time()
+        if t_wished == None:
+            t_wished = now
+
+        # forced notification
+
+        # block if notifications are program-wide disabled
+        if not self.enable_notifications:
+            return False
+
+        # does the notification period allow sending out this notification?
+
+        # block if notifications are disabled for this host
+        if not self.notifications_enabled:
+            return False
+
+        # pass if this is a custom notification
+
+        # block if the current status is in the notification_options d,u,r,f,s
+        if self.state == 'DOWN' and not 'd' in self.notification_options:
+            return False
+        if self.state == 'UP' and not 'u' in self.notification_options:
+            return False
+        if self.state == 'UNREACHABLE' and not 'r' in self.notification_options:
+            return False
+
+        # acknowledgement notifications pass only when the status is not OK
+        if type == 'ACKNOWLEDGEMENT':
+            if self.state == self.ok_up:
+                return False
+            else:
+                return True
+
+        # flapping
+        if type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
+        # todo    block if not notify_on_flapping
+            if self.scheduled_downtime_depth > 0:
+                return False
+            return True
+
+        # downtime notifications
+        if type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
+        # todo    block if notify_on_downtime is false
+            if self.scheduled_downtime_depth > 0:
+                return False
+            return True
+
+        # block if in a scheduled downtime
+        if self.scheduled_downtime_depth > 0:
+            return False
+
+        # block if the status is SOFT
+        if self.state_type == 'SOFT':
+            return False
+
+        # block if the problem has already been acknowledged
+        if self.problem_has_been_acknowledged:
+            return False
+
+        # block if dependencies have failed
+
+        # block if flapping
+        if self.is_flapping:
+            return False
+
+        # pass if status is OK (for RECOVERY)
+        if self.state == self.ok_up:
+            return True
+
+        # block if no_more_notifications
+
+        return True
 
 
 class Hosts(Items):

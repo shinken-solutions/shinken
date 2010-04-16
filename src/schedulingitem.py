@@ -336,7 +336,7 @@ class SchedulingItem(Item):
     #main function of reaction of checks like raise notifications
     #Special case:
     #is_flapping : immediate notif when problem
-    #is_in_downtime : no notification
+    #is_in_scheduled_downtime : no notification
     #is_volatile : notif immediatly (service only)
     def consume_result(self, c):
         now = time.time()
@@ -527,7 +527,7 @@ class SchedulingItem(Item):
                     self.remove_in_progress_notifications()
                     if not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
-                elif self.in_downtime_during_last_check == True:
+                elif self.in_scheduled_downtime_during_last_check == True:
                     #during the last check i was in a downtime. but now
                     #the status is still critical and notifications 
                     #are possible again. send an alert immediately
@@ -536,7 +536,7 @@ class SchedulingItem(Item):
                         res.extend(self.create_notifications('PROBLEM'))
 
         #Reset this flag. If it was true, actions were already taken
-        self.in_downtime_during_last_check == False
+        self.in_scheduled_downtime_during_last_check == False
 
         #now is the time to update state_type_id
         if self.state_type == 'HARD':
@@ -556,12 +556,21 @@ class SchedulingItem(Item):
     #status of now, and we add the contact to set of contact we notified. And we raise the log
     #entry
     def prepare_notification_for_sending(self, n):
-        #The command need to be uptodate
-        self.update_notification_command(n)
-        #Ok, we add if need this contact to contacts that have been notified
-        self.notified_contacts.add(n.contact)
-        #We send a notification, we need to log it
-        self.raise_notification_log_entry(n)
+        if n.status == 'scheduled':
+            if n.notif_nb == 1 and self.first_notification_delay == 0:
+                #The first notif is clean at creation
+                self.update_notification_command(n)
+                #Ok, we add if need this contact to contacts that have been notified
+                self.notified_contacts.add(n.contact)
+        elif n.status == 'inpoller':
+            if n.notif_nb > 1 or (n.notif_nb == 1 and self.first_notification_delay != 0):
+                #This notification is either a repeated one or it is
+                #a forst notification which has been delayed until now
+                self.update_notification_command(n)
+                self.notified_contacts.add(n.contact)
+        if n.status == 'inpoller':
+            #Log the notification just before it is launched
+            self.raise_notification_log_entry(n)
 
 
     #Just update the notification command by resolving Macros
@@ -596,13 +605,8 @@ class SchedulingItem(Item):
     def create_notifications(self, type, t_wished = None):
         #if notif is disabled, not need to go thurser
         #print "Ask for notification creation of type", type, "current level", self.current_notification_number
-        cls = self.__class__
-        if not self.notifications_enabled or (self.is_in_downtime and not (type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED')) or not cls.enable_notifications:
-            return []
 
-        #A recovery is usefull only if previous notif were send
-        if type == 'RECOVERY' and self.current_notification_number == 0:
-            return []
+        cls = self.__class__
 
         #Recovery make the counter of notif become 0
         if type == 'RECOVERY':
@@ -622,12 +626,16 @@ class SchedulingItem(Item):
             t_wished = now
             #if first notification, we must add first_notification_delay
             #TODO : useless check isn't it?
-            if self.current_notification_number == 1:
-                t_wished = now + self.first_notification_delay
+            if self.current_notification_number == 1 and type == 'PROBLEM':
+                t_wished = self.last_time_non_ok_or_up() + self.first_notification_delay * self.__class__.interval_length
             t = self.notification_period.get_next_valid_time_from_t(t_wished)
         else:
             #We folow our order
             t = t_wished
+
+        #now check if this notification should be sent or dropped
+        if not self.check_notification_viability(type, t_wished):
+            return []
 
         #We check our contacts:
         #for a PROBLEM, we check for escalations if we have some
@@ -661,12 +669,12 @@ class SchedulingItem(Item):
                 #data = self.get_data_for_notifications(contact, n)
                 #n.command = m.resolve_command(cmd, data)
                 #Maybe the contact do not want this notif? Arg!
-                if self.is_notification_launchable(n, contact):                    
+                if self.is_notification_launchable(n, contact):
+
                     #The notif must be fill with current data, 
                     #so we create the commmand now but only if it's the first 
                     #And we can add the log entry now
-                    if self.current_notification_number == 1 or type == 'RECOVERY':
-                        self.prepare_notification_for_sending(n)
+                    self.prepare_notification_for_sending(n)
 
                     notifications.append(n)
                     #print "DBG: Create a new notification from :", n.id, n.type, n.status, n.ref.get_name(), n.ref.state, 'level:%d' % n.notif_nb
@@ -690,7 +698,7 @@ class SchedulingItem(Item):
             return []
 
         #These are singular events. It makes no sense to repeat them.
-        if n.type == 'DOWNTIMESTART' or n.type == 'DOWNTIMEEND' or n.type == 'DOWNTIMECANCEL':
+        if n.is_administrative():
             return []
 
         #notification_interval 0 means: one notification is enough

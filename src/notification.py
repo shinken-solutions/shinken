@@ -160,9 +160,16 @@ class Notification(Action):
     def get_output(self):
         return self.output
 
+
+    def is_administrative(self):
+        if self.type == 'PROBLEM' or self.type == 'RECOVERY':
+            return False
+        else:
+            return True
+
     
     def __str__(self):
-        return "Notification %d status:%s command:%s ref:%s" % (self.id, self.status, self.command, self.ref)
+        return "Notification %d status:%s command:%s ref:%s t_to_go:%s" % (self.id, self.status, self.command, self.ref, self.t_to_go)
         #return ''#str(self.__dict__)
 
 
