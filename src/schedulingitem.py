@@ -565,7 +565,7 @@ class SchedulingItem(Item):
         elif n.status == 'inpoller':
             if n.notif_nb > 1 or (n.notif_nb == 1 and self.first_notification_delay != 0):
                 #This notification is either a repeated one or it is
-                #a forst notification which has been delayed until now
+                #a first notification which has been delayed until now
                 self.update_notification_command(n)
                 self.notified_contacts.add(n.contact)
         if n.status == 'inpoller':
