@@ -238,14 +238,18 @@ class Broker(Satellite):
 			if not is_active:
 				return
 
-		print "init de connexion avec", links[id]['uri']
+		print "Init connexion with", links[id]['uri']
 		running_id = links[id]['running_id']
 		uri = links[id]['uri']
 		links[id]['con'] = Pyro.core.getProxyForURI(uri)
 
 		try:
+			#intial ping must be quick
+			links[id]['con']._setTimeout(5)
 			links[id]['con'].ping()
 			new_run_id = links[id]['con'].get_running_id()
+			#data transfert can be longer
+			links[id]['con']._setTimeout(120)
 
 		        #The schedulers have been restart : it has a new run_id.
 		        #So we clear all verifs, they are obsolete now.
