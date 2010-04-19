@@ -118,7 +118,6 @@ class Service(SchedulingItem):
         'output' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
         'long_output' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
         'is_flapping' : {'default' : False, 'fill_brok' : ['full_status']},
-        'is_in_downtime' : {'default' : False, 'fill_brok' : ['full_status']},
         'act_depend_of' : {'default' : [] }, #dependencies for actions like notif of event handler, so AFTER check return
         'chk_depend_of' : {'default' : []}, #dependencies for checks raise, so BEFORE checks
         'last_state_update' : {'default' : time.time(), 'fill_brok' : ['full_status']},
@@ -152,7 +151,8 @@ class Service(SchedulingItem):
         'host' : {'default' : None},
         'customs' : {'default' : {}},
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
-        'in_downtime_during_last_check' : {'default' : False}, 
+        'in_scheduled_downtime' : {'default' : False},
+        'in_scheduled_downtime_during_last_check' : {'default' : False}, 
         }
 
     #Mapping between Macros and properties (can be prop or a function)
@@ -341,6 +341,16 @@ class Service(SchedulingItem):
         return False
 
 
+    #The last time when the state was not OK 
+    def last_time_non_ok_or_up(self):
+        non_ok_times = filter(lambda x: x > self.last_time_ok, [self.last_time_warning, self.last_time_critical, self.last_time_unknown])
+        if len(non_ok_times) == 0:
+            last_time_non_ok = 0 # program_start would be better
+        else:
+            last_time_non_ok = min(non_ok_times)
+        return last_time_non_ok
+
+
     #Add a log entry with a SERVICE ALERT like:
     #SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
@@ -467,7 +477,84 @@ class Service(SchedulingItem):
         h, m = divmod(m, 60)
         return "%02dh %02dm %02ds" % (h, m, s)
 
+
+    def check_notification_viability(self, type, t_wished = None):
+        if t_wished == None:
+            t_wished = time.time()
+
+        # forced notification
+     
+        # block if notifications are program-wide disabled
+        if not self.enable_notifications:
+            return False
+
+        # does the notification period allow sending out this notification?
+
+        # block if notifications are disabled for this service
+        if not self.notifications_enabled:
+            return False
+
+        # pass if this is a custom notification
+
+        # block if the current status is in the notification_options w,u,c,r,f,s
+        if self.state == 'UNKNOWN' and not 'u' in self.notification_options:
+            return False
+        if self.state == 'WARNING' and not 'w' in self.notification_options:
+            return False
+        if self.state == 'CRITICAL' and not 'c' in self.notification_options:
+            return False
+        if self.state == 'OK' and not 'r' in self.notification_options:
+            return False
+
+        # acknowledgement notifications pass only when the status is not OK
+        if type == 'ACKNOWLEDGEMENT':
+            if self.state == self.ok_up:
+                return False
+            else:
+                return True
+        
+        # block if in a scheduled downtime
+        if self.scheduled_downtime_depth > 0:
+            return False
             
+        # block if host is in a scheduled downtime
+        if self.host.scheduled_downtime_depth > 0:
+            return False
+
+        # downtime{start|end} notification
+        #     pass if notify_on_downtime is true
+        #     pass if scheduled_downtime_depth > 0
+
+        # block if the status is SOFT
+        if self.state_type == 'SOFT':
+            return False
+
+        # block if the problem has already been acknowledged
+        if self.problem_has_been_acknowledged:
+            return False
+
+        # block if this is service dependends on a service
+
+        # block if this is service dependends on a host
+
+        # block if problem notification and still in first_notification_delay
+
+        # block if flapping
+        if self.is_flapping:
+            return False
+
+        # pass if status is OK (for RECOVERY)
+        if self.state == self.ok_up:
+            return True
+
+        # block if no_more_notifications
+
+        # block if host is down
+        if self.host.state != self.host.ok_up:
+            return False
+
+        return True
+
 
 class Services(Items):
     inner_class = Service #use for know what is in items

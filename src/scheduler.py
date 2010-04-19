@@ -286,13 +286,8 @@ class Scheduler:
                 if a.status == 'scheduled' and a.is_launchable(now):
                     a.status = 'inpoller'
                     if a.is_a == 'notification':
-                        #The first notif is clean at creation, but the others
-                        #are create just after the first return, so before the
-                        #notification_interval. At launch, the macors need to
-                        #be updated
-                        #And we can add now the log entry
-                        if a.notif_nb > 1:
-                            a.ref.prepare_notification_for_sending(a)
+                        #Update the command if necessary
+                        a.ref.prepare_notification_for_sending(a)
                     new_a = a.copy_shell()
                     res.append(new_a)
         return res

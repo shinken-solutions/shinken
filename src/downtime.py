@@ -80,7 +80,7 @@ class Downtime:
         self.activate_me.append(other_downtime)
 
 
-    def is_in_downtime(self):
+    def in_scheduled_downtime(self):
         return self.is_in_effect
 
 
@@ -96,7 +96,7 @@ class Downtime:
             self.ref.raise_enter_downtime_log_entry()
             res.extend(self.ref.create_notifications('DOWNTIMESTART'))
         self.ref.scheduled_downtime_depth += 1
-        self.ref.is_in_downtime = True
+        self.ref.in_scheduled_downtime = True
         for dt in self.activate_me:
             res.extend(dt.enter())
         return res
@@ -112,7 +112,7 @@ class Downtime:
             if self.ref.scheduled_downtime_depth == 0:
                 self.ref.raise_exit_downtime_log_entry()
                 res.extend(self.ref.create_notifications('DOWNTIMEEND'))
-                self.ref.is_in_downtime = False
+                self.ref.in_scheduled_downtime = False
         else:
             #This was probably a flexible downtime which was not triggered
             #In this case it silently disappears
@@ -123,7 +123,7 @@ class Downtime:
         #a notification is sent with the next critical check
         #So we should set a flag here which signals consume_result
         #to send a notification
-        self.ref.in_downtime_during_last_check = True
+        self.ref.in_scheduled_downtime_during_last_check = True
         return res
 
 
@@ -134,10 +134,10 @@ class Downtime:
         self.ref.scheduled_downtime_depth -= 1
         if self.ref.scheduled_downtime_depth == 0:
             self.ref.raise_cancel_downtime_log_entry()
-            self.ref.is_in_downtime = False
+            self.ref.in_scheduled_downtime = False
         self.del_automatic_comment()
         self.can_be_deleted = True
-        self.ref.in_downtime_during_last_check = True
+        self.ref.in_scheduled_downtime_during_last_check = True
         #Nagios does not notify on cancelled downtimes
         #res.extend(self.ref.create_notifications('DOWNTIMECANCELLED'))
         #Also cancel other downtimes triggered by me

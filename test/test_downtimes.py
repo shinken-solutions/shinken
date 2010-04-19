@@ -7,6 +7,8 @@
 import sys
 import time
 import os
+import string
+import re
 import random
 import unittest
 sys.path.append("../src")
@@ -75,7 +77,6 @@ class TestConfig(unittest.TestCase):
     def show_logs(self):
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
-                print "LOGID", brok.id
                 print "LOG:", brok.data['log']
 
 
@@ -93,18 +94,12 @@ class TestConfig(unittest.TestCase):
 
 
     def clear_logs(self):
-        print "--------- clear_logs enter ---------- with", self.count_logs()
         id_to_del = []
         for b in self.sched.broks.values():
             if b.type == 'log':
-                print ">>id_to_del+", b.id
                 id_to_del.append(b.id)
         for id in id_to_del:
             del self.sched.broks[id]
-        for b in self.sched.broks.values():
-            if b.type == 'log':
-                print "<<id_to_del+", b.id
-        print "--------- clear_logs leave ----------with", self.count_logs()
             
 
     def clear_actions(self):
@@ -113,7 +108,7 @@ class TestConfig(unittest.TestCase):
 
     def scheduler_loop(self, count, ref, exit_status, output="OK"):
         ref.checks_in_progress = []
-        for loop in range(1, count):
+        for loop in range(1, count + 1):
             print "processing check", loop
             ref.update_in_checking()
             self.fake_check(ref, exit_status, output)
@@ -123,11 +118,34 @@ class TestConfig(unittest.TestCase):
             time.sleep(ref.retry_interval * 60 + 1)
 
 
+    def log_match(self, index, pattern):
+        if index > self.count_logs():
+            return False
+        else:
+            regex = re.compile(pattern)
+            lognum = 1
+            for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+                if brok.type == 'log':
+                    if index == lognum:
+                        if re.search(regex, brok.data['log']):
+                            return True
+                    lognum += 1
+        return False
+
+
+    def print_header(self):
+        print "#" * 80 + "\n" + "#" + " " * 78 + "#"
+        print "#" + string.center(self.id(), 78) + "#"
+        print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
+
+
     def test_conf_is_correct(self):
+        self.print_header()
         self.assert_(self.conf.conf_is_correct)
 
 
     def test_schedule_fixed_svc_downtime(self):
+        self.print_header()
         # schedule a 2-minute downtime
         # downtime must be active
         # consume a good result, sleep for a minute
@@ -144,7 +162,7 @@ class TestConfig(unittest.TestCase):
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         time.sleep(20)
-        self.sched.update_downtimes_and_comments()
+        self.scheduler_loop(1, svc, 0, 'OK')
 
         print "downtime was scheduled. check its activity and the comment"
         self.assert_(len(self.sched.downtimes) == 1)
@@ -158,47 +176,39 @@ class TestConfig(unittest.TestCase):
         self.assert_(svc.comments[0] in self.sched.comments.values())
         self.assert_(svc.downtimes[0].comment_id == svc.comments[0].id)
 
-        svc.update_in_checking()
-
-        self.fake_check(svc, 0, 'OK')
-        self.sched.consume_results()
-        self.sched.update_downtimes_and_comments()
+        self.scheduler_loop(1, svc, 0, 'OK')
 
         print "good check was launched, downtime must be active"
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 1)
         self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
-        self.assert_(svc.is_in_downtime)
+        self.assert_(svc.in_scheduled_downtime)
         self.assert_(svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
         self.assert_(not svc.downtimes[0].can_be_deleted)
         time.sleep(61)
 
-        self.fake_check(svc, 2, 'BAD')
-        self.sched.consume_results()
-        self.sched.update_downtimes_and_comments()
+        self.scheduler_loop(1, svc, 2, 'BAD')
 
         print "bad check was launched (SOFT;1), downtime must be active"
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 1)
         self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
-        self.assert_(svc.is_in_downtime)
+        self.assert_(svc.in_scheduled_downtime)
         self.assert_(svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
         self.assert_(not svc.downtimes[0].can_be_deleted)
         time.sleep(61)
 
         # now the state changes to hard
-        self.fake_check(svc, 2, 'BAD')
-        self.sched.consume_results()
-        self.sched.update_downtimes_and_comments()
+        self.scheduler_loop(1, svc, 2, 'BAD')
 
         print "bad check was launched (HARD;2), downtime must be active"
         print svc.downtimes[0]
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 1)
         self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
-        self.assert_(svc.is_in_downtime)
+        self.assert_(svc.in_scheduled_downtime)
         self.assert_(svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
         self.assert_(not svc.downtimes[0].can_be_deleted)
@@ -208,7 +218,7 @@ class TestConfig(unittest.TestCase):
         self.sched.run_external_command(cmd)
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 1)
-        self.assert_(not svc.is_in_downtime)
+        self.assert_(not svc.in_scheduled_downtime)
         self.assert_(svc.scheduled_downtime_depth < scheduled_downtime_depth)
         self.assert_(svc.downtimes[0].fixed)
         self.assert_(not svc.downtimes[0].is_in_effect)
@@ -218,9 +228,7 @@ class TestConfig(unittest.TestCase):
         time.sleep(61)
 
         # now a notification must be sent
-        self.fake_check(svc, 2, 'BAD')
-        self.sched.consume_results()
-        self.sched.update_downtimes_and_comments()
+        self.scheduler_loop(1, svc, 2, 'BAD')
         # downtimes must have been deleted now
         self.assert_(len(self.sched.downtimes) == 0)
         self.assert_(len(svc.downtimes) == 0)
@@ -228,24 +236,22 @@ class TestConfig(unittest.TestCase):
         self.assert_(len(svc.comments) == 0)
 
     def test_schedule_flexible_svc_downtime(self):
-        # schedule a 2-minute downtime
-        # downtime must not be active
-        # consume a good result, sleep for a minute
-        # downtime must not be active
-        # consume a bad result
-        # downtime must be active
-        # no notification must be found in broks
+        self.print_header()
+        #----------------------------------------------------------------
+        # schedule a flexible downtime of 3 minutes for the host
+        #----------------------------------------------------------------
         duration = 180
         now = time.time()
-        # flexible downtime valid for the next 2 minutes
         cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;0;0;%d;lausser;blablub" % (now, now, now + duration, duration)
         self.sched.run_external_command(cmd)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         time.sleep(20)
-
-        print "downtime was scheduled. check its inactivity and the comment"
+        #----------------------------------------------------------------
+        # check if a downtime object exists (scheduler and service)
+        # check if the downtime is still inactive
+        #----------------------------------------------------------------
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 1)
         self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
@@ -256,58 +262,54 @@ class TestConfig(unittest.TestCase):
         self.assert_(len(svc.comments) == 1)
         self.assert_(svc.comments[0] in self.sched.comments.values())
         self.assert_(svc.downtimes[0].comment_id == svc.comments[0].id)
-
-        svc.update_in_checking()
-
-        self.fake_check(svc, 0, 'OK')
-        self.sched.consume_results()
-        self.sched.update_downtimes_and_comments()
-
-        print "good check was launched, downtime must still be inactive"
+        #----------------------------------------------------------------
+        # run the service and return an OK status
+        # check if the downtime is still inactive
+        #----------------------------------------------------------------
+        self.scheduler_loop(1, svc, 0, 'OK')
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 1)
         self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
-        self.assert_(not svc.is_in_downtime)
+        self.assert_(not svc.in_scheduled_downtime)
         self.assert_(not svc.downtimes[0].fixed)
         self.assert_(not svc.downtimes[0].is_in_effect)
         self.assert_(not svc.downtimes[0].can_be_deleted)
         time.sleep(61)
-
-        self.fake_check(svc, 2, 'BAD')
-        self.sched.consume_results()
-        self.sched.update_downtimes_and_comments()
-
-        print "bad check was launched (SOFT;1), downtime must still be inactive"
+        #----------------------------------------------------------------
+        # run the service twice to get a soft critical status
+        # check if the downtime is still inactive
+        #----------------------------------------------------------------
+        self.scheduler_loop(1, svc, 2, 'BAD')
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 1)
         self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
-        self.assert_(not svc.is_in_downtime)
+        self.assert_(not svc.in_scheduled_downtime)
         self.assert_(not svc.downtimes[0].fixed)
         self.assert_(not svc.downtimes[0].is_in_effect)
         self.assert_(not svc.downtimes[0].can_be_deleted)
         time.sleep(61)
-
-        # now the downtime must be triggered
-        self.fake_check(svc, 2, 'BAD')
-        self.sched.consume_results()
-        self.sched.update_downtimes_and_comments()
-
-        print "bad check was launched (HARD;2), downtime must now be active"
-        print svc.downtimes[0]
+        #----------------------------------------------------------------
+        # run the service again to get a hard critical status
+        # check if the downtime is active now
+        #----------------------------------------------------------------
+        self.scheduler_loop(1, svc, 2, 'BAD')
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 1)
         self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
-        self.assert_(svc.is_in_downtime)
+        self.assert_(svc.in_scheduled_downtime)
         self.assert_(not svc.downtimes[0].fixed)
         self.assert_(svc.downtimes[0].is_in_effect)
         self.assert_(not svc.downtimes[0].can_be_deleted)
-
+        #----------------------------------------------------------------
+        # cancel the downtime
+        # check if the downtime is inactive now and can be deleted
+        #----------------------------------------------------------------
         scheduled_downtime_depth = svc.scheduled_downtime_depth
         cmd = "[%lu] DEL_SVC_DOWNTIME;%d" % (now, svc.downtimes[0].id)
         self.sched.run_external_command(cmd)
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 1)
-        self.assert_(not svc.is_in_downtime)
+        self.assert_(not svc.in_scheduled_downtime)
         self.assert_(svc.scheduled_downtime_depth < scheduled_downtime_depth)
         self.assert_(not svc.downtimes[0].fixed)
         self.assert_(not svc.downtimes[0].is_in_effect)
@@ -315,22 +317,22 @@ class TestConfig(unittest.TestCase):
         self.assert_(len(self.sched.comments) == 1)
         self.assert_(len(svc.comments) == 1)
         time.sleep(61)
-
-        # now a notification must be sent
-        self.fake_check(svc, 2, 'BAD')
-        self.sched.consume_results()
-        self.sched.update_downtimes_and_comments()
-        # downtimes must have been deleted now
+        #----------------------------------------------------------------
+        # run the service again with a critical status
+        # the downtime must have disappeared
+        # a notification must be sent
+        #----------------------------------------------------------------
+        self.scheduler_loop(1, svc, 2, 'BAD')
         self.assert_(len(self.sched.downtimes) == 0)
         self.assert_(len(svc.downtimes) == 0)
         self.assert_(len(self.sched.comments) == 0)
         self.assert_(len(svc.comments) == 0)
-
         self.show_logs()
         self.show_actions()
 
 
     def test_schedule_fixed_host_downtime(self):
+        self.print_header()
         # schedule a 2-minute downtime
         # downtime must be active
         # consume a good result, sleep for a minute
@@ -340,48 +342,18 @@ class TestConfig(unittest.TestCase):
         # no notification must be found in broks
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router 
+        host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         print "test_schedule_fixed_host_downtime initialized"
-        print "show logs and actions"
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 0)
         self.assert_(self.count_actions() == 0)
-        print "now run three service checks with a critical result which is more than enough. (max 2)"
-        #self.scheduler_loop(4, host, 2, 'DOWN')
-        self.scheduler_loop(3, svc, 2, 'CRITICAL')
-        print "show logs and actions after three negative checkresults"
-        print "there must be a notification"
-        # count actions and notifications
-        self.show_logs()
-        self.show_actions()
-        # soft 1, eventhandler, hard 2, notification, eventhandler
-        self.assert_(self.count_logs() == 5)
-        # eventhandler, notification, eventhandler
-        self.assert_(self.count_actions() == 3)
-
-        print "clear logs and actions and recover the service"
-        self.clear_logs()
-        self.clear_actions()
-        self.assert_(self.count_logs() == 0)
-        self.assert_(self.count_actions() == 0)
-        self.scheduler_loop(2, svc, 0, 'OK')
-        # count actions and notifications
-        self.show_logs()
-        self.show_actions()
-        # hard 1, notification, eventhandler
-        self.assert_(self.count_logs() == 3)
-        # notification, eventhandler
-        self.assert_(self.count_actions() == 2)
-        print "------------------------------------------------------"
-        
-        self.clear_logs()
-        self.clear_actions()
-        self.assert_(self.count_logs() == 0)
-        self.assert_(self.count_actions() == 0)
+        #----------------------------------------------------------------
+        # schedule a downtime of 10 minutes for the host
+        #----------------------------------------------------------------
         duration = 600
         now = time.time()
         # flexible downtime valid for the next 2 minutes
@@ -389,8 +361,9 @@ class TestConfig(unittest.TestCase):
         self.sched.run_external_command(cmd)
         time.sleep(20)
         self.sched.update_downtimes_and_comments()
-
-        print "downtime was scheduled. check its inactivity and the comment"
+        #----------------------------------------------------------------
+        # check if a downtime object exists (scheduler and host)
+        #----------------------------------------------------------------
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(host.downtimes) == 1)
         self.assert_(host.downtimes[0] in self.sched.downtimes.values())
@@ -401,28 +374,138 @@ class TestConfig(unittest.TestCase):
         self.assert_(len(host.comments) == 1)
         self.assert_(host.comments[0] in self.sched.comments.values())
         self.assert_(host.downtimes[0].comment_id == host.comments[0].id)
+        #----------------------------------------------------------------
+        # send the host to a hard DOWN state
+        # check log messages, (no) notifications and eventhandlers
+        #----------------------------------------------------------------
         self.scheduler_loop(5, host, 2, 'DOWN')
-        print "host is down and in hard state. and inside a downtime"
         self.show_logs()
         self.show_actions()
-        # start downtime, soft 1, soft 2, hard 3, 
-        self.assert_(self.count_logs() == 4)
-        # nothing
+        # start downtime, soft 1, evt1, soft 2, evt2, hard 3, evt3
+        self.assert_(self.count_logs() == 7)
+        # 3x evthandler
+        self.assert_(self.count_actions() == 3)
+        self.clear_logs()
+        self.clear_actions()
+        #----------------------------------------------------------------
+        # the host comes UP again
+        # check log messages, (no) notifications and eventhandlers
+        #----------------------------------------------------------------
+        self.scheduler_loop(2, host, 0, 'UP')
+        self.show_logs()
+        self.show_actions()
+        # hard 3, eventhandler
+        self.assert_(self.count_logs() == 2)
+        # 1x evthandler
+        self.assert_(self.count_actions() == 1)
+        self.clear_logs()
+        self.clear_actions()
+
+
+    def test_schedule_fixed_host_downtime_with_service(self):
+        self.print_header()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.show_logs()
+        self.show_actions()
+        self.assert_(self.count_logs() == 0)
         self.assert_(self.count_actions() == 0)
+        #----------------------------------------------------------------
+        # schedule a downtime of 10 minutes for the host
+        #----------------------------------------------------------------
+        duration = 600
+        now = time.time()
+        cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        time.sleep(20)
+        self.sched.update_downtimes_and_comments()
+        #----------------------------------------------------------------
+        # check if a downtime object exists (scheduler and host)
+        # check the start downtime notification
+        #----------------------------------------------------------------
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(host.downtimes) == 1)
+        self.assert_(host.in_scheduled_downtime)
+        self.assert_(host.downtimes[0] in self.sched.downtimes.values())
+        self.assert_(host.downtimes[0].fixed)
+        self.assert_(host.downtimes[0].is_in_effect)
+        self.assert_(not host.downtimes[0].can_be_deleted)
+        self.assert_(len(self.sched.comments) == 1)
+        self.assert_(len(host.comments) == 1)
+        self.assert_(host.comments[0] in self.sched.comments.values())
+        self.assert_(host.downtimes[0].comment_id == host.comments[0].id)
+        self.scheduler_loop(4, host, 2, 'DOWN')
+        self.show_logs()
+        self.show_actions()
+        # start downtime, soft 1, evt1, soft 2, evt2, hard 3, evt3
+        self.assert_(self.count_logs() == 7)
+        # 3x evthandler
+        self.assert_(self.count_actions() == 3)
+        self.clear_logs()
+        self.clear_actions()
+        #----------------------------------------------------------------
+        # now the service becomes critical
+        # check that the host has a downtime, _not_ the service
+        # check logs, (no) notifications and eventhandlers
+        #----------------------------------------------------------------
+        self.scheduler_loop(4, svc, 2, 'CRITICAL')
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(svc.downtimes) == 0)
+        self.assert_(not svc.in_scheduled_downtime)
+        self.assert_(svc.host.in_scheduled_downtime)
+        self.show_logs()
+        self.show_actions()
+        # soft 1, evt1, hard 2, evt2
+        self.assert_(self.count_logs() == 4)
+        # 2x evthandler
+        self.assert_(self.count_actions() == 2)
+        self.clear_logs()
+        self.clear_actions()
+        #----------------------------------------------------------------
+        # the host comes UP again
+        # check log messages, (no) notifications and eventhandlers
+        #----------------------------------------------------------------
+        self.scheduler_loop(2, host, 0, 'UP')
+        self.show_logs()
+        self.show_actions()
+        # hard 3, eventhandler
+        self.assert_(self.count_logs() == 2)
+        # 1x evthandler
+        self.assert_(self.count_actions() == 1)
+        self.clear_logs()
+        self.clear_actions()
+        #----------------------------------------------------------------
+        # the service becomes OK again
+        # check log messages, (no) notifications and eventhandlers
+        # check if the stop downtime notification is the only one
+        #----------------------------------------------------------------
+        self.scheduler_loop(10, host, 0, 'UP')
+        self.assert_(len(self.sched.downtimes) == 0)
+        self.assert_(len(host.downtimes) == 0)
+        self.assert_(not host.in_scheduled_downtime)
+        self.show_logs()
+        self.show_actions()
+        self.assert_(self.log_match(1, 'HOST DOWNTIME ALERT.*STOPPED'))
+        self.clear_logs()
+        self.clear_actions()
 
-        # send host into downtime
-        # run host checks with result down
-        # check for notifications (there must be no notification)
-
-        # send host into downtime
-        # run service checks with result critical
-        # check for notifications (there must be no notification)
 
 
         # todo
         # checks return 1=warn. this means normally up
         # set use_aggressive_host_checking which treats warn as down
 
+        # send host into downtime
+        # run service checks with result critical
+        # host exits downtime
+        # does the service send a notification like when it exts a svc dt?
+        # check for notifications
+
+        # host is down and in downtime. what about service eventhandlers?
 
 
     def test_notification_after_cancel_flexible_svc_downtime(self):
