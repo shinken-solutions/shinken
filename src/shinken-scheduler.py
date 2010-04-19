@@ -138,8 +138,18 @@ class IBroks(Pyro.core.ObjBase):
         res = self.sched.get_broks()
         #print "Sending %d broks" % len(res)#, res
         self.sched.nb_broks_send += len(res)
+        #we do not more have a full broks in queue
+        self.sched.has_full_broks = False
         return res
 
+    #A broker is a new one, if we do not have
+    #a full broks, we clean our broks, and
+    #fill it with all new values
+    def fill_initial_broks(self):
+        if not self.sched.has_full_broks:
+            self.sched.broks.clear()
+            self.sched.fill_initial_broks()
+            
 
     #Ping? Pong!
     def ping(self):

@@ -242,9 +242,21 @@ class Broker(Satellite):
 		running_id = links[id]['running_id']
 		uri = links[id]['uri']
 		links[id]['con'] = Pyro.core.getProxyForURI(uri)
+
 		try:
 			links[id]['con'].ping()
 			new_run_id = links[id]['con'].get_running_id()
+
+		        #The schedulers have been restart : it has a new run_id.
+		        #So we clear all verifs, they are obsolete now.
+			if links[id]['running_id'] != 0 or new_run_id != running_id:
+				links[id]['broks'].clear()
+			        #we must ask for a enw full broks if
+			        #it's a scheduler
+				if type == 'scheduler':
+					print "Ask for a broks generation"
+					links[id]['con'].fill_initial_broks()
+			links[id]['running_id'] = new_run_id			
 		except Pyro.errors.ProtocolError, exp:
 			print exp
 			return
@@ -256,11 +268,7 @@ class Broker(Satellite):
                         print "%s is not initilised %s" % (type, exp)
                         links[id]['con'] = None
                         return
-		#The schedulers have been restart : it has a new run_id.
-		#So we clear all verifs, they are obsolete now.
-		if links[id]['running_id'] != 0 and new_run_id != running_id:
-			links[id]['broks'].clear()
-		links[id]['running_id'] = new_run_id
+
 		print "Connexion OK"
 
 

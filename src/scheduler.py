@@ -79,7 +79,7 @@ class Scheduler:
         self.downtimes = {}
         self.comments = {}
         self.broks = {}
-
+        self.has_full_broks = False #have a initial_broks in broks queue?
 
 
     #Load conf for future use
@@ -443,6 +443,9 @@ class Scheduler:
             for i in tab:
                 b = i.get_initial_status_brok()
                 self.add(b)
+
+        #We now have all full broks
+        self.has_full_broks = True
 
         Log().log("Created initial Broks: %d" % len(self.broks))
         
