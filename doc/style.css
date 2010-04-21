@@ -1,4 +1,8 @@
+
+
 /* OpenID icon style */
+
+
 input.system-openid, input.com-system-openid {
    background: url(http://openid.net/images/login-bg.gif) no-repeat;
    background-color: #fff;
@@ -45,6 +49,18 @@ body {
 	color: #666;
 	background: #fff;
 }
+
+body {
+  font-size: 10pt;
+  margin-left: 15%;
+  margin-right: 15%;
+  font-family: sans-serif;
+  background-image: url(images/shinken-logo-rotated.png);
+  background-repeat: no-repeat;
+  background-position: 10px 10px;
+  background-attachment: fixed;
+}
+
 
 body.contentpane {
 	background: #fff;

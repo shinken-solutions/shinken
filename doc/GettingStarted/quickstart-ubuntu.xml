@@ -43,6 +43,7 @@
   </section>
 
   <section> 
+    <title> Lasy (efficient) admins</title>
     <para>
       For lasy (efficient) admins : Remember you can download a already configured
       Shinken Virtual Machine <ulink url="http://www.megaupload.com/?d=KC4NO09A">here</ulink>.
@@ -170,7 +171,7 @@
 
     <screen>
       <prompt>linux:~ # </prompt><userinput>sudo apt-get install nagios-plugins</userinput>
-      <prompt>linux:~ # </prompt><userinput>ln -s /usr/lib/nagios/plugins /usr/local/shinken/libexec/<userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /usr/lib/nagios/plugins /usr/local/shinken/libexec/</userinput>
     </screen>
 
   </section>
