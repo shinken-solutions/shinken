@@ -12,11 +12,11 @@
 <remark>Chapitre terminé</remark>
   
   <para>
-  Congratulations on choosing Nagios! Nagios is quite powerful and
+  Congratulations on choosing Shinken! Shinken is quite powerful and
   flexible, but it can take a lot of work to get it configured just the way
   you'd like. Once you become familiar with how it works and what it can do
   for you, you'll never want to be without it&nbsp;:-) Here are some important
-  things to keep in mind for first-time Nagios users:
+  things to keep in mind for first-time Shinken users:
   </para>
 
   <orderedlist>
@@ -25,8 +25,8 @@
       <emphasis role="bold">Relax - it's going to take some
       time.</emphasis> Don't expect to be able to get things working exactly
       the way you want them right off the bat. it's not that easy. Setting up
-      Nagios can involve a bit of work - partly because of the options that
-      Nagios offers, partly because you need to know what to monitor on your
+      Shinken can involve a bit of work - partly because of the options that
+      Shinken offers, partly because you need to know what to monitor on your
       network (and how best to do it).
       </para>
     </listitem>
@@ -36,18 +36,18 @@
       <emphasis role="bold">Use the quickstart instructions.</emphasis>
       The <link linkend="gettingstarted-quickstart">Quickstart installation 
       guide</link> is designed to get most new users up and running with a 
-      basic Nagios setup fairly quickly. Within 20 minutes you can have Nagios 
+      basic Shinken setup fairly quickly. Within 20 minutes you can have Shinken 
       installed and monitoring your local system. Once that's complete, you can 
-      move on to learning how to configure Nagios to do more.
+      move on to learning how to configure Shinken to do more.
       </para>
     </listitem>
 
     <listitem>
       <para>
-      <emphasis role="bold">Read the documentation.</emphasis> Nagios
+      <emphasis role="bold">Read the documentation.</emphasis> Shinken
       can be tricky to configure when you've got a good grasp of what's going
       on, and nearly impossible if you don't. Make sure you read the
-      documentation (particularly the sections on <quote>Configuring Nagios</quote> and
+      documentation (particularly the sections on <quote>Configuring Shinken</quote> and
       <quote>The Basics</quote>). Save the advanced topics for when you've got a good
       understanding of the basics.
       </para>
@@ -58,7 +58,7 @@
       <emphasis role="bold">Seek the help of others.</emphasis> If
       you've read the documentation, reviewed the sample config files, and are
       still having problems, send an email message describing your problems to
-      the <email>nagios-users</email> mailing list. Due to the amount of
+      the <email>shinken-users</email> mailing list. Due to the amount of
       work that I have to do for this project, I am unable to answer most of
       the questions that get sent directly to me, so your best source of help
       is going to be the mailing list. If you've done some background reading

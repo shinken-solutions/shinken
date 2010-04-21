@@ -12,7 +12,7 @@
   <abstract>
     <para>
       These quickstart guides are intended to provide you with simple
-      instructions on how to install Nagios from source (code) and have
+      instructions on how to install Shinken from source (code) and have
       it monitoring your local machine inside of 20 minutes. No advanced
       installation options are discussed here - just the basics that will
       work for 95% of users who want to get started.
@@ -36,13 +36,23 @@
       </listitem>
     </itemizedlist>
     <para>
+      You can also take a already configured Virtual Machine available <ulink url="http://www.megaupload.com/?d=KC4NO09A">here</ulink>.
+      It's a Ubuntu 9.10 server distribution with Shinken 0.1Rc on it. You can connect to it with the account shinken/shinken. Then you just ned to
+      launch the command :
+      <screen>
+	<prompt>linux:~ $ </prompt><userinput>./start_all.sh</userinput>
+      </screen>
+      to have a working Shinken environnement. Then you can connect to <ulink url="http://VMADDRESS/ninja"> the ninja interface</ulink> with the 
+      account administrator/monitor to see the hosts already configured.
+    </para>
+    <para>
       You can also find additional quickstart guides on the
       <ulink url="&url-nagios-community;">NagiosCommunity.org wiki</ulink>.
       Can't find a quickstart for your particular OS ? Write one and post
       it to the wiki for others!
    </para>
     <para>
-      If you are installing Nagios on an operating system or Linux
+      If you are installing Shinken on an operating system or Linux
       distribution that isn't listed above, read the 
       <link linkend="gettingstarted-quickstart-fedora">&name-fedora; Quickstart</link> for
       an overview of what you'll need to do. Command names, paths, etc.
@@ -54,7 +64,7 @@
   <section>
     <title>Post-Installation Modifications</title>
     <para>
-      Once you get Nagios installed and running properly, you'll no doubt
+      Once you get Shinken installed and running properly, you'll no doubt
       want to start monitoring more than just your local machine. Check
       out the following docs for how to go about monitoring other
       things...

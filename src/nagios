@@ -1,0 +1,5 @@
+#!/bin/sh
+#Wrapper script to call Arbiter in place of Nagios bin
+
+DIR=`/usr/bin/dirname $0`
+$DIR/shinken-arbiter.py $*
