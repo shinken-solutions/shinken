@@ -34,6 +34,9 @@
       <listitem>
         <para><link linkend="gettingstarted-quickstart-ubuntu">&name-ubuntu; Quickstart</link></para>
       </listitem>
+      <listitem>
+        <para><link linkend="gettingstarted-quickstart-windows">Windows Quickstart</link></para>
+      </listitem>
     </itemizedlist>
     <para>
       You can also take a already configured Virtual Machine available <ulink url="http://www.megaupload.com/?d=KC4NO09A">here</ulink>.

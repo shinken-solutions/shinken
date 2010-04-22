@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+	  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+	  [
+	  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+	  %all.entities;
+	  ]
+	  >
+<chapter id="gettingstarted-quickstart-windows" xreflabel="Windows quickstart">
+  <title>Windows Quickstart</title>
+
+  <abstract>
+    <para>
+      This guide is intended to provide you with simple instructions on
+      how to install Shinken on windows and have it monitoring
+      your local machine inside of 20 minutes. No advanced installation options
+      are discussed here - just the basics that will work for 95% of users who
+      want to get started.
+    </para>
+
+    <para>
+      These instructions were written based on a standard Windows (tested on 2k3, 2k8, XP and Seven).
+    </para>
+  </abstract>
+
+  <section>
+    <title>What You'll End Up With</title>
+
+    <para>
+      If you follow these instructions, here's what you'll end up with:
+    </para>
+
+    <itemizedlist>
+      <listitem>
+        <para>
+	  Shinken and the plugins will be installed underneath <filename class="directory">c:\shinken\</filename>
+	</para>
+      </listitem>
+
+      <listitem>
+        <para>
+	  Shinken will be configured to monitor a few aspects of your local
+          system (CPU load, disk usage, etc.)
+	</para>
+      </listitem>
+
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title>Prerequisites</title>
+
+    <para>
+      During portions of the installation you'll need to have administrator access
+      to your machine.
+    </para>
+
+    <para>
+      Make sure you've installed the following packages on your Windows
+      installation before continuing.
+    </para>
+
+    <itemizedlist>
+      <listitem>
+        <para><ulink url="http://www.python.org/download/">Python 2.6 for Windows</ulink></para>
+      </listitem>
+      <listitem>
+        <para><ulink url="http://pyro.sourceforge.net/download.html">Pyro librairy Windows</ulink></para>
+      </listitem>
+      <listitem>
+        <para><ulink url="http://www.microsoft.com/downloads/details.aspx?FamilyID=9D467A69-57FF-4AE7-96EE-B18C4790CFFD">Windows Ressource Kit</ulink></para>
+      </listitem>
+    </itemizedlist>
+
+  </section>
+
+  <section>
+    <title>Download Shinken and the Plugins</title>
+
+    <para>Take the Shinken pakage <ulink url="http://shinken-monitoring.org/download">Here</ulink> and uncomrpess it in <filename class="directory">c:</filename> so you will have directory as <filename class="directory">c:\shinken\src</filename>. Take the files instsrv.exe, srvany.exe and sc.exe from the directory of the ressource kit (typically <filename class="directory">c:\program files\Windows Resource Kits\Tools</filename>) and put them in the directory <filename class="directory">c:\shinken\src\windows</filename>.
+    </para>
+
+  </section>
+
+  <section>
+    <title>Install Shinken as a Service</title>
+
+    <para>Launch the batch <filename class="directory">c:\shinken\src\windows\install-all.bat</filename> to declare all services need by Shinken :</para>
+    <itemizedlist>
+      <listitem>
+        <para>Shinken-Arbiter : launch the Arbiter service</para>
+      </listitem>
+      <listitem>
+        <para>Shinken-Scheduler : launch the Scheduler service</para>
+      </listitem>
+      <listitem>
+        <para>Shinken-Poller : launch the Poller service</para>
+      </listitem>
+      <listitem>
+        <para>Shinken-Reactionner : launch the Reactionner service</para>
+      </listitem>
+      <listitem>
+        <para>Shinken-Broker : launch the Broker service</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>Then double click in all reg file in the directory (one for each service) so service parameters
+      will be correcly populated. You can then launch services.msc to see you brand new services.</para>
+
+    
+    <para>But don't start Shinken yet - there's still more that needs to be
+      done&hellip;</para>
+  </section>
+
+  <section>
+    <title>Customize Configuration</title>
+
+    <para>Sample <link linkend="configuringnagios-config">configuration files</link>
+      have now been installed in the <filename class="directory">c:\shinken\etc</filename>
+      directory. These sample files should work fine for getting started with
+      Shinken. You'll need to make just one change before you proceed...</para>
+
+    <para>Edit the
+      <filename>c:\shinken\etc\contacts.cfg</filename> config
+      file with your favorite editor and change the email address associated
+      with the shinkenadmin contact definition to the address you'd like to use
+      for receiving alerts.</para>
+
+  </section>
+
+
+  <section>
+    <title>Compile and Install the Nagios Plugins</title>
+    <para> TODO </para>
+
+  </section>
+
+  <section>
+    <title>Start Shinken</title>
+
+    <para>The only thing you need is to start all Shinken services.</para>
+
+  </section>
+
+
+  <section>
+    <title>Other Modifications</title>
+
+    <para>Configuring email notifications is out of the scope of this
+      documentation. While Shinken is currently configured to send you email
+      notifications, your system may not yet have a mail program properly
+      installed or configured. Refer to your system documentation, search the
+      web, or look to the <ulink
+			     url="&url-nagios-community;">NagiosCommunity.org wiki</ulink>
+      for specific instructions on configuring your system to send email
+      messages to external addresses. More information on notifications can be
+      found <link linkend="thebasics-notifications">here</link>.</para>
+  </section>
+
+  <section>
+    <title>You're Done</title>
+
+    <para>Congratulations! You sucessfully installed Shinken. Your journey into
+      monitoring is just beginning. You'll no doubt want to monitor more than
+      just your local machine, so check out the following docs...</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-windows">Monitoring Windows machines</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-linux">Monitoring Linux/Unix machines</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-netware">Monitoring Netware servers</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-routers">Monitoring routers/switches</link></para>
+      </listitem>
+
+      <listitem>
+        <para><link linkend="gettingstarted-monitoring-publicservices">Monitoring publicly available services (&protocol-http;, &protocol-ftp;, &protocol-ssh;, etc.)</link></para>
+      </listitem>
+    </itemizedlist>
+  </section>
+</chapter>
+
