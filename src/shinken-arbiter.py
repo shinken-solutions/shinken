@@ -451,12 +451,14 @@ class Arbiter(Daemon):
         self.dispatcher.dispatch()
         
 	#Now create the external commander
-        e = ExternalCommand(self.conf, 'dispatcher')
+        if os.name != 'nt':
+          e = ExternalCommand(self.conf, 'dispatcher')
 	
 	#Scheduler need to know about external command to activate it 
         #if necessery
-        self.load_external_command(e)
-	
+          self.load_external_command(e)
+        else:
+          self.fifo = None
 
         print "Run baby, run..."
         timeout = 1.0
@@ -590,7 +592,7 @@ if __name__ == "__main__":
 
     #p = Shinken(conf)
     import cProfile
-    #p.main()
+    p.main()
     command = """p.main()"""
-    cProfile.runctx( command, globals(), locals(), filename="/tmp/Arbiter.profile" )
+    #cProfile.runctx( command, globals(), locals(), filename="/tmp/Arbiter.profile" )
 
