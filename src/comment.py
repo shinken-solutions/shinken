@@ -26,7 +26,7 @@ class Comment:
     #is set to zero (0), the comment will be deleted the next time
     #Nagios is restarted. Otherwise, the comment will persist 
     #across program restarts until it is deleted manually.
-    def __init__(self, ref, persistent, author, comment, entry_type, source, expires, expire_time):
+    def __init__(self, ref, persistent, author, comment, comment_type, entry_type, source, expires, expire_time):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.ref = ref #pointer to srv or host we are apply
@@ -35,6 +35,8 @@ class Comment:
         self.author = author
         self.comment = comment
         #Now the hidden attributes
+        #HOST_COMMENT=1,SERVICE_COMMENT=2
+        self.comment_type = comment_type
         #USER_COMMENT=1,DOWNTIME_COMMENT=2,FLAPPING_COMMENT=3,ACKNOWLEDGEMENT_COMMENT=4
         self.entry_type = entry_type
         #COMMENTSOURCE_INTERNAL=0,COMMENTSOURCE_EXTERNAL=1
