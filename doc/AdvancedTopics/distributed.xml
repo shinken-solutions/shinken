@@ -189,7 +189,7 @@
   </section>
 
   <section>
-    <title>Different type of Pollers : poller_tag</title>
+    <title>Different types of Pollers : poller_tag</title>
     <para>
       Current Shinken's architecture is useful for someone that use the same type of poller for checks. 
       But it can be useful to have different types of pollers, like GNU/Linux ones and Windows ones. 
