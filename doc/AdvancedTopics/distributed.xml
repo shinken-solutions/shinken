@@ -187,25 +187,105 @@
       For each commands, Shinken knows if it is global or not. If global, it just sends orders to all schedulers. For specific ones instead it searches which scheduler manages the element referred by the command (host/service) and sends the order to this scheduler. When the order is received by schedulers they just need to apply them.
     </para>
   </section>
+
+  <section>
+    <title>Different type of Pollers : poller_tag</title>
+    <para>
+      Current Shinken's architecture is useful for someone that use the same type of poller for checks. 
+      But it can be useful to have different types of pollers, like GNU/Linux ones and Windows ones. 
+      We already saw that all pollers talks to all schedulers. In fact, pollers can be "taggued" so they
+      will only got some checks.
+    </para>
+    <para>This is useful when user need to have hosts in the same scheduler (like with dependancies) but
+      need some hosts or services to be checks by specific pollers (see uses cases below).
+    </para>
+    <para>
+      Theses checks can in fact be taggued in 3 levels :
+      <itemizedlist>
+	<listitem>
+	  <para>Host</para>
+	</listitem>
+	<listitem>
+          <para>Service</para>
+        </listitem>
+	<listitem>
+	  <para>Command</para>
+	</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      The parameter to tag a command, host ro service is "poller_tag". If a check use a "taggued" or "untaggued" command 
+      in a untaggued host/service, it takes the poller_tag of this host/service. In a "untagued" host/service, it's the
+      command tag that is taken into account.
+    </para>
+    <para>
+      The pollers can be taggued with multiples poller_tags. If they are taggued, they will only take checks that are taggued, not
+      the untaggued ones.
+    </para>
+
+    <section>
+      <title>Use cases</title>
+      <para>
+	This capability is useful in two cases:
+	<itemizedlist>
+        <listitem>
+          <para>GNU/Linux and Windows pollers</para>
+        </listitem>
+        <listitem>
+          <para>DMZ</para>
+        </listitem>
+      </itemizedlist>
+      </para>
+      <para>
+	In the first case, it can be useful to have a windows box in a domain with poller daemon running under a domain account.
+	If this poller launch WMI queries, user can have a easy Windows monitoring.
+      </para>
+      <para>
+        In the second case is a classic one : when you have a DMZ network, you need to have a dedicated poller that 
+	is in the DMZ, and return results to a scheduler in LAN. With this, you can still have dependancies between
+	DMZ hosts and LAN hosts, and still be sure checks are done in a DMZ only poller.
+      </para>
+    </section>
+  </section>
+
   <section>
     <title>Advanced architectures : Realms</title>
     <para>
       Shinken's architecture allows the administrator to have a unique point of administration with numerous schedulers, pollers, reactionners and brokers. Hosts are dispatched with their own services to schedulers and the satellites (pollers/reactionners/brokers) get jobs from them. Everyone is happy.
     </para>
     <para>
-      Or almost everyone. Think about an administrator who has a distributed architecture around the world. With the current Shinken architecture the administrator can put a couple scheduler/poller in Europe and another in Asia, but he cannot "tag" hosts in Asia to be checked by the asian scheduler . And try ingto check an asian server with an european scheduler can be... random. The hosts are dispatched to all schedulers and satellites so the administrator cannot be sure than asian hosts will be checked by the asian monitoring servers.
-
-      In the current Architecture Shinken is usefull for load balancing with high availability, but for a unique site. Site managment must be added.
-
-      We will use a generic term for this site managment because maybe this partitioning is not a geographic one, but an organisational one. We will then use the name  realm.
+      Or almost everyone. Think about an administrator who has a distributed architecture around the world. With the current
+      Shinken architecture the administrator can put a couple scheduler/poller in Europe and another in Asia, but he cannot
+      "tag" hosts in Asia to be checked by the asian scheduler . And try ingto check an asian server with an european
+      scheduler can be... random. The hosts are dispatched to all schedulers and satellites so the administrator cannot
+      be sure than asian hosts will be checked by the asian monitoring servers.
     </para>
-
+    <para>
+      In the current Architecture Shinken is usefull for load balancing with high availability, but for a 
+      unique site. Site managment must be added.
+    </para>
+    <para>
+      We will use a generic term for this site managment because maybe this partitioning is not a geographic 
+      one, but an organisational one. We will then use the name  realm.
+    </para>
     <section>
       <title>Realms in few words</title>
       <para>      
-	A realm is a pool of resources (scheduler, poller, reactionner and broker) that hosts or hostgroups can be attached to. A host or hostgroup can be attached to only one realm. All "dependancies" or parents of this hosts must be in the same realm. A realm can be tagged "default"' and untagged hosts will be put into it.
+	A realm is a pool of resources (scheduler, poller, reactionner and broker) that hosts or hostgroups
+	can be attached to. A host or hostgroup can be attached to only one realm. All "dependancies" or
+	parents of this hosts must be in the same realm. A realm can be tagged "default"' and 
+	realm untagged hosts will be put into it.
 
 	In a realm, pollers, reactionners and brokers will only get jobs from scehdulers of the same realm.
+      </para>
+    </section>
+    <section>
+      <title>Realms are not poller_tags!</title>
+      <para>
+	Beware to understand when to use realms and when to use poller_tags. Realms are use to divise schedulers, 
+	poller_tags for divise pollers. If some cases of poller_tag can be done with realm, think taht you must see if poller_tag is
+	"enough" for you before use realms. In realms, hosts between schedulers do not communicate. If you just need a poller in a DMZ
+	network, use poller_tag. If you need a scheduler/poller in a customer LAN, use realms.
       </para>
     </section>
     <section>

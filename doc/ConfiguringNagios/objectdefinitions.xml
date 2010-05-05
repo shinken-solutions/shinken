@@ -339,6 +339,11 @@
               </row>
 
               <row>
+                <entry><para>poller_tag</para></entry>
+                <entry><para><emphasis>poller_tag</emphasis></para></entry>
+              </row>
+
+              <row>
                 <entry nameend="col_2" namest="col_1"><para>}</para></entry>
               </row>
             </tbody>
@@ -368,6 +373,7 @@
 	    notification_period            24x7
 	    notification_options           d,u,r
 	    realm                          Europe
+	    poller_tag                     DMZ
 	    }
 	</programlisting></para>
       </section>
@@ -1034,6 +1040,19 @@
 		the host will be put. By putting the host in a realm, it will be manage by one of the scheduler of this realm.</para>
 	    </listitem>
 	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      poller_tag
+	    </term>
+	    <listitem>
+	      <para>This variable is used to define the poller_tag of the host. All checks of this hosts will only
+		take by pollers that have this value in their poller_tags parameter.
+	      </para>
+	      <para>
+		By default there is no poller_tag, so all untaggued pollers can take it.
+	      </para>
+	    </listitem>
+	  </varlistentry>
 
 	  <!--
 	      <varlistentry>
@@ -1481,6 +1500,11 @@
               </row>
 
               <row>
+                <entry><para>poller_tag</para></entry>
+                <entry><para><emphasis>poller_tag</emphasis></para></entry>
+              </row>
+
+              <row>
                 <entry nameend="col_2" namest="col_1"><para>}</para></entry>
               </row>
             </tbody>
@@ -1504,6 +1528,7 @@
 	  notification_period     24x7
 	  notification_options    w,c,r
 	  contact_groups          linux-admins
+	  poller_tag              DMZ
 	  }
 	</programlisting>
       </section>
@@ -2058,6 +2083,21 @@
 	      </para>
 	    </listitem>
 	  </varlistentry>
+
+	  <varlistentry>
+	    <term>
+	      poller_tag
+	    </term>
+	    <listitem>
+	      <para>This variable is used to define the poller_tag of checks from this service. All of theses checks will be 
+		taken by pollers that have this value in their poller_tags parameter.
+	      </para>
+	      <para>
+		By default there is no poller_tag, so all untaggued pollers can take it.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+
 	</variablelist>
         
       </section>
@@ -3007,6 +3047,11 @@
               </row>
 
               <row>
+                <entry><para>poller_tag</para></entry>
+                <entry><para><emphasis>poller_tag</emphasis></para></entry>
+              </row>
+
+              <row>
                 <entry nameend="col_2"
                        namest="col_1"><para>}</para></entry>
               </row>
@@ -3078,6 +3123,21 @@
 	      </para>
 	    </listitem>
 	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      poller_tag
+	    </term>
+	    <listitem>
+	      <para>This directive is used to define the poller_tag of this command. If the host/service
+		that call this command do nto override it with their own poller_tag, it will make this command if used in a check
+		only taken by polelrs that also have this value in their poller_tags parameter.
+	      </para>
+	      <para>
+		By default there is no poller_tag, so all untaggued pollers can take it.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+
 	</variablelist>
       </section>
     </section>
@@ -5009,6 +5069,11 @@
                 <entry><para><emphasis>[0,1]</emphasis></para></entry>
               </row>
 
+	      <row>
+                <entry><para>poller_tags</para></entry>
+                <entry><para><emphasis>poller_tags</emphasis></para></entry>
+              </row>
+
               <row>
                 <entry><para>modules</para></entry>
                 <entry><para><emphasis>modules</emphasis></para></entry>
@@ -5033,6 +5098,7 @@
              spare              0
 	     realm              Europe
 	     manage_sub_realms  0
+	     poller_tags        DMZ, Another-DMZ
              modules            module1,module2
 	  }
 	</programlisting>
@@ -5099,6 +5165,19 @@
               <para>This variable is used to define if the poller will take jobs from scheduler from the sub-realms of it's realm. The
 		default value is <emphasis>0</emphasis>.
               </para>
+            </listitem>
+          </varlistentry>
+	  <varlistentry>
+            <term>
+              poller_tags
+            </term>
+            <listitem>
+              <para>This variable is used to define the checks the poller can take. If no poller_tags is defined, 
+		poller will take all untagued checks. If at least one tag is defined, it will take only the checks that are also
+		taggued like it.
+              </para>
+	      <para>By default, there is no poller_tag, so poller can take all untagued checks (default).
+	      </para>
             </listitem>
           </varlistentry>
 	  <varlistentry>
