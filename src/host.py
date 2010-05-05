@@ -93,6 +93,7 @@ class Host(SchedulingItem):
         #New to shinken
         'realm' : {'required' : False, 'default' : None}, #no 'fill_brok' because realm are link with every one, it's too dangerous
         #so picle things like connexions to schedulers, etc.
+        'poller_tag' : {'required' : False, 'default' : None},
 
         #Shinken specific
         'resultmodulations' : {'required' : False, 'default' : ''}, #TODO : fix brok and deepcopy a patern is not allowed
@@ -263,7 +264,7 @@ class Host(SchedulingItem):
             Log().log("%s : I do not have contacts nor contacgroups" % self.get_name())
             state = False
         if not hasattr(self, 'check_command') or not self.check_command.is_valid():
-            Log().log("%s : my check_command is invalid" % self.get_name())
+            Log().log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
             state = False
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
             Log().log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())

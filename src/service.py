@@ -89,6 +89,8 @@ class Service(SchedulingItem):
         'parallelize_check' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
 
         #Shinken specific
+        'poller_tag' : {'required' : False, 'default' : None},
+        
         'resultmodulations' : {'required' : False, 'default' : ''}, #TODO : fix brok and deepcopy a patern is not allowed
         'escalations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         }
@@ -252,7 +254,7 @@ class Service(SchedulingItem):
             Log().log('%s : I do not have contacts nor contacgroups' % self.get_name())
             state = False
         if not hasattr(self, 'check_command') or not self.check_command.is_valid():
-            Log().log('%s : my check_command is invalid' % self.get_name())
+            Log().log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
             state = False
         if not hasattr(self, 'notification_interval') and  self.notifications_enabled == True:
             Log().log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
@@ -671,7 +673,8 @@ class Services(Items):
     #So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
         for prop in ['contacts', 'contact_groups', 'notification_interval', \
-                         'notification_period', 'resultmodulations', 'escalations']:
+                         'notification_period', 'resultmodulations', 'escalations', \
+                         'poller_tag']:
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):

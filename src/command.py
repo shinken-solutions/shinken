@@ -26,6 +26,7 @@ class Command(object):
     properties={
         'command_name' : {'required' : True, 'fill_brok' : ['full_status']},
         'command_line' : {'required' : True, 'fill_brok' : ['full_status']},
+        'poller_tag' : {'required' : False, 'default' : None},
         }
 
 
@@ -34,15 +35,21 @@ class Command(object):
         self.__class__.id += 1
         for key in params:
             setattr(self, key, params[key])
+        if not hasattr(self, 'poller_tag'):
+            self.poller_tag = None
+
 
     def pythonize(self):
         self.command_name = self.command_name.strip()
 
+
     def clean(self):
         pass
 
+
     def __str__(self):
         return str(self.__dict__)
+
 
     #Get a brok with initial status
     def get_initial_status_brok(self):
@@ -53,6 +60,7 @@ class Command(object):
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_'+my_type+'_status', data)
         return b
+
 
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
@@ -73,7 +81,7 @@ class Command(object):
 class CommandCall:
     __slots__ = ('id', 'call', 'command', 'valid', 'args')
     id = 0
-    def __init__(self, commands, call):
+    def __init__(self, commands, call, poller_tag=None):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.call = call
@@ -85,6 +93,12 @@ class CommandCall:
             self.valid = True
         else:
             self.valid = False
+            self.command = tab[0]
+        #If the host/service do not give an override poller_tag, take
+        #the one of the command
+        self.poller_tag = poller_tag #from host/service
+        if self.valid and poller_tag == None:
+            self.poller_tag = self.command.poller_tag #from command if not set
 
 
     def is_valid(self):

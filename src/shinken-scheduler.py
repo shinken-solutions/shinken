@@ -95,9 +95,9 @@ class IChecks(Pyro.core.ObjBase):
 
 		
     #poller or reactionner ask us actions
-    def get_checks(self , do_checks=False, do_actions=False):
+    def get_checks(self , do_checks=False, do_actions=False, poller_tags=[]):
         #print "We ask us checks"
-        res = self.sched.get_to_run_checks(do_checks, do_actions)
+        res = self.sched.get_to_run_checks(do_checks, do_actions, poller_tags)
         #print "Sending %d checks" % len(res)
         self.sched.nb_checks_send += len(res)
         return res

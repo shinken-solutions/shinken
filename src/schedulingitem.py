@@ -754,7 +754,8 @@ class SchedulingItem(Item):
             
             #Make the Check object and put the service in checking
             #print "Asking for a check with command:", command_line
-            c = Check('scheduled', command_line, self, t, ref_check, timeout=cls.check_timeout)
+            #Make the check inherit poller_tag from the command
+            c = Check('scheduled', command_line, self, t, ref_check, timeout=cls.check_timeout, poller_tag=self.check_command.poller_tag)
             #We keep a trace of all checks in progress
             #to know if we are in checking_or not
             self.checks_in_progress.append(c)

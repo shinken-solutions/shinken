@@ -460,7 +460,7 @@ class ExternalCommand:
     
     #CHANGE_HOST_CHECK_COMMAND;<host_name>;<check_command>
     def CHANGE_HOST_CHECK_COMMAND(self, host, check_command):
-        host.check_command = CommandCall(self.commands, check_command)
+        host.check_command = CommandCall(self.commands, check_command, poller_tag=host.poller_tag)
         self.sched.get_and_register_status_brok(host)
 
     #CHANGE_HOST_CHECK_TIMEPERIOD;<host_name>;<timeperiod>
@@ -509,7 +509,7 @@ class ExternalCommand:
 
     #CHANGE_SVC_CHECK_COMMAND;<host_name>;<service_description>;<check_command>
     def CHANGE_SVC_CHECK_COMMAND(self, service, check_command):
-        service.check_command = CommandCall(self.commands, check_command)
+        service.check_command = CommandCall(self.commands, check_command, poller_tag=service.poller_tag)
         self.sched.get_and_register_status_brok(service)
 
     #CHANGE_SVC_CHECK_TIMEPERIOD;<host_name>;<service_description>;<check_timeperiod>

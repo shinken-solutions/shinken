@@ -265,20 +265,23 @@ class Scheduler:
 
     #Called by poller to get checks
     #Can get checks and actions (notifications and co)
-    def get_to_run_checks(self, do_checks=False, do_actions=False):
+    def get_to_run_checks(self, do_checks=False, do_actions=False, poller_tags=[]):
         res = []
         now = time.time()
 
         #If poller want to do checks
         if do_checks:
             for c in self.checks.values():
-                if c.status == 'scheduled' and c.is_launchable(now):
-                    c.status = 'inpoller'
-                    #We do not send c, because it it link (c.ref) to 
-                    #host/service and poller do not need it. It just
-                    #need a shell with id, command and defaults
-                    #parameters. It's the goal of copy_shell
-                    res.append(c.copy_shell())
+                #If the command is untagged, and the poller too, or if both are taggued
+                #with same name, go for it
+                if (c.poller_tag == None and poller_tags == []) or c.poller_tag in poller_tags:
+                    if c.status == 'scheduled' and c.is_launchable(now):
+                        c.status = 'inpoller'
+                        #We do not send c, because it it link (c.ref) to 
+                        #host/service and poller do not need it. It just
+                        #need a shell with id, command and defaults
+                        #parameters. It's the goal of copy_shell
+                        res.append(c.copy_shell())
 
         #If poller want to notify too
         if do_actions:

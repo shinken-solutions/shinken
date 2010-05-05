@@ -51,11 +51,12 @@ class Check(Action):
                 'dep_check' : {'required': False, 'default': []},
                 'check_time' : {'required': False, 'default': 0},
                 'execution_time' : {'required': False, 'default': 0},
-                'perf_data' : {'required': False, 'default':''}                
+                'perf_data' : {'required': False, 'default':''},
+                'poller_tag' : {'required': False, 'default': None}
                 }
 
     #id = 0 #Is common to Actions
-    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10):
+    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag=None):
         self.is_a = 'check'
         self.type = ''
         if id == None: #id != None is for copy call only
@@ -79,6 +80,7 @@ class Check(Action):
         self.check_time = 0
         self.execution_time = 0
         self.perf_data = ''
+        self.poller_tag = poller_tag
 
 
     #return a copy of the check but just what is important for execution

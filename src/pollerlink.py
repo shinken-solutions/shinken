@@ -39,6 +39,7 @@ class PollerLink(SatelliteLink):
                 'processes_by_worker' : {'required' : False, 'default' : '256', 'pythonize' : to_int, 'to_send' : True},
                 'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
                 'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
+                'poller_tags' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'to_send' : True}
                 }
  
     running_properties = {'is_active' : {'default' : False},
@@ -53,7 +54,8 @@ class PollerLink(SatelliteLink):
 
     def register_to_my_realm(self):
         self.realm.pollers.append(self)
-
+        if self.poller_tags != []:
+            print "I %s manage tags : %s " % (self.get_name(), self.poller_tags)
 
 class PollerLinks(SatelliteLinks):
     name_property = "name"

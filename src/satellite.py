@@ -86,6 +86,10 @@ class IForArbiter(Pyro.core.ObjBase):
         self.app.min_workers = conf['global']['min_workers']
         self.app.processes_by_worker = conf['global']['processes_by_worker']
 	self.app.polling_interval = conf['global']['polling_interval']
+        if 'poller_tags' in conf['global']:
+            self.app.poller_tags = conf['global']['poller_tags']
+        else: #for reactionner, poler_tag is [None]
+            self.app.poller_tags = []
         print "We have our schedulers :", self.schedulers
 
 
@@ -403,9 +407,9 @@ class Satellite(Daemon):
 
             try:
                 con = sched['con']
-                if con is not None: #None = not initilized
+                if con is not None: #None = not initilized                        
                     #OK, go for it :)
-                    tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions)
+                    tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, poller_tags=self.poller_tags)
                     print "Ask actions to", sched_id, "got", len(tmp)
                     #We 'tag' them with sched_id and put into queue for workers
                     #REF: doc/shinken-action-queues.png (2)

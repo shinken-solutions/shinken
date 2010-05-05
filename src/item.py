@@ -602,7 +602,10 @@ class Items(object):
             if hasattr(i, prop):
                 command = getattr(i, prop).strip()
                 if command != '':
-                    cmdCall = CommandCall(commands, command)
+                    if hasattr(i, 'poller_tag'):
+                        cmdCall = CommandCall(commands, command, poller_tag=i.poller_tag)
+                    else:
+                        cmdCall = CommandCall(commands, command)
                     #TODO: catch None?
                     setattr(i, prop, cmdCall)
                 else:
@@ -618,7 +621,10 @@ class Items(object):
                 com_list = []
                 for com in coms:
                     if com != '':
-                        cmdCall = CommandCall(commands, com)
+                        if hasattr(i, 'poller_tag'):
+                            cmdCall = CommandCall(commands, com, poller_tag=i.poller_tag)
+                        else:
+                            cmdCall = CommandCall(commands, com)
                         #TODO: catch None?
                         com_list.append(cmdCall)
                     else: # TODO: catch?
