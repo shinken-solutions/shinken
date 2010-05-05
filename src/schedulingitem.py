@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+#Copyright (C) 2009-2010 Gabes Jean, naparuba@gmail.com
 #
 #This file is part of Shinken.
 #
@@ -35,9 +35,12 @@ class SchedulingItem(Item):
     #Add a flapping change, but no more than 20 states
     #Then update the self.is_flapping bool by calling update_flapping
     def add_flapping_change(self, b):
-        self.flapping_states.append(b)
-        #Just 20 changes
-        if len(self.flapping_changes) > 20:
+        self.flapping_changes.append(b)
+
+        #Keep just 20 changes (global flap_history value)
+        flap_history = self.__class__.flap_history
+
+        if len(self.flapping_changes) > flap_history:
             self.flapping_changes.pop(0)
         #Now we add a value, we update the is_flapping prop
         self.update_flapping()
@@ -46,14 +49,15 @@ class SchedulingItem(Item):
     #We update the is_flapping prop with value in self.flapping_states
     #Old values have less weight than new ones
     def update_flapping(self):
+        flap_history = self.__class__.flap_history
         #We compute the flapping change in %
         r = 0.0
         i = 0
         for b in self.flapping_changes:
            i += 1
            if b:
-               r += i*(1.2-0.8)/20 + 0.8
-        r = r / 20
+               r += i*(1.2-0.8)/flap_history + 0.8
+        r = r / flap_history
 
         #Now we get the low_flap_threshold and high_flap_threshold values
         #They can be from self, or class

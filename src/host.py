@@ -347,15 +347,18 @@ class Host(SchedulingItem):
             self.state = 'UP'
             self.state_id = 0
             self.last_time_up = int(self.last_state_update)
+            state_code = 'u'
         elif status == 1 or status == 2 or status == 3:
             self.state = 'DOWN'
             self.state_id = 1
             self.last_time_down = int(self.last_state_update)
+            state_code = 'd'
         else:
             self.state = 'DOWN'#exit code UNDETERMINED
             self.state_id = 1
             self.last_time_down = int(self.last_state_update)
-        if status in self.flap_detection_options:
+            state_code = 'd'
+        if state_code in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
         if self.state != self.last_state:
             self.last_state_change = self.last_state_update

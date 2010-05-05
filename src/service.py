@@ -300,25 +300,29 @@ class Service(SchedulingItem):
             self.state = 'OK'
             self.state_id = 0
             self.last_time_ok = int(self.last_state_update)
+            state_code = 'o'
         elif status == 1:
             self.state = 'WARNING'
             self.state_id = 1
             self.last_time_warning = int(self.last_state_update)
-            
+            state_code = 'w'
         elif status == 2:
             self.state = 'CRITICAL'
             self.state_id = 2
             self.last_time_critical = int(self.last_state_update)
+            state_code = 'c'
         elif status == 3:
             self.state = 'UNKNOWN'
             self.state_id = 3
             self.last_time_unknown = int(self.last_state_update)
+            state_code = 'u'
         else:
             self.state = 'CRITICAL'#exit code UNDETERMINED
             self.state_id = 2
             self.last_time_critical = int(self.last_state_update)
+            state_code = 'c'
 
-        if status in self.flap_detection_options:
+        if state_code in self.flap_detection_options:
             self.add_flapping_change(self.state != self.last_state)
 
         if self.state != self.last_state:

@@ -88,6 +88,8 @@
       state is different from the archived state that immediately precedes it
       chronologically. Since we keep the results of the last 21 service checks
       in the array, there is a possibility of having at most 20 state changes.
+      The 20 value can be changed in the main configuration file, see 
+      <link linkend="configuringnagios-configmain-flap_history">flap_history</link>.
       In this example there are 7 state changes, indicated by blue arrows in the
       image above.</para>
 
