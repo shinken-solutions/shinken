@@ -221,6 +221,7 @@ class StatusFile:
             'service_description' : {},
             'comment_id' : {'prop' : 'id', 'default' : '0'},
             'source' : {'prop' : None, 'default' : '0'},
+            'comment_type' : {'prop' : None, 'default' : '0'},
             'entry_type' : {'prop' : None, 'default' : '0'},
             'persistent' : {'prop' : None, 'depythonize' : from_bool_to_string},
             'expires' : {'prop' : None, 'depythonize' : from_bool_to_string},
