@@ -11,5 +11,5 @@
 
 <xi:include href="Development/pluginapi.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="Development/epnplugins.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-
+<xi:include href="Development/hackingcode.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 </part>
