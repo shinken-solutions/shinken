@@ -25,6 +25,10 @@
 #It will need just a new file, and a new manager :)
 
 import time
+import select
+import socket
+import sys
+import cPickle
 
 from host import Host
 from hostgroup import Hostgroup
@@ -37,6 +41,7 @@ from command import Command
 from status import StatusFile
 from objectscache import ObjectsCacheFile
 from config import Config
+from livestatus import LiveStatus
 
 
 
@@ -73,6 +78,7 @@ class Status_dat_broker:
 
         self.status = StatusFile(self.path, self.configs, self.hosts, self.services, self.contacts)
         self.objects_cache = ObjectsCacheFile(self.opath, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
+        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
 
         self.number_of_objects = 0
     
@@ -92,7 +98,7 @@ class Status_dat_broker:
         manager = 'manage_'+type+'_brok'
         #print "------------------------------------------- i receive", manager
         if hasattr(self, manager):
-            #print "------------------------------------------- i manage", manager
+            print "------------------------------------------- i manage", manager
             #print b
             f = getattr(self, manager)
             f(b)
@@ -256,8 +262,9 @@ class Status_dat_broker:
     #In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
         self.manage_service_check_result_brok(b)
-
+        data = b.data
         #In the status, we've got duplicated item, we must relink thems
+        s = self.find_service(data['host_name'], data['service_description'])
         s.check_period = self.get_timeperiod(s.check_period)
         s.notification_period = self.get_timeperiod(s.notification_period)
         s.contacts = self.get_contacts(s.contacts)
@@ -280,8 +287,9 @@ class Status_dat_broker:
     #In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
         self.manage_host_check_result_brok(b)
-
+        data = b.data
         #In the status, we've got duplicated item, we must relink thems
+        h = self.find_host(data['host_name'])
         h.check_period = self.get_timeperiod(h.check_period)
         h.notification_period = self.get_timeperiod(h.notification_period)
         h.contacts = self.get_contacts(h.contacts)
@@ -357,11 +365,42 @@ class Status_dat_broker:
         last_generation = time.time()
         objects_cache_written = False
         number_of_objects_written = 0
+
+        host = ''
+        port = 50000
+        backlog = 5
+        size = 8192
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setblocking(0)
+        server.bind((host,port))
+        server.listen(backlog)
+        input = [server]
+
         while True:
-            b = self.q.get() # can block here :)
-            self.manage_brok(b)
+            try:
+                b = self.q.get(False) # do not block
+                self.manage_brok(b)
+            except:
+                pass
+            inputready,outputready,exceptready = select.select(input,[],[], 0)
+
+            for s in inputready:
+                if s == server:
+                    # handle the server socket
+                    client, address = server.accept()
+                    input.append(client)
+                else:
+                    # handle all other sockets
+                    data = s.recv(size)
+                    if data:
+                        response = self.livestatus.handle_request(data)
+                        s.send(response)
+                    else:
+                        s.close()
+                        input.remove(s)
             
-            if time.time() - last_generation > self.update_interval:
+            #if time.time() - last_generation > self.update_interval:
+            if False:
                 #from guppy import hpy
                 #hp=hpy()
                 #print hp.heap()
@@ -373,6 +412,7 @@ class Status_dat_broker:
                     self.objects_cache.create_or_update()
                     number_of_objects_written = self.number_of_objects
                     objects_cache_written = True
+
                 print "Generating status file!"
                 r = self.status.create_or_update()
                 #if we get an error (an exception in fact) we bail out

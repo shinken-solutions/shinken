@@ -47,5 +47,5 @@ class Comment:
 
 
     def __str__(self):
-        return "%s Comment id=%d %s" % (active, self.id, self.comment)
+        return "Comment id=%d %s" % (self.id, self.comment)
 
