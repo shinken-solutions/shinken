@@ -127,6 +127,8 @@ class Livestatus_broker:
         #Escalations is not use for status_dat
         del h.escalations
                 
+        h.service_ids = []
+        h.services = []
         #print "H:", h
         self.hosts[h_id] = h
         self.number_of_objects += 1
@@ -164,6 +166,10 @@ class Livestatus_broker:
 
         del s.escalations
 
+        h = self.find_host(data['host_name'])
+        if h != None:
+            h.service_ids.append(s_id)
+            h.services.append(s)
         #print "S:", s
         self.services[s_id] = s
         self.number_of_objects += 1
