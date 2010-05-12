@@ -155,13 +155,14 @@ class TestConfig(unittest.TestCase):
         data = 'GET hosts'
         response = self.status_dat_broker.livestatus.handle_request(data)
         print response
+
         #---------------------------------------------------------------
         # get only the host names and addresses
         #---------------------------------------------------------------
-        data = 'GET hosts\nColumns: name address'
+        data = 'GET hosts\nColumns: name address\nColumnHeaders: on'
         response = self.status_dat_broker.livestatus.handle_request(data)
         print response
-
+        
         #---------------------------------------------------------------
         # query_1
         #---------------------------------------------------------------
@@ -183,15 +184,15 @@ class TestConfig(unittest.TestCase):
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2\nColumnHeaders: on'
         response = self.status_dat_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
-        self.assert_(response == 'host_name;description;state\ntest_host_0;test_ok_0;2')
+        self.assert_(response == 'host_name;description;state\ntest_host_0;test_ok_0;2\n')
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2'
         response = self.status_dat_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
-        self.assert_(response == 'test_host_0;test_ok_0;2')
+        self.assert_(response == 'test_host_0;test_ok_0;2\n')
         data = 'GET services\nColumns: host_name description state\nFilter: state = 0'
         response = self.status_dat_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
-        self.assert_(response == '')
+        self.assert_(response == '\n')
         duration = 180
         now = time.time()
         cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;0;0;%d;lausser;blablub" % (now, now, now + duration, duration)
@@ -204,7 +205,7 @@ class TestConfig(unittest.TestCase):
         data = 'GET services\nColumns: host_name description scheduled_downtime_depth\nFilter: state = 2\nFilter: scheduled_downtime_depth = 1'
         response = self.status_dat_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
-        self.assert_(response == 'test_host_0;test_ok_0;1')
+        self.assert_(response == 'test_host_0;test_ok_0;1\n')
 
         #---------------------------------------------------------------
         # query_4
@@ -212,7 +213,7 @@ class TestConfig(unittest.TestCase):
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2\nFilter: in_notification_period = 1\nAnd: 2\nFilter: state = 0\nOr: 2\nFilter: host_name = test_host_0\nFilter: description = test_ok_0\nAnd: 3\nFilter: contacts >= harri\nFilter: contacts >= test_contact\nOr: 3'
         response = self.status_dat_broker.livestatus.handle_request(data)
         print 'query_4_______________\n%s\n%s\n' % (data, response)
-        self.assert_(response == 'test_host_0;test_ok_0;2')
+        self.assert_(response == 'test_host_0;test_ok_0;2\n')
 
         #---------------------------------------------------------------
         # query_6
@@ -220,7 +221,7 @@ class TestConfig(unittest.TestCase):
         data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3'        
         response = self.status_dat_broker.livestatus.handle_request(data)
         print 'query_6_______________\n%s\n%s\n' % (data, response)
-        self.assert_(response == '0;0;1;0')
+        self.assert_(response == '0;0;1;0\n')
 
         #---------------------------------------------------------------
         # query_7
@@ -228,7 +229,7 @@ class TestConfig(unittest.TestCase):
         data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nFilter: contacts >= test_contact'        
         response = self.status_dat_broker.livestatus.handle_request(data)
         print 'query_6_______________\n%s\n%s\n' % (data, response)
-        self.assert_(response == '0;0;1;0')
+        self.assert_(response == '0;0;1;0\n')
 
 
 
@@ -371,7 +372,7 @@ Separators: 10 59 44 124
 ResponseHeader: fixed16"""
         response = self.status_dat_broker.livestatus.handle_request(data)
         print response
-        raise
+        
         data = """GET services
 Filter: has_been_checked = 1
 Filter: check_type = 0
