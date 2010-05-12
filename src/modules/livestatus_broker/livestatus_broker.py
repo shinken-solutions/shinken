@@ -38,20 +38,19 @@ from contact import Contact
 from contactgroup import Contactgroup
 from timeperiod import Timeperiod
 from command import Command
-from status import StatusFile
-from objectscache import ObjectsCacheFile
 from config import Config
+from livestatus import LiveStatus
 
 
 
-#Class for the Merlindb Broker
-#Get broks and puts them in merlin database
-class Status_dat_broker:
-    def __init__(self, name, path, opath, update_interval):
-        self.path = path
-        self.opath = opath
+#Class for the Livestatus Broker
+#Get broks and listen to livestatus query language requests
+class Livestatus_broker:
+    def __init__(self, name, host, port, socket):
+        self.host = host
+        self.port = port
+        self.socket = socket
         self.name = name
-        self.update_interval = update_interval
         
         #Warning :
         #self.properties will be add by the modulesmanager !!
@@ -75,8 +74,7 @@ class Status_dat_broker:
         self.timeperiods = {}
         self.commands = {}
 
-        self.status = StatusFile(self.path, self.configs, self.hosts, self.services, self.contacts)
-        self.objects_cache = ObjectsCacheFile(self.opath, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
+        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
 
         self.number_of_objects = 0
     
@@ -360,33 +358,34 @@ class Status_dat_broker:
 
 
     def main(self):
-        last_generation = time.time()
-        objects_cache_written = False
-        number_of_objects_written = 0
+        backlog = 5
+        size = 8192
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setblocking(0)
+        server.bind((self.host, self.port))
+        server.listen(backlog)
+        input = [server]
 
         while True:
-            b = self.q.get()
-            self.manage_brok(b)
+            try:
+                b = self.q.get(False) # do not block
+                self.manage_brok(b)
+            except:
+                pass
+            inputready,outputready,exceptready = select.select(input,[],[], 0)
 
-            if time.time() - last_generation > self.update_interval:
-                #from guppy import hpy
-                #hp=hpy()
-                #print hp.heap()
-                if not objects_cache_written or self.number_of_objects > number_of_objects_written:
-                    #with really big configurations it can take longer than
-                    #status_update_interval to send all objects to this broker
-                    #if more objects are received, write objects.cache again
-                    print "Generating objects file!"
-                    self.objects_cache.create_or_update()
-                    number_of_objects_written = self.number_of_objects
-                    objects_cache_written = True
-
-                print "Generating status file!"
-                r = self.status.create_or_update()
-                #if we get an error (an exception in fact) we bail out
-                if r != None:
-                    print "[status_dat] Error :", r
-                    break
-                last_generation = time.time()
+            for s in inputready:
+                if s == server:
+                    # handle the server socket
+                    client, address = server.accept()
+                    input.append(client)
+                else:
+                    # handle all other sockets
+                    data = s.recv(size)
+                    if data:
+                        response = self.livestatus.handle_request(data)
+                        s.send(response)
+                    else:
+                        s.close()
+                        input.remove(s)
             
-
