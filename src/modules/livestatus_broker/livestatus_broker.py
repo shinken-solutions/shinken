@@ -362,8 +362,6 @@ class Livestatus_broker:
         size = 8192
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setblocking(0)
-        print "now i bind"
-        print "i bind to", self.host, self.port
         server.bind((self.host, self.port))
         server.listen(backlog)
         input = [server]
