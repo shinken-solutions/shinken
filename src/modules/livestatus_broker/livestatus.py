@@ -91,7 +91,12 @@ class LiveStatus:
             'last_state_change' : {'required' : False, 'depythonize' : from_float_to_int, 'default' : 0},
             'last_notification' : {'required' : False, 'depythonize' : to_int, 'default' : 0},
             'childs' : {'required' : False, 'depythonize' : from_list_to_split, 'default' : ''},
+            'groups' : {'required' : False, 'prop' : 'hostgroups', 'default' : ''},
             'current_attempt' : {'prop' : 'attempt', 'default' : 0},
+            'acknowledged' : {'prop' : 'problem_has_been_acknowledged', 'depythonize' : from_bool_to_string, 'default' : 0},
+            'scheduled_downtime_depth' : {'default' : 0},
+            'has_been_checked' : {'default' : 0, 'depythonize' : from_bool_to_string},
+            'checks_enabled' : {'default' : 0, 'prop' : 'active_checks_enabled', 'depythonize' : from_bool_to_string}, # this may be not correct
             },
         Service : {
             'host_name' : {'required' : True},
@@ -142,6 +147,7 @@ class LiveStatus:
             'has_been_checked' : {'required' : False, 'depythonize' : to_int, 'default' : 0},
             'last_notification' : {'required' : False, 'depythonize' : to_int, 'default' : 0},
             'current_attempt' : {'prop' : 'attempt', 'default' : 0},
+            'groups' : {'required' : False, 'prop' : 'servicegroups', 'default' : ''},
             },
               
         Contact : {
@@ -1206,8 +1212,8 @@ class LiveStatus:
                                 if isinstance(value, list):
                                     #depythonize's argument might be an attribute or a method
                                     #example: members is an array of hosts and we want get_name() of each element
-                                    value = [getattr(item, str(f))() for item in value if callable(getattr(item, str(f))) ] \
-                                          + [getattr(item, str(f)) for item in value if not callable(getattr(item, str(f))) ]
+                                    value = [getattr(item, f)() for item in value if callable(getattr(item, f)) ] \
+                                          + [getattr(item, f) for item in value if not callable(getattr(item, f)) ]
                                     #at least servicegroups are nested [host,service],.. The need some flattening
                                     value = ','.join(['%s' % y for x in value if isinstance(x, list) for y in x] + \
                                         ['%s' % x for x in value if not isinstance(x, list)])
@@ -1284,7 +1290,7 @@ class LiveStatus:
                     else:
                         if (len(columns) == 0):
                             # Show all available columns
-                            columns = result[0].keys().sort()
+                            columns = sorted(result[0].keys())
                         lines.append(separators[1].join(columns))
                 for object in result:
                     #construct one line of output for each object found
@@ -1311,6 +1317,12 @@ class LiveStatus:
 
         def ge_filter(ref):
             return ref[attribute] >= reference
+
+        def lt_filter(ref):
+            return ref[attribute] < reference
+
+        def le_filter(ref):
+            return ref[attribute] <= reference
 
         def contains_filter(ref):
             return reference in ref[attribute].split(',')
@@ -1434,7 +1446,7 @@ class LiveStatus:
         filtercolumns = []
         responseheader = 'off'
         outputformat = 'CSV'
-        columnheaders = 'default'
+        columnheaders = 'off'
         groupby = False
         aliases = []
         # Set the default values for the separators
@@ -1467,7 +1479,7 @@ class LiveStatus:
                 except:
                     cmd, attribute, operator = line.split(' ', 3)
                     reference = ''
-                if operator in ['=', '!=', '>', '>=']:
+                if operator in ['=', '!=', '>', '>=', '<', '<=']:
                     # Put a function on top of the filter_stack which implements
                     # the desired operation
                     filtercolumns.append(attribute)
@@ -1552,6 +1564,7 @@ class LiveStatus:
         except BaseException as e:
             exit
             print "REQUEST produces an exception", data, e
+
 
         if responseheader == 'fixed16':
             statuscode = 200

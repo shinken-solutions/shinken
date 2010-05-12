@@ -19,9 +19,8 @@ from scheduler import Scheduler
 from macroresolver import MacroResolver
 from external_command import ExternalCommand
 from check import Check
-sys.path.append("../src/modules/status_dat_broker")
-from status_dat_broker import Status_dat_broker
-from livestatus import LiveStatus
+sys.path.append("../src/modules/livestatus_broker")
+from livestatus_broker import Livestatus_broker
 sys.setcheckinterval(10000)
 class TestConfig(unittest.TestCase):
     def setUp(self):
@@ -58,11 +57,11 @@ class TestConfig(unittest.TestCase):
         self.sched.external_command = e
         e.load_scheduler(self.sched)
         self.sched.schedule()
-        self.status_dat_broker = Status_dat_broker('livestatus', 'var/status.dat', 'var/objects.cache', 1000)
-        self.status_dat_broker.properties = {
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live')
+        self.livestatus_broker.properties = {
             'to_queue' : 0
             }
-        self.status_dat_broker.init()
+        self.livestatus_broker.init()
         self.sched.fill_initial_broks()
 
 
@@ -125,7 +124,7 @@ class TestConfig(unittest.TestCase):
 
     def update_broker(self):
         for brok in self.sched.broks.values():
-            self.status_dat_broker.manage_brok(brok)
+            self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
 
     def print_header(self):
@@ -153,28 +152,28 @@ class TestConfig(unittest.TestCase):
         # get the full hosts table
         #---------------------------------------------------------------
         data = 'GET hosts'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         #---------------------------------------------------------------
         # get only the host names and addresses
         #---------------------------------------------------------------
         data = 'GET hosts\nColumns: name address\nColumnHeaders: on'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         
         #---------------------------------------------------------------
         # query_1
         #---------------------------------------------------------------
         data = 'GET contacts'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_1_______________\n%s\n%s\n' % (data, response)
 
         #---------------------------------------------------------------
         # query_2
         #---------------------------------------------------------------
         data = 'GET contacts\nColumns: name alias'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_2_______________\n%s\n%s\n' % (data, response)
 
         #---------------------------------------------------------------
@@ -182,15 +181,15 @@ class TestConfig(unittest.TestCase):
         #---------------------------------------------------------------
         #self.scheduler_loop(3, svc, 2, 'BAD')
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2\nColumnHeaders: on'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == 'host_name;description;state\ntest_host_0;test_ok_0;2\n')
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == 'test_host_0;test_ok_0;2\n')
         data = 'GET services\nColumns: host_name description state\nFilter: state = 0'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == '\n')
         duration = 180
@@ -203,7 +202,7 @@ class TestConfig(unittest.TestCase):
         self.scheduler_loop(3, [[svc, 2, 'BAD']])
         self.update_broker()
         data = 'GET services\nColumns: host_name description scheduled_downtime_depth\nFilter: state = 2\nFilter: scheduled_downtime_depth = 1'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == 'test_host_0;test_ok_0;1\n')
 
@@ -211,7 +210,7 @@ class TestConfig(unittest.TestCase):
         # query_4
         #---------------------------------------------------------------      
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2\nFilter: in_notification_period = 1\nAnd: 2\nFilter: state = 0\nOr: 2\nFilter: host_name = test_host_0\nFilter: description = test_ok_0\nAnd: 3\nFilter: contacts >= harri\nFilter: contacts >= test_contact\nOr: 3'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_4_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == 'test_host_0;test_ok_0;2\n')
 
@@ -219,7 +218,7 @@ class TestConfig(unittest.TestCase):
         # query_6
         #---------------------------------------------------------------      
         data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3'        
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_6_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == '0;0;1;0\n')
 
@@ -227,7 +226,7 @@ class TestConfig(unittest.TestCase):
         # query_7
         #---------------------------------------------------------------      
         data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nFilter: contacts >= test_contact'        
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_6_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == '0;0;1;0\n')
 
@@ -252,7 +251,7 @@ class TestConfig(unittest.TestCase):
         # get the full hosts table
         #---------------------------------------------------------------
         data = 'GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length'
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         
         data = """GET hosts
@@ -329,20 +328,20 @@ Stats: childs !=
 StatsAnd: 2
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET comments
 Columns: host_name source type author comment entry_time entry_type expire_time
 Filter: service_description ="""
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET hosts
 Columns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change plugin_output next_check long_plugin_output
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         duration = 180
@@ -363,14 +362,14 @@ Filter: service_description =
 Columns: author comment end_time entry_time fixed host_name id start_time
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         data = """GET comments
 Filter: service_description = 
 Columns: author comment
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         
         data = """GET services
@@ -380,7 +379,7 @@ Stats: sum has_been_checked
 Stats: sum latency
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         
         data = """GET services
@@ -395,11 +394,19 @@ Stats: max latency
 Stats: max execution_time
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET services\nFilter: has_been_checked = 1\nFilter: check_type = 0\nStats: sum has_been_checked as has_been_checked\nStats: sum latency as latency_sum\nStats: sum execution_time as execution_time_sum\nStats: min latency as latency_min\nStats: min execution_time as execution_time_min\nStats: max latency as latency_max\nStats: max execution_time as execution_time_max\n\nResponseHeader: fixed16"""
-        response = self.status_dat_broker.livestatus.handle_request(data)
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        
+        data = """GET hostgroups\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        
+        data = """GET hosts\nColumns: name groups\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         
 if __name__ == '__main__':
