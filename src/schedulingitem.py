@@ -429,6 +429,7 @@ class SchedulingItem(Item):
 
         #OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
+            self.problem_has_been_acknowledged = False
             #action in return can be notification or other checks (dependancies)
             if (self.state_type == 'SOFT') and self.last_state != 'PENDING':
                 if self.is_max_attempts() and self.state_type == 'SOFT':
