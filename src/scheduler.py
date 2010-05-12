@@ -24,7 +24,6 @@ import cPickle, zlib
 from check import Check
 from notification import Notification
 from eventhandler import EventHandler
-from status import StatusFile
 from brok import Brok
 from downtime import Downtime
 from comment import Comment
