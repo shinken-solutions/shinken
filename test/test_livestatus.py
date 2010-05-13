@@ -409,6 +409,10 @@ ResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         
+        data = """GET hostgroups\nColumns: name num_services num_services_ok\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        
 if __name__ == '__main__':
     import cProfile
     command = """unittest.main()"""

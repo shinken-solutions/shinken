@@ -187,16 +187,15 @@ class LiveStatus:
             'num_hosts_unreach' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len(filter(lambda y: y.state == 'UNREACHABLE', x)) },
             'num_hosts_up' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len(filter(lambda y: y.state == 'UP', x)) },
             'num_services' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: sum((len(y.service_ids) for y in x)) },
-            'num_services_crit' : {},
-            #'num_services_crit' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: sum(len(filter(lambda z: z.state == 'CRITICAL', [y.services for y in x]))) },
-            'num_services_hard_crit' : {},
-            'num_services_hard_ok' : {},
-            'num_services_hard_unknown' : {},
-            'num_services_hard_warn' : {},
-            'num_services_ok' : {},
-            'num_services_pending' : {},
-            'num_services_unknown' : {},
-            'num_services_warn' : {},
+            'num_services_crit' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len([z for y in x for z in y.services if z.state == 'CRITICAL']) },
+            'num_services_hard_crit' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len([z for y in x for z in y.services if z.state == 'CRITICAL' and z.state_type == 'HARD']) },
+            'num_services_hard_ok' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len([z for y in x for z in y.services if z.state == 'OK' and z.state_type == 'HARD']) },
+            'num_services_hard_unknown' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len([z for y in x for z in y.services if z.state == 'UNKNOWN' and z.state_type == 'HARD']) },
+            'num_services_hard_warn' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len([z for y in x for z in y.services if z.state == 'WARNING' and z.state_type == 'HARD']) },
+            'num_services_ok' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len([z for y in x for z in y.services if z.state == 'OK']) },
+            'num_services_pending' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len([z for y in x for z in y.services if z.state == 'PENDING']) },
+            'num_services_unknown' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len([z for y in x for z in y.services if z.state == 'UNKNOWN']) },
+            'num_services_warn' : { 'prop' : 'get_hosts', 'depythonize' : lambda x: len([z for y in x for z in y.services if z.state == 'WARNING']) },
             'worst_host_state' : {},
             'worst_service_hard_state' : {},
             'worst_service_state' : {},
@@ -1228,11 +1227,8 @@ class LiveStatus:
                         if display in type_map and 'depythonize' in type_map[display]:
                             f = type_map[display]['depythonize']
                             if callable(f):
-                                print "i can depython", display
                                 #for example "from_list_to_split". value is an array and f takes the array as an argument
-                                print "first we have", value
                                 value = f(value)
-                                print "then we have", value
                                 
                             else:
                                 if isinstance(value, list):
