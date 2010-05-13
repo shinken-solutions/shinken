@@ -412,7 +412,31 @@ ResponseHeader: fixed16"""
         data = """GET hostgroups\nColumns: name num_services num_services_ok\nColumnHeaders: on\nResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
+
+        data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warning num_services_critical num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']])
+        self.update_broker()
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
+        self.update_broker()
         
+        print "WARNING SOFT;1"
+        # worst_service_state 1, worst_service_hard_state 0
+        data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
+        self.update_broker()
+        print "WARNING HARD;3"
+        # worst_service_state 1, worst_service_hard_state 1
+        data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        for s in self.livestatus_broker.livestatus.services.values():
+            print "%s %d %s;%d" % (s.state, s.state_id, s.state_type, s.attempt)
+
 if __name__ == '__main__':
     import cProfile
     command = """unittest.main()"""
