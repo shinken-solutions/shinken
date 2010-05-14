@@ -84,7 +84,7 @@ class LiveStatus:
             'failure_prediction_enabled' : { 'depythonize' : from_bool_to_string, 'default' : '0' },
             'retain_status_information' : { 'depythonize' : from_bool_to_string, 'default' : '0' },
             'retain_nonstatus_information' : { 'depythonize' : from_bool_to_string, 'default' : '0' },
-            'comments' : { 'depythonize' : 'comment_id', 'default' : '' },
+            'comments' : { 'depythonize' : 'id', 'default' : '' },
             'is_flapping' : { 'depythonize' : from_bool_to_string, 'default' : '0' },
             'last_check' : { 'prop' : 'last_chk', 'depythonize' : from_float_to_int, 'default' : 0},
             'next_check' : { 'prop' : 'next_chk', 'depythonize' : from_float_to_int, 'default' : 0},
@@ -138,7 +138,8 @@ class LiveStatus:
             
 
             'in_notification_period' : { 'default' : '1' },
-            'comments' : { 'depythonize' : 'comment_id', 'default' : '' },
+            'comments' : { 'depythonize' : 'id', 'default' : '' },
+            'host_comments' : { 'prop' : 'host', 'depythonize' : lambda h: ','.join([str(c.id) for c in h.comments]), 'default' : '' },
             'is_flapping' : { 'depythonize' : from_bool_to_string, 'default' : '0' },
             'host_is_flapping' : { 'depythonize' : from_bool_to_string, 'default' : '0' },
             'last_check' : { 'prop' : 'last_chk', 'depythonize' : from_float_to_int, 'default' : 0},
@@ -148,6 +149,7 @@ class LiveStatus:
             'last_notification' : { 'depythonize' : to_int, 'default' : 0},
             'current_attempt' : { 'prop' : 'attempt', 'default' : 0},
             'groups' : { 'prop' : 'servicegroups', 'default' : '' },
+            'host_groups' : { 'prop' : 'host', 'default' : '', 'depythonize' : lambda x: x.hostgroups},
             },
               
         Contact : { # needs rewrite
@@ -1194,15 +1196,16 @@ class LiveStatus:
             print message
 
 
-    def create_output(self, elt, attributes):
+    def create_output(self, elt, attributes, filterattributes):
         output = {}
         elt_type = elt.__class__
         if elt_type in LiveStatus.out_map:
             type_map = LiveStatus.out_map[elt_type]
-            if not attributes:
-                # There was no Columns: statement, so we need the complete list of attributes
-                attributes = LiveStatus.default_attributes[elt_type]
-            for display in attributes:
+            if len(attributes) == 0:
+                display_attributes = LiveStatus.default_attributes[elt_type]
+            else:
+                display_attributes = list(set(attributes + filterattributes))
+            for display in display_attributes:
                 value = ''
                 if display not in type_map:
                     # no mapping, use it as a direct attribute
@@ -1259,22 +1262,51 @@ class LiveStatus:
         return output
 
 
-    def get_live_data(self, table, columns, filter_stack, stats_filter_stack, stats_postprocess_stack):
+    def get_live_data(self, table, columns, filtercolumns, filter_stack, stats_filter_stack, stats_postprocess_stack):
         result = []
         if table in ['hosts', 'services', 'downtimes', 'comments', 'hostgroups', 'servicegroups']:
             #Scan through the objects and apply the Filter: rules
             if table == 'hosts':
-                filtresult = [y for y in [self.create_output(x, columns) for x in self.hosts.values()] if filter_stack(y)]
+                if len(filtercolumns) == 0:
+                    filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.hosts.values()] if filter_stack(y)]
+                else:
+                    # If there we had Filter: statements, it makes sense to make two steps
+                    # 1. Walk through the complete list of hosts, but only resolve those attributes
+                    #    which are needed for the filtering
+                    #    Hopefully after this step there are only a few host objects left
+                    prefiltresult = [x for x in self.hosts.values() if filter_stack(self.create_output(x, [], filtercolumns))]
+                    # 2. Then take the remaining objects and resolve the whole list of attributes (which may be a lot if there was no short Columns: list)
+                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'services':
-                filtresult = [y for y in [self.create_output(x, columns) for x in self.services.values()] if filter_stack(y)]
+                if len(filtercolumns) == 0:
+                    filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.services.values()] if filter_stack(y)]
+                else:
+                    prefiltresult = [x for x in self.services.values() if filter_stack(self.create_output(x, [], filtercolumns))]
+                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'downtimes':
-                filtresult = [self.create_output(y, columns) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() +self.hosts.values() if len(x.downtimes) > 0], [])]
+                if len(filtercolumns) == 0:
+                    filtresult = [self.create_output(y, columns, filtercolumns) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() +self.hosts.values() if len(x.downtimes) > 0], [])]
+                else:
+                    prefiltresult = [d for d in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], []) if filter_stack(self.create_output(d, [], filtercolumns))]
+                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'comments':
-                filtresult = [self.create_output(y, columns) for y in reduce(list.__add__, [x.comments for x in self.services.values() +self.hosts.values() if len(x.comments) > 0], [])]
+                if len(filtercolumns) == 0:
+                    filtresult = [self.create_output(y, columns, filtercolumns) for y in reduce(list.__add__, [x.comments for x in self.services.values() +self.hosts.values() if len(x.comments) > 0], [])]
+                else:
+                    prefiltresult = [c for c in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], []) if filter_stack(self.create_output(c, [], filtercolumns))]
+                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'hostgroups':
-                filtresult = [y for y in [self.create_output(x, columns) for x in self.hostgroups.values()] if filter_stack(y)]
+                if len(filtercolumns) == 0:
+                    filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.hostgroups.values()] if filter_stack(y)]
+                else:
+                    prefiltresult = [x for x in self.hostgroups.values() if filter_stack(self.create_output(x, [], filtercolumns))]
+                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'servicegroups':
-                filtresult = [y for y in [self.create_output(x, columns) for x in self.servicegroups.values()] if filter_stack(y)]
+                if len(filtercolumns) == 0:
+                    filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.servicegroups.values()] if filter_stack(y)]
+                else:
+                    prefiltresult = [x for x in self.servicegroups.values() if filter_stack(self.create_output(x, [], filtercolumns))]
+                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
             if stats_filter_stack.qsize() > 0:
                 #The number of Stats: statements
                 #For each statement there is one function on the stack
@@ -1293,10 +1325,10 @@ class LiveStatus:
                 result = filtresult
         elif table == 'contacts':
             for c in self.contacts.values():
-                result.append(self.create_output(c, columns))
+                result.append(self.create_output(c, columns, filtercolumns))
         elif table == 'status':
             for c in self.configs.values():
-                result.append(self.create_output(c, columns))
+                result.append(self.create_output(c, columns, filtercolumns))
         return result
 
 
@@ -1471,6 +1503,7 @@ class LiveStatus:
         columnheaders = 'off'
         groupby = False
         aliases = []
+        extcmd = False
         # Set the default values for the separators
         separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
         # Initialize the stacks which are needed for the Filter: and Stats:
@@ -1480,6 +1513,7 @@ class LiveStatus:
         stats_postprocess_stack = Queue.LifoQueue()
         for line in data.splitlines():
             line = line.strip()
+            print "input:", line
             if line.find('GET ') != -1:
                 # Get the name of the base table
                 cmd, table = line.split(' ', 1)
@@ -1558,43 +1592,59 @@ class LiveStatus:
                 # check Class.attribute exists
                 cmd, sep1, sep2, sep3, sep4 = line.split(' ', 5)
                 separators = map(lambda x: chr(int(x)), [sep1, sep2, sep3, sep4])
+            elif line.find('COMMAND') != -1:
+                cmd, extcmd = line.split(' ', 1)
             else:
                 # This line is not valid or not implemented
+                print "Received a line of input which i can't handle"
+                print line
                 pass
         
-        if filter_stack.qsize() > 1:
-            #If we have Filter: statements but no FilterAnd/Or statements
-            #Make one big filter where the single filters are anded
-            filter_stack = self.and_filter_stack(filter_stack.qsize(), filter_stack)
-        try:
-            #Get the function which implements the Filter: statements
-            simplefilter_stack = self.get_filter_stack(filter_stack)
-            #Get the function which implements the Stats: statements
-            stats = stats_filter_stack.qsize()
-            #Apply the filters on the broker's host/service/etc elements
-            #Deduplicate the columns with a list(set(<list>)) hack
-            result = self.get_live_data(table, list(set(columns + filtercolumns)), simplefilter_stack, stats_filter_stack, stats_postprocess_stack)
-            if stats > 0:
-                columns = range(stats)
-                if len(aliases) == 0:
-                    #If there were Stats: staments without "as", show no column headers at all
-                    columnheaders = 'off'
-                else:
-                    columnheaders = 'on'
-            #Now bring the retrieved information to a form which can be sent back to the client
-            response = self.format_live_data(result, columns, outputformat, columnheaders, separators, aliases) + "\n"
-        except BaseException as e:
-            exit
-            print "REQUEST produces an exception", data, e
-
-
-        if responseheader == 'fixed16':
-            statuscode = 200
-            responselength = len(response) # no error
-            response = '%3d %11d\n' % (statuscode, responselength) + response
-
-        print "REQUEST", data
-        print "RESPONSE\n%s\n" % response
-        return response
+        if extcmd:
+            print "send cmd to", self.configs[0].command_file
+            command_file = self.configs[0].command_file
+            if os.path.exists(command_file):
+                try:
+                    fifo = os.open(command_file, os.O_NONBLOCK|os.O_WRONLY)
+                    os.write(fifo, extcmd)
+                    os.close(fifo)
+                except:
+                    print "Unable to open/write the external command pipe"
+            return '\n'
+        else:
+            if filter_stack.qsize() > 1:
+                #If we have Filter: statements but no FilterAnd/Or statements
+                #Make one big filter where the single filters are anded
+                filter_stack = self.and_filter_stack(filter_stack.qsize(), filter_stack)
+            try:
+                #Get the function which implements the Filter: statements
+                simplefilter_stack = self.get_filter_stack(filter_stack)
+                #Get the function which implements the Stats: statements
+                stats = stats_filter_stack.qsize()
+                #Apply the filters on the broker's host/service/etc elements
+                #Deduplicate the columns with a list(set(<list>)) hack
+                result = self.get_live_data(table, columns, filtercolumns, simplefilter_stack, stats_filter_stack, stats_postprocess_stack)
+                if stats > 0:
+                    columns = range(stats)
+                    if len(aliases) == 0:
+                        #If there were Stats: staments without "as", show no column headers at all
+                        columnheaders = 'off'
+                    else:
+                        columnheaders = 'on'
+                #Now bring the retrieved information to a form which can be sent back to the client
+                response = self.format_live_data(result, columns, outputformat, columnheaders, separators, aliases) + "\n"
+            except BaseException as e:
+                exit
+                print "REQUEST produces an exception", data, e
+    
+    
+            if responseheader == 'fixed16':
+                statuscode = 200
+                responselength = len(response) # no error
+                response = '%3d %11d\n' % (statuscode, responselength) + response
+    
+            print "REQUEST", data
+            print "RESPONSE\n%s\n" % response
+            return response
 
 

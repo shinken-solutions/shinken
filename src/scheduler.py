@@ -120,6 +120,7 @@ class Scheduler:
 
     #We've got activity in the fifo, we get and run commands
     def run_external_command(self, command):
+        print "scheduler resolves command", command
         self.external_command.resolve_command(command)
 
 
@@ -487,7 +488,8 @@ class Scheduler:
                 "modified_host_attributes" : 0,
                 "modified_service_attributes" : 0,
                 "global_host_event_handler" : self.conf.global_host_event_handler,
-                'global_service_event_handler' : self.conf.global_service_event_handler
+                'global_service_event_handler' : self.conf.global_service_event_handler,
+                'command_file' : self.conf.command_file
                 }
         b = Brok('program_status', data)
         return b

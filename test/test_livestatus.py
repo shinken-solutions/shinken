@@ -437,6 +437,49 @@ ResponseHeader: fixed16"""
         for s in self.livestatus_broker.livestatus.services.values():
             print "%s %d %s;%d" % (s.state, s.state_id, s.state_type, s.attempt)
 
+
+        duration = 180
+        now = time.time()
+        # downtime valid for the next 2 minutes
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        time.sleep(20)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']])
+
+        print "downtime was scheduled. check its activity and the comment"
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(svc.downtimes) == 1)
+        self.assert_(svc.downtimes[0] in self.sched.downtimes.values())
+        self.assert_(svc.downtimes[0].fixed)
+        self.assert_(svc.downtimes[0].is_in_effect)
+        self.assert_(not svc.downtimes[0].can_be_deleted)
+        self.assert_(len(self.sched.comments) == 1)
+        self.assert_(len(svc.comments) == 1)
+        self.assert_(svc.comments[0] in self.sched.comments.values())
+        self.assert_(svc.downtimes[0].comment_id == svc.comments[0].id)
+
+        now = time.time()
+        cmd = "[%lu] ADD_SVC_COMMENT;test_host_0;test_ok_0;1;lausser;comment" % now
+        print cmd
+        self.sched.run_external_command(cmd)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']])
+        self.assert_(len(self.sched.comments) == 1)
+        self.assert_(len(svc.comments) == 1)
+
+        self.update_broker()
+        print svc.comments
+        #data = """GET services\nFilter: groups >= ok\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output long_plugin_output\nResponseHeader: fixed16"""
+        data = """GET services\nFilter: groups >= ok\nColumns: host_name host_comments description comments \nResponseHeader: fixed16"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+        data = """REQUEST GET services\nFilter: host_name = test_host_0\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output long_plugin_output\nResponseHeader: fixed16"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
 if __name__ == '__main__':
     import cProfile
     command = """unittest.main()"""

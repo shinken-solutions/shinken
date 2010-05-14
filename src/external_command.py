@@ -347,12 +347,12 @@ class ExternalCommand:
                             #is usefull so a bad command will be catch
 
                     elif type_searched == 'host_group':
-                        hg = self.host_groups.find_by_name(val)
+                        hg = self.hostgroups.find_by_name(val)
                         if hg is not None:
                             args.append(hg)
 
                     elif type_searched == 'service_group':
-                        sg = self.service_groups.find_by_name(val)
+                        sg = self.servicegroups.find_by_name(val)
                         if sg is not None:
                             args.append(sg)
 
@@ -1093,11 +1093,13 @@ class ExternalCommand:
 
     #SCHEDULE_SERVICEGROUP_HOST_DOWNTIME;<servicegroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SERVICEGROUP_HOST_DOWNTIME(self, servicegroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
-        pass
+        for h in [s.host for s in servicegroup.get_services()]:
+            self.SCHEDULE_HOST_DOWNTIME(h, start_time, end_time, fixed, trigger_id, duration, author, comment)
 
     #SCHEDULE_SERVICEGROUP_SVC_DOWNTIME;<servicegroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SERVICEGROUP_SVC_DOWNTIME(self, servicegroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
-        pass
+        for s in servicegroup.get_services():
+            self.SCHEDULE_SVC_DOWNTIME(s, start_time, end_time, fixed, trigger_id, duration, author, comment)
 
     #SCHEDULE_SVC_CHECK;<host_name>;<service_description>;<check_time>
     def SCHEDULE_SVC_CHECK(self, service, check_time):
