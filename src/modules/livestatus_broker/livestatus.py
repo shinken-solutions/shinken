@@ -232,7 +232,7 @@ class LiveStatus:
             'host_notes_url_expanded' : { },
             'host_notification_interval' : { },
             'host_notification_period' : { },
-            'host_notifications_enabled' : { },
+            'host_notifications_enabled' : { 'prop' : 'host', 'depythonize' : lambda x: from_bool_to_string(x.notifications_enabled) },
             'host_num_services' : { 'prop' : 'host', 'depythonize' : lambda x: len(x.services) },
             'host_num_services_crit' : { 'prop' : 'host', 'depythonize' : lambda x: len([y for y in x.services if y.state_id == 2]) },
             'host_num_services_hard_crit' : { 'prop' : 'host', 'depythonize' : lambda x: len([y for y in x.services if y.state_id == 2 and y.state_type_id == 1]) },

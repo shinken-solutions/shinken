@@ -675,7 +675,7 @@ class ExternalCommand:
 
     #DISABLE_HOST_NOTIFICATIONS;<host_name>
     def DISABLE_HOST_NOTIFICATIONS(self, host):
-        host.enable_notifications = False
+        host.notifications_enabled = False
         self.sched.get_and_register_status_brok(host)
 
     #DISABLE_HOST_SVC_CHECKS;<host_name>
@@ -770,7 +770,7 @@ class ExternalCommand:
 
     #DISABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def DISABLE_SVC_NOTIFICATIONS(self, service):
-        service.enable_notifications = False
+        service.notifications_enabled = False
         self.sched.get_and_register_status_brok(service)
 
     #ENABLE_ALL_NOTIFICATIONS_BEYOND_HOST;<host_name>
@@ -875,7 +875,7 @@ class ExternalCommand:
 
     #ENABLE_HOST_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_NOTIFICATIONS(self, host):
-        host.enable_notifications = True
+        host.notifications_enabled = True
         self.sched.get_and_register_status_brok(host)
 
     #ENABLE_HOST_SVC_CHECKS;<host_name>
@@ -965,7 +965,7 @@ class ExternalCommand:
 
     #ENABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def ENABLE_SVC_NOTIFICATIONS(self, service):
-        service.enable_notifications = True
+        service.notifications_enabled = True
         self.sched.get_and_register_status_brok(service)
 
     #PROCESS_FILE;<file_name>;<delete>
