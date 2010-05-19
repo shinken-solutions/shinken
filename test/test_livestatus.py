@@ -473,10 +473,19 @@ ResponseHeader: fixed16"""
         print svc.comments
         #data = """GET services\nFilter: groups >= ok\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output long_plugin_output\nResponseHeader: fixed16"""
         data = """GET services\nFilter: groups >= ok\nColumns: host_name host_comments description comments \nResponseHeader: fixed16"""
+        data = """GET services\nFilter: groups >= ok\nColumns: host_name host_comments description comments groups\nResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
-        data = """REQUEST GET services\nFilter: host_name = test_host_0\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output long_plugin_output\nResponseHeader: fixed16"""
+        data = """GET services\nFilter: host_name = test_host_0\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output long_plugin_output\nResponseHeader: fixed16"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+        data = """GET comments\nResponseHeader: fixed16\n"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+        data = """GET servicegroups\nColumns: name alias members\nResponseHeader: fixed16\n"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
