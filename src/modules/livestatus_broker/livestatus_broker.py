@@ -74,6 +74,9 @@ class Livestatus_broker:
         self.timeperiods = {}
         self.commands = {}
 
+        self.hostname_lookup_table = {}
+        self.servicename_lookup_table = {}
+
         self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
 
         self.number_of_objects = 0
@@ -94,7 +97,7 @@ class Livestatus_broker:
         manager = 'manage_'+type+'_brok'
         #print "------------------------------------------- i receive", manager
         if hasattr(self, manager):
-            print "------------------------------------------- i manage", manager
+            #print "------------------------------------------- i manage", manager
             #print b
             f = getattr(self, manager)
             f(b)
@@ -127,8 +130,10 @@ class Livestatus_broker:
         #Escalations is not use for status_dat
         del h.escalations
                 
-        #print "H:", h
+        h.service_ids = []
+        h.services = []
         self.hosts[h_id] = h
+        self.hostname_lookup_table[h.host_name] = h_id
         self.number_of_objects += 1
 
 
@@ -164,8 +169,15 @@ class Livestatus_broker:
 
         del s.escalations
 
-        #print "S:", s
+        h = self.find_host(data['host_name'])
+        if h != None:
+            # Reconstruct the connection between hosts and services
+            h.service_ids.append(s_id)
+            h.services.append(s)
+            # There is already a s.host_name, but a reference to the h object can be useful too
+            s.host = h
         self.services[s_id] = s
+        self.servicename_lookup_table[s.host_name + s.service_description] = s_id
         self.number_of_objects += 1
 
 
@@ -175,7 +187,7 @@ class Livestatus_broker:
         sg_id = data['id']
         members = data['members']
         del data['members']
-        print "Creating servicegroup:", sg_id, data
+        #print "Creating servicegroup:", sg_id, data
         sg = Servicegroup()
         for prop in data:
             setattr(sg, prop, data[prop])
@@ -183,7 +195,7 @@ class Livestatus_broker:
         for (s_id, s_name) in members:
             if s_id in self.services:
                 sg.members.append(self.services[s_id])
-        print "SG:", sg
+        #print "SG:", sg
         self.servicegroups[sg_id] = sg
         self.number_of_objects += 1
 
@@ -320,6 +332,8 @@ class Livestatus_broker:
 
 
     def find_host(self, host_name):
+        if host_name in self.hostname_lookup_table:
+            return self.hosts[self.hostname_lookup_table[host_name]]
         for h in self.hosts.values():
             if h.host_name == host_name:
                 return h
@@ -327,6 +341,8 @@ class Livestatus_broker:
 
 
     def find_service(self, host_name, service_description):
+        if host_name + service_description in self.servicename_lookup_table:
+            return self.services[self.servicename_lookup_table[host_name + service_description]]
         for s in self.services.values():
             if s.host_name == host_name and s.service_description == service_description:
                 return s
@@ -358,6 +374,7 @@ class Livestatus_broker:
 
 
     def main(self):
+        last_number_of_objects = 0
         backlog = 5
         size = 8192
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -365,6 +382,7 @@ class Livestatus_broker:
         server.bind((self.host, self.port))
         server.listen(backlog)
         input = [server]
+        # todo. open self.socket and add it to input
 
         while True:
             try:
@@ -389,3 +407,8 @@ class Livestatus_broker:
                         s.close()
                         input.remove(s)
             
+            if self.number_of_objects > last_number_of_objects:
+                # Still in the initialization phase
+                # Maybe we should wait until there are no more initial broks
+                # before we open the socket
+                pass

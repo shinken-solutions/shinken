@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #Copyright (C) 2010 Gabes Jean, naparuba@gmail.com
 #
 #This file is part of Shinken.

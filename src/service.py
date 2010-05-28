@@ -1,5 +1,7 @@
-#!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+#!/usr/bin/env python
+#Copyright (C) 2009-2010 : 
+#    Gabes Jean, naparuba@gmail.com 
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
 #
@@ -133,7 +135,7 @@ class Service(SchedulingItem):
         'problem_has_been_acknowledged' : {'default' : False, 'fill_brok' : ['full_status']},
         'acknowledgement_type' : {'default' : 1, 'fill_brok' : ['full_status', 'check_result']},
         'check_type' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
-        'has_been_checked' : {'default' : 1, 'fill_brok' : ['full_status', 'check_result']},
+        'has_been_checked' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'should_be_scheduled' : {'default' : 1, 'fill_brok' : ['full_status']},
         'last_problem_id' : {'default' : 0, 'fill_brok' : ['full_status']},
         'current_problem_id' : {'default' : 0, 'fill_brok' : ['full_status']},

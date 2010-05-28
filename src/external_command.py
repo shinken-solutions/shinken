@@ -1,5 +1,7 @@
-#!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+#!/usr/bin/env python
+#Copyright (C) 2009-2010 : 
+#    Gabes Jean, naparuba@gmail.com 
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
 #
@@ -347,12 +349,12 @@ class ExternalCommand:
                             #is usefull so a bad command will be catch
 
                     elif type_searched == 'host_group':
-                        hg = self.host_groups.find_by_name(val)
+                        hg = self.hostgroups.find_by_name(val)
                         if hg is not None:
                             args.append(hg)
 
                     elif type_searched == 'service_group':
-                        sg = self.service_groups.find_by_name(val)
+                        sg = self.servicegroups.find_by_name(val)
                         if sg is not None:
                             args.append(sg)
 
@@ -675,7 +677,7 @@ class ExternalCommand:
 
     #DISABLE_HOST_NOTIFICATIONS;<host_name>
     def DISABLE_HOST_NOTIFICATIONS(self, host):
-        host.enable_notifications = False
+        host.notifications_enabled = False
         self.sched.get_and_register_status_brok(host)
 
     #DISABLE_HOST_SVC_CHECKS;<host_name>
@@ -770,7 +772,7 @@ class ExternalCommand:
 
     #DISABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def DISABLE_SVC_NOTIFICATIONS(self, service):
-        service.enable_notifications = False
+        service.notifications_enabled = False
         self.sched.get_and_register_status_brok(service)
 
     #ENABLE_ALL_NOTIFICATIONS_BEYOND_HOST;<host_name>
@@ -875,7 +877,7 @@ class ExternalCommand:
 
     #ENABLE_HOST_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_NOTIFICATIONS(self, host):
-        host.enable_notifications = True
+        host.notifications_enabled = True
         self.sched.get_and_register_status_brok(host)
 
     #ENABLE_HOST_SVC_CHECKS;<host_name>
@@ -965,7 +967,7 @@ class ExternalCommand:
 
     #ENABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def ENABLE_SVC_NOTIFICATIONS(self, service):
-        service.enable_notifications = True
+        service.notifications_enabled = True
         self.sched.get_and_register_status_brok(service)
 
     #PROCESS_FILE;<file_name>;<delete>
@@ -1093,11 +1095,13 @@ class ExternalCommand:
 
     #SCHEDULE_SERVICEGROUP_HOST_DOWNTIME;<servicegroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SERVICEGROUP_HOST_DOWNTIME(self, servicegroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
-        pass
+        for h in [s.host for s in servicegroup.get_services()]:
+            self.SCHEDULE_HOST_DOWNTIME(h, start_time, end_time, fixed, trigger_id, duration, author, comment)
 
     #SCHEDULE_SERVICEGROUP_SVC_DOWNTIME;<servicegroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SERVICEGROUP_SVC_DOWNTIME(self, servicegroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
-        pass
+        for s in servicegroup.get_services():
+            self.SCHEDULE_SVC_DOWNTIME(s, start_time, end_time, fixed, trigger_id, duration, author, comment)
 
     #SCHEDULE_SVC_CHECK;<host_name>;<service_description>;<check_time>
     def SCHEDULE_SVC_CHECK(self, service, check_time):

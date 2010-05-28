@@ -1,5 +1,7 @@
-#!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+#!/usr/bin/env python
+#Copyright (C) 2009-2010 : 
+#    Gabes Jean, naparuba@gmail.com 
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
 #
