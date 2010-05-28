@@ -360,6 +360,7 @@ class Broker(Satellite):
 	def main(self):
 
 		Pyro.config.PYRO_STORAGE = self.workdir
+		Pyro.config.PYRO_MULTITHREADED = 0
                 #Daemon init
 		Pyro.core.initServer()
 
