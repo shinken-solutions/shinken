@@ -45,19 +45,21 @@ class Poller (Satellite):
 	#default_port = 7771
 	
 	properties = {
-		'workdir' : {'default' : '/home/nap/shinken/src/var', 'pythonize' : None},
-		'pidfile' : {'default' : '/home/nap/shinken/src/var/pollerd.pid', 'pythonize' : None},
+		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None},
+		'pidfile' : {'default' : '/usr/local/shinken/src/var/pollerd.pid', 'pythonize' : None},
 		'port' : {'default' : '7771', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
-		'user' : {'default' : 'nap', 'pythonize' : None},
-		'group' : {'default' : 'nap', 'pythonize' : None},
+		'user' : {'default' : 'shinken', 'pythonize' : None},
+		'group' : {'default' : 'shinken', 'pythonize' : None},
 		'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool}
 		}
 
 
 ################### Process launch part
 def usage(name):
-    print "Shinken Poller Daemon, version %s, from Gabes Jean, naparuba@gmail.com" % VERSION
+    print "Shinken Poller Daemon, version %s, from : " % VERSION
+    print "        Gabes Jean, naparuba@gmail.com"
+    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
     print "Usage: %s [options] [-c configfile]" % name
     print "Options:"
     print " -c, --config"

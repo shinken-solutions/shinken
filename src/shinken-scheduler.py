@@ -73,7 +73,7 @@ from daemon import Daemon#create_daemon, check_parallele_run, change_user
 from util import to_int, to_bool
 #from module import Module, Modules
 
-VERSION = "0.1beta"
+VERSION = "0.1"
 
 
 
@@ -232,12 +232,12 @@ class Shinken(Daemon):
     #default_port = 7768
 
     properties = {
-        'workdir' : {'default' : '/home/nap/shinken/src/var', 'pythonize' : None},
-        'pidfile' : {'default' : '/home/nap/shinken/src/var/schedulerd.pid', 'pythonize' : None},
+        'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None},
+        'pidfile' : {'default' : '/usr/local/shinken/src/var/schedulerd.pid', 'pythonize' : None},
         'port' : {'default' : '7768', 'pythonize' : to_int},
         'host' : {'default' : '0.0.0.0', 'pythonize' : None},
-        'user' : {'default' : 'nap', 'pythonize' : None},
-        'group' : {'default' : 'nap', 'pythonize' : None},
+        'user' : {'default' : 'shinken', 'pythonize' : None},
+        'group' : {'default' : 'shinken', 'pythonize' : None},
         'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool}
         }
 
@@ -417,7 +417,9 @@ class Shinken(Daemon):
 
 ################### Process launch part
 def usage(name):
-    print "Shinken Scheduler Daemon, version %s, from Gabes Jean, naparuba@gmail.com" % VERSION
+    print "Shinken Scheduler Daemon, version %s, from :" % VERSION
+    print "        Gabes Jean, naparuba@gmail.com"
+    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
     print "Usage: %s [options] [-c configfile]" % name
     print "Options:"
     print " -c, --config"

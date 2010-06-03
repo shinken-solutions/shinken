@@ -51,7 +51,7 @@ from timeperiod import Timeperiod
 from contact import Contact
 from command import Command, CommandCall
 
-VERSION = "0.1beta"
+VERSION = "0.1"
 
 
 
@@ -154,14 +154,14 @@ class IForArbiter(Pyro.core.ObjBase):
 class Broker(Satellite):
 	#default_port = 7772
 	properties = {
-		'workdir' : {'default' : '/home/nap/shinken/src/var', 'pythonize' : None},
-		'pidfile' : {'default' : '/home/nap/shinken/src/var/brokerd.pid', 'pythonize' : None},
+		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None},
+		'pidfile' : {'default' : '/usr/local/shinken/src/var/brokerd.pid', 'pythonize' : None},
 		'port' : {'default' : '7772', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
-		'user' : {'default' : 'nap', 'pythonize' : None},
-		'group' : {'default' : 'nap', 'pythonize' : None},
+		'user' : {'default' : 'shinken', 'pythonize' : None},
+		'group' : {'default' : 'shinken', 'pythonize' : None},
 		'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
-		'modulespath' : {'default' :'/home/nap/shinken/src/modules' , 'pythonize' : None}
+		'modulespath' : {'default' :'/usr/local/shinken/src/modules' , 'pythonize' : None}
 		}
 	
 
@@ -446,7 +446,9 @@ class Broker(Satellite):
 
 ################### Process launch part
 def usage(name):
-    print "Shinken Broker Daemon, version %s, from Gabes Jean, naparuba@gmail.com" % VERSION
+    print "Shinken Broker Daemon, version %s, from :" % VERSION
+    print "        Gabes Jean, naparuba@gmail.com"
+    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
     print "Usage: %s [options] [-c configfile]" % name
     print "Options:"
     print " -c, --config"

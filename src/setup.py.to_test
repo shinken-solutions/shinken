@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*-
+
+#From Maximilien Bersoult
+
+from setuptools import setup, find_packages
+
+setup(
+  name = "Shinken",
+  version = "0.1b1",
+  packages = find_packages(),
+  description = "Shinken is a Nagios reimplementaion in Pyhton",
+  author = "Gabès Jean",
+  author_email = "naparuba@gmail.com",
+  license = "GNU Affero General Public License",
+  url = "http://sourceforge.net/projects/shinken/",
+  
+  install_requires = [
+                      'pyro',
+                      ],
+  
+#  entry_points = {
+#      'console_scripts': [
+#                          'shinken-arbiter=shinken-arbiter:main',
+#                          'shinken-broker=shinken-broker:main',
+#                          'shinken-poller=shinken-poller:main',
+#                          'shinken-reactionner=shinken-reactionner:main',
+#                          'shinken-scheduler=shinken-scheduler:main'
+#                          ]
+#  },
+
+  package_data = {'shinken': ['etc/*', 'db/*' , 'var/*'] }
+  
+)
