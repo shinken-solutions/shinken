@@ -232,8 +232,8 @@ class Shinken(Daemon):
     #default_port = 7768
 
     properties = {
-        'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None},
-        'pidfile' : {'default' : '/usr/local/shinken/src/var/schedulerd.pid', 'pythonize' : None},
+        'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None, 'path' : True},
+        'pidfile' : {'default' : '/usr/local/shinken/src/var/schedulerd.pid', 'pythonize' : None, 'path' : True},
         'port' : {'default' : '7768', 'pythonize' : to_int},
         'host' : {'default' : '0.0.0.0', 'pythonize' : None},
         'user' : {'default' : 'shinken', 'pythonize' : None},
@@ -287,6 +287,7 @@ class Shinken(Daemon):
         Config.fill_usern_macros()
 		
         #create the server
+        print "Workdir", self.workdir
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0
