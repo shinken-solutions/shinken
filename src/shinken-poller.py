@@ -45,8 +45,8 @@ class Poller (Satellite):
 	#default_port = 7771
 	
 	properties = {
-		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None},
-		'pidfile' : {'default' : '/usr/local/shinken/src/var/pollerd.pid', 'pythonize' : None},
+		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None, 'path' : True},
+		'pidfile' : {'default' : '/usr/local/shinken/src/var/pollerd.pid', 'pythonize' : None, 'path' : True},
 		'port' : {'default' : '7771', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
 		'user' : {'default' : 'shinken', 'pythonize' : None},
@@ -109,8 +109,8 @@ if __name__ == "__main__":
             sys.exit()
 
     p = Poller(config_file, is_daemon, do_replace, debug, debug_file)
-    import cProfile
-    #p.main()
-    command = """p.main()"""
-    cProfile.runctx( command, globals(), locals(), filename="var/Poller.profile" )
+    #import cProfile
+    p.main()
+    #command = """p.main()"""
+    #cProfile.runctx( command, globals(), locals(), filename="var/Poller.profile" )
 

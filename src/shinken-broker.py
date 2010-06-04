@@ -154,14 +154,14 @@ class IForArbiter(Pyro.core.ObjBase):
 class Broker(Satellite):
 	#default_port = 7772
 	properties = {
-		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None},
-		'pidfile' : {'default' : '/usr/local/shinken/src/var/brokerd.pid', 'pythonize' : None},
+		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None, 'path' : True},
+		'pidfile' : {'default' : '/usr/local/shinken/src/var/brokerd.pid', 'pythonize' : None, 'path' : True},
 		'port' : {'default' : '7772', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
 		'user' : {'default' : 'shinken', 'pythonize' : None},
 		'group' : {'default' : 'shinken', 'pythonize' : None},
 		'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
-		'modulespath' : {'default' :'/usr/local/shinken/src/modules' , 'pythonize' : None}
+		'modulespath' : {'default' :'/usr/local/shinken/src/modules' , 'pythonize' : None, 'path' : True}
 		}
 	
 
@@ -177,6 +177,11 @@ class Broker(Satellite):
 		#Read teh config file if exist
 		#if not, default properties are used
 		self.parse_config_file()
+
+		if config_file != None:
+		        #Some paths can be relatives. We must have a full path by taking
+                        #the config file by reference
+			self.relative_paths_to_full(os.path.dirname(config_file))
 
                 #Check if another Scheduler is not running (with the same conf)
 		self.check_parallele_run(do_replace)

@@ -152,6 +152,11 @@ class Satellite(Daemon):
         #if not, default properties are used
         self.parse_config_file()
 
+        if self.config_file != None:
+            #Some paths can be relatives. We must have a full path by taking
+            #the config file by reference
+            self.relative_paths_to_full(os.path.dirname(config_file))
+
         #Check if another Scheduler is not running (with the same conf)
         self.check_parallele_run(do_replace)
         

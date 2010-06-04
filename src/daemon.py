@@ -196,6 +196,35 @@ class Daemon:
                 setattr(self, prop, value)
                 print "Using default value :", prop, value
 
+    
+    #Some paths can be relatives. We must have a full path by taking
+    #the config file by reference
+    def relative_paths_to_full(self, reference_path):
+        #print "Create relative paths with", reference_path
+        properties = self.__class__.properties
+        for prop in properties:
+            if 'path' in properties[prop] and properties[prop]['path']:
+                path = getattr(self, prop)
+                new_path = path
+                #Windows full paths are like c:/blabla
+                #Unixes are like /blabla
+                #So we look for : on windows, / for Unixes
+                if os.name != 'nt':
+                    #os.sep = / on Unix
+                    #so here if not 
+                    if path != '' and path[0] != os.sep :
+                        new_path = reference_path + os.sep + path
+                else:
+                    #os.sep = \ on windows, and we must look at c: like format
+                    if len(path) > 2 and path[1] != ':':
+                        new_path = reference_path + os.sep + path
+                setattr(self, prop, new_path)
+                #print "Setting %s for %s" % (new_path, prop)
+                    
+                               
+
+
+
     def manage_signal(self, sig, frame):
         print "Dummy signal function !"
         sys.exit(0)
