@@ -5,4 +5,4 @@ BIN=$DIR"/../src"
 ETC=$DIR"/../src/etc"
 
 echo "Stopping arbiter"
-kill `cat $DIR../src/var/arbiterd.pid`
+kill `cat $DIR/../src/var/arbiterd.pid`

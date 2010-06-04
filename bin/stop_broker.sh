@@ -5,4 +5,4 @@ BIN=$DIR"/../src"
 ETC=$DIR"/../src/etc"
 
 echo "Stopping broker"
-kill `cat $DIR../src/var/brokerd.pid`
+kill `cat $DIR/../src/var/brokerd.pid`

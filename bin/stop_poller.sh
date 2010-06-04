@@ -5,4 +5,4 @@ BIN=$DIR"/../src"
 ETC=$DIR"/../src/etc"
 
 echo "Stopping poller"
-kill `cat $DIR../src/var/pollerd.pid`
+kill `cat $DIR/../src/var/pollerd.pid`

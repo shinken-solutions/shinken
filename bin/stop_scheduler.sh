@@ -5,4 +5,4 @@ BIN=$DIR"/../src"
 ETC=$DIR"/../src/etc"
 
 echo "Stopping scheduler"
-kill `cat $DIR../src/var/schedulerd.pid`
+kill `cat $DIR/../src/var/schedulerd.pid`
