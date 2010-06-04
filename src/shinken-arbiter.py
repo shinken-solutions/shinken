@@ -275,6 +275,8 @@ class Arbiter(Daemon):
 
         if self.me == None:
             print "Error : I cannot find my own Arbiter object, I bail out"
+            print "To solve it : please change the host_name parameter in the object Arbiter"
+            print "in the file shinken-specific.cfg. Thanks."
             sys.exit(1)
 
 

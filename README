@@ -1,0 +1,53 @@
+
+== Presentation Of the Shinken project ==
+Hi,
+
+Welcome in the Shinken project.
+
+Shinken is a new implementation of Nagios in AGLv3 written in Python. The main goal of Shinken is to allow users to have a fully flexible architecture for their monitoring system that can easily scale to large environments. Shinken is backward compatible with the Nagios configuration standard and plugins. It works on any operative system and architecture that supports Python, which includes Windows and Mac OS X/Darwin.
+
+
+== How to install it ==
+
+You just need to add a shinken user (in the shinken group) on your system :
+$adduser shinken
+
+Then move the shinken directory and give it to the shinken user :
+mv shinken /usr/local
+chown -R shinken:shinken /usr/local/shinken
+
+For the compilation part it's easy : there is no compilation part!
+
+== Dependancies ==
+The only dependancies are Python >= 2.6 and the Pyro module.
+
+For Python, it should be ok with nearly all distribution (unless RedHat 5 that use a old Python 2.4, sorry).
+
+Under ubuntu, you can grag the Pyro module with :
+$ sudo apt-get install pyro
+
+Under other distributions, you can search for it :
+$ yum search pyro
+And if you do not find it, you can install it from Pypi :
+$ easy_install pyro
+
+And that all folks :)
+
+
+== Where is the configuration ? ==
+The configuration is at /usr/local/shinken/src/etc.
+
+The nagios.cfg, commons files are like Nagios. All Shinken specific objects (like link to daemons or realms) are in
+the shinken-specific.cfg file.
+
+== I need to change the configuration ? ==
+
+Yes, just change the arbiter object in etc/shinken-specific.cfg, the parameter host_name should
+take your machine name (hostname)
+
+That's all
+
+== How to run it ==
+It's easy, there is a already launch script for you :
+$ /usr/local/shinken/bin/launch_all.sh
+

@@ -1,0 +1,24 @@
+== Fully compatible? ==
+
+Not 100%, and it will never be. Some Nagios features are just useless in a Shiken architecture.
+
+== I need to change something ? ==
+
+From now YES, two things : the status.dat export (if you want it) and nagios.log (I think you still want it).
+
+Theses things are now managed as "modules" by the Brokers, and are in the shinken-specific.cfg file (look at Simple-log and Status-Dat modules, and put your paths on it).
+
+Maybe one day we will "hack" something like if there is such paths in nagios.cfg, we will create the modules in a dynamic way. If you want to help us on that, you can :)
+
+== Ok, but how do I launch my Nagios conf with Shinken ? ==
+
+It's simple, after launching scheduler, poller, reactionner and broker daemons (see README), you just need
+to launch the Arbiter daemon with your Nagios configuration :
+
+$ /usr/local/shinken/src/shinken-arbiter.py -c /usr/local/nagios/etc/nagios.cfg -c /usr/local/shinken/src/etc/shinken-specific.cfg
+
+And that's all :)
+
+Shinken arbiter can take multiples configuration file, so classic Nagios things are called by nagios.cfg, all specific things (like daemons connexions or realms) are in shinken-specific.cfg.
+
+
