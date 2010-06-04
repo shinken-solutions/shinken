@@ -73,7 +73,8 @@ class Config(Item):
     #Service class with name blabla
     #if (Service, None) : must set this properti to the Service class with
     #same name
-    properties={'log_file' : {'required':False, 'default' : '/tmp/log.txt'},
+    properties={'prefix' : {'required':False, 'default' : '/usr/local/shinken/'},
+                'log_file' : {'required':False, 'default' : '/tmp/log.txt'},
                 'object_cache_file' : {'required':False, 'default' : '/tmp/object.dat'},
                 'precached_object_file' : {'required':False , 'default' : '/tmp/object.precache'},
                 'resource_file' : {'required':False , 'default':'/tmp/ressources.txt'},
@@ -207,6 +208,7 @@ class Config(Item):
 
 
     macros = {
+        'PREFIX' : 'prefix',
         'MAINCONFIGFILE' : '',
         'STATUSDATAFILE' : '',
         'COMMENTDATAFILE' : '',
