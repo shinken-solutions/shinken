@@ -97,7 +97,7 @@ class Config(Item):
                 'external_command_buffer_slots' : {'required':False, 'default':'512', 'pythonize': to_int},
                 'check_for_updates' : {'required':False, 'default':'1', 'pythonize': to_bool},
                 'bare_update_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'lock_file' : {'required':False, 'default':'/tmp/lock.lock'},
+                'lock_file' : {'required':False, 'default':'/usr/local/shinken/var/arbiterd.pid'},
                 'retain_state_information' : {'required':False, 'default':'1', 'pythonize': to_bool},
                 'state_retention_file' : {'required':False, 'default':'/tmp/retention.dat'},
                 'retention_update_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
