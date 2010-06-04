@@ -45,8 +45,8 @@ class Reactionner(Satellite):
 	#default_port = 7769
 
 	properties = {
-		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None},
-		'pidfile' : {'default' : '/usr/local/shinken/src/var/reactionnerd.pid', 'pythonize' : None},
+		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None, 'path' : True},
+		'pidfile' : {'default' : '/usr/local/shinken/src/var/reactionnerd.pid', 'pythonize' : None, 'path' : True},
 		'port' : {'default' : '7769', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
 		'user' : {'default' : 'shinken', 'pythonize' : None},

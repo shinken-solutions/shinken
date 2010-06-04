@@ -220,9 +220,6 @@ class Daemon:
                         new_path = reference_path + os.sep + path
                 setattr(self, prop, new_path)
                 #print "Setting %s for %s" % (new_path, prop)
-                    
-                               
-
 
 
     def manage_signal(self, sig, frame):
