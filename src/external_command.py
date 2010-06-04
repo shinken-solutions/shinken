@@ -604,19 +604,19 @@ class ExternalCommand:
     def DISABLE_EVENT_HANDLERS(self):
         self.conf.enable_event_handlers = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #DISABLE_FAILURE_PREDICTION
     def DISABLE_FAILURE_PREDICTION(self):
         self.conf.enable_failure_prediction = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #DISABLE_FLAP_DETECTION
     def DISABLE_FLAP_DETECTION(self):
         self.conf.enable_flap_detection = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #DISABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
@@ -696,7 +696,7 @@ class ExternalCommand:
     def DISABLE_NOTIFICATIONS(self):
         self.conf.enable_notifications = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #DISABLE_PASSIVE_HOST_CHECKS;<host_name>
     def DISABLE_PASSIVE_HOST_CHECKS(self, host):
@@ -712,7 +712,7 @@ class ExternalCommand:
     def DISABLE_PERFORMANCE_DATA(self):
         self.conf.process_performance_data = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #DISABLE_SERVICEGROUP_HOST_CHECKS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_HOST_CHECKS(self, servicegroup):
@@ -753,7 +753,7 @@ class ExternalCommand:
     def DISABLE_SERVICE_FRESHNESS_CHECKS(self):
         self.conf.check_service_freshness = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #DISABLE_SVC_CHECK;<host_name>;<service_description>
     def DISABLE_SVC_CHECK(self, service):
@@ -803,19 +803,19 @@ class ExternalCommand:
     def ENABLE_EVENT_HANDLERS(self):
         self.conf.enable_event_handlers = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #ENABLE_FAILURE_PREDICTION
     def ENABLE_FAILURE_PREDICTION(self):
         self.conf.enable_failure_prediction = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #ENABLE_FLAP_DETECTION
     def ENABLE_FLAP_DETECTION(self):
         self.conf.enable_flap_detection = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #ENABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def ENABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
@@ -873,7 +873,7 @@ class ExternalCommand:
     def ENABLE_HOST_FRESHNESS_CHECKS(self):
         self.conf.check_host_freshness = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #ENABLE_HOST_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_NOTIFICATIONS(self, host):
@@ -896,7 +896,7 @@ class ExternalCommand:
     def ENABLE_NOTIFICATIONS(self):
         self.conf.enable_notifications = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #ENABLE_PASSIVE_HOST_CHECKS;<host_name>
     def ENABLE_PASSIVE_HOST_CHECKS(self, host):
@@ -912,7 +912,7 @@ class ExternalCommand:
     def ENABLE_PERFORMANCE_DATA(self):
         self.conf.process_performance_data = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
     
     #ENABLE_SERVICEGROUP_HOST_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_HOST_CHECKS(self, servicegroup):
@@ -948,7 +948,7 @@ class ExternalCommand:
     def ENABLE_SERVICE_FRESHNESS_CHECKS(self):
         self.conf.check_service_freshness = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #ENABLE_SVC_CHECK;<host_name>;<service_description>
     def ENABLE_SVC_CHECK(self, service):
@@ -1142,25 +1142,25 @@ class ExternalCommand:
     def START_ACCEPTING_PASSIVE_HOST_CHECKS(self):
         self.conf.accept_passive_host_checks = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #START_ACCEPTING_PASSIVE_SVC_CHECKS
     def START_ACCEPTING_PASSIVE_SVC_CHECKS(self):
         self.conf.accept_passive_service_checks = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #START_EXECUTING_HOST_CHECKS
     def START_EXECUTING_HOST_CHECKS(self):
         self.conf.execute_host_checks = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #START_EXECUTING_SVC_CHECKS
     def START_EXECUTING_SVC_CHECKS(self):
         self.conf.execute_service_checks = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #START_OBSESSING_OVER_HOST;<host_name>
     def START_OBSESSING_OVER_HOST(self, host):
@@ -1181,31 +1181,31 @@ class ExternalCommand:
     def START_OBSESSING_OVER_SVC_CHECKS(self):
         self.conf.obsess_over_services = True
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #STOP_ACCEPTING_PASSIVE_HOST_CHECKS
     def STOP_ACCEPTING_PASSIVE_HOST_CHECKS(self):
         self.accept_passive_host_checks = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #STOP_ACCEPTING_PASSIVE_SVC_CHECKS
     def STOP_ACCEPTING_PASSIVE_SVC_CHECKS(self):
         self.accept_passive_service_checks = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #STOP_EXECUTING_HOST_CHECKS
     def STOP_EXECUTING_HOST_CHECKS(self):
         self.conf.execute_host_checks = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #STOP_EXECUTING_SVC_CHECKS
     def STOP_EXECUTING_SVC_CHECKS(self):
         self.conf.execute_service_checks = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #STOP_OBSESSING_OVER_HOST;<host_name>
     def STOP_OBSESSING_OVER_HOST(self, host):
@@ -1216,7 +1216,7 @@ class ExternalCommand:
     def STOP_OBSESSING_OVER_HOST_CHECKS(self):
         self.conf.obsess_over_hosts = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
 
     #STOP_OBSESSING_OVER_SVC;<host_name>;<service_description>
     def STOP_OBSESSING_OVER_SVC(self, service):
@@ -1227,7 +1227,7 @@ class ExternalCommand:
     def STOP_OBSESSING_OVER_SVC_CHECKS(self):
         self.conf.obsess_over_services = False
         self.conf.explode_global_conf()
-        self.sched.get_and_register_program_status_brok()
+        self.sched.get_and_register_update_program_status_brok()
     
     
 if __name__ == '__main__':

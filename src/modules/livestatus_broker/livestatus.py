@@ -1369,7 +1369,8 @@ class LiveStatus:
             'downtimes' : LiveStatus.out_map[Downtime],
             'commands' : LiveStatus.out_map[Command],
             'timeperiods' : LiveStatus.out_map[Timeperiod],
-            'status' : LiveStatus.out_map[Config]
+            'status' : LiveStatus.out_map[Config],
+            'log' : LiveStatus.out_map[Config]
         }[table]
         if attribute in out_map and 'converter' in out_map[attribute]:
             return out_map[attribute]['converter']
@@ -1613,6 +1614,10 @@ class LiveStatus:
         elif operator == '>':
             return gt_filter
         elif operator == '>=':
+            return ge_contains_filter
+        elif operator == '<':
+            return gt_filter
+        elif operator == '<=':
             return ge_contains_filter
         elif operator == '=~':
             return eq_nocase_filter
