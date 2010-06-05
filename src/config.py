@@ -276,6 +276,9 @@ class Config(Item):
         res = ''
 
         for file in files:
+            #We add a \n (or \r\n) to be sure config files are separated
+            #if the previous do not finished with a line return
+            res += os.linesep
             print "Opening configuration file", file
             try:
                 fd = open(file)
