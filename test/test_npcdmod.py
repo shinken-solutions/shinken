@@ -148,7 +148,7 @@ class TestConfig(unittest.TestCase):
         if os.path.exists("./perfdata"):
             os.unlink("./perfdata")
         
-        self.npcdmod_broker = Npcd_broker('npcd', None, './perfdata', '.', 'perfdata-target')
+        self.npcdmod_broker = Npcd_broker('npcd', None, './perfdata', '.', 'perfdata-target', 15)
         self.npcdmod_broker.properties = {
             'to_queue' : 0
             }
