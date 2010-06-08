@@ -159,6 +159,7 @@ class Host(SchedulingItem):
         'early_timeout' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'return_code' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
+        'last_perf_data' : {'default' : ''},
         'customs' : {'default' : {}},
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
         'in_scheduled_downtime' : {'default' : False},
@@ -198,6 +199,7 @@ class Host(SchedulingItem):
               'HOSTOUTPUT' : 'output',
               'LONGHOSTOUTPUT' : 'long_output',
               'HOSTPERFDATA' : 'perf_data',
+              'LASTHOSTPERFDATA' : 'last_perf_data',
               'HOSTCHECKCOMMAND' : 'get_check_command',
               'HOSTACKAUTHOR' : 'ack_author',
               'HOSTACKAUTHORNAME' : 'get_ack_author_name',

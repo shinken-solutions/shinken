@@ -152,6 +152,7 @@ class Service(SchedulingItem):
         'early_timeout' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'return_code' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result']},
+        'last_perf_data' : {'default' : ''},
         'host' : {'default' : None},
         'customs' : {'default' : {}},
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
@@ -192,6 +193,7 @@ class Service(SchedulingItem):
         'SERVICEOUTPUT' : 'output',
         'LONGSERVICEOUTPUT' : 'long_output',
         'SERVICEPERFDATA' : 'perf_data',
+        'LASTSERVICEPERFDATA' : 'last_perf_data',
         'SERVICECHECKCOMMAND' : 'get_check_command',
         'SERVICEACKAUTHOR' : 'ack_author',
         'SERVICEACKAUTHORNAME' : 'get_ack_author_name',
