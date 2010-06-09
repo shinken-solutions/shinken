@@ -240,6 +240,11 @@ class Arbiter(Daemon):
         
         #print "*************** applying dependancies ************"
         self.conf.apply_dependancies()
+
+        #Hacking some global parameter inherited from Nagios to create
+        #on the fly some Broker modules like for status.dat parameters
+        #or nagios.log one if there are no already available
+        self.conf.hack_old_nagios_parameters()
         
         #print "************** Exlode global conf ****************"
         self.conf.explode_global_conf()

@@ -96,7 +96,7 @@ class Status_dat_broker:
         manager = 'manage_'+type+'_brok'
         #print "------------------------------------------- i receive", manager
         if hasattr(self, manager):
-            print "------------------------------------------- i manage", manager
+            #print "------------------------------------------- i manage", manager
             #print b
             f = getattr(self, manager)
             f(b)
