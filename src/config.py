@@ -610,6 +610,8 @@ class Config(Item):
         self.contacts.apply_inheritance()
         #print "Services"
         self.services.apply_inheritance(self.hosts)
+        #print "Servicedependencies"
+        self.servicedependencies.apply_inheritance(self.hosts)
 
 
     #Use to apply implicit inheritance
@@ -691,6 +693,7 @@ class Config(Item):
         self.hosts.linkify_templates()
         self.contacts.linkify_templates()
         self.services.linkify_templates()
+        self.servicedependencies.linkify_templates()
         
 
     #Reversed list is a dist with name for quick search by name
@@ -836,6 +839,7 @@ class Config(Item):
         self.hosts.clean_useless()
         self.contacts.clean_useless()
         self.services.clean_useless()
+        self.servicedependencies.clean_useless()
 
 
     #Create packs of hosts an services so in a pack, 
