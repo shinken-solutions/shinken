@@ -546,6 +546,13 @@ class Config(Item):
         #print "Schedulers", self.schedulerlinks
 
 
+    #It's used to change Nagios2 names to Nagios3 ones
+    #For hosts and services
+    def old_properties_names_to_new(self):
+        self.hosts.old_properties_names_to_new()
+        self.services.old_properties_names_to_new()
+
+
     #Use to fill groups values on hosts and create new services
     #(for host group ones)
     def explode(self):

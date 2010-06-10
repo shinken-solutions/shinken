@@ -208,6 +208,9 @@ class Arbiter(Daemon):
             sys.exit(1)
 
 
+        #************** Change Nagios2 names to Nagios3 ones ******
+        self.conf.old_properties_names_to_new()
+
 	#print "****************** Create Template links **********"
         self.conf.linkify_templates()
 

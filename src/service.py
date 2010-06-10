@@ -204,6 +204,14 @@ class Service(SchedulingItem):
         'SERVICENOTES' : 'notes'
         }
 
+    #This tab is used to transform old parameters name into new ones
+    #so from Nagios2 format, to Nagios3 ones
+    old_properties = {
+        'normal_check_interval' : 'check_interval',
+        'retry_check_interval' : 'retry_interval'
+        }
+        
+
     #Give a nice name output
     def get_name(self):
         return self.service_description
@@ -674,6 +682,13 @@ class Services(Items):
     def delete_services_by_id(self, ids):
         for id in ids:
             del self.items[id]
+
+            
+    #It's used to change old Nagios2 names to
+    #Nagios3 ones
+    def old_properties_names_to_new(self):
+        for s in self:
+            s.old_properties_names_to_new()
 
 
     #Apply implicit inheritance for special properties:

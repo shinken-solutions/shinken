@@ -216,6 +216,13 @@ class Host(SchedulingItem):
         }
 
 
+    #This tab is used to transform old parameters name into new ones
+    #so from Nagios2 format, to Nagios3 ones
+    old_properties = {
+        'normal_check_interval' : 'check_interval',
+        'retry_check_interval' : 'retry_interval'
+        }
+        
 
     def clean(self):
         pass
@@ -644,6 +651,14 @@ class Hosts(Items):
                 h.realm = p
                 if p != None:
                     print "Host", h.get_name(), "is in the realm", p.get_name()
+
+
+    #It's used to change old Nagios2 names to
+    #Nagios3 ones
+    def old_properties_names_to_new(self):
+        for h in self:
+            h.old_properties_names_to_new()
+
 
     
     #We look for hostgroups property in hosts and

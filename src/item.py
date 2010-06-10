@@ -251,6 +251,21 @@ class Item(object):
         return state
 
 
+    #This function is used by service and hosts
+    #to transform Nagios2 parameters to Nagios3
+    #ones, like normal_check_interval to
+    #check_interval. There is a old_parameters tab
+    #in Classes taht give such modifications to do.
+    def old_properties_names_to_new(self):
+        old_properties = self.__class__.old_properties
+        for old_name in old_properties:
+            new_name = old_properties[old_name]
+            #Ok, if we got old_name and NO new name,
+            #we switch the name
+            if hasattr(self, old_name) and not hasattr(self, new_name):
+                value = getattr(self, old_name)
+                setattr(self, new_name, value)
+
 
     def add_downtime(self, downtime):
         self.downtimes.append(downtime)
