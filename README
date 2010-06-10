@@ -45,7 +45,7 @@ the shinken-specific.cfg file.
 Yes, just change the arbiter object in etc/shinken-specific.cfg, the parameter host_name should
 take your machine name (hostname)
 
-That's all
+That's all (and this only thing will be changed soon).
 
 == How to run it ==
 It's easy, there is a already launch script for you :

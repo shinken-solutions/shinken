@@ -1,14 +1,17 @@
 == Fully compatible? ==
 
-Not 100%, and it will never be. Some Nagios features are just useless in a Shiken architecture.
+Not 100%, and it will never be. Some Nagios features are just useless in a Shiken architecture. For theses differences, you can look at the Shinken website : 
+http://www.shinken-monitoring.org/what-is-in-shinken-not-in-nagios-and-vice-versa/
 
 == I need to change something ? ==
 
-From now YES, two things : the status.dat export (if you want it) and nagios.log (I think you still want it).
+No. 
 
-Theses things are now managed as "modules" by the Brokers, and are in the shinken-specific.cfg file (look at Simple-log and Status-Dat modules, and put your paths on it).
+There are differences between some nagios parameters and shinken way of doing :
+status_file and log_file parameters are no more useful in the nagios.cfg file for Shinken. Theses things are now managed as "modules" by the Brokers, and are in the shinken-specific.cfg file (look at Simple-log and Status-Dat modules, and put your paths on it).
 
-Maybe one day we will "hack" something like if there is such paths in nagios.cfg, we will create the modules in a dynamic way. If you want to help us on that, you can :)
+But hopefuly, Shinken can detect you put such parameters and will autogenerate the modules for you. (But if you can take them in the shinken-specific.cfg file, it's better...)
+
 
 == Ok, but how do I launch my Nagios conf with Shinken ? ==
 
@@ -16,6 +19,8 @@ It's simple, after launching scheduler, poller, reactionner and broker daemons (
 to launch the Arbiter daemon with your Nagios configuration :
 
 $ /usr/local/shinken/src/shinken-arbiter.py -c /usr/local/nagios/etc/nagios.cfg -c /usr/local/shinken/src/etc/shinken-specific.cfg
+
+(you can also be even more lasy and call the bin/launch_all.sh script).
 
 And that's all :)
 
