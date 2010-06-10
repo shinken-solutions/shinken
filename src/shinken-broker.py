@@ -118,14 +118,22 @@ class IForArbiter(Pyro.core.ObjBase):
 		except KeyError:
 			pass
 
+
 	#Arbiter ask me which sched_id I manage, If it is not ok with it
 	#It will ask me to remove one or more sched_id
 	def what_i_managed(self):
 		return self.schedulers.keys()
 
+
 	#Use for arbiter to know if we are alive
 	def ping(self):
 		print "We ask us for a ping"
+		return True
+
+
+	#Use by the Arbiter to push broks to broker
+	def push_broks(self, broks):
+		self.app.add_broks_to_queue(broks)
 		return True
 
 
@@ -301,6 +309,20 @@ class Broker(Satellite):
 		for mod in to_del:
 			self.modules_manager.remove_instance(mod)
 
+	
+	#Add broks (a tab) to different queues for
+	#internal and external modules
+	def add_broks_to_queue(self, broks):
+		#Ok now put in queue brocks for manage by
+		#internal modules
+		self.broks.extend(broks.values())
+		
+		#and for external queues
+		#REF: doc/broker-modules.png (3)
+		for b in broks.values():
+			for q in self.modules_manager.get_external_to_queues():
+				q.put(b)
+
 
 	#We get new broks from schedulers
 	#REF: doc/broker-modules.png (2)
@@ -322,15 +344,10 @@ class Broker(Satellite):
 					tmp_broks = con.get_broks()
 					for b in tmp_broks.values():
 						b.instance_id = links[sched_id]['instance_id']
-					
-					#Ok now put in queue brobs for manage by
-					#internal modules
-					self.broks.extend(tmp_broks.values())
-					#and for external queues
-					#REF: doc/broker-modules.png (3)
-					for b in tmp_broks.values():
-						for q in self.modules_manager.get_external_to_queues():
-							q.put(b)
+
+					#Ok, we can add theses broks to our queues
+					self.add_broks_to_queue(tmp_broks)
+
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id, type=type)
                         #Ok, con is not know, so we create it
@@ -393,8 +410,8 @@ class Broker(Satellite):
 		for sched_id in self.schedulers:
 			self.pynag_con_init(sched_id, type='scheduler')
 
-		for arb_id in self.arbiters:
-			self.pynag_con_init(arb_id, type='arbiter')
+		#for arb_id in self.arbiters:
+		#	self.pynag_con_init(arb_id, type='arbiter')
 
 		#Now main loop
 		i = 0
@@ -414,7 +431,7 @@ class Broker(Satellite):
 			self.watch_for_new_conf(0.0)
 			
 			#Now we can get new broks from arbiters in self.broks
-			self.get_new_broks(type='arbiter')
+			#self.get_new_broks(type='arbiter')
 			#And from schedulers
 			self.get_new_broks(type='scheduler')
 			

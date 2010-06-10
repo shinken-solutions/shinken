@@ -65,15 +65,15 @@ class IBroks(Pyro.core.ObjBase):
 
 		
     #poller or reactionner ask us actions
-    def get_broks(self):
-        #print "We ask us broks"
-        res = self.arbiter.get_broks()
-	#print "Sending %d broks" % len(res)#, res
-        self.arbiter.nb_broks_send += len(res)
-        return res
+    #def get_broks(self):
+    #    #print "We ask us broks"
+    #    res = self.arbiter.get_broks()
+    #	#print "Sending %d broks" % len(res)#, res
+    #    self.arbiter.nb_broks_send += len(res)
+    #    return res
 
 
-	#Ping? Pong!
+    #Ping? Pong!
     def ping(self):
         return None
 
@@ -169,11 +169,27 @@ class Arbiter(Daemon):
 
     #Call by brokers to have broks
     #We give them, and clean them!
-    def get_broks(self):
-        res = self.broks
-        #They are gone, we keep none!
-        self.broks = {}
-        return res
+    #def get_broks(self):
+    #    res = self.broks
+    #    #They are gone, we keep none!
+    #    self.broks = {}
+    #    return res
+
+
+    #We must push our broks to the broker
+    #because it's stupid to make a crossing connexion
+    #so we find the broker responbile for our broks,
+    #and we send him it
+    #TODO : better find the broker, here it can be dead?
+    #or not the good one?
+    def push_broks_to_broker(self):
+        for brk in self.conf.brokers:
+            if brk.manage_arbiters:
+                is_send = brk.push_broks(self.broks)
+                if is_send:
+                    #They are gone, we keep none!
+                    self.broks = {}
+
 
 
     #Load the external commander
@@ -503,6 +519,9 @@ class Arbiter(Daemon):
                 #REF: doc/shinken-conf-dispatching.png (3)
                 self.dispatcher.dispatch()
                 self.dispatcher.check_bad_dispatch()
+                #One broker is responsible for our broks,
+                #we must give him our broks
+                self.push_broks_to_broker()
                 #send_conf_to_schedulers()
                 timeout = 1.0
 

@@ -169,6 +169,20 @@ class SatelliteLink(Item):
             return []
 
 
+    def push_broks(self, broks):
+        if self.con == None:
+            self.create_connexion()
+        try:
+            return self.con.push_broks(broks)
+        except Pyro.errors.URIError as exp:
+            self.con = None
+            return False
+        except Pyro.errors.ProtocolError as exp:
+            self.con = None
+            return False
+
+
+
     def prepare_for_conf(self):
         self.cfg = { 'global' : {}, 'schedulers' : {}, 'arbiters' : {}}
         #cfg_for_satellite['modules'] = satellite.modules
