@@ -187,7 +187,7 @@ class SchedulingItem(Item):
     def is_no_check_dependant(self):
         now = time.time()
         for (dep, status, type, tp) in self.chk_depend_of:
-            if tp is None and tp.is_time_valid(now):
+            if tp is None or tp.is_time_valid(now):
                 if dep.do_i_raise_dependency(status):
                         return True
         return False

@@ -33,7 +33,7 @@ else:
     REDIRECT_TO = "/dev/null"
 
 UMASK = 0
-VERSION = "0.1Beta"
+VERSION = "0.1"
 
 class Daemon:
     #the instances will have their own init
@@ -244,8 +244,8 @@ class Daemon:
 
     def get_header(self):
         return ["Shinken %s" % VERSION,
-                "Copyright (c) 2009 Gabes Jean (naparuba@gmail.com)",
-                "Last Modified: 25-11-2009",
+                "Copyright (c) 2009-2010 Gabes Jean (naparuba@gmail.com)",
+                "Last Modified: 31-05-2010",
                 "License: AGPL"]
 
     def print_header(self):

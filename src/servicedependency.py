@@ -74,23 +74,25 @@ class Servicedependencies(Items):
         servicedeps = self.items.keys() 
         for id in servicedeps:
             sd = self.items[id]
-            if not hasattr(sd, 'dependent_host_name'):
-                sd.dependent_host_name = sd.host_name
-            hnames = sd.dependent_host_name.split(',')
-            snames = sd.dependent_service_description.split(',')
-            couples = []
-            for hname in hnames:
-                for sname in snames:
-                    couples.append((hname, sname))
-            if len(couples) >= 2:
-                for (hname, sname) in couples:
-                    hname = hname.strip()
-                    sname = sname.strip()
-                    new_sd = sd.copy()
-                    new_sd.dependent_host_name = hname
-                    new_sd.dependent_service_description = sname
-                    self.items[new_sd.id] = new_sd
-                srvdep_to_remove.append(id)        
+            if not sd.is_tpl(): #Exploding template is useless
+                print sd
+                if not hasattr(sd, 'dependent_host_name'):
+                    sd.dependent_host_name = sd.host_name
+                hnames = sd.dependent_host_name.split(',')
+                snames = sd.dependent_service_description.split(',')
+                couples = []
+                for hname in hnames:
+                    for sname in snames:
+                        couples.append((hname, sname))
+                if len(couples) >= 2:
+                    for (hname, sname) in couples:
+                        hname = hname.strip()
+                        sname = sname.strip()
+                        new_sd = sd.copy()
+                        new_sd.dependent_host_name = hname
+                        new_sd.dependent_service_description = sname
+                        self.items[new_sd.id] = new_sd
+                    srvdep_to_remove.append(id)        
         self.delete_servicesdep_by_id(srvdep_to_remove)
 
 
@@ -138,11 +140,26 @@ class Servicedependencies(Items):
     #We backport service dep to service. So SD is not need anymore
     def linkify_s_by_sd(self):
         for sd in self:
-            s = sd.dependent_service_description
-            if s is not None:
-                if hasattr(sd, 'dependency_period'):
-                    s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, sd.dependency_period)
-                    s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, sd.dependency_period)
-                else:
-                    s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, None)
-                    s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, None)
+            if not sd.is_tpl():
+                s = sd.dependent_service_description
+                if s is not None:
+                    if hasattr(sd, 'dependency_period'):
+                        s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, sd.dependency_period)
+                        s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, sd.dependency_period)
+                    else:
+                        s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, None)
+                        s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, None)
+
+
+    #Apply inheritance for all properties
+    def apply_inheritance(self, hosts):
+        #We check for all Host properties if the host has it
+        #if not, it check all host templates for a value
+        for prop in Servicedependency.properties:
+            self.apply_partial_inheritance(prop)
+
+        #Then implicit inheritance
+        #self.apply_implicit_inheritance(hosts)
+        for s in self:
+            s.get_customs_properties_by_inheritance(self)
+

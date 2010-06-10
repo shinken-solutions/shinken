@@ -35,7 +35,7 @@ from satellite import Satellite
 from util import to_int, to_bool
 from module import Module, Modules
 
-VERSION = "0.1beta"
+VERSION = "0.1"
 
 
 #Our main APP class
