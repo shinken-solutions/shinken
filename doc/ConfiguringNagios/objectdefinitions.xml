@@ -2964,6 +2964,115 @@
 		from the timeperiod, simply do not include it in the
 		timeperiod definition.
 	      </para>
+              <para>The daterange format are multiples :
+		Calendar Daterange : look like a standart date, so like 2005-04-04 - 2008-09-19. All forms are (in Python format):
+		(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) / (\d+)[\s\t]*([0-9:, -]+) 
+		with in the order : start year, start month, start month day, end year, end month, end month day, a skip day interval and other timerange.
+
+		(\d{4})-(\d{2})-(\d{2}) / (\d+)[\s\t]*([0-9:, -]+) with in the order :
+		with in the order : start year, start month, start month day, a skip day interval and the other timerange.
+
+		(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2})[\s\t]*([0-9:, -]+) 
+		with in the order : star year, start month, start month day, end year, end month, end month day, other timerange.
+		
+		and finally : 
+		(\d{4})-(\d{2})-(\d{2})[\s\t]*([0-9:, -]+)
+		with in the order :
+		start year, start month, start month day, other timerange.
+
+
+		Month Week Day:
+		Then there are the month week day daterange same than before, but without the year and with day names
+		That give something like :
+		tuesday 2 january - thursday 4 august / 5
+		([a-z]*) ([\d-]+) ([a-z]*) - ([a-z]*) ([\d-]+) ([a-z]*) / (\d+)[\s\t]*([0-9:, -]+) with in the order :
+		start week day , offset of the week for the day, start month, same for end for 3 nexts, a skip day interval and other timerange.
+		
+		There also 
+		'([a-z]*) ([\d-]+) ([a-z]*) - ([a-z]*) ([\d-]+) ([a-z]*) [\s\t]*([0-9:, -]+)' with :
+		the same than before, without the skip day.
+
+		There also : 
+		'([a-z]*) ([\d-]+) ([a-z]*)[\s\t]*([0-9:, -]+)' with :
+		same than before, just start, no skip day but only if first match and third are a week day and a month.
+
+		
+		Now Week Day Daterange:
+		It look like tuesday 2 - tuesday -1 / 3
+		It matchs:
+		'([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)' 
+		with stat week day , start month day , end week day, end month day, a skip day interval and other timerange. if of course first and trhird match are week days.
+		
+		It also match :
+		'([a-z]*) ([\d-]+) - ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)' with :
+		with same than before, it's just teh month is the same.
+
+		There also:
+		'([a-z]*) ([\d-]+) - ([\d-]+)[\s\t]*([0-9:, -]+)'
+		same than before, no skip day.
+
+		And also :
+		'([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+)[\s\t]*([0-9:, -]+)'
+		with no skip and same month.
+
+		But also :
+		'([a-z]*) ([\d-]+)[\s\t]+([0-9:, -]+)'
+		with only a day, no skip of course.
+
+		
+		Now Month Date Daterange:
+		It looks like : february 1 - march 15 / 3
+		it matchs :
+		'([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)'
+		if first and second matched are months and ti gives : start month, start month day, end month, end month day, a skip day interval and other timerange.
+				
+		it matchs also:
+		'([a-z]*) ([\d-]+) - ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)'
+		if the first match is a month, same month.
+
+		'([a-z]*) ([\d-]+) - ([\d-]+)[\s\t]*([0-9:, -]+)':
+		Same than upper, but no skip day.
+
+		It also match:
+		'([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+)[\s\t]*([0-9:, -]+)'
+		like the first case, but no skip day too.
+
+		It also match :
+		'([a-z]*) ([\d-]+)[\s\t]+([0-9:, -]+)'
+		Just one day, first match is a month of course, no skip day.
+
+		
+		Now Month Day Daterange.
+		It looks like day 13 - 14
+		
+		It matchs :
+		'([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)' with:
+		if first and thirsd are "day"
+		day, start month day, day, end month day, a skip day interval and other timerange.
+		
+		It also maths :
+		'([a-z]*) ([\d-]+) - ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)'
+		with first is day, then it the same than upper, but same month.
+
+		There also :
+		'([a-z]*) ([\d-]+) - ([\d-]+)[\s\t]*([0-9:, -]+)'
+		Same, no skip day.
+
+		There also:
+		'([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+)[\s\t]*([0-9:, -]+)'
+		like the first case, but no skip day.
+
+		There also:
+		'([a-z]*) ([\d-]+)[\s\t]+([0-9:, -]+)'
+		same then all upper, but just one day (so no skip day, do you at least follow what I say?).
+
+		
+		Now Standard Daterange:
+		Ok this time ti's quite easy:
+		'([a-z]*)[\s\t]+([0-9:, -]+)'
+		with the first a week day.
+
+	      </para>
 	    </listitem>
 	  </varlistentry>
 	  <varlistentry>
