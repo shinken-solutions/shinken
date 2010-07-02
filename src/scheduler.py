@@ -149,7 +149,7 @@ class Scheduler:
         if isinstance(elt, Notification):
             self.actions[elt.id] = elt
             #A notification ask for a brok
-            if elt.contact != None
+            if elt.contact != None:
                 b = elt.get_initial_status_brok()
                 self.add(b)
             return
