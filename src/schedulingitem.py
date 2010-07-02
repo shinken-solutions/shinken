@@ -29,6 +29,7 @@ from notification import Notification
 from timeperiod import Timeperiod
 from macroresolver import MacroResolver
 from eventhandler import EventHandler
+from log import Log
 
 
 class SchedulingItem(Item):
@@ -562,20 +563,9 @@ class SchedulingItem(Item):
     #status of now, and we add the contact to set of contact we notified. And we raise the log
     #entry
     def prepare_notification_for_sending(self, n):
-        if n.status == 'scheduled':
-            if n.notif_nb == 1 and self.first_notification_delay == 0:
-                #The first notif is clean at creation
-                self.update_notification_command(n)
-                #Ok, we add if need this contact to contacts that have been notified
-                self.notified_contacts.add(n.contact)
-        elif n.status == 'inpoller':
-            if n.notif_nb > 1 or (n.notif_nb == 1 and self.first_notification_delay != 0):
-                #This notification is either a repeated one or it is
-                #a first notification which has been delayed until now
-                self.update_notification_command(n)
-                self.notified_contacts.add(n.contact)
         if n.status == 'inpoller':
-            #Log the notification just before it is launched
+            self.update_notification_command(n)
+            self.notified_contacts.add(n.contact)
             self.raise_notification_log_entry(n)
 
 
@@ -607,133 +597,112 @@ class SchedulingItem(Item):
         return list(contacts)
 
 
-    #Create notifications
+    # Create a "master" notification here, which will later
+    # (immediately before the reactionner gets it) be split up
+    # in many "child" notifications, one for each contact.
     def create_notifications(self, type, t_wished = None):
-        #if notif is disabled, not need to go thurser
-        #print "Ask for notification creation of type", type, "current level", self.current_notification_number
-
         cls = self.__class__
-
-        #Recovery make the counter of notif become 0
-        if type == 'RECOVERY':
-            self.current_notification_number = 0
-        #If not recovery and it's the first launch, we upgrade the level
-        #all other upgrade will be done by get_new_notifications_from
-        elif self.current_notification_number == 0:
-            self.current_notification_number = 1
-
-        #print "Raise notification of type", type, "for", self.get_name()
-        
-        notifications = []
-        now = time.time()
         #t_wished==None for the first notification launch after consume
         #here we must look at the self.notification_period
         if t_wished == None:
+            now = time.time()
             t_wished = now
             #if first notification, we must add first_notification_delay
-            #TODO : useless check isn't it?
-            if self.current_notification_number == 1 and type == 'PROBLEM':
-                t_wished = self.last_time_non_ok_or_up() + self.first_notification_delay * self.__class__.interval_length
+            if self.current_notification_number == 0 and type == 'PROBLEM':
+                last_time_non_ok_or_up = self.last_time_non_ok_or_up()
+                if last_time_non_ok_or_up == 0:
+                    # this happens at initial 
+                    t_wished = now + self.first_notification_delay * cls.interval_length
+                else:
+                    t_wished = last_time_non_ok_or_up + self.first_notification_delay * cls.interval_length
             t = self.notification_period.get_next_valid_time_from_t(t_wished)
         else:
-            #We folow our order
+            #We follow our order
             t = t_wished
 
-        #now check if this notification should be sent or dropped
-        if not self.check_notification_viability(type, t_wished):
+        if self.notification_is_blocked_by_item(type, t_wished) and self.first_notification_delay == 0 and self.notification_interval == 0:
+            # If notifications are blocked on the host/service level somehow
+            # and repeated notifications are not configured,
+            # we can silently drop this one
             return []
 
-        #We check our contacts:
-        #for a PROBLEM, we check for escalations if we have some
-        #for a RECOVERY, we just send it to everyone we already send notifications
-        if type == 'RECOVERY':
-            contacts = list(self.notified_contacts)
-            print "Get contacts for a RECOVERY, so we already send notification to:"
-            for c in contacts:
-                    print c.get_name()
+        if type == 'PROBLEM':
+            # Create the notification with an incremented notification_number.
+            # The current_notification_number  of the item itself will only 
+            # be incremented when this notification (or its children)
+            # have actually be sent.
+            next_notif_nb = self.current_notification_number + 1
+        elif type == 'RECOVERY':
+            # Recovery resets the notification counter to zero
+            self.current_notification_number = 0
+            next_notif_nb = self.current_notification_number
+        else:
+            # downtime/flap/etc do not change the notification number
+            next_notif_nb = self.current_notification_number
+        n = Notification(type, 'scheduled', 'VOID', None, self, None, t, \
+            timeout=cls.notification_timeout, \
+            notif_nb=next_notif_nb)
+        self.notifications_in_progress[n.id] = n
+        return [n]
+
+
+    # In create_notifications we created a notification "template". When it's
+    # time to hand it over to the reactionner, this master notification needs
+    # to be split in several child notifications, one for each contact
+    # To be more exact, one for each contact who is willing to accept
+    # notifications of this type and at this time
+    def scatter_notification(self, n):
+        cls = self.__class__
+        childnotifications = []
+
+        if n.contact:
+            # only master notifications can be split up
+            return []
+        if n.type == 'RECOVERY':
+            now = time.time()
+            if self.first_notification_delay != 0 and len(self.notified_contacts) == 0:
+                # Recovered during first_notification_delay. No notifications
+                # have been sent yet, so we keep quiet
+                contacts = []
+            else:
+                # The old way. Only send recover notifications to those contacts
+                # who also got problem notifications
+                #contacts = list(self.notified_contacts)
+                # The new way. Allow recover-only contacts
+                contacts = self.contacts
+            self.notified_contacts.clear()
         else:
             #Check is an escalation match. If yes, get all contacts from escalations
-            if self.is_escalable(t):
-                contacts = self.get_escalable_contacts(t)                
-                for c in contacts:
-                    print c.get_name()
-            #elese take normal contacts
+            if self.is_escalable(n.t_to_go):
+                contacts = self.get_escalable_contacts(n.t_to_go)
+            #else take normal contacts
             else:
                 contacts = self.contacts
-                for c in contacts:
-                    print c.get_name()
-            
+
         for contact in contacts:
-            #Get the propertie name for notif commands, like
+            #Get the property name for notif commands, like
             #service_notification_commands for service
             notif_commands_prop = cls.my_type+'_notification_commands'
             notif_commands = getattr(contact, notif_commands_prop)
             for cmd in notif_commands:
-                n = Notification(type, 'scheduled', 'VOID', cmd, self, contact, t, \
-                                     timeout=cls.notification_timeout, notif_nb=self.current_notification_number )
-                    
-                #data = self.get_data_for_notifications(contact, n)
-                #n.command = m.resolve_command(cmd, data)
-                #Maybe the contact do not want this notif? Arg!
-                if self.is_notification_launchable(n, contact):
+                child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
+                    contact, n.t_to_go, timeout=cls.notification_timeout,
+                    notif_nb=n.notif_nb )
+                if not self.notification_is_blocked_by_contact(child_n, contact):
+                    # Update the notification with fresh status information
+                    # of the item. Example: during the notification_delay
+                    # the status of a service may have changed from WARNING to CRITICAL
+                    self.update_notification_command(child_n)
+                    self.raise_notification_log_entry(child_n)
+                    self.notifications_in_progress[child_n.id] = child_n
+                    childnotifications.append(child_n)
 
-                    #The notif must be fill with current data, 
-                    #so we create the commmand now but only if it's the first 
-                    #And we can add the log entry now
-                    self.prepare_notification_for_sending(n)
+            if n.type == 'PROBLEM':
+                # Remember the contacts. We might need them later in the
+                # recovery code some lines above
+                self.notified_contacts.add(contact)
 
-                    notifications.append(n)
-                    #print "DBG: Create a new notification from :", n.id, n.type, n.status, n.ref.get_name(), n.ref.state, 'level:%d' % n.notif_nb
-                    #Add in ours queues
-                    self.notifications_in_progress[n.id] = n
-
-        return notifications
-
-
-    #We just send a notification, we need new ones in notification_interval
-    def get_new_notifications_from(self, n):
-        now = time.time()
-        cls = self.__class__
-
-        #print "Get a new notification from :", n.id, n.type, n.status, n.ref.get_name(), n.ref.state, 'level:%d' % n.notif_nb
-        #print "And my level is", self.current_notification_number
-        #a recovery notif is send ony one time
-        #plus reset the self.notified_contacts so begin to fill with new ones
-        if n.type == 'RECOVERY':
-            self.notified_contacts.clear()
-            return []
-
-        #These are singular events. It makes no sense to repeat them.
-        if n.is_administrative():
-            return []
-
-        #notification_interval 0 means: one notification is enough
-        if self.notification_interval == 0:
-            return []
-
-        #We do not need to resolv the command. I will be ask by scheduler when
-        #the notification will be ready to go, so status will be uptodate
-        notif_nb = n.notif_nb
-        #print "Received a notification level:", notif_nb
-
-        #Maybe we already receive a notification of this level and manage to launch all
-        #notification for the new level. If so, we do not launch new ones
-        if notif_nb < self.current_notification_number:
-            #print "DBG: I already manage the level, so we do not launch new notifications"
-            return []
-
-        #Ok, here we are in the same level of our notification return, so we must
-        #raise new ones on self.notification_interval with the good new level
-        self.current_notification_number += 1
-
-        #We will end new notification_escalation at
-        t = now + self.notification_interval * 60
-        
-        #Create an return notifications we will raise with the same type and
-        #at time we want
-        notifications = self.create_notifications(n.type, t_wished=t)
-        
-        return notifications
+        return childnotifications
 
 
     #return a check to check the host/service

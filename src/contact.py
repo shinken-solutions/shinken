@@ -78,6 +78,8 @@ class Contact(Item):
     #Search for notification_options with state and if t is
     #in service_notification_period
     def want_service_notification(self, t, state, type):
+        if not self.service_notifications_enabled:
+            return False
         b = self.service_notification_period.is_time_valid(t)
         if 'n' in self.service_notification_options:
             return False
@@ -93,9 +95,10 @@ class Contact(Item):
             pass
         elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
             pass 
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND':
-            #No notification when a downtime was cancelled
-            return b and 's' in self.service_notification_options
+        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
+            #No notification when a downtime was cancelled. Is that true??
+            # According to the documentation we need to look at _host_ options
+            return b and 's' in self.host_notification_options
 
         return False
 
@@ -103,6 +106,8 @@ class Contact(Item):
     #Search for notification_options with state and if t is in
     #host_notification_period
     def want_host_notification(self, t, state, type):
+        if not self.host_notifications_enabled:
+            return False
         b = self.host_notification_period.is_time_valid(t)
         if 'n' in self.host_notification_options:
             return False
@@ -118,7 +123,7 @@ class Contact(Item):
             pass
         elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
             pass 
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND':
+        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
             return b and 's' in self.host_notification_options
 
         return False

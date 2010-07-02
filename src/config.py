@@ -746,7 +746,7 @@ class Config(Item):
             got_status_dat_module = False
             for b in self.brokers:
                 for m in b.modules:
-                    if hasattr(m, 'module_type') and m.module_type == 'status_dat':
+                    if hasattr(m, 'module_type') and m.module_type == 'simple_log':
                         got_status_dat_module = True
             #We need to create the modue on the fly?
             if not got_status_dat_module:
