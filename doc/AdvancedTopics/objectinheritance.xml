@@ -420,6 +420,16 @@
         </row>
 
         <row rowsep="1">
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>check_period</emphasis></para></entry>
+
+          <entry colsep="1"
+          rowsep="1"><para><emphasis>check_period</emphasis> in the
+          associated host definition</para></entry>
+        </row>
+
+
+        <row rowsep="1">
           <entry colsep="1" morerows="2" nameend="col_0"
           namest="col_0" rowsep="1"><para><emphasis role="bold">Host
           Escalations</emphasis></para></entry>
