@@ -262,8 +262,8 @@ class Service(SchedulingItem):
                     state = False #Bad boy...
 
         #Ok now we manage special cases...
-        if not hasattr(self, 'contacts') and not hasattr(self, 'contacgroups') and  self.notifications_enabled == True:
-            Log().log('%s : I do not have contacts nor contacgroups' % self.get_name())
+        if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups') and  self.notifications_enabled == True:
+            Log().log('%s : I do not have contacts nor contact_groups' % self.get_name())
             state = False
         if not hasattr(self, 'check_command') or not self.check_command.is_valid():
             Log().log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
@@ -272,7 +272,7 @@ class Service(SchedulingItem):
             Log().log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if not hasattr(self, 'host') or self.host == None:
-            Log().log("%s : I do not have and host" % self.get_name())
+            Log().log("%s : I do not have an host" % self.get_name())
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
