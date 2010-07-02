@@ -19,6 +19,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import re
 
 from autoslots import AutoSlots
 from item import Items
@@ -514,9 +515,9 @@ class Host(SchedulingItem):
         return [self, contact, n]
 
 
-    #see if the notification is launchable (time is OK and contact is OK too)
-    def is_notification_launchable(self, n, contact):
-        return contact.want_host_notification(self.last_chk, self.state, n.type)
+    #See if the notification is launchable (time is OK and contact is OK too)
+    def notification_is_blocked_by_contact(self, n, contact):
+        return not contact.want_host_notification(self.last_chk, self.state, n.type)
 
 
     #MACRO PART
@@ -530,79 +531,72 @@ class Host(SchedulingItem):
         return "%02dh %02dm %02ds" % (h, m, s)
 
 
-    def check_notification_viability(self, type, t_wished = None):
-        now = time.time()
+    #Check if a notification for this host is suppressed at this time
+    #This is a check at the host level. Do not look at contacts here
+    def notification_is_blocked_by_item(self, type, t_wished = None):
         if t_wished == None:
-            t_wished = now
+            t_wished = time.time()
 
-        # forced notification
+        # TODO
+        # forced notification -> false
+        # custom notification -> false
 
-        # block if notifications are program-wide disabled
+        # Block if notifications are program-wide disabled
         if not self.enable_notifications:
-            return False
+            return True
 
-        # does the notification period allow sending out this notification?
+        # Does the notification period allow sending out this notification?
+        if not self.notification_period.is_time_valid(t_wished):
+            return True
 
-        # block if notifications are disabled for this host
+        # Block if notifications are disabled for this host
         if not self.notifications_enabled:
-            return False
+            return True
 
-        # pass if this is a custom notification
+        # Block if the current status is in the notification_options d,u,r,f,s
+        if 'n' in self.notification_options:
+            return True
+        if type == 'PROBLEM' or type == 'RECOVERY':
+            if self.state == 'DOWN' and not 'd' in self.notification_options:
+                return True
+            if self.state == 'UP' and not 'r' in self.notification_options:
+                return True
+            if self.state == 'UNREACHABLE' and not 'u' in self.notification_options:
+                return True
+        if (type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED') and not 'f' in self.notification_options:
+            return True
+        if (type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED') and not 's' in self.notification_options:
+            return True
 
-        # block if the current status is in the notification_options d,u,r,f,s
-        if self.state == 'DOWN' and not 'd' in self.notification_options:
-            return False
-        if self.state == 'UP' and not 'u' in self.notification_options:
-            return False
-        if self.state == 'UNREACHABLE' and not 'r' in self.notification_options:
-            return False
-
-        # acknowledgement notifications pass only when the status is not OK
+        # Acknowledgements make no sense when the status is ok/up
         if type == 'ACKNOWLEDGEMENT':
             if self.state == self.ok_up:
-                return False
-            else:
                 return True
 
-        # flapping
+        # Flapping
         if type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
         # todo    block if not notify_on_flapping
             if self.scheduled_downtime_depth > 0:
-                return False
+                return True
+
+        # When in deep downtime, only allow end-of-downtime notifications
+        # In depth 1 the downtime just started and can be notified
+        if self.scheduled_downtime_depth > 1 and (type != 'DOWNTIMEEND' or type != 'DOWNTIMECANCELLED'):
             return True
 
-        # downtime notifications
-        if type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
-        # todo    block if notify_on_downtime is false
-            if self.scheduled_downtime_depth > 0:
-                return False
+        # Block if the status is SOFT
+        if self.state_type == 'SOFT' and type == 'PROBLEM':
             return True
 
-        # block if in a scheduled downtime
-        if self.scheduled_downtime_depth > 0:
-            return False
-
-        # block if the status is SOFT
-        if self.state_type == 'SOFT':
-            return False
-
-        # block if the problem has already been acknowledged
+        # Block if the problem has already been acknowledged
         if self.problem_has_been_acknowledged:
-            return False
-
-        # block if dependencies have failed
-
-        # block if flapping
-        if self.is_flapping:
-            return False
-
-        # pass if status is OK (for RECOVERY)
-        if self.state == self.ok_up:
             return True
 
-        # block if no_more_notifications
+        # Block if flapping
+        if self.is_flapping:
+            return True
 
-        return True
+        return False
 
 
 class Hosts(Items):

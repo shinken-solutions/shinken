@@ -20,6 +20,7 @@
 
 
 import os
+import time
 
 #Unix and windows do not have the same import
 #if os.name == 'nt':
@@ -60,9 +61,9 @@ class Notification(Action):
         'NOTIFICATIONAUTHORNAME' : 'author_name',
         'NOTIFICATIONAUTHORALIAS' : 'author_alias',
         'NOTIFICATIONCOMMENT' : 'comment',
-        'HOSTNOTIFICATIONNUMBER' : 'number',
+        'HOSTNOTIFICATIONNUMBER' : 'notif_nb',
         'HOSTNOTIFICATIONID' : 'id',
-        'SERVICENOTIFICATIONNUMBER' : 'number',
+        'SERVICENOTIFICATIONNUMBER' : 'notif_nb',
         'SERVICENOTIFICATIONID' : 'id'
         }
     
@@ -71,7 +72,8 @@ class Notification(Action):
                      contact_name='', host_name='', service_description='',
                      reason_type=1, state=0, ack_author='', ack_data='', \
                      escalated=False, contacts_notified=0, \
-                     start_time=0, end_time=0, notification_type=0, id=None, notif_nb=1, timeout=10):
+                     start_time=0, end_time=0, notification_type=0, id=None, \
+                     notif_nb=1, timeout=10):
         self.is_a = 'notification'
         self.type = type
         if id == None: #id != None is for copy call only
@@ -171,7 +173,7 @@ class Notification(Action):
 
     
     def __str__(self):
-        return "Notification %d status:%s command:%s ref:%s t_to_go:%s" % (self.id, self.status, self.command, self.ref, self.t_to_go)
+        return "Notification %d status:%s command:%s ref:%s t_to_go:%s" % (self.id, self.status, self.command, self.ref, time.asctime(time.localtime(self.t_to_go)))
         #return ''#str(self.__dict__)
 
 

@@ -290,29 +290,63 @@ class Scheduler:
             for a in self.actions.values():
                 if a.status == 'scheduled' and a.is_launchable(now):
                     a.status = 'inpoller'
-                    if a.is_a == 'notification':
-                        #Update the command if necessary
-                        a.ref.prepare_notification_for_sending(a)
-                    new_a = a.copy_shell()
-                    res.append(new_a)
+                    if a.is_a == 'notification' and not a.contact:
+                        # This is a "master" notification created by create_notifications. It will not be sent itself because it has no contact.
+                        # We use it to create "child" notifications (for the contacts and notification_commands) which are executed in the reactionner.
+                        item = a.ref
+                        childnotifications = []
+                        if not item.notification_is_blocked_by_item(a.type, now):
+                            # If it is possible to send notifications of this type at the current time, then create 
+                            # a single notification for each contact of this item.
+                            childnotifications = item.scatter_notification(a)
+                            for c in childnotifications:
+                                c.status = 'inpoller'
+                                self.add(c) # this will send a brok
+                                new_c = c.copy_shell()
+                                res.append(new_c)
+
+                        # If we have notification_interval then schedule the next notification (problems only)
+                        if a.type == 'PROBLEM':
+                            if len(childnotifications) != 0:
+                                # notif_nb of the master notification was already current_notification_number+1.
+                                # If notifications were sent, then host/service-counter will also be incremented
+                                item.current_notification_number = a.notif_nb
+                        
+                            if item.notification_interval != 0:
+                                # We must continue to send notifications.
+                                # We cannot add(a) because we don't want an initial status brok
+                                # Just leave it in the actions list and set it to "scheduled" and it will be found again later
+                                a.t_to_go = a.t_to_go + item.notification_interval * item.__class__.interval_length
+                                a.notif_nb = item.current_notification_number + 1
+                                a.status = 'scheduled'
+                            else:
+                                # Wipe out this master notification. One problem notification is enough.
+                                item.remove_in_progress_notification(a)
+                                self.actions[a.id].status = 'zombie'
+                        else:
+                            # Wipe out this master notification. We don't repeat recover/downtime/flap/etc...
+                            item.remove_in_progress_notification(a)
+                            self.actions[a.id].status = 'zombie'
+                    else:
+                        # This is for child notifications and eventhandlers
+                        new_a = a.copy_shell()
+                        res.append(new_a)
         return res
 
 
     #Called by poller and reactionner to send result
     def put_results(self, c):
         if c.is_a == 'notification':
+            # We will only see childnotifications here
             try:
                 self.actions[c.id].get_return_from(c)
                 item = self.actions[c.id].ref
                 item.remove_in_progress_notification(c)
-                l = item.get_new_notifications_from(self.actions[c.id])
-                for a in l:
-                    if a is not None:
-                        self.add(a)
                 self.actions[c.id].status = 'zombie'
+                item.last_notification = c.check_time
             except KeyError as exp:
                 Log().log("Warning : received an notification of an unknown id! %s" % str(exp))
-            #del self.actions[c.id]
+
         elif c.is_a == 'check':
             try:
                 self.checks[c.id].get_return_from(c)
@@ -607,7 +641,6 @@ class Scheduler:
 
         #Check start and stop times
         for dt in self.downtimes.values():
-            print dt
             if dt.real_end_time < now:
                 #this one has expired
                 broks.extend(dt.exit()) # returns downtimestop notifications

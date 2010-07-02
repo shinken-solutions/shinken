@@ -481,9 +481,9 @@ class Service(SchedulingItem):
         return [self.host, self, contact, n]
 
 
-    #see if the notification is launchable (time is OK and contact is OK too)
-    def is_notification_launchable(self, n, contact):
-        return contact.want_service_notification(self.last_chk, self.state, n.type)
+    #See if the notification is launchable (time is OK and contact is OK too)
+    def notification_is_blocked_by_contact(self, n, contact):
+        return not contact.want_service_notification(self.last_chk, self.state, n.type)
 
 
     def get_duration_sec(self):
@@ -496,82 +496,74 @@ class Service(SchedulingItem):
         return "%02dh %02dm %02ds" % (h, m, s)
 
 
-    def check_notification_viability(self, type, t_wished = None):
+    #Check if a notification for this service is suppressed at this time
+    def notification_is_blocked_by_item(self, type, t_wished = None):
         if t_wished == None:
             t_wished = time.time()
 
+        # TODO
         # forced notification
-     
-        # block if notifications are program-wide disabled
-        if not self.enable_notifications:
-            return False
-
-        # does the notification period allow sending out this notification?
-
-        # block if notifications are disabled for this service
-        if not self.notifications_enabled:
-            return False
-
         # pass if this is a custom notification
-
-        # block if the current status is in the notification_options w,u,c,r,f,s
-        if self.state == 'UNKNOWN' and not 'u' in self.notification_options:
-            return False
-        if self.state == 'WARNING' and not 'w' in self.notification_options:
-            return False
-        if self.state == 'CRITICAL' and not 'c' in self.notification_options:
-            return False
-        if self.state == 'OK' and not 'r' in self.notification_options:
-            return False
-
-        # acknowledgement notifications pass only when the status is not OK
-        if type == 'ACKNOWLEDGEMENT':
-            if self.state == self.ok_up:
-                return False
-            else:
-                return True
-        
-        # block if in a scheduled downtime
-        if self.scheduled_downtime_depth > 0:
-            return False
-            
-        # block if host is in a scheduled downtime
-        if self.host.scheduled_downtime_depth > 0:
-            return False
-
-        # downtime{start|end} notification
-        #     pass if notify_on_downtime is true
-        #     pass if scheduled_downtime_depth > 0
-
-        # block if the status is SOFT
-        if self.state_type == 'SOFT':
-            return False
-
-        # block if the problem has already been acknowledged
-        if self.problem_has_been_acknowledged:
-            return False
-
-        # block if this is service dependends on a service
-
-        # block if this is service dependends on a host
-
-        # block if problem notification and still in first_notification_delay
-
-        # block if flapping
-        if self.is_flapping:
-            return False
-
-        # pass if status is OK (for RECOVERY)
-        if self.state == self.ok_up:
+     
+        # Block if notifications are program-wide disabled
+        if not self.enable_notifications:
             return True
 
-        # block if no_more_notifications
+        # Does the notification period allow sending out this notification?
+        if not self.notification_period.is_time_valid(t_wished):
+            return True
 
-        # block if host is down
+        # Block if notifications are disabled for this service
+        if not self.notifications_enabled:
+            return True
+
+        # Block if the current status is in the notification_options w,u,c,r,f,s
+        if 'n' in self.notification_options:
+            return True
+        if type == 'PROBLEM' or type == 'RECOVERY':
+            if self.state == 'UNKNOWN' and not 'u' in self.notification_options:
+                return True
+            if self.state == 'WARNING' and not 'w' in self.notification_options:
+                return True
+            if self.state == 'CRITICAL' and not 'c' in self.notification_options:
+                return True
+            if self.state == 'OK' and not 'r' in self.notification_options:
+                return True
+        if (type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED') and not 'f' in self.notification_options:
+            return True
+        if (type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED') and not 's' in self.notification_options:
+            return True
+
+        # Acknowledgements make no sense when the status is ok/up
+        if type == 'ACKNOWLEDGEMENT':
+            if self.state == self.ok_up:
+                return True
+        
+        # When in downtime, only allow end-of-downtime notifications
+        if self.scheduled_downtime_depth > 1 and (type != 'DOWNTIMEEND' or type != 'DOWNTIMECANCELLED'):
+            return True
+            
+        # Block if host is in a scheduled downtime
+        if self.host.scheduled_downtime_depth > 0:
+            return True
+
+        # Block if the status is SOFT
+        if self.state_type == 'SOFT' and type == 'PROBLEM':
+            return True
+
+        # Block if the problem has already been acknowledged
+        if self.problem_has_been_acknowledged:
+            return True
+
+        # Block if flapping
+        if self.is_flapping:
+            return True
+
+        # Block if host is down
         if self.host.state != self.host.ok_up:
-            return False
+            return True
 
-        return True
+        return False
 
 
 class Services(Items):
