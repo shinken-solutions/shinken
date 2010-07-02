@@ -149,8 +149,9 @@ class Scheduler:
         if isinstance(elt, Notification):
             self.actions[elt.id] = elt
             #A notification ask for a brok
-            b = elt.get_initial_status_brok()
-            self.add(b)
+            if elt.contact != None
+                b = elt.get_initial_status_brok()
+                self.add(b)
             return
         if isinstance(elt, EventHandler):
             print "Add an event Handler", elt.id
@@ -314,7 +315,6 @@ class Scheduler:
                         
                             if item.notification_interval != 0:
                                 # We must continue to send notifications.
-                                # We cannot add(a) because we don't want an initial status brok
                                 # Just leave it in the actions list and set it to "scheduled" and it will be found again later
                                 a.t_to_go = a.t_to_go + item.notification_interval * item.__class__.interval_length
                                 a.notif_nb = item.current_notification_number + 1
