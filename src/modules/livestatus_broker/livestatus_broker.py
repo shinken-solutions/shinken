@@ -386,9 +386,9 @@ class Livestatus_broker:
 
         while True:
             try:
-                b = self.q.get(False) # do not block
+                b = self.q.get(True, .01)  # do not block indefinitely
                 self.manage_brok(b)
-            except:
+            except Exception:
                 pass
             inputready,outputready,exceptready = select.select(input,[],[], 0)
 
