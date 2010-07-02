@@ -28,7 +28,7 @@ class ArbiterLink(SatelliteLink):
     id = 0
     my_type = 'arbiter'
     properties={'arbiter_name' : {'required' : True },
-                'host_name' : {'required' : True},
+                'host_name' : {'required' : False, 'default' : socket.gethostname()},
                 'address' : {'required' : True},
                 'port' : {'required':  False, 'default' : '7770', 'pythonize': to_int},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
