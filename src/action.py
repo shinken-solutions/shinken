@@ -122,11 +122,16 @@ class Action:
                 self.exit_status = 3
                 return
             return
-        (stdoutdata, stderrdata) = self.process.communicate()
-        self.get_outputs(stdoutdata, max_plugins_output_length)
+        #Get standards outputs
         self.exit_status = self.process.returncode
-        #if self.exit_status != 0:
-        #    print "DBG:", self.command, self.exit_status, self.output
+        (stdoutdata, stderrdata) = self.process.communicate()
+        
+        #if the exit status is anormal, we add stderr to the output
+        if self.exit_status not in [0, 1, 2, 3]:
+            stdoutdata = stdoutdata + stderrdata
+        #Now grep what we want in the output
+        self.get_outputs(stdoutdata, max_plugins_output_length)
+
         self.status = 'done'
         self.execution_time = time.time() - self.check_time
 
@@ -151,8 +156,17 @@ class Action:
                 self.exit_status = 3
                 return
             return
-        self.get_outputs(self.process.stdout.read(),max_plugins_output_length)
+        #Get standards outputs
         self.exit_status = self.process.returncode
+        (stdoutdata, stderrdata) = self.process.communicate()
+
+        #if the exit status is anormal, we add stderr to the output
+        if self.exit_status not in [0, 1, 2, 3]:
+            stdoutdata = stdoutdata + stderrdata
+        #self.get_outputs(self.process.stdout.read(),max_plugins_output_length)
+        #Now grep what we want in the output
+        self.get_outputs(stdoutdata, max_plugins_output_length)
+
         #if self.exit_status != 0:
         #    print "DBG:", self.command, self.exit_status, self.output
         self.status = 'done'
