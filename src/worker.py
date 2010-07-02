@@ -40,7 +40,7 @@ class Worker:
     _idletime = None
     _timeout = None
     _c = None
-    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300):
+    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300, max_plugins_output_length=8192):
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -51,6 +51,7 @@ class Worker:
         self._c = Queue() # Private Control queue for the Worker
         self._process = Process(target=self.work, args=(s, returns_queue, self._c))
         self.returns_queue = returns_queue
+        self.max_plugins_output_length = max_plugins_output_length
 	#Thread version : not good in cpython :(
         #self._process = threading.Thread(target=self.work, args=(s, returns_queue, self._c))
 
@@ -138,7 +139,7 @@ class Worker:
         now = time.time()
         for action in self.checks:
             if action.status == 'lanched' and action.last_poll < now - action.wait_time:
-                action.check_finished()
+                action.check_finished(self.max_plugins_output_length)
                 wait_time = min(wait_time, action.wait_time)
                 #If action done, we can launch a new one
             if action.status == 'done' or action.status == 'timeout':

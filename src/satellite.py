@@ -92,6 +92,11 @@ class IForArbiter(Pyro.core.ObjBase):
             self.app.poller_tags = conf['global']['poller_tags']
         else: #for reactionner, poler_tag is [None]
             self.app.poller_tags = []
+        if 'max_plugins_output_length' in conf['global']:
+            self.app.max_plugins_output_length = conf['global']['max_plugins_output_length']
+        else: #for reactionner, we don't really care about it
+            self.app.max_plugins_output_length = 8192
+        print "Max output lenght" , self.app.max_plugins_output_length
         print "We have our schedulers :", self.schedulers
 
 
@@ -330,7 +335,8 @@ class Satellite(Daemon):
     #Create and launch a new worker, and put it into self.workers
     #It can be mortal or not
     def create_and_launch_worker(self, mortal=True):
-        w = Worker(1, self.s, self.returns_queue, self.processes_by_worker, mortal=mortal)
+        w = Worker(1, self.s, self.returns_queue, self.processes_by_worker, \
+                   mortal=mortal,max_plugins_output_length = self.max_plugins_output_length )
         self.workers[w.id] = w
         print "Allocating new Worker : ", w.id
         self.workers[w.id].start()

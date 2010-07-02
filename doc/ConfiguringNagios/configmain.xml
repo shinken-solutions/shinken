@@ -3375,6 +3375,38 @@ cfg_file=/usr/local/nagios/etc/commands.cfg</literallayout></para>
     </section>
 
     <section>
+      <title><anchor
+      id="configuringnagios-configmain-max_plugins_output_length"
+      xreflabel="Max Plugins Output Length" />Max Plugins Output Length</title>
+
+      <informaltable colsep="0" frame="none" rowsep="0">
+        <tgroup cols="2">
+          <colspec colnum="1" colwidth="15*" />
+
+          <colspec colnum="2" colwidth="85*" />
+
+          <tbody>
+            <row>
+              <entry><para>Format:</para></entry>
+
+              <entry><para><programlisting>max_plugins_output_length=&lt;int&gt;</programlisting></para></entry>
+            </row>
+
+            <row>
+              <entry><para>Example:</para></entry>
+
+              <entry><para><programlisting>max_plugins_output_length=8192</programlisting></para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>This option is used to set the max size in bytes for the checks plugins output. So if you saw truncated output
+	like for huge disk check when you have a lot of partitions, raise this value.</para>
+    </section>
+
+
+    <section>
       <title><anchor id="configuringnagios-configmain-soft_state_dependencies"
       xreflabel="Soft State Dependencies Option" />Soft State Dependencies
       Option (Not implemented)</title>

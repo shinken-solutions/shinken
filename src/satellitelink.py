@@ -191,6 +191,14 @@ class SatelliteLink(Item):
             if 'to_send' in properties[prop] and properties[prop]['to_send']:
                 self.cfg['global'][prop] = getattr(self, prop)
 
+    #Some parameters for satellites are not defined in the satellites conf
+    #but in the global configuration. We can pass them in the global
+    #property
+    def add_global_conf_parameters(self, params):
+        for prop in params:
+            print "Add glboal param", prop, params[prop]
+            self.cfg['global'][prop] = params[prop]
+
 
     def get_my_type(self):
         return self.__class__.my_type

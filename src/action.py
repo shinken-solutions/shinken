@@ -37,7 +37,11 @@ class Action:
         pass
 
 
-    def get_outputs(self, out):
+    def get_outputs(self, out, max_plugins_output_length):
+        #print "Get only," , max_plugins_output_length, "bytes"
+        #Squize all output after max_plugins_output_length
+        out = out[:max_plugins_output_length]
+        #Then cuts by lines
         elts = out.split('\n')
         #For perf data
         elts_line1 = elts[0].split('|')
@@ -91,14 +95,14 @@ class Action:
             return
 
 
-    def check_finished(self):
+    def check_finished(self, max_plugins_output_length):
         if os.name == 'nt':
-            self.check_finished_windows()
+            self.check_finished_windows(max_plugins_output_length)
         else:
-            self.check_finished_unix()
+            self.check_finished_unix(max_plugins_output_length)
     
 
-    def check_finished_unix(self):
+    def check_finished_unix(self, max_plugins_output_length):
         #We must wait, but checks are variable in time
         #so we do not wait the same for an little check
         #than a long ping. So we do like TCP : slow start with *2
@@ -119,7 +123,7 @@ class Action:
                 return
             return
         (stdoutdata, stderrdata) = self.process.communicate()
-        self.get_outputs(stdoutdata)
+        self.get_outputs(stdoutdata, max_plugins_output_length)
         self.exit_status = self.process.returncode
         #if self.exit_status != 0:
         #    print "DBG:", self.command, self.exit_status, self.output
@@ -127,7 +131,7 @@ class Action:
         self.execution_time = time.time() - self.check_time
 
 
-    def check_finished_windows(self):
+    def check_finished_windows(self, max_plugins_output_length):
         #We must wait, but checks are variable in time
         #so we do not wait the same for an little check
         #than a long ping. So we do like TCP : slow start with *2
@@ -147,7 +151,7 @@ class Action:
                 self.exit_status = 3
                 return
             return
-        self.get_outputs(self.process.stdout.read())
+        self.get_outputs(self.process.stdout.read(),max_plugins_output_length)
         self.exit_status = self.process.returncode
         #if self.exit_status != 0:
         #    print "DBG:", self.command, self.exit_status, self.output
