@@ -138,7 +138,7 @@ class Worker:
         wait_time = 1
         now = time.time()
         for action in self.checks:
-            if action.status == 'lanched' and action.last_poll < now - action.wait_time:
+            if action.status == 'launched' and action.last_poll < now - action.wait_time:
                 action.check_finished(self.max_plugins_output_length)
                 wait_time = min(wait_time, action.wait_time)
                 #If action done, we can launch a new one
