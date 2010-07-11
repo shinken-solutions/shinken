@@ -125,7 +125,7 @@ class Notification(Action):
 #    def execute(self):
 #        print "Notification %s" % self.command
 #        child = spawn ('/bin/sh -c "%s"' % self.command)
-#        self.status = 'lanched'
+#        self.status = 'launched'
 #        
 #        try:
 #            child.expect_exact(EOF, timeout=5)

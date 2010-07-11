@@ -64,7 +64,7 @@ class Action:
  
     def execute_windows(self):
         #self.timeout = 20
-        self.status = 'lanched'
+        self.status = 'launched'
         self.check_time = time.time()
         self.wait_time = 0.0001
         self.last_poll = self.check_time
@@ -78,7 +78,7 @@ class Action:
 
 
     def execute_unix(self):
-        self.status = 'lanched'
+        self.status = 'launched'
         self.check_time = time.time()
         self.last_poll = self.check_time
         self.wait_time = 0.0001

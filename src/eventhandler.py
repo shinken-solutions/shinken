@@ -108,7 +108,7 @@ class EventHandler(Action):
 #    def execute(self):
 #        print "Launching EVENT HANDLER command", self.command
 #        child = spawn ('/bin/sh -c "%s"' % self.command)
-#        self.status = 'lanched'
+#        self.status = 'launched'
 #        self.check_time = time.time()
 #
 #        try:

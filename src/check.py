@@ -131,7 +131,7 @@ class Check(Action):
 #        """call shell-command and either return its output or kill it
 #        if it doesn't normally exit within timeout seconds and return None"""
 #        timeout = 5
-#        self.status = 'lanched'
+#        self.status = 'launched'
 #        self.check_time = time.time()
 #        start = datetime.datetime.now()
 #        try:
@@ -160,7 +160,7 @@ class Check(Action):
 #    def execute_unix(self):
 #        #print "Launching command", self.command
 #        child = spawn ('/bin/sh -c "%s"' % self.command)
-#        self.status = 'lanched'
+#        self.status = 'launched'
 #        self.check_time = time.time()
 #
 #        try:
