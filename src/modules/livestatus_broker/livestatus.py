@@ -23,6 +23,7 @@ import os
 import re
 import tempfile
 import Queue
+import json
 
 from service import Service
 from host import Host
@@ -1514,8 +1515,8 @@ class LiveStatus:
 
     def format_live_data(self, result, columns, outputformat, columnheaders, separators, aliases):
         output = ''
-        if outputformat == 'CSV':
-            lines = []
+        lines = []
+        if outputformat == 'csv':
             if len(result) > 0:
                 if columnheaders != 'off' or len(columns) == 0:
                     if len(aliases) > 0:
@@ -1528,7 +1529,6 @@ class LiveStatus:
                         lines.append(separators[1].join(columns))
                 for object in result:
                     #construct one line of output for each object found
-                    #lines.append(separators[1].join(str(x) for x in [object[c] for c in columns]))
                     lines.append(separators[1].join(separators[2].join(str(y) for y in x) if isinstance(x, list) else str(x) for x in [object[c] for c in columns]))
             else:
                 if columnheaders == 'on':
@@ -1537,6 +1537,27 @@ class LiveStatus:
                     else:
                         lines.append(separators[1].join(columns))
             return separators[0].join(lines)
+
+        elif outputformat == 'json':
+            if len(result) > 0:
+                if columnheaders != 'off' or len(columns) == 0:
+                    if len(aliases) > 0:
+                        #This is for statements like "Stats: .... as alias_column
+                        lines.append([str(aliases[col]) for col in columns])
+                    else:
+                        if (len(columns) == 0):
+                            # Show all available columns
+                            columns = sorted(result[0].keys())
+                        lines.append(columns)
+                for object in result:
+                    lines.append([object[c] for c in columns])
+            else:
+                if columnheaders == 'on':
+                    if len(aliases) > 0:
+                        lines.append([aliases[col] for col in columns])
+                    else:
+                        lines.append(columns)
+            return json.dumps(lines, separators=(',', ':'))
 
 
     def make_filter(self, operator, attribute, reference):
@@ -1706,7 +1727,7 @@ class LiveStatus:
         columns = []
         filtercolumns = []
         responseheader = 'off'
-        outputformat = 'CSV'
+        outputformat = 'csv'
         columnheaders = 'off'
         groupby = False
         aliases = []
