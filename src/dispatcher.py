@@ -103,6 +103,7 @@ class Dispatcher:
         for elt in self.elements:
             elt.alive = elt.is_alive()
             #print "Element", elt.get_name(), " alive:", elt.alive, ", active:", elt.is_active
+
             #Not alive need new need_conf
             #and spare too if they do not have already a conf
             #REF: doc/shinken-scheduler-lost.png (1)
@@ -111,10 +112,9 @@ class Dispatcher:
 
         for arb in self.arbiters:
             #If not me...
-            print "Alive for", arb, self.arbiter
             if arb != self.arbiter:
                 arb.alive = arb.is_alive()
-                print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
+                #print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
 
 
     #Check if all active items are still alive
@@ -136,22 +136,22 @@ class Dispatcher:
         #TODO: sup this loop and use the 2 loops below. It's far more readable to thinks
         #about conf dispatch and not by node dead -> cfg unavalable. So after the active
         #tag will no be usefull anymore I think.
-        for elt in self.elements:
-            #skip sched because it is managed by the new way
-            if not hasattr(elt, 'conf'):
-                if (elt.is_active and not elt.alive):
-                    Log().log('The satellite %s have a configuration in charge, but seem to be dead! I run a new confguration dispatch' % \
-                                  elt.get_name())
-                    self.dispatch_ok = False
-                    #print "Set dispatch False"
-                    elt.is_active = False
-                    if hasattr(elt, 'conf'):
-                        if elt.conf != None:
-                            elt.conf.assigned_to = None
-                            elt.conf.is_assigned = False
-                            elt.conf = None
-                    #else:
-                    #    print 'No conf'
+        #for elt in self.elements:
+        #    #skip sched because it is managed by the new way
+        #    if not hasattr(elt, 'conf'):
+        #        if (elt.is_active and not elt.alive):
+        #            Log().log('Warning : The satellite %s have a configuration in charge, but seem to be dead! I run a new confguration dispatch' % \
+        #                          elt.get_name())
+        #            self.dispatch_ok = False
+        #            #print "Set dispatch False"
+        #            elt.is_active = False
+        #            if hasattr(elt, 'conf'):
+        #                if elt.conf != None:
+        #                    elt.conf.assigned_to = None
+        #                    elt.conf.is_assigned = False
+        #                    elt.conf = None
+        #            #else:
+        #            #    print 'No conf'
 
         #We check for confs to be dispatched on alive scheds. If not dispatch, need dispatch :)
         #and if dipatch on a failed node, remove the association, and need a new disaptch
@@ -165,7 +165,7 @@ class Dispatcher:
                 else:
                     if not sched.alive:
                         self.dispatch_ok = False #so we ask a new dispatching
-                        Log().log("Scheduler %s had the configuration %d but is dead, I am not happy." % (sched.get_name(), cfg_id))
+                        Log().log("Warning : Scheduler %s had the configuration %d but is dead, I am not happy." % (sched.get_name(), cfg_id))
                         sched.conf.assigned_to = None
                         sched.conf.is_assigned = False
                         sched.conf = None
@@ -176,15 +176,6 @@ class Dispatcher:
         #the cfg_id I think is not corectly dispatched.
         for r in self.realms:
             for cfg_id in r.confs:
-                #DBG
-                sched = r.confs[cfg_id].assigned_to
-                if sched != None:
-                    #print "CFG", cfg_id, "is managed by", sched.get_name()
-                    pass
-                else:
-                    if self.first_dispatch_done:
-                        Log().log("Scheduler configuration %d is unmanaged!!" % cfg_id)
-                #END DBG
                 try:
                     for kind in ['reactionner', 'poller', 'broker']:
                         #We must have the good number of satellite or we are not happy
@@ -206,6 +197,7 @@ class Dispatcher:
                             #Or maybe it is alive but I thought that this reactionner manage the conf
                             #but ot doesn't. I ask a full redispatch of these cfg for both cases
                             if not satellite.alive or (satellite.alive and cfg_id not in satellite.what_i_managed()):
+                                Log().log('[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False #so we will redispatch all
                                 r.to_satellites_nb_assigned[kind][cfg_id] = 0
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = True
@@ -230,7 +222,7 @@ class Dispatcher:
                 if elt.conf == None and elt.alive:
                     #print "Ask", elt.get_name() , 'if it got conf'
                     if elt.have_conf():
-                        Log().log('The element %s have a conf and should have too! I ask it to idle now' % elt.get_name())
+                        Log().log('Warning : The element %s have a conf and should not have one! I ask it to idle now' % elt.get_name())
                         elt.active = False
                         elt.wait_new_conf()
                         #I do not care about order not send or not. If not,
@@ -240,7 +232,7 @@ class Dispatcher:
         
         #I ask satellite witch sched_id they manage. If I am not agree, I ask
         #them to remove it
-        for satellite in self.satellites:#reactionners:
+        for satellite in self.satellites:
             kind = satellite.get_my_type()
             if satellite.alive:
                 cfg_ids = satellite.what_i_managed()
@@ -364,7 +356,7 @@ class Dispatcher:
             if nb_missed > 0:
                 Log().log("WARNING : All schedulers configurations are not dispatched, %d are missing" % nb_missed)
             else:
-                Log().log("OK, all configurations are dispatched to schedulers :)")
+                Log().log("OK, all schedulers configurations are dispatched :)")
                 self.dispatch_ok = True
             
             #Sched without conf in a dispatch ok are set to no need_conf

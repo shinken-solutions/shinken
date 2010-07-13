@@ -298,7 +298,6 @@ class Satellite(Daemon):
                 for sock in socks:
                     if sock in ins:
                         self.daemon.handleRequests()
-                        print "Apres handle : Have conf?", self.have_conf
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff

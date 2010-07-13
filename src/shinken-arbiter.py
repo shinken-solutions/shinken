@@ -418,7 +418,6 @@ class Arbiter(Daemon):
                 for s in socks:
                     if s in ins:
                         self.poller_daemon.handleRequests()
-                        print "Apres handle : Have conf?", self.have_conf
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff

@@ -332,13 +332,12 @@ class Shinken(Daemon):
         while not self.have_conf :
             socks = self.poller_daemon.getServerSockets()
             avant = time.time()
-			# 'foreign' event loop
+            # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:
                         self.poller_daemon.handleRequests()
-                        print "Apres handle : Have conf?", self.have_conf
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff
