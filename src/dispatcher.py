@@ -286,6 +286,8 @@ class Dispatcher:
         for s in print_sched:
             print_string += '%s ' % s
         Log().log(print_string)
+        #END DBG
+        
         return scheds
 
 
