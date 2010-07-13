@@ -55,25 +55,21 @@ class Dispatcher:
             cfg.is_assigned = False
             cfg.assigned_to = None
         for sched in self.schedulers:
-            sched.is_active = False
             sched.alive = False
             sched.conf = None
             sched.need_conf = True
             self.elements.append(sched)
         for reactionner in self.reactionners:
-            reactionner.is_active = False
             reactionner.alive = False
             reactionner.need_conf = False
             self.elements.append(reactionner)
             self.satellites.append(reactionner)
         for poller in self.pollers:
-            poller.is_active = False
             poller.alive = False
             poller.need_conf = True
             self.elements.append(poller)
             self.satellites.append(poller)
         for broker in self.brokers:
-            broker.is_active = False
             broker.alive = False
             broker.need_conf = True
             self.elements.append(broker)
@@ -325,7 +321,7 @@ class Dispatcher:
                             Log().log('[%s] Trying to send conf %d to scheduler %s' % (r.get_name(), conf.id, sched.get_name()))
                             if sched.need_conf:
                                 every_one_need_conf = True
-                                #Log().log('[%s] Dispatching configuration %d' % (r.get_name(), sched.id))
+                                
                                 #We tag conf with the instance_name = scheduler_name
                                 conf.instance_name = sched.scheduler_name
                                 #REF: doc/shinken-conf-dispatching.png (3)
@@ -335,7 +331,6 @@ class Dispatcher:
                                     Log().log('[%s] Dispatch OK of for conf in scheduler %s' % (r.get_name(), sched.get_name()))
                                     sched.conf = conf
                                     sched.need_conf = False
-                                    sched.is_active = True
                                     conf.is_assigned = True
                                     conf.assigned_to = sched
                                     #Ok, the conf is dispatch, no more loop for this
