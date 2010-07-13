@@ -184,7 +184,6 @@ class MacroResolver(Borg):
                     macros[macro]['val'] = self.resolve_ondemand(macro, data)
                 
             #We resolved all we can, now replace the macro in the command call
-            print macros
             for macro in macros:
                 c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
 
