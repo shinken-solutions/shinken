@@ -261,6 +261,38 @@ class Dispatcher:
                             satellite.remove_from_conf(cfg_id)
     
 
+    #Make a ORDERED list of schedulers so we can
+    #send them conf in this order for a specific realm
+    def get_scheduler_ordered_list(self, r):
+        #get scheds, alive and no spare first
+        scheds =  []
+        for s in r.schedulers:
+            scheds.append(s)
+
+        #now the spare scheds of higher realms
+        #they are after the sched of realm, so
+        #they will be used after the spare of
+        #the realm
+        for higher_r in r.higher_realms:
+            for s in higher_r.schedulers:
+                if s.spare:
+                    scheds.append(s)
+
+        #Now we sort the scheds so we take master, then spare
+        #the dead, but we do not care about thems
+        scheds.sort(alive_then_spare_then_deads)
+        scheds.reverse() #pop is last, I need first
+
+        #DBG: dump
+        print_sched = [s.get_name() for s in scheds]
+        print_sched.reverse()
+        print_string = '[%s] Schedulers order : ' % r.get_name()
+        for s in print_sched:
+            print_string += '%s ' % s
+        Log().log(print_string)
+        return scheds
+
+
     #Manage the dispatch
     #REF: doc/shinken-conf-dispatching.png (3)
     def dispatch(self):
@@ -274,45 +306,26 @@ class Dispatcher:
                 conf_to_dispatch = [cfg for cfg in r.confs.values() if cfg.is_assigned==False]
                 nb_conf = len(conf_to_dispatch)
                 Log().log('[%s] Dispatching %d/%d configurations' % (r.get_name(), nb_conf, len(r.confs)))
-                #get scheds, alive and no spare first
-                scheds =  []
-                for s in r.schedulers:
-                    scheds.append(s)
-                #now the spare scheds of higher realms
-                #they are after the sched of realm, so
-                #they will be used after the spare of
-                #the realm
-                for higher_r in r.higher_realms:
-                    for s in higher_r.schedulers:
-                        if s.spare:
-                            scheds.append(s)
-                #Now we sort the scheds so we take master, then spare
-                #the dead, but we do not care about thems
-                scheds.sort(alive_then_spare_then_deads)
-                scheds.reverse() #pop is last, I need first
 
-                #DBG: dump
-                print_sched = [s.get_name() for s in scheds]
-                print_sched.reverse()
-                print_string = '[%s] Schedulers order : ' % r.get_name()
-                for s in print_sched:
-                    print_string += '%s ' % s
-                Log().log(print_string)
+                #Now we get in scheds all scheduler of this realm and upper so
+                #we will send them conf (in this order)
+                scheds = self.get_scheduler_ordered_list(r)
 
-                #Now we do the job
+                #Now we do the real job
                 every_one_need_conf = False
                 for conf in conf_to_dispatch:
                     Log().log('[%s] Dispatching one configuration' % r.get_name())
+
                     #we need to loop until the conf is assigned
                     #or when there are no more schedulers available
                     need_loop = True
                     while need_loop:
                         try:
                             sched = scheds.pop()
-                            Log().log('[%s] Trying to send conf to scheduler %s' % (r.get_name(), sched.get_name()))
+                            Log().log('[%s] Trying to send conf %d to scheduler %s' % (r.get_name(), conf.id, sched.get_name()))
                             if sched.need_conf:
                                 every_one_need_conf = True
-                                Log().log('[%s] Dispatching configuration %d' % (r.get_name(), sched.id))
+                                #Log().log('[%s] Dispatching configuration %d' % (r.get_name(), sched.id))
                                 #We tag conf with the instance_name = scheduler_name
                                 conf.instance_name = sched.scheduler_name
                                 #REF: doc/shinken-conf-dispatching.png (3)
@@ -342,7 +355,7 @@ class Dispatcher:
                                 Log().log('[%s] The scheduler %s do not need conf, sorry' % (r.get_name(), sched.get_name()))
                         except IndexError: #No more schedulers.. not good, no loop
                             need_loop = False
-                            #The conf donot need to be dispatch
+                            #The conf do not need to be dispatch
                             cfg_id = conf.id
                             for kind in ['reactionner', 'poller', 'broker']:
                                 r.to_satellites[kind][cfg_id] = None
