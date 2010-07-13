@@ -112,5 +112,5 @@ if __name__ == "__main__":
     #import cProfile
     p.main()
     #command = """p.main()"""
-    #cProfile.runctx( command, globals(), locals(), filename="var/Poller.profile" )
+    #cProfile.runctx( command, globals(), locals(), filename="/tmp/Poller.profile" )
 

@@ -386,7 +386,7 @@ class Shinken(Daemon):
         m.init(self.conf)
         #we give sched it's conf
         self.sched.load_conf(self.conf)
-        
+
         #self.conf.dump()
         #self.conf.quick_debug()
 		
@@ -492,8 +492,8 @@ if __name__ == "__main__":
     #Ok, now we load the config
 
     #p = Shinken(conf)
-    import cProfile
-    #p.main()
-    command = """p.main()"""
-    cProfile.runctx( command, globals(), locals(), filename="/tmp/Shinken.profile" )
+    #import cProfile
+    p.main()
+    #command = """p.main()"""
+    #cProfile.runctx( command, globals(), locals(), filename="/tmp/Shinken.profile" )
 

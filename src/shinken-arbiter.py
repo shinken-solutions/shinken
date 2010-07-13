@@ -215,6 +215,7 @@ class Arbiter(Daemon):
         #The config Class must have the USERN macro
         #There are 256 of them, so we create online
         Config.fill_usern_macros()
+        
         #REF: doc/shinken-conf-dispatching.png (1)
         self.conf.read_config(self.config_files)
         
@@ -627,8 +628,8 @@ if __name__ == "__main__":
     #Ok, now we load the config
 
     #p = Shinken(conf)
-    import cProfile
+    #import cProfile
     p.main()
-    command = """p.main()"""
+    #command = """p.main()"""
     #cProfile.runctx( command, globals(), locals(), filename="/tmp/Arbiter.profile" )
 
