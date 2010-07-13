@@ -5,4 +5,12 @@ BIN=$DIR"/../src"
 ETC=$DIR"/../src/etc"
 
 echo "Stopping broker"
-kill `cat $DIR/../src/var/brokerd.pid`
+
+parent=`cat $DIR/../src/var/brokerd.pid`
+
+# kill parent and childs broker processes
+for brokerpid in $(ps -aef | grep $parent | grep "shinken-broker.py" | awk '{print $2}')
+do
+	kill $brokerpid
+done
+
