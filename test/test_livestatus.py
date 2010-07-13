@@ -116,6 +116,7 @@ class TestConfig(unittest.TestCase):
         for a in actions:
             #print "---> fake return of action", a.id
             a.status = 'inpoller'
+            a.check_time = time.time()
             a.exit_status = 0
             self.sched.put_results(a)
         #self.show_actions()
@@ -230,6 +231,31 @@ class TestConfig(unittest.TestCase):
         print 'query_6_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == '0;0;1;0\n')
 
+
+    def test_json(self):
+        self.print_header()
+        print "got initial broks"
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
+        self.update_broker()
+        data = 'GET services\nColumns: host_name description state\nOutputFormat: json'
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print 'json wo headers__________\n%s\n%s\n' % (data, response)
+        self.assert_(response == '[["test_host_0","test_ok_0",2]]\n')
+        data = 'GET services\nColumns: host_name description state\nOutputFormat: json\nColumnHeaders: on'
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print 'json with headers__________\n%s\n%s\n' % (data, response)
+        self.assert_(response == '[["host_name","description","state"],["test_host_0","test_ok_0",2]]\n')
+        #100% mklivesttaus: self.assert_(response == '[["host_name","description","state"],\n["test_host_0","test_ok_0",2]]\n')
 
 
     def test_thruk(self):
