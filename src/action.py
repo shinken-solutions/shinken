@@ -88,7 +88,7 @@ class Action:
             self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
         except OSError as exp:
             print "FUCK:", exp
-            self.output = exp
+            self.output = exp.__str__()
             self.exit_status = 2
             self.status = 'done'
             self.execution_time = time.time() - self.check_time

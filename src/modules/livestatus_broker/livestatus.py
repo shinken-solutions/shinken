@@ -165,7 +165,7 @@ class LiveStatus:
             'description' : { 'prop' : 'service_description' },
             'display_name' : { },
             'downtimes' : { },
-            'event_handler' : { },
+            'event_handler' : { 'depythonize' : 'call' },
             'event_handler_enabled' : { 'depythonize' : from_bool_to_string },
             'execution_time' : { 'converter' : float },
             'first_notification_delay' : { 'converter' : int },
