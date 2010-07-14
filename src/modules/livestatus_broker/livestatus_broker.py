@@ -375,6 +375,7 @@ class Livestatus_broker:
 
     def main(self):
         last_number_of_objects = 0
+        #self.prepare_log_db()
         backlog = 5
         size = 8192
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -382,6 +383,7 @@ class Livestatus_broker:
         server.bind((self.host, self.port))
         server.listen(backlog)
         input = [server]
+        databuffer = {}
         # todo. open self.socket and add it to input
 
         while True:
@@ -400,13 +402,19 @@ class Livestatus_broker:
                 else:
                     # handle all other sockets
                     data = s.recv(size)
-                    if data:
-                        response = self.livestatus.handle_request(data)
-                        s.send(response)
+                    if s in databuffer:
+                        databuffer[s] += data
                     else:
+                        databuffer[s] = data
+                    if not data or databuffer[s].endswith('\n\n'):
+                        # end-of-transmission or an empty line was received
+                        response = self.livestatus.handle_request(databuffer[s].rstrip())
+                        del databuffer[s]
+                        s.send(response)
+                        s.shutdown(2)
                         s.close()
                         input.remove(s)
-            
+
             if self.number_of_objects > last_number_of_objects:
                 # Still in the initialization phase
                 # Maybe we should wait until there are no more initial broks
