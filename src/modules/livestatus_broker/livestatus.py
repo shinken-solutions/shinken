@@ -133,7 +133,7 @@ class LiveStatus:
             'retry_interval' : { },
             'scheduled_downtime_depth' : { 'converter' : int },
             'state' : { 'converter' : int, 'prop' : 'state_id' },
-            'state_type' : { 'converter' : int },
+            'state_type' : { 'converter' : int, 'prop' : 'state_type_id' },
             'statusmap_image' : { },
             'total_services' : { },
             'worst_service_hard_state' : { },
@@ -298,7 +298,7 @@ class LiveStatus:
             'retry_interval' : { },
             'scheduled_downtime_depth' : { 'converter' : int },
             'state' : { 'converter' : int, 'prop' : 'state_id' },
-            'state_type' : { 'converter' : int },
+            'state_type' : { 'converter' : int, 'prop' : 'state_type_id' },
             },
               
         Contact : { # in progress
