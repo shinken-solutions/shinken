@@ -124,6 +124,10 @@ class Service(SchedulingItem):
         'is_flapping' : {'default' : False, 'fill_brok' : ['full_status']},
         'act_depend_of' : {'default' : [] }, #dependencies for actions like notif of event handler, so AFTER check return
         'chk_depend_of' : {'default' : []}, #dependencies for checks raise, so BEFORE checks
+
+        'act_depend_of_me' : {'default' : [] }, #elements that depend of me, so the reverse than just uppper
+        'chk_depend_of_me' : {'default' : []}, #elements that depend of me
+        
         'last_state_update' : {'default' : time.time(), 'fill_brok' : ['full_status']},
         'checks_in_progress' : {'default' : []}, # no brok because checks are too linked
         'notifications_in_progress' : {'default' : {}}, # no broks because notifications are too linked
@@ -158,6 +162,12 @@ class Service(SchedulingItem):
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
         'in_scheduled_downtime' : {'default' : False},
         'in_scheduled_downtime_during_last_check' : {'default' : False}, 
+        
+        #Problem/incident part
+        'is_problem' : {'default' : False},
+        'is_incident' : {'default' : False},
+        'source_problems' : {'default' : []}, # list of problems taht make us an incident
+        'incidents' : {'default' : []}, #list of the incident I'm the cause of
         }
 
     #Mapping between Macros and properties (can be prop or a function)
@@ -285,15 +295,25 @@ class Service(SchedulingItem):
     def fill_daddy_dependancy(self):
         #Depend of host, all status, is a networkdep and do not have timeperiod
         if self.host is not None:
+            #I add the dep in MY list
             self.act_depend_of.append( (self.host, ['d', 'u', 's', 'f'], 'network_dep', None) )
+            #I add the dep in Daddy list
+            self.host.act_depend_of_me.append( (self, ['d', 'u', 's', 'f'], 'network_dep', None) )
 
-            
+    #Register the dependancy between 2 service for action (notification etc)    
     def add_service_act_dependancy(self, srv, status, timeperiod):
+        #first I add the other the I depend on in MY list
         self.act_depend_of.append( (srv, status, 'logic_dep', timeperiod) )
+        #then I register myself in the other service dep list
+        srv.act_depend_of_me.append( (self, status, 'logic_dep', timeperiod) )
 
 
+    #Register the dependancy between 2 service for checks
     def add_service_chk_dependancy(self, srv, status, timeperiod):
+        #first I add the other the I depend on in MY list
         self.chk_depend_of.append( (srv, status, 'logic_dep', timeperiod) )
+        #then I register myself in the other service dep list
+        srv.chk_depend_of_me.append( (self, status, 'logic_dep', timeperiod) )
 
 
     #Set unreachable : our host is DOWN, but it mean nothing for a service

@@ -132,6 +132,10 @@ class Host(SchedulingItem):
         #No broks for _depend_of because of to much links to hsots/services
         'act_depend_of' : {'default' : []}, #dependencies for actions like notif of event handler, so AFTER check return
         'chk_depend_of' : {'default' : []}, #dependencies for checks raise, so BEFORE checks
+
+        'act_depend_of_me' : {'default' : [] }, #elements that depend of me, so the reverse than just uppper
+        'chk_depend_of_me' : {'default' : []}, #elements that depend of me
+
         'last_state_update' : {'default' : time.time(), 'fill_brok' : ['full_status']},
         'services' : {'default' : []}, #no brok ,to much links
         'checks_in_progress' : {'default' : []},#No broks, it's just internal, and checks have too links
@@ -165,6 +169,12 @@ class Host(SchedulingItem):
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
         'in_scheduled_downtime' : {'default' : False},
         'in_scheduled_downtime_during_last_check' : {'default' : False},
+        
+        #Problem/incident part
+        'is_problem' : {'default' : False},
+        'is_incident' : {'default' : False},
+        'source_problems' : {'default' : []}, # list of problems taht make us an incident
+        'incidents' : {'default' : []}, #list of the incident I'm the cause of
         }
 
     #Hosts macros and prop that give the information
@@ -325,14 +335,21 @@ class Host(SchedulingItem):
 
 
     #Add a dependancy for action event handler, notification, etc)
+    #and add ourself in it's dep list
     def add_host_act_dependancy(self, h, status, timeperiod):
+        #I add him in MY list
         self.act_depend_of.append( (h, status, 'logic_dep', timeperiod) )
+        #And I add me in it's list
+        h.act_depend_of_me.append( (self, status, 'logic_dep', timeperiod) )
 
 
     #Add a dependancy for check (so before launch)
     def add_host_chk_dependancy(self, h, status, timeperiod):
+        #I add him in MY list
         self.chk_depend_of.append( (h, status, 'logic_dep', timeperiod) )
-
+        #And I add me in it's list
+        h.chk_depend_of_me.append( (self, status, 'logic_dep', timeperiod) )
+        
 
     #add one of our service to services (at linkify)
     def add_service_link(self, service):
@@ -496,10 +513,14 @@ class Host(SchedulingItem):
 
 
     #fill act_depend_of with my parents (so network dep)
+    #and say parents they impact me
     def fill_parents_dependancie(self):
         for parent in self.parents:
             if parent is not None:
+                #I add my parent in my list
                 self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None) )
+                #And I register myself in my parent list too
+                parent.act_depend_of_me.append( (self, ['d', 'u', 's', 'f'], 'network_dep', None) )
 
 
     #Give data for checks's macros
