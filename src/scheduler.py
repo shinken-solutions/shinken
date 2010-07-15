@@ -425,7 +425,8 @@ class Scheduler:
         #a new check will be launch like with a normal begining (random distributed
         #scheduling)
         not_loading = ['act_depend_of', 'chk_depend_of', 'checks_in_progress', \
-                           'downtimes', 'host', 'next_chk']
+                           'downtimes', 'host', 'next_chk', 'act_depend_of_me', \
+                           'chk_depend_of_me', 'services']
 
         ret_hosts = all_data['hosts']
         for ret_h in ret_hosts:
