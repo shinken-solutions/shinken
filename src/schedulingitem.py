@@ -588,7 +588,10 @@ class SchedulingItem(Item):
 
             #DBG : can raise a problem...
             #PROBLEM/INCIDENT
-            self.set_myself_as_problem()
+            #I'm a problem only if I'm the root problem,
+            #so not no_action:
+            if not no_action:
+                self.set_myself_as_problem()
 
         #NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
@@ -605,7 +608,10 @@ class SchedulingItem(Item):
 
                 #DBG : can raise a problem...
                 #PROBLEM/INCIDENT
-                self.set_myself_as_problem()
+                #I'm a problem only if I'm the root problem,
+                #so not no_action:
+                if not no_action:
+                    self.set_myself_as_problem()
 
             else:
                 #This is the first NON-OK result. Initiate the SOFT-sequence
@@ -638,7 +644,10 @@ class SchedulingItem(Item):
 
                     #DBG : can raise a problem...
                     #PROBLEM/INCIDENT
-                    self.set_myself_as_problem()
+                    #I'm a problem only if I'm the root problem,
+                    #so not no_action:
+                    if not no_action:
+                        self.set_myself_as_problem()
 
                 else:
                     self.raise_alert_log_entry()
@@ -656,7 +665,10 @@ class SchedulingItem(Item):
                     #PROBLEM/INCIDENT
                     #Maybe our new state can raise the problem
                     #when the last one was not
-                    self.set_myself_as_problem()
+                    #I'm a problem only if I'm the root problem,
+                    #so not no_action:
+                    if not no_action:
+                        self.set_myself_as_problem()
 
                 elif self.in_scheduled_downtime_during_last_check == True:
                     #during the last check i was in a downtime. but now
