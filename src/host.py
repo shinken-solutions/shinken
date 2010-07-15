@@ -175,6 +175,8 @@ class Host(SchedulingItem):
         'is_incident' : {'default' : False},
         'source_problems' : {'default' : []}, # list of problems taht make us an incident
         'incidents' : {'default' : []}, #list of the incident I'm the cause of
+        'state_before_incident' : {'default' : 0}, #keep a trace of the old state before being an incident
+        'state_changed_since_incident' : {'default' : False}, #if teh state change, we know so we do not revert it
         }
 
     #Hosts macros and prop that give the information
@@ -329,8 +331,13 @@ class Host(SchedulingItem):
         return str(len([s for s in self.services if s.state_id == 3]))
 
 
-    #For debugging purpose only (nice name)
+    #For get a nice name
     def get_name(self):
+        return self.host_name
+
+
+    #For debugin purpose only
+    def get_dbg_name(self):
         return self.host_name
 
 

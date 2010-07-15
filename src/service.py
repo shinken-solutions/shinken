@@ -168,6 +168,8 @@ class Service(SchedulingItem):
         'is_incident' : {'default' : False},
         'source_problems' : {'default' : []}, # list of problems taht make us an incident
         'incidents' : {'default' : []}, #list of the incident I'm the cause of
+        'state_before_incident' : {'default' : 0}, #keep a trace of the old state before being an incident
+        'state_changed_since_incident' : {'default' : False}, #if teh state change, we know so we do not revert it
         }
 
     #Mapping between Macros and properties (can be prop or a function)
@@ -225,6 +227,11 @@ class Service(SchedulingItem):
     #Give a nice name output
     def get_name(self):
         return self.service_description
+
+
+    #Need the whole name for debugin purpose
+    def get_dbg_name(self):
+        return "%s/%s" % (self.host.host_name, self.service_description)
 
     
     #Call by picle for dataify service
@@ -299,6 +306,7 @@ class Service(SchedulingItem):
             self.act_depend_of.append( (self.host, ['d', 'u', 's', 'f'], 'network_dep', None) )
             #I add the dep in Daddy list
             self.host.act_depend_of_me.append( (self, ['d', 'u', 's', 'f'], 'network_dep', None) )
+
 
     #Register the dependancy between 2 service for action (notification etc)    
     def add_service_act_dependancy(self, srv, status, timeperiod):

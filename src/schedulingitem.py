@@ -112,6 +112,103 @@ class SchedulingItem(Item):
         return None
 
 
+    #Raise all incident from my error. I'm setting myself 
+    #as a problem, and I register myself as this in all
+    #hosts/services that depend_on_me. So they are now my
+    #incidents
+    def set_myself_as_problem(self):
+        now = time.time()        
+        print "ME %s is now a PROBLEM" % self.get_dbg_name()
+        self.is_problem = True
+        #we should warn potentials incident of our problem
+        #and they should be cool to register them so I've got
+        #my incidents list
+        for (incident, status, dep_type, tp) in self.act_depend_of_me:
+            #Check if the status is ok for impact
+            for s in status:
+                if self.is_state(s):
+                    #now check if we should bailout because of a
+                    #not good timeperiod for dep
+                    if tp is None or tp.is_time_valid(now):
+                        print "I can call %s for registering me as a problem" % incident.get_dbg_name()
+                        new_incidents = incident.register_a_problem(self)
+                        self.incidents.extend(new_incidents)
+                        #Make element unique in this list
+                        self.incidents = list(set(self.incidents))
+        #DBG:
+        print "Finally, ME %s got incidents:" % self.get_dbg_name()
+        for incident in self.incidents:
+            print incident.get_dbg_name()
+
+
+    #Look for my incidents, and remove me from theirs problems list
+    def no_more_a_problem(self):
+        if self.is_problem:
+            print "Me %s is no more a problem! Cool" % self.get_dbg_name()
+            self.is_problem = False
+            #we warn incidents that we are no more a problem
+            for incident in self.incidents:
+                print "I'm deregistring from incident %s" % incident.get_dbg_name()
+                incident.deregister_a_problem(self)
+                
+            #we can just drop our incidents list
+            self.incidents = []
+        
+
+    #call recursively by potentials incidents so they
+    #update their source_problems list. But do not
+    #go below if the problem is not a real one for me
+    #like If I've got multiple parents for examples
+    def register_a_problem(self, pb):
+        self.is_incident = self.is_no_action_dependant()
+        print "Is me %s an incident? %s" % (self.get_dbg_name(), self.is_incident)
+        #TODO : put as incident so put good status
+        
+        incidents = []
+        #Ok, if we are incidented, we can add it in our
+        #problem list
+        if self.is_incident:
+            #Maybe I was a problem myself, now I can say : not my fault!
+            if self.is_problem:
+                print "I was a problem, but now me %s is a simple incident! Cool" % self.get_dbg_name()
+                self.no_more_a_problem()
+
+            #Ok now we can be a simple incident
+            incidents.append(self)
+            if pb not in self.source_problems:
+                self.source_problems.append(pb)
+            #we should send this problem to all potential incident that
+            #depend on us
+            for (incident, status, dep_type, tp) in self.act_depend_of_me:
+                #Check if the status is ok for impact
+                for s in status:
+                    if self.is_state(s):
+                        #now check if we should bailout because of a
+                        #not good timeperiod for dep
+                        if tp is None or tp.is_time_valid(now):
+                            print "I can call %s for registering a root problem (%s)" % (incident.get_dbg_name(), pb.get_dbg_name())
+                            new_incidents = incident.register_a_problem(pb)
+                            incidents.extend(new_incidents)
+
+        #now we return all incidents (can be void of course)
+        #DBG
+        print "At my level, I raised incidents :"
+        for i in incidents:
+            print i.get_dbg_name()
+        #DBG
+        return incidents
+
+    
+    #Just remove the problem from our problems list
+    #and check if we are still 'incidented'. It's not recursif because problem
+    #got the lsit of all its incidents
+    def deregister_a_problem(self, pb):
+        self.source_problems.remove(pb)
+        self.is_incident = self.is_no_action_dependant()
+        print "Is me %s is still an incident? : %s" % (self.get_dbg_name(), self.is_incident)
+        #TODO : back as incident so put good status
+
+
     #When all dep are resolved, this function say if
     #action can be raise or not by viewing dep status
     #network_dep have to be all raise to be no action
@@ -142,6 +239,7 @@ class SchedulingItem(Item):
         else:# every parents are dead, so... It's not my fault :)
             return True
 
+
     #We check if we are no action just because of ours parents (or host for
     #service)
     #TODO : factorize with previous check?
@@ -164,7 +262,6 @@ class SchedulingItem(Item):
             return
 
 
-
     #Use to know if I raise dependency for soneone else (with status)
     #If I do not raise dep, maybe my dep raise me. If so, I raise dep.
     #So it's a recursive function
@@ -177,7 +274,7 @@ class SchedulingItem(Item):
         now = time.time()
         for (dep, status, type, tp) in self.chk_depend_of:
             if dep.do_i_raise_dependency(status):
-                if tp is None and tp.is_time_valid(now):
+                if tp is None or tp.is_time_valid(now):
                     return True
         #No, I relly do not raise...
         return False
@@ -357,7 +454,8 @@ class SchedulingItem(Item):
             self.latency = max(0, c.check_time - c.t_to_go)
         except TypeError:
             #DBG
-            print "ERROR FUCK:", c.check_time, c.t_to_go, c.ref.get_name()
+            print "DBG ERROR about time: ", c.check_time, c.t_to_go, c.ref.get_name()
+
         self.has_been_checked = 1
         self.execution_time = c.execution_time
         self.last_chk = c.check_time
@@ -465,6 +563,11 @@ class SchedulingItem(Item):
                 #Internally it is a hard OK
                 self.state_type = 'HARD'
                 self.attempt = 1
+                
+                #DBG: PROBLEM/INCIDENT management
+                #I'm no more a problem if I was one
+                self.no_more_a_problem()
+                
 
         #Volatile part
         #Only for service
@@ -483,6 +586,10 @@ class SchedulingItem(Item):
             #Ok, event handlers here too
             res.extend(self.get_event_handlers())
 
+            #DBG : can raise a problem...
+            #PROBLEM/INCIDENT
+            self.set_myself_as_problem()
+
         #NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
             if self.is_max_attempts():
@@ -495,6 +602,11 @@ class SchedulingItem(Item):
                     res.extend(self.create_notifications('PROBLEM'))
                 #Oh? This is the typical go for a event handler :)
                 res.extend(self.get_event_handlers())
+
+                #DBG : can raise a problem...
+                #PROBLEM/INCIDENT
+                self.set_myself_as_problem()
+
             else:
                 #This is the first NON-OK result. Initiate the SOFT-sequence
                 #Also launch the event handler, he might fix it.
@@ -523,6 +635,11 @@ class SchedulingItem(Item):
                         res.extend(self.create_notifications('PROBLEM'))
                     #So event handlers here too
                     res.extend(self.get_event_handlers())
+
+                    #DBG : can raise a problem...
+                    #PROBLEM/INCIDENT
+                    self.set_myself_as_problem()
+
                 else:
                     self.raise_alert_log_entry()
                     #eventhandler is launched each time during the soft state
@@ -534,6 +651,13 @@ class SchedulingItem(Item):
                     self.remove_in_progress_notifications()
                     if not no_action:
                         res.extend(self.create_notifications('PROBLEM'))
+                        
+                    #DBG : can raise a problem...
+                    #PROBLEM/INCIDENT
+                    #Maybe our new state can raise the problem
+                    #when the last one was not
+                    self.set_myself_as_problem()
+
                 elif self.in_scheduled_downtime_during_last_check == True:
                     #during the last check i was in a downtime. but now
                     #the status is still critical and notifications 
