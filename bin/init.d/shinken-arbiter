@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Shinken        Starts Shinken
+#
+#
+# chkconfig: 345 99 01
+# description: Start Shinken arbiter daemon
+
+# Source function library.
+if [ -f /etc/init.d/functions ]; then
+        . /etc/init.d/functions
+fi
+
+SHINKEN_USER=shinken
+SHINKEN_GROUP=shinken
+
+SHINKEN_BIN=/usr/local/shinken/bin
+SHINKEN_VAR=/usr/local/shinken/src/var/
+
+start() {
+        echo "Starting Shinken Arbiter daemon  ..."
+        su - $SHINKEN_USER -c "$SHINKEN_BIN/launch_arbiter.sh"
+#        chown -R $SHINKEN_GROUP:$NAGIOS_GROUP $SHINKEN_VAR
+        echo_success 
+        echo
+
+}
+
+stop() {
+        echo "Stopping Shinken Arbiter daemon  ..."
+        su - $SHINKEN_USER -c "$SHINKEN_BIN/stop_arbiter.sh"
+        #sleep 3
+        #count=$(ps aux | grep python2.6 | grep -v grep | wc -l)
+        #if [ $count -gt 0 ]; then
+        #    killall python2.6
+        #fi
+        echo_success 
+        echo
+ 
+}
+
+case "$1" in
+  restart)
+        stop
+        start
+        exit 0
+        ;;
+  start)
+        start
+        exit 0
+        ;;
+  stop)
+       stop
+       exit 0
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 2
+esac
+
+exit $?
+
