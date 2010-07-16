@@ -112,119 +112,119 @@ class SchedulingItem(Item):
         return None
 
 
-    #Raise all incident from my error. I'm setting myself 
+    #Raise all impact from my error. I'm setting myself 
     #as a problem, and I register myself as this in all
     #hosts/services that depend_on_me. So they are now my
-    #incidents
+    #impacts
     def set_myself_as_problem(self):
         now = time.time()        
         #print "ME %s is now a PROBLEM" % self.get_dbg_name()
         self.is_problem = True
-        #we should warn potentials incident of our problem
+        #we should warn potentials impact of our problem
         #and they should be cool to register them so I've got
-        #my incidents list
-        for (incident, status, dep_type, tp) in self.act_depend_of_me:
+        #my impacts list
+        for (impact, status, dep_type, tp) in self.act_depend_of_me:
             #Check if the status is ok for impact
             for s in status:
                 if self.is_state(s):
                     #now check if we should bailout because of a
                     #not good timeperiod for dep
                     if tp is None or tp.is_time_valid(now):
-                        #print "I can call %s for registering me as a problem" % incident.get_dbg_name()
-                        new_incidents = incident.register_a_problem(self)
-                        self.incidents.extend(new_incidents)
+                        #print "I can call %s for registering me as a problem" % impact.get_dbg_name()
+                        new_impacts = impact.register_a_problem(self)
+                        self.impacts.extend(new_impacts)
                         #Make element unique in this list
-                        self.incidents = list(set(self.incidents))
+                        self.impacts = list(set(self.impacts))
         #DBG:
-        #print "Finally, ME %s got incidents:" % self.get_dbg_name()
-        #for incident in self.incidents:
-        #    print incident.get_dbg_name()
+        #print "Finally, ME %s got impacts:" % self.get_dbg_name()
+        #for impact in self.impacts:
+        #    print impact.get_dbg_name()
 
 
-    #Look for my incidents, and remove me from theirs problems list
+    #Look for my impacts, and remove me from theirs problems list
     def no_more_a_problem(self):
         if self.is_problem:
             #print "Me %s is no more a problem! Cool" % self.get_dbg_name()
             self.is_problem = False
-            #we warn incidents that we are no more a problem
-            for incident in self.incidents:
-                #print "I'm deregistring from incident %s" % incident.get_dbg_name()
-                incident.deregister_a_problem(self)
+            #we warn impacts that we are no more a problem
+            for impact in self.impacts:
+                #print "I'm deregistring from impact %s" % impact.get_dbg_name()
+                impact.deregister_a_problem(self)
                 
-            #we can just drop our incidents list
-            self.incidents = []
+            #we can just drop our impacts list
+            self.impacts = []
         
 
-    #call recursively by potentials incidents so they
+    #call recursively by potentials impacts so they
     #update their source_problems list. But do not
     #go below if the problem is not a real one for me
     #like If I've got multiple parents for examples
     def register_a_problem(self, pb):
-        was_an_incident = self.is_incident
+        was_an_impact = self.is_impact
         #Our father already look of he impacts us. So if we are here,
         #it's that we really are impacted
-        self.is_incident = True
-        #print "Is me %s an incident? %s" % (self.get_dbg_name(), self.is_incident)
-        #TODO : put as incident so put good status
+        self.is_impact = True
+        #print "Is me %s an impact? %s" % (self.get_dbg_name(), self.is_impact)
+        #TODO : put as impact so put good status
         
-        incidents = []
-        #Ok, if we are incidented, we can add it in our
+        impacts = []
+        #Ok, if we are impacted, we can add it in our
         #problem list
         #TODO : remove this unused check
-        if self.is_incident:
+        if self.is_impact:
             #Maybe I was a problem myself, now I can say : not my fault!
             if self.is_problem:
-                #print "I was a problem, but now me %s is a simple incident! Cool" % self.get_dbg_name()
+                #print "I was a problem, but now me %s is a simple impact! Cool" % self.get_dbg_name()
                 self.no_more_a_problem()
 
-            #Ok, we are now an incident, we should take the good state
-            #but only when we just go in incident state
-            if not was_an_incident:
-                self.set_incident_state()
+            #Ok, we are now an impact, we should take the good state
+            #but only when we just go in impact state
+            if not was_an_impact:
+                self.set_impact_state()
 
-            #Ok now we can be a simple incident
-            incidents.append(self)
+            #Ok now we can be a simple impact
+            impacts.append(self)
             if pb not in self.source_problems:
                 self.source_problems.append(pb)
-            #we should send this problem to all potential incident that
+            #we should send this problem to all potential impact that
             #depend on us
             #print "Guys depending on me:"
-            for (incident, status, dep_type, tp) in self.act_depend_of_me:
-                #print "Potential incident :", incident.get_dbg_name(), status, dep_type, tp
+            for (impact, status, dep_type, tp) in self.act_depend_of_me:
+                #print "Potential impact :", impact.get_dbg_name(), status, dep_type, tp
                 #Check if the status is ok for impact
                 for s in status:
                     if self.is_state(s):
                         #now check if we should bailout because of a
                         #not good timeperiod for dep
                         if tp is None or tp.is_time_valid(now):
-                            #print "I can call %s for registering a root problem (%s)" % (incident.get_dbg_name(), pb.get_dbg_name())
-                            new_incidents = incident.register_a_problem(pb)
-                            incidents.extend(new_incidents)
+                            #print "I can call %s for registering a root problem (%s)" % (impact.get_dbg_name(), pb.get_dbg_name())
+                            new_impacts = impact.register_a_problem(pb)
+                            impacts.extend(new_impacts)
 
-        #now we return all incidents (can be void of course)
+        #now we return all impacts (can be void of course)
         #DBG
-        #print "At my level, I raised incidents :"
-        #for i in incidents:
+        #print "At my level, I raised impacts :"
+        #for i in impacts:
         #    print i.get_dbg_name()
         #DBG
-        return incidents
+        return impacts
 
     
     #Just remove the problem from our problems list
-    #and check if we are still 'incidented'. It's not recursif because problem
-    #got the lsit of all its incidents
+    #and check if we are still 'impacted'. It's not recursif because problem
+    #got the lsit of all its impacts
     def deregister_a_problem(self, pb):
         #print "We are asking ME %s to remove a pb %s from %s" % (self.get_dbg_name(), pb.get_dbg_name(), self.source_problems)
         self.source_problems.remove(pb)
 
-        #For know if we are still an incident, maybe our dependancies
-        #are not aware of teh remove of the incident state because it's not ordered
+        #For know if we are still an impact, maybe our dependancies
+        #are not aware of teh remove of the impact state because it's not ordered
         #so we can just look at if we still have some problem in our list
         if len(self.source_problems) == 0:
-            self.is_incident = False
-            #No more an incident, we can unset the incident state
-            self.unset_incident_state()
-        #print "Is me %s is still an incident? : %s" % (self.get_dbg_name(), self.is_incident)
+            self.is_impact = False
+            #No more an impact, we can unset the impact state
+            self.unset_impact_state()
+        #print "Is me %s is still an impact? : %s" % (self.get_dbg_name(), self.is_impact)
 
 
     #When all dep are resolved, this function say if
@@ -518,8 +518,8 @@ class SchedulingItem(Item):
         self.set_state_from_exit_status(c.exit_status)
 
         #we change the state, do whatever we are or not in
-        #an incident mode, we can put it
-        self.state_changed_since_incident = True
+        #an impact mode, we can put it
+        self.state_changed_since_impact = True
 
         #The check is consume, uptade the in_checking propertie
         self.remove_in_progress_check(c)
@@ -591,7 +591,7 @@ class SchedulingItem(Item):
                 self.state_type = 'HARD'
                 self.attempt = 1
                 
-                #DBG: PROBLEM/INCIDENT management
+                #DBG: PROBLEM/IMPACT management
                 #I'm no more a problem if I was one
                 self.no_more_a_problem()
                 
@@ -614,7 +614,7 @@ class SchedulingItem(Item):
             res.extend(self.get_event_handlers())
 
             #DBG : can raise a problem...
-            #PROBLEM/INCIDENT
+            #PROBLEM/IMPACT
             #I'm a problem only if I'm the root problem,
             #so not no_action:
             if not no_action:
@@ -634,7 +634,7 @@ class SchedulingItem(Item):
                 res.extend(self.get_event_handlers())
 
                 #DBG : can raise a problem...
-                #PROBLEM/INCIDENT
+                #PROBLEM/IMPACT
                 #I'm a problem only if I'm the root problem,
                 #so not no_action:
                 if not no_action:
@@ -670,7 +670,7 @@ class SchedulingItem(Item):
                     res.extend(self.get_event_handlers())
 
                     #DBG : can raise a problem...
-                    #PROBLEM/INCIDENT
+                    #PROBLEM/IMPACT
                     #I'm a problem only if I'm the root problem,
                     #so not no_action:
                     if not no_action:
@@ -689,7 +689,7 @@ class SchedulingItem(Item):
                         res.extend(self.create_notifications('PROBLEM'))
                         
                     #DBG : can raise a problem...
-                    #PROBLEM/INCIDENT
+                    #PROBLEM/IMPACT
                     #Maybe our new state can raise the problem
                     #when the last one was not
                     #I'm a problem only if I'm the root problem,

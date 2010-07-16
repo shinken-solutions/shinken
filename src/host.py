@@ -170,14 +170,14 @@ class Host(SchedulingItem):
         'in_scheduled_downtime' : {'default' : False},
         'in_scheduled_downtime_during_last_check' : {'default' : False},
         
-        #Problem/incident part
+        #Issue/impact part
         'is_problem' : {'default' : False},
-        'is_incident' : {'default' : False},
-        'source_problems' : {'default' : []}, # list of problems taht make us an incident
-        'incidents' : {'default' : []}, #list of the incident I'm the cause of
-        'state_before_incident' : {'default' : 0}, #keep a trace of the old state before being an incident
-        'state_id_before_incident' : {'default' : 0}, #keep a trace of the old state id before being an incident
-        'state_changed_since_incident' : {'default' : False}, #if teh state change, we know so we do not revert it
+        'is_impact' : {'default' : False},
+        'source_problems' : {'default' : []}, # list of problems taht make us an impact
+        'impacts' : {'default' : []}, #list of the impact I'm the cause of
+        'state_before_impact' : {'default' : 0}, #keep a trace of the old state before being an impact
+        'state_id_before_impact' : {'default' : 0}, #keep a trace of the old state id before being an impact
+        'state_changed_since_impact' : {'default' : False}, #if teh state change, we know so we do not revert it
         }
 
     #Hosts macros and prop that give the information
@@ -375,28 +375,28 @@ class Host(SchedulingItem):
         self.last_time_unreachable = int(now)
 
 
-    #We just go an incident, so we go unreachable
-    def set_incident_state(self):
+    #We just go an impact, so we go unreachable
+    def set_impact_state(self):
         #Keep a trace of the old state (problem came back before
         #a new checks)
-        self.state_before_incident = self.state
-        self.state_id_before_incident = self.state_id
-        #this flag will know if we overide the incident state
-        self.state_changed_since_incident = False
+        self.state_before_impact = self.state
+        self.state_id_before_impact = self.state_id
+        #this flag will know if we overide the impact state
+        self.state_changed_since_impact = False
         self.state = 'UNREACHABLE'#exit code UNDETERMINED
         self.state_id = 2
         #self.last_time_down = int(self.last_state_update)
         #state_code = 'd'
-        #print "Setting my ME %s incident states to %s %s" % (self.get_dbg_name(), self.state, self.state_id)
+        #print "Setting my ME %s impact states to %s %s" % (self.get_dbg_name(), self.state, self.state_id)
 
 
-    #Ok, we are no more an incident, if no news checks
-    #overide the incident state, we came back to old
+    #Ok, we are no more an impact, if no news checks
+    #overide the impact state, we came back to old
     #states
-    def unset_incident_state(self):
-        if not self.state_changed_since_incident:
-            self.state = self.state_before_incident
-            self.state_id = self.state_id_before_incident
+    def unset_impact_state(self):
+        if not self.state_changed_since_impact:
+            self.state = self.state_before_impact
+            self.state_id = self.state_id_before_impact
             #print "Reverting ME %s states to %s %s" % (self.get_dbg_name(), self.state, self.state_id)
     
 
@@ -407,16 +407,16 @@ class Host(SchedulingItem):
         self.last_state_update = now
 
         #we should put in last_state the good last state:
-        #if not just change the state by an problem/incident
+        #if not just change the state by an problem/impact
         #we can take current state. But if it's the case, the
-        #real old state is self.state_before_incident (it's teh TRUE
+        #real old state is self.state_before_impact (it's teh TRUE
         #state in fact)
-        if self.state_changed_since_incident:
+        if self.state_changed_since_impact:
             #print "Me %s take standard state %s" % (self.get_dbg_name(), self.state)
             self.last_state = self.state
         else:
-            #print "Me %s take incident state %s and not %s" % (self.get_dbg_name(), self.state_before_incident, self.state)
-            self.last_state = self.state_before_incident
+            #print "Me %s take impact state %s and not %s" % (self.get_dbg_name(), self.state_before_impact, self.state)
+            self.last_state = self.state_before_impact
         
         if status == 0:
             self.state = 'UP'
