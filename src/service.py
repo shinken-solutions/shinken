@@ -169,6 +169,7 @@ class Service(SchedulingItem):
         'source_problems' : {'default' : []}, # list of problems taht make us an incident
         'incidents' : {'default' : []}, #list of the incident I'm the cause of
         'state_before_incident' : {'default' : 0}, #keep a trace of the old state before being an incident
+        'state_id_before_incident' : {'default' : 0}, #keep a trace of the old state id before being an incident
         'state_changed_since_incident' : {'default' : False}, #if teh state change, we know so we do not revert it
         }
 
@@ -329,12 +330,46 @@ class Service(SchedulingItem):
         pass
 
 
+    #We just go an incident, so we go unreachable
+    def set_incident_state(self):
+        #Keep a trace of the old state (problem came back before
+        #a new checks)
+        self.state_before_incident = self.state
+        self.state_id_before_incident = self.state_id
+        #this flag will know if we overide the incident state
+        self.state_changed_since_incident = False
+        self.state = 'UNKNOWN'#exit code UNDETERMINED
+        self.state_id = 3
+        #self.last_time_down = int(self.last_state_update)
+        #state_code = 'd'
+        #print "Setting my ME %s incident states to %s %s" % (self.get_dbg_name(), self.state, self.state_id)
+
+
+    #Ok, we are no more an incident, if no news checks
+    #overide the incident state, we came back to old
+    #states
+    def unset_incident_state(self):
+        if not self.state_changed_since_incident:
+            self.state = self.state_before_incident
+            self.state_id = self.state_id_before_incident
+            #print "Reverting ME %s states to %s %s" % (self.get_dbg_name(), self.state, self.state_id)
+
+
     #Set state with status return by the check
     #and update flapping state
     def set_state_from_exit_status(self, status):
         now = time.time()
         self.last_state_update = now
-        self.last_state = self.state
+
+        #we should put in last_state the good last state:
+        #if not just change the state by an problem/incident
+        #we can take current state. But if it's the case, the
+        #real old state is self.state_before_incident (it's teh TRUE
+        #state in fact)
+        if not self.state_changed_since_incident:
+            self.last_state = self.state
+        else:
+            self.last_state = self.state_before_incident
         
         if status == 0:
             self.state = 'OK'

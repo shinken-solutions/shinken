@@ -118,7 +118,7 @@ class SchedulingItem(Item):
     #incidents
     def set_myself_as_problem(self):
         now = time.time()        
-        print "ME %s is now a PROBLEM" % self.get_dbg_name()
+        #print "ME %s is now a PROBLEM" % self.get_dbg_name()
         self.is_problem = True
         #we should warn potentials incident of our problem
         #and they should be cool to register them so I've got
@@ -130,25 +130,25 @@ class SchedulingItem(Item):
                     #now check if we should bailout because of a
                     #not good timeperiod for dep
                     if tp is None or tp.is_time_valid(now):
-                        print "I can call %s for registering me as a problem" % incident.get_dbg_name()
+                        #print "I can call %s for registering me as a problem" % incident.get_dbg_name()
                         new_incidents = incident.register_a_problem(self)
                         self.incidents.extend(new_incidents)
                         #Make element unique in this list
                         self.incidents = list(set(self.incidents))
         #DBG:
-        print "Finally, ME %s got incidents:" % self.get_dbg_name()
-        for incident in self.incidents:
-            print incident.get_dbg_name()
+        #print "Finally, ME %s got incidents:" % self.get_dbg_name()
+        #for incident in self.incidents:
+        #    print incident.get_dbg_name()
 
 
     #Look for my incidents, and remove me from theirs problems list
     def no_more_a_problem(self):
         if self.is_problem:
-            print "Me %s is no more a problem! Cool" % self.get_dbg_name()
+            #print "Me %s is no more a problem! Cool" % self.get_dbg_name()
             self.is_problem = False
             #we warn incidents that we are no more a problem
             for incident in self.incidents:
-                print "I'm deregistring from incident %s" % incident.get_dbg_name()
+                #print "I'm deregistring from incident %s" % incident.get_dbg_name()
                 incident.deregister_a_problem(self)
                 
             #we can just drop our incidents list
@@ -160,18 +160,27 @@ class SchedulingItem(Item):
     #go below if the problem is not a real one for me
     #like If I've got multiple parents for examples
     def register_a_problem(self, pb):
-        self.is_incident = self.is_no_action_dependant()
-        print "Is me %s an incident? %s" % (self.get_dbg_name(), self.is_incident)
+        was_an_incident = self.is_incident
+        #Our father already look of he impacts us. So if we are here,
+        #it's that we really are impacted
+        self.is_incident = True
+        #print "Is me %s an incident? %s" % (self.get_dbg_name(), self.is_incident)
         #TODO : put as incident so put good status
         
         incidents = []
         #Ok, if we are incidented, we can add it in our
         #problem list
+        #TODO : remove this unused check
         if self.is_incident:
             #Maybe I was a problem myself, now I can say : not my fault!
             if self.is_problem:
-                print "I was a problem, but now me %s is a simple incident! Cool" % self.get_dbg_name()
+                #print "I was a problem, but now me %s is a simple incident! Cool" % self.get_dbg_name()
                 self.no_more_a_problem()
+
+            #Ok, we are now an incident, we should take the good state
+            #but only when we just go in incident state
+            if not was_an_incident:
+                self.set_incident_state()
 
             #Ok now we can be a simple incident
             incidents.append(self)
@@ -179,22 +188,24 @@ class SchedulingItem(Item):
                 self.source_problems.append(pb)
             #we should send this problem to all potential incident that
             #depend on us
+            #print "Guys depending on me:"
             for (incident, status, dep_type, tp) in self.act_depend_of_me:
+                #print "Potential incident :", incident.get_dbg_name(), status, dep_type, tp
                 #Check if the status is ok for impact
                 for s in status:
                     if self.is_state(s):
                         #now check if we should bailout because of a
                         #not good timeperiod for dep
                         if tp is None or tp.is_time_valid(now):
-                            print "I can call %s for registering a root problem (%s)" % (incident.get_dbg_name(), pb.get_dbg_name())
+                            #print "I can call %s for registering a root problem (%s)" % (incident.get_dbg_name(), pb.get_dbg_name())
                             new_incidents = incident.register_a_problem(pb)
                             incidents.extend(new_incidents)
 
         #now we return all incidents (can be void of course)
         #DBG
-        print "At my level, I raised incidents :"
-        for i in incidents:
-            print i.get_dbg_name()
+        #print "At my level, I raised incidents :"
+        #for i in incidents:
+        #    print i.get_dbg_name()
         #DBG
         return incidents
 
@@ -203,10 +214,17 @@ class SchedulingItem(Item):
     #and check if we are still 'incidented'. It's not recursif because problem
     #got the lsit of all its incidents
     def deregister_a_problem(self, pb):
+        #print "We are asking ME %s to remove a pb %s from %s" % (self.get_dbg_name(), pb.get_dbg_name(), self.source_problems)
         self.source_problems.remove(pb)
-        self.is_incident = self.is_no_action_dependant()
-        print "Is me %s is still an incident? : %s" % (self.get_dbg_name(), self.is_incident)
-        #TODO : back as incident so put good status
+
+        #For know if we are still an incident, maybe our dependancies
+        #are not aware of teh remove of the incident state because it's not ordered
+        #so we can just look at if we still have some problem in our list
+        if len(self.source_problems) == 0:
+            self.is_incident = False
+            #No more an incident, we can unset the incident state
+            self.unset_incident_state()
+        #print "Is me %s is still an incident? : %s" % (self.get_dbg_name(), self.is_incident)
 
 
     #When all dep are resolved, this function say if
@@ -254,6 +272,7 @@ class SchedulingItem(Item):
                 if True in dep_match:#the parent match a case, so he is down
                     p_is_down = True
                 parent_is_down.append(p_is_down)
+
         #if a parent is not down, no dep can explain the pb
         if False in parent_is_down:
             return
@@ -456,7 +475,10 @@ class SchedulingItem(Item):
             #DBG
             print "DBG ERROR about time: ", c.check_time, c.t_to_go, c.ref.get_name()
 
+        #Ok, the first check is done
         self.has_been_checked = 1
+
+        #Now get data from check
         self.execution_time = c.execution_time
         self.last_chk = c.check_time
         self.output = c.output
@@ -495,6 +517,10 @@ class SchedulingItem(Item):
 
         self.set_state_from_exit_status(c.exit_status)
 
+        #we change the state, do whatever we are or not in
+        #an incident mode, we can put it
+        self.state_changed_since_incident = True
+
         #The check is consume, uptade the in_checking propertie
         self.remove_in_progress_check(c)
 
@@ -511,6 +537,7 @@ class SchedulingItem(Item):
         
         #Use to know if notif is raise or not
         no_action = False
+        
         #C was waitdep, but now all dep are resolved, so check for deps
         if c.status == 'waitdep':
             if c.depend_on_me != []:
