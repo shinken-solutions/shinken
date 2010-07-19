@@ -96,7 +96,7 @@ class Downtime:
             self.real_end_time = now + self.duration
         if self.ref.scheduled_downtime_depth == 0:
             self.ref.raise_enter_downtime_log_entry()
-            res.extend(self.ref.create_notifications('DOWNTIMESTART'))
+            self.ref.create_notifications('DOWNTIMESTART')
         self.ref.scheduled_downtime_depth += 1
         self.ref.in_scheduled_downtime = True
         for dt in self.activate_me:
@@ -113,7 +113,7 @@ class Downtime:
             self.ref.scheduled_downtime_depth -= 1
             if self.ref.scheduled_downtime_depth == 0:
                 self.ref.raise_exit_downtime_log_entry()
-                res.extend(self.ref.create_notifications('DOWNTIMEEND'))
+                self.ref.create_notifications('DOWNTIMEEND')
                 self.ref.in_scheduled_downtime = False
         else:
             #This was probably a flexible downtime which was not triggered
