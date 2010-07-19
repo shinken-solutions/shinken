@@ -89,6 +89,8 @@ class TestConfig(unittest.TestCase):
                 obj.update_in_checking()
                 self.fake_check(obj, exit_status, output)
             self.sched.consume_results()
+            self.sched.get_new_actions()
+            self.sched.get_new_broks()
             self.worker_loop()
             for ref in reflist:
                 (obj, exit_status, output) = ref
@@ -109,7 +111,6 @@ class TestConfig(unittest.TestCase):
         self.show_actions()
         #print "------------ worker loop new ----------------"
         for a in actions:
-            #print "---> fake return of action", a.id
             a.status = 'inpoller'
             a.check_time = time.time()
             a.exit_status = 0

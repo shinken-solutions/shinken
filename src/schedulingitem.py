@@ -328,10 +328,11 @@ class SchedulingItem(Item):
                 #if the update is 'fresh', do not raise dep,
                 #cached_check_horizon = cached_service_check_horizon for service
                 if dep.last_state_update < now - cls.cached_check_horizon:
-                    c = dep.launch_check(now, ref_check)
-                    checks.append(c)
+                    i = dep.launch_check(now, ref_check)
+                    if i != None:
+                        checks.append(i)
                 else:
-                    print "**************** The state is FRESH", dep.host_name, time.asctime(time.localtime(dep.last_state_update))
+                    print "DBG: **************** The state is FRESH", dep.host_name, time.asctime(time.localtime(dep.last_state_update))
         return checks
 
 
@@ -504,21 +505,12 @@ class SchedulingItem(Item):
             c.status = 'waitdep'
             #Make sure the check know about his dep
             #C is my check, and he wants dependancies
-            checks = self.raise_dependancies_check(c)
-            to_del = []
-            for check in checks:
-                #C is a int? Ok, in fact it's a check that is
-                #already in progress, so we do not need to return it to scheduler
-                if isinstance(check, int):
-                    c.depend_on.append(check)
-                    to_del.append(check)
-                else:
-                    #We get a new check, scheduler must be warning about it to folow it
-                    #print c.id, self.get_name()," I depend on check", check.id
-                    c.depend_on.append(check.id)
-            for i in to_del:
-                checks.remove(i)
-            self.actions.extend(checks)
+            checks_id = self.raise_dependancies_check(c)
+            for check_id in checks_id:
+                #Get checks_id of dep
+                c.depend_on.append(check_id)
+            #Ok, no more need because checks are not
+            #take by host/service, and not returned
 
         self.set_state_from_exit_status(c.exit_status)
 
@@ -874,6 +866,7 @@ class SchedulingItem(Item):
 
 
     #return a check to check the host/service
+    #and return id of the check
     def launch_check(self, t, ref_check = None):
         c = None
         cls = self.__class__
@@ -909,4 +902,6 @@ class SchedulingItem(Item):
         #so scheduler can take it
         if c != None:
             self.actions.append(c)
-        #return c
+            return c.id
+        #None mean I already take it into account
+        return None
