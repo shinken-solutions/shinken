@@ -117,6 +117,7 @@ class Host(SchedulingItem):
         'state_type_id' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result']},
         'current_event_id' : {'default' : 0, 'fill_brok' : ['full_status']},
         'last_event_id' : {'default' : 0, 'fill_brok' : ['full_status']},
+        'last_state' : {'default' : 'PENDING', 'fill_brok' : ['full_status']},
         'last_state_id' : {'default' : 0, 'fill_brok' : ['full_status']},
         'last_state_change' : {'default' : time.time(), 'fill_brok' : ['full_status']},
         'last_hard_state_change' : {'default' : time.time(), 'fill_brok' : ['full_status']},
@@ -169,13 +170,15 @@ class Host(SchedulingItem):
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
         'in_scheduled_downtime' : {'default' : False},
         'in_scheduled_downtime_during_last_check' : {'default' : False},
+        'actions' : {'default' : []}, #put here checks and notif raised
+        'broks' : {'default' : []}, #and here broks raised
         
         #Issue/impact part
         'is_problem' : {'default' : False},
         'is_impact' : {'default' : False},
         'source_problems' : {'default' : []}, # list of problems taht make us an impact
         'impacts' : {'default' : []}, #list of the impact I'm the cause of
-        'state_before_impact' : {'default' : 0}, #keep a trace of the old state before being an impact
+        'state_before_impact' : {'default' : 'PENDING'}, #keep a trace of the old state before being an impact
         'state_id_before_impact' : {'default' : 0}, #keep a trace of the old state id before being an impact
         'state_changed_since_impact' : {'default' : False}, #if teh state change, we know so we do not revert it
         }

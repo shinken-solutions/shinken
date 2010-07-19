@@ -386,8 +386,8 @@ class SchedulingItem(Item):
             self.raise_no_next_check_log_entry()
             return None
 
-        #Get the command to launch
-        return self.launch_check(self.next_chk)
+        #Get the command to launch, and put it in queue
+        self.launch_check(self.next_chk)
 
 
     def remove_in_progress_check(self, c):
@@ -423,34 +423,34 @@ class SchedulingItem(Item):
     def get_event_handlers(self):
         cls = self.__class__
         if self.event_handler == None or not self.event_handler_enabled or not cls.enable_event_handlers:
-            return []
+            return
 
         print self.event_handler.__dict__
-        events = []
         m = MacroResolver()
         data = self.get_data_for_event_handler()
         cmd = m.resolve_command(self.event_handler, data)
         e = EventHandler(cmd, timeout=cls.event_handler_timeout)
-        print "Event handler call created"
-        print e.__dict__
+        print "DBG: Event handler call created"
+        print "DBG: ",e.__dict__
         self.raise_event_handler_log_entry(self.event_handler)
-        events.append(e)
-        return events
+
+        #ok we can put it in our temp action queue
+        self.actions.append(e)
 
 
     #Whenever a non-ok hard state is reached, we must check whether this
     #host/service has a flexible downtime waiting to be activated
     def check_for_flexible_downtime(self):
-        res = []
         status_updated = False
         for dt in self.downtimes:
             #activate flexible downtimes (do not activate triggered downtimes)
             if dt.fixed == False and dt.is_in_effect == False and dt.start_time <= self.last_chk and self.state_id != 0 and dt.trigger_id == 0:
-                res.extend(dt.enter()) # returns downtimestart notifications
+                n = dt.enter() # returns downtimestart notifications
+                if n is not None:
+                    self.actions.append(n)
                 status_updated = True
         if status_updated == True:
-            res.append(self.get_update_status_brok())
-        return res
+            self.broks.append(self.get_update_status_brok())
 
 
     #consume a check return and send action in return
@@ -513,7 +513,7 @@ class SchedulingItem(Item):
                     c.depend_on.append(check.id)
             for i in to_del:
                 checks.remove(i)
-            return checks
+            self.actions.extend(checks)
 
         self.set_state_from_exit_status(c.exit_status)
 
@@ -552,7 +552,9 @@ class SchedulingItem(Item):
             #and we need to overide the state_id
             self.check_and_set_unreachability()
 
-        res = []
+        #no more return of actions or broks
+        #but put them in a queue
+        #res = []
 
         #OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
@@ -574,7 +576,7 @@ class SchedulingItem(Item):
                 self.add_attempt()
                 self.raise_alert_log_entry()
                 #Eventhandler gets OK;SOFT;++attempt, no notification needed
-                res.extend(self.get_event_handlers())
+                self.get_event_handlers()
                 #Internally it is a hard OK
                 self.state_type = 'HARD'
                 self.attempt = 1
@@ -585,8 +587,8 @@ class SchedulingItem(Item):
                 #Ok, so current notifications are not need, we 'zombie' thems
                 self.remove_in_progress_notifications()
                 if not no_action:
-                    res.extend(self.create_notifications('RECOVERY'))
-                res.extend(self.get_event_handlers())
+                    self.create_notifications('RECOVERY')
+                self.get_event_handlers()
                 #Internally it is a hard OK
                 self.state_type = 'HARD'
                 self.attempt = 1
@@ -594,7 +596,6 @@ class SchedulingItem(Item):
                 #DBG: PROBLEM/IMPACT management
                 #I'm no more a problem if I was one
                 self.no_more_a_problem()
-                
 
         #Volatile part
         #Only for service
@@ -606,12 +607,12 @@ class SchedulingItem(Item):
             #status != 0 so add a log entry (before actions that can also raise log
             #it is smarter to log error before notification)
             self.raise_alert_log_entry()
-            res.extend(self.check_for_flexible_downtime())
+            self.check_for_flexible_downtime()
             self.remove_in_progress_notifications()
             if not no_action:
-                res.extend(self.create_notifications('PROBLEM'))
+                self.create_notifications('PROBLEM')
             #Ok, event handlers here too
-            res.extend(self.get_event_handlers())
+            self.get_event_handlers()
 
             #DBG : can raise a problem...
             #PROBLEM/IMPACT
@@ -627,11 +628,11 @@ class SchedulingItem(Item):
                 self.state_type = 'HARD'
                 self.raise_alert_log_entry()
                 self.remove_in_progress_notifications()
-                res.extend(self.check_for_flexible_downtime())
+                self.check_for_flexible_downtime()
                 if not no_action:
-                    res.extend(self.create_notifications('PROBLEM'))
+                    self.create_notifications('PROBLEM')
                 #Oh? This is the typical go for a event handler :)
-                res.extend(self.get_event_handlers())
+                self.get_event_handlers()
 
                 #DBG : can raise a problem...
                 #PROBLEM/IMPACT
@@ -646,7 +647,7 @@ class SchedulingItem(Item):
                 self.attempt = 1
                 self.state_type = 'SOFT'
                 self.raise_alert_log_entry()
-                res.extend(self.get_event_handlers())
+                self.get_event_handlers()
 
         #If no OK in a no OK : if hard, still hard, if soft,
         #check at self.max_check_attempts
@@ -663,11 +664,11 @@ class SchedulingItem(Item):
                     #on soft states which does make sense. If this becomes
                     #the default behavior, just move the following line
                     #into the else-branch below.
-                    res.extend(self.check_for_flexible_downtime())
+                    self.check_for_flexible_downtime()
                     if not no_action:
-                        res.extend(self.create_notifications('PROBLEM'))
+                        self.create_notifications('PROBLEM')
                     #So event handlers here too
-                    res.extend(self.get_event_handlers())
+                    self.get_event_handlers()
 
                     #DBG : can raise a problem...
                     #PROBLEM/IMPACT
@@ -679,14 +680,14 @@ class SchedulingItem(Item):
                 else:
                     self.raise_alert_log_entry()
                     #eventhandler is launched each time during the soft state
-                    res.extend(self.get_event_handlers())
+                    self.get_event_handlers()
             else:
                 #Send notifications whenever the state has changed. (W -> C)
                 if self.state != self.last_state:
                     self.raise_alert_log_entry()
                     self.remove_in_progress_notifications()
                     if not no_action:
-                        res.extend(self.create_notifications('PROBLEM'))
+                        self.create_notifications('PROBLEM')
                         
                     #DBG : can raise a problem...
                     #PROBLEM/IMPACT
@@ -703,7 +704,7 @@ class SchedulingItem(Item):
                     #are possible again. send an alert immediately
                     self.remove_in_progress_notifications()
                     if not no_action:
-                        res.extend(self.create_notifications('PROBLEM'))
+                        self.create_notifications('PROBLEM')
 
         #Reset this flag. If it was true, actions were already taken
         self.in_scheduled_downtime_during_last_check == False
@@ -714,11 +715,8 @@ class SchedulingItem(Item):
         else:
             self.state_type_id = 0
 
-        res.append(self.get_check_result_brok())
+        self.broks.append(self.get_check_result_brok())
 
-        # res is filled with eventhandler and notification
-        # now would be the time to add self.oscp...
-        return res
 
 
     #Called by scheduler when a notification is ok to be send
@@ -787,7 +785,7 @@ class SchedulingItem(Item):
             # If notifications are blocked on the host/service level somehow
             # and repeated notifications are not configured,
             # we can silently drop this one
-            return []
+            return
 
         if type == 'PROBLEM':
             # Create the notification with an incremented notification_number.
@@ -805,8 +803,10 @@ class SchedulingItem(Item):
         n = Notification(type, 'scheduled', 'VOID', None, self, None, t, \
             timeout=cls.notification_timeout, \
             notif_nb=next_notif_nb)
+        #Keep a trace in our notifications queue
         self.notifications_in_progress[n.id] = n
-        return [n]
+        #and put it in the temp queue for scheduler
+        self.actions.append(n)
 
 
     # In create_notifications we created a notification "template". When it's
@@ -899,5 +899,9 @@ class SchedulingItem(Item):
             self.checks_in_progress.append(c)
             #print self.get_name()+" we ask me for a check" + str(c.id)
         self.update_in_checking()
-        #We need to return the check for scheduling adding
-        return c
+
+        #We need to put this new check in our actions queue
+        #so scheduler can take it
+        if c != None:
+            self.actions.append(c)
+        #return c

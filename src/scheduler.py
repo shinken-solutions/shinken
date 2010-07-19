@@ -50,17 +50,19 @@ class Scheduler:
         #TODO : at load, change value by configuration one (like reaper time, etc)
         self.recurrent_works = {
             0 : (self.update_downtimes_and_comments, 1),
-            1 : (self.schedule, 1),
-            2 : (self.consume_results , 1),
-            3 : (self.delete_zombie_checks, 1),
-            4 : (self.delete_zombie_actions, 1),
+            1 : (self.schedule, 1), #just schedule
+            2 : (self.consume_results , 1), #incorpore checks and dependancies
+            3 : (self.get_new_actions, 1), #now get the news actions (checks, notif) raised
+            4 : (self.get_new_broks, 1), #and broks
+            5 : (self.delete_zombie_checks, 1),
+            6 : (self.delete_zombie_actions, 1),
             #3 : (self.delete_unwanted_notifications, 1),
-            5 : (self.check_freshness, 10),
-            6 : (self.clean_caches, 1),
-            7 : (self.update_retention_file, 3600),
-            8 : (self.check_orphaned, 60),
+            7 : (self.check_freshness, 10),
+            8 : (self.clean_caches, 1),
+            9 : (self.update_retention_file, 3600),
+            10 : (self.check_orphaned, 60),
             #For NagVis like tools : udpdate our status every 10s
-            9 : (self.get_and_register_update_program_status_brok, 10) 
+            11 : (self.get_and_register_update_program_status_brok, 10) 
             }
 
         #stats part
@@ -544,19 +546,11 @@ class Scheduler:
         
         #Then we consume thems
         #print "**********Consume*********"
-        checks_to_add = []
         for c in self.checks.values():
             if c.status == 'waitconsume':
                 item = c.ref
-                actions = item.consume_result(c)
+                item.consume_result(c)
 
-                #Now we manage the actions we must do
-                for a in actions:
-                    if isinstance(a, Check):
-                        #print "*******Adding dep checks*****"
-                        checks_to_add.append(a)
-                    else:
-                        self.add(a)
 
         #All 'finished' checks (no more dep) raise checks they depends on
         for c in self.checks.values():
@@ -567,22 +561,12 @@ class Scheduler:
                 #REMOVE OLD DEP CHECL -> zombie
                 c.status = 'zombie'
 
-        #Now, reintegr dep checks
+        #Now, reinteger dep checks
         for c in self.checks.values():
             if c.status == 'waitdep' and len(c.depend_on) == 0:
                 item = c.ref
-                actions = item.consume_result(c)
+                item.consume_result(c)
 
-                #Now we manage the actions we must do
-                for a in actions:
-                    if isinstance(a, Check):
-                        #print "*******Adding dep checks*****"
-                        checks_to_add.append(a)
-                    else:
-                        self.add(a)
-        if checks_to_add != []:
-            for c in checks_to_add:
-                self.add(c)
 
 
     #Called every 1sec to delete all checks in a zombie state
@@ -609,13 +593,6 @@ class Scheduler:
         #une petite tape dans le doc et tu t'en vas, merci...
         for id in id_to_del:
             del self.actions[id] # ZANKUSEN!
-
-
-    #Use to update the status file.
-    def update_status_file(self):
-        #TODO : OPTIMIZE it because it sucks
-        pass
-        #self.status_file.create_or_update()
 
 
     #Check for downtimes start and stop, and register 
@@ -659,10 +636,32 @@ class Scheduler:
         #ask for service and hosts their next check
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
-                c = i.schedule()
-                if c is not None:
-                    self.add(c)
+                i.schedule()
                     
+
+    #Main actions reaper function : it get all new checks,
+    #notification and event handler from hosts and services
+    def get_new_actions(self):
+        #ask for service and hosts their next check
+        for type_tab in [self.services, self.hosts]:
+            for i in type_tab:
+                for a in i.actions:
+                    self.add(a)
+                #We take all, we can clear it
+                i.actions = []
+
+
+    #Same the just upper, but for broks
+    def get_new_broks(self):
+        #ask for service and hosts their broks waiting
+        #be eaten
+        for type_tab in [self.services, self.hosts]:
+            for i in type_tab:
+                for b in i.broks:
+                    self.add(b)
+                #We take all, we can clear it
+                i.broks = []
+
 
     #Raise checks for no fresh states for services and hosts
     def check_freshness(self):
