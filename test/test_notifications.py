@@ -64,7 +64,10 @@ class TestConfig(unittest.TestCase):
     def fake_check(self, ref, exit_status, output="OK"):
         print "fake", ref
         now = time.time()
-        check = ref.schedule()
+        ref.schedule()
+        #now checks are schedule and we get them in
+        #the action queue
+        check = ref.actions.pop()
         self.sched.add(check)  # check is now in sched.checks[]
         # fake execution
         check.check_time = now

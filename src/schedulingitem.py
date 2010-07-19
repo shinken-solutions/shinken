@@ -181,6 +181,9 @@ class SchedulingItem(Item):
             #but only when we just go in impact state
             if not was_an_impact:
                 self.set_impact_state()
+                #And we register a new broks for update status
+                b = self.get_update_status_brok()
+                self.broks.append(b)
 
             #Ok now we can be a simple impact
             impacts.append(self)
@@ -224,7 +227,9 @@ class SchedulingItem(Item):
             self.is_impact = False
             #No more an impact, we can unset the impact state
             self.unset_impact_state()
-        #print "Is me %s is still an impact? : %s" % (self.get_dbg_name(), self.is_impact)
+            #And we register a new broks for update status
+            b = self.get_update_status_brok()
+            self.broks.append(b)
 
 
     #When all dep are resolved, this function say if
