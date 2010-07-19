@@ -55,9 +55,9 @@ class SchedulingItem(Item):
         r = 0.0
         i = 0
         for b in self.flapping_changes:
-           i += 1
-           if b:
-               r += i*(1.2-0.8)/flap_history + 0.8
+            i += 1
+            if b:
+                r += i*(1.2-0.8)/flap_history + 0.8
         r = r / flap_history
 
         #Now we get the low_flap_threshold and high_flap_threshold values
@@ -160,12 +160,12 @@ class SchedulingItem(Item):
     #go below if the problem is not a real one for me
     #like If I've got multiple parents for examples
     def register_a_problem(self, pb):
+        now = time.time()
         was_an_impact = self.is_impact
         #Our father already look of he impacts us. So if we are here,
         #it's that we really are impacted
         self.is_impact = True
         #print "Is me %s an impact? %s" % (self.get_dbg_name(), self.is_impact)
-        #TODO : put as impact so put good status
         
         impacts = []
         #Ok, if we are impacted, we can add it in our
@@ -311,7 +311,7 @@ class SchedulingItem(Item):
         for (dep, status, type, tp) in self.chk_depend_of:
             if tp is None or tp.is_time_valid(now):
                 if dep.do_i_raise_dependency(status):
-                        return True
+                    return True
         return False
 
 
@@ -466,7 +466,6 @@ class SchedulingItem(Item):
     #is_in_scheduled_downtime : no notification
     #is_volatile : notif immediatly (service only)
     def consume_result(self, c):
-        now = time.time()
         OK_UP = self.__class__.ok_up #OK for service, UP for host
         
         #We check for stalking if necessery
@@ -819,7 +818,6 @@ class SchedulingItem(Item):
             # only master notifications can be split up
             return []
         if n.type == 'RECOVERY':
-            now = time.time()
             if self.first_notification_delay != 0 and len(self.notified_contacts) == 0:
                 # Recovered during first_notification_delay. No notifications
                 # have been sent yet, so we keep quiet

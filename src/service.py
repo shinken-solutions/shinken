@@ -519,13 +519,13 @@ class Service(SchedulingItem):
     def manage_stalking(self, c):
         need_stalk = False
         if c.status == 'waitconsume':
-            if c.exit_status==0 and 'o' in self.stalking_options:
+            if c.exit_status == 0 and 'o' in self.stalking_options:
                 need_stalk = True
-            elif c.exit_status==1 and 'w' in self.stalking_options:
+            elif c.exit_status == 1 and 'w' in self.stalking_options:
                 need_stalk = True
-            elif c.exit_status==2 and 'c' in self.stalking_options:
+            elif c.exit_status == 2 and 'c' in self.stalking_options:
                 need_stalk = True
-            elif c.exit_status==3 and 'u' in self.stalking_options:
+            elif c.exit_status == 3 and 'u' in self.stalking_options:
                 need_stalk = True
             if c.output == self.output:
                 need_stalk = False
