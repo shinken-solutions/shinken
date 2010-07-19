@@ -680,11 +680,11 @@ class Scheduler:
         for c in self.checks.values():
             if c.status == 'inpoller' and c.t_to_go < now - 300:
                 Log().log("Warning : the results of check %d never came back. I'm reenable it for polling" % c.id)
-                c.status == 'scheduled'
+                c.status = 'scheduled'
         for a in self.actions.values():
             if a.status == 'inpoller' and a.t_to_go < now - 300:
                 Log().log("Warning : the results of action %d never came back. I'm reenable it for polling" % a.id)
-                a.status == 'scheduled'
+                a.status = 'scheduled'
 
 
     #Main function
@@ -712,7 +712,7 @@ class Scheduler:
             # 'foreign' event loop
             ins,outs,exs = select.select(socks,[],[],timeout)
             if ins != []:
-		for s in socks:
+                for s in socks:
                     if s in ins:
                         #If FIFO, read external command
                         #if s == self.fifo:
@@ -726,7 +726,7 @@ class Scheduler:
                         timeout = timeout - diff
                         break    # no need to continue with the for loop
             else: #Timeout
-		timeout = 1.0
+                timeout = 1.0
                 ticks += 1
                 #Do reccurent works like schedule, consume
                 #delete_zombie_checks
@@ -795,4 +795,4 @@ class Scheduler:
 
 
             if timeout < 0:
-		timeout = 1.0
+                timeout = 1.0
