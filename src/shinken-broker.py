@@ -42,7 +42,8 @@ from daemon import Daemon
 from util import to_int, to_bool
 from module import Module, Modules
 from modulesmanager import ModulesManager
-
+from log import Log
+from brok import Brok
 
 #Load to be used by modules
 from resultmodulation import Resultmodulation
@@ -94,7 +95,6 @@ class IForArbiter(Pyro.core.ObjBase):
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
 		print "We have our schedulers :", self.schedulers
-		print "TOTO"
 		for arb_id in conf['arbiters'] :
 			a = conf['arbiters'][arb_id]
 			self.arbiters[arb_id] = a
@@ -133,7 +133,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
 	#Use by the Arbiter to push broks to broker
 	def push_broks(self, broks):
-		self.app.add_broks_to_queue(broks)
+		self.app.add_broks_to_queue(broks.valeus())
 		return True
 
 
@@ -180,6 +180,10 @@ class Broker(Satellite):
 		#exists, a dummy function otherwise
 		self.set_exit_handler()
 
+                #Log init
+		self.log = Log()
+		self.log.load_obj(self)
+
 		#The config reading part
 		self.config_file = config_file
 		#Read teh config file if exist
@@ -202,7 +206,7 @@ class Broker(Satellite):
 		if os.name != 'nt':
 			self.change_user(insane)
 		else:
-			print "Sorry, you can't change user on this system"
+			Log().log("Sorry, you can't change user on this system")
 
                 #Now the daemon part if need
 		if is_daemon:
@@ -223,16 +227,31 @@ class Broker(Satellite):
 		self.modules = []
 
 		#All broks to manage
-		self.broks = []
+		self.broks = [] #broks to manage
+		#broks raised this turn and that need to be put in self.broks
+		self.broks_internal_raised = [] 
+
 
 
 	#Manage signal function
 	#TODO : manage more than just quit
 	#Frame is just garbage
 	def manage_signal(self, sig, frame):
-		print "\nExiting with signal", sig
+		Log().log("\nExiting with signal %s" % sig)
 		self.daemon.shutdown(True)
 		sys.exit(0)
+
+
+        #Schedulers have some queues. We can simplify call by adding
+        #elements into the proper queue just by looking at their type
+        #Brok -> self.broks
+	#TODO : better tag ID?
+	def add(self, elt):
+		if isinstance(elt, Brok):
+                        #For brok, we TAG brok with our instance_id
+			elt.data['instance_id'] = 0
+			self.broks_internal_raised.append(elt)
+			return
 
 
 	#initialise or re-initialise connexion with scheduler or
@@ -243,7 +262,7 @@ class Broker(Satellite):
 		elif type == 'arbiter':
 			links = self.arbiters
 		else:
-			print 'Type unknown for connexion! %s' % type
+			Log().log('DBG: Type unknown for connexion! %s' % type)
 			return
 		
 		if type == 'scheduler':
@@ -277,18 +296,18 @@ class Broker(Satellite):
 					links[id]['con'].fill_initial_broks()
 			links[id]['running_id'] = new_run_id			
 		except Pyro.errors.ProtocolError, exp:
-			print exp
+			Log().log(str(exp))
 			return
 		except Pyro.errors.NamingError, exp:
-			print "%s is not initilised : %s" %(type, exp)
+			Log().log("%s is not initilised : %s" % (type, str(exp)))
 			links[id]['con'] = None
 			return
 		except KeyError , exp:
-                        print "%s is not initilised %s" % (type, exp)
+			Log().log("%s is not initilised : %s" % (type, str(exp)))
                         links[id]['con'] = None
                         return
 
-		print "Connexion OK"
+		Log().log("Connexion OK")
 
 
 	#Get a brok. Our role is to put it in the modules
@@ -302,7 +321,7 @@ class Broker(Satellite):
 				mod.manage_brok(b)
 			except Exception as exp:
 				print exp.__dict__
-				print "Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),exp)
+				Log().log("Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
 				print "DBG:", type(exp)
 				to_del.append(mod)
 		#Now remove mod that raise an exception
@@ -315,13 +334,37 @@ class Broker(Satellite):
 	def add_broks_to_queue(self, broks):
 		#Ok now put in queue brocks for manage by
 		#internal modules
-		self.broks.extend(broks.values())
+		self.broks.extend(broks)
 		
 		#and for external queues
 		#REF: doc/broker-modules.png (3)
-		for b in broks.values():
+		for b in broks:
 			for q in self.modules_manager.get_external_to_queues():
 				q.put(b)
+
+				
+	#Each turn we get all broks from
+	#self.broks_internal_raised and we put them in
+	#self.broks
+	def interger_internal_broks(self):
+		self.add_broks_to_queue(self.broks_internal_raised)
+		self.broks_internal_raised = []
+
+
+	#Get 'objects' from external modules
+	#from now nobody use it, but it can be useful
+	#for a moduel like livestatus to raise external
+	#commandsfor example
+	def get_objects_from_from_queues(self):
+		for f in self.modules_manager.get_external_from_queues():
+			full_queue = True
+			while full_queue:
+				try:
+					o = f.get(block=False)
+					self.add(o)
+				except Empty :
+					full_queue = False
+				
 
 
 	#We get new broks from schedulers
@@ -332,7 +375,7 @@ class Broker(Satellite):
 		elif type == 'arbiter':
 			links = self.arbiters
 		else:
-			print 'Type unknown for connexion! %s' % type
+			print ' DBG: Type unknown for connexion! %s' % type
 			return
 		
 		#We check for new check in each schedulers and put
@@ -346,7 +389,7 @@ class Broker(Satellite):
 						b.instance_id = links[sched_id]['instance_id']
 
 					#Ok, we can add theses broks to our queues
-					self.add_broks_to_queue(tmp_broks)
+					self.add_broks_to_queue(tmp_broks.values())
 
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id, type=type)
@@ -355,19 +398,19 @@ class Broker(Satellite):
 				#print exp
 				self.pynag_con_init(sched_id, type=type)
 			except Pyro.errors.ProtocolError as exp:
-				print exp
+				Log().log(str(exp))
 				#we reinitialise the ccnnexion to pynag
 				self.pynag_con_init(sched_id, type=type)
                         #scheduler must not #be initialized
 			except AttributeError as exp: 
-				print exp
+				Log().log(str(exp))
                         #scheduler must not have checks
 			except Pyro.errors.NamingError as exp:
-				print exp
+				Log().log(str(exp))
 			# What the F**k? We do not know what happenned,
 			#so.. bye bye :)
 			except Exception,x: 
-				print ''.join(Pyro.util.getPyroTraceback(x))
+				Log().log(''.join(Pyro.util.getPyroTraceback(x)))
 				sys.exit(0)
 
 
@@ -388,11 +431,11 @@ class Broker(Satellite):
                 #Daemon init
 		Pyro.core.initServer()
 
-		print "Port:", self.port
+		Log().log("Opening port: %s" % self.port)
 		self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)
 		#If the port is not free, pyro take an other. I don't like that!
 		if self.daemon.port != self.port:
-			print "Sorry, the port %d was not free" % self.port
+			Log().log("Error : the port %d was not free" % self.port)
 			sys.exit(1)
 		self.uri2 = self.daemon.connect(IForArbiter(self),"ForArbiter")
 
@@ -430,6 +473,10 @@ class Broker(Satellite):
 			#When it push us conf, we reinit connexions
 			self.watch_for_new_conf(0.0)
 			
+			#Maybe the last loop we raised some broks internally
+			#we should interger them in broks
+			self.interger_internal_broks()
+
 			#Now we can get new broks from arbiters in self.broks
 			#self.get_new_broks(type='arbiter')
 			#And from schedulers
@@ -456,6 +503,10 @@ class Broker(Satellite):
 
 		        #Restore the good sense
 			self.broks.reverse()
+
+			#Maybe external modules raised 'objets'
+			#we should get them
+			self.get_objects_from_from_queues()
 			
 			#Maybe we do not have something to do, so we wait a little
 			if len(self.broks) == 0:

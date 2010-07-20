@@ -61,7 +61,7 @@ class Simple_log_broker:
     #Conf from arbiter!
     def init(self):
         self.q = self.properties['to_queue']
-        print "I open the log file"
+        print "I open the log file %s" % self.path
         self.file = open(self.path,'a')
     
 
