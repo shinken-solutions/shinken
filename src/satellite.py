@@ -37,12 +37,14 @@ import sys
 import Pyro.core
 import select
 import cPickle
+import random
 
 from message import Message
 from worker import Worker
 from load import Load
 from daemon import Daemon
-
+from log import Log
+from brok import Brok
 
 #Interface for Arbiter, our big MASTER
 #It put us our conf
@@ -67,7 +69,7 @@ class IForArbiter(Pyro.core.ObjBase):
         for sched_id in conf['schedulers'] :
             already_got = False
             if sched_id in self.schedulers:
-                print "We already got hte conf", sched_id
+                Log().log("We already got the conf %" % sched_id)
                 already_got = True
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
             s = conf['schedulers'][sched_id]
@@ -97,7 +99,7 @@ class IForArbiter(Pyro.core.ObjBase):
         else: #for reactionner, we don't really care about it
             self.app.max_plugins_output_length = 8192
         print "Max output lenght" , self.app.max_plugins_output_length
-        print "We have our schedulers :", self.schedulers
+        Log().log("We have our schedulers : %s" % (str(self.schedulers)))
 
 
     #Arbiter ask us to do not manage a scheduler_id anymore
@@ -141,6 +143,34 @@ class IForArbiter(Pyro.core.ObjBase):
         self.app.have_conf = False
 
 
+#Interface for Brokers
+#They connect here and get all broks (data for brokers)
+#datas must be ORDERED! (initial status BEFORE uodate...)
+class IBroks(Pyro.core.ObjBase):
+    #we keep sched link
+    def __init__(self, app):
+        Pyro.core.ObjBase.__init__(self)
+        self.app = app
+        self.running_id = random.random()
+
+
+    #Broker need to void it's broks?
+    def get_running_id(self):
+        return self.running_id
+
+		
+    #poller or reactionner ask us actions
+    def get_broks(self):
+        #print "We ask us broks"
+        res = self.app.get_broks()
+        return res
+
+
+    #Ping? Pong!
+    def ping(self):
+        return None
+
+
 
 #Our main APP class
 class Satellite(Daemon):
@@ -150,6 +180,10 @@ class Satellite(Daemon):
         #From daemon to manage signal. Call self.manage_signal if
         #exists, a dummy function otherwise
         self.set_exit_handler()
+
+        #Log init
+        self.log = Log()
+        self.log.load_obj(self)
 
         #The config reading part
         self.config_file = config_file
@@ -173,7 +207,7 @@ class Satellite(Daemon):
         if os.name != 'nt':
             self.change_user(insane)
         else:
-            print "Sorry, you can't change user on this system"
+            Log().log("Sorry, you can't change user on this system")
 
 
         #Now the daemon part if need
@@ -197,7 +231,10 @@ class Satellite(Daemon):
         
         #Init stats like Load for workers
         self.wait_ratio = Load(initial_value=1)
-        
+
+        #Keep broks so they can be eaten by a broker
+        self.broks = []
+
 
     #initialise or re-initialise connexion with scheduler
     def pynag_con_init(self, id):
@@ -207,7 +244,7 @@ class Satellite(Daemon):
         if not sched['active']:
             return
 
-        print "Init de connexion with", sched['uri']
+        Log().log("Init de connexion with %s" % sched['uri'])
         running_id = sched['running_id']
         sched['con'] = Pyro.core.getProxyForURI(sched['uri'])
 
@@ -217,17 +254,17 @@ class Satellite(Daemon):
             sched['con']._setTimeout(120)
             new_run_id = sched['con'].get_running_id()
         except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError) as exp:
-            print "Scheduler is not initilised", exp
+            Log().log("Scheduler is not initilised : %s" % exp)
             sched['con'] = None
             return
 
         #The schedulers have been restart : it has a new run_id.
         #So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
-            print "The running id of the scheduler changed, we must clear it's actions"
+            Log().log("The running id of the scheduler changed, we must clear it's actions")
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
-        print "Connexion OK"
+        Log().log("Connexion OK")
 
 
     #Manage action return from Workers
@@ -278,7 +315,7 @@ class Satellite(Daemon):
                 sched['wait_homerun'].clear()
             else:
                 self.pynag_con_init(sched_id)
-                print "Sent failed!"
+                Log().log("Sent failed!")
 
 
 
@@ -287,7 +324,7 @@ class Satellite(Daemon):
     #if he send us something
     #(it can just do a ping)
     def wait_for_initial_conf(self):
-        print "Waiting for initial configuration"
+        Log().log("Waiting for initial configuration")
         timeout = 1.0
         #Arbiter do not already set our have_conf param
         while not self.have_conf :
@@ -326,7 +363,7 @@ class Satellite(Daemon):
                     #so another handle will not make a con_init 
                     if self.have_new_conf:
                         for sched_id in self.schedulers:
-                            print "Init watch_for_new_conf"
+                            Log().log("Init watch_for_new_conf")
                             self.pynag_con_init(sched_id)
                         self.have_new_conf = False
 
@@ -337,7 +374,7 @@ class Satellite(Daemon):
         w = Worker(1, self.s, self.returns_queue, self.processes_by_worker, \
                    mortal=mortal,max_plugins_output_length = self.max_plugins_output_length )
         self.workers[w.id] = w
-        print "Allocating new Worker : ", w.id
+        Log().log("Allocating new Worker : %s" % w.id)
         self.workers[w.id].start()
 
 
@@ -345,7 +382,7 @@ class Satellite(Daemon):
     #TODO : manage more than just quit
     #Frame is just garbage
     def manage_signal(self, sig, frame):
-        print "\nExiting with signal", sig
+        Log().log("\nExiting with signal %s" % sig)
         for w in self.workers.values():
             try:
                 w.terminate()
@@ -357,8 +394,27 @@ class Satellite(Daemon):
             except AssertionError: #In a worker
                 pass
         self.daemon.disconnect(self.interface)
+        self.daemon.disconnect(self.brok_interface)
         self.daemon.shutdown(True)
         sys.exit(0)
+
+
+    #A simple fucntion to add objects in self
+    #like broks in self.broks, etc
+    #TODO : better tag ID?
+    def add(self, elt):
+        if isinstance(elt, Brok):
+            #For brok, we TAG brok with our instance_id
+            elt.data['instance_id'] = 0
+            self.broks.append(elt)
+            return
+
+
+    #Someone ask us our broks. We send them, and clean the queue
+    def get_broks(self):
+        res = self.broks
+        self.broks = []
+        return res
 
 
     #workers are processes, they can die in a numerous of ways
@@ -378,7 +434,7 @@ class Satellite(Daemon):
             #good : we can think having a worker and it's not True
             #So we del it
             if not w.is_alive():
-                print "Warning : the worker %s goes down unexpectly!" % w.id
+                Log().log("Warning : the worker %s goes down unexpectly!" % w.id)
                 #AIM ... Press FIRE ... <B>HEAD SHOT!</B>
                 w.terminate()
                 w.join(timeout=1)
@@ -459,15 +515,17 @@ class Satellite(Daemon):
         #Daemon init
         Pyro.core.initServer()
 
-        print "Port:", self.port
+        Log().log("Opening port: %s" % self.port)
         self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)
 
         #If the port is not free, pyro take an other. I don't like that!
         if self.daemon.port != self.port:
-            print "Sorry, the port %d was not free" % self.port
+            Log().log("Sorry, the port %d was not free" % self.port)
             sys.exit(1)
         self.interface = IForArbiter(self)
         self.uri2 = self.daemon.connect(self.interface,"ForArbiter")
+        self.brok_interface = IBroks(self)
+        self.uri3 = self.daemon.connect(self.brok_interface,"Broks")
 
         #We wait for initial conf
         self.wait_for_initial_conf()
@@ -492,7 +550,7 @@ class Satellite(Daemon):
             if self.have_conf == False:
                 print "Begin wait initial"
                 self.wait_for_initial_conf()
-                print "End wiat initial"
+                print "End wait initial"
                 for sched_id in self.schedulers:
                     print "Init main2"
                     self.pynag_con_init(sched_id)
@@ -534,7 +592,7 @@ class Satellite(Daemon):
                 #must wait more or at least have more workers
                 wait_ratio = self.wait_ratio.get_load()
                 if self.s.qsize() != 0 and wait_ratio < 5*self.polling_interval:
-                    print "I decide to up wait ratio"
+                    Log().log("I decide to up wait ratio")
                     self.wait_ratio.update_load(wait_ratio * 2)
                 else:
                     #Go to self.polling_interval on normal run, if wait_ratio
