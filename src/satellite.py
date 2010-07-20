@@ -233,7 +233,7 @@ class Satellite(Daemon):
         self.wait_ratio = Load(initial_value=1)
 
         #Keep broks so they can be eaten by a broker
-        self.broks = []
+        self.broks = {}
 
 
     #initialise or re-initialise connexion with scheduler
@@ -406,14 +406,14 @@ class Satellite(Daemon):
         if isinstance(elt, Brok):
             #For brok, we TAG brok with our instance_id
             elt.data['instance_id'] = 0
-            self.broks.append(elt)
+            self.broks[elt.id] = elt
             return
 
 
     #Someone ask us our broks. We send them, and clean the queue
     def get_broks(self):
         res = self.broks
-        self.broks = []
+        self.broks.clear()
         return res
 
 

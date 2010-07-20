@@ -161,7 +161,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
 	#Use by the Arbiter to push broks to broker
 	def push_broks(self, broks):
-		self.app.add_broks_to_queue(broks.valeus())
+		self.app.add_broks_to_queue(broks.values())
 		return True
 
 
@@ -286,14 +286,22 @@ class Broker(Satellite):
 			return
 
 
+	#Get teh good tabs for links by the kind. If unknown, return None
+	def get_links_from_type(self, type):
+		t = {'scheduler' : self.schedulers, 'arbiter' : self.arbiters, \
+		     'poller' : self.pollers, 'reactionner' : self.reactionners}
+		if type in t :
+			return t[type]
+		return None
+
+	
+
 	#initialise or re-initialise connexion with scheduler or
 	#arbiter if type == arbiter
 	def pynag_con_init(self, id, type='scheduler'):
-		if type == 'scheduler':
-			links = self.schedulers
-		elif type == 'arbiter':
-			links = self.arbiters
-		else:
+		#Get teh good links tab for looping..
+		links = self.get_links_from_type(type)
+		if links == None:
 			Log().log('DBG: Type unknown for connexion! %s' % type)
 			return
 		
@@ -402,12 +410,10 @@ class Broker(Satellite):
 	#We get new broks from schedulers
 	#REF: doc/broker-modules.png (2)
 	def get_new_broks(self, type='scheduler'):
-		if type == 'scheduler':
-			links = self.schedulers
-		elif type == 'arbiter':
-			links = self.arbiters
-		else:
-			print ' DBG: Type unknown for connexion! %s' % type
+		#Get teh good links tab for looping..
+		links = self.get_links_from_type(type)
+		if links == None:
+			Log().log('DBG: Type unknown for connexion! %s' % type)
 			return
 		
 		#We check for new check in each schedulers and put
@@ -484,9 +490,13 @@ class Broker(Satellite):
                 #Connexion init with Schedulers
 		for sched_id in self.schedulers:
 			self.pynag_con_init(sched_id, type='scheduler')
+			
+		for pol_id in self.pollers:
+			self.pynag_con_init(pol_id, type='poller')
 
-		#for arb_id in self.arbiters:
-		#	self.pynag_con_init(arb_id, type='arbiter')
+		for rea_id in self.reactionners:
+                        self.pynag_con_init(rea_id, type='reactionner')
+
 
 		#Now main loop
 		i = 0
@@ -513,6 +523,10 @@ class Broker(Satellite):
 			#self.get_new_broks(type='arbiter')
 			#And from schedulers
 			self.get_new_broks(type='scheduler')
+			#And for other satellites
+			self.get_new_broks(type='poller')
+			self.get_new_broks(type='reactionner')
+			
 			
 		        #We must had new broks at the end of the list, so we reverse the list
 			self.broks.reverse()			
