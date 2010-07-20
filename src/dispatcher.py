@@ -129,26 +129,6 @@ class Dispatcher:
                     arb.do_not_run()
 
 
-        #TODO: sup this loop and use the 2 loops below. It's far more readable to thinks
-        #about conf dispatch and not by node dead -> cfg unavalable. So after the active
-        #tag will no be usefull anymore I think.
-        #for elt in self.elements:
-        #    #skip sched because it is managed by the new way
-        #    if not hasattr(elt, 'conf'):
-        #        if (elt.is_active and not elt.alive):
-        #            Log().log('Warning : The satellite %s have a configuration in charge, but seem to be dead! I run a new confguration dispatch' % \
-        #                          elt.get_name())
-        #            self.dispatch_ok = False
-        #            #print "Set dispatch False"
-        #            elt.is_active = False
-        #            if hasattr(elt, 'conf'):
-        #                if elt.conf != None:
-        #                    elt.conf.assigned_to = None
-        #                    elt.conf.is_assigned = False
-        #                    elt.conf = None
-        #            #else:
-        #            #    print 'No conf'
-
         #We check for confs to be dispatched on alive scheds. If not dispatch, need dispatch :)
         #and if dipatch on a failed node, remove the association, and need a new disaptch
         for r in self.realms:
@@ -412,6 +392,9 @@ class Dispatcher:
                                     satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part
                                     if satellite.manage_arbiters:
                                         satellite.cfg['arbiters'] = arbiters_cfg
+                                    #Brokers should have poller/reactionners links too
+                                    if kind == "broker":
+                                        r.fill_broker_with_poller_reactionner_links(satellite)
                                     #cfg_for_satellite['modules'] = satellite.modules
                                     is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
                                     if is_sent:

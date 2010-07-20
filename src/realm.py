@@ -138,6 +138,39 @@ class Realm(Itemgroup):
         return r
 
 
+    def get_pollers(self):
+        r = []
+        for p in self.pollers:
+            r.append(p)
+        return r
+
+
+    def get_all_subs_pollers(self):
+        r = self.get_pollers()
+        for p in self.realm_members:
+            tmps = p.get_all_subs_pollers()
+            for s in tmps:
+                r.append(s)
+        return r
+
+
+
+    def get_reactionners(self):
+        r = []
+        for p in self.reactionners:
+            r.append(p)
+        return r
+
+
+    def get_all_subs_reactionners(self):
+        r = self.get_reactionners()
+        for p in self.realm_members:
+            tmps = p.get_all_subs_reactionners()
+            for s in tmps:
+                r.append(s)
+        return r
+
+
     def count_reactionners(self):
         self.nb_reactionners = 0
         for reactionner in self.reactionners:
@@ -271,6 +304,25 @@ class Realm(Itemgroup):
         self.count_brokers()
         self.fill_potential_brokers()
 
+
+    #TODO: find a better name...
+    #TODO : and if he goes active?
+    def fill_broker_with_poller_reactionner_links(self, broker):
+        #First we create/void theses links
+        broker.cfg['pollers'] = {}
+        broker.cfg['reactionners'] = {}
+        if not broker.spare and broker.manage_sub_realms:
+            #Now pollers
+            for p in self.get_all_subs_pollers():
+                cfg = p.give_satellite_cfg()
+                broker.cfg['pollers'][p.id] = cfg
+                
+            #Now reactionners
+            for r in self.get_all_subs_reactionners():
+                cfg = r.give_satellite_cfg()
+                broker.cfg['reactionners'][r.id] = cfg
+
+        print "***** Broker Me %s got a poller/reactionner link : %s and %s" % (broker.get_name(), broker.cfg['pollers'], broker.cfg['reactionners'])
 
 
 class Realms(Itemgroups):
