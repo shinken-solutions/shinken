@@ -67,6 +67,9 @@ class IForArbiter(Pyro.core.ObjBase):
 		self.app = app
 		self.schedulers = app.schedulers
 		self.arbiters = app.arbiters
+		self.pollers = app.pollers
+		self.reactionners = app.reactionners
+
 
 	#function called by arbiter for giving us our conf
 	#conf must be a dict with:
@@ -95,6 +98,8 @@ class IForArbiter(Pyro.core.ObjBase):
 			#pyro do not allow thread to create new connexions...
 			#So we do it just after.
 		print "We have our schedulers :", self.schedulers
+
+		#Now get arbiter
 		for arb_id in conf['arbiters'] :
 			a = conf['arbiters'][arb_id]
 			self.arbiters[arb_id] = a
@@ -104,6 +109,29 @@ class IForArbiter(Pyro.core.ObjBase):
 			self.arbiters[arb_id]['instance_id'] = 0 #No use so all to 0
 			self.arbiters[arb_id]['running_id'] = 0			
 		print "We have our arbiters :", self.arbiters
+
+		#Now for pollers
+		for pol_id in conf['pollers'] :
+			p = conf['pollers'][pol_id]
+			self.pollers[pol_id] = p
+			uri = "PYROLOC://%s:%d/Broks" % (p['address'], p['port'])
+			self.pollers[pol_id]['uri'] = uri
+			self.pollers[pol_id]['broks'] = {}
+			self.pollers[pol_id]['instance_id'] = 0 #No use so all to 0
+			self.pollers[pol_id]['running_id'] = 0			
+		print "We have our pollers :", self.pollers
+		
+		#Now reactionners
+		for rea_id in conf['reactionners'] :
+                        r = conf['reactionners'][rea_id]
+                        self.reactionners[rea_id] = r
+                        uri = "PYROLOC://%s:%d/Broks" % (r['address'], r['port'])
+                        self.reactionners[rea_id]['uri'] = uri
+                        self.reactionners[rea_id]['broks'] = {}
+                        self.reactionners[rea_id]['instance_id'] = 0 #No use so all to 0
+                        self.reactionners[rea_id]['running_id'] = 0
+                print "We have our reactionners :", self.reactionners
+		
 		if not self.app.have_modules:
 			self.app.modules = conf['global']['modules']
 			self.app.have_modules = True
@@ -221,6 +249,10 @@ class Broker(Satellite):
 
 		#Our arbiters
 		self.arbiters = {}
+
+		#Our pollers and reactionners
+		self.pollers = {}
+		self.reactionners = {}
 		
 		#Modules are load one time
 		self.have_modules = False
