@@ -365,16 +365,19 @@ class Service(SchedulingItem):
         now = time.time()
         self.last_state_update = now
 
+
         #we should put in last_state the good last state:
         #if not just change the state by an problem/impact
         #we can take current state. But if it's the case, the
         #real old state is self.state_before_impact (it's teh TRUE
         #state in fact)
-        if not self.state_changed_since_impact:
-            self.last_state = self.state
-        else:
+        if self.is_impact and not self.state_changed_since_impact:
+            #print "Me %s take standard state %s" % (self.get_dbg_name(), self.state)
             self.last_state = self.state_before_impact
-        
+        else: #standard case
+            #print "Me %s take impact state %s and not %s" % (self.get_dbg_name(), self.state_before_impact, self.state)
+            self.last_state = self.state
+
         if status == 0:
             self.state = 'OK'
             self.state_id = 0

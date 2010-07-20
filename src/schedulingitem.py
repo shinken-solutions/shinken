@@ -554,6 +554,7 @@ class SchedulingItem(Item):
 
         #OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
+            #print "Case 1 (OK following a previous OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
             self.problem_has_been_acknowledged = False
             #action in return can be notification or other checks (dependancies)
             if (self.state_type == 'SOFT') and self.last_state != 'PENDING':
@@ -567,6 +568,7 @@ class SchedulingItem(Item):
 
         #OK following a NON-OK. 
         elif c.exit_status == 0 and (self.last_state != OK_UP and self.last_state != 'PENDING'):
+            #print "Case 2 (OK following a NON-OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.state_type == 'SOFT':
                 #OK following a NON-OK still in SOFT state
                 self.add_attempt()
@@ -596,6 +598,7 @@ class SchedulingItem(Item):
         #Volatile part
         #Only for service
         elif c.exit_status != 0 and hasattr(self, 'is_volatile') and self.is_volatile:
+            #print "Case 3 (volatile only)"
             #There are no repeated attempts, so the first non-ok results
             #in a hard state
             self.attempt = 1
@@ -619,6 +622,7 @@ class SchedulingItem(Item):
 
         #NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
+            #print "Case 4 : NON-OK follows OK : code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.is_max_attempts():
                 # if max_attempts == 1 we're already in deep trouble
                 self.state_type = 'HARD'
@@ -649,6 +653,7 @@ class SchedulingItem(Item):
         #check at self.max_check_attempts
         #when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
+            #print "Case 5 (no OK in a no OK) : code:%s last_state:%s state_type:%s" % (c.exit_status, self.last_state,self.state_type)
             if self.state_type == 'SOFT':
                 self.add_attempt()
                 if self.is_max_attempts():

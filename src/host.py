@@ -414,12 +414,12 @@ class Host(SchedulingItem):
         #we can take current state. But if it's the case, the
         #real old state is self.state_before_impact (it's teh TRUE
         #state in fact)
-        if self.state_changed_since_impact:
+        if self.is_impact and not self.state_changed_since_impact:
             #print "Me %s take standard state %s" % (self.get_dbg_name(), self.state)
-            self.last_state = self.state
+            self.last_state = self.state_before_impact
         else:
             #print "Me %s take impact state %s and not %s" % (self.get_dbg_name(), self.state_before_impact, self.state)
-            self.last_state = self.state_before_impact
+            self.last_state = self.state
         
         if status == 0:
             self.state = 'UP'
