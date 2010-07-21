@@ -804,6 +804,7 @@ class SchedulingItem(Item):
         n = Notification(type, 'scheduled', 'VOID', None, self, None, t, \
             timeout=cls.notification_timeout, \
             notif_nb=next_notif_nb)
+        
         #Keep a trace in our notifications queue
         self.notifications_in_progress[n.id] = n
         #and put it in the temp queue for scheduler

@@ -1043,8 +1043,7 @@ class ExternalCommand:
 
     #SCHEDULE_FORCED_HOST_CHECK;<host_name>;<check_time>
     def SCHEDULE_FORCED_HOST_CHECK(self, host, check_time):
-        c = host.schedule(force=True, force_time=check_time)
-        self.sched.add(c)
+        host.schedule(force=True, force_time=check_time)
         self.sched.get_and_register_status_brok(host)
 
     #SCHEDULE_FORCED_HOST_SVC_CHECKS;<host_name>;<check_time>
@@ -1055,8 +1054,7 @@ class ExternalCommand:
 
     #SCHEDULE_FORCED_SVC_CHECK;<host_name>;<service_description>;<check_time>
     def SCHEDULE_FORCED_SVC_CHECK(self, service, check_time):
-        c = service.schedule(force=True, force_time=check_time)
-        self.sched.add(c)
+        service.schedule(force=True, force_time=check_time)
         self.sched.get_and_register_status_brok(service)
 
     #SCHEDULE_HOSTGROUP_HOST_DOWNTIME;<hostgroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
@@ -1069,8 +1067,7 @@ class ExternalCommand:
 
     #SCHEDULE_HOST_CHECK;<host_name>;<check_time>
     def SCHEDULE_HOST_CHECK(self, host, check_time):
-        c = host.schedule(force=False, force_time=check_time)
-        self.sched.add(c)
+        host.schedule(force=False, force_time=check_time)
         self.sched.get_and_register_status_brok(host)
 
     #SCHEDULE_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
@@ -1105,8 +1102,7 @@ class ExternalCommand:
 
     #SCHEDULE_SVC_CHECK;<host_name>;<service_description>;<check_time>
     def SCHEDULE_SVC_CHECK(self, service, check_time):
-        c = service.schedule(force=False, force_time=check_time)
-        self.sched.add(c)
+        service.schedule(force=False, force_time=check_time)
         self.sched.get_and_register_status_brok(service)
 
     #SCHEDULE_SVC_DOWNTIME;<host_name>;<service_desription><start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>

@@ -626,6 +626,7 @@ class Host(SchedulingItem):
         # Block if the current status is in the notification_options d,u,r,f,s
         if 'n' in self.notification_options:
             return True
+
         if type == 'PROBLEM' or type == 'RECOVERY':
             if self.state == 'DOWN' and not 'd' in self.notification_options:
                 return True
