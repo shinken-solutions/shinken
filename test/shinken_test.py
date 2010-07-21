@@ -78,7 +78,7 @@ class ShinkenTest(unittest.TestCase):
         self.sched.waiting_results.append(check)
 
 
-    def scheduler_loop(self, count, reflist, do_sleep=True):
+    def scheduler_loop(self, count, reflist, do_sleep=False):
         for ref in reflist:
             (obj, exit_status, output) = ref
             obj.checks_in_progress = []  
@@ -118,6 +118,13 @@ class ShinkenTest(unittest.TestCase):
             self.sched.put_results(a)
         self.show_actions()
         #print "------------ worker loop end ----------------"
+
+
+        
+    def update_broker(self):
+        for brok in self.sched.broks.values():
+            self.livestatus_broker.manage_brok(brok)
+        self.sched.broks = {}
 
     
     def show_logs(self):
@@ -195,6 +202,17 @@ class ShinkenTest(unittest.TestCase):
                 if re.search(regex, brok.data['log']):
                     return True
         return False
+
+
+    def get_log_match(self, pattern):
+        regex = re.compile(pattern)
+        res = []
+        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+            if brok.type == 'log':
+                if re.search(regex, brok.data['log']):
+                    res.append(brok.data['log'])
+        return res
+
 
 
     def print_header(self):

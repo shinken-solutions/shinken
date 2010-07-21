@@ -4,25 +4,13 @@
 # This file is used to test host- and service-downtimes.
 #
 
-import sys
-import time
-import os
-import string
-import re
-import random
-import unittest
-sys.path.append("../src")
-from config import Config
-from dispatcher import Dispatcher
-from log import Log
-from scheduler import Scheduler
-from macroresolver import MacroResolver
-from external_command import ExternalCommand
-from check import Check
+from shinken_test import *
+
 sys.path.append("../src/modules/livestatus_broker")
 from livestatus_broker import Livestatus_broker
 sys.setcheckinterval(10000)
-class TestConfig(unittest.TestCase):
+
+class TestConfig(ShinkenTest):
     def setUp(self):
         # i am arbiter-like
         self.broks = {}
@@ -64,74 +52,6 @@ class TestConfig(unittest.TestCase):
         self.livestatus_broker.init()
         self.sched.fill_initial_broks()
 
-
-    def add(self, b):
-        self.broks[b.id] = b
-
-
-    def fake_check(self, ref, exit_status, output="OK"):
-        print "fake", ref
-        now = time.time()
-        check = ref.schedule()
-        self.sched.add(check)  # check is now in sched.checks[]
-        # fake execution
-        check.check_time = now
-        check.output = output
-        check.exit_status = exit_status
-        check.execution_time = 0.001
-        check.status = 'waitconsume'
-        self.sched.waiting_results.append(check)
-
-
-    def scheduler_loop(self, count, reflist):
-        for ref in reflist:
-            (obj, exit_status, output) = ref
-            obj.checks_in_progress = [] 
-        for loop in range(1, count + 1):
-            print "processing check", loop
-            for ref in reflist:
-                (obj, exit_status, output) = ref
-                obj.update_in_checking()
-                self.fake_check(obj, exit_status, output)
-            self.sched.consume_results()
-            self.worker_loop()
-            for ref in reflist:
-                (obj, exit_status, output) = ref
-                obj.checks_in_progress = []
-            self.sched.update_downtimes_and_comments()
-            #time.sleep(ref.retry_interval * 60 + 1)
-            #time.sleep(60 + 1)
-
-
-    def worker_loop(self):
-        self.sched.delete_zombie_checks()
-        self.sched.delete_zombie_actions()
-        checks = self.sched.get_to_run_checks(True, False)
-        actions = self.sched.get_to_run_checks(False, True)
-        #print "------------ worker loop checks ----------------"
-        #print checks
-        #print "------------ worker loop actions ----------------"
-        #self.show_actions()
-        #print "------------ worker loop new ----------------"
-        for a in actions:
-            #print "---> fake return of action", a.id
-            a.status = 'inpoller'
-            a.check_time = time.time()
-            a.exit_status = 0
-            self.sched.put_results(a)
-        #self.show_actions()
-        #print "------------ worker loop end ----------------"
-
-
-    def update_broker(self):
-        for brok in self.sched.broks.values():
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
-
-    def print_header(self):
-        print "#" * 80 + "\n" + "#" + " " * 78 + "#"
-        print "#" + string.center(self.id(), 78) + "#"
-        print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
 
 
     def test_fill_status(self):

@@ -4,21 +4,11 @@
 # This file is used to test reading and processing of config files
 #
 
-import sys
-import time
-import os
-import random
-import unittest
-sys.path.append("../src")
-from config import Config
-from dispatcher import Dispatcher
-from log import Log
-from scheduler import Scheduler
-from macroresolver import MacroResolver
-from external_command import ExternalCommand
-from check import Check
+#It's ugly I know....
+from shinken_test import *
 
-class TestConfig(unittest.TestCase):
+
+class TestConfig(ShinkenTest):
     def setUp(self):
         # i am arbiter-like
         self.broks = {}
@@ -54,15 +44,6 @@ class TestConfig(unittest.TestCase):
         e.load_scheduler(self.sched)
         self.sched.schedule()
 
-
-    def add(self, b):
-        self.broks[b.id] = b
-
-
-    def show_logs(self):
-        for brok in sorted(self.broks.values(), lambda x, y: x.id - y.id):
-            if brok.type == 'log':
-                print "LOG:", brok.data['log']
 
 
     def test_conf_is_correct(self):
