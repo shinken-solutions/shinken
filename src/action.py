@@ -36,6 +36,17 @@ class Action:
     def __init__(self):
         pass
 
+    
+    #If the command line got shell caracters, we should go in a shell
+    #mode. So look at theses parameters
+    #Note : it's "hard", but in fact you can launch it 100000times
+    #a second so... I don't care :) (and at least it's easy to understand)
+    def got_shell_caracters(self):
+        for c in self.command:
+            if c in ['!','$','^','&','*','(',')','~','[',']','|','{','}',';','<','>','?','`']:
+                return True
+        return False
+
 
     def get_outputs(self, out, max_plugins_output_length):
         #print "Get only," , max_plugins_output_length, "bytes"
@@ -84,8 +95,13 @@ class Action:
         self.wait_time = 0.0001
         #cmd = ['/bin/sh', '-c', self.command]
         #Nagios do not use the /bin/sh -c command, so I don't do it too
+        
         try:
-            self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+            #If got specials caracters (forshell) go in shell mode
+            if self.got_shell_caracters():
+                self.process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True)
+            else:#instead, launch by execve
+                self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
         except OSError as exp:
             print "FUCK:", exp
             self.output = exp.__str__()
