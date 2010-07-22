@@ -42,22 +42,7 @@ class Acknowledge:
         self.id = self.__class__.id
         self.__class__.id += 1
         self.ref = ref #pointer to srv or host we are apply
-        self.trigger_me = [] #The trigger i need to activate
-        self.start_time = start_time
-        if fixed:
-            self.end_time = end_time
-        else:
-            self.end_time = self.start_time + duration
-        if trigger_downtime is not None:
-            trigger_downtime.trigger_me(self)
+        self.sticky = sticky
+        self.notify = notify
         self.author = author
         self.comment = comment
-
-
-    def trigger_me(self, other_downtime):
-        self.active_me.append(other_downtime)
-
-
-    def is_in_downtime(self):
-        now = time.time()
-        return self.start_time <= now <= self.end_time

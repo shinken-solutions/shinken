@@ -26,6 +26,8 @@ from brok import Brok
 
 from util import strip_and_uniq
 from command import CommandCall
+from acknowledge import Acknowledge
+from comment import Comment
 
 class Item(object):
     def __init__(self, params={}):
@@ -293,6 +295,35 @@ class Item(object):
                 c.can_be_deleted = True
         if c_to_del is not None:
             self.comments.remove(c_to_del)
+
+
+    def acknowledge_problem(self, sticky, notify, persistent, author, comment):
+        if notify:
+            self.create_notifications('ACKNOWLEDGEMENT')
+        self.problem_has_been_acknowledged = True
+        a = Acknowledge(self, sticky, notify, persistent, author, comment)
+        self.acknowledgement = a
+        comment_type = 1 if self.my_type == 'host' else 2
+        c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
+        self.add_comment(c)
+        self.broks.append(self.get_update_status_brok())
+
+
+    # Delete the acknowledgement object and reset the flag
+    # but do not remove the associated comment.
+    def unacknowledge_problem(self):
+        if self.problem_has_been_acknowledged:
+            self.problem_has_been_acknowledged = False
+            del self.acknowledgement
+            self.broks.append(self.get_update_status_brok())
+
+    
+    # Check if we have an acknowledgement and if this is marked as sticky.
+    # This is needed when a non-ok state changes 
+    def unacknowledge_problem_if_not_sticky(self):
+        if hasattr(self, 'acknowledgement'):
+            if not self.acknowledgement.sticky:
+                self.unacknowledge_problem()
 
 
     #Fill data with info of item by looking at brok_type
