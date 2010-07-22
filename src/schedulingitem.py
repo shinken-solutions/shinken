@@ -568,6 +568,7 @@ class SchedulingItem(Item):
 
         #OK following a NON-OK. 
         elif c.exit_status == 0 and (self.last_state != OK_UP and self.last_state != 'PENDING'):
+            self.problem_has_been_acknowledged = False
             #print "Case 2 (OK following a NON-OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.state_type == 'SOFT':
                 #OK following a NON-OK still in SOFT state

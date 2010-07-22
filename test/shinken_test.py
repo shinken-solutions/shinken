@@ -143,7 +143,7 @@ class ShinkenTest(unittest.TestCase):
                     ref = "host: %s" % a.ref.get_name()
                 else:
                     ref = "host: %s svc: %s" % (a.ref.host.get_name(), a.ref.get_name())
-                print "NOTIFICATION %d %s %s %s" % (a.id, ref, time.asctime(time.localtime(a.t_to_go)), a.status)
+                print "NOTIFICATION %d %s %s %s %s" % (a.id, ref, a.type, time.asctime(time.localtime(a.t_to_go)), a.status)
             elif a.is_a == 'eventhandler':
                 print "EVENTHANDLER:", a
         print "--- actions >>>----------------------------------"
@@ -181,6 +181,7 @@ class ShinkenTest(unittest.TestCase):
     
     
     def log_match(self, index, pattern):
+        # log messages are counted 1...n, so index=1 for the first message
         if index > self.count_logs():
             return False
         else:

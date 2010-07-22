@@ -1023,11 +1023,15 @@ class ExternalCommand:
 
     #REMOVE_HOST_ACKNOWLEDGEMENT;<host_name>
     def REMOVE_HOST_ACKNOWLEDGEMENT(self, host):
-        pass
+        if host.problem_has_been_acknowledged:
+            host.problem_has_been_acknowledged = False
+            self.sched.get_and_register_status_brok(host)
 
     #REMOVE_SVC_ACKNOWLEDGEMENT;<host_name>;<service_description>
     def REMOVE_SVC_ACKNOWLEDGEMENT(self, service):
-        pass
+        if service.problem_has_been_acknowledged:
+            service.problem_has_been_acknowledged = False
+            self.sched.get_and_register_status_brok(service)
 
     #RESTART_PROGRAM
     def RESTART_PROGRAM(self):

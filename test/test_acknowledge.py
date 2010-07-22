@@ -46,7 +46,7 @@ class TestConfig(ShinkenTest):
 
 
 
-    def test_ack_soft_service(self):
+    def xtest_ack_soft_service(self):
         self.print_header()
         # retry_interval 2
         # critical notification
@@ -67,17 +67,33 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.current_notification_number == 0)
 
         #--------------------------------------------------------------
+        # first check the normal behavior
+        # service reaches hard;2
+        # at the end there must be 3 actions: eventhandler hard, 
+        #   master notification and contact notification
+        #--------------------------------------------------------------
+        print "- 2 x BAD get hard -------------------------------------"
+        self.scheduler_loop(2, [[svc, 2, 'BAD']])
+        self.assert_(svc.current_notification_number == 1)
+        self.assert_(self.count_actions() == 3) 
+        self.assert_(self.log_match(5, 'SERVICE NOTIFICATION'))
+        self.show_and_clear_logs()
+        self.show_and_clear_actions()
+        # clean up
+        self.scheduler_loop(1, [[svc, 0, 'OK']])
+        self.clear_logs()
+        self.clear_actions()
+        
+        #--------------------------------------------------------------
         # service reaches soft;1
         # there must not be any notification
         #--------------------------------------------------------------
         print "- 1 x BAD get soft -------------------------------------"
         self.scheduler_loop(1, [[svc, 2, 'BAD']])
         self.assert_(svc.current_notification_number == 0)
-        self.show_and_clear_logs()
-        self.show_actions()
 
         #--------------------------------------------------------------
-        # someone acknowldeges the problem before a notification goes out
+        # someone acknowledges the problem before a notification goes out
         #--------------------------------------------------------------
         self.assert_(not svc.problem_has_been_acknowledged)
         now = time.time()
@@ -86,10 +102,10 @@ class TestConfig(ShinkenTest):
         self.sched.get_new_actions()
         self.worker_loop()
         self.assert_(svc.problem_has_been_acknowledged)
-        self.log_match(0, 'ACKNOWLEDGEMENT \(CRITICAL\)')
+        self.assert_(self.log_match(3, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.show_and_clear_logs()
         self.show_actions()
-
+        
         #--------------------------------------------------------------
         # service reaches hard;2
         # a notification must have been created but blocked
@@ -98,25 +114,124 @@ class TestConfig(ShinkenTest):
         print "- 1 x BAD get hard -------------------------------------"
         self.scheduler_loop(1, [[svc, 2, 'BAD']])
         self.assert_(self.count_logs() == 2)
+        self.assert_(self.count_actions() == 2)
         self.assert_(svc.current_notification_number == 0)
-
+        self.show_and_clear_logs()
+        self.show_actions()
+        
         #--------------------------------------------------------------
-        # service reaches hard;2
-        # a notification must have been created but blocked
-        # notification number must be 0
+        # recover
+        # the acknowledgement must have been removed automatically
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']])
+        print "- 1 x OK recover"
+        self.show_logs()
+        self.show_actions()
+        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
+
+
+    def test_ack_hard_service(self):
+        self.print_header()
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        #--------------------------------------------------------------
+        # initialize host/service state
+        #--------------------------------------------------------------
+        self.scheduler_loop(1, [[host, 0, 'UP']])
+        print "- 1 x OK -------------------------------------"
+        self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assert_(svc.current_notification_number == 0)
 
+        #--------------------------------------------------------------
+        # first check the normal behavior
+        # service reaches hard;2
+        # at the end there must be 3 actions: eventhandler hard, 
+        #   master notification and contact notification
+        #--------------------------------------------------------------
+        print "- 2 x BAD get hard -------------------------------------"
+        self.scheduler_loop(2, [[svc, 2, 'BAD']])
+        self.assert_(svc.current_notification_number == 1)
+        self.assert_(self.count_actions() == 3) 
+        self.assert_(self.log_match(5, 'SERVICE NOTIFICATION'))
+        self.show_and_clear_logs()
+        self.show_actions()
+        
+        #--------------------------------------------------------------
+        # stay hard and wait for the second notification (notification_interval)
+        #--------------------------------------------------------------
+        print "- 2 x BAD stay hard -------------------------------------"
+        self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
+        self.show_and_clear_logs()
+        self.show_actions()
+        self.assert_(svc.current_notification_number == 2)
 
-# service gets hard, notification is sent
-# acknowledge
-# no repetition of notifications
-# ack deleted, notifications again
-#    REMOVE_SVC_ACKNOWLEDGEMENT;<host_name>;<service_description>
-
+        #--------------------------------------------------------------
+        # admin wakes up and acknowledges the problem
+        # the ACK is the only log message
+        # a master notification is still around, but can't be sent
+        #--------------------------------------------------------------
+        self.assert_(not svc.problem_has_been_acknowledged)
+        now = time.time()
+        cmd = "[%lu] ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;1;1;1;lausser;blablub" % now
+        self.sched.run_external_command(cmd)
+        self.sched.get_new_actions()
+        self.worker_loop()
+        self.assert_(svc.problem_has_been_acknowledged)
+        self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
+        self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
+        self.assert_(self.count_logs() == 1) 
+        self.assert_(self.count_actions() == 1) 
+        self.show_and_clear_logs()
+        self.show_actions()
+        
+        #--------------------------------------------------------------
+        # remove acknowledgement
+        # now notifications are sent again
+        #--------------------------------------------------------------
+        now = time.time()
+        cmd = "[%lu] REMOVE_SVC_ACKNOWLEDGEMENT;test_host_0;test_ok_0" % now
+        self.sched.run_external_command(cmd)
+        self.sched.get_new_actions()
+        self.worker_loop()
+        self.show_logs()
+        self.show_actions()
+        # the contact notification was sent immediately (t_to_go)
+        self.assert_(not svc.problem_has_been_acknowledged)
+        self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
+        self.show_logs()
+        self.show_actions()
+        self.assert_(self.log_match(1, 'SERVICE NOTIFICATION'))
+        self.assert_(self.log_match(2, 'SERVICE NOTIFICATION'))
+        self.assert_(self.count_logs() == 2)
+        self.assert_(self.count_actions() == 2) # master sched, contact zombie
+        self.assert_(svc.current_notification_number == 4)
+        self.show_and_clear_logs()
+        self.show_actions()
+        
+        #--------------------------------------------------------------
+        # recover
+        # the acknowledgement must have been removed automatically
+        #--------------------------------------------------------------
+        self.scheduler_loop(1, [[svc, 0, 'GOOD']])
+        print "- 1 x OK recover"
+        self.show_logs()
+        self.show_actions()
+        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(not svc.problem_has_been_acknowledged)
+        self.assert_(svc.current_notification_number == 0)
+        self.show_and_clear_logs()
+        self.show_and_clear_actions()
 
 
 if __name__ == '__main__':
