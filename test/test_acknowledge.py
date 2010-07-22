@@ -310,7 +310,7 @@ class TestConfig(ShinkenTest):
         self.assert_(self.log_match(1, 'SERVICE ALERT.*WARNING'))
         self.assert_(self.log_match(2, 'SERVICE NOTIFICATION'))
         self.assert_(self.log_match(3, 'SERVICE NOTIFICATION'))
-        self.assert_(self.count_logs() == 2)
+        self.assert_(self.count_logs() == 3)
         self.assert_(self.count_actions() == 2) # master sched, contact zombie
         self.assert_(svc.current_notification_number == 4)
         self.show_and_clear_logs()
