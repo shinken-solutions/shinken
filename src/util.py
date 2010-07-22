@@ -33,7 +33,7 @@ def get_sequence():
 #@memoized
 def get_end_of_day(year, month_id, day):
     end_time = (year, month_id, day, 23, 59, 59, 0, 0, -1)
-    end_time_epoch = time.mktime(end_time)+1.0
+    end_time_epoch = time.mktime(end_time)
     return end_time_epoch
 
 

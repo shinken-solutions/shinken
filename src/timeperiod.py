@@ -183,7 +183,7 @@ class Timeperiod:
             
             #print self.get_name(), 'Mins:', dr_mins
             #for o in dr_mins:
-            #    print self.get_name(), '\t',time.asctime(time.localtime(o))
+            #    self.get_name(), '\t',time.asctime(time.localtime(o))
 
             #Min but not the None valus...
             try:
@@ -191,7 +191,9 @@ class Timeperiod:
             except ValueError: #dr_mins if full of None, not good
                 local_min = None
 
-            #print self.get_name(), 'Local min:', local_min
+            #if local_min != None:
+            #    print "Proposed local min", time.asctime(time.localtime(local_min))
+
 
             #We do not loop unless the local_min is not valid
             still_loop = False
@@ -206,6 +208,9 @@ class Timeperiod:
                         #t = local_min + 60
                         #print self.get_name(), "TP pas content:", tp.get_name(), time.asctime(time.localtime(local_min))
                         local_min = tp.get_next_invalid_time_from_t(local_min+60)
+                        #if local_min != None:
+                        #    print "TP proposed new local min", time.asctime(time.localtime(local_min))
+
                         #print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
                     #else:
                     #    print self.get_name(), "Tp ca lui va", tp.get_name()

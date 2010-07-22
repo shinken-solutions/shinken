@@ -194,6 +194,9 @@ class Daterange:
 
     def is_time_day_valid(self, t):
         (start_time, end_time) = self.get_start_and_end_time(t)
+#        print "My class", self.__class__
+#        print "Search for t", time.asctime(time.localtime(start_time))
+#        print "Start time, endtime", time.asctime(time.localtime(start_time)), time.asctime(time.localtime(end_time))
         if start_time <= t <= end_time:
             return True
         else:
@@ -255,6 +258,7 @@ class Daterange:
             (start_time, end_time) = self.get_start_and_end_time(get_day(t)+86400)
         else:
             (start_time, end_time) = self.get_start_and_end_time(t)
+
         if t <= start_time:
             return start_time
         if self.is_time_day_valid(t):
@@ -272,7 +276,8 @@ class Daterange:
         t_day = self.get_next_valid_day(t)
         sec_from_morning = self.get_min_sec_from_morning()
         
-        #print "DR: next day", time.asctime(time.localtime(t_day))
+#        print "Search for t", time.asctime(time.localtime(t))
+#        print "DR: next day", time.asctime(time.localtime(t_day))
         #print "DR: sec from morning", time.asctime(time.localtime(sec_from_morning))
 
         #We search for the min of all tr.start > sec_from_morning
