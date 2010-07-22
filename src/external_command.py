@@ -429,14 +429,18 @@ class ExternalCommand:
 
     #ACKNOWLEDGE_SVC_PROBLEM;<host_name>;<service_description>;<sticky>;<notify>;<persistent>;<author>;<comment>
     def ACKNOWLEDGE_SVC_PROBLEM(self, service, sticky, notify, persistent, author, comment):
-        service.problem_has_been_acknowledged = True
-        self.sched.get_and_register_status_brok(service)
+        if not service.problem_has_been_acknowledged:
+            service.create_notifications('ACKNOWLEDGEMENT')
+            service.problem_has_been_acknowledged = True
+            self.sched.get_and_register_status_brok(service)
 
     #ACKNOWLEDGE_HOST_PROBLEM;<host_name>;<sticky>;<notify>;<persistent>;<author>;<comment>
     #TODO : add a better ACK management
     def ACKNOWLEDGE_HOST_PROBLEM(self, host, sticky, notify, persistent, author, comment):
-        host.problem_has_been_acknowledged = True
-        self.sched.get_and_register_status_brok(host)
+        if not host.problem_has_been_acknowledged:
+            host.create_notifications('ACKNOWLEDGEMENT')
+            host.problem_has_been_acknowledged = True
+            self.sched.get_and_register_status_brok(host)
         
     #CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):

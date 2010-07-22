@@ -223,7 +223,7 @@ class ShinkenTest(unittest.TestCase):
     
     
 
-    def test_conf_is_correct(self):
+    def xtest_conf_is_correct(self):
         self.print_header()
         self.assert_(self.conf.conf_is_correct)
 

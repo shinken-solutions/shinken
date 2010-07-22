@@ -660,7 +660,7 @@ class Host(SchedulingItem):
             return True
 
         # Block if the problem has already been acknowledged
-        if self.problem_has_been_acknowledged:
+        if self.problem_has_been_acknowledged and type != 'ACKNOWLEDGEMENT':
             return True
 
         # Block if flapping
