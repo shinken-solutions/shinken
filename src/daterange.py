@@ -589,8 +589,14 @@ class MonthDayDaterange(Daterange):
             if month_start_id > 12:
                 month_start_id = 1
                 self.syear += 1
+
+            #For the start
+            month_start = Daterange.get_month_by_id(month_start_id)
             day_start = find_day_by_offset(self.syear, month_start, self.smday)
             start_time = get_start_of_day(self.syear, month_start_id, day_start)
+
+            #For the end
+            month_end = Daterange.get_month_by_id(month_end_id)
             day_end = find_day_by_offset(self.eyear, month_end, self.emday)
             end_time = get_end_of_day(self.eyear, month_end_id, day_end)
                     
