@@ -287,6 +287,7 @@ class Daterange:
 
     def get_next_valid_time_from_t(self, t):
         #print "DR Get next valid from:", time.asctime(time.localtime(t))
+        #print "DR Get next valid from:", t
         if self.is_time_valid(t):
             return t
         
@@ -309,6 +310,7 @@ class Daterange:
         #tr can't be valid, or it will be return at the begining
         sec_from_morning = self.get_next_future_timerange_valid(t)
         #print "DR: sec from morning", time.asctime(time.localtime(sec_from_morning))
+        #print "Sec from morning", t_day
         if sec_from_morning is not None:
             if t_day is not None and sec_from_morning is not None:
                 return t_day + sec_from_morning
@@ -447,10 +449,11 @@ class StandardDaterange(Daterange):
         day_diff = (day_id - now.tm_wday) % 7
         return (today_morning + day_diff*86400, tonight + day_diff*86400)
 
-
+#thusday 3 february
 class MonthWeekDayDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
+
         if self.syear == 0:
             self.syear = now.tm_year
         month_id = Daterange.get_month_id(self.smon)

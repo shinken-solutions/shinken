@@ -44,7 +44,7 @@ def print_date(t):
 
 #@memoized
 def get_day(t):
-    return t - get_sec_from_morning(t)
+    return int(t - get_sec_from_morning(t))
 
 
 #@memoized

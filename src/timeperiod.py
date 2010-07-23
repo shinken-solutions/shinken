@@ -190,8 +190,9 @@ class Timeperiod:
                 local_min = min([d for d in dr_mins if d!=None])
             except ValueError: #dr_mins if full of None, not good
                 local_min = None
-
+                
             #if local_min != None:
+            #    print "Poposed?", local_min
             #    print "Proposed local min", time.asctime(time.localtime(local_min))
 
 
@@ -210,6 +211,7 @@ class Timeperiod:
                         local_min = tp.get_next_invalid_time_from_t(local_min+60)
                         #if local_min != None:
                         #    print "Exclude TP proposed new local min", time.asctime(time.localtime(local_min))
+                        #    print local_min
                             #print "Is it really a invalid date?", tp.is_time_valid(local_min), "if true FUCK"
                         #print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
                     #else:
