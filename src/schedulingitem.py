@@ -555,7 +555,7 @@ class SchedulingItem(Item):
         #OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
             #print "Case 1 (OK following a previous OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
-            self.problem_has_been_acknowledged = False
+            self.unacknowledge_problem()
             #action in return can be notification or other checks (dependancies)
             if (self.state_type == 'SOFT') and self.last_state != 'PENDING':
                 if self.is_max_attempts() and self.state_type == 'SOFT':
@@ -568,6 +568,7 @@ class SchedulingItem(Item):
 
         #OK following a NON-OK. 
         elif c.exit_status == 0 and (self.last_state != OK_UP and self.last_state != 'PENDING'):
+            self.unacknowledge_problem()
             #print "Case 2 (OK following a NON-OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.state_type == 'SOFT':
                 #OK following a NON-OK still in SOFT state
@@ -685,6 +686,7 @@ class SchedulingItem(Item):
             else:
                 #Send notifications whenever the state has changed. (W -> C)
                 if self.state != self.last_state:
+                    self.unacknowledge_problem_if_not_sticky()
                     self.raise_alert_log_entry()
                     self.remove_in_progress_notifications()
                     if not no_action:
@@ -909,3 +911,5 @@ class SchedulingItem(Item):
             return c.id
         #None mean I already take it into account
         return None
+
+

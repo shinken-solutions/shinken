@@ -429,14 +429,12 @@ class ExternalCommand:
 
     #ACKNOWLEDGE_SVC_PROBLEM;<host_name>;<service_description>;<sticky>;<notify>;<persistent>;<author>;<comment>
     def ACKNOWLEDGE_SVC_PROBLEM(self, service, sticky, notify, persistent, author, comment):
-        service.problem_has_been_acknowledged = True
-        self.sched.get_and_register_status_brok(service)
+        service.acknowledge_problem(sticky, notify, persistent, author, comment)
 
     #ACKNOWLEDGE_HOST_PROBLEM;<host_name>;<sticky>;<notify>;<persistent>;<author>;<comment>
     #TODO : add a better ACK management
     def ACKNOWLEDGE_HOST_PROBLEM(self, host, sticky, notify, persistent, author, comment):
-        host.problem_has_been_acknowledged = True
-        self.sched.get_and_register_status_brok(host)
+        host.acknowledge_problem(sticky, notify, persistent, author, comment)
         
     #CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
@@ -1019,11 +1017,11 @@ class ExternalCommand:
 
     #REMOVE_HOST_ACKNOWLEDGEMENT;<host_name>
     def REMOVE_HOST_ACKNOWLEDGEMENT(self, host):
-        pass
+        host.unacknowledge_problem()
 
     #REMOVE_SVC_ACKNOWLEDGEMENT;<host_name>;<service_description>
     def REMOVE_SVC_ACKNOWLEDGEMENT(self, service):
-        pass
+        service.unacknowledge_problem()
 
     #RESTART_PROGRAM
     def RESTART_PROGRAM(self):
