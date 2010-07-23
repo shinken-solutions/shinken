@@ -298,15 +298,17 @@ class Item(object):
 
 
     def acknowledge_problem(self, sticky, notify, persistent, author, comment):
-        if notify:
-            self.create_notifications('ACKNOWLEDGEMENT')
-        self.problem_has_been_acknowledged = True
-        a = Acknowledge(self, sticky, notify, persistent, author, comment)
-        self.acknowledgement = a
-        comment_type = 1 if self.my_type == 'host' else 2
-        c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
-        self.add_comment(c)
-        self.broks.append(self.get_update_status_brok())
+        if self.state != self.ok_up:
+            if notify:
+                self.create_notifications('ACKNOWLEDGEMENT')
+            self.problem_has_been_acknowledged = True
+            sticky = True if sticky == 2 else False
+            a = Acknowledge(self, sticky, notify, persistent, author, comment)
+            self.acknowledgement = a
+            comment_type = 1 if self.my_type == 'host' else 2
+            c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
+            self.add_comment(c)
+            self.broks.append(self.get_update_status_brok())
 
 
     # Delete the acknowledgement object and reset the flag
@@ -315,6 +317,10 @@ class Item(object):
         if self.problem_has_been_acknowledged:
             self.problem_has_been_acknowledged = False
             del self.acknowledgement
+            # find comments of non-persistent ack-comments and delete them too
+            for c in self.comments:
+                if c.entry_type == 4 and not c.persistent:
+                    self.del_comment(c.id)
             self.broks.append(self.get_update_status_brok())
 
     

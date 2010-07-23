@@ -32,12 +32,14 @@ class Acknowledge:
     #same servicestate) are disabled.
     #If the "sticky" option is set to one (1), the acknowledgement will remain 
     #until the service returns to an OK state. Otherwise the acknowledgement 
-    #will automatically be removed when the service changes state. If the 
-    #"notify" option is set to one (1), a notification will be sent out to 
+    #will automatically be removed when the service changes state. In this case
+    #Web interfaces set a value of (2). 
+    #If the "notify" option is set to one (1), a notification will be sent out to 
     #contacts indicating that the current service problem has been acknowledged.
     #If the "persistent" option is set to one (1), the comment associated with
     #the acknowledgement will survive across restarts of the Shinken process.
     #If not, the comment will be deleted the next time Nagios restarts.
+    #"persistent" not only means "survive restarts", but also
     def __init__(self, ref, sticky, notify, persistent, author, comment):
         self.id = self.__class__.id
         self.__class__.id += 1
