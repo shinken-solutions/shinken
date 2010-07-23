@@ -209,8 +209,8 @@ class Timeperiod:
                         #print self.get_name(), "TP pas content:", tp.get_name(), time.asctime(time.localtime(local_min))
                         local_min = tp.get_next_invalid_time_from_t(local_min+60)
                         #if local_min != None:
-                        #    print "TP proposed new local min", time.asctime(time.localtime(local_min))
-
+                        #    print "Exclude TP proposed new local min", time.asctime(time.localtime(local_min))
+                            #print "Is it really a invalid date?", tp.is_time_valid(local_min), "if true FUCK"
                         #print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
                     #else:
                     #    print self.get_name(), "Tp ca lui va", tp.get_name()
@@ -218,13 +218,13 @@ class Timeperiod:
             if local_min == None:
                 still_loop = False
             else:
-                #print 'Local min', local_min
                 t = local_min
                 #No loop more than one year
                 if t > original_t + 3600*24*366 + 1:
                     still_loop = False
                     local_min = None
 
+        #print "We got it!"
         #Ok, we update the cache...
         self.cache[original_t] = local_min
         return local_min
@@ -243,6 +243,8 @@ class Timeperiod:
         res = None
         #Loop for all minutes...
         while still_loop:
+            #print "Invalid loop with", time.asctime(time.localtime(local_min))
+
             #Ok, not in cache...
             #print self.get_name(), "Begin loop with", time.asctime(time.localtime(local_min))
             next_exclude = None
@@ -266,7 +268,7 @@ class Timeperiod:
                 m = dr.get_next_invalid_time_from_t(local_min)
                 #print self.get_name(), "Dr give me next invalid", time.asctime(time.localtime(m))
                 if m != None:
-                    #print time.asctime(time.localtime(m))
+                    #print "Final : Got a next invalid at", time.asctime(time.localtime(m))
                     local_min = m
             
             #print self.get_name(), 'Invalid: local min', time.asctime(time.localtime(local_min))
@@ -286,11 +288,13 @@ class Timeperiod:
                         if local_min > original_t + 60*24*366 + 1:
                             still_loop = False
                             res = None
+
                 if not still_loop:#We find a possible value
                     #We take the result the minimal possible
                     if res == None or local_min < res:
                         res = local_min
 
+        #print "Got the next invalid", time.asctime(time.localtime(res))
         return res
 
     
