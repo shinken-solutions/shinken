@@ -47,7 +47,7 @@ class TestTimeperiods(ShinkenTest):
 
 
 
-    def OK_test_simple_timeperiod(self):
+    def test_simple_timeperiod(self):
         self.print_header()
         t = Timeperiod()
         now = time.time()
@@ -74,7 +74,7 @@ class TestTimeperiods(ShinkenTest):
 
 
 
-    def OK_test_simple_timeperiod_with_exclude(self):
+    def test_simple_timeperiod_with_exclude(self):
         self.print_header()
         t = Timeperiod()
         now = time.time()
@@ -114,7 +114,7 @@ class TestTimeperiods(ShinkenTest):
         self.assert_(t_next == "Tue Jul 13 21:01:00 2010")
 
 
-    def OK_test_dayweek_timeperiod_with_exclude(self):
+    def test_dayweek_timeperiod_with_exclude(self):
         self.print_header()
         now = time.time()
         #Get the 12 of july 2010 at 15:00, monday
@@ -147,7 +147,7 @@ class TestTimeperiods(ShinkenTest):
         self.assert_(t_next == 'Tue Jul 13 23:59:00 2010')
 
 
-    def OK_test_mondayweek_timeperiod_with_exclude(self):
+    def test_mondayweek_timeperiod_with_exclude(self):
         self.print_header()
         now = time.time()
         #Get the 12 of july 2010 at 15:00, monday
@@ -190,7 +190,7 @@ class TestTimeperiods(ShinkenTest):
 
 
 
-    def OK_test_mondayweek_timeperiod_with_exclude_bis(self):
+    def test_mondayweek_timeperiod_with_exclude_bis(self):
         self.print_header()
         now = time.time()
         #Get the 12 of july 2010 at 15:00, monday
@@ -233,7 +233,7 @@ class TestTimeperiods(ShinkenTest):
 
 
 
-    def OK_test_funky_mondayweek_timeperiod_with_exclude_and_multiple_daterange(self):
+    def test_funky_mondayweek_timeperiod_with_exclude_and_multiple_daterange(self):
         self.print_header()
         now = time.time()
         #Get the 12 of july 2010 at 15:00, monday
