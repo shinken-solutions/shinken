@@ -181,9 +181,9 @@ class Timeperiod:
             for dr in self.dateranges:
                 dr_mins.append(dr.get_next_valid_time_from_t(t))
             
-            #print self.get_name(), 'Mins:', dr_mins
+            #print "TOTO", self.get_name(), 'Mins:', dr_mins
             #for o in dr_mins:
-            #    self.get_name(), '\t',time.asctime(time.localtime(o))
+            #    print "FUCK",time.asctime(time.localtime(o)), "\n"
 
             #Min but not the None valus...
             try:

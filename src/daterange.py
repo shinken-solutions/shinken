@@ -20,24 +20,33 @@
 
 from util import *
 
+
+#Get the day number (like 27 in July tuesday 27 2010 for call:
+#2010, july, tuesday, -1 (last tuesday of july 2010)
 def find_day_by_weekday_offset(year, month, weekday, offset):
+    #et the id if teh weekday (1 for tuesday)
     weekday_id = Daterange.get_weekday_id(weekday)
     if weekday_id is None:
         return None
+
+    #same for month
     month_id = Daterange.get_month_id(month)
     if month_id is None:
         return None
-    
+
+    #thanks calendar :)
     cal = calendar.monthcalendar(year, month_id)
+
+    #If we ask for a -1 day, just reverse cal
     if offset < 0:
         offset = abs(offset)
-        for elt in cal:
-            elt.reverse()
         cal.reverse()
+        
+    #ok go for it
     nb_found = 0
-
     try:
         for i in xrange(0, offset + 1):
+            #in cal 0 mean "there are no day here :)"
             if cal[i][weekday_id] != 0:
                 nb_found += 1
             if nb_found == offset:
@@ -277,6 +286,7 @@ class Daterange:
 
 
     def get_next_valid_time_from_t(self, t):
+        #print "DR Get next valid from:", time.asctime(time.localtime(t))
         if self.is_time_valid(t):
             return t
         
@@ -285,7 +295,7 @@ class Daterange:
         t_day = self.get_next_valid_day(t)
         sec_from_morning = self.get_min_sec_from_morning()
         
-#        print "Search for t", time.asctime(time.localtime(t))
+        #print "Search for t", time.asctime(time.localtime(t))
         #print "DR: next day", time.asctime(time.localtime(t_day))
         #print "DR: sec from morning", time.asctime(time.localtime(sec_from_morning))
 
@@ -508,6 +518,8 @@ class MonthDateDaterange(Daterange):
 class WeekDayDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
+
+        #If no year, it's our year
         if self.syear == 0:
             self.syear = now.tm_year
         month_start_id = now.tm_mon
@@ -515,6 +527,7 @@ class WeekDayDaterange(Daterange):
         day_start = find_day_by_weekday_offset(self.syear, month_start, self.swday, self.swday_offset)
         start_time = get_start_of_day(self.syear, month_start_id, day_start)
 
+        #Same for end year
         if self.eyear == 0:
             self.eyear = now.tm_year
         month_end_id = now.tm_mon
@@ -522,11 +535,14 @@ class WeekDayDaterange(Daterange):
         day_end = find_day_by_weekday_offset(self.eyear, month_end, self.ewday, self.ewday_offset)
         end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
+        #Maybe end_time is before start. So look for the
+        #next month
         if start_time > end_time:
             month_end_id = month_end_id + 1
             if month_end_id > 12:
                 month_end_id = 1
                 self.eyear += 1
+            month_end = Daterange.get_month_by_id(month_end_id)
             day_end = find_day_by_weekday_offset(self.eyear, month_end, self.ewday, self.ewday_offset)
             end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
