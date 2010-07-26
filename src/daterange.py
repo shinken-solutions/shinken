@@ -356,11 +356,12 @@ class Daterange:
                 #print "Early Return next invalid day:", time.asctime(time.localtime(get_day(t)))
                 return get_day(t)
             if start_time >= t :
-                return start_time
+                return get_day(start_time)
         else:#Else, there is no possibility than in our start_time<->end_time we got
             #any invalid time (full period out). So it's end_time+1 sec (tomorow of end_time)
             #print "Full period out, got end_time", time.asctime(time.localtime(get_day(end_time +1)))
             return get_day(end_time +1)
+
         return None
 
 
@@ -389,9 +390,9 @@ class Daterange:
         #print "TOTO sec_from_morning:", sec_from_morning
         #Ok we've got a next invalid day and a invalid possibility in
         #timerange, so the next invalid is this day+sec_from_morning
+        #print "T_day", t_day, "Sec from morning", sec_from_morning
         if t_day is not None and sec_from_morning is not None:
-            #print "TOTO out with", time.asctime(time.localtime(t_day + sec_from_morning))
-            return t_day + sec_from_morning
+            return t_day + sec_from_morning + 60
 
         #We've got a day but no sec_from_morning : the timerange is full (0->24h)
         #so the next invalid is this day at the day_start
@@ -404,7 +405,7 @@ class Daterange:
         t_day2 = self.get_next_invalid_day(t)
         sec_from_morning = self.get_next_future_timerange_invalid(t_day2)
         if t_day2 is not None and sec_from_morning is not None:
-            return t_day2 + sec_from_morning
+            return t_day2 + sec_from_morning + 60
         
         if t_day2 is not None and sec_from_morning == None:
             return t_day2

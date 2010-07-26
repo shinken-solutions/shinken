@@ -247,32 +247,45 @@ class Timeperiod:
         while still_loop:
             #print "Invalid loop with", time.asctime(time.localtime(local_min))
 
-            #Ok, not in cache...
-            #print self.get_name(), "Begin loop with", time.asctime(time.localtime(local_min))
-            next_exclude = None
-            for dr in self.exclude:
-                m = dr.get_next_valid_time_from_t(local_min)
-                if m != None:
-                    #print time.asctime(time.localtime(m))
-                    if next_exclude == None or m <= next_exclude:
-                        next_exclude = m
+#            #Ok, not in cache...
+#            #print self.get_name(), "Begin loop with", time.asctime(time.localtime(local_min))
+#            next_exclude = None
+#            for dr in self.exclude:
+#                m = dr.get_next_valid_time_from_t(local_min)
+#                if m != None:
+#                    #print time.asctime(time.localtime(m))
+#                    if next_exclude == None or m <= next_exclude:
+#                        next_exclude = m
 
-            #Maybe the min of exclude is not valid, it is the min we can find.
-            if next_exclude != None and not self.is_time_valid(next_exclude):
-                #print self.get_name(), "find a possible early exit for invalid ! with", time.asctime(time.localtime(next_exclude)) 
-                res = next_exclude
-                still_loop = False
+#            #Maybe the min of exclude is not valid, it is the min we can find.
+#            if next_exclude != None and not self.is_time_valid(next_exclude):
+#                #print self.get_name(), "find a possible early exit for invalid ! with", time.asctime(time.localtime(next_exclude)) 
+#                res = next_exclude
+#                still_loop = False
 
+            dr_mins = []
             #But maybe we can find a better solution with next invalid of standart dateranges
             #print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
             for dr in self.dateranges:
                 #print self.get_name(), "Search a next invalid from DR", time.asctime(time.localtime(local_min))
+                #print dr.__dict__
                 m = dr.get_next_invalid_time_from_t(local_min)
+
                 #print self.get_name(), "Dr give me next invalid", time.asctime(time.localtime(m))
                 if m != None:
+                    #But maybe it's invalid for this dr, but valid for other ones.
+                    if not self.is_time_valid(m):
                     #print "Final : Got a next invalid at", time.asctime(time.localtime(m))
-                    local_min = m
-            
+                        dr_mins.append(m)
+                        #print "Add a m", time.asctime(time.localtime(m))
+#                    else:
+#                        print dr.__dict__
+#                        print "FUCK bad result\n\n\n"
+
+            if dr_mins != []:
+                local_min = min(dr_mins)
+                #print "After dr : found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
+                
             #print self.get_name(), 'Invalid: local min', time.asctime(time.localtime(local_min))
             #We do not loop unless the local_min is not valid
             still_loop = False
@@ -291,13 +304,13 @@ class Timeperiod:
                             still_loop = False
                             res = None
 
-                if not still_loop:#We find a possible value
-                    #We take the result the minimal possible
-                    if res == None or local_min < res:
-                        res = local_min
+            if not still_loop:#We find a possible value
+                #We take the result the minimal possible
+                if res == None or local_min < res:
+                    res = local_min
 
-        #print "Got the next invalid", time.asctime(time.localtime(res))
-        return res
+        #print "Finished Return the next invalid", time.asctime(time.localtime(local_min))
+        return local_min
 
     
     def has(self, prop):
