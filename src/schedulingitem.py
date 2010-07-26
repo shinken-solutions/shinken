@@ -146,6 +146,7 @@ class SchedulingItem(Item):
         if self.is_problem:
             #print "Me %s is no more a problem! Cool" % self.get_dbg_name()
             self.is_problem = False
+
             #we warn impacts that we are no more a problem
             for impact in self.impacts:
                 #print "I'm deregistring from impact %s" % impact.get_dbg_name()

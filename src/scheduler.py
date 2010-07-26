@@ -428,7 +428,7 @@ class Scheduler:
         #scheduling)
         not_loading = ['act_depend_of', 'chk_depend_of', 'checks_in_progress', \
                            'downtimes', 'host', 'next_chk', 'act_depend_of_me', \
-                           'chk_depend_of_me', 'services']
+                           'chk_depend_of_me', 'services', 'source_problems', 'impacts']
 
         ret_hosts = all_data['hosts']
         for ret_h in ret_hosts:

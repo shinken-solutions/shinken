@@ -69,7 +69,7 @@ class IForArbiter(Pyro.core.ObjBase):
         for sched_id in conf['schedulers'] :
             already_got = False
             if sched_id in self.schedulers:
-                Log().log("We already got the conf %" % sched_id)
+                Log().log("We already got the conf %d" % sched_id)
                 already_got = True
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
             s = conf['schedulers'][sched_id]
