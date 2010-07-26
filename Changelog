@@ -1,0 +1,88 @@
+########################
+Shinken 0.x ChangeLog
+#######################
+
+
+0.2 - ??/??/2010
+------------------
+ENHANCEMENTS
+	*Add sticky acknowledgement. Non-permanent ack-comments are now automatically removed	
+	*Acknowledgement test cases
+	*Add some hard tests about timeperiods calculations
+	*Add host acknowledgement and acknowledgement stickiness
+	*Finished service problem acknowledgement. one more testcase
+	*Add REMOVE_HOST/SVC_ACKNOWLEDGEMENT external command
+	*Add a test.sh script for Hudson test (launch all tests)
+	*Add a problem/impact test.
+	*Now broker get broks from pollers and reactionners. (Useful for Logs)
+	*Give Broker a way to make broks :) (like for it's own log)
+	*Now external modules can return objects (from now nobody use it, but it can be useful in the future)
+	*Make easier to raise checks/notificatiosn from in deep objects class.
+	*Add a problem/incident change states when apply. But it do not interfer with the standard check way of doing (or at least should not).
+	*Add some init.d scripts
+	*Nested macros are managed (like USERN in ARGN macro).
+	*Add json outputformat to the livestatus module
+	*repository cosmetics (Luke L)
+	*Redesign of the notifications (far easierto understand than the old async way)
+	*Notice about unused parameters and explain why it can eb removed from conf.
+	*Catch non standard return code in actions.py so we can add stderr to the output for such cases.
+	*Add check_period implicitly inheritate to service from host.
+	*Add max_plugins_output_length parameter to limit the checks output size.
+	*Now arbiter host_name property is not mandatory. But WARNING : for a multiple arbiter conf, it must be set.
+	*Updated cfg documentation (Author: Luke L <lukehasnoname@gmail.com>)
+	*Add documentation about date range format because it was not documented.
+	*Update the nagios to shinken migration file
+	*Change the way broks are send from Arbiter to Broker : before, the Broker connect to the Arbiter, take broks like for schedulers. But Arbiter also connect to broker. That's a nightmare about hangout. Now, Arbiter push the broks. It's far more easy and efficient.
+	*Add a pass about changing Nagios2 properties to Nagios3 ones.
+	*Add template handling to servicedependencies
+	*Add test_dependencies as the regression test
+	* "Hack" the old nagios parameters : now status_file and nagios_log are catched. If the user defined them, but do not defined the good broker modules, we create them "on the fly". I hope one day we will remove it...
+	* Less status_dat verbosity :)
+	*Add a last_perf_data + macros to access last perfdatas as in https://sourceforge.net/apps/trac/shinken/ticket/76
+	*Add a broker module npcdmod (plus test_npcdmod) which writes a perfdata file suitable for pnp4nagios
+	*HUGE clean on shinken-specific.cfg file.
+	*Add a README file
+	*Add a little note about how migrate from Nagios to Shinken
+	*Add a hint about how solve 'cannot find my own arbiter' error message.
+	*Add bin directory with some bash scripts to launch/stop the whole application.
+	*Add relative paths features for *d.cfg files : now paths in it can be relative
+	*Relative path, now we can have a easy portable sample configuration. (Gerhard)
+	*Add two missing operators in livestatus.py
+	*Add Maximilien Bersoult setup.py for testing, but we are not ready for the layout
+	*Big clean up conf sample!	
+	
+FIXES
+	*Fix a bug in ACKNOWLEDGE_SVC_PROBLEM ext. command. Sticky can be 0/1/2, not bool
+	*Bug fix in find_day_by_weekday_offset.
+	*Bug Fix : when a date was calcl before teh ref time for a weekday it was not recalculated, so problem.
+	*Bug Fix : error in get_end_of_day. It was given the first secon of the next day, so some exclude make problem with it.
+	*Bug Fix : shell like commands where not good :(. Thanks to Gilles Seban for pointing it and to Hiren Patel for giving a list of shell caracters (so we know if we should use shell or not :) )
+	*Bug fix: external commands to send checks should work now
+	*Bug fix : Arbiter do not more crash when scheduler is down and broker is up (not initialized make a missign parameter)
+	*Bug Fix : cehck orphaned was badly status set. Thanks Pylint.
+	*Bug fix : host in unreach were set DOWN un state, but unreach in state_id. Now it say clearly it's UNREACHABLE.
+	*Bug: retention was loading services objects from retention file. It's not good at all.
+	*Fix a and -> or bug in the dependancies
+	*Fix a bug in livestatus. state_type is now a number instead of HARD/SOFT
+	*Fix a bug in the livestatus module. Eventhandler command is now serializable
+	*Fix a bug in execute_unix. If there is an exception during plugin execution, use it's string representation as plugin_output
+	*Fix a bug in the livestatus module. Multiline input is now possible
+	*Bug : patch from David GUÉNAULT about stopping all brokers
+	*Correct launched/lanched type everywhere (Grégory Starck)
+	*Fixed scheduler.add so that master notifications (without contact) don't create a status brok
+	*Patch from Nicolas DUPEUX about typo correction in service.py
+	*Reduce CPU comsumption of livestatus broker (thanks flox for the patch)
+	*Fix a bug in the npcdmod test case
+	*Fix : configurations files can be mix if the previous do not finished with a line return (Sebastian Reimers)
+	*Fix: Correct a bad default arbiter pid configuration (Sebastian Reimers)
+	*Bug fix a missing save of shinken-reactionner.py about path in relative mode
+	*Global external commands now create an update_program_status_brok instead of program_status_brok
+	*Fix : add Gerhard in print screen :)
+	*NO MORE nap in code, now all are shinken :)
+
+
+
+0.1 - 31/05/2010
+------------------
+ENHANCEMENTS
+	*Initial realease
