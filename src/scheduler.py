@@ -422,13 +422,10 @@ class Scheduler:
             
             
         #Now load interesting properties in hosts/services
-        #Taging prop that not be directly load
+        #Taging retention=False prop that not be directly load
         #Items will be with theirs status, but not in checking, so
         #a new check will be launch like with a normal begining (random distributed
         #scheduling)
-        not_loading = ['act_depend_of', 'chk_depend_of', 'checks_in_progress', \
-                           'downtimes', 'host', 'next_chk', 'act_depend_of_me', \
-                           'chk_depend_of_me', 'services', 'source_problems', 'impacts']
 
         ret_hosts = all_data['hosts']
         for ret_h in ret_hosts:
@@ -436,7 +433,8 @@ class Scheduler:
             if h != None:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
-                    if prop not in not_loading:
+                    entry = running_properties[prop]
+                    if 'retention' in entry and entry['retention']:
                         setattr(h, prop, getattr(ret_h, prop))
                         for a in h.notifications_in_progress.values():
                             a.ref = h
@@ -449,7 +447,8 @@ class Scheduler:
             if s != None:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
-                    if prop not in not_loading:
+                    entry = running_properties[prop]
+                    if 'retention' in entry and entry['retention']:
                         setattr(s, prop, getattr(ret_s, prop))
                         for a in s.notifications_in_progress.values():
                             a.ref = s
