@@ -435,6 +435,18 @@ ResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
+
+    def test_columns(self):
+        self.print_header()
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get the columns meta-table
+        #---------------------------------------------------------------
+        data = """GET columns"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+
 if __name__ == '__main__':
     import cProfile
     command = """unittest.main()"""
