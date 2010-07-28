@@ -25,6 +25,7 @@ from util import to_int, to_bool
 from downtime import Downtime
 from command import CommandCall
 from log import Log
+from check import Check
 
 class ExternalCommand:
 
@@ -982,15 +983,18 @@ class ExternalCommand:
         cls = host.__class__
         #If globally disable OR locally, do not launch
         if cls.accept_passive_checks and host.passive_checks_enabled:
-            c = host.launch_check(now)
-            #Now we 'trasnform the check into a result'
-            #So exit_status, output and status to be eat by the host
-            c.exit_status = status_code
-            c.get_outputs(plugin_output)
-            c.status = 'waitconsume'
+            c = Check('scheduled', None, host, now, None)
+            host.checks_in_progress.append(c)
             #We add in the check
-            self.add(c)
-
+            self.sched.add(c)
+            #Now we 'transform the check into a result'
+            #So exit_status, output and status is eaten by the host
+            c.exit_status = status_code
+            c.get_outputs(plugin_output, host.max_plugins_output_length)
+            c.status = 'waitconsume'
+            self.sched.nb_check_received += 1
+            self.sched.waiting_results.append(c)
+            
 
     #PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
@@ -1001,14 +1005,17 @@ class ExternalCommand:
         cls = service.__class__
         #If globally disable OR locally, do not launch
         if cls.accept_passive_checks and service.passive_checks_enabled:
-            c = service.launch_check(now)
-            #Now we 'trasnform the check into a result'
-            #So exit_status, output and status to be eat by the service
-            c.exit_status = return_code
-            c.get_outputs(plugin_output)
-            c.status = 'waitconsume'
+            c = Check('scheduled', None, service, now, None)
+            service.checks_in_progress.append(c)
             #We add in the check
             self.sched.add(c)
+            #Now we 'transform the check into a result'
+            #So exit_status, output and status is eaten by the service
+            c.exit_status = return_code
+            c.get_outputs(plugin_output, service.max_plugins_output_length)
+            c.status = 'waitconsume'
+            self.sched.nb_check_received += 1
+            self.sched.waiting_results.append(c)
 
 
     #READ_STATE_INFORMATION
