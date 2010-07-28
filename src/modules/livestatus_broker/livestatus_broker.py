@@ -29,6 +29,7 @@ import select
 import socket
 import sys
 import cPickle
+import sqlite3
 
 from host import Host
 from hostgroup import Hostgroup
@@ -39,7 +40,7 @@ from contactgroup import Contactgroup
 from timeperiod import Timeperiod
 from command import Command
 from config import Config
-from livestatus import LiveStatus
+from livestatus import LiveStatus, LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL
 
 
 
@@ -77,7 +78,8 @@ class Livestatus_broker:
         self.hostname_lookup_table = {}
         self.servicename_lookup_table = {}
 
-        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
+        self.prepare_log_db()
+        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.dbconn)
 
         self.number_of_objects = 0
     
@@ -121,12 +123,9 @@ class Livestatus_broker:
         h = Host({})
         for prop in data:
             setattr(h, prop, data[prop])
-
         h.check_period = self.get_timeperiod(h.check_period)
         h.notification_period = self.get_timeperiod(h.notification_period)
-        
         h.contacts = self.get_contacts(h.contacts)
-
         #Escalations is not use for status_dat
         del h.escalations
                 
@@ -206,8 +205,6 @@ class Livestatus_broker:
         #print "Creating Contact:", c_id, data
         c = Contact({})
         self.update_element(c, data)
-        
-        
         #print "C:", c
         self.contacts[c_id] = c
         self.number_of_objects += 1
@@ -279,7 +276,6 @@ class Livestatus_broker:
         del s.escalations
 
 
-
     def manage_host_check_result_brok(self, b):
         data = b.data
         h = self.find_host(data['host_name'])
@@ -291,6 +287,7 @@ class Livestatus_broker:
     # this brok should arrive within a second after the host_check_result_brok
     def manage_host_next_schedule_brok(self, b):
         self.manage_host_check_result_brok(b)
+
 
     #In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
@@ -304,6 +301,130 @@ class Livestatus_broker:
         #Escalations is not use for status_dat
         del h.escalations
 
+
+    #A log brok will be written into a database
+    def manage_log_brok(self, b):
+        data = b.data
+        line = data['log'].encode('UTF-8').rstrip()
+        # split line and make sql insert
+        print "LOG--->", line
+        # [1278280765] SERVICE ALERT: test_host_0
+        # split leerzeichen
+        if line[0] != '[' and line[11] != ']':
+            pass
+            print "INVALID"
+            # invalid
+        else:
+            service_states = { 'OK' : 0, 'WARNING' : 1, 'CRITICAL' : 2, 'UNKNOWN' : 3, 'RECOVERY' : 0 }
+            host_states = { 'UP' : 0, 'DOWN' : 1, 'UNREACHABLE' : 2, 'RECOVERY' : 0 }
+
+            # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
+            # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
+            # 0:info, 1:state, 2:program, 3:notification, 4:passive, 5:command
+
+            # lineno, message?, plugin_output?
+            logclass = LOGCLASS_INVALID
+            attempt, command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state, state_type = [None] * 11
+            time= line[1:11]
+            print "i start with a timestamp", time
+            first_type_pos = line.find(' ') + 1
+            last_type_pos = line.find(':')
+            first_detail_pos = last_type_pos + 2
+            type = line[first_type_pos:last_type_pos]
+            options = line[first_detail_pos:]
+            message = line
+            if type == 'CURRENT SERVICE STATE':
+                logclass = LOGCLASS_STATE
+                host_name, service_description, state, state_type, attempt, plugin_output = options.split(';')
+            elif type == 'INITIAL SERVICE STATE':
+                logclass = LOGCLASS_STATE
+                host_name, service_description, state, state_type, attempt, plugin_output = options.split(';')
+            elif type == 'SERVICE ALERT':
+                # SERVICE ALERT: srv-40;Service-9;CRITICAL;HARD;1;[Errno 2] No such file or directory
+                logclass = LOGCLASS_ALERT
+                host_name, service_description, state, state_type, attempt, plugin_output = options.split(';')
+                state = service_states[state]
+            elif type == 'SERVICE DOWNTIME ALERT':
+                logclass = LOGCLASS_ALERT
+                host_name, service_description, state_type, comment = options.split(';')
+            elif type == 'SERVICE FLAPPING ALERT':
+                logclass = LOGCLASS_ALERT
+                host_name, service_description, state_type, comment = options.split(';')
+
+            elif type == 'CURRENT HOST STATE':
+                logclass = LOGCLASS_STATE
+                host_name, state, state_type, attempt, plugin_output = options.split(';')
+            elif type == 'INITIAL HOST STATE':
+                logclass = LOGCLASS_STATE
+                host_name, state, state_type, attempt, plugin_output = options.split(';')
+            elif type == 'HOST ALERT':
+                logclass = LOGCLASS_ALERT
+                host_name, state, state_type, attempt, plugin_output = options.split(';')
+                state = host_states[state]
+            elif type == 'HOST DOWNTIME ALERT':
+                logclass = LOGCLASS_ALERT
+                host_name, state_type, comment = options.split(';')
+            elif type == 'HOST FLAPPING ALERT':
+                logclass = LOGCLASS_ALERT
+                host_name, state_type, comment = options.split(';')
+
+            elif type == 'SERVICE NOTIFICATION':
+                # tust_cuntuct;test_host_0;test_ok_0;CRITICAL;notify-service;i am CRITICAL  <-- normal
+                # SERVICE NOTIFICATION: test_contact;test_host_0;test_ok_0;DOWNTIMESTART (OK);notify-service;OK
+                logclass = LOGCLASS_NOTIFICATION
+                contact_name, host_name, service_description, state_type, command_name, check_plugin_output = options.split(';')
+                if '(' in state_type: # downtime/flapping/etc-notifications take the type UNKNOWN
+                    state_type = 'UNKNOWN'
+                state = service_states[state_type]
+            elif type == 'HOST NOTIFICATION':
+                # tust_cuntuct;test_host_0;DOWN;notify-host;i am DOWN
+                logclass = LOGCLASS_NOTIFICATION
+                contact_name, host_name, state_type, command_name, check_plugin_output = options.split(';')
+                if '(' in state_type:
+                    state_type = 'UNKNOWN'
+                state = host_states[state_type]
+
+            elif type == 'PASSIVE SERVICE CHECK':
+                logclass = LOGCLASS_PASSIVECHECK
+                host_name, service_description, state, check_plugin_output = options.split(';')
+            elif type == 'PASSIVE HOST CHECK':
+                logclass = LOGCLASS_PASSIVECHECK
+                host_name, state, check_plugin_output = options.split(';')
+
+            elif type == 'SERVICE EVENT HANDLER':
+                # SERVICE EVENT HANDLER: test_host_0;test_ok_0;CRITICAL;SOFT;1;eventhandler
+                host_name, service_description, state, state_type, attempt, command_name = options.split(';')
+                state = service_states[state]
+            elif type == 'HOST EVENT HANDLER':
+                host_name, state, state_type, attempt, command_name = options.split(';')
+                state = host_states[state]
+
+            elif type == 'EXTERNAL COMMAND':
+                logclass = LOGCLASS_COMMAND
+            elif type.startswith('starting...') or \
+                 type.startswith('shutting down...') or \
+                 type.startswith('Bailing out') or \
+                 type.startswith('active mode...') or \
+                 type.startswith('standby mode...'):
+                logclass = LOGCLASS_PROGRAM
+            else:
+                print "does not match"
+
+            lineno = 0
+
+            try:
+                values = (attempt, logclass, command_name, comment, contact_name, host_name, lineno, message, options, plugin_output, service_description, state, state_type, time, type)
+            except:
+                print "Unexpected error:", sys.exc_info()[0]
+            #print "LOG:", logclass, type, host_name, service_description, state, state_type, attempt, plugin_output, contact_name, comment, command_name
+            print "LOG:", values
+            try:
+                if logclass != LOGCLASS_INVALID:
+                    self.dbcursor.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
+                    self.dbconn.commit()
+            except sqlite3.Error, e:
+                print "An error occurred:", e.args[0]
+                print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
 
 
     #The contacts must not be duplicated
@@ -373,9 +494,20 @@ class Livestatus_broker:
             setattr(e, prop, data[prop])
 
 
+    def prepare_log_db(self):
+        # create db file and tables if not existing
+        self.dbconn = sqlite3.connect('/tmp/livelogs.db')
+        self.dbcursor = self.dbconn.cursor()
+        # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
+        # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
+        cmd = "CREATE TABLE IF NOT EXISTS logs(attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options INT, plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))"
+        self.dbcursor.execute(cmd)
+        self.dbconn.commit()
+        self.dbconn.row_factory = sqlite3.Row
+
+
     def main(self):
         last_number_of_objects = 0
-        #self.prepare_log_db()
         backlog = 5
         size = 8192
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
