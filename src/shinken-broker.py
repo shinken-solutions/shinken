@@ -28,13 +28,36 @@
 #(and broks into)
 #take new ones and do the (new) job.
 
-from Queue import Empty
-from multiprocessing import active_children
 import time
 import sys
-import Pyro.core
+import platform
 import sys, os
 import getopt
+
+
+#We know that a Python 2.5 or Python3K will fail.
+#We can say why and quit.
+python_version = platform.python_version_tuple()
+
+## Make sure people are using Python 2.5 or higher
+if int(python_version[0]) == 2 and int(python_version[1]) < 6:
+    print "Shinken require as a minimum Python 2.6.x, sorry"
+    sys.exit(1)
+
+if int(python_version[0]) == 3:
+    print "Shinken is not yet compatible with Python3k, sorry"
+    sys.exit(1)
+
+
+try:
+    import Pyro.core
+except ImportError:
+    print "Shinken require the Python Pyro module. Please install it."
+    sys.exit(1)
+
+#Module from 2.6 and higher
+from Queue import Empty
+from multiprocessing import active_children
 
 
 from satellite import Satellite

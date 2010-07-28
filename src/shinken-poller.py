@@ -30,6 +30,28 @@
 import sys, os
 import getopt
 import ConfigParser
+import platform
+
+#We know that a Python 2.5 or Python3K will fail.
+#We can say why and quit.
+python_version = platform.python_version_tuple()
+
+## Make sure people are using Python 2.5 or higher
+if int(python_version[0]) == 2 and int(python_version[1]) < 6:
+    print "Shinken require as a minimum Python 2.6.x, sorry"
+    sys.exit(1)
+
+if int(python_version[0]) == 3:
+    print "Shinken is not yet compatible with Python3k, sorry"
+    sys.exit(1)
+
+
+try:
+    import Pyro.core
+except ImportError:
+    print "Shinken require the Python Pyro module. Please install it."
+    sys.exit(1)
+
 
 from satellite import Satellite
 from util import to_int, to_bool
