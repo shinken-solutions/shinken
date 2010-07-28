@@ -5584,9 +5584,6 @@ class LiveStatus:
                 if obj.__name__ in tablenames:
                     for attr in LiveStatus.out_map[obj]:
                         result.append({ 'description' : LiveStatus.out_map[obj][attr]['description'] if 'description' in LiveStatus.out_map[obj][attr] and LiveStatus.out_map[obj][attr]['description'] else 'to_do_desc', 'name' : attr, 'table' : tablenames[obj.__name__], 'type' : LiveStatus.out_map[obj][attr]['type'] })
-            print "---------------------------------------------------------------"
-            print result
-            print "---------------------------------------------------------------"
         elif table == 'log':
             if len(filtercolumns) == 0:
                 c = self.dbconn.cursor()
@@ -5636,24 +5633,17 @@ class LiveStatus:
         lines = []
         if outputformat == 'csv':
             if len(result) > 0:
-                print "MARK1"
                 if columnheaders != 'off' or len(columns) == 0:
-                    print "MARK2"
                     if len(aliases) > 0:
                         #This is for statements like "Stats: .... as alias_column
                         lines.append(separators[1].join([aliases[col] for col in columns]))
                     else:
-                        print "MARK3"
                         if (len(columns) == 0):
-                            print "MARK4"
                             # Show all available columns
                             columns = sorted(result[0].keys())
-                        print "MARK5"
                         lines.append(separators[1].join(columns))
-                        print "MARK6"
                 for object in result:
                     #construct one line of output for each object found
-                    print "ojbect is", object
                     lines.append(separators[1].join(separators[2].join(str(y) for y in x) if isinstance(x, list) else str(x) for x in [object[c] for c in columns]))
             else:
                 if columnheaders == 'on':
