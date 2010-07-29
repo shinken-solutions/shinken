@@ -255,7 +255,7 @@ class Ndodb_broker:
     #TODO : fill nagios_instances
     def manage_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
-        to_del = ['instance_name']
+        to_del = ['instance_name', 'command_file']
         to_add = []
         mapping = self.mapping['program_status']
         for prop in new_b.data:
