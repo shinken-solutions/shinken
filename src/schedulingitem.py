@@ -874,14 +874,14 @@ class SchedulingItem(Item):
 
     #return a check to check the host/service
     #and return id of the check
-    def launch_check(self, t, ref_check = None):
+    def launch_check(self, t, ref_check = None, force=False):
         c = None
         cls = self.__class__
         
         #if I'm already in checking, Why launch a new check?
         #If ref_check_id is not None , this is a dependancy_ check
         #If none, it might be a forced check, so OK, I do a new
-        if self.in_checking and ref_check != None:
+        if not force and (self.in_checking and ref_check != None):
             #print "FUCK, I do not want to launch a new check, I alreay have one"
             c_in_progress = self.checks_in_progress[0] #0 is OK because in_checking is True
             if c_in_progress.t_to_go > time.time(): #Very far?
@@ -889,7 +889,7 @@ class SchedulingItem(Item):
             c_in_progress.depend_on_me.append(ref_check)
             return c_in_progress.id
 
-        if not self.is_no_check_dependant():
+        if force or (not self.is_no_check_dependant()):
             #Get the command to launch
             m = MacroResolver()
             data = self.get_data_for_checks()
