@@ -512,6 +512,7 @@ class Satellite(Daemon):
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0
         Pyro.config.PYRO_STORAGE = self.workdir
+        Log().log("Using working directory : %s" % os.path.abspath(self.workdir))
         #Daemon init
         Pyro.core.initServer()
 

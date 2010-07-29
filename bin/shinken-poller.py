@@ -19,20 +19,18 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is an application for launch actions 
-#like notifications or event handlers
-#The actionner listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where actionner will take 
-#actions.
-#When already launch and have a conf, actionner still listen to arbiter (one 
-#a timeout) if arbiter wants it to have a new conf, actionner forgot old 
-#chedulers (and actions into) take new ones and do the (new) job.
+#This class is an application for launch checks
+#The poller listen configuration from Arbiter in a port (first argument)
+#the configuration gived by arbiter is schedulers where actionner will
+#take checks.
+#When already launch and have a conf, poller still listen to arbiter 
+#(one a timeout) if arbiter whant it to have a new conf, poller forgot
+#old cheduler (and checks into) take new ones and do the (new) job.
 
 import sys, os
 import getopt
 import ConfigParser
 import platform
-
 
 #We know that a Python 2.5 or Python3K will fail.
 #We can say why and quit.
@@ -54,23 +52,39 @@ except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
 
+#Try to load shinken lib.
+#Maybe it's not in our python path, so we detect it
+#it so (it's a untar install) we add .. in the path
+try :
+    from shinken.util import to_bool
+except ImportError:
+    #Now add in the python path the shinken lib
+    #if we launch it in a direct way and
+    #the shinken is not a python lib
+    my_path = os.path.abspath(sys.modules['__main__'].__file__)
+    elts = os.path.dirname(my_path).split(os.sep)[:-1]
+    sys.path.append(os.sep.join(elts))
+    elts.append('shinken')
+    sys.path.append(os.sep.join(elts))
 
-from satellite import Satellite
-from util import to_int, to_bool
 
-VERSION = "0.1"
+from shinken.satellite import Satellite
+from shinken.util import to_int, to_bool
+from shinken.module import Module, Modules
+
+VERSION = "0.2"
 
 
 #Our main APP class
-class Reactionner(Satellite):
-	do_checks = False #I do not do checks
-	do_actions = True #just actions like notifications
-	#default_port = 7769
-
+class Poller (Satellite):
+	do_checks = True #I do checks
+	do_actions = False #but no actions
+	#default_port = 7771
+	
 	properties = {
-		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None, 'path' : True},
-		'pidfile' : {'default' : '/usr/local/shinken/src/var/reactionnerd.pid', 'pythonize' : None, 'path' : True},
-		'port' : {'default' : '7769', 'pythonize' : to_int},
+		'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
+		'pidfile' : {'default' : '/usr/local/shinken/var/pollerd.pid', 'pythonize' : None, 'path' : True},
+		'port' : {'default' : '7771', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
 		'user' : {'default' : 'shinken', 'pythonize' : None},
 		'group' : {'default' : 'shinken', 'pythonize' : None},
@@ -80,7 +94,7 @@ class Reactionner(Satellite):
 
 ################### Process launch part
 def usage(name):
-    print "Shinken Reactionner Daemon, version %s, from :" % VERSION
+    print "Shinken Poller Daemon, version %s, from : " % VERSION
     print "        Gabes Jean, naparuba@gmail.com"
     print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
     print "Usage: %s [options] [-c configfile]" % name
@@ -95,7 +109,6 @@ def usage(name):
     print "\tPrint detailed help screen"
     print " --debug"
     print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-
 
 
 #lets go to the party
@@ -132,9 +145,9 @@ if __name__ == "__main__":
 	    usage(sys.argv[0])
             sys.exit()
 
-
-    p = Reactionner(config_file, is_daemon, do_replace, debug, debug_file)
+    p = Poller(config_file, is_daemon, do_replace, debug, debug_file)
     #import cProfile
     p.main()
     #command = """p.main()"""
-    #cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
+    #cProfile.runctx( command, globals(), locals(), filename="/tmp/Poller.profile" )
+

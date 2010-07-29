@@ -86,16 +86,31 @@ except ImportError:
     sys.exit(1)
 
 
+#Try to load shinken lib.
+#Maybe it's not in our python path, so we detect it
+#it so (it's a untar install) we add .. in the path
+try :
+    from shinken.util import to_bool
+except ImportError:
+    #Now add in the python path the shinken lib
+    #if we launch it in a direct way and
+    #the shinken is not a python lib
+    my_path = os.path.abspath(sys.modules['__main__'].__file__)
+    elts = os.path.dirname(my_path).split(os.sep)[:-1]
+    sys.path.append(os.sep.join(elts))
+    elts.append('shinken')
+    sys.path.append(os.sep.join(elts))
+
 #from check import Check
-from scheduler import Scheduler
-from config import Config
-from macroresolver import MacroResolver
-from external_command import ExternalCommand
-from daemon import Daemon#create_daemon, check_parallele_run, change_user
-from util import to_int, to_bool
+from shinken.scheduler import Scheduler
+from shinken.config import Config
+from shinken.macroresolver import MacroResolver
+from shinken.external_command import ExternalCommand
+from shinken.daemon import Daemon#create_daemon, check_parallele_run, change_user
+from shinken.util import to_int, to_bool
 #from module import Module, Modules
 
-VERSION = "0.1"
+VERSION = "0.2"
 
 
 
@@ -254,8 +269,8 @@ class Shinken(Daemon):
     #default_port = 7768
 
     properties = {
-        'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None, 'path' : True},
-        'pidfile' : {'default' : '/usr/local/shinken/src/var/schedulerd.pid', 'pythonize' : None, 'path' : True},
+        'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
+        'pidfile' : {'default' : '/usr/local/shinken/var/schedulerd.pid', 'pythonize' : None, 'path' : True},
         'port' : {'default' : '7768', 'pythonize' : to_int},
         'host' : {'default' : '0.0.0.0', 'pythonize' : None},
         'user' : {'default' : 'shinken', 'pythonize' : None},
@@ -309,7 +324,7 @@ class Shinken(Daemon):
         Config.fill_usern_macros()
 		
         #create the server
-        print "Workdir", self.workdir
+        print "Using working directory : %s" % os.path.abspath(self.workdir)
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0

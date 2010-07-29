@@ -58,17 +58,31 @@ except ImportError:
     sys.exit(1)
 
 
+#Try to load shinken lib.
+#Maybe it's not in our python path, so we detect it
+#it so (it's a untar install) we add .. in the path
+try :
+    from shinken.util import to_bool
+except ImportError:
+    #Now add in the python path the shinken lib
+    #if we launch it in a direct way and
+    #the shinken is not a python lib
+    my_path = os.path.abspath(sys.modules['__main__'].__file__)
+    elts = os.path.dirname(my_path).split(os.sep)[:-1]
+    sys.path.append(os.sep.join(elts))
+    elts.append('shinken')
+    sys.path.append(os.sep.join(elts))
 
-from util import to_bool
+from shinken.util import to_bool
 #from scheduler import Scheduler
-from config import Config
-from external_command import ExternalCommand
-from dispatcher import Dispatcher
-from daemon import Daemon
-from log import Log
+from shinken.config import Config
+from shinken.external_command import ExternalCommand
+from shinken.dispatcher import Dispatcher
+from shinken.daemon import Daemon
+from shinken.log import Log
 
 
-VERSION = "0.1"
+VERSION = "0.2"
 
 
 
@@ -391,6 +405,7 @@ class Arbiter(Daemon):
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0
+        Log().log("Using working directory : %s" % os.path.abspath(self.workdir))
         Pyro.core.initServer()
 	
         Log().log("Listening on %s:%d" % (self.me.address, self.me.port))

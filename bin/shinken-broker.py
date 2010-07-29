@@ -60,22 +60,38 @@ from Queue import Empty
 from multiprocessing import active_children
 
 
-from satellite import Satellite
-from daemon import Daemon
-from util import to_int, to_bool
-from module import Module, Modules
-from modulesmanager import ModulesManager
-from log import Log
-from brok import Brok
+#Try to load shinken lib.
+#Maybe it's not in our python path, so we detect it
+#it so (it's a untar install) we add .. in the path
+try :
+    from shinken.util import to_bool
+except ImportError:
+    #Now add in the python path the shinken lib
+    #if we launch it in a direct way and
+    #the shinken is not a python lib
+    my_path = os.path.abspath(sys.modules['__main__'].__file__)
+    elts = os.path.dirname(my_path).split(os.sep)[:-1]
+    sys.path.append(os.sep.join(elts))
+    elts.append('shinken')
+    sys.path.append(os.sep.join(elts))
+
+
+from shinken.satellite import Satellite
+from shinken.daemon import Daemon
+from shinken.util import to_int, to_bool
+from shinken.module import Module, Modules
+from shinken.modulesmanager import ModulesManager
+from shinken.log import Log
+from shinken.brok import Brok
 
 #Load to be used by modules
-from resultmodulation import Resultmodulation
-from escalation import Escalation
-from timeperiod import Timeperiod
-from contact import Contact
-from command import Command, CommandCall
+from shinken.resultmodulation import Resultmodulation
+from shinken.escalation import Escalation
+from shinken.timeperiod import Timeperiod
+from shinken.contact import Contact
+from shinken.command import Command, CommandCall
 
-VERSION = "0.1"
+VERSION = "0.2"
 
 
 
@@ -213,14 +229,14 @@ class IForArbiter(Pyro.core.ObjBase):
 class Broker(Satellite):
 	#default_port = 7772
 	properties = {
-		'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None, 'path' : True},
-		'pidfile' : {'default' : '/usr/local/shinken/src/var/brokerd.pid', 'pythonize' : None, 'path' : True},
+		'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
+		'pidfile' : {'default' : '/usr/local/shinken/var/brokerd.pid', 'pythonize' : None, 'path' : True},
 		'port' : {'default' : '7772', 'pythonize' : to_int},
 		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
 		'user' : {'default' : 'shinken', 'pythonize' : None},
 		'group' : {'default' : 'shinken', 'pythonize' : None},
 		'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
-		'modulespath' : {'default' :'/usr/local/shinken/src/modules' , 'pythonize' : None, 'path' : True}
+		'modulespath' : {'default' :'/usr/local/shinken/shinken/modules' , 'pythonize' : None, 'path' : True}
 		}
 	
 
@@ -232,7 +248,7 @@ class Broker(Satellite):
 		self.set_exit_handler()
 
                 #Log init
-		self.log = Log()
+                self.log = Log()
 		self.log.load_obj(self)
 
 		#The config reading part
@@ -486,9 +502,10 @@ class Broker(Satellite):
 
 	#Main function, will loop forever
 	def main(self):
-
-		Pyro.config.PYRO_STORAGE = self.workdir
-		Pyro.config.PYRO_MULTITHREADED = 0
+            
+                Log().log("Using working directory : %s" % os.path.abspath(self.workdir))
+                Pyro.config.PYRO_STORAGE = self.workdir
+                Pyro.config.PYRO_MULTITHREADED = 0
                 #Daemon init
 		Pyro.core.initServer()
 
