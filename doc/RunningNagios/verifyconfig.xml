@@ -20,7 +20,7 @@
     <option>-v</option> command line option like so:</para>
 
     <screen>
-<prompt>linux:~ # </prompt><userinput>/usr/local/shinken/src/shinken-arbiter -v /usr/local/shinken/src/etc/nagios.cfg</userinput>
+<prompt>linux:~ # </prompt><userinput>/usr/local/shinken/bin/shinken-arbiter -v -c /usr/local/shinken/etc/nagios.cfg -c /usr/local/shinken/etc/shinken-specific.cfg</userinput>
 </screen>
 
     <para>If you've forgotten to enter some critical data or misconfigured
