@@ -77,7 +77,7 @@
   <section>
     <title>Download Shinken and the Plugins</title>
 
-    <para>Take the Shinken pakage <ulink url="http://shinken-monitoring.org/download">Here</ulink> and uncomrpess it in <filename class="directory">c:</filename> so you will have directory as <filename class="directory">c:\shinken\src</filename>. Take the files instsrv.exe, srvany.exe and sc.exe from the directory of the ressource kit (typically <filename class="directory">c:\program files\Windows Resource Kits\Tools</filename>) and put them in the directory <filename class="directory">c:\shinken\src\windows</filename>.
+    <para>Take the Shinken pakage <ulink url="http://shinken-monitoring.org/download">Here</ulink> and uncomrpess it in <filename class="directory">c:</filename> so you will have directory as <filename class="directory">c:\shinken</filename>. Take the files instsrv.exe, srvany.exe and sc.exe from the directory of the ressource kit (typically <filename class="directory">c:\program files\Windows Resource Kits\Tools</filename>) and put them in the directory <filename class="directory">c:\shinken\windows</filename>.
     </para>
 
   </section>
@@ -85,7 +85,7 @@
   <section>
     <title>Install Shinken as a Service</title>
 
-    <para>Launch the batch <filename class="directory">c:\shinken\src\windows\install-all.bat</filename> to declare all services need by Shinken :</para>
+    <para>Launch the batch <filename class="directory">c:\shinken\windows\install-all.bat</filename> to declare all services need by Shinken :</para>
     <itemizedlist>
       <listitem>
         <para>Shinken-Arbiter : launch the Arbiter service</para>

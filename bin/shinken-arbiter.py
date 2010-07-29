@@ -172,8 +172,8 @@ class Arbiter(Daemon):
 
 
     properties = {
-        'workdir' : {'default' : '/usr/local/shinken/src/var', 'pythonize' : None},
-        'pidfile' : {'default' : '/usr/local/shinken/src/var/arbiterd.pid', 'pythonize' : None},
+        'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None},
+        'pidfile' : {'default' : '/usr/local/shinken/var/arbiterd.pid', 'pythonize' : None},
         #'port' : {'default' : '7768', 'pythonize' : to_int},
         #'host' : {'default' : '0.0.0.0', 'pythonize' : None},
         'user' : {'default' : 'shinken', 'pythonize' : None},

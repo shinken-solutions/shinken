@@ -30,11 +30,11 @@
         <para>Manually: You can start the Shinken daemon manually with the
         <option>-d</option> command line option like so:</para>
 
-        <screen><prompt>linux:~ # </prompt><userinput>/usr/local/shinken/src/shinken-scheduler.py -d -c /usr/local/shinken/src/etc/schedulerd.cfg
-</userinput><prompt>linux:~ # </prompt>/usr/local/shinken/src/shinken-poller.py -d -c /usr/local/shinken/src/etc/pollerd.cfg<prompt>
-linux:~ # </prompt>/usr/local/shinken/src/shinken-reactionner.py -d -c /usr/local/shinken/src/etc/reactionnerd.cfg<prompt>
-linux:~ # </prompt>/usr/local/shinken/src/shinken-broker.py -d -c /usr/local/shinken/src/etc/brokerd.cfg<prompt>
-linux:~ # </prompt>/usr/local/shinken/src/shinken-arbiter.py -d -c /usr/local/shinken/src/etc/nagios.cfg</screen>
+        <screen><prompt>linux:~ # </prompt><userinput>/usr/local/shinken/bin/shinken-scheduler.py -d -c /usr/local/shinken/etc/schedulerd.cfg
+</userinput><prompt>linux:~ # </prompt>/usr/local/shinken/bin/shinken-poller.py -d -c /usr/local/shinken/etc/pollerd.cfg<prompt>
+linux:~ # </prompt>/usr/local/shinken/bin/shinken-reactionner.py -d -c /usr/local/shinken/etc/reactionnerd.cfg<prompt>
+linux:~ # </prompt>/usr/local/shinken/bin/shinken-broker.py -d -c /usr/local/shinken/etc/brokerd.cfg<prompt>
+linux:~ # </prompt>/usr/local/shinken/bin/shinken-arbiter.py -d -c /usr/local/shinken/etc/nagios.cfg</screen>
       </listitem>
     </orderedlist>
   </section>
@@ -71,7 +71,7 @@ linux:~ # </prompt>/usr/local/shinken/src/shinken-arbiter.py -d -c /usr/local/sh
         SIGHUP signal like so:</para>
 
         <screen><prompt>linux:~ # </prompt><userinput>kill &lt;arbiter_pid&gt;
-<prompt>linux:~ # </prompt>/usr/local/shinken/src/shinken-arbiter.py -d -c /usr/local/shinken/src/etc/nagios.cfg
+<prompt>linux:~ # </prompt>/usr/local/shinken/bin/shinken-arbiter.py -d -c /usr/local/shinken/etc/nagios.cfg
 </userinput></screen>
       </listitem>
     </orderedlist>

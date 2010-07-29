@@ -23,28 +23,28 @@
   <section>
     <title>How is organized then Shinken's code</title>
     <para>
-      All the Shinken code is in the src directory. All important
+      All the Shinken code is in the shinken directory. All important
       source files are :
       <itemizedlist>
 	<listitem>
-	  <para>shinken-*py : source files of daemons
+	  <para>bin/shinken-*py : source files of daemons
 	  </para>
 	</listitem>
 	<listitem>
-	  <para>item.py : based class for nearly all important objects
+	  <para>shinken/item.py : based class for nearly all important objects
 	  like hosts, services and contacts.
 	  </para>
 	</listitem>
 	<listitem>
-	  <para>*link.py : class used by Arbiter to connect to daemons.
+	  <para>shinken/*link.py : class used by Arbiter to connect to daemons.
 	  </para>
 	</listitem>
 	<listitem>
-	  <para>modules/*/*py : modules for daemons (like Broker).
+	  <para>shinken/modules/*/*py : modules for daemons (like Broker).
 	  </para>
 	</listitem>
 	<listitem>
-	  <para>schedulingitem.py : based class for host/service that
+	  <para>shinken/schedulingitem.py : based class for host/service that
 	  defined all algorithm for scheduling things.
 	  </para>
 	</listitem>

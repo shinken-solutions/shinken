@@ -15,7 +15,7 @@ SHINKEN_USER=shinken
 SHINKEN_GROUP=shinken
 
 SHINKEN_BIN=/usr/local/shinken/bin
-SHINKEN_VAR=/usr/local/shinken/src/var/
+SHINKEN_VAR=/usr/local/shinken/var/
 
 start() {
         echo "Starting Shinken Poller daemon  ..."

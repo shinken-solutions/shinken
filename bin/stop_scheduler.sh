@@ -1,8 +1,8 @@
 #!/bin/bash
 
 DIR=$(cd $(dirname "$0"); pwd)
-BIN=$DIR"/../src"
-ETC=$DIR"/../src/etc"
+BIN=$DIR"/../bin"
+ETC=$DIR"/../etc"
 
 echo "Stopping scheduler"
-kill `cat $DIR/../src/var/schedulerd.pid`
+kill `cat $DIR/../var/schedulerd.pid`
