@@ -1,8 +1,8 @@
 #!/bin/bash
 
 DIR=$(cd $(dirname "$0"); pwd)
-BIN=$DIR"/../src"
-ETC=$DIR"/../src/etc"
+BIN=$DIR"/../bin"
+ETC=$DIR"/../etc"
 
 echo "Stopping poller"
-kill `cat $DIR/../src/var/pollerd.pid`
+kill `cat $DIR/../var/pollerd.pid`
