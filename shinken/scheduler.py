@@ -88,6 +88,7 @@ class Scheduler:
 
     #Load conf for future use
     def load_conf(self, conf):
+        self.program_start = time.time()
         self.conf = conf
         self.hostgroups = conf.hostgroups
         self.services = conf.services
@@ -508,7 +509,7 @@ class Scheduler:
                 "instance_id" : self.instance_id,
                 "instance_name": self.instance_name,
                 "last_alive" : now,
-                "program_start" : now,
+                "program_start" : self.program_start,
                 "pid" : os.getpid(),
                 "daemon_mode" : 1,
                 "last_command_check" : now,

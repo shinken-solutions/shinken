@@ -59,6 +59,13 @@ class Merlindb_broker:
                                 'is_running' : { 'transform' : None},
                                 'instance_id' : {'transform' : None},
                                 },
+            #Program status update (every 10s)
+            'update_program_status' : {'program_start' : {'transform' : None},
+                                'pid' : {'transform' : None},
+                                'last_alive' : {'transform' : None},
+                                'is_running' : { 'transform' : None},
+                                'instance_id' : {'transform' : None},
+                                },
             #Host
             'initial_host_status' : {
                 'id' : {'transform' : None},
@@ -592,6 +599,16 @@ class Merlindb_broker:
     #Like pid, daemon mode, last activity, etc
     #We aleady clean database, so insert
     def manage_program_status_brok(self, b):
+	instance_id = b.data['instance_id']
+	del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
+        query = self.create_insert_query('program_status', b.data)
+        return [del_query,query]
+
+
+    #Program status is .. status of program? :)
+    #Like pid, daemon mode, last activity, etc
+    #We aleady clean database, so insert
+    def manage_update_program_status_brok(self, b):
 	instance_id = b.data['instance_id']
 	del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
         query = self.create_insert_query('program_status', b.data)
