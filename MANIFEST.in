@@ -3,11 +3,11 @@ recursive-include etc *.cfg
 recursive-include windows .bat .reg
 recursive-include bin *.* *-*
 recursive-include libexec *.*
-recursive-include test *.py *.txt
+include test *.py *.txt
 recursive-include doc *.html *.png *.txt *.css *.jpg *.xml
 global-exclude .git *.pyc *.pyo
 global-exclude .debug .pid .exe
 include var/void_for_git
 include MANIFEST.in MANIFEST FROM_NAGIOS_TO_SHINKEN Changelog
-include COPYING THANKS README 
+include COPYING THANKS README setup_parameters.cfg
 exclude doc/dvi doc/html/ etc.orig/ etc/bench/ test/my/

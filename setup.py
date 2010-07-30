@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -100,7 +99,7 @@ setup(
   packages = find_packages(),
   description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
   long_description=open('README').read(),
-  author = "Gabès Jean",
+  author = "Gabes Jean",
   author_email = "naparuba@gmail.com",
   license = "GNU Affero General Public License",
   url = "http://www.shinken-monitoring.org",
@@ -155,7 +154,7 @@ def get_gid(group_name):
         print "Error: the group",group_name , "is unknown"
         sys.exit(2)
 
-if os.name != 'nt':
+if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv):
     #First var
     var_uid = get_uid(var_owner)
     var_gui = get_gid(var_group)
