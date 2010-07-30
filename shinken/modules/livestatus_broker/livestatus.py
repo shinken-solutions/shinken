@@ -6013,7 +6013,6 @@ class LiveStatus:
                 # check Class.attribute exists
                 cmd, sep1, sep2, sep3, sep4 = line.split(' ', 5)
                 separators = map(lambda x: chr(int(x)), [sep1, sep2, sep3, sep4])
-                LiveStatus.separators = separators
             elif line.find('COMMAND') != -1:
                 cmd, extcmd = line.split(' ', 1)
             else:
