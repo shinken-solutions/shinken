@@ -11,7 +11,7 @@ import string
 import re
 import random
 import unittest
-sys.path.append("../src")
+sys.path.append("../shinken")
 from config import Config
 from dispatcher import Dispatcher
 from log import Log
@@ -119,14 +119,7 @@ class ShinkenTest(unittest.TestCase):
         self.show_actions()
         #print "------------ worker loop end ----------------"
 
-
         
-    def update_broker(self):
-        for brok in self.sched.broks.values():
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
-
-    
     def show_logs(self):
         print "--- logs <<<----------------------------------"
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):

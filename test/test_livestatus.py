@@ -6,7 +6,7 @@
 
 from shinken_test import *
 
-sys.path.append("../src/modules/livestatus_broker")
+sys.path.append("../shinken/modules/livestatus_broker")
 from livestatus_broker import Livestatus_broker
 sys.setcheckinterval(10000)
 
@@ -52,6 +52,11 @@ class TestConfig(ShinkenTest):
         self.livestatus_broker.init()
         self.sched.fill_initial_broks()
 
+
+    def update_broker(self):
+        for brok in self.sched.broks.values():
+            self.livestatus_broker.manage_brok(brok)
+        self.sched.broks = {}
 
 
     def test_fill_status(self):

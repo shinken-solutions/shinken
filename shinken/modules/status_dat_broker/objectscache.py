@@ -37,7 +37,8 @@ from util import from_bool_to_string,from_list_to_split
 #For the servicegroup config we need more. host_name + service_description
 def get_full_name(self):
     return [self.host_name, self.service_description]
-Service.get_full_name = get_full_name
+Service.get_status_dat_full_name = get_full_name
+
 
 class ObjectsCacheFile:
     #prop : is the internal name if it is different than the name in the output file
@@ -148,7 +149,7 @@ class ObjectsCacheFile:
         Servicegroup : {
             'servicegroup_name' : {'required' : True},
             'alias' : {'required' : False},
-            'members' : {'required' : False, 'depythonize' : 'get_full_name'},
+            'members' : {'required' : False, 'depythonize' : 'get_status_dat_full_name'},
         },
 
         Contactgroup : {

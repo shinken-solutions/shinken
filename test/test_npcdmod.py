@@ -1,27 +1,16 @@
 #!/usr/bin/env python2.6
 
 #
-# This file is used to test host- and service-downtimes.
+# This file is used to test the npcd broker module
 #
 
-import sys
-import time
-import os
-import string
-import re
-import random
-import unittest
-sys.path.append("../src")
-from config import Config
-from dispatcher import Dispatcher
-from log import Log
-from scheduler import Scheduler
-from macroresolver import MacroResolver
-from external_command import ExternalCommand
-from check import Check
-sys.path.append("../src/modules")
+from shinken_test import *
+
+sys.path.append("../shinken/modules")
 from npcdmod_broker import Npcd_broker
 sys.setcheckinterval(10000)
+
+
 class TestConfig(unittest.TestCase):
     def setUp(self):
         # i am arbiter-like
