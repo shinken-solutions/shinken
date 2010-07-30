@@ -1,0 +1,30 @@
+Hi,
+
+First of all : THANKS for trying to make a package of Shinken :)
+
+I try to make the setup.py quite useful for you. It will install the shinken
+librayry to the classic python way (in site-package).
+
+You will need Python >=2.6 (there are such packages for redhat5 too).
+
+You will need the pyro lib too. It must already have a package. If not, take if from pypi (easy_install)
+but WARNING : not the 4.X version! (not stable and change API...). The 3.10 is cool, take this one :)
+
+You should add teh shinken:shinken user first to launch the setup.py pass.
+
+You can change the place you want to put etc and var in the file setup_parameters.cfg. You can also change
+the owner of theses dir (and ALL files in them) in this file.
+
+Then you can make the install:
+python setup.py install
+
+With the python lib + etc + var it should be ok :)
+
+I don't know what you need exctly more, so please ask in the mailing list at
+https://lists.sourceforge.net/lists/listinfo/shinken-devel
+or directly at my email : naparuba@gmail.com
+
+And again : thanks a lot, a tool without package is nothing :)
+
+
+Jean
