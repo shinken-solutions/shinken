@@ -1,0 +1,11 @@
+recursive-include shinken *
+recursive-include windows .bat .reg
+recursive-include bin *.* *-*
+recursive-include libexec *.*
+recursive-include test *.py *.txt
+recursive-include doc *.html *.png *.txt *.css *.jpg *.xml
+global-exclude .git *.pyc *.pyo
+global-exclude .debug .pid .exe
+include MANIFEST.in MANIFEST FROM_NAGIOS_TO_SHINKEN Changelog
+include COPYING THANKS README 
+exclude doc/dvi doc/html/ etc.orig/ etc/bench/ test/my/
