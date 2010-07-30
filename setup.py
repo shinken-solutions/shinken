@@ -24,7 +24,7 @@
 
 from setuptools import setup, find_packages
 from glob import glob
-import os
+import os, sys
 
 #We know that a Python 2.5 or Python3K will fail.
 #We can say why and quit.
@@ -42,7 +42,6 @@ if int(python_version[0]) == 3:
 
 def getscripts(path):
     script = os.path.basename(path)
-    print "Script", script
     return script
 
 
@@ -71,18 +70,19 @@ setup(
   install_requires = [
                       'pyro <= 3.10',
                       ],
- 
-  scripts = [getscripts(f) for f in glob('bin/[!_]*.py')],
-#  entry_points = {
-#      'console_scripts': [
-#                          'shinken-arbiter=bin.shinken_arbiter.py:main',
-#                          'shinken-broker=bin.shinken_broker:main',
-#                          'shinken-poller=bin.shinken_poller:main',
-#                          'shinken-reactionner=bin.shinken_reactionner:main',
-#                          'shinken-scheduler=bin.shinken_scheduler:main'
-#                          ]
-#  },
 
-  package_data = {'shinken': ['etc/*', 'db/*' , 'var/*', 'libexec/*', 'doc/*'] }
+  scripts = [f for f in glob('bin/[!_]*.py')],
+  data_files=[('/etc/shinken', ["etc/nagios.cfg",'etc/brokerd.cfg', 'etc/brokerd-windows.cfg',
+                                'etc/commons.cfg', 'etc/conf-windows.cfg', 'etc/host-150.cfg',
+                                'etc/nagios.cfg', 'etc/nagios-windows.cfg', 'etc/pollerd.cfg',
+                                'etc/reactionnerd.cfg', 'etc/resource.cfg', 'etc/schedulerd.cfg',
+                                'etc/schedulerd-windows.cfg', 'etc/pollerd-windows.cfg',
+                                'etc/shinken-specific.cfg', 'etc/shinken-specific-high-availability.cfg',
+                                'etc/shinken-specific-load-balanced-only.cfg'
+                                ]),
+              ('/etc/init.d', ['bin/init.d/shinken-arbiter', 'bin/init.d/shinken-broker', 'bin/init.d/shinken-poller',
+                               'bin/init.d/shinken-reactionner', 'bin/init.d/shinken-scheduler'])
+              ]
+#  package_data = {'shinken': ['etc/*', 'db/*' , 'var/*', 'libexec/*', 'doc/*'] }
   
 )

@@ -1,4 +1,5 @@
 recursive-include shinken *
+recursive-include etc *.cfg
 recursive-include windows .bat .reg
 recursive-include bin *.* *-*
 recursive-include libexec *.*
