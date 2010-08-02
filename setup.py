@@ -23,7 +23,7 @@
 
 from setuptools import setup, find_packages
 from glob import glob
-import os, sys
+import os, sys, re
 import ConfigParser
 if os.name != 'nt':
     from pwd import getpwnam
@@ -154,7 +154,8 @@ def get_gid(group_name):
         print "Error: the group",group_name , "is unknown"
         sys.exit(2)
 
-if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv):
+#If there is another root, it's strange, it must be a special case...
+if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv) and re.search("--root", ' '.join(sys.argv)) == None:
     #First var
     var_uid = get_uid(var_owner)
     var_gui = get_gid(var_group)

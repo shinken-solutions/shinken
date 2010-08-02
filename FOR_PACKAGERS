@@ -15,6 +15,11 @@ You should add teh shinken:shinken user first to launch the setup.py pass.
 You can change the place you want to put etc and var in the file setup_parameters.cfg. You can also change
 the owner of theses dir (and ALL files in them) in this file.
 
+But WARNING (bis) : if you set a --root (example =/tmp/something) it will not update the owner of the /tc and /var directory (calling with a --root is for having all files to create a package, so you don't need changing owners).
+Example when you call :
+python setup.py install --root=/tmp/moncul --record=INSTALLED_FILES
+You get all files to package in the file INSTALLED_FILES (and only the /tmp/moncul is changed, so it's ok for your system ;)).
+
 Then you can make the install:
 python setup.py install
 
