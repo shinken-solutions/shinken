@@ -477,13 +477,7 @@
       <title>Performance Improvements</title>
 
       <itemizedlist>
-        <listitem>
-          <para>Add ability to precache object config files and exclude
-          circular path detection checks from verification process. This can
-          speed up Nagios start time immensely in large environments! Read
-          more <link
-          linkend="securityandperformancetuning-faststartup">here</link>.</para>
-        </listitem>
+
 
         <listitem>
           <para>A new <link
@@ -875,14 +869,6 @@
           support for it is there nonetheless.</para>
         </listitem>
 
-        <listitem>
-          <para><emphasis role="bold">Better scheduling information</emphasis>
-          - More detailed information is given when Nagios is executed with
-          the <option>-s</option> command line option. This information can be
-          used to help <link
-          linkend="securityandperformancetuning-faststartup">reduce</link> the
-          time it takes to start/restart Nagios.</para>
-        </listitem>
 
         <listitem>
           <para><emphasis role="bold">Aggregated status file

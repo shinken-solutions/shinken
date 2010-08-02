@@ -205,41 +205,6 @@ cfg_file=/usr/local/nagios/etc/commands.cfg</literallayout></para>
       affecting the output displayed in the CGIs.</para>
     </section>
 
-    <section>
-      <title><anchor id="configuringnagios-configmain-precached_object_file"
-      xreflabel="Precached Object File" />Precached Object File (Unused in
-      Shinken)</title>
-
-      <informaltable colsep="0" frame="none" rowsep="0">
-        <tgroup cols="2">
-          <colspec colnum="1" colwidth="15*" />
-
-          <colspec colnum="2" colwidth="85*" />
-
-          <tbody>
-            <row>
-              <entry><para>Format:</para></entry>
-
-              <entry><para><programlisting>precached_object_file=&lt;file_name&gt;</programlisting></para></entry>
-            </row>
-
-            <row>
-              <entry><para>Example:</para></entry>
-
-              <entry><para><programlisting>precached_object_file=/usr/local/nagios/var/objects.precache</programlisting>
-              </para></entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-
-      <para>This directive is used to specify a file in which a pre-processed,
-      pre-cached copy of <xref linkend="configuringnagios-configobject" />
-      should be stored. This file can be used to drastically improve startup
-      times in large/complex Nagios installations. Read more information on
-      how to speed up start times <xref
-      linkend="securityandperformancetuning-faststartup" />.</para>
-    </section>
 
     <section>
       <title><anchor id="configuringnagios-configmain-resource_file"

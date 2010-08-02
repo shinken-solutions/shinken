@@ -12,7 +12,7 @@
 <xi:include href="SecurityAndPerformanceTuning/security.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="SecurityAndPerformanceTuning/cgisecurity.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="SecurityAndPerformanceTuning/tuning.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-<xi:include href="SecurityAndPerformanceTuning/faststartup.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
 <xi:include href="SecurityAndPerformanceTuning/largeinstalltweaks.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="SecurityAndPerformanceTuning/nagiostats.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="SecurityAndPerformanceTuning/mrtggraphs.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>

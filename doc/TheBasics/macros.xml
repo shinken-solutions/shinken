@@ -10,15 +10,15 @@
 	<title>Understanding Macros and How They Work</title>
 	<section>
 		<title>Macros</title>
-		<para>One of the main features that make Nagios so flexible is the ability to use macros
+		<para>One of the main features that make Shinken so flexible is the ability to use macros
 		in command defintions. Macros allow you to reference information from hosts, services, and
 		other sources in your commands.</para>
 	</section>
 	<section>
 		<title>Macro Substitution - How Macros Work</title>
-		<para>Before Nagios executes a command, it will replace any macros it finds in the 
+		<para>Before Shinken executes a command, it will replace any macros it finds in the 
 		command definition with their corresponding values. This macro substitution occurs for 
-		all types of commands that Nagios executes - host and service checks, notifications, event
+		all types of commands that Shinken executes - host and service checks, notifications, event
 		handlers, etc.</para>
 		<para>Certain macros may themselves contain other macros. These include the <code>$HOSTNOTES$</code>,
 		<code>$HOSTNOTESURL$</code>, <code>$HOSTACTIONURL$</code>, <code>$SERVICENOTES$</code>, 
@@ -41,11 +41,11 @@
 		       
 		define command{
 		        command_name    check_ping
-		        command_line    /usr/local/nagios/libexec/check_ping -H $HOSTADDRESS$ -w 100.0,90% -c 200.0,60%
+		        command_line    /usr/local/shinken/libexec/check_ping -H $HOSTADDRESS$ -w 100.0,90% -c 200.0,60%
 		        }
 		</programlisting>
 		<para>the expanded/final command line to be executed for the host's check command would look like this:</para>
-		<para><code>/usr/local/nagios/libexec/check_ping -H 192.168.1.2 -w 100.0,90% -c 200.0,60%</code></para>
+		<para><code>/usr/local/shinken/libexec/check_ping -H 192.168.1.2 -w 100.0,90% -c 200.0,60%</code></para>
 		<para>Pretty simple, right? The beauty in this is that you can use a single command definition to check 
 		an unlimited number of hosts. Each host can be checked with the same command definition because each host's 
 		address is automatically substituted in the command line before execution.</para>
@@ -71,11 +71,11 @@
 		<programlisting>
 		define command{
 		        command_name    check_ping
-		        command_line    /usr/local/nagios/libexec/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$
+		        command_line    /usr/local/shinken/libexec/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$
 		        
 		</programlisting>
 		<para>the expanded/final command line to be executed for the service's check command would look like this:</para>
-		<para><code>/usr/local/nagios/libexec/check_ping -H 192.168.1.2 -w 200.0,80% -c 400.0,40%</code></para>
+		<para><code>/usr/local/shinken/libexec/check_ping -H 192.168.1.2 -w 200.0,80% -c 400.0,40%</code></para>
 		<para><tip><para>If you need to pass bang (!) characters in your command arguments, you can do so by escaping 
 		them with a backslash (\). If you need to include backslashes in your command arguments, they should
 		also be escaped with a backslash.</para></tip></para>
@@ -234,7 +234,7 @@
 	<section>
 		<title>Macros as Environment Variables</title>
 		<para>Most macros are made available as environment variables for easy reference by scripts or
-		commands that are executed by Nagios. For purposes of security and sanity, <link linkend="thebasics-macrolist-user">$USERn$</link>
+		commands that are executed by Shinken. For purposes of security and sanity, <link linkend="thebasics-macrolist-user">$USERn$</link>
 		and "on-demand" host and service macros are not made available as environment variables.</para>
 		<para>Environment variables that contain standard macros are named the same as their corresponding 
 		macro names (listed <link linkend="thebasics-macrolist">here</link>), with "NAGIOS_" prepended to 
@@ -243,7 +243,7 @@
 	</section>
 	<section>
 		<title>Available Macros</title>
-		<para>A list of all the macros that are available in Nagios, as well as a chart of when they can be
+		<para>A list of all the macros that are available in Shinken, as well as a chart of when they can be
 		used, can be found <link linkend="thebasics-macrolist">here</link>.</para>
 	</section>
 </chapter>
