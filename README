@@ -12,11 +12,21 @@ Shinken is a new implementation of Nagios in AGLv3 written in Python. The main g
 You just need to add a shinken user (in the shinken group) on your system :
 $adduser shinken
 
+=== First way : all in a directory (ugly but quick way ;) )===
 Then move the shinken directory and give it to the shinken user :
 mv shinken /usr/local
 chown -R shinken:shinken /usr/local/shinken
 
-For the compilation part it's easy : there is no compilation part!
+=== Second way : district directory (clean way) ===
+You can install really the application by using the setup.py script. It 
+will install the shinken librairy in the python path, create the
+/etc/shinken and /var/lib/shinken directory (you can change them
+in the setup_parameters.cfg file before launching setup.py).
+Then just run :
+sudo python setyp.py install
+
+
+For the compilation part in both way it's easy : there is no compilation part!
 
 == Dependancies ==
 The only dependancies are Python >= 2.6 and the Pyro module.
@@ -50,4 +60,3 @@ That's all (and this only thing will be changed soon).
 == How to run it ==
 It's easy, there is a already launch script for you :
 $ /usr/local/shinken/bin/launch_all.sh
-
