@@ -10,7 +10,7 @@
 	<title>Service and Host Freshness Checks</title>
 	<section>
 		<title>Introduction</title>
-		<para>Nagios supports a feature that does <quote>freshness</quote> checking on the results of host 
+		<para>Shinken supports a feature that does <quote>freshness</quote> checking on the results of host 
 		and service checks. The purpose of freshness checking is to ensure that host and service 
 		checks are being provided passively by external applications on a regular basis.</para>
 		<para>Freshness checking is useful when you want to ensure that
@@ -27,7 +27,7 @@
 		        <imagedata fileref="images/freshness.png" format="PNG"/>
 		      </imageobject>
 		    </inlinemediaobject>
-		Nagios periodically checks the freshness of the results for all hosts services that
+		Shinken periodically checks the freshness of the results for all hosts services that
 		have freshness checking enabled.</para>
 		<itemizedlist>
 			<listitem>
@@ -42,14 +42,14 @@
 				threshold, the check result is considered <quote>stale</quote>.</para>
 			</listitem>
 			<listitem>
-				<para>If the check results is found to be stale, Nagios will force an
+				<para>If the check results is found to be stale, Shinken will force an
 				<link linkend="thebasics-activechecks">active check</link> of the host
 				or service by executing the command specified by in the host or service definition.</para>
 			</listitem>
 		</itemizedlist>
 		<tip><para>An active check is executed even if active checks are disabled on a program-wide
 		or host- or service-specific basis.</para></tip>
-		<para>For example, if you have a freshness threshold of 60 for one of your services, Nagios
+		<para>For example, if you have a freshness threshold of 60 for one of your services, Shinken
 		will consider that service to be stale if its last check result is older than 60 seconds.</para>
 	</section>
 	<section>
@@ -63,7 +63,7 @@
 			</listitem>
 			<listitem>
 				<para>Use <link linkend="configuringnagios-configmain-service_freshness_check_interval">service_freshness_check_interval</link> 
-				and <link linkend="configuringnagios-configmain-host_freshness_check_interval">host_freshness_check_interval</link> options to tell Nagios 
+				and <link linkend="configuringnagios-configmain-host_freshness_check_interval">host_freshness_check_interval</link> options to tell Shinken 
 				how often in should check the freshness of service and host results.</para>
 			</listitem>
 			<listitem>
@@ -82,24 +82,24 @@
 			</listitem>
 			<listitem>
 				<para>The <varname>check_period</varname> option in your host and service
-				definitions is used when Nagios determines when a host or service can be
+				definitions is used when Shinken determines when a host or service can be
 				checked for freshness, so make sure it is set to a valid timeperiod.</para>
 			</listitem>
 		</itemizedlist>
 		<tip><para>If you do not specify a host- or service-specific <varname>freshness_threshold</varname> value 
-		(or you set it to zero), Nagios will automatically calculate a threshold automatically, based 
+		(or you set it to zero), Shinken will automatically calculate a threshold automatically, based 
 		on a how often you monitor that particular host or service. I would recommended that you 
-		explicitly specify a freshness threshold, rather than let Nagios pick one for you.</para></tip>
+		explicitly specify a freshness threshold, rather than let Shinken pick one for you.</para></tip>
 	</section>
 	<section>
 		<title>Example</title>
 		<para>An example of a service that might require freshness checking might be one that 
 		reports the status of your nightly backup jobs. Perhaps you have a external script that
-		submit the results of the backup job to Nagios once the backup is completed. 
+		submit the results of the backup job to Shinken once the backup is completed. 
 		In this case, all of the checks/results for the service are provided by an external 
 		application using passive checks. In order to ensure that the status of the backup job
 		gets reported every day, you may want to enable freshness checking for the service.
-		If the external script doesn't submit the results of the backup job, you can have Nagios 
+		If the external script doesn't submit the results of the backup job, you can have Shinken 
 		fake a critical result by doing something like this...</para>
 		<para>Here's what the definition for the service might look like (some required 
 		options are omitted)...</para>
@@ -123,11 +123,11 @@
 		might look like this...</para>
 		<programlisting>define command{
 		        command_name    no-backup-report
-		        command_line    /usr/local/nagios/libexec/check_dummy 2 "CRITICAL: Results of backup job were not reported!"
+		        command_line    /usr/local/shinken/libexec/check_dummy 2 "CRITICAL: Results of backup job were not reported!"
 		        }</programlisting>
-		<para>If Nagios detects that the service results are stale, it will run the 
+		<para>If Shinken detects that the service results are stale, it will run the 
 		<code>no-backup-report</code> command as an active service check. This causes the &plugin-dummy; 
-		plugin to be executed, which returns a critical state to Nagios. The service will then go into to
+		plugin to be executed, which returns a critical state to Shinken. The service will then go into to
 		a critical state (if it isn't already there) and someone will probably get notified of the problem.</para>
 	</section>
 </chapter>

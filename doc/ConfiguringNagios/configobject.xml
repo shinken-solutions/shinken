@@ -62,7 +62,7 @@
     
     <tip>
       <para>When you follow the <xref linkend="gettingstarted-quickstart" />, several sample object
-	configuration files are placed in <filename class="directory">/usr/local/nagios/etc/objects/</filename>.
+	configuration files are placed in <filename class="directory">/usr/local/shinken/etc/objects/</filename>.
 	You can use these sample files to see how object inheritance works and
 	learn how to define your own object definitions.</para>
     </tip>
@@ -72,7 +72,7 @@
     <title>How Are Objects Defined?</title>
     
     <para>Objects are defined in a flexible template format, which can make it much easier 
-      to manage your Nagios configuration in the long term. Basic information on how to define 
+      to manage your Shinken configuration in the long term. Basic information on how to define 
       objects in your configuration files can be found 
       <link linkend="configuringnagios-objectdefinitions">here</link>.</para>
     
@@ -129,7 +129,7 @@
       <para>
 	<link linkend="configuringnagios-objectdefinitions-hostgroup">Host Groups</link> 
 	are groups of one or more hosts. Host groups can make it easier to (1) view the status 
-	of related hosts in the Nagios web interface and (2) simplify your configuration through
+	of related hosts in the Shinken web interface and (2) simplify your configuration through
 	the use of <link linkend="advancedtopics-objecttricks">object tricks</link>.
       </para>
     </section>
@@ -171,7 +171,7 @@
       <para>
 	<link linkend="configuringnagios-objectdefinitions-servicegroup">Service Groups</link> 
 	are groups of one or more services. Service groups can make it easier
-	to (1) view the status of related services in the Nagios web
+	to (1) view the status of related services in the Shinken web
 	interface and (2) simplify your configuration through the use of
 	<link linkend="advancedtopics-objecttricks">object tricks</link>.
       </para>
@@ -250,7 +250,7 @@
       <title>Commands</title>
       <para>
 	<link linkend="configuringnagios-objectdefinitions-command">Commands</link> are used to tell
-	Nagios what programs, scripts, etc. it should execute to perform:
+	Shinken what programs, scripts, etc. it should execute to perform:
       </para>
       <itemizedlist>
 	<listitem>

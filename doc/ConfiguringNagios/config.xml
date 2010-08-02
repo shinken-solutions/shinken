@@ -14,14 +14,14 @@
 		
 		<para>There are several different configuration files that you're going to
 		need to create or edit before you start monitoring anything. Be patient!
-		Configuring Nagios can take quite a while, especially if you're first-time
+		Configuring Shinken can take quite a while, especially if you're first-time
 		user. Once you figure out how things work, it'll all be well worth your
 		time. :-)
 		</para>
 		
 		<note>
 			<para>Sample configuration files are installed in the
-			<filename class="directory">/usr/local/nagios/etc/</filename> 
+			<filename class="directory">/usr/local/shinken/etc/</filename> 
 			directory when you follow the <xref linkend="gettingstarted-quickstart"/>.			</para>
 		</note>
 	</section>
@@ -30,8 +30,8 @@
 		<title>Main Configuration File</title>
 		
 		<para>The main configuration file contains a number of directives that
-		affect how the Nagios daemon operates. This config file is read by both
-		the Nagios daemon and the <acronym>CGIs</acronym>. This is where you're going to
+		affect how the Shinken daemon operates. This config file is read by both
+		the Shinken daemon and the <acronym>CGIs</acronym>. This is where you're going to
 		want to get started in your configuration adventures.
 		</para>
 		
@@ -88,7 +88,7 @@
 		<para>The CGI configuration file contains a number of directives that
 		affect the operation of the <link linkend="thebasics-cgis">CGIs</link>.
 		It also contains a reference the main configuration file, so the CGIs know
-		how you've configured Nagios and where your object defintions are stored.
+		how you've configured Shinken and where your object defintions are stored.
 		</para>
 		
 		<para>Documentation for the CGI configuration file can be found 

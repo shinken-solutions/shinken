@@ -86,7 +86,7 @@
 		called check_service_cluster defined as follows:</para>
 		<programlisting>define command{
         command_name    check_service_cluster
-        command_line    /usr/local/nagios/libexec/check_cluster --service -l $ARG1$ -w $ARG2$ -c $ARG3$ -d $ARG4$
+        command_line    /usr/local/shinken/libexec/check_cluster --service -l $ARG1$ -w $ARG2$ -c $ARG3$ -d $ARG4$
         }</programlisting>
 		<para>Now you'll need to create the "cluster" service and use the <code>check_service_cluster</code> command you 
 		just created as the cluster's check command. The example below gives an example of how to do this. The example 
@@ -111,7 +111,7 @@
 		<para>Anyway, let's assume that you have a <code>check_host_cluster</code> command defined as follows:</para>
 		<programlisting>define command{
 	command_name    check_host_cluster
-	command_line    /usr/local/nagios/libexec/check_cluster --host -l $ARG1$ -w $ARG2$ -c $ARG3$ -d $ARG4$
+	command_line    /usr/local/shinken/libexec/check_cluster --host -l $ARG1$ -w $ARG2$ -c $ARG3$ -d $ARG4$
 	}</programlisting>
 		<para>Let's say you have three hosts (named "host1", "host2" and "host3") in the host cluster. If you want 
 		Shinken to generate a warning alert if one host in the cluster is not UP or a critical alert if two or more 

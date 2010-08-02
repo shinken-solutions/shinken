@@ -289,32 +289,6 @@
     </section>
 
     <section>
-      <title>Embedded Perl</title>
-
-      <itemizedlist>
-        <listitem>
-          <para>Added new <link
-          linkend="configuringnagios-configmain-enable_embedded_perl">enable_embedded_perl</link>
-          and <link
-          linkend="configuringnagios-configmain-use_embedded_perl_implicitly">use_embedded_perl_implicitly</link>
-          variables to control use of the embedded Perl interpreter.</para>
-        </listitem>
-
-        <listitem>
-          <para>Perl scripts/plugins can now explicitly tell Nagios whether or
-          not they should be run under the embedded Perl interpreter. This is
-          useful if you have troublesome scripts that don't function well
-          under the ePN.</para>
-        </listitem>
-
-        <listitem>
-          <para>More information about these new options can be found <link
-          linkend="advancedtopics-embeddedperl">here</link>.</para>
-        </listitem>
-      </itemizedlist>
-    </section>
-
-    <section>
       <title>Adaptive Monitoring</title>
 
       <itemizedlist>

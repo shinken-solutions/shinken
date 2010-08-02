@@ -18,9 +18,9 @@
           <imagedata fileref="images/tcpwrappers.png" />
         </imageobject>
       </mediaobject></informalfigure>This document explains how to easily generate alerts
-    in Nagios for connection attempts that are rejected by TCP wrappers. For
+    in Shinken for connection attempts that are rejected by TCP wrappers. For
     example, if an unauthorized host attempts to connect to your &protocol-ssh; server,
-    you can receive an alert in Nagios that contains the name of the host that
+    you can receive an alert in Shinken that contains the name of the host that
     was rejected. If you implement this on your Linux/Unix boxes, you'll be
     surprised how many port scans you can detect across your network.</para>
 
@@ -40,7 +40,7 @@
       <listitem>
         <para>The host which you are generating alerts for (i.e. the host you
         are using TCP wrappers on) is a remote host (called firestorm in this
-        example). If you want to generate alerts on the same host that Nagios
+        example). If you want to generate alerts on the same host that Shinken
         is running you will need to make a few modifications to the examples I
         provide.</para>
       </listitem>
@@ -88,7 +88,7 @@
       <listitem>
         <para>Active checks of the service as disabled, while passive checks
         are enabled. This means that the service will never be actively
-        checked by Nagios - all alert information will have to be received
+        checked by Shinken - all alert information will have to be received
         passively from an external source.</para>
       </listitem>
 
@@ -107,10 +107,10 @@
     monitoring host whenever a connection attempt is denied, you'll have to
     add a line similiar to the following:</para>
 
-    <programlisting>ALL: ALL: RFC931: twist (/usr/local/nagios/libexec/eventhandlers/handle_tcp_wrapper %h %d)&amp;</programlisting>
+    <programlisting>ALL: ALL: RFC931: twist (/usr/local/shinken/libexec/eventhandlers/handle_tcp_wrapper %h %d)&amp;</programlisting>
 
     <para>This line assumes that there is a script called handle_tcp_wrapper
-    in the <filename class="directory">/usr/local/nagios/libexec/eventhandlers/</filename> directory on firestorm.
+    in the <filename class="directory">/usr/local/shinken/libexec/eventhandlers/</filename> directory on firestorm.
     We'll write that script next.</para>
   </section>
 
@@ -118,16 +118,16 @@
     <title>Writing The Script</title>
 
     <para>The last thing you need to do is write the handle_tcp_wrapper script
-    on firestorm that will send the alert back to the Nagios server. It might
+    on firestorm that will send the alert back to the Shinken server. It might
     look something like this:</para>
 
     <programlisting>
     	#!/bin/sh
-	/usr/local/nagios/libexec/eventhandlers/submit_check_result firestorm "TCP Wrappers" 2 "Denied $2-$1" &gt; /dev/null 2&gt; /dev/null
+	/usr/local/shinken/libexec/eventhandlers/submit_check_result firestorm "TCP Wrappers" 2 "Denied $2-$1" &gt; /dev/null 2&gt; /dev/null
 	</programlisting>
 	<para>Notice that the <command>handle_tcp_wrapper</command> script calls the 
 	<command>submit_check_result</command> script to actually send the alert back to 
-	the monitoring host. Assuming your Nagios server is called monitor, the 
+	the monitoring host. Assuming your Shinken server is called monitor, the 
 	<command>submit_check_result</command> script might look like this: 
 	</para>
 	<programlisting>
@@ -138,7 +138,7 @@
 #	$3 = return code
 #	$4 = outputs
 
-/bin/echo -e "$1\t$2\t$3\t$4\n" | /usr/local/nagios/bin/send_nsca monitor -c /usr/local/nagios/etc/send_nsca.cfg
+/bin/echo -e "$1\t$2\t$3\t$4\n" | /usr/local/shinken/bin/send_nsca monitor -c /usr/local/shinken/etc/send_nsca.cfg
 	</programlisting>
   </section>
 
@@ -146,9 +146,9 @@
     <title>Finishing Up</title>
 
     <para>You've now configured everything you need to, so all you have to do
-    is restart the inetd process on firestorm and restart Nagios on your
+    is restart the inetd process on firestorm and restart Shinken on your
     monitoring server. That's it! When the TCP wrappers on firestorm deny a
-    connection attempt, you should be getting alerts in Nagios. The plugin
+    connection attempt, you should be getting alerts in Shinken. The plugin
     output for the alert will look something like the following:
 
     <computeroutput>Denied sshd2-sdn-ar-002mnminnP321.dialsprint.net</computeroutput>

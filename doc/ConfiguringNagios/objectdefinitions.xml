@@ -12,7 +12,7 @@
   <section>
     <title>Introduction</title>
 
-    <para>One of the features of Nagios' object configuration format is that you can create object
+    <para>One of the features of Shinken' object configuration format is that you can create object
       definitions that inherit properties from other object definitions. An explanation of how object
       inheritence works can be found <link linkend="advancedtopics-objectinheritance">here</link>. 
       I strongly suggest that you familiarize yourself with object inheritence once you read over
@@ -41,10 +41,10 @@
     <title><anchor id="configuringnagios-objectdefinitions-retention_notes" />Retention Notes</title>
 
     <para>It is important to point out that several directives in host, service, and contact 
-      definitions may not be picked up by Nagios when you change them in your configuration files.
+      definitions may not be picked up by Shinken when you change them in your configuration files.
       Object directives that can exhibit this behavior are marked with an asterisk
       (<link linkend="configuringnagios-objectdefinitions-retention_notes">*</link>). 
-      The reason for this behavior is due to the fact that Nagios chooses to honor values stored in the 
+      The reason for this behavior is due to the fact that Shinken chooses to honor values stored in the 
       <link linkend="configuringnagios-configmain-state_retention_file">state retention file</link> 
       over values found in the config files, assuming you have 
       <link linkend="configuringnagios-configmain-retain_state_information">state retention</link>
@@ -53,7 +53,7 @@
 
     <para>One way to get around this problem is to disable the retention of non-status 
       information using the retain_nonstatus_information directive in the host, service, and
-      contact definitions. Disabling this directive will cause Nagios to take the initial 
+      contact definitions. Disabling this directive will cause Shinken to take the initial 
       values for these directives from your config files, rather than from the state retention
       file when it (re)starts.
     </para>
@@ -64,7 +64,7 @@
 
     <note>
       <para>Sample object configuration files are installed in the 
-	<filename class="directory">/usr/local/nagios/etc/</filename> directory when you
+	<filename class="directory">/usr/local/shinken/etc/</filename> directory when you
 	follow the <link linkend="gettingstarted-quickstart">quickstart installation guide</link>.
       </para>
     </note>
@@ -465,7 +465,7 @@
                 intermediate routers, etc.) the host is considered to be on
                 the local network and will not have a parent host. Leave this
                 value blank if the host does not have a parent host (i.e. it
-                is on the same segment as the Nagios host). The order in which
+                is on the same segment as the Shinken host). The order in which
                 you specify parent hosts has no effect on how things are
                 monitored.</para>
 	    </listitem>
@@ -495,9 +495,9 @@
 		<link linkend="configuringnagios-objectdefinitions-command">command</link> that should be used to check
                 if the host is up or down. Typically, this command would try
                 and ping the host to see if it is "alive". The command must
-                return a status of OK (0) or Nagios will assume the host is
+                return a status of OK (0) or Shinken will assume the host is
                 down. If you leave this argument blank, the host will
-                <emphasis>not</emphasis> be actively checked. Thus, Nagios
+                <emphasis>not</emphasis> be actively checked. Thus, Shinken
                 will likely always assume the host is up (it may show up as
                 being in a "PENDING" state in the web interface). This is
                 useful if you are monitoring printers or other devices that
@@ -512,7 +512,7 @@
 	      initial_state
 	    </term>
 	    <listitem>
-	      <para>By default Nagios will assume that all hosts are in UP states 
+	      <para>By default Shinken will assume that all hosts are in UP states 
 		when in starts. You can override the initial state for a host by using 
 		this directive.
                 Valid options are: <emphasis role="strong">o</emphasis> = UP,
@@ -526,9 +526,9 @@
 	    </term>
 	    <listitem>
 	      <para>This directive is used to
-                define the number of times that Nagios will retry the host
+                define the number of times that Shinken will retry the host
                 check command if it returns any state other than an OK state.
-                Setting this value to 1 will cause Nagios to generate an alert
+                Setting this value to 1 will cause Shinken to generate an alert
                 without retrying the host check again.</para><note><para>If you do not
                   want to check the status of the host, you must still set this
                   to a minimum value of 1. To bypass the host check, just leave
@@ -630,7 +630,7 @@
 	    <listitem>
 	      <para>This directive is used to
                 specify the freshness threshold (in seconds) for this host. If
-                you set this directive to a value of 0, Nagios will determine
+                you set this directive to a value of 0, Shinken will determine
                 a freshness threshold to use automatically.</para>
 	    </listitem>
 	  </varlistentry>
@@ -792,7 +792,7 @@
                 a contact that this service is <emphasis>still</emphasis> down
                 or unreachable. Unless you've changed the <link linkend="configuringnagios-configmain-interval_length">interval_length</link>
                 directive from the default value of 60, this number will mean
-                minutes. If you set this value to 0, Nagios will
+                minutes. If you set this value to 0, Shinken will
                 <emphasis>not</emphasis> re-notify contacts about problems for
                 this host - only one problem notification will be sent out.
               </para>
@@ -808,7 +808,7 @@
                 the first problem notification when this host enters a non-UP
                 state. Unless you've changed the <link linkend="configuringnagios-configmain-interval_length">interval_length</link>
                 directive from the default value of 60, this number will mean
-                minutes. If you set this value to 0, Nagios will start sending
+                minutes. If you set this value to 0, Shinken will start sending
                 out notifications immediately.</para>
 	    </listitem>
 	  </varlistentry>
@@ -842,7 +842,7 @@
                 when <link linkend="advancedtopics-downtime">scheduled
                   downtime</link> starts and ends. If you specify <emphasis role="bold">n</emphasis> (none) as an option, no host
                 notifications will be sent out. If you do not specify any
-                notification options, Nagios will assume that you want
+                notification options, Shinken will assume that you want
                 notifications to be sent out for all possible states.
 		<informalexample><para>
                     If you specify <emphasis role="strong">d,r</emphasis> in this
@@ -899,7 +899,7 @@
                 information) that links to the URL you specify here. Any valid
                 URL can be used. If you plan on using relative paths, the base
                 path will the the same as what is used to access the CGIs
-                (i.e. <emphasis>/cgi-bin/nagios/</emphasis>). This can be very
+                (i.e. <emphasis>/cgi-bin/shinken/</emphasis>). This can be very
                 useful if you want to make detailed information on the host,
                 emergency contact methods, etc. available to other support
                 staff.</para>
@@ -917,7 +917,7 @@
                 viewing host information) that links to the URL you specify
                 here. Any valid URL can be used. If you plan on using relative
                 paths, the base path will the the same as what is used to
-                access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+                access the CGIs (i.e. <emphasis>/cgi-bin/shinken/</emphasis>).
               </para>
 	    </listitem>
 	  </varlistentry>
@@ -933,7 +933,7 @@
                 40x40 pixels in size. Images for hosts are assumed to be in
                 the <emphasis role="strong">logos/</emphasis> subdirectory in
                 your HTML images directory (i.e.
-                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+                <filename class="directory">/usr/local/shinken/share/images/logos</filename>).
               </para>
 	    </listitem>
 	  </varlistentry>
@@ -963,7 +963,7 @@
                 transparency. If it does, the host object will look a bit
                 wierd. Images for hosts are assumed to be in the <emphasis role="bold">logos/</emphasis> subdirectory in your HTML
                 images directory (i.e.
-                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+                <filename class="directory">/usr/local/shinken/share/images/logos</filename>).
               </para>
 	    </listitem>
 	  </varlistentry>
@@ -989,7 +989,7 @@
                 statusmap CGI. Images for hosts are assumed to be in the
                 <emphasis role="strong">logos/</emphasis> subdirectory in your
                 HTML images directory (i.e.
-                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+                <filename class="directory">/usr/local/shinken/share/images/logos</filename>).
               </para>
 	    </listitem>
 	  </varlistentry>
@@ -1250,7 +1250,7 @@
 		see a red <quote>splat</quote> icon in the CGIs (when you are viewing hostgroup information) 
 		that links to the URL you specify here. Any valid URL can be used. If you plan 
 		on using relative paths, the base path will the the same as what is used to access
-		the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+		the CGIs (i.e. <emphasis>/cgi-bin/shinken/</emphasis>).
 	      </para>
 	    </listitem>
 	  </varlistentry>
@@ -1618,7 +1618,7 @@
 	    </term>
 	    <listitem>
 	      <para>This directive is used to specify the <emphasis>short name</emphasis> of the
-		<link linkend="configuringnagios-objectdefinitions-command">command</link> that Nagios 
+		<link linkend="configuringnagios-objectdefinitions-command">command</link> that Shinken 
 		will run in order to check the status of the service. The maximum amount of time
                 that the service check command can run is controlled by the
                 <link linkend="configuringnagios-configmain-service_check_timeout">service_check_timeout</link>
@@ -1630,7 +1630,7 @@
 	      initial_state
 	    </term>
 	    <listitem>
-	      <para>By default Nagios will assume that all services are in OK states when in starts.
+	      <para>By default Shinken will assume that all services are in OK states when in starts.
 		You can override the initial state for a service by using this directive. 
 		Valid options are: 
 		<itemizedlist>
@@ -1647,9 +1647,9 @@
 	      max_check_attempts
 	    </term>
 	    <listitem>
-	      <para>This directive is used to define the number of times that Nagios will retry the 
+	      <para>This directive is used to define the number of times that Shinken will retry the 
 		service check command if it returns any state other than an OK state. Setting this value 
-		to 1 will cause Nagios to generate an alert  without retrying the service check again.</para>
+		to 1 will cause Shinken to generate an alert  without retrying the service check again.</para>
 	    </listitem>
 	  </varlistentry>
 	  <varlistentry>
@@ -1754,7 +1754,7 @@
 	    </term>
 	    <listitem>
 	      <para>This directive is used to specify the freshness threshold (in seconds) for 
-		this service. If you set this directive to a value of 0, Nagios will determine a
+		this service. If you set this directive to a value of 0, Shinken will determine a
 		freshness threshold to use automatically.
               </para>
 	    </listitem>
@@ -1900,7 +1900,7 @@
                 a contact that this service is <emphasis>still</emphasis> in a non-OK state. Unless you've
 		changed the <link linkend="configuringnagios-configmain-interval_length">interval_length</link>
                 directive from the default value of 60, this number will mean minutes. If you set this value 
-		to 0, Nagios will  <emphasis>not</emphasis> re-notify contacts about problems for
+		to 0, Shinken will  <emphasis>not</emphasis> re-notify contacts about problems for
                 this service - only one problem notification will be sent out.
               </para>
 	    </listitem>
@@ -1914,7 +1914,7 @@
                 the first problem notification when this service enters a non-OK state. Unless you've changed the
 		<link linkend="configuringnagios-configmain-interval_length">interval_length</link>
                 directive from the default value of 60, this number will mean minutes. If you set this value 
-		to 0, Nagios will start sending out notifications immediately.</para>
+		to 0, Shinken will start sending out notifications immediately.</para>
 	    </listitem>
 	  </varlistentry>
 	  <varlistentry>
@@ -1943,7 +1943,7 @@
 		  <listitem><para><emphasis role="bold">r</emphasis> = send notifications on recoveries (OK state)</para></listitem>
 		  <listitem><para><emphasis role="strong">f</emphasis> = send notifications when the service starts and stops <link linkend="advancedtopics-flapping">flapping</link></para></listitem>
 		  <listitem><para><emphasis role="strong">s</emphasis> = send notifications when <link linkend="advancedtopics-downtime">scheduled downtime</link> starts and ends</para></listitem> 
-		  <listitem><para><emphasis role="bold">n</emphasis> (none) as an option, no service notifications will be sent out. If you do not specify any notification options, Nagios will assume that you want notifications to be sent out for all possible states</para></listitem>
+		  <listitem><para><emphasis role="bold">n</emphasis> (none) as an option, no service notifications will be sent out. If you do not specify any notification options, Shinken will assume that you want notifications to be sent out for all possible states</para></listitem>
 		</itemizedlist>
 		
 		<informalexample>
@@ -2036,7 +2036,7 @@
                 information about the service. If you specify an URL, you will see a red folder icon in
 		the CGIs (when you are viewing service information) that links to the URL you specify here.
                 Any valid URL can be used. If you plan on using relative paths, the base path will the 
-		the same as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+		the same as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/shinken/</emphasis>).
                 This can be very useful if you want to make detailed information on the service, emergency 
 		contact methods, etc. available to other support staff.
 	      </para>
@@ -2051,7 +2051,7 @@
                 actions to be performed on the service. If you specify an URL, you will see a red <quote>splat</quote>
 		icon in the CGIs (when you are viewing service information) that links to the URL you specify
                 here. Any valid URL can be used. If you plan on using relative paths, the base path will 
-		the the same as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+		the the same as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/shinken/</emphasis>).
               </para>
 	    </listitem>
 	  </varlistentry>
@@ -2066,7 +2066,7 @@
 		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGIs. The image will 
 		look best if it is 40x40 pixels in size. Images for services are assumed to be in the 
 		<emphasis role="strong">logos/</emphasis> subdirectory in your HTML images directory 
-		(i.e. <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+		(i.e. <filename class="directory">/usr/local/shinken/share/images/logos</filename>).
 	      </para>
 	    </listitem>
 	  </varlistentry>
@@ -2265,7 +2265,7 @@
 		will see a red folder icon in the CGIs (when you are viewing service group
 		information) that links to the URL you specify here. Any valid URL can be
 		used. If you plan on using relative paths, the base path will the the same
-		as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>). 
+		as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/shinken/</emphasis>). 
 		This can be very useful if you want to make detailed information on the service
                 group, emergency contact methods, etc. available to other support staff.
 	      </para>
@@ -2281,7 +2281,7 @@
 		will see a red <quote>splat</quote> icon in the CGIs (when you are viewing service group information) 
 		that links to the URL you specify here. Any valid URL can be used. If you plan on using 
 		relative paths, the base path will the the same as what is used to access the CGIs 
-		(i.e. <emphasis>/cgi-bin/nagios/</emphasis>).
+		(i.e. <emphasis>/cgi-bin/shinken/</emphasis>).
 	      </para>
 	    </listitem>
 	  </varlistentry>
@@ -2643,7 +2643,7 @@
 	    </term>
 	    <listitem>
 	      <para>This directive is used to determine whether or not the contact can submit 
-		<link linkend="advancedtopics-extcommands">external commands</link> to Nagios from the CGIs.
+		<link linkend="advancedtopics-extcommands">external commands</link> to Shinken from the CGIs.
 		Values:
 		<itemizedlist>
 		  <listitem><para>0 = don't allow contact to submit commands</para></listitem>
@@ -3175,7 +3175,7 @@
         <programlisting>        
 	  define command{
           command_name   check_pop
-          command_line   /usr/local/nagios/libexec/check_pop -H $HOSTADDRESS$    
+          command_line   /usr/local/shinken/libexec/check_pop -H $HOSTADDRESS$    
 	  }
 	</programlisting>
       </section>
@@ -3202,7 +3202,7 @@
 	      command_line
 	    </term>
 	    <listitem>
-	      <para>This directive is used to define what is actually executed by Nagios when the command 
+	      <para>This directive is used to define what is actually executed by Shinken when the command 
 		is used for service or host checks, notifications, or 
 		<link linkend="advancedtopics-eventhandlers">event handlers</link>. Before the command 
 		line is executed, all valid <link linkend="thebasics-macros">macros</link> are replaced with 
@@ -3257,7 +3257,7 @@
       <section>
         <title>Description</title>
 
-        <para>Service dependencies are an advanced feature of Nagios that
+        <para>Service dependencies are an advanced feature of Shinken that
           allow you to suppress notifications and active checks of services
           based on the status of one or more other services. Service
           dependencies are optional and are mainly targeted at advanced users
@@ -3718,7 +3718,7 @@
 	    </term>
 	    <listitem>
 	      <para>This directive is used to determine the interval at which notifications should be made
-                while this escalation is valid. If you specify a value of 0 for the interval, Nagios will 
+                while this escalation is valid. If you specify a value of 0 for the interval, Shinken will 
 		send the first notification when this escalation definition is valid, but will then prevent any
                 more problem notifications from being sent out for the host. Notifications are sent out again 
 		until the host recovers. This is useful if you want to stop having notifications sent out
@@ -3770,7 +3770,7 @@
       <section>
         <title>Description</title>
 
-        <para>Host dependencies are an advanced feature of Nagios that allow
+        <para>Host dependencies are an advanced feature of Shinken that allow
           you to suppress notifications for hosts based on the status of one or
           more other hosts. Host dependencies are optional and are mainly
           targeted at advanced users who have complicated monitoring setups.
@@ -4161,7 +4161,7 @@
 	    <listitem>
 	      <para>This directive is used to determine the interval at which notifications 
 		should be made while this escalation is valid. If you specify a value of 0
-                for the interval, Nagios will send the first notification when this escalation 
+                for the interval, Shinken will send the first notification when this escalation 
 		definition is valid, but will then prevent any more problem notifications 
 		from being sent out for the host. Notifications are sent out again until the
 		host recovers. This is useful if you want to stop having notifications sent out
@@ -4224,7 +4224,7 @@
 	  effect on monitoring and are completely optional.</para>
 
         <tip>
-          <para>As of Nagios 3.x, all directives contained in extended host
+          <para>As of Shinken 3.x, all directives contained in extended host
             information definitions are also available in
 	    <link linkend="configuringnagios-objectdefinitions-host">host definitions</link>. 
 	    Thus, you can choose to define the directives below in your host definitions if 
@@ -4363,7 +4363,7 @@
 		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGI 
 		(when you are viewing information about the specified host). Any valid URL can
 		be used. If you plan on using relative paths, the base path will the the same
-                as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>). 
+                as what is used to access the CGIs (i.e. <emphasis>/cgi-bin/shinken/</emphasis>). 
 		This can be very useful if you want to make detailed information on the host,
                 emergency contact methods, etc. available to other support staff.</para>
 	    </listitem>
@@ -4379,7 +4379,7 @@
 		<link linkend="thebasics-cgis-extinfo_cgi">extended  information</link> CGI 
 		(when you are viewing information about the specified host). Any valid URL can be used.
 		If you plan on using relative paths, the base path will the the same as what is used 
-		to access the CGIs (i.e. <emphasis>/cgi-bin/nagios/</emphasis>).</para>
+		to access the CGIs (i.e. <emphasis>/cgi-bin/shinken/</emphasis>).</para>
 	    </listitem>
 	  </varlistentry>
 	  <varlistentry>
@@ -4393,7 +4393,7 @@
 		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGIs.
 		The image will look best if it is 40x40 pixels in size. Images for hosts are assumed to 
 		be in the <emphasis role="strong">logos/</emphasis> subdirectory in your HTML images 
-		directory (i.e. <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+		directory (i.e. <filename class="directory">/usr/local/shinken/share/images/logos</filename>).
               </para>
 	    </listitem>
 	  </varlistentry>
@@ -4421,7 +4421,7 @@
                 should probably <emphasis>not</emphasis> have any transparency. If it does, the host object
 		will look a bit weird. Images for hosts are assumed to be in the 
 		<emphasis role="bold">logos/</emphasis> subdirectory in your HTML images directory (i.e.
-                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+                <filename class="directory">/usr/local/shinken/share/images/logos</filename>).
 	      </para>
 	    </listitem>
 	  </varlistentry>
@@ -4442,7 +4442,7 @@
 		in size.
                 You can leave these option blank if you are not using the statusmap CGI. Images for hosts
 		are assumed to be in the <emphasis role="strong">logos/</emphasis> subdirectory in your HTML 
-		images directory (i.e. <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+		images directory (i.e. <filename class="directory">/usr/local/shinken/share/images/logos</filename>).
               </para>
 	    </listitem>
 	  </varlistentry>
@@ -4496,7 +4496,7 @@
           monitoring and are completely optional.</para>
 
         <tip>
-          <para>As of Nagios 3.x, all directives contained in extended service
+          <para>As of Shinken 3.x, all directives contained in extended service
             information definitions are also available in <link
 							     linkend="configuringnagios-objectdefinitions-service">service definitions</link>. Thus, you can choose to
             define the directives below in your service definitions if it makes
@@ -4629,7 +4629,7 @@
 		<link linkend="thebasics-cgis-extinfo_cgi">extended information</link> CGI (when you 
 		are viewing information about the specified service). Any valid URL can be used. If
                 you plan on using relative paths, the base path will the the same as what is used to
-		access the CGIs (i.e.  <emphasis>/cgi-bin/nagios/</emphasis>). This can be very
+		access the CGIs (i.e.  <emphasis>/cgi-bin/shinken/</emphasis>). This can be very
                 useful if you want to make detailed information on the service, emergency contact 
 		methods, etc. available to other support staff.</para>
 	    </listitem>
@@ -4660,7 +4660,7 @@
 		The image will look best if it is 40x40 pixels in size. Images for hosts are
 		assumed to be in  the <emphasis role="strong">logos/</emphasis> subdirectory in
                 your HTML images directory (i.e.
-                <filename class="directory">/usr/local/nagios/share/images/logos</filename>).
+                <filename class="directory">/usr/local/shinken/share/images/logos</filename>).
               </para>
 	    </listitem>
 	  </varlistentry>
@@ -4798,7 +4798,7 @@
 	  It reads the configuration, cuts it into parts (N schedulers = N parts), and then send them to all
 	  others elements. It manages the high availability part : if an element dies, it re-routes the 
 	  configuration managed by this falling element to a spare one. Its other role is to receive input
-	  from users (like external commands of nagios.cmd) and send them to other elements. There can be
+	  from users (like external commands of shinken.cmd) and send them to other elements. There can be
 	  only one active arbiter in the architecture.
 	</para>
 

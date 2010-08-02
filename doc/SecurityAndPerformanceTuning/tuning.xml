@@ -139,16 +139,7 @@
         instance can significantly increase the load on your monitoring host
         if you have a lot of service checks. If you want to use Perl plugins,
         consider compiling them into true executables using perlcc(1) (a
-        utility which is part of the standard Perl distribution) or compiling
-        Nagios with an embedded Perl interpreter (see below).</para>
-      </listitem>
-
-      <listitem>
-        <para>Use the embedded Perl interpreter. If you're using a lot of Perl
-        scripts for service checks, etc., you will probably find that
-        compiling the <link linkend="advancedtopics-embeddedperl">embedded
-        Perl interpreter</link> into the Nagios binary will speed things
-        up.</para>
+        utility which is part of the standard Perl distribution).</para>
       </listitem>
 
       <listitem>

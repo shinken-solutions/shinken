@@ -7,34 +7,34 @@
 ]
 >
 <chapter>
-  <title id="upgrading">Upgrading Nagios</title>
+  <title id="upgrading">Upgrading Shinken</title>
   <section>
-    <title>Upgrading From Previous Nagios 3.x Releases</title>
+    <title>Upgrading From Previous Shinken 3.x Releases</title>
     <para>
-      As newer alpha, beta, and stable releases of Nagios 3.x are
+      As newer alpha, beta, and stable releases of Shinken 3.x are
       released, you should strongly consider upgrading as soon as
       possible. Newer releases usually contain critical bug fixes, so its
       important to stay up to date. Assuming you've already installed
-      Nagios from source code as described in the
+      Shinken from source code as described in the
       <link linkend="gettingstarted-quickstart">quickstart guide</link>, you can
-      install newer versions of Nagios 3.x easily. You don't even need
+      install newer versions of Shinken 3.x easily. You don't even need
       root access to do it, as everything that needed to be done as root
       was done during the initial install. Here's the upgrade process...
    </para>
     <para>
-      Make sure you have a good backup of your existing Nagios
+      Make sure you have a good backup of your existing Shinken
       installation and configuration files. If anything goes wrong or
       doesn't work, this will allow you to rollback to your old version.
    </para>
     <para>
-      Become the nagios user. Debian/&name-ubuntu; users should use
-      <userinput>sudo -s nagios</userinput>.
+      Become the shinken user. Debian/&name-ubuntu; users should use
+      <userinput>sudo -s shinken</userinput>.
    </para>
 <screen>
-<prompt>linux:~ $ </prompt><userinput>su -l nagios</userinput>
+<prompt>linux:~ $ </prompt><userinput>su -l shinken</userinput>
 </screen>
     <para>
-      Download the source code tarball of the latest version of Nagios
+      Download the source code tarball of the latest version of Shinken
       (visit
       <ulink url="&url-nagios;download/">&url-nagios;download/</ulink>
       for the link to the latest version).
@@ -43,21 +43,21 @@
 <prompt>linux:~ $ </prompt><userinput>wget http://osdn.dl.sourceforge.net/sourceforge/nagios/nagios-3.x.tar.gz</userinput>
 </screen>
     <para>
-      Extract the Nagios source code tarball.
+      Extract the Shinken source code tarball.
    </para>
 <screen>
-<prompt>linux:~ $ </prompt><userinput>tar xzf nagios-3.x.tar.gz</userinput>
-<prompt>linux:~ $ </prompt><userinput>cd nagios-3.x</userinput>
+<prompt>linux:~ $ </prompt><userinput>tar xzf shinken-3.x.tar.gz</userinput>
+<prompt>linux:~ $ </prompt><userinput>cd shinken-3.x</userinput>
 </screen>
     <para>
-      Run the Nagios configure script, passing the name of the group used
+      Run the Shinken configure script, passing the name of the group used
       to control external command file permissions like so:
    </para>
 <screen>
 <prompt>linux:~ $ </prompt><userinput>./configure --with-command-group=nagcmd</userinput>
 </screen>
     <para>
-      Compile the Nagios source code.
+      Compile the Shinken source code.
    </para>
 <screen>
 <prompt>linux:~ $ </prompt><userinput>make all</userinput>
@@ -71,11 +71,11 @@
 <prompt>linux:~ $ </prompt><userinput>make install</userinput>
 </screen>
     <para>
-      Verify your configuration files and restart Nagios.
+      Verify your configuration files and restart Shinken.
    </para>
 <screen>
-<prompt>linux:~ $ </prompt><userinput>/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg</userinput>
-<prompt>linux:~ $ </prompt><userinput>/sbin/service nagios restart</userinput>
+<prompt>linux:~ $ </prompt><userinput>/usr/local/shinken/bin/shinken -v /usr/local/shinken/etc/shinken.cfg</userinput>
+<prompt>linux:~ $ </prompt><userinput>/sbin/service shinken restart</userinput>
 </screen>
     <para>
       That's it - you're done!
@@ -84,10 +84,10 @@
   <section>
     <title>Upgrading From Nagios 2.x</title>
     <para>
-      It shouldn't be too difficult to upgrade from Nagios 2.x to Nagios
+      It shouldn't be too difficult to upgrade from Shinken 2.x to Shinken
       3. The upgrade is essentially the same as what is described above
       for upgrading to newer 3.x releases. You will, however, have to
-      change your configuration files a bit so they work with Nagios 3:
+      change your configuration files a bit so they work with Shinken 3:
    </para>
     <itemizedlist>
       <listitem>
@@ -124,7 +124,7 @@
       <listitem>
         <para>
           Extended host and extended service definitions have been
-          deprecated. They are still read and processed by Nagios, but it is
+          deprecated. They are still read and processed by Shinken, but it is
           recommended that you move the directives found in these definitions
           to your host and service definitions, respectively.
        </para>
@@ -135,7 +135,7 @@
           main config file is no longer supported, as scheduled downtime
           entries are now saved in the
           <link linkend="configuringnagios-configmain-state_retention_file">retention file</link>.
-          To preserve existing downtime entries, stop Nagios 2.x and append
+          To preserve existing downtime entries, stop Shinken 2.x and append
           the contents of your old downtime file to the retention file.
        </para>
       </listitem>
@@ -145,7 +145,7 @@
           config file is no longer supported, as comments are now saved in
           the
           <link linkend="configuringnagios-configmain-state_retention_file">retention file</link>.
-          To preserve existing comments, stop Nagios 2.x and append the
+          To preserve existing comments, stop Shinken 2.x and append the
           contents of your old comment file to the retention file.
        </para>
       </listitem>
@@ -154,7 +154,7 @@
       Also make sure to read the
       <quote><link linkend="about-whatsnew">What's New</link></quote> section
       of the documentation. It describes all the changes that were made
-      to the Nagios 3 code since the latest stable release of Nagios 2.x.
+      to the Shinken 3 code since the latest stable release of Shinken 2.x.
       Quite a bit has changed, so make sure you read it over.
    </para>
   </section>
@@ -162,14 +162,14 @@
     <title>Upgrading From an RPM Installation</title>
     <para>
       If you currently have an RPM- or Debian/&name-ubuntu; APT package-based
-      installation of Nagios and you would like to transition to
-      installing Nagios from the official source code distribution,
+      installation of Shinken and you would like to transition to
+      installing Shinken from the official source code distribution,
       here's the basic process you should follow:
    </para>
         <orderedlist>
 
     <listitem>
-      <para>Backup your existing Nagios installation</para>
+      <para>Backup your existing Shinken installation</para>
 
       <itemizedlist>
         <listitem>
@@ -178,7 +178,7 @@
           <itemizedlist>
             <listitem>
               <para>Main config file (usually
-              <filename>nagios.cfg</filename>)</para>
+              <filename>shinken.cfg</filename>)</para>
             </listitem>
 
             <listitem>
@@ -203,12 +203,12 @@
         </listitem>
 
         <listitem>
-          <para>Current Nagios log file (usually
-          <filename>nagios.log</filename>)</para>
+          <para>Current Shinken log file (usually
+          <filename>shinken.log</filename>)</para>
         </listitem>
 
         <listitem>
-          <para>Archived Nagios log files</para>
+          <para>Archived Shinken log files</para>
         </listitem>
       </itemizedlist>
     </listitem>
@@ -218,25 +218,25 @@
     </listitem>
 
     <listitem>
-      <para>Install Nagios from source by following the <link
+      <para>Install Shinken from source by following the <link
       linkend="gettingstarted-quickstart">quickstart
       guide</link></para>
     </listitem>
 
     <listitem>
-      <para>Restore your original Nagios configuration files, retention file,
+      <para>Restore your original Shinken configuration files, retention file,
       and log files</para>
     </listitem>
 
     <listitem>
       <para><link linkend="runningnagios-verifyconfig">Verify</link>
       your configuration and 
-      <link linkend="runningnagios-startstop">start</link> Nagios</para>
+      <link linkend="runningnagios-startstop">start</link> Shinken</para>
     </listitem>
   </orderedlist>
-<note><para>Different RPMs or APT packages may install Nagios in
+<note><para>Different RPMs or APT packages may install Shinken in
       different ways and in different locations. Make sure you've backed
-      up all your critical Nagios files before removing the original RPM
+      up all your critical Shinken files before removing the original RPM
       or APT package, so you can revert back if you encounter problems.</para></note>
   </section>
 </chapter>

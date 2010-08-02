@@ -12,7 +12,7 @@
   <abstract>
     <para>
     This guide is intended to provide you with simple instructions on
-    how to install Nagios from source (code) on &name-fedora; and have it monitoring
+    how to install Shinken from source (code) on &name-fedora; and have it monitoring
     your local machine inside of 20 minutes. No advanced installation options
     are discussed here - just the basics that will work for 95% of users who
     want to get started.
@@ -34,21 +34,21 @@
     <itemizedlist>
       <listitem>
         <para>
-	Nagios and the plugins will be installed underneath
-        <filename class="directory">/usr/local/nagios</filename>
+	Shinken and the plugins will be installed underneath
+        <filename class="directory">/usr/local/shinken</filename>
 	</para>
       </listitem>
 
       <listitem>
         <para>
-	Nagios will be configured to monitor a few aspects of your local
+	Shinken will be configured to monitor a few aspects of your local
         system (CPU load, disk usage, etc.)
 	</para>
       </listitem>
 
       <listitem>
         <para>
-	The Nagios web interface will be accessible at
+	The Shinken web interface will be accessible at
         <uri>http://localhost/nagios/</uri>
 	</para>
       </listitem>
@@ -102,26 +102,26 @@
 <prompt>linux:~ $ </prompt><userinput>su -l</userinput>
 </screen>
 
-    <para>Create a new nagios user account and give it a password.</para>
+    <para>Create a new shinken user account and give it a password.</para>
 
     <screen>
-<prompt>linux:~ # </prompt><userinput>/usr/sbin/useradd -m nagios</userinput>
-<prompt>linux:~ # </prompt><userinput>passwd nagios</userinput>
+<prompt>linux:~ # </prompt><userinput>/usr/sbin/useradd -m shinken</userinput>
+<prompt>linux:~ # </prompt><userinput>passwd shinken</userinput>
 </screen>
 
     <para>Create a new nagcmd group for allowing external commands to be
-    submitted through the web interface. Add both the nagios user and the
+    submitted through the web interface. Add both the shinken user and the
     apache user to the group.</para>
 
     <screen>
 <prompt>linux:~ # </prompt><userinput>/usr/sbin/groupadd nagcmd</userinput>
-<prompt>linux:~ # </prompt><userinput>/usr/sbin/usermod -G nagcmd nagios</userinput>
+<prompt>linux:~ # </prompt><userinput>/usr/sbin/usermod -G nagcmd shinken</userinput>
 <prompt>linux:~ # </prompt><userinput>/usr/sbin/usermod -G nagcmd apache</userinput>
 </screen>
   </section>
 
   <section>
-    <title>Download Nagios and the Plugins</title>
+    <title>Download Shinken and the Plugins</title>
 
     <para>Create a directory for storing the downloads.</para>
 
@@ -131,10 +131,10 @@
 </screen>
 
     <para>
-    Download the source code tarballs of both Nagios and the Nagios
+    Download the source code tarballs of both Shinken and the Shinken
     plugins (visit <ulink url="&url-nagios;download/">&url-nagios;download/</ulink>
     for links to the latest versions). At the time of writing, the latest
-    versions of Nagios and the Nagios plugins were 3.0.3 and 1.4.11,
+    versions of Shinken and the Shinken plugins were 3.0.3 and 1.4.11,
     respectively.
     </para>
 
@@ -145,9 +145,9 @@
   </section>
 
   <section>
-    <title>Compile and Install Nagios</title>
+    <title>Compile and Install Shinken</title>
 
-    <para>Extract the Nagios source code tarball.</para>
+    <para>Extract the Shinken source code tarball.</para>
 
     <screen>
 <prompt>linux:~ # </prompt><userinput>cd ~/downloads</userinput>
@@ -155,14 +155,14 @@
 <prompt>linux:~ # </prompt><userinput>cd nagios-3.0.2</userinput>
 </screen>
 
-    <para>Run the Nagios configure script, passing the name of the group you
+    <para>Run the Shinken configure script, passing the name of the group you
     created earlier like so:</para>
 
     <screen>
 <prompt>linux:~ # </prompt><userinput>./configure --with-command-group=nagcmd</userinput>
 </screen>
 
-    <para>Compile the Nagios source code.</para>
+    <para>Compile the Shinken source code.</para>
 
     <screen>
 <prompt>linux:~ # </prompt><userinput>make all</userinput>
@@ -178,7 +178,7 @@
 <prompt>linux:~ # </prompt><userinput>make install-commandmode</userinput>
 </screen>
 
-    <para>Don't start Nagios yet - there's still more that needs to be
+    <para>Don't start Shinken yet - there's still more that needs to be
     done&hellip;</para>
   </section>
 
@@ -186,37 +186,37 @@
     <title>Customize Configuration</title>
 
     <para>Sample <link linkend="configuringnagios-config">configuration files</link>
-    have now been installed in the <filename class="directory">/usr/local/nagios/etc</filename>
+    have now been installed in the <filename class="directory">/usr/local/shinken/etc</filename>
     directory. These sample files should work fine for getting started with
-    Nagios. You'll need to make just one change before you proceed...</para>
+    Shinken. You'll need to make just one change before you proceed...</para>
 
     <para>Edit the
-    <filename>/usr/local/nagios/etc/objects/contacts.cfg</filename> config
+    <filename>/usr/local/shinken/etc/objects/contacts.cfg</filename> config
     file with your favorite editor and change the email address associated
-    with the nagiosadmin contact definition to the address you'd like to use
+    with the shinkenadmin contact definition to the address you'd like to use
     for receiving alerts.</para>
 
     <screen>
-<prompt>linux:~ # </prompt><userinput>vi /usr/local/nagios/etc/objects/contacts.cfg</userinput>
+<prompt>linux:~ # </prompt><userinput>vi /usr/local/shinken/etc/objects/contacts.cfg</userinput>
 </screen>
   </section>
 
   <section>
     <title>Configure the Web Interface</title>
 
-    <para>Install the Nagios web config file in the Apache
+    <para>Install the Shinken web config file in the Apache
     <filename class="directory">conf.d</filename> directory.</para>
 
     <screen>
 <prompt>linux:~ # </prompt><userinput>make install-webconf</userinput>
 </screen>
 
-    <para>Create a nagiosadmin account for logging into the Nagios web
+    <para>Create a shinkenadmin account for logging into the Shinken web
     interface. Remember the password you assign to this account&nbsp;-&nbsp;you'll need
     it later.</para>
 
     <screen>
-<prompt>linux:~ # </prompt><userinput>htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin</userinput>
+<prompt>linux:~ # </prompt><userinput>htpasswd -c /usr/local/shinken/etc/htpasswd.users shinkenadmin</userinput>
 </screen>
 
     <para>Restart Apache to make the new settings take effect.</para>
@@ -227,9 +227,9 @@
   </section>
 
   <section>
-    <title>Compile and Install the Nagios Plugins</title>
+    <title>Compile and Install the Shinken Plugins</title>
 
-    <para>Extract the Nagios plugins source code tarball.</para>
+    <para>Extract the Shinken plugins source code tarball.</para>
 
     <screen>
 <prompt>linux:~ # </prompt><userinput>cd ~/downloads</userinput>
@@ -247,26 +247,26 @@
   </section>
 
   <section>
-    <title>Start Nagios</title>
+    <title>Start Shinken</title>
 
-    <para>Add Nagios to the list of system services and have it automatically
+    <para>Add Shinken to the list of system services and have it automatically
     start when the system boots.</para>
 
     <screen>
-<prompt>linux:~ # </prompt><userinput>chkconfig --add nagios</userinput>
-<prompt>linux:~ # </prompt><userinput>chkconfig nagios on</userinput>
+<prompt>linux:~ # </prompt><userinput>chkconfig --add shinken</userinput>
+<prompt>linux:~ # </prompt><userinput>chkconfig shinken on</userinput>
 </screen>
 
-    <para>Verify the sample Nagios configuration files.</para>
+    <para>Verify the sample Shinken configuration files.</para>
 
     <screen>
-<prompt>linux:~ # </prompt><userinput>/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg</userinput>
+<prompt>linux:~ # </prompt><userinput>/usr/local/shinken/bin/shinken -v /usr/local/shinken/etc/shinken.cfg</userinput>
 </screen>
 
-    <para>If there are no errors, start Nagios.</para>
+    <para>If there are no errors, start Shinken.</para>
 
     <screen>
-<prompt>linux:~ # </prompt><userinput>service nagios start</userinput>
+<prompt>linux:~ # </prompt><userinput>service shinken start</userinput>
 </screen>
   </section>
 
@@ -275,7 +275,7 @@
 
     <para>&name-fedora; ships with SELinux (Security Enhanced Linux) installed and in
     Enforcing mode by default. This can result in <errorname>Internal Server
-    Error</errorname> messages when you attempt to access the Nagios
+    Error</errorname> messages when you attempt to access the Shinken
     CGIs.</para>
 
     <para>See if SELinux is in Enforcing mode.</para>
@@ -298,8 +298,8 @@
     enforcing/targeted mode:</para>
 
     <screen>
-<prompt>linux:~ # </prompt><userinput>chcon -R -t httpd_sys_content_t /usr/local/nagios/sbin/</userinput>
-<prompt>linux:~ # </prompt><userinput>chcon -R -t httpd_sys_content_t /usr/local/nagios/share/</userinput>
+<prompt>linux:~ # </prompt><userinput>chcon -R -t httpd_sys_content_t /usr/local/shinken/sbin/</userinput>
+<prompt>linux:~ # </prompt><userinput>chcon -R -t httpd_sys_content_t /usr/local/shinken/share/</userinput>
 </screen>
 
     <para>For information on running the Nagios CGIs under Enforcing mode with
@@ -318,7 +318,7 @@
 
     <para>Click on the <guimenuitem>Service Detail</guimenuitem> navbar link
     to see details of what's being monitored on your local machine. It will
-    take a few minutes for Nagios to check all the services associated with
+    take a few minutes for Shinken to check all the services associated with
     your machine, as the checks are spread out over time.</para>
   </section>
 
@@ -326,11 +326,11 @@
     <title>Other Modifications</title>
 
     <para>Make sure your machine's firewall rules are configured to allow
-    access to the web server if you want to access the Nagios interface
+    access to the web server if you want to access the Shinken interface
     remotely.</para>
 
     <para>Configuring email notifications is out of the scope of this
-    documentation. While Nagios is currently configured to send you email
+    documentation. While Shinken is currently configured to send you email
     notifications, your system may not yet have a mail program properly
     installed or configured. Refer to your system documentation, search the
     web, or look to the <ulink
@@ -343,7 +343,7 @@
   <section>
     <title>You're Done</title>
 
-    <para>Congratulations! You sucessfully installed Nagios. Your journey into
+    <para>Congratulations! You sucessfully installed Shinken. Your journey into
     monitoring is just beginning. You'll no doubt want to monitor more than
     just your local machine, so check out the following docs...</para>
 

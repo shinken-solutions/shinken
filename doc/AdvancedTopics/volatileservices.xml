@@ -12,7 +12,7 @@
   <section>
     <title>Introduction</title>
 
-    <para>Nagios has the ability to distinguish between <quote>normal</quote> services and
+    <para>Shinken has the ability to distinguish between <quote>normal</quote> services and
       "volatile" services. The is_volatile option in each service definition
       allows you to specify whether a specific service is volatile or not. For
       most people, the majority of all monitored services will be non-volatile
@@ -92,11 +92,11 @@
     <para>How about an example... Let's say you're running <ulink
 							      url="&url-sourceforge-projects;sentrytools/">PortSentry</ulink> to
       detect port scans on your machine and automatically firewall potential
-      intruders. If you want to let Nagios know about port scans, you could do
+      intruders. If you want to let Shinken know about port scans, you could do
       the following...</para>
 
     <section>
-      <title>Nagios Configuration</title>
+      <title>Shinken Configuration</title>
 
       <itemizedlist>
         <listitem>
@@ -106,14 +106,14 @@
 
         <listitem>
           <para>Set the <varname>max_check_attempts</varname> directive in the
-            service definition to 1. This will tell Nagios to immediate force
+            service definition to 1. This will tell Shinken to immediate force
             the service into a <link linkend="thebasics-statetypes">hard
               state</link> when a non-OK state is reported.</para>
         </listitem>
 
         <listitem>
           <para>Set the <varname>active_checks_enabled</varname> directive in
-            the service definition to 0. This prevents Nagios from actively
+            the service definition to 0. This prevents Shinken from actively
             checking the service.</para>
         </listitem>
 
@@ -137,7 +137,7 @@
 	(<filename>portsentry.conf</filename>) and define a command for the
 	KILL_RUN_CMD directive as follows:</para>
 
-      <programlisting>KILL_RUN_CMD="/usr/local/Nagios/libexec/eventhandlers/submit_check_result <replaceable>host_name</replaceable> 'Port Scans' 2 'Port scan from host $TARGET$ on port $PORT$.  Host has been firewalled.'"</programlisting>
+      <programlisting>KILL_RUN_CMD="/usr/local/Shinken/libexec/eventhandlers/submit_check_result <replaceable>host_name</replaceable> 'Port Scans' 2 'Port scan from host $TARGET$ on port $PORT$.  Host has been firewalled.'"</programlisting>
 
       <para>Make sure to replace host_name with the short name of the host
 	that the service is associated with.</para>
@@ -147,18 +147,18 @@
       <title>Port Scan Script</title>
 
       <para>Create a shell script in the <filename
-					    class="directory">/usr/local/nagios/libexec/eventhandlers</filename>
+					    class="directory">/usr/local/shinken/libexec/eventhandlers</filename>
 	directory named <command>submit_check_result</command>. The contents of
 	the shell script should be something similiar to the following...</para>
 
       <programlisting>#!/bin/sh
 
-	# Write a command to the Nagios command file to cause
+	# Write a command to the Shinken command file to cause
 	# it to process a service check result
 
 	echocmd="/bin/echo"
 
-	CommandFile="/usr/local/nagios/var/rw/nagios.cmd"
+	CommandFile="/usr/local/shinken/var/rw/shinken.cmd"
 
 	# get the current date/time in seconds since UNIX epoch
 	datetime=`date +%s`
@@ -181,16 +181,16 @@
         <listitem>
           <para>PortSentry will execute the
             <command>submit_check_result</command> shell script and send a
-            passive check result to Nagios</para>
+            passive check result to Shinken</para>
         </listitem>
 
         <listitem>
-          <para>Nagios will read the external command file and see the passive
+          <para>Shinken will read the external command file and see the passive
             service check submitted by PortSentry</para>
         </listitem>
 
         <listitem>
-          <para>Nagios will put the Port Scans service in a hard CRITICAL
+          <para>Shinken will put the Port Scans service in a hard CRITICAL
             state and send notifications to contacts</para>
         </listitem>
       </itemizedlist>

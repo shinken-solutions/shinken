@@ -218,12 +218,6 @@
 		official Nagios plugins and look through the code for various C, Perl, and shell script plugins.
 		Information on obtaining the official Nagios plugins can be found <link linkend="thebasics-plugins">here</link>.</para>
 	</section>
-	<section>
-		<title>Perl Plugins</title>
-		<para>Nagios features an optional <link linkend="advancedtopics-embeddedperl">embedded Perl 
-		interpreter</link> which can speed up the execution of Perl plugins. More information 
-		on developing Perl plugins for use with the embedded Perl interpreter can be found 
-		<link linkend="advancedtopics-embeddedperl">here</link>.</para>
-	</section>
+
 </chapter>
 

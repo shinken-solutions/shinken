@@ -23,7 +23,6 @@
 <xi:include href="AdvancedTopics/stalking.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="AdvancedTopics/perfdata.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="AdvancedTopics/downtime.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-<xi:include href="AdvancedTopics/embeddedperl.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="AdvancedTopics/adaptive.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="AdvancedTopics/dependencychecks.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="AdvancedTopics/cachedchecks.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>

@@ -12,7 +12,7 @@
   <section>
     <title>Introduction</title>
 
-    <para>Nagios is designed to allow <link linkend="thebasics-plugins">plugins</link> to return optional performance
+    <para>Shinken is designed to allow <link linkend="thebasics-plugins">plugins</link> to return optional performance
       data in addition to normal status data, as well as allow you to pass that
       performance data to external applications for processing. A description of
       the different types of performance data, as well as information on how to
@@ -23,7 +23,7 @@
     <title>Types of Performance Data</title>
 
     <para>There are two basic categories of performance data that can be
-      obtained from Nagios:</para>
+      obtained from Shinken:</para>
 
     <orderedlist>
       <listitem>
@@ -54,13 +54,13 @@
       <link linkend="thebasics-macrolist-hostperfdata">$HOSTPERFDATA$</link> and 
       <link linkend="thebasics-macrolist-serviceperfdata">$SERVICEPERFDATA$</link>
       <link linkend="thebasics-macros">macros</link>. Read on for more information on how plugins can 
-      return performance data to Nagios for inclusion in the $HOSTPERFDATA$ and $SERVICEPERFDATA$ macros.</para>
+      return performance data to Shinken for inclusion in the $HOSTPERFDATA$ and $SERVICEPERFDATA$ macros.</para>
   </section>
 
   <section>
     <title>Plugin Performance Data</title>
 
-    <para>At a minimum, Nagios plugins must return a single line of
+    <para>At a minimum, Shinken plugins must return a single line of
       human-readable text that indicates the status of some type of measurable
       data. For example, the &plugin-ping; plugin might return a line of text like
       the following:</para>
@@ -81,7 +81,7 @@
 
     <programlisting>PING ok - Packet loss = 0%, RTA = 0.80 ms | percent_packet_loss=0, rta=0.80</programlisting>
 
-    <para>When Nagios sees this plugin output format it will split the output
+    <para>When Shinken sees this plugin output format it will split the output
       into two parts:</para>
 
     <orderedlist>
@@ -107,7 +107,7 @@
       can be obtained from plugins, as described in the <link linkend="development-pluginapi">plugin API documentation</link>.</para>
 
     <note>
-      <para>The Nagios daemon doesn't directly process plugin performance
+      <para>The Shinken daemon doesn't directly process plugin performance
 	data, so it doesn't really care what the performance data looks like.
 	There aren't really any inherent limitations on the format or content of
 	the performance data. However, if you are using an external addon to
@@ -122,7 +122,7 @@
     <title>Processing Performance Data</title>
 
     <para>If you want to process the performance data that is available from
-      Nagios and the plugins, you'll need to do the following:</para>
+      Shinken and the plugins, you'll need to do the following:</para>
 
     <orderedlist>
       <listitem>
@@ -132,7 +132,7 @@
       </listitem>
 
       <listitem>
-	<para>Configure Nagios so that performance data is either written to
+	<para>Configure Shinken so that performance data is either written to
           files and/or processed by executing commands.</para>
       </listitem>
     </orderedlist>
@@ -144,9 +144,9 @@
   <section>
     <title>Processing Performance Data Using Commands</title>
 
-    <para>The most flexible way to process performance data is by having Nagios execute 
+    <para>The most flexible way to process performance data is by having Shinken execute 
       commands (that you specify) to process or redirect the data for later processing 
-      by external applications. The commands that Nagios executes to process host and
+      by external applications. The commands that Shinken executes to process host and
       service performance data are determined by the 
       <link linkend="configuringnagios-configmain-host_perfdata_command">host_perfdata_command</link> 
       and <link linkend="configuringnagios-configmain-service_perfdata_command">service_perfdata_command</link> 
@@ -158,13 +158,13 @@
 
     <programlisting>define command{
               command_name    store-service-perfdata
-              command_line    /bin/echo -e "$LASTSERVICECHECK$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICESTATE$\t$SERVICEATTEMPT$\t$SERVICESTATETYPE$\t$SERVICEEXECUTIONTIME$\t$SERVICELATENCY$\t$SERVICEOUTPUT$\t$SERVICEPERFDATA$" &gt;&gt; /usr/local/nagios/var/service-perfdata.dat
+              command_line    /bin/echo -e "$LASTSERVICECHECK$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICESTATE$\t$SERVICEATTEMPT$\t$SERVICESTATETYPE$\t$SERVICEEXECUTIONTIME$\t$SERVICELATENCY$\t$SERVICEOUTPUT$\t$SERVICEPERFDATA$" &gt;&gt; /usr/local/shinken/var/service-perfdata.dat
               }</programlisting>
 
     <tip>
       <para>This method, while flexible, comes with a relatively high CPU
 	overhead. If you're processing performance data for a large number of
-	hosts and services, you'll probably want Nagios to write performance
+	hosts and services, you'll probably want Shinken to write performance
 	data to files instead. This method is described in the next
 	section.</para>
     </tip>
@@ -173,7 +173,7 @@
   <section>
     <title>Writing Performance Data To Files</title>
 
-    <para>You can have Nagios write all host and service performance data directly to text
+    <para>You can have Shinken write all host and service performance data directly to text
       files using the <link linkend="configuringnagios-configmain-host_perfdata_file">host_perfdata_file</link> 
       and <link linkend="configuringnagios-configmain-service_perfdata_file">service_perfdata_file</link> options. 
       The format in which host and service performance data is written to those files is determined by
@@ -191,7 +191,7 @@
       <link linkend="configuringnagios-configmain-service_perfdata_file_mode">service_perfdata_file_mode</link> 
       options.</para>
 
-    <para>Additionally, you can have Nagios periodically execute commands to periocially process 
+    <para>Additionally, you can have Shinken periodically execute commands to periocially process 
       the performance data files (e.g. rotate them) using the 
       <link linkend="configuringnagios-configmain-host_perfdata_file_processing_command">host_perfdata_file_processing_command</link>
       and <link linkend="configuringnagios-configmain-service_perfdata_file_processing_command">service_perfdata_file_processing_command</link> 

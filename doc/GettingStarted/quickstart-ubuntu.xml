@@ -98,7 +98,7 @@
     </screen>
 
     <para>On &name-ubuntu; server edition (9.10 and possible newer versions), you
-      will need to also add a nagios group (it's not created by default). You
+      will need to also add a shinken group (it's not created by default). You
       should be able to skip this step on desktop editions of &name-ubuntu;.</para>
 
     <screen>
@@ -123,10 +123,10 @@
       <prompt>linux:~ # </prompt><userinput>cd ~/downloads</userinput>
     </screen>
 
-    <para>Download the source code of Shinken and the Nagios
+    <para>Download the source code of Shinken and the Shinken
       plugins (visit <ulink url="&url-nagios;download/">&url-nagios;download/</ulink>
       for links to the latest versions of the plugins). At the time of writing, the latest
-      versions of Shinken and the Nagios plugins were 0.1rc and 1.4.13,
+      versions of Shinken and the Shinken plugins were 0.1rc and 1.4.13,
       respectively.</para>
 
     <screen>
@@ -156,7 +156,7 @@
     <para>Edit the
       <filename>/usr/local/shinken/etc/objects/contacts.cfg</filename> config
       file with your favorite editor and change the email address associated
-      with the nagiosadmin contact definition to the address you'd like to use
+      with the shinkenadmin contact definition to the address you'd like to use
       for receiving alerts.</para>
 
     <screen>
@@ -165,13 +165,13 @@
   </section>
 
   <section>
-    <title>Install the Nagios Plugins</title>
+    <title>Install the Shinken Plugins</title>
 
     <para>You can download plugins from source, but your debian-like administrator will just will you :</para>
 
     <screen>
       <prompt>linux:~ # </prompt><userinput>sudo apt-get install nagios-plugins</userinput>
-      <prompt>linux:~ # </prompt><userinput>ln -s /usr/lib/nagios/plugins /usr/local/shinken/libexec/</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /usr/lib/shinken/plugins /usr/local/shinken/libexec/</userinput>
     </screen>
 
   </section>
