@@ -309,28 +309,32 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [[host, 2, 'DOWN']])
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3)    # hard3, evt3, notif
-        self.assert_(self.count_actions() == 3) # evt3, notif"
+        self.assert_(self.count_logs() == 2)    # hard3, evt3
+        self.assert_(self.count_actions() == 2) # evt3, notif"
         self.clear_logs()
         #--
+        # we have a notification, but this is blocked. it will stay in
+        # the actions queue because we have a notification_interval.
+        # it's called notif" because it is a master notification
         print "DBG: host", host.state, host.state_type
-        self.scheduler_loop(1, [[host, 2, 'DOWN']])
+        self.scheduler_loop(1, [[host, 2, 'DOWN']], do_sleep=True)
         print "DBG2: host", host.state, host.state_type
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 1)    # next notif
-        self.assert_(self.count_actions() == 2) # notif"
+        self.assert_(self.count_logs() == 0)    # 
+        self.assert_(self.count_actions() == 1) # notif"
         self.clear_logs()
         #----------------------------------------------------------------
         # the host comes UP again
         # check log messages, (no) notifications and eventhandlers
-        # only a blind recover notification
+        # a (recovery) notification was created, but has been blocked.
+        # we see it in the actions as a zombie
         #----------------------------------------------------------------
-        self.scheduler_loop(1, [[host, 0, 'UP']])
+        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True)
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3)    # hard3ok, evtok, notif
-        self.assert_(self.count_actions() == 3) # evtok, notif"
+        self.assert_(self.count_logs() == 2)    # hard3ok, evtok
+        self.assert_(self.count_actions() == 2) # evtok, notif"
         self.clear_logs()
         self.clear_actions()
 
@@ -375,10 +379,10 @@ class TestConfig(ShinkenTest):
         self.assert_(len(host.comments) == 1)
         self.assert_(host.comments[0] in self.sched.comments.values())
         self.assert_(host.downtimes[0].comment_id == host.comments[0].id)
-        self.scheduler_loop(4, [[host, 2, 'DOWN']])
+        self.scheduler_loop(4, [[host, 2, 'DOWN']], do_sleep=True)
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 9)    # start downt, notif downt, soft1, evt1, soft 2, evt2, hard 3, evt3, notif
+        self.assert_(self.count_logs() == 8)    # start downt, notif downt, soft1, evt1, soft 2, evt2, hard 3, evt3
         self.clear_logs()
         self.clear_actions()
         #----------------------------------------------------------------
@@ -386,7 +390,8 @@ class TestConfig(ShinkenTest):
         # check that the host has a downtime, _not_ the service
         # check logs, (no) notifications and eventhandlers
         #----------------------------------------------------------------
-        self.scheduler_loop(4, [[svc, 2, 'CRITICAL']])
+        print "now the service goes critical"
+        self.scheduler_loop(4, [[svc, 2, 'CRITICAL']], do_sleep=True)
         self.assert_(len(self.sched.downtimes) == 1)
         self.assert_(len(svc.downtimes) == 0)
         self.assert_(not svc.in_scheduled_downtime)
@@ -401,11 +406,12 @@ class TestConfig(ShinkenTest):
         # the host comes UP again
         # check log messages, (no) notifications and eventhandlers
         #----------------------------------------------------------------
-        self.scheduler_loop(2, [[host, 0, 'UP']])
+        print "now the host comes up"
+        self.scheduler_loop(2, [[host, 0, 'UP']], do_sleep=True)
         self.show_logs()
         self.show_actions()
         # hard 3, eventhandler
-        self.assert_(self.count_logs() == 3)    # up, evt, notif
+        self.assert_(self.count_logs() == 2)    # up, evt
         self.clear_logs()
         self.clear_actions()
         #----------------------------------------------------------------
@@ -413,7 +419,7 @@ class TestConfig(ShinkenTest):
         # check log messages, (no) notifications and eventhandlers
         # check if the stop downtime notification is the only one
         #----------------------------------------------------------------
-        self.scheduler_loop(10, [[host, 0, 'UP']])
+        self.scheduler_loop(2, [[host, 0, 'UP']], do_sleep=True)
         self.assert_(len(self.sched.downtimes) == 0)
         self.assert_(len(host.downtimes) == 0)
         self.assert_(not host.in_scheduled_downtime)

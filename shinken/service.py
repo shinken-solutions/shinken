@@ -617,6 +617,10 @@ class Service(SchedulingItem):
         if self.host.scheduled_downtime_depth > 0:
             return True
 
+        # Block if in a scheduled downtime and a problem arises
+        if self.scheduled_downtime_depth > 0 and (type == 'PROBLEM' or type == 'RECOVERY'):
+            return True
+
         # Block if the status is SOFT
         if self.state_type == 'SOFT' and type == 'PROBLEM':
             return True

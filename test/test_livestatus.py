@@ -436,6 +436,13 @@ ResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
+        #data = """GET comments\nFilter: host_name = localhost\nFilter: service_description = Root Partition\nColumns: author id comment entry_time entry_type expire_time expires persistent source"""
+        data = """GET comments\nFilter: host_name = test_host_0\nFilter: service_description = test_ok_0\nColumns: author id comment entry_time entry_type expire_time expires persistent source"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        time.sleep(19)
+        raise
+
         data = """GET servicegroups\nColumns: name alias members\nResponseHeader: fixed16\n"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
@@ -450,6 +457,7 @@ ResponseHeader: fixed16"""
         data = """GET columns"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
+
 
 
 if __name__ == '__main__':
