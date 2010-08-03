@@ -245,7 +245,7 @@ class ExternalCommand:
 
 
     #Ok the command is not for every one, so we search 
-    #by the hostname with schduler have the host. Then send
+    #by the hostname which scheduler have the host. Then send
     #it the command
     def search_host_and_dispatch(self, host_name, command):
 	print "Calling search_host_and_dispatch", 'for', host_name

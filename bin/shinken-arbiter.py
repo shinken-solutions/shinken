@@ -359,8 +359,8 @@ class Arbiter(Daemon):
         Log().log("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
 
-        #If the conf can be incorrect here if the cut into parts see errors like
-	#a realm with hosts and not scehdulers for it
+        #The conf can be incorrect here if the cut into parts see errors like
+	#a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
             print "Configuration is incorrect, sorry, I bail out"
             sys.exit(1)
@@ -498,7 +498,7 @@ class Arbiter(Daemon):
             if timeout < 0:
                 timeout = 1.0
             
-            #Now check if master is die or not
+            #Now check if master is dead or not
             now = time.time()
             if now - self.last_master_speack > 5:
                 print "Master is dead!!!"
@@ -508,7 +508,7 @@ class Arbiter(Daemon):
 
     #Main function
     def run(self):
-        #Before running, I must be sure who Im I
+        #Before running, I must be sure who am I
         #The arbiters change, so we must refound the new self.me
         for arb in self.conf.arbiterlinks:
             if arb.is_me():
@@ -526,7 +526,7 @@ class Arbiter(Daemon):
           e = ExternalCommand(self.conf, 'dispatcher')
 	
 	#Scheduler need to know about external command to activate it 
-        #if necessery
+        #if necessary
           self.load_external_command(e)
         else:
           self.fifo = None
