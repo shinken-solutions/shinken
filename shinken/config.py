@@ -800,6 +800,8 @@ class Config(Item):
         #Hosts
         Log().log('Checking hosts...')
         r &= self.hosts.is_correct()
+        #Hosts got a special cehcks for loops
+        r &= self.hosts.no_loop_in_parents()
         Log().log('\tChecked %d hosts' % len(self.hosts))
         
         #Hostgroups

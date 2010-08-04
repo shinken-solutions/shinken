@@ -754,24 +754,38 @@ class Hosts(Items):
 
         
     #Create depenancies:
-    #Parent graph: use to find quickly relations between all host, and loop
     #Depencies at the host level: host parent
     def apply_dependancies(self):
+        for h in self:
+            h.fill_parents_dependancie()
+            
+
+    #Parent graph: use to find quickly relations between all host, and loop
+    #return True if tehre is a loop
+    def no_loop_in_parents(self):
+        #Ok, we say "from now, no loop :) "
+        r = True
+
         #Create parent graph
         parents = Graph()
         
-        #With all hosts
+        #With all hosts as nodes
         for h in self:
             if h != None:
                 parents.add_node(h)
-            
+        
+        #And now fill edges
         for h in self:
             for p in h.parents:
                 if p != None:
                     parents.add_edge(p, h)
 
-        Log().log("Hosts in a loop: %s" % parents.loop_check())
-        
-        for h in self:
-            h.fill_parents_dependancie()
-            
+        #Now get the list of all hosts in a loop
+        host_in_loops = parents.loop_check()
+
+        #and raise errors about it
+        for h in host_in_loops:
+            Log().log("Error: The host '%s' is part of a circular parent/child chain!" % h.get_name())
+            r = False
+
+        return r
