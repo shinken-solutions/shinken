@@ -23,6 +23,7 @@ import os, time
 
 from util import to_int, to_bool
 from downtime import Downtime
+from comment import Comment
 from command import CommandCall
 from log import Log
 from check import Check
@@ -422,11 +423,15 @@ class ExternalCommand:
 
     #ADD_SVC_COMMENT;<host_name>;<service_description>;<persistent>;<author>;<comment>
     def ADD_SVC_COMMENT(self, service, persistent, author, comment):
-        pass
+        c = Comment(service, persistent, author, comment, 2, 1, 1, False, 0)
+        service.add_comment(c)
+        self.sched.add(c)
 
     #ADD_HOST_COMMENT;<host_name>;<persistent>;<author>;<comment>
     def ADD_HOST_COMMENT(self, host, persistent, author, comment):
-        pass
+        c = Comment(host, persistent, author, comment, 1, 1, 1, False, 0)
+        host.add_comment(c)
+        self.sched.add(c)
 
     #ACKNOWLEDGE_SVC_PROBLEM;<host_name>;<service_description>;<sticky>;<notify>;<persistent>;<author>;<comment>
     def ACKNOWLEDGE_SVC_PROBLEM(self, service, sticky, notify, persistent, author, comment):
