@@ -414,14 +414,15 @@ class Shinken(Daemon):
 
         print "Loading configuration"
         self.conf.explode_global_conf()
+        #we give sched it's conf
+        self.sched.load_conf(self.conf)
+
         self.conf.is_correct()
 
 
         #Creating the Macroresolver Class & unique instance
         m = MacroResolver()
         m.init(self.conf)
-        #we give sched it's conf
-        self.sched.load_conf(self.conf)
 
         #self.conf.dump()
         #self.conf.quick_debug()

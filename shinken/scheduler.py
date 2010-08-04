@@ -91,6 +91,7 @@ class Scheduler:
         self.program_start = time.time()
         self.conf = conf
         self.hostgroups = conf.hostgroups
+        self.hostgroups.create_reversed_list()
         self.services = conf.services
         #We need reversed list for search in the retention
         #file read
@@ -98,10 +99,15 @@ class Scheduler:
         self.services.optimize_service_search(conf.hosts)
         self.hosts = conf.hosts
         self.hosts.create_reversed_list()
+
         self.contacts = conf.contacts
+        self.contacts.create_reversed_list()
         self.contactgroups = conf.contactgroups
+        self.contactgroups.create_reversed_list()
         self.servicegroups = conf.servicegroups
+        self.servicegroups.create_reversed_list()
         self.timeperiods = conf.timeperiods
+        self.timeperiods.create_reversed_list()
         self.commands = conf.commands
 
         #self.status_file = StatusFile(self)        #External status file
