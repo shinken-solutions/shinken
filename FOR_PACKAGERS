@@ -20,6 +20,9 @@ Example when you call :
 python setup.py install --root=/tmp/moncul --record=INSTALLED_FILES
 You get all files to package in the file INSTALLED_FILES (and only the /tmp/moncul is changed, so it's ok for your system ;)).
 
+The setup.py will also generate the bin/default/shinken file that will be install in /etc/default/shinken. In it, you get
+all variables used by the init.d scripts. It will generate the etc and var directory with the values you give in the setup cfg file.
+
 Then you can make the install:
 python setup.py install
 

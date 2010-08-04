@@ -39,14 +39,17 @@
       </listitem>
     </itemizedlist>
     <para>
-      You can also take a already configured Virtual Machine available <ulink url="http://www.megaupload.com/?d=KC4NO09A">here</ulink>.
-      It's a Ubuntu 9.10 server distribution with Shinken 0.1Rc on it. You can connect to it with the account shinken/shinken. Then you just ned to
+      You can also take a already configured Virtual Machine available <ulink url="http://ftp.monitoring-fr.org/JEAN/shinken-0.1.tar.gz">here</ulink>.
+      It's a Ubuntu 9.10 server distribution with Shinken 0.1 on it. You can connect to it with the account shinken/shinken. Then you just ned to
       launch the command :
       <screen>
 	<prompt>linux:~ $ </prompt><userinput>./start_all.sh</userinput>
       </screen>
       to have a working Shinken environnement. Then you can connect to <ulink url="http://VMADDRESS/ninja"> the ninja interface</ulink> with the 
       account administrator/monitor to see the hosts already configured.
+    </para>
+    <para>
+      You can also connect to <ulink url="http://VMADDRESS/"> and folow the Thruk link to get this cool webinterface that replace the old CGI.
     </para>
     <para>
       You can also find additional quickstart guides on the

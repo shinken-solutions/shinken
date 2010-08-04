@@ -66,6 +66,18 @@ else:
     etc_group='shinken'
 
 
+def generate_default_shinken_file():
+    global var_path
+    global etc_path
+    f = open("bin/default/shinken.in")
+    buf = f.read()
+    f.close
+    f = open("bin/default/shinken", "w")
+    buf = buf.replace("$ETC$", etc_path)
+    buf = buf.replace("$VAR$", var_path)
+    f.write(buf)
+    f.close()
+
 
 def parse_config_file(config_file):
     global var_path
@@ -91,7 +103,7 @@ def parse_config_file(config_file):
         etc_group=config._sections['etc']['group']
 
 parse_config_file('setup_parameters.cfg')
-
+generate_default_shinken_file()
 
 setup(
   name = "Shinken",
@@ -130,6 +142,7 @@ setup(
                                 ]),
               ('/etc/init.d', ['bin/init.d/shinken-arbiter', 'bin/init.d/shinken-broker', 'bin/init.d/shinken-poller',
                                'bin/init.d/shinken-reactionner', 'bin/init.d/shinken-scheduler']),
+              ('/etc/default/', ['bin/default/shinken']),
               (var_path, ['var/void_for_git'])
               ]
   
@@ -145,6 +158,7 @@ def get_uid(user_name):
         return getpwnam(user_name)[2]
     except KeyError, exp:
         print "Error: the user", user_name, "is unknown"
+        print "Maybe you should create this user"
         sys.exit(2)
         
 def get_gid(group_name):
@@ -152,6 +166,7 @@ def get_gid(group_name):
         return getgrnam(group_name)[2]
     except KeyError, exp:
         print "Error: the group",group_name , "is unknown"
+        print "Maybe you should create this group"
         sys.exit(2)
 
 #If there is another root, it's strange, it must be a special case...
@@ -182,3 +197,4 @@ if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv) and re.sea
         for name in files:
             print "Change owner of the file", root+os.sep+name, "by", etc_owner, ":", etc_group
             os.chown(root+os.sep+name,etc_uid, etc_gui)
+
