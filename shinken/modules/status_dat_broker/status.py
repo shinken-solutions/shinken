@@ -22,19 +22,12 @@ import time
 import os
 import tempfile
 
-from service import Service
-from host import Host
-from contact import Contact
-from downtime import Downtime
-from comment import Comment
-from config import Config
-
 from util import from_bool_to_string
 
 
 class StatusFile:
     out_map = {
-        Host : {
+        'Host' : {
             'host_name' : {},#'host_name',
             'modified_attributes' : {'prop' : None, 'default' : '0'},
             'check_command' : {'depythonize' : 'get_name'},
@@ -90,7 +83,7 @@ class StatusFile:
             'percent_state_change' : {},
             'scheduled_downtime_depth' : {'prop' : None, 'default' : '0'}
             },
-        Service : {
+        'Service' : {
             'host_name' : {},
             'service_description' : {},
             'modified_attributes' : {'prop' : None, 'default' : '0'},
@@ -148,7 +141,7 @@ class StatusFile:
             'percent_state_change' : {},
             'scheduled_downtime_depth' : {'prop' : None, 'default' : '0'}
             },
-        Contact : {
+        'Contact' : {
             'contact_name' : {},
             'modified_attributes' : {'prop' : None, 'default' : '0'},
             'modified_host_attributes' : {'prop' : None, 'default' : '0'},
@@ -160,7 +153,7 @@ class StatusFile:
             'host_notifications_enabled' : {'depythonize' : from_bool_to_string},
             'service_notifications_enabled' : {'depythonize' : from_bool_to_string}
             },
-        Config : {
+        'Config' : {
             'modified_host_attributes' : {'prop' : None, 'default' : '0'},
             'modified_service_attributes' : {'prop' : None, 'default' : '0'},
             'nagios_pid' : {'prop' : 'pid', 'default' : '0'},
@@ -203,7 +196,7 @@ class StatusFile:
             'parallel_host_check_stats' : {'prop' : None, 'default' : '0,0,0'},
             'serial_host_check_stats' : {'prop' : None, 'default' : '0,0,0'}
             },
-        Downtime : {
+        'Downtime' : {
             'host_name' : {},
             'service_description' : {},
             'downtime_id' : {'prop' : 'id', 'default' : '0'},
@@ -216,13 +209,14 @@ class StatusFile:
             'author' : {'prop' : None, 'default' : '0'},
             'comment' : {'prop' : None, 'default' : '0'},
         },
-        Comment : {
+        'Comment' : {
             'host_name' : {},
             'service_description' : {},
             'comment_id' : {'prop' : 'id', 'default' : '0'},
             'source' : {'prop' : None, 'default' : '0'},
             'comment_type' : {'prop' : None, 'default' : '0'},
             'entry_type' : {'prop' : None, 'default' : '0'},
+            'entry_time' : {'prop' : None, 'default' : '0'},
             'persistent' : {'prop' : None, 'depythonize' : from_bool_to_string},
             'expires' : {'prop' : None, 'depythonize' : from_bool_to_string},
             'expire_time' : {'prop' : None, 'default' : '0'},
@@ -243,44 +237,42 @@ class StatusFile:
         self.contacts = contacts
 
 
-    
     def create_output(self, elt):
         output = ''
-        for elt_type in StatusFile.out_map:
-            if elt_type == elt.__class__:
-                type_map = StatusFile.out_map[elt_type]
-                for display in type_map:
-                    value = None
-                    if 'prop' not in type_map[display] or type_map[display]['prop'] is None:
-                        prop = display
-                    else:
-                        prop = type_map[display]['prop']
-                        
-                    if prop is not None and hasattr(elt, prop):
-                        value = getattr(elt, prop)
+        if elt.__class__.__name__ in StatusFile.out_map:
+            type_map = StatusFile.out_map[elt.__class__.__name__]
+            for display in type_map:
+                value = None
+                if 'prop' not in type_map[display] or type_map[display]['prop'] is None:
+                    prop = display
+                else:
+                    prop = type_map[display]['prop']
+                    
+                if prop is not None and hasattr(elt, prop):
+                    value = getattr(elt, prop)
 
-                        #Maybe it's not a value, but a function link
-                        if callable(value):
-                            value = value()
-                            
-                        if 'depythonize' in type_map[display]:
-                            f = type_map[display]['depythonize']
-                            if callable(f):
-                                value = f(value)
-                            else:
-                                #print "Elt: ", elt, "prop", prop
-                                #ok not a direct function, maybe a functin provided by value...
-                                if value is not None:
-                                    f = getattr(value, f)
-                                    value = f()
-
-                    if value == None:
-                        try:
-                            value = type_map[display]['default']
-                        except KeyError:  #Fuck!
-                            value = ''
-                    output += '\t' + display + '=' + str(value) + '\n'
+                    #Maybe it's not a value, but a function link
+                    if callable(value):
+                        value = value()
                         
+                    if 'depythonize' in type_map[display]:
+                        f = type_map[display]['depythonize']
+                        if callable(f):
+                            value = f(value)
+                        else:
+                            #print "Elt: ", elt, "prop", prop
+                            #ok not a direct function, maybe a functin provided by value...
+                            if value is not None:
+                                f = getattr(value, f)
+                                value = f()
+
+                if value == None:
+                    try:
+                        value = type_map[display]['default']
+                    except KeyError:  #Fuck!
+                        value = ''
+                output += '\t' + display + '=' + str(value) + '\n'
+
         return output
 
 

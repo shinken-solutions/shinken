@@ -43,7 +43,6 @@ from objectscache import ObjectsCacheFile
 from config import Config
 
 
-
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Status_dat_broker:
