@@ -543,7 +543,10 @@ class Livestatus_broker:
                         response = self.livestatus.handle_request(databuffer[s].rstrip())
                         del databuffer[s]
                         s.send(response)
-                        s.shutdown(2)
+                        try:
+                            s.shutdown(2)
+                        except Exception as exp:
+                            print exp
                         s.close()
                         input.remove(s)
 
