@@ -24,7 +24,7 @@ from item import Item, Items
 
 class Servicedependency(Item):
     id = 0
-    
+
 #F is dep of D
 #host_name			Host B
 #	service_description		Service D

@@ -612,11 +612,12 @@ class Config(Item):
         
 
     #Remove elements will the same name, so twins :)
+    #In fact only services should be acceptable with twins
     def remove_twins(self):
-        self.hosts.remove_twins()
+        #self.hosts.remove_twins()
         self.services.remove_twins()
-        self.contacts.remove_twins()
-        self.timeperiods.remove_twins()
+        #self.contacts.remove_twins()
+        #self.timeperiods.remove_twins()
 
 
     #Dependancies are importants for scheduling
@@ -774,8 +775,11 @@ class Config(Item):
     #Reversed list is a dist with name for quick search by name
     def create_reversed_list(self):
         self.hosts.create_reversed_list()
+        self.hostgroups.create_reversed_list()
         self.contacts.create_reversed_list()
+        self.contactgroups.create_reversed_list()
         self.services.create_reversed_list()
+        self.servicegroups.create_reversed_list()
         self.timeperiods.create_reversed_list()
         self.modules.create_reversed_list()
         self.resultmodulations.create_reversed_list()

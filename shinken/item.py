@@ -496,7 +496,17 @@ class Items(object):
 
 
     def is_correct(self):
+        #we are ok at the begining. Hope we still ok at the end...
         r = True
+        #Some class do not have twins, because they do not have names
+        #like servicedependancies
+        if hasattr(self, 'twins'):
+            #Ok, look at no twins (it's bad!)
+            for id in self.twins:
+                i = self.items[id]
+                print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated"
+                r = False
+        #Then look for individual ok
         for i in self:
             r &= i.is_correct()
         return r
@@ -567,7 +577,9 @@ class Items(object):
             type = i.__class__.my_type
             print 'Warning: the', type, i.get_name(), 'is already defined.'
             del self.items[id] #bye bye
-        del self.twins #no more need
+        #do not remove twins, we should look in it, but just void it
+        self.twins = []
+        #del self.twins #no more need
 
 
 

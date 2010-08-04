@@ -88,6 +88,8 @@ class Timeperiod:
     properties={
         'timeperiod_name' : {'required' : True, 'fill_brok' : ['full_status']},
         'alias' : {'required' : False, 'fill_brok' : ['full_status']},
+        'use' : {'required' : False},
+        'exclude' : {'required' : False},
         }
 
     
@@ -98,7 +100,7 @@ class Timeperiod:
         self.dateranges = []
         self.exclude = ''
         for key in params:
-            if key in ['name', 'alias', 'timeperiod_name', 'exclude']:
+            if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use']:
                 setattr(self, key, params[key])
             else:
                 self.unresolved.append(key+' '+params[key])

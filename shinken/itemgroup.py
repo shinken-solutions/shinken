@@ -74,6 +74,7 @@ class Itemgroup:
         self.members = members
 
 
+
     #If a prop is absent and is not required, put the default value
     def fill_default(self):
         cls = self.__class__
@@ -189,7 +190,31 @@ class Itemgroups:
 
 
     def is_correct(self):
+        #we are ok at the begining. Hope we still ok at the end...
         r = True
+        #First look at no twins (it's bad!)
+        for id in self.twins:
+            i = self.itemgroups[id]
+            print "Error : the", i.__class__.my_type, i.get_name(), "is duplicated"
+            r = False
+        #Then look for individual ok
         for ig in self:
             r &= ig.is_correct()
         return r
+
+
+    #We create the reversed list so search will be faster
+    #We also create a twins list with id of twins (not the original
+    #just the others, higher twins)
+    def create_reversed_list(self):
+        self.reversed_list = {}
+        self.twins = []
+        name_property = self.__class__.name_property
+        for id in self.itemgroups:
+            if hasattr(self.itemgroups[id], name_property):
+                name = getattr(self.itemgroups[id], name_property)
+                if name not in self.reversed_list:
+                    self.reversed_list[name] = id
+                else:
+                    self.twins.append(id)
+
