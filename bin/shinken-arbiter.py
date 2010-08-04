@@ -383,7 +383,7 @@ class Arbiter(Daemon):
         
         #If we go, we must go in daemon or not
         #Check if another Scheduler is not running (with the same conf)
-        self.check_parallele_run(do_replace)
+        self.check_parallel_run(do_replace)
                 
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity

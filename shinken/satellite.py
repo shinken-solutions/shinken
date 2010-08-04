@@ -197,7 +197,7 @@ class Satellite(Daemon):
             self.relative_paths_to_full(os.path.dirname(config_file))
 
         #Check if another Scheduler is not running (with the same conf)
-        self.check_parallele_run(do_replace)
+        self.check_parallel_run(do_replace)
         
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity
