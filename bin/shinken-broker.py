@@ -48,12 +48,16 @@ if int(python_version[0]) == 3:
     print "Shinken is not yet compatible with Python3k, sorry"
     sys.exit(1)
 
+#DBG for Pyro4
+sys.path.insert(0, '.')
 
 try:
-    import Pyro.core
+    import shinken.pyro_wrapper    
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
+
+Pyro = shinken.pyro_wrapper.Pyro
 
 #Module from 2.6 and higher
 from Queue import Empty
@@ -65,6 +69,10 @@ from multiprocessing import active_children
 #it so (it's a untar install) we add .. in the path
 try :
     from shinken.util import to_bool
+    my_path = os.path.abspath(sys.modules['__main__'].__file__)
+    elts = os.path.dirname(my_path).split(os.sep)[:-1]
+    elts.append('shinken')
+    sys.path.append(os.sep.join(elts))
 except ImportError:
     #Now add in the python path the shinken lib
     #if we launch it in a direct way and
@@ -126,7 +134,11 @@ class IForArbiter(Pyro.core.ObjBase):
 		for sched_id in conf['schedulers'] :
 			s = conf['schedulers'][sched_id]
 			self.schedulers[sched_id] = s
-			uri = "PYROLOC://%s:%d/Broks" % (s['address'], s['port'])
+                        #Change from pyro 3 to 4
+                        if shinken.pyro_wrapper.pyro_version == 3:
+                            uri = "PYROLOC://%s:%d/Broks" % (s['address'], s['port'])
+                        else:
+                            uri = "PYRO:Broks@%s:%d" % (s['address'], s['port'])
 			self.schedulers[sched_id]['uri'] = uri
 			self.schedulers[sched_id]['broks'] = {}
 			self.schedulers[sched_id]['instance_id'] = s['instance_id']
@@ -142,7 +154,11 @@ class IForArbiter(Pyro.core.ObjBase):
 		for arb_id in conf['arbiters'] :
 			a = conf['arbiters'][arb_id]
 			self.arbiters[arb_id] = a
-			uri = "PYROLOC://%s:%d/Broks" % (a['address'], a['port'])
+                        #Change from pyro 3 to 4
+                        if shinken.pyro_wrapper.pyro_version == 3:
+                            uri = "PYROLOC://%s:%d/Broks" % (a['address'], a['port'])
+                        else:
+                            uri = "PYRO:Broks@%s:%d" % (a['address'], a['port'])
 			self.arbiters[arb_id]['uri'] = uri
 			self.arbiters[arb_id]['broks'] = {}
 			self.arbiters[arb_id]['instance_id'] = 0 #No use so all to 0
@@ -153,7 +169,11 @@ class IForArbiter(Pyro.core.ObjBase):
 		for pol_id in conf['pollers'] :
 			p = conf['pollers'][pol_id]
 			self.pollers[pol_id] = p
-			uri = "PYROLOC://%s:%d/Broks" % (p['address'], p['port'])
+                        #Change from pyro 3 to 4
+                        if shinken.pyro_wrapper.pyro_version == 3:
+                            uri = "PYROLOC://%s:%d/Broks" % (p['address'], p['port'])
+                        else:
+                            uri = "PYRO:Broks@%s:%d" % (p['address'], p['port'])
 			self.pollers[pol_id]['uri'] = uri
 			self.pollers[pol_id]['broks'] = {}
 			self.pollers[pol_id]['instance_id'] = 0 #No use so all to 0
@@ -164,7 +184,11 @@ class IForArbiter(Pyro.core.ObjBase):
 		for rea_id in conf['reactionners'] :
                         r = conf['reactionners'][rea_id]
                         self.reactionners[rea_id] = r
-                        uri = "PYROLOC://%s:%d/Broks" % (r['address'], r['port'])
+                        #Change from pyro 3 to 4
+                        if shinken.pyro_wrapper.pyro_version == 3:
+                            uri = "PYROLOC://%s:%d/Broks" % (r['address'], r['port'])
+                        else:
+                            uri = "PYRO:Broks@%s:%d" % (r['address'], r['port'])
                         self.reactionners[rea_id]['uri'] = uri
                         self.reactionners[rea_id]['broks'] = {}
                         self.reactionners[rea_id]['instance_id'] = 0 #No use so all to 0
@@ -358,11 +382,19 @@ class Broker(Satellite):
 
 		try:
 			#intial ping must be quick
-			links[id]['con']._setTimeout(5)
+                        #Timeout change between pyro 3 and 4
+                        if shinken.pyro_wrapper.pyro_version == 3:
+                            links[id]['con']._setTimeout(5)
+                        else:
+                            links[id]['con']._pyroTimeout = 5
 			links[id]['con'].ping()
 			new_run_id = links[id]['con'].get_running_id()
 			#data transfert can be longer
-			links[id]['con']._setTimeout(120)
+                        #Timeout change between pyro 3 and 4
+                        if shinken.pyro_wrapper.pyro_version == 3:
+                            links[id]['con']._setTimeout(120)
+                        else:
+                            links[id]['con']._pyroTimeout = 120
 
 		        #The schedulers have been restart : it has a new run_id.
 		        #So we clear all verifs, they are obsolete now.
@@ -385,6 +417,10 @@ class Broker(Satellite):
 			Log().log("%s is not initilised : %s" % (type, str(exp)))
                         links[id]['con'] = None
                         return
+                except Pyro.errors.CommunicationError, exp:
+                        links[id]['con'] = None
+                        return
+
 
 		Log().log("Connexion OK")
 
@@ -484,9 +520,15 @@ class Broker(Satellite):
                         #scheduler must not have checks
 			except Pyro.errors.NamingError as exp:
 				Log().log(str(exp))
+                        except Pyro.errors.ConnectionClosedError as exp:
+                               Log().log(str(exp))
+                               self.pynag_con_init(sched_id, type=type)
 			# What the F**k? We do not know what happenned,
 			#so.. bye bye :)
 			except Exception,x: 
+                                print x.__class__
+                                print x.__dict__
+                                Log().log(str(x))
 				Log().log(''.join(Pyro.util.getPyroTraceback(x)))
 				sys.exit(0)
 
@@ -506,16 +548,32 @@ class Broker(Satellite):
                 Log().log("Using working directory : %s" % os.path.abspath(self.workdir))
                 Pyro.config.PYRO_STORAGE = self.workdir
                 Pyro.config.PYRO_MULTITHREADED = 0
-                #Daemon init
-		Pyro.core.initServer()
 
-		Log().log("Opening port: %s" % self.port)
-		self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)
-		#If the port is not free, pyro take an other. I don't like that!
-		if self.daemon.port != self.port:
-			Log().log("Error : the port %d was not free" % self.port)
-			sys.exit(1)
-		self.uri2 = self.daemon.connect(IForArbiter(self),"ForArbiter")
+		Log().log("Opening port: %s" % self.port)                
+                #Init are differetn for pyro 3 and 4
+                if shinken.pyro_wrapper.pyro_version == 3:
+                    Pyro.core.initServer()
+                    self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)
+                    if self.daemon.port != self.port:
+                        print "Sorry, the port %d is not free" % self.port
+                        sys.exit(1)
+                else:
+                    #Pyro 4 i by default thread, should do select
+                    #(I hate threads!)
+                    Pyro.config.SERVERTYPE="select"
+                    #And port already use now raise an exception
+                    import socket
+                    try:
+                        self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)
+                    except socket.error, exp:
+                        print "Sorry, the port %d is not free : %s" % (self.port, str(exp))
+                        sys.exit(1)
+
+                #Ok, registering interfaces are also differents...
+                if shinken.pyro_wrapper.pyro_version == 3:
+                    self.uri2 = self.daemon.connect(IForArbiter(self),"ForArbiter")
+                else:
+                    self.uri2 = self.daemon.register(IForArbiter(self),"ForArbiter")
 
                 #We wait for initial conf
 		self.wait_for_initial_conf()

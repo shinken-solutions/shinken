@@ -78,19 +78,28 @@ if int(python_version[0]) == 3:
     print "Shinken is not yet compatible with Python3k, sorry"
     sys.exit(1)
 
+#DBG for Pyro 4
+sys.path.insert(0, '.')
+
 
 try:
-    import Pyro.core
+    import shinken.pyro_wrapper    
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
 
+Pyro = shinken.pyro_wrapper.Pyro
 
 #Try to load shinken lib.
 #Maybe it's not in our python path, so we detect it
 #it so (it's a untar install) we add .. in the path
+
 try :
     from shinken.util import to_bool
+    my_path = os.path.abspath(sys.modules['__main__'].__file__)
+    elts = os.path.dirname(my_path).split(os.sep)[:-1]
+    elts.append('shinken')
+    sys.path.append(os.sep.join(elts))
 except ImportError:
     #Now add in the python path the shinken lib
     #if we launch it in a direct way and
@@ -328,17 +337,39 @@ class Shinken(Daemon):
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0
-        Pyro.core.initServer()
-	
+
+
+
+        #Init are differetn for pyro 3 and 4
+        if shinken.pyro_wrapper.pyro_version == 3:
+            Pyro.core.initServer()
+            self.poller_daemon = Pyro.core.Daemon(host=self.host, port=self.port)
+            if self.poller_daemon.port != self.port:
+                print "Sorry, the port %d is not free" % self.port
+                sys.exit(1)
+        else:
+            #Pyro 4 i by default thread, should do select
+            #(I hate threads!)
+            Pyro.config.SERVERTYPE="select"
+            #And port already use now raise an exception
+            import socket
+            try:
+                self.poller_daemon = Pyro.core.Daemon(host=self.host, port=self.port)
+            except socket.error, exp:
+                print "Sorry, the port %d is not free : %s" % (self.port, str(exp))
+                sys.exit(1)
+
         print "Listening on:", self.host, ":", self.port
-        self.poller_daemon = Pyro.core.Daemon(host=self.host, port=self.port)
-        if self.poller_daemon.port != self.port:
-            print "Sorry, the port %d is not free" % self.port
-            sys.exit(1)
 
         #Now the interface
         i_for_arbiter = IForArbiter(self)
-        self.uri2 = self.poller_daemon.connect(i_for_arbiter,"ForArbiter")
+        
+        #Ok, registering interfaces are also differents...
+        if shinken.pyro_wrapper.pyro_version == 3:
+            self.uri2 = self.poller_daemon.connect(i_for_arbiter,"ForArbiter")
+        else:
+            self.uri2 = self.poller_daemon.register(i_for_arbiter,"ForArbiter")
+
         print "The Arbiter Interface is at:", self.uri2
 		
         #Ok, now the conf
@@ -363,18 +394,28 @@ class Shinken(Daemon):
 
     #We wait (block) for arbiter to send us conf
     def wait_initial_conf(self):
+
         self.have_conf = False
         print "Waiting for initial configuration"
         timeout = 1.0
         while not self.have_conf :
-            socks = self.poller_daemon.getServerSockets()
+            #Ok, still a difference between 3 and 4 ...
+            if shinken.pyro_wrapper.pyro_version == 3:
+                socks = self.poller_daemon.getServerSockets()
+            else:
+                socks = self.poller_daemon.sockets()
+            
             avant = time.time()
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:
-                        self.poller_daemon.handleRequests()
+                        #Yes, even here there is a difference :)
+                        if shinken.pyro_wrapper.pyro_version == 3:
+                            self.poller_daemon.handleRequests()
+                        else:
+                            self.poller_daemon.handleRequests([s])
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff
@@ -399,17 +440,36 @@ class Shinken(Daemon):
         #But first remove previous interface if exists
         if self.ichecks != None:
             print "Deconnecting previous Check Interface from daemon"
-            self.poller_daemon.disconnect(self.ichecks)
+            #Fun with pyro 3 and 4...
+            if shinken.pyro_wrapper.pyro_version == 3:
+                self.poller_daemon.disconnect(self.ichecks)
+            else:
+                self.poller_daemon.unregister(self.ichecks)
         self.ichecks = IChecks(self.sched)
-        self.uri = self.poller_daemon.connect(self.ichecks,"Checks")
+
+        #Ok, registering interfaces are also differents...
+        if shinken.pyro_wrapper.pyro_version == 3:
+            self.uri = self.poller_daemon.connect(self.ichecks,"Checks")
+        else:
+            self.uri = self.poller_daemon.register(self.ichecks,"Checks")
+
+
         print "The Checks Interface uri is:", self.uri
 		
         #Same fro Broks
         if self.ibroks != None:
             print "Deconnecting previous Broks Interface from daemon"
-            self.poller_daemon.disconnect(self.ibroks)
+            #Fun with Pyro 3
+            if shinken.pyro_wrapper.pyro_version == 3:
+                self.poller_daemon.disconnect(self.ibroks)
+            else:
+                self.poller_daemon.unregister(self.ibroks)
         self.ibroks = IBroks(self.sched)
-        self.uri2 = self.poller_daemon.connect(self.ibroks,"Broks")
+        #Fun with pyro 3 and 4
+        if shinken.pyro_wrapper.pyro_version == 3:
+            self.uri2 = self.poller_daemon.connect(self.ibroks,"Broks")
+        else:
+            self.uri2 = self.poller_daemon.register(self.ibroks,"Broks")
         print "The Broks Interface uri is:", self.uri2
 
         print "Loading configuration"

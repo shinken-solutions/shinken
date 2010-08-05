@@ -23,7 +23,9 @@
 #Arbiter with Conf Dispatcher.
 
 
-import Pyro.core
+import shinken.pyro_wrapper
+Pyro = shinken.pyro_wrapper.Pyro
+
 
 from item import Item, Items
 from util import to_int, to_bool
@@ -68,10 +70,16 @@ class SatelliteLink(Item):
 
 
     def create_connexion(self):
-        self.uri = "PYROLOC://"+self.address+":"+str(self.port)+"/ForArbiter"
-        self.con = Pyro.core.getProxyForURI(self.uri)
-        #Ok, set timeout to 5 sec
-        self.con._setTimeout(5)
+        #URI are differents between 3 and 4
+        if shinken.pyro_wrapper.pyro_version == 3:
+            self.uri = 'PYROLOC://'+self.address+":"+str(self.port)+"/ForArbiter"
+            self.con = Pyro.core.getProxyForURI(self.uri)            
+            #Ok, set timeout to 5 sec
+            self.con._setTimeout(5)
+        else:
+            self.uri = 'PYRO:ForArbiter@'+self.address+":"+str(self.port)
+            self.con = Pyro.core.Proxy(self.uri)
+            self.con._pyroTimeout = 5
 
 
     def put_conf(self, conf):
@@ -80,10 +88,17 @@ class SatelliteLink(Item):
         #print "Connexion is OK, now we put conf", conf
         #print "Try to put conf:", conf
         try:
-            self.con._setTimeout(120)
-            self.con.put_conf(conf)
-            self.con._setTimeout(5)
-            return True
+            #Still fun with pyro 3 and 4...
+            if shinken.pyro_wrapper.pyro_version == 3:
+                self.con._setTimeout(120)
+                self.con.put_conf(conf)
+                self.con._setTimeout(5)
+                return True
+            else:
+                self.con._pyroTimeout = 120
+                self.con.put_conf(conf)
+                self.con._pyroTimeout = 5
+                return True
         except Pyro.errors.URIError as exp:
             self.con = None
             return False
@@ -92,6 +107,9 @@ class SatelliteLink(Item):
             return False
         except TypeError as exp:
             print ''.join(Pyro.util.getPyroTraceback(exp))
+        except Pyro.errors.CommunicationError as exp:
+            self.con = None
+            return False
 
 
     def is_alive(self):
@@ -100,13 +118,22 @@ class SatelliteLink(Item):
                 self.create_connexion()
             self.con.ping()
             return True
+        except Pyro.errors.ProtocolError as exp:
+            self.con = None
+            #print exp
+            return False
         except Pyro.errors.URIError as exp:
             self.con = None
             print exp
             return False
-        except Pyro.errors.ProtocolError as exp:
+        #Only pyro 4 but will be ProtocolError in 3
+        except Pyro.errors.CommunicationError as exp:
+            #print "Is not alive!", self.uri
             self.con = None
-            #print exp
+            return False
+        except Pyro.errors.DaemonError as exp:
+            self.con = None
+            print exp
             return False
 
 

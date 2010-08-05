@@ -22,6 +22,7 @@
 import select, time, os
 import cPickle, zlib
 
+import shinken.pyro_wrapper
 
 from check import Check
 from notification import Notification
@@ -30,6 +31,7 @@ from brok import Brok
 from downtime import Downtime
 from comment import Comment
 from log import Log
+
 
 
 #from guppy import hpy
@@ -407,6 +409,8 @@ class Scheduler:
         Log().log("Reading from retention_file %s" % self.conf.state_retention_file)
         try:
             f = open(self.conf.state_retention_file, 'rb')
+            import sys
+            print sys.path
             all_data = cPickle.load(f)
             f.close()
         except EOFError as exp:
@@ -713,7 +717,11 @@ class Scheduler:
         gogogo = time.time()
 
         while self.must_run :
-            socks = self.daemon.getServerSockets()
+            #Ok, still a difference between 3 and 4 ...
+            if shinken.pyro_wrapper.pyro_version == 3:
+                socks = self.daemon.getServerSockets()
+            else:
+                socks = self.daemon.sockets()
             avant = time.time()
             #socks.append(self.fifo)
             # 'foreign' event loop
@@ -727,7 +735,11 @@ class Scheduler:
                         #    self.fifo = self.external_command.open()
                         #Must be paquet from poller
                         #else:
-                        self.daemon.handleRequests()
+                        #Yes, even here there is a difference :)
+                        if shinken.pyro_wrapper.pyro_version == 3:
+                            self.daemon.handleRequests()
+                        else:
+                            self.daemon.handleRequests([s])
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff

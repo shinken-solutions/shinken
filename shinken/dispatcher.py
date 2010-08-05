@@ -289,11 +289,18 @@ class Dispatcher:
                 #we will send them conf (in this order)
                 scheds = self.get_scheduler_ordered_list(r)
 
+                #Try to send only for alive members
+                scheds = [s for s in scheds if s.alive]
+                
                 #Now we do the real job
                 every_one_need_conf = False
                 for conf in conf_to_dispatch:
                     Log().log('[%s] Dispatching one configuration' % r.get_name())
 
+                    #If there is no alive schedulers, not good...
+                    if len(scheds) == 0:
+                        Log().log('[%s] but there a no alive schedulers in this realm!' % r.get_name())
+                    
                     #we need to loop until the conf is assigned
                     #or when there are no more schedulers available
                     need_loop = True
