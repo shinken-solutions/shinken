@@ -413,24 +413,7 @@ class Arbiter(Daemon):
         Pyro.config.PYRO_MULTITHREADED = 0
         Log().log("Using working directory : %s" % os.path.abspath(self.workdir))
 
-        #Init are differetn for pyro 3 and 4
-        if shinken.pyro_wrapper.pyro_version == 3:
-            Pyro.core.initServer()
-            self.poller_daemon = Pyro.core.Daemon(host=self.me.address, port=self.me.port)
-            if self.poller_daemon.port != self.me.port:
-                Log().log("Error : the port %d is not free!" % self.me.port)
-                sys.exit(1)
-        else:
-            #Pyro 4 i by default thread, should do select
-            #(I hate threads!)
-            Pyro.config.SERVERTYPE="select"
-            #And port already use now raise an exception
-            import socket
-            try:
-                self.poller_daemon = Pyro.core.Daemon(host=self.me.address, port=self.me.port)
-            except socket.error, exp:
-                print "Sorry, the port %d is not free : %s" % (self.me.port, str(exp))
-                sys.exit(1)
+        self.poller_daemon = shinken.pyro_wrapper.init_daemon(self.me.address, self.me.port)
 
         Log().log("Listening on %s:%d" % (self.me.address, self.me.port))
 
@@ -469,11 +452,7 @@ class Arbiter(Daemon):
         print "Waiting for configuration from master"
         timeout = 1.0
         while not self.have_conf :
-            #Ok, still a difference between 3 and 4 ...
-            if shinken.pyro_wrapper.pyro_version == 3:
-                socks = self.poller_daemon.getServerSockets()
-            else:
-                socks = self.poller_daemon.sockets()
+            socks = shinken.pyro_wrapper.get_sockets(self.poller_daemon)
 
             avant = time.time()
             # 'foreign' event loop
@@ -481,11 +460,7 @@ class Arbiter(Daemon):
             if ins != []:
                 for s in socks:
                     if s in ins:
-                        #Pyro 3 and 4 do not manage handle the same way
-                        if shinken.pyro_wrapper.pyro_version == 3:
-                            self.poller_daemon.handleRequests()
-                        else:
-                            self.poller_daemon.handleRequests([s])
+                        shinken.pyro_wrapper.handleRequests(self.poller_daemon, s)
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff
@@ -506,22 +481,14 @@ class Arbiter(Daemon):
         is_master_dead = False
         self.last_master_speack = time.time()
         while not is_master_dead:
-            #Ok, still a difference between 3 and 4 ...
-            if shinken.pyro_wrapper.pyro_version == 3:
-                socks = self.poller_daemon.getServerSockets()
-            else:
-                socks = self.poller_daemon.sockets()
+            socks = shinken.pyro_wrapper.get_sockets(self.poller_daemon)
             avant = time.time()
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:
-                        #Pyro 3 and 4 do not manage request the same way
-                        if shinken.pyro_wrapper.pyro_version == 3:
-                            self.poller_daemon.handleRequests()
-                        else:
-                            self.poller_daemon.handleRequests([s])
+                        shinken.pyro_wrapper.handleRequests(self.poller_daemon, s)
                         self.last_master_speack = time.time()
                         apres = time.time()
                         diff = apres-avant
@@ -571,12 +538,7 @@ class Arbiter(Daemon):
         timeout = 1.0
         while self.must_run :
             socks = []
-            #Ok, still a difference between 3 and 4 ...
-            if shinken.pyro_wrapper.pyro_version == 3:
-                daemon_sockets = self.poller_daemon.getServerSockets()
-            else:
-                daemon_sockets = self.poller_daemon.sockets()
-
+            daemon_sockets = shinken.pyro_wrapper.get_sockets(self.poller_daemon)
             socks.extend(daemon_sockets)
             avant = time.time()
             if self.fifo != None:
@@ -587,11 +549,7 @@ class Arbiter(Daemon):
                 for s in socks:
                     if s in ins:
                         if s in daemon_sockets:
-                            #Pyro 3 and 4 do not manage request the same way
-                            if shinken.pyro_wrapper.pyro_version == 3:
-                                self.poller_daemon.handleRequests()
-                            else:
-                                self.poller_daemon.handleRequests([s])
+                            shinken.pyro_wrapper.handleRequests(self.poller_daemon, s)
                             apres = time.time()
                             diff = apres-avant
                             timeout = timeout - diff
@@ -623,16 +581,6 @@ class Arbiter(Daemon):
 
 
 
-#if __name__ == '__main__':
-#	p = Arbiter()
-#        import cProfile
-	#p.main()
-#        command = """p.main()"""
-#        cProfile.runctx( command, globals(), locals(), filename="var/Arbiter.profile" )
-
-
-
-
 ################### Process launch part
 def usage(name):
     print "Shinken Arbiter Daemon, version %s, from :" % VERSION
@@ -652,18 +600,6 @@ def usage(name):
     print "\tDebug File. Default : no use (why debug a bug free program? :) )"
     
     
-    
-#if __name__ == '__main__':
-#	p = Shinken()
-#        import cProfile
-#	#p.main()
-#        command = """p.main()"""
-#        cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
-
-
-
-
-
 
 
 #Here we go!
