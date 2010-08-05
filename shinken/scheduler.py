@@ -409,8 +409,6 @@ class Scheduler:
         Log().log("Reading from retention_file %s" % self.conf.state_retention_file)
         try:
             f = open(self.conf.state_retention_file, 'rb')
-            import sys
-            print sys.path
             all_data = cPickle.load(f)
             f.close()
         except EOFError as exp:

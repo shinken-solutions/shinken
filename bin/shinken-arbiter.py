@@ -61,17 +61,6 @@ except ImportError:
     sys.exit(1)
 
 Pyro = shinken.pyro_wrapper.Pyro
-#Try to see if we are Python 3 or 4
-#try:
-#    Pyro.core.ObjBase
-#    pyro_version = 3
-#except AttributeError:
-#    print "Pyro 4"
-#    pyro_version = 4
-#    #Ok, in Pyro 4, interface do not need to
-#    #inherit from ObjBase, just object is good
-#    Pyro.core.ObjBase = object
-#    Pyro.errors.URIError = Pyro.errors.ProtocolError
 
 
 #Try to load shinken lib.
@@ -443,24 +432,13 @@ class Arbiter(Daemon):
                 print "Sorry, the port %d is not free : %s" % (self.me.port, str(exp))
                 sys.exit(1)
 
-	
         Log().log("Listening on %s:%d" % (self.me.address, self.me.port))
-
 
         self.ibroks = IBroks(self)
         self.iarbiters = IArbiters(self)
 
-        #Still a difference between pyro
-        if shinken.pyro_wrapper.pyro_version == 3:
-            self.uri = self.poller_daemon.connect(self.ibroks,"Broks")
-            self.uri_arb = self.poller_daemon.connect(self.iarbiters,"ForArbiter")
-        else:
-            self.uri = self.poller_daemon.register(self.ibroks,"Broks")
-            self.uri_arb = self.poller_daemon.register(self.iarbiters,"ForArbiter")
-
-
-        #print "The Broks Interface uri is:", self.uri
-
+        self.uri = shinken.pyro_wrapper.register(self.poller_daemon, self.ibroks, "Broks")
+        self.uri_arb = shinken.pyro_wrapper.register(self.poller_daemon, self.iarbiters, "ForArbiter")
 
         Log().log("Configuration Loaded")
 

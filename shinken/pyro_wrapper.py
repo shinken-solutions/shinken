@@ -51,3 +51,62 @@ except AttributeError:
     import socket
     if hasattr(socket, 'MSG_WAITALL'):
         del socket.MSG_WAITALL
+
+
+#Registering an object as an interface change between Pyro 3 and 4
+#So this function know which one call
+def register(daemon, obj, name):
+    global pyro_version
+    if pyro_version == 3:
+        return daemon.connect(obj, name)
+    else:
+        return daemon.register(obj, name)
+
+
+#Same that upper, but for deregister
+def unregister(daemon, obj):
+    global pyro_version
+    if pyro_version == 3:
+        daemon.disconnect(obj)
+    else:
+        daemon.unregister(obj)
+
+#The method to get sockets are differents too
+def get_sockets(daemon):
+    global pyro_version
+    if pyro_version == 3:
+        return daemon.getServerSockets()
+    else:
+        return daemon.sockets()
+
+
+#The method handleRequests take none in 3
+#but [s] in 4
+def handleRequests(daemon, s):
+    global pyro_version
+    if pyro_version == 3:
+        daemon.handleRequests()
+    else:
+        daemon.handleRequests([s])
+
+#The way we init daemons in 3 and 4 change
+#So return the daemon in the good mode here
+def init_daemon(host, port):
+    global pyro_version
+    if pyro_version == 3:
+        Pyro.core.initServer()
+        daemon = Pyro.core.Daemon(host=host, port=port)
+        if daemon.port != port:
+            print "Sorry, the port %d is not free" % port
+            sys.exit(1)
+    else:
+        #Pyro 4 i by default thread, should do select
+        #(I hate threads!)
+        Pyro.config.SERVERTYPE="select"
+        #And port already use now raise an exception
+        try:
+            daemon = Pyro.core.Daemon(host=host, port=port)
+        except socket.error, exp:
+            print "Sorry, the port %d is not free : %s" % (port, str(exp))
+            sys.exit(1)
+    return daemon
