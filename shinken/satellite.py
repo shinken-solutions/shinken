@@ -83,11 +83,7 @@ class IForArbiter(Pyro.core.ObjBase):
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
 
-            #Change from pyro 3 to 4
-            if shinken.pyro_wrapper.pyro_version == 3:
-                uri = "PYROLOC://%s:%d/Checks" % (s['address'], s['port'])
-            else:
-                uri = "PYRO:Checks@%s:%d" % (s['address'], s['port'])
+            uri = shinken.pyro_wrapper.create_uri(s['address'], s['port'], 'Checks')
 
             self.schedulers[sched_id]['uri'] = uri
             if already_got:
@@ -265,11 +261,7 @@ class Satellite(Daemon):
         #timeout of 120 s
         #and get the running id
         try:
-            #Timeout change between pyro 3 and 4
-            if shinken.pyro_wrapper.pyro_version == 3:
-                sched['con']._setTimeout(5)
-            else:
-                sched['con']._pyroTimeout = 5
+            shinken.pyro_wrapper.set_timeout(sched['con'], 5)
             new_run_id = sched['con'].get_running_id()
         except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) as exp:
             Log().log("Scheduler is not initilised : %s" % str(exp))
@@ -346,22 +338,14 @@ class Satellite(Daemon):
         timeout = 1.0
         #Arbiter do not already set our have_conf param
         while not self.have_conf :
-            #Ok, still a difference between 3 and 4 ...
-            if shinken.pyro_wrapper.pyro_version == 3:
-                socks = self.daemon.getServerSockets()
-            else:
-                socks = self.daemon.sockets()
+            socks = shinken.pyro_wrapper.get_sockets(self.daemon)
 
             avant = time.time()
             ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
             if ins != []:
                 for sock in socks:
                     if sock in ins:
-                        #Yes, even here there is a difference :)
-                        if shinken.pyro_wrapper.pyro_version == 3:
-                            self.daemon.handleRequests()
-                        else:
-                            self.daemon.handleRequests([sock])
+                        shinken.pyro_wrapper.handleRequests(self.daemon, sock)
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff
@@ -380,21 +364,14 @@ class Satellite(Daemon):
     #wait, timeout = 0s
     #If it send us a new conf, we reinit the connexions of all schedulers
     def watch_for_new_conf(self, timeout_daemon):
-        #Ok, still a difference between 3 and 4 ...
-        if shinken.pyro_wrapper.pyro_version == 3:
-            socks = self.daemon.getServerSockets()
-        else:
-            socks = self.daemon.sockets()
+        socks = shinken.pyro_wrapper.get_sockets(self.daemon)
 
         ins,outs,exs = select.select(socks,[],[],timeout_daemon)
         if ins != []:
             for sock in socks:
                 if sock in ins:
-                    #Ok, still a difference between 3 and 4 ...
-                    if shinken.pyro_wrapper.pyro_version == 3:
-                        self.daemon.handleRequests()
-                    else:
-                        self.daemon.handleRequests([sock])
+                    shinken.pyro_wrapper.handleRequests(self.daemon, sock)
+
                     #have_new_conf is set with put_conf
                     #so another handle will not make a con_init 
                     if self.have_new_conf:
@@ -511,12 +488,8 @@ class Satellite(Daemon):
 
             try:
                 con = sched['con']
-                if con is not None: #None = not initilized                      
-                    #Timeout change between pyro 3 and 4
-                    if shinken.pyro_wrapper.pyro_version == 3:
-                        con._setTimeout(120)
-                    else:
-                        con._pyroTimeout = 120
+                if con is not None: #None = not initilized
+                    shinken.pyro_wrapper.set_timeout(con, 120)
                     #OK, go for it :)
                     tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, poller_tags=self.poller_tags)
                     print "Ask actions to", sched_id, "got", len(tmp)
@@ -559,37 +532,15 @@ class Satellite(Daemon):
         Log().log("Using working directory : %s" % os.path.abspath(self.workdir))
         Log().log("Opening port: %s" % self.port)
         #Daemon init
-        #Init are differetn for pyro 3 and 4
-        if shinken.pyro_wrapper.pyro_version == 3:
-            Pyro.core.initServer()
-            self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)
-            if self.daemon.port != self.port:
-                print "Sorry, the port %d is not free" % self.port
-                sys.exit(1)
-        else:
-            #Pyro 4 i by default thread, should do select
-            #(I hate threads!)
-            Pyro.config.SERVERTYPE="select"
-            #And port already use now raise an exception
-            import socket
-            try:
-                self.daemon = Pyro.core.Daemon(host=self.host, port=self.port)
-            except socket.error, exp:
-                print "Sorry, the port %d is not free : %s" % (self.port, str(exp))
-                sys.exit(1)
+        self.daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port)
 
         #Now we create the interfaces
         self.interface = IForArbiter(self)
         self.brok_interface = IBroks(self)
         
         #And we register them
-        #Ok, registering interfaces are also differents...
-        if shinken.pyro_wrapper.pyro_version == 3:
-            self.uri2 = self.daemon.connect(self.interface,"ForArbiter")
-            self.uri3 = self.daemon.connect(self.brok_interface,"Broks")
-        else:
-            self.uri2 = self.daemon.register(self.interface,"ForArbiter")
-            self.uri3 = self.daemon.register(self.brok_interface,"Broks")
+        self.uri2 = shinken.pyro_wrapper.register(self.daemon, self.interface, "ForArbiter")
+        self.uri3 = shinken.pyro_wrapper.register(self.daemon, self.brok_interface, "Broks")
 
         #We wait for initial conf
         self.wait_for_initial_conf()
