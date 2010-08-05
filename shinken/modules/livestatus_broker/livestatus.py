@@ -68,9 +68,7 @@ class LiveStatus:
     #depythonize : 
     #default :
     out_map = {
-
-
-        Host : {
+        'Host' : {
             'accept_passive_checks' : {
                 'depythonize' : from_bool_to_string,
                 'description' : 'Wether passive host checks are accepted (0/1)',
@@ -503,7 +501,7 @@ class LiveStatus:
             },
         },
 
-        Service : {
+        'Service' : {
             'accept_passive_checks' : {
                 'depythonize' : from_bool_to_string,
                 'description' : 'Wether the service accepts passive checks (0/1)',
@@ -1206,7 +1204,7 @@ class LiveStatus:
             },
         },
 
-        Hostgroup : {
+        'Hostgroup' : {
             'action_url' : {
                 'description' : 'An optional URL to custom actions or information about the hostgroup',
                 'type' : 'string',
@@ -1343,7 +1341,7 @@ class LiveStatus:
             },
         },
 
-        Servicegroup : {
+        'Servicegroup' : {
             'action_url' : {
                 'description' : 'An optional URL to custom notes or actions on the service group',
                 'type' : 'string',
@@ -1448,7 +1446,7 @@ class LiveStatus:
             },
         },
 
-        Contact : {
+        'Contact' : {
             'address1' : {
                 'description' : 'The additional field address1',
                 'type' : 'string',
@@ -1534,7 +1532,7 @@ class LiveStatus:
             },
         },
 
-        Contactgroup : {
+        'Contactgroup' : {
             'alias' : {
                 'description' : 'The alias of the contactgroup',
                 'type' : 'string',
@@ -1551,7 +1549,7 @@ class LiveStatus:
             },
         },
 
-        Timeperiod : {
+        'Timeperiod' : {
             'alias' : {
                 'description' : 'The alias of the timeperiod',
                 'type' : 'string',
@@ -1563,7 +1561,7 @@ class LiveStatus:
             },
         },
 
-        Command : {
+        'Command' : {
             'line' : {
                 'description' : 'The shell command line',
                 'prop' : 'command_line',
@@ -1576,7 +1574,7 @@ class LiveStatus:
             },
         },
 
-        Downtime : {
+        'Downtime' : {
             'author' : {
                 'default' : 'nobody',
                 'description' : 'The contact that scheduled the downtime',
@@ -2560,7 +2558,7 @@ class LiveStatus:
             },
         },
 
-        Comment : {
+        'Comment' : {
             'author' : {
                 'default' : None,
                 'description' : 'The contact that entered the comment',
@@ -3545,7 +3543,7 @@ class LiveStatus:
             },
         },
 
-        Config : {
+        'Config' : {
             'accept_passive_host_checks' : {
                 'default' : '0',
                 'depythonize' : from_bool_to_string,
@@ -3747,7 +3745,7 @@ class LiveStatus:
             },
         },
 
-        Log : {
+        'Log' : {
             'attempt' : {
                 'description' : 'The number of the check attempt',
                 'type' : 'int',
@@ -5419,18 +5417,18 @@ class LiveStatus:
     # Find the converter function for a table/attribute pair
     def find_converter(self, table, attribute):
         out_map = {
-            'hosts' : LiveStatus.out_map[Host],
-            'services' : LiveStatus.out_map[Service],
-            'hostgroups' : LiveStatus.out_map[Hostgroup],
-            'servicegroups' : LiveStatus.out_map[Servicegroup],
-            'contacts' : LiveStatus.out_map[Contact],
-            'contactgroups' : LiveStatus.out_map[Contactgroup],
-            'comments' : LiveStatus.out_map[Comment],
-            'downtimes' : LiveStatus.out_map[Downtime],
-            'commands' : LiveStatus.out_map[Command],
-            'timeperiods' : LiveStatus.out_map[Timeperiod],
-            'status' : LiveStatus.out_map[Config],
-            'log' : LiveStatus.out_map[Log]
+            'hosts' : LiveStatus.out_map['Host'],
+            'services' : LiveStatus.out_map['Service'],
+            'hostgroups' : LiveStatus.out_map['Hostgroup'],
+            'servicegroups' : LiveStatus.out_map['Servicegroup'],
+            'contacts' : LiveStatus.out_map['Contact'],
+            'contactgroups' : LiveStatus.out_map['Contactgroup'],
+            'comments' : LiveStatus.out_map['Comment'],
+            'downtimes' : LiveStatus.out_map['Downtime'],
+            'commands' : LiveStatus.out_map['Command'],
+            'timeperiods' : LiveStatus.out_map['Timeperiod'],
+            'status' : LiveStatus.out_map['Config'],
+            'log' : LiveStatus.out_map['Log']
         }[table]
         if attribute in out_map and 'converter' in out_map[attribute]:
             return out_map[attribute]['converter']
@@ -5439,7 +5437,7 @@ class LiveStatus:
 
     def create_output(self, elt, attributes, filterattributes):
         output = {}
-        elt_type = elt.__class__
+        elt_type = elt.__class__.__name__
         if elt_type in LiveStatus.out_map:
             type_map = LiveStatus.out_map[elt_type]
             if len(attributes + filterattributes) == 0:
@@ -6056,8 +6054,12 @@ class LiveStatus:
                 #Now bring the retrieved information to a form which can be sent back to the client
                 response = self.format_live_data(result, columns, outputformat, columnheaders, separators, aliases) + "\n"
             except BaseException as e:
-                exit
-                print "REQUEST produces an exception", data, e
+                import traceback
+                print "REQUEST produces an exception", data
+                print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                print e
+                traceback.print_exc(32)
+                print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     
     
             if responseheader == 'fixed16':

@@ -611,7 +611,6 @@ class Scheduler:
     def update_downtimes_and_comments(self):
         broks = []
         now = time.time()
-
         #A loop where those downtimes are removed
         #which were marked for deletion (mostly by dt.exit())
         for dt in self.downtimes.values():

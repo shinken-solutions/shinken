@@ -115,7 +115,7 @@ from shinken.scheduler import Scheduler
 from shinken.config import Config
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommand
-from shinken.daemon import Daemon#create_daemon, check_parallele_run, change_user
+from shinken.daemon import Daemon#create_daemon, check_parallel_run, change_user
 from shinken.util import to_int, to_bool
 #from module import Module, Modules
 
@@ -309,7 +309,7 @@ class Shinken(Daemon):
             self.relative_paths_to_full(os.path.dirname(config_file))
 
         #Check if another Scheduler is not running (with the same conf)
-        self.check_parallele_run(do_replace)
+        self.check_parallel_run(do_replace)
                 
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity

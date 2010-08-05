@@ -57,7 +57,7 @@ class Daemon:
     #if the pid exist by not the pid, we remove the pidfile
     #if still exit, we can replace (kill) the other run
     #or just bail out
-    def check_parallele_run(self, do_replace):
+    def check_parallel_run(self, do_replace):
         if os.path.exists(self.pidfile):
             p = self.findpid()
             try:
