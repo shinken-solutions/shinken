@@ -110,3 +110,24 @@ def init_daemon(host, port):
             print "Sorry, the port %d is not free : %s" % (port, str(exp))
             sys.exit(1)
     return daemon
+
+
+#Generate a URI with the good form
+#for 3 and 4 version of Pyro
+def create_uri(address, port, obj_name):
+    global pyro_version
+    if pyro_version == 3:
+        return "PYROLOC://%s:%d/%s" % (address, port, obj_name)
+    else:
+        return "PYRO:%s@%s:%d" % (obj_name, address, port)
+
+
+#Timeout way is also changed between 3 and 4
+#it's a method in 3, a property in 4
+def set_timeout(con, timeout):
+    global pyro_version
+    if pyro_version == 3:
+        con._setTimeout(timeout)
+    else:
+        con._pyroTimeout = timeout
+
