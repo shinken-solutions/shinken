@@ -29,9 +29,12 @@ sudo python setup.py install
 For the compilation part in both way it's easy : there is no compilation part!
 
 == Dependancies ==
-The only dependancies are Python >= 2.6 and the Pyro module.
+The only dependancies are Python >= 2.4 and the Pyro module.
 
-For Python, it should be ok with nearly all distribution (unless RedHat 5 that use a old Python 2.4, sorry).
+For 2.4 and 2.5 python version, you will need an additionnal package : multiprocessing from http://pypi.python.org/pypi/multiprocessing/.
+Just untar and launch python setup.py install (and be sure to have installed the python-devel package too).
+
+For Python, it should be ok with nearly all distribution.
 
 Under ubuntu, you can grag the Pyro module with :
 $ sudo apt-get install pyro
