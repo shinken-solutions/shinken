@@ -49,8 +49,8 @@
       account administrator/monitor to see the hosts already configured.
     </para>
     <para>
-      You can also connect to <ulink url="http://VMADDRESS/"> and folow the Thruk link to get this cool webinterface that replace the old CGI.
-    </para>
+      You can also connect to <ulink url="http://VMADDRESS/"> the main web page </ulink> and folow the Thruk link to get this cool webinterface that replace the old CGI.
+      </para>
     <para>
       You can also find additional quickstart guides on the
       <ulink url="&url-nagios-community;">NagiosCommunity.org wiki</ulink>.

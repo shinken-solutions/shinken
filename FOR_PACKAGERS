@@ -8,7 +8,6 @@ librayry to the classic python way (in site-package).
 You will need Python >=2.6 (there are such packages for redhat5 too).
 
 You will need the pyro lib too. It must already have a package. If not, take if from pypi (easy_install)
-but WARNING : not the 4.X version! (not stable and change API...). The 3.10 is cool, take this one :)
 
 You should add teh shinken:shinken user first to launch the setup.py pass.
 

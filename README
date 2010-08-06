@@ -23,7 +23,7 @@ will install the shinken librairy in the python path, create the
 /etc/shinken and /var/lib/shinken directory (you can change them
 in the setup_parameters.cfg file before launching setup.py).
 Then just run :
-sudo python setyp.py install
+sudo python setup.py install
 
 
 For the compilation part in both way it's easy : there is no compilation part!
