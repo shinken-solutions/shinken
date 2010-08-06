@@ -128,7 +128,7 @@ setup(
                ],
 
   install_requires = [
-                      'pyro <= 3.10',
+                      'pyro',
                       ],
 
   scripts = [f for f in glob('bin/[!_]*.py')],
