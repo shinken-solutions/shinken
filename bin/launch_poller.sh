@@ -5,4 +5,4 @@ BIN=$DIR"/../bin"
 ETC=$DIR"/../etc"
 
 echo "Launching Poller (that launch checks)"
-$BIN/shinken-poller.py -d -c $ETC/pollerd.cfg
+$BIN/shinken-poller.py -d -c $ETC/pollerd.ini

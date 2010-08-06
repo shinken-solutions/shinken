@@ -5,4 +5,4 @@ BIN=$DIR"/../bin"
 ETC=$DIR"/../etc"
 
 echo "Launching Broker (that export all data)"
-$BIN/shinken-broker.py -d -c $ETC/brokerd.cfg
+$BIN/shinken-broker.py -d -c $ETC/brokerd.ini

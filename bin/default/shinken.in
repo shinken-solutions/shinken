@@ -19,7 +19,7 @@ ARBITERPID=/var/lib/shinken/arbiterd.pid
 
 ###PART FOR SCHEDULER
 # The place of the scheduler daemon configuration
-SCHEDULERCFG="$ETC$/schedulerd.cfg"
+SCHEDULERCFG="$ETC$/schedulerd.ini"
 
 # The command to launch
 SCHEDULERDAEMON=/usr/bin/shinken-scheduler.py
@@ -30,7 +30,7 @@ SCHEDULERPID=/var/lib/shinken/schedulerd.pid
 
 ###PART FOR POLLER
 # The place of the poller daemon configuration
-POLLERCFG="$ETC$/pollerd.cfg"
+POLLERCFG="$ETC$/pollerd.ini"
 
 # The command to launch
 POLLERDAEMON=/usr/bin/shinken-poller.py
@@ -41,7 +41,7 @@ POLLERPID=/var/lib/shinken/pollerd.pid
 
 ###PART FOR REACTIONNER
 # The place of the reactionner daemon configuration
-REACTIONNERCFG="$ETC$/reactionnerd.cfg"
+REACTIONNERCFG="$ETC$/reactionnerd.ini"
 
 # The command to launch
 REACTIONNERDAEMON=/usr/bin/shinken-reactionner.py
@@ -52,7 +52,7 @@ REACTIONNERPID=/var/lib/shinken/reactionnerd.pid
 
 ###PART FOR BROKER
 # The place of the broker daemon configuration
-BROKERCFG="$ETC$/brokerd.cfg"
+BROKERCFG="$ETC$/brokerd.ini"
 
 # The command to launch
 BROKERDAEMON=/usr/bin/shinken-broker.py
