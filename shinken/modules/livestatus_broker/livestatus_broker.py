@@ -545,7 +545,7 @@ class Livestatus_broker:
                         s.send(response)
                         try:
                             s.shutdown(2)
-                        except Exception as exp:
+                        except Exception , exp:
                             print exp
                         s.close()
                         input.remove(s)

@@ -33,7 +33,7 @@ def get_instance(plugin):
     #first try the import
     try:
         from couchdb_broker import Couchdb_broker
-    except ImportError as exp:
+    except ImportError , exp:
         print "Warning : the plugin type couchdb is unavalable : %s" % exp
         return None
 

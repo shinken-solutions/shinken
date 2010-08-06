@@ -33,7 +33,7 @@ def get_instance(plugin):
     #First try to import
     try:
         from host_perfdata_broker import Host_perfdata_broker
-    except ImportError as exp:
+    except ImportError , exp:
         print "Warning : the plugin type %s is unavalable : %s" % (get_type(), exp)
         return None
 

@@ -33,7 +33,7 @@ def get_instance(plugin):
     #Try to import all need modules
     try:
         from ndodb_oracle_broker import Ndodb_Oracle_broker
-    except ImportError as exp:
+    except ImportError , exp:
         print "Warning : the plugin type ndodb_oracle is unavalable : %s" % exp
         return None
     print "Get a ndoDB broker for plugin %s" % plugin.get_name()

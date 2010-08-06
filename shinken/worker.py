@@ -114,7 +114,7 @@ class Worker:
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 #print "I", self.id, "I've got a message!"
-        except Empty as exp:
+        except Empty , exp:
             if len(self.checks) == 0:
                 self._idletime = self._idletime + 1
                 time.sleep(1)
@@ -148,7 +148,7 @@ class Worker:
                 #msg = Message(id=self.id, type='Result', data=action)
                 try:
                     self.returns_queue.append(action)#msg)
-                except IOError as exp:
+                except IOError , exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
                     sys.exit(2)               
         #Little sleep

@@ -263,7 +263,7 @@ class Satellite(Daemon):
         try:
             shinken.pyro_wrapper.set_timeout(sched['con'], 5)
             new_run_id = sched['con'].get_running_id()
-        except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) as exp:
+        except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
             Log().log("Scheduler is not initilised : %s" % str(exp))
             sched['con'] = None
             return
@@ -310,13 +310,13 @@ class Satellite(Daemon):
                     if con is not None: #None = not initialized
                         send_ok = con.put_results(ret)
                 #Not connected or sched is gone
-                except (Pyro.errors.ProtocolError, KeyError) as exp:
+                except (Pyro.errors.ProtocolError, KeyError) , exp:
                     print exp
                     self.pynag_con_init(sched_id)
                     return
-                except AttributeError as exp: #the scheduler must  not be initialized
+                except AttributeError , exp: #the scheduler must  not be initialized
                     print exp
-                except Exception as exp:
+                except Exception , exp:
                     print ''.join(Pyro.util.getPyroTraceback(exp))
                     sys.exit(0)
             
@@ -506,19 +506,19 @@ class Satellite(Daemon):
                     self.pynag_con_init(sched_id)
             #Ok, con is not know, so we create it
             #Or maybe is the connexion lsot, we recreate it
-            except (KeyError, Pyro.errors.ProtocolError) as exp:
+            except (KeyError, Pyro.errors.ProtocolError) , exp:
                 print exp
                 self.pynag_con_init(sched_id)
             #scheduler must not be initialized
             #or scheduler must not have checks
-            except (AttributeError, Pyro.errors.NamingError) as exp:
+            except (AttributeError, Pyro.errors.NamingError) , exp:
                 print exp
             #What the F**k? We do not know what happenned,
             #so.. bye bye :)
-            except Pyro.errors.ConnectionClosedError as exp:
+            except Pyro.errors.ConnectionClosedError , exp:
                 print exp
                 self.pynag_con_init(sched_id)
-            except Exception as exp:
+            except Exception , exp:
                 print ''.join(Pyro.util.getPyroTraceback(exp))
                 sys.exit(0)
             
@@ -584,7 +584,7 @@ class Satellite(Daemon):
                     print "Time out", timeout
                     raise Empty
                     
-            except Empty as exp: #Time out Part
+            except Empty , exp: #Time out Part
                 print " ======================== "
                 after = time.time()
                 timeout = self.polling_interval

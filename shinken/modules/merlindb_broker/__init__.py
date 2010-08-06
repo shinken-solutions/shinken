@@ -34,7 +34,7 @@ def get_instance(plugin):
     #First try to import
     try:
         from merlindb_broker import Merlindb_broker
-    except ImportError as exp:
+    except ImportError , exp:
         print "Warning : the plugin type %s is unavalable : %s" % (properties['type'], exp)
         return None
 
@@ -54,7 +54,7 @@ def get_instance(plugin):
             instance = Merlindb_broker(plugin.get_name(), backend, host=host, user=user, password=password, database=database, character_set=character_set)
             return instance
             
-        except ImportError as exp:
+        except ImportError , exp:
             print "Warning : the plugin type %s is unavalable : %s" % (properties['type'], exp)
             return None
 
@@ -64,7 +64,7 @@ def get_instance(plugin):
             instance = Merlindb_broker(plugin.get_name(), backend, database_path=database_path)
             return instance
 
-        except ImportError as exp:
+        except ImportError , exp:
             print "Warning : the plugin type %s is unavalable : %s" % (properties['type'], exp)
             return None
         

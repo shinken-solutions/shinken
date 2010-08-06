@@ -6053,7 +6053,7 @@ class LiveStatus:
                         columnheaders = 'on'
                 #Now bring the retrieved information to a form which can be sent back to the client
                 response = self.format_live_data(result, columns, outputformat, columnheaders, separators, aliases) + "\n"
-            except BaseException as e:
+            except BaseException, e:
                 import traceback
                 print "REQUEST produces an exception", data
                 print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"

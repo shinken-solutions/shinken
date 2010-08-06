@@ -109,9 +109,9 @@ class Ndodb_broker:
         try:
             self.db_cursor.execute(query)
             self.db.commit ()
-        except IntegrityError as exp:
+        except IntegrityError , exp:
             print "[Ndodb] Warning : a query raise an integrity error : %s, %s" % (query, exp) 
-        except ProgrammingError as exp:
+        except ProgrammingError , exp:
             print "[Ndodb] Warning : a query raise a programming error : %s, %s" % (query, exp) 
 
 

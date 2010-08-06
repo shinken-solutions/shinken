@@ -32,7 +32,7 @@ from multiprocessing import Process, Queue, active_children
 #modulepath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "modules/")
 #Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html
 
-class ModulesManager():
+class ModulesManager(object):
 
     def __init__(self, modules_type, modules_path, modules):
         self.modules_path = modules_path
@@ -57,7 +57,7 @@ class ModulesManager():
         for fname in modules_files:
             try:
                 self.imported_modules.append(__import__(fname))
-            except ImportError as exp:
+            except ImportError , exp:
                 print "Warning :", exp
 
         self.modules_assoc = []
@@ -83,7 +83,7 @@ class ModulesManager():
                     #the instance need the properties of the module
                     inst.properties = mod.properties
                     self.instances.append(inst)
-            except Exception as exp:
+            except Exception , exp:
                 print "Error : the module %s raised an exception %s, I remove it!" % (module.get_name(), str(exp))
 
         print "Load", len(self.instances), "module instances"
@@ -100,7 +100,7 @@ class ModulesManager():
                 else:
                     inst.properties['external'] = False
                     inst.init()
-            except Exception as exp:
+            except Exception , exp:
                 print "Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(exp))
                 to_del.append(inst)
 

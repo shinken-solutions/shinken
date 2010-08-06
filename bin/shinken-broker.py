@@ -40,8 +40,8 @@ import getopt
 python_version = platform.python_version_tuple()
 
 ## Make sure people are using Python 2.5 or higher
-if int(python_version[0]) == 2 and int(python_version[1]) < 6:
-    print "Shinken require as a minimum Python 2.6.x, sorry"
+if int(python_version[0]) == 2 and int(python_version[1]) < 4:
+    print "Shinken require as a minimum Python 2.4.x, sorry"
     sys.exit(1)
 
 if int(python_version[0]) == 3:
@@ -409,7 +409,7 @@ class Broker(Satellite):
 		for mod in self.modules_manager.get_internal_instances():
 			try:
 				mod.manage_brok(b)
-			except Exception as exp:
+			except Exception , exp:
 				print exp.__dict__
 				Log().log("Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
 				print "DBG:", type(exp)
@@ -482,20 +482,20 @@ class Broker(Satellite):
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id, type=type)
                         #Ok, con is not know, so we create it
-			except KeyError as exp: 
+			except KeyError , exp: 
 				#print exp
 				self.pynag_con_init(sched_id, type=type)
-			except Pyro.errors.ProtocolError as exp:
+			except Pyro.errors.ProtocolError , exp:
 				Log().log(str(exp))
 				#we reinitialise the ccnnexion to pynag
 				self.pynag_con_init(sched_id, type=type)
                         #scheduler must not #be initialized
-			except AttributeError as exp: 
+			except AttributeError , exp: 
 				Log().log(str(exp))
                         #scheduler must not have checks
-			except Pyro.errors.NamingError as exp:
+			except Pyro.errors.NamingError , exp:
 				Log().log(str(exp))
-                        except Pyro.errors.ConnectionClosedError as exp:
+                        except Pyro.errors.ConnectionClosedError , exp:
                                Log().log(str(exp))
                                self.pynag_con_init(sched_id, type=type)
 			# What the F**k? We do not know what happenned,

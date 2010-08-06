@@ -342,5 +342,5 @@ class StatusFile:
             os.close(temp_fh)
             os.chmod(temp_status_file, 0640)
             os.rename(temp_status_file, self.path)
-        except OSError as exp:
+        except OSError , exp:
             return exp
