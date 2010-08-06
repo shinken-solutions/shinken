@@ -87,7 +87,7 @@ class Hostdependencies(Items):
                 tp_name = hd.dependency_period
                 tp = timeperiods.find_by_name(tp_name)
                 hd.dependency_period = tp
-            except AttributeError as exp:
+            except AttributeError , exp:
                 print exp
 
 

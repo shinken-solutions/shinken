@@ -356,14 +356,14 @@ class Scheduler:
                 item.remove_in_progress_notification(c)
                 self.actions[c.id].status = 'zombie'
                 item.last_notification = c.check_time
-            except KeyError as exp:
+            except KeyError , exp:
                 Log().log("Warning : received an notification of an unknown id! %s" % str(exp))
 
         elif c.is_a == 'check':
             try:
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
-            except KeyError as exp:
+            except KeyError , exp:
                 Log().log("Warning : received an check of an unknown id! %s" % str(exp))
         elif c.is_a == 'eventhandler':
             #It just die
@@ -396,7 +396,7 @@ class Scheduler:
             cPickle.dump(all_data, f)
             #f.write(s_compress)
             f.close()
-        except IOError as exp:
+        except IOError , exp:
             Log().log("Error: retention file creation failed, %s" % str(exp))
             return
         Log().log("Updating retention_file %s" % self.conf.state_retention_file)
@@ -411,20 +411,20 @@ class Scheduler:
             f = open(self.conf.state_retention_file, 'rb')
             all_data = cPickle.load(f)
             f.close()
-        except EOFError as exp:
+        except EOFError , exp:
             print exp
             return
-        except ValueError as exp:
+        except ValueError , exp:
             print exp
             return
-        except IOError as exp:
+        except IOError , exp:
             print exp
             return
-        except IndexError as exp:
+        except IndexError , exp:
             s = "WARNING: Sorry, the ressource file is not compatible"
             Log().log(s)
             return
-        except TypeError as exp:
+        except TypeError , exp:
             s = "WARNING: Sorry, the ressource file is not compatible"
             Log().log(s)
             return

@@ -129,7 +129,7 @@ class Daemon:
     def find_uid_from_name(self):
         try:
             return getpwnam(self.user)[2]
-        except KeyError as exp:
+        except KeyError , exp:
             print "Error: the user", self.user, "is unknown"
             return None
 
@@ -137,7 +137,7 @@ class Daemon:
     def find_gid_from_name(self):
         try:
             return getgrnam(self.group)[2]
-        except KeyError as exp:
+        except KeyError , exp:
             print "Error: the group", self.group, "is unknown"
             return None
 

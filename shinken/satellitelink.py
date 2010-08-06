@@ -99,15 +99,15 @@ class SatelliteLink(Item):
                 self.con.put_conf(conf)
                 self.con._pyroTimeout = 5
                 return True
-        except Pyro.errors.URIError as exp:
+        except Pyro.errors.URIError , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError as exp:
+        except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
-        except TypeError as exp:
+        except TypeError , exp:
             print ''.join(Pyro.util.getPyroTraceback(exp))
-        except Pyro.errors.CommunicationError as exp:
+        except Pyro.errors.CommunicationError , exp:
             self.con = None
             return False
 
@@ -118,20 +118,20 @@ class SatelliteLink(Item):
                 self.create_connexion()
             self.con.ping()
             return True
-        except Pyro.errors.ProtocolError as exp:
+        except Pyro.errors.ProtocolError , exp:
             self.con = None
             #print exp
             return False
-        except Pyro.errors.URIError as exp:
+        except Pyro.errors.URIError , exp:
             self.con = None
             print exp
             return False
         #Only pyro 4 but will be ProtocolError in 3
-        except Pyro.errors.CommunicationError as exp:
+        except Pyro.errors.CommunicationError , exp:
             #print "Is not alive!", self.uri
             self.con = None
             return False
-        except Pyro.errors.DaemonError as exp:
+        except Pyro.errors.DaemonError , exp:
             self.con = None
             print exp
             return False
@@ -143,10 +143,10 @@ class SatelliteLink(Item):
         try:
             self.con.wait_new_conf()
             return True
-        except Pyro.errors.URIError as exp:
+        except Pyro.errors.URIError , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError as exp:
+        except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
 
@@ -162,10 +162,10 @@ class SatelliteLink(Item):
                 return self.con.have_conf()
             else:
                 return self.con.have_conf(magic_hash)
-        except Pyro.errors.URIError as exp:
+        except Pyro.errors.URIError , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError as exp:
+        except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
 
@@ -176,10 +176,10 @@ class SatelliteLink(Item):
         try:
             self.con.remove_from_conf(sched_id)
             return True
-        except Pyro.errors.URIError as exp:
+        except Pyro.errors.URIError , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError as exp:
+        except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
 
@@ -188,10 +188,10 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             return self.con.what_i_managed()
-        except Pyro.errors.URIError as exp:
+        except Pyro.errors.URIError , exp:
             self.con = None
             return []
-        except Pyro.errors.ProtocolError as exp:
+        except Pyro.errors.ProtocolError , exp:
             self.con = None
             return []
 
@@ -201,13 +201,13 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             return self.con.push_broks(broks)
-        except Pyro.errors.URIError as exp:
+        except Pyro.errors.URIError , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError as exp:
+        except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
-        except AttributeError as exp:
+        except AttributeError , exp:
             print exp
             return False
 

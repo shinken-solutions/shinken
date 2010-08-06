@@ -740,7 +740,7 @@ class Services(Items):
                 #Let the host know we are his service
                 if s.host is not None:
                     hst.add_service_link(s)
-            except AttributeError as exp:
+            except AttributeError , exp:
                 pass #Will be catch at the is_correct moment
 
 

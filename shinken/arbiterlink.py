@@ -78,10 +78,10 @@ class ArbiterLink(SatelliteLink):
         try:
             self.con.do_not_run()
             return True
-        except Pyro.errors.URIError as exp:
+        except Pyro.errors.URIError , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError as exp:
+        except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
 

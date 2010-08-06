@@ -121,7 +121,7 @@ class Servicedependencies(Items):
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 sd.service_description = s
                 
-            except AttributeError as exp:
+            except AttributeError , exp:
                 print exp
 
 
@@ -133,7 +133,7 @@ class Servicedependencies(Items):
                 tp_name = sd.dependency_period
                 tp = timeperiods.find_by_name(tp_name)
                 sd.dependency_period = tp
-            except AttributeError as exp:
+            except AttributeError , exp:
                 print exp
 
 

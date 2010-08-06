@@ -102,7 +102,7 @@ class Action:
                 self.process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True)
             else:#instead, launch by execve
                 self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
-        except OSError as exp:
+        except OSError , exp:
             print "FUCK:", exp
             self.output = exp.__str__()
             self.exit_status = 2

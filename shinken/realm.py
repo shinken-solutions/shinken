@@ -80,7 +80,7 @@ class Realm(Itemgroup):
                     new_val = f(old_val)
                     #print "Changing ", old_val, "by", new_val
                     setattr(self, prop, new_val)
-            except AttributeError as exp:
+            except AttributeError , exp:
                 #print self.get_name(), ' : ', exp
                 pass # Will be catch at the is_correct moment
 

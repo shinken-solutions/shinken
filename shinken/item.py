@@ -149,7 +149,7 @@ class Item(object):
                     new_val = f(old_val)
                     #print "Changing ", old_val, "by", new_val
                     setattr(self, prop, new_val)
-            except AttributeError as exp:
+            except AttributeError , exp:
                 #print self.get_name(), ' : ', exp
                 pass # Will be catch at the is_correct moment
 
@@ -302,10 +302,16 @@ class Item(object):
             if notify:
                 self.create_notifications('ACKNOWLEDGEMENT')
             self.problem_has_been_acknowledged = True
-            sticky = True if sticky == 2 else False
+            if sticky == 2:
+                sticky = True 
+            else:
+                sticky = False
             a = Acknowledge(self, sticky, notify, persistent, author, comment)
             self.acknowledgement = a
-            comment_type = 1 if self.my_type == 'host' else 2
+            if self.my_type == 'host':
+                comment_type = 1 
+            else :
+                comment_type = 2
             c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
             self.add_comment(c)
             self.broks.append(self.get_update_status_brok())

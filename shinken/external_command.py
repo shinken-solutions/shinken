@@ -223,7 +223,7 @@ class ExternalCommand:
                 try :
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
-                except OSError as exp:
+                except OSError , exp:
                     print "Error : pipe creation failed (",self.pipe_path,')', exp
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
