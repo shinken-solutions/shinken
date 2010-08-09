@@ -5,7 +5,7 @@
 
 ###PART FOR ARBITER
 # location of the nagios configuration file
-SHINKENCFG="$ETC$/shinken.cfg"
+SHINKENCFG="$ETC$/nagios.cfg"
 
 # We got 2 config because tools like Centreon do nto generate all
 #configuration (onnly the shinken.cfg part)
