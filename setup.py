@@ -30,12 +30,12 @@ if os.name != 'nt':
     from grp import getgrnam
 
 
-#We know that a Python 2.5 or Python3K will fail.
+#We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
 import platform
 python_version = platform.python_version_tuple()
 
-## Make sure people are using Python 2.5 or higher
+## Make sure people are using Python 2.3 or higher
 if int(python_version[0]) == 2 and int(python_version[1]) < 4:
     print "Shinken require as a minimum Python 2.4.x, sorry"
     sys.exit(1)
