@@ -4,7 +4,7 @@ Hi,
 
 Welcome in the Shinken project.
 
-Shinken is a new implementation of Nagios in AGLv3 written in Python. The main goal of Shinken is to allow users to have a fully flexible architecture for their monitoring system that can easily scale to large environments. Shinken is backward compatible with the Nagios configuration standard and plugins. It works on any operative system and architecture that supports Python, which includes Windows and Mac OS X/Darwin.
+Shinken is a new implementation of Nagios in AGPLv3 written in Python. The main goal of Shinken is to allow users to have a fully flexible architecture for their monitoring system that can easily scale to large environments. Shinken is backward compatible with the Nagios configuration standard and plugins. It works on any operative system and architecture that supports Python, which includes Windows and Mac OS X/Darwin.
 
 
 == How to install it ==
@@ -22,6 +22,7 @@ You can install really the application by using the setup.py script. It
 will install the shinken librairy in the python path, create the
 /etc/shinken and /var/lib/shinken directory (you can change them
 in the setup_parameters.cfg file before launching setup.py).
+You will need the python-setuptools package for it.
 Then just run :
 sudo python setup.py install
 

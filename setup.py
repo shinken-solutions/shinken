@@ -132,11 +132,11 @@ setup(
                       ],
 
   scripts = [f for f in glob('bin/[!_]*.py')],
-  data_files=[(etc_path, ["etc/nagios.cfg",'etc/brokerd.cfg', 'etc/brokerd-windows.cfg',
+  data_files=[(etc_path, ["etc/nagios.cfg",'etc/brokerd.ini', 'etc/brokerd-windows.ini',
                                 'etc/commons.cfg', 'etc/conf-windows.cfg', 'etc/host-150.cfg',
-                                'etc/nagios.cfg', 'etc/nagios-windows.cfg', 'etc/pollerd.cfg',
-                                'etc/reactionnerd.cfg', 'etc/resource.cfg', 'etc/schedulerd.cfg',
-                                'etc/schedulerd-windows.cfg', 'etc/pollerd-windows.cfg',
+                                'etc/nagios.cfg', 'etc/nagios-windows.cfg', 'etc/pollerd.ini',
+                                'etc/reactionnerd.ini', 'etc/resource.cfg', 'etc/schedulerd.ini',
+                                'etc/schedulerd-windows.ini', 'etc/pollerd-windows.ini',
                                 'etc/shinken-specific.cfg', 'etc/shinken-specific-high-availability.cfg',
                                 'etc/shinken-specific-load-balanced-only.cfg'
                                 ]),
