@@ -15,7 +15,7 @@ SHINKENSPECIFICCFG="$ETC$/shinken-specific.cfg"
 ARBITERDAEMON=/usr/bin/shinken-arbiter.py
 
 #The ARBITER PID
-ARBITERPID=/var/lib/shinken/arbiterd.pid
+ARBITERPID=$(grep lock_file $SHINKENCFG | cut -d= -f2)
 
 ###PART FOR SCHEDULER
 # The place of the scheduler daemon configuration
