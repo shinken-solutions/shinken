@@ -11,6 +11,7 @@ import string
 import re
 import random
 import unittest
+sys.path.append("..")
 sys.path.append("../shinken")
 from config import Config
 from dispatcher import Dispatcher
