@@ -109,6 +109,7 @@ setup(
   name = "Shinken",
   version = "0.1.99",
   packages = find_packages(),
+  package_data = {'':['*.py','modules/*.py','modules/*/*.py']},
   description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
   long_description=open('README').read(),
   author = "Gabes Jean",
