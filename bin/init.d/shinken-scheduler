@@ -16,6 +16,7 @@
 # Shinken        Starts Shinken Scheduler
 #
 # chkconfig: 345 99 01
+# description: Start Shinken scheduler daemon
 ### END INIT INFO
 
 # Author: Gabes Jean <naparuba@gmail.com>

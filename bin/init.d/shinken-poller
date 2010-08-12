@@ -16,6 +16,7 @@
 # Shinken        Starts Shinken Poller
 #
 # chkconfig: 345 99 01
+# description: Start Shinken poller daemon
 ### END INIT INFO
 
 # Author: Gabes Jean <naparuba@gmail.com>

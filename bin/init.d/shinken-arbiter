@@ -16,6 +16,7 @@
 # Shinken        Starts Shinken Arbiter
 #
 # chkconfig: 345 99 01
+# description: Start Shinken arbiter daemon
 ### END INIT INFO
 
 # Author: Gabes Jean <naparuba@gmail.com>

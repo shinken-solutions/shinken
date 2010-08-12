@@ -16,6 +16,7 @@
 # Shinken        Starts Shinken Broker
 #
 # chkconfig: 345 99 01
+# description: Start Shinken broker daemon
 ### END INIT INFO
 
 # Author: Gabes Jean <naparuba@gmail.com>
