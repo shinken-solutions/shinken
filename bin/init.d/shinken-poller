@@ -12,7 +12,15 @@
 #                    other daemons
 ### END INIT INFO
 
+### BEGIN INIT INFO Redhat
+# Shinken        Starts Shinken Poller
+#
+# chkconfig: 345 99 01
+### END INIT INFO
+
 # Author: Gabes Jean <naparuba@gmail.com>
+#         Olivier LI-KIANG-CHEONG <lkco@gezen.fr>
+
 
 # Do NOT "set -e"
 #set -x
