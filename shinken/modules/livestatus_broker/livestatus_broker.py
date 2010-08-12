@@ -324,7 +324,8 @@ class Livestatus_broker:
 
             # lineno, message?, plugin_output?
             logclass = LOGCLASS_INVALID
-            attempt, command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state, state_type = [None] * 11
+            attempt, state = [0] * 2
+            command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state_type = [''] * 9
             time= line[1:11]
             print "i start with a timestamp", time
             first_type_pos = line.find(' ') + 1
