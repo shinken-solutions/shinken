@@ -5,4 +5,4 @@ BIN=$DIR"/../bin"
 ETC=$DIR"/../etc"
 
 echo "Launching Reactionner (that do notification send)"
-$BIN/shinken-reactionner.py -d -c $ETC/reactionnerd.ini
+$BIN/shinken-reactionner.py -d -c $ETC/reactionnerd-for-test.ini

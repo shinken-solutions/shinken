@@ -6,4 +6,4 @@ ETC=$DIR"/../etc"
 DEBUG_PATH="/tmp/scheduler.debug"
 
 echo "Launching Scheduler (that do scheduling only) in debug mode to the file $DEBUG_PATH"
-$BIN/shinken-scheduler.py -d -c $ETC/schedulerd.ini --debug $DEBUG_PATH
+$BIN/shinken-scheduler.py -d -c $ETC/schedulerd-for-test.ini --debug $DEBUG_PATH
