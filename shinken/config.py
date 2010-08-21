@@ -317,12 +317,18 @@ class Config(Item):
                 elif re.search("^cfg_dir", line):
                     elts = line.split('=')
                     if os.path.isabs(elts[1]):
-                        cfg_file_name = elts[1]
+                        cfg_dir_name = elts[1]
                     else:
                         cfg_dir_name = os.path.join(config_base_dir, elts[1])
+                    #Ok, look if it's really a directory
+                    if not os.path.isdir(cfg_dir_name):
+                        Log().log("Error: Cannot open config dir '%s' for reading" % cfg_dir_name)
+                        self.conf_is_correct = False
+                    #Now walk for it
                     for root, dirs, files in os.walk(cfg_dir_name):
                         for file in files:
                             if re.search("\.cfg$", file):
+                                Log().log("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
 
                                     fd = open(os.path.join(root, file))

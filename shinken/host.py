@@ -299,9 +299,9 @@ class Host(SchedulingItem):
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
             Log().log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
-        #If active check is enabled with a check_interval!=0, we must have a check_timeperiod
+        #If active check is enabled with a check_interval!=0, we must have a check_period
         if (hasattr(self, 'active_checks_enabled') and self.active_checks_enabled) and (not hasattr(self, 'check_period') or self.check_period == None) and (hasattr(self, 'check_interval') and self.check_interval!=0):
-            Log().log("%s : My check_timeperiod is not correct" % self.get_name())
+            Log().log("%s : My check_period is not correct" % self.get_name())
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
