@@ -18,29 +18,30 @@
 
 
 #This Class is a plugin for the Shinken Broker. It is in charge
-#to brok information of the service perfdata into the file
-#var/service-perfdata
-#So it just manage the service_check_return
-#Maybe one day host data will be usefull too
-#It will need just a new file, and a new manager :)
+#to brok information of the service status.dat file and generate
+# the objects.dat files too
 
+#And now classic include
 import time
 import select
 import socket
 import sys
 import cPickle
 
-from host import Host
-from hostgroup import Hostgroup
-from service import Service
-from servicegroup import Servicegroup
-from contact import Contact
-from contactgroup import Contactgroup
-from timeperiod import Timeperiod
-from command import Command
+#And now include from this global directory
+from shinken.host import Host
+from shinken.hostgroup import Hostgroup
+from shinken.service import Service
+from shinken.servicegroup import Servicegroup
+from shinken.contact import Contact
+from shinken.contactgroup import Contactgroup
+from shinken.timeperiod import Timeperiod
+from shinken.command import Command
+from shinken.config import Config
+#And now include from this directory
 from status import StatusFile
 from objectscache import ObjectsCacheFile
-from config import Config
+
 
 
 #Class for the Merlindb Broker
