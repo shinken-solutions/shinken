@@ -22,8 +22,7 @@ import time
 import os
 import tempfile
 
-from util import from_bool_to_string
-
+from shinken.util import from_bool_to_string 
 
 class StatusFile:
     out_map = {

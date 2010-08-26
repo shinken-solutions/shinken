@@ -22,16 +22,16 @@ import time
 import os
 import tempfile
 
-from service import Service
-from host import Host
-from contact import Contact
-from hostgroup import Hostgroup
-from servicegroup import Servicegroup
-from contactgroup import Contactgroup
-from timeperiod import Timeperiod
-from command import Command
+from shinken.service import Service
+from shinken.host import Host
+from shinken.contact import Contact
+from shinken.hostgroup import Hostgroup
+from shinken.servicegroup import Servicegroup
+from shinken.contactgroup import Contactgroup
+from shinken.timeperiod import Timeperiod
+from shinken.command import Command
 
-from util import from_bool_to_string,from_list_to_split
+from shinken.util import from_bool_to_string,from_list_to_split
 
 #This is a dirty hack. Service.get_name only returns service_description.
 #For the servicegroup config we need more. host_name + service_description
