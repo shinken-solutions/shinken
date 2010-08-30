@@ -170,6 +170,21 @@ def get_gid(group_name):
         print "Maybe you should create this group"
         sys.exit(2)
 
+#Open a /etc/*d.ini file and change the ../var occurence with a good value
+#from the configuration file
+def update_ini_file_with_var(path):
+    global var_path
+    f = open(path)
+    buf = f.read()
+    f.close
+    f = open(path, "w")
+    buf = buf.replace("../var", var_path)
+    f.write(buf)
+    f.close()
+
+
+
+
 #If there is another root, it's strange, it must be a special case...
 if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv) and re.search("--root", ' '.join(sys.argv)) == None:
     #First var
@@ -199,3 +214,10 @@ if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv) and re.sea
             print "Change owner of the file", root+os.sep+name, "by", etc_owner, ":", etc_group
             os.chown(root+os.sep+name,etc_uid, etc_gui)
 
+
+    #then update the /etc/*d.ini files ../var value with the real var one
+    print "Now updating the /etc/*d/ini files with the good value for var"
+    update_ini_file_with_var(os.sep.join([etc_path, 'brokerd.ini']))
+    update_ini_file_with_var(os.sep.join([etc_path, 'schedulerd.ini']))
+    update_ini_file_with_var(os.sep.join([etc_path, 'pollerd.ini']))
+    update_ini_file_with_var(os.sep.join([etc_path, 'reactionnerd.ini']))
