@@ -244,7 +244,7 @@ class Broker(Satellite):
 		'user' : {'default' : 'shinken', 'pythonize' : None},
 		'group' : {'default' : 'shinken', 'pythonize' : None},
 		'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
-		'modulespath' : {'default' :'/usr/local/shinken/shinken/modules' , 'pythonize' : None, 'path' : True}
+#		'modulespath' : {'default' :'/usr/local/shinken/shinken/modules' , 'pythonize' : None, 'path' : True}
 		}
 	
 
@@ -530,11 +530,22 @@ class Broker(Satellite):
 
                 self.uri2 = shinken.pyro_wrapper.register(self.daemon, IForArbiter(self), "ForArbiter")
 
+                #Now get the module path. It's in fact the directory modules
+                #inside the shinken directory. So let's find it.
+                modulespath = os.path.abspath(shinken.modulesmanager.__file__)
+                #We got one of the files of 
+                elts = os.path.dirname(modulespath).split(os.sep)[:-1]
+                elts.append('shinken')
+                elts.append('modules')
+                self.modulespath = os.sep.join(elts)
+                Log().log("Using modules path : %s" % os.sep.join(elts))
+                
                 #We wait for initial conf
 		self.wait_for_initial_conf()
 
 		#Do the modules part, we have our modules in self.modules
 		#REF: doc/broker-modules.png (1)
+
 		self.modules_manager = ModulesManager('broker', self.modulespath, self.modules)
 		self.modules_manager.load()
 		self.mod_instances = self.modules_manager.get_instances()
