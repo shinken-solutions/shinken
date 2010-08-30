@@ -25,7 +25,7 @@ SCHEDULERCFG="$ETC$/schedulerd.ini"
 SCHEDULERDAEMON=/usr/bin/shinken-scheduler.py
 
 #The SCHEDULER PID
-SCHEDULERPID=/var/lib/shinken/schedulerd.pid
+SCHEDULERPID="$VAR$/schedulerd.pid"
 
 
 ###PART FOR POLLER
@@ -36,7 +36,7 @@ POLLERCFG="$ETC$/pollerd.ini"
 POLLERDAEMON=/usr/bin/shinken-poller.py
 
 #The poller pid
-POLLERPID=/var/lib/shinken/pollerd.pid
+POLLERPID="$VAR$/pollerd.pid"
 
 
 ###PART FOR REACTIONNER
@@ -47,7 +47,7 @@ REACTIONNERCFG="$ETC$/reactionnerd.ini"
 REACTIONNERDAEMON=/usr/bin/shinken-reactionner.py
 
 #The reactionner pid
-REACTIONNERPID=/var/lib/shinken/reactionnerd.pid
+REACTIONNERPID="$VAR$/reactionnerd.pid"
 
 
 ###PART FOR BROKER
@@ -58,7 +58,7 @@ BROKERCFG="$ETC$/brokerd.ini"
 BROKERDAEMON=/usr/bin/shinken-broker.py
 
 #The broker pid
-BROKERPID=/var/lib/shinken/brokerd.pid
+BROKERPID="$VAR$/brokerd.pid"
 
 # nicelevel to run nagios daemon with
 NICENESS=5
