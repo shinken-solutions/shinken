@@ -13,13 +13,13 @@ import random
 import unittest
 sys.path.append("..")
 sys.path.append("../shinken")
-from config import Config
-from dispatcher import Dispatcher
-from log import Log
-from scheduler import Scheduler
-from macroresolver import MacroResolver
-from external_command import ExternalCommand
-from check import Check
+from shinken.config import Config
+from shinken.dispatcher import Dispatcher
+from shinken.log import Log
+from shinken.scheduler import Scheduler
+from shinken.macroresolver import MacroResolver
+from shinken.external_command import ExternalCommand
+from shinken.check import Check
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
