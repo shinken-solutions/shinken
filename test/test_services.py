@@ -17,7 +17,7 @@ class TestConfig(ShinkenTest):
 
     
     #Look if get_*_name return the good result
-    def OK_test_get_name(self):
+    def test_get_name(self):
         svc = self.get_svc()
         print svc.get_dbg_name()
         self.assert_(svc.get_name() == 'test_ok_0')
@@ -25,7 +25,7 @@ class TestConfig(ShinkenTest):
 
     #getstate should be with all properties in dict class + id
     #check also the setstate
-    def OK_test___getstate__(self):
+    def test___getstate__(self):
         svc = self.get_svc()
         cls = svc.__class__
         #We get teh state
@@ -44,7 +44,7 @@ class TestConfig(ShinkenTest):
 
 
     #Look if it can detect all incorrect cases
-    def OK_test_is_correct(self):
+    def test_is_correct(self):
         svc = self.get_svc()
 
         #first it's ok
@@ -99,7 +99,7 @@ class TestConfig(ShinkenTest):
 
 
     #Look for set/unset impacted states (unknown)
-    def OK_test_impact_state(self):
+    def test_impact_state(self):
         svc = self.get_svc()
         ori_state = svc.state
         ori_state_id = svc.state_id
@@ -143,7 +143,6 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.state_id == 2)
         self.assert_(svc.is_state('CRITICAL') == True)
         self.assert_(svc.is_state('c') == True)
-
 
 
 
