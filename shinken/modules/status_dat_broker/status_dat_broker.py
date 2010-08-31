@@ -367,7 +367,7 @@ class Status_dat_broker:
         while True:
             b = self.q.get()
             self.manage_brok(b)
-
+            
             if time.time() - last_generation > self.update_interval:
                 #from guppy import hpy
                 #hp=hpy()

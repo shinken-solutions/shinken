@@ -24,8 +24,7 @@ will install the shinken librairy in the python path, create the
 in the setup_parameters.cfg file before launching setup.py).
 You will need the python-setuptools package for it.
 Then just run :
-sudo python setup.py install
-
+sudo python setup.py install --install-scripts=/usr/bin/
 
 For the compilation part in both way it's easy : there is no compilation part!
 
@@ -51,18 +50,24 @@ And that all folks :)
 
 
 == Where is the configuration ? ==
-The configuration is at /usr/local/shinken/src/etc.
+The configuration is where you put the etc directory (in /usr/local/shinken/etc for a quick and dirty install, /etc/shinken for a clean one).
 
 The nagios.cfg, commons files are like Nagios. All Shinken specific objects (like link to daemons or realms) are in
 the shinken-specific.cfg file.
 
 == I need to change the configuration ? ==
 
-Yes, just change the arbiter object in etc/shinken-specific.cfg, the parameter host_name should
-take your machine name (hostname)
-
-That's all (and this only thing will be changed soon).
+Nothing unless somenews hosts and services.
 
 == How to run it ==
+===Quick and dirty way ===
 It's easy, there is a already launch script for you :
 $ /usr/local/shinken/bin/launch_all.sh
+
+===Clean way==
+The setup.py give you some init.d scripts, let use them :)
+$ /etc/init.d/shinken-scheduler start
+$ /etc/init.d/shinken-poller start
+$ /etc/init.d/shinken-reactionner start
+$ /etc/init.d/shinken-broker start
+$ /etc/init.d/shinken-arbiter start
