@@ -33,6 +33,7 @@ if os.name != 'nt':
 
 #Some global variables
 install_scripts_path = "/usr/bin" #where to install launch scripts. Beter in PATH ;)
+root_path = "/" #if the setup.py is call with root, get it
 
 #We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
@@ -114,11 +115,15 @@ def parse_config_file(config_file):
 for arg in sys.argv:
     print "Argument", arg
     if re.search("--install-scripts=", arg):
-        print "Find"
         elts = arg.split('=')
         if len(elts) > 1:
             install_scripts_path = elts[1]
             print "Install script path", install_scripts_path
+    if re.search("--root=", arg):
+        elts = arg.split('=')
+        if len(elts) > 1:
+            root_path = elts[1]
+            print "New root path", root_path
 
 
 
@@ -236,9 +241,11 @@ if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv) and re.sea
             os.chown(root+os.sep+name,etc_uid, etc_gui)
 
 
+#Here, even with --root we should change the file with good values
+if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv):
     #then update the /etc/*d.ini files ../var value with the real var one
     print "Now updating the /etc/*d/ini files with the good value for var"
-    update_ini_file_with_var(os.sep.join([etc_path, 'brokerd.ini']))
-    update_ini_file_with_var(os.sep.join([etc_path, 'schedulerd.ini']))
-    update_ini_file_with_var(os.sep.join([etc_path, 'pollerd.ini']))
-    update_ini_file_with_var(os.sep.join([etc_path, 'reactionnerd.ini']))
+    update_ini_file_with_var(os.sep.join([root_path, etc_path, 'brokerd.ini']))
+    update_ini_file_with_var(os.sep.join([root_path, etc_path, 'schedulerd.ini']))
+    update_ini_file_with_var(os.sep.join([root_path, etc_path, 'pollerd.ini']))
+    update_ini_file_with_var(os.sep.join([root_path, etc_path, 'reactionnerd.ini']))
