@@ -10,41 +10,7 @@ from shinken_test import *
 
 
 class TestConfig(ShinkenTest):
-    def setUp(self):
-        # i am arbiter-like
-        self.broks = {}
-        self.me = None
-        self.log = Log()
-        self.log.load_obj(self)
-        self.config_files = ['etc/nagios_1r_1h_1s.cfg']
-        self.conf = Config()
-        self.conf.read_config(self.config_files)
-        self.conf.instance_id = 0
-        self.conf.instance_name = 'test'
-        self.conf.linkify_templates()
-        self.conf.apply_inheritance()
-        self.conf.explode()
-        self.conf.create_reversed_list()
-        self.conf.remove_twins()
-        self.conf.apply_implicit_inheritance()
-        self.conf.fill_default()
-        self.conf.clean_useless()
-        self.conf.pythonize()
-        self.conf.linkify()
-        self.conf.apply_dependancies()
-        self.conf.explode_global_conf()
-        self.conf.is_correct()
-        self.confs = self.conf.cut_into_parts()
-        self.dispatcher = Dispatcher(self.conf, self.me)
-        self.sched = Scheduler(None)
-        m = MacroResolver()
-        m.init(self.conf)
-        self.sched.load_conf(self.conf)
-        e = ExternalCommand(self.conf, 'applyer')
-        self.sched.external_command = e
-        e.load_scheduler(self.sched)
-        self.sched.schedule()
-
+    #setUp is in shinken_test
 
     def get_svc(self):
         return self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
@@ -78,7 +44,7 @@ class TestConfig(ShinkenTest):
 
 
     #Look if it can detect all incorrect cases
-    def test_is_correct(self):
+    def OK_test_is_correct(self):
         svc = self.get_svc()
 
         #first it's ok
@@ -130,6 +96,55 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.is_correct() == False)
         svc.host = host
         self.assert_(svc.is_correct() == True)
+
+
+    #Look for set/unset impacted states (unknown)
+    def OK_test_impact_state(self):
+        svc = self.get_svc()
+        ori_state = svc.state
+        ori_state_id = svc.state_id
+        svc.set_impact_state()
+        self.assert_(svc.state == 'UNKNOWN')
+        self.assert_(svc.state_id == 3)
+        svc.unset_impact_state()
+        self.assert_(svc.state == ori_state)
+        self.assert_(svc.state_id == ori_state_id)
+
+    def test_set_state_from_exit_status(self):
+        svc = self.get_svc()
+        #First OK
+        svc.set_state_from_exit_status(0)
+        self.assert_(svc.state == 'OK')
+        self.assert_(svc.state_id == 0)
+        self.assert_(svc.is_state('OK') == True)
+        self.assert_(svc.is_state('o') == True)
+        #Then warning
+        svc.set_state_from_exit_status(1)
+        self.assert_(svc.state == 'WARNING')
+        self.assert_(svc.state_id == 1)
+        self.assert_(svc.is_state('WARNING') == True)
+        self.assert_(svc.is_state('w') == True)
+        #Then Critical
+        svc.set_state_from_exit_status(2)
+        self.assert_(svc.state == 'CRITICAL')
+        self.assert_(svc.state_id == 2)
+        self.assert_(svc.is_state('CRITICAL') == True)
+        self.assert_(svc.is_state('c') == True)
+        #And unknown
+        svc.set_state_from_exit_status(3)
+        self.assert_(svc.state == 'UNKNOWN')
+        self.assert_(svc.state_id == 3)
+        self.assert_(svc.is_state('UNKNOWN') == True)
+        self.assert_(svc.is_state('u') == True)
+
+        #And something else :)
+        svc.set_state_from_exit_status(99)
+        self.assert_(svc.state == 'CRITICAL')
+        self.assert_(svc.state_id == 2)
+        self.assert_(svc.is_state('CRITICAL') == True)
+        self.assert_(svc.is_state('c') == True)
+
+
 
 
 if __name__ == '__main__':
