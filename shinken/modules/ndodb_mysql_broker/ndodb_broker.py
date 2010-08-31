@@ -105,7 +105,7 @@ class Ndodb_broker:
     #Just run the query
     #TODO: finish catch
     def execute_query(self, query):
-        #print "I run query", query, "\n"
+        print "I run query", query, "\n"
         try:
             self.db_cursor.execute(query)
             self.db.commit ()
@@ -280,7 +280,7 @@ class Ndodb_broker:
     #TODO : fill nagios_instances
     def manage_update_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
-        to_del = ['instance_name']
+        to_del = ['instance_name', 'command_file']
         to_add = []
         mapping = self.mapping['program_status']
         for prop in new_b.data:
@@ -492,11 +492,25 @@ class Ndodb_broker:
                            'check_type' : 0, 'current_check_attempt' : data['attempt'],
                            'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                           'output' : data['output'], 'perfdata' : data['perf_data']
+                           'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk'])
         }
         hoststatus_query = self.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
         return [query, hoststatus_query]
+
+    #The next schedule got it's own brok. got it and just update the
+    #next_check with it
+    def manage_host_next_schedule_brok(self, b):
+	data = b.data
+	host_id = self.get_host_object_id_by_name(data['host_name'])
+	#Only the host is impacted
+        where_clause = {'host_object_id' : host_id}
+	
+	#Just update teh host status
+	hoststatus_data = {'next_check' : de_unixify(data['next_chk'])}
+	hoststatus_query = self.create_update_query('hoststatus' , hoststatus_data, where_clause)
+
+        return [hoststatus_query]
 
 
     #Same than service result, but for host result
@@ -522,12 +536,29 @@ class Ndodb_broker:
                            'check_type' : 0, 'current_check_attempt' : data['attempt'],
                            'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                           'output' : data['output'], 'perfdata' : data['perf_data']
+                           'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk'])
         }
         
         servicestatus_query = self.create_update_query('servicestatus' , servicestatus_data, where_clause)
         
         return [query, servicestatus_query]
+
+
+    #The next schedule got it's own brok. got it and just update the
+    #next_check with it
+    def manage_service_next_schedule_brok(self, b):
+	data = b.data
+        #print "DATA", data
+        service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
+
+        #Only the service is impacted
+        where_clause = {'service_object_id' : service_id}
+
+        #Just update the service status
+        servicestatus_data = {'next_check' : de_unixify(data['next_chk'])}
+        servicestatus_query = self.create_update_query('servicestatus' , servicestatus_data, where_clause)
+
+        return [servicestatus_query]
 
 
 

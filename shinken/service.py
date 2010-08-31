@@ -287,9 +287,14 @@ class Service(SchedulingItem):
         if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups') and  self.notifications_enabled == True:
             Log().log('%s : I do not have contacts nor contact_groups' % self.get_name())
             state = False
-        if not hasattr(self, 'check_command') or not self.check_command.is_valid():
-            Log().log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+        if not hasattr(self, 'check_command'):
+            Log().log("%s : I've got no check_command" % self.get_name())
             state = False
+        #Ok got a command, but maybe it's invalid
+        else:
+            if not self.check_command.is_valid():
+                Log().log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                state = False
         if not hasattr(self, 'notification_interval') and  self.notifications_enabled == True:
             Log().log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False

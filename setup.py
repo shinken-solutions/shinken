@@ -25,10 +25,14 @@ from setuptools import setup, find_packages
 from glob import glob
 import os, sys, re
 import ConfigParser
+import getopt
+import re
 if os.name != 'nt':
     from pwd import getpwnam
     from grp import getgrnam
 
+#Some global variables
+install_scripts_path = "/usr/bin" #where to install launch scripts. Beter in PATH ;)
 
 #We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
@@ -69,12 +73,15 @@ else:
 def generate_default_shinken_file():
     global var_path
     global etc_path
+    global install_scripts_path
+    
     f = open("bin/default/shinken.in")
     buf = f.read()
     f.close
     f = open("bin/default/shinken", "w")
     buf = buf.replace("$ETC$", etc_path)
     buf = buf.replace("$VAR$", var_path)
+    buf = buf.replace("$SCRIPTS_BIN$", install_scripts_path)
     f.write(buf)
     f.close()
 
@@ -101,6 +108,19 @@ def parse_config_file(config_file):
         var_group=config._sections['var']['group']
         etc_owner=config._sections['etc']['owner']
         etc_group=config._sections['etc']['group']
+
+#I search for the --install-scripts= parameter if present to modify the
+#default/shinken file
+for arg in sys.argv:
+    print "Argument", arg
+    if re.search("--install-scripts=", arg):
+        print "Find"
+        elts = arg.split('=')
+        if len(elts) > 1:
+            install_scripts_path = elts[1]
+            print "Install script path", install_scripts_path
+
+
 
 parse_config_file('setup_parameters.cfg')
 generate_default_shinken_file()
