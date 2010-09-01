@@ -77,6 +77,9 @@ class Ndodb_broker:
     def manage_brok(self, b):
         type = b.type
         manager = 'manage_'+type+'_brok'
+	#We've got problem with instance_id == 0 so we add 1 every where
+	if 'instance_id' in b.data:
+	    b.data['instance_id'] = b.data['instance_id'] + 1
         #print "(Ndo) I search manager:", manager
         if self.has(manager):
             f = getattr(self, manager)
@@ -240,11 +243,12 @@ class Ndodb_broker:
                   'services',  'serviceescalations', 'programstatus',
                   'servicegroups', 'timeperiods', 'hostgroup_members',
                   'contactgroup_members', 'objects', 'hoststatus',
-                  'servicestatus']
+                  'servicestatus', 'instances']
         res = []
         for table in tables:
             q = "DELETE FROM %s WHERE instance_id = '%s' " % ('nagios_'+table, instance_id)
             res.append(q)
+
         return res
 
 
@@ -255,6 +259,15 @@ class Ndodb_broker:
     #TODO : fill nagios_instances
     def manage_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
+
+	#Must delete me first
+	query_delete_instance = "DELETE FROM %s WHERE instance_name = '%s' " % ('nagios_instances', b.data['instance_name'])
+
+	query_instance = self.create_insert_query('instances', {'instance_name' : new_b.data['instance_name'],\
+	 'instance_description' : new_b.data['instance_name'], \
+	'instance_id' : new_b.data['instance_id']
+	})
+
         to_del = ['instance_name', 'command_file']
         to_add = []
         mapping = self.mapping['program_status']
@@ -274,7 +287,7 @@ class Ndodb_broker:
         for (name, val) in to_add:
             new_b.data[name] = val
         query = self.create_insert_query('programstatus', new_b.data)
-        return [query]
+        return [query_delete_instance, query_instance, query]
 
 
     #TODO : fill nagios_instances
