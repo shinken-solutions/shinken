@@ -11,9 +11,7 @@
 
 <xi:include href="GettingStarted/beginners.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="GettingStarted/quickstart.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-<xi:include href="GettingStarted/quickstart-fedora.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-<xi:include href="GettingStarted/quickstart-opensuse.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-<xi:include href="GettingStarted/quickstart-ubuntu.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<xi:include href="GettingStarted/quickstart-gnulinux.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="GettingStarted/quickstart-windows.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="GettingStarted/upgrading.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 <xi:include href="GettingStarted/monitoring-windows.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>

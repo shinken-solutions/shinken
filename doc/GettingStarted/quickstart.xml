@@ -22,17 +22,11 @@
     <title>Guides</title>
     <para>
       Quickstart installation guides are currently available for the
-      following Linux distributions:
+      following OSs :
    </para>
     <itemizedlist>
       <listitem>
-        <para><link linkend="gettingstarted-quickstart-fedora">&name-fedora; Quickstart</link></para>
-      </listitem>
-      <listitem>
-        <para><link linkend="gettingstarted-quickstart-opensuse">&name-opensuse; Quickstart</link></para>
-      </listitem>
-      <listitem>
-        <para><link linkend="gettingstarted-quickstart-ubuntu">&name-ubuntu; Quickstart</link></para>
+        <para><link linkend="gettingstarted-quickstart-gnulinux">GNU/Linux Quickstart</link></para>
       </listitem>
       <listitem>
         <para><link linkend="gettingstarted-quickstart-windows">Windows Quickstart</link></para>
@@ -57,15 +51,6 @@
       Can't find a quickstart for your particular OS ? Write one and post
       it to the wiki for others!
    </para>
-    <para>
-      If you are installing Shinken on an operating system or Linux
-      distribution that isn't listed above, read the 
-      <link linkend="gettingstarted-quickstart-fedora">&name-fedora; Quickstart</link> for
-      an overview of what you'll need to do. Command names, paths, etc.
-      vary widely across different OSes/distributions, so you'll likely
-      need to tweak the installation docs a bit to work for your
-      particular case.
-   </para>
   </section>
   <section>
     <title>Post-Installation Modifications</title>
@@ -81,7 +66,7 @@
       </listitem>
 
       <listitem>
-        <para><link linkend="gettingstarted-monitoring-linux">Monitoring Linux/Unix machines</link></para>
+        <para><link linkend="gettingstarted-monitoring-linux">Monitoring GNU/Linux or other Unix machines</link></para>
       </listitem>
 
       <listitem>
