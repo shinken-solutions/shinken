@@ -1,11 +1,13 @@
 ########################
-Shinken 0.x ChangeLog
+Shinken ChangeLog
 #######################
 
 
 0.2 - ??/??/2010
 ------------------
 ENHANCEMENTS
+	*New code layout
+	*Installation is easy with the setup.py process
 	*Add sticky acknowledgement. Non-permanent ack-comments are now automatically removed	
 	*Acknowledgement test cases
 	*Add some hard tests about timeperiods calculations
@@ -19,7 +21,7 @@ ENHANCEMENTS
 	*Now external modules can return objects (from now nobody use it, but it can be useful in the future)
 	*Make easier to raise checks/notificatiosn from in deep objects class.
 	*Add a problem/incident change states when apply. But it do not interfer with the standard check way of doing (or at least should not).
-	*Add some init.d scripts
+	*Add some LSB init.d scripts
 	*Nested macros are managed (like USERN in ARGN macro).
 	*Add json outputformat to the livestatus module
 	*repository cosmetics (Luke L)
@@ -49,9 +51,15 @@ ENHANCEMENTS
 	*Relative path, now we can have a easy portable sample configuration. (Gerhard)
 	*Add two missing operators in livestatus.py
 	*Add Maximilien Bersoult setup.py for testing, but we are not ready for the layout
-	*Big clean up conf sample!	
+	*Big clean up conf sample!
+	*Now compatible with Pyro 3 AND 4
+	*Now compatible with Python 2.4 and 2.5 too
+	*No more modulespath need in brokerd.ini. Will be easier for packagers.
 	
 FIXES
+	*Fix : now merlin is correctly filled with update program value
+	*Bug Fix : ndo do not have command_file, so do not export it.
+	*Bug fix : retention load was loading not good tab (impacts ones) and so cause problem with remove (not the good object!) (nicolas.dupeux)
 	*Fix a bug in ACKNOWLEDGE_SVC_PROBLEM ext. command. Sticky can be 0/1/2, not bool
 	*Bug fix in find_day_by_weekday_offset.
 	*Bug Fix : when a date was calcl before teh ref time for a weekday it was not recalculated, so problem.
@@ -77,7 +85,11 @@ FIXES
 	*Fix: Correct a bad default arbiter pid configuration (Sebastian Reimers)
 	*Bug fix a missing save of shinken-reactionner.py about path in relative mode
 	*Global external commands now create an update_program_status_brok instead of program_status_brok
+	*Fix a bug in the status_dat_broker (incorrect servicegroup-definition in objects.cache)
 	*Fix : add Gerhard in print screen :)
+	*Bug Fix: add duplication check for elements (and groups). Only service is allowed to have duplicated (will Warning, but no error).
+	*Bug Fix : patch from Nicolas Dupeux. Thruk socket shutdowns are now handled in an exception
+	*Bux Fix (Sven Velt): patch about recursive dir load and check timeperiod typo
 	*NO MORE nap in code, now all are shinken :)
 
 
