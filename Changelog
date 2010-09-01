@@ -7,54 +7,52 @@ Shinken ChangeLog
 ------------------
 ENHANCEMENTS
 	*New code layout
-	*Installation is easy with the setup.py process
+	*Installation is easy with the setup.py process (first version from Maximilien Bersoult)
+	*Now compatible with Pyro 3 AND 4
+	*Now compatible with Python 2.4 and 2.5 too
 	*Add sticky acknowledgement. Non-permanent ack-comments are now automatically removed	
-	*Acknowledgement test cases
-	*Add some hard tests about timeperiods calculations
 	*Add host acknowledgement and acknowledgement stickiness
 	*Finished service problem acknowledgement. one more testcase
 	*Add REMOVE_HOST/SVC_ACKNOWLEDGEMENT external command
-	*Add a test.sh script for Hudson test (launch all tests)
-	*Add a problem/impact test.
 	*Now broker get broks from pollers and reactionners. (Useful for Logs)
 	*Give Broker a way to make broks :) (like for it's own log)
-	*Now external modules can return objects (from now nobody use it, but it can be useful in the future)
-	*Make easier to raise checks/notificatiosn from in deep objects class.
 	*Add a problem/incident change states when apply. But it do not interfer with the standard check way of doing (or at least should not).
 	*Add some LSB init.d scripts
-	*Nested macros are managed (like USERN in ARGN macro).
-	*Add json outputformat to the livestatus module
-	*repository cosmetics (Luke L)
-	*Redesign of the notifications (far easierto understand than the old async way)
-	*Notice about unused parameters and explain why it can eb removed from conf.
-	*Catch non standard return code in actions.py so we can add stderr to the output for such cases.
-	*Add check_period implicitly inheritate to service from host.
 	*Add max_plugins_output_length parameter to limit the checks output size.
+	*"Hack" the old nagios parameters : now status_file and nagios_log are catched. If the user defined them, but do not defined the good broker modules, we create them "on the fly". I hope one day we will remove it...
+	*Nested macros are managed (like USERN in ARGN macro).
+	*Add a pass about changing Nagios2 properties to Nagios3 ones.
+	*Add json outputformat to the livestatus module
+	*Add a broker module npcdmod (plus test_npcdmod) which writes a perfdata file suitable for pnp4nagios
+	*Add check_period implicitly inheritate to service from host.
+	*Redesign of the notifications (far easier to understand than the old async way)
+	*Notice about unused parameters and explain why it can be removed from conf.
+	*Catch non standard return code in actions.py so we can add stderr to the output for such cases.
 	*Now arbiter host_name property is not mandatory. But WARNING : for a multiple arbiter conf, it must be set.
 	*Updated cfg documentation (Author: Luke L <lukehasnoname@gmail.com>)
 	*Add documentation about date range format because it was not documented.
 	*Update the nagios to shinken migration file
 	*Change the way broks are send from Arbiter to Broker : before, the Broker connect to the Arbiter, take broks like for schedulers. But Arbiter also connect to broker. That's a nightmare about hangout. Now, Arbiter push the broks. It's far more easy and efficient.
-	*Add a pass about changing Nagios2 properties to Nagios3 ones.
 	*Add template handling to servicedependencies
 	*Add test_dependencies as the regression test
-	* "Hack" the old nagios parameters : now status_file and nagios_log are catched. If the user defined them, but do not defined the good broker modules, we create them "on the fly". I hope one day we will remove it...
-	* Less status_dat verbosity :)
+	*Less status_dat verbosity :)
 	*Add a last_perf_data + macros to access last perfdatas as in https://sourceforge.net/apps/trac/shinken/ticket/76
-	*Add a broker module npcdmod (plus test_npcdmod) which writes a perfdata file suitable for pnp4nagios
 	*HUGE clean on shinken-specific.cfg file.
 	*Add a README file
 	*Add a little note about how migrate from Nagios to Shinken
 	*Add a hint about how solve 'cannot find my own arbiter' error message.
 	*Add bin directory with some bash scripts to launch/stop the whole application.
-	*Add relative paths features for *d.cfg files : now paths in it can be relative
 	*Relative path, now we can have a easy portable sample configuration. (Gerhard)
 	*Add two missing operators in livestatus.py
-	*Add Maximilien Bersoult setup.py for testing, but we are not ready for the layout
 	*Big clean up conf sample!
-	*Now compatible with Pyro 3 AND 4
-	*Now compatible with Python 2.4 and 2.5 too
 	*No more modulespath need in brokerd.ini. Will be easier for packagers.
+	*Acknowledgement test cases
+	*Add some hard tests about timeperiods calculations
+	*Add a test.sh script for Hudson test (launch all tests)
+	*Add a problem/impact test.
+	*Now external modules can return objects (from now nobody use it, but it can be useful in the future)
+	*Make easier to raise checks/notificatiosn from in deep objects class.
+	*repository cosmetics (Luke L)
 	
 FIXES
 	*Fix : now merlin is correctly filled with update program value
