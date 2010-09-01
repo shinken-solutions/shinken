@@ -138,8 +138,8 @@
     <title>Install Shinken</title>
 
     <screen>
-      <prompt>linux:~ # </prompt><userinput>cp shinken /usr/local</userinput>
-      <prompt>linux:~ # </prompt><userinput>chown -R shinken:shinken /usr/local/shinken</userinput>
+      <prompt>linux:~ # </prompt><userinput>cd shinken</userinput>
+      <prompt>linux:~ # </prompt><userinput>sudo python setup.py install --install-scripts=/usr/bin</userinput>
     </screen>
 
     <para>Don't start Shinken yet - there's still more that needs to be done...</para>
@@ -149,29 +149,28 @@
     <title>Customize Configuration</title>
 
     <para>Sample <link linkend="configuringnagios-config">configuration files</link>
-      have now been installed in the <filename class="directory">/usr/local/shinken/etc</filename>
+      have now been installed in the <filename class="directory">/etc/shinken/</filename>
       directory. These sample files should work fine for getting started with
       Shinken. You'll need to make just one change before you proceed...</para>
 
     <para>Edit the
-      <filename>/usr/local/shinken/etc/objects/contacts.cfg</filename> config
+      <filename>/etc/shinken/contacts.cfg</filename> config
       file with your favorite editor and change the email address associated
       with the shinkenadmin contact definition to the address you'd like to use
       for receiving alerts.</para>
 
     <screen>
-      <prompt>linux:~ # </prompt><userinput>vi /usr/local/shinken/etc/objects/contacts.cfg</userinput>
+      <prompt>linux:~ # </prompt><userinput>vi /etc/shinken/contacts.cfg</userinput>
     </screen>
   </section>
 
   <section>
-    <title>Install the Shinken Plugins</title>
+    <title>Install the Nagios Plugins to use with Shinken</title>
 
     <para>You can download plugins from source, but your debian-like administrator will just will you :</para>
 
     <screen>
       <prompt>linux:~ # </prompt><userinput>sudo apt-get install nagios-plugins</userinput>
-      <prompt>linux:~ # </prompt><userinput>ln -s /usr/lib/shinken/plugins /usr/local/shinken/libexec/</userinput>
     </screen>
 
   </section>
@@ -182,20 +181,27 @@
     <para>Configure Shinken to automatically start when the system boots.</para>
     
     <screen>
-      <prompt>linux:~ # </prompt><userinput>cp etc/init.d/shinken /etc/init.d/shinken</userinput>
-      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken /etc/rcS.d/S99shinken</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-scheduler /etc/rcS.d/S98shinken-scheduler</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-poller /etc/rcS.d/S98shinken-poller</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-reactionner /etc/rcS.d/S98shinken-reactionner</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-broker /etc/rcS.d/S98shinken-broker</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-arbiter /etc/rcS.d/S98shinken-arbiter</userinput>
     </screen>
 
     <para>Verify the sample Shinken configuration files.</para>
 
     <screen>
-      <prompt>linux:~ # </prompt><userinput>/usr/local/shinken/bin/shinken -v /usr/local/shinken/etc/shinken.cfg</userinput>
+      <prompt>linux:~ # </prompt><userinput>/usr/bin/shinken-arbiter.py -v -c /etc/shinken/nagios.cfg -c /etc/shinken/shinken-specific.cfg</userinput>
     </screen>
 
     <para>If there are no errors, start Shinken.</para>
 
     <screen>
-      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken start</userinput>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-scheduler start</userinput>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-poller start</userinput>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-broker start</userinput>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-reactionner start</userinput>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-arbiter start</userinput>
     </screen>
   </section>
 
@@ -210,12 +216,12 @@
     </screen>
 
     <para>You'll have to edit the Shinken email notification commands found in
-      <filename>/usr/local/shinken/etc/objects/commands.cfg</filename> and change any <command>/bin/mail</command>
+      <filename>/etc/shinken/common.cfg</filename> and change any <command>/bin/mail</command>
       references to <command>/usr/bin/mail</command>. Once you do that you'll need to restart
       Shinken to make the configuration changes live.</para>
 
     <screen>
-      <prompt>linux:~ $ </prompt><userinput>sudo /etc/init.d/shinken restart</userinput>
+      <prompt>linux:~ $ </prompt><userinput>sudo /etc/init.d/shinken-arbiter restart</userinput>
     </screen>
 
     <para>Configuring email notifications is outside the scope of this
