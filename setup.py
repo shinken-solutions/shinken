@@ -54,31 +54,37 @@ def getscripts(path):
     return script
 
 
+
+
 #Set the default values for the paths
+#owners and groups
 if os.name == 'nt':
-    var_path="c:\\shinken\\var"
-    var_owner=None
-    var_group=None
-    etc_path="c:\\shinken\\etc"
-    etc_owner=None
-    etc_group=None
+    paths_and_owners = {'var' : {'path' : "c:\\shinken\\var", 'owner' : None, 'group' : None },
+                        'etc' : {'path' : "c:\\shinken\\etc", 'owner'  : None, 'group' : None},
+                        'libexec' : {'path' : "c:\\shinken\\libexec", 'owner'  : None, 'group' : None},
+                        }
 else:
-    etc_path="/etc/shinken"
-    var_path="/var/lib/shinken/"
-    var_owner='shinken'
-    var_group='shinken'
-    etc_owner='shinken'
-    etc_group='shinken'
+    paths_and_owners = {'var' : {'path' : "/var/lib/shinken/", 'owner' : 'shinken', 'group' : 'shinken' },
+                        'etc' : {'path' : "/etc/shinken", 'owner'  : 'shinken', 'group' : 'shinken'},
+                        'libexec' : {'path' : "/usr/lib/shinken/plugins", 'owner'  : 'shinken', 'group' : 'shinken'},
+                        }
 
-
-def generate_default_shinken_file():
-    global var_path
-    global etc_path
-    global install_scripts_path
     
+
+#The default file must have good values for the directories:
+#etc, var and where to push scripts that launch the app.
+def generate_default_shinken_file():
+    global paths_and_owners
+    global install_scripts_path
+
+    #Read the in file, it's our template
     f = open("bin/default/shinken.in")
     buf = f.read()
     f.close
+
+    #then generate the new one with good values
+    etc_path = paths_and_owners['etc']['path']
+    var_path = paths_and_owners['var']['path']
     f = open("bin/default/shinken", "w")
     buf = buf.replace("$ETC$", etc_path)
     buf = buf.replace("$VAR$", var_path)
@@ -88,27 +94,22 @@ def generate_default_shinken_file():
 
 
 def parse_config_file(config_file):
-    global var_path
-    global var_owner
-    global var_group
-    global etc_path
-    global etc_owner
-    global etc_group
+    global paths_and_owners
     
     config = ConfigParser.ConfigParser()
     config.read(config_file)
     if config._sections == {}:
         print "Bad or missing config file : %s " % config_file
         sys.exit(2)
-    
-    etc_path = config._sections['etc']['path']
-    var_path = config._sections['var']['path']
+
+    for dir in ['var', 'etc', 'libexec']:
+        paths_and_owners[dir]['path'] = config._sections[dir]['path']
+
     #on nt no owner...
     if os.name != 'nt':
-        var_owner=config._sections['var']['owner']
-        var_group=config._sections['var']['group']
-        etc_owner=config._sections['etc']['owner']
-        etc_group=config._sections['etc']['group']
+        paths_and_owners[dir]['owner'] = config._sections[dir]['owner']
+        paths_and_owners[dir]['group'] = config._sections[dir]['group']
+
 
 #I search for the --install-scripts= parameter if present to modify the
 #default/shinken file
@@ -126,9 +127,15 @@ for arg in sys.argv:
             print "New root path", root_path
 
 
-
+#Get the paths and ownsers form the parameter file
+#and the generate the default/shinken file so the init.d
+#scripts will have the good values for directories
 parse_config_file('setup_parameters.cfg')
 generate_default_shinken_file()
+
+etc_path = paths_and_owners['etc']['path']
+var_path = paths_and_owners['var']['path']
+libexec_path = paths_and_owners['libexec']['path']
 
 setup(
   name = "Shinken",
@@ -170,7 +177,8 @@ setup(
               ('/etc/init.d', ['bin/init.d/shinken-arbiter', 'bin/init.d/shinken-broker', 'bin/init.d/shinken-poller',
                                'bin/init.d/shinken-reactionner', 'bin/init.d/shinken-scheduler']),
               ('/etc/default/', ['bin/default/shinken']),
-              (var_path, ['var/void_for_git'])
+              (var_path, ['var/void_for_git']),
+              (libexec_path, ['libexec/check.sh']),
               ]
   
 )
@@ -187,6 +195,7 @@ def get_uid(user_name):
         print "Error: the user", user_name, "is unknown"
         print "Maybe you should create this user"
         sys.exit(2)
+
         
 def get_gid(group_name):
     try:
@@ -196,10 +205,12 @@ def get_gid(group_name):
         print "Maybe you should create this group"
         sys.exit(2)
 
+
 #Open a /etc/*d.ini file and change the ../var occurence with a good value
 #from the configuration file
 def update_ini_file_with_var(path):
-    global var_path
+    global paths_and_owners
+    var_path = paths_and_owners['var']['path']
     f = open(path)
     buf = f.read()
     f.close
@@ -209,43 +220,49 @@ def update_ini_file_with_var(path):
     f.close()
 
 
+#Replace the libexec path in common.cfg by the one in the parameter file
+def update_resource_cfg_file_with_libexec(path):
+    global paths_and_owners
+    libexec_path = paths_and_owners['libexec']['path']
+    f = open(path)
+    buf = f.read()
+    f.close
+    f = open(path, "w")
+    buf = buf.replace("/usr/local/shinken/libexec", libexec_path)
+    f.write(buf)
+    f.close()
+
 
 
 #If there is another root, it's strange, it must be a special case...
 if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv) and re.search("--root", ' '.join(sys.argv)) == None:
-    #First var
-    var_uid = get_uid(var_owner)
-    var_gui = get_gid(var_group)
-    for root, dirs, files in os.walk(var_path):
-        print "Changing the directory", root, "by", var_owner, ":", var_group
-        os.chown(root, var_uid, var_gui)
-        for fir in dirs:
-            print "Change owner of the directory", root+os.sep+dir, "by", var_owner, ":", var_group
-            os.chown(root+os.sep+dir,var_uid, var_gui)
-        for name in files:
-            print "Change owner of the file", root+os.sep+name, "by", var_owner, ":", var_group
-            os.chown(root+os.sep+name,var_uid, var_gui)
-        
+    for g_dir in ['etc', 'var']:
+        path = paths_and_owners[g_dir]['path']
+        owner = paths_and_owners[g_dir]['owner']
+        group = paths_and_owners[g_dir]['group']
+        uid = get_uid(owner)
+        gui = get_gid(group)
+        for root, dirs, files in os.walk(path):
+            print "Changing the directory", root, "by", owner, ":", group
+            os.chown(root, uid, gui)
+            for dir in dirs:
+                print "Change owner of the directory", root+os.sep+dir, "by", owner, ":", group
+                os.chown(root+os.sep+dir,uid, gui)
+            for name in files:
+                print "Change owner of the file", root+os.sep+name, "by", owner, ":", group
+                os.chown(root+os.sep+name,uid, gui)
 
-    #Then etc
-    etc_uid = get_uid(etc_owner)
-    etc_gui = get_gid(etc_group)
-    for root, dirs, files in os.walk(etc_path):
-        print "Changing the directory", root, "by", etc_owner, ":", etc_group
-        os.chown(root, etc_uid, etc_gui)
-        for dir in dirs:
-            print "Change owner of the directory", root+os.sep+dir, "by", etc_owner, ":", etc_group
-            os.chown(root+os.sep+dir,etc_uid, etc_gui)
-        for name in files:
-            print "Change owner of the file", root+os.sep+name, "by", etc_owner, ":", etc_group
-            os.chown(root+os.sep+name,etc_uid, etc_gui)
 
 
 #Here, even with --root we should change the file with good values
 if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv):
     #then update the /etc/*d.ini files ../var value with the real var one
-    print "Now updating the /etc/*d/ini files with the good value for var"
+    print "Now updating the /etc/shinken/*d/ini files with the good value for var"
     update_ini_file_with_var(os.sep.join([root_path, etc_path, 'brokerd.ini']))
     update_ini_file_with_var(os.sep.join([root_path, etc_path, 'schedulerd.ini']))
     update_ini_file_with_var(os.sep.join([root_path, etc_path, 'pollerd.ini']))
     update_ini_file_with_var(os.sep.join([root_path, etc_path, 'reactionnerd.ini']))
+    
+    #And now the resource.cfg path with the value of libexec path
+    print "Now updating the /etc/shinken/resource.cfg file with good libexec path"
+    update_resource_cfg_file_with_libexec(os.sep.join([root_path, etc_path, 'resource.cfg']))
