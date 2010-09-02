@@ -24,6 +24,7 @@ launch_and_assert test_livestatus.py
 launch_and_assert test_npcdmod.py
 launch_and_assert test_problem_impact.py
 launch_and_assert test_timeperiods.py
+launch_and_assert test_command.py
 
 echo "All quick unit tests passed :)"
 echo "But please launch a test.sh pass too for long tests too!"
