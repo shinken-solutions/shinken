@@ -1,0 +1,144 @@
+#!/usr/bin/env python2.6
+
+#
+# This file is used to test reading and processing of config files
+#
+
+import copy
+#It's ugly I know....
+from shinken_test import *
+
+
+class TestConfig(ShinkenTest):
+    #setUp is in shinken_test
+
+    def get_hst(self):
+        return self.sched.hosts.find_by_name("test_host_0")
+
+    
+    #Look if get_*_name return the good result
+    def test_get_name(self):
+        hst = self.get_hst()
+        print hst.get_dbg_name()
+        self.assert_(hst.get_name() == 'test_host_0')
+        self.assert_(hst.get_dbg_name() == 'test_host_0')
+
+    #getstate should be with all properties in dict class + id
+    #check also the setstate
+    def test___getstate__(self):
+        hst = self.get_hst()
+        cls = hst.__class__
+        #We get teh state
+        state = hst.__getstate__()
+        #Check it's the good lenght
+        self.assert_(len(state) == len(cls.properties) + len(cls.running_properties) + 1)
+        #we copy the service
+        hst_copy = copy.copy(hst)
+        #reset the state in the original service
+        hst.__setstate__(state)
+        #And it should be the same :then before :)
+        for p in cls.properties:
+#            print getattr(hst_copy, p)
+#            print getattr(hst, p)
+            self.assert_(getattr(hst_copy, p) == getattr(hst, p))
+
+
+    #Look if it can detect all incorrect cases
+    def test_is_correct(self):
+        hst = self.get_hst()
+
+        #first it's ok
+        self.assert_(hst.is_correct() == True)
+
+        #Now try to delete a required property
+        max_check_attempts = hst.max_check_attempts
+        del hst.max_check_attempts
+        self.assert_(hst.is_correct() == False)
+        hst.max_check_attempts = max_check_attempts
+
+        ###
+        ### Now special cases
+        ###
+
+        #no contacts with notification enabled is a problem
+        hst.notifications_enabled = True
+        contacts = hst.contacts
+        contact_groups = hst.contact_groups
+        del hst.contacts
+        del hst.contact_groups
+        self.assert_(hst.is_correct() == False)
+        #and with disabled it's ok
+        hst.notifications_enabled = False
+        self.assert_(hst.is_correct() == True)
+        hst.contacts = contacts
+        hst.contact_groups = contact_groups
+        
+        hst.notifications_enabled = True
+        self.assert_(hst.is_correct() == True)
+
+        #no check command
+        check_command = hst.check_command
+        del hst.check_command
+        self.assert_(hst.is_correct() == False)
+        hst.check_command = check_command
+        self.assert_(hst.is_correct() == True)
+
+        #no notification_interval
+        notification_interval = hst.notification_interval
+        del hst.notification_interval
+        self.assert_(hst.is_correct() == False)
+        hst.notification_interval = notification_interval
+        self.assert_(hst.is_correct() == True)
+
+
+    #Look for set/unset impacted states (unknown)
+    def test_impact_state(self):
+        hst = self.get_hst()
+        ori_state = hst.state
+        ori_state_id = hst.state_id
+        hst.set_impact_state()
+        self.assert_(hst.state == 'UNREACHABLE')
+        self.assert_(hst.state_id == 2)
+        hst.unset_impact_state()
+        self.assert_(hst.state == ori_state)
+        self.assert_(hst.state_id == ori_state_id)
+
+    def test_set_state_from_exit_status(self):
+        hst = self.get_hst()
+        #First OK
+        hst.set_state_from_exit_status(0)
+        self.assert_(hst.state == 'UP')
+        self.assert_(hst.state_id == 0)
+        self.assert_(hst.is_state('UP') == True)
+        self.assert_(hst.is_state('o') == True)
+        #Then warning
+        hst.set_state_from_exit_status(1)
+        self.assert_(hst.state == 'DOWN')
+        self.assert_(hst.state_id == 1)
+        self.assert_(hst.is_state('DOWN') == True)
+        self.assert_(hst.is_state('d') == True)
+        #Then Critical
+        hst.set_state_from_exit_status(2)
+        self.assert_(hst.state == 'DOWN')
+        self.assert_(hst.state_id == 1)
+        self.assert_(hst.is_state('DOWN') == True)
+        self.assert_(hst.is_state('d') == True)
+        #And unknown
+        hst.set_state_from_exit_status(3)
+        self.assert_(hst.state == 'DOWN')
+        self.assert_(hst.state_id == 1)
+        self.assert_(hst.is_state('DOWN') == True)
+        self.assert_(hst.is_state('d') == True)
+
+        #And something else :)
+        hst.set_state_from_exit_status(99)
+        self.assert_(hst.state == 'DOWN')
+        self.assert_(hst.state_id == 1)
+        self.assert_(hst.is_state('DOWN') == True)
+        self.assert_(hst.is_state('d') == True)
+
+
+
+if __name__ == '__main__':
+    unittest.main()
+
