@@ -12,6 +12,13 @@ cd $DIR/..
 echo "Clean old tests and kill remaining processes"
 ./clean.sh
 
+
+echo "####################################################################################"
+echo "#                                                                                  #"
+echo "#                           SIMPLE START                                           #"
+echo "#                                                                                  #"
+echo "####################################################################################"
+
 echo "Now we can start some launch tests"
 bin/launch_all.sh
 
@@ -99,9 +106,58 @@ echo "First launch check OK"
 echo "Now we clean it and test an install"
 ./clean.sh
 
+echo "####################################################################################"
+echo "#                                                                                  #"
+echo "#                           DUMMY INSTALL                                          #"
+echo "#                                                                                  #"
+echo "####################################################################################"
 
-echo "Now installing the application"
-#python setup.py install --root=/tmp/moncul --record=INSTALLED_FILES --install-scripts=/usr/bin
+echo "Now installing the application in DUMMY mode"
+python setup.py install --root=/tmp/moncul --record=INSTALLED_FILES --install-scripts=/usr/bin
+
+if [ $? != '0' ]
+then
+    echo "Error : the dummy install failed."
+    exit 2
+fi
+echo "Dummy install OK"
+
+echo "I reclean all for a real install"
+./clean.sh
+
+echo "####################################################################################"
+echo "#                                                                                  #"
+echo "#                           REAL INSTALL                                           #"
+echo "#                                                                                  #"
+echo "####################################################################################"
+
+echo "Now a REAL install"
+sudo python setup.py install --install-scripts=/usr/bin
+if [ $? != '0' ]
+then
+    echo "Error : the real install failed."
+    exit 2
+fi
+echo "Real install OK"
+
+#Useful to take it from setup_parameter? It's just for coding here
+ETC=/etc/shinken
+is_file_present $ETC/nagios.cfg
+is_file_present $ETC/shinken-specific.cfg
+string_in_file "host-150.cfg" $ETC/nagios.cfg
+is_file_present /usr/bin/shinken-arbiter.py
+
+echo "Now we can test a real run guy"
+/etc/init.d/shinken-scheduler start
+/etc/init.d/shinken-poller start
+/etc/init.d/shinken-reactionner start
+/etc/init.d/shinken-broker start
+/etc/init.d/shinken-arbiter start
+
+echo "We will sleep again 5sec so every one is quite stable...."
+sleep 5
+check_good_run /var/lib/shinken
+
 
 
 echo "All check are OK. Congrats!"
