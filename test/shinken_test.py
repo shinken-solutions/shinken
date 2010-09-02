@@ -20,6 +20,7 @@ from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommand
 from shinken.check import Check
+from shinken.module import Module
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
