@@ -54,6 +54,8 @@ from daemon import Daemon
 from log import Log
 from brok import Brok
 from check import Check
+from notification import Notification
+from eventhandler import EventHandler
 
 #Interface for Arbiter, our big MASTER
 #It put us our conf
