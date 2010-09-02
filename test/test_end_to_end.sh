@@ -160,4 +160,4 @@ check_good_run /var/lib/shinken
 
 
 
-echo "All check are OK. Congrats!"
+echo "All check are OK. Congrats! You can go take a Beer ;)"

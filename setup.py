@@ -211,24 +211,32 @@ def get_gid(group_name):
 def update_ini_file_with_var(path):
     global paths_and_owners
     var_path = paths_and_owners['var']['path']
-    f = open(path)
-    buf = f.read()
-    f.close
-    f = open(path, "w")
-    buf = buf.replace("../var", var_path)
-    f.write(buf)
-    f.close()
+    update_file_with_string(path, "../var", var_path)
 
 
 #Replace the libexec path in common.cfg by the one in the parameter file
 def update_resource_cfg_file_with_libexec(path):
     global paths_and_owners
     libexec_path = paths_and_owners['libexec']['path']
+    update_file_with_string(path, "/usr/local/shinken/libexec", libexec_path)
+
+
+#Replace paths in nagios.cfg file
+def update_cfg_file_with_var_path(path):
+    global paths_and_owners
+    var_path = paths_and_owners['var']['path']
+    update_file_with_string(path, "/usr/local/shinken/var", var_path)
+
+
+
+
+#Replace the libexec path in common.cfg by the one in the parameter file
+def update_file_with_string(path, match, new_string):
     f = open(path)
     buf = f.read()
     f.close
     f = open(path, "w")
-    buf = buf.replace("/usr/local/shinken/libexec", libexec_path)
+    buf = buf.replace(match, new_string)
     f.write(buf)
     f.close()
 
@@ -266,3 +274,8 @@ if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv):
     #And now the resource.cfg path with the value of libexec path
     print "Now updating the /etc/shinken/resource.cfg file with good libexec path"
     update_resource_cfg_file_with_libexec(os.sep.join([root_path, etc_path, 'resource.cfg']))
+
+    #And update the nagios.cfg file for all /usr/local/shinken/var value with good one
+    print "Now updating the /etc/shinken/nagios.cfg file with good var path"
+    update_cfg_file_with_var_path(os.sep.join([root_path, etc_path, 'nagios.cfg']))
+    update_cfg_file_with_var_path(os.sep.join([root_path, etc_path, 'shinken-specific.cfg']))
