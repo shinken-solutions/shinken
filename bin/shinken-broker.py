@@ -259,6 +259,11 @@ class Broker(Satellite):
                 self.log = Log()
 		self.log.load_obj(self)
 
+		#All broks to manage
+		self.broks = [] #broks to manage
+		#broks raised this turn and that need to be put in self.broks
+		self.broks_internal_raised = [] 
+
 		#The config reading part
 		self.config_file = config_file
 		#Read teh config file if exist
@@ -269,6 +274,23 @@ class Broker(Satellite):
 		        #Some paths can be relatives. We must have a full path by taking
                         #the config file by reference
 			self.relative_paths_to_full(os.path.dirname(config_file))
+
+
+                #BEWARE: this way of finding path is good if we still 
+                #DO NOT HAVE CHANGE PWD!!!
+                #Now get the module path. It's in fact the directory modules
+                #inside the shinken directory. So let's find it.
+                print "modulemanager file", shinken.modulesmanager.__file__
+                modulespath = os.path.abspath(shinken.modulesmanager.__file__)
+                print "modulemanager absolute file", modulespath
+                #We got one of the files of 
+                elts = os.path.dirname(modulespath).split(os.sep)[:-1]
+                elts.append('shinken')
+                elts.append('modules')
+                self.modulespath = os.sep.join(elts)
+                Log().log("Using modules path : %s" % os.sep.join(elts))
+
+
 
                 #Check if another Scheduler is not running (with the same conf)
 		self.check_parallel_run(do_replace)
@@ -305,10 +327,6 @@ class Broker(Satellite):
 		self.have_modules = False
 		self.modules = []
 
-		#All broks to manage
-		self.broks = [] #broks to manage
-		#broks raised this turn and that need to be put in self.broks
-		self.broks_internal_raised = [] 
 
 
 
@@ -530,15 +548,6 @@ class Broker(Satellite):
 
                 self.uri2 = shinken.pyro_wrapper.register(self.daemon, IForArbiter(self), "ForArbiter")
 
-                #Now get the module path. It's in fact the directory modules
-                #inside the shinken directory. So let's find it.
-                modulespath = os.path.abspath(shinken.modulesmanager.__file__)
-                #We got one of the files of 
-                elts = os.path.dirname(modulespath).split(os.sep)[:-1]
-                elts.append('shinken')
-                elts.append('modules')
-                self.modulespath = os.sep.join(elts)
-                Log().log("Using modules path : %s" % os.sep.join(elts))
                 
                 #We wait for initial conf
 		self.wait_for_initial_conf()
