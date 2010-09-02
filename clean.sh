@@ -20,6 +20,6 @@ sudo rm -fr /tmp/retention.dat
 
 
 #Then kill remaining processes
-killall -9 python2.6
-killall -9 python
-killall -9 /usr/bin/python
+killall -9 python2.6 2> /dev/null
+killall -9 python 2> /dev/null
+killall -9 /usr/bin/python 2> /dev/null
