@@ -38,6 +38,7 @@ class TestConfig(ShinkenTest):
         self.create_db()
         self.db.connect_database()
 
+
     def test_execute_query(self):
         self.create_db()
         self.db.connect_database()

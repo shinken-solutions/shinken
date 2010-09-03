@@ -408,14 +408,16 @@ class Merlindb_broker:
 
         #Now get a backend_db of our backend type
         if backend == 'mysql':
-            from mysql_backend import Mysql_backend
+#            from mysql_backend import Mysql_backend
+            from shinken.db_mysql import DBMysql
             print "Creating a mysql backend"
-            self.db_backend = Mysql_backend(host, user, password, database, character_set)
+            self.db_backend = DBMysql(host, user, password, database, character_set)
 
         if backend == 'sqlite':
-            from sqlite_backend import Sqlite_backend
+#            from sqlite_backend import Sqlite_backend
+            from shinken.db_sqlite import DBSqlite
             print "Creating a sqlite backend"
-            self.db_backend = Sqlite_backend(self.database_path)
+            self.db_backend = DBSqlite(self.database_path)
         
 
     def get_name(self):
@@ -478,103 +480,6 @@ class Merlindb_broker:
                 self.db_backend.execute_query(q)
             return
 
-
-#    #Create the database connexion
-#    #TODO : finish (begin :) ) error catch and conf parameters...
-#    def connect_database(self):
-#        #self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
-#        self.db = MySQLdb.connect (host = self.host, user = self.user, \
-#                                       passwd = self.password, db = self.database)
-#        self.db.set_character_set(self.character_set)
-#        self.db_cursor = self.db.cursor ()
-#        self.db_cursor.execute('SET NAMES %s;' % self.character_set)
-#        self.db_cursor.execute('SET CHARACTER SET %s;' % self.character_set)
-#        self.db_cursor.execute('SET character_set_connection=%s;' % self.character_set)
-
-
-#    #Just run the query
-#    #TODO: finish catch
-#    def execute_query(self, query):
-#        print "I run query", query, "\n"
-#        try:
-#            self.db_cursor.execute(query)
-#            self.db.commit ()
-#        except IntegrityError as exp:
-#            print "[Merlindb] Warning : a query raise an integrity error : %s, %s" % (query, exp) 
-#        except ProgrammingError as exp:
-#            print "[Merlindb] Warning : a query raise a programming error : %s, %s" % (query, exp) 
-        
-
-    #Create a INSERT query in table with all data of data (a dict)
-    def create_insert_query(self, table, data):
-        query = "INSERT INTO %s " % table
-        props_str = ' ('
-        values_str = ' ('
-        i = 0 #for the ',' problem... look like C here...
-        for prop in data:
-            i += 1
-            val = data[prop]
-            #Boolean must be catch, because we want 0 or 1, not True or False
-            if isinstance(val, bool):
-                if val:
-                    val = 1
-                else:
-                    val = 0
-            if i == 1:
-                props_str = props_str + "%s " % prop
-                values_str = values_str + "'%s' " % str(val).replace("'", "''")
-            else:
-                props_str = props_str + ", %s " % prop
-                values_str = values_str + ", '%s' " % str(val).replace("'", "''")
-
-        #Ok we've got data, let's finish the query
-        props_str = props_str + ' )'
-        values_str = values_str + ' )'
-        query = query + props_str + 'VALUES' + values_str
-        return query
-
-    
-    #Create a update query of table with data, and use where data for
-    #the WHERE clause
-    def create_update_query(self, table, data, where_data):
-        query = "UPDATE %s set " % table
-		
-        #First data manage
-        query_folow = ''
-        i = 0 #for the , problem...
-        for prop in data:
-            i += 1
-            val = data[prop]
-            #Boolean must be catch, because we want 0 or 1, not True or False
-            if isinstance(val, bool):
-                if val:
-                    val = 1
-                else:
-                    val = 0
-            if i == 1:
-                query_folow += "%s='%s' " % (prop, str(val).replace("'", "''"))
-            else:
-                query_folow += ", %s='%s' " % (prop, str(val).replace("'", "''"))
-                
-        #Ok for data, now WHERE, same things
-        where_clause = " WHERE "
-        i = 0 # For the 'and' problem
-        for prop in where_data:
-            i += 1
-            val = where_data[prop]
-            #Boolean must be catch, because we want 0 or 1, not True or False
-            if isinstance(val, bool):
-                if val:
-                    val = 1
-                else:
-                    val = 0
-            if i == 1:
-                where_clause += "%s='%s' " % (prop, val)
-            else:
-                where_clause += "and %s='%s' " % (prop, val)
-
-        query = query + query_folow + where_clause
-        return query
     
     
     #Ok, we are at launch and a scheduler want him only, OK...
@@ -601,7 +506,7 @@ class Merlindb_broker:
     def manage_program_status_brok(self, b):
 	instance_id = b.data['instance_id']
 	del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
-        query = self.create_insert_query('program_status', b.data)
+        query = self.db_backend.create_insert_query('program_status', b.data)
         return [del_query,query]
 
 
@@ -611,7 +516,7 @@ class Merlindb_broker:
     def manage_update_program_status_brok(self, b):
 	instance_id = b.data['instance_id']
 	del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
-        query = self.create_insert_query('program_status', b.data)
+        query = self.db_backend.create_insert_query('program_status', b.data)
         return [del_query,query]
 
 
@@ -620,7 +525,7 @@ class Merlindb_broker:
     def manage_initial_service_status_brok(self, b):
         b.data['last_update'] = time.time()
         #It's a initial entry, so we need insert
-        query = self.create_insert_query('service', b.data)		
+        query = self.db_backend.create_insert_query('service', b.data)		
         return [query]
 
 
@@ -630,7 +535,7 @@ class Merlindb_broker:
         b.data['last_update'] = time.time()
         #We just impact the service :)
         where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
-        query = self.create_update_query('service', data, where_clause)
+        query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 
 
@@ -639,7 +544,7 @@ class Merlindb_broker:
         data = b.data
         #We just impact the service :)
         where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
-        query = self.create_update_query('service', data, where_clause)
+        query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 
 
@@ -649,14 +554,14 @@ class Merlindb_broker:
         data = b.data
         b.data['last_update'] = time.time()
         where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
-        query = self.create_update_query('service', data, where_clause)
+        query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 
 
     #A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
         b.data['last_update'] = time.time()
-        query = self.create_insert_query('host', b.data)
+        query = self.db_backend.create_insert_query('host', b.data)
         return [query]
 
 
@@ -671,7 +576,7 @@ class Merlindb_broker:
         #tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
-        query = self.create_insert_query('hostgroup', tmp_data)
+        query = self.db_backend.create_insert_query('hostgroup', tmp_data)
         res = [query]
 		
         #Ok, the hostgroup table is uptodate, now we add relations 
@@ -695,7 +600,7 @@ class Merlindb_broker:
         #tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
-        query = self.create_insert_query('servicegroup', tmp_data)
+        query = self.db_backend.create_insert_query('servicegroup', tmp_data)
         res = [query]
 
         #Now the members part
@@ -715,7 +620,7 @@ class Merlindb_broker:
         data = b.data
         #Only the host is impacted
         where_clause = {'host_name' : data['host_name']}
-        query = self.create_update_query('host', data, where_clause)
+        query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
 
@@ -724,7 +629,7 @@ class Merlindb_broker:
         data = b.data
         #Only the host is impacted
         where_clause = {'host_name' : data['host_name']}
-        query = self.create_update_query('host', data, where_clause)
+        query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
 
@@ -734,13 +639,13 @@ class Merlindb_broker:
         data = b.data
         #Only this host
         where_clause = {'host_name' : data['host_name']}
-        query = self.create_update_query('host', data, where_clause)
+        query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
 
     #A contact have just be created, database is clean, we INSERT it
     def manage_initial_contact_status_brok(self, b):
-        query = self.create_insert_query('contact', b.data)
+        query = self.db_backend.create_insert_query('contact', b.data)
         return [query]
 
     #same from hostgroup, but with servicegroup
@@ -752,7 +657,7 @@ class Merlindb_broker:
         #tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
-        query = self.create_insert_query('contactgroup', tmp_data)
+        query = self.db_backend.create_insert_query('contactgroup', tmp_data)
         res = [query]
 
         #Now the members part
@@ -767,5 +672,5 @@ class Merlindb_broker:
 
     #A notification have just be created, we INSERT it
     def manage_notification_raise_brok(self, b):
-        query = self.create_insert_query('notification', b.data)
+        query = self.db_backend.create_insert_query('notification', b.data)
         return [query]
