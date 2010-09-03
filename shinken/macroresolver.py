@@ -182,7 +182,7 @@ class MacroResolver(Borg):
                                 macros[macro]['val'] = elt.customs['_'+macro_name]
                 if macros[macro]['type'] == 'ONDEMAND':
                     macros[macro]['val'] = self.resolve_ondemand(macro, data)
-                
+
             #We resolved all we can, now replace the macro in the command call
             for macro in macros:
                 c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
@@ -294,6 +294,7 @@ class MacroResolver(Borg):
             return val
         return ''
 
+
     #Get Fri 15 May 11:42:39 CEST 2009
     def get_long_date_time(self):
         return time.strftime("%a %d %b %H:%M:%S %Z %Y", time.localtime())
@@ -317,3 +318,58 @@ class MacroResolver(Borg):
     #Get epoch time
     def get_timet(self):
         return str(int(time.time()))
+
+    
+    def get_total_hosts_up(self):
+        return len([h for h in self.hosts if h.state == 'UP'])
+
+    def get_total_hosts_down(self):
+        return len([h for h in self.hosts if h.state == 'DOWN'])
+
+    def get_total_hosts_unreacheable(self):
+        return len([h for h in self.hosts if h.state == 'UNREACHABLE'])
+    
+    #TODO
+    def get_total_hosts_unreacheable_unhandled(self):
+        return 0
+    
+
+    def get_total_host_problems(self):
+        return len([h for h in self.hosts if h.is_problem])
+
+    def get_total_host_problems_unhandled(self):
+        return 0
+
+    def get_total_service_ok(self):
+        return len([s for s in self.services if s.state == 'OK'])
+
+    def get_total_services_warning(self):
+        return len([s for s in self.services if s.state == 'WARNING'])
+
+    def get_total_services_critical(self):
+        return len([s for s in self.services if s.state == 'CRITICAL'])
+
+    def get_total_services_unknown(self):
+        return len([s for s in self.services if s.state == 'UNKNOWN'])
+
+    #TODO
+    def get_total_services_warning_unhandled(self):
+        return 0
+
+    def get_total_services_critical_unhandled(self):
+        return 0
+
+    def get_total_services_unknown_unhandled(self):
+        return 0
+
+    def get_total_service_problems(self):
+        return len([s for s in self.services if s.is_problem])
+
+    def get_total_service_problems_unhandled(self):
+        return 0
+
+    def get_process_start_time(self):
+        return 0
+
+    def get_events_start_time(self):
+        return 0

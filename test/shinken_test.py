@@ -25,6 +25,7 @@ from shinken.module import Module
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
         # i am arbiter-like
+        Config.fill_usern_macros()
         self.broks = {}
         self.me = None
         self.log = Log()
