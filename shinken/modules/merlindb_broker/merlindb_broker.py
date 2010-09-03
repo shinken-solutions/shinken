@@ -648,6 +648,7 @@ class Merlindb_broker:
         query = self.db_backend.create_insert_query('contact', b.data)
         return [query]
 
+
     #same from hostgroup, but with servicegroup
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data

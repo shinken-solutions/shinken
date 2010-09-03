@@ -48,6 +48,7 @@ class DBMysql(DB):
         self.db_cursor.execute('SET NAMES %s;' % self.character_set)
         self.db_cursor.execute('SET CHARACTER SET %s;' % self.character_set)
         self.db_cursor.execute('SET character_set_connection=%s;' % self.character_set)
+        #Thanks http://www.dasprids.de/blog/2007/12/17/python-mysqldb-and-utf-8 for utf8 code :)
 
 
     #Just run the query

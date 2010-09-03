@@ -100,3 +100,8 @@ class DB(object):
 
         query = query + query_folow + where_clause
         return query
+
+
+    #Just get an entry
+    def fetchone(self):
+        return self.db_cursor.fetchone()
