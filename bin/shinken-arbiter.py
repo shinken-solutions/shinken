@@ -37,7 +37,7 @@ import getopt
 import random
 
 
-#We know that a Python 2.5 or Python3K will fail.
+#We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
 python_version = platform.python_version_tuple()
 

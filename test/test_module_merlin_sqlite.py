@@ -27,7 +27,7 @@
 import os
 from shinken_test import *
 sys.path.append("../shinken/modules")
-from simplelog_broker import *
+from merlindb_broker import *
 from shinken.brok import Brok
 
 class TestConfig(ShinkenTest):
@@ -39,34 +39,25 @@ class TestConfig(ShinkenTest):
         #get our modules
         mod = None
         for m in self.conf.modules:
-            if m.module_type == 'simple_log':
+            if m.module_name == 'ToMerlindb_Sqlite':
                 mod = m
         self.assert_(mod != None)
-        self.assert_(mod.path == '/dev/shm/nagios.log')
-        self.assert_(mod.module_name == 'Simple-log')
+        self.assert_(mod.database_path == '/usr/local/shinken/var/merlindb.sqlite')
+        self.assert_(mod.module_type == 'merlindb')
+        self.assert_(mod.backend == 'sqlite')
+        
 
-        try :
-            os.unlink(mod.path)
-        except :
-            pass
+        md = get_instance(mod)
+        print "TOTO", md.db_backend.__dict__
 
-        sl = get_instance(mod)
-        print sl
-        #Hack here :(
-        sl.properties = {}
-        sl.properties['to_queue'] = None
-        sl.init()
-        b = Brok('log', {'log' : "look at my ass.\n"})
-        sl.manage_brok(b)
-        b = Brok('log', {'log' : "look at my ass again.\n"})
-        sl.manage_brok(b)
-        fd = open(mod.path)
-        buf = fd.readline()
-        self.assert_(buf == "look at my ass.\n")
-        buf = fd.readline()
-        self.assert_(buf == "look at my ass again.\n")
-        fd.close()
-        os.unlink(mod.path)
+        md.init()
+        b = Brok('clean_all_my_instance_id', {'instance_id' : 0})
+        md.manage_brok(b)
+        r = md.db_backend.db_cursor.execute("SELECT count(*) from timeperiod WHERE instance_id = '0'")
+        self.assert_(r.fetchall() == [(0,)])
+
+        
+
 
 
 if __name__ == '__main__':

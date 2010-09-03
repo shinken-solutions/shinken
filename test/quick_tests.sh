@@ -45,6 +45,7 @@ launch_and_assert test_problem_impact.py
 launch_and_assert test_timeperiods.py
 launch_and_assert test_command.py
 launch_and_assert test_module_simplelog.py
+launch_and_assert test_db.py
 
 
 echo "All quick unit tests passed :)"
