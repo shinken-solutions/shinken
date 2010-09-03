@@ -35,7 +35,7 @@ class DBSqlite(DB):
     def connect_database(self):
         self.db = sqlite3.connect(self.db_path)
         self.db_cursor = self.db.cursor ()
-
+        
 
     #Just run the query
     def execute_query(self, query):

@@ -199,7 +199,7 @@ class TestTimeperiods(ShinkenTest):
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
         
-        print "T next raw", t_next
+        print "T next raw JEAN", t_next
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
         
@@ -244,7 +244,7 @@ class TestTimeperiods(ShinkenTest):
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
         
-        print "T next raw", t_next
+        print "T next raw JEAN2", t_next
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
         
