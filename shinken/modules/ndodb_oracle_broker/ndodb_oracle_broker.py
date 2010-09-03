@@ -28,30 +28,7 @@ import copy
 import os
 import time
 
-connect_function = None
-IntegrityError_exp = None
-ProgrammingError_exp = None
-DatabaseError_exp = None
-InternalError_exp = None
-DataError_exp = None
-OperationalError_exp = None
-
-
-#Failed to import will be catch by __init__.py
-from cx_Oracle import connect
-connect_function = connect
-from cx_Oracle import IntegrityError
-IntegrityError_exp = IntegrityError
-from cx_Oracle import ProgrammingError
-ProgrammingError_exp = ProgrammingError
-from cx_Oracle import DatabaseError
-DatabaseError_exp = DatabaseError
-from cx_Oracle import InternalError
-InternalError_exp = InternalError
-from cx_Oracle import DataError
-DataError_exp = DataError
-from cx_Oracle import OperationalError
-OperationalError_exp = OperationalError
+from shinken.db_oracle import DBOracle
 
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
@@ -89,7 +66,8 @@ class Ndodb_Oracle_broker:
     #Conf from arbiter!
     def init(self):
         print "I connect to NDO database with Oracle"
-        self.connect_database()
+        self.db = DBOracle(self.user, self.password, self.database, table_prefix = '')
+        self.db.connect_database()
     
 
     #Get a brok, parse it, and put in in database
@@ -103,49 +81,17 @@ class Ndodb_Oracle_broker:
             queries = f(b)
             #Ok, we've got queries, now : run them!
             for q in queries :
-                self.execute_query(q)
+                self.db.execute_query(q)
             return
         #print "(ndodb)I don't manage this brok type", b
 
 
-    #Create the database connexion
-    #TODO : finish (begin :) ) error catch and conf parameters...
-    def connect_database(self):
-        connstr='%s/%s@%s' % (self.user, self.password, self.database)
-
-        self.db = connect_function(connstr)
-        self.db_cursor = self.db.cursor()
-        self.db_cursor.arraysize=50
-
-
-    #Just run the query
-    #TODO: finish catch
-    def execute_query(self, query):
-        #print "I run Oracle query", query, "\n"
-        try:
-            self.db_cursor.execute(query)
-            self.db.commit ()
-        except IntegrityError_exp , exp:
-            print "[Ndodb] Warning : a query raise an integrity error : %s, %s" % (query, exp) 
-        except ProgrammingError_exp , exp:
-            print "[Ndodb] Warning : a query raise a programming error : %s, %s" % (query, exp) 
-        except DatabaseError_exp , exp:
-            print "[Ndodb] Warning : a query raise a database error : %s, %s" % (query, exp) 
-        except InternalError_exp , exp:
-            print "[Ndodb] Warning : a query raise an internal error : %s, %s" % (query, exp) 
-        except DataError_exp , exp:
-            print "[Ndodb] Warning : a query raise a data error : %s, %s" % (query, exp)
-        except OperationalError_exp , exp:
-            print "[Ndodb] Warning : a query raise an operational error : %s, %s" % (query, exp)
-        except Exception , exp:
-             print "[Ndodb] Warning : a query raise an unknow error : %s, %s" % (query, exp)
-             print exp.__dict__
 
 
     def get_host_object_id_by_name(self, host_name):
         query = "SELECT id from objects where name1='%s' and objecttype_id='1'" % host_name
-        self.db_cursor.execute(query)
-        row = self.db_cursor.fetchone ()
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
         if row == None or len(row) < 1:
             return 0
         else:
@@ -154,8 +100,8 @@ class Ndodb_Oracle_broker:
 
     def get_hostgroup_object_id_by_name(self, hostgroup_name):
         query = "SELECT id from objects where name1='%s' and objecttype_id='3'" % hostgroup_name
-        self.db_cursor.execute(query)
-        row = self.db_cursor.fetchone ()
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
         if row == None or len(row) < 1:
             return 0
         else:
@@ -164,8 +110,8 @@ class Ndodb_Oracle_broker:
 
     def get_service_object_id_by_name(self, host_name, service_description):
         query = "SELECT id from objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
-        self.db_cursor.execute(query)
-        row = self.db_cursor.fetchone ()
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
         if row == None or len(row) < 1:
             return 0
         else:
@@ -174,85 +120,13 @@ class Ndodb_Oracle_broker:
 
     def get_servicegroup_object_id_by_name(self, servicegroup_name):
         query = "SELECT id from objects where name1='%s' and objecttype_id='4'" % servicegroup_name
-        self.db_cursor.execute(query)
-        row = self.db_cursor.fetchone ()
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
         if row == None or len(row) < 1:
             return 0
         else:
             return row[0]
 
-
-
-    #Create a INSERT query in table with all data of data (a dict)
-    def create_insert_query(self, table, data):
-        query = "INSERT INTO %s " % (''+table)
-        props_str = ' ('
-        values_str = ' ('
-        i = 0 #for the ',' problem... look like C here...
-        for prop in data:
-            i += 1
-            val = data[prop]
-            #Boolean must be catch, because we want 0 or 1, not True or False
-            if isinstance(val, bool):
-                if val:
-                    val = 1
-                else:
-                    val = 0
-            if i == 1:
-                props_str = props_str + "%s " % prop
-                values_str = values_str + "'%s' " %  str(val).replace("'", "''")
-            else:
-                props_str = props_str + ", %s " % prop
-                values_str = values_str + ", '%s' " %  str(val).replace("'", "''")
-
-        #Ok we've got data, let's finish the query
-        props_str = props_str + ' )'
-        values_str = values_str + ' )'
-        query = query + props_str + 'VALUES' + values_str
-        return query
-
-    
-    #Create a update query of table with data, and use where data for
-    #the WHERE clause
-    def create_update_query(self, table, data, where_data):
-        query = "UPDATE %s set " % (''+table)
-		
-        #First data manage
-        query_folow = ''
-        i = 0 #for the , problem...
-        for prop in data:
-            i += 1
-            val = data[prop]
-            #Boolean must be catch, because we want 0 or 1, not True or False
-            if isinstance(val, bool):
-                if val:
-                    val = 1
-                else:
-                    val = 0
-            if i == 1:
-                query_folow += "%s='%s' " % (prop,  str(val).replace("'", "''"))
-            else:
-                query_folow += ", %s='%s' " % (prop,  str(val).replace("'", "''"))
-                
-        #Ok for data, now WHERE, same things
-        where_clause = " WHERE "
-        i = 0 # For the 'and' problem
-        for prop in where_data:
-            i += 1
-            val = where_data[prop]
-            #Boolean must be catch, because we want 0 or 1, not True or False
-            if isinstance(val, bool):
-                if val:
-                    val = 1
-                else:
-                    val = 0
-            if i == 1:
-                where_clause += "%s='%s' " % (prop,  str(val).replace("'", "''"))
-            else:
-                where_clause += "and %s='%s' " % (prop,  str(val).replace("'", "''"))
-
-        query = query + query_folow + where_clause
-        return query
     
     
     #Ok, we are at launch and a scheduler want him only, OK...
@@ -300,7 +174,7 @@ class Ndodb_Oracle_broker:
             del new_b.data[prop]
         for (name, val) in to_add:
             new_b.data[name] = val
-        query = self.create_insert_query('programstatus', new_b.data)
+        query = self.db.create_insert_query('programstatus', new_b.data)
         return [query]
 
 
@@ -326,7 +200,7 @@ class Ndodb_Oracle_broker:
         for (name, val) in to_add:
             new_b.data[name] = val
         where_clause = {'instance_id' : new_b.data['instance_id']}
-        query = self.create_update_query('programstatus', new_b.data, where_clause)
+        query = self.db.create_update_query('programstatus', new_b.data, where_clause)
         return [query]
 
 
@@ -341,8 +215,8 @@ class Ndodb_Oracle_broker:
         objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 1,
                         'name1' : data['host_name'], 'is_active' : data['active_checks_enabled']
                         }
-        object_query = self.create_insert_query('objects', objects_data)
-        self.execute_query(object_query)
+        object_query = self.db.create_insert_query('objects', objects_data)
+        self.db.execute_query(object_query)
         
         host_id = self.get_host_object_id_by_name(data['host_name'])
         
@@ -362,7 +236,7 @@ class Ndodb_Oracle_broker:
             }
 
         #print "HOST DATA", hosts_data
-        query = self.create_insert_query('hosts', hosts_data)
+        query = self.db.create_insert_query('hosts', hosts_data)
 
         #Now create an hoststatus entry
         hoststatus_data = {'instance_id' : data['instance_id'],
@@ -374,7 +248,7 @@ class Ndodb_Oracle_broker:
                            'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
                            'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data']
         }
-        hoststatus_query = self.create_insert_query('hoststatus' , hoststatus_data)
+        hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
         
         return [query, hoststatus_query]
 
@@ -388,8 +262,8 @@ class Ndodb_Oracle_broker:
         objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 2,
                         'name1' : data['host_name'], 'name2' : data['service_description'], 'is_active' : data['active_checks_enabled']
                         }
-        object_query = self.create_insert_query('objects', objects_data)
-        self.execute_query(object_query)
+        object_query = self.db.create_insert_query('objects', objects_data)
+        self.db.execute_query(object_query)
         
         host_id = self.get_host_object_id_by_name(data['host_name'])
         service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
@@ -412,7 +286,7 @@ class Ndodb_Oracle_broker:
             }
 
         #print "HOST DATA", hosts_data
-        query = self.create_insert_query('services', services_data)
+        query = self.db.create_insert_query('services', services_data)
 
         #Now create an hoststatus entry
         servicestatus_data = {'instance_id' : data['instance_id'],
@@ -424,7 +298,7 @@ class Ndodb_Oracle_broker:
                               'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
                               'obsess_over_service' : data['obsess_over_service'],'process_performance_data' : data['process_perf_data']
         }
-        servicestatus_query = self.create_insert_query('servicestatus' , servicestatus_data)
+        servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
         return [query, servicestatus_query]
 
@@ -440,8 +314,8 @@ class Ndodb_Oracle_broker:
         objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 3,
                         'name1' : data['hostgroup_name'], 'is_active' : 1
                         }
-        object_query = self.create_insert_query('objects', objects_data)
-        self.execute_query(object_query)
+        object_query = self.db.create_insert_query('objects', objects_data)
+        self.db.execute_query(object_query)
         
         hostgroup_id = self.get_hostgroup_object_id_by_name(data['hostgroup_name'])
         
@@ -450,7 +324,7 @@ class Ndodb_Oracle_broker:
                            'alias' : data['alias']
             }
 
-        query = self.create_insert_query('hostgroups', hostgroups_data)
+        query = self.db.create_insert_query('hostgroups', hostgroups_data)
         res = [query]
 		
         #Ok, the hostgroups table is uptodate, now we add relations 
@@ -458,7 +332,7 @@ class Ndodb_Oracle_broker:
         for (h_id, h_name) in b.data['members']:
             hostgroup_members_data = {'instance_id' : data['instance_id'], 'hostgroup_id' : data['id'],
                                       'host_object_id' : h_id}
-            q = self.create_insert_query('hostgroup_members', hostgroup_members_data)
+            q = self.db.create_insert_query('hostgroup_members', hostgroup_members_data)
             res.append(q)
         return res
 
@@ -474,8 +348,8 @@ class Ndodb_Oracle_broker:
         objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 4,
                         'name1' : data['servicegroup_name'], 'is_active' : 1
                         }
-        object_query = self.create_insert_query('objects', objects_data)
-        self.execute_query(object_query)
+        object_query = self.db.create_insert_query('objects', objects_data)
+        self.db.execute_query(object_query)
         
         servicegroup_id = self.get_servicegroup_object_id_by_name(data['servicegroup_name'])
 
@@ -485,7 +359,7 @@ class Ndodb_Oracle_broker:
                            'alias' : data['alias']
             }
 
-        query = self.create_insert_query('servicegroups', servicegroups_data)
+        query = self.db.create_insert_query('servicegroups', servicegroups_data)
         res = [query]
 		
         #Ok, the hostgroups table is uptodate, now we add relations 
@@ -493,7 +367,7 @@ class Ndodb_Oracle_broker:
         for (s_id, s_name) in b.data['members']:
             servicegroup_members_data = {'instance_id' : data['instance_id'], 'servicegroup_id' : data['id'],
                                          'service_object_id' : s_id}
-            q = self.create_insert_query('servicegroup_members', servicegroup_members_data)
+            q = self.db.create_insert_query('servicegroup_members', servicegroup_members_data)
             res.append(q)
         return res
 
@@ -513,7 +387,7 @@ class Ndodb_Oracle_broker:
                            'return_code' : data['return_code'], 'output' : data['output'],
                            'perfdata' : data['perf_data']
         }
-        query = self.create_update_query('hostchecks', host_check_data, where_clause)
+        query = self.db.create_update_query('hostchecks', host_check_data, where_clause)
 
         #Now servicestatus
         hoststatus_data = {'instance_id' : data['instance_id'],
@@ -522,7 +396,7 @@ class Ndodb_Oracle_broker:
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
                            'output' : data['output'], 'perfdata' : data['perf_data']
         }
-        hoststatus_query = self.create_update_query('hoststatus' , hoststatus_data, where_clause)
+        hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
         return [query, hoststatus_query]
 
@@ -543,7 +417,7 @@ class Ndodb_Oracle_broker:
                            'return_code' : data['return_code'], 'output' : data['output'],
                            'perfdata' : data['perf_data']
         }
-        query = self.create_update_query('servicechecks', service_check_data, where_clause)
+        query = self.db.create_update_query('servicechecks', service_check_data, where_clause)
 
         #Now servicestatus
         servicestatus_data = {'instance_id' : data['instance_id'],
@@ -553,7 +427,7 @@ class Ndodb_Oracle_broker:
                            'output' : data['output'], 'perfdata' : data['perf_data']
         }
         
-        servicestatus_query = self.create_update_query('servicestatus' , servicestatus_data, where_clause)
+        servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
         
         return [query, servicestatus_query]
 
@@ -575,7 +449,7 @@ class Ndodb_Oracle_broker:
                       }
                       #Only this host
         where_clause = {'host_name' : data['host_name']}
-        query = self.create_update_query('host', hosts_data, where_clause)
+        query = self.db.create_update_query('host', hosts_data, where_clause)
         return [query]
 
 
@@ -594,7 +468,7 @@ class Ndodb_Oracle_broker:
             }
 
         #print "HOST DATA", hosts_data
-        query = self.create_insert_query('contacts', contacts_data)
+        query = self.db.create_insert_query('contacts', contacts_data)
         return [query]
 
 
@@ -610,7 +484,7 @@ class Ndodb_Oracle_broker:
                            'alias' : data['alias']
             }
 
-        query = self.create_insert_query('contactgroups', contactgroups_data)
+        query = self.db.create_insert_query('contactgroups', contactgroups_data)
         res = [query]
 		
         #Ok, the hostgroups table is uptodate, now we add relations 
@@ -619,7 +493,7 @@ class Ndodb_Oracle_broker:
             #print c_name
             contactgroup_members_data = {'instance_id' : data['instance_id'], 'contactgroup_id' : data['id'],
                                          'contact_object_id' : c_id}
-            q = self.create_insert_query('contactgroup_members', contactgroup_members_data)
+            q = self.db.create_insert_query('contactgroup_members', contactgroup_members_data)
             res.append(q)
         return res
 
@@ -627,5 +501,5 @@ class Ndodb_Oracle_broker:
 
     #A notification have just be created, we INSERT it
     #def manage_notification_raise_brok(self, b):
-    #    query = self.create_insert_query('notification', b.data)
+    #    query = self.db.create_insert_query('notification', b.data)
     #    return [query]
