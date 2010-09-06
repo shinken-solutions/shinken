@@ -78,17 +78,7 @@ if int(python_version[0]) == 3:
     print "Shinken is not yet compatible with Python3k, sorry"
     sys.exit(1)
 
-#DBG for Pyro 4
-sys.path.insert(0, '.')
 
-
-try:
-    import shinken.pyro_wrapper    
-except ImportError:
-    print "Shinken require the Python Pyro module. Please install it."
-    sys.exit(1)
-
-Pyro = shinken.pyro_wrapper.Pyro
 
 #Try to load shinken lib.
 #Maybe it's not in our python path, so we detect it
@@ -109,6 +99,18 @@ except ImportError:
     sys.path.append(os.sep.join(elts))
     elts.append('shinken')
     sys.path.append(os.sep.join(elts))
+
+
+#DBG for Pyro 4
+sys.path.insert(0, '.')
+
+try:
+    import shinken.pyro_wrapper    
+except ImportError:
+    print "Shinken require the Python Pyro module. Please install it."
+    sys.exit(1)
+
+Pyro = shinken.pyro_wrapper.Pyro
 
 
 from shinken.scheduler import Scheduler

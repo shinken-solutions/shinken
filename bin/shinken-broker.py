@@ -48,8 +48,16 @@ if int(python_version[0]) == 3:
     print "Shinken is not yet compatible with Python3k, sorry"
     sys.exit(1)
 
+
+#Module from 2.6 and higher
+from Queue import Empty
+from multiprocessing import active_children
+
+
+
 #DBG for Pyro4
 sys.path.insert(0, '.')
+
 
 try:
     import shinken.pyro_wrapper    
@@ -59,9 +67,6 @@ except ImportError:
 
 Pyro = shinken.pyro_wrapper.Pyro
 
-#Module from 2.6 and higher
-from Queue import Empty
-from multiprocessing import active_children
 
 
 #Try to load shinken lib.
@@ -82,6 +87,7 @@ except ImportError:
     sys.path.append(os.sep.join(elts))
     elts.append('shinken')
     sys.path.append(os.sep.join(elts))
+
 
 
 from shinken.satellite import Satellite
