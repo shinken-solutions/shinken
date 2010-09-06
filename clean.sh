@@ -1,5 +1,5 @@
 #!/bin/sh
-sudo rm -fr /usr/local/lib/python2.6/dist-packages/Shinken-0.1.99-py2.6.egg
+sudo rm -fr /usr/local/lib/python2.6/dist-packages/Shinken-*-py2.6.egg
 sudo rm  -fr /usr/local/bin/shinken-*
 sudo rm  -fr /usr/bin/shinken-*
 sudo rm -fr build
