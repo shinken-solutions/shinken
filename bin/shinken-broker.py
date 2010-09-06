@@ -59,15 +59,6 @@ from multiprocessing import active_children
 sys.path.insert(0, '.')
 
 
-try:
-    import shinken.pyro_wrapper    
-except ImportError:
-    print "Shinken require the Python Pyro module. Please install it."
-    sys.exit(1)
-
-Pyro = shinken.pyro_wrapper.Pyro
-
-
 
 #Try to load shinken lib.
 #Maybe it's not in our python path, so we detect it
@@ -88,6 +79,15 @@ except ImportError:
     elts.append('shinken')
     sys.path.append(os.sep.join(elts))
 
+
+
+try:
+    import shinken.pyro_wrapper    
+except ImportError:
+    print "Shinken require the Python Pyro module. Please install it."
+    sys.exit(1)
+
+Pyro = shinken.pyro_wrapper.Pyro
 
 
 from shinken.satellite import Satellite
