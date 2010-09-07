@@ -113,14 +113,45 @@ class Status_dat_broker:
         self.configs[c_id] = c
 
 
+    def manage_clean_all_my_instance_id_brok(self, b):
+        data = b.data
+        instance_id = data['instance_id']
+
+        #We clean all previous hosts and services from this instance_id
+        h_to_del = []
+        for h in self.hosts.values():
+            if h.instance_id ==  instance_id:
+                h_to_del.append(h.id)
+
+        for i in h_to_del:
+            print "Deleting previous host %d" % i
+            del self.hosts[i]
+            
+        #same for services
+        s_to_del = []
+        for s in self.services.values():
+            if s.instance_id ==  instance_id:
+                s_to_del.append(s.id)
+
+        for i in s_to_del:
+            print "Deleting previous service %d" % i
+            del self.services[i]
+
+
+
     def manage_initial_host_status_brok(self, b):
         data = b.data
         h_id = data['id']
-        #print "Creating host:", h_id, data
+
+        print "Creating host:", h_id, b.__dict__
+        
         h = Host({})
         for prop in data:
             setattr(h, prop, data[prop])
 
+        #add instance_id to the host, so we know in which scheduler he is
+        h.instance_id = b.instance_id
+        
         h.check_period = self.get_timeperiod(h.check_period)
         h.notification_period = self.get_timeperiod(h.notification_period)
         
@@ -158,6 +189,9 @@ class Status_dat_broker:
         #print "Creating Service:", s_id, data
         s = Service({})
         self.update_element(s, data)
+
+        #add instance_id to the host, so we know in which scheduler he is
+        s.instance_id = b.instance_id
 
         s.check_period = self.get_timeperiod(s.check_period)
         s.notification_period = self.get_timeperiod(s.notification_period)
@@ -281,6 +315,7 @@ class Status_dat_broker:
     # this brok should arrive within a second after the host_check_result_brok
     def manage_host_next_schedule_brok(self, b):
         self.manage_host_check_result_brok(b)
+
 
     #In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
