@@ -797,7 +797,7 @@ class Services(Items):
 
 
     #We create new service if necessery (host groups and co)
-    def explode(self, hostgroups, contactgroups, servicegroups):
+    def explode(self, hosts, hostgroups, contactgroups, servicegroups):
         #Hostgroups property need to be fullfill for got the informations
         #self.apply_partial_inheritance('contact_groups')
         #self.apply_partial_inheritance('hostgroup_name')
@@ -810,7 +810,7 @@ class Services(Items):
 
         #items::explode_host_groups_into_hosts
         #take all hosts from our hostgroup_name into our host_name property
-        self.explode_host_groups_into_hosts(hostgroups)
+        self.explode_host_groups_into_hosts(hosts, hostgroups)
         
         #items::explode_contact_groups_into_contacts
         #take all contacts from our contact_groups into our contact property

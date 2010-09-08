@@ -704,10 +704,102 @@ class Items(object):
                 setattr(i, prop, com_list)
 
 
+    #Return host group names 
+    def is_complex_hostgroup_name(self, hgname):
+        for c in hgname:
+            if c in ['!', '(', '*', ')', '&', '|']:
+                return True
+        return False
+
+    def get_all_host_names_set(self, hosts):
+        hnames = [h.host_name for h in hosts.items.values() if hasattr(h, 'host_name')]
+        return set(hnames)
+
+
+    def get_hostnames_from_complex_hostgroup_name(self, hgname, hosts, hostgroups):
+        res = []
+        #MAybe we reach a simple exprssion
+        if not self.is_complex_hostgroup_name(hgname):
+            hnames = hostgroups.get_members_by_name(hgname)
+            print "We reach a simple expression (%s) that return %s" % (hgname, hnames)
+            return hnames
+        print "Try to manage the still hostgroup name expression:", hgname
+
+        #First cut by &
+        elts = hgname.split('&')
+        #If there is multiple part with & we manage it now
+        if len(elts) > 1:
+            print "Elements cuts by &:", elts
+            and_mixer = []
+            #All part do not have & so we will ANDed them
+            for part in elts:
+                print "& Managing part", part
+                sub_hosts = self.get_hostnames_from_complex_hostgroup_name(part, hosts, hostgroups)
+                print "& And got raw sub_hosts", sub_hosts
+                sub_hosts_set = sub_hosts.split(',')
+                sub_hosts_set = strip_and_uniq(sub_hosts_set)
+                sub_hosts_set = set(sub_hosts_set)
+                print "& And got set sub_hosts", sub_hosts_set
+                and_mixer.append(sub_hosts_set)
+
+            print "And mixer", and_mixer
+
+            #We've got our sets. Now we can ANDed
+            all_hosts = self.get_all_host_names_set(hosts)
+            print "All hosts:", all_hosts
+            and_mix = all_hosts
+            for sub_hosts_set in and_mixer:
+                print "Loop", sub_hosts_set
+                and_mix = and_mix.intersection(sub_hosts_set)
+            print "And mix after intersection pass:", and_mix
+            res = ','.join(list(and_mix))
+            return res
+
+        return ','.join(res)
+
+
     #If we've got a hostgroup_name property, we search for all
     #theses groups and ask them their hosts, and then add them
     #all into our host_name property
-    def explode_host_groups_into_hosts(self, hostgroups):
+    def explode_host_groups_into_hosts(self, hosts, hostgroups):
+        for i in self:
+            if hasattr(i, 'hostgroup_name'):
+                print "Begin Resolving hostgroups", i.get_name(), ":", i.hostgroup_name
+                
+                hgnames = i.hostgroup_name.split(',')
+                hgnames = strip_and_uniq(hgnames)
+                
+                for hgname in hgnames:
+                    is_complex = self.is_complex_hostgroup_name(hgname)
+                    print "Is complex hostgroup expression?", is_complex
+                    if not is_complex:
+                        hnames = hostgroups.get_members_by_name(hgname)
+                        print "Hnames", hnames
+                        #We add hosts into our host_name
+                        if hnames != []:
+                            if hasattr(i, 'host_name'):
+                                i.host_name += ',' + str(hnames)
+                            else:
+                                i.host_name = str(hnames)
+                    else: #Complex case
+                        hnames = self.get_hostnames_from_complex_hostgroup_name(hgname, hosts, hostgroups)
+                        print "Got from complex : hnames=", hnames
+                        if hasattr(i, 'host_name'):
+                                i.host_name += ',' + str(hnames)
+                        else:
+                                i.host_name = str(hnames)
+
+
+                if hasattr(i, 'host_name'):
+                    print "After explote hostgroups", i.get_name(), ":", i.host_name
+                else:
+                    i.host_name = ''
+
+
+    #If we've got a hostgroup_name property, we search for all
+    #theses groups and ask them their hosts, and then add them
+    #all into our host_name property
+    def bkp_explode_host_groups_into_hosts(self, hostgroups):
         for i in self:
             if hasattr(i, 'hostgroup_name'):
                 hgnames = i.hostgroup_name.split(',')
@@ -720,4 +812,5 @@ class Items(object):
                             i.host_name += ',' + str(hnames)
                         else:
                             i.host_name = str(hnames)
+
 

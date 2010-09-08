@@ -135,13 +135,13 @@ class Escalations(Items):
 
     
     #We look for contacts property in contacts and
-    def explode(self, hostgroups, contactgroups):
-
+    def explode(self, hosts, hostgroups, contactgroups):
+        
         #items::explode_host_groups_into_hosts
         #take all hosts from our hostgroup_name into our host_name property
-        self.explode_host_groups_into_hosts(hostgroups)
-
+        self.explode_host_groups_into_hosts(hosts, hostgroups)
+        
         #items::explode_contact_groups_into_contacts
         #take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
-
+        

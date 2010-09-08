@@ -162,8 +162,10 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.is_state('CRITICAL') == True)
         self.assert_(svc.is_state('c') == True)
 
+        
 
 
 if __name__ == '__main__':
     unittest.main()
 
+    

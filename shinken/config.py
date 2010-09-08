@@ -594,7 +594,7 @@ class Config(Item):
 
         #print "Services"
         #print "Initialy got nb of services : %d" % len(self.services.items)
-        self.services.explode(self.hostgroups, self.contactgroups, self.servicegroups)
+        self.services.explode(self.hosts, self.hostgroups, self.contactgroups, self.servicegroups)
         #print "finally got nb of services : %d" % len(self.services.items)
         #print "Servicegroups"
         self.servicegroups.explode()
@@ -610,7 +610,7 @@ class Config(Item):
         #Serviceescalations hostescalations will create new escalations
         self.serviceescalations.explode(self.escalations)
         self.hostescalations.explode(self.escalations)
-        self.escalations.explode(self.hostgroups, self.contactgroups)
+        self.escalations.explode(self.hosts, self.hostgroups, self.contactgroups)
 
         #Now the architecture part
         #print "Realms"
