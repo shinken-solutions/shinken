@@ -138,11 +138,14 @@ class TestConfig(ShinkenTest):
         r = self.srv_define_only_on('linux_web_0', [test_linux_web_prod_0, test_linux_web_qual_0, test_linux_file_prod_0,test_win_web_prod_0,test_win_web_qual_0])
         self.assert_(r == True)
 
-        #Now the real complex things :)
+        ###Now the real complex things :)
         print "Service Linux&web"
         r = self.srv_define_only_on('linux_AND_web_0', [test_linux_web_prod_0, test_linux_web_qual_0])
         self.assert_(r == True)
 
+        print "Service Linux|web"
+        r = self.srv_define_only_on('linux_OR_web_0', [test_linux_web_prod_0, test_linux_web_qual_0, test_win_web_prod_0, test_win_web_qual_0, test_linux_file_prod_0])
+        self.assert_(r == True)
         
 
 if __name__ == '__main__':

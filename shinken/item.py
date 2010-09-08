@@ -725,7 +725,7 @@ class Items(object):
             return hnames
         print "Try to manage the still hostgroup name expression:", hgname
 
-        #First cut by &
+        ###  First cut by & ###
         elts = hgname.split('&')
         #If there is multiple part with & we manage it now
         if len(elts) > 1:
@@ -754,6 +754,38 @@ class Items(object):
             print "And mix after intersection pass:", and_mix
             res = ','.join(list(and_mix))
             return res
+
+        ### Then we can cut by | ###
+        elts = hgname.split('|')
+        if len(elts) > 1:
+            print "Elements cuts by |:", elts
+            and_mixer = []
+            #All part do not have | so we will ORed them
+            for part in elts:
+                print "| Managing part", part
+                sub_hosts = self.get_hostnames_from_complex_hostgroup_name(part, hosts, hostgroups)
+                print "| And got raw sub_hosts", sub_hosts
+                sub_hosts_set = sub_hosts.split(',')
+                sub_hosts_set = strip_and_uniq(sub_hosts_set)
+                sub_hosts_set = set(sub_hosts_set)
+                print "| And got set sub_hosts", sub_hosts_set
+                and_mixer.append(sub_hosts_set)
+
+            print "And mixer", and_mixer
+
+            #We've got our sets. Now we can ORed
+            #all_hosts = self.get_all_host_names_set(hosts)
+            #print "All hosts:", all_hosts
+            #and_mix = all_hosts
+            #OR came from Nothing to something
+            and_mix = set()
+            for sub_hosts_set in and_mixer:
+                print "Loop", sub_hosts_set
+                and_mix = and_mix.union(sub_hosts_set)
+            print "And mix after union pass:", and_mix
+            res = ','.join(list(and_mix))
+            return res
+
 
         return ','.join(res)
 
