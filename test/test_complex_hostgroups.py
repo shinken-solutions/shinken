@@ -147,6 +147,7 @@ class TestConfig(ShinkenTest):
         r = self.srv_define_only_on('linux_OR_web_0', [test_linux_web_prod_0, test_linux_web_qual_0, test_win_web_prod_0, test_win_web_qual_0, test_linux_file_prod_0])
         self.assert_(r == True)
         
+        
 
 if __name__ == '__main__':
     unittest.main()
