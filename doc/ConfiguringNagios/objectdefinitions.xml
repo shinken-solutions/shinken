@@ -1559,6 +1559,19 @@
                 separated by commas. The hostgroup_name may be used instead of, or in addition to, the
 		host_name directive.
               </para>
+	      <para>This is possibleto define "complex" hostgroup expression with the folowing operators :
+	      </para>
+	      <itemizedlist>
+		<listitem> <para>&amp; : it's use to make an AND betweens groups</para></listitem>
+		<listitem> <para>| : it's use to make an OR betweens groups</para></listitem>
+		<listitem> <para>! : it's use to make a NOT of a group or expression</para></listitem>
+		<listitem> <para>, : it's use to make a OR, like the | sign.</para></listitem>
+		<listitem> <para>( and ) : they are use like in all math expressions.</para></listitem>
+	      </itemizedlist>
+	      <para>For example the above definition is valid :</para>
+	      <para> hostgroup_name=(linux|windows)&amp;!qualification,routers</para>
+	      <para> This service wil be apply on hosts that are in the routers group or (in lunux or windows and not in qualification group).
+	      </para>
 	    </listitem>
 	  </varlistentry>
 	  <varlistentry>
