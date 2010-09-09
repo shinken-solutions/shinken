@@ -38,14 +38,14 @@ root_path = "/" #if the setup.py is call with root, get it
 #We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
 import platform
-python_version = platform.python_version_tuple()
+python_version = tuple((int(s) for s in platform.python_version_tuple()))
 
 ## Make sure people are using Python 2.3 or higher
-if int(python_version[0]) == 2 and int(python_version[1]) < 4:
+if python_version < (2, 4):
     print "Shinken require as a minimum Python 2.4.x, sorry"
     sys.exit(1)
 
-if int(python_version[0]) == 3:
+if python_version < (3):
     print "Shinken is not yet compatible with Python3k, sorry"
     sys.exit(1)
 
@@ -137,6 +137,14 @@ etc_path = paths_and_owners['etc']['path']
 var_path = paths_and_owners['var']['path']
 libexec_path = paths_and_owners['libexec']['path']
 
+required_pkgs = []
+if python_version < (2, 5):
+    required_pkgs.append('pyro<4')
+else:
+    required_pkgs.append('pyro')
+if python_version < (2, 6):
+    required_pkgs.append('multiprocessing')
+
 setup(
   name = "Shinken",
   version = "0.2",
@@ -161,7 +169,7 @@ setup(
                ],
 
   install_requires = [
-                      'pyro',
+                      required_pkgs
                       ],
 
   scripts = [f for f in glob('bin/[!_]*.py')],
