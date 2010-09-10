@@ -63,6 +63,21 @@ class Servicedependencies(Items):
             del self.items[id]
 
 
+    #Add a simple service dep from another (dep -> par)
+    def add_service_dependency(self, dep_host_name, dep_service_description, par_host_name, par_service_description):
+        #We create a "standard" service_dep
+        prop = {
+            'dependent_host_name' : dep_host_name,
+            'dependent_service_description' : dep_service_description,
+            'host_name' : par_host_name,
+            'service_description' : par_service_description,
+            'notification_failure_criteria' : 'u,c,w'
+            }
+        sd = Servicedependency(prop)
+        self.items[sd.id] = sd
+        print "Created", sd
+
+
     #We create new servicedep if necessery (host groups and co)
     def explode(self):
         #The "old" services will be removed. All services with 

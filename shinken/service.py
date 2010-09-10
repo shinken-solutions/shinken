@@ -175,6 +175,10 @@ class Service(SchedulingItem):
         'state_before_impact' : {'default' : 'PENDING'}, #keep a trace of the old state before being an impact
         'state_id_before_impact' : {'default' : 0}, #keep a trace of the old state id before being an impact
         'state_changed_since_impact' : {'default' : False}, #if teh state change, we know so we do not revert it
+
+        #Easy Service dep definition
+        'service_dependencies' : {'required' : False, 'default' : '', 'pythonize' : to_split}, #TODO : find a way to brok it?
+        
         }
 
     #Mapping between Macros and properties (can be prop or a function)
@@ -801,12 +805,7 @@ class Services(Items):
 
 
     #We create new service if necessery (host groups and co)
-    def explode(self, hosts, hostgroups, contactgroups, servicegroups):
-        #Hostgroups property need to be fullfill for got the informations
-        #self.apply_partial_inheritance('contact_groups')
-        #self.apply_partial_inheritance('hostgroup_name')
-        #self.apply_partial_inheritance('host_name')
-
+    def explode(self, hosts, hostgroups, contactgroups, servicegroups, servicedependencies):
         #The "old" services will be removed. All services with 
         #more than one host or a host group will be in it
         srv_to_remove = []
@@ -846,7 +845,7 @@ class Services(Items):
         self.delete_services_by_id(srv_to_remove)
 
         #Servicegroups property need to be fullfill for got the informations
-        #self.apply_partial_inheritance('servicegroups')
+        #And then just register to this service_group
         for s in self:
             if not s.is_tpl():
                 sname = s.service_description
@@ -857,3 +856,26 @@ class Services(Items):
                         servicegroups.add_member(shname+','+sname, sg)
 
 
+        #Now we explode service_dependencies into Servicedependency
+        #We just create serviceDep with goods values (as STRING!),
+        #the link pass will be done after
+        for s in self:
+            if not s.is_tpl():
+                if hasattr(s, 'service_dependencies'):
+                    if s.service_dependencies != '':
+                        sdeps = s.service_dependencies.split(',')
+                        print "DBG: Service DEP", sdeps
+                        #%2=0 are for hosts, !=0 are for service_decription
+                        i = 0
+                        hname = ''
+                        for elt in sdeps:
+                            if i % 2 == 0: #host
+                                hname = elt
+                            else: #description
+                                desc = elt
+                                #we can register it (s) (depend on) -> (hname, desc)
+                                #If we do not have enouth data for s, it's no use
+                                if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
+                                    print "DBG : registering", hname, desc, "for", s.host_name, s.service_description
+                                    servicedependencies.add_service_dependency(s.host_name, s.service_description, hname, desc)
+                            i += 1

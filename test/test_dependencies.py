@@ -46,8 +46,10 @@ class TestConfig(ShinkenTest):
         self.conf.remove_twins()
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
+
         self.conf.clean_useless()
         self.conf.pythonize()
+
         self.conf.linkify()
         self.conf.apply_dependancies()
         self.conf.explode_global_conf()
@@ -118,6 +120,19 @@ class TestConfig(ShinkenTest):
         self.assert_(len(test_host_1_test_ok_0.act_depend_of) == 1)
         self.assert_(len(test_host_1_test_ok_1.act_depend_of) == 2)
 
+
+    #Now test a in service service_dep definition. More easierto use than create a full new object
+    def test_in_servicedef_dep(self):
+        svc_parent = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_parent_svc")
+        svc_son = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_son_svc")
+        
+        print "DumP", self.conf.servicedependencies
+
+        # the most important: test_parent is in the chk_depend_of-list of test_son
+        print "Dep : ", svc_son.act_depend_of
+        self.assert_([['u', 'c', 'w']] == [x[1] for x in svc_son.act_depend_of if x[0] is svc_parent])
+
+        
 
 if __name__ == '__main__':
     import cProfile

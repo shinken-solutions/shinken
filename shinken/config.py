@@ -596,7 +596,7 @@ class Config(Item):
 
         #print "Services"
         #print "Initialy got nb of services : %d" % len(self.services.items)
-        self.services.explode(self.hosts, self.hostgroups, self.contactgroups, self.servicegroups)
+        self.services.explode(self.hosts, self.hostgroups, self.contactgroups, self.servicegroups, self.servicedependencies)
         #print "finally got nb of services : %d" % len(self.services.items)
         #print "Servicegroups"
         self.servicegroups.explode()
@@ -666,6 +666,11 @@ class Config(Item):
         self.services.fill_default()
         self.servicegroups.fill_default()
         self.resultmodulations.fill_default()
+
+        #Also fill default of host/servicedep objects
+        self.servicedependencies.fill_default()
+        self.hostdependencies.fill_default()
+
         #first we create missing sat, so no other sat will
         #be created after this point
         self.fill_default_satellites()
