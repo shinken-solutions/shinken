@@ -208,7 +208,9 @@ class Config(Item):
                 #'conf_is_correct' : {'required' : False, 'default' : '1', 'pythonize': to_bool},
                 'flap_history' : {'required':False, 'default':'20', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
                 'max_plugins_output_length' : {'required':False, 'default':'8192', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
-                
+
+                #Now for problem/impact states changes
+                'enable_problem_impacts_states_change' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
     }
 
 

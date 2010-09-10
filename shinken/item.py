@@ -713,67 +713,87 @@ class Items(object):
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups):
         res = []
         original_expr = expr
-        print "I'm trying to prepare the expression", expr
+        #print "I'm trying to prepare the expression", expr
+
+        #We've got problem with the "-" sign. It can be in a 
+        #valid name but it's a sign of difference for sets
+        #so we change the - now by something, then we reverse after
+        if '-' in expr:
+            expr = expr.replace('-', 'MINUSSIGN')
         
         #! (not) should be changed as "ALL-" (all but not...)
         if '!' in expr:
             ALLELEMENTS = self.get_all_host_names_set(hosts)
-            print "Changing ! by ALLELEMENTS- in ", expr
+            #print "Changing ! by ALLELEMENTS- in ", expr
             expr = expr.replace('!', 'ALLELEMENTS-')
         
-        print "Now finding all token to change in variable"
-        print "So I remove all non want caracters"
+        #print "Now finding all token to change in variable"
+        #print "So I remove all non want caracters"
         
         #We change all separaton token by 10 spaces (so names can still have some spaces
         #on them like Europe Servers because we wil cut byy this 10spaces after
         strip_expr = expr
         for c in ['|', '&', '(', ')', ',', '-']:
             strip_expr = strip_expr.replace(c, ' '*10)
-        print "Stripped expression:", strip_expr
+        #print "Stripped expression:", strip_expr
         
         tokens = strip_expr.split(' '*10)
         #Strip and non void token
         tokens = [token.strip() for  token in tokens if token != '']
-        print "Tokens:", tokens
+        #print "Tokens:", tokens
         
         #Now add in locals() dict (yes, real variables!)
         for token in tokens:
             #ALLELEMENTS is a private group for us
             if token != 'ALLELEMENTS':
-                members = hostgroups.get_members_by_name(token)
+                #Maybe the token was with - at the begining,
+                #but we change all by "MINUSSIGN". We must change it back now
+                #for the search
+                if 'MINUSSIGN' in token:
+                    tmp_token = token.replace('MINUSSIGN', '-')
+                    print "Finding members of", tmp_token
+                    members = hostgroups.get_members_by_name(tmp_token)
+                else:
+                    members = hostgroups.get_members_by_name(token)
+
                 if members != []:
-                    print "Get members", members
+                    #print "Get members", members
                     elts = members.split(',')
                     elts = strip_and_uniq(elts)
                     elts = set(elts)
-                    print "Elements:", elts
-                    print "Now set in locals the token new values"
+                    #print "Elements:", elts
+                    #print "Now set in locals the token new values"
                     locals()[token.upper()] = elts
                 #TODO : raise error
                 else:
+                    if 'MINUSSIGN' in token:
+                        token = token.replace('MINUSSIGN', '-')
                     print "ERROR: the group %s is unknown!" % token
             
-            print "Now changing the exprtoken value with UPPER one (so less risk of problem..."
+            #print "Now changing the exprtoken value with UPPER one (so less risk of problem..."
             expr = expr.replace(token, token.upper())
             
-        print "Final expression:", expr
+        #print "Final expression:", expr
         try:
             evaluation = eval(expr)
         except SyntaxError:
             print "The syntax of %s is invalid" % original_expr
             return res
-        print "Evaluation :", evaluation
+        except NameError:
+            print "There is a unknow name in %s" % original_expr
+            return res
+        #print "Evaluation :", evaluation
 
         #In evaluation we can have multiples values because of , (so it make a tuple in fact)
         #we must OR them in the result
         if ',' in expr:
             for part in evaluation:
-                print "PART", part
+                #print "PART", part
                 res.extend(list(part))
         else:#no , so we do not have a tuple but a simple uniq set
             res.extend(list(evaluation))
         res_string = ','.join(res)
-        print "Final resolution is", res_string
+        #print "Final resolution is", res_string
         return res_string
 
 
@@ -783,18 +803,11 @@ class Items(object):
     def explode_host_groups_into_hosts(self, hosts, hostgroups):
         for i in self:
             if hasattr(i, 'hostgroup_name'):
-                print "Begin Resolving hostgroups", i.get_name(), ":", i.hostgroup_name
-                
                 hnames = self.evaluate_hostgroup_expression(i.hostgroup_name, hosts, hostgroups)
                 if hnames != []:
-                    print "Got from complex : hnames=", hnames
                     if hasattr(i, 'host_name'):
                         i.host_name += ',' + str(hnames)
                     else:
                         i.host_name = str(hnames)
-
-                #DBG
-                if hasattr(i, 'host_name'):
-                    print "After explote hostgroups", i.get_name(), ":", i.host_name
 
 

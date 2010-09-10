@@ -386,25 +386,27 @@ class Host(SchedulingItem):
 
 
     #We just go an impact, so we go unreachable
+    #But only if we enable this stte change in the conf
     def set_impact_state(self):
-        #Keep a trace of the old state (problem came back before
-        #a new checks)
-        self.state_before_impact = self.state
-        self.state_id_before_impact = self.state_id
-        #this flag will know if we overide the impact state
-        self.state_changed_since_impact = False
-        self.state = 'UNREACHABLE'#exit code UNDETERMINED
-        self.state_id = 2
-        #self.last_time_down = int(self.last_state_update)
-        #state_code = 'd'
-        #print "Setting my ME %s impact states to %s %s" % (self.get_dbg_name(), self.state, self.state_id)
+        cls = self.__class__
+        if cls.enable_problem_impacts_states_change:
+            #Keep a trace of the old state (problem came back before
+            #a new checks)
+            self.state_before_impact = self.state
+            self.state_id_before_impact = self.state_id
+            #this flag will know if we overide the impact state
+            self.state_changed_since_impact = False
+            self.state = 'UNREACHABLE'#exit code UNDETERMINED
+            self.state_id = 2
 
 
     #Ok, we are no more an impact, if no news checks
     #overide the impact state, we came back to old
     #states
+    #And only if impact state change is set in configuration
     def unset_impact_state(self):
-        if not self.state_changed_since_impact:
+        cls = self.__class__
+        if cls.enable_problem_impacts_states_change and not self.state_changed_since_impact:
             self.state = self.state_before_impact
             self.state_id = self.state_id_before_impact
             #print "Reverting ME %s states to %s %s" % (self.get_dbg_name(), self.state, self.state_id)
@@ -421,7 +423,9 @@ class Host(SchedulingItem):
         #we can take current state. But if it's the case, the
         #real old state is self.state_before_impact (it's teh TRUE
         #state in fact)
-        if self.is_impact and not self.state_changed_since_impact:
+        #And only if we enable the impact state change
+        cls = self.__class__
+        if cls.enable_problem_impacts_states_change and self.is_impact and not self.state_changed_since_impact:
             #print "Me %s take standard state %s" % (self.get_dbg_name(), self.state)
             self.last_state = self.state_before_impact
         else:

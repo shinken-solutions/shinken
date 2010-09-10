@@ -72,6 +72,10 @@ class TestConfig(ShinkenTest):
 
         #First initialize routers 0 and 1
         now = time.time()
+        
+        #The problem_impact_state change should be enabled in the configuration
+        self.assert_(self.conf.enable_problem_impacts_states_change == True)
+        
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
         host_router_1 = self.sched.hosts.find_by_name("test_router_1")
@@ -134,6 +138,11 @@ class TestConfig(ShinkenTest):
         for s in all_servers:
             self.assert_(s.is_impact == True)
             self.assert_(s.state == 'UNREACHABLE')
+            #And check the services are impacted too
+            for svc in s.services:
+                print "Service state", svc.state
+                self.assert_(svc.state == 'UNKNOWN')
+
             for h in all_routers:
                 self.assert_(h in s.source_problems)
 
