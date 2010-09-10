@@ -751,7 +751,6 @@ class Items(object):
                 #for the search
                 if 'MINUSSIGN' in token:
                     tmp_token = token.replace('MINUSSIGN', '-')
-                    print "Finding members of", tmp_token
                     members = hostgroups.get_members_by_name(tmp_token)
                 else:
                     members = hostgroups.get_members_by_name(token)
