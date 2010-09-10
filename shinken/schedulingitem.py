@@ -495,7 +495,7 @@ class SchedulingItem(Item):
         #Before set state, module thems
         for rm in self.resultmodulations:
             if rm != None:
-                (c.exit_status, self.output, self.long_output) = rm.module_return(c.exit_status, self.output, self.long_output)
+                c.exit_status = rm.module_return(c.exit_status)
 
         #If we got a bad result on a normal check, and we have dep,
         #we raise dep checks

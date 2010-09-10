@@ -48,6 +48,8 @@ launch_and_assert test_module_simplelog.py
 launch_and_assert test_db.py
 launch_and_assert test_macroresolver.py
 launch_and_assert test_complex_hostgroups.py
+launch_and_assert test_resultmodulation.py
+
 
 echo "All quick unit tests passed :)"
 echo "But please launch a test.sh pass too for long tests too!"

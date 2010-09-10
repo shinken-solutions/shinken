@@ -33,10 +33,7 @@ class Resultmodulation(Item):
 
     properties = {'resultmodulation_name' : {'required':True},
                   'exit_codes_match' : {'required':False, 'default':'', 'pythonize' : to_split},
-                  'output_match' : {'required':False, 'default':None},
                   'exit_code_modulation' : {'required':False, 'default':None},
-                  'output_modulation' : {'required':False, 'default':None},
-                  'longoutput_modulation' : {'required':False, 'default':None},
                   'modulation_period' : {'required':False, 'default':None},
                   }
 
@@ -54,9 +51,8 @@ class Resultmodulation(Item):
         pass
 
 
-    #TODO : make the regexp part :(
-    #TODO2 : put the over pythonize in the normal pythonize part
-    def module_return(self, return_code, output, long_output):
+    #Make the return code modulation if need
+    def module_return(self, return_code):
         #Only if in modulation_period of modulation_period == None
         if self.modulation_period == None or self.modulation_period.is_time_valid(time.time()):
             #Try to change the exit code only if a new one is defined
@@ -64,11 +60,8 @@ class Resultmodulation(Item):
                 #First with the exit_code_match
                 if return_code in self.exit_codes_match:
                     return_code = self.exit_code_modulation
-                #Then with output match
-                if self.output_match != None and self.output_match.search(output) != None:
-                    return_code = self.exit_code_modulation
-                
-        return (return_code, output, long_output)
+                    
+        return return_code
      
    
     #We override the pythonize because we have special cases that we do not want 
@@ -90,21 +83,6 @@ class Resultmodulation(Item):
             self.exit_code_modulation = int(self.exit_code_modulation)
         else:
             self.exit_code_modulation = None
-
-        if hasattr(self, 'output_match'):
-            self.output_match = re.compile(self.output_match)
-        else:
-            self.output_match = None
-
-        if hasattr(self, 'output_modulation'):
-            self.output_modulation = re.compile(self.output_modulation)
-        else:
-            self.output_modulation = None
-
-        if hasattr(self, 'longoutput_modulation'):
-            self.longoutput_modulation = re.compile(self.longoutput_modulation)
-        else:
-            self.longoutput_modulation = None
 
 
         
