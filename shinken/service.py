@@ -860,11 +860,11 @@ class Services(Items):
         #We just create serviceDep with goods values (as STRING!),
         #the link pass will be done after
         for s in self:
+            #Templates are useless here
             if not s.is_tpl():
                 if hasattr(s, 'service_dependencies'):
                     if s.service_dependencies != '':
                         sdeps = s.service_dependencies.split(',')
-                        print "DBG: Service DEP", sdeps
                         #%2=0 are for hosts, !=0 are for service_decription
                         i = 0
                         hname = ''
@@ -876,6 +876,6 @@ class Services(Items):
                                 #we can register it (s) (depend on) -> (hname, desc)
                                 #If we do not have enouth data for s, it's no use
                                 if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
-                                    print "DBG : registering", hname, desc, "for", s.host_name, s.service_description
+                                    #print "DBG : registering", hname, desc, "for", s.host_name, s.service_description
                                     servicedependencies.add_service_dependency(s.host_name, s.service_description, hname, desc)
                             i += 1

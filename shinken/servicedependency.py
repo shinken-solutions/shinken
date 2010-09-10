@@ -75,7 +75,6 @@ class Servicedependencies(Items):
             }
         sd = Servicedependency(prop)
         self.items[sd.id] = sd
-        print "Created", sd
 
 
     #We create new servicedep if necessery (host groups and co)
@@ -90,7 +89,6 @@ class Servicedependencies(Items):
         for id in servicedeps:
             sd = self.items[id]
             if not sd.is_tpl(): #Exploding template is useless
-                print sd
                 if not hasattr(sd, 'dependent_host_name'):
                     sd.dependent_host_name = sd.host_name
                 hnames = sd.dependent_host_name.split(',')
