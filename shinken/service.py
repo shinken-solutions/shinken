@@ -343,7 +343,6 @@ class Service(SchedulingItem):
     #but only if it's enable in the configuration
     def set_impact_state(self):
         cls = self.__class__
-        print "Impact state enabled?", cls.enable_problem_impacts_states_change
         if cls.enable_problem_impacts_states_change:
             #Keep a trace of the old state (problem came back before
             #a new checks)
