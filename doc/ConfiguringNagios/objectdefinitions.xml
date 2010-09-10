@@ -1505,6 +1505,11 @@
               </row>
 
               <row>
+                <entry><para>service_dependencies</para></entry>
+                <entry><para><emphasis>services</emphasis></para></entry>
+              </row>
+
+              <row>
                 <entry nameend="col_2" namest="col_1"><para>}</para></entry>
               </row>
             </tbody>
@@ -2107,6 +2112,20 @@
 	      </para>
 	      <para>
 		By default there is no poller_tag, so all untaggued pollers can take it.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+
+
+	  <varlistentry>
+	    <term>
+	      service_dependencies
+	    </term>
+	    <listitem>
+	      <para>This variable is used to define services that this serice is dependent of for notifications. It's a comma separated list of service like host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as 'u,c,w' and no dependency_period).
+	      </para>
+	      <para>
+		By default this value is void so there is no linked dependencies.
 	      </para>
 	    </listitem>
 	  </varlistentry>
