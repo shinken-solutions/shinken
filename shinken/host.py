@@ -24,7 +24,7 @@ import re
 from autoslots import AutoSlots
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name
+from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists
 #from macroresolver import MacroResolver
 #from check import Check
 #from notification import Notification
@@ -180,10 +180,10 @@ class Host(SchedulingItem):
         'broks' : {'default' : []}, #and here broks raised
         
         #Issue/impact part
-        'is_problem' : {'default' : False},
-        'is_impact' : {'default' : False},
-        'source_problems' : {'default' : []}, # list of problems taht make us an impact
-        'impacts' : {'default' : []}, #list of the impact I'm the cause of
+        'is_problem' : {'default' : False, 'fill_brok' : ['full_status']},
+        'is_impact' : {'default' : False, 'fill_brok' : ['full_status']},
+        'source_problems' : {'default' : [], 'fill_brok' : ['full_status'], 'brok_transformation' : to_svc_hst_distinct_lists}, # list of problems that make us an impact
+        'impacts' : {'default' : [], 'fill_brok' : ['full_status'], 'brok_transformation' : to_svc_hst_distinct_lists}, #list of the impact I'm the cause of
         'state_before_impact' : {'default' : 'PENDING'}, #keep a trace of the old state before being an impact
         'state_id_before_impact' : {'default' : 0}, #keep a trace of the old state id before being an impact
         'state_changed_since_impact' : {'default' : False}, #if teh state change, we know so we do not revert it

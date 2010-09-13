@@ -116,6 +116,21 @@ def to_hostnames_list(tab):
             r.append(h.host_name)
     return r
 
+#Wil lcreate a dict with 2 lists:
+#*services : all services of the tab
+#*hosts : all hosts of the tab
+def to_svc_hst_distinct_lists(tab):
+    r = {'hosts' : [], 'services' : []}
+    for e in tab:
+        cls = e.__class__
+        if cls.my_type == 'service':
+            name = e.get_dbg_name()
+            r['services'].append(name)
+        else:
+            name = e.get_dbg_name()
+            r['hosts'].append(name)
+    return r
+
 #Just get the string name of the object
 #(like for realm)
 def get_obj_name(obj):

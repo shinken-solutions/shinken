@@ -128,11 +128,17 @@ class TestConfig(ShinkenTest):
         # Routers get HARD/DOWN
         # should be problems now!
         #--------------------------------------------------------------
+        #Now check in the brok generation too
+        host_router_0_brok = host_router_0.get_update_status_brok()
+        host_router_1_brok = host_router_1.get_update_status_brok()
+
         #Should be problems and have sub servers as impacts
         for h in all_routers:
             self.assert_(h.is_problem == True)
             for s in all_servers:
                 self.assert_(s in h.impacts)
+                self.assert_(s.get_dbg_name() in host_router_0_brok.data['impacts']['hosts'])
+                self.assert_(s.get_dbg_name() in host_router_1_brok.data['impacts']['hosts'])
         
         #Now impacts should really be .. impacts :)
         for s in all_servers:
@@ -142,9 +148,15 @@ class TestConfig(ShinkenTest):
             for svc in s.services:
                 print "Service state", svc.state
                 self.assert_(svc.state == 'UNKNOWN')
-
+                self.assert_(svc.get_dbg_name() in host_router_0_brok.data['impacts']['services'])
+                self.assert_(svc.get_dbg_name() in host_router_1_brok.data['impacts']['services'])
+                #brk_svc = svc.get_update_status_brok()
+                #print "Ultra:", brk_svc.data['source_problems']['hosts']
             for h in all_routers:
                 self.assert_(h in s.source_problems)
+                brk_hst = s.get_update_status_brok()
+                self.assert_(h.get_dbg_name() in brk_hst.data['source_problems']['hosts'])
+
 
         #--------------------------------------------------------------
         # One router get UP now
@@ -161,12 +173,13 @@ class TestConfig(ShinkenTest):
         #And should not be a problem any more!
         self.assert_(host_router_0.is_problem == False)
         self.assert_(host_router_0.impacts == [])
-
+        
         #And check if it's no more in sources problems of others servers
         for s in all_servers:
             #Still impacted by the other server
             self.assert_(s.is_impact == True)
             self.assert_(s.source_problems == [host_router_1])
+
 
         #--------------------------------------------------------------
         # The other router get UP :)
