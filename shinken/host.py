@@ -24,7 +24,7 @@ import re
 from autoslots import AutoSlots
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list
+from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name
 #from macroresolver import MacroResolver
 #from check import Check
 #from notification import Notification
@@ -48,6 +48,8 @@ class Host(SchedulingItem):
     #*fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
     #*no_slots : do not take this property for __slots__
     # Only for the inital call
+    #conf_send_preparation : if set, will pass the property to this function. It's used to "flatten"
+    # some dangerous properties like realms that are too 'linked' to be send like that.
     #brok_transformation : if set, will call the function with the value of the property
     # the major times it will be to flatten the data (like realm_name instead of the realm object).
     properties={
@@ -96,13 +98,13 @@ class Host(SchedulingItem):
         '2d_coords' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status'], 'no_slots' : True},
         '3d_coords' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status'], 'no_slots' : True},
         'failure_prediction_enabled' : {'required' : False, 'default' : '0', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
+
         #New to shinken
-        'realm' : {'required' : False, 'default' : None}, #no 'fill_brok' because realm are link with every one, it's too dangerous
-        #so picle things like connexions to schedulers, etc.
+        'realm' : {'required' : False, 'default' : None, 'conf_send_preparation' : get_obj_name, 'fill_brok' : ['full_status']}, #'fill_brok' is ok because in scheduler it's already a string from conf_send_preparation
         'poller_tag' : {'required' : False, 'default' : None},
 
         #Shinken specific
-        'resultmodulations' : {'required' : False, 'default' : ''}, #TODO : fix brok and deepcopy a patern is not allowed
+        'resultmodulations' : {'required' : False, 'default' : ''},
         'escalations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         }
 
@@ -309,6 +311,9 @@ class Host(SchedulingItem):
         #If active check is enabled with a check_interval!=0, we must have a check_period
         if (hasattr(self, 'active_checks_enabled') and self.active_checks_enabled) and (not hasattr(self, 'check_period') or self.check_period == None) and (hasattr(self, 'check_interval') and self.check_interval!=0):
             Log().log("%s : My check_period is not correct" % self.get_name())
+            state = False
+        if not hasattr(self, 'realm') or self.realm == None:
+            Log().log("%s : My realm is not correct" % self.get_name())
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
@@ -691,6 +696,13 @@ class Hosts(Items):
     name_property = "host_name" #use for the search by name
     inner_class = Host #use for know what is in items
 
+
+    #prepare_for_conf_sending to flatten some properties
+    def prepare_for_sending(self):
+        for h in self:
+            h.prepare_for_conf_sending()
+
+
     #Create link between elements:
     #hosts -> timeperiods
     #hosts -> hosts (parents, etc)
@@ -724,16 +736,29 @@ class Hosts(Items):
             #We find the id, we remplace the names
             h.parents = new_parents
 
-    
+
+    #Link with realms and set a default realm if none
     def linkify_h_by_realms(self, realms):
+        default_realm = None
+        for r in realms:
+            if hasattr(r, 'default') and r.default:
+                default_realm = r
+        if default_realm == None:
+            print "Error : there is no default realm defined!"
         for h in self:
             #print h.get_name(), h.realm
             if h.realm != None:
                 p = realms.find_by_name(h.realm.strip())
-                h.realm = p
                 if p != None:
+                    h.realm = p
                     print "Host", h.get_name(), "is in the realm", p.get_name()
-
+                else:
+                    print "Warning : the host %s git a invalid realm (%s)!" % (h.get_name(), h.realm)
+                    h.realm = None
+            else:
+                print "Notice : applying default realm %s to host %s" % (default_realm.get_name(), h.get_name())
+                h.realm = default_realm
+                
 
     #It's used to change old Nagios2 names to
     #Nagios3 ones

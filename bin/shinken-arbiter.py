@@ -329,7 +329,6 @@ class Arbiter(Daemon):
             sys.exit(1)
 
 
-
         #self.conf.dump()
 
         #from guppy import hpy
@@ -363,6 +362,7 @@ class Arbiter(Daemon):
         #for r in self.conf.realms:
         #    print r.get_name(), r.__dict__
         print "\n"
+
         
         #REF: doc/shinken-conf-dispatching.png (2)
         Log().log("Cutting the hosts and services into parts")
@@ -381,6 +381,12 @@ class Arbiter(Daemon):
             sys.exit(0)
 	
         #self.conf.debug()
+
+        #Some properties need to be "flatten" (put in strings)
+        #before being send, like realms for hosts for example
+        #BEWARE: after the cutting part, because we stringify some properties
+        self.conf.prepare_for_sending()
+
 	
         #Ok, here we must check if we go on or not.
         #TODO : check OK or not

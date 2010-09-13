@@ -116,6 +116,11 @@ def to_hostnames_list(tab):
             r.append(h.host_name)
     return r
 
+#Just get the string name of the object
+#(like for realm)
+def get_obj_name(obj):
+    return obj.get_name()
+
 
 ###################### Sorting ################
 def scheduler_no_spare_first(x, y):

@@ -108,6 +108,13 @@ class TestConfig(ShinkenTest):
         hst.notification_interval = notification_interval
         self.assert_(hst.is_correct() == True)
 
+        #no realm
+        realm = hst.realm
+        del hst.realm
+        self.assert_(hst.is_correct() == False)
+        hst.realm = realm
+        self.assert_(hst.is_correct() == True)
+
 
     #Look for set/unset impacted states (unknown)
     def test_impact_state(self):

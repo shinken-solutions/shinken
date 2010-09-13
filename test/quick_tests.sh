@@ -29,6 +29,7 @@ function launch_and_assert {
     if [ $? != 0 ]
 	then
 	echo "Error : the test $SCRIPT failed"
+	exit 2
     fi
 }
 

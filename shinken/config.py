@@ -536,6 +536,12 @@ class Config(Item):
         self.pollers.linkify(self.realms, self.modules)
 
 
+    #Some properties are dangerous to be send like that
+    #like realms linked in hosts. Realms are too big to send (too linked)
+    def prepare_for_sending(self):
+        self.hosts.prepare_for_sending()
+
+
     def dump(self):
         #print 'Parameters:', self
         #print 'Hostgroups:',self.hostgroups,'\n'

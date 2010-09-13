@@ -337,6 +337,33 @@ class Item(object):
             if not self.acknowledgement.sticky:
                 self.unacknowledge_problem()
 
+    #Will flatten some parameters taggued by the 'conf_send_preparation'
+    #property because they are too "linked" to be send like that (like realms)
+    def prepare_for_conf_sending(self):
+        cls = self.__class__
+
+        for prop in cls.properties:
+            entry = cls.properties[prop]
+            #Is this property need preparation for sending?
+            if 'conf_send_preparation' in entry:
+                f = entry['conf_send_preparation']
+                if f != None:
+                    val = f(getattr(self, prop))
+                    setattr(self, prop, val)
+
+        if hasattr(cls, 'running_properties'):
+            for prop in cls.running_properties:
+                entry = cls.running_properties[prop]
+            #Is this property need preparation for sending?
+                if 'conf_send_preparation' in entry:
+                    f = entry['conf_send_preparation']
+                    if f != None:
+                        val = f(getattr(self, prop))
+                        setattr(self, prop, val)
+
+        
+
+
     #Get the property for an object, with good value
     #and brok_transformation if need
     def get_property_value_for_brok(self, prop, tab):
