@@ -24,7 +24,7 @@ import re
 from autoslots import AutoSlots
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format
+from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list
 #from macroresolver import MacroResolver
 #from check import Check
 #from notification import Notification
@@ -42,18 +42,20 @@ class Host(SchedulingItem):
 
 
     #properties defined by configuration
-    #required : is required in conf
-    #default : default value if no set in conf
-    #pythonize : function to call when transfort string to python object
-    #fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
-    #no_slots : do not take this property for __slots__
-    #Only for the inital call
+    #*required : is required in conf
+    #*default : default value if no set in conf
+    #*pythonize : function to call when transfort string to python object
+    #*fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
+    #*no_slots : do not take this property for __slots__
+    # Only for the inital call
+    #brok_transformation : if set, will call the function with the value of the property
+    # the major times it will be to flatten the data (like realm_name instead of the realm object).
     properties={
         'host_name' : {'required' : True, 'fill_brok' : ['full_status', 'check_result', 'next_schedule']},
         'alias' : {'required' : True, 'fill_brok' : ['full_status']},
         'display_name' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
         'address' : {'required' : True, 'fill_brok' : ['full_status']},
-        'parents' : {'required' : False, 'default' : '', 'pythonize' : to_split}, #TODO : find a way to brok it?
+        'parents' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'fill_brok' : ['full_status'], 'brok_transformation' : to_hostnames_list},
         'hostgroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'check_command' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'initial_state' : {'required' : False, 'default' : 'u', 'pythonize' : to_char, 'fill_brok' : ['full_status']},

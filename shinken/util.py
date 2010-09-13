@@ -107,6 +107,15 @@ def from_float_to_int(val):
     val = int(val)
     return val
 
+#take a list of hosts and return a list
+#of all host_names
+def to_hostnames_list(tab):
+    r = []
+    for h in tab:
+        if hasattr(h, 'host_name'):
+            r.append(h.host_name)
+    return r
+
 
 ###################### Sorting ################
 def scheduler_no_spare_first(x, y):

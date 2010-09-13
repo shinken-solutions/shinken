@@ -337,6 +337,26 @@ class Item(object):
             if not self.acknowledgement.sticky:
                 self.unacknowledge_problem()
 
+    #Get the property for an object, with good value
+    #and brok_transformation if need
+    def get_property_value_for_brok(self, prop, tab):
+        pre_op = None
+        entry = tab[prop]
+        if 'brok_transformation' in entry:
+            pre_op = entry['brok_transformation']
+
+        #Get the current value, or the default if need
+        if hasattr(self, prop):
+            value = getattr(self, prop)
+        elif 'default' in cls.properties[prop]:
+            value = cls.properties[prop]['default']
+
+        #Apply brok_transformation if need
+        if pre_op != None:
+            value = pre_op(value)
+
+        return value
+
 
     #Fill data with info of item by looking at brok_type
     #in props of properties or running_propterties
@@ -347,18 +367,23 @@ class Item(object):
             #Is this property intended for brokking?
             if 'fill_brok' in cls.properties[prop]:
                 if brok_type in cls.properties[prop]['fill_brok']:
-                    if hasattr(self, prop):
-                        data[prop] = getattr(self, prop)
-                    elif 'default' in cls.properties[prop]:
-                        data[prop] = cls.properties[prop]['default']
+                    data[prop] = self.get_property_value_for_brok(prop, cls.properties)
+#                    if hasattr(self, prop):
+#                        data[prop] = getattr(self, prop)
+#                    elif 'default' in cls.properties[prop]:
+#                        data[prop] = cls.properties[prop]['default']
+
+        #Maybe the class do not have running_properties
+        if hasattr(cls, 'running_properties'):
         #We've got prop in running_properties too
-        for prop in cls.running_properties:
-            if 'fill_brok' in cls.running_properties[prop]:
-                if brok_type in cls.running_properties[prop]['fill_brok']:
-                    if hasattr(self, prop):
-                        data[prop] = getattr(self, prop)
-                    elif 'default' in cls.properties[prop]:
-                        data[prop] = cls.running_properties[prop]['default']
+            for prop in cls.running_properties:
+                if 'fill_brok' in cls.running_properties[prop]:
+                    if brok_type in cls.running_properties[prop]['fill_brok']:
+                        data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
+#                        if hasattr(self, prop):
+#                            data[prop] = getattr(self, prop)
+#                        elif 'default' in cls.properties[prop]:
+#                            data[prop] = cls.running_properties[prop]['default']
 
 
     #Get a brok with initial status
