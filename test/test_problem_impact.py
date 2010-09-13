@@ -150,8 +150,8 @@ class TestConfig(ShinkenTest):
                 self.assert_(svc.state == 'UNKNOWN')
                 self.assert_(svc.get_dbg_name() in host_router_0_brok.data['impacts']['services'])
                 self.assert_(svc.get_dbg_name() in host_router_1_brok.data['impacts']['services'])
-                #brk_svc = svc.get_update_status_brok()
-                #print "Ultra:", brk_svc.data['source_problems']['hosts']
+                brk_svc = svc.get_update_status_brok()
+                self.assert_(brk_svc.data['source_problems']['hosts'] == ['test_router_0', 'test_router_1'])
             for h in all_routers:
                 self.assert_(h in s.source_problems)
                 brk_hst = s.get_update_status_brok()
