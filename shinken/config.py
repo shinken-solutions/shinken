@@ -1192,9 +1192,8 @@ class Config(Item):
                     self.confs[i].other_elements[h.get_name()] = i
 
         #We tag conf with instance_id
-	#TODO : fix ninja/merlin so it manage more than instance_id == 0 ....
         for i in self.confs:
-            self.confs[i].instance_id = 0#i
+            self.confs[i].instance_id = i
             random.seed(time.time())
             self.confs[i].magic_hash = random.randint(1, 100000)
 
