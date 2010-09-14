@@ -532,7 +532,6 @@ class Arbiter(Daemon):
         sys.exit(0)
 
 
-
     #Main function
     def run(self):
         #Before running, I must be sure who am I

@@ -106,6 +106,7 @@ class Host(SchedulingItem):
         #Shinken specific
         'resultmodulations' : {'required' : False, 'default' : ''},
         'escalations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'maintenance_period' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         }
 
 
@@ -711,6 +712,7 @@ class Hosts(Items):
     def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, escalations=None):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
+        self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
         self.linkify_h_by_h()
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')

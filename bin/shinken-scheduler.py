@@ -373,7 +373,6 @@ class Shinken(Daemon):
         except OSError, exp:
             print "Error un deleting pid file:", exp
         sys.exit(0)
-
 		
 
     #We wait (block) for arbiter to send us conf

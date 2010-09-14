@@ -50,6 +50,7 @@ launch_and_assert test_db.py
 launch_and_assert test_macroresolver.py
 launch_and_assert test_complex_hostgroups.py
 launch_and_assert test_resultmodulation.py
+launch_and_assert test_maintenance_period.py
 
 
 echo "All quick unit tests passed :)"

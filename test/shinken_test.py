@@ -24,13 +24,16 @@ from shinken.module import Module
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
+        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+
+    def setup_with_file(self, path):
         # i am arbiter-like
         Config.fill_usern_macros()
         self.broks = {}
         self.me = None
         self.log = Log()
         self.log.load_obj(self)
-        self.config_files = ['etc/nagios_1r_1h_1s.cfg']
+        self.config_files = [path]
         self.conf = Config()
         self.conf.read_config(self.config_files)
         self.conf.instance_id = 0
