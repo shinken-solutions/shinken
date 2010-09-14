@@ -35,6 +35,7 @@ class TestConfig(ShinkenTest):
         fd = open(self.conf.command_file, 'wb')
         fd.write(s)
         fd.close()
+
     
     #Change ME :)
     def test_external_comand(self):
