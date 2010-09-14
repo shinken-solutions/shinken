@@ -105,7 +105,7 @@ from shinken.timeperiod import Timeperiod
 from shinken.contact import Contact
 from shinken.command import Command, CommandCall
 
-VERSION = "0.2"
+VERSION = "0.2+"
 
 
 

@@ -90,7 +90,7 @@ from shinken.daemon import Daemon
 from shinken.log import Log
 
 
-VERSION = "0.2"
+VERSION = "0.2+"
 
 
 
