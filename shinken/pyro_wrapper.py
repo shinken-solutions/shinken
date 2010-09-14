@@ -22,7 +22,7 @@
 #This class is a wrapper for managing Pyro 3 and 4 version
 
 
-
+import sys
 import Pyro.core
 
 

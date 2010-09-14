@@ -518,6 +518,21 @@ class Arbiter(Daemon):
                 is_master_dead = True
 
 
+    #Manage signal function
+    #Frame is just garbage
+    def manage_signal(self, sig, frame):
+        print "\nExiting with signal", sig
+        print "Stopping all network connexions"
+        self.poller_daemon.shutdown(True)
+        print "Unlinking pid file"
+        try:
+            os.unlink(self.pidfile)
+        except OSError, exp:
+            print "Error un deleting pid file:", exp
+        sys.exit(0)
+
+
+
     #Main function
     def run(self):
         #Before running, I must be sure who am I

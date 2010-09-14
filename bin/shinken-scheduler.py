@@ -362,11 +362,16 @@ class Shinken(Daemon):
 
 
     #Manage signal function
-    #TODO : manage more than just quit
     #Frame is just garbage
     def manage_signal(self, sig, frame):
         print "\nExiting with signal", sig
+        print "Stopping all network connexions"
         self.poller_daemon.shutdown(True)
+        print "Unlinking pid file"
+        try:
+            os.unlink(self.pidfile)
+        except OSError, exp:
+            print "Error un deleting pid file:", exp
         sys.exit(0)
 
 		

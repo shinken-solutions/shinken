@@ -340,9 +340,25 @@ class Broker(Satellite):
 	#TODO : manage more than just quit
 	#Frame is just garbage
 	def manage_signal(self, sig, frame):
-		Log().log("\nExiting with signal %s" % sig)
-		self.daemon.shutdown(True)
-		sys.exit(0)
+            Log().log("\nExiting with signal %s" % sig)
+            #Maybe we quit before even launch modules
+            if hasattr(self, 'modulesmanager'):
+                Log().log('Stopping all modules')
+                self.modulesmanager.stop_all()
+            act = active_children()
+            for a in act:
+                a.terminate()
+                a.join(1)
+            Log().log('Stopping all network connexions')
+            self.daemon.shutdown(True)
+            Log().log("Unlinking pid file")
+            try:
+                os.unlink(self.pidfile)
+            except OSError, exp:
+                print "Error un deleting pid file:", exp
+            Log().log("Exiting")
+            sys.exit(0)
+
 
 
         #Schedulers have some queues. We can simplify call by adding
