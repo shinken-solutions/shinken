@@ -47,7 +47,9 @@ class TestConfig(ShinkenTest):
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
         
-        self.sched.run_external_command('[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy' % int(time.time()))
+        excmd = ExternalCommand('[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy' % int(time.time()))
+
+        self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, []) #Need 2 run for get then consume)
         self.assert_(host.state == 'DOWN')

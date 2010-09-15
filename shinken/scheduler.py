@@ -24,6 +24,7 @@ import cPickle, zlib
 
 import shinken.pyro_wrapper
 
+from shinken.external_command import ExternalCommandManager, ExternalCommand
 from check import Check
 from notification import Notification
 from eventhandler import EventHandler
@@ -135,7 +136,8 @@ class Scheduler:
     #We've got activity in the fifo, we get and run commands
     def run_external_command(self, command):
         print "scheduler resolves command", command
-        self.external_command.resolve_command(command)
+        ext_cmd = ExternalCommand(command)
+        self.external_command.resolve_command(ext_cmd)
 
 
     #Schedulers have some queues. We can simplify call by adding
@@ -726,12 +728,6 @@ class Scheduler:
             if ins != []:
                 for s in socks:
                     if s in ins:
-                        #If FIFO, read external command
-                        #if s == self.fifo:
-                        #    self.external_command.read_and_interpret()
-                        #    self.fifo = self.external_command.open()
-                        #Must be paquet from poller
-                        #else:
                         #Yes, even here there is a difference :)
                         if shinken.pyro_wrapper.pyro_version == 3:
                             self.daemon.handleRequests()

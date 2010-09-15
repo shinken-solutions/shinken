@@ -28,6 +28,11 @@ from command import CommandCall
 from log import Log
 from check import Check
 
+class ExternalCommand:
+    def __init__(self, cmd_line):
+        self.cmd_line = cmd_line
+
+
 class ExternalCommandManager:
 
     commands = {
@@ -231,14 +236,18 @@ class ExternalCommandManager:
         return self.fifo
 
     
-    def read_and_interpret(self):
+    def get(self):
         buf = os.read(self.fifo, 8096)
         os.close(self.fifo)
         if buf != '':
-            self.resolve_command(buf)
+            excmd = ExternalCommand(buf)
+            return excmd
+        return None
+
 
     
-    def resolve_command(self, command):
+    def resolve_command(self, excmd):
+        command = excmd.cmd_line
         #Only log if we are in the Arbiter
         if self.mode == 'dispatcher':
             Log().log('EXTERNAL COMMAND: '+command.rstrip())

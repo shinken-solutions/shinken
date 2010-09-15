@@ -18,7 +18,7 @@ from shinken.dispatcher import Dispatcher
 from shinken.log import Log
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
-from shinken.external_command import ExternalCommandManager
+from shinken.external_command import ExternalCommandManager, ExternalCommand
 from shinken.check import Check
 from shinken.module import Module
 

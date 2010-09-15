@@ -208,6 +208,9 @@ class Arbiter(Daemon):
 
         self.nb_broks_send = 0
 
+        #Now tab for external_commands
+        self.external_commands = []
+
 
     #Use for adding broks
     def add(self, b):
@@ -579,7 +582,9 @@ class Arbiter(Daemon):
                             break    # no need to continue with the for loop
                         #If FIFO, read external command
                         if s == self.fifo:
-                            self.external_command.read_and_interpret()
+                            ext_cmd = self.external_command.get()
+                            if ext_cmd != None:
+                                self.external_commands.append(ext_cmd)
                             self.fifo = self.external_command.open()
 
             else:#Timeout
@@ -598,6 +603,11 @@ class Arbiter(Daemon):
                 #Log().log("Nb Broks send: %d" % self.nb_broks_send)
                 self.nb_broks_send = 0
                 
+
+                #Now send all external commands
+                for ext_cmd in self.external_commands:
+                    self.external_command.resolve_command(ext_cmd)
+                self.external_commands = []
 						
             if timeout < 0:
                 timeout = 1.0
