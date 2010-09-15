@@ -84,7 +84,7 @@ Pyro = shinken.pyro_wrapper.Pyro
 from shinken.util import to_bool
 #from scheduler import Scheduler
 from shinken.config import Config
-from shinken.external_command import ExternalCommand
+from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon
 from shinken.log import Log
@@ -549,7 +549,7 @@ class Arbiter(Daemon):
         
 	#Now create the external commander
         if os.name != 'nt':
-          e = ExternalCommand(self.conf, 'dispatcher')
+          e = ExternalCommandManager(self.conf, 'dispatcher')
 	
 	#Scheduler need to know about external command to activate it 
         #if necessary

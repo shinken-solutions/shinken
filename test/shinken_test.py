@@ -18,7 +18,7 @@ from shinken.dispatcher import Dispatcher
 from shinken.log import Log
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
-from shinken.external_command import ExternalCommand
+from shinken.external_command import ExternalCommandManager
 from shinken.check import Check
 from shinken.module import Module
 
@@ -57,7 +57,7 @@ class ShinkenTest(unittest.TestCase):
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf)
-        e = ExternalCommand(self.conf, 'applyer')
+        e = ExternalCommandManager(self.conf, 'applyer')
         self.sched.external_command = e
         e.load_scheduler(self.sched)
         self.sched.schedule()
