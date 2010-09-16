@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+  <!ENTITY % all.entities SYSTEM "../all-entities.ent">
+  %all.entities;
+]
+>
+<chapter id="gettingstarted-quickstart-gnulinux" xreflabel="Gnu/Linux quickstart">
+  <title>&name-ubuntu; Quickstart</title>
+
+  <abstract>
+
+
+    <para>This guide is intended to provide you with simple instructions on
+      how to install Shinken from source (code) on GNU/Linux and have it monitoring
+      your local machine inside of 20 minutes. No advanced installation options
+      are discussed here - just the basics that will work for 95% of users who
+      want to get started.</para>
+
+  </abstract>
+
+  <section>
+    <title>What You'll End Up With</title>
+
+    <para>If you follow these instructions, here's what you'll end up
+      with:</para>
+
+    <orderedlist>
+      <listitem>
+        <para>Shinken and the plugins will be installed underneath
+          <filename class="directory">/usr/local/shinken</filename></para>
+      </listitem>
+
+      <listitem>
+        <para>Shinken will be configured to monitor a few aspects of your local
+          system (CPU load, disk usage, etc.)</para>
+      </listitem>
+
+    </orderedlist>
+  </section>
+
+  <section> 
+    <title> Lasy (efficient) admins</title>
+    <para>
+      For lasy (efficient) admins : Remember you can download a already configured
+      Shinken Virtual Machine <ulink url="http://www.megaupload.com/?d=KC4NO09A">here</ulink>.
+    </para>
+  </section>
+
+  <section>
+    <title> Install by packages </title>
+    <para>Curently only a package for Ubuntu 10.04 LTS is available. To install it, just folow theses instructions.</para>
+    <para>Add the mjeanson/ppa repository (with synaptic or below with vi)</para>
+    <screen>
+      <prompt>linux:~ $ </prompt><userinput>sudo vi /etc/apt/sources.list </userinput>
+    </screen>
+    <para> And add the line :</para>
+    <screen>
+      <prompt>linux:~ $ </prompt><userinput>deb http://ppa.launchpad.net/mjeanson/ppa/ubuntu lucid main </userinput>
+    </screen>
+    <para> Then you only need to install the daemons :</para>
+    <screen>
+      <prompt>linux:~ $ </prompt><userinput>sudo apt-get install shinken-arbiter shinken-reactionner shinken-poller shinken-scheduler shinken-broker </userinput>
+    </screen>
+    <para>Then you can modify the configuration in /etc/shinken if you want and start the daemons like in the "Start Shinken" section below.</para>
+  </section>
+    
+  <section>
+    <title>Required Packages</title>
+
+    <para>Make sure you've installed the following packages on your &name-ubuntu;
+      installation before continuing.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>Python >= 2.6</para>
+      </listitem>
+
+      <listitem>
+        <para>Pyro (Python module for distributed objects)</para>
+      </listitem>
+
+      <listitem>
+        <para>Git (For Shinken code download, only if you want to install from fresh sources)</para>
+      </listitem>
+
+
+    </orderedlist>
+
+
+    <para>On a debian based system (like Ubuntu) you can use <command>apt-get</command> to install these packages by running the
+      following commands:</para>
+
+    <screen>
+      <prompt>linux:~ $ </prompt><userinput>sudo apt-get install python pyro git-core</userinput>
+    </screen>
+
+    <para>On a fedora based system (like RedHat) you can use <command>yum</command> to install these packages by running the
+      following commands:</para>
+
+    <screen>
+      <prompt>linux:~ $ </prompt><userinput>yum install python python-pyro git-core</userinput>
+    </screen>
+
+  </section>
+
+  <section>
+    <title>Create Account Information</title>
+
+    <para>Become the root user.</para>
+
+    <screen>
+      <prompt>linux:~ $ </prompt><userinput>sudo -s</userinput>
+    </screen>
+
+    <para>Create a new shinken user account and give it a password.</para>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>/usr/sbin/useradd -m shinken</userinput>
+      <prompt>linux:~ # </prompt><userinput>passwd shinken</userinput>
+    </screen>
+
+    <para>On &name-ubuntu; server edition (9.10 and possible newer versions), you
+      will need to also add a shinken group (it's not created by default). You
+      should be able to skip this step on desktop editions of &name-ubuntu;.</para>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>/usr/sbin/groupadd shinken</userinput>
+      <prompt>linux:~ # </prompt><userinput>/usr/sbin/usermod -G shinken shinken</userinput>
+    </screen>
+
+    <para>Add the apache user to this group to allow external commands to be send from the web interface.</para>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>/usr/sbin/usermod -G shinken www-data</userinput>
+    </screen>
+  </section>
+
+  <section>
+    <title>Download Shinken and the Plugins</title>
+
+    <para>Create a directory for storing the downloads.</para>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>mkdir ~/downloads</userinput>
+      <prompt>linux:~ # </prompt><userinput>cd ~/downloads</userinput>
+    </screen>
+
+    <para>Download the source code of Shinken and the Shinken
+      plugins (visit <ulink url="&url-nagios;download/">&url-nagios;download/</ulink>
+      for links to the latest versions of the plugins). At the time of writing, the latest
+      versions of Shinken and the Shinken plugins were 0.2 and 1.4.13,
+      respectively.</para>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>git clone git://shinken.git.sourceforge.net/gitroot/shinken/shinken</userinput>
+    </screen>
+  </section>
+
+  <section>
+    <title>Install Shinken</title>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>cd shinken</userinput>
+      <prompt>linux:~ # </prompt><userinput>sudo python setup.py install --install-scripts=/usr/bin</userinput>
+    </screen>
+
+    <para>Don't start Shinken yet - there's still more that needs to be done...</para>
+  </section>
+
+  <section>
+    <title>Customize Configuration</title>
+
+    <para>Sample <link linkend="configuringnagios-config">configuration files</link>
+      have now been installed in the <filename class="directory">/etc/shinken/</filename>
+      directory. These sample files should work fine for getting started with
+      Shinken. You'll need to make just one change before you proceed...</para>
+
+    <para>Edit the
+      <filename>/etc/shinken/contacts.cfg</filename> config
+      file with your favorite editor and change the email address associated
+      with the shinkenadmin contact definition to the address you'd like to use
+      for receiving alerts.</para>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>vi /etc/shinken/contacts.cfg</userinput>
+    </screen>
+  </section>
+
+  <section>
+    <title>Install the Nagios Plugins to use with Shinken</title>
+
+    <para>You can download plugins from source, but your debian-like administrator will just will you :</para>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>sudo apt-get install nagios-plugins</userinput>
+    </screen>
+
+  </section>
+
+  <section>
+    <title>Start Shinken</title>
+
+    <para>Configure Shinken to automatically start when the system boots.</para>
+    
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-scheduler /etc/rcS.d/S98shinken-scheduler</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-poller /etc/rcS.d/S98shinken-poller</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-reactionner /etc/rcS.d/S98shinken-reactionner</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-broker /etc/rcS.d/S98shinken-broker</userinput>
+      <prompt>linux:~ # </prompt><userinput>ln -s /etc/init.d/shinken-arbiter /etc/rcS.d/S98shinken-arbiter</userinput>
+    </screen>
+
+    <para>Verify the sample Shinken configuration files.</para>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>/usr/bin/shinken-arbiter.py -v -c /etc/shinken/nagios.cfg -c /etc/shinken/shinken-specific.cfg</userinput>
+    </screen>
+
+    <para>If there are no errors, start Shinken.</para>
+
+    <screen>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-scheduler start</userinput>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-poller start</userinput>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-broker start</userinput>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-reactionner start</userinput>
+      <prompt>linux:~ # </prompt><userinput>/etc/init.d/shinken-arbiter start</userinput>
+    </screen>
+  </section>
+
+  <section>
+    <title>Other Modifications</title>
+
+    <para>If you want to receive email notifications for Shinken alerts, you
+      need to install the mailx (Postfix) package.</para>
+
+    <screen>
+      <prompt>linux:~ $ </prompt><userinput>sudo apt-get install mailx</userinput>
+    </screen>
+
+    <para>You'll have to edit the Shinken email notification commands found in
+      <filename>/etc/shinken/common.cfg</filename> and change any <command>/bin/mail</command>
+      references to <command>/usr/bin/mail</command>. Once you do that you'll need to restart
+      Shinken to make the configuration changes live.</para>
+
+    <screen>
+      <prompt>linux:~ $ </prompt><userinput>sudo /etc/init.d/shinken-arbiter restart</userinput>
+    </screen>
+
+    <para>Configuring email notifications is outside the scope of this
+      documentation. Refer to your system documentation, search the web, or look
+      to the <ulink url="&url-nagios-community;">NagiosCommunity.org wiki</ulink>
+      for specific instructions on configuring your &name-ubuntu; system to send email
+      messages to external addresses.</para>
+  </section>
+</chapter>
+
