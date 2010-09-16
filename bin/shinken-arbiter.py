@@ -279,9 +279,6 @@ class Arbiter(Daemon):
         #************** Change Nagios2 names to Nagios3 ones ******
         self.conf.old_properties_names_to_new()
 
-        #************* Print warning about useless parameters in Shinken **************"
-        self.conf.notice_about_useless_parameters()
-
 	#print "****************** Create Template links **********"
         self.conf.linkify_templates()
 
@@ -322,6 +319,9 @@ class Arbiter(Daemon):
         
         #print "************** Exlode global conf ****************"
         self.conf.explode_global_conf()
+
+        #************* Print warning about useless parameters in Shinken **************"
+        self.conf.notice_about_useless_parameters()
         
         #print "****************** Correct ?******************"
         self.conf.is_correct()
