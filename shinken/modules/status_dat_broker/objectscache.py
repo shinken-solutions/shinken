@@ -49,7 +49,7 @@ class ObjectsCacheFile:
             'host_name' : {'required' : True},
             'alias' : {'required' : False},
             'address' : {'required' : True},
-            'parents' : {'required' : False, 'depythonize' : 'get_name'},
+            'parents' : {'required' : False, 'depythonize' : from_list_to_split},
             'check_period' : {'required' : True, 'depythonize' : 'get_name'},
             'check_command' : {'required' : True, 'depythonize' : 'call'},
             #'contact_groups' : ,
