@@ -49,6 +49,8 @@ class BrokerLink(SatelliteLink):
         self.realm.brokers.append(self)
 
 
+
+
 class BrokerLinks(SatelliteLinks):
     name_property = "name"
     inner_class = BrokerLink

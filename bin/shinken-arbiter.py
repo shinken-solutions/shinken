@@ -217,15 +217,6 @@ class Arbiter(Daemon):
         self.broks[b.id] = b
 
 
-    #Call by brokers to have broks
-    #We give them, and clean them!
-    #def get_broks(self):
-    #    res = self.broks
-    #    #They are gone, we keep none!
-    #    self.broks = {}
-    #    return res
-
-
     #We must push our broks to the broker
     #because it's stupid to make a crossing connexion
     #so we find the broker responbile for our broks,
@@ -241,6 +232,15 @@ class Arbiter(Daemon):
                     #They are gone, we keep none!
                     self.broks = {}
 
+
+    #We must take external_commands from all brokers
+    def get_external_commands_from_brokers(self):
+        for brk in self.conf.brokers:
+            #Get only if alive of course
+            if brk.alive:
+                new_cmds = brk.get_external_commands()
+                for new_cmd in new_cmds:
+                    self.external_commands.append(new_cmd)
 
 
     #Load the external commander
@@ -587,7 +587,7 @@ class Arbiter(Daemon):
                                 self.external_commands.append(ext_cmd)
                             self.fifo = self.external_command.open()
 
-            else:#Timeout
+            else: #Timeout
                 self.dispatcher.check_alive()
                 self.dispatcher.check_dispatch()
                 #REF: doc/shinken-conf-dispatching.png (3)
@@ -596,6 +596,7 @@ class Arbiter(Daemon):
                 #One broker is responsible for our broks,
                 #we must give him our broks
                 self.push_broks_to_broker()
+                self.get_external_commands_from_brokers()
                 #send_conf_to_schedulers()
                 timeout = 1.0
 

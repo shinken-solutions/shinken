@@ -212,6 +212,22 @@ class SatelliteLink(Item):
             return False
 
 
+    def get_external_commands(self):
+        if self.con == None:
+            self.create_connexion()
+        try:
+            return self.con.get_external_commands()
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return []
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return []
+        except AttributeError , exp:
+            print exp
+            return []
+
+
 
     def prepare_for_conf(self):
         self.cfg = { 'global' : {}, 'schedulers' : {}, 'arbiters' : {}}
