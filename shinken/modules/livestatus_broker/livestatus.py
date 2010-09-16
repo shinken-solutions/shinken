@@ -38,7 +38,7 @@ from comment import Comment
 from downtime import Downtime
 from config import Config
 
-from util import from_bool_to_string,from_list_to_split,from_float_to_int,to_int,to_split
+from util import from_bool_to_string,from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
 
 LOGCLASS_INFO         = 0 # all messages not in any other class
 LOGCLASS_ALERT        = 1 # alerts: the change service/host state
@@ -49,6 +49,10 @@ LOGCLASS_COMMAND      = 5 # external commands
 LOGCLASS_STATE        = 6 # initial or current states
 LOGCLASS_INVALID      = -1 # never stored
 LOGCLASS_ALL          = 0xffff
+LOGOBJECT_INFO        = 0 
+LOGOBJECT_HOST        = 1
+LOGOBJECT_SERVICE     = 2
+LOGOBJECT_CONTACT     = 3 
 
 #This is a dirty hack. Service.get_name only returns service_description.
 #For the servicegroup config we need more. host_name + separator + service_description
@@ -57,8 +61,21 @@ def get_full_name(self):
 Service.get_full_name = get_full_name
 
 
-class Log:
-    pass
+class Logline(dict):
+    def __init__(self, cursor, row):
+        for idx, col in enumerate(cursor.description):
+            setattr(self, col[0], row[idx])
+
+    def fill(self, hosts, services, hostname_lookup_table, servicename_lookup_table, columns):
+        if self.logobject == LOGOBJECT_HOST:
+            if self.host_name in hostname_lookup_table:
+                setattr(self, 'log_host', hosts[hostname_lookup_table[self.host_name]])
+        elif self.logobject == LOGOBJECT_SERVICE:
+            if self.host_name in hostname_lookup_table:
+                setattr(self, 'log_host', hosts[hostname_lookup_table[self.host_name]])
+            if self.host_name + self.service_description in servicename_lookup_table:
+                setattr(self, 'log_service', services[servicename_lookup_table[self.host_name + self.service_description]])
+        return self
 
 
 class LiveStatus:
@@ -70,13 +87,13 @@ class LiveStatus:
     out_map = {
         'Host' : {
             'accept_passive_checks' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether passive host checks are accepted (0/1)',
                 'prop' : 'passive_checks_enabled',
                 'type' : 'int',
             },
             'acknowledged' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the current host problem has been acknowledged (0/1)',
                 'prop' : 'problem_has_been_acknowledged',
                 'type' : 'int',
@@ -94,7 +111,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'active_checks_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether active checks are enabled for the host (0/1)',
                 'type' : 'int',
             },
@@ -112,7 +129,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'check_freshness' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether freshness checks are activated (0/1)',
                 'type' : 'int',
             },
@@ -136,7 +153,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'checks_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether checks of the host are enabled (0/1)',
                 'prop' : 'active_checks_enabled',
                 'type' : 'int',
@@ -187,7 +204,7 @@ class LiveStatus:
                 'type' : 'list',
             },
             'event_handler_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether event handling is enabled (0/1)',
                 'type' : 'int',
             },
@@ -202,7 +219,7 @@ class LiveStatus:
                 'type' : 'float',
             },
             'flap_detection_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether flap detection is enabled (0/1)',
                 'type' : 'int',
             },
@@ -218,7 +235,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'has_been_checked' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the host has already been checked (0/1)',
                 'type' : 'int',
             },
@@ -256,7 +273,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'is_flapping' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the host state is flapping (0/1)',
                 'type' : 'int',
             },
@@ -353,7 +370,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'notifications_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether notifications of the host are enabled (0/1)',
                 'type' : 'int',
             },
@@ -418,12 +435,12 @@ class LiveStatus:
                 'type' : 'list',
             },
             'obsess_over_host' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'The current obsess_over_host setting... (0/1)',
                 'type' : 'int',
             },
             'parents' : {
-                'depythonize' : 'get_name',
+                'depythonize' : lambda x: ','.join(x),
                 'description' : 'A list of all direct parents of the host',
                 'type' : 'list',
             },
@@ -445,7 +462,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'process_performance_data' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether processing of performance data is enabled (0/1)',
                 'prop' : 'process_perf_data',
                 'type' : 'int',
@@ -503,13 +520,13 @@ class LiveStatus:
 
         'Service' : {
             'accept_passive_checks' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the service accepts passive checks (0/1)',
                 'prop' : 'passive_checks_enabled',
                 'type' : 'int',
             },
             'acknowledged' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the current service problem has been acknowledged (0/1)',
                 'prop' : 'problem_has_been_acknowledged',
                 'type' : 'int',
@@ -527,7 +544,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'active_checks_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether active checks are enabled for the service (0/1)',
                 'type' : 'int',
             },
@@ -556,7 +573,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'checks_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether active checks are enabled for the service (0/1)',
                 'prop' : 'active_checks_enabled',
                 'type' : 'int',
@@ -609,7 +626,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'event_handler_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether and event handler is activated for the service (0/1)',
                 'type' : 'int',
             },
@@ -624,7 +641,7 @@ class LiveStatus:
                 'type' : 'float',
             },
             'flap_detection_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether flap detection is enabled for the service (0/1)',
                 'type' : 'int',
             },
@@ -636,7 +653,7 @@ class LiveStatus:
                 'type' : 'list',
             },
             'has_been_checked' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the service already has been checked (0/1)',
                 'type' : 'int',
             },
@@ -649,7 +666,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_acknowledged' : {
-                'depythonize' : lambda x: from_bool_to_string(x.problem_has_been_acknowledged),
+                'depythonize' : lambda x: from_bool_to_int(x.problem_has_been_acknowledged),
                 'description' : 'Wether the current host problem has been acknowledged (0/1)',
                 'prop' : 'host',
                 'type' : 'int',
@@ -703,7 +720,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_checks_enabled' : {
-                'depythonize' : lambda x: from_bool_to_string(x.active_checks_enabled),
+                'depythonize' : lambda x: from_bool_to_int(x.active_checks_enabled),
                 'description' : 'Wether checks of the host are enabled (0/1)',
                 'prop' : 'host',
                 'type' : 'int',
@@ -775,7 +792,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_has_been_checked' : {
-                'depythonize' : lambda x: from_bool_to_string(x.has_been_checked),
+                'depythonize' : lambda x: from_bool_to_int(x.has_been_checked),
                 'description' : 'Wether the host has already been checked (0/1)',
                 'prop' : 'host',
                 'type' : 'int',
@@ -814,7 +831,7 @@ class LiveStatus:
             },
             'host_is_flapping' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the host state is flapping (0/1)',
                 'type' : 'int',
             },
@@ -895,7 +912,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'host_notifications_enabled' : {
-                'depythonize' : lambda x: from_bool_to_string(x.notifications_enabled),
+                'depythonize' : lambda x: from_bool_to_int(x.notifications_enabled),
                 'description' : 'Wether notifications of the host are enabled (0/1)',
                 'prop' : 'host',
                 'type' : 'int',
@@ -1067,7 +1084,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'is_flapping' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the service is flapping (0/1)',
                 'type' : 'int',
             },
@@ -1153,12 +1170,12 @@ class LiveStatus:
                 'type' : 'string',
             },
             'notifications_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether notifications are enabled for the service (0/1)',
                 'type' : 'int',
             },
             'obsess_over_service' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether \'obsess_over_service\' is enabled for the service (0/1)',
                 'type' : 'int',
             },
@@ -1176,7 +1193,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'process_performance_data' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether processing of performance data is enabled for the service (0/1)',
                 'prop' : 'process_perf_data',
                 'type' : 'int',
@@ -1476,7 +1493,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'can_submit_commands' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the contact is allowed to submit commands (0/1)',
                 'type' : 'int',
             },
@@ -1498,17 +1515,17 @@ class LiveStatus:
                 'type' : 'string',
             },
             'host_notifications_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the contact will be notified about host problems in general (0/1)',
                 'type' : 'int',
             },
             'in_host_notification_period' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the contact is currently in his/her host notification period (0/1)',
                 'type' : 'int',
             },
             'in_service_notification_period' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the contact is currently in his/her service notification period (0/1)',
                 'type' : 'int',
             },
@@ -1526,7 +1543,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'service_notifications_enabled' : {
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Wether the contact will be notified about service problems in general (0/1)',
                 'type' : 'int',
             },
@@ -1607,7 +1624,7 @@ class LiveStatus:
             },
             'fixed' : {
                 'default' : None,
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'A 1 if the downtime is fixed, a 0 if it is flexible',
                 'prop' : None,
                 'type' : 'int',
@@ -2591,7 +2608,7 @@ class LiveStatus:
             },
             'expires' : {
                 'default' : None,
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether this comment expires',
                 'prop' : None,
                 'type' : 'int',
@@ -3133,7 +3150,7 @@ class LiveStatus:
             },
             'persistent' : {
                 'default' : None,
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether this comment is persistent (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -3546,14 +3563,14 @@ class LiveStatus:
         'Config' : {
             'accept_passive_host_checks' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether passive host checks are accepted in general (0/1)',
                 'prop' : 'passive_host_checks_enabled',
                 'type' : 'int',
             },
             'accept_passive_service_checks' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether passive service checks are activated in general (0/1)',
                 'prop' : 'passive_service_checks_enabled',
                 'type' : 'int',
@@ -3566,21 +3583,21 @@ class LiveStatus:
             },
             'check_external_commands' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether Nagios checks for external commands at its command pipe (0/1)',
                 'prop' : None,
                 'type' : 'int',
             },
             'check_host_freshness' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether host freshness checking is activated in general (0/1)',
                 'prop' : None,
                 'type' : 'int',
             },
             'check_service_freshness' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether service freshness checking is activated in general (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -3599,35 +3616,35 @@ class LiveStatus:
             },
             'enable_event_handlers' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether event handlers are activated in general (0/1)',
                 'prop' : 'event_handlers_enabled',
                 'type' : 'int',
             },
             'enable_flap_detection' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether flap detection is activated in general (0/1)',
                 'prop' : 'flap_detection_enabled',
                 'type' : 'int',
             },
             'enable_notifications' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether notifications are enabled in general (0/1)',
                 'prop' : 'notifications_enabled',
                 'type' : 'int',
             },
             'execute_host_checks' : {
                 'default' : '1',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether host checks are executed in general (0/1)',
                 'prop' : 'active_host_checks_enabled',
                 'type' : 'int',
             },
             'execute_service_checks' : {
                 'default' : '1',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether active service checks are activated in general (0/1)',
                 'prop' : 'active_service_checks_enabled',
                 'type' : 'int',
@@ -3688,21 +3705,21 @@ class LiveStatus:
             },
             'obsess_over_hosts' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether Nagios will obsess over host checks (0/1)',
                 'prop' : None,
                 'type' : 'int',
             },
             'obsess_over_services' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether Nagios will obsess over service checks and run the ocsp_command (0/1)',
                 'prop' : None,
                 'type' : 'int',
             },
             'process_performance_data' : {
                 'default' : '0',
-                'depythonize' : from_bool_to_string,
+                'depythonize' : from_bool_to_int,
                 'description' : 'Whether processing of performance data is activated in general (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -3745,7 +3762,7 @@ class LiveStatus:
             },
         },
 
-        'Log' : {
+        'Logline' : {
             'attempt' : {
                 'description' : 'The number of the check attempt',
                 'type' : 'int',
@@ -4051,7 +4068,10 @@ class LiveStatus:
                 'type' : 'int',
             },
             'current_host_name' : {
+                'default' : '',
+                'depythonize' : lambda x: x.get_name(),
                 'description' : 'Host name',
+                'prop' : 'log_host',
                 'type' : 'string',
             },
             'current_host_next_check' : {
@@ -4275,7 +4295,10 @@ class LiveStatus:
                 'type' : 'list',
             },
             'current_service_description' : {
+                'default' : '',
+                'depythonize' : lambda x: x.get_name(),
                 'description' : 'Description of the service (also used as key)',
+                'prop' : 'log_service',
                 'type' : 'string',
             },
             'current_service_display_name' : {
@@ -4487,7 +4510,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'state' : {
+                'default' : 0,
                 'description' : 'The state of the host or service in question',
+                'prop' : 'state',
                 'type' : 'int',
             },
             'state_type' : {
@@ -4495,7 +4520,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'time' : {
+                'default' : 0,
                 'description' : 'Time of the log event (UNIX timestamp)',
+                'prop' : 'time',
                 'type' : 'int',
             },
             'type' : {
@@ -4504,895 +4531,15 @@ class LiveStatus:
             },
         },
 
-
-    }
-
-    default_attributes = {
-        Host : [
-            'accept_passive_checks',
-            'acknowledged',
-            'acknowledgement_type',
-            'action_url',
-            'action_url_expanded',
-            'active_checks_enabled',
-            'address',
-            'alias',
-            'check_command',
-            'check_freshness',
-            'check_interval',
-            'check_options',
-            'check_period',
-            'check_type',
-            'checks_enabled',
-            'childs',
-            'comments',
-            'contacts',
-            'current_attempt',
-            'current_notification_number',
-            'custom_variable_names',
-            'custom_variable_values',
-            'display_name',
-            'downtimes',
-            'event_handler_enabled',
-            'execution_time',
-            'first_notification_delay',
-            'flap_detection_enabled',
-            'groups',
-            'hard_state',
-            'has_been_checked',
-            'high_flap_threshold',
-            'icon_image',
-            'icon_image_alt',
-            'icon_image_expanded',
-            'in_check_period',
-            'in_notification_period',
-            'initial_state',
-            'is_executing',
-            'is_flapping',
-            'last_check',
-            'last_hard_state',
-            'last_hard_state_change',
-            'last_notification',
-            'last_state',
-            'last_state_change',
-            'latency',
-            'long_plugin_output',
-            'low_flap_threshold',
-            'max_check_attempts',
-            'name',
-            'next_check',
-            'next_notification',
-            'notes',
-            'notes_expanded',
-            'notes_url',
-            'notes_url_expanded',
-            'notification_interval',
-            'notification_period',
-            'notifications_enabled',
-            'num_services',
-            'num_services_crit',
-            'num_services_hard_crit',
-            'num_services_hard_ok',
-            'num_services_hard_unknown',
-            'num_services_hard_warn',
-            'num_services_ok',
-            'num_services_pending',
-            'num_services_unknown',
-            'num_services_warn',
-            'obsess_over_host',
-            'parents',
-            'pending_flex_downtime',
-            'percent_state_change',
-            'perf_data',
-            'plugin_output',
-            'process_performance_data',
-            'retry_interval',
-            'scheduled_downtime_depth',
-            'state',
-            'state_type',
-            'statusmap_image',
-            'total_services',
-            'worst_service_hard_state',
-            'worst_service_state',
-            'x_3d',
-            'y_3d',
-            'z_3d',
-        ],
-        Service : [
-            'accept_passive_checks',
-            'acknowledged',
-            'acknowledgement_type',
-            'action_url',
-            'action_url_expanded',
-            'active_checks_enabled',
-            'check_command',
-            'check_interval',
-            'check_options',
-            'check_period',
-            'check_type',
-            'checks_enabled',
-            'comments',
-            'contacts',
-            'current_attempt',
-            'current_notification_number',
-            'custom_variable_names',
-            'custom_variable_values',
-            'description',
-            'display_name',
-            'downtimes',
-            'event_handler',
-            'event_handler_enabled',
-            'execution_time',
-            'first_notification_delay',
-            'flap_detection_enabled',
-            'groups',
-            'has_been_checked',
-            'high_flap_threshold',
-            'host_accept_passive_checks',
-            'host_acknowledged',
-            'host_acknowledgement_type',
-            'host_action_url',
-            'host_action_url_expanded',
-            'host_active_checks_enabled',
-            'host_address',
-            'host_alias',
-            'host_check_command',
-            'host_check_freshness',
-            'host_check_interval',
-            'host_check_options',
-            'host_check_period',
-            'host_check_type',
-            'host_checks_enabled',
-            'host_childs',
-            'host_comments',
-            'host_contacts',
-            'host_current_attempt',
-            'host_current_notification_number',
-            'host_custom_variable_names',
-            'host_custom_variable_values',
-            'host_display_name',
-            'host_downtimes',
-            'host_event_handler_enabled',
-            'host_execution_time',
-            'host_first_notification_delay',
-            'host_flap_detection_enabled',
-            'host_groups',
-            'host_hard_state',
-            'host_has_been_checked',
-            'host_high_flap_threshold',
-            'host_icon_image',
-            'host_icon_image_alt',
-            'host_icon_image_expanded',
-            'host_in_check_period',
-            'host_in_notification_period',
-            'host_initial_state',
-            'host_is_executing',
-            'host_is_flapping',
-            'host_last_check',
-            'host_last_hard_state',
-            'host_last_hard_state_change',
-            'host_last_notification',
-            'host_last_state',
-            'host_last_state_change',
-            'host_latency',
-            'host_long_plugin_output',
-            'host_low_flap_threshold',
-            'host_max_check_attempts',
-            'host_name',
-            'host_next_check',
-            'host_next_notification',
-            'host_notes',
-            'host_notes_expanded',
-            'host_notes_url',
-            'host_notes_url_expanded',
-            'host_notification_interval',
-            'host_notification_period',
-            'host_notifications_enabled',
-            'host_num_services',
-            'host_num_services_crit',
-            'host_num_services_hard_crit',
-            'host_num_services_hard_ok',
-            'host_num_services_hard_unknown',
-            'host_num_services_hard_warn',
-            'host_num_services_ok',
-            'host_num_services_pending',
-            'host_num_services_unknown',
-            'host_num_services_warn',
-            'host_obsess_over_host',
-            'host_parents',
-            'host_pending_flex_downtime',
-            'host_percent_state_change',
-            'host_perf_data',
-            'host_plugin_output',
-            'host_process_performance_data',
-            'host_retry_interval',
-            'host_scheduled_downtime_depth',
-            'host_state',
-            'host_state_type',
-            'host_statusmap_image',
-            'host_total_services',
-            'host_worst_service_hard_state',
-            'host_worst_service_state',
-            'host_x_3d',
-            'host_y_3d',
-            'host_z_3d',
-            'icon_image',
-            'icon_image_alt',
-            'icon_image_expanded',
-            'in_check_period',
-            'in_notification_period',
-            'initial_state',
-            'is_executing',
-            'is_flapping',
-            'last_check',
-            'last_hard_state',
-            'last_hard_state_change',
-            'last_notification',
-            'last_state',
-            'last_state_change',
-            'latency',
-            'long_plugin_output',
-            'low_flap_threshold',
-            'max_check_attempts',
-            'next_check',
-            'next_notification',
-            'notes',
-            'notes_expanded',
-            'notes_url',
-            'notes_url_expanded',
-            'notification_interval',
-            'notification_period',
-            'notifications_enabled',
-            'obsess_over_service',
-            'percent_state_change',
-            'perf_data',
-            'plugin_output',
-            'process_performance_data',
-            'retry_interval',
-            'scheduled_downtime_depth',
-            'state',
-            'state_type',
-        ],
-        Contact : [
-            'address1',
-            'address2',
-            'address3',
-            'address4',
-            'address5',
-            'address6',
-            'alias',
-            'can_submit_commands',
-            'custom_variable_names',
-            'custom_variable_values',
-            'email',
-            'host_notification_period',
-            'host_notifications_enabled',
-            'in_host_notification_period',
-            'in_service_notification_period',
-            'name',
-            'pager',
-            'service_notification_period',
-            'service_notifications_enabled',
-        ],
-        Hostgroup : [
-            'action_url',
-            'alias',
-            'members',
-            'name',
-            'notes',
-            'notes_url',
-            'num_hosts',
-            'num_hosts_down',
-            'num_hosts_pending',
-            'num_hosts_unreach',
-            'num_hosts_up',
-            'num_services',
-            'num_services_crit',
-            'num_services_hard_crit',
-            'num_services_hard_ok',
-            'num_services_hard_unknown',
-            'num_services_hard_warn',
-            'num_services_ok',
-            'num_services_pending',
-            'num_services_unknown',
-            'num_services_warn',
-            'worst_host_state',
-            'worst_service_hard_state',
-            'worst_service_state',
-        ],
-        Servicegroup : [
-            'action_url',
-            'alias',
-            'members',
-            'name',
-            'notes',
-            'notes_url',
-            'num_services',
-            'num_services_crit',
-            'num_services_hard_crit',
-            'num_services_hard_ok',
-            'num_services_hard_unknown',
-            'num_services_hard_warn',
-            'num_services_ok',
-            'num_services_pending',
-            'num_services_unknown',
-            'num_services_warn',
-            'worst_service_state',
-        ],
-        Contactgroup : [
-            'alias',
-            'members',
-            'name',
-        ],
-        Timeperiod : [
-            'alias',
-            'name',
-        ],
-        Downtime : [
-            'author',
-            'comment',
-            'duration',
-            'end_time',
-            'entry_time',
-            'fixed',
-            'host_accept_passive_checks',
-            'host_acknowledged',
-            'host_acknowledgement_type',
-            'host_action_url',
-            'host_action_url_expanded',
-            'host_active_checks_enabled',
-            'host_address',
-            'host_alias',
-            'host_check_command',
-            'host_check_freshness',
-            'host_check_interval',
-            'host_check_options',
-            'host_check_period',
-            'host_check_type',
-            'host_checks_enabled',
-            'host_childs',
-            'host_comments',
-            'host_contacts',
-            'host_current_attempt',
-            'host_current_notification_number',
-            'host_custom_variable_names',
-            'host_custom_variable_values',
-            'host_display_name',
-            'host_downtimes',
-            'host_event_handler_enabled',
-            'host_execution_time',
-            'host_first_notification_delay',
-            'host_flap_detection_enabled',
-            'host_groups',
-            'host_hard_state',
-            'host_has_been_checked',
-            'host_high_flap_threshold',
-            'host_icon_image',
-            'host_icon_image_alt',
-            'host_icon_image_expanded',
-            'host_in_check_period',
-            'host_in_notification_period',
-            'host_initial_state',
-            'host_is_executing',
-            'host_is_flapping',
-            'host_last_check',
-            'host_last_hard_state',
-            'host_last_hard_state_change',
-            'host_last_notification',
-            'host_last_state',
-            'host_last_state_change',
-            'host_latency',
-            'host_long_plugin_output',
-            'host_low_flap_threshold',
-            'host_max_check_attempts',
-            'host_name',
-            'host_next_check',
-            'host_next_notification',
-            'host_notes',
-            'host_notes_expanded',
-            'host_notes_url',
-            'host_notes_url_expanded',
-            'host_notification_interval',
-            'host_notification_period',
-            'host_notifications_enabled',
-            'host_num_services',
-            'host_num_services_crit',
-            'host_num_services_hard_crit',
-            'host_num_services_hard_ok',
-            'host_num_services_hard_unknown',
-            'host_num_services_hard_warn',
-            'host_num_services_ok',
-            'host_num_services_pending',
-            'host_num_services_unknown',
-            'host_num_services_warn',
-            'host_obsess_over_host',
-            'host_parents',
-            'host_pending_flex_downtime',
-            'host_percent_state_change',
-            'host_perf_data',
-            'host_plugin_output',
-            'host_process_performance_data',
-            'host_retry_interval',
-            'host_scheduled_downtime_depth',
-            'host_state',
-            'host_state_type',
-            'host_statusmap_image',
-            'host_total_services',
-            'host_worst_service_hard_state',
-            'host_worst_service_state',
-            'host_x_3d',
-            'host_y_3d',
-            'host_z_3d',
-            'id',
-            'service_accept_passive_checks',
-            'service_acknowledged',
-            'service_acknowledgement_type',
-            'service_action_url',
-            'service_action_url_expanded',
-            'service_active_checks_enabled',
-            'service_check_command',
-            'service_check_interval',
-            'service_check_options',
-            'service_check_period',
-            'service_check_type',
-            'service_checks_enabled',
-            'service_comments',
-            'service_contacts',
-            'service_current_attempt',
-            'service_current_notification_number',
-            'service_custom_variable_names',
-            'service_custom_variable_values',
-            'service_description',
-            'service_display_name',
-            'service_downtimes',
-            'service_event_handler',
-            'service_event_handler_enabled',
-            'service_execution_time',
-            'service_first_notification_delay',
-            'service_flap_detection_enabled',
-            'service_groups',
-            'service_has_been_checked',
-            'service_high_flap_threshold',
-            'service_icon_image',
-            'service_icon_image_alt',
-            'service_icon_image_expanded',
-            'service_in_check_period',
-            'service_in_notification_period',
-            'service_initial_state',
-            'service_is_executing',
-            'service_is_flapping',
-            'service_last_check',
-            'service_last_hard_state',
-            'service_last_hard_state_change',
-            'service_last_notification',
-            'service_last_state',
-            'service_last_state_change',
-            'service_latency',
-            'service_long_plugin_output',
-            'service_low_flap_threshold',
-            'service_max_check_attempts',
-            'service_next_check',
-            'service_next_notification',
-            'service_notes',
-            'service_notes_expanded',
-            'service_notes_url',
-            'service_notes_url_expanded',
-            'service_notification_interval',
-            'service_notification_period',
-            'service_notifications_enabled',
-            'service_obsess_over_service',
-            'service_percent_state_change',
-            'service_perf_data',
-            'service_plugin_output',
-            'service_process_performance_data',
-            'service_retry_interval',
-            'service_scheduled_downtime_depth',
-            'service_state',
-            'service_state_type',
-            'start_time',
-            'triggered_by',
-            'type',
-        ],
-        Comment : [
-            'author',
-            'comment',
-            'entry_time',
-            'entry_type',
-            'expire_time',
-            'expires',
-            'host_accept_passive_checks',
-            'host_acknowledged',
-            'host_acknowledgement_type',
-            'host_action_url',
-            'host_action_url_expanded',
-            'host_active_checks_enabled',
-            'host_address',
-            'host_alias',
-            'host_check_command',
-            'host_check_freshness',
-            'host_check_interval',
-            'host_check_options',
-            'host_check_period',
-            'host_check_type',
-            'host_checks_enabled',
-            'host_childs',
-            'host_comments',
-            'host_contacts',
-            'host_current_attempt',
-            'host_current_notification_number',
-            'host_custom_variable_names',
-            'host_custom_variable_values',
-            'host_display_name',
-            'host_downtimes',
-            'host_event_handler_enabled',
-            'host_execution_time',
-            'host_first_notification_delay',
-            'host_flap_detection_enabled',
-            'host_groups',
-            'host_hard_state',
-            'host_has_been_checked',
-            'host_high_flap_threshold',
-            'host_icon_image',
-            'host_icon_image_alt',
-            'host_icon_image_expanded',
-            'host_in_check_period',
-            'host_in_notification_period',
-            'host_initial_state',
-            'host_is_executing',
-            'host_is_flapping',
-            'host_last_check',
-            'host_last_hard_state',
-            'host_last_hard_state_change',
-            'host_last_notification',
-            'host_last_state',
-            'host_last_state_change',
-            'host_latency',
-            'host_long_plugin_output',
-            'host_low_flap_threshold',
-            'host_max_check_attempts',
-            'host_name',
-            'host_next_check',
-            'host_next_notification',
-            'host_notes',
-            'host_notes_expanded',
-            'host_notes_url',
-            'host_notes_url_expanded',
-            'host_notification_interval',
-            'host_notification_period',
-            'host_notifications_enabled',
-            'host_num_services',
-            'host_num_services_crit',
-            'host_num_services_hard_crit',
-            'host_num_services_hard_ok',
-            'host_num_services_hard_unknown',
-            'host_num_services_hard_warn',
-            'host_num_services_ok',
-            'host_num_services_pending',
-            'host_num_services_unknown',
-            'host_num_services_warn',
-            'host_obsess_over_host',
-            'host_parents',
-            'host_pending_flex_downtime',
-            'host_percent_state_change',
-            'host_perf_data',
-            'host_plugin_output',
-            'host_process_performance_data',
-            'host_retry_interval',
-            'host_scheduled_downtime_depth',
-            'host_state',
-            'host_state_type',
-            'host_statusmap_image',
-            'host_total_services',
-            'host_worst_service_hard_state',
-            'host_worst_service_state',
-            'host_x_3d',
-            'host_y_3d',
-            'host_z_3d',
-            'id',
-            'persistent',
-            'service_accept_passive_checks',
-            'service_acknowledged',
-            'service_acknowledgement_type',
-            'service_action_url',
-            'service_action_url_expanded',
-            'service_active_checks_enabled',
-            'service_check_command',
-            'service_check_interval',
-            'service_check_options',
-            'service_check_period',
-            'service_check_type',
-            'service_checks_enabled',
-            'service_comments',
-            'service_contacts',
-            'service_current_attempt',
-            'service_current_notification_number',
-            'service_custom_variable_names',
-            'service_custom_variable_values',
-            'service_description',
-            'service_display_name',
-            'service_downtimes',
-            'service_event_handler',
-            'service_event_handler_enabled',
-            'service_execution_time',
-            'service_first_notification_delay',
-            'service_flap_detection_enabled',
-            'service_groups',
-            'service_has_been_checked',
-            'service_high_flap_threshold',
-            'service_icon_image',
-            'service_icon_image_alt',
-            'service_icon_image_expanded',
-            'service_in_check_period',
-            'service_in_notification_period',
-            'service_initial_state',
-            'service_is_executing',
-            'service_is_flapping',
-            'service_last_check',
-            'service_last_hard_state',
-            'service_last_hard_state_change',
-            'service_last_notification',
-            'service_last_state',
-            'service_last_state_change',
-            'service_latency',
-            'service_long_plugin_output',
-            'service_low_flap_threshold',
-            'service_max_check_attempts',
-            'service_next_check',
-            'service_next_notification',
-            'service_notes',
-            'service_notes_expanded',
-            'service_notes_url',
-            'service_notes_url_expanded',
-            'service_notification_interval',
-            'service_notification_period',
-            'service_notifications_enabled',
-            'service_obsess_over_service',
-            'service_percent_state_change',
-            'service_perf_data',
-            'service_plugin_output',
-            'service_process_performance_data',
-            'service_retry_interval',
-            'service_scheduled_downtime_depth',
-            'service_state',
-            'service_state_type',
-            'source',
-            'type',
-        ],
-        Config : [
-            'accept_passive_host_checks',
-            'accept_passive_service_checks',
-            'cached_log_messages',
-            'check_external_commands',
-            'check_host_freshness',
-            'check_service_freshness',
-            'connections',
-            'connections_rate',
-            'enable_event_handlers',
-            'enable_flap_detection',
-            'enable_notifications',
-            'execute_host_checks',
-            'execute_service_checks',
-            'host_checks',
-            'host_checks_rate',
-            'interval_length',
-            'last_command_check',
-            'last_log_rotation',
-            'livestatus_version',
-            'nagios_pid',
-            'neb_callbacks',
-            'neb_callbacks_rate',
-            'obsess_over_hosts',
-            'obsess_over_services',
-            'process_performance_data',
-            'program_start',
-            'program_version',
-            'requests',
-            'requests_rate',
-            'service_checks',
-            'service_checks_rate',
-        ],
-        Command : [
-            'line',
-            'name',
-        ],
-        Log : [
-            'attempt',
-            'class',
-            'command_name',
-            'comment',
-            'contact_name',
-            'current_command_line',
-            'current_command_name',
-            'current_contact_address1',
-            'current_contact_address2',
-            'current_contact_address3',
-            'current_contact_address4',
-            'current_contact_address5',
-            'current_contact_address6',
-            'current_contact_alias',
-            'current_contact_can_submit_commands',
-            'current_contact_custom_variable_names',
-            'current_contact_custom_variable_values',
-            'current_contact_email',
-            'current_contact_host_notification_period',
-            'current_contact_host_notifications_enabled',
-            'current_contact_in_host_notification_period',
-            'current_contact_in_service_notification_period',
-            'current_contact_name',
-            'current_contact_pager',
-            'current_contact_service_notification_period',
-            'current_contact_service_notifications_enabled',
-            'current_host_accept_passive_checks',
-            'current_host_acknowledged',
-            'current_host_acknowledgement_type',
-            'current_host_action_url',
-            'current_host_action_url_expanded',
-            'current_host_active_checks_enabled',
-            'current_host_address',
-            'current_host_alias',
-            'current_host_check_command',
-            'current_host_check_freshness',
-            'current_host_check_interval',
-            'current_host_check_options',
-            'current_host_check_period',
-            'current_host_check_type',
-            'current_host_checks_enabled',
-            'current_host_childs',
-            'current_host_comments',
-            'current_host_contacts',
-            'current_host_current_attempt',
-            'current_host_current_notification_number',
-            'current_host_custom_variable_names',
-            'current_host_custom_variable_values',
-            'current_host_display_name',
-            'current_host_downtimes',
-            'current_host_event_handler_enabled',
-            'current_host_execution_time',
-            'current_host_first_notification_delay',
-            'current_host_flap_detection_enabled',
-            'current_host_groups',
-            'current_host_hard_state',
-            'current_host_has_been_checked',
-            'current_host_high_flap_threshold',
-            'current_host_icon_image',
-            'current_host_icon_image_alt',
-            'current_host_icon_image_expanded',
-            'current_host_in_check_period',
-            'current_host_in_notification_period',
-            'current_host_initial_state',
-            'current_host_is_executing',
-            'current_host_is_flapping',
-            'current_host_last_check',
-            'current_host_last_hard_state',
-            'current_host_last_hard_state_change',
-            'current_host_last_notification',
-            'current_host_last_state',
-            'current_host_last_state_change',
-            'current_host_latency',
-            'current_host_long_plugin_output',
-            'current_host_low_flap_threshold',
-            'current_host_max_check_attempts',
-            'current_host_name',
-            'current_host_next_check',
-            'current_host_next_notification',
-            'current_host_notes',
-            'current_host_notes_expanded',
-            'current_host_notes_url',
-            'current_host_notes_url_expanded',
-            'current_host_notification_interval',
-            'current_host_notification_period',
-            'current_host_notifications_enabled',
-            'current_host_num_services',
-            'current_host_num_services_crit',
-            'current_host_num_services_hard_crit',
-            'current_host_num_services_hard_ok',
-            'current_host_num_services_hard_unknown',
-            'current_host_num_services_hard_warn',
-            'current_host_num_services_ok',
-            'current_host_num_services_pending',
-            'current_host_num_services_unknown',
-            'current_host_num_services_warn',
-            'current_host_obsess_over_host',
-            'current_host_parents',
-            'current_host_pending_flex_downtime',
-            'current_host_percent_state_change',
-            'current_host_perf_data',
-            'current_host_plugin_output',
-            'current_host_process_performance_data',
-            'current_host_retry_interval',
-            'current_host_scheduled_downtime_depth',
-            'current_host_state',
-            'current_host_state_type',
-            'current_host_statusmap_image',
-            'current_host_total_services',
-            'current_host_worst_service_hard_state',
-            'current_host_worst_service_state',
-            'current_host_x_3d',
-            'current_host_y_3d',
-            'current_host_z_3d',
-            'current_service_accept_passive_checks',
-            'current_service_acknowledged',
-            'current_service_acknowledgement_type',
-            'current_service_action_url',
-            'current_service_action_url_expanded',
-            'current_service_active_checks_enabled',
-            'current_service_check_command',
-            'current_service_check_interval',
-            'current_service_check_options',
-            'current_service_check_period',
-            'current_service_check_type',
-            'current_service_checks_enabled',
-            'current_service_comments',
-            'current_service_contacts',
-            'current_service_current_attempt',
-            'current_service_current_notification_number',
-            'current_service_custom_variable_names',
-            'current_service_custom_variable_values',
-            'current_service_description',
-            'current_service_display_name',
-            'current_service_downtimes',
-            'current_service_event_handler',
-            'current_service_event_handler_enabled',
-            'current_service_execution_time',
-            'current_service_first_notification_delay',
-            'current_service_flap_detection_enabled',
-            'current_service_groups',
-            'current_service_has_been_checked',
-            'current_service_high_flap_threshold',
-            'current_service_icon_image',
-            'current_service_icon_image_alt',
-            'current_service_icon_image_expanded',
-            'current_service_in_check_period',
-            'current_service_in_notification_period',
-            'current_service_initial_state',
-            'current_service_is_executing',
-            'current_service_is_flapping',
-            'current_service_last_check',
-            'current_service_last_hard_state',
-            'current_service_last_hard_state_change',
-            'current_service_last_notification',
-            'current_service_last_state',
-            'current_service_last_state_change',
-            'current_service_latency',
-            'current_service_long_plugin_output',
-            'current_service_low_flap_threshold',
-            'current_service_max_check_attempts',
-            'current_service_next_check',
-            'current_service_next_notification',
-            'current_service_notes',
-            'current_service_notes_expanded',
-            'current_service_notes_url',
-            'current_service_notes_url_expanded',
-            'current_service_notification_interval',
-            'current_service_notification_period',
-            'current_service_notifications_enabled',
-            'current_service_obsess_over_service',
-            'current_service_percent_state_change',
-            'current_service_perf_data',
-            'current_service_plugin_output',
-            'current_service_process_performance_data',
-            'current_service_retry_interval',
-            'current_service_scheduled_downtime_depth',
-            'current_service_state',
-            'current_service_state_type',
-            'host_name',
-            'lineno',
-            'message',
-            'options',
-            'plugin_output',
-            'service_description',
-            'state',
-            'state_type',
-            'time',
-            'type',
-        ],
     }
 
 
-    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, dbconn):
+    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, dbconn):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
         self.configs = configs
+        self.hostname_lookup_table = hostname_lookup_table
+        self.servicename_lookup_table = servicename_lookup_table
         self.hosts = hosts
         self.services = services
         self.contacts = contacts
@@ -5403,6 +4550,7 @@ class LiveStatus:
         self.commands = commands
         self.dbconn = dbconn
         self.debuglevel = 2
+        self.dbconn.row_factory = self.row_factory
 
 
     def debug(self, debuglevel, message):
@@ -5428,10 +4576,15 @@ class LiveStatus:
             'commands' : LiveStatus.out_map['Command'],
             'timeperiods' : LiveStatus.out_map['Timeperiod'],
             'status' : LiveStatus.out_map['Config'],
-            'log' : LiveStatus.out_map['Log']
+            'log' : LiveStatus.out_map['Logline']
         }[table]
-        if attribute in out_map and 'converter' in out_map[attribute]:
-            return out_map[attribute]['converter']
+        if attribute in out_map and 'type' in out_map[attribute]:
+            if out_map[attribute]['type'] == 'int':
+                return int
+            elif out_map[attribute]['type'] == 'float':
+                return float
+        #if attribute in out_map and 'converter' in out_map[attribute]:
+        #    return out_map[attribute]['converter']
         return None
 
 
@@ -5513,14 +4666,14 @@ class LiveStatus:
                     # 1. Walk through the complete list of hosts, but only resolve those attributes
                     #    which are needed for the filtering
                     #    Hopefully after this step there are only a few host objects left
-                    prefiltresult = [x for x in self.hosts.values() if filter_stack(self.create_output(x, [], filtercolumns))]
+                    prefiltresult = (x for x in self.hosts.values() if filter_stack(self.create_output(x, [], filtercolumns)))
                     # 2. Then take the remaining objects and resolve the whole list of attributes (which may be a lot if there was no short Columns: list)
                     filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'services':
                 if len(filtercolumns) == 0:
                     filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.services.values()] if filter_stack(y)]
                 else:
-                    prefiltresult = [x for x in self.services.values() if filter_stack(self.create_output(x, [], filtercolumns))]
+                    prefiltresult = (x for x in self.services.values() if filter_stack(self.create_output(x, [], filtercolumns)))
                     filtresult = [self.create_output(x, columns, []) for x in prefiltresult]
             elif table == 'downtimes':
                 if len(filtercolumns) == 0:
@@ -5565,6 +4718,9 @@ class LiveStatus:
         elif table == 'contacts':
             for c in self.contacts.values():
                 result.append(self.create_output(c, columns, filtercolumns))
+        elif table == 'commands':
+            for c in self.commands.values():
+                result.append(self.create_output(c, columns, filtercolumns))
         elif table == 'status':
             for c in self.configs.values():
                 result.append(self.create_output(c, columns, filtercolumns))
@@ -5577,52 +4733,40 @@ class LiveStatus:
                 'description' : 'The name of the table' , 'name' : 'table' , 'table' : 'columns' , 'type' : 'string' })
             result.append({ 
                 'description' : 'The data type of the column (int, float, string, list)' , 'name' : 'type' , 'table' : 'columns' , 'type' : 'string' })
-            tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Log' : 'log' }
+            tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Logline' : 'log' }
             for obj in sorted(LiveStatus.out_map, key=lambda x: x.__name__):
                 if obj.__name__ in tablenames:
                     for attr in LiveStatus.out_map[obj]:
                         result.append({ 'description' : LiveStatus.out_map[obj][attr]['description'] if 'description' in LiveStatus.out_map[obj][attr] and LiveStatus.out_map[obj][attr]['description'] else 'to_do_desc', 'name' : attr, 'table' : tablenames[obj.__name__], 'type' : LiveStatus.out_map[obj][attr]['type'] })
-        elif table == 'log':
-            if len(filtercolumns) == 0:
-                c = self.dbconn.cursor()
-                c.execute('SELECT * FROM logs WHERE message like \'%SERVICE ALERT%\'')
-                #result = c.fetchall()
-                result = [c.fetchone()]
-                print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-                for res in result:
-                    print res
-                    print res.keys()
-                    for k in res.keys():
-                        print "%s is %s\n" % (k, res[k])
-                print "-------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-            else:
-                print "filter_stack is", filter_stack
-                filter_clause, filter_values = filter_stack()
-                print "clause", filter_clause
-                print "values", filter_values
-                print "columns", columns
-                if len(columns) == 0:
-                    columns = '*' 
-                c = self.dbconn.cursor()
-                try:
-                    print "sql:", 'SELECT %s FROM logs WHERE %s' % (','.join(columns), filter_clause)
-                    c.execute('SELECT %s FROM logs WHERE %s' % (','.join(columns), filter_clause), filter_values)
-                except sqlite3.Error, e:
-                    print "An error occurred:", e.args[0]
 
-                result = c.fetchall()
-                #result = [c.fetchone()]
-                print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-                print "result", result
-                for res in result:
-                    print res
-                    print res.keys()
-                    for k in res.keys():
-                        print "%s is %s\n" % (k, res[k])
-                print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-                pass
-            # CREATE TABLE IF NOT EXISTS logs(attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options INT, plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))
-        print "result is", result
+        #print "result is", result
+        return result
+
+
+    def get_live_data_log(self, table, columns, filtercolumns, filter_stack, sql_filter_stack):
+        result = []
+        if table == 'log':
+            # we can apply the filterstack here as well. we have columns and filtercolumns.
+            # the only additional step is to enrich log lines with host/service-attributes
+            # a timerange can be useful for a faster preselection of lines
+            filter_clause, filter_values = sql_filter_stack()
+            c = self.dbconn.cursor()
+            try:
+                #print "sql:", 'SELECT * FROM logs WHERE %s' % (filter_clause)
+                c.execute('SELECT * FROM logs WHERE %s' % filter_clause, filter_values)
+            except sqlite3.Error, e:
+                print "An error occurred:", e.args[0]
+            prefiltresult = []
+            dbresult = c.fetchall()
+            # make a generator: fill in the missing columns in the logline and filter it with filtercolumns
+            prefiltresult = (y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(columns + filtercolumns)) for x in dbresult) if filter_stack(self.create_output(y, [], filtercolumns)))
+            # add output columns
+            filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+            result = filtresult
+            pass
+            # CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options INT, plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))
+
+        #print "result is", result
         return result
 
 
@@ -5683,8 +4827,6 @@ class LiveStatus:
             return ref[attribute].lower() == reference.lower()
 
         def ne_filter(ref):
-            if type(ref[attribute]) != type(reference):
-                print "ne mismatch", attribute, type(ref[attribute]), ref[attribute], "!=", type(reference), reference
             return ref[attribute] != reference
 
         def gt_filter(ref):
@@ -5752,7 +4894,7 @@ class LiveStatus:
         elif operator == '<':
             return gt_filter
         elif operator == '<=':
-            return ge_contains_filter
+            return le_filter
         elif operator == '=~':
             return eq_nocase_filter
         elif operator == '~':
@@ -5864,6 +5006,14 @@ class LiveStatus:
             return match_filter
 
 
+    def get_sql_filter_stack(self, filter_stack):
+        if filter_stack.qsize() == 0:
+            return ["1 = ?", 1]
+        else:
+            return filter_stack.get()
+        pass
+
+
     def and_sql_filter_stack(self, num, filter_stack):
         filters = []
         for i in range(int(num)):
@@ -5906,6 +5056,7 @@ class LiveStatus:
         # Initialize the stacks which are needed for the Filter: and Stats:
         # filter- and count-operations
         filter_stack = Queue.LifoQueue()
+        sql_filter_stack = Queue.LifoQueue()
         stats_filter_stack = Queue.LifoQueue()
         stats_postprocess_stack = Queue.LifoQueue()
         for line in data.splitlines():
@@ -5942,14 +5093,10 @@ class LiveStatus:
                     converter = self.find_converter(table, attribute)
                     if converter:
                         reference = converter(reference)
+                    filter_stack.put(self.make_filter(operator, attribute, reference))
                     if table == 'log':
-                        if attribute.startswith('current_'):
-                            pass
-                            #filter_stack.put(self.make_filter(operator, attribute[:8], reference))
-                        else:
-                            filter_stack.put(self.make_sql_filter(operator, attribute, reference))
-                    else:
-                        filter_stack.put(self.make_filter(operator, attribute, reference))
+                        if attribute == 'time':
+                            sql_filter_stack.put(self.make_sql_filter(operator, attribute, reference))
                 else:
                     print "illegal operation", operator
                     pass # illegal operation
@@ -5958,19 +5105,13 @@ class LiveStatus:
                 # Take the last andnum functions from the stack
                 # Construct a new function which makes a logical and
                 # Put the function back onto the stack
-                if table == 'log':
-                    filter_stack = self.and_sql_filter_stack(andnum, filter_stack)
-                else:
-                    filter_stack = self.and_filter_stack(andnum, filter_stack)
+                filter_stack = self.and_filter_stack(andnum, filter_stack)
             elif line.find('Or: ', 0, 4) != -1:
                 cmd, ornum = line.split(' ', 1)
                 # Take the last ornum functions from the stack
                 # Construct a new function which makes a logical or
                 # Put the function back onto the stack
-                if table == 'log':
-                    filter_stack = self.or_sql_filter_stack(ornum, filter_stack)
-                else:
-                    filter_stack = self.or_filter_stack(ornum, filter_stack)
+                filter_stack = self.or_filter_stack(ornum, filter_stack)
             elif line.find('StatsGroupBy: ') != -1:
                 cmd, groupby = line.split(' ', 1)
                 filtercolumns.append(groupby)
@@ -6030,27 +5171,33 @@ class LiveStatus:
                     print "Unable to open/write the external command pipe"
             return '\n'
         else:
+            # make filtercolumns unique
+            filtercolumns = list(set(filtercolumns))
             if filter_stack.qsize() > 1:
                 #If we have Filter: statements but no FilterAnd/Or statements
                 #Make one big filter where the single filters are anded
-                if table == 'log':
-                    filter_stack = self.and_sql_filter_stack(filter_stack.qsize(), filter_stack)
-                else:
-                    filter_stack = self.and_filter_stack(filter_stack.qsize(), filter_stack)
+                filter_stack = self.and_filter_stack(filter_stack.qsize(), filter_stack)
             try:
                 #Get the function which implements the Filter: statements
                 simplefilter_stack = self.get_filter_stack(filter_stack)
-                #Get the function which implements the Stats: statements
-                stats = stats_filter_stack.qsize()
-                #Apply the filters on the broker's host/service/etc elements
-                result = self.get_live_data(table, columns, filtercolumns, simplefilter_stack, stats_filter_stack, stats_postprocess_stack)
-                if stats > 0:
-                    columns = range(stats)
-                    if len(aliases) == 0:
-                        #If there were Stats: staments without "as", show no column headers at all
-                        columnheaders = 'off'
-                    else:
-                        columnheaders = 'on'
+                if table == 'log':
+                    if sql_filter_stack.qsize() > 1:
+                        sql_filter_stack = self.and_sql_filter_stack(sql_filter_stack.qsize(), sql_filter_stack)
+                    sql_simplefilter_stack = self.get_sql_filter_stack(sql_filter_stack)
+                    result = self.get_live_data_log(table, columns, filtercolumns, simplefilter_stack, sql_simplefilter_stack)
+                else:
+                    #Get the function which implements the Stats: statements
+                    stats = stats_filter_stack.qsize()
+                    #Apply the filters on the broker's host/service/etc elements
+                    result = self.get_live_data(table, columns, filtercolumns, simplefilter_stack, stats_filter_stack, stats_postprocess_stack)
+                    if stats > 0:
+                        columns = range(stats)
+                        if len(aliases) == 0:
+                            #If there were Stats: staments without "as", show no column headers at all
+                            columnheaders = 'off'
+                        else:
+                            columnheaders = 'on'
+
                 #Now bring the retrieved information to a form which can be sent back to the client
                 response = self.format_live_data(result, columns, outputformat, columnheaders, separators, aliases) + "\n"
             except BaseException, e:
@@ -6071,4 +5218,5 @@ class LiveStatus:
             print "RESPONSE\n%s\n" % response
             return response
 
-
+    def row_factory(self, cursor, row):
+        return Logline(cursor, row)

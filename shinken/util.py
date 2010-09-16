@@ -99,6 +99,12 @@ def from_bool_to_string(b):
     else:
         return '0'
 
+def from_bool_to_int(b):
+    if b :
+        return 1
+    else:
+        return 0
+
 def from_list_to_split(val):
     val = ','.join(['%s' % v for v in val])
     return val
