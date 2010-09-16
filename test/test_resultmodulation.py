@@ -28,41 +28,7 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
     def setUp(self):
-        # i am arbiter-like
-        Config.fill_usern_macros()
-        self.broks = {}
-        self.me = None
-        self.log = Log()
-        self.log.load_obj(self)
-        self.config_files = ['etc/nagios_resultmodulation.cfg']
-        self.conf = Config()
-        self.conf.read_config(self.config_files)
-        self.conf.instance_id = 0
-        self.conf.instance_name = 'test'
-        self.conf.linkify_templates()
-        self.conf.apply_inheritance()
-        self.conf.explode()
-        self.conf.create_reversed_list()
-        self.conf.remove_twins()
-        self.conf.apply_implicit_inheritance()
-        self.conf.fill_default()
-        self.conf.clean_useless()
-        self.conf.pythonize()
-        self.conf.linkify()
-        self.conf.apply_dependancies()
-        self.conf.explode_global_conf()
-        self.conf.is_correct()
-        self.confs = self.conf.cut_into_parts()
-        self.dispatcher = Dispatcher(self.conf, self.me)
-        self.sched = Scheduler(None)
-        m = MacroResolver()
-        m.init(self.conf)
-        self.sched.load_conf(self.conf)
-        e = ExternalCommand(self.conf, 'applyer')
-        self.sched.external_command = e
-        e.load_scheduler(self.sched)
-        self.sched.schedule()
-
+        self.setup_with_file('etc/nagios_resultmodulation.cfg')
 
     def get_svc(self):
         return self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")

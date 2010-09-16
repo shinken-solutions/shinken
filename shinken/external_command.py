@@ -29,6 +29,11 @@ from log import Log
 from check import Check
 
 class ExternalCommand:
+    def __init__(self, cmd_line):
+        self.cmd_line = cmd_line
+
+
+class ExternalCommandManager:
 
     commands = {
         'CHANGE_CONTACT_MODSATTR' : {'global' : True, 'args' : ['contact', None]},
@@ -231,14 +236,18 @@ class ExternalCommand:
         return self.fifo
 
     
-    def read_and_interpret(self):
+    def get(self):
         buf = os.read(self.fifo, 8096)
         os.close(self.fifo)
         if buf != '':
-            self.resolve_command(buf)
+            excmd = ExternalCommand(buf)
+            return excmd
+        return None
+
 
     
-    def resolve_command(self, command):
+    def resolve_command(self, excmd):
+        command = excmd.cmd_line
         #Only log if we are in the Arbiter
         if self.mode == 'dispatcher':
             Log().log('EXTERNAL COMMAND: '+command.rstrip())
@@ -287,17 +296,17 @@ class ExternalCommand:
         c_name = elts2[1]
         
         print "Get command name", c_name
-        if c_name not in ExternalCommand.commands:
+        if c_name not in ExternalCommandManager.commands:
             print "This command is not recognized, sorry"
             return None
 
-        if self.mode == 'dispatcher' and ExternalCommand.commands[c_name]['global']:
+        if self.mode == 'dispatcher' and ExternalCommandManager.commands[c_name]['global']:
             print "This command is a global one, we resent it to all schedulers"
             self.dispatch_global_command(command)
             return None
-	print "Is bloabl?", c_name, ExternalCommand.commands[c_name]['global']
+	print "Is bloabl?", c_name, ExternalCommandManager.commands[c_name]['global']
 	print "Mode:", self.mode
-        print "This command have arguments:", ExternalCommand.commands[c_name]['args'], len(ExternalCommand.commands[c_name]['args'])
+        print "This command have arguments:", ExternalCommandManager.commands[c_name]['args'], len(ExternalCommandManager.commands[c_name]['args'])
 
         args = []
         i = 1
@@ -313,7 +322,7 @@ class ExternalCommand:
                 print "For command arg", val
 
                 if not in_service:                    
-                    type_searched = ExternalCommand.commands[c_name]['args'][i-1]
+                    type_searched = ExternalCommandManager.commands[c_name]['args'][i-1]
                     print "Search for a arg", type_searched
                     
                     if type_searched == 'host':
@@ -395,7 +404,7 @@ class ExternalCommand:
             print "Sorry, the arguments are not corrects"
             return None
         print 'Finally got ARGS:', args
-        if len(args) == len(ExternalCommand.commands[c_name]['args']):
+        if len(args) == len(ExternalCommandManager.commands[c_name]['args']):
             print "OK, we can call the command", c_name, "with", args
             f = getattr(self, c_name)
             apply(f, args)

@@ -93,8 +93,9 @@ class Service(SchedulingItem):
         #Shinken specific
         'poller_tag' : {'required' : False, 'default' : None},
         
-        'resultmodulations' : {'required' : False, 'default' : ''}, #TODO : fix brok and deepcopy a patern is not allowed
+        'resultmodulations' : {'required' : False, 'default' : ''},
         'escalations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'maintenance_period' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         }
     
     #properties used in the running state
@@ -722,6 +723,7 @@ class Services(Items):
     def linkify(self, hosts, commands, timeperiods, contacts, resultmodulations, escalations):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
+        self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
         self.linkify_s_by_hst(hosts)
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
@@ -776,7 +778,7 @@ class Services(Items):
     def apply_implicit_inheritance(self, hosts):
         for prop in ['contacts', 'contact_groups', 'notification_interval', \
                          'notification_period', 'resultmodulations', 'escalations', \
-                         'poller_tag', 'check_period']:
+                         'poller_tag', 'check_period', 'maintenance_period']:
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):

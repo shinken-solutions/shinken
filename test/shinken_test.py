@@ -18,19 +18,22 @@ from shinken.dispatcher import Dispatcher
 from shinken.log import Log
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
-from shinken.external_command import ExternalCommand
+from shinken.external_command import ExternalCommandManager, ExternalCommand
 from shinken.check import Check
 from shinken.module import Module
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
+        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+
+    def setup_with_file(self, path):
         # i am arbiter-like
         Config.fill_usern_macros()
         self.broks = {}
         self.me = None
         self.log = Log()
         self.log.load_obj(self)
-        self.config_files = ['etc/nagios_1r_1h_1s.cfg']
+        self.config_files = [path]
         self.conf = Config()
         self.conf.read_config(self.config_files)
         self.conf.instance_id = 0
@@ -54,7 +57,7 @@ class ShinkenTest(unittest.TestCase):
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf)
-        e = ExternalCommand(self.conf, 'applyer')
+        e = ExternalCommandManager(self.conf, 'applyer')
         self.sched.external_command = e
         e.load_scheduler(self.sched)
         self.sched.schedule()

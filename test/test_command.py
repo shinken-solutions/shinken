@@ -48,6 +48,7 @@ class TestConfig(ShinkenTest):
         self.assert_(cc.command == c)
         self.assert_(cc.poller_tag == 'DMZ')
 
+
 if __name__ == '__main__':
     unittest.main()
 

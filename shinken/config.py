@@ -209,6 +209,9 @@ class Config(Item):
                 'flap_history' : {'required':False, 'default':'20', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
                 'max_plugins_output_length' : {'required':False, 'default':'8192', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
 
+                #Enable or not the notice about old Nagios parameters
+                'disable_old_nagios_parameters_whining' : {'required':False, 'default':'0', 'pythonize': to_bool},
+                
                 #Now for problem/impact states changes
                 'enable_problem_impacts_states_change' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
     }
@@ -574,16 +577,17 @@ class Config(Item):
         
     #It's used to warn about useless parameter and print why it's not use.
     def notice_about_useless_parameters(self):
-        properties = self.__class__.properties
-        for prop in properties:
-            entry = properties[prop]
-            if 'unused' in entry and entry['unused'] and hasattr(self, prop):
-                if 'unused_text' in entry:
-                    unused_text = entry['unused_text']
-                else:
-                    unused_text = "this parameter is no longer useful in the Shinken architecture."
-                text = 'Notice : the parameter %s is useless and can be removed from the configuration (Reason: %s)' %  (prop, unused_text)
-                Log().log(text)
+        if not self.disable_old_nagios_parameters_whining:
+            properties = self.__class__.properties
+            for prop in properties:
+                entry = properties[prop]
+                if 'unused' in entry and entry['unused'] and hasattr(self, prop):
+                    if 'unused_text' in entry:
+                        unused_text = entry['unused_text']
+                    else:
+                        unused_text = "this parameter is no longer useful in the Shinken architecture."
+                    text = 'Notice : the parameter %s is useless and can be removed from the configuration (Reason: %s)' %  (prop, unused_text)
+                    Log().log(text)
 
 
     #Use to fill groups values on hosts and create new services
@@ -1192,9 +1196,8 @@ class Config(Item):
                     self.confs[i].other_elements[h.get_name()] = i
 
         #We tag conf with instance_id
-	#TODO : fix ninja/merlin so it manage more than instance_id == 0 ....
         for i in self.confs:
-            self.confs[i].instance_id = 0#i
+            self.confs[i].instance_id = i
             random.seed(time.time())
             self.confs[i].magic_hash = random.randint(1, 100000)
 

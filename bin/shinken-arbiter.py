@@ -84,13 +84,13 @@ Pyro = shinken.pyro_wrapper.Pyro
 from shinken.util import to_bool
 #from scheduler import Scheduler
 from shinken.config import Config
-from shinken.external_command import ExternalCommand
+from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon
 from shinken.log import Log
 
 
-VERSION = "0.2"
+VERSION = "0.2+"
 
 
 
@@ -208,19 +208,13 @@ class Arbiter(Daemon):
 
         self.nb_broks_send = 0
 
+        #Now tab for external_commands
+        self.external_commands = []
+
 
     #Use for adding broks
     def add(self, b):
         self.broks[b.id] = b
-
-
-    #Call by brokers to have broks
-    #We give them, and clean them!
-    #def get_broks(self):
-    #    res = self.broks
-    #    #They are gone, we keep none!
-    #    self.broks = {}
-    #    return res
 
 
     #We must push our broks to the broker
@@ -238,6 +232,15 @@ class Arbiter(Daemon):
                     #They are gone, we keep none!
                     self.broks = {}
 
+
+    #We must take external_commands from all brokers
+    def get_external_commands_from_brokers(self):
+        for brk in self.conf.brokers:
+            #Get only if alive of course
+            if brk.alive:
+                new_cmds = brk.get_external_commands()
+                for new_cmd in new_cmds:
+                    self.external_commands.append(new_cmd)
 
 
     #Load the external commander
@@ -275,9 +278,6 @@ class Arbiter(Daemon):
 
         #************** Change Nagios2 names to Nagios3 ones ******
         self.conf.old_properties_names_to_new()
-
-        #************* Print warning about useless parameters in Shinken **************"
-        self.conf.notice_about_useless_parameters()
 
 	#print "****************** Create Template links **********"
         self.conf.linkify_templates()
@@ -319,6 +319,9 @@ class Arbiter(Daemon):
         
         #print "************** Exlode global conf ****************"
         self.conf.explode_global_conf()
+
+        #************* Print warning about useless parameters in Shinken **************"
+        self.conf.notice_about_useless_parameters()
         
         #print "****************** Correct ?******************"
         self.conf.is_correct()
@@ -518,6 +521,20 @@ class Arbiter(Daemon):
                 is_master_dead = True
 
 
+    #Manage signal function
+    #Frame is just garbage
+    def manage_signal(self, sig, frame):
+        print "\nExiting with signal", sig
+        print "Stopping all network connexions"
+        self.poller_daemon.shutdown(True)
+        print "Unlinking pid file"
+        try:
+            os.unlink(self.pidfile)
+        except OSError, exp:
+            print "Error un deleting pid file:", exp
+        sys.exit(0)
+
+
     #Main function
     def run(self):
         #Before running, I must be sure who am I
@@ -535,7 +552,7 @@ class Arbiter(Daemon):
         
 	#Now create the external commander
         if os.name != 'nt':
-          e = ExternalCommand(self.conf, 'dispatcher')
+          e = ExternalCommandManager(self.conf, 'dispatcher')
 	
 	#Scheduler need to know about external command to activate it 
         #if necessary
@@ -565,10 +582,12 @@ class Arbiter(Daemon):
                             break    # no need to continue with the for loop
                         #If FIFO, read external command
                         if s == self.fifo:
-                            self.external_command.read_and_interpret()
+                            ext_cmd = self.external_command.get()
+                            if ext_cmd != None:
+                                self.external_commands.append(ext_cmd)
                             self.fifo = self.external_command.open()
 
-            else:#Timeout
+            else: #Timeout
                 self.dispatcher.check_alive()
                 self.dispatcher.check_dispatch()
                 #REF: doc/shinken-conf-dispatching.png (3)
@@ -577,6 +596,7 @@ class Arbiter(Daemon):
                 #One broker is responsible for our broks,
                 #we must give him our broks
                 self.push_broks_to_broker()
+                self.get_external_commands_from_brokers()
                 #send_conf_to_schedulers()
                 timeout = 1.0
 
@@ -584,6 +604,11 @@ class Arbiter(Daemon):
                 #Log().log("Nb Broks send: %d" % self.nb_broks_send)
                 self.nb_broks_send = 0
                 
+
+                #Now send all external commands
+                for ext_cmd in self.external_commands:
+                    self.external_command.resolve_command(ext_cmd)
+                self.external_commands = []
 						
             if timeout < 0:
                 timeout = 1.0

@@ -223,7 +223,7 @@ class Daemon:
 
 
     def manage_signal(self, sig, frame):
-        print "Dummy signal function !"
+        print "Dummy signal function Do not use this function dumbass dev ! "
         sys.exit(0)
 
 

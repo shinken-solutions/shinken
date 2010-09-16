@@ -399,6 +399,7 @@ class Satellite(Daemon):
     #Frame is just garbage
     def manage_signal(self, sig, frame):
         Log().log("\nExiting with signal %s" % sig)
+        Log().log('Stopping all workers')
         for w in self.workers.values():
             try:
                 w.terminate()
@@ -409,9 +410,16 @@ class Satellite(Daemon):
                 pass
             except AssertionError: #In a worker
                 pass
+        Log().log('Stopping all network connexions')
         self.daemon.disconnect(self.interface)
         self.daemon.disconnect(self.brok_interface)
         self.daemon.shutdown(True)
+        Log().log("Unlinking pid file")
+        try:
+            os.unlink(self.pidfile)
+        except OSError, exp:
+            print "Error un deleting pid file:", exp
+        Log().log("Exiting")
         sys.exit(0)
 
 

@@ -116,12 +116,12 @@ Pyro = shinken.pyro_wrapper.Pyro
 from shinken.scheduler import Scheduler
 from shinken.config import Config
 from shinken.macroresolver import MacroResolver
-from shinken.external_command import ExternalCommand
+from shinken.external_command import ExternalCommandManager
 from shinken.daemon import Daemon#create_daemon, check_parallel_run, change_user
 from shinken.util import to_int, to_bool
 
 
-VERSION = "0.2"
+VERSION = "0.2+"
 
 
 
@@ -362,13 +362,17 @@ class Shinken(Daemon):
 
 
     #Manage signal function
-    #TODO : manage more than just quit
     #Frame is just garbage
     def manage_signal(self, sig, frame):
         print "\nExiting with signal", sig
+        print "Stopping all network connexions"
         self.poller_daemon.shutdown(True)
+        print "Unlinking pid file"
+        try:
+            os.unlink(self.pidfile)
+        except OSError, exp:
+            print "Error un deleting pid file:", exp
         sys.exit(0)
-
 		
 
     #We wait (block) for arbiter to send us conf
@@ -448,7 +452,7 @@ class Shinken(Daemon):
         #Now create the external commander
         #it's a applyer : it role is not to dispatch commands,
         #but to apply them
-        e = ExternalCommand(self.conf, 'applyer')
+        e = ExternalCommandManager(self.conf, 'applyer')
 
         #Scheduler need to know about external command to 
         #activate it if necessery

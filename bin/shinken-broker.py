@@ -104,8 +104,9 @@ from shinken.escalation import Escalation
 from shinken.timeperiod import Timeperiod
 from shinken.contact import Contact
 from shinken.command import Command, CommandCall
+from shinken.external_command import ExternalCommand
 
-VERSION = "0.2"
+VERSION = "0.2+"
 
 
 
@@ -216,6 +217,10 @@ class IForArbiter(Pyro.core.ObjBase):
 	def push_broks(self, broks):
 		self.app.add_broks_to_queue(broks.values())
 		return True
+
+        #The arbiter ask us our external commands in queue
+        def get_external_commands(self):
+            return self.app.get_external_commands()
 
 
 	#Use by arbiter to know if we have a conf or not
@@ -333,28 +338,50 @@ class Broker(Satellite):
 		self.have_modules = False
 		self.modules = []
 
-
+                #Can have a queue of external_commands give by modules
+                #will be taken by arbiter to process
+                self.external_commands = []
 
 
 	#Manage signal function
 	#TODO : manage more than just quit
 	#Frame is just garbage
 	def manage_signal(self, sig, frame):
-		Log().log("\nExiting with signal %s" % sig)
-		self.daemon.shutdown(True)
-		sys.exit(0)
+            Log().log("\nExiting with signal %s" % sig)
+            #Maybe we quit before even launch modules
+            if hasattr(self, 'modulesmanager'):
+                Log().log('Stopping all modules')
+                self.modulesmanager.stop_all()
+            act = active_children()
+            for a in act:
+                a.terminate()
+                a.join(1)
+            Log().log('Stopping all network connexions')
+            self.daemon.shutdown(True)
+            Log().log("Unlinking pid file")
+            try:
+                os.unlink(self.pidfile)
+            except OSError, exp:
+                print "Error un deleting pid file:", exp
+            Log().log("Exiting")
+            sys.exit(0)
+
 
 
         #Schedulers have some queues. We can simplify call by adding
         #elements into the proper queue just by looking at their type
         #Brok -> self.broks
 	#TODO : better tag ID?
+        #External commands -> self.external_commands
 	def add(self, elt):
 		if isinstance(elt, Brok):
-                        #For brok, we TAG brok with our instance_id
-			elt.data['instance_id'] = 0
-			self.broks_internal_raised.append(elt)
-			return
+                    #For brok, we TAG brok with our instance_id
+                    elt.data['instance_id'] = 0
+                    self.broks_internal_raised.append(elt)
+                    return
+                elif isinstance(elt, ExternalCommand):
+                    print "Adding in queue an external command", ExternalCommand.__dict__
+                    self.external_commands.append(elt)
 
 
 	#Get teh good tabs for links by the kind. If unknown, return None
@@ -365,6 +392,13 @@ class Broker(Satellite):
 			return t[type]
 		return None
 
+
+        #Call by arbiter to get our external commands
+        def get_external_commands(self):
+            res = self.external_commands
+#            print "Call my command get_external_commands, I return ", res
+            self.external_commands = []
+            return res
 	
 
 	#initialise or re-initialise connexion with scheduler or
@@ -576,6 +610,10 @@ class Broker(Satellite):
 		for rea_id in self.reactionners:
                         self.pynag_con_init(rea_id, type='reactionner')
 
+                #DBG
+                ext_cmd = ExternalCommand("moncul c'est du poulet")
+                self.add(ext_cmd)
+                        
 
 		#Now main loop
 		i = 0
