@@ -36,7 +36,7 @@ class SchedulerLink(SatelliteLink):
                 }
  
     running_properties = {'con' : {'default' : None},
-                          'alive' : {'default' : False},
+                          'alive' : {'default' : False, 'fill_brok' : ['full_status']},
                           'conf' : {'default' : None},
                           'need_conf' : {'default' : True},
                           }
@@ -50,7 +50,7 @@ class SchedulerLink(SatelliteLink):
     def run_external_command(self, command):
         if self.con == None:
             self.create_connexion()
-        if not self.is_alive():
+        if not self.alive:
             return None
         print "Send command", command
         self.con.run_external_command(command)

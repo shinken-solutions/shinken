@@ -88,7 +88,7 @@ class Dispatcher:
     #checks alive elements
     def check_alive(self):
         for elt in self.elements:
-            elt.alive = elt.is_alive()
+            elt.ping()
             #print "Element", elt.get_name(), " alive:", elt.alive, "
 
             #Not alive need new need_conf
@@ -100,7 +100,7 @@ class Dispatcher:
         for arb in self.arbiters:
             #If not me...
             if arb != self.arbiter:
-                arb.alive = arb.is_alive()
+                arb.ping()
                 #print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
 
 

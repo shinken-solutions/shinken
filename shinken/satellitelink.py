@@ -40,7 +40,6 @@ class SatelliteLink(Item):
  
     #running_properties = {
     #                      'con' : {'default' : None}
-    #                      #self.is_alive = False
     #                      }
     #macros = {}
 
@@ -112,29 +111,33 @@ class SatelliteLink(Item):
             return False
 
 
-    def is_alive(self):
+    def set_alive(self):
+        self.alive = True
+
+
+    def set_dead(self):
+        self.alive = False
+        self.con = None
+
+
+    def ping(self):
         try:
             if self.con == None:
                 self.create_connexion()
             self.con.ping()
-            return True
+            self.set_alive()
         except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            #print exp
-            return False
+            self.set_dead()
         except Pyro.errors.URIError , exp:
-            self.con = None
             print exp
-            return False
+            self.set_dead()
         #Only pyro 4 but will be ProtocolError in 3
         except Pyro.errors.CommunicationError , exp:
             #print "Is not alive!", self.uri
-            self.con = None
-            return False
+            self.set_dead()
         except Pyro.errors.DaemonError , exp:
-            self.con = None
             print exp
-            return False
+            self.set_dead()
 
 
     def wait_new_conf(self):
@@ -242,7 +245,7 @@ class SatelliteLink(Item):
     #property
     def add_global_conf_parameters(self, params):
         for prop in params:
-            print "Add glboal param", prop, params[prop]
+            print "Add global parameter", prop, params[prop]
             self.cfg['global'][prop] = params[prop]
 
 
