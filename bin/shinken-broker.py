@@ -33,6 +33,7 @@ import sys
 import platform
 import sys, os
 import getopt
+import traceback
 
 
 #We know that a Python 2.5 or Python3K will fail.
@@ -374,14 +375,15 @@ class Broker(Satellite):
 	#TODO : better tag ID?
         #External commands -> self.external_commands
 	def add(self, elt):
-		if isinstance(elt, Brok):
-                    #For brok, we TAG brok with our instance_id
-                    elt.data['instance_id'] = 0
-                    self.broks_internal_raised.append(elt)
-                    return
-                elif isinstance(elt, ExternalCommand):
-                    print "Adding in queue an external command", ExternalCommand.__dict__
-                    self.external_commands.append(elt)
+            cls_type = elt.__class__.my_type
+            if cls_type == 'brok':
+                #For brok, we TAG brok with our instance_id
+                elt.data['instance_id'] = 0
+                self.broks_internal_raised.append(elt)
+                return
+            elif cls_type == 'externalcommand':
+                print "Adding in queue an external command", ExternalCommand.__dict__
+                self.external_commands.append(elt)
 
 
 	#Get teh good tabs for links by the kind. If unknown, return None
@@ -471,6 +473,8 @@ class Broker(Satellite):
 				print exp.__dict__
 				Log().log("Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
 				print "DBG:", type(exp)
+                                print "Back trace of this kill:"
+                                traceback.print_stack()
 				to_del.append(mod)
 		#Now remove mod that raise an exception
 		for mod in to_del:
@@ -504,14 +508,16 @@ class Broker(Satellite):
 	#for a moduel like livestatus to raise external
 	#commandsfor example
 	def get_objects_from_from_queues(self):
-		for f in self.modules_manager.get_external_from_queues():
-			full_queue = True
-			while full_queue:
-				try:
-					o = f.get(block=False)
-					self.add(o)
-				except Empty :
-					full_queue = False
+            print "Call for objects from queues"
+            for f in self.modules_manager.get_external_from_queues():
+                full_queue = True
+                while full_queue:
+                    try:
+                        o = f.get(block=False)
+                        print "Got an object from queue"
+                        self.add(o)
+                    except Empty :
+                        full_queue = False
 				
 
 

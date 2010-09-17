@@ -40,7 +40,6 @@ launch_and_assert test_hosts.py
 launch_and_assert test_action.py
 launch_and_assert test_config.py
 launch_and_assert test_dependencies.py
-launch_and_assert test_livestatus.py
 launch_and_assert test_npcdmod.py
 launch_and_assert test_problem_impact.py
 launch_and_assert test_timeperiods.py
@@ -52,6 +51,8 @@ launch_and_assert test_complex_hostgroups.py
 launch_and_assert test_resultmodulation.py
 launch_and_assert test_maintenance_period.py
 
+#Live status is a bit longer than the previous, so we put it at the end.
+launch_and_assert test_livestatus.py
 
 echo "All quick unit tests passed :)"
 echo "But please launch a test.sh pass too for long tests too!"

@@ -26,6 +26,8 @@ import os
 import os.path
 import imp
 import sys
+import traceback
+
 
 from multiprocessing import Process, Queue, active_children
 
@@ -85,6 +87,8 @@ class ModulesManager(object):
                     self.instances.append(inst)
             except Exception , exp:
                 print "Error : the module %s raised an exception %s, I remove it!" % (module.get_name(), str(exp))
+                print "Back trace of this remove :"
+                traceback.print_exc(file=sys.stdout)
 
         print "Load", len(self.instances), "module instances"
 
@@ -102,7 +106,10 @@ class ModulesManager(object):
                     inst.init()
             except Exception , exp:
                 print "Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(exp))
+                print "Back trace of this remove :"
+                traceback.print_exc(file=sys.stdout)
                 to_del.append(inst)
+
 
         for inst in to_del:
             self.instances.remove(inst)

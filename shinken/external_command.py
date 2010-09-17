@@ -29,6 +29,7 @@ from log import Log
 from check import Check
 
 class ExternalCommand:
+    my_type = 'externalcommand'
     def __init__(self, cmd_line):
         self.cmd_line = cmd_line
 
@@ -275,8 +276,8 @@ class ExternalCommandManager:
     #The command is global, so sent it to every schedulers
     def dispatch_global_command(self, command):
         for sched in self.conf.schedulerlinks:
-            print "Sending command", command, 'to sched', sched
-            if sched.is_active:
+            print "Sending a command", command, 'to scheduler', sched
+            if sched.alive:
                 sched.run_external_command(command)
 
 

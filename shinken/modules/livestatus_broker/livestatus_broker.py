@@ -62,8 +62,14 @@ class Livestatus_broker:
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
-        print "I am init"
+        print "Initialisation of the livestatus broker"
+        
+        #to_queue is where we get broks from Broker
         self.q = self.properties['to_queue']
+        
+        #from_quue is where we push back objects like
+        #external commands to the broker
+        self.r = self.properties['from_queue']
     
         #Our datas
         self.configs = {}
@@ -80,7 +86,7 @@ class Livestatus_broker:
         self.servicename_lookup_table = {}
 
         self.prepare_log_db()
-        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.dbconn)
+        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.dbconn, self.r)
 
         self.number_of_objects = 0
     
@@ -216,7 +222,7 @@ class Livestatus_broker:
         cg_id = data['id']
         members = data['members']
         del data['members']
-        print "Creating contactgroup:", cg_id, data
+        #print "Creating contactgroup:", cg_id, data
         cg = Contactgroup()
         for prop in data:
             setattr(cg, prop, data[prop])
@@ -224,7 +230,7 @@ class Livestatus_broker:
         for (c_id, c_name) in members:
             if c_id in self.contacts:
                 cg.members.append(self.contacts[c_id])
-        print "CG:", cg
+        #print "CG:", cg
         self.contactgroups[cg_id] = cg
         self.number_of_objects += 1
 
@@ -232,10 +238,10 @@ class Livestatus_broker:
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
         tp_id = data['id']
-        print "Creating Timeperiod:", tp_id, data
+        #print "Creating Timeperiod:", tp_id, data
         tp = Timeperiod({})
         self.update_element(tp, data)
-        print "TP:", tp
+        #print "TP:", tp
         self.timeperiods[tp_id] = tp
         self.number_of_objects += 1
 
@@ -243,10 +249,10 @@ class Livestatus_broker:
     def manage_initial_command_status_brok(self, b):
         data = b.data
         c_id = data['id']
-        print "Creating Command:", c_id, data
+        #print "Creating Command:", c_id, data
         c = Command({})
         self.update_element(c, data)
-        print "CMD:", c
+        #print "CMD:", c
         self.commands[c_id] = c
         self.number_of_objects += 1
 
@@ -308,7 +314,7 @@ class Livestatus_broker:
         data = b.data
         line = data['log'].encode('UTF-8').rstrip()
         # split line and make sql insert
-        print "LOG--->", line
+        #print "LOG--->", line
         # [1278280765] SERVICE ALERT: test_host_0
         # split leerzeichen
         if line[0] != '[' and line[11] != ']':
@@ -329,7 +335,7 @@ class Livestatus_broker:
             attempt, state = [0] * 2
             command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state_type = [''] * 9
             time= line[1:11]
-            print "i start with a timestamp", time
+            #print "i start with a timestamp", time
             first_type_pos = line.find(' ') + 1
             last_type_pos = line.find(':')
             first_detail_pos = last_type_pos + 2
@@ -429,7 +435,8 @@ class Livestatus_broker:
                 logobject = LOGOBJECT_INFO
                 logclass = LOGCLASS_PROGRAM
             else:
-                print "does not match"
+                pass
+                #print "does not match"
 
             lineno = 0
 
@@ -438,7 +445,7 @@ class Livestatus_broker:
             except:
                 print "Unexpected error:", sys.exc_info()[0]
             #print "LOG:", logobject, logclass, type, host_name, service_description, state, state_type, attempt, plugin_output, contact_name, comment, command_name
-            print "LOG:", values
+            #print "LOG:", values
             try:
                 if logclass != LOGCLASS_INVALID:
                     self.dbcursor.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)

@@ -34,7 +34,9 @@ class TestConfig(ShinkenTest):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
         self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live', '/tmp/livelogs.db')
         self.livestatus_broker.properties = {
-            'to_queue' : 0
+            'to_queue' : 0,
+            'from_queue' : 0
+            
             }
         self.livestatus_broker.init()
         self.sched.fill_initial_broks()
@@ -534,7 +536,8 @@ Or: 3"""
 Filter: options ~ ;HARD;
 Filter: type = HOST ALERT
 Filter: time >= 1284056080
-Filter: time <= 1284660880Filter: current_service_description != 
+Filter: time <= 1284660880
+Filter: current_service_description != 
 Filter: service_description = 
 Filter: host_name != 
 And: 2

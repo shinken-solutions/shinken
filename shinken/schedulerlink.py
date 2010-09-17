@@ -51,6 +51,7 @@ class SchedulerLink(SatelliteLink):
             self.create_connexion()
         if not self.is_alive():
             return None
+        print "Send command", command
         self.con.run_external_command(command)
 
 

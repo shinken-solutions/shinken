@@ -37,7 +37,7 @@ def get_instance(plugin):
     try:
         from livestatus_broker import Livestatus_broker
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavalable : %s" % (get_type(), exp)
+        print "Warning : the plugin type %s is unavalable : %s" % ('livestatus', exp)
         return None
 
     if hasattr(plugin, 'host'):
@@ -56,7 +56,7 @@ def get_instance(plugin):
     else:
         socket = os.sep.join([os.path.abspath(''), 'var', 'rw', 'live'])
     if hasattr(plugin, 'database_file'):
-        database_file = int(plugin.database_file)
+        database_file = plugin.database_file
     else:
         database_file = os.sep.join([os.path.abspath(''), 'var', 'livestatus.db'])
 

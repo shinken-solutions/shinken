@@ -37,6 +37,7 @@ from command import Command
 from comment import Comment
 from downtime import Downtime
 from config import Config
+from external_command import ExternalCommand
 
 from util import from_bool_to_string,from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
 
@@ -4534,7 +4535,7 @@ class LiveStatus:
     }
 
 
-    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, dbconn):
+    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, dbconn, return_queue):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
         self.configs = configs
@@ -4551,6 +4552,7 @@ class LiveStatus:
         self.dbconn = dbconn
         self.debuglevel = 2
         self.dbconn.row_factory = self.row_factory
+        self.return_queue = return_queue
 
 
     def debug(self, debuglevel, message):
@@ -5159,16 +5161,19 @@ class LiveStatus:
                 print "Received a line of input which i can't handle"
                 print line
                 pass
-        
+        #External command are send back to broker
         if extcmd:
-            command_file = self.configs[0].command_file
-            if os.path.exists(command_file):
-                try:
-                    fifo = os.open(command_file, os.O_NONBLOCK|os.O_WRONLY)
-                    os.write(fifo, extcmd)
-                    os.close(fifo)
-                except:
-                    print "Unable to open/write the external command pipe"
+            print "Managing an external command", extcmd
+            e = ExternalCommand(extcmd)
+            self.return_queue.put(e)
+            #command_file = self.configs[0].command_file
+            #if os.path.exists(command_file):
+            #    try:
+            #        fifo = os.open(command_file, os.O_NONBLOCK|os.O_WRONLY)
+            #        os.write(fifo, extcmd)
+            #        os.close(fifo)
+            #    except:
+            #        print "Unable to open/write the external command pipe"
             return '\n'
         else:
             # make filtercolumns unique

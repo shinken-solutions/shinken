@@ -26,6 +26,7 @@
 class Brok:
     __slots__ = ('__dict__', 'id', 'type', 'data')
     id = 0
+    my_type = 'brok'
     def __init__(self, type, data):
         self.type = type
         self.id = self.__class__.id
