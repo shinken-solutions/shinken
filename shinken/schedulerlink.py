@@ -26,18 +26,19 @@ from item import Items
 
 class SchedulerLink(SatelliteLink):
     id = 0
-    properties={'scheduler_name' : {'required' : True },#, 'pythonize': None},
-                'address' : {'required' : True},#, 'pythonize': to_bool},
-                'port' : {'required':  False, 'default' : '7768', 'pythonize': to_int},
-                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
+    properties={'scheduler_name' : {'required' : True , 'fill_brok' : ['full_status']},#, 'pythonize': None},
+                'address' : {'required' : True, 'fill_brok' : ['full_status']},#, 'pythonize': to_bool},
+                'port' : {'required':  False, 'default' : '7768', 'pythonize': to_int, 'fill_brok' : ['full_status']},
+                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'fill_brok' : ['full_status']},
                 'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split},
-                'weight': {'required':  False, 'default' : '1', 'pythonize': to_int},
+                'weight': {'required':  False, 'default' : '1', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
                 }
  
-    running_properties = {'is_active' : {'default' : False},
-                          'con' : {'default' : None},
-                          #self.is_alive = False
+    running_properties = {'con' : {'default' : None},
+                          'alive' : {'default' : False},
+                          'conf' : {'default' : None},
+                          'need_conf' : {'default' : True},
                           }
     macros = {}
 

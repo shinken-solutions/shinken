@@ -44,9 +44,8 @@ class PollerLink(SatelliteLink):
                 'poller_tags' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'to_send' : True}
                 }
  
-    running_properties = {'is_active' : {'default' : False},
-                          'con' : {'default' : None},
-                          #self.is_alive = False
+    running_properties = {'con' : {'default' : None},
+                          'alive' : {'default' : False},
                           }
     macros = {}
 

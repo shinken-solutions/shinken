@@ -38,7 +38,7 @@ class SatelliteLink(Item):
     #            'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
     #            }
  
-    #running_properties = {'is_active' : {'default' : False},
+    #running_properties = {
     #                      'con' : {'default' : None}
     #                      #self.is_alive = False
     #                      }

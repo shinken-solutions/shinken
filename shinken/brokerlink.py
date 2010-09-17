@@ -36,8 +36,8 @@ class BrokerLink(SatelliteLink):
                 'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
                 }
  
-    running_properties = {'is_active' : {'default' : False},
-                          'con' : {'default' : None},
+    running_properties = {'con' : {'default' : None},
+                          'alive' : {'default' : False}
                           }
     macros = {}
 

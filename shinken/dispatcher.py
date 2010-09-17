@@ -26,15 +26,13 @@
 #dead to the spare
 
 
-import Pyro.core
-
 from util import scheduler_no_spare_first, alive_then_spare_then_deads
 from log import Log
 
 #Dispatcher Class
 class Dispatcher:
     #Load all elements, set them no assigned
-    # and add them to elements, so loop will be easier :)
+    #and add them to elements, so loop will be easier :)
     def __init__(self, conf, arbiter):
         self.arbiter = arbiter
         #Pointer to the whole conf
@@ -49,31 +47,24 @@ class Dispatcher:
         self.dispatch_queue = {'schedulers' : [], 'reactionners' : [],
                                'brokers' : [], 'pollers' : []}
         self.elements = [] #all elements, sched and satellites
-        self.satellites = [] #only satellites
+        self.satellites = [] #only satellites not schedulers
 
         for cfg in self.conf.confs.values():
             cfg.is_assigned = False
             cfg.assigned_to = None
-        for sched in self.schedulers:
-            sched.alive = False
-            sched.conf = None
-            sched.need_conf = True
-            self.elements.append(sched)
-        for reactionner in self.reactionners:
-            reactionner.alive = False
-            reactionner.need_conf = False
-            self.elements.append(reactionner)
-            self.satellites.append(reactionner)
-        for poller in self.pollers:
-            poller.alive = False
-            poller.need_conf = True
-            self.elements.append(poller)
-            self.satellites.append(poller)
-        for broker in self.brokers:
-            broker.alive = False
-            broker.need_conf = True
-            self.elements.append(broker)
-            self.satellites.append(broker)
+
+        #Add satellites in the good lists
+        self.elements.extend(self.schedulers)
+
+        #Others are in 2 lists
+        self.elements.extend(self.reactionners)
+        self.satellites.extend(self.reactionners)
+        self.elements.extend(self.pollers)
+        self.satellites.extend(self.pollers)
+        self.elements.extend(self.brokers)
+        self.satellites.extend(self.brokers)
+
+        #Some flag about dispatch need or not
         self.dispatch_ok = False
         self.first_dispatch_done = False
 
@@ -98,7 +89,7 @@ class Dispatcher:
     def check_alive(self):
         for elt in self.elements:
             elt.alive = elt.is_alive()
-            #print "Element", elt.get_name(), " alive:", elt.alive, ", active:", elt.is_active
+            #print "Element", elt.get_name(), " alive:", elt.alive, "
 
             #Not alive need new need_conf
             #and spare too if they do not have already a conf
@@ -405,7 +396,6 @@ class Dispatcher:
                                     #cfg_for_satellite['modules'] = satellite.modules
                                     is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
                                     if is_sent:
-                                        satellite.need_conf = False
                                         satellite.active = True
                                         Log().log('[%s] Dispatch OK of for configuration %s to %s %s' %(r.get_name(), cfg_id, kind, satellite.get_name()))
                                         nb_cfg_sent += 1
