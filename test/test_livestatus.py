@@ -32,7 +32,7 @@ sys.setcheckinterval(10000)
 class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live')
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live', '/tmp/livelogs.db')
         self.livestatus_broker.properties = {
             'to_queue' : 0
             }
@@ -419,6 +419,254 @@ ResponseHeader: fixed16"""
         self.update_broker()
 
         data = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+
+    def test_thruk_logs(self):
+        self.print_header()
+        start = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
+        self.update_broker()
+        duration = 600
+        now = time.time()
+        # downtime valid for the next 2 minutes
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        now = time.time()
+        cmd = "[%lu] ADD_SVC_COMMENT;test_host_0;test_ok_0;1;lausser;comment" % now
+        self.sched.run_external_command(cmd)
+        time.sleep(1)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 2, 'DOWN'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        end = time.time()
+
+        # show history for service
+        data = """GET log
+Columns: time type options state
+Filter: time >= """ + str(int(start)) + """
+Filter: time <= """ + str(int(end)) + """
+Filter: type = SERVICE ALERT
+Filter: type = HOST ALERT
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Or: 6
+Filter: host_name = test_host_0
+Filter: service_description = test_ok_0
+And: 3
+Filter: type ~ starting...
+Filter: type ~ shutting down...
+Or: 3
+Filter: current_service_description != 
+
+Filter: service_description = 
+Filter: host_name != 
+And: 2
+Filter: service_description = 
+Filter: host_name = 
+And: 2
+Or: 3"""
+
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+    def test_thruk_logs_alerts_summary(self):
+        self.print_header()
+        start = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
+        self.update_broker()
+        duration = 600
+        now = time.time()
+        # downtime valid for the next 2 minutes
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        now = time.time()
+        cmd = "[%lu] ADD_SVC_COMMENT;test_host_0;test_ok_0;1;lausser;comment" % now
+        self.sched.run_external_command(cmd)
+        time.sleep(1)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 2, 'DOWN'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        end = time.time()
+
+        # is this an error in thruk?
+
+        data = """GET log
+Filter: options ~ ;HARD;
+Filter: type = HOST ALERT
+Filter: time >= 1284056080
+Filter: time <= 1284660880Filter: current_service_description != 
+Filter: service_description = 
+Filter: host_name != 
+And: 2
+Filter: service_description = 
+Filter: host_name = 
+And: 2
+Or: 3
+Columns: time state state_type host_name service_description current_host_groups current_service_groups plugin_output"""
+
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+
+    def test_thruk_logs_current(self):
+        self.print_header()
+        start = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
+        self.update_broker()
+        duration = 600
+        now = time.time()
+        # downtime valid for the next 2 minutes
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        now = time.time()
+        cmd = "[%lu] ADD_SVC_COMMENT;test_host_0;test_ok_0;1;lausser;comment" % now
+        self.sched.run_external_command(cmd)
+        time.sleep(1)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 2, 'DOWN'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 0, 'UUP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+#        time.sleep(1)
+#        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
+#        self.update_broker()
+        end = time.time()
+        
+        # show history for service
+        data = """GET log
+Columns: time type options state current_host_name
+Filter: time >= """ + str(int(start)) + """
+Filter: time <= """ + str(int(end)) + """
+Filter: type = SERVICE ALERT
+Filter: type = HOST ALERT
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Or: 6
+Filter: current_host_name = test_host_0
+Filter: current_service_description = test_ok_0
+And: 2"""
+        data = """GET log
+Columns: time type options state current_host_name
+Filter: time >= """ + str(int(start)) + """
+Filter: time <= """ + str(int(end)) + """
+Filter: current_host_name = test_host_0
+Filter: current_service_description = test_ok_0
+And: 2"""
+
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+
+    def test_thruk_tac_svc(self):
+        self.print_header()
+        start = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
+        self.update_broker()
+        duration = 600
+        now = time.time()
+        # downtime valid for the next 2 minutes
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        now = time.time()
+        cmd = "[%lu] ADD_SVC_COMMENT;test_host_0;test_ok_0;1;lausser;comment" % now
+        self.sched.run_external_command(cmd)
+        time.sleep(1)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 2, 'DOWN'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 0, 'UUP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+#        time.sleep(1)
+#        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
+#        self.update_broker()
+        end = time.time()
+        
+        # show history for service
+        data = """GET services
+Filter: has_been_checked = 1
+Filter: check_type = 0
+Stats: sum has_been_checked
+Stats: sum latency
+Stats: sum execution_time
+Stats: min latency
+Stats: min execution_time
+Stats: max latency
+Stats: max execution_time"""
+
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 

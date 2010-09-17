@@ -40,17 +40,18 @@ from contactgroup import Contactgroup
 from timeperiod import Timeperiod
 from command import Command
 from config import Config
-from livestatus import LiveStatus, LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL
+from livestatus import LiveStatus, LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, LOGOBJECT_CONTACT, Logline
 
 
 
 #Class for the Livestatus Broker
 #Get broks and listen to livestatus query language requests
 class Livestatus_broker:
-    def __init__(self, name, host, port, socket):
+    def __init__(self, name, host, port, socket, database_file):
         self.host = host
         self.port = port
         self.socket = socket
+        self.database_file = database_file
         self.name = name
         
         #Warning :
@@ -79,7 +80,7 @@ class Livestatus_broker:
         self.servicename_lookup_table = {}
 
         self.prepare_log_db()
-        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.dbconn)
+        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.dbconn)
 
         self.number_of_objects = 0
     
@@ -323,6 +324,7 @@ class Livestatus_broker:
             # 0:info, 1:state, 2:program, 3:notification, 4:passive, 5:command
 
             # lineno, message?, plugin_output?
+            logobject = LOGOBJECT_INFO
             logclass = LOGCLASS_INVALID
             attempt, state = [0] * 2
             command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state_type = [''] * 9
@@ -335,43 +337,54 @@ class Livestatus_broker:
             options = line[first_detail_pos:]
             message = line
             if type == 'CURRENT SERVICE STATE':
+                logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_STATE
                 host_name, service_description, state, state_type, attempt, plugin_output = options.split(';')
             elif type == 'INITIAL SERVICE STATE':
+                logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_STATE
                 host_name, service_description, state, state_type, attempt, plugin_output = options.split(';')
             elif type == 'SERVICE ALERT':
                 # SERVICE ALERT: srv-40;Service-9;CRITICAL;HARD;1;[Errno 2] No such file or directory
+                logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_ALERT
                 host_name, service_description, state, state_type, attempt, plugin_output = options.split(';')
                 state = service_states[state]
             elif type == 'SERVICE DOWNTIME ALERT':
+                logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_ALERT
                 host_name, service_description, state_type, comment = options.split(';')
             elif type == 'SERVICE FLAPPING ALERT':
+                logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_ALERT
                 host_name, service_description, state_type, comment = options.split(';')
 
             elif type == 'CURRENT HOST STATE':
+                logobject = LOGOBJECT_HOST
                 logclass = LOGCLASS_STATE
                 host_name, state, state_type, attempt, plugin_output = options.split(';')
             elif type == 'INITIAL HOST STATE':
+                logobject = LOGOBJECT_HOST
                 logclass = LOGCLASS_STATE
                 host_name, state, state_type, attempt, plugin_output = options.split(';')
             elif type == 'HOST ALERT':
+                logobject = LOGOBJECT_HOST
                 logclass = LOGCLASS_ALERT
                 host_name, state, state_type, attempt, plugin_output = options.split(';')
                 state = host_states[state]
             elif type == 'HOST DOWNTIME ALERT':
+                logobject = LOGOBJECT_HOST
                 logclass = LOGCLASS_ALERT
                 host_name, state_type, comment = options.split(';')
             elif type == 'HOST FLAPPING ALERT':
+                logobject = LOGOBJECT_HOST
                 logclass = LOGCLASS_ALERT
                 host_name, state_type, comment = options.split(';')
 
             elif type == 'SERVICE NOTIFICATION':
                 # tust_cuntuct;test_host_0;test_ok_0;CRITICAL;notify-service;i am CRITICAL  <-- normal
                 # SERVICE NOTIFICATION: test_contact;test_host_0;test_ok_0;DOWNTIMESTART (OK);notify-service;OK
+                logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_NOTIFICATION
                 contact_name, host_name, service_description, state_type, command_name, check_plugin_output = options.split(';')
                 if '(' in state_type: # downtime/flapping/etc-notifications take the type UNKNOWN
@@ -379,6 +392,7 @@ class Livestatus_broker:
                 state = service_states[state_type]
             elif type == 'HOST NOTIFICATION':
                 # tust_cuntuct;test_host_0;DOWN;notify-host;i am DOWN
+                logobject = LOGOBJECT_HOST
                 logclass = LOGCLASS_NOTIFICATION
                 contact_name, host_name, state_type, command_name, check_plugin_output = options.split(';')
                 if '(' in state_type:
@@ -386,27 +400,33 @@ class Livestatus_broker:
                 state = host_states[state_type]
 
             elif type == 'PASSIVE SERVICE CHECK':
+                logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_PASSIVECHECK
                 host_name, service_description, state, check_plugin_output = options.split(';')
             elif type == 'PASSIVE HOST CHECK':
+                logobject = LOGOBJECT_HOST
                 logclass = LOGCLASS_PASSIVECHECK
                 host_name, state, check_plugin_output = options.split(';')
 
             elif type == 'SERVICE EVENT HANDLER':
                 # SERVICE EVENT HANDLER: test_host_0;test_ok_0;CRITICAL;SOFT;1;eventhandler
+                logobject = LOGOBJECT_SERVICE
                 host_name, service_description, state, state_type, attempt, command_name = options.split(';')
                 state = service_states[state]
             elif type == 'HOST EVENT HANDLER':
+                logobject = LOGOBJECT_HOST
                 host_name, state, state_type, attempt, command_name = options.split(';')
                 state = host_states[state]
 
             elif type == 'EXTERNAL COMMAND':
+                logobject = LOGOBJECT_INFO
                 logclass = LOGCLASS_COMMAND
             elif type.startswith('starting...') or \
                  type.startswith('shutting down...') or \
                  type.startswith('Bailing out') or \
                  type.startswith('active mode...') or \
                  type.startswith('standby mode...'):
+                logobject = LOGOBJECT_INFO
                 logclass = LOGCLASS_PROGRAM
             else:
                 print "does not match"
@@ -414,14 +434,14 @@ class Livestatus_broker:
             lineno = 0
 
             try:
-                values = (attempt, logclass, command_name, comment, contact_name, host_name, lineno, message, options, plugin_output, service_description, state, state_type, time, type)
+                values = (logobject, attempt, logclass, command_name, comment, contact_name, host_name, lineno, message, options, plugin_output, service_description, state, state_type, time, type)
             except:
                 print "Unexpected error:", sys.exc_info()[0]
-            #print "LOG:", logclass, type, host_name, service_description, state, state_type, attempt, plugin_output, contact_name, comment, command_name
+            #print "LOG:", logobject, logclass, type, host_name, service_description, state, state_type, attempt, plugin_output, contact_name, comment, command_name
             print "LOG:", values
             try:
                 if logclass != LOGCLASS_INVALID:
-                    self.dbcursor.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
+                    self.dbcursor.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
                     self.dbconn.commit()
             except sqlite3.Error, e:
                 print "An error occurred:", e.args[0]
@@ -497,14 +517,16 @@ class Livestatus_broker:
 
     def prepare_log_db(self):
         # create db file and tables if not existing
-        self.dbconn = sqlite3.connect('/tmp/livelogs.db')
+        self.dbconn = sqlite3.connect(self.database_file)
         self.dbcursor = self.dbconn.cursor()
         # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
         # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
-        cmd = "CREATE TABLE IF NOT EXISTS logs(attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options INT, plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))"
+        cmd = "CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options INT, plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))"
+        self.dbcursor.execute(cmd)
+        cmd = "CREATE INDEX IF NOT EXISTS logs_time ON logs (time)"
         self.dbcursor.execute(cmd)
         self.dbconn.commit()
-        self.dbconn.row_factory = sqlite3.Row
+        # rowfactory will later be redefined (in livestatus.py)
 
 
     def main(self):
@@ -556,3 +578,7 @@ class Livestatus_broker:
                 # Maybe we should wait until there are no more initial broks
                 # before we open the socket
                 pass
+
+
+def livestatus_factory(cursor, row):
+    return Logline(row)

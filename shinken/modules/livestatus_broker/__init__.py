@@ -55,7 +55,11 @@ def get_instance(plugin):
         socket = plugin.socket
     else:
         socket = os.sep.join([os.path.abspath(''), 'var', 'rw', 'live'])
+    if hasattr(plugin, 'database_file'):
+        database_file = int(plugin.database_file)
+    else:
+        database_file = os.sep.join([os.path.abspath(''), 'var', 'livestatus.db'])
 
-    instance = Livestatus_broker(plugin.get_name(), host, port, socket)
+    instance = Livestatus_broker(plugin.get_name(), host, port, socket, database_file)
     return instance
 
