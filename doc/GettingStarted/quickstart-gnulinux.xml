@@ -57,7 +57,7 @@
     </screen>
     <para> And add the line :</para>
     <screen>
-      <prompt>linux:~ $ </prompt><userinput>deb http://ppa.launchpad.net/mjeanson/ppa/ubuntu lucid main </userinput>
+      <prompt>$ </prompt><userinput>deb http://ppa.launchpad.net/shinken-dev/ppa/ubuntu lucid main </userinput>
     </screen>
     <para> Then you only need to install the daemons :</para>
     <screen>
