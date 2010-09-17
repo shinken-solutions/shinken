@@ -39,7 +39,8 @@ class ArbiterLink(SatelliteLink):
                 'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
                 }
  
-    running_properties = {'con' : {'default' : None},                        
+    running_properties = {'con' : {'default' : None},                                                  
+                          'broks' : {'default' : []},
                           }
 
     macros = {}

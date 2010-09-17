@@ -508,13 +508,11 @@ class Broker(Satellite):
 	#for a moduel like livestatus to raise external
 	#commandsfor example
 	def get_objects_from_from_queues(self):
-            print "Call for objects from queues"
             for f in self.modules_manager.get_external_from_queues():
                 full_queue = True
                 while full_queue:
                     try:
                         o = f.get(block=False)
-                        print "Got an object from queue"
                         self.add(o)
                     except Empty :
                         full_queue = False
@@ -616,10 +614,6 @@ class Broker(Satellite):
 		for rea_id in self.reactionners:
                         self.pynag_con_init(rea_id, type='reactionner')
 
-                #DBG
-                ext_cmd = ExternalCommand("moncul c'est du poulet")
-                self.add(ext_cmd)
-                        
 
 		#Now main loop
 		i = 0

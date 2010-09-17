@@ -211,6 +211,27 @@ class Arbiter(Daemon):
                 for new_cmd in new_cmds:
                     self.external_commands.append(new_cmd)
 
+                
+    #Our links to satellites can raise broks. We must send them
+    def get_broks_from_satellitelinks(self):
+        tabs = [self.conf.brokers, self.conf.schedulerlinks, \
+                    self.conf.pollers, self.conf.reactionners]
+        for tab in tabs:
+            for s in tab:
+                new_broks = s.get_all_broks()
+                for b in new_broks:
+                    self.add(b)
+
+
+    #Our links to satellites can raise broks. We must send them
+    def get_initial_broks_from_satellitelinks(self):
+        tabs = [self.conf.brokers, self.conf.schedulerlinks, \
+                    self.conf.pollers, self.conf.reactionners]
+        for tab in tabs:
+            for s in tab:
+                b  = s.get_initial_status_brok()
+                self.add(b)
+
 
     #Load the external commander
     def load_external_command(self, e):
@@ -516,7 +537,10 @@ class Arbiter(Daemon):
         self.dispatcher.check_dispatch()
         #REF: doc/shinken-conf-dispatching.png (3)
         self.dispatcher.dispatch()
-        
+
+        #Now we can get all initial broks for our satellites
+        self.get_initial_broks_from_satellitelinks()
+
 	#Now create the external commander
         if os.name != 'nt':
           e = ExternalCommandManager(self.conf, 'dispatcher')
@@ -560,6 +584,10 @@ class Arbiter(Daemon):
                 #REF: doc/shinken-conf-dispatching.png (3)
                 self.dispatcher.dispatch()
                 self.dispatcher.check_bad_dispatch()
+
+                #Maybe our satellites links raise new broks. Must reap them
+                self.get_broks_from_satellitelinks()
+
                 #One broker is responsible for our broks,
                 #we must give him our broks
                 self.push_broks_to_broker()
@@ -572,9 +600,11 @@ class Arbiter(Daemon):
                 self.nb_broks_send = 0
                 
 
-                #Now send all external commands
+                #Now send all external commands to schedulers
                 for ext_cmd in self.external_commands:
                     self.external_command.resolve_command(ext_cmd)
+                #It's send, do not keep them
+                #TODO: check if really send. Queue by scheduler?
                 self.external_commands = []
 						
             if timeout < 0:

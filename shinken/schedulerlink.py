@@ -26,6 +26,10 @@ from item import Items
 
 class SchedulerLink(SatelliteLink):
     id = 0
+    
+    #Ok we lie a little here because we are a mere link in fact
+    my_type = 'scheduler'
+    
     properties={'scheduler_name' : {'required' : True , 'fill_brok' : ['full_status']},#, 'pythonize': None},
                 'address' : {'required' : True, 'fill_brok' : ['full_status']},#, 'pythonize': to_bool},
                 'port' : {'required':  False, 'default' : '7768', 'pythonize': to_int, 'fill_brok' : ['full_status']},
@@ -39,6 +43,7 @@ class SchedulerLink(SatelliteLink):
                           'alive' : {'default' : False, 'fill_brok' : ['full_status']},
                           'conf' : {'default' : None},
                           'need_conf' : {'default' : True},
+                          'broks' : {'default' : []},
                           }
     macros = {}
 

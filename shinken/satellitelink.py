@@ -111,13 +111,35 @@ class SatelliteLink(Item):
             return False
 
 
+    #Get and clean all of our broks
+    def get_all_broks(self):
+        res = self.broks
+        self.broks = []
+        return res
+
+
     def set_alive(self):
+        was_alive = self.alive
         self.alive = True
+
+        #We came from dead to alive
+        #so we must add a brok update
+        if not was_alive:
+            b = self.get_update_status_brok()
+            self.broks.append(b)
 
 
     def set_dead(self):
+        was_alive = self.alive
         self.alive = False
         self.con = None
+
+        #We are dead now. Must raise
+        #a brok to say it
+        if was_alive:
+            b = self.get_update_status_brok()
+            self.broks.append(b)
+
 
 
     def ping(self):

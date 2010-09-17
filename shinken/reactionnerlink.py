@@ -40,7 +40,8 @@ class ReactionnerLink(SatelliteLink):
                 }
  
     running_properties = {'con' : {'default' : None},
-                          'alive' : {'default' : False, 'fill_brok' : ['full_status']}
+                          'alive' : {'default' : False, 'fill_brok' : ['full_status']},                          
+                          'broks' : {'default' : []},
                           }
     macros = {}
 
