@@ -94,37 +94,6 @@ VERSION = "0.2+"
 
 
 
-
-#Interface for Brokers
-#They connect here and get all broks (data for brokers)
-#datas must be ORDERED! (initial status BEFORE update...)
-class IBroks(Pyro.core.ObjBase):
-    #we keep sched link
-    def __init__(self, arbiter):
-        Pyro.core.ObjBase.__init__(self)
-        self.arbiter = arbiter
-        self.running_id = random.random()
-
-
-    #Broker need to void it's broks?
-    def get_running_id(self):
-        return self.running_id
-
-		
-    #poller or reactionner ask us actions
-    #def get_broks(self):
-    #    #print "We ask us broks"
-    #    res = self.arbiter.get_broks()
-    #	#print "Sending %d broks" % len(res)#, res
-    #    self.arbiter.nb_broks_send += len(res)
-    #    return res
-
-
-    #Ping? Pong!
-    def ping(self):
-        return None
-
-
 #Interface for the other Arbiter
 #It connect, and we manage who is the Master, slave etc. 
 #Here is a also a fnction to have a new conf from the master
@@ -429,10 +398,8 @@ class Arbiter(Daemon):
 
         Log().log("Listening on %s:%d" % (self.me.address, self.me.port))
 
-        self.ibroks = IBroks(self)
         self.iarbiters = IArbiters(self)
 
-        self.uri = shinken.pyro_wrapper.register(self.poller_daemon, self.ibroks, "Broks")
         self.uri_arb = shinken.pyro_wrapper.register(self.poller_daemon, self.iarbiters, "ForArbiter")
 
         Log().log("Configuration Loaded")
