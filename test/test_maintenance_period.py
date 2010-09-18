@@ -50,8 +50,9 @@ class TestConfig(ShinkenTest):
         #Now inplicit inheritance
         #This one is defined in the service conf
         self.assert_(svc1.maintenance_period == a_24_7)
-        #This one is inherited
-        self.assert_(svc2.maintenance_period == a_24_7)
+        #This one is empty, because maintenance_period are not inherited from the
+        #host like check/notification_periods
+        self.assert_(svc2.maintenance_period == None)
         #This one got nothing :)
         self.assert_(svc3.maintenance_period == None)
 
