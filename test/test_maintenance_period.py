@@ -24,6 +24,7 @@
 
 #It's ugly I know....
 from shinken_test import *
+from timeperiod import Timeperiod
 
 
 class TestConfig(ShinkenTest):
@@ -56,6 +57,39 @@ class TestConfig(ShinkenTest):
         #This one got nothing :)
         self.assert_(svc3.maintenance_period == None)
 
+
+    def test_check_enter_downtime(self):
+        test_host_0 = self.sched.hosts.find_by_name("test_host_0")
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        now = time.time()
+        print "now it is", time.asctime(time.localtime(now))
+        nowday = time.strftime("%A", time.localtime(now + 60)).lower()
+        soonstart = time.strftime("%H:%M", time.localtime(now + 60))
+        soonend = time.strftime("%H:%M", time.localtime(now + 180))
+        
+        range = "%s %s-%s" % (nowday, soonstart, soonend)
+        print "range is ", range
+        t = Timeperiod()
+        t.timeperiod_name = ''
+        t.resolve_daterange(t.dateranges, range)
+        t_next = t.get_next_valid_time_from_t(now)
+        print "planned start", time.asctime(time.localtime(t_next))
+        t_next = t.get_next_invalid_time_from_t(t_next + 1)
+        print "planned stop ", time.asctime(time.localtime(t_next))
+        svc1.maintenance_period = t
+        # 
+        # now let the scheduler run and wait until the maintenance period begins
+        #
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(svc1.downtimes) == 1)
+        self.assert_(svc1.downtimes[0] in self.sched.downtimes.values())
+        self.assert_(svc1.in_scheduled_downtime)
+        self.assert_(svc1.downtimes[0].fixed)
+        self.assert_(svc1.downtimes[0].is_in_effect)
+        self.assert_(not svc1.downtimes[0].can_be_deleted)
+
+
+      
 
 if __name__ == '__main__':
     unittest.main()
