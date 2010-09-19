@@ -636,6 +636,23 @@ class Scheduler:
                 #this one has to start now
                 broks.extend(dt.enter()) # returns downtimestart notifications
                 broks.append(dt.ref.get_update_status_brok())
+            
+        #Check maintenance periods
+        for elt in [y for y in [x for x in self.hosts] + [x for x in self.services] if y.maintenance_period != None]:
+            if not hasattr(elt, 'in_maintenance'):
+                setattr(elt, 'in_maintenance', False)
+            if not elt.in_maintenance:
+                if elt.maintenance_period.is_time_valid(now):
+                    end_time = elt.maintenance_period.get_next_invalid_time_from_t(now)
+                    dt = Downtime(elt, now, end_time, 1, 0, 0, "system", "this downtime was automatically scheduled through a maintenance_period")
+                    elt.add_downtime(dt)
+                    self.add(dt)
+                    self.get_and_register_status_brok(elt)
+                    elt.in_maintenance = dt.id
+            else:
+                if not elt.in_maintenance in self.downtimes:
+                    # the maint downtimes has expired or was manually deleted
+                    elt.in_maintenance = False
 
         for b in broks:
             self.add(b)

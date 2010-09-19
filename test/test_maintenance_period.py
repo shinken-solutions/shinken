@@ -59,8 +59,20 @@ class TestConfig(ShinkenTest):
 
 
     def test_check_enter_downtime(self):
+        test_router_0 = self.sched.hosts.find_by_name("test_router_0")
         test_host_0 = self.sched.hosts.find_by_name("test_host_0")
+        test_nobody = self.sched.hosts.find_by_name("test_nobody")
+
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "test_ok_0")
+        svc3 = self.sched.services.find_srv_by_name_and_hostname("test_nobody", "test_ok_0")
+        # we want to focus on only one maintenance
+        test_router_0.maintenance_period = None
+        test_host_0.maintenance_period = None
+        test_nobody.maintenance_period = None
+        svc1.maintenance_period = None
+        svc2.maintenance_period = None
+
         now = time.time()
         print "now it is", time.asctime(time.localtime(now))
         nowday = time.strftime("%A", time.localtime(now + 60)).lower()
@@ -76,18 +88,33 @@ class TestConfig(ShinkenTest):
         print "planned start", time.asctime(time.localtime(t_next))
         t_next = t.get_next_invalid_time_from_t(t_next + 1)
         print "planned stop ", time.asctime(time.localtime(t_next))
-        svc1.maintenance_period = t
+        svc3.maintenance_period = t
+
+        self.assert_(not hasattr(svc3, 'in_maintenance'))
         # 
         # now let the scheduler run and wait until the maintenance period begins
         #
-        self.assert_(len(self.sched.downtimes) == 1)
-        self.assert_(len(svc1.downtimes) == 1)
-        self.assert_(svc1.downtimes[0] in self.sched.downtimes.values())
-        self.assert_(svc1.in_scheduled_downtime)
-        self.assert_(svc1.downtimes[0].fixed)
-        self.assert_(svc1.downtimes[0].is_in_effect)
-        self.assert_(not svc1.downtimes[0].can_be_deleted)
+        self.scheduler_loop(3, [[svc3, 0, 'OK']], do_sleep=True)
 
+        self.assert_(hasattr(svc3, 'in_maintenance'))
+        self.assert_(len(self.sched.downtimes) == 1)
+        self.assert_(len(svc3.downtimes) == 1)
+        self.assert_(svc3.downtimes[0] in self.sched.downtimes.values())
+        self.assert_(svc3.in_scheduled_downtime)
+        self.assert_(svc3.downtimes[0].fixed)
+        self.assert_(svc3.downtimes[0].is_in_effect)
+        self.assert_(not svc3.downtimes[0].can_be_deleted)
+        self.assert_(svc3.in_maintenance == svc3.downtimes[0].id)
+
+        # 
+        # now the downtime should expire...
+        #
+        self.scheduler_loop(3, [[svc3, 0, 'OK']], do_sleep=True)
+
+        self.assert_(len(self.sched.downtimes) == 0)
+        self.assert_(len(svc3.downtimes) == 0)
+        self.assert_(not svc3.in_scheduled_downtime)
+        self.assert_(svc3.in_maintenance == False)
 
       
 
