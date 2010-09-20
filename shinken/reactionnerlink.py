@@ -26,16 +26,16 @@ from item import Items
 class ReactionnerLink(SatelliteLink):
     id = 0
     my_type = 'reactionner'
-    properties={'reactionner_name' : {'required' : True },
-                'address' : {'required' : True},
-                'port' : {'required':  False, 'default' : '7769', 'pythonize': to_int},
-                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
-                'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool},
+    properties={'reactionner_name' : {'required' : True , 'fill_brok' : ['full_status']},
+                'address' : {'required' : True, 'fill_brok' : ['full_status']},
+                'port' : {'required':  False, 'default' : '7769', 'pythonize': to_int, 'fill_brok' : ['full_status']},
+                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'fill_brok' : ['full_status']},
+                'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool, 'fill_brok' : ['full_status']},
                 'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
-                'min_workers' : {'required' : False, 'default' : '1', 'pythonize' : to_int, 'to_send' : True},
-                'max_workers' : {'required' : False, 'default' : '30', 'pythonize' : to_int, 'to_send' : True},
-                'processes_by_worker' : {'required' : False, 'default' : '256', 'pythonize' : to_int, 'to_send' : True},
-                'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
+                'min_workers' : {'required' : False, 'default' : '1', 'pythonize' : to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
+                'max_workers' : {'required' : False, 'default' : '30', 'pythonize' : to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
+                'processes_by_worker' : {'required' : False, 'default' : '256', 'pythonize' : to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
+                'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
                 'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
                 }
  

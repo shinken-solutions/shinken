@@ -42,6 +42,7 @@ from timeperiod import Timeperiod
 from command import Command
 from config import Config
 from schedulerlink import SchedulerLink
+from reactionnerlink import ReactionnerLink
 from livestatus import LiveStatus, LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, LOGOBJECT_CONTACT, Logline
 
 
@@ -85,12 +86,13 @@ class Livestatus_broker:
         self.commands = {}
         #Now satellites
         self.schedulers = {}
+        self.reactionners = {}
 
         self.hostname_lookup_table = {}
         self.servicename_lookup_table = {}
 
         self.prepare_log_db()
-        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.dbconn, self.r)
+        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.reactionners, self.dbconn, self.r)
 
         self.number_of_objects = 0
     
@@ -274,6 +276,21 @@ class Livestatus_broker:
         #print "CMD:", c
         self.schedulers[sched_id] = sched
         print "scheduler added"
+        #print "MONCUL: Add a new scheduler ", sched
+        self.number_of_objects += 1
+
+
+    def manage_initial_reactionner_status_brok(self, b):
+        data = b.data
+        reac_id = data['id']
+        print "Creating Reactionner:", reac_id, data
+        reac = ReactionnerLink({})
+        print "Created a new reactionner", reac
+        self.update_element(reac, data)
+        print "Updated reactionner"
+        #print "CMD:", c
+        self.reactionners[reac_id] = reac
+        print "reactionner added"
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
 

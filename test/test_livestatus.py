@@ -715,6 +715,37 @@ othernode;1;scheduler-2;7768;1;1
         self.assert_(response == good_response)
 
 
+    def test_reactionner_table(self):
+        self.print_header()
+        creation_tab = {'reactionner_name' : 'reactionner-1', 'address' : 'localhost', 'spare' : '0'}
+        reac = ReactionnerLink(creation_tab)
+        reac.pythonize()
+        reac.alive = True
+        b = reac.get_initial_status_brok()
+        self.sched.add(b)
+        creation_tab = {'reactionner_name' : 'reactionner-2', 'address' : 'othernode', 'spare' : '1'}
+        reac = ReactionnerLink(creation_tab)
+        reac.pythonize()
+        reac.alive = True
+        b2 = reac.get_initial_status_brok()
+        self.sched.add(b2)
+
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get the columns meta-table
+        #---------------------------------------------------------------
+        data = """GET reactionners"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """address;alive;name;port;spare
+localhost;1;reactionner-1;7769;0
+othernode;1;reactionner-2;7769;1
+"""
+        print response == good_response
+        self.assert_(response == good_response)
+
+
+
 if __name__ == '__main__':
     import cProfile
     command = """unittest.main()"""

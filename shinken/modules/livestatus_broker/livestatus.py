@@ -1636,6 +1636,39 @@ class LiveStatus:
         },
 
 
+
+        #Reactionners
+        'ReactionnerLink' : {
+            'name' : {
+                'description' : 'The name of the reactionner',
+                'prop' : 'reactionner_name',
+                'type' : 'string',
+            },
+            'address' : {
+                'description' : 'The ip or dns adress of the reactionner',
+                'prop' : 'address',
+                'type' : 'string',
+            },
+            'port' : {
+                'description' : 'The TCP port of the reactionner',
+                'prop' : 'port',
+                'type' : 'int',
+            },
+            'spare' : {
+                'description' : 'If the reactionner is a spare or not',
+                'depythonize' : from_bool_to_int,
+                'prop' : 'spare',
+                'type' : 'int',
+            },
+            'alive' : {
+                'description' : 'If the reactionner is alive or not',
+                'prop' : 'alive',
+                'depythonize' : from_bool_to_int,
+                'type' : 'int',
+            },
+        },
+
+
         #Downtimes
         'Downtime' : {
             'author' : {
@@ -4588,7 +4621,7 @@ class LiveStatus:
     }
 
 
-    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, dbconn, return_queue):
+    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, reactionners, dbconn, return_queue):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
         self.configs = configs
@@ -4603,6 +4636,7 @@ class LiveStatus:
         self.timeperiods = timeperiods
         self.commands = commands
         self.schedulers = schedulers
+        self.reactionners = reactionners
         self.dbconn = dbconn
         self.debuglevel = 2
         self.dbconn.row_factory = self.row_factory
@@ -4634,6 +4668,7 @@ class LiveStatus:
             'status' : LiveStatus.out_map['Config'],
             'log' : LiveStatus.out_map['Logline'],
             'schedulers' : LiveStatus.out_map['SchedulerLink'],
+            'reactionners' : LiveStatus.out_map['ReactionnerLink'],
         }[table]
         if attribute in out_map and 'type' in out_map[attribute]:
             if out_map[attribute]['type'] == 'int':
@@ -4780,6 +4815,9 @@ class LiveStatus:
                 result.append(self.create_output(c, columns, filtercolumns))
         elif table == 'schedulers':
             for s in self.schedulers.values():
+                result.append(self.create_output(s, columns, filtercolumns))
+        elif table == 'reactionners':
+            for s in self.reactionners.values():
                 result.append(self.create_output(s, columns, filtercolumns))
         elif table == 'status':
             for c in self.configs.values():
