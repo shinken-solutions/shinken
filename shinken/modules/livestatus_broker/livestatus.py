@@ -4736,10 +4736,10 @@ class LiveStatus:
             result.append({ 
                 'description' : 'The data type of the column (int, float, string, list)' , 'name' : 'type' , 'table' : 'columns' , 'type' : 'string' })
             tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Logline' : 'log' }
-            for obj in sorted(LiveStatus.out_map, key=lambda x: x.__name__):
-                if obj.__name__ in tablenames:
+            for obj in sorted(LiveStatus.out_map, key=lambda x: x):
+                if obj in tablenames:
                     for attr in LiveStatus.out_map[obj]:
-                        result.append({ 'description' : LiveStatus.out_map[obj][attr]['description'] if 'description' in LiveStatus.out_map[obj][attr] and LiveStatus.out_map[obj][attr]['description'] else 'to_do_desc', 'name' : attr, 'table' : tablenames[obj.__name__], 'type' : LiveStatus.out_map[obj][attr]['type'] })
+                        result.append({ 'description' : LiveStatus.out_map[obj][attr]['description'] if 'description' in LiveStatus.out_map[obj][attr] and LiveStatus.out_map[obj][attr]['description'] else 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
 
         #print "result is", result
         return result
