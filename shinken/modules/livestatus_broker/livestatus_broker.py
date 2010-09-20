@@ -30,6 +30,7 @@ import socket
 import sys
 import cPickle
 import sqlite3
+import Queue
 
 from host import Host
 from hostgroup import Hostgroup
@@ -40,6 +41,7 @@ from contactgroup import Contactgroup
 from timeperiod import Timeperiod
 from command import Command
 from config import Config
+from schedulerlink import SchedulerLink
 from livestatus import LiveStatus, LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, LOGOBJECT_CONTACT, Logline
 
 
@@ -81,12 +83,14 @@ class Livestatus_broker:
         self.contactgroups = {}
         self.timeperiods = {}
         self.commands = {}
+        #Now satellites
+        self.schedulers = {}
 
         self.hostname_lookup_table = {}
         self.servicename_lookup_table = {}
 
         self.prepare_log_db()
-        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.dbconn, self.r)
+        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.dbconn, self.r)
 
         self.number_of_objects = 0
     
@@ -110,6 +114,8 @@ class Livestatus_broker:
             #print b
             f = getattr(self, manager)
             f(b)
+        else:
+            print "I do not have manager", manager
 
 
     def manage_program_status_brok(self, b):
@@ -255,6 +261,22 @@ class Livestatus_broker:
         #print "CMD:", c
         self.commands[c_id] = c
         self.number_of_objects += 1
+
+
+    def manage_initial_scheduler_status_brok(self, b):
+        data = b.data
+        sched_id = data['id']
+        print "Creating Scheduler:", sched_id, data
+        sched = SchedulerLink({})
+        print "Created a new scheduler", sched
+        self.update_element(sched, data)
+        print "Updated scheduler"
+        #print "CMD:", c
+        self.schedulers[sched_id] = sched
+        print "scheduler added"
+        #print "MONCUL: Add a new scheduler ", sched
+        self.number_of_objects += 1
+
 
 
     #A service check have just arrived, we UPDATE data info with this
@@ -552,8 +574,13 @@ class Livestatus_broker:
             try:
                 b = self.q.get(True, .01)  # do not block indefinitely
                 self.manage_brok(b)
-            except Exception:
+            #We do not ware about Empty queue
+            except Queue.Empty:
                 pass
+            #But others are importants
+            except Exception:
+                print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
+                raise
             inputready,outputready,exceptready = select.select(input,[],[], 0)
 
             for s in inputready:

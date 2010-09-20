@@ -1550,6 +1550,8 @@ class LiveStatus:
             },
         },
 
+
+        #Group of contacts
         'Contactgroup' : {
             'alias' : {
                 'description' : 'The alias of the contactgroup',
@@ -1567,6 +1569,8 @@ class LiveStatus:
             },
         },
 
+        
+        #Timeperiods
         'Timeperiod' : {
             'alias' : {
                 'description' : 'The alias of the timeperiod',
@@ -1579,6 +1583,7 @@ class LiveStatus:
             },
         },
 
+        #All commands (checks + notifications)
         'Command' : {
             'line' : {
                 'description' : 'The shell command line',
@@ -1592,6 +1597,46 @@ class LiveStatus:
             },
         },
 
+
+        ###Satellites 
+        #Schedulers 
+        'SchedulerLink' : {
+            'name' : {
+                'description' : 'The name of the scheduler',
+                'prop' : 'scheduler_name',
+                'type' : 'string',
+            },
+            'address' : {
+                'description' : 'The ip or dns adress ofthe scheduler',
+                'prop' : 'address',
+                'type' : 'string',
+            },
+            'port' : {
+                'description' : 'The TCP port of the scheduler',
+                'prop' : 'port',
+                'type' : 'int',
+            },
+            'spare' : {
+                'description' : 'If the scheduler is a spare or not',
+                'depythonize' : from_bool_to_int,
+                'prop' : 'spare',
+                'type' : 'int',
+            },
+            'weight' : {
+                'description' : 'Weight (in terms of hosts) of the scheduler',
+                'prop' : 'weight',
+                'type' : 'int',
+            },
+            'alive' : {
+                'description' : 'If the scheduler is alive or not',
+                'prop' : 'alive',
+                'depythonize' : from_bool_to_int,
+                'type' : 'int',
+            },
+        },
+
+
+        #Downtimes
         'Downtime' : {
             'author' : {
                 'default' : 'nobody',
@@ -2575,6 +2620,8 @@ class LiveStatus:
                 'type' : 'int',
             },
         },
+
+        #Comments
 
         'Comment' : {
             'author' : {
@@ -3561,6 +3608,9 @@ class LiveStatus:
             },
         },
 
+
+        #All the global config parameters
+
         'Config' : {
             'accept_passive_host_checks' : {
                 'default' : '0',
@@ -3762,6 +3812,9 @@ class LiveStatus:
                 'type' : 'float',
             },
         },
+
+
+        #Logs
 
         'Logline' : {
             'attempt' : {
@@ -4535,7 +4588,7 @@ class LiveStatus:
     }
 
 
-    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, dbconn, return_queue):
+    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, dbconn, return_queue):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
         self.configs = configs
@@ -4549,6 +4602,7 @@ class LiveStatus:
         self.contactgroups = contactgroups
         self.timeperiods = timeperiods
         self.commands = commands
+        self.schedulers = schedulers
         self.dbconn = dbconn
         self.debuglevel = 2
         self.dbconn.row_factory = self.row_factory
@@ -4578,7 +4632,8 @@ class LiveStatus:
             'commands' : LiveStatus.out_map['Command'],
             'timeperiods' : LiveStatus.out_map['Timeperiod'],
             'status' : LiveStatus.out_map['Config'],
-            'log' : LiveStatus.out_map['Logline']
+            'log' : LiveStatus.out_map['Logline'],
+            'schedulers' : LiveStatus.out_map['SchedulerLink'],
         }[table]
         if attribute in out_map and 'type' in out_map[attribute]:
             if out_map[attribute]['type'] == 'int':
@@ -4723,6 +4778,9 @@ class LiveStatus:
         elif table == 'commands':
             for c in self.commands.values():
                 result.append(self.create_output(c, columns, filtercolumns))
+        elif table == 'schedulers':
+            for s in self.schedulers.values():
+                result.append(self.create_output(s, columns, filtercolumns))
         elif table == 'status':
             for c in self.configs.values():
                 result.append(self.create_output(c, columns, filtercolumns))

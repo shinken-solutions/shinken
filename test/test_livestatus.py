@@ -685,16 +685,34 @@ Stats: max execution_time"""
         print response
 
 
-    def test_satellites_tables(self):
+    def test_scheduler_table(self):
         self.print_header()
+        creation_tab = {'scheduler_name' : 'scheduler-1', 'address' : 'localhost', 'spare' : '0'}
+        sched = SchedulerLink(creation_tab)
+        sched.pythonize()
+        sched.alive = True
+        b = sched.get_initial_status_brok()
+        self.sched.add(b)
+        creation_tab = {'scheduler_name' : 'scheduler-2', 'address' : 'othernode', 'spare' : '1'}
+        sched = SchedulerLink(creation_tab)
+        sched.pythonize()
+        sched.alive = True
+        b2 = sched.get_initial_status_brok()
+        self.sched.add(b2)
+
         self.update_broker()
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------
-        data = """GET columns"""
+        data = """GET schedulers"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
-
+        good_response = """address;alive;name;port;spare;weight
+localhost;1;scheduler-1;7768;0;1
+othernode;1;scheduler-2;7768;1;1
+"""
+        print response == good_response
+        self.assert_(response == good_response)
 
 
 if __name__ == '__main__':

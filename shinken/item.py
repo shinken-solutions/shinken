@@ -372,11 +372,12 @@ class Item(object):
         if 'brok_transformation' in entry:
             pre_op = entry['brok_transformation']
 
+        value = None
         #Get the current value, or the default if need
         if hasattr(self, prop):
             value = getattr(self, prop)
-        elif 'default' in cls.properties[prop]:
-            value = cls.properties[prop]['default']
+        elif 'default' in entry:
+            value = entry['default']
 
         #Apply brok_transformation if need
         if pre_op != None:
