@@ -48,7 +48,7 @@ class TestConfig(ShinkenTest):
         self.sched.broks = {}
 
 
-    def test_fill_status(self):
+    def test_status(self):
         self.print_header()
         print "got initial broks"
         now = time.time()
@@ -740,6 +740,36 @@ othernode;1;scheduler-2;7768;1;1
         good_response = """address;alive;name;port;spare
 localhost;1;reactionner-1;7769;0
 othernode;1;reactionner-2;7769;1
+"""
+        print response == good_response
+        self.assert_(response == good_response)
+
+
+    def test_poller_table(self):
+        self.print_header()
+        creation_tab = {'poller_name' : 'poller-1', 'address' : 'localhost', 'spare' : '0'}
+        pol = PollerLink(creation_tab)
+        pol.pythonize()
+        pol.alive = True
+        b = pol.get_initial_status_brok()
+        self.sched.add(b)
+        creation_tab = {'poller_name' : 'poller-2', 'address' : 'othernode', 'spare' : '1'}
+        pol = PollerLink(creation_tab)
+        pol.pythonize()
+        pol.alive = True
+        b2 = pol.get_initial_status_brok()
+        self.sched.add(b2)
+
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get the columns meta-table
+        #---------------------------------------------------------------
+        data = """GET pollers"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """address;alive;name;port;spare
+localhost;1;poller-1;7771;0
+othernode;1;poller-2;7771;1
 """
         print response == good_response
         self.assert_(response == good_response)

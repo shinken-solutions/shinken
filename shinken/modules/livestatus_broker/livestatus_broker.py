@@ -43,6 +43,7 @@ from command import Command
 from config import Config
 from schedulerlink import SchedulerLink
 from reactionnerlink import ReactionnerLink
+from pollerlink import PollerLink
 from livestatus import LiveStatus, LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, LOGOBJECT_CONTACT, Logline
 
 
@@ -86,13 +87,14 @@ class Livestatus_broker:
         self.commands = {}
         #Now satellites
         self.schedulers = {}
+        self.pollers = {}
         self.reactionners = {}
 
         self.hostname_lookup_table = {}
         self.servicename_lookup_table = {}
 
         self.prepare_log_db()
-        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.reactionners, self.dbconn, self.r)
+        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.dbconn, self.r)
 
         self.number_of_objects = 0
     
@@ -280,6 +282,22 @@ class Livestatus_broker:
         self.number_of_objects += 1
 
 
+    def manage_initial_poller_status_brok(self, b):
+        data = b.data
+        reac_id = data['id']
+        print "Creating Poller:", reac_id, data
+        reac = PollerLink({})
+        print "Created a new poller", reac
+        self.update_element(reac, data)
+        print "Updated poller"
+        #print "CMD:", c
+        self.pollers[reac_id] = reac
+        print "poller added"
+        #print "MONCUL: Add a new scheduler ", sched
+        self.number_of_objects += 1
+
+
+
     def manage_initial_reactionner_status_brok(self, b):
         data = b.data
         reac_id = data['id']
@@ -316,6 +334,9 @@ class Livestatus_broker:
         data = b.data
         #In the status, we've got duplicated item, we must relink thems
         s = self.find_service(data['host_name'], data['service_description'])
+        if s == None:
+            print "Warning : the service %s/%s is unknown!" % (data['host_name'], data['service_description'])
+            return
         s.check_period = self.get_timeperiod(s.check_period)
         s.notification_period = self.get_timeperiod(s.notification_period)
         s.contacts = self.get_contacts(s.contacts)
