@@ -286,10 +286,10 @@ ResponseHeader: fixed16"""
 
         duration = 180
         now = time.time()
-        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_001;test_warning_00;%d;%d;0;0;%d;lausser;blablubsvc" % (now, now, now + duration, duration)
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_warning_00;%d;%d;0;0;%d;lausser;blablubsvc" % (now, now, now + duration, duration)
         print cmd
         self.sched.run_external_command(cmd)
-        cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_001;%d;%d;0;0;%d;lausser;blablubhost" % (now, now, now + duration, duration)
+        cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_0;%d;%d;0;0;%d;lausser;blablubhost" % (now, now, now + duration, duration)
         print cmd
         self.sched.run_external_command(cmd)
         self.update_broker()
