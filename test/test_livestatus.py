@@ -714,6 +714,21 @@ othernode;1;scheduler-2;7768;1;1
         print response == good_response
         self.assert_(response == good_response)
 
+        #Now we update a scheduler state and we check
+        #here the N2
+        sched.alive = False
+        b = sched.get_update_status_brok()
+        self.sched.add(b)
+        self.update_broker()
+        data = """GET schedulers"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        good_response = """address;alive;name;port;spare;weight
+localhost;1;scheduler-1;7768;0;1
+othernode;0;scheduler-2;7768;1;1
+"""
+        self.assert_(response == good_response)
+
+
 
     def test_reactionner_table(self):
         self.print_header()
@@ -743,6 +758,23 @@ othernode;1;reactionner-2;7769;1
 """
         print response == good_response
         self.assert_(response == good_response)
+
+        #Now the update part
+        reac.alive = False
+        b2 = reac.get_update_status_brok()
+        self.sched.add(b2)
+        self.update_broker()
+        data = """GET reactionners"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """address;alive;name;port;spare
+localhost;1;reactionner-1;7769;0
+othernode;0;reactionner-2;7769;1
+"""
+        print response == good_response
+        self.assert_(response == good_response)
+
+
 
 
     def test_poller_table(self):
@@ -774,6 +806,26 @@ othernode;1;poller-2;7771;1
         print response == good_response
         self.assert_(response == good_response)
 
+        #Now the update part
+        pol.alive = False
+        b2 = pol.get_update_status_brok()
+        self.sched.add(b2)
+
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get the columns meta-table
+        #---------------------------------------------------------------
+        data = """GET pollers"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """address;alive;name;port;spare
+localhost;1;poller-1;7771;0
+othernode;0;poller-2;7771;1
+"""
+        print response == good_response
+        self.assert_(response == good_response)
+
+
 
     def test_broker_table(self):
         self.print_header()
@@ -800,6 +852,25 @@ othernode;1;poller-2;7771;1
         good_response = """address;alive;name;port;spare
 localhost;1;broker-1;7772;0
 othernode;1;broker-2;7772;1
+"""
+        print response == good_response
+        self.assert_(response == good_response)
+
+        #Now the update part
+        pol.alive = False
+        b2 = pol.get_initial_status_brok()
+        self.sched.add(b2)
+
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get the columns meta-table
+        #---------------------------------------------------------------
+        data = """GET brokers"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """address;alive;name;port;spare
+localhost;1;broker-1;7772;0
+othernode;0;broker-2;7772;1
 """
         print response == good_response
         self.assert_(response == good_response)

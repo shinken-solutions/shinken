@@ -284,6 +284,15 @@ class Livestatus_broker:
         self.number_of_objects += 1
 
 
+    def manage_update_scheduler_status_brok(self, b):
+        data = b.data
+        s = self.find_scheduler(data['scheduler_name'])
+        if s != None:
+            self.update_element(s, data)
+            #print "S:", s
+
+
+
     def manage_initial_poller_status_brok(self, b):
         data = b.data
         reac_id = data['id']
@@ -297,6 +306,13 @@ class Livestatus_broker:
         print "poller added"
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
+
+    def manage_update_poller_status_brok(self, b):
+        data = b.data
+        s = self.find_poller(data['poller_name'])
+        if s != None:
+            self.update_element(s, data)
+            #print "S:", s
 
 
 
@@ -315,6 +331,15 @@ class Livestatus_broker:
         self.number_of_objects += 1
 
 
+    def manage_update_reactionner_status_brok(self, b):
+        data = b.data
+        s = self.find_reactionner(data['reactionner_name'])
+        if s != None:
+            self.update_element(s, data)
+            #print "S:", s
+
+
+
     def manage_initial_broker_status_brok(self, b):
         data = b.data
         reac_id = data['id']
@@ -328,6 +353,14 @@ class Livestatus_broker:
         print "broker added"
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
+
+
+    def manage_update_broker_status_brok(self, b):
+        data = b.data
+        s = self.find_broker(data['broker_name'])
+        if s != None:
+            self.update_element(s, data)
+            #print "S:", s
 
 
 
@@ -605,7 +638,7 @@ class Livestatus_broker:
 
     def find_reactionner(self, name):
         for s in self.reactionners.values():
-            if s.ractionners == name:
+            if s.reactionner_name == name:
                 return s
         return None
 
