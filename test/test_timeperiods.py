@@ -87,14 +87,14 @@ class TestTimeperiods(ShinkenTest):
         t2.resolve_daterange(t2.dateranges, 'tuesday 08:30-21:00')
         t.exclude = [t2]
         #So the next will be after 16:30 and not before 21:00. So
-        #It will be 21:01
+        #It will be 21:00:01 (first second after invalid is valid)
 
         #we clean the cache of previous calc of t ;)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
-        print "T exclude:", t_next
-        self.assert_(t_next == "Tue Jul 13 21:01:00 2010")
+        print "T nxt with exclude:", t_next
+        self.assert_(t_next == "Tue Jul 13 21:00:01 2010")
 
 
     def test_dayweek_timeperiod_with_exclude(self):
@@ -109,6 +109,7 @@ class TestTimeperiods(ShinkenTest):
         t.resolve_daterange(t.dateranges, 'tuesday 2 16:30-24:00')
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_next = time.asctime(time.localtime(t_next))
+        print "T next", t_next
         self.assert_(t_next == "Tue Jul 13 16:30:00 2010")
 
         #Now we add this timeperiod an exception
@@ -117,7 +118,7 @@ class TestTimeperiods(ShinkenTest):
         t2.resolve_daterange(t2.dateranges, 'tuesday 00:00-23:58')
         t.exclude = [t2]
         #We are a bad boy : first time period want a tuesday
-        #but exclude do not want it until 23:58. So next is 59 :)
+        #but exclude do not want it until 23:58. So next is 58 + 1second :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_exclude = t2.get_next_valid_time_from_t(july_the_12)
@@ -127,7 +128,7 @@ class TestTimeperiods(ShinkenTest):
         t_next = time.asctime(time.localtime(t_next))
         print "TOTO T next", t_next
         
-        self.assert_(t_next == 'Tue Jul 13 23:59:00 2010')
+        self.assert_(t_next == 'Tue Jul 13 23:58:01 2010')
 
 
     def test_mondayweek_timeperiod_with_exclude(self):
