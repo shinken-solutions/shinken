@@ -145,7 +145,7 @@ class SchedulingItem(Item):
     #Look for my impacts, and remove me from theirs problems list
     def no_more_a_problem(self):
         if self.is_problem:
-            print "Me %s is no more a problem! Cool" % self.get_dbg_name()
+            #print "Me %s is no more a problem! Cool" % self.get_dbg_name()
             self.is_problem = False
 
             #we warn impacts that we are no more a problem
