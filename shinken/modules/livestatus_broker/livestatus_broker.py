@@ -412,6 +412,9 @@ class Livestatus_broker:
         data = b.data
         #In the status, we've got duplicated item, we must relink thems
         h = self.find_host(data['host_name'])
+        if h == None:
+            print "Warning : the host %s is unknown!" % data['host_name']
+            return
         h.check_period = self.get_timeperiod(h.check_period)
         h.notification_period = self.get_timeperiod(h.notification_period)
         h.contacts = self.get_contacts(h.contacts)

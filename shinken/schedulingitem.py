@@ -135,16 +135,17 @@ class SchedulingItem(Item):
                         self.impacts.extend(new_impacts)
                         #Make element unique in this list
                         self.impacts = list(set(self.impacts))
-        #DBG:
-        #print "Finally, ME %s got impacts:" % self.get_dbg_name()
-        #for impact in self.impacts:
-        #    print impact.get_dbg_name()
+                        
+        #And we register a new broks for update status
+        b = self.get_update_status_brok()
+        self.broks.append(b)
+
 
 
     #Look for my impacts, and remove me from theirs problems list
     def no_more_a_problem(self):
         if self.is_problem:
-            #print "Me %s is no more a problem! Cool" % self.get_dbg_name()
+            print "Me %s is no more a problem! Cool" % self.get_dbg_name()
             self.is_problem = False
 
             #we warn impacts that we are no more a problem
@@ -154,7 +155,11 @@ class SchedulingItem(Item):
                 
             #we can just drop our impacts list
             self.impacts = []
-        
+
+            #And we register a new broks for update status
+            b = self.get_update_status_brok()
+            self.broks.append(b)
+
 
     #call recursively by potentials impacts so they
     #update their source_problems list. But do not
@@ -182,9 +187,10 @@ class SchedulingItem(Item):
             #but only when we just go in impact state
             if not was_an_impact:
                 self.set_impact_state()
-                #And we register a new broks for update status
-                b = self.get_update_status_brok()
-                self.broks.append(b)
+
+            #And we register a new broks for update status
+            b = self.get_update_status_brok()
+            self.broks.append(b)
 
             #Ok now we can be a simple impact
             impacts.append(self)
@@ -228,9 +234,10 @@ class SchedulingItem(Item):
             self.is_impact = False
             #No more an impact, we can unset the impact state
             self.unset_impact_state()
-            #And we register a new broks for update status
-            b = self.get_update_status_brok()
-            self.broks.append(b)
+
+        #And we register a new broks for update status
+        b = self.get_update_status_brok()
+        self.broks.append(b)
 
 
     #When all dep are resolved, this function say if

@@ -62,6 +62,33 @@ def get_full_name(self):
 Service.get_full_name = get_full_name
 
 
+#Another for hosts. We must have the same function for hosts and service in
+#problem's source. So must define such a function for hosts too
+def get_common_full_name(self):
+    cls_name = self.__class__.my_type
+    if cls_name == 'service':
+        return self.host_name + LiveStatus.separators[3] + self.service_description
+    else:
+        return self.host_name
+
+
+#It's a dict with 2 entries : hosts a,d services. Will return a string with just
+#full name of all elements
+def from_svc_hst_distinct_lists(dct):
+    t = []
+    for h in dct['hosts']:
+        t.append(h)
+    for s in dct['services']:
+        t.append(s)
+    return ','.join(t)
+    
+
+class Problem:
+    def __init__(self, source, impacts):
+        self.source = source
+        self.impacts = impacts
+
+
 class Logline(dict):
     def __init__(self, cursor, row):
         for idx, col in enumerate(cursor.description):
@@ -1729,6 +1756,23 @@ class LiveStatus:
                 'prop' : 'alive',
                 'depythonize' : from_bool_to_int,
                 'type' : 'int',
+            },
+        },
+
+
+        #Problem
+        'Problem' : {
+            'source' : {
+                'description' : 'The source name of the problem (host or service)',
+                'prop' : 'source',
+                'type' : 'string',
+                'depythonize' : get_common_full_name
+            },
+            'impacts' : {
+                'description' : 'List of what the source impact (list of hosts and services)',
+                'prop' : 'impacts',
+                'type' : 'string',
+                'depythonize' : from_svc_hst_distinct_lists,
             },
         },
 
@@ -4737,6 +4781,7 @@ class LiveStatus:
             'pollers' : LiveStatus.out_map['PollerLink'],
             'reactionners' : LiveStatus.out_map['ReactionnerLink'],
             'brokers' : LiveStatus.out_map['BrokerLink'],
+            'problems' : LiveStatus.out_map['Problem'],
         }[table]
         if attribute in out_map and 'type' in out_map[attribute]:
             if out_map[attribute]['type'] == 'int':
@@ -4893,6 +4938,25 @@ class LiveStatus:
         elif table == 'brokers':
             for s in self.brokers.values():
                 result.append(self.create_output(s, columns, filtercolumns))
+        elif table == 'problems':
+            #We will crate a problems list first with all problems and source in it
+            #TODO : create with filter
+            problems = []
+            for h in self.hosts.values():
+                if h.is_problem:
+                    print "Got a problem indeed", h.get_name()
+                    pb = Problem(h, h.impacts)
+                    problems.append(pb)
+            for s in self.services.values():
+                if s.is_problem:
+                    print "Got a service problem", s.get_dbg_name()
+                    pb = Problem(s, s.impacts)
+                    problems.append(pb)
+            #DBG:
+            print "Our problems",  problems
+            #Then return
+            for pb in problems:
+                result.append(self.create_output(pb, columns, filtercolumns))
         elif table == 'status':
             for c in self.configs.values():
                 result.append(self.create_output(c, columns, filtercolumns))

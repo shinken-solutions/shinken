@@ -39,11 +39,20 @@ class TestConfig(ShinkenTest):
             
             }
         self.livestatus_broker.init()
+        print "Cleaning old broks?"
         self.sched.fill_initial_broks()
+        self.update_broker()
 
 
     def update_broker(self):
-        for brok in self.sched.broks.values():
+        #The brok should be manage in the good order
+        ids = self.sched.broks.keys()
+        ids.sort()
+        for brok_id in ids:
+            brok = self.sched.broks[brok_id]
+            #print "Managing a brok type", brok.type, "of id", brok_id
+            #if brok.type == 'update_service_status':
+            #    print "Problem?", brok.data['is_problem']
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
 
@@ -620,6 +629,8 @@ And: 2"""
 
     def test_thruk_tac_svc(self):
         self.print_header()
+        self.update_broker()
+
         start = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -687,17 +698,19 @@ Stats: max execution_time"""
 
     def test_scheduler_table(self):
         self.print_header()
+        self.update_broker()
+
         creation_tab = {'scheduler_name' : 'scheduler-1', 'address' : 'localhost', 'spare' : '0'}
-        sched = SchedulerLink(creation_tab)
-        sched.pythonize()
-        sched.alive = True
-        b = sched.get_initial_status_brok()
+        schedlink = SchedulerLink(creation_tab)
+        schedlink.pythonize()
+        schedlink.alive = True
+        b = schedlink.get_initial_status_brok()
         self.sched.add(b)
         creation_tab = {'scheduler_name' : 'scheduler-2', 'address' : 'othernode', 'spare' : '1'}
-        sched = SchedulerLink(creation_tab)
-        sched.pythonize()
-        sched.alive = True
-        b2 = sched.get_initial_status_brok()
+        schedlink = SchedulerLink(creation_tab)
+        schedlink.pythonize()
+        schedlink.alive = True
+        b2 = schedlink.get_initial_status_brok()
         self.sched.add(b2)
 
         self.update_broker()
@@ -708,23 +721,23 @@ Stats: max execution_time"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """address;alive;name;port;spare;weight
-localhost;1;scheduler-1;7768;0;1
 othernode;1;scheduler-2;7768;1;1
+localhost;1;scheduler-1;7768;0;1
 """
-        print response == good_response
+        print response, 'FUCK'
         self.assert_(response == good_response)
 
         #Now we update a scheduler state and we check
         #here the N2
-        sched.alive = False
-        b = sched.get_update_status_brok()
+        schedlink.alive = False
+        b = schedlink.get_update_status_brok()
         self.sched.add(b)
         self.update_broker()
         data = """GET schedulers"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         good_response = """address;alive;name;port;spare;weight
-localhost;1;scheduler-1;7768;0;1
 othernode;0;scheduler-2;7768;1;1
+localhost;1;scheduler-1;7768;0;1
 """
         self.assert_(response == good_response)
 
@@ -732,6 +745,7 @@ othernode;0;scheduler-2;7768;1;1
 
     def test_reactionner_table(self):
         self.print_header()
+        self.update_broker()
         creation_tab = {'reactionner_name' : 'reactionner-1', 'address' : 'localhost', 'spare' : '0'}
         reac = ReactionnerLink(creation_tab)
         reac.pythonize()
@@ -779,6 +793,8 @@ othernode;0;reactionner-2;7769;1
 
     def test_poller_table(self):
         self.print_header()
+        self.update_broker()
+
         creation_tab = {'poller_name' : 'poller-1', 'address' : 'localhost', 'spare' : '0'}
         pol = PollerLink(creation_tab)
         pol.pythonize()
@@ -829,6 +845,8 @@ othernode;0;poller-2;7771;1
 
     def test_broker_table(self):
         self.print_header()
+        self.update_broker()
+
         creation_tab = {'broker_name' : 'broker-1', 'address' : 'localhost', 'spare' : '0'}
         pol = BrokerLink(creation_tab)
         pol.pythonize()
@@ -874,6 +892,42 @@ othernode;0;broker-2;7772;1
 """
         print response == good_response
         self.assert_(response == good_response)
+
+
+
+    def test_problems_table(self):
+        self.print_header()
+        self.update_broker()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(4, [[host, 2, 'DOWN'], [router, 2, 'DOWN'], [svc, 2, 'BAD']])
+        print "Is router a problem?", router.is_problem, router.state, router.state_type
+        print "Is host a problem?", host.is_problem, host.state, host.state_type
+        print "Is service a problem?", svc.is_problem, svc.state, svc.state_type
+        self.update_broker()
+        print "All", self.livestatus_broker.hosts
+        for h in self.livestatus_broker.hosts.values():
+            print h.get_dbg_name(), h.is_problem
+
+        #---------------------------------------------------------------
+        # get the columns meta-table
+        #---------------------------------------------------------------
+        data = """GET problems"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print "FUCK", response
+        good_response = """impacts;source
+test_host_0,test_host_0/test_ok_0;test_router_0
+"""
+        print response == good_response
+        self.assert_(response == good_response)
+        
 
 
 
