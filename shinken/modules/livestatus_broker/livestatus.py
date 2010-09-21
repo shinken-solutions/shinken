@@ -1701,6 +1701,38 @@ class LiveStatus:
         },
 
 
+        #Brokers
+        'BrokerLink' : {
+            'name' : {
+                'description' : 'The name of the broker',
+                'prop' : 'broker_name',
+                'type' : 'string',
+            },
+            'address' : {
+                'description' : 'The ip or dns adress of the broker',
+                'prop' : 'address',
+                'type' : 'string',
+            },
+            'port' : {
+                'description' : 'The TCP port of the broker',
+                'prop' : 'port',
+                'type' : 'int',
+            },
+            'spare' : {
+                'description' : 'If the broker is a spare or not',
+                'depythonize' : from_bool_to_int,
+                'prop' : 'spare',
+                'type' : 'int',
+            },
+            'alive' : {
+                'description' : 'If the broker is alive or not',
+                'prop' : 'alive',
+                'depythonize' : from_bool_to_int,
+                'type' : 'int',
+            },
+        },
+
+
         #Downtimes
         'Downtime' : {
             'author' : {
@@ -4653,7 +4685,7 @@ class LiveStatus:
     }
 
 
-    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, dbconn, return_queue):
+    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, return_queue):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
         self.configs = configs
@@ -4670,6 +4702,7 @@ class LiveStatus:
         self.schedulers = schedulers
         self.pollers = pollers
         self.reactionners = reactionners
+        self.brokers = brokers
         self.dbconn = dbconn
         self.debuglevel = 2
         self.dbconn.row_factory = self.row_factory
@@ -4703,6 +4736,7 @@ class LiveStatus:
             'schedulers' : LiveStatus.out_map['SchedulerLink'],
             'pollers' : LiveStatus.out_map['PollerLink'],
             'reactionners' : LiveStatus.out_map['ReactionnerLink'],
+            'brokers' : LiveStatus.out_map['BrokerLink'],
         }[table]
         if attribute in out_map and 'type' in out_map[attribute]:
             if out_map[attribute]['type'] == 'int':
@@ -4855,6 +4889,9 @@ class LiveStatus:
                 result.append(self.create_output(s, columns, filtercolumns))
         elif table == 'reactionners':
             for s in self.reactionners.values():
+                result.append(self.create_output(s, columns, filtercolumns))
+        elif table == 'brokers':
+            for s in self.brokers.values():
                 result.append(self.create_output(s, columns, filtercolumns))
         elif table == 'status':
             for c in self.configs.values():

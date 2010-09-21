@@ -44,6 +44,7 @@ from config import Config
 from schedulerlink import SchedulerLink
 from reactionnerlink import ReactionnerLink
 from pollerlink import PollerLink
+from brokerlink import BrokerLink
 from livestatus import LiveStatus, LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, LOGOBJECT_CONTACT, Logline
 
 
@@ -89,12 +90,13 @@ class Livestatus_broker:
         self.schedulers = {}
         self.pollers = {}
         self.reactionners = {}
+        self.brokers = {}
 
         self.hostname_lookup_table = {}
         self.servicename_lookup_table = {}
 
         self.prepare_log_db()
-        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.dbconn, self.r)
+        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.r)
 
         self.number_of_objects = 0
     
@@ -309,6 +311,21 @@ class Livestatus_broker:
         #print "CMD:", c
         self.reactionners[reac_id] = reac
         print "reactionner added"
+        #print "MONCUL: Add a new scheduler ", sched
+        self.number_of_objects += 1
+
+
+    def manage_initial_broker_status_brok(self, b):
+        data = b.data
+        reac_id = data['id']
+        print "Creating Broker:", reac_id, data
+        reac = BrokerLink({})
+        print "Created a new broker", reac
+        self.update_element(reac, data)
+        print "Updated broker"
+        #print "CMD:", c
+        self.brokers[reac_id] = reac
+        print "broker added"
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
 
@@ -570,6 +587,35 @@ class Livestatus_broker:
             if c.contact_name == contact_name:
                 return c
         return None
+
+    ###Find satellites
+    def find_scheduler(self, name):
+        for s in self.schedulers.values():
+            if s.scheduler_name == name:
+                return s
+        return None
+
+
+    def find_poller(self, name):
+        for s in self.pollers.values():
+            if s.poller_name == name:
+                return s
+        return None
+
+
+    def find_reactionner(self, name):
+        for s in self.reactionners.values():
+            if s.ractionners == name:
+                return s
+        return None
+
+
+    def find_broker(self, name):
+        for s in self.brokers.values():
+            if s.broker_name == name:
+                return s
+        return None
+
 
         
     def update_element(self, e, data):

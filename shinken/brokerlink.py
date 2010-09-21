@@ -26,18 +26,18 @@ from item import Items
 class BrokerLink(SatelliteLink):
     id = 0
     my_type = 'broker'
-    properties={'broker_name' : {'required' : True },
-                'address' : {'required' : True},
-                'port' : {'required':  False, 'default': '7772', 'pythonize': to_int},
-                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
-                'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool},
-                'manage_arbiters' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'to_send' : True},
+    properties={'broker_name' : {'required' : True , 'fill_brok' : ['full_status']},
+                'address' : {'required' : True, 'fill_brok' : ['full_status']},
+                'port' : {'required':  False, 'default': '7772', 'pythonize': to_int, 'fill_brok' : ['full_status']},
+                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'fill_brok' : ['full_status']},
+                'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool, 'fill_brok' : ['full_status']},
+                'manage_arbiters' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'to_send' : True, 'fill_brok' : ['full_status']},
                 'modules' : {'required':  False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
-                'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
+                'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
                 }
  
     running_properties = {'con' : {'default' : None},
-                          'alive' : {'default' : False, 'fill_brok' : ['full_status']},
+                          'alive' : {'default' : False, 'fill_brok' : ['full_status'], 'fill_brok' : ['full_status']},
                           'broks' : {'default' : []},
                           }
     macros = {}

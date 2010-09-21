@@ -775,6 +775,36 @@ othernode;1;poller-2;7771;1
         self.assert_(response == good_response)
 
 
+    def test_broker_table(self):
+        self.print_header()
+        creation_tab = {'broker_name' : 'broker-1', 'address' : 'localhost', 'spare' : '0'}
+        pol = BrokerLink(creation_tab)
+        pol.pythonize()
+        pol.alive = True
+        b = pol.get_initial_status_brok()
+        self.sched.add(b)
+        creation_tab = {'broker_name' : 'broker-2', 'address' : 'othernode', 'spare' : '1'}
+        pol = BrokerLink(creation_tab)
+        pol.pythonize()
+        pol.alive = True
+        b2 = pol.get_initial_status_brok()
+        self.sched.add(b2)
+
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get the columns meta-table
+        #---------------------------------------------------------------
+        data = """GET brokers"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """address;alive;name;port;spare
+localhost;1;broker-1;7772;0
+othernode;1;broker-2;7772;1
+"""
+        print response == good_response
+        self.assert_(response == good_response)
+
+
 
 if __name__ == '__main__':
     import cProfile
