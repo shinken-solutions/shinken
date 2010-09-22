@@ -5117,6 +5117,7 @@ class LiveStatus:
                 return sum(float(obj[attribute]) for obj in ref) / len(ref)
             return 0
 
+
         def std_postproc(ref):
             return 0
         
