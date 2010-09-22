@@ -56,9 +56,15 @@ LOGOBJECT_SERVICE     = 2
 LOGOBJECT_CONTACT     = 3 
 
 #This is a dirty hack. Service.get_name only returns service_description.
-#For the servicegroup config we need more. host_name + separator + service_description
+#For the servicegroup config we need more. host_name + separator + service_descriptio
 def get_full_name(self):
-    return self.host_name + LiveStatus.separators[3] + self.service_description
+    if get_full_name.outputformat == 'csv':
+        return self.host_name + LiveStatus.separators[3] + self.service_description
+    elif get_full_name.outputformat == 'json':
+        return [self.host_name , self.service_description]
+    else:
+        print "Unknow output format!"
+        return ''
 Service.get_full_name = get_full_name
 
 
@@ -4834,10 +4840,12 @@ class LiveStatus:
                                     value = [getattr(item, f)() for item in value if callable(getattr(item, f)) ] \
                                           + [getattr(item, f) for item in value if not callable(getattr(item, f)) ]
                                     #at least servicegroups are nested [host,service],.. The need some flattening
-                                    #value = ','.join(['%s' % y for x in value if isinstance(x, list) for y in x] + \
-                                    #    ['%s' % x for x in value if not isinstance(x, list)])
-                                    value = [y for x in value if isinstance(x, list) for y in x] + \
-                                        [x for x in value if not isinstance(x, list)]
+                                    
+                                    #I thin the 2 above lines are create a problem in json output at least
+                                    #with service groups members that need to be [[hostname, desc], [hostname, desc]]
+                                    #value = [y for x in value if isinstance(x, list) for y in x] + \
+                                    #    [x for x in value if not isinstance(x, list)]
+                                    print "DBG: Final value:", value
                                    
                                 else:
                                     #ok not a direct function, maybe a functin provided by value...
@@ -5117,7 +5125,6 @@ class LiveStatus:
                 return sum(float(obj[attribute]) for obj in ref) / len(ref)
             return 0
 
-
         def std_postproc(ref):
             return 0
         
@@ -5278,6 +5285,9 @@ class LiveStatus:
 
 
     def handle_request(self, data):
+        #Dirty hack to change the output of get_full_name for services
+        #for cvs and json
+        global get_full_name
         title = ''
         content = ''
         response = ''
@@ -5285,6 +5295,10 @@ class LiveStatus:
         filtercolumns = []
         responseheader = 'off'
         outputformat = 'csv'
+
+        #So set first this format in out global function
+        get_full_name.outputformat = outputformat
+
         columnheaders = 'off'
         groupby = False
         aliases = []
@@ -5313,6 +5327,7 @@ class LiveStatus:
                 cmd, responseheader = line.split(' ', 1)
             elif line.find('OutputFormat: ') != -1:
                 cmd, outputformat = line.split(' ', 1)
+                get_full_name.outputformat = outputformat
             elif line.find('ColumnHeaders: ') != -1:
                 cmd, columnheaders = line.split(' ', 1)
             elif line.find('Filter: ') != -1:
