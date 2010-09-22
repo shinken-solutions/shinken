@@ -5103,13 +5103,19 @@ class LiveStatus:
             return sum(float(obj[attribute]) for obj in ref)
 
         def max_postproc(ref):
-            return max(float(obj[attribute]) for obj in ref)
+            if ref != []:
+                return max(float(obj[attribute]) for obj in ref)
+            return 0
 
         def min_postproc(ref):
-            return min(float(obj[attribute]) for obj in ref)
+            if ref != []:
+                return min(float(obj[attribute]) for obj in ref)
+            return 0
 
         def avg_postproc(ref):
-            return sum(float(obj[attribute]) for obj in ref) / len(ref)
+            if ref != []:
+                return sum(float(obj[attribute]) for obj in ref) / len(ref)
+            return 0
 
         def std_postproc(ref):
             return 0
