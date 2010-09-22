@@ -91,7 +91,7 @@ class Scheduler:
 
     #Load conf for future use
     def load_conf(self, conf):
-        self.program_start = time.time()
+        self.program_start = int(time.time())
         self.conf = conf
         self.hostgroups = conf.hostgroups
         self.hostgroups.create_reversed_list()

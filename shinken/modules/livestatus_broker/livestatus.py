@@ -3872,7 +3872,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'livestatus_version' : {
-                'default' : '0',
+                'default' : '1.1.3',
                 'description' : 'The version of the MK Livestatus module',
                 'prop' : None,
                 'type' : 'string',
@@ -4944,16 +4944,12 @@ class LiveStatus:
             problems = []
             for h in self.hosts.values():
                 if h.is_problem:
-                    print "Got a problem indeed", h.get_name()
                     pb = Problem(h, h.impacts)
                     problems.append(pb)
             for s in self.services.values():
                 if s.is_problem:
-                    print "Got a service problem", s.get_dbg_name()
                     pb = Problem(s, s.impacts)
                     problems.append(pb)
-            #DBG:
-            print "Our problems",  problems
             #Then return
             for pb in problems:
                 result.append(self.create_output(pb, columns, filtercolumns))
