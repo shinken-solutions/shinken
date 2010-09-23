@@ -468,8 +468,13 @@ class Config(Item):
     #We've got raw objects in string, now create real Instances
     def create_objects(self, raw_objects):        
         types_creations = self.__class__.types_creations
+        
+        #some types are already created in this time
+        early_created_types = ['arbiter', 'module']
+
         for t in types_creations:
-            self.create_objects_for_type(raw_objects, t)
+            if t not in early_created_types:
+                self.create_objects_for_type(raw_objects, t)
 
 
     def create_objects_for_type(self, raw_objects, type):
