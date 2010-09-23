@@ -51,12 +51,19 @@ if int(python_version[0]) == 3:
     sys.exit(1)
 
 
+#In fact it's useful for installed daemon
+sys.path.insert(0, '.')
+
 
 #Try to load shinken lib.
 #Maybe it's not in our python path, so we detect it
 #it so (it's a untar install) we add .. in the path
 try :
     from shinken.util import to_bool
+    my_path = os.path.abspath(sys.modules['__main__'].__file__)
+    elts = os.path.dirname(my_path).split(os.sep)[:-1]
+    elts.append('shinken')
+    sys.path.append(os.sep.join(elts))
 except ImportError:
     #Now add in the python path the shinken lib
     #if we launch it in a direct way and
@@ -68,9 +75,6 @@ except ImportError:
     sys.path.append(os.sep.join(elts))
 
 
-
-#DBG for Pyro 4
-sys.path.insert(0, '.')
 
 try:
     import shinken.pyro_wrapper    
@@ -88,6 +92,7 @@ from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon
 from shinken.log import Log
+from shinken.modulesmanager import ModulesManager
 
 
 VERSION = "0.2+"
@@ -262,11 +267,62 @@ class Arbiter(Daemon):
         
         raw_objects = self.conf.read_config_buf(buf)
 
+        #### Loading Arbiter module part ####
+        
         #first we need to get arbtiers and modules first
         #so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
+        
+        
+        self.conf.early_arbiter_linking()
 
+        #Search wich Arbiterlink I am
+        for arb in self.conf.arbiterlinks:
+            if arb.is_me():
+                arb.need_conf = False
+                self.me = arb
+                print "I am the arbiter :", arb.get_name()
+                print "Am I the master?", not self.me.spare
+            else: #not me
+                arb.need_conf = True
+
+        #If None, there will be huge problems. The conf will be invalid
+        #And we will bail out after print all errors
+        if self.me != None:
+            print "My own modules :"
+            for m in self.me.modules:
+                print m
+
+            #BEWARE: this way of finding path is good if we still 
+            #DO NOT HAVE CHANGE PWD!!!
+            #Now get the module path. It's in fact the directory modules
+            #inside the shinken directory. So let's find it.
+            print "modulemanager file", shinken.modulesmanager.__file__
+            modulespath = os.path.abspath(shinken.modulesmanager.__file__)
+            print "modulemanager absolute file", modulespath
+            #We got one of the files of 
+            elts = os.path.dirname(modulespath).split(os.sep)[:-1]
+            elts.append('shinken')
+            elts.append('modules')
+            self.modulespath = os.sep.join(elts)
+            Log().log("Using modules path : %s" % os.sep.join(elts))
+
+
+            self.modules_manager = ModulesManager('arbiter', self.modulespath, self.me.modules)
+            self.modules_manager.load()
+            self.mod_instances = self.modules_manager.get_instances()
+
+            for inst in self.mod_instances:
+                try :
+                    r = inst.get_objects()
+                    for h in r['hosts']:
+                        raw_objects['host'].append(h)
+                except Exception, exp:
+                    print "The instance %s raise an exception %s. I remove it" % (inst.get_name(), str(exp))
+
+
+        ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
         
 	#Maybe conf is already invalid
@@ -337,18 +393,6 @@ class Arbiter(Daemon):
         #hp=hpy()
         #print hp.heap()
         #print hp.heapu()
-
-
-        #Search wich Arbiterlink I am
-        for arb in self.conf.arbiterlinks:
-            if arb.is_me():
-                arb.need_conf = False
-                self.me = arb
-                print "I am the arbiter :", arb.get_name()
-                print "Am I the master?", not self.me.spare
-            else: #not me
-                arb.need_conf = True
-
 
         if self.me == None:
             print "Error : I cannot find my own Arbiter object, I bail out"

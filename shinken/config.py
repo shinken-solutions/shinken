@@ -501,6 +501,27 @@ class Config(Item):
             
 
 
+    #Here arbiter and modules objects should be prepare and link
+    #before all others types
+    def early_arbiter_linking(self):
+        
+        self.modules.create_reversed_list()
+
+        if len(self.arbiterlinks) == 0:
+            Log().log("Warning : there is no arbiter, I add one in localhost:7770")
+            a = ArbiterLink({'arbiter_name' : 'Default-Arbiter', 'host_name' : socket.gethostname(), 'address' : 'localhost', 'port' : '7770', 'spare' : '0'})
+            self.arbiterlinks = ArbiterLinks([a])
+
+        #First fill default
+        self.arbiterlinks.fill_default()
+        
+
+        #print "****************** Pythonize ******************"
+        self.arbiterlinks.pythonize()
+
+        #print "****************** Linkify ******************"
+        self.arbiterlinks.linkify(self.modules)
+
         
 
     #We use linkify to make the config more efficient : elements will be
@@ -551,7 +572,7 @@ class Config(Item):
 
         #print "Schedulers and satellites"
         #Link all links with realms
-        self.arbiterlinks.linkify(self.modules)
+#        self.arbiterlinks.linkify(self.modules)
         self.schedulerlinks.linkify(self.realms, self.modules)
         self.brokers.linkify(self.realms, self.modules)
         self.reactionners.linkify(self.realms, self.modules)
@@ -711,7 +732,7 @@ class Config(Item):
         self.pollers.fill_default()
         self.brokers.fill_default()
         self.schedulerlinks.fill_default()
-        self.arbiterlinks.fill_default()
+#        self.arbiterlinks.fill_default()
 
         
     #Will check if a realm is defined, if not
@@ -735,10 +756,6 @@ class Config(Item):
     #If a satellite is missing, we add them in the localhost
     #with defaults values
     def fill_default_satellites(self):
-        if len(self.arbiterlinks) == 0:
-            Log().log("Warning : there is no arbiter, I add one in localhost:7770")
-            a = ArbiterLink({'arbiter_name' : 'Default-Arbiter', 'host_name' : socket.gethostname(), 'address' : 'localhost', 'port' : '7770', 'spare' : '0'})
-            self.arbiterlinks = ArbiterLinks([a])
         if len(self.schedulerlinks) == 0:
             Log().log("Warning : there is no scheduler, I add one in localhost:7768")
             s = SchedulerLink({'scheduler_name' : 'Default-Scheduler', 'address' : 'localhost', 'port' : '7768'})
@@ -823,7 +840,7 @@ class Config(Item):
         self.services.create_reversed_list()
         self.servicegroups.create_reversed_list()
         self.timeperiods.create_reversed_list()
-        self.modules.create_reversed_list()
+#        self.modules.create_reversed_list()
         self.resultmodulations.create_reversed_list()
         self.escalations.create_reversed_list()
         #For services it's a special case
@@ -941,7 +958,7 @@ class Config(Item):
         self.servicedependencies.pythonize()
         self.resultmodulations.pythonize()
         self.escalations.pythonize()
-        self.arbiterlinks.pythonize()
+#        self.arbiterlinks.pythonize()
         self.schedulerlinks.pythonize()
         self.realms.pythonize()
         self.reactionners.pythonize()

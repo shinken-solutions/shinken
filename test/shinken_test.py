@@ -40,6 +40,12 @@ class ShinkenTest(unittest.TestCase):
         self.config_files = [path]
         self.conf = Config()
         self.conf.read_config(self.config_files)
+        buf = self.conf.read_config(self.config_files)
+        raw_objects = self.conf.read_config_buf(buf)
+        self.conf.create_objects_for_type(raw_objects, 'arbiter')
+        self.conf.create_objects_for_type(raw_objects, 'module')
+        self.conf.early_arbiter_linking()
+        self.conf.create_objects(raw_objects)
         self.conf.instance_id = 0
         self.conf.instance_name = 'test'
         self.conf.linkify_templates()

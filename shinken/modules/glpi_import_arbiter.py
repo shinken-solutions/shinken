@@ -48,7 +48,7 @@ def get_instance(plugin):
 
 #Just get hostname from a GLPI webservices
 class Glpi_importer_arbiter:
-    def __init__(self, name, server, uri, login_name, login_password):
+    def __init__(self, name, uri, login_name, login_password):
         self.name = name
         self.uri = uri
         self.login_name = login_name
@@ -58,11 +58,11 @@ class Glpi_importer_arbiter:
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "I open the GLPI connexion to %s" % self.uri
-        self.con = xmlrpclib.ServerProxy(uri)
+        self.con = xmlrpclib.ServerProxy(self.uri)
         print "Connexion opened"
         print "Authentification in progress"
         arg = {'login_name' : self.login_name , 'login_password' : self.login_password}
-        res = proxy.glpi.doLogin(arg)
+        res = self.con.glpi.doLogin(arg)
         self.session = res['session']
         print "My session number", self.session
 
@@ -76,13 +76,13 @@ class Glpi_importer_arbiter:
     def get_objects(self):
         r = {'hosts' : []}
         arg = {'session' : self.session}
-        all_hosts = proxy.glpi.listComputers(arg)
+        all_hosts = self.con.glpi.listComputers(arg)
         print "Get all hosts", all_hosts
         for host in all_hosts:
             print "\n\n"
             print "Host info in GLPI", host
             arg = {'session' : self.session, 'computer' : host['id']}
-            host_info = proxy.glpi.getComputer(arg)
+            host_info = self.con.glpi.getComputer(arg)
             print "Host info", host_info
             h = {'host_name' : host_info['name'],
                  'alias' : host_info['name'],
