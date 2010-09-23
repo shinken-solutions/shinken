@@ -264,8 +264,8 @@ class Arbiter(Daemon):
 
         #first we need to get arbtiers and modules first
         #so we can ask them some objects too
-        self.conf.create_objects_for_type('arbiter')
-        self.conf.create_objects_for_type('module')
+        self.conf.create_objects_for_type(raw_objects, 'arbiter')
+        self.conf.create_objects_for_type(raw_objects, 'module')
 
         self.conf.create_objects(raw_objects)
         
