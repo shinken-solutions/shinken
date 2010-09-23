@@ -41,18 +41,23 @@ def get_instance(plugin):
     uri = plugin.uri
     login_name = plugin.login_name
     login_password = plugin.login_password
-    instance = Glpi_importer_arbiter(plugin.get_name(), uri, login_name, login_password)
+    if hasattr(plugin, 'use_property'):
+        use_property = plugin.use_property
+    else:
+        use_property = 'otherserial'
+    instance = Glpi_importer_arbiter(plugin.get_name(), uri, login_name, login_password, use_property)
     return instance
 
 
 
 #Just get hostname from a GLPI webservices
 class Glpi_importer_arbiter:
-    def __init__(self, name, uri, login_name, login_password):
+    def __init__(self, name, uri, login_name, login_password, use_property):
         self.name = name
         self.uri = uri
         self.login_name = login_name
         self.login_password = login_password
+        self.use_property = use_property
         
 
     #Called by Arbiter to say 'let's prepare yourself guy'
@@ -87,9 +92,11 @@ class Glpi_importer_arbiter:
             h = {'host_name' : host_info['name'],
                  'alias' : host_info['name'],
                  'address' : host_info['name'],
-                 #TODO : get a true field
-                 'use' : 'generic-host'
                  }
+            #Then take use only if there is a value inside
+            if host_info[self.use_property] != '':
+                h['use'] = host_info[self.use_property]
+
             r['hosts'].append(h)
         print "Returning to Arbiter the hosts:", r
         return r

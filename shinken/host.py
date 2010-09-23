@@ -298,7 +298,7 @@ class Host(SchedulingItem):
         if not hasattr(self, 'contacts') and not hasattr(self, 'contacgroups') and self.notifications_enabled == True:
             Log().log("%s : I do not have contacts nor contacgroups" % self.get_name())
             state = False
-        if not hasattr(self, 'check_command'):
+        if not hasattr(self, 'check_command') or self.check_command == None:
             Log().log("%s : I've got no check_command" % self.get_name())
             state = False
         #Ok got a command, but maybe it's invalid
