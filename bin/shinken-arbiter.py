@@ -258,7 +258,11 @@ class Arbiter(Daemon):
         Config.fill_usern_macros()
         
         #REF: doc/shinken-conf-dispatching.png (1)
-        self.conf.read_config(self.config_files)
+        buf = self.conf.read_config(self.config_files)
+        
+        raw_objects = self.conf.read_config_buf(buf)
+
+        self.conf.create_objects(raw_objects)
         
 	#Maybe conf is already invalid
         if not self.conf.conf_is_correct:

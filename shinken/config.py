@@ -238,6 +238,33 @@ class Config(Item):
         }
 
 
+    #We create dict of objects
+    #Type: 'name in objects' : {Class of object, Class of objects, 
+    #'property for self for the objects(config)'
+    types_creations = {'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
+                       'service' : (Service, Services, 'services'),
+                       'servicegroup' : (Servicegroup, Servicegroups, 'servicegroups'),
+                       'command' : (Command, Commands, 'commands'),
+                       'host' : (Host, Hosts, 'hosts'),
+                       'hostgroup' : (Hostgroup, Hostgroups, 'hostgroups'),
+                       'contact' : (Contact, Contacts, 'contacts'),
+                       'contactgroup' : (Contactgroup, Contactgroups, 'contactgroups'),
+                       'servicedependency' : (Servicedependency, Servicedependencies, 'servicedependencies'),
+                       'hostdependency' : (Hostdependency, Hostdependencies, 'hostdependencies'),
+                       'arbiter' : (ArbiterLink, ArbiterLinks, 'arbiterlinks'),
+                       'scheduler' : (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
+                       'reactionner' : (ReactionnerLink, ReactionnerLinks, 'reactionners'),
+                       'broker' : (BrokerLink, BrokerLinks, 'brokers'),
+                       'poller' : (PollerLink, PollerLinks, 'pollers'),
+                       'realm' : (Realm, Realms, 'realms'),
+                       'module' : (Module, Modules, 'modules'),
+                       'resultmodulation' : (Resultmodulation, Resultmodulations, 'resultmodulations'),
+                       'escalation' : (Escalation, Escalations, 'escalations'),
+                       'serviceescalation' : (Serviceescalation, Serviceescalations, 'serviceescalations'),
+                       'hostescalation' : (Hostescalation, Hostescalations, 'hostescalations'),
+                       }
+
+
     def __init__(self):
         self.params = {}
         #By default the conf is correct
@@ -343,8 +370,8 @@ class Config(Item):
                                     Log().log("Error: Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
                                 #The configuration is invalid because we have a bad file!
                                     self.conf_is_correct = False
-
-        self.read_config_buf(res)
+        return res
+#        self.read_config_buf(res)
         
 
     def read_config_buf(self, buf):
@@ -434,32 +461,20 @@ class Config(Item):
                         tmp[prop] = value
                 if tmp != {}:
                     objects[type].append(tmp)
-        
-        #We create dict of objects
-        #Type: 'name in objects' : {Class of object, Class of objects, 
-        #'property for self for the objects(config)'
-        types_creations = {'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
-                           'service' : (Service, Services, 'services'),
-                           'servicegroup' : (Servicegroup, Servicegroups, 'servicegroups'),
-                           'command' : (Command, Commands, 'commands'),
-                           'host' : (Host, Hosts, 'hosts'),
-                           'hostgroup' : (Hostgroup, Hostgroups, 'hostgroups'),
-                           'contact' : (Contact, Contacts, 'contacts'),
-                           'contactgroup' : (Contactgroup, Contactgroups, 'contactgroups'),
-                           'servicedependency' : (Servicedependency, Servicedependencies, 'servicedependencies'),
-                           'hostdependency' : (Hostdependency, Hostdependencies, 'hostdependencies'),
-                           'arbiter' : (ArbiterLink, ArbiterLinks, 'arbiterlinks'),
-                           'scheduler' : (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
-                           'reactionner' : (ReactionnerLink, ReactionnerLinks, 'reactionners'),
-                           'broker' : (BrokerLink, BrokerLinks, 'brokers'),
-                           'poller' : (PollerLink, PollerLinks, 'pollers'),
-                           'realm' : (Realm, Realms, 'realms'),
-                           'module' : (Module, Modules, 'modules'),
-                           'resultmodulation' : (Resultmodulation, Resultmodulations, 'resultmodulations'),
-                           'escalation' : (Escalation, Escalations, 'escalations'),
-                           'serviceescalation' : (Serviceescalation, Serviceescalations, 'serviceescalations'),
-                           'hostescalation' : (Hostescalation, Hostescalations, 'hostescalations'),
-                           }
+                    
+        return objects
+
+
+    #We've got raw objects in string, now create real Instances
+    def create_objects(self, raw_objects):        
+        types_creations = self.__class__.types_creations
+        for t in types_creations:
+            self.create_objects_for_type(raw_objects, t)
+
+
+    def create_objects_for_type(self, raw_objects, type):
+        types_creations = self.__class__.types_creations
+        t = type
         #Ex: the above code do for timeperiods:
         #timeperiods = []
         #for timeperiodcfg in objects['timeperiod']:
@@ -468,17 +483,16 @@ class Config(Item):
         #    timeperiods.append(t)
         #self.timeperiods = Timeperiods(timeperiods)
 
-        for t in types_creations:
-            (cls, clss, prop) = types_creations[t]
-            #List where we put objects
-            lst = []
-            for obj_cfg in objects[t]:
-                #We create teh object
-                o = cls(obj_cfg)
-                o.clean()
-                lst.append(o)
-            #we create the objects Class and we set it in prop
-            setattr(self, prop, clss(lst))
+        (cls, clss, prop) = types_creations[t]
+        #List where we put objects
+        lst = []
+        for obj_cfg in raw_objects[t]:
+            #We create teh object
+            o = cls(obj_cfg)
+            o.clean()
+            lst.append(o)
+        #we create the objects Class and we set it in prop
+        setattr(self, prop, clss(lst))
             
 
 
