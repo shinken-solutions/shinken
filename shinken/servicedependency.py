@@ -175,4 +175,4 @@ class Servicedependencies(Items):
         #self.apply_implicit_inheritance(hosts)
         for s in self:
             s.get_customs_properties_by_inheritance(self)
-
+            

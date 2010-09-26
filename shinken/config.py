@@ -560,6 +560,9 @@ class Config(Item):
 
         #print "Servicedependancy"
         self.servicedependencies.linkify(self.hosts, self.services, self.timeperiods)
+        
+        #print "Hostdependancy"
+        self.hostdependencies.linkify(self.hosts, self.timeperiods)
 
         #print "Resultmodulations"
         self.resultmodulations.linkify(self.timeperiods)
@@ -697,6 +700,8 @@ class Config(Item):
         self.services.apply_inheritance(self.hosts)
         #print "Servicedependencies"
         self.servicedependencies.apply_inheritance(self.hosts)
+        #print "Hostdependencies"
+        self.hostdependencies.apply_inheritance()
 
 
     #Use to apply implicit inheritance
@@ -829,6 +834,7 @@ class Config(Item):
         self.contacts.linkify_templates()
         self.services.linkify_templates()
         self.servicedependencies.linkify_templates()
+        self.hostdependencies.linkify_templates()
         
 
     #Reversed list is a dist with name for quick search by name
@@ -951,6 +957,7 @@ class Config(Item):
         super(Config, self).pythonize()
         self.hosts.pythonize()
         self.hostgroups.pythonize()
+        self.hostdependencies.pythonize()
         self.contactgroups.pythonize()
         self.contacts.pythonize()
         self.servicegroups.pythonize()
@@ -980,6 +987,7 @@ class Config(Item):
         self.contacts.clean_useless()
         self.services.clean_useless()
         self.servicedependencies.clean_useless()
+        self.hostdependencies.clean_useless()
 
 
     #Create packs of hosts and services so in a pack, 

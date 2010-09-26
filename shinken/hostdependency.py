@@ -44,6 +44,15 @@ class Hostdependency(Item):
                 'notification_failure_criteria' : {'required':False, 'default' : 'n', 'pythonize' : to_split},
                 'dependency_period' : {'required':False, 'default' : ''}
                 }
+    
+    running_properties = {}
+
+
+    #Give a nice name output, for debbuging purpose
+    #(debugging happens more often than expected...)
+    def get_name(self):
+        return self.dependent_host_name+'/'+self.host_name
+    
 
 
 class Hostdependencies(Items):
@@ -54,34 +63,49 @@ class Hostdependencies(Items):
 
     #We create new servicedep if necessery (host groups and co)
     def explode(self):
-        #The "old" services will be removed. All services with 
+        #The "old" dependencies will be removed. All dependencies with 
         #more than one host or a host group will be in it
         hstdep_to_remove = []
         
-        #Then for every host create a copy of the service with just the host
+        #Then for every host create a copy of the dependency with just the host
         #because we are adding services, we can't just loop in it
         hostdeps = self.items.keys()
         for id in hostdeps:
             hd = self.items[id]
-            hnames = hd.dependent_host_name.split(',')
-            if len(hnames) >= 2:
-                for hname in hnames:
-                    hname = hname.strip()
-                    new_hd = hd.copy()
-                    new_hd.dependent_host_name = hname
-                    self.items[new_hd.id] = new_hd
-                hstdep_to_remove.append(id)        
+            if not hd.is_tpl(): #Exploding template is useless
+                hnames = hd.dependent_host_name.split(',')
+                if len(hnames) >= 1:
+                    for hname in hnames:
+                        hname = hname.strip()
+                        new_hd = hd.copy()
+                        new_hd.dependent_host_name = hname
+                        self.items[new_hd.id] = new_hd
+                    hstdep_to_remove.append(id)    
         self.delete_hostsdep_by_id(hstdep_to_remove)
 
 
     def linkify(self, hosts, timeperiods):
+        self.linkify_hd_by_h(hosts)
         self.linkify_hd_by_tp(timeperiods)
         self.linkify_h_by_hd()
 
 
-    #We just search for each srvdep the id of the srv
+    def linkify_hd_by_h(self, hosts):
+        for hd in self:
+            try:
+                h_name = hd.host_name
+                dh_name = hd.dependent_host_name
+                h = hosts.find_by_name(h_name)
+                dh = hosts.find_by_name(dh_name)
+                hd.host_name = h
+                hd.dependent_host_name = dh
+            except AttributeError , exp:
+                print exp
+                
+                
+    #We just search for each hostdep the id of the host
     #and replace the name by the id
-    def linkify_sd_by_tp(self, timeperiods):
+    def linkify_hd_by_tp(self, timeperiods):
         for hd in self:
             try:
                 tp_name = hd.dependency_period
@@ -91,13 +115,28 @@ class Hostdependencies(Items):
                 print exp
 
 
-    #We backport service dep to service. So SD is not need anymore
+    #We backport host dep to host. So HD is not need anymore
     def linkify_h_by_hd(self):
         for hd in self:
-            h = hd.dependent_host_name
-            if h is not None:
-                if hasattr(hd, 'dependency_period'):
-                    h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, hd.dependency_period)
-                else:
-                    h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, None)
+            if not hd.is_tpl():
+                h = hd.dependent_host_name
+                if h is not None:
+                    if hasattr(hd, 'dependency_period'):
+                        h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, hd.dependency_period)
+                        h.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, hd.dependency_period)
+                    else:
+                        h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, None)
+                        h.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, None)
 
+
+    #Apply inheritance for all properties
+    def apply_inheritance(self):
+        #We check for all Host properties if the host has it
+        #if not, it check all host templates for a value
+        for prop in Hostdependency.properties:
+            self.apply_partial_inheritance(prop)
+
+        #Then implicit inheritance
+        #self.apply_implicit_inheritance(hosts)
+        for h in self:
+            h.get_customs_properties_by_inheritance(self)
