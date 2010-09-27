@@ -130,45 +130,24 @@ class Contact(Item):
         state = True #guilty or not? :)
         cls = self.__class__
 
+        #All of the above are checks in the notificationways part
         special_properties = ['service_notification_commands', 'service_notification_commands', \
-                                  'service_notification_period', 'host_notification_period']
+                                  'service_notification_period', 'host_notification_period', \
+                                  'service_notification_options', 'host_notification_options', \
+                                  'host_notification_commands']
+        
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
-        #Ok now we manage special cases...
-        #Service part
-        if not hasattr(self, 'service_notification_commands') :
-            print self.get_name()," : do not have any service_notification_commands defined"
-            state = False
-        else:
-            for cmd in self.service_notification_commands:
-                if cmd == None:
-                    print self.get_name()," : a service_notification_command is missing"
-                    state = False
-                if not cmd.is_valid():
-                    print self.get_name()," : a service_notification_command is invalid", cmd.get_name()
-                    state = False
-        if not hasattr(self, 'service_notification_period') or self.service_notification_period==None:
-            print self.get_name()," : the service_notification_period is invalid"
-            state = False
-
-        #Now host part
-        if not hasattr(self, 'host_notification_commands') :
-            print self.get_name()," : do not have any host_notification_commands defined"
-            state = False
-        else:
-            for cmd in self.host_notification_commands:
-                if cmd == None :
-                    print self.get_name()," : a host_notification_command is missing"
-                    state = False
-                if not cmd.is_valid():
-                    print self.get_name()," : a host_notification_command is invalid", cmd.get_name(), cmd.__dict__
-                    state = False
-        if not hasattr(self, 'host_notification_period') or self.host_notification_period==None:
-            print self.get_name()," : the host_notification_period is invalid"
-            state = False
+                    
+        #There is a case where there is no nw : when there is not special_prop defined
+        #at all!!
+        if self.notificationways == []:
+            for p in special_properties:
+                print self.get_name()," : I'm missing the property %s" % p
+                state = False
             
         return state
 
