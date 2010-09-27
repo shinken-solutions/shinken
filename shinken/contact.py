@@ -133,6 +133,15 @@ class Contact(Item):
         pass
 
 
+    #Call to get our commands to launch a Notification
+    def get_notification_commands(self, type):
+        #service_notification_commands for service
+        notif_commands_prop = type+'_notification_commands'
+        notif_commands = getattr(self, notif_commands_prop)
+        return notif_commands
+
+
+
     #Check is required prop are set:
     #contacts OR contactgroups is need
     def is_correct(self):

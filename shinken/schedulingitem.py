@@ -855,9 +855,9 @@ class SchedulingItem(Item):
 
         for contact in contacts:
             #Get the property name for notif commands, like
-            #service_notification_commands for service
-            notif_commands_prop = cls.my_type+'_notification_commands'
-            notif_commands = getattr(contact, notif_commands_prop)
+            #service_notification_commands for service            
+            notif_commands = contact.get_notification_commands(cls.my_type)
+
             for cmd in notif_commands:
                 child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
                     contact, n.t_to_go, timeout=cls.notification_timeout,

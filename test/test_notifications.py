@@ -27,6 +27,7 @@
 #It's ugly I know....
 from shinken_test import *
 
+
 class TestConfig(ShinkenTest):
 
     def test_continuous_notifications(self):
@@ -39,21 +40,26 @@ class TestConfig(ShinkenTest):
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+
+        #To make tests quicker we make notifications send very quickly
+        svc.notification_interval = 0.001
+
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
-        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True)
+        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True, sleep_time=0.1)
         print "- 1 x OK -------------------------------------"
-        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
+
         self.assert_(svc.current_notification_number == 0)
         #--------------------------------------------------------------
         # service reaches soft;1
         # there must not be any notification
         #--------------------------------------------------------------
         print "- 1 x BAD get soft -------------------------------------"
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         # check_notification: not (soft)
         print "---current_notification_number", svc.current_notification_number
         #--------------------------------------------------------------
@@ -62,7 +68,7 @@ class TestConfig(ShinkenTest):
         # notification number must be 1
         #--------------------------------------------------------------
         print "- 1 x BAD get hard -------------------------------------"
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         #self.show_and_clear_actions()
         self.show_actions()
@@ -79,23 +85,25 @@ class TestConfig(ShinkenTest):
         print "find a way to get the number of the last reaction"
         cnn = svc.current_notification_number
         print "- 5 x BAD repeat -------------------------------------"
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
         print "cnn and cur", cnn, svc.current_notification_number
         self.assert_(svc.current_notification_number > cnn)
         cnn = svc.current_notification_number
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
+        print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
         self.assert_(svc.current_notification_number > cnn)
         #--------------------------------------------------------------
         # 2 cycles = 2 minutes = 2 new notifications
         #--------------------------------------------------------------
         cnn = svc.current_notification_number
-        self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
+        print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
         self.assert_(svc.current_notification_number > cnn)
         #--------------------------------------------------------------
         # 2 cycles = 2 minutes = 2 new notifications (theoretically)
@@ -106,7 +114,7 @@ class TestConfig(ShinkenTest):
         cmd = "[%lu] DISABLE_CONTACT_SVC_NOTIFICATIONS;test_contact" % now
         self.sched.run_external_command(cmd)
         cnn = svc.current_notification_number
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
         self.assert_(svc.current_notification_number == cnn)
@@ -118,14 +126,15 @@ class TestConfig(ShinkenTest):
         cmd = "[%lu] ENABLE_CONTACT_SVC_NOTIFICATIONS;test_contact" % now
         self.sched.run_external_command(cmd)
         #cnn = svc.current_notification_number
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
+        print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
         self.assert_(svc.current_notification_number == cnn + 1)
         #--------------------------------------------------------------
         # now recover. there must be no scheduled/inpoller notification
         #--------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
         self.assert_(svc.current_notification_number == 0)
@@ -141,14 +150,18 @@ class TestConfig(ShinkenTest):
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        svc.first_notification_delay = 5
+
+        #To make tests quicker we make notifications send very quickly
+        svc.notification_interval = 0.001 #and send imediatly then
+
+        svc.first_notification_delay = 0.1 # set 6s for first notif delay
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True)
+        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True, sleep_time=1)
         #-----------------------------------------------------------------
         # initialize with a good check. there must be no pending notification
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=1)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
         self.assert_(svc.current_notification_number == 0)
@@ -156,8 +169,10 @@ class TestConfig(ShinkenTest):
         # check fails and enters soft state.
         # there must be no notification, only the event handler
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 1, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 1, 'BAD']], do_sleep=True, sleep_time=1)
         self.assert_(self.count_actions() == 1)
+        print time.time()
+        print  svc.last_time_warning,  svc.last_time_critical,  svc.last_time_unknown, svc.last_time_ok
         last_time_not_ok = svc.last_time_non_ok_or_up()
         deadline = svc.last_time_non_ok_or_up() + svc.first_notification_delay * svc.__class__.interval_length
         #-----------------------------------------------------------------
@@ -166,7 +181,7 @@ class TestConfig(ShinkenTest):
         # current_notification_number is still 0, until notifications
         # have actually been sent
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
         self.assert_(svc.current_notification_number == 0)
@@ -177,9 +192,10 @@ class TestConfig(ShinkenTest):
         loop=0
         while deadline > time.time():
             loop += 1
-            self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+            self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
             self.show_and_clear_logs()
             self.show_actions()
+            print deadline-time.time()
             ###self.assert_(self.count_actions() == 1)
         #-----------------------------------------------------------------
         # now the delay period is over and the notification can be sent
@@ -187,7 +203,8 @@ class TestConfig(ShinkenTest):
         # there is 1 action, the notification (
         # 1 notification was sent, so current_notification_number is 1
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=1)
+        print "Counted actions", self.count_actions()
         self.assert_(self.count_actions() == 2)
         # 1 master, 1 child
         self.assert_(svc.current_notification_number == 1)
@@ -202,7 +219,7 @@ class TestConfig(ShinkenTest):
         # there are 2 actions, one notification and one eventhandler
         # current_notification_number was reset to 0
         #-----------------------------------------------------------------
-        self.scheduler_loop(2, [[svc, 0, 'GOOD']], do_sleep=True)
+        self.scheduler_loop(2, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=1)
         self.assert_(self.log_match(1, 'SERVICE ALERT.*;OK;'))
         self.assert_(self.log_match(2, 'SERVICE EVENT HANDLER.*;OK;'))
         self.assert_(self.log_match(3, 'SERVICE NOTIFICATION.*;OK;'))
@@ -228,11 +245,11 @@ class TestConfig(ShinkenTest):
         svc.first_notification_delay = 5
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True)
+        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True, sleep_time=0.1)
         #-----------------------------------------------------------------
         # initialize with a good check. there must be no pending notification
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
         self.assert_(svc.current_notification_number == 0)
@@ -240,7 +257,7 @@ class TestConfig(ShinkenTest):
         # check fails and enters soft state.
         # there must be no notification, only the event handler
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 1, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 1, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
         self.assert_(self.count_actions() == 1)
@@ -250,7 +267,7 @@ class TestConfig(ShinkenTest):
         # current_notification_number is still 0 (will be raised when
         # a notification is actually sent)
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
         self.assert_(self.count_actions() == 2)
@@ -260,7 +277,7 @@ class TestConfig(ShinkenTest):
         # but only one time. we don't want to reach the deadline
         # there is one action: the pending notification
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_actions()
         self.assert_(self.count_actions() == 1)
@@ -270,7 +287,7 @@ class TestConfig(ShinkenTest):
         # there is a second action: the master recover notification
         # but it becomes a zombie very soon, because it has no effect
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.log_match(1, 'SERVICE ALERT.*;OK;'))
         self.assert_(self.log_match(2, 'SERVICE EVENT HANDLER.*;OK;'))
         self.assert_(not self.log_match(3, 'SERVICE NOTIFICATION.*;OK;'))
@@ -292,19 +309,23 @@ class TestConfig(ShinkenTest):
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0") 
+
+        #To make tests quicker we make notifications send very quickly
+        svc.notification_interval = 0.001
+
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
-        self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.assert_(svc.current_notification_number == 0)
         #--------------------------------------------------------------
         # service reaches hard;2
         # a notification must have been created
         # notification number must be 1
         #--------------------------------------------------------------
-        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_logs()
         self.show_actions()
         self.assert_(self.log_match(1, 'SERVICE ALERT.*;CRITICAL;SOFT'))
@@ -318,7 +339,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # reset host/service state
         #--------------------------------------------------------------
-        self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.assert_(svc.current_notification_number == 0)
         duration = 300
         now = time.time()
@@ -329,7 +350,7 @@ class TestConfig(ShinkenTest):
         # service reaches hard;2
         # no notificatio
         #--------------------------------------------------------------
-        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWNTIMESTART'))
         self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -344,11 +365,15 @@ class TestConfig(ShinkenTest):
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+
+        #To make tests quicker we make notifications send very quickly
+        svc.notification_interval = 0.001
+
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True)
+        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True, sleep_time=0.1)
         print "- 1 x OK -------------------------------------"
-        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
         self.assert_(svc.current_notification_number == 0)
@@ -358,7 +383,7 @@ class TestConfig(ShinkenTest):
         # scheduled but not sent yet
         #-----------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
-        self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         # check action array: 1xnotification, check logs: none
         print "---current_notification_number", svc.current_notification_number
         #-----------------------------------------------------------------
@@ -366,7 +391,7 @@ class TestConfig(ShinkenTest):
         # we re-enter the notification_period and finally 
         # a notification is sent (a log exists, next notification is scheduled
         #-----------------------------------------------------------------
-        self.scheduler_loop(6, [[svc, 2, 'BAD']], do_sleep=True)
+        self.scheduler_loop(6, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()
         #self.show_and_clear_actions()
         self.show_actions()
@@ -382,7 +407,7 @@ class TestConfig(ShinkenTest):
         # a recover log for test_contact is written
         #-----------------------------------------------------------------
         print "- 1 x OK -------------------------------------"
-        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.assert_(len(svc.notifications_in_progress) == 1)
         self.show_and_clear_logs()
         self.show_actions()
@@ -391,7 +416,7 @@ class TestConfig(ShinkenTest):
         # neither a notification nor a log must be found 
         #-----------------------------------------------------------------
         print "- 1 x OK -------------------------------------"
-        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True)
+        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
         self.assert_(len(svc.notifications_in_progress) == 0)
         self.show_and_clear_logs()
         self.show_actions()
