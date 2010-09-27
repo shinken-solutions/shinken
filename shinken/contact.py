@@ -136,10 +136,12 @@ class Contact(Item):
 
     #Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
+        r = []
         #service_notification_commands for service
         notif_commands_prop = type+'_notification_commands'
-        notif_commands = getattr(self, notif_commands_prop)
-        return notif_commands
+        for nw in self.notificationways:
+            r.extend(getattr(nw, notif_commands_prop))
+        return r
 
 
 
