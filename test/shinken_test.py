@@ -94,7 +94,7 @@ class ShinkenTest(unittest.TestCase):
         self.sched.waiting_results.append(check)
 
 
-    def scheduler_loop(self, count, reflist, do_sleep=False):
+    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         for ref in reflist:
             (obj, exit_status, output) = ref
             obj.checks_in_progress = []  
@@ -114,7 +114,7 @@ class ShinkenTest(unittest.TestCase):
             self.sched.update_downtimes_and_comments()
             #time.sleep(ref.retry_interval * 60 + 1)
             if do_sleep:
-                time.sleep(60 + 1)
+                time.sleep(sleep_time)
 
 
     def worker_loop(self):

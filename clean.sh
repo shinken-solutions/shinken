@@ -17,6 +17,7 @@ sudo rm -fr var/*.profile
 sudo rm -fr var/*.cache
 sudo rm -fr var/rw/*cmd
 sudo rm -fr /tmp/retention.dat
+sudo rm -fr /tmp/*debug
 
 
 #Then kill remaining processes

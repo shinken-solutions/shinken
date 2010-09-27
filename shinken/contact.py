@@ -21,7 +21,7 @@
 
 from command import CommandCall
 from item import Item, Items
-from util import to_split, to_bool
+from util import to_split, to_bool, strip_and_uniq
 
 class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
@@ -49,6 +49,7 @@ class Contact(Item):
         'address6' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
         'can_submit_commands' : {'required' : False, 'default' : '0', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
         'retain_status_information' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
+        'notificationways' : {'required' : False, 'default' : ''},
         }
 
     running_properties = {}
@@ -80,26 +81,14 @@ class Contact(Item):
     def want_service_notification(self, t, state, type):
         if not self.service_notifications_enabled:
             return False
-        b = self.service_notification_period.is_time_valid(t)
-        if 'n' in self.service_notification_options:
-            return False
-        t = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
-             'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's'}
-        if type == 'PROBLEM':
-            if state in t:
-                return b and t[state] in self.service_notification_options
-        elif type == 'RECOVERY':
-            if type in t:
-                return b and t[type] in self.service_notification_options
-        elif type == 'ACKNOWLEDGEMENT':
-            return b
-        elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
-            return b and 'f' in self.service_notification_options
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
-            #No notification when a downtime was cancelled. Is that true??
-            # According to the documentation we need to look at _host_ options
-            return b and 's' in self.host_notification_options
+        
+        #Now the rest is for sub notificationways. If one is OK, we are ok
+        for nw in self.notificationways:
+            nw_b = nw.want_service_notification(t, state, type)
+            if nw_b:
+                return True
 
+        #Oh... no one is ok for it? so no, sorry
         return False
 
 
@@ -108,29 +97,31 @@ class Contact(Item):
     def want_host_notification(self, t, state, type):
         if not self.host_notifications_enabled:
             return False
-        b = self.host_notification_period.is_time_valid(t)
-        if 'n' in self.host_notification_options:
-            return False
-        t = {'DOWN' : 'd', 'UNREACHABLE' : 'u', 'RECOVERY' : 'r',
-             'FLAPPING' : 'f', 'DOWNTIME' : 's'}
-        if type == 'PROBLEM':
-            if state in t:
-                return b and t[state] in self.host_notification_options
-        elif type == 'RECOVERY':
-            if type in t:
-                return b and t[type] in self.host_notification_options
-        elif type == 'ACKNOWLEDGEMENT':
-             return b
-        elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
-            return b and 'f' in self.host_notification_options
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
-            return b and 's' in self.host_notification_options
+        
+        #Now it's all for sub notificationways. If one is OK, we are OK
+        for nw in self.notificationways:
+            nw_b = nw.want_host_notification(t, state, type)
+            if nw_b:
+                return True
 
+        #Oh, nobody..so NO :)
         return False
 
-
+    
+    #Useless function from now
     def clean(self):
         pass
+
+
+    #Call to get our commands to launch a Notification
+    def get_notification_commands(self, type):
+        r = []
+        #service_notification_commands for service
+        notif_commands_prop = type+'_notification_commands'
+        for nw in self.notificationways:
+            r.extend(getattr(nw, notif_commands_prop))
+        return r
+
 
 
     #Check is required prop are set:
@@ -139,45 +130,24 @@ class Contact(Item):
         state = True #guilty or not? :)
         cls = self.__class__
 
+        #All of the above are checks in the notificationways part
         special_properties = ['service_notification_commands', 'service_notification_commands', \
-                                  'service_notification_period', 'host_notification_period']
+                                  'service_notification_period', 'host_notification_period', \
+                                  'service_notification_options', 'host_notification_options', \
+                                  'host_notification_commands']
+        
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
-        #Ok now we manage special cases...
-        #Service part
-        if not hasattr(self, 'service_notification_commands') :
-            print self.get_name()," : do not have any service_notification_commands defined"
-            state = False
-        else:
-            for cmd in self.service_notification_commands:
-                if cmd == None:
-                    print self.get_name()," : a service_notification_command is missing"
-                    state = False
-                if not cmd.is_valid():
-                    print self.get_name()," : a service_notification_command is invalid", cmd.get_name()
-                    state = False
-        if not hasattr(self, 'service_notification_period') or self.service_notification_period==None:
-            print self.get_name()," : the service_notification_period is invalid"
-            state = False
-
-        #Now host part
-        if not hasattr(self, 'host_notification_commands') :
-            print self.get_name()," : do not have any host_notification_commands defined"
-            state = False
-        else:
-            for cmd in self.host_notification_commands:
-                if cmd == None :
-                    print self.get_name()," : a host_notification_command is missing"
-                    state = False
-                if not cmd.is_valid():
-                    print self.get_name()," : a host_notification_command is invalid", cmd.get_name(), cmd.__dict__
-                    state = False
-        if not hasattr(self, 'host_notification_period') or self.host_notification_period==None:
-            print self.get_name()," : the host_notification_period is invalid"
-            state = False
+                    
+        #There is a case where there is no nw : when there is not special_prop defined
+        #at all!!
+        if self.notificationways == []:
+            for p in special_properties:
+                print self.get_name()," : I'm missing the property %s" % p
+                state = False
             
         return state
 
@@ -188,15 +158,34 @@ class Contacts(Items):
     name_property = "contact_name"
     inner_class = Contact
 
-    def linkify(self, timeperiods, commands):
+    def linkify(self, timeperiods, commands, notificationways):
         self.linkify_with_timeperiods(timeperiods, 'service_notification_period')
         self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
         self.linkify_command_list_with_commands(commands, 'service_notification_commands')
         self.linkify_command_list_with_commands(commands, 'host_notification_commands')
+        self.linkify_with_notificationways(notificationways)
 
-        
+    #We've got a notificationways property with , separated contacts names
+    #and we want have a list of NotificationWay
+    def linkify_with_notificationways(self, notificationways):
+        for i in self:
+            if hasattr(i, 'notificationways'):
+                notificationways_tab = i.notificationways.split(',')
+                notificationways_tab = strip_and_uniq(notificationways_tab)
+                new_notificationways = []
+                for nw_name in notificationways_tab:
+                    nw = notificationways.find_by_name(nw_name)
+                    if nw != None:
+                        new_notificationways.append(nw)
+                    else: #TODO: What?
+                        pass
+                #Get the list, but first make elements uniq
+                i.notificationways = list(set(new_notificationways))
+
+
+    
     #We look for contacts property in contacts and
-    def explode(self, contactgroups):
+    def explode(self, contactgroups, notificationways):
         #Contactgroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('contactgroups')
         
@@ -208,4 +197,33 @@ class Contacts(Items):
                     cgs = c.contactgroups.split(',')
                     for cg in cgs:
                         contactgroups.add_member(cname, cg.strip())
+
+        #Now create a notification way with the simple parameter of the
+        #contacts
+        simple_way_parameters = ['service_notification_period', 'host_notification_period', \
+                                     'service_notification_options', 'host_notification_options', \
+                                     'service_notification_commands', 'host_notification_commands']
+        for c in self:
+            if not c.is_tpl():
+                need_notificationway = False
+                params = {}
+                for p in simple_way_parameters:
+                    if hasattr(c, p):
+                        need_notificationway = True
+                        params[p] = getattr(c, p)
+                
+                if need_notificationway:
+                    #print "Create notif way with", params
+                    if hasattr(c, 'contact_name'):
+                        cname = c.contact_name
+                    else: #Will be change with an unique id, but will be an error in the end
+                        cname = None
+                    nw_name = cname+'_inner_notificationway'
+                    notificationways.new_inner_member(nw_name, params)
+                    
+                    if not hasattr(c, 'notificationways'):
+                        c.notificationways = nw_name
+                    else:
+                        c.notificationways = c.notificationways + ',' +nw_name
+                    
 

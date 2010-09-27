@@ -103,9 +103,16 @@ from shinken.brok import Brok
 from shinken.resultmodulation import Resultmodulation
 from shinken.escalation import Escalation
 from shinken.timeperiod import Timeperiod
+from shinken.notificationway import NotificationWay, NotificationWays
 from shinken.contact import Contact
 from shinken.command import Command, CommandCall
 from shinken.external_command import ExternalCommand
+from shinken.service import Service, Services
+from shinken.host import Host, Hosts
+from shinken.hostgroup import Hostgroup, Hostgroups
+from shinken.servicegroup import Servicegroup, Servicegroups
+from shinken.contactgroup import Contactgroup, Contactgroups
+from shinken.config import Config
 
 VERSION = "0.2+"
 
@@ -421,6 +428,7 @@ class Broker(Satellite):
 
 		print "Init connexion with", links[id]['uri']
 		running_id = links[id]['running_id']
+                print "Running id", running_id
 		uri = links[id]['uri']
 		links[id]['con'] = Pyro.core.getProxyForURI(uri)
 
@@ -434,7 +442,8 @@ class Broker(Satellite):
 
 		        #The schedulers have been restart : it has a new run_id.
 		        #So we clear all verifs, they are obsolete now.
-			if links[id]['running_id'] != 0 or new_run_id != running_id:
+			if running_id != 0 and new_run_id != running_id:
+                                print "New running id", new_run_id
 				links[id]['broks'].clear()
 			        #we must ask for a enw full broks if
 			        #it's a scheduler
@@ -454,6 +463,7 @@ class Broker(Satellite):
                         links[id]['con'] = None
                         return
                 except Pyro.errors.CommunicationError, exp:
+                        Log().log("%s got CommunicationError : %s" % (type, str(exp)))
                         links[id]['con'] = None
                         return
 
