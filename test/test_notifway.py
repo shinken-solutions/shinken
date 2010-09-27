@@ -64,6 +64,25 @@ class TestConfig(ShinkenTest):
         for nw in contact_simple.notificationways:
             print "\t", nw.notificationway_name
         self.assert_(test_contact_simple_inner_notificationway in contact_simple.notificationways)
+
+        #Now all want* functions
+        #First is ok with warning alerts
+        self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM') == True)
+        #But a SMS is now WAY for warning. When we sleep, we wake up for critical only guy!
+        self.assert_(sms_the_night.want_service_notification(now, 'WARNING', 'PROBLEM') == False)
+        
+        #Same with contacts now
+        #First is ok for warning in the email_in_day nw
+        self.assert_(contact.want_service_notification(now, 'WARNING', 'PROBLEM') == True)
+        #Simple is not ok for it
+        self.assert_(contact_simple.want_service_notification(now, 'WARNING', 'PROBLEM') == False)
+
+        #Then for host notification
+        #First is ok for warning in the email_in_day nw
+        self.assert_(contact.want_host_notification(now, 'FLAPPING', 'PROBLEM') == True)
+        #Simple is not ok for it
+        self.assert_(contact_simple.want_host_notification(now, 'FLAPPING', 'PROBLEM') == False)
+
         
 
 if __name__ == '__main__':

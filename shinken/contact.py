@@ -81,26 +81,14 @@ class Contact(Item):
     def want_service_notification(self, t, state, type):
         if not self.service_notifications_enabled:
             return False
-        b = self.service_notification_period.is_time_valid(t)
-        if 'n' in self.service_notification_options:
-            return False
-        t = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
-             'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's'}
-        if type == 'PROBLEM':
-            if state in t:
-                return b and t[state] in self.service_notification_options
-        elif type == 'RECOVERY':
-            if type in t:
-                return b and t[type] in self.service_notification_options
-        elif type == 'ACKNOWLEDGEMENT':
-            return b
-        elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
-            return b and 'f' in self.service_notification_options
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
-            #No notification when a downtime was cancelled. Is that true??
-            # According to the documentation we need to look at _host_ options
-            return b and 's' in self.host_notification_options
+        
+        #Now the rest is for sub notificationways. If one is OK, we are ok
+        for nw in self.notificationways:
+            nw_b = nw.want_service_notification(t, state, type)
+            if nw_b:
+                return True
 
+        #Oh... no one is ok for it? so no, sorry
         return False
 
 
@@ -109,27 +97,18 @@ class Contact(Item):
     def want_host_notification(self, t, state, type):
         if not self.host_notifications_enabled:
             return False
-        b = self.host_notification_period.is_time_valid(t)
-        if 'n' in self.host_notification_options:
-            return False
-        t = {'DOWN' : 'd', 'UNREACHABLE' : 'u', 'RECOVERY' : 'r',
-             'FLAPPING' : 'f', 'DOWNTIME' : 's'}
-        if type == 'PROBLEM':
-            if state in t:
-                return b and t[state] in self.host_notification_options
-        elif type == 'RECOVERY':
-            if type in t:
-                return b and t[type] in self.host_notification_options
-        elif type == 'ACKNOWLEDGEMENT':
-             return b
-        elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
-            return b and 'f' in self.host_notification_options
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
-            return b and 's' in self.host_notification_options
+        
+        #Now it's all for sub notificationways. If one is OK, we are OK
+        for nw in self.notificationways:
+            nw_b = nw.want_host_notification(t, state, type)
+            if nw_b:
+                return True
 
+        #Oh, nobody..so NO :)
         return False
 
-
+    
+    #Useless function from now
     def clean(self):
         pass
 
