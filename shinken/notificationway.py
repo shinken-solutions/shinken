@@ -21,16 +21,14 @@
 
 from command import CommandCall
 from item import Item, Items
-from util import to_split, to_bool, strip_and_uniq
+from util import to_split, to_bool
 
-class Contact(Item):
+class NotificationWay(Item):
     id = 1#0 is always special in database, so we do not take risk here
-    my_type = 'contact'
+    my_type = 'notificationway'
 
     properties={
-        'contact_name' : {'required' : True, 'fill_brok' : ['full_status']},
-        'alias' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'contactgroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'notificationway_name' : {'required' : True, 'fill_brok' : ['full_status']},
         'host_notifications_enabled' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
         'service_notifications_enabled' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
         'host_notification_period' : {'required' : True, 'fill_brok' : ['full_status']},
@@ -39,41 +37,18 @@ class Contact(Item):
         'service_notification_options' : {'required' : True, 'pythonize' : to_split, 'fill_brok' : ['full_status']},
         'host_notification_commands' : {'required' : True, 'fill_brok' : ['full_status']},
         'service_notification_commands' : {'required' : True, 'fill_brok' : ['full_status']},
-        'email' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'pager' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address1' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address2' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address3' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address4' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address5' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address6' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'can_submit_commands' : {'required' : False, 'default' : '0', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'retain_status_information' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'notificationways' : {'required' : False, 'default' : ''},
         }
 
     running_properties = {}
 
     
     macros = {
-        'CONTACTNAME' : 'contact_name',
-        'CONTACTALIAS' : 'alias',
-        'CONTACTEMAIL' : 'email',
-        'CONTACTPAGER' : 'pager',
-        'CONTACTADDRESS1' : 'address1',
-        'CONTACTADDRESS2' : 'address2',
-        'CONTACTADDRESS3' : 'address3',
-        'CONTACTADDRESS4' : 'address4',
-        'CONTACTADDRESS5' : 'address5',
-        'CONTACTADDRESS6' : 'address6',
-        'CONTACTGROUPNAME' : 'get_groupname',
-        'CONTACTGROUPNAMES' : 'get_groupnames'
         }
 
 
     #For debugging purpose only (nice name)
     def get_name(self):
-        return self.contact_name
+        return self.notificationway_name
 
 
     #Search for notification_options with state and if t is
@@ -194,47 +169,14 @@ class Contact(Item):
 
 
 
-class Contacts(Items):
-    name_property = "contact_name"
-    inner_class = Contact
+class NotificationWays(Items):
+    name_property = "notificationway_name"
+    inner_class = NotificationWay
 
-    def linkify(self, timeperiods, commands, notificationways):
+    def linkify(self, timeperiods, commands):
         self.linkify_with_timeperiods(timeperiods, 'service_notification_period')
         self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
         self.linkify_command_list_with_commands(commands, 'service_notification_commands')
         self.linkify_command_list_with_commands(commands, 'host_notification_commands')
-        self.linkify_with_notificationways(notificationways)
-
-    #We've got a notificationways property with , separated contacts names
-    #and we want have a list of NotificationWay
-    def linkify_with_notificationways(self, notificationways):
-        for i in self:
-            if hasattr(i, 'notificationways'):
-                notificationways_tab = i.notificationways.split(',')
-                notificationways_tab = strip_and_uniq(notificationways_tab)
-                new_notificationways = []
-                for nw_name in notificationways_tab:
-                    nw = notificationways.find_by_name(nw_name)
-                    if nw != None:
-                        new_notificationways.append(nw)
-                    else: #TODO: What?
-                        pass
-                #Get the list, but first make elements uniq
-                i.notificationways = list(set(new_notificationways))
-
 
         
-    #We look for contacts property in contacts and
-    def explode(self, contactgroups):
-        #Contactgroups property need to be fullfill for got the informations
-        self.apply_partial_inheritance('contactgroups')
-        
-        #Register ourself into the contactsgroups we are in
-        for c in self:
-            if not c.is_tpl():
-                cname = c.contact_name
-                if hasattr(c, 'contactgroups'):
-                    cgs = c.contactgroups.split(',')
-                    for cg in cgs:
-                        contactgroups.add_member(cname, cg.strip())
-

@@ -42,6 +42,7 @@ from hostgroup import Hostgroup, Hostgroups
 from realm import Realm, Realms
 from contact import Contact, Contacts
 from contactgroup import Contactgroup, Contactgroups
+from notificationway import NotificationWay, NotificationWays
 from servicegroup import Servicegroup, Servicegroups
 from item import Item
 from macroresolver import MacroResolver
@@ -249,6 +250,7 @@ class Config(Item):
                        'hostgroup' : (Hostgroup, Hostgroups, 'hostgroups'),
                        'contact' : (Contact, Contacts, 'contacts'),
                        'contactgroup' : (Contactgroup, Contactgroups, 'contactgroups'),
+                       'notificationway' : (NotificationWay, NotificationWays, 'notificationways'),
                        'servicedependency' : (Servicedependency, Servicedependencies, 'servicedependencies'),
                        'hostdependency' : (Hostdependency, Hostdependencies, 'hostdependencies'),
                        'arbiter' : (ArbiterLink, ArbiterLinks, 'arbiterlinks'),
@@ -377,28 +379,29 @@ class Config(Item):
     def read_config_buf(self, buf):
         params = []
         objectscfg = {'void': [],
-                    'timeperiod' : [],
-                    'command' : [],
-                    'contactgroup' : [],
-                    'hostgroup' : [],
-                    'contact' : [],
-                    'host' : [],
-                    'service' : [],
-                    'servicegroup' : [],
-                    'servicedependency' : [],
-                    'hostdependency' : [],
-                    'arbiter' : [],
-                    'scheduler' : [],
-                    'reactionner' : [],
-                    'broker' : [],
-                    'poller' : [],
-                    'realm' : [],
-                    'module' : [],
-                    'resultmodulation' : [],
-                    'escalation' : [],
-                    'serviceescalation' : [],
-                    'hostescalation' : [],
-                    }
+                      'timeperiod' : [],
+                      'command' : [],
+                      'contactgroup' : [],
+                      'hostgroup' : [],
+                      'contact' : [],
+                      'notificationway' : [],
+                      'host' : [],
+                      'service' : [],
+                      'servicegroup' : [],
+                      'servicedependency' : [],
+                      'hostdependency' : [],
+                      'arbiter' : [],
+                      'scheduler' : [],
+                      'reactionner' : [],
+                      'broker' : [],
+                      'poller' : [],
+                      'realm' : [],
+                      'module' : [],
+                      'resultmodulation' : [],
+                      'escalation' : [],
+                      'serviceescalation' : [],
+                      'hostescalation' : [],
+                      }
         tmp = []
         tmp_type = 'void'
         in_define = False
@@ -546,13 +549,16 @@ class Config(Item):
         #link servicegroups members with services
         self.servicegroups.linkify(self.services)
 
+        #link notificationways with timeperiods and commands
+        self.notificationways.linkify(self.timeperiods, self.commands)
+
         #print "Contactgroups"
         #link contacgroups with contacts
         self.contactgroups.linkify(self.contacts)
 
         #print "Contacts"
         #link contacts with timeperiods and commands
-        self.contacts.linkify(self.timeperiods, self.commands)
+        self.contacts.linkify(self.timeperiods, self.commands, self.notificationways)
 
         #print "Timeperiods"
         #link timeperiods with timeperiods (exclude part)
@@ -718,6 +724,7 @@ class Config(Item):
         self.hostgroups.fill_default()
         self.contacts.fill_default()
         self.contactgroups.fill_default()
+        self.notificationways.fill_default()
         self.services.fill_default()
         self.servicegroups.fill_default()
         self.resultmodulations.fill_default()
@@ -843,6 +850,7 @@ class Config(Item):
         self.hostgroups.create_reversed_list()
         self.contacts.create_reversed_list()
         self.contactgroups.create_reversed_list()
+        self.notificationways.create_reversed_list()
         self.services.create_reversed_list()
         self.servicegroups.create_reversed_list()
         self.timeperiods.create_reversed_list()
@@ -883,6 +891,11 @@ class Config(Item):
         Log().log('Checking contactgroups')
         r &= self.contactgroups.is_correct()
         Log().log('\tChecked %d contactgroups' % len(self.contactgroups))
+
+        #Notificationways
+        Log().log('Checking notificationways...')
+        r &= self.notificationways.is_correct()
+        Log().log('\tChecked %d notificationways' % len(self.notificationways))
 
         #Services
         Log().log('Checking services')
@@ -960,6 +973,7 @@ class Config(Item):
         self.hostdependencies.pythonize()
         self.contactgroups.pythonize()
         self.contacts.pythonize()
+        self.notificationways.pythonize()
         self.servicegroups.pythonize()
         self.services.pythonize()
         self.servicedependencies.pythonize()
@@ -1159,6 +1173,7 @@ class Config(Item):
             for hg in self.hostgroups:
                 new_hostgroups.append(hg.copy_shell())
             self.confs[i].hostgroups = Hostgroups(new_hostgroups)
+            self.confs[i].notificationways = self.notificationways
             self.confs[i].contactgroups = self.contactgroups
             self.confs[i].contacts = self.contacts
             self.confs[i].schedulerlinks = copy.copy(self.schedulerlinks)
