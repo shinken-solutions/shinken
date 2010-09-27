@@ -644,7 +644,7 @@ class Config(Item):
     def explode(self):
         #first elements, after groups
         #print "Contacts"
-        self.contacts.explode(self.contactgroups)
+        self.contacts.explode(self.contactgroups, self.notificationways)
         #print "Contactgroups"
         self.contactgroups.explode()
 

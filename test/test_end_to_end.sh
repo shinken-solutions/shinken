@@ -39,7 +39,7 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
-bin/launch_all.sh
+bin/launch_all_debug.sh
 
 
 echo "Now checking for existing apps"
@@ -93,8 +93,8 @@ function check_good_run {
     check_process_nb reactionner 3
     is_file_present $VAR/reactionnerd.pid
     
-    echo "Check for 2 brokers (one master, one for status.dat)"
-    check_process_nb broker 2
+    echo "Check for 3 brokers (one master, one for status.dat, one for log)"
+    check_process_nb broker 3
     is_file_present $VAR/brokerd.pid
     
     echo "Check for 1 arbiter"

@@ -96,6 +96,7 @@ class ModulesManager(object):
         for inst in self.instances:
             try:
                 if 'external' in inst.properties and inst.properties['external']:
+                    print "Starting external process for instance", inst.get_name()
                     inst.properties['to_queue'] = Queue()
                     inst.properties['from_queue'] = Queue()
                     inst.init()

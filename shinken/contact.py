@@ -223,9 +223,9 @@ class Contacts(Items):
                 i.notificationways = list(set(new_notificationways))
 
 
-        
+    
     #We look for contacts property in contacts and
-    def explode(self, contactgroups):
+    def explode(self, contactgroups, notificationways):
         #Contactgroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('contactgroups')
         
@@ -237,4 +237,33 @@ class Contacts(Items):
                     cgs = c.contactgroups.split(',')
                     for cg in cgs:
                         contactgroups.add_member(cname, cg.strip())
+
+        #Now create a notification way with the simple parameter of the
+        #contacts
+        simple_way_parameters = ['service_notification_period', 'host_notification_period', \
+                                     'service_notification_options', 'host_notification_options', \
+                                     'service_notification_commands', 'host_notification_commands']
+        for c in self:
+            if not c.is_tpl():
+                need_notificationway = False
+                params = {}
+                for p in simple_way_parameters:
+                    if hasattr(c, p):
+                        need_notificationway = True
+                        params[p] = getattr(c, p)
+                
+                if need_notificationway:
+                    #print "Create notif way with", params
+                    if hasattr(c, 'contact_name'):
+                        cname = c.contact_name
+                    else: #Will be change with an unique id, but will be an error in the end
+                        cname = None
+                    nw_name = cname+'_inner_notificationway'
+                    notificationways.new_inner_member(nw_name, params)
+                    
+                    if not hasattr(c, 'notificationways'):
+                        c.notificationways = nw_name
+                    else:
+                        c.notificationways = c.notificationways + ',' +nw_name
+                    
 

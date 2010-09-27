@@ -45,7 +45,7 @@ class TestConfig(ShinkenTest):
 
         print "All notification Way :"
         for nw in self.sched.notificationways:
-            print "\t", nw
+            print "\t", nw.notificationway_name
 
         email_in_day = self.sched.notificationways.find_by_name('email_in_day')
         self.assert_(email_in_day in contact.notificationways)
@@ -55,8 +55,16 @@ class TestConfig(ShinkenTest):
 
         print "Contact notification way(s) :"
         for nw in contact.notificationways:
-            print "\t", nw
+            print "\t", nw.notificationway_name
 
+        contact_simple = self.sched.contacts.find_by_name("test_contact_simple")
+        #It's the created notifway for this simple contact
+        test_contact_simple_inner_notificationway = self.sched.notificationways.find_by_name("test_contact_simple_inner_notificationway")
+        print "Simple contact"
+        for nw in contact_simple.notificationways:
+            print "\t", nw.notificationway_name
+        self.assert_(test_contact_simple_inner_notificationway in contact_simple.notificationways)
+        
 
 if __name__ == '__main__':
     unittest.main()

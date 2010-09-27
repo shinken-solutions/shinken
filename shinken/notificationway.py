@@ -180,3 +180,10 @@ class NotificationWays(Items):
         self.linkify_command_list_with_commands(commands, 'host_notification_commands')
 
         
+    def new_inner_member(self, name=None, params={}):
+        if name == None:
+            name = NotificationWay.id
+        params['notificationway_name'] = name
+        #print "Asking a new inner notificationway from name %s with params %s" % (name, params)
+        nw = NotificationWay(params)
+        self.items[nw.id] = nw
