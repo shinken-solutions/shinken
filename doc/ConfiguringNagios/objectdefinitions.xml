@@ -2437,6 +2437,12 @@
                 <entry><para>[0/1]</para></entry>
               </row>
 
+	      <row>
+                <entry><para>notificationways</para></entry>
+                <entry><para>notificationways</para></entry>
+              </row>
+
+
               <row>
                 <entry nameend="col_2" namest="col_1"><para>}</para></entry>
               </row>
@@ -2716,6 +2722,16 @@
 	      </para>
 	    </listitem>
 	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      notification_ways
+	    </term>
+	    <listitem>
+	      <para>This directive is used to add to this contact one or more notification ways that will be use to get commands to raise notifications. If the commands and notification options are already configured for the contact, notification ways are not required if it's good for you. If you need a more powerful way to manage command creation like email the day, sms the night, use notification ways for it.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+
 	</variablelist>
       </section>
     </section>
@@ -2838,6 +2854,217 @@
 	</variablelist>
       </section>
     </section>
+
+
+
+
+
+
+
+
+    <section>
+      <title><anchor id="configuringnagios-objectdefinitions-notificationway" />Notification Way</title>
+
+      <section>
+        <title>Description</title>
+
+        <para>A notification way is used to know which commands will be used for a cotnact that must be notified. Notification way configuration look like the contact one. It can be used for exemple to define a SMS send that will be send only the night for critical alerts, and another will be used to send emails for all alerts. Both notification ways will be add to the contact with the notificationways parameters.</para>
+      </section>
+
+      <section>
+        <title>Definition Format</title>
+
+        <note>
+          <para>Directives in red are required, while those in black are
+            optional.</para>
+        </note>
+
+        <informaltable frame="none">
+          <tgroup cols="2">
+            <colspec colname="col_1" />
+            <colspec colname="col_2" />
+
+            <tbody>
+              <row>
+                <entry><para>define notificationway{</para></entry>
+                <entry></entry>
+              </row>
+
+              <row>
+                <entry><para>notificationway_name</para></entry>
+                <entry><para><emphasis>notificationway_name</emphasis></para></entry>
+              </row>
+
+
+              <row>
+                <entry><para>host_notification_period</para></entry>
+                <entry><para><emphasis>timeperiod_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_notification_period</para></entry>
+                <entry><para><emphasis>timeperiod_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>host_notification_options</para></entry>
+                <entry><para>[d,u,r,f,s,n]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_notification_options</para></entry>
+                <entry><para>[w,u,c,r,f,s,n]</para></entry>
+              </row>
+
+              <row>
+                <entry><para>host_notification_commands</para></entry>
+                <entry><para><emphasis>command_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry><para>service_notification_commands</para></entry>
+                <entry><para><emphasis>command_name</emphasis></para></entry>
+              </row>
+
+              <row>
+                <entry nameend="col_2" namest="col_1"><para>}</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section>
+        <title>Example Definition</title>
+
+        <programlisting>
+	  define notificationway{
+	  notificationway_name            SMS_the_night
+	  service_notification_period     night
+	  host_notification_period        night
+	  service_notification_options    c
+	  host_notification_options       d
+	  service_notification_commands   notify-by-sms
+	  host_notification_commands      host-notify-by-sms
+	  }
+	</programlisting>
+      </section>
+
+      <section>
+        <title>Directive Descriptions</title>
+
+	<variablelist>
+	  <varlistentry>
+	    <term>
+	      notificationway_name
+	    </term>
+	    <listitem>
+	      <para>This directive is used to define a short name used to identify the notificationway. It is referenced in 
+		<link linkend="configuringnagios-objectdefinitions-contact">contact</link> definitions. 
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      host_notification_period
+	    </term>
+	    <listitem>
+	      <para>This directive is used to specify the short name of the
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> 
+		during which the contact can be notified about host problems or recoveries with this notification way.
+		You can think of this as an <quote>on call</quote> time for host notifications for the contact.
+		Read the documentation on <link linkend="thebasics-timeperiods">time periods</link>
+		for more information on how this works and potential problems that may result 
+		from improper use.
+              </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      service_notification_period
+	    </term>
+	    <listitem>
+	      <para>This directive is used to specify the short name of the
+		<link linkend="configuringnagios-objectdefinitions-timeperiod">time period</link> 
+		during which the contact can be notified about service problems or recoverie with this notification way.
+		You can think of this as an <quote>on call</quote> time for service notifications for the contact. 
+		Read the documentation on <link linkend="thebasics-timeperiods">time periods</link>
+		for more information on how this works and potential problems that may result from improper use.
+              </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      host_notification_commands
+	    </term>
+	    <listitem>
+	      <para>This directive is used to define a list of the <emphasis>short names</emphasis> of the
+                <link linkend="configuringnagios-objectdefinitions-command">commands</link> used to notify the
+                contact of a <emphasis>host</emphasis> problem or recovery with this notification way.. Multiple notification commands 
+		should be separated by commas. All notification commands are executed when the contact needs
+                to be notified. The maximum amount of time that a notification command can run is controlled by the 
+		<link linkend="configuringnagios-configmain-notification_timeout">notification_timeout</link>
+                option.</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      host_notification_options
+	    </term>
+	    <listitem>
+	      <para>This directive is used to define the host states for which notifications can be sent out
+                to the contact with this notification way. Valid options are a combination of one or more of the following:
+		<itemizedlist>
+		  <listitem><para>d = notify on DOWN host states</para></listitem>
+		  <listitem><para>u = notify on UNREACHABLE host states</para></listitem>
+		  <listitem><para>r = notify on host recoveries (UP states)</para></listitem>
+		  <listitem><para>f = notify when the host starts and stops <link linkend="advancedtopics-flapping">flapping</link>,</para></listitem>
+                  <listitem><para>s = send notifications when host or service <link linkend="advancedtopics-downtime">scheduled downtime</link> starts and ends. If you specify <emphasis role="bold">n</emphasis> (none) as an option, the contact will not receive any type of host notifications.</para></listitem>
+		</itemizedlist>
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      service_notification_options
+	    </term>
+	    <listitem>
+	      <para>This directive is used to define the service states for which notifications can be sent out to the
+		contact with this notification way.. Valid options are a combination of one or more of the following:
+		<itemizedlist>
+		  <listitem><para>w = notify on WARNING service states</para></listitem>
+		  <listitem><para>u = notify on UNKNOWN service states</para></listitem>
+                  <listitem><para>c = notify on CRITICAL service states</para></listitem>
+		  <listitem><para>r = notify on service recoveries (OK states)</para></listitem>
+		  <listitem><para>f = notify when the service starts and stops <link linkend="advancedtopics-flapping">flapping</link>.</para></listitem>
+                  <listitem><para>n = (none) : the contact will not receive any type of service notifications.</para></listitem>
+		</itemizedlist>
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      service_notification_commands
+	    </term>
+	    <listitem>
+	      <para>This directive is used to define a list of the <emphasis>short names</emphasis> of the
+                <link linkend="configuringnagios-objectdefinitions-command">commands</link> used to notify the
+                contact of a <emphasis>service</emphasis> problem or recovery with this notification way.. Multiple notification commands
+		should be separated by commas. All notification commands are executed when the contact needs
+                to be notified. The maximum amount of time that a notification command can run is controlled by the
+		<link linkend="configuringnagios-configmain-notification_timeout">notification_timeout</link>
+                option.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </section>
+    </section>
+
+
+
+
+
 
     <section>
       <title><anchor id="configuringnagios-objectdefinitions-timeperiod" xreflabel="Time Period Definition" />Time Period Definition</title>
@@ -4711,6 +4938,7 @@
 	</variablelist>
       </section>
     </section>
+
 
 
 

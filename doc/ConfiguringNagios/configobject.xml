@@ -44,6 +44,9 @@
 	<para>Notification Escalations</para>
       </listitem>
       <listitem>
+        <para>Notification Ways</para>
+      </listitem>
+      <listitem>
 	<para>Notification and Execution Dependencies</para>
       </listitem>
     </itemizedlist>
@@ -237,6 +240,22 @@
 	<link linkend="thebasics-timeperiods">here</link>.
       </para>
     </section>
+
+    <section>
+      <title>Notification Ways</title>
+      <para>
+	<link linkend="configuringnagios-objectdefinitions-notificationway">Notification Ways</link> 
+	are are used to  control:</para>
+      <itemizedlist>
+	<listitem>
+	  <para>When notification commands should be send, by looking at good states and timeperiods. Like send email the day, and SMS the night.</para>
+	</listitem>
+      </itemizedlist>
+      <para>Information on how notification ways work can be found 
+	<link linkend="configuringnagios-objectdefinitions-notificationway">here</link>.
+      </para>
+    </section>
+
     <!--		
        <para>
 	 <inlinemediaobject>
