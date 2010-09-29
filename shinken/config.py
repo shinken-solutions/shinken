@@ -94,26 +94,26 @@ class Config(Item):
                 'accept_passive_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'accept_passive_checks')]},
                 'enable_event_handlers' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'log_rotation_method' : {'required':False, 'default':'d', 'pythonize': to_char, 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'log_archive_path' : {'required':False, 'default':'/tmp/', 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
+                'log_archive_path' : {'required':False, 'default':'/tmp/', 'usage' : 'unmanaged'},
                 'check_external_commands' : {'required':False, 'default':'1', 'pythonize': to_bool},
                 'command_check_interval' : {'required':False, 'default':'-1', 'usage' : 'unused', 'usage_text' : 'anoter value than look always the file is useless, so we fix it.'},
                 'command_file' : {'required':False, 'default':'/tmp/command.cmd'},
-                'external_command_buffer_slots' : {'required':False, 'default':'512', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
+                'external_command_buffer_slots' : {'required':False, 'default':'512', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'We do not limit the ewxternal command slot.'},
                 'check_for_updates' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'network administrators will never allow such communication between server and the external world. Use your distribution packet manager to know if updates are available or go to the http://www.shinken-monitoring.org website instead.'},
                 'bare_update_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused'},
                 'lock_file' : {'required':False, 'default':'/usr/local/shinken/var/arbiterd.pid'},
-                'retain_state_information' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'state_retention_file' : {'required':False, 'default':'/tmp/retention.dat', 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
+                'retain_state_information' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, retain state information will not be implemented because it is useless.'},
+                'state_retention_file' : {'required':False, 'default':'/tmp/retention.dat'},
                 'retention_update_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
-                'use_retained_program_state' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'use_retained_scheduling_info' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'retained_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'retained_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Service, 'retained_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'retained_process_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_process_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'retained_process_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_process_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'retained_contact_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_contact_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'retained_contact_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Service, 'retained_contact_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'use_syslog' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
+                'use_retained_program_state' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'use_retained_scheduling_info' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Service, 'retained_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_process_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_process_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_process_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_process_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_contact_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_contact_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_contact_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Service, 'retained_contact_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'use_syslog' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'log_notifications' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'log_service_retries' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'log_retries')]},
                 'log_host_retries' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'log_retries')]},
@@ -127,7 +127,7 @@ class Config(Item):
                 'service_inter_check_delay_method' : {'required':False, 'default':'s', 'class_inherit' : [(Service, 'inter_check_delay_method')], 'usage' : 'unused', 'usage_text' : 'This option is useless in the Shinken scheduling. The only way is the smart way.'},
                 'max_service_check_spread' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Service, 'max_check_spread')]},
                 'service_interleave_factor' : {'required':False, 'default':'s', 'class_inherit' : [(Service, 'interleave_factor')], 'usage' : 'unused', 'usage_text' : 'This option is useless in the Shinken scheduling because it use a random distribution for initial checks.'},
-                'max_concurrent_checks' : {'required':False, 'default':'200', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
+                'max_concurrent_checks' : {'required':False, 'default':'200', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Limiting the max concurrent checks is not helful to got a good running monitoring server.'},
                 'check_result_reaper_frequency' : {'required':False, 'default':'5', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Shinken do not use reaper process.'},
                 'max_check_result_reaper_time' : {'required':False, 'default':'30', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Shinken do not use reaper process.'},
                 'check_result_path' : {'required':False, 'default':'/tmp/', 'usage' : 'unused', 'usage_text' : 'Shinken use in memory returns, not check results on flat file.'},
@@ -135,65 +135,65 @@ class Config(Item):
                 'host_inter_check_delay_method' : {'required':False, 'default':'s', 'class_inherit' : [(Host, 'inter_check_delay_method')], 'usage' : 'unused', 'usage_text' : 'This option is unused in the Shinken scheduling because distribution of the initial check is a random one.'},
                 'max_host_check_spread' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Host, 'max_check_spread')]},
                 'interval_length' : {'required':False, 'default':'60', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
-                'auto_reschedule_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'auto_rescheduling_interval' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'auto_rescheduling_window' : {'required':False, 'default':'180', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'use_aggressive_host_checking' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None)], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'translate_passive_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'translate_passive_checks')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'passive_host_checks_are_soft' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'passive_checks_are_soft')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'enable_predictive_host_dependency_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'enable_predictive_dependency_checks')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
-                'enable_predictive_service_dependency_checks' : {'required':False, 'default':'1', 'class_inherit' : [(Service, 'enable_predictive_dependency_checks')], 'usage' : 'unused', 'usage_text' : 'sorry, log rotation is not already implemented'},
+                'auto_reschedule_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
+                'auto_rescheduling_interval' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
+                'auto_rescheduling_window' : {'required':False, 'default':'180', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
+                'use_aggressive_host_checking' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None)], 'usage' : 'unused', 'usage_text' : 'Host agressive checking is an heritage from Nagios 1 and is really useless now.'},
+                'translate_passive_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'translate_passive_checks')], 'usage' : 'unmanaged'},
+                'passive_host_checks_are_soft' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'passive_checks_are_soft')], 'usage' : 'unmanaged'},
+                'enable_predictive_host_dependency_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'enable_predictive_dependency_checks')], 'usage' : 'unmanaged'},
+                'enable_predictive_service_dependency_checks' : {'required':False, 'default':'1', 'class_inherit' : [(Service, 'enable_predictive_dependency_checks')], 'usage' : 'unmanaged'},
                 'cached_host_check_horizon' : {'required':False, 'default':'0', 'pythonize': to_int, 'class_inherit' : [(Host, 'cached_check_horizon')]},
                 'cached_service_check_horizon' : {'required':False, 'default':'0', 'pythonize': to_int, 'class_inherit' : [(Service, 'cached_check_horizon')]},
-                'use_large_installation_tweaks' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'Shinken is always tweaks.'},
+                'use_large_installation_tweaks' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'free_child_process_memory' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'this option is automatic in Python processes'},
                 'child_processes_fork_twice' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'fork twice is not use.'},
-                'enable_environment_macros' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unused', 'usage_text' : 'sorry, not already implemented'},
+                'enable_environment_macros' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged', 'usage_text' : 'Please check at your plugins if they are using it. Only few of them are using this feature.'},
                 'enable_flap_detection' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'low_service_flap_threshold' : {'required':False, 'default':'25', 'pythonize': to_int, 'class_inherit' : [(Service, 'low_flap_threshold')]},
                 'high_service_flap_threshold' : {'required':False, 'default':'50', 'pythonize': to_int, 'class_inherit' : [(Service, 'high_flap_threshold')]},
                 'low_host_flap_threshold' : {'required':False, 'default':'25', 'pythonize': to_int, 'class_inherit' : [(Host, 'low_flap_threshold')]},
                 'high_host_flap_threshold' : {'required':False, 'default':'50', 'pythonize': to_int, 'class_inherit' : [(Host, 'high_flap_threshold')]},
-                'soft_state_dependencies' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unused', 'usage_text' : 'sorry, not already implemented'},
+                'soft_state_dependencies' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
                 'service_check_timeout' : {'required':False, 'default':'10', 'pythonize': to_int, 'class_inherit' : [(Service, 'check_timeout')]},
                 'host_check_timeout' : {'required':False, 'default':'10', 'pythonize': to_int, 'class_inherit' : [(Host, 'check_timeout')]},
                 'event_handler_timeout' : {'required':False, 'default':'10', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
                 'notification_timeout' : {'required':False, 'default':'5', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
-                'ocsp_timeout' : {'required':False, 'default':'5', 'pythonize': to_int, 'class_inherit' : [(Service, None)], 'usage' : 'unused', 'usage_text' : 'O*HP commands are only useful for old distributed architecture, so no use with Shinken'},
-                'ochp_timeout' : {'required':False, 'default':'5', 'pythonize': to_int, 'class_inherit' : [(Host, None)], 'usage' : 'unused', 'usage_text' : 'O*HP commands are only useful for old distributed architecture, so no use with Shinken'},
-                'perfdata_timeout' : {'required':False, 'default':'2', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unused', 'usage_text' : 'Perfdata are manage by a broker module, not as a global parameter.'},
-                'obsess_over_services' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Service, 'obsess_over')], 'usage' : 'unused', 'usage_text' : 'O*HP commands are only useful for old distributed architecture, so no use with Shinken'},
-                'ocsp_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, None)], 'usage' : 'unused', 'usage_text' : 'O*HP commands are only useful for old distributed architecture, so no use with Shinken'},
-                'obsess_over_hosts' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, 'obsess_over')], 'usage' : 'unused', 'usage_text' : 'O*HP commands are only useful for old distributed architecture, so no use with Shinken'},
-                'ochp_command' : {'required':False, 'default':'', 'class_inherit' : [(Host, None)], 'usage' : 'unused', 'usage_text' : 'O*HP commands are only useful for old distributed architecture, so no use with Shinken'},
+                'ocsp_timeout' : {'required':False, 'default':'5', 'pythonize': to_int, 'class_inherit' : [(Service, None)], 'usage' : 'unmanaged', 'usage_text' : 'O*HP commands are only useful for old distributed architecture, so if you use the Shinken one, it is no use for you.'},
+                'ochp_timeout' : {'required':False, 'default':'5', 'pythonize': to_int, 'class_inherit' : [(Host, None)], 'usage' : 'unmanaged'},
+                'perfdata_timeout' : {'required':False, 'default':'2', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged', 'usage_text' : 'Perfdata are manage by a broker module, not as a global parameter from now.'},
+                'obsess_over_services' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Service, 'obsess_over')], 'usage' : 'unmanaged'},
+                'ocsp_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, None)], 'usage' : 'unmanaged'},
+                'obsess_over_hosts' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, 'obsess_over')], 'usage' : 'unmanaged'},
+                'ochp_command' : {'required':False, 'default':'', 'class_inherit' : [(Host, None)], 'usage' : 'unmanaged'},
                 'process_performance_data' : {'required':False, 'default':'1', 'pythonize': to_bool , 'class_inherit' : [(Host, None), (Service, None)]},
-                'host_perfdata_command' : {'required':False, 'default':'' , 'class_inherit' : [(Host, 'perfdata_command')], 'usage' : 'unused', 'usage_text' : 'Perfdata are manage by a broker module, not as a global parameter.'},
-                'service_perfdata_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'perfdata_command')], 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'host_perfdata_file' : {'required':False, 'default':'/tmp/host.perf' , 'class_inherit' : [(Host, 'perfdata_file')], 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'service_perfdata_file' : {'required':False, 'default':'/tmp/service.perf' , 'class_inherit' : [(Service, 'perfdata_file')], 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'host_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Host, 'perfdata_file_template')], 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'service_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Service, 'perfdata_file_template')], 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'host_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Host, 'perfdata_file_mode')], 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'service_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Service, 'perfdata_file_mode')], 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'host_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'service_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'host_perfdata_file_processing_command' : {'required':False, 'default':'', 'class_inherit' : [(Host, 'perfdata_file_processing_command')], 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
-                'service_perfdata_file_processing_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'perfdata_file_processing_command')], 'usage' : 'unused', 'usage_text' : 'Perfdata are managed by a broker module, not as a global parameter.'},
+                'host_perfdata_command' : {'required':False, 'default':'' , 'class_inherit' : [(Host, 'perfdata_command')], 'usage' : 'unmanaged'},
+                'service_perfdata_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'perfdata_command')], 'usage' : 'unmanaged'},
+                'host_perfdata_file' : {'required':False, 'default':'/tmp/host.perf' , 'class_inherit' : [(Host, 'perfdata_file')], 'usage' : 'unmanaged'},
+                'service_perfdata_file' : {'required':False, 'default':'/tmp/service.perf' , 'class_inherit' : [(Service, 'perfdata_file')], 'usage' : 'unmanaged'},
+                'host_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Host, 'perfdata_file_template')], 'usage' : 'unmanaged'},
+                'service_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Service, 'perfdata_file_template')], 'usage' : 'unmanaged'},
+                'host_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Host, 'perfdata_file_mode')], 'usage' : 'unmanaged'},
+                'service_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Service, 'perfdata_file_mode')], 'usage' : 'unmanaged'},
+                'host_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int, 'usage' : 'unmanaged'},
+                'service_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int, 'usage' : 'unmanaged'},
+                'host_perfdata_file_processing_command' : {'required':False, 'default':'', 'class_inherit' : [(Host, 'perfdata_file_processing_command')], 'usage' : 'unmanaged'},
+                'service_perfdata_file_processing_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'perfdata_file_processing_command')], 'usage' : 'unmanaged'},
                 'check_for_orphaned_services' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'check_for_orphaned')]},
                 'check_for_orphaned_hosts' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'check_for_orphaned')]},
                 'check_service_freshness' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'check_freshness')]},
                 'service_freshness_check_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
                 'check_host_freshness' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'check_freshness')]},
                 'host_freshness_check_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
-                'additional_freshness_latency' : {'required':False, 'default':'15', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'enable_embedded_perl' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented'},
-                'use_embedded_perl_implicitly' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'date_format' : {'required':False, 'default':'us', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'use_timezone' : {'required':False, 'default':'FR/Paris', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'illegal_object_name_chars' : {'required':False, 'default':'/tmp/', 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'illegal_macro_output_chars' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'use_regexp_matching' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'use_true_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
+                'additional_freshness_latency' : {'required':False, 'default':'15', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
+                'enable_embedded_perl' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged', 'usage_text' : 'It will surely never managed, but it should not be useful with poller performances.'},
+                'use_embedded_perl_implicitly' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
+                'date_format' : {'required':False, 'default':'us', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
+                'use_timezone' : {'required':False, 'default':'FR/Paris', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
+                'illegal_object_name_chars' : {'required':False, 'default':'/tmp/', 'usage' : 'unmanaged'},
+                'illegal_macro_output_chars' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
+                'use_regexp_matching' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged', 'usage_text' : ' if you go some host or service definition like prod*, it will surely failed from now, sorry.'},
+                'use_true_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
                 'admin_email' : {'required':False, 'default':'admin@localhost', 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
                 'admin_pager' : {'required':False, 'default':'', 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
                 'event_broker_options' : {'required':False, 'default':'', 'usage' : 'unused', 'usage_text' : 'event broker are replaced by modules iwth a real configuration template.'},
@@ -641,19 +641,26 @@ class Config(Item):
 
     #It's used to raise warning if the user got parameter that we do not manage from now
     def warn_about_unmanaged_parameters(self):
-        if not self.disable_old_nagios_parameters_whining:
-            properties = self.__class__.properties
-            for prop in properties:
-                entry = properties[prop]
-                if 'usage' in entry and entry['usage'] == 'unmanaged' and hasattr(self, prop):
-                    if 'usage_text' in entry:
-                        usage_text = entry['usage_text']
-                    else:
-                        usage_text = "this parameter is not managed from now. "
-                    mailing_list_uri = "https://lists.sourceforge.net/lists/listinfo/shinken-devel"
-                    text = 'Warning : the parameter %s is not managed from now. If you really need it, please aregister at the devel mailing list at %s and ask for it or propose us a patch :)' % (prop, mailing_list_uri)
-                    Log().log(text)
-
+        properties = self.__class__.properties
+        unmanaged = []
+        for prop in properties:
+            entry = properties[prop]
+            if 'usage' in entry and entry['usage'] == 'unmanaged' and hasattr(self, prop):
+                if 'usage_text' in entry:
+                    s = "%s : %s" % (prop, entry['usage_text'])
+                else:
+                    s = prop
+                unmanaged.append(s)
+        if len(unmanaged) != 0:
+            print "\n"
+            mailing_list_uri = "https://lists.sourceforge.net/lists/listinfo/shinken-devel"
+            text = 'Warning : the folowing parameter(s) are not curently managed.'
+            Log().log(text)
+            for s in unmanaged:
+                Log().log(s)
+            text = 'Please look if you really need it. If so, please register at the devel mailing list (%s) and ask for it or propose us a patch :)' % mailing_list_uri
+            Log().log(text)
+            print "\n"
 
 
     #Use to fill groups values on hosts and create new services
