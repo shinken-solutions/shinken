@@ -113,6 +113,7 @@ from shinken.hostgroup import Hostgroup, Hostgroups
 from shinken.servicegroup import Servicegroup, Servicegroups
 from shinken.contactgroup import Contactgroup, Contactgroups
 from shinken.config import Config
+from shinken.db_mysql import DBMysql
 
 VERSION = "0.2+"
 
