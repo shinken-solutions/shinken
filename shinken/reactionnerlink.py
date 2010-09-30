@@ -37,6 +37,7 @@ class ReactionnerLink(SatelliteLink):
                 'processes_by_worker' : {'required' : False, 'default' : '256', 'pythonize' : to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
                 'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
                 'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
+                'use_timezone' : {'required' : False, 'default' : 'NOTSET', 'to_send' : True},
                 }
  
     running_properties = {'con' : {'default' : None},

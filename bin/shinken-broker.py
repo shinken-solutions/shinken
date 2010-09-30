@@ -113,6 +113,7 @@ from shinken.hostgroup import Hostgroup, Hostgroups
 from shinken.servicegroup import Servicegroup, Servicegroups
 from shinken.contactgroup import Contactgroup, Contactgroups
 from shinken.config import Config
+from shinken.db_mysql import DBMysql
 
 VERSION = "0.2+"
 
@@ -198,6 +199,14 @@ class IForArbiter(Pyro.core.ObjBase):
 			self.app.modules = conf['global']['modules']
 			self.app.have_modules = True
 			print "We received modules", self.app.modules
+
+                #Set our giving timezone from arbiter
+                use_timezone = conf['global']['use_timezone']
+                if use_timezone != 'NOTSET':
+                    print "Setting our timezone to", use_timezone
+                    os.environ['TZ'] = use_timezone
+                    time.tzset()
+
 		
 
 	#Arbiter ask us to do not manage a scheduler_id anymore

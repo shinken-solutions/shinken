@@ -112,6 +112,12 @@ class IForArbiter(Pyro.core.ObjBase):
         else: #for reactionner, we don't really care about it
             self.app.max_plugins_output_length = 8192
         print "Max output lenght" , self.app.max_plugins_output_length
+        #Set our giving timezone from arbiter
+        use_timezone = conf['global']['use_timezone']
+        if use_timezone != 'NOTSET':
+            print "Setting our timezone to", use_timezone
+            os.environ['TZ'] = use_timezone
+            time.tzset()
         Log().log("We have our schedulers : %s" % (str(self.schedulers)))
 
 

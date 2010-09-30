@@ -371,9 +371,15 @@ class Arbiter(Daemon):
         #on the fly some Broker modules like for status.dat parameters
         #or nagios.log one if there are no already available
         self.conf.hack_old_nagios_parameters()
+
+        #Raise warning about curently unmanaged parameters
+        self.conf.warn_about_unmanaged_parameters()
         
         #print "************** Exlode global conf ****************"
         self.conf.explode_global_conf()
+
+        #set ourown timezone and propagate it to other satellites
+        self.conf.propagate_timezone_option()
 
         #************* Print warning about useless parameters in Shinken **************"
         self.conf.notice_about_useless_parameters()
