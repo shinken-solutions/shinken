@@ -37,6 +37,7 @@ class SchedulerLink(SatelliteLink):
                 'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split},
                 'weight': {'required':  False, 'default' : '1', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
+                'use_timezone' : {'required' : False, 'default' : 'NOTSET'},
                 }
  
     running_properties = {'con' : {'default' : None},
@@ -68,7 +69,7 @@ class SchedulerLink(SatelliteLink):
     def give_satellite_cfg(self):
         return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.conf!=None}
 
-class SchedulerLinks(SatelliteLinks):#(Items):
+class SchedulerLinks(SatelliteLinks):
     name_property = "name"
     inner_class = SchedulerLink
 

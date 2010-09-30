@@ -378,6 +378,9 @@ class Arbiter(Daemon):
         #print "************** Exlode global conf ****************"
         self.conf.explode_global_conf()
 
+        #set ourown timezone and propagate it to other satellites
+        self.conf.propagate_timezone_option()
+
         #************* Print warning about useless parameters in Shinken **************"
         self.conf.notice_about_useless_parameters()
         

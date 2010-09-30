@@ -189,7 +189,7 @@ class Config(Item):
                 'enable_embedded_perl' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged', 'usage_text' : 'It will surely never managed, but it should not be useful with poller performances.'},
                 'use_embedded_perl_implicitly' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'date_format' : {'required':False, 'default':'us', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
-                'use_timezone' : {'required':False, 'default':'FR/Paris', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
+                'use_timezone' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
                 'illegal_object_name_chars' : {'required':False, 'default':'/tmp/', 'usage' : 'unmanaged'},
                 'illegal_macro_output_chars' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
                 'use_regexp_matching' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged', 'usage_text' : ' if you go some host or service definition like prod*, it will surely failed from now, sorry.'},
@@ -875,6 +875,21 @@ class Config(Item):
                 for b in self.brokers:
                     b.modules.append(m)
         
+
+    #Set our timezone value and give it too to unset satellites
+    def propagate_timezone_option(self):
+        if self.use_timezone != '':
+            #first apply myself
+            os.environ['TZ'] = self.use_timezone
+            time.tzset()
+            
+            tab = [self.schedulerlinks, self.pollers, self.brokers, self.reactionners]
+            for t in tab:
+                for s in t:
+                    if s.use_timezone == 'NOTSET':
+                        setattr(s, 'use_timezone', self.use_timezone)
+            
+
 
     #Link templates with elements
     def linkify_templates(self):
