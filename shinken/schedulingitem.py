@@ -33,6 +33,11 @@ from log import Log
 
 
 class SchedulingItem(Item):
+
+    # global counters used for [current|last]_[host|service]_[event|problem]_id
+    current_event_id = 0
+    current_problem_id = 0
+
     #Add a flapping change, but no more than 20 states
     #Then update the self.is_flapping bool by calling update_flapping
     def add_flapping_change(self, b):
@@ -726,8 +731,35 @@ class SchedulingItem(Item):
         else:
             self.state_type_id = 0
 
+        # update event/problem-counters
+        self.update_event_and_problem_id()
         self.broks.append(self.get_check_result_brok())
 
+
+    def update_event_and_problem_id(self):
+        OK_UP = self.__class__.ok_up #OK for service, UP for host
+        if self.state != self.last_state and self.last_state != 'PENDING' or self.state != OK_UP and self.last_state == 'PENDING':
+            SchedulingItem.current_event_id += 1
+            self.last_event_id = self.current_event_id
+            self.current_event_id = SchedulingItem.current_event_id
+            # now the problem_id
+            if self.state != OK_UP and self.last_state == 'PENDING':
+                # broken ever since i can remember
+                SchedulingItem.current_problem_id += 1
+                self.last_problem_id = self.current_problem_id
+                self.current_problem_id = SchedulingItem.current_problem_id
+            elif self.state != OK_UP and self.last_state != OK_UP:
+                # State transitions between non-OK states (e.g. WARNING to CRITICAL) do not cause this problem id to increase.
+                pass
+            elif self.state == OK_UP:
+                # If the service is currently in an OK state, this macro will be set to zero (0). 
+                self.last_problem_id = self.current_problem_id
+                self.current_problem_id = 0
+            else:
+                # Every time a service (or host) transitions from an OK or UP state to a problem state, a global problem ID number is incremented by one (1).
+                SchedulingItem.current_problem_id += 1
+                self.last_problem_id = self.current_problem_id
+                self.current_problem_id = SchedulingItem.current_problem_id
 
 
     #Called by scheduler when a notification is ok to be send
