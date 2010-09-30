@@ -77,7 +77,10 @@ class Simple_log_broker:
         now = int(time.time())
         #first check if the file last mod (or creation) was
         #not our day
-        t_last_mod = int(float(str(os.path.getmtime(self.path))))
+        try :
+            t_last_mod = int(float(str(os.path.getmtime(self.path))))
+        except OSError: #there should be no path from now, so no move :)
+            return False
         #print "Ctime %d" % os.path.getctime(self.path)
         t_last_mod_day = get_day(t_last_mod)
         today = get_day(now)
