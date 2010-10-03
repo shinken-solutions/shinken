@@ -80,7 +80,7 @@ class Action:
         self.wait_time = 0.0001
         self.last_poll = self.check_time
         try:
-            process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except WindowsError:
             print "On le kill"
             self.status = 'timeout'
