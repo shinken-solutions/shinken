@@ -96,6 +96,8 @@ class TestConfig(ShinkenTest):
         host_A = self.sched.hosts.find_by_name("test_host_A")
         host_B = self.sched.hosts.find_by_name("test_host_B")
         host_C = self.sched.hosts.find_by_name("test_host_C")
+        host_D = self.sched.hosts.find_by_name("test_host_D")
+        
 
         # the most important: test_ok_0 is in the chk_depend_of-list of test_ok_1
         #self.assert_(host_A in [x[0] for x in host_C.chk_depend_of])
@@ -113,10 +115,11 @@ class TestConfig(ShinkenTest):
         self.assert_(host_B in [x[0] for x in host_A.act_depend_of_me])
         self.assert_(host_C in [x[0] for x in host_A.act_depend_of_me])
         self.assert_(host_C in [x[0] for x in host_B.act_depend_of_me])
-        self.assert_(host_C.act_depend_of_me == [])
+        #self.assert_(host_C.act_depend_of_me == []) # D in here
         self.assert_(host_B in [x[0] for x in host_A.chk_depend_of_me])
         self.assert_(host_C in [x[0] for x in host_A.chk_depend_of_me])
         self.assert_(host_C in [x[0] for x in host_B.chk_depend_of_me])
+        self.assert_(host_D in [x[0] for x in host_C.chk_depend_of_me])
         
         # check the notification/execution criteria
         self.assert_([['d', 'u']] == [x[1] for x in host_C.act_depend_of if x[0] is host_B])
