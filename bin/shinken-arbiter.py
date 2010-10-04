@@ -95,7 +95,7 @@ from shinken.log import Log
 from shinken.modulesmanager import ModulesManager
 
 
-VERSION = "0.2+"
+VERSION = "0.3"
 
 
 

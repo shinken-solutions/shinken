@@ -71,3 +71,7 @@ $ /etc/init.d/shinken-poller start
 $ /etc/init.d/shinken-reactionner start
 $ /etc/init.d/shinken-broker start
 $ /etc/init.d/shinken-arbiter start
+
+
+== Known bugs ==
+*The only know bug not already 'fix ok' is in the status.dat module. In fact the objects.dat file is 'shrink' after a conf reload. If so, just restart the broker too (and we take debug message if you got it of course :) ). Thanks a lot.

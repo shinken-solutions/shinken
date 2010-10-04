@@ -2,7 +2,40 @@
 Shinken ChangeLog
 #######################
 	
+	
 
+0.3 - 06/10/2010
+------------------
+ENHANCEMENTS
+	*Add : complex hostgroup amtching with & ( ) | !
+	*Add : resultmodulation code and tests
+	*Add : brok information about problem/impacts
+	*Add : livestatus export about problem/impacts
+	*Add : clean quit on daemons (pid file and sub processes)
+	*Add : maintenance_period parameter in hosts and services
+	*Add :even more unit test cases
+	*Add : now external commands raised in livestatus module are taken by the arbiter
+	*Add : satellites states are now exported by livestatus
+	*Add : arbiter module managment
+	*Add : GLPI import arbiter module :)
+	*Add : notificationways for contacts
+	*Add : warning about unmanaged parameters
+	*Add : log rotation and syslog managment
+	
+	
+FIXES
+	*Fix : install crash is now catch with Pyro 4 in Centos (python 2.4)
+	*Fix : host/service dep where not filled with default properties
+	*Fix : catch realm configuration errors
+	*Fix : but in status.dat about parents printing
+	*Fix : problem with the Collums talbe in livestatus module
+	*Fix : next valid time was one minute delay for cases with excludes
+	*Fix : livestatus export in json was bad for service group members
+	*Fix : bug in windows check launch
+	*Clean : dispatcher code about useless options
+	*Clean : tests cases setUp
+
+	
 0.2 - 06/09/2010
 ------------------
 ENHANCEMENTS

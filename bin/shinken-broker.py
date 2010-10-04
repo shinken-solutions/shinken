@@ -115,7 +115,7 @@ from shinken.contactgroup import Contactgroup, Contactgroups
 from shinken.config import Config
 from shinken.db_mysql import DBMysql
 
-VERSION = "0.2+"
+VERSION = "0.3"
 
 
 

@@ -121,7 +121,7 @@ from shinken.daemon import Daemon#create_daemon, check_parallel_run, change_user
 from shinken.util import to_int, to_bool
 
 
-VERSION = "0.2+"
+VERSION = "0.3"
 
 
 
