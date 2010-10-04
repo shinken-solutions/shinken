@@ -94,7 +94,7 @@ class Status_dat_broker:
     def manage_brok(self, b):
         type = b.type
         manager = 'manage_'+type+'_brok'
-        print "I manage brok Number", b.id, ":", manager
+#        print "I manage brok Number", b.id, ":", manager
         #print "------------------------------------------- i receive", manager
         if hasattr(self, manager):
             #print "------------------------------------------- i manage", manager
@@ -117,6 +117,8 @@ class Status_dat_broker:
     def manage_clean_all_my_instance_id_brok(self, b):
         data = b.data
         instance_id = data['instance_id']
+
+        print 'DBG: Cleann all my instance with brok :', b.id
 
         #We clean all previous hosts and services from this instance_id
         h_to_del = []
@@ -144,7 +146,9 @@ class Status_dat_broker:
         data = b.data
         h_id = data['id']
 
+        print 'DBG: Creacting host with with brok :', b.id
         print "Creating host:", h_id, b.__dict__
+
         
         h = Host({})
         for prop in data:
