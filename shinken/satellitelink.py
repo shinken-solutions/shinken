@@ -73,12 +73,12 @@ class SatelliteLink(Item):
         if shinken.pyro_wrapper.pyro_version == 3:
             self.uri = 'PYROLOC://'+self.address+":"+str(self.port)+"/ForArbiter"
             self.con = Pyro.core.getProxyForURI(self.uri)            
-            #Ok, set timeout to 5 sec
-            self.con._setTimeout(5)
+            #Ok, set timeout to 3 sec (ping timeout)
+            self.con._setTimeout(self.timeout)
         else:
             self.uri = 'PYRO:ForArbiter@'+self.address+":"+str(self.port)
             self.con = Pyro.core.Proxy(self.uri)
-            self.con._pyroTimeout = 5
+            self.con._pyroTimeout = self.timeout
 
 
     def put_conf(self, conf):
@@ -89,14 +89,15 @@ class SatelliteLink(Item):
         try:
             #Still fun with pyro 3 and 4...
             if shinken.pyro_wrapper.pyro_version == 3:
-                self.con._setTimeout(120)
+                #Data timeout is far longer than timeout (ping one)
+                self.con._setTimeout(self.data_timeout)
                 self.con.put_conf(conf)
-                self.con._setTimeout(5)
+                self.con._setTimeout(self.timeout)
                 return True
             else:
-                self.con._pyroTimeout = 120
+                self.con._pyroTimeout = self.data_timeout
                 self.con.put_conf(conf)
-                self.con._pyroTimeout = 5
+                self.con._pyroTimeout = self.timeout
                 return True
         except Pyro.errors.URIError , exp:
             self.con = None
@@ -118,9 +119,13 @@ class SatelliteLink(Item):
         return res
 
 
+    #Set alive, reachable, and reset attemps.
+    #If we change state, raise a status brok update
     def set_alive(self):
         was_alive = self.alive
         self.alive = True
+        self.attempt = 0
+        self.reachable = True
 
         #We came from dead to alive
         #so we must add a brok update
@@ -130,6 +135,7 @@ class SatelliteLink(Item):
 
 
     def set_dead(self):
+        print "Set dead for %s" % self.get_name()
         was_alive = self.alive
         self.alive = False
         self.con = None
@@ -141,25 +147,38 @@ class SatelliteLink(Item):
             self.broks.append(b)
 
 
+    #Go in reachable=False and add a failed attempt
+    #if we reach the max, go dead
+    def add_failed_check_attempt(self):
+        print "Add failed attempt to", self.get_name()
+        self.reachable = False
+        self.attempt += 1
+        self.attempt = min(self.attempt, self.max_check_attempts)
+        print "Attemps", self.attempt, self.max_check_attempts
+        #check when we just go HARD (dead)
+        if self.attempt == self.max_check_attempts:
+            self.set_dead()
+    
 
     def ping(self):
+        print "Pinging %s" % self.get_name()
         try:
             if self.con == None:
                 self.create_connexion()
             self.con.ping()
             self.set_alive()
         except Pyro.errors.ProtocolError , exp:
-            self.set_dead()
+            self.add_failed_check_attempt()
         except Pyro.errors.URIError , exp:
             print exp
-            self.set_dead()
+            self.add_failed_check_attempt()
         #Only pyro 4 but will be ProtocolError in 3
         except Pyro.errors.CommunicationError , exp:
             #print "Is not alive!", self.uri
-            self.set_dead()
+            self.add_failed_check_attempt()
         except Pyro.errors.DaemonError , exp:
             print exp
-            self.set_dead()
+            self.add_failed_check_attempt()
 
 
     def wait_new_conf(self):

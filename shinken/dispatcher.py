@@ -163,7 +163,7 @@ class Dispatcher:
                             #is need
                             #Or maybe it is alive but I thought that this reactionner manage the conf
                             #but ot doesn't. I ask a full redispatch of these cfg for both cases
-                            if not satellite.alive or (satellite.alive and cfg_id not in satellite.what_i_managed()):
+                            if not satellite.alive or (satellite.reachable and cfg_id not in satellite.what_i_managed()):
                                 Log().log('[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False #so we will redispatch all
                                 r.to_satellites_nb_assigned[kind][cfg_id] = 0
@@ -186,7 +186,7 @@ class Dispatcher:
             if hasattr(elt, 'conf'):
                 #If element have a conf, I do not care, it's a good dispatch
                 #If die : I do not ask it something, it won't respond..
-                if elt.conf == None and elt.alive:
+                if elt.conf == None and elt.reachable:
                     #print "Ask", elt.get_name() , 'if it got conf'
                     if elt.have_conf():
                         Log().log('Warning : The element %s have a conf and should not have one! I ask it to idle now' % elt.get_name())
@@ -201,7 +201,7 @@ class Dispatcher:
         #them to remove it
         for satellite in self.satellites:
             kind = satellite.get_my_type()
-            if satellite.alive:
+            if satellite.reachable:
                 cfg_ids = satellite.what_i_managed()
                 #I do nto care about satellites that do nothing, it already
                 #do what I want :)

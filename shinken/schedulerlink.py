@@ -38,10 +38,15 @@ class SchedulerLink(SatelliteLink):
                 'weight': {'required':  False, 'default' : '1', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
                 'use_timezone' : {'required' : False, 'default' : 'NOTSET'},
+                'timeout' : {'required' : False, 'default' : '3', 'pythonize': to_int, 'fill_brok' : ['full_status']},
+                'data_timeout' : {'required' : False, 'default' : '120', 'pythonize': to_int, 'fill_brok' : ['full_status']},
+                'max_check_attempts' : {'required' : False, 'default' : '3','pythonize': to_int, 'fill_brok' : ['full_status']},
                 }
  
     running_properties = {'con' : {'default' : None},
-                          'alive' : {'default' : False, 'fill_brok' : ['full_status']},
+                          'alive' : {'default' : False, 'fill_brok' : ['full_status']}, # DEAD or not
+                          'attempt' : {'default' : 0, 'fill_brok' : ['full_status']}, # the number of failed attempt
+                          'reachable' : {'default' : False, 'fill_brok' : ['full_status']}, # can be network ask or not (dead or check in timeout or error)
                           'conf' : {'default' : None},
                           'need_conf' : {'default' : True},
                           'broks' : {'default' : []},

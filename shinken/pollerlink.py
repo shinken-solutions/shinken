@@ -43,11 +43,16 @@ class PollerLink(SatelliteLink):
                 'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
                 'poller_tags' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
                 'use_timezone' : {'required' : False, 'default' : 'NOTSET', 'to_send' : True},
+                'timeout' : {'required' : False, 'default' : '3', 'pythonize': to_int, 'fill_brok' : ['full_status']},
+                'data_timeout' : {'required' : False, 'default' : '120', 'pythonize': to_int, 'fill_brok' : ['full_status']},
+                'max_check_attempts' : {'required' : False, 'default' : '3','pythonize': to_int, 'fill_brok' : ['full_status']},
                 }
  
     running_properties = {'con' : {'default' : None},
                           'alive' : {'default' : False, 'fill_brok' : ['full_status']},
                           'broks' : {'default' : []},
+                          'attempt' : {'default' : 0, 'fill_brok' : ['full_status']}, # the number of failed attempt
+                          'reachable' : {'default' : False, 'fill_brok' : ['full_status']}, # can be network ask or not (dead or check in timeout or error)
                           }
     macros = {}
 
