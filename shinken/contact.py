@@ -148,7 +148,12 @@ class Contact(Item):
             for p in special_properties:
                 print self.get_name()," : I'm missing the property %s" % p
                 state = False
-            
+
+        if hasattr(self, 'contact_name'):
+            for c in cls.illegal_object_name_chars:
+                if c in self.contact_name:
+                    Log().log("%s : My contact_name got the caracter %s that is not allowed." % (self.get_name(), c))
+                    state = False            
         return state
 
 

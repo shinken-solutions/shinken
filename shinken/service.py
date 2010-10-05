@@ -308,6 +308,11 @@ class Service(SchedulingItem):
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
+        if hasattr(self, 'service_description'):
+            for c in cls.illegal_object_name_chars:
+                if c in self.service_description:
+                    Log().log("%s : My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
+                    state = False
         return state
 
 

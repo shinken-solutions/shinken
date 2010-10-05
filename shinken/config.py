@@ -190,7 +190,7 @@ class Config(Item):
                 'use_embedded_perl_implicitly' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'date_format' : {'required':False, 'default':'us', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
                 'use_timezone' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
-                'illegal_object_name_chars' : {'required':False, 'default':'/tmp/', 'usage' : 'unmanaged'},
+                'illegal_object_name_chars' : {'required':False, 'default':"""`~!$%^&*"|'<>?,()=""", 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
                 'illegal_macro_output_chars' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
                 'use_regexp_matching' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged', 'usage_text' : ' if you go some host or service definition like prod*, it will surely failed from now, sorry.'},
                 'use_true_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},

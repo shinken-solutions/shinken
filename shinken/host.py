@@ -318,6 +318,11 @@ class Host(SchedulingItem):
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
+        if hasattr(self, 'host_name'):
+            for c in cls.illegal_object_name_chars:
+                if c in self.host_name:
+                    Log().log("%s : My host_name got the caracter %s that is not allowed." % (self.get_name(), c))
+                    state = False
         return state
 
 
