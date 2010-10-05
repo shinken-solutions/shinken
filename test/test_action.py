@@ -31,11 +31,17 @@ from shinken.action import Action
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
     
+    def wait_finished(self, a):
+        for i in xrange(1, 1000):
+            if a.status == 'launched':
+                a.check_finished(8012)        
+
     #Change ME :)
     def test_action(self):
         a = Action()
         a.timeout = 10
-        
+        a.env = {}
+
         if os.name == 'nt':
             a.command = "./dummy_command.cmd"
         else:
@@ -44,14 +50,37 @@ class TestConfig(ShinkenTest):
         a.execute()
         self.assert_(a.status == 'launched')
         #Give also the max output we want for the command
-        for i in xrange(1, 100):
-            if a.status == 'launched':
-                a.check_finished(8012)
+        self.wait_finished(a)
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
         self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really ")
         self.assert_(a.perf_data == " Hip=99% Bob=34mm")
+
+
+    def test_environnement_variables(self):
+        a = Action()
+        a.timeout = 10
+        if os.name == 'nt':
+            return
+        else:
+            a.command = "/usr/bin/env"
+        a.env = {'TITI' : 'est en vacance'}
+
+        self.assert_(a.got_shell_caracters() == False)
         
+        a.execute()
+
+        self.assert_(a.status == 'launched')
+        #Give also the max output we want for the command
+        self.wait_finished(a)
+        print "Output", a.long_output, a.output
+        titi_found = False
+        for l in a.long_output.splitlines():
+            if l == 'TITI=est en vacance':
+                titi_found = True
+            
+        self.assert_(titi_found == True)
+
 
 if __name__ == '__main__':
     unittest.main()

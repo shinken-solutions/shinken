@@ -46,11 +46,12 @@ class EventHandler(Action):
                 #'ref_type' : {'required': False, 'default':''},
                 't_to_go' : {'required': False, 'default': 0},
                 'check_time' : {'required': False, 'default': 0},
-                'execution_time' : {'required': False, 'default': 0}
+                'execution_time' : {'required': False, 'default': 0},
+                'env' : {'required' : False, 'default' : {}},
                 }
 
     #id = 0 #Is common to Actions
-    def __init__(self, command, id=None, timeout=10):
+    def __init__(self, command, id=None, timeout=10, env={}):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
@@ -67,6 +68,7 @@ class EventHandler(Action):
         self.check_time = 0
         self.execution_time = 0
         self.perf_data = ''
+        self.env = {}
 
 
 
@@ -75,7 +77,7 @@ class EventHandler(Action):
     def copy_shell(self):
         #We create a dummy check with nothing in it, jsut defaults values
         new_n = EventHandler('', id=self.id)
-        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout']
+        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout', 'env']
         for prop in only_copy_prop:
             val = getattr(self, prop)
             setattr(new_n, prop, val)

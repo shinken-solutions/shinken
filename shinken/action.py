@@ -18,7 +18,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, time
+import os, time, copy
 import shlex
 
 #Unix and windows do not have the same import
@@ -66,6 +66,17 @@ class Action:
             self.long_output = '\n'.join(elts[1:])
 
 
+    #Mix the env into the environnment variables
+    #into a new local env dict
+    #rmq : we cannot just update os.environ because
+    #it will be modified for all other checks too
+    def get_local_environnement(self):
+        local_env = copy.copy(os.environ)
+        for p in self.env:
+            local_env[p] = self.env[p]
+        return local_env
+        
+
     def execute(self):
         if os.name == 'nt':
             self.execute_windows()
@@ -79,8 +90,9 @@ class Action:
         self.check_time = time.time()
         self.wait_time = 0.0001
         self.last_poll = self.check_time
+        local_env = self.get_local_environnement()
         try:
-            self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=local_env)
         except WindowsError:
             print "On le kill"
             self.status = 'timeout'
@@ -95,15 +107,18 @@ class Action:
         self.wait_time = 0.0001
         #cmd = ['/bin/sh', '-c', self.command]
         #Nagios do not use the /bin/sh -c command, so I don't do it too
+
+        #Get a local env variables with our additionnal values
+        local_env = self.get_local_environnement()
         
         try:
             #If got specials caracters (forshell) go in shell mode
             if self.got_shell_caracters():
-                self.process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True)
+                self.process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True, env=local_env)
             else:#instead, launch by execve
-                self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+                self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, env=local_env)
         except OSError , exp:
-            print "FUCK:", exp
+            print "Debug : Error in launching command:", exp
             self.output = exp.__str__()
             self.exit_status = 2
             self.status = 'done'

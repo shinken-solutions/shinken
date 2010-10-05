@@ -36,7 +36,7 @@ class Check(Action):
     __slots__ = ('id', 'is_a', 'type', '_in_timeout', 'status', 'exit_status',\
                   '_command', 'output', 'long_output', 'ref', 'ref_type', \
                      't_to_go', 'depend_on', 'depend_on_me', 'check_time', \
-                     'execution_time')
+                     'execution_time', 'env')
 
     properties={'is_a' : {'required': False, 'default':'check'},
                 'type' : {'required': False, 'default': ''},
@@ -54,11 +54,12 @@ class Check(Action):
                 'check_time' : {'required': False, 'default': 0},
                 'execution_time' : {'required': False, 'default': 0},
                 'perf_data' : {'required': False, 'default':''},
-                'poller_tag' : {'required': False, 'default': None}
+                'poller_tag' : {'required': False, 'default': None},
+                'env' : {'required' : False, 'default' : {}},
                 }
 
     #id = 0 #Is common to Actions
-    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag=None):
+    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag=None, env={}):
         self.is_a = 'check'
         self.type = ''
         if id == None: #id != None is for copy call only
@@ -83,6 +84,7 @@ class Check(Action):
         self.execution_time = 0
         self.perf_data = ''
         self.poller_tag = poller_tag
+        self.env = env
 
 
     #return a copy of the check but just what is important for execution
@@ -90,7 +92,7 @@ class Check(Action):
     def copy_shell(self):
         #We create a dummy check with nothing in it, jsut defaults values
         new_c = Check('', '', '', '', '', id=self.id)
-        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout']
+        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout', 'env']
         for prop in only_copy_prop:
             val = getattr(self, prop)
             setattr(new_c, prop, val)

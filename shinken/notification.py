@@ -51,6 +51,7 @@ class Notification(Action):
         'ack_data' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'escalated' : {'required' : False, 'default' : False, 'fill_brok' : ['full_status']},
         'contacts_notified' : {'required': False, 'default':0, 'fill_brok' : ['full_status']},
+        'env' : {'required' : False, 'default' : {}},
         }
 
     macros = {
@@ -73,7 +74,7 @@ class Notification(Action):
                      reason_type=1, state=0, ack_author='', ack_data='', \
                      escalated=False, contacts_notified=0, \
                      start_time=0, end_time=0, notification_type=0, id=None, \
-                     notif_nb=1, timeout=10):
+                     notif_nb=1, timeout=10, env={}):
         self.is_a = 'notification'
         self.type = type
         if id == None: #id != None is for copy call only
@@ -89,6 +90,7 @@ class Notification(Action):
         self.command_call = command_call
         self.output = None
         self.ref = ref
+        self.env = env
         #self.ref_type = ref_type
         self.t_to_go = t_to_go
         self.notif_nb = notif_nb
@@ -114,7 +116,7 @@ class Notification(Action):
     def copy_shell(self):
         #We create a dummy check with nothing in it, jsut defaults values
         new_n = Notification('', '', '', '', '', '', '', id=self.id)
-        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout']
+        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout', 'env']
         for prop in only_copy_prop:
             val = getattr(self, prop)
             setattr(new_n, prop, val)
