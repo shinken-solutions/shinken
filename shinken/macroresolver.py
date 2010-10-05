@@ -88,7 +88,8 @@ class MacroResolver(Borg):
         self.lists_on_demand.append(self.servicegroups)
         self.contactgroups = conf.contactgroups
         self.lists_on_demand.append(self.contactgroups)
-
+        self.illegal_macro_output_chars = conf.illegal_macro_output_chars
+        self.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
         #Try cache :)
         #self.cache = {}
 
@@ -127,6 +128,13 @@ class MacroResolver(Borg):
                 return str(value)
         except AttributeError , exp:
             return str(exp)
+
+    
+    #For some macros, we need to delete unwanted caracters
+    def delete_unwanted_caracters(self, s):
+        for c in self.illegal_macro_output_chars:
+            s = s.replace(c, '')
+        return s
 
 
     #Resolve a command with macro by looking at data classes.macros
@@ -170,6 +178,10 @@ class MacroResolver(Borg):
                         if elt is not None and elt.__class__ == cls:
                             prop = cls.macros[macro]
                             macros[macro]['val'] = self.get_value_from_element(elt, prop)
+                            #Now check if we do not have a 'output' macro. If so, we must
+                            #delete all special caracters that can be dangerous
+                            if macro in self.output_macros:
+                                macros[macro]['val'] = self.delete_unwanted_caracters(macros[macro]['val'])
                 if macros[macro]['type'] == 'CUSTOM':
                     cls_type = macros[macro]['class']
                     macro_name = re.split('_'+cls_type, macro)[1].upper()

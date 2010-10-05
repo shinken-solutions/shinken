@@ -63,7 +63,26 @@ class TestConfig(ShinkenTest):
         com = mr.resolve_command(cc, data)
         print com
         self.assert_(com == 'plugins/nothing 1')
-        
+
+    #For output macro we want to delete all illegal macro caracter
+    def test_illegal_macro_output_chars(self):
+        "$HOSTOUTPUT$, $HOSTPERFDATA$, $HOSTACKAUTHOR$, $HOSTACKCOMMENT$, $SERVICEOUTPUT$, $SERVICEPERFDATA$, $SERVICEACKAUTHOR$, and $SERVICEACKCOMMENT$ "
+        mr = self.get_mr()
+        (svc, hst) = self.get_hst_svc()
+        data = svc.get_data_for_checks()
+        illegal_macro_output_chars = self.sched.conf.illegal_macro_output_chars
+        print "Illegal macros caracters :", illegal_macro_output_chars
+        hst.output = 'monculcestdupoulet'
+        dummy_call = "special_macro!$HOSTOUTPUT$"
+
+        for c in illegal_macro_output_chars:
+            hst.output = 'monculcestdupoulet'+c
+            cc = CommandCall(self.conf.commands, dummy_call)
+            com = mr.resolve_command(cc, data)
+            print com
+            self.assert_(com == 'plugins/nothing monculcestdupoulet')
+
+
 
 if __name__ == '__main__':
     unittest.main()
