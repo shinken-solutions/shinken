@@ -306,7 +306,9 @@ class Dispatcher:
                                 conf.instance_name = sched.scheduler_name
                                 #REF: doc/shinken-conf-dispatching.png (3)
                                 #REF: doc/shinken-scheduler-lost.png (2)
-                                is_sent = sched.put_conf(conf)
+                                override_conf = sched.get_override_configuration()
+                                conf_package = (conf, override_conf)
+                                is_sent = sched.put_conf(conf_package)
                                 if is_sent:
                                     Log().log('[%s] Dispatch OK of for conf in scheduler %s' % (r.get_name(), sched.get_name()))
                                     sched.conf = conf

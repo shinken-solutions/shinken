@@ -235,9 +235,11 @@ class IForArbiter(Pyro.core.ObjBase):
     #Arbiter is sending us a new conf. We check if we do not already have it.
     #If not, we take it, and if app has a scheduler, we ask it to die,
     #so the new conf  will be load, and a new scheduler created
-    def put_conf(self, conf):
+    def put_conf(self, conf_package):
+        (conf, override_conf) = conf_package
         if not self.app.have_conf or self.app.conf.magic_hash != conf.magic_hash:
             self.app.conf = conf
+            self.app.override_conf = override_conf
             print "Get conf:", self.app.conf
             self.app.have_conf = True
             print "Have conf?", self.app.have_conf
@@ -410,6 +412,18 @@ class Shinken(Daemon):
     #and launch scheduler with it
     #we also create interface for poller and reactionner
     def load_conf(self):
+        #First mix conf and override_conf to have our definitive conf
+        for prop in self.override_conf:
+            print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
+            val = self.override_conf[prop]
+            setattr(self.conf, prop, val)
+
+            
+        if self.conf.use_timezone != 'NOTSET':
+            print "Setting our timezone to", self.conf.use_timezone
+            os.environ['TZ'] = self.conf.use_timezone
+            time.tzset()
+
         #create scheduler with ref of our daemon
         self.sched = Scheduler(self.poller_daemon)
 		

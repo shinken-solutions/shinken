@@ -37,7 +37,7 @@ class SchedulerLink(SatelliteLink):
                 'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split},
                 'weight': {'required':  False, 'default' : '1', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
-                'use_timezone' : {'required' : False, 'default' : 'NOTSET'},
+                'use_timezone' : {'required' : False, 'default' : 'NOTSET', 'override' : True},
                 'timeout' : {'required' : False, 'default' : '3', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'data_timeout' : {'required' : False, 'default' : '120', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'max_check_attempts' : {'required' : False, 'default' : '3','pythonize': to_int, 'fill_brok' : ['full_status']},
@@ -73,6 +73,18 @@ class SchedulerLink(SatelliteLink):
 
     def give_satellite_cfg(self):
         return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.conf!=None}
+
+
+    #Some parameters can give as 'overriden parameters' like use_timezone
+    #so they will be mixed (in the scheduler) with the standard conf send by the arbiter
+    def get_override_configuration(self):
+        r = {}
+        properties = self.__class__.properties
+        for prop in properties:
+            entry = properties[prop]
+            if 'override' in entry and entry['override']:
+                r[prop] = getattr(self, prop)
+        return r
 
 class SchedulerLinks(SatelliteLinks):
     name_property = "name"
