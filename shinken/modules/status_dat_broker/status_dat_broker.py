@@ -303,6 +303,7 @@ class Status_dat_broker:
         #In the status, we've got duplicated item, we must relink thems
         s = self.find_service(data['host_name'], data['service_description'])
         if s != None:
+            print "Warning : problem with unknown service for brok", b.id
             s.check_period = self.get_timeperiod(s.check_period)
             s.notification_period = self.get_timeperiod(s.notification_period)
             s.contacts = self.get_contacts(s.contacts)
