@@ -90,7 +90,9 @@ class TestConfig(ShinkenTest):
 
         env = mr.get_env_macros(data)
         print "Env:", env
-
+        self.assert_(env != {})
+        self.assert_(env['NAGIOS_HOSTNAME'] == 'test_host_0')
+        self.assert_(env['NAGIOS_SERVICEPERCENTCHANGE'] == '0.0')
         
 
 
