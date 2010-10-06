@@ -83,6 +83,17 @@ class TestConfig(ShinkenTest):
             self.assert_(com == 'plugins/nothing monculcestdupoulet')
 
 
+    def test_env_macros(self):
+        mr = self.get_mr()
+        (svc, hst) = self.get_hst_svc()
+        data = svc.get_data_for_checks()
+
+        env = mr.get_env_macros(data)
+        print "Env:", env
+
+        
+
+
 
 if __name__ == '__main__':
     unittest.main()

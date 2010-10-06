@@ -137,6 +137,26 @@ class MacroResolver(Borg):
         return s
 
 
+    #return a dict with all environement variable came from
+    #the macros of the datas object
+    def get_env_macros(self, data):
+        env = {}
+        
+        clss = [d.__class__ for d in data]
+        for o in data:
+            for cls in clss:
+                if o.__class__ == cls:
+                    macros = cls.macros
+                    for macro in macros:
+                        print "Macro in %s : %s" % (o.__class__, macro)
+                        prop = macros[macro]
+                        value = self.get_value_from_element(o, prop)
+                        print "Value: %s" % value
+                        env['NAGIOS_'+macro] = value
+
+        return env
+
+
     #Resolve a command with macro by looking at data classes.macros
     #And get macro from item properties.
     def resolve_command(self, com, data):

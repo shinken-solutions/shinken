@@ -153,6 +153,7 @@ class Host(SchedulingItem):
         'flapping_changes' : {'default' : [], 'fill_brok' : ['full_status'], 'retention' : True},
         'percent_state_change' : {'default' : 0.0, 'fill_brok' : ['full_status'], 'retention' : True},
         'problem_has_been_acknowledged' : {'default' : False, 'fill_brok' : ['full_status'], 'retention' : True},
+        'acknowledgement' : {'default' : None, 'retention' : True},
         'acknowledgement_type' : {'default' : 1, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'check_type' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'has_been_checked' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
@@ -197,9 +198,9 @@ class Host(SchedulingItem):
               'HOSTALIAS' :  'alias',
               'HOSTADDRESS' : 'address',
               'HOSTSTATE' : 'state',
-              'HOSTSTATEID' : 'get_stateid',
+              'HOSTSTATEID' : 'state_id',
               'LASTHOSTSTATE' : 'last_state',
-              'LASTHOSTSTATEID' : 'get_last_stateid',
+              'LASTHOSTSTATEID' : 'last_state_id',
               'HOSTSTATETYPE' : 'state_type',
               'HOSTATTEMPT' : 'attempt',
               'MAXHOSTATTEMPTS' : 'max_check_attempts',
@@ -225,10 +226,10 @@ class Host(SchedulingItem):
               'HOSTPERFDATA' : 'perf_data',
               'LASTHOSTPERFDATA' : 'last_perf_data',
               'HOSTCHECKCOMMAND' : 'get_check_command',
-              'HOSTACKAUTHOR' : 'ack_author',
+              'HOSTACKAUTHOR' : 'get_ack_author_name',
               'HOSTACKAUTHORNAME' : 'get_ack_author_name',
-              'HOSTACKAUTHORALIAS' : 'get_ack_author_alias',
-              'HOSTACKCOMMENT' : 'ack_comment',
+              'HOSTACKAUTHORALIAS' : 'get_ack_author_name',
+              'HOSTACKCOMMENT' : 'get_ack_comment',
               'HOSTACTIONURL' : 'action_url',
               'HOSTNOTESURL' : 'notes_url',
               'HOSTNOTES' : 'notes',
@@ -354,6 +355,22 @@ class Host(SchedulingItem):
     def get_total_services_unknown(self):
         return str(len([s for s in self.services if s.state_id == 3]))
 
+
+    def get_ack_author_name(self):
+        if self.acknowledgement == None:
+            return ''
+        return self.acknowledgement.author
+
+
+    def get_ack_comment(self):
+        if self.acknowledgement == None:
+            return ''
+        return self.acknowledgement.comment
+
+
+    def get_check_command(self):
+        return self.check_command.get_name()
+    
 
     #For get a nice name
     def get_name(self):
@@ -620,7 +637,7 @@ class Host(SchedulingItem):
 
 
     def get_duration(self):
-        m, s = divmod(self.get_duration_sec, 60)
+        m, s = divmod(self.duration_sec, 60)
         h, m = divmod(m, 60)
         return "%02dh %02dm %02ds" % (h, m, s)
 

@@ -139,6 +139,7 @@ class Service(SchedulingItem):
         'flapping_comment_id' : {'default' : 0, 'fill_brok' : ['full_status'], 'retention' : True},
         'percent_state_change' : {'default' : 0.0, 'fill_brok' : ['full_status'], 'retention' : True},
         'problem_has_been_acknowledged' : {'default' : False, 'fill_brok' : ['full_status'], 'retention' : True},
+        'acknowledgement' : {'default' : None, 'retention' : True},
         'acknowledgement_type' : {'default' : 1, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'check_type' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'has_been_checked' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
@@ -187,9 +188,9 @@ class Service(SchedulingItem):
         'SERVICEDESC' : 'service_description',
         'SERVICEDISPLAYNAME' : 'display_name',
         'SERVICESTATE' : 'state',
-        'SERVICESTATEID' : 'get_state_id',
+        'SERVICESTATEID' : 'state_id',
         'LASTSERVICESTATE' : 'last_state',
-        'LASTSERVICESTATEID' : 'get_last_state_id',
+        'LASTSERVICESTATEID' : 'last_state_id',
         'SERVICESTATETYPE' : 'state_type',
         'SERVICEATTEMPT' : 'attempt',
         'MAXSERVICEATTEMPTS' : 'max_check_attempts',
@@ -217,10 +218,10 @@ class Service(SchedulingItem):
         'SERVICEPERFDATA' : 'perf_data',
         'LASTSERVICEPERFDATA' : 'last_perf_data',
         'SERVICECHECKCOMMAND' : 'get_check_command',
-        'SERVICEACKAUTHOR' : 'ack_author',
+        'SERVICEACKAUTHOR' : 'get_ack_author_name',
         'SERVICEACKAUTHORNAME' : 'get_ack_author_name',
-        'SERVICEACKAUTHORALIAS' : 'get_ack_author_alias',
-        'SERVICEACKCOMMENT' : 'ack_comment',
+        'SERVICEACKAUTHORALIAS' : 'get_ack_author_name',
+        'SERVICEACKCOMMENT' : 'get_ack_comment',
         'SERVICEACTIONURL' : 'action_url',
         'SERVICENOTESURL' : 'notes_url',
         'SERVICENOTES' : 'notes'
@@ -580,9 +581,24 @@ class Service(SchedulingItem):
 
 
     def get_duration(self):
-        m, s = divmod(self.get_duration_sec, 60)
+        m, s = divmod(self.duration_sec, 60)
         h, m = divmod(m, 60)
         return "%02dh %02dm %02ds" % (h, m, s)
+
+
+    def get_ack_author_name(self):
+        if self.acknowledgement == None:
+            return ''
+        return self.acknowledgement.author
+
+    def get_ack_comment(self):
+        if self.acknowledgement == None:
+            return ''
+        return self.acknowledgement.comment
+
+
+    def get_check_command(self):
+        return self.check_command.get_name()
 
 
     #Check if a notification for this service is suppressed at this time
