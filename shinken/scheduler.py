@@ -66,7 +66,10 @@ class Scheduler:
             9 : (self.update_retention_file, 3600),
             10 : (self.check_orphaned, 60),
             #For NagVis like tools : udpdate our status every 10s
-            11 : (self.get_and_register_update_program_status_brok, 10) 
+            11 : (self.get_and_register_update_program_status_brok, 10),
+            #Check for system time change. And AFTER get new checks
+            #so they are changed too.
+            12 : (self.check_for_system_time_change, 1),
             }
 
         #stats part
@@ -470,9 +473,22 @@ class Scheduler:
         Log().log("We've load data from retention")
 
 
+    def check_for_system_time_change(self):
+        now = time.time()
+        difference = now - self.t_each_loop
+        #If we have more than 15 min time change, we need to compensate
+        #it
+        if abs(difference) > 900:
+            self.compensate_system_time_change(difference)
+
+        #Now set the new value for the tick loop
+        self.t_each_loop = now
+
+
     #If we've got a system time change, we need to compensate it
     #So change our value, and all checks/notif ones
     def compensate_system_time_change(self, difference):
+        Log().log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
         #We only need to change some value
         self.program_start = max(0, self.program_start + difference)
 
@@ -792,14 +808,15 @@ class Scheduler:
         timeout = 1.0 #For the select
 
         gogogo = time.time()
-
+        self.t_each_loop = time.time() #use to track system time change
+        
         while self.must_run :
             #Ok, still a difference between 3 and 4 ...
             if shinken.pyro_wrapper.pyro_version == 3:
                 socks = self.daemon.getServerSockets()
             else:
                 socks = self.daemon.sockets()
-            avant = time.time()
+            t_begin = time.time()
             #socks.append(self.fifo)
             # 'foreign' event loop
             ins,outs,exs = select.select(socks,[],[],timeout)
@@ -811,13 +828,14 @@ class Scheduler:
                             self.daemon.handleRequests()
                         else:
                             self.daemon.handleRequests([s])
-                        apres = time.time()
-                        diff = apres-avant
+                        t_after = time.time()
+                        diff = t_after-t_begin
                         timeout = timeout - diff
                         break    # no need to continue with the for loop
             else: #Timeout
                 timeout = 1.0
                 ticks += 1
+
                 #Do reccurent works like schedule, consume
                 #delete_zombie_checks
                 for i in self.recurrent_works:
