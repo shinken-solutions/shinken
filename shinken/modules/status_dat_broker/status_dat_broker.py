@@ -302,10 +302,11 @@ class Status_dat_broker:
         data = b.data
         #In the status, we've got duplicated item, we must relink thems
         s = self.find_service(data['host_name'], data['service_description'])
-        s.check_period = self.get_timeperiod(s.check_period)
-        s.notification_period = self.get_timeperiod(s.notification_period)
-        s.contacts = self.get_contacts(s.contacts)
-        del s.escalations
+        if s != None:
+            s.check_period = self.get_timeperiod(s.check_period)
+            s.notification_period = self.get_timeperiod(s.notification_period)
+            s.contacts = self.get_contacts(s.contacts)
+            del s.escalations
 
 
 
@@ -328,11 +329,12 @@ class Status_dat_broker:
         data = b.data
         #In the status, we've got duplicated item, we must relink thems
         h = self.find_host(data['host_name'])
-        h.check_period = self.get_timeperiod(h.check_period)
-        h.notification_period = self.get_timeperiod(h.notification_period)
-        h.contacts = self.get_contacts(h.contacts)
-        #Escalations is not use for status_dat
-        del h.escalations
+        if h != None:
+            h.check_period = self.get_timeperiod(h.check_period)
+            h.notification_period = self.get_timeperiod(h.notification_period)
+            h.contacts = self.get_contacts(h.contacts)
+            #Escalations is not use for status_dat
+            del h.escalations
 
 
 
