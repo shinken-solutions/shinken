@@ -148,10 +148,10 @@ class MacroResolver(Borg):
                 if o.__class__ == cls:
                     macros = cls.macros
                     for macro in macros:
-                        print "Macro in %s : %s" % (o.__class__, macro)
+#                        print "Macro in %s : %s" % (o.__class__, macro)
                         prop = macros[macro]
                         value = self.get_value_from_element(o, prop)
-                        print "Value: %s" % value
+#                        print "Value: %s" % value
                         env['NAGIOS_'+macro] = value
 
         return env
