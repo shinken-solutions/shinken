@@ -476,6 +476,12 @@ class Scheduler:
         #We only need to change some value
         self.program_start = max(0, self.program_start + difference)
 
+        #Then we compasate all host/services
+        for h in self.hosts:
+            h.compensate_system_time_change(difference)
+        for s in self.services:
+            s.compensate_system_time_change(difference)
+
         #Now all checks and actions
         for c in self.checks.values():
             #Already launch checks should not be touch
@@ -495,6 +501,7 @@ class Scheduler:
                     c.execution_time == 0
                 else:
                     c.t_to_go = new_t
+                    ref.next_chk = new_t
 
         #Now all checks and actions
         for c in self.actions.values():
