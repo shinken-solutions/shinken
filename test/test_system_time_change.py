@@ -1,0 +1,115 @@
+#!/usr/bin/env python2.6
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#
+#This file is part of Shinken.
+#
+#Shinken is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#Shinken is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+#
+# This file is used to test reading and processing of config files
+#
+
+#It's ugly I know....
+from shinken_test import *
+import commands
+
+class TestConfig(ShinkenTest):
+    #setUp is in shinken_test
+    
+    def set_time(self, d):
+        cmd = 'sudo date -s "%s"' % d
+        print "CMD,", cmd
+        #a = commands.getstatusoutput(cmd)
+        #Check the time is set correctly!
+        #self.assert_(a[0] == 0)
+
+
+
+    #Change ME :)
+    def test_dummy(self):
+        #
+        # Config is not correct because of a wrong relative path 
+        # in the main config file
+        #
+        print "Get the hosts and services"
+        host = self.sched.hosts.find_by_name("test_host_0")
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        now = time.time()
+        now_str = time.asctime(time.localtime(now))
+        print "Now:", now
+        print "Now:", time.asctime(time.localtime(now))        
+        tomorow = time.asctime(time.localtime(now+86400))
+        yesterday = time.asctime(time.localtime(now-86400))
+
+        host.schedule()
+        host_check = host.actions[0]
+
+        svc.schedule()
+        srv_check = svc.actions[0]
+        print "Service check", srv_check, time.asctime(time.localtime(srv_check.t_to_go))
+
+        print "Current Host last_state_change", time.asctime(time.localtime(host.last_state_change))
+
+        #Ok, start to check for bad time
+        self.set_time(tomorow)
+        last_state_change = host.last_state_change
+        host.compensate_system_time_change(86400)
+        self.assert_(host.last_state_change - last_state_change == 86400)
+        svc.compensate_system_time_change(86400)
+        print "Tomorow Host last_state_change", time.asctime(time.localtime(host.last_state_change))
+
+        #And now a huge change : yesterday (so a 2 day move)
+        self.set_time(yesterday)
+        last_state_change = host.last_state_change
+        host.compensate_system_time_change(-86400 * 2)
+        self.assert_(host.last_state_change - last_state_change == -86400*2)
+        svc.compensate_system_time_change(-86400*2)
+        print "Yesterday Host last_state_change", time.asctime(time.localtime(host.last_state_change))
+        
+        self.set_time(now_str)
+
+        #Ok, now the scheduler and check things
+        #Put checks in the scheduler
+        self.sched.get_new_actions()
+        
+        host_to_go = host_check.t_to_go
+        srv_to_go = srv_check.t_to_go
+        print "current Host check", time.asctime(time.localtime(host_check.t_to_go))
+        print "current Service check", time.asctime(time.localtime(srv_check.t_to_go))
+        self.set_time(tomorow)
+        self.sched.compensate_system_time_change(86400)
+        print "Tomorow Host check", time.asctime(time.localtime(host_check.t_to_go))
+        print "Tomorow Service check", time.asctime(time.localtime(srv_check.t_to_go))
+        self.assert_(host_check.t_to_go - host_to_go == 86400)
+        self.assert_(srv_check.t_to_go - srv_to_go == 86400)
+        
+        #and yesterday
+        host_to_go = host_check.t_to_go
+        srv_to_go = srv_check.t_to_go
+        self.set_time(yesterday)
+        self.sched.compensate_system_time_change(-86400*2)
+        print "Yesterday Host check", time.asctime(time.localtime(host_check.t_to_go))
+        print "Yesterday Service check", time.asctime(time.localtime(srv_check.t_to_go))
+        self.assert_(host_check.t_to_go - host_to_go == -86400*2)
+        self.assert_(srv_check.t_to_go - srv_to_go == -86400*2)
+
+        self.set_time(now_str)
+
+        
+
+if __name__ == '__main__':
+    unittest.main()
+

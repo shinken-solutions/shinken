@@ -470,6 +470,57 @@ class Scheduler:
         Log().log("We've load data from retention")
 
 
+    #If we've got a system time change, we need to compensate it
+    #So change our value, and all checks/notif ones
+    def compensate_system_time_change(self, difference):
+        #We only need to change some value
+        self.program_start = max(0, self.program_start + difference)
+
+        #Now all checks and actions
+        for c in self.checks.values():
+            #Already launch checks should not be touch
+            if c.status == 'scheduled':
+                t_to_go = c.t_to_go
+                ref = c.ref
+                new_t = max(0, t_to_go + difference)
+                #But it's no so simple, we must match the timeperiod
+                new_t = ref.check_period.get_next_valid_time_from_t(new_t)
+                #But maybe no there is no more new value! Not good :(
+                #Say as error, with error output
+                if new_t == None:
+                    c.state = 'waitconsume'
+                    c.exit_status = 2
+                    c.output = '(Error: there is no available check time after time change!)'
+                    c.check_time = time.time()
+                    c.execution_time == 0
+                else:
+                    c.t_to_go = new_t
+
+        #Now all checks and actions
+        for c in self.actions.values():
+            #Already launch checks should not be touch
+            if c.status == 'scheduled':
+                t_to_go = c.t_to_go
+                ref = c.ref
+                new_t = max(0, t_to_go + difference)
+
+                #Notification should be check with notification_period
+                if c.is_a == 'notification':
+                    #But it's no so simple, we must match the timeperiod
+                    new_t = ref.notification_period.get_next_valid_time_from_t(new_t)
+
+                #But maybe no there is no more new value! Not good :(
+                #Say as error, with error output
+                if new_t == None:
+                    c.state = 'waitconsume'
+                    c.exit_status = 2
+                    c.output = '(Error: there is no available check time after time change!)'
+                    c.check_time = time.time()
+                    c.execution_time == 0
+                else:
+                    c.t_to_go = new_t
+
+
     #Fill the self.broks with broks of self (process id, and co)
     #broks of service and hosts (initial status)
     def fill_initial_broks(self):

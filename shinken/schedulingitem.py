@@ -408,6 +408,19 @@ class SchedulingItem(Item):
         #Get the command to launch, and put it in queue
         self.launch_check(self.next_chk)
 
+    
+    #If we've got a system time change, we need to compensate it
+    #If modify all past value. For active one like next_chk, it's the current
+    #checks that will give us the new value
+    def compensate_system_time_change(self, difference):
+        #We only need to change some value
+        need_change = ['last_notification', 'last_state_change', 'last_hard_state_change']
+        for p in need_change:
+            val = getattr(self, p) # current value
+            #Do not go below 1970 :)
+            val = max(0, val + difference) #diff can be -
+            setattr(self, p, val)
+
 
     def remove_in_progress_check(self, c):
         #The check is consume, uptade the in_checking propertie
