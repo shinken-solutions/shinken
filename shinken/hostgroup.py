@@ -126,11 +126,14 @@ class Hostgroups(Itemgroups):
             #The new member list, in id
             new_mbrs = []
             for mbr in mbrs:
-                h = hosts.find_by_name(mbr)
-                if h != None:
-                    new_mbrs.append(h)
+                if mbr == '*':
+                    new_mbrs.extend(hosts)
                 else:
-                    hg.unknown_members.append(mbr)
+                    h = hosts.find_by_name(mbr)
+                    if h != None:
+                        new_mbrs.append(h)
+                    else:
+                        hg.unknown_members.append(mbr)
                 
             #Make members uniq
             new_mbrs = list(set(new_mbrs))
