@@ -384,19 +384,19 @@ class Host(SchedulingItem):
 
     #Add a dependancy for action event handler, notification, etc)
     #and add ourself in it's dep list
-    def add_host_act_dependancy(self, h, status, timeperiod):
+    def add_host_act_dependancy(self, h, status, timeperiod, inherits_parent):
         #I add him in MY list
-        self.act_depend_of.append( (h, status, 'logic_dep', timeperiod) )
+        self.act_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
         #And I add me in it's list
-        h.act_depend_of_me.append( (self, status, 'logic_dep', timeperiod) )
+        h.act_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
 
 
     #Add a dependancy for check (so before launch)
-    def add_host_chk_dependancy(self, h, status, timeperiod):
+    def add_host_chk_dependancy(self, h, status, timeperiod, inherits_parent):
         #I add him in MY list
-        self.chk_depend_of.append( (h, status, 'logic_dep', timeperiod) )
+        self.chk_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
         #And I add me in it's list
-        h.chk_depend_of_me.append( (self, status, 'logic_dep', timeperiod) )
+        h.chk_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
         
 
     #add one of our service to services (at linkify)
@@ -603,14 +603,14 @@ class Host(SchedulingItem):
 
 
     #fill act_depend_of with my parents (so network dep)
-    #and say parents they impact me
+    #and say parents they impact me, no timeperiod and folow parents of course
     def fill_parents_dependancie(self):
         for parent in self.parents:
             if parent is not None:
                 #I add my parent in my list
-                self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None) )
+                self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
                 #And I register myself in my parent list too
-                parent.act_depend_of_me.append( (self, ['d', 'u', 's', 'f'], 'network_dep', None) )
+                parent.act_depend_of_me.append( (self, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
 
 
     #Give data for checks's macros

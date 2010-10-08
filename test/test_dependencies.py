@@ -169,6 +169,37 @@ class TestConfig(ShinkenTest):
         print "Dep : ", svc_son.act_depend_of
         self.assert_([['u', 'c', 'w']] == [x[1] for x in svc_son.act_depend_of if x[0] is svc_parent])
 
+
+
+    def test_host_non_inherits_dependencies(self):
+        #
+        #   A  <------  B  <--
+        #   ^                 \NOT/---  C   <--  D
+        #   |---------------------
+        #
+        host_A = self.sched.hosts.find_by_name("test_host_A")
+        host_B = self.sched.hosts.find_by_name("test_host_B")
+        host_C = self.sched.hosts.find_by_name("test_host_C")
+        host_D = self.sched.hosts.find_by_name("test_host_D")
+        host_E = self.sched.hosts.find_by_name("test_host_E")
+        
+        
+        print "A depends on", ",".join([x[0].get_name() for x in host_A.chk_depend_of])
+        print "B depends on", ",".join([x[0].get_name() for x in host_B.chk_depend_of])
+        print "C depends on", ",".join([x[0].get_name() for x in host_C.chk_depend_of])
+        print "D depends on", ",".join([x[0].get_name() for x in host_D.chk_depend_of])
+        print "E depends on", ",".join([x[0].get_name() for x in host_E.chk_depend_of])
+        
+        host_C.state = 'DOWN'
+        print "D state", host_D.state
+        print "E dep", host_E.chk_depend_of
+        print "I raise?", host_D.do_i_raise_dependency('d', inherit_parents=False)
+        #If I ask D for dep, he should raise Nothing if we do not want parents.
+        self.assert_(host_D.do_i_raise_dependency('d', inherit_parents=False) == False)
+        #But he should raise a problem (C here) of we ask for its parents
+        self.assert_(host_D.do_i_raise_dependency('d', inherit_parents=True) == True)
+        
+        
         
 
 if __name__ == '__main__':

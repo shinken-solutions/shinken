@@ -122,11 +122,11 @@ class Hostdependencies(Items):
                 h = hd.dependent_host_name
                 if h is not None:
                     if hasattr(hd, 'dependency_period'):
-                        h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, hd.dependency_period)
-                        h.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, hd.dependency_period)
+                        h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, hd.dependency_period, hd.inherits_parent)
+                        h.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, hd.dependency_period, hd.inherits_parent)
                     else:
-                        h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, None)
-                        h.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, None)
+                        h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, None, hd.inherits_parent)
+                        h.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, None, hd.inherits_parent)
 
 
     #Apply inheritance for all properties

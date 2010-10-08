@@ -321,28 +321,28 @@ class Service(SchedulingItem):
     #The service is dependent of his father dep
     #Must be AFTER linkify
     def fill_daddy_dependancy(self):
-        #Depend of host, all status, is a networkdep and do not have timeperiod
+        #Depend of host, all status, is a networkdep and do not have timeperiod, and folow parents dep
         if self.host is not None:
             #I add the dep in MY list
-            self.act_depend_of.append( (self.host, ['d', 'u', 's', 'f'], 'network_dep', None) )
+            self.act_depend_of.append( (self.host, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
             #I add the dep in Daddy list
-            self.host.act_depend_of_me.append( (self, ['d', 'u', 's', 'f'], 'network_dep', None) )
+            self.host.act_depend_of_me.append( (self, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
 
 
     #Register the dependancy between 2 service for action (notification etc)    
-    def add_service_act_dependancy(self, srv, status, timeperiod):
+    def add_service_act_dependancy(self, srv, status, timeperiod, inherits_parent):
         #first I add the other the I depend on in MY list
-        self.act_depend_of.append( (srv, status, 'logic_dep', timeperiod) )
+        self.act_depend_of.append( (srv, status, 'logic_dep', timeperiod, inherits_parent) )
         #then I register myself in the other service dep list
-        srv.act_depend_of_me.append( (self, status, 'logic_dep', timeperiod) )
+        srv.act_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
 
 
     #Register the dependancy between 2 service for checks
-    def add_service_chk_dependancy(self, srv, status, timeperiod):
+    def add_service_chk_dependancy(self, srv, status, timeperiod, inherits_parent):
         #first I add the other the I depend on in MY list
-        self.chk_depend_of.append( (srv, status, 'logic_dep', timeperiod) )
+        self.chk_depend_of.append( (srv, status, 'logic_dep', timeperiod, inherits_parent) )
         #then I register myself in the other service dep list
-        srv.chk_depend_of_me.append( (self, status, 'logic_dep', timeperiod) )
+        srv.chk_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
 
 
     #Set unreachable : our host is DOWN, but it mean nothing for a service

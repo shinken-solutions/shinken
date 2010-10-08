@@ -1081,21 +1081,21 @@ class Config(Item):
                 if p is not None:
                     links.add((p, h))
             #Add the others dependencies
-            for (dep, tmp, tmp2, tmp3) in h.act_depend_of:
+            for (dep, tmp, tmp2, tmp3, tmp4) in h.act_depend_of:
                 links.add((dep, h))
-            for (dep, tmp, tmp2, tmp3) in h.chk_depend_of:
+            for (dep, tmp, tmp2, tmp3, tmp4) in h.chk_depend_of:
                 links.add((dep, h))
 
         #For services : they are link woth their own host but we need
         #To have the hosts of service dep in the same pack too
         for s in self.services:
-            for (dep, tmp, tmp2, tmp3) in s.act_depend_of:
+            for (dep, tmp, tmp2, tmp3, tmp4) in s.act_depend_of:
                 #I don't care about dep host: they are just the host
                 #of the service...
                 if hasattr(dep, 'host'):
                     links.add((dep.host, s.host))
             #The othe type of dep
-            for (dep, tmp, tmp2, tmp3) in s.chk_depend_of:
+            for (dep, tmp, tmp2, tmp3, tmp4) in s.chk_depend_of:
                 links.add((dep.host, s.host))
         
         #Now we create links in the graph. With links (set)

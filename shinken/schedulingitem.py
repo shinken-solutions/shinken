@@ -128,7 +128,7 @@ class SchedulingItem(Item):
         #we should warn potentials impact of our problem
         #and they should be cool to register them so I've got
         #my impacts list
-        for (impact, status, dep_type, tp) in self.act_depend_of_me:
+        for (impact, status, dep_type, tp, inh_par) in self.act_depend_of_me:
             #Check if the status is ok for impact
             for s in status:
                 if self.is_state(s):
@@ -204,7 +204,7 @@ class SchedulingItem(Item):
             #we should send this problem to all potential impact that
             #depend on us
             #print "Guys depending on me:"
-            for (impact, status, dep_type, tp) in self.act_depend_of_me:
+            for (impact, status, dep_type, tp, inh_par) in self.act_depend_of_me:
                 #print "Potential impact :", impact.get_dbg_name(), status, dep_type, tp
                 #Check if the status is ok for impact
                 for s in status:
@@ -256,7 +256,7 @@ class SchedulingItem(Item):
         #So if one logic is Raise, is dep
         #is one network is no ok, is not dep
         #at teh end, raise no dep
-        for (dep, status, type, tp) in self.act_depend_of:
+        for (dep, status, type, tp, inh_par) in self.act_depend_of:
             #For logic_dep, only one state raise put no action
             if type == 'logic_dep':
                 for s in status:
@@ -282,7 +282,7 @@ class SchedulingItem(Item):
     def check_and_set_unreachability(self):
         parent_is_down = []
         #We must have all parents raised to be unreachable
-        for (dep, status, type, tp) in self.act_depend_of:
+        for (dep, status, type, tp, inh_par) in self.act_depend_of:
             #For logic_dep, only one state raise put no action
             if type == 'network_dep':
                 p_is_down = False
@@ -302,17 +302,23 @@ class SchedulingItem(Item):
     #Use to know if I raise dependency for soneone else (with status)
     #If I do not raise dep, maybe my dep raise me. If so, I raise dep.
     #So it's a recursive function
-    def do_i_raise_dependency(self, status):
+    def do_i_raise_dependency(self, status, inherit_parents):
         #Do I raise dep?
         for s in status:
             if self.is_state(s):
                 return True
+
+        #If we do not inherit parent, we have no reason to be blocking
+        if not inherit_parents:
+            return False
+
         #Ok, I do not raise dep, but my dep maybe raise me
         now = time.time()
-        for (dep, status, type, tp) in self.chk_depend_of:
-            if dep.do_i_raise_dependency(status):
+        for (dep, status, type, tp, inh_parent) in self.chk_depend_of:
+            if dep.do_i_raise_dependency(status, inh_parent):
                 if tp is None or tp.is_time_valid(now):
                     return True
+
         #No, I relly do not raise...
         return False
 
@@ -321,9 +327,9 @@ class SchedulingItem(Item):
     #So check the chk_depend_of if they raise me
     def is_no_check_dependant(self):
         now = time.time()
-        for (dep, status, type, tp) in self.chk_depend_of:
+        for (dep, status, type, tp, inh_parent) in self.chk_depend_of:
             if tp is None or tp.is_time_valid(now):
-                if dep.do_i_raise_dependency(status):
+                if dep.do_i_raise_dependency(status, inh_parent):
                     return True
         return False
 
@@ -334,7 +340,7 @@ class SchedulingItem(Item):
         now = time.time()
         cls = self.__class__
         checks = []
-        for (dep, status, type, tp) in self.act_depend_of:
+        for (dep, status, type, tp, inh_par) in self.act_depend_of:
             #If the dep timeperiod is not valid, do notraise the dep,
             #None=everytime
             if tp is None or tp.is_time_valid(now):
