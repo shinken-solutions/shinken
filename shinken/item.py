@@ -333,9 +333,10 @@ class Item(object):
     # Check if we have an acknowledgement and if this is marked as sticky.
     # This is needed when a non-ok state changes 
     def unacknowledge_problem_if_not_sticky(self):
-        if hasattr(self, 'acknowledgement'):
+        if hasattr(self, 'acknowledgement') and self.acknowledgement != None:
             if not self.acknowledgement.sticky:
                 self.unacknowledge_problem()
+
 
     #Will flatten some parameters taggued by the 'conf_send_preparation'
     #property because they are too "linked" to be send like that (like realms)

@@ -71,7 +71,8 @@ class Servicedependencies(Items):
             'dependent_service_description' : dep_service_description,
             'host_name' : par_host_name,
             'service_description' : par_service_description,
-            'notification_failure_criteria' : 'u,c,w'
+            'notification_failure_criteria' : 'u,c,w',
+            'inherits_parent' : '1',
             }
         sd = Servicedependency(prop)
         self.items[sd.id] = sd
@@ -157,11 +158,11 @@ class Servicedependencies(Items):
                 s = sd.dependent_service_description
                 if s is not None:
                     if hasattr(sd, 'dependency_period'):
-                        s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, sd.dependency_period)
-                        s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, sd.dependency_period)
+                        s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, sd.dependency_period, sd.inherits_parent)
+                        s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, sd.dependency_period, sd.inherits_parent)
                     else:
-                        s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, None)
-                        s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, None)
+                        s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, None, sd.inherits_parent)
+                        s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, None, sd.inherits_parent)
 
 
     #Apply inheritance for all properties

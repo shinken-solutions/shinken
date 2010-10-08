@@ -161,6 +161,21 @@ class Worker:
         time.sleep(wait_time)
             
 
+    #Check if our system time change. If so, change our 
+    def check_for_system_time_change(self):
+        now = time.time()
+        difference = now - self.t_each_loop
+        
+        #Now set the new value for the tick loop
+        self.t_each_loop = now
+
+        #return the diff if it need, of just 0
+        if abs(difference) > 900:
+            return difference
+        else:
+            return 0
+
+
     #id = id of the worker
     #s = Global Queue Master->Slave
     #m = Queue Slave->Master
@@ -171,6 +186,7 @@ class Worker:
         self.checks = []
         self.returns_queue = returns_queue
         self.s = s
+        self.t_each_loop = time.time() 
         while True:
             begin = time.time()
             msg = None
@@ -196,6 +212,10 @@ class Worker:
                 print "[%d]Timeout, Arakiri" % self.id
                 #The master must be dead and we are loonely, we must die
                 break
+
+            #Manage a possible time change (our avant will be change with the diff)
+            diff = self.check_for_system_time_change()
+            begin += diff
             
             timeout -= time.time() - begin
             if timeout < 0:

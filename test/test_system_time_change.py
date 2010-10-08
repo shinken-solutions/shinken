@@ -103,6 +103,9 @@ class TestConfig(ShinkenTest):
         self.sched.compensate_system_time_change(-86400*2)
         print "Yesterday Host check", time.asctime(time.localtime(host_check.t_to_go))
         print "Yesterday Service check", time.asctime(time.localtime(srv_check.t_to_go))
+        print "New host check", time.asctime(time.localtime(host.next_chk))
+        self.assert_(host.next_chk == host_check.t_to_go)
+        self.assert_(svc.next_chk == srv_check.t_to_go)
         self.assert_(host_check.t_to_go - host_to_go == -86400*2)
         self.assert_(srv_check.t_to_go - srv_to_go == -86400*2)
 

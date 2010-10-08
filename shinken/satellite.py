@@ -254,6 +254,8 @@ class Satellite(Daemon):
         #Keep broks so they can be eaten by a broker
         self.broks = {}
 
+        self.t_each_loop = time.time() #use to track system time change
+
 
     #initialise or re-initialise connexion with scheduler
     def pynag_con_init(self, id):
@@ -351,6 +353,11 @@ class Satellite(Daemon):
 
             avant = time.time()
             ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
+
+            #Manage a possible time change (our avant will be change with the diff)
+            diff = self.check_for_system_time_change()
+            avant += diff
+
             if ins != []:
                 for sock in socks:
                     if sock in ins:
@@ -388,6 +395,35 @@ class Satellite(Daemon):
                             Log().log("Init watch_for_new_conf")
                             self.pynag_con_init(sched_id)
                         self.have_new_conf = False
+
+
+    #Check if our system time change. If so, change our 
+    def check_for_system_time_change(self):
+        now = time.time()
+        difference = now - self.t_each_loop
+        #If we have more than 15 min time change, we need to compensate
+        #it
+        
+        if abs(difference) > 900:
+            self.compensate_system_time_change(difference)
+
+        #Now set the new value for the tick loop
+        self.t_each_loop = now
+
+        #return the diff if it need, of just 0
+        if abs(difference) > 900:
+            return difference
+        else:
+            return 0
+
+
+    #If we've got a system time change, we need to compensate it
+    #from now, we do not do anything in fact.
+    def compensate_system_time_change(self, difference):
+        Log().log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
+        #We only need to change some value
+        
+
 
 
     #Create and launch a new worker, and put it into self.workers
@@ -593,9 +629,14 @@ class Satellite(Daemon):
             #Sleep in waiting a new conf :)
             self.watch_for_new_conf(timeout)
 
+            #Manage a possible time change (our avant will be change with the diff)
+            diff = self.check_for_system_time_change()
+            begin_loop += diff
+
             try:
                 after = time.time()
                 timeout -= after-begin_loop
+                print "Timeout diff:", timeout
 
                 if timeout < 0: #for go in timeout
                     print "Time out", timeout

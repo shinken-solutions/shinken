@@ -359,6 +359,8 @@ class Broker(Satellite):
                 #will be taken by arbiter to process
                 self.external_commands = []
 
+                self.t_each_loop = time.time() #use to track system time change
+
 
 	#Manage signal function
 	#TODO : manage more than just quit

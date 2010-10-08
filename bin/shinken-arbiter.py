@@ -185,6 +185,8 @@ class Arbiter(Daemon):
         #Now tab for external_commands
         self.external_commands = []
 
+        self.t_each_loop = time.time() # to track system time change
+
 
     #Use for adding broks
     def add(self, b):
@@ -243,6 +245,34 @@ class Arbiter(Daemon):
         self.external_command = e
         self.fifo = e.open()
         
+
+    #Check if our system time change. If so, change our 
+    def check_for_system_time_change(self):
+        now = time.time()
+        difference = now - self.t_each_loop
+        #If we have more than 15 min time change, we need to compensate
+        #it
+        
+        if abs(difference) > 900:
+            self.compensate_system_time_change(difference)
+
+        #Now set the new value for the tick loop
+        self.t_each_loop = now
+
+        #return the diff if it need, of just 0
+        if abs(difference) > 900:
+            return difference
+        else:
+            return 0
+
+
+    #If we've got a system time change, we need to compensate it
+    #from now, we do not do anything in fact.
+    def compensate_system_time_change(self, difference):
+        Log().log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
+        #We only need to change some value
+
+
         
     def main(self):
         #Log will be broks
@@ -516,6 +546,11 @@ class Arbiter(Daemon):
             avant = time.time()
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
+            
+            #Manage a possible time change (our avant will be change with the diff)
+            diff = self.check_for_system_time_change()
+            avant += diff
+
             if ins != []:
                 for s in socks:
                     if s in ins:
@@ -544,6 +579,11 @@ class Arbiter(Daemon):
             avant = time.time()
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
+
+            #Manage a possible time change (our avant will be change with the diff)
+            diff = self.check_for_system_time_change()
+            avant += diff
+
             if ins != []:
                 for s in socks:
                     if s in ins:
@@ -621,6 +661,11 @@ class Arbiter(Daemon):
                 socks.append(self.fifo)
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
+
+            #Manage a possible time change (our avant will be change with the diff)
+            diff = self.check_for_system_time_change()
+            avant += diff
+
             if ins != []:
                 for s in socks:
                     if s in ins:
