@@ -467,7 +467,7 @@ class Livestatus_broker:
                 # SERVICE ALERT: srv-40;Service-9;CRITICAL;HARD;1;[Errno 2] No such file or directory
                 logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_ALERT
-                host_name, service_description, state, state_type, attempt, plugin_output = options.split(';')
+                host_name, service_description, state, state_type, attempt, plugin_output = options.split(';', 5)
                 state = service_states[state]
             elif type == 'SERVICE DOWNTIME ALERT':
                 logobject = LOGOBJECT_SERVICE
@@ -505,7 +505,7 @@ class Livestatus_broker:
                 # SERVICE NOTIFICATION: test_contact;test_host_0;test_ok_0;DOWNTIMESTART (OK);notify-service;OK
                 logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_NOTIFICATION
-                contact_name, host_name, service_description, state_type, command_name, check_plugin_output = options.split(';')
+                contact_name, host_name, service_description, state_type, command_name, check_plugin_output = options.split(';', 5)
                 if '(' in state_type: # downtime/flapping/etc-notifications take the type UNKNOWN
                     state_type = 'UNKNOWN'
                 state = service_states[state_type]
