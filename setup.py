@@ -156,6 +156,7 @@ setup(
   author_email = "naparuba@gmail.com",
   license = "GNU Affero General Public License",
   url = "http://www.shinken-monitoring.org",
+  zip_safe=False,
   classifiers=['Development Status :: 4 - Beta',
                'Environment :: Console',
                'Intended Audience :: System Administrators',
