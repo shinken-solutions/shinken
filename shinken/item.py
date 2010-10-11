@@ -534,7 +534,7 @@ class Items(object):
 
 
     def find_tpl_by_name(self, name):
-        for id in self.templates:#items:
+        for id in self.templates:
             i = self.items[id]
             if i.name == name:
                 return i

@@ -52,6 +52,7 @@ launch_and_assert test_resultmodulation.py
 launch_and_assert test_satellites.py
 launch_and_assert test_illegal_names.py
 launch_and_assert test_notifway.py
+launch_and_assert test_timeperiod_inheritance.py
 launch_and_assert test_maintenance_period.py
 
 #Live status is a bit longer than the previous, so we put it at the end.

@@ -80,9 +80,8 @@ from daterange import Timerange
 from brok import Brok
 
 
-class Timeperiod:
-    id = 0
-
+class Timeperiod(Item):
+    id = 1
     my_type = 'timeperiod'
 
     properties={
@@ -90,6 +89,7 @@ class Timeperiod:
         'alias' : {'required' : False, 'fill_brok' : ['full_status']},
         'use' : {'required' : False},
         'exclude' : {'required' : False},
+        'register' : {'required' : False}
         }
 
     
@@ -99,8 +99,10 @@ class Timeperiod:
         self.unresolved = []
         self.dateranges = []
         self.exclude = ''
+        self.customs = {}
+        self.plus = {}
         for key in params:
-            if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use']:
+            if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register']:
                 setattr(self, key, params[key])
             else:
                 self.unresolved.append(key+' '+params[key])
@@ -108,12 +110,23 @@ class Timeperiod:
 
         self.cache = {} #For tunning purpose only
 
+
     def get_name(self):
         return self.timeperiod_name
         
 
     def clean(self):
         pass
+
+
+    #We fillfull properties with template ones if need
+    #for the unresolved values (like sunday ETCETC)
+    def get_unresolved_properties_by_inheritance(self, items):
+        #Ok, I do not have prop, Maybe my templates do?
+        #Same story for plus
+        for i in self.templates:
+            self.unresolved.extend(i.unresolved)
+
 
 
     def is_time_valid(self, t):
@@ -514,7 +527,11 @@ class Timeperiod:
                 return
         print "No match for", entry
 
-    
+
+    def apply_inheritance(self):
+        pass
+
+
     #create daterange from unresolved param
     def explode(self, timeperiods):
         for entry in self.unresolved:
@@ -590,6 +607,18 @@ class Timeperiods(Items):
         for id in self.items:
             tp = self.items[id]
             tp.linkify(self)
+
+
+    def apply_inheritance(self):
+        #The only interesting property to inherit is exclude
+        self.apply_partial_inheritance('exclude')
+        for i in self:
+            i.get_customs_properties_by_inheritance(self)
+
+        #And now apply inheritance for unresolved properties
+        #like the dateranges in fact
+        for tp in self:
+            tp.get_unresolved_properties_by_inheritance(self.items)
 
 
     #check for loop in definition

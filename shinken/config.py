@@ -732,6 +732,8 @@ class Config(Item):
         self.servicedependencies.apply_inheritance(self.hosts)
         #print "Hostdependencies"
         self.hostdependencies.apply_inheritance()
+        #Also timeperiods
+        self.timeperiods.apply_inheritance()
 
 
     #Use to apply implicit inheritance
@@ -898,6 +900,8 @@ class Config(Item):
         self.services.linkify_templates()
         self.servicedependencies.linkify_templates()
         self.hostdependencies.linkify_templates()
+        self.timeperiods.linkify_templates()
+        
         
 
     #Reversed list is a dist with name for quick search by name
@@ -1058,6 +1062,7 @@ class Config(Item):
         self.services.clean_useless()
         self.servicedependencies.clean_useless()
         self.hostdependencies.clean_useless()
+        self.timeperiods.clean_useless()
 
 
     #Create packs of hosts and services so in a pack, 
