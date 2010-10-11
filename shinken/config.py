@@ -771,6 +771,14 @@ class Config(Item):
         self.brokers.fill_default()
         self.schedulerlinks.fill_default()
 #        self.arbiterlinks.fill_default()
+        #Now fill some fields we can predict (like adress for hosts)
+        self.fill_predictive_missing_parameters()
+
+    #Here is a special functions to fill some special
+    #properties that are not filled and should be like
+    #adress for host (if not set, put host_name)
+    def fill_predictive_missing_parameters(self):
+        self.hosts.fill_predictive_missing_parameters()
 
         
     #Will check if a realm is defined, if not

@@ -467,9 +467,15 @@ class StandardDaterange(Daterange):
 class MonthWeekDayDaterange(Daterange):
     #It's correct only if the weekday (sunday, etc) is a valid one
     def is_correct(self):
-        b = self.day in Daterange.weekdays
+        b = True
+        b &= self.swday in Daterange.weekdays
         if not b:
-            print "Error : %s is not a valid day" % day
+            print "Error : %s is not a valid day" % self.swday
+
+        b &= self.ewday in Daterange.weekdays
+        if not b:
+            print "Error : %s is not a valid day" % self.ewday
+
         return b
 
     def get_start_and_end_time(self, ref=None):

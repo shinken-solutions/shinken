@@ -37,6 +37,7 @@ function launch_and_assert {
 #for ii in `ls -1 test_*py`; do echo "Launching Test $ii" && python $ii; done
 launch_and_assert test_services.py
 launch_and_assert test_hosts.py
+launch_and_assert test_host_missing_adress.py
 launch_and_assert test_action.py
 launch_and_assert test_config.py
 launch_and_assert test_dependencies.py

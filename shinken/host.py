@@ -282,6 +282,12 @@ class Host(SchedulingItem):
 
 
 
+    #Fill adresse with host_name if not already set
+    def fill_predictive_missing_parameters(self):
+        if hasattr(self, 'host_name') and not hasattr(self, 'address'):
+            self.address = self.host_name
+
+
     #Check is required prop are set:
     #contacts OR contactgroups is need
     def is_correct(self):
@@ -746,6 +752,12 @@ class Hosts(Items):
         #(just the escalation here, not serviceesca or hostesca).
         #This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
+
+
+    #Fill adress by host_name if not set
+    def fill_predictive_missing_parameters(self):
+        for h in self:
+            h.fill_predictive_missing_parameters()
         
 
     #Link host with hosts (parents)
