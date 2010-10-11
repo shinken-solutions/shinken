@@ -478,6 +478,7 @@ class MonthWeekDayDaterange(Daterange):
 
         return b
 
+
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
 

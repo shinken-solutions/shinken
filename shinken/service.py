@@ -168,6 +168,10 @@ class Service(SchedulingItem):
         'actions' : {'default' : []}, #put here checks and notif raised
         'broks' : {'default' : []}, #and here broks raised
 
+        #All errors and warning raised during the configuration parsing
+        #and taht will raised real warning/errors during the is_correct
+        'configuration_warnings' : {'default' : []},
+        'configuration_errors' : {'default' : []},
         
         #Problem/impact part
         'is_problem' : {'default' : False, 'fill_brok' : ['full_status']},
@@ -288,6 +292,12 @@ class Service(SchedulingItem):
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
                     Log().log('%s : I do not have %s' % (self.get_name(), prop))
                     state = False #Bad boy...
+
+        #Raised all previously saw errors like unknown contacts and co
+        if self.configuration_errors != []:
+            state = False
+            for err in self.configuration_errors:
+                Log().log(err)
 
         #Ok now we manage special cases...
         if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups') and  self.notifications_enabled == True:

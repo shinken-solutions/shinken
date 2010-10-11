@@ -652,11 +652,13 @@ class Items(object):
                 contacts_tab = strip_and_uniq(contacts_tab)
                 new_contacts = []
                 for c_name in contacts_tab:
-                    c = contacts.find_by_name(c_name)
-                    if c != None:
-                        new_contacts.append(c)
-                    else: #TODO: What?
-                        pass
+                    if c_name != '':
+                        c = contacts.find_by_name(c_name)
+                        if c != None:
+                            new_contacts.append(c)
+                        else: #Add in the errors tab. will be raised at is_correct
+                            err = "ERROR: the contact '%s' defined for '%s' is unkown" % (c_name, i.get_name())
+                            i.configuration_errors.append(err)
                 #Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
 
