@@ -52,6 +52,7 @@ launch_and_assert test_resultmodulation.py
 launch_and_assert test_satellites.py
 launch_and_assert test_illegal_names.py
 launch_and_assert test_notifway.py
+launch_and_assert test_notification_warning.py
 launch_and_assert test_timeperiod_inheritance.py
 launch_and_assert test_bad_timeperiods.py
 launch_and_assert test_maintenance_period.py
