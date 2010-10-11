@@ -362,6 +362,9 @@ class Scheduler:
                 item.remove_in_progress_notification(c)
                 self.actions[c.id].status = 'zombie'
                 item.last_notification = c.check_time
+                #If we' ve got a problem with the notification, raise a Warning log.
+                if c.exit_status != 0:
+                    Log().log("Warning : the notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
             except KeyError , exp:
                 Log().log("Warning : received an notification of an unknown id! %s" % str(exp))
 
