@@ -148,7 +148,7 @@ class Config(Item):
                 'use_large_installation_tweaks' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'free_child_process_memory' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'this option is automatic in Python processes'},
                 'child_processes_fork_twice' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'fork twice is not use.'},
-                'enable_environment_macros' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged', 'usage_text' : 'Please check at your plugins if they are using it. Only few of them are using this feature.'},
+                'enable_environment_macros' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'enable_flap_detection' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'low_service_flap_threshold' : {'required':False, 'default':'25', 'pythonize': to_int, 'class_inherit' : [(Service, 'low_flap_threshold')]},
                 'high_service_flap_threshold' : {'required':False, 'default':'50', 'pythonize': to_int, 'class_inherit' : [(Service, 'high_flap_threshold')]},
@@ -189,10 +189,10 @@ class Config(Item):
                 'enable_embedded_perl' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged', 'usage_text' : 'It will surely never managed, but it should not be useful with poller performances.'},
                 'use_embedded_perl_implicitly' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'date_format' : {'required':False, 'default':'us', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
-                'use_timezone' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
-                'illegal_object_name_chars' : {'required':False, 'default':"""`~!$%^&*"|'<>?,()=""", 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
+                'use_timezone' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
+                'illegal_object_name_chars' : {'required':False, 'default':"""`~!$%^&*"|'<>?,()=""", 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
                 'illegal_macro_output_chars' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
-                'use_regexp_matching' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged', 'usage_text' : ' if you go some host or service definition like prod*, it will surely failed from now, sorry.'},
+                'use_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged', 'usage_text' : ' if you go some host or service definition like prod*, it will surely failed from now, sorry.'},
                 'use_true_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
                 'admin_email' : {'required':False, 'default':'admin@localhost', 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
                 'admin_pager' : {'required':False, 'default':'', 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
@@ -931,6 +931,24 @@ class Config(Item):
         self.services.optimize_service_search(self.hosts)
 
 
+    #Some parameters are just not managed like O*HP commands
+    #and regexp capabilities
+    #True : OK
+    #False : error in conf
+    def check_error_on_hard_unmanaged_parameters(self):
+        r = True
+        if self.use_regexp_matching:
+            Log().log("Error : the use_regexp_matching parameter is not managed.")
+            r &= False
+        if self.ochp_command != '':
+            Log().log("Error : the ochp_command parameter is not managed.")
+            r &= False
+        if self.ocsp_command != '':
+            Log().log("Error : the ocsp_command parameter is not managed.")
+            r &= False
+        return r
+
+
     #check if elements are correct or not (fill with defaults, etc)
     #Warning : this function call be called from a Arbiter AND
     #from and scheduler. The first one got everything, the second
@@ -938,6 +956,11 @@ class Config(Item):
     def is_correct(self):
         Log().log('Running pre-flight check on configuration data...')
         r = self.conf_is_correct
+
+        #Globally unamanged parameters
+        Log().log('Checking global parameters...')
+        r &= self.check_error_on_hard_unmanaged_parameters()
+
         #Hosts
         Log().log('Checking hosts...')
         r &= self.hosts.is_correct()
