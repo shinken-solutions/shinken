@@ -130,6 +130,11 @@ class Daterange:
     def __str__(self):
         return ''#str(self.__dict__)
 
+    
+    #By default, daterange are correct
+    def is_correct(self):
+        return True
+
 
     def get_month_id(cls, month):
         try:
@@ -435,7 +440,15 @@ class StandardDaterange(Daterange):
             self.timeranges.append(Timerange(timeinterval.strip()))
         self.day = day
         self.is_valid_today = False
-    
+
+
+    #It's correct only if the weekday (sunday, etc) is a valid one
+    def is_correct(self):
+        b = self.day in Daterange.weekdays
+        if not b:
+            print "Error : %s is not a valid day" % day
+        return b
+
 
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
@@ -452,6 +465,13 @@ class StandardDaterange(Daterange):
 
 #thusday 3 february
 class MonthWeekDayDaterange(Daterange):
+    #It's correct only if the weekday (sunday, etc) is a valid one
+    def is_correct(self):
+        b = self.day in Daterange.weekdays
+        if not b:
+            print "Error : %s is not a valid day" % day
+        return b
+
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
 

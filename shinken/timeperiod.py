@@ -101,6 +101,7 @@ class Timeperiod(Item):
         self.exclude = ''
         self.customs = {}
         self.plus = {}
+        self.invalid_entries = []
         for key in params:
             if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register']:
                 setattr(self, key, params[key])
@@ -332,6 +333,20 @@ class Timeperiod(Item):
         return hasattr(self, prop)
 
 
+    #We are correct only if our daterange are
+    #and if we have no unmatch entries
+    def is_correct(self):
+        b = True
+        for dr in self.dateranges:
+            b &= dr.is_correct()
+            
+        #Even one invalid is non correct
+        for e in self.invalid_entries:
+            b = False
+            print "Error : The timeperiod %s got an invalid entry '%s'" % (self.get_name(), e)
+        return b
+
+
     def __str__(self):
         s = ''
         s += str(self.__dict__)+'\n'
@@ -526,6 +541,7 @@ class Timeperiod(Item):
                 dateranges.append(StandardDaterange(day, other))
                 return
         print "No match for", entry
+        self.invalid_entries.append(entry)
 
 
     def apply_inheritance(self):
@@ -638,6 +654,11 @@ class Timeperiods(Items):
         for tp in self.items.values():
             del tp.rec_tag
 
+        #And check all timeperiods for correct (sounday is false)
+        for tp in self:
+            r &= tp.is_correct()
+        
+            
         return r
 
 
