@@ -89,7 +89,15 @@ class ShinkenTest(unittest.TestCase):
         self.sched.add(check)  # check is now in sched.checks[]
         # fake execution
         check.check_time = now
-        check.output = output
+
+        elts_line1 = output.split('|')
+        #First line before | is output
+        check.output = elts_line1[0]
+        #After | is perfdata
+        if len(elts_line1) > 1:
+            check.perf_data = elts_line1[1]
+        else:
+            check.perf_data = ''
         check.exit_status = exit_status
         check.execution_time = 0.001
         check.status = 'waitconsume'

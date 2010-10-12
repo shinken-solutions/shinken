@@ -29,17 +29,23 @@
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Host_perfdata_broker:
-    def __init__(self, name, path):
+    def __init__(self, name, path, mode, template):
         self.path = path
         self.name = name
+        self.mode = mode
+        self.template = template
+
+        #Make some raw change
+        self.template = self.template.replace(r'\t', '\t')
+        self.template = self.template.replace(r'\n', '\n')
 
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
-        print "I open the host-perfdata file"
-        self.file = open(self.path,'a')
+        print "I open the host-perfdata file '%s'" % self.path
+        self.file = open(self.path, self.mode)
     
 
     def get_name(self):
@@ -72,10 +78,19 @@ class Host_perfdata_broker:
         #The original model
         #"$TIMET\t$HOSTNAME\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
         current_state = self.resolve_host_state(data['state_id'])
-        s = "%s\t%s\t%s\t%s\t%s\n" % (int(data['last_chk']),data['host_name'], \
-                                          data['output'], \
-                                          current_state, data['perf_data'] )
-
+        macros = {
+            '$LASTHOSTCHECK$' : int(data['last_chk']),
+            '$HOSTNAME$' : data['host_name'],
+            '$HOSTOUTPUT$' : data['output'],
+            '$HOSTSTATE$' : current_state,
+            '$HOSTPERFDATA$' : data['perf_data'],
+            }
+        s = self.template
+        for m in macros:
+            s = s.replace(m, str(macros[m]))
+        #s = "%s\t%s\t%s\t%s\t%s\n" % (int(data['last_chk']),data['host_name'], \
+        #                                  data['output'], \
+        #                                  current_state, data['perf_data'] )
         self.file.write(s)
         self.file.flush()
 

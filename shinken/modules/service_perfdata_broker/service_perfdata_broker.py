@@ -29,17 +29,23 @@
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Service_perfdata_broker:
-    def __init__(self, name, path):
+    def __init__(self, name, path, mode, template):
         self.path = path
         self.name = name
+        self.mode = mode
+        self.template = template
+        
+        #Make some raw change
+        self.template = self.template.replace(r'\t', '\t')
+        self.template = self.template.replace(r'\n', '\n')
 
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
-        print "I open the service-perfdata file"
-        self.file = open(self.path,'a')
+        print "I open the service-perfdata file '%s'" % self.path
+        self.file = open(self.path, self.mode)
     
 
     def get_name(self):
@@ -72,10 +78,21 @@ class Service_perfdata_broker:
         #The original model
         #"$TIMET\t$HOSTNAME\t$SERVICEDESC\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
         current_state = self.resolve_service_state(data['state_id'])
-        s = "%s\t%s\t%s\t%s\t%s\t%s\n" % (int(data['last_chk']),data['host_name'], \
-                                          data['service_description'], data['output'], \
-                                          current_state, data['perf_data'] )
-
+        macros = {
+            '$LASTSERVICECHECK$' : int(data['last_chk']),
+            '$HOSTNAME$' : data['host_name'],
+            '$SERVICEDESC$' : data['service_description'],
+            '$SERVICEOUTPUT$' : data['output'],
+            '$SERVICESTATE$' : current_state,
+            '$SERVICEPERFDATA$' : data['perf_data'],
+            }
+        s = self.template
+        for m in macros:
+            #print "Replacing in %s %s by %s" % (s, m, str(macros[m]))
+            s = s.replace(m, str(macros[m]))
+        #s = "%s\t%s\t%s\t%s\t%s\t%s\n" % (int(data['last_chk']),data['host_name'], \
+        #                                  data['service_description'], data['output'], \
+        #                                  current_state, data['perf_data'] )
         self.file.write(s)
         self.file.flush()
 

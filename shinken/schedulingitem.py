@@ -520,8 +520,11 @@ class SchedulingItem(Item):
         self.last_chk = c.check_time
         self.output = c.output
         self.long_output = c.long_output
-        self.last_perf_data = self.perf_data
-        self.perf_data = c.perf_data
+        
+        #Get the perf_data only if we want it in the configuration
+        if self.__class__.process_performance_data and self.process_perf_data:
+            self.last_perf_data = self.perf_data
+            self.perf_data = c.perf_data
 
         #Before set state, module thems
         for rm in self.resultmodulations:
@@ -955,7 +958,7 @@ class SchedulingItem(Item):
             command_line = m.resolve_command(self.check_command, data)
             
             #And get all environnement varialbe if need
-            if cls.enable_environment_macros:
+            if cls.enable_environment_macros or cls.use_large_installation_tweaks:
                 env = m.get_env_macros(data)
             else:
                 env = {}

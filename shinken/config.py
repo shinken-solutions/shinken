@@ -145,7 +145,7 @@ class Config(Item):
                 'enable_predictive_service_dependency_checks' : {'required':False, 'default':'1', 'class_inherit' : [(Service, 'enable_predictive_dependency_checks')], 'usage' : 'unmanaged'},
                 'cached_host_check_horizon' : {'required':False, 'default':'0', 'pythonize': to_int, 'class_inherit' : [(Host, 'cached_check_horizon')]},
                 'cached_service_check_horizon' : {'required':False, 'default':'0', 'pythonize': to_int, 'class_inherit' : [(Service, 'cached_check_horizon')]},
-                'use_large_installation_tweaks' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
+                'use_large_installation_tweaks' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'free_child_process_memory' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'this option is automatic in Python processes'},
                 'child_processes_fork_twice' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'fork twice is not use.'},
                 'enable_environment_macros' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
@@ -169,12 +169,12 @@ class Config(Item):
                 'process_performance_data' : {'required':False, 'default':'1', 'pythonize': to_bool , 'class_inherit' : [(Host, None), (Service, None)]},
                 'host_perfdata_command' : {'required':False, 'default':'' , 'class_inherit' : [(Host, 'perfdata_command')], 'usage' : 'unmanaged'},
                 'service_perfdata_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'perfdata_command')], 'usage' : 'unmanaged'},
-                'host_perfdata_file' : {'required':False, 'default':'/tmp/host.perf' , 'class_inherit' : [(Host, 'perfdata_file')], 'usage' : 'unmanaged'},
-                'service_perfdata_file' : {'required':False, 'default':'/tmp/service.perf' , 'class_inherit' : [(Service, 'perfdata_file')], 'usage' : 'unmanaged'},
-                'host_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Host, 'perfdata_file_template')], 'usage' : 'unmanaged'},
-                'service_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Service, 'perfdata_file_template')], 'usage' : 'unmanaged'},
-                'host_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Host, 'perfdata_file_mode')], 'usage' : 'unmanaged'},
-                'service_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Service, 'perfdata_file_mode')], 'usage' : 'unmanaged'},
+                'host_perfdata_file' : {'required':False, 'default':'' , 'class_inherit' : [(Host, 'perfdata_file')]},
+                'service_perfdata_file' : {'required':False, 'default':'' , 'class_inherit' : [(Service, 'perfdata_file')]},
+                'host_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Host, 'perfdata_file_template')]},
+                'service_perfdata_file_template' : {'required':False, 'default':'/tmp/host.perf', 'class_inherit' : [(Service, 'perfdata_file_template')]},
+                'host_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Host, 'perfdata_file_mode')]},
+                'service_perfdata_file_mode' : {'required':False, 'default':'a', 'pythonize': to_char, 'class_inherit' : [(Service, 'perfdata_file_mode')]},
                 'host_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int, 'usage' : 'unmanaged'},
                 'service_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int, 'usage' : 'unmanaged'},
                 'host_perfdata_file_processing_command' : {'required':False, 'default':'', 'class_inherit' : [(Host, 'perfdata_file_processing_command')], 'usage' : 'unmanaged'},
@@ -186,7 +186,7 @@ class Config(Item):
                 'check_host_freshness' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'check_freshness')]},
                 'host_freshness_check_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
                 'additional_freshness_latency' : {'required':False, 'default':'15', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
-                'enable_embedded_perl' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged', 'usage_text' : 'It will surely never managed, but it should not be useful with poller performances.'},
+                'enable_embedded_perl' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged', 'usage_text' : 'It will surely never be managed, but it should not be useful with poller performances.'},
                 'use_embedded_perl_implicitly' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'date_format' : {'required':False, 'default':'us', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
                 'use_timezone' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
@@ -196,7 +196,7 @@ class Config(Item):
                 'use_true_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
                 'admin_email' : {'required':False, 'default':'admin@localhost', 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
                 'admin_pager' : {'required':False, 'default':'', 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'event_broker_options' : {'required':False, 'default':'', 'usage' : 'unused', 'usage_text' : 'event broker are replaced by modules iwth a real configuration template.'},
+                'event_broker_options' : {'required':False, 'default':'', 'usage' : 'unused', 'usage_text' : 'event broker are replaced by modules with a real configuration template.'},
                 'broker_module' : {'required':False, 'default':''},
                 'debug_file' : {'required':False, 'default':'/tmp/debug.txt'},
                 'debug_level' : {'required':False, 'default':'0'},
@@ -864,7 +864,6 @@ class Config(Item):
                 mod = Module(data)
                 mod_to_add.append(mod)
 
-
         #Now the syslog facility
         if self.use_syslog:
             #Ok, the user want a syslog logging, why not after all
@@ -876,6 +875,27 @@ class Config(Item):
                 mod = Module(data)
                 mod_to_add.append(mod)
 
+        #Now the service_perfdata module
+        if self.service_perfdata_file != '':
+            #Ok, we've got a path for a service perfdata file
+            got_service_perfdata_module = self.got_broker_module_type_defined('service_perfdata')
+            
+            #We need to create the module on the fly?
+            if not got_service_perfdata_module:
+                data = {'module_type': 'service_perfdata', 'module_name': 'Service-Perfdata-Autogenerated', 'path' : self.service_perfdata_file, 'mode' : self.service_perfdata_file_mode, 'template' : self.service_perfdata_file_template}
+                mod = Module(data)
+                mod_to_add.append(mod)
+
+        #Now the host_perfdata module
+        if self.host_perfdata_file != '':
+            #Ok, we've got a path for a host perfdata file
+            got_host_perfdata_module = self.got_broker_module_type_defined('host_perfdata')
+
+            #We need to create the module on the fly?
+            if not got_host_perfdata_module:
+                data = {'module_type': 'host_perfdata', 'module_name': 'Host-Perfdata-Autogenerated', 'path' : self.host_perfdata_file, 'mode' : self.host_perfdata_file_mode, 'template' : self.host_perfdata_file_template}
+                mod = Module(data)
+                mod_to_add.append(mod)
 
         #We add them to the brokers if we need it
         if mod_to_add != []:
