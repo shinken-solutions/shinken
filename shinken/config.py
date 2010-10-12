@@ -145,7 +145,7 @@ class Config(Item):
                 'enable_predictive_service_dependency_checks' : {'required':False, 'default':'1', 'class_inherit' : [(Service, 'enable_predictive_dependency_checks')], 'usage' : 'unmanaged'},
                 'cached_host_check_horizon' : {'required':False, 'default':'0', 'pythonize': to_int, 'class_inherit' : [(Host, 'cached_check_horizon')]},
                 'cached_service_check_horizon' : {'required':False, 'default':'0', 'pythonize': to_int, 'class_inherit' : [(Service, 'cached_check_horizon')]},
-                'use_large_installation_tweaks' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
+                'use_large_installation_tweaks' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'free_child_process_memory' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'this option is automatic in Python processes'},
                 'child_processes_fork_twice' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'fork twice is not use.'},
                 'enable_environment_macros' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
