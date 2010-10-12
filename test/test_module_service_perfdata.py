@@ -67,8 +67,8 @@ class TestConfig(ShinkenTest):
         for b in self.sched.broks.values():
             if b.type == 'service_check_result':
                 sl.manage_brok(b)
-                
-        sl.manage_brok(b)
+        self.sched.broks = {}
+
         fd = open(mod.path)
         buf = fd.readline()
         print "BUF:", buf
@@ -76,25 +76,28 @@ class TestConfig(ShinkenTest):
         print "Comparison:", comparison
         self.assert_(buf == comparison)
         fd.close()
+        os.unlink(mod.path)
 
         #Now change with a new template
         #and direct in the instance (do not do this in prod :) )
-        sl.template == r'$LASTSERVICECHECK$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICEOUTPUT$\t$SERVICEPERFDATA$\t$SERVICESTATE$\n'
+        mod.template = '$LASTSERVICECHECK$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICEOUTPUT$\t$SERVICEPERFDATA$\t$SERVICESTATE$\n'
+        sl2 = get_instance(mod)
+        sl2.init()
+        print sl2.__dict__
         t = int(time.time())
         print "T", t
         self.scheduler_loop(1, [[svc, 2, 'BAD | value1=0 value2=0']])
         #manage all service check result broks
         for b in self.sched.broks.values():
             if b.type == 'service_check_result':
-                sl.manage_brok(b)
-
-        sl.manage_brok(b)
+                sl2.manage_brok(b)
+        
         fd = open(mod.path)
         buf = fd.readline()
         print "BUF:", buf
         comparison = '%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD ', ' value1=0 value2=0', 'CRITICAL')
         print "Comparison:", comparison
-        #self.assert_(buf == comparison)
+        self.assert_(buf == comparison)
         fd.close()
         os.unlink(mod.path)
         
