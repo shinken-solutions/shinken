@@ -47,6 +47,7 @@ launch_and_assert test_problem_impact.py
 launch_and_assert test_timeperiods.py
 launch_and_assert test_command.py
 launch_and_assert test_module_simplelog.py
+launch_and_assert test_module_service_perfdata.py
 launch_and_assert test_db.py
 launch_and_assert test_macroresolver.py
 launch_and_assert test_complex_hostgroups.py
@@ -54,10 +55,12 @@ launch_and_assert test_resultmodulation.py
 launch_and_assert test_satellites.py
 launch_and_assert test_illegal_names.py
 launch_and_assert test_notifway.py
+launch_and_assert test_eventids.py
 launch_and_assert test_notification_warning.py
 launch_and_assert test_timeperiod_inheritance.py
 launch_and_assert test_bad_timeperiods.py
 launch_and_assert test_maintenance_period.py
+
 
 #Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py
