@@ -237,6 +237,7 @@ class SatelliteLink(Item):
             if isinstance(tab, bool):
                 self.con = None
                 return []
+            return tab
         except Pyro.errors.URIError , exp:
             self.con = None
             return []

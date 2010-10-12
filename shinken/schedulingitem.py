@@ -522,7 +522,7 @@ class SchedulingItem(Item):
         self.long_output = c.long_output
         
         #Get the perf_data only if we want it in the configuration
-        if self.__class__.process_performance_data:
+        if self.__class__.process_performance_data and self.process_perf_data:
             self.last_perf_data = self.perf_data
             self.perf_data = c.perf_data
 
