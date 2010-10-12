@@ -520,8 +520,11 @@ class SchedulingItem(Item):
         self.last_chk = c.check_time
         self.output = c.output
         self.long_output = c.long_output
-        self.last_perf_data = self.perf_data
-        self.perf_data = c.perf_data
+        
+        #Get the perf_data only if we want it in the configuration
+        if self.__class__.process_performance_data:
+            self.last_perf_data = self.perf_data
+            self.perf_data = c.perf_data
 
         #Before set state, module thems
         for rm in self.resultmodulations:

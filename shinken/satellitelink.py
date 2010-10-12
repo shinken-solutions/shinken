@@ -232,7 +232,11 @@ class SatelliteLink(Item):
         if self.con == None:
             self.create_connexion()
         try:
-            return self.con.what_i_managed()
+            tab = self.con.what_i_managed()
+            #I don't know why, but tab can be a bool. Not good here
+            if isinstance(tab, bool):
+                self.con = None
+                return []
         except Pyro.errors.URIError , exp:
             self.con = None
             return []

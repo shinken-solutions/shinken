@@ -165,7 +165,7 @@ class Dispatcher:
                             #but ot doesn't. I ask a full redispatch of these cfg for both cases
                             #DBG:
                             try :
-                                cfg_id not in satellite.what_i_managed()
+                                satellite.reachable and cfg_id not in satellite.what_i_managed()
                             except TypeError, exp:
                                 print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
                                 satellite.reachable = False
