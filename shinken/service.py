@@ -683,6 +683,31 @@ class Service(SchedulingItem):
             return True
 
         return False
+    
+    
+            
+
+    #Get a oc*p command if item has obsess_over_*  
+    #command. It must be enabled locally and globally
+    def get_obsessive_compulsive_processor_command(self):
+        cls = self.__class__
+        print "class", cls.obsess_over
+        if not cls.obsess_over or not hasattr(self, 'obsess_over_service') or not self.obsess_over_service:
+            return
+
+        #print self.ocsp_command.__dict__
+        print "cmd", self.ocsp_command
+        #m = MacroResolver()
+        #data = self.get_data_for_event_handler()
+        #cmd = m.resolve_command(self.ocsp_command, data)
+        #e = EventHandler(cmd, timeout=cls.ocsp_timeout)
+        #print "DBG: Event handler call created"
+        #print "DBG: ",e.__dict__
+        #self.raise_event_handler_log_entry(self.event_handler)
+
+        #ok we can put it in our temp action queue
+        #self.actions.append(e)
+
 
 
 class Services(Items):
@@ -758,6 +783,7 @@ class Services(Items):
         self.linkify_s_by_hst(hosts)
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
+        self.linkify_one_command_with_commands(commands, 'ocsp_command')
         self.linkify_with_contacts(contacts)
         self.linkify_with_resultmodulations(resultmodulations)
         #WARNING: all escalations will not be link here

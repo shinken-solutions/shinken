@@ -130,6 +130,7 @@ class Item(object):
                         value = getattr(conf, prop)
                         if change_name is None:
                             setattr(cls, prop, value)
+                            print "i set attr", prop, " to ", value
                         else:
                             setattr(cls, change_name, value)
 

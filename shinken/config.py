@@ -940,12 +940,12 @@ class Config(Item):
         if self.use_regexp_matching:
             Log().log("Error : the use_regexp_matching parameter is not managed.")
             r &= False
-        if self.ochp_command != '':
-            Log().log("Error : the ochp_command parameter is not managed.")
-            r &= False
-        if self.ocsp_command != '':
-            Log().log("Error : the ocsp_command parameter is not managed.")
-            r &= False
+        #if self.ochp_command != '':
+        #    Log().log("Error : the ochp_command parameter is not managed.")
+        #    r &= False
+        #if self.ocsp_command != '':
+        #    Log().log("Error : the ocsp_command parameter is not managed.")
+        #    r &= False
         return r
 
 

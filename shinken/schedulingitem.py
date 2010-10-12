@@ -753,6 +753,7 @@ class SchedulingItem(Item):
         # update event/problem-counters
         self.update_event_and_problem_id()
         self.broks.append(self.get_check_result_brok())
+        self.get_obsessive_compulsive_processor_command() 
 
 
     def update_event_and_problem_id(self):
