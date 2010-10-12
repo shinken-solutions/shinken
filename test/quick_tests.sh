@@ -48,6 +48,7 @@ launch_and_assert test_timeperiods.py
 launch_and_assert test_command.py
 launch_and_assert test_module_simplelog.py
 launch_and_assert test_module_service_perfdata.py
+launch_and_assert test_module_host_perfdata.py
 launch_and_assert test_db.py
 launch_and_assert test_macroresolver.py
 launch_and_assert test_complex_hostgroups.py

@@ -40,7 +40,18 @@ def get_instance(plugin):
 
     #Catch errors
     path = plugin.path
-    instance = Host_perfdata_broker(plugin.get_name(), path)
+    if hasattr(plugin, 'mode'):
+        mode = plugin.mode
+    else:
+        mode = 'a'
+
+    if hasattr(plugin, 'template'):
+        template = plugin.template
+    else:
+        template = "$LASTHOSTCHECK$\t$HOSTNAME$\t$HOSTOUTPUT$\t$HOSTSTATE$\t$HOSTPERFDATA$\n"
+        # int(data['last_chk']),data['host_name'], data['service_description'], data['output'], current_state, data['perf_data']
+
+    instance = Host_perfdata_broker(plugin.get_name(), path, mode, template)
     return instance
 
 
