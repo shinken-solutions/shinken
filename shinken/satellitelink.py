@@ -227,6 +227,7 @@ class SatelliteLink(Item):
             self.con = None
             return False
 
+
     def what_i_managed(self):
         if self.con == None:
             self.create_connexion()
