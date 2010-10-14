@@ -130,7 +130,6 @@ class Item(object):
                         value = getattr(conf, prop)
                         if change_name is None:
                             setattr(cls, prop, value)
-                            print "i set attr", prop, " to ", value
                         else:
                             setattr(cls, change_name, value)
 
@@ -458,6 +457,19 @@ class Item(object):
         self.fill_data_brok_from(data, 'next_schedule')
         b = Brok(my_type+'_next_schedule', data)
         return b
+        
+        
+    #Link one command property to a class (for globals like oc*p_command)
+    @classmethod
+    def linkify_one_command_with_commands(cls, commands, prop):
+        if hasattr(cls, prop):
+            command = getattr(cls, prop).strip()
+            if command != '':
+                cmdCall = CommandCall(commands, command)
+                #TODO: catch None?
+                setattr(cls, prop, cmdCall)
+            else:
+                setattr(cls, prop, None)
 
 
             

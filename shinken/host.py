@@ -29,6 +29,8 @@ from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, 
 #from check import Check
 #from notification import Notification
 from graph import Graph
+from macroresolver import MacroResolver
+from eventhandler import EventHandler
 from log import Log
 
 class Host(SchedulingItem):
@@ -731,8 +733,36 @@ class Host(SchedulingItem):
             return True
 
         return False
+    
+    
+    #Get a oc*p command if item has obsess_over_*  
+    #command. It must be enabled locally and globally
+    def get_obsessive_compulsive_processor_command(self):
+        cls = self.__class__
+        print "class", cls.obsess_over
+        if not cls.obsess_over or not hasattr(self, 'obsess_over_host') or not self.obsess_over_host:
+            return
+
+        #print self.ocsp_command.__dict__
+        print "cmd", cls.ochp_command
+        m = MacroResolver()
+        data = self.get_data_for_event_handler()
+        cmd = m.resolve_command(cls.ochp_command, data)
+        e = EventHandler(cmd, timeout=cls.ochp_timeout)
+        print "DBG: Event handler call created"
+        print "DBG: ",e.__dict__
+        #self.raise_event_handler_log_entry(self.event_handler)
+
+        #ok we can put it in our temp action queue
+        self.actions.append(e)
 
 
+    @classmethod
+    def linkify(cls, hosts, commands, timeperiods, contacts, resultmodulations, escalations):
+        cls.linkify_one_command_with_commands(commands, 'ochp_command')
+        
+        
+        
 class Hosts(Items):
     name_property = "host_name" #use for the search by name
     inner_class = Host #use for know what is in items

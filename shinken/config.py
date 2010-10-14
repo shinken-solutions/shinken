@@ -544,7 +544,7 @@ class Config(Item):
         #print "Services"
         #link services with hosts, commands, timeperiods, contacts and resultmodulations
         self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations)
-
+        
         #print "Service groups"
         #link servicegroups members with services
         self.servicegroups.linkify(self.services)
@@ -586,6 +586,7 @@ class Config(Item):
         self.brokers.linkify(self.realms, self.modules)
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
+        
 
 
     #Some properties are dangerous to be send like that
@@ -1104,6 +1105,11 @@ class Config(Item):
         Service.load_global_conf(self)
         Host.load_global_conf(self)
         Contact.load_global_conf(self)
+        # Host and Service classes can have properties which need to be 
+        # resolved to objects (like oc*p_command)
+        Host.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations)
+        Service.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations)
+
 
 
     #Clean useless elements like templates because they are not needed anymore

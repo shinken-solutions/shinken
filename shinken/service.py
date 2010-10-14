@@ -29,6 +29,7 @@ from util import to_int, to_char, to_split, to_bool, strip_and_uniq, format_t_in
 from check import Check
 from notification import Notification
 from macroresolver import MacroResolver
+from eventhandler import EventHandler
 from log import Log
 
 class Service(SchedulingItem):
@@ -696,17 +697,22 @@ class Service(SchedulingItem):
             return
 
         #print self.ocsp_command.__dict__
-        print "cmd", self.ocsp_command
-        #m = MacroResolver()
-        #data = self.get_data_for_event_handler()
-        #cmd = m.resolve_command(self.ocsp_command, data)
-        #e = EventHandler(cmd, timeout=cls.ocsp_timeout)
-        #print "DBG: Event handler call created"
-        #print "DBG: ",e.__dict__
+        print "cmd", cls.ocsp_command
+        m = MacroResolver()
+        data = self.get_data_for_event_handler()
+        cmd = m.resolve_command(cls.ocsp_command, data)
+        e = EventHandler(cmd, timeout=cls.ocsp_timeout)
+        print "DBG: Event handler call created"
+        print "DBG: ",e.__dict__
         #self.raise_event_handler_log_entry(self.event_handler)
 
         #ok we can put it in our temp action queue
-        #self.actions.append(e)
+        self.actions.append(e)
+        
+
+    @classmethod
+    def linkify(cls, hosts, commands, timeperiods, contacts, resultmodulations, escalations):
+        cls.linkify_one_command_with_commands(commands, 'ocsp_command')
 
 
 
@@ -783,7 +789,6 @@ class Services(Items):
         self.linkify_s_by_hst(hosts)
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
-        self.linkify_one_command_with_commands(commands, 'ocsp_command')
         self.linkify_with_contacts(contacts)
         self.linkify_with_resultmodulations(resultmodulations)
         #WARNING: all escalations will not be link here
