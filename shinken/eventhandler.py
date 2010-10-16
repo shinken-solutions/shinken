@@ -93,7 +93,7 @@ class EventHandler(Action):
         self.perf_data = e.perf_data
         
 
-    def get_outputs(self, out):
+    def get_outputs(self, out, max_plugins_output_length):
         elts = out.split('\n')
         #For perf data
         elts_line1 = elts[0].split('|')
