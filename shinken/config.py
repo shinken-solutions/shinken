@@ -1107,8 +1107,8 @@ class Config(Item):
         Contact.load_global_conf(self)
         # Host and Service classes can have properties which need to be 
         # resolved to objects (like oc*p_command)
-        Host.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations)
-        Service.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations)
+        Host.linkify(self)
+        Service.linkify(self)
 
 
 
