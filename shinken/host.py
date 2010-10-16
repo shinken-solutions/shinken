@@ -758,7 +758,7 @@ class Host(SchedulingItem):
 
 
     @classmethod
-    def linkify(cls, config)
+    def linkify(cls, config):
         cls.linkify_one_command_with_commands(config.commands, 'ochp_command')
         
         
