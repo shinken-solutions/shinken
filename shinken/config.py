@@ -293,8 +293,12 @@ class Config(Item):
     def load_params(self, params):
         for elt in params:
             elts = elt.split('=')
-            self.params[elts[0]] = elts[1]
-            setattr(self, elts[0], elts[1])
+            if len(elts) == 1: #error, there is no = !
+                self.conf_is_correct = False
+                print "Error : the parameter %s is malformed! (no = sign)" % elts[0]
+            else:
+                self.params[elts[0]] = elts[1]
+                setattr(self, elts[0], elts[1])
 
 
     def _cut_line(self, line):
