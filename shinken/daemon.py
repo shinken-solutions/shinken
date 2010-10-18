@@ -245,7 +245,7 @@ class Daemon:
     def get_header(self):
         return ["Shinken %s" % VERSION,
                 "Copyright (c) 2009-2010 Gabes Jean (naparuba@gmail.com)",
-                "Last Modified: 31-05-2010",
+                "Gerhard Lausser, Gerhard.Lausser@consol.de",
                 "License: AGPL"]
 
     def print_header(self):
