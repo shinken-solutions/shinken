@@ -532,6 +532,12 @@ class Config(Item):
     #and contacts directly in it's properties
     #REMEMBER: linkify AFTER explode...
     def linkify(self):
+        
+        #First linkify myself like for some global commands
+        self.linkify_one_command_with_commands(self.commands, 'ocsp_command')
+        self.linkify_one_command_with_commands(self.commands, 'ochp_command')
+
+
         #Do the simplify AFTER explode groups
         #print "Hostgroups"
         #link hostgroups with hosts
@@ -1100,16 +1106,12 @@ class Config(Item):
 
 
     #Explode parameters like cached_service_check_horizon in the
-    #Service class in a cached_check_horizon manner
+    #Service class in a cached_check_horizon manner, o*hp commands
+    #, etc
     def explode_global_conf(self):
         Service.load_global_conf(self)
         Host.load_global_conf(self)
         Contact.load_global_conf(self)
-        # Host and Service classes can have properties which need to be 
-        # resolved to objects (like oc*p_command)
-        Host.linkify(self)
-        Service.linkify(self)
-
 
 
     #Clean useless elements like templates because they are not needed anymore

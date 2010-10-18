@@ -460,17 +460,18 @@ class Item(object):
         
         
     #Link one command property to a class (for globals like oc*p_command)
-    @classmethod
-    def linkify_one_command_with_commands(cls, commands, prop):
-        if hasattr(cls, prop):
-            command = getattr(cls, prop).strip()
+    def linkify_one_command_with_commands(self, commands, prop):
+        if hasattr(self, prop):
+            command = getattr(self, prop).strip()
             if command != '':
-                cmdCall = CommandCall(commands, command)
-                #TODO: catch None?
-                setattr(cls, prop, cmdCall)
+                if hasattr(self, 'poller_tag'):
+                    cmdCall = CommandCall(commands, command, poller_tag=self.poller_tag)
+                else:
+                    cmdCall = CommandCall(commands, command)
+                    #TODO: catch None?
+                    setattr(self, prop, cmdCall)
             else:
-                setattr(cls, prop, None)
-
+                setattr(self, prop, None)
 
             
 
