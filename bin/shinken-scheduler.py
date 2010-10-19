@@ -478,6 +478,8 @@ class Shinken(Daemon):
         #we give sched it's conf
         self.sched.load_conf(self.conf)
 
+        self.sched.load_modules(self.modules_manager, self.mod_instances)
+
         self.conf.is_correct()
 
 

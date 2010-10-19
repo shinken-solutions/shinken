@@ -125,6 +125,12 @@ class Scheduler:
         self.instance_name = conf.instance_name
 
 
+    #Load the modules from our app master
+    def load_modules(self, modules_manager, mod_instances):
+        self.modules_manager = modules_manager
+        self.mod_instances = mod_instances
+
+
     #Oh... Arbiter want us to die... For launch a new Scheduler
     #"Mais qu'a-t-il de plus que je n'ais pas?"
     def die(self):
@@ -395,6 +401,12 @@ class Scheduler:
     #For now compression is no use, but it can be add easylly 
     #just uncomment :)
     def update_retention_file(self):
+        #Do the job for all modules that do the retention
+        for inst in self.mod_instances: 
+            if 'retention' in inst.properties['phases']:
+                inst.update_retention_objects(self)
+
+        #Now the flat file method
         try:
             f = open(self.conf.state_retention_file, 'wb')
             #Just put hosts/services becauses checks and notifications
@@ -413,8 +425,16 @@ class Scheduler:
    
     #Load the retention file and get status from it. It do not get all checks in progress
     #for the moment, just the status and the notifications.
-    #TODO : speed up because the service lookup si VERY slow
     def retention_load(self):
+        #Do this job with modules too
+        for inst in self.mod_instances:
+            if 'retention' in inst.properties['phases']:
+                b = inst.load_retention_objects(self)
+                #Stop at the first module that succeed to load the retention
+                if b:
+                    return
+
+        #Now the old flat file way :(
         Log().log("Reading from retention_file %s" % self.conf.state_retention_file)
         try:
             f = open(self.conf.state_retention_file, 'rb')
