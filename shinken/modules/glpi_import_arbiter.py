@@ -26,12 +26,13 @@ import xmlrpclib
 
 
 #This text is print at the import
-print "I am simple GLPI importer for Arbiter"
+print "Detected module : GLPI importer for Arbiter"
 
 
 properties = {
     'type' : 'glpi_import',
     'external' : False,
+    'phases' : ['configuration'],
     }
 
 
