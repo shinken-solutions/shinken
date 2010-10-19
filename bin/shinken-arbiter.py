@@ -28,14 +28,13 @@
 
 
 import os
-#import re
 import time
 import platform
 import sys
 import select
 import getopt
 import random
-
+from Queue import Empty
 
 #We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
@@ -93,6 +92,8 @@ from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon
 from shinken.log import Log
 from shinken.modulesmanager import ModulesManager
+from shinken.brok import Brok
+from shinken.external_command import ExternalCommand
 
 
 VERSION = "0.3"
@@ -188,9 +189,14 @@ class Arbiter(Daemon):
         self.t_each_loop = time.time() # to track system time change
 
 
-    #Use for adding broks
+    #Use for adding things like broks
     def add(self, b):
-        self.broks[b.id] = b
+        if isinstance(b, Brok):
+            self.broks[b.id] = b
+        elif isinstance(b, ExternalCommand):
+            self.external_commands.append(b)
+        else:
+            Log().log('Warning : cannot manage object type %s (%s)' % (type(b), b))
 
 
     #We must push our broks to the broker
@@ -344,12 +350,13 @@ class Arbiter(Daemon):
             self.mod_instances = self.modules_manager.get_instances()
 
             for inst in self.mod_instances:
-                try :
-                    r = inst.get_objects()
-                    for h in r['hosts']:
-                        raw_objects['host'].append(h)
-                except Exception, exp:
-                    print "The instance %s raise an exception %s. I remove it" % (inst.get_name(), str(exp))
+                if 'configuration' in inst.properties['phases']:
+                    try :
+                        r = inst.get_objects()
+                        for h in r['hosts']:
+                            raw_objects['host'].append(h)
+                    except Exception, exp:
+                        print "The instance %s raise an exception %s. I remove it" % (inst.get_name(), str(exp))
 
 
         ### Resume standard operations ###
@@ -535,6 +542,22 @@ class Arbiter(Daemon):
                 self.run()
 
 
+    #Get 'objects' from external modules
+    #It can be used for get external commands for example
+    def get_objects_from_from_queues(self):
+        for f in self.modules_manager.get_external_from_queues():
+            print "Groking from module instance %s" % f
+            full_queue = True
+            while full_queue:
+                try:
+                    o = f.get(block=False)
+                    print "Got object :", o
+                    self.add(o)
+                except Empty :
+                    full_queue = False
+
+
+
     #We wait (block) for arbiter to send us conf
     def wait_initial_conf(self):
         self.have_conf = False
@@ -688,6 +711,9 @@ class Arbiter(Daemon):
                 #REF: doc/shinken-conf-dispatching.png (3)
                 self.dispatcher.dispatch()
                 self.dispatcher.check_bad_dispatch()
+
+                #Now get things from our module instances
+                self.get_objects_from_from_queues()
 
                 #Maybe our satellites links raise new broks. Must reap them
                 self.get_broks_from_satellitelinks()

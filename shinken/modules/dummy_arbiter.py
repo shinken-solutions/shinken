@@ -25,9 +25,14 @@
 print "Detected module : Dummy module for Arbiter"
 
 
+import time
+from shinken.external_command import ExternalCommand
+
+
+
 properties = {
     'type' : 'dummy_arbiter',
-    'external' : False,
+    'external' : True,
     'phases' : ['configuration', 'running'],
     }
 
@@ -43,11 +48,12 @@ def get_instance(plugin):
 #Just print some stuff
 class Dummy_arbiter:
     def __init__(self, name):
-        pass
+        self.name = name
 
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the dummy arbiter module"
+        self.return_queue = self.properties['from_queue']
 
 
     def get_name(self):
@@ -66,3 +72,11 @@ class Dummy_arbiter:
         print "[Dummy] Returning to Arbiter the hosts:", r
         return r
 
+
+    #When you are in "external" mode, that is the main loop of your process
+    def main(self):
+        while True:
+            print "Raise a external command as example"
+            e = ExternalCommand('Viva la revolution')
+            self.return_queue.put(e)
+            time.sleep(1)

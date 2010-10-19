@@ -143,20 +143,20 @@ class ModulesManager(object):
             self.remove_instance(inst)
 
 
-    def get_internal_instances(self):
-        return [inst for inst in self.instances if not inst.properties['external']]
+    def get_internal_instances(self, phase=None):
+        return [inst for inst in self.instances if not inst.properties['external'] and (phase==None or phase in inst.properties['phases'])]
 
 
-    def get_external_instances(self):
-        return [inst for inst in self.instances if inst.properties['external']]
+    def get_external_instances(self, phase=None):
+        return [inst for inst in self.instances if inst.properties['external'] and (phase==None or phase in inst.properties['phases'])]
 
 
-    def get_external_to_queues(self):
-        return [inst.properties['to_queue'] for inst in self.instances if inst.properties['external']]
+    def get_external_to_queues(self, phase=None):
+        return [inst.properties['to_queue'] for inst in self.instances if inst.properties['external'] and (phase==None or phase in inst.properties['phases'])]
 
 
-    def get_external_from_queues(self):
-        return [inst.properties['from_queue'] for inst in self.instances if inst.properties['external']]
+    def get_external_from_queues(self, phase=None):
+        return [inst.properties['from_queue'] for inst in self.instances if inst.properties['external'] and (phase==None or phase in inst.properties['phases'])]
 
 
     def stop_all(self):
