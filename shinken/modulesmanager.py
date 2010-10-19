@@ -158,6 +158,7 @@ class ModulesManager(object):
     def get_external_from_queues(self):
         return [inst.properties['from_queue'] for inst in self.instances if inst.properties['external']]
 
+
     def stop_all(self):
         for inst in self.get_external_instances():
             self.remove_instance(inst)

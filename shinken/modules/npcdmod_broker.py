@@ -36,6 +36,7 @@ print "I am the nocdmod broker for pnp"
 properties = {
     'type' : 'npcdmod',
     'external' : True,
+    'phases' : ['running'],
     }
 
 

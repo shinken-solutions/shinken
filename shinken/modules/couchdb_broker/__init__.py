@@ -23,6 +23,7 @@ print "I am Couchdb Broker"
 
 properties = {
     'type' : 'couchdb',
+    'phases' : ['running'],
     }
 
 #called by the plugin manager to get a broker

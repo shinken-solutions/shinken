@@ -24,7 +24,8 @@ print "I am Livestatus Broker"
 
 properties = {
     'type' : 'livestatus',
-    'external' : True
+    'external' : True,
+    'phases' : ['running'],
     }
 
 

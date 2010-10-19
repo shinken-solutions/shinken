@@ -31,6 +31,7 @@ print "I am simple syslog Broker"
 properties = {
     'type' : 'syslog',
     'external' : False,
+    'phases' : ['running'],
     }
 
 

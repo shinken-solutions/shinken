@@ -22,6 +22,7 @@ print "I am Generic Merlin Broker"
 
 properties = {
     'type' : 'merlindb',
+    'phases' : ['running'],
     }
 
 

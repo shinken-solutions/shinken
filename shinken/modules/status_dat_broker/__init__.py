@@ -23,7 +23,8 @@ print "I am Status Dat Broker"
 
 properties = {
     'type' : 'status_dat',
-    'external' : True
+    'external' : True,
+    'phases' : ['running'],
     }
 
 

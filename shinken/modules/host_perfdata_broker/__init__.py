@@ -23,6 +23,7 @@ print "I am Host Perfdata Broker"
 
 properties = {
     'type' : 'host_perfdata',
+    'phases' : ['running'],
     }
 
 

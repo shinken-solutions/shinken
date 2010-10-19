@@ -23,6 +23,7 @@ print "I am Service Perfdata Broker"
 
 properties = {
     'type' : 'service_perfdata',
+    'phases' : ['running'],
     }
 
 

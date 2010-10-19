@@ -23,6 +23,7 @@ print "I am Ndo Mysql Broker"
 
 properties = {
     'type' : 'ndodb_mysql',
+    'phases' : ['running'],
     }
 
 

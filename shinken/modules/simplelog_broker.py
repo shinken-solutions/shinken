@@ -41,6 +41,7 @@ print "I am simple log Broker"
 properties = {
     'type' : 'simple_log',
     'external' : True,
+    'phases' : ['running'],
     }
 
 
