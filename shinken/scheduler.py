@@ -439,7 +439,6 @@ class Scheduler:
             return
 
             
-            
         #Now load interesting properties in hosts/services
         #Taging retention=False prop that not be directly load
         #Items will be with theirs status, but not in checking, so
@@ -794,9 +793,12 @@ class Scheduler:
                 a.status = 'scheduled'
 
 
+
+
+
     #Main function
     def run(self):
-        #First we see if we've got info in the retention file
+        #Then we see if we've got info in the retention file
         self.retention_load()
 
         #Ok, now all is initilised, we can make the inital broks

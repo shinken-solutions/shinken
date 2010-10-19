@@ -117,8 +117,9 @@ from shinken.scheduler import Scheduler
 from shinken.config import Config
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager
-from shinken.daemon import Daemon#create_daemon, check_parallel_run, change_user
+from shinken.daemon import Daemon
 from shinken.util import to_int, to_bool
+from shinken.modulesmanager import ModulesManager
 
 
 VERSION = "0.3"
@@ -236,10 +237,11 @@ class IForArbiter(Pyro.core.ObjBase):
     #If not, we take it, and if app has a scheduler, we ask it to die,
     #so the new conf  will be load, and a new scheduler created
     def put_conf(self, conf_package):
-        (conf, override_conf) = conf_package
+        (conf, override_conf, modules) = conf_package
         if not self.app.have_conf or self.app.conf.magic_hash != conf.magic_hash:
             self.app.conf = conf
             self.app.override_conf = override_conf
+            self.app.modules = modules
             print "Get conf:", self.app.conf
             self.app.have_conf = True
             print "Have conf?", self.app.have_conf
@@ -317,6 +319,18 @@ class Shinken(Daemon):
                 
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity
+
+        #The module grabber part should be run BEFORE change the pwd with
+        #the daemon mode
+        print "modulemanager file", shinken.modulesmanager.__file__
+        modulespath = os.path.abspath(shinken.modulesmanager.__file__)
+        print "modulemanager absolute file", modulespath
+        #We got one of the files of 
+        elts = os.path.dirname(modulespath).split(os.sep)[:-1]
+        elts.append('shinken')
+        elts.append('modules')
+        self.modulespath = os.sep.join(elts)
+        print "Using modules path : %s" % os.sep.join(elts)
 
         #Try to change the user (not nt for the moment)
         #TODO: change user on nt
@@ -408,6 +422,14 @@ class Shinken(Daemon):
                 timeout = 1.0
 
 
+    #Load and init all modules we've got
+    def load_modules(self):
+        self.modules_manager = ModulesManager('scheduler', self.modulespath, self.modules)
+        self.modules_manager.load()
+        self.mod_instances = self.modules_manager.get_instances()
+
+
+
     #OK, we've got the conf, now we load it
     #and launch scheduler with it
     #we also create interface for poller and reactionner
@@ -423,6 +445,9 @@ class Shinken(Daemon):
             print "Setting our timezone to", self.conf.use_timezone
             os.environ['TZ'] = self.conf.use_timezone
             time.tzset()
+
+        print "I've got modules", self.modules
+        self.load_modules()
 
         #create scheduler with ref of our daemon
         self.sched = Scheduler(self.poller_daemon)
