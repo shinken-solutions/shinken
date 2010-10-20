@@ -414,7 +414,12 @@ class Scheduler:
     #a dict so read can pickup what it wants
     #For now compression is no use, but it can be add easylly 
     #just uncomment :)
-    def update_retention_file(self):
+    def update_retention_file(self, forced=False):
+        #If we set the update to 0, we do not want of this
+        #if we do not forced (like at stopping)
+        if self.conf.retention_update_interval == 0 and not forced:
+            return
+        
         #Do the job for all modules that do the retention
         for inst in self.mod_instances: 
             if 'retention' in inst.properties['phases']:
@@ -879,9 +884,11 @@ class Scheduler:
                 #delete_zombie_checks
                 for i in self.recurrent_works:
                     (name, f, nb_ticks) = self.recurrent_works[i]
-                    if ticks % nb_ticks == 0:
-                        #print "I run function :", name
-                        f()
+                    #A 0 in the tick will just disable it
+                    if nb_ticks != 0:
+                        if ticks % nb_ticks == 0:
+                            #print "I run function :", name
+                            f()
 
                 #if  ticks % 10 == 0:
                 #    self.conf.quick_debug()
