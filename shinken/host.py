@@ -113,7 +113,7 @@ class Host(SchedulingItem):
 
 
     #properties set only for running purpose
-    #retention : load this property from retention
+    #retention : save/load this property from retention
     running_properties = {
         'last_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'next_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'next_schedule']},

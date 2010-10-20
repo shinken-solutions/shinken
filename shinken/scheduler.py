@@ -53,23 +53,23 @@ class Scheduler:
         #The order is important, so make key a int.
         #TODO : at load, change value by configuration one (like reaper time, etc)
         self.recurrent_works = {
-            0 : (self.update_downtimes_and_comments, 1),
-            1 : (self.schedule, 1), #just schedule
-            2 : (self.consume_results , 1), #incorpore checks and dependancies
-            3 : (self.get_new_actions, 1), #now get the news actions (checks, notif) raised
-            4 : (self.get_new_broks, 1), #and broks
-            5 : (self.delete_zombie_checks, 1),
-            6 : (self.delete_zombie_actions, 1),
+            0 : ('update_downtimes_and_comments', self.update_downtimes_and_comments, 1),
+            1 : ('schedule', self.schedule, 1), #just schedule
+            2 : ('consume_results', self.consume_results , 1), #incorpore checks and dependancies
+            3 : ('get_new_actions', self.get_new_actions, 1), #now get the news actions (checks, notif) raised
+            4 : ('get_new_broks', self.get_new_broks, 1), #and broks
+            5 : ('delete_zombie_checks', self.delete_zombie_checks, 1),
+            6 : ('delete_zombie_actions', self.delete_zombie_actions, 1),
             #3 : (self.delete_unwanted_notifications, 1),
-            7 : (self.check_freshness, 10),
-            8 : (self.clean_caches, 1),
-            9 : (self.update_retention_file, 3600),
-            10 : (self.check_orphaned, 60),
+            7 : ('check_freshness', self.check_freshness, 10),
+            8 : ('clean_caches', self.clean_caches, 1),
+            9 : ('update_retention_file', self.update_retention_file, 3600),
+            10 : ('check_orphaned', self.check_orphaned, 60),
             #For NagVis like tools : udpdate our status every 10s
-            11 : (self.get_and_register_update_program_status_brok, 10),
+            11 : ('get_and_register_update_program_status_brok', self.get_and_register_update_program_status_brok, 10),
             #Check for system time change. And AFTER get new checks
             #so they are changed too.
-            12 : (self.check_for_system_time_change, 1),
+            12 : ('check_for_system_time_change', self.check_for_system_time_change, 1),
             }
 
         #stats part
@@ -90,6 +90,7 @@ class Scheduler:
         self.comments = {}
         self.broks = {}
         self.has_full_broks = False #have a initial_broks in broks queue?
+
 
 
     #Load conf for future use
@@ -124,6 +125,20 @@ class Scheduler:
         #self for instance_name
         self.instance_name = conf.instance_name
 
+        #Now we can updte our 'ticks' for special calls
+        #like the retention one, etc
+        self.update_recurrent_works_tick('update_retention_file', self.conf.retention_update_interval)
+
+
+    #Update the 'tick' for a function call in our
+    #recurrent work
+    def update_recurrent_works_tick(self, f_name, new_tick):
+        for i in self.recurrent_works:
+            (name, f, old_tick) = self.recurrent_works[i]
+            if name == f_name:
+                print "Changing the tick for the function", name, new_tick
+                self.recurrent_works[i] = (name, f, new_tick)
+
 
     #Load the modules from our app master
     def load_modules(self, modules_manager, mod_instances):
@@ -140,7 +155,6 @@ class Scheduler:
     #Load the external commander
     def load_external_command(self, e):
         self.external_command = e
-        #self.fifo = e.open()
 
 
     #We've got activity in the fifo, we get and run commands
@@ -864,9 +878,9 @@ class Scheduler:
                 #Do reccurent works like schedule, consume
                 #delete_zombie_checks
                 for i in self.recurrent_works:
-                    (f, nb_ticks) = self.recurrent_works[i]
+                    (name, f, nb_ticks) = self.recurrent_works[i]
                     if ticks % nb_ticks == 0:
-                        #print "I run function :", f.func_name
+                        #print "I run function :", name
                         f()
 
                 #if  ticks % 10 == 0:
