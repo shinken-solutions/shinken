@@ -756,10 +756,6 @@ class Host(SchedulingItem):
         #ok we can put it in our temp action queue
         self.actions.append(e)
 
-
-    @classmethod
-    def linkify(cls, config):
-        cls.linkify_one_command_with_commands(config.commands, 'ochp_command')
         
         
         

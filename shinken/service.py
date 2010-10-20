@@ -710,10 +710,6 @@ class Service(SchedulingItem):
         self.actions.append(e)
         
 
-    @classmethod
-    def linkify(cls, config):
-        cls.linkify_one_command_with_commands(config.commands, 'ocsp_command')
-
 
 
 class Services(Items):
