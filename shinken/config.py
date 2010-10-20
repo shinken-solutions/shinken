@@ -103,7 +103,7 @@ class Config(Item):
                 'bare_update_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused'},
                 'lock_file' : {'required':False, 'default':'/usr/local/shinken/var/arbiterd.pid'},
                 'retain_state_information' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, retain state information will not be implemented because it is useless.'},
-                'state_retention_file' : {'required':False, 'default':'/tmp/retention.dat'},
+                'state_retention_file' : {'required':False, 'default':''},
                 'retention_update_interval' : {'required':False, 'default':'0', 'pythonize': to_int},
                 'use_retained_program_state' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
                 'use_retained_scheduling_info' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
@@ -921,7 +921,7 @@ class Config(Item):
                 mod_to_add.append(mod)
 
         #The user can maybe want to use the retention thing
-        if self.retention_update_interval != 0:
+        if self.retention_update_interval != 0 and self.state_retention_file != '':
             got_retention_module = self.got_scheduler_module_type_defined('pickle_retention_file')
             
             #We need to create the module on the fly?
