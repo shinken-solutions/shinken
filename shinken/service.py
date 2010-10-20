@@ -881,23 +881,44 @@ class Services(Items):
         
         for id in service_to_check:
             s = self.items[id]
+            duplicate_for_hosts = [] #get the list of our host_names if more than 1
+            not_hosts = [] #the list of !host_name so we remove them after
             if not s.is_tpl(): #Exploding template is useless
                 hnames = s.host_name.split(',')
                 hnames = strip_and_uniq(hnames)
                 if len(hnames) >= 2:
                     for hname in hnames:
                         hname = hname.strip()
+
+                        #If the name begin with a !, we put it in
+                        #the not list
+                        if len(hname) > 0 and hname[0] == '!':
+                            not_hosts.append(hname[1:])
+                        else: # the standard list
+                            duplicate_for_hosts.append(hname)
+
+                    #Multiple host_name -> the original service
+                    #must be delete
+                    srv_to_remove.append(id)
+
+                    #Ok now we clean the duplicate_for_hosts with all hosts
+                    #of the not
+                    for hname in not_hosts:
+                        if hname in duplicate_for_hosts:
+                            duplicate_for_hosts.remove(hname)
+                            
+                    #Now we duplicate the service for all host_names
+                    for hname in duplicate_for_hosts:
                         new_s = s.copy()
                         new_s.host_name = hname
                         self.items[new_s.id] = new_s
-                    #Multiple host_name -> the original service
-                    #must be delete
-                    srv_to_remove.append(id)                    
+                        
                 else: #Maybe the hnames was full of same host,
                       #so we must reset the name
                     for hname in hnames: #So even if len == 0, we are protected
                         s.host_name = hname
 
+        #We clean all service that was for multiple hosts.
         self.delete_services_by_id(srv_to_remove)
 
         #Servicegroups property need to be fullfill for got the informations

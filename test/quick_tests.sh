@@ -38,6 +38,7 @@ function launch_and_assert {
 launch_and_assert test_services.py
 launch_and_assert test_hosts.py
 launch_and_assert test_host_missing_adress.py
+launch_and_assert test_not_hostname.py
 launch_and_assert test_bad_contact_call.py
 launch_and_assert test_action.py
 launch_and_assert test_config.py
