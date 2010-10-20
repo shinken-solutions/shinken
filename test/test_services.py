@@ -162,6 +162,46 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.is_state('CRITICAL') == True)
         self.assert_(svc.is_state('c') == True)
 
+    #Check if the check_freshnes is doing it's job
+    def test_check_freshness(self): 
+        self.print_header()
+        #We want an eventhandelr (the perfdata command) to be put in the actions dict
+        #after we got a service check
+        now = time.time()
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        #--------------------------------------------------------------
+        # initialize host/service state
+        #--------------------------------------------------------------
+        #We do not want to be just a string but a real command
+        print "Additonal freshness latency", svc.__class__.additional_freshness_latency
+        self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
+        print "Addi :", svc.last_state_update, svc.freshness_threshold , svc.check_freshness
+        #By default check fresh ness is set at false, so no new checks
+        self.assert_(len(svc.actions) == 0)
+        svc.do_check_freshness()
+        self.assert_(len(svc.actions) == 0)
+
+        #We make it 10s less than it was
+        svc.last_state_update = svc.last_state_update - 10
+
+
+        #Now we active it, with a too small value (now - 10s is still higer than now - (1 - 15, the addition time)
+        #So still no check
+        svc.check_freshness = True
+        svc.freshness_threshold = 1
+        print "Addi:", svc.last_state_update, svc.freshness_threshold , svc.check_freshness
+        svc.do_check_freshness()
+        self.assert_(len(svc.actions) == 0)
+
+        #Ok, now, we remove again 10s. Here we will saw the new entry
+        svc.last_state_update = svc.last_state_update - 10
+        svc.do_check_freshness()
+        self.assert_(len(svc.actions) == 1)
+        #And we check for the message in the log too
+        self.assert_(self.log_match(1, 'Warning: The results of service'))
+
         
 
 

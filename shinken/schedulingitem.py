@@ -109,7 +109,7 @@ class SchedulingItem(Item):
         if not self.in_checking:
             if cls.check_freshness:
                 if self.check_freshness and self.freshness_threshold != 0:
-                    if self.last_state_update < now - self.freshness_threshold:
+                    if self.last_state_update < now - (self.freshness_threshold + cls.additional_freshness_latency):
                         #Raise a log
                         self.raise_freshness_log_entry(int(now-self.last_state_update), int(now-self.freshness_threshold))
                         #And a new check

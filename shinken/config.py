@@ -185,7 +185,7 @@ class Config(Item):
                 'service_freshness_check_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
                 'check_host_freshness' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'check_freshness')]},
                 'host_freshness_check_interval' : {'required':False, 'default':'60', 'pythonize': to_int},
-                'additional_freshness_latency' : {'required':False, 'default':'15', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
+                'additional_freshness_latency' : {'required':False, 'default':'15', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
                 'enable_embedded_perl' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged', 'usage_text' : 'It will surely never be managed, but it should not be useful with poller performances.'},
                 'use_embedded_perl_implicitly' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'date_format' : {'required':False, 'default':'us', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
