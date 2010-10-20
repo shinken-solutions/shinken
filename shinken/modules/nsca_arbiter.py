@@ -30,6 +30,7 @@ import select
 import socket
 import struct
 from ctypes import create_string_buffer
+import random
 
 from shinken.external_command import ExternalCommand
 
@@ -39,6 +40,10 @@ properties = {
     'phases' : ['running'],
     }
 
+def decrypt_xor(data, key):
+    keylen = len(key)
+    crypted = [chr(ord(data[i]) ^ ord(key[i % keylen])) for i in xrange(len(data))]
+    return ''.join(crypted)
 
 #called by the plugin manager to get a broker
 def get_instance(plugin):
@@ -56,7 +61,7 @@ def get_instance(plugin):
     else:
         port = 5667
     if hasattr(plugin, 'encryption_method'):
-        encryption_method = plugin.encryption_method
+        encryption_method = int(plugin.encryption_method)
     else:
 	encryption_method = 0
     if hasattr(plugin, 'password'):
@@ -64,16 +69,19 @@ def get_instance(plugin):
     else:
         password = ""
 
-    instance = NSCA_arbiter(plugin.get_name(), host, port)
+    instance = NSCA_arbiter(plugin.get_name(), host, port, encryption_method, password)
     return instance
 
 
 #Just print some stuff
 class NSCA_arbiter:
-    def __init__(self, name, host, port):
+    def __init__(self, name, host, port, encryption_method, password):
         self.name = name
         self.host = host
         self.port = port
+        self.encryption_method = encryption_method
+        self.password = password
+        self.rng = random.Random(password)
 
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
@@ -104,10 +112,12 @@ class NSCA_arbiter:
          128-131 : unix timestamp
         '''
         init_packet=create_string_buffer(132)
-        init_packet.raw=struct.pack("!128sI","",int(time.mktime(time.gmtime())))
+        iv = ''.join([chr(self.rng.randrange(256)) for i in xrange(128)])
+        init_packet.raw=struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
         socket.send(init_packet)
+	return iv
 
-    def read_check_result(self, data):
+    def read_check_result(self, data, iv):
         '''
         Read the check result
          00-01 : Version
@@ -121,6 +131,11 @@ class NSCA_arbiter:
         '''
         if len(data) != 720:
             return None
+
+        if self.encryption_method == 1:
+		data = decrypt_xor(data,self.password)
+		data = decrypt_xor(data,iv)
+
         (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
 	hostname, sep, dish =  hostname_dirty.partition("\0")
 	service, sep, dish = service_dirty.partition("\0")
@@ -150,6 +165,7 @@ class NSCA_arbiter:
         server.listen(backlog)
         input = [server]
         databuffer = {}
+	IVs = {}
 
         while True:
             inputready,outputready,exceptready = select.select(input,[],[], 0)
@@ -158,7 +174,8 @@ class NSCA_arbiter:
                 if s == server:
                     # handle the server socket
                     client, address = server.accept()
-                    self.send_init_packet(client)
+                    iv = self.send_init_packet(client)
+                    IVs[client] = iv
                     input.append(client)
                 else:
                     # handle all other sockets
@@ -169,8 +186,9 @@ class NSCA_arbiter:
                         databuffer[s] = data
                     if len(databuffer[s]) == 720:
                         # end-of-transmission or an empty line was received
-                        (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s])
+                        (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s],IVs[s])
                         del databuffer[s]
+                        del IVs[s]
 			self.post_command(timestamp,rc,hostname,service,output)
                         try:
                             s.shutdown(2)
