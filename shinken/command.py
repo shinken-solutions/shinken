@@ -83,6 +83,7 @@ class Command(object):
 class CommandCall:
     __slots__ = ('id', 'call', 'command', 'valid', 'args')
     id = 0
+    my_type = 'CommandCall'
     def __init__(self, commands, call, poller_tag=None):
         self.id = self.__class__.id
         self.__class__.id += 1

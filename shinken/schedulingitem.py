@@ -757,6 +757,7 @@ class SchedulingItem(Item):
         self.update_event_and_problem_id()
         self.broks.append(self.get_check_result_brok())
         self.get_obsessive_compulsive_processor_command() 
+        self.get_perfdata_command()
 
 
     def update_event_and_problem_id(self):
@@ -982,3 +983,17 @@ class SchedulingItem(Item):
         return None
 
 
+    #Get the perfdata command with macro resolved for this
+    def get_perfdata_command(self):
+        cls = self.__class__
+        if not cls.process_performance_data or not self.process_perf_data:
+            return
+        
+        if cls.perfdata_command != None:
+            m = MacroResolver()
+            data = self.get_data_for_event_handler()
+            cmd = m.resolve_command(cls.perfdata_command, data)
+            e = EventHandler(cmd, timeout=cls.perfdata_timeout)
+            
+            #ok we can put it in our temp action queue
+            self.actions.append(e)

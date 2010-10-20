@@ -540,7 +540,8 @@ class Config(Item):
         #First linkify myself like for some global commands
         self.linkify_one_command_with_commands(self.commands, 'ocsp_command')
         self.linkify_one_command_with_commands(self.commands, 'ochp_command')
-
+        self.linkify_one_command_with_commands(self.commands, 'host_perfdata_command')
+        self.linkify_one_command_with_commands(self.commands, 'service_perfdata_command')
 
         #Do the simplify AFTER explode groups
         #print "Hostgroups"

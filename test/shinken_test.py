@@ -27,6 +27,7 @@ from shinken.pollerlink import PollerLink
 from shinken.reactionnerlink import ReactionnerLink
 from shinken.brokerlink import BrokerLink
 from shinken.notification import Notification
+from shinken.command import Command
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):

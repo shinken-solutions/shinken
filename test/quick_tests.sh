@@ -58,6 +58,7 @@ launch_and_assert test_illegal_names.py
 launch_and_assert test_notifway.py
 launch_and_assert test_eventids.py
 launch_and_assert test_obsess.py
+launch_and_assert test_commands_perfdata.py
 launch_and_assert test_notification_warning.py
 launch_and_assert test_timeperiod_inheritance.py
 launch_and_assert test_bad_timeperiods.py

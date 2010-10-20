@@ -739,20 +739,14 @@ class Host(SchedulingItem):
     #command. It must be enabled locally and globally
     def get_obsessive_compulsive_processor_command(self):
         cls = self.__class__
-        #print "class", cls.obsess_over
         if not cls.obsess_over or not self.obsess_over_host:
             return
-
-        #print self.ocsp_command.__dict__
-        #print "cmd", cls.ochp_command
+        
         m = MacroResolver()
         data = self.get_data_for_event_handler()
         cmd = m.resolve_command(cls.ochp_command, data)
         e = EventHandler(cmd, timeout=cls.ochp_timeout)
-        #print "DBG: Event handler call created"
-        #print "DBG: ",e.__dict__
-        #self.raise_event_handler_log_entry(self.event_handler)
-
+        
         #ok we can put it in our temp action queue
         self.actions.append(e)
 
