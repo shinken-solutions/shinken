@@ -435,70 +435,11 @@ class Scheduler:
         #Do this job with modules too
         for inst in self.mod_instances:
             if 'retention' in inst.properties['phases']:
-                b = inst.load_retention_objects(self)
+                #give us ourself (full control!) and a log manager object
+                b = inst.load_retention_objects(self, Log())
                 #Stop at the first module that succeed to load the retention
                 if b:
                     return
-
-        #Now the old flat file way :(
-        Log().log("Reading from retention_file %s" % self.conf.state_retention_file)
-        try:
-            f = open(self.conf.state_retention_file, 'rb')
-            all_data = cPickle.load(f)
-            f.close()
-        except EOFError , exp:
-            print exp
-            return
-        except ValueError , exp:
-            print exp
-            return
-        except IOError , exp:
-            print exp
-            return
-        except IndexError , exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            Log().log(s)
-            return
-        except TypeError , exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            Log().log(s)
-            return
-
-            
-        #Now load interesting properties in hosts/services
-        #Taging retention=False prop that not be directly load
-        #Items will be with theirs status, but not in checking, so
-        #a new check will be launch like with a normal begining (random distributed
-        #scheduling)
-
-        ret_hosts = all_data['hosts']
-        for ret_h in ret_hosts:
-            h = self.hosts.find_by_name(ret_h.host_name)
-            if h != None:
-                running_properties = h.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
-                        setattr(h, prop, getattr(ret_h, prop))
-                        for a in h.notifications_in_progress.values():
-                            a.ref = h
-                            self.add(a)
-                        h.update_in_checking()
-
-        ret_services = all_data['services']
-        for ret_s in ret_services:
-            s = self.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
-            if s != None:
-                running_properties = s.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
-                        setattr(s, prop, getattr(ret_s, prop))
-                        for a in s.notifications_in_progress.values():
-                            a.ref = s
-                            self.add(a)
-                        s.update_in_checking()
-        Log().log("We've load data from retention")
 
 
     def check_for_system_time_change(self):

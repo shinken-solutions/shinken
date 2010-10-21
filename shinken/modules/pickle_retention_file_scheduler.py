@@ -85,8 +85,69 @@ class Pickle_retention_scheduler:
 
 
     #Should return if it succeed in the retention load or not
-    def load_retention_objects(self, sched):
+    def load_retention_objects(self, sched, log_mgr):
         print "[PickleRetention] asking me to load the retention objects"
         
-        return False
+        #Now the old flat file way :(
+        log_mgr.log("[PickleRetention]Reading from retention_file %s" % self.path)
+        try:
+            f = open(self.path, 'rb')
+            all_data = cPickle.load(f)
+            f.close()
+        except EOFError , exp:
+            print exp
+            return False
+        except ValueError , exp:
+            print exp
+            return False
+        except IOError , exp:
+            print exp
+            return False
+        except IndexError , exp:
+            s = "WARNING: Sorry, the ressource file is not compatible"
+            log_mgr.log(s)
+            return False
+        except TypeError , exp:
+            s = "WARNING: Sorry, the ressource file is not compatible"
+            log_mgr.log(s)
+            return False
+
+            
+        #Now load interesting properties in hosts/services
+        #Taging retention=False prop that not be directly load
+        #Items will be with theirs status, but not in checking, so
+        #a new check will be launch like with a normal begining (random distributed
+        #scheduling)
+
+        ret_hosts = all_data['hosts']
+        for ret_h in ret_hosts:
+            h = sched.hosts.find_by_name(ret_h.host_name)
+            if h != None:
+                running_properties = h.__class__.running_properties
+                for prop in running_properties:
+                    entry = running_properties[prop]
+                    if 'retention' in entry and entry['retention']:
+                        setattr(h, prop, getattr(ret_h, prop))
+                        for a in h.notifications_in_progress.values():
+                            a.ref = h
+                            sched.add(a)
+                        h.update_in_checking()
+
+        ret_services = all_data['services']
+        for ret_s in ret_services:
+            s = sched.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
+            if s != None:
+                running_properties = s.__class__.running_properties
+                for prop in running_properties:
+                    entry = running_properties[prop]
+                    if 'retention' in entry and entry['retention']:
+                        setattr(s, prop, getattr(ret_s, prop))
+                        for a in s.notifications_in_progress.values():
+                            a.ref = s
+                            sched.add(a)
+                        s.update_in_checking()
+
+        log_mgr.log("[PickleRetention] OK we've load data from retention file")
+
+        return True
 
