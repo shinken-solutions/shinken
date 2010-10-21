@@ -423,23 +423,10 @@ class Scheduler:
         #Do the job for all modules that do the retention
         for inst in self.mod_instances: 
             if 'retention' in inst.properties['phases']:
-                inst.update_retention_objects(self)
+                #Ask it with self to they have full access, and a log object
+                #so they can easily raise log
+                inst.update_retention_objects(self, Log())
 
-        #Now the flat file method
-        try:
-            f = open(self.conf.state_retention_file, 'wb')
-            #Just put hosts/services becauses checks and notifications
-            #are already link into
-            all_data = {'hosts' : self.hosts, 'services' : self.services}
-            #s = cPickle.dumps(all_data)
-            #s_compress = zlib.compress(s)
-            cPickle.dump(all_data, f)
-            #f.write(s_compress)
-            f.close()
-        except IOError , exp:
-            Log().log("Error: retention file creation failed, %s" % str(exp))
-            return
-        Log().log("Updating retention_file %s" % self.conf.state_retention_file)
      
    
     #Load the retention file and get status from it. It do not get all checks in progress

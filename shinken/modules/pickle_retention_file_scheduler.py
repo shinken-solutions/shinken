@@ -26,7 +26,7 @@ print "Detected module : Picle retention file for Scheduler"
 
 
 import time
-from shinken.external_command import ExternalCommand
+import cPickle
 
 
 
@@ -63,12 +63,30 @@ class Pickle_retention_scheduler:
 
 
     #Ok, main function that is called in the retention creation pass
-    def update_retention_objects(self, sched):
+    def update_retention_objects(self, sched, log_mgr):
         print "[PickleRetention] asking me to update the retention objects"
+        #Now the flat file method
+        try:
+            f = open(self.path, 'wb')
+            #Just put hosts/services becauses checks and notifications
+            #are already link into
+            all_data = {'hosts' : sched.hosts, 'services' : sched.services}
+            #s = cPickle.dumps(all_data)
+            #s_compress = zlib.compress(s)
+            cPickle.dump(all_data, f)
+            #f.write(s_compress)
+            f.close()
+        except IOError , exp:
+            log_mgr.log("Error: retention file creation failed, %s" % str(exp))
+            return
+        log_mgr.log("Updating retention_file %s" % self.path)
+        
+
 
 
     #Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched):
         print "[PickleRetention] asking me to load the retention objects"
+        
         return False
 
