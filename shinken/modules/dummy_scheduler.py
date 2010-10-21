@@ -61,12 +61,12 @@ class Dummy_scheduler:
 
 
     #Ok, main function that is called in the retention creation pass
-    def update_retention_objects(self, sched):
+    def update_retention_objects(self, sched, log_mgr):
         print "[Dummy] asking me to update the retention objects"
 
 
     #Should return if it succeed in the retention load or not
-    def load_retention_objects(self, sched):
+    def load_retention_objects(self, sched, log_mrg):
         print "[Dummy] asking me to load the retention objects"
         return False
 

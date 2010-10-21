@@ -22,16 +22,15 @@
 
 
 #This text is print at the import
-print "Detected module : Picle retention file for Scheduler"
+print "Detected module : Memcache retention file for Scheduler"
 
 
 import time
-import cPickle
-
+import memcache
 
 
 properties = {
-    'type' : 'pickle_retention_file',
+    'type' : 'memcache_retention',
     'external' : False,
     'phases' : ['retention'],
     }
@@ -39,24 +38,30 @@ properties = {
 
 #called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a pickle retention scheduler module for plugin %s" % plugin.get_name()
-    path = plugin.path
-    instance = Pickle_retention_scheduler(plugin.get_name(), path)
+    print "Get a memcache retention scheduler module for plugin %s" % plugin.get_name()
+    server = plugin.server
+    port = plugin.port
+    instance = Memcache_retention_scheduler(plugin.get_name(), server, port)
     return instance
 
 
 
 #Just print some stuff
-class Pickle_retention_scheduler:
-    def __init__(self, name, path):
+class Memcache_retention_scheduler:
+    def __init__(self, name, server, port):
         self.name = name
-        self.path = path
+        self.server = server
+        self.port = port
 
     #Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the Pickle file retention scheduler module"
+        print "Initilisation of the memcache module"
         #self.return_queue = self.properties['from_queue']
+        self.mc = memcache.Client(['%s:%s' % (self.server, self.port)], debug=0)
 
+
+#    mc.set("some_key", "Some value")
+#    value = mc.get("some_key")
 
     def get_name(self):
         return self.name
@@ -64,28 +69,24 @@ class Pickle_retention_scheduler:
 
     #Ok, main function that is called in the retention creation pass
     def update_retention_objects(self, sched, log_mgr):
-        print "[PickleRetention] asking me to update the retention objects"
+        print "[MemcacheRetention] asking me to update the retention objects"
         #Now the flat file method
-        try:
-            f = open(self.path, 'wb')
-            #Just put hosts/services becauses checks and notifications
-            #are already link into
-            all_data = {'hosts' : sched.hosts, 'services' : sched.services}
-            #s = cPickle.dumps(all_data)
-            #s_compress = zlib.compress(s)
-            cPickle.dump(all_data, f)
-            #f.write(s_compress)
-            f.close()
-        except IOError , exp:
-            log_mgr.log("Error: retention file creation failed, %s" % str(exp))
-            return
-        log_mgr.log("Updating retention_file %s" % self.path)
-        
+        for h in sched.hosts:
+            key = "HOST-%s" % h.host_name
+            self.mc.set(key, h)
+        for s in sched.services:
+            key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
+            #space are not allowed in memcache key.. so change it by SPACE token
+            key = key.replace(' ', 'SPACE')
+            #print "Using key", key
+            self.mc.set(key, s)
+        log_mgr.log("Retention information updated in Memcache")
 
 
 
     #Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mgr):
+        return False
         print "[PickleRetention] asking me to load the retention objects"
         
         #Now the old flat file way :(
