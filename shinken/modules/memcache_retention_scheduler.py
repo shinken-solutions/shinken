@@ -74,6 +74,7 @@ class Memcache_retention_scheduler:
         for h in sched.hosts:
             key = "HOST-%s" % h.host_name
             self.mc.set(key, h)
+
         for s in sched.services:
             key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
             #space are not allowed in memcache key.. so change it by SPACE token
@@ -86,32 +87,30 @@ class Memcache_retention_scheduler:
 
     #Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mgr):
-        return False
-        print "[PickleRetention] asking me to load the retention objects"
+        print "[MemcacheRetention] asking me to load the retention objects"
         
         #Now the old flat file way :(
-        log_mgr.log("[PickleRetention]Reading from retention_file %s" % self.path)
-        try:
-            f = open(self.path, 'rb')
-            all_data = cPickle.load(f)
-            f.close()
-        except EOFError , exp:
-            print exp
-            return False
-        except ValueError , exp:
-            print exp
-            return False
-        except IOError , exp:
-            print exp
-            return False
-        except IndexError , exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            log_mgr.log(s)
-            return False
-        except TypeError , exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            log_mgr.log(s)
-            return False
+        log_mgr.log("[MemcacheRetention] asking me to load the retention objects")
+        
+        #We got list of loaded data from retention server
+        ret_hosts = []
+        ret_services = []
+
+        #Now the flat file method
+        for h in sched.hosts:
+            key = "HOST-%s" % h.host_name
+            val = self.mc.get(key)
+            if val != None:
+                ret_hosts.append(val)
+
+        for s in sched.services:
+            key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
+            #space are not allowed in memcache key.. so change it by SPACE token
+            key = key.replace(' ', 'SPACE')
+            #print "Using key", key
+            val = self.mc.get(key)
+            if val != None:
+                ret_services.append(val)
 
             
         #Now load interesting properties in hosts/services
@@ -120,7 +119,7 @@ class Memcache_retention_scheduler:
         #a new check will be launch like with a normal begining (random distributed
         #scheduling)
 
-        ret_hosts = all_data['hosts']
+#        ret_hosts = all_data['hosts']
         for ret_h in ret_hosts:
             h = sched.hosts.find_by_name(ret_h.host_name)
             if h != None:
@@ -134,7 +133,7 @@ class Memcache_retention_scheduler:
                             sched.add(a)
                         h.update_in_checking()
 
-        ret_services = all_data['services']
+#        ret_services = all_data['services']
         for ret_s in ret_services:
             s = sched.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
             if s != None:
@@ -148,7 +147,7 @@ class Memcache_retention_scheduler:
                             sched.add(a)
                         s.update_in_checking()
 
-        log_mgr.log("[PickleRetention] OK we've load data from retention file")
+        log_mgr.log("[MemcacheRetention] OK we've load data from memcache server")
 
         return True
 
