@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -20,7 +20,7 @@
 
 
 #This is the class of the Arbiter. It's role is to read configuration,
-#cuts it, and send it to other elements like schedulers, reactionner 
+#cuts it, and send it to other elements like schedulers, reactionner
 #or pollers. It is responsible for hight avaibility part. If a scheduler
 #is dead,
 #it send it's conf to another if available.
@@ -76,7 +76,7 @@ except ImportError:
 
 
 try:
-    import shinken.pyro_wrapper    
+    import shinken.pyro_wrapper
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
@@ -101,7 +101,7 @@ VERSION = "0.3"
 
 
 #Interface for the other Arbiter
-#It connect, and we manage who is the Master, slave etc. 
+#It connect, and we manage who is the Master, slave etc.
 #Here is a also a fnction to have a new conf from the master
 class IArbiters(Pyro.core.ObjBase):
     #we keep arbiter link
@@ -224,7 +224,7 @@ class Arbiter(Daemon):
                 for new_cmd in new_cmds:
                     self.external_commands.append(new_cmd)
 
-                
+
     #Our links to satellites can raise broks. We must send them
     def get_broks_from_satellitelinks(self):
         tabs = [self.conf.brokers, self.conf.schedulerlinks, \
@@ -250,15 +250,15 @@ class Arbiter(Daemon):
     def load_external_command(self, e):
         self.external_command = e
         self.fifo = e.open()
-        
 
-    #Check if our system time change. If so, change our 
+
+    #Check if our system time change. If so, change our
     def check_for_system_time_change(self):
         now = time.time()
         difference = now - self.t_each_loop
         #If we have more than 15 min time change, we need to compensate
         #it
-        
+
         if abs(difference) > 900:
             self.compensate_system_time_change(difference)
 
@@ -279,7 +279,7 @@ class Arbiter(Daemon):
         #We only need to change some value
 
 
-        
+
     def main(self):
         #Log will be broks
         self.log = Log()
@@ -288,29 +288,29 @@ class Arbiter(Daemon):
         self.print_header()
         for line in self.get_header():
             self.log.log(line)#, format = 'TOTO %s\n')
-	    
+
 	#Use to know if we must still be alive or not
         self.must_run = True
-        
+
         print "Loading configuration"
         self.conf = Config()
         #The config Class must have the USERN macro
         #There are 256 of them, so we create online
         Config.fill_usern_macros()
-        
+
         #REF: doc/shinken-conf-dispatching.png (1)
         buf = self.conf.read_config(self.config_files)
-        
+
         raw_objects = self.conf.read_config_buf(buf)
 
         #### Loading Arbiter module part ####
-        
+
         #first we need to get arbtiers and modules first
         #so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
-        
-        
+
+
         self.conf.early_arbiter_linking()
 
         #Search wich Arbiterlink I am
@@ -330,14 +330,14 @@ class Arbiter(Daemon):
             for m in self.me.modules:
                 print m
 
-            #BEWARE: this way of finding path is good if we still 
+            #BEWARE: this way of finding path is good if we still
             #DO NOT HAVE CHANGE PWD!!!
             #Now get the module path. It's in fact the directory modules
             #inside the shinken directory. So let's find it.
             print "modulemanager file", shinken.modulesmanager.__file__
             modulespath = os.path.abspath(shinken.modulesmanager.__file__)
             print "modulemanager absolute file", modulespath
-            #We got one of the files of 
+            #We got one of the files of
             elts = os.path.dirname(modulespath).split(os.sep)[:-1]
             elts.append('shinken')
             elts.append('modules')
@@ -361,7 +361,7 @@ class Arbiter(Daemon):
 
         ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
-        
+
 	#Maybe conf is already invalid
         if not self.conf.conf_is_correct:
             print "***> One or more problems was encountered while processing the config files..."
@@ -391,16 +391,16 @@ class Arbiter(Daemon):
 
         #print "****************** Fill default ******************"
         self.conf.fill_default()
-        
+
         #print "****************** Clean templates ******************"
         self.conf.clean_useless()
-        
+
         #print "****************** Pythonize ******************"
         self.conf.pythonize()
-        
+
         #print "****************** Linkify ******************"
         self.conf.linkify()
-        
+
         #print "*************** applying dependancies ************"
         self.conf.apply_dependancies()
 
@@ -411,7 +411,7 @@ class Arbiter(Daemon):
 
         #Raise warning about curently unmanaged parameters
         self.conf.warn_about_unmanaged_parameters()
-        
+
         #print "************** Exlode global conf ****************"
         self.conf.explode_global_conf()
 
@@ -420,7 +420,7 @@ class Arbiter(Daemon):
 
         #************* Print warning about useless parameters in Shinken **************"
         self.conf.notice_about_useless_parameters()
-        
+
         #print "****************** Correct ?******************"
         self.conf.is_correct()
 
@@ -446,13 +446,13 @@ class Arbiter(Daemon):
 
 	#If I am a spare, I must wait a (true) conf from Arbiter Master
         self.wait_conf = self.me.spare
-        
+
         #print "Dump realms"
         #for r in self.conf.realms:
         #    print r.get_name(), r.__dict__
         print "\n"
 
-        
+
         #REF: doc/shinken-conf-dispatching.png (2)
         Log().log("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
@@ -468,7 +468,7 @@ class Arbiter(Daemon):
 	#Exit if we are just here for config checking
         if self.verify_only:
             sys.exit(0)
-	
+
         #self.conf.debug()
 
         #Some properties need to be "flatten" (put in strings)
@@ -476,7 +476,7 @@ class Arbiter(Daemon):
         #BEWARE: after the cutting part, because we stringify some properties
         self.conf.prepare_for_sending()
 
-	
+
         #Ok, here we must check if we go on or not.
         #TODO : check OK or not
         self.pidfile = self.conf.lock_file
@@ -484,11 +484,11 @@ class Arbiter(Daemon):
         self.user = self.conf.nagios_user
         self.group = self.conf.nagios_group
         self.workdir = os.path.expanduser('~'+self.user)
-        
+
         #If we go, we must go in daemon or not
         #Check if another Scheduler is not running (with the same conf)
         self.check_parallel_run(do_replace)
-                
+
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity
 
@@ -499,7 +499,7 @@ class Arbiter(Daemon):
             self.change_user(insane)
         else:
             Log().log("Warning : you can't change user on this system")
-        
+
         #Now the daemon part if need
         if is_daemon:
             self.create_daemon(do_debug=debug, debug_file=debug_file)
@@ -524,7 +524,7 @@ class Arbiter(Daemon):
         #Main loop
         while True:
 	    #If I am a spare, I wait for the master arbiter to send me
-	    #true conf. When 
+	    #true conf. When
             if self.me.spare:
                 self.wait_initial_conf()
             else:#I'm the master, I've got a conf
@@ -532,7 +532,7 @@ class Arbiter(Daemon):
                 self.have_conf = True
 
             #Ok, now It've got a True conf, Now I wait to get too much
-            #time without 
+            #time without
             if self.me.spare:
                 print "I must wait now"
                 self.wait_for_master_death()
@@ -569,7 +569,7 @@ class Arbiter(Daemon):
             avant = time.time()
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
-            
+
             #Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
             avant += diff
@@ -622,7 +622,7 @@ class Arbiter(Daemon):
 
             if timeout < 0:
                 timeout = 1.0
-            
+
             #Now check if master is dead or not
             now = time.time()
             if now - self.last_master_speack > 5:
@@ -666,8 +666,8 @@ class Arbiter(Daemon):
 	#Now create the external commander
         if os.name != 'nt':
           e = ExternalCommandManager(self.conf, 'dispatcher')
-	
-	#Scheduler need to know about external command to activate it 
+
+	#Scheduler need to know about external command to activate it
         #if necessary
           self.load_external_command(e)
         else:
@@ -728,7 +728,7 @@ class Arbiter(Daemon):
                 print "Nb Broks send:", self.nb_broks_send
                 #Log().log("Nb Broks send: %d" % self.nb_broks_send)
                 self.nb_broks_send = 0
-                
+
 
                 #Now send all external commands to schedulers
                 for ext_cmd in self.external_commands:
@@ -736,7 +736,7 @@ class Arbiter(Daemon):
                 #It's send, do not keep them
                 #TODO: check if really send. Queue by scheduler?
                 self.external_commands = []
-						
+
             if timeout < 0:
                 timeout = 1.0
 
@@ -759,8 +759,8 @@ def usage(name):
     print "\tPrint detailed help screen"
     print " --debug"
     print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-    
-    
+
+
 
 
 #Here we go!

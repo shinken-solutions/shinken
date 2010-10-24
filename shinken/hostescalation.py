@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -36,13 +36,13 @@ class Hostescalation(Item):
                 'contacts' : {'required':True},
                 'contact_groups' : {'required':True},
                 }
-    
+
     running_properties = {}
-    
-    
+
+
     macros = {}
-    
-    
+
+
     #For debugging purpose only (nice name)
     def get_name(self):
         return ''
@@ -52,12 +52,12 @@ class Hostescalations(Items):
     name_property = ""
     inner_class = Hostescalation
 
-            
+
     #We look for contacts property in contacts and
     def explode(self, escalations):
         #Now we explode all escalations (host_name, service_description) to escalations
         for es in self:
-            properties = es.__class__.properties            
+            properties = es.__class__.properties
             creation_dict = {'escalation_name' : 'Generated-Hostescalation-%d' % es.id}
             for prop in properties:
                 if hasattr(es, prop):

@@ -32,8 +32,8 @@ class TestConfig(ShinkenTest):
 
     def create_db(self):
         self.db = DBSqlite("/usr/local/shinken/var/merlindb.sqlite", table_prefix = '')
-    
-        
+
+
     def test_connect_database(self):
         self.create_db()
         self.db.connect_database()
@@ -43,7 +43,7 @@ class TestConfig(ShinkenTest):
         self.db.connect_database()
         q = "DELETE FROM service WHERE instance_id = '0'"
         self.db.execute_query(q)
-        
+
 
 
 if __name__ == '__main__':

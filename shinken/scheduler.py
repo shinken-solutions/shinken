@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -40,13 +40,13 @@ from log import Log
 class Scheduler:
     def __init__(self, daemon):
         self.daemon = daemon #Pyro daemon for incomming orders/askings
-        self.must_run = True #When set to false by us, we die and 
+        self.must_run = True #When set to false by us, we die and
                              #arbiter launch a new Scheduler
 
         self.waiting_results = [] #satellites returns us results
-        #and for not waiting them, we are putting them here and 
+        #and for not waiting them, we are putting them here and
         #consume thems later
-        
+
         #Every N seconds we call functions like consume, del zombies
         #etc. All of theses functions are in recurrent_works with the
         #every tick to run. So must be integer and > 0
@@ -119,7 +119,7 @@ class Scheduler:
         self.commands = conf.commands
 
         #self.status_file = StatusFile(self)        #External status file
-        self.instance_id = conf.instance_id #From Arbiter. Use for 
+        self.instance_id = conf.instance_id #From Arbiter. Use for
                                             #Broker to disting betweens
                                             #schedulers
         #self for instance_name
@@ -214,7 +214,7 @@ class Scheduler:
         max_broks = 2 * (len(self.hosts) + len(self.services))
         max_actions = 2* len(self.contacts) * (len(self.hosts) + len(self.services))
 
-        #For checks, it's not very simple: 
+        #For checks, it's not very simple:
         #For checks, they may be referred to their host/service
         #We do not just del them in checks, but also in their service/host
         #We want id of less than max_id - 2*max_checks
@@ -262,12 +262,12 @@ class Scheduler:
                     del self.actions[i]
         else:
             nb_actions_drops = 0
-        
+
         if nb_checks_drops != 0 or nb_broks_drops != 0 or nb_actions_drops != 0:
             print "WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops)
             Log().log("WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
 
-            
+
     #For tunning purpose we use caches but we do not whant them to explode
     #So we clean thems
     def clean_caches(self):
@@ -318,7 +318,7 @@ class Scheduler:
                 if (c.poller_tag == None and poller_tags == []) or c.poller_tag in poller_tags:
                     if c.status == 'scheduled' and c.is_launchable(now):
                         c.status = 'inpoller'
-                        #We do not send c, because it it link (c.ref) to 
+                        #We do not send c, because it it link (c.ref) to
                         #host/service and poller do not need it. It just
                         #need a shell with id, command and defaults
                         #parameters. It's the goal of copy_shell
@@ -335,7 +335,7 @@ class Scheduler:
                         item = a.ref
                         childnotifications = []
                         if not item.notification_is_blocked_by_item(a.type, now):
-                            # If it is possible to send notifications of this type at the current time, then create 
+                            # If it is possible to send notifications of this type at the current time, then create
                             # a single notification for each contact of this item.
                             childnotifications = item.scatter_notification(a)
                             for c in childnotifications:
@@ -350,7 +350,7 @@ class Scheduler:
                                 # notif_nb of the master notification was already current_notification_number+1.
                                 # If notifications were sent, then host/service-counter will also be incremented
                                 item.current_notification_number = a.notif_nb
-                        
+
                             if item.notification_interval != 0:
                                 # We must continue to send notifications.
                                 # Just leave it in the actions list and set it to "scheduled" and it will be found again later
@@ -408,27 +408,27 @@ class Scheduler:
         #They are gone, we keep none!
         self.broks = {}
         return res
-    
-    
+
+
     #Update the retention file and give it all of ours data in
     #a dict so read can pickup what it wants
-    #For now compression is no use, but it can be add easylly 
+    #For now compression is no use, but it can be add easylly
     #just uncomment :)
     def update_retention_file(self, forced=False):
         #If we set the update to 0, we do not want of this
         #if we do not forced (like at stopping)
         if self.conf.retention_update_interval == 0 and not forced:
             return
-        
+
         #Do the job for all modules that do the retention
-        for inst in self.mod_instances: 
+        for inst in self.mod_instances:
             if 'retention' in inst.properties['phases']:
                 #Ask it with self to they have full access, and a log object
                 #so they can easily raise log
                 inst.update_retention_objects(self, Log())
 
-     
-   
+
+
     #Load the retention file and get status from it. It do not get all checks in progress
     #for the moment, just the status and the notifications.
     def retention_load(self):
@@ -540,8 +540,8 @@ class Scheduler:
         self.has_full_broks = True
 
         Log().log("Created initial Broks: %d" % len(self.broks))
-        
-    
+
+
     #Crate a brok with program status info
     def get_and_register_program_status_brok(self):
         b = self.get_program_status_brok()
@@ -553,7 +553,7 @@ class Scheduler:
         b = self.get_program_status_brok()
         b.type = 'update_program_status'
         self.add(b)
-        
+
 
     #Get a brok with program status
     #TODO : GET REAL VALUES
@@ -598,7 +598,7 @@ class Scheduler:
         for c in self.waiting_results:
             self.put_results(c)
         self.waiting_results = []
-        
+
         #Then we consume thems
         #print "**********Consume*********"
         for c in self.checks.values():
@@ -650,7 +650,7 @@ class Scheduler:
             del self.actions[id] # ZANKUSEN!
 
 
-    #Check for downtimes start and stop, and register 
+    #Check for downtimes start and stop, and register
     #them if need
     def update_downtimes_and_comments(self):
         broks = []
@@ -699,7 +699,7 @@ class Scheduler:
                 #this one has to start now
                 broks.extend(dt.enter()) # returns downtimestart notifications
                 broks.append(dt.ref.get_update_status_brok())
-            
+
         for b in broks:
             self.add(b)
 
@@ -710,7 +710,7 @@ class Scheduler:
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
                 i.schedule()
-                    
+
 
     #Main actions reaper function : it get all new checks,
     #notification and event handler from hosts and services
@@ -781,7 +781,7 @@ class Scheduler:
 
         gogogo = time.time()
         self.t_each_loop = time.time() #use to track system time change
-        
+
         while self.must_run :
             #Ok, still a difference between 3 and 4 ...
             if shinken.pyro_wrapper.pyro_version == 3:
@@ -836,7 +836,7 @@ class Scheduler:
                     m_nb += 1
                 if m_nb != 0:
                     print "Average latency:", m, m_nb,  m / m_nb
-                
+
                 #print "Notifications:", nb_notifications
                 now = time.time()
                 #for a in self.actions.values():
@@ -851,7 +851,7 @@ class Scheduler:
 
                 time_elapsed = now - gogogo
                 print "Check average =", int(self.nb_check_received / time_elapsed), "checks/s"
-                
+
                 #for n in  self.actions.values():
                 #    if n.ref_type == 'service':
                 #        print 'Service notification', n

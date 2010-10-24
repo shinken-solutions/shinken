@@ -81,7 +81,7 @@ class TestConfig(ShinkenTest):
         test_win_web_qual_0 = self.find_host('test_win_web_qual_0')
         test_linux_file_prod_0 = self.find_host('test_linux_file_prod_0')
 
-        
+
 
         hg_linux = self.find_hostgroup('linux')
         hg_web = self.find_hostgroup('web')
@@ -93,7 +93,7 @@ class TestConfig(ShinkenTest):
 
         self.assert_(test_linux_web_prod_0 in hg_linux.members)
         self.assert_(test_linux_web_prod_0 not in hg_file.members)
-        
+
         #First the service define for linux only
         svc = self.find_service('test_linux_web_prod_0', 'linux_0')
         print "Service Linux only", svc.get_dbg_name()
@@ -112,7 +112,7 @@ class TestConfig(ShinkenTest):
         print "Service Linux|web"
         r = self.srv_define_only_on('linux_OR_web_0', [test_linux_web_prod_0, test_linux_web_qual_0, test_win_web_prod_0, test_win_web_qual_0, test_linux_file_prod_0])
         self.assert_(r == True)
-        
+
         print "(linux|web),file"
         r = self.srv_define_only_on('linux_OR_web_PAR_file0', [test_linux_web_prod_0, test_linux_web_qual_0, test_win_web_prod_0, test_win_web_qual_0, test_linux_file_prod_0, test_linux_file_prod_0])
         self.assert_(r == True)

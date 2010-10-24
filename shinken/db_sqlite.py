@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -30,12 +30,12 @@ class DBSqlite(DB):
         self.table_prefix = table_prefix
         self.db_path = db_path
 
-    
+
     #Create the database connexion
     def connect_database(self):
         self.db = sqlite3.connect(self.db_path)
         self.db_cursor = self.db.cursor ()
-        
+
 
     #Just run the query
     def execute_query(self, query):

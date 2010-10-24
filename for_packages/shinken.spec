@@ -59,7 +59,7 @@ Nagios est une marque déposée de Nagios Enterprises.
 
 %build
 
-# Force python 2.6 
+# Force python 2.6
 %{__sed} -i 's/\/env python$/\/env python26/' bin/*.py
 
 # build .pyc files
@@ -114,7 +114,7 @@ echo Adding %{shinken_user} user ...
 /sbin/chkconfig %{sysv_service} on
 
 
-#====[ pre uninstall scripts 
+#====[ pre uninstall scripts
 %preun
 if [ $1 -eq 0 ]; then
 	# Stop and remove initscript :

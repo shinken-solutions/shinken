@@ -32,7 +32,7 @@ from shinken.brok import Brok
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     #Change ME :)
     def test_simplelog(self):
         print self.conf.modules
@@ -45,7 +45,7 @@ class TestConfig(ShinkenTest):
         self.assert_(mod.database_path == '/usr/local/shinken/var/merlindb.sqlite')
         self.assert_(mod.module_type == 'merlindb')
         self.assert_(mod.backend == 'sqlite')
-        
+
 
         md = get_instance(mod)
         print "TOTO", md.db_backend.__dict__
@@ -56,7 +56,7 @@ class TestConfig(ShinkenTest):
         r = md.db_backend.db_cursor.execute("SELECT count(*) from timeperiod WHERE instance_id = '0'")
         self.assert_(r.fetchall() == [(0,)])
 
-        
+
 
 
 

@@ -55,7 +55,7 @@ function check_process_nb {
     else
 	echo "Ok, got $NB $1"
     fi
-} 
+}
 
 function is_file_present {
     if [ -f $1 ]
@@ -84,23 +84,23 @@ function check_good_run {
     echo "Check for 1 Scheduler"
     check_process_nb scheduler 1
     is_file_present $VAR/schedulerd.pid
-    
+
     echo "Check for 6 pollers (1 master, 1 for multiporcess module (queue manager), 4 workers)"
     check_process_nb poller 6
     is_file_present $VAR/pollerd.pid
-    
+
     echo "Check for 2 reactionners (1 master, 1 for multiporcess module (queue manager) 1 worker)"
     check_process_nb reactionner 3
     is_file_present $VAR/reactionnerd.pid
-    
+
     echo "Check for 3 brokers (one master, one for status.dat, one for log)"
     check_process_nb broker 3
     is_file_present $VAR/brokerd.pid
-    
+
     echo "Check for 1 arbiter"
     check_process_nb arbiter 1
     is_file_present $VAR/arbiterd.pid
-    
+
     echo "Now checking for good file prensence"
     ls var
     is_file_present $VAR/nagios.log

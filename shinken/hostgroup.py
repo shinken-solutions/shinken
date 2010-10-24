@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -35,7 +35,7 @@ class Hostgroup(Itemgroup):
         'notes_url' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'action_url' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'members' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        #Shinken specific 
+        #Shinken specific
         'unknown_members' : {'required': False, 'default': []}
         }
 
@@ -73,7 +73,7 @@ class Hostgroup(Itemgroup):
         #First we tag the hg so it will not be explode
         #if a son of it already call it
         self.already_explode = True
-        
+
         #Now the recursiv part
         #rec_tag is set to False avery HG we explode
         #so if True here, it must be a loop in HG
@@ -117,8 +117,8 @@ class Hostgroups(Itemgroups):
         self.linkify_hg_by_hst(hosts)
         self.linkify_hg_by_realms()
 
-    
-    #We just search for each hostgroup the id of the hosts 
+
+    #We just search for each hostgroup the id of the hosts
     #and replace the name by the id
     def linkify_hg_by_hst(self, hosts):
         for hg in self.itemgroups.values():
@@ -134,7 +134,7 @@ class Hostgroups(Itemgroups):
                         new_mbrs.append(h)
                     else:
                         hg.unknown_members.append(mbr)
-                
+
             #Make members uniq
             new_mbrs = list(set(new_mbrs))
 
@@ -145,7 +145,7 @@ class Hostgroups(Itemgroups):
     #More than an explode function, but we need to already
     #have members so... Will be really linkify just after
     #And we explode realm in ours members, but do not overide
-    #a host realm value if it's already set    
+    #a host realm value if it's already set
     def linkify_hg_by_realms(self):
         #Now we explode the realm value if we've got one
         #The group realm must not overide a host one (warning?)
@@ -193,4 +193,4 @@ class Hostgroups(Itemgroups):
                 del tmp_hg.rec_tag
             del tmp_hg.already_explode
 
-        
+

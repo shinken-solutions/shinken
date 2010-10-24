@@ -27,7 +27,7 @@ from shinken_test import *
 
 
 class TestConfig(ShinkenTest):
-    
+
     def setUp(self):
         self.setup_with_file('etc/nagios_timeperiod_inheritance.cfg')
 
@@ -35,14 +35,14 @@ class TestConfig(ShinkenTest):
     #Change ME :)
     def test_dummy(self):
         #
-        # Config is not correct because of a wrong relative path 
+        # Config is not correct because of a wrong relative path
         # in the main config file
         #
         print "Get the Timeperiods"
         now = time.time()
         tp = self.sched.timeperiods.find_by_name("24x7")
         print "TP", tp.__dict__
-        
+
         #sunday should be inherited from templates
         print "Check for sunday in the timeperiod"
         got_sunday = False
@@ -51,7 +51,7 @@ class TestConfig(ShinkenTest):
             if hasattr(dr, 'day') and dr.day == 'sunday':
                 got_sunday = True
         self.assert_(got_sunday == True)
-            
+
 
 if __name__ == '__main__':
     unittest.main()

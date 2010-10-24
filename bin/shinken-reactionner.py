@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -19,13 +19,13 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is an application for launch actions 
+#This class is an application for launch actions
 #like notifications or event handlers
 #The actionner listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where actionner will take 
+#the configuration gived by arbiter is schedulers where actionner will take
 #actions.
-#When already launch and have a conf, actionner still listen to arbiter (one 
-#a timeout) if arbiter wants it to have a new conf, actionner forgot old 
+#When already launch and have a conf, actionner still listen to arbiter (one
+#a timeout) if arbiter wants it to have a new conf, actionner forgot old
 #chedulers (and actions into) take new ones and do the (new) job.
 
 import sys, os

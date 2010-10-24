@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -29,11 +29,11 @@ class Downtime:
     #to one (1), downtime will start and end at the times specified by the
     #"start" and "end" arguments.
     #Otherwise, downtime will begin between the "start" and "end" times and last
-    #for "duration" seconds. The "start" and "end" arguments are specified 
-    #in time_t format (seconds since the UNIX epoch). The specified service 
+    #for "duration" seconds. The "start" and "end" arguments are specified
+    #in time_t format (seconds since the UNIX epoch). The specified service
     #downtime can be triggered by another downtime entry if the "trigger_id"
-    #is set to the ID of another scheduled downtime entry. 
-    #Set the "trigger_id" argument to zero (0) if the downtime for the 
+    #is set to the ID of another scheduled downtime entry.
+    #Set the "trigger_id" argument to zero (0) if the downtime for the
     #specified service should not be triggered by another downtime entry.
     def __init__(self, ref, start_time, end_time, fixed, trigger_id, duration, author, comment):
         self.id = self.__class__.id
@@ -121,7 +121,7 @@ class Downtime:
             pass
         self.del_automatic_comment()
         self.can_be_deleted = True
-        #when a downtime ends and the service was critical 
+        #when a downtime ends and the service was critical
         #a notification is sent with the next critical check
         #So we should set a flag here which signals consume_result
         #to send a notification
@@ -157,7 +157,7 @@ class Downtime:
             minutes, seconds = divmod(remainder, 60)
             text = "This %s has been scheduled for flexible downtime starting between %s and %s and lasting for a period of %d hours and %d minutes. Notifications for the %s will not be sent out during that time period." % (self.ref.my_type, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.start_time)), time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.end_time)), hours, minutes, self.ref.my_type)
         if self.ref.my_type == 'host':
-            comment_type = 1 
+            comment_type = 1
         else:
             comment_type = 2
         c = Comment(self.ref, False, "(Nagios Process)", text, comment_type, 2, 0, False, 0)

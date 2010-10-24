@@ -80,7 +80,7 @@ class Npcd_broker:
         except:
             print "could not open file %s" % self.perfdata_file
             raise
-            
+
 
     #Called by Broker so we can do init stuff
     def init(self):
@@ -105,7 +105,7 @@ class Npcd_broker:
                 f(b)
 
 
-    # Handle the global process_performance_data setting. If it is not active, this module will not write 
+    # Handle the global process_performance_data setting. If it is not active, this module will not write
     # any lines to the perfdata_file
     def manage_program_status_brok(self, b):
         if self.process_performance_data and not b.data['process_performance_data']:
@@ -174,7 +174,7 @@ class Npcd_broker:
             return True
         except:
             return False
-            
+
 
     def rotate(self):
         target = '%s/%s.%s' % (self.perfdata_spool_dir, self.perfdata_spool_filename, time.time())
@@ -202,4 +202,4 @@ class Npcd_broker:
                 self.rotate()
                 last_rotated = time.time()
         self.logfile.close()
-        
+

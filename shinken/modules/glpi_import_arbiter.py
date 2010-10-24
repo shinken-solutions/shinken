@@ -59,7 +59,7 @@ class Glpi_importer_arbiter:
         self.login_name = login_name
         self.login_password = login_password
         self.use_property = use_property
-        
+
 
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):

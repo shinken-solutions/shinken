@@ -69,7 +69,7 @@ else:
                         'libexec' : {'path' : "/usr/lib/shinken/plugins", 'owner'  : 'shinken', 'group' : 'shinken'},
                         }
 
-    
+
 
 #The default file must have good values for the directories:
 #etc, var and where to push scripts that launch the app.
@@ -95,7 +95,7 @@ def generate_default_shinken_file():
 
 def parse_config_file(config_file):
     global paths_and_owners
-    
+
     config = ConfigParser.ConfigParser()
     config.read(config_file)
     if config._sections == {}:
@@ -189,13 +189,13 @@ setup(
               (var_path, ['var/void_for_git']),
               (libexec_path, ['libexec/check.sh']),
               ]
-  
+
 )
 
 
 #Ok now the less good part :(
 #I didn't find any easy way to get it :(
-#We will chown shinken:shinken for all /etc/shinken 
+#We will chown shinken:shinken for all /etc/shinken
 #and /var/lib/shinken.
 def get_uid(user_name):
     try:
@@ -205,7 +205,7 @@ def get_uid(user_name):
         print "Maybe you should create this user"
         sys.exit(2)
 
-        
+
 def get_gid(group_name):
     try:
         return getgrnam(group_name)[2]
@@ -279,7 +279,7 @@ if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv):
     update_ini_file_with_var(os.sep.join([root_path, etc_path, 'schedulerd.ini']))
     update_ini_file_with_var(os.sep.join([root_path, etc_path, 'pollerd.ini']))
     update_ini_file_with_var(os.sep.join([root_path, etc_path, 'reactionnerd.ini']))
-    
+
     #And now the resource.cfg path with the value of libexec path
     print "Now updating the /etc/shinken/resource.cfg file with good libexec path"
     update_resource_cfg_file_with_libexec(os.sep.join([root_path, etc_path, 'resource.cfg']))

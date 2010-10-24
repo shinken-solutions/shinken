@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -93,12 +93,12 @@ class Service(SchedulingItem):
 
         #Shinken specific
         'poller_tag' : {'required' : False, 'default' : None},
-        
+
         'resultmodulations' : {'required' : False, 'default' : ''},
         'escalations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'maintenance_period' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         }
-    
+
     #properties used in the running state
     running_properties = {
         'last_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
@@ -130,7 +130,7 @@ class Service(SchedulingItem):
 
         'act_depend_of_me' : {'default' : [] }, #elements that depend of me, so the reverse than just uppper
         'chk_depend_of_me' : {'default' : []}, #elements that depend of me
-        
+
         'last_state_update' : {'default' : time.time(), 'fill_brok' : ['full_status'], 'retention' : True},
         'checks_in_progress' : {'default' : []}, # no brok because checks are too linked
         'notifications_in_progress' : {'default' : {}, 'retention' : True}, # no broks because notifications are too linked
@@ -165,7 +165,7 @@ class Service(SchedulingItem):
         'customs' : {'default' : {}},
         'notified_contacts' : {'default' : set()}, #use for having all contacts we have notified
         'in_scheduled_downtime' : {'default' : False, 'retention' : True},
-        'in_scheduled_downtime_during_last_check' : {'default' : False, 'retention' : True}, 
+        'in_scheduled_downtime_during_last_check' : {'default' : False, 'retention' : True},
         'actions' : {'default' : []}, #put here checks and notif raised
         'broks' : {'default' : []}, #and here broks raised
 
@@ -173,7 +173,7 @@ class Service(SchedulingItem):
         #and taht will raised real warning/errors during the is_correct
         'configuration_warnings' : {'default' : []},
         'configuration_errors' : {'default' : []},
-        
+
         #Problem/impact part
         'is_problem' : {'default' : False, 'fill_brok' : ['full_status']},
         'is_impact' : {'default' : False, 'fill_brok' : ['full_status']},
@@ -185,7 +185,7 @@ class Service(SchedulingItem):
 
         #Easy Service dep definition
         'service_dependencies' : {'required' : False, 'default' : '', 'pythonize' : to_split}, #TODO : find a way to brok it?
-        
+
         }
 
     #Mapping between Macros and properties (can be prop or a function)
@@ -238,7 +238,7 @@ class Service(SchedulingItem):
         'normal_check_interval' : 'check_interval',
         'retry_check_interval' : 'retry_interval'
         }
-        
+
 
     #Give a nice name output
     def get_name(self):
@@ -249,7 +249,7 @@ class Service(SchedulingItem):
     def get_dbg_name(self):
         return "%s/%s" % (self.host.host_name, self.service_description)
 
-    
+
     #Call by picle for dataify service
     #Here we do not want a dict, it's too heavy
     #We create a list with properties inlined
@@ -257,7 +257,7 @@ class Service(SchedulingItem):
     def __getstate__(self):
         cls = self.__class__
         #id is not in *_properties
-        res = [self.id] 
+        res = [self.id]
         for prop in cls.properties:
             res.append(getattr(self, prop))
         for prop in cls.running_properties:
@@ -340,7 +340,7 @@ class Service(SchedulingItem):
             self.host.act_depend_of_me.append( (self, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
 
 
-    #Register the dependancy between 2 service for action (notification etc)    
+    #Register the dependancy between 2 service for action (notification etc)
     def add_service_act_dependancy(self, srv, status, timeperiod, inherits_parent):
         #first I add the other the I depend on in MY list
         self.act_depend_of.append( (srv, status, 'logic_dep', timeperiod, inherits_parent) )
@@ -460,7 +460,7 @@ class Service(SchedulingItem):
         return False
 
 
-    #The last time when the state was not OK 
+    #The last time when the state was not OK
     def last_time_non_ok_or_up(self):
         non_ok_times = filter(lambda x: x > self.last_time_ok, [self.last_time_warning, self.last_time_critical, self.last_time_unknown])
         if len(non_ok_times) == 0:
@@ -505,7 +505,7 @@ class Service(SchedulingItem):
             Log().log("SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s" % (self.host.get_name(), self.get_name(), self.state, self.state_type, self.attempt, \
                                                                        command.get_name()))
 
-        
+
     #Raise a log entry with FLAPPING START alert like
     #SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
@@ -620,7 +620,7 @@ class Service(SchedulingItem):
         # TODO
         # forced notification
         # pass if this is a custom notification
-     
+
         # Block if notifications are program-wide disabled
         if not self.enable_notifications:
             return True
@@ -654,11 +654,11 @@ class Service(SchedulingItem):
         if type == 'ACKNOWLEDGEMENT':
             if self.state == self.ok_up:
                 return True
-        
+
         # When in downtime, only allow end-of-downtime notifications
         if self.scheduled_downtime_depth > 1 and (type != 'DOWNTIMEEND' or type != 'DOWNTIMECANCELLED'):
             return True
-            
+
         # Block if host is in a scheduled downtime
         if self.host.scheduled_downtime_depth > 0:
             return True
@@ -684,11 +684,11 @@ class Service(SchedulingItem):
             return True
 
         return False
-    
-    
-            
 
-    #Get a oc*p command if item has obsess_over_*  
+
+
+
+    #Get a oc*p command if item has obsess_over_*
     #command. It must be enabled locally and globally
     def get_obsessive_compulsive_processor_command(self):
         cls = self.__class__
@@ -699,7 +699,7 @@ class Service(SchedulingItem):
         data = self.get_data_for_event_handler()
         cmd = m.resolve_command(cls.ocsp_command, data)
         e = EventHandler(cmd, timeout=cls.ocsp_timeout)
-        
+
         #ok we can put it in our temp action queue
         self.actions.append(e)
 
@@ -712,7 +712,7 @@ class Services(Items):
     inner_class = Service #use for know what is in items
     #Create the reversed list for speedup search by host_name/name
     #We also tag service already in list : they are twins. It'a a bad things.
-    #Hostgroups service have an ID higer thant host service. So it we tag 
+    #Hostgroups service have an ID higer thant host service. So it we tag
     #an id that already are in the list, this service is already
     #exist, and is a host,
     #or a previous hostgroup, but define before.
@@ -731,7 +731,7 @@ class Services(Items):
         #For service, the reversed_list is not used for
         #search, so we del it
         del self.reversed_list
-                    
+
 
 
     #TODO : finish serach to use reversed
@@ -787,15 +787,15 @@ class Services(Items):
         #(just the escalation here, not serviceesca or hostesca).
         #This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
-    
-    
+
+
     #We can link services with hosts so
     #We can search in O(hosts) instead
     #of O(services) for common cases
     def optimize_service_search(self, hosts):
         self.hosts = hosts
-    
-    
+
+
     #We just search for each host the id of the host
     #and replace the name by the id
     #+ inform the host we are a service of him
@@ -818,7 +818,7 @@ class Services(Items):
         for id in ids:
             del self.items[id]
 
-            
+
     #It's used to change old Nagios2 names to
     #Nagios3 ones
     def old_properties_names_to_new(self):
@@ -862,23 +862,23 @@ class Services(Items):
 
     #We create new service if necessery (host groups and co)
     def explode(self, hosts, hostgroups, contactgroups, servicegroups, servicedependencies):
-        #The "old" services will be removed. All services with 
+        #The "old" services will be removed. All services with
         #more than one host or a host group will be in it
         srv_to_remove = []
-        
+
 
         #items::explode_host_groups_into_hosts
         #take all hosts from our hostgroup_name into our host_name property
         self.explode_host_groups_into_hosts(hosts, hostgroups)
-        
+
         #items::explode_contact_groups_into_contacts
         #take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
- 
+
         #Then for every host create a copy of the service with just the host
         #because we are adding services, we can't just loop in it
         service_to_check = self.items.keys()
-        
+
         for id in service_to_check:
             s = self.items[id]
             duplicate_for_hosts = [] #get the list of our host_names if more than 1
@@ -906,13 +906,13 @@ class Services(Items):
                     for hname in not_hosts:
                         if hname in duplicate_for_hosts:
                             duplicate_for_hosts.remove(hname)
-                            
+
                     #Now we duplicate the service for all host_names
                     for hname in duplicate_for_hosts:
                         new_s = s.copy()
                         new_s.host_name = hname
                         self.items[new_s.id] = new_s
-                        
+
                 else: #Maybe the hnames was full of same host,
                       #so we must reset the name
                     for hname in hnames: #So even if len == 0, we are protected

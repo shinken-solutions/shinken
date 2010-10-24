@@ -28,11 +28,11 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     #Change ME :)
     def test_dummy(self):
         #
-        # Config is not correct because of a wrong relative path 
+        # Config is not correct because of a wrong relative path
         # in the main config file
         #
         print "Get the hosts and services"

@@ -33,7 +33,7 @@ class TestConfig(ShinkenTest):
     def get_hst(self):
         return self.sched.hosts.find_by_name("test_host_0")
 
-    
+
     #Look if get_*_name return the good result
     def test_get_name(self):
         hst = self.get_hst()
@@ -90,7 +90,7 @@ class TestConfig(ShinkenTest):
         self.assert_(hst.is_correct() == True)
         hst.contacts = contacts
         hst.contact_groups = contact_groups
-        
+
         hst.notifications_enabled = True
         self.assert_(hst.is_correct() == True)
 

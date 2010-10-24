@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -24,7 +24,7 @@ from item import Item, Items
 
 class Hostdependency(Item):
     id = 0
-    
+
 #F is dep of D
 #host_name			Host B
 #	service_description		Service D
@@ -44,7 +44,7 @@ class Hostdependency(Item):
                 'notification_failure_criteria' : {'required':False, 'default' : 'n', 'pythonize' : to_split},
                 'dependency_period' : {'required':False, 'default' : ''}
                 }
-    
+
     running_properties = {}
 
 
@@ -52,7 +52,7 @@ class Hostdependency(Item):
     #(debugging happens more often than expected...)
     def get_name(self):
         return self.dependent_host_name+'/'+self.host_name
-    
+
 
 
 class Hostdependencies(Items):
@@ -63,10 +63,10 @@ class Hostdependencies(Items):
 
     #We create new servicedep if necessery (host groups and co)
     def explode(self):
-        #The "old" dependencies will be removed. All dependencies with 
+        #The "old" dependencies will be removed. All dependencies with
         #more than one host or a host group will be in it
         hstdep_to_remove = []
-        
+
         #Then for every host create a copy of the dependency with just the host
         #because we are adding services, we can't just loop in it
         hostdeps = self.items.keys()
@@ -80,7 +80,7 @@ class Hostdependencies(Items):
                         new_hd = hd.copy()
                         new_hd.dependent_host_name = hname
                         self.items[new_hd.id] = new_hd
-                    hstdep_to_remove.append(id)    
+                    hstdep_to_remove.append(id)
         self.delete_hostsdep_by_id(hstdep_to_remove)
 
 
@@ -101,8 +101,8 @@ class Hostdependencies(Items):
                 hd.dependent_host_name = dh
             except AttributeError , exp:
                 print exp
-                
-                
+
+
     #We just search for each hostdep the id of the host
     #and replace the name by the id
     def linkify_hd_by_tp(self, timeperiods):

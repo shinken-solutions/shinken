@@ -33,7 +33,7 @@ class TestConfig(ShinkenTest):
     def get_svc(self):
         return self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
-    
+
     #Look if get_*_name return the good result
     def test_get_name(self):
         svc = self.get_svc()
@@ -90,7 +90,7 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.is_correct() == True)
         svc.contacts = contacts
         svc.contact_groups = contact_groups
-        
+
         svc.notifications_enabled = True
         self.assert_(svc.is_correct() == True)
 
@@ -163,7 +163,7 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.is_state('c') == True)
 
     #Check if the check_freshnes is doing it's job
-    def test_check_freshness(self): 
+    def test_check_freshness(self):
         self.print_header()
         #We want an eventhandelr (the perfdata command) to be put in the actions dict
         #after we got a service check
@@ -202,10 +202,10 @@ class TestConfig(ShinkenTest):
         #And we check for the message in the log too
         self.assert_(self.log_match(1, 'Warning: The results of service'))
 
-        
+
 
 
 if __name__ == '__main__':
     unittest.main()
 
-    
+

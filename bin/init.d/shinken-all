@@ -25,7 +25,7 @@ start() {
         su - $SHINKEN_USER -c "$SHINKEN_BIN/launch_broker.sh"
         su - $SHINKEN_USER -c "$SHINKEN_BIN/launch_arbiter.sh"
 #        chown -R $SHINKEN_GROUP:$NAGIOS_GROUP $SHINKEN_VAR
-        echo_success 
+        echo_success
         echo
 
 }
@@ -42,9 +42,9 @@ stop() {
         if [ $count -gt 0 ]; then
             killall python2.6
         fi
-        echo_success 
+        echo_success
         echo
- 
+
 }
 
 case "$1" in

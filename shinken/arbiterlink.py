@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -41,19 +41,19 @@ class ArbiterLink(SatelliteLink):
                 'data_timeout' : {'required' : False, 'default' : '120', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'max_check_attempts' : {'required' : False, 'default' : '3','pythonize': to_int, 'fill_brok' : ['full_status']},
                 }
- 
-    running_properties = {'con' : {'default' : None},                                                  
+
+    running_properties = {'con' : {'default' : None},
                           'broks' : {'default' : []},
                           'attempt' : {'default' : 0, 'fill_brok' : ['full_status']}, # the number of failed attempt
                           'reachable' : {'default' : False, 'fill_brok' : ['full_status']}, # can be network ask or not (dead or check in timeout or error)
                           }
 
     macros = {}
-    
-    
+
+
     def get_name(self):
         return self.arbiter_name
-    
+
 
     #Check is required prop are set:
     #contacts OR contactgroups is need
@@ -67,12 +67,12 @@ class ArbiterLink(SatelliteLink):
                 state = False #Bad boy...
         return state
 
-    
+
     def is_me(self):
         print "Hostname:%s, gethostname:%s" % (self.host_name, socket.gethostname())
         return self.host_name == socket.gethostname()
-    
-    
+
+
     def give_satellite_cfg(self):
         return {'port' : self.port, 'address' : self.address, 'name' : self.arbiter_name}
 
@@ -96,11 +96,11 @@ class ArbiterLinks(SatelliteLinks):
     name_property = "name"
     inner_class = ArbiterLink
 
-    
+
     #We must have a realm property, so we find our realm
     def linkify(self, modules):
         self.linkify_s_by_plug(modules)
- 
+
 
     def linkify_s_by_plug(self, modules):
         for s in self:

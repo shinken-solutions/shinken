@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -22,7 +22,7 @@
 #This class revolv Macro in commands by looking at the macros list
 #in Class of elements. It give a propertie that call be callable or not.
 #It not callable, it's a simple properties and remplace the macro with the value
-#If callable, it's a method that is call for getting the value. for exemple, to 
+#If callable, it's a method that is call for getting the value. for exemple, to
 #get the number of service in a host, you call a method to get the
 # len(host.services)
 
@@ -54,13 +54,13 @@ class MacroResolver(Borg):
         'TOTALSERVICESUNKNOWNUNHANDLED' : 'get_total_services_unknown_unhandled',
         'TOTALSERVICEPROBLEMS' : 'get_total_service_problems',
         'TOTALSERVICEPROBLEMSUNHANDLED' : 'get_total_service_problems_unhandled',
-        
+
         'LONGDATETIME' : 'get_long_date_time',
         'SHORTDATETIME' : 'get_short_date_time',
         'DATE' : 'get_date',
         'TIME' : 'get_time',
         'TIMET' : 'get_timet',
-        
+
         'PROCESSSTARTTIME' : 'get_process_start_time',
         'EVENTSTARTTIME' : 'get_events_start_time',
 
@@ -73,7 +73,7 @@ class MacroResolver(Borg):
         # For searching class and elements for ondemand
         #we need link to types
         self.conf = conf
-        self.lists_on_demand = [] 
+        self.lists_on_demand = []
         self.hosts = conf.hosts
         #For special void host_name handling...
         self.host_class = self.hosts.inner_class
@@ -114,7 +114,7 @@ class MacroResolver(Borg):
 
         #self.cache[s] = macros
         return macros
-                
+
 
     #Get a value from a propertie of a element
     #Prop can ba a function or a propertie
@@ -129,7 +129,7 @@ class MacroResolver(Borg):
         except AttributeError , exp:
             return str(exp)
 
-    
+
     #For some macros, we need to delete unwanted caracters
     def delete_unwanted_caracters(self, s):
         for c in self.illegal_macro_output_chars:
@@ -141,7 +141,7 @@ class MacroResolver(Borg):
     #the macros of the datas object
     def get_env_macros(self, data):
         env = {}
-        
+
         clss = [d.__class__ for d in data]
         for o in data:
             for cls in clss:
@@ -173,16 +173,16 @@ class MacroResolver(Borg):
         #until we reach the botom. So the last loop is when we do
         #not still have macros :)
         still_got_macros = True
-        
+
         while still_got_macros:
-            
+
             #Ok, we want the macros in the command line
             macros = self.get_macros(c_line)
 
             #We can get out if we do not have macros this loop
             still_got_macros = (len(macros)!=0)
             #print "Still go macros:", still_got_macros
-            
+
             #Put in the macros the type of macro for all macros
             self.get_type_of_macro(macros, clss)
             #Now we get values from elements
@@ -227,7 +227,7 @@ class MacroResolver(Borg):
     #MACRO name (ARGN? -> argn_type,
     #HOSTBLABLA -> class one and set Host in class)
     #_HOSTTOTO -> HOST CUSTOM MACRO TOTO
-    #$SERVICESTATEID:srv-1:Load$ -> MACRO SERVICESTATEID of 
+    #$SERVICESTATEID:srv-1:Load$ -> MACRO SERVICESTATEID of
     #the service Load of host srv-1
     def get_type_of_macro(self, macros, clss):
         for macro in macros:
@@ -351,7 +351,7 @@ class MacroResolver(Borg):
     def get_timet(self):
         return str(int(time.time()))
 
-    
+
     def get_total_hosts_up(self):
         return len([h for h in self.hosts if h.state == 'UP'])
 
@@ -360,11 +360,11 @@ class MacroResolver(Borg):
 
     def get_total_hosts_unreacheable(self):
         return len([h for h in self.hosts if h.state == 'UNREACHABLE'])
-    
+
     #TODO
     def get_total_hosts_unreacheable_unhandled(self):
         return 0
-    
+
 
     def get_total_host_problems(self):
         return len([h for h in self.hosts if h.is_problem])

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -83,7 +83,7 @@ class EventHandler(Action):
             setattr(new_n, prop, val)
         return new_n
 
-    
+
     def get_return_from(self, e):
         self.exit_status  = e.exit_status
         self.output = e.output
@@ -91,7 +91,7 @@ class EventHandler(Action):
         self.check_time = e.check_time
         self.execution_time = e.execution_time
         self.perf_data = e.perf_data
-        
+
 
     def get_outputs(self, out, max_plugins_output_length):
         elts = out.split('\n')
@@ -106,7 +106,7 @@ class EventHandler(Action):
         if len(elts) > 1:
             self.long_output = '\n'.join(elts[1:])
 
-    
+
 #    def execute(self):
 #        print "Launching EVENT HANDLER command", self.command
 #        child = spawn ('/bin/sh -c "%s"' % self.command)
@@ -128,8 +128,8 @@ class EventHandler(Action):
 
     def is_launchable(self, t):
         return t > self.t_to_go
-    
-    
+
+
     def set_status(self, status):
         self.status = status
 
@@ -137,11 +137,11 @@ class EventHandler(Action):
     def get_status(self):
         return self.status
 
-    
+
     def get_output(self):
         return self.output
 
-    
+
     def __str__(self):
         return "Check %d status:%s command:%s" % (self.id, self.status, self.command)
 

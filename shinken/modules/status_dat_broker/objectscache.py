@@ -42,8 +42,8 @@ Service.get_status_dat_full_name = get_full_name
 
 class ObjectsCacheFile:
     #prop : is the internal name if it is different than the name in the output file
-    #required : 
-    #depythonize : 
+    #required :
+    #depythonize :
     #default :
     out_map = {Host : {
             'host_name' : {'required' : True},
@@ -115,7 +115,7 @@ class ObjectsCacheFile:
             'retain_status_information' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
             'retain_nonstatus_information' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
             },
-              
+
         Contact : {
             'contact_name' : {'required' : True, 'default' : '0'},
             'alias' : {'required' : False, 'default' : '0'},
@@ -213,8 +213,8 @@ class ObjectsCacheFile:
 #            'serial_host_check_stats' : {'prop' : None, 'default' : '0'}
 #            }
     }
-               
-                   
+
+
 
     def __init__(self, path, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands):
         #self.conf = scheduler.conf
@@ -242,14 +242,14 @@ class ObjectsCacheFile:
                     prop = display
                 else:
                     prop = type_map[display]['prop']
-                    
+
                 if prop is not None and hasattr(elt, prop) and getattr(elt, prop) != None:
                     value = getattr(elt, prop)
-                
+
                     #Maybe it's not a value, but a function link
                     if callable(value):
                         value = value()
-                            
+
                     if 'depythonize' in type_map[display]:
                         f = type_map[display]['depythonize']
                         if callable(f):
@@ -283,12 +283,12 @@ class ObjectsCacheFile:
                     value = ''
                 if len(str(value)) > 0:
                     output += '\t' + display + '\t' + str(value) + '\n'
-                        
+
         return output
 
 
     def create_or_update(self):
-        
+
         output = ''
         now = time.time()
         output += '''########################################
@@ -301,7 +301,7 @@ class ObjectsCacheFile:
         output += '# Created: %s\n' % time.ctime()
         output += '########################################\n\n'
         #print "Create output :", output
-        
+
         for tp in self.timeperiods.values():
             tmp = self.create_output(tp)
             output += 'define timeperiod {\n' + tmp + '\t}\n\n'
@@ -339,7 +339,7 @@ class ObjectsCacheFile:
 
 
         #print "Create output :", output
-        
+
         try :
             temp_fh, temp_objects_cache_file = tempfile.mkstemp(dir=os.path.dirname(self.path))
             os.write(temp_fh, output)

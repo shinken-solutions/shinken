@@ -32,7 +32,7 @@ class TestConfig(ShinkenTest):
 
     def create_db(self):
         self.db = DB(table_prefix = 'test_')
-    
+
     #Change ME :)
     def test_create_insert_query(self):
         self.create_db()
@@ -40,7 +40,7 @@ class TestConfig(ShinkenTest):
         q = self.db.create_insert_query('instances' , data)
         self.assert_(q == "INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , 'master of the universe'  )")
 
-        
+
     def test_update_query(self):
         self.create_db()
         data = {'id' : "1", "is_master" : True, 'plop' : "master of the universe"}
@@ -48,7 +48,7 @@ class TestConfig(ShinkenTest):
         q = self.db.create_update_query('instances' , data, where)
         #beware of the last space
         self.assert_(q == "UPDATE test_instances set is_master='1' , id='1' , plop='master of the universe'  WHERE is_master='1' and id='1' ")
-        
+
 
 
 if __name__ == '__main__':

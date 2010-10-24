@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -35,7 +35,7 @@ import time, math
 #without having to send value at regular interval
 #(but it's more efficient if you do this :) ) and not
 #having a list and all. Just an object, an update and a get
-#You can define m : the average is for m minutes. The val is 
+#You can define m : the average is for m minutes. The val is
 #the initial value. It's better if it's 0 but you can choice.
 
 
@@ -66,7 +66,7 @@ class Load:
         except ZeroDivisionError: #do not care
             pass
 
-    
+
     def get_load(self):
         return self.val
 

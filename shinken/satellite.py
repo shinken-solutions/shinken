@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -21,7 +21,7 @@
 
 #This class is an interface for reactionner and poller
 #The satallite listen configuration from Arbiter in a port
-#the configuration gived by arbiter is schedulers where actionner will 
+#the configuration gived by arbiter is schedulers where actionner will
 #take actions.
 #When already launch and have a conf, actionner still listen to arbiter
 #(one a timeout)
@@ -39,7 +39,7 @@ import cPickle
 import random
 
 try:
-    import shinken.pyro_wrapper    
+    import shinken.pyro_wrapper
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
@@ -143,8 +143,8 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
     #Use by arbiter to know if we have a conf or not
-    #can be usefull if we must do nothing but 
-    #we are not because it can KILL US! 
+    #can be usefull if we must do nothing but
+    #we are not because it can KILL US!
     def have_conf(self):
         return self.app.have_conf
 
@@ -154,7 +154,7 @@ class IForArbiter(Pyro.core.ObjBase):
     #and wait a new conf)
     #Us : No please...
     #Arbiter : I don't care, hasta la vista baby!
-    #Us : ... <- Nothing! We are die! you don't follow 
+    #Us : ... <- Nothing! We are die! you don't follow
     #anything or what?? Reading code is not a job for eyes only...
     def wait_new_conf(self):
         print "Arbiter want me to wait a new conf"
@@ -177,7 +177,7 @@ class IBroks(Pyro.core.ObjBase):
     def get_running_id(self):
         return self.running_id
 
-		
+
     #poller or reactionner ask us actions
     def get_broks(self):
         #print "We ask us broks"
@@ -217,7 +217,7 @@ class Satellite(Daemon):
 
         #Check if another Scheduler is not running (with the same conf)
         self.check_parallel_run(do_replace)
-        
+
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity
 
@@ -241,13 +241,13 @@ class Satellite(Daemon):
         #self.m = Queue() #Slave -> Master
         self.manager = Manager()
         self.returns_queue = self.manager.list()
-        
+
         #Ours schedulers
         self.schedulers = {}
         self.workers = {} #dict of active workers
-        
+
         self.nb_actions_in_workers = 0
-        
+
         #Init stats like Load for workers
         self.wait_ratio = Load(initial_value=1)
 
@@ -300,7 +300,7 @@ class Satellite(Daemon):
         self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
         #We update stats
         self.nb_actions_in_workers =- 1
-        
+
 
     #Return the chk to scheduler and clean them
     #REF: doc/shinken-action-queues.png (6)
@@ -330,7 +330,7 @@ class Satellite(Daemon):
                 except Exception , exp:
                     print ''.join(Pyro.util.getPyroTraceback(exp))
                     sys.exit(0)
-            
+
             #We clean ONLY if the send is OK
             if send_ok :
                 sched['wait_homerun'].clear()
@@ -372,11 +372,11 @@ class Satellite(Daemon):
                 timeout = 1.0
 
             if timeout < 0:
-                timeout = 1.0        
+                timeout = 1.0
 
-                
+
     #The arbiter can resent us new conf in the daemon port.
-    #We do not want to loose time about it, so it's not a bloking 
+    #We do not want to loose time about it, so it's not a bloking
     #wait, timeout = 0s
     #If it send us a new conf, we reinit the connexions of all schedulers
     def watch_for_new_conf(self, timeout_daemon):
@@ -389,7 +389,7 @@ class Satellite(Daemon):
                     shinken.pyro_wrapper.handleRequests(self.daemon, sock)
 
                     #have_new_conf is set with put_conf
-                    #so another handle will not make a con_init 
+                    #so another handle will not make a con_init
                     if self.have_new_conf:
                         for sched_id in self.schedulers:
                             Log().log("Init watch_for_new_conf")
@@ -397,13 +397,13 @@ class Satellite(Daemon):
                         self.have_new_conf = False
 
 
-    #Check if our system time change. If so, change our 
+    #Check if our system time change. If so, change our
     def check_for_system_time_change(self):
         now = time.time()
         difference = now - self.t_each_loop
         #If we have more than 15 min time change, we need to compensate
         #it
-        
+
         if abs(difference) > 900:
             self.compensate_system_time_change(difference)
 
@@ -422,7 +422,7 @@ class Satellite(Daemon):
     def compensate_system_time_change(self, difference):
         Log().log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
         #We only need to change some value
-        
+
 
 
 
@@ -508,7 +508,7 @@ class Satellite(Daemon):
         #OK, now really del workers
         for id in w_to_del:
             del self.workers[id]
-        
+
 
     #Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
@@ -521,11 +521,11 @@ class Satellite(Daemon):
         #TODO : if len(workers) > 2*wish, maybe we can kill a worker?
 
 
-    #We get new actions from schedulers, we create a Message ant we 
+    #We get new actions from schedulers, we create a Message ant we
     #put it in the s queue (from master to slave)
     #REF: doc/shinken-action-queues.png (1)
     def get_new_actions(self):
-        #Here are the differences between a 
+        #Here are the differences between a
         #poller and a reactionner:
         #Poller will only do checks,
         #reactionner do actions
@@ -574,7 +574,7 @@ class Satellite(Daemon):
             except Exception , exp:
                 print ''.join(Pyro.util.getPyroTraceback(exp))
                 sys.exit(0)
-            
+
 
 
     #Main function, will loop forever
@@ -590,7 +590,7 @@ class Satellite(Daemon):
         #Now we create the interfaces
         self.interface = IForArbiter(self)
         self.brok_interface = IBroks(self)
-        
+
         #And we register them
         self.uri2 = shinken.pyro_wrapper.register(self.daemon, self.interface, "ForArbiter")
         self.uri3 = shinken.pyro_wrapper.register(self.daemon, self.brok_interface, "Broks")
@@ -641,12 +641,12 @@ class Satellite(Daemon):
                 if timeout < 0: #for go in timeout
                     print "Time out", timeout
                     raise Empty
-                    
+
             except Empty , exp: #Time out Part
                 print " ======================== "
                 after = time.time()
                 timeout = self.polling_interval
-                
+
                 #Check if zombies workers are among us :)
                 #If so : KILL THEM ALL!!!
                 self.check_and_del_zombie_workers()
@@ -661,7 +661,7 @@ class Satellite(Daemon):
 
 
                 #Before return or get new actions, see how we manage
-                #old ones : are they still in queue (s)? If True, we 
+                #old ones : are they still in queue (s)? If True, we
                 #must wait more or at least have more workers
                 wait_ratio = self.wait_ratio.get_load()
                 if self.s.qsize() != 0 and wait_ratio < 5*self.polling_interval:
@@ -669,7 +669,7 @@ class Satellite(Daemon):
                     self.wait_ratio.update_load(wait_ratio * 2)
                 else:
                     #Go to self.polling_interval on normal run, if wait_ratio
-                    #was >5*self.polling_interval, 
+                    #was >5*self.polling_interval,
                     #it make it come near 5 because if < 5, go up :)
                     self.wait_ratio.update_load(self.polling_interval)
                 wait_ratio = self.wait_ratio.get_load()
@@ -692,9 +692,9 @@ class Satellite(Daemon):
 
                 #Now we can get new actions from schedulers
                 self.get_new_actions()
-                
+
                 #We send all finished checks
                 #REF: doc/shinken-action-queues.png (6)
                 self.manage_returns()
-                
-                
+
+

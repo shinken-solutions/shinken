@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -105,7 +105,7 @@ except ImportError:
 sys.path.insert(0, '.')
 
 try:
-    import shinken.pyro_wrapper    
+    import shinken.pyro_wrapper
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
@@ -144,7 +144,7 @@ class IChecks(Pyro.core.ObjBase):
     def get_running_id(self):
         return self.running_id
 
-		
+
     #poller or reactionner ask us actions
     def get_checks(self , do_checks=False, do_actions=False, poller_tags=[]):
         #print "We ask us checks"
@@ -153,14 +153,14 @@ class IChecks(Pyro.core.ObjBase):
         self.sched.nb_checks_send += len(res)
         return res
 
-	
+
     #poller or reactionner are putting us results
     def put_results(self, results):
         nb_received = len(results)
         self.sched.nb_check_received += nb_received
         print "Received %d results" % nb_received
         self.sched.waiting_results.extend(results)
-		
+
         #for c in results:
         #self.sched.put_results(c)
         return True
@@ -182,7 +182,7 @@ class IBroks(Pyro.core.ObjBase):
     def get_running_id(self):
         return self.running_id
 
-		
+
     #poller or reactionner ask us actions
     def get_broks(self):
         #print "We ask us broks"
@@ -200,7 +200,7 @@ class IBroks(Pyro.core.ObjBase):
         if not self.sched.has_full_broks:
             self.sched.broks.clear()
             self.sched.fill_initial_broks()
-            
+
 
     #Ping? Pong!
     def ping(self):
@@ -247,20 +247,20 @@ class IForArbiter(Pyro.core.ObjBase):
             print "Have conf?", self.app.have_conf
             print "Just apres reception"
 
-            #if app already have a scheduler, we must say him to 
+            #if app already have a scheduler, we must say him to
             #DIE Mouahahah
             #So It will quit, and will load a new conf (and create a brand new scheduler)
             if hasattr(self.app, "sched"):
                 self.app.sched.die()
-			
+
 
     #Arbiter want to know if we are alive
     def ping(self):
         return True
 
     #Use by arbiter to know if we have a conf or not
-    #can be usefull if we must do nothing but 
-    #we are not because it can KILL US! 
+    #can be usefull if we must do nothing but
+    #we are not because it can KILL US!
     def have_conf(self):
         return self.app.have_conf
 
@@ -270,7 +270,7 @@ class IForArbiter(Pyro.core.ObjBase):
     #and wait a new conf)
     #Us : No please...
     #Arbiter : I don't care, hasta la vista baby!
-    #Us : ... <- Nothing! We are die! you don't follow 
+    #Us : ... <- Nothing! We are die! you don't follow
     #anything or what??
     def wait_new_conf(self):
         print "Arbiter want me to wait a new conf"
@@ -299,7 +299,7 @@ class Shinken(Daemon):
     #Then, it wait for a first configuration
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
         self.print_header()
-        
+
         #From daemon to manage signal. Call self.manage_signal if
         #exists, a dummy function otherwise
         self.set_exit_handler()
@@ -316,7 +316,7 @@ class Shinken(Daemon):
 
         #Check if another Scheduler is not running (with the same conf)
         self.check_parallel_run(do_replace)
-                
+
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity
 
@@ -325,7 +325,7 @@ class Shinken(Daemon):
         print "modulemanager file", shinken.modulesmanager.__file__
         modulespath = os.path.abspath(shinken.modulesmanager.__file__)
         print "modulemanager absolute file", modulespath
-        #We got one of the files of 
+        #We got one of the files of
         elts = os.path.dirname(modulespath).split(os.sep)[:-1]
         elts.append('shinken')
         elts.append('modules')
@@ -338,7 +338,7 @@ class Shinken(Daemon):
             self.change_user(insane)
         else:
             print "Sorry, you can't change user on this system"
-        
+
         #Now the daemon part if need
         if is_daemon:
             self.create_daemon(do_debug=debug, debug_file=debug_file)
@@ -349,7 +349,7 @@ class Shinken(Daemon):
 
         #Config Class must be filled with USERN Macro
         Config.fill_usern_macros()
-		
+
         #create the server
         print "Using working directory : %s" % os.path.abspath(self.workdir)
         Pyro.config.PYRO_STORAGE = self.workdir
@@ -362,11 +362,11 @@ class Shinken(Daemon):
 
         #Now the interface
         i_for_arbiter = IForArbiter(self)
-        
+
         self.uri2 = shinken.pyro_wrapper.register(self.poller_daemon, i_for_arbiter, "ForArbiter")
 
         print "The Arbiter Interface is at:", self.uri2
-		
+
         #Ok, now the conf
         self.must_run = True
         self.wait_initial_conf()
@@ -389,7 +389,7 @@ class Shinken(Daemon):
         except OSError, exp:
             print "Error un deleting pid file:", exp
         sys.exit(0)
-		
+
 
     #We wait (block) for arbiter to send us conf
     def wait_initial_conf(self):
@@ -399,14 +399,14 @@ class Shinken(Daemon):
         timeout = 1.0
         while not self.have_conf :
             socks = shinken.pyro_wrapper.get_sockets(self.poller_daemon)
-            
+
             avant = time.time()
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:
-                        #Cal the wrapper to manage the good 
+                        #Cal the wrapper to manage the good
                         #handleRequests call of daemon
                         shinken.pyro_wrapper.handleRequests(self.poller_daemon, s)
                         apres = time.time()
@@ -417,7 +417,7 @@ class Shinken(Daemon):
                 sys.stdout.write(".")
                 sys.stdout.flush()
                 timeout = 1.0
-                
+
             if timeout < 0:
                 timeout = 1.0
 
@@ -440,7 +440,7 @@ class Shinken(Daemon):
             val = self.override_conf[prop]
             setattr(self.conf, prop, val)
 
-            
+
         if self.conf.use_timezone != 'NOTSET':
             print "Setting our timezone to", self.conf.use_timezone
             os.environ['TZ'] = self.conf.use_timezone
@@ -451,7 +451,7 @@ class Shinken(Daemon):
 
         #create scheduler with ref of our daemon
         self.sched = Scheduler(self.poller_daemon)
-		
+
         #give it an interface
         #But first remove previous interface if exists
         if self.ichecks != None:
@@ -462,7 +462,7 @@ class Shinken(Daemon):
         self.ichecks = IChecks(self.sched)
         self.uri = shinken.pyro_wrapper.register(self.poller_daemon, self.ichecks, "Checks")
         print "The Checks Interface uri is:", self.uri
-		
+
         #Same for Broks
         if self.ibroks != None:
             print "Deconnecting previous Broks Interface from daemon"
@@ -489,16 +489,16 @@ class Shinken(Daemon):
 
         #self.conf.dump()
         #self.conf.quick_debug()
-		
+
         #Now create the external commander
         #it's a applyer : it role is not to dispatch commands,
         #but to apply them
         e = ExternalCommandManager(self.conf, 'applyer')
 
-        #Scheduler need to know about external command to 
+        #Scheduler need to know about external command to
         #activate it if necessery
         self.sched.load_external_command(e)
-		
+
         #External command need the sched because he can raise checks
         e.load_scheduler(self.sched)
 
@@ -507,7 +507,7 @@ class Shinken(Daemon):
     def main(self):
         #ok, if we are here, we've got the conf
         self.load_conf()
-		
+
         print "Configuration Loaded"
         while self.must_run:
             self.sched.run()
@@ -519,7 +519,7 @@ class Shinken(Daemon):
                 else:
                     self.wait_initial_conf()
                     self.load_conf()
-				
+
 
 ################### Process launch part
 def usage(name):

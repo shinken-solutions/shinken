@@ -42,7 +42,7 @@ def get_instance(plugin):
     if hasattr(plugin, 'oracle_home'):
         os.environ['ORACLE_HOME'] = plugin.oracle_home
         print "INFO: setting Oracle_HOME :", plugin.oracle_home
-    
+
     user = plugin.user
     password = plugin.password
     database = plugin.database

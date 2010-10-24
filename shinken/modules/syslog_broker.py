@@ -18,7 +18,7 @@
 
 
 #This Class is a plugin for the Shinken Broker. It is in charge
-#to brok log into the syslog 
+#to brok log into the syslog
 
 
 import syslog
@@ -59,7 +59,7 @@ class Syslog_broker:
     def init(self):
         pass
         #self.q = self.properties['to_queue']
-    
+
 
     def get_name(self):
         return self.name
@@ -85,4 +85,4 @@ class Syslog_broker:
 #        while True:
 #            b = self.q.get() # can block here :)
 #            self.manage_brok(b)
-                        
+

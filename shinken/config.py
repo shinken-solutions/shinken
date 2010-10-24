@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -66,11 +66,11 @@ class Config(Item):
     cache_path = "objects.cache"
     my_type = "config"
 
-    #Properties: 
+    #Properties:
     #required : if True, there is not default, and the config must put them
     #default: if not set, take this value
-    #pythonize : function call to 
-    #class_inherit : (Service, 'blabla') : must set this propertie to the 
+    #pythonize : function call to
+    #class_inherit : (Service, 'blabla') : must set this propertie to the
     #Service class with name blabla
     #if (Service, None) : must set this properti to the Service class with
     #same name
@@ -203,7 +203,7 @@ class Config(Item):
                 'debug_verbosity' : {'required':False, 'default':'1'},
                 'max_debug_file_size' : {'required':False, 'default':'10000', 'pythonize': to_int},
                 #'$USERn$ : {'required':False, 'default':''} # Add at run in __init__
-                
+
                 #SHINKEN SPECIFIC
                 'idontcareaboutsecurity' : {'required':False, 'default':'0', 'pythonize': to_bool},
                 #'conf_is_correct' : {'required' : False, 'default' : '1', 'pythonize': to_bool},
@@ -212,7 +212,7 @@ class Config(Item):
 
                 #Enable or not the notice about old Nagios parameters
                 'disable_old_nagios_parameters_whining' : {'required':False, 'default':'0', 'pythonize': to_bool},
-                
+
                 #Now for problem/impact states changes
                 'enable_problem_impacts_states_change' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
     }
@@ -240,7 +240,7 @@ class Config(Item):
 
 
     #We create dict of objects
-    #Type: 'name in objects' : {Class of object, Class of objects, 
+    #Type: 'name in objects' : {Class of object, Class of objects,
     #'property for self for the objects(config)'
     types_creations = {'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
                        'service' : (Service, Services, 'services'),
@@ -312,7 +312,7 @@ class Config(Item):
         return ' '.join(values)
 
 
-    
+
 
     def read_config(self, files):
         #just a first pass to get the cfg_file and all files in a buf
@@ -333,7 +333,7 @@ class Config(Item):
                 #The configuration is invalid because we have a bad file!
                 self.conf_is_correct = False
                 continue
-            
+
             for line in buf:
                 res += line
                 line = line[:-1]
@@ -378,7 +378,7 @@ class Config(Item):
                                     self.conf_is_correct = False
         return res
 #        self.read_config_buf(res)
-        
+
 
     def read_config_buf(self, buf):
         params = []
@@ -431,7 +431,7 @@ class Config(Item):
                 in_define = False
             if re.search("^\s*\t*#|^\s*$|^\s*}", line):
                 pass
-                        
+
             #A define must be catch and the type save
             #The old entry must be save before
             elif re.search("^define", line):
@@ -449,13 +449,13 @@ class Config(Item):
                     tmp.append(line)
                 else:
                     params.append(line)
-                    
+
         objectscfg[tmp_type].append(tmp)
         objects = {}
-        
+
         #print "Params", params
         self.load_params(params)
-        
+
         for type in objectscfg:
             objects[type] = []
             for items in objectscfg[type]:
@@ -468,14 +468,14 @@ class Config(Item):
                         tmp[prop] = value
                 if tmp != {}:
                     objects[type].append(tmp)
-                    
+
         return objects
 
 
     #We've got raw objects in string, now create real Instances
-    def create_objects(self, raw_objects):        
+    def create_objects(self, raw_objects):
         types_creations = self.__class__.types_creations
-        
+
         #some types are already created in this time
         early_created_types = ['arbiter', 'module']
 
@@ -505,13 +505,13 @@ class Config(Item):
             lst.append(o)
         #we create the objects Class and we set it in prop
         setattr(self, prop, clss(lst))
-            
+
 
 
     #Here arbiter and modules objects should be prepare and link
     #before all others types
     def early_arbiter_linking(self):
-        
+
         self.modules.create_reversed_list()
 
         if len(self.arbiterlinks) == 0:
@@ -521,7 +521,7 @@ class Config(Item):
 
         #First fill default
         self.arbiterlinks.fill_default()
-        
+
 
         #print "****************** Pythonize ******************"
         self.arbiterlinks.pythonize()
@@ -529,14 +529,14 @@ class Config(Item):
         #print "****************** Linkify ******************"
         self.arbiterlinks.linkify(self.modules)
 
-        
+
 
     #We use linkify to make the config more efficient : elements will be
     #linked, like pointers. For example, a host will have it's service,
     #and contacts directly in it's properties
     #REMEMBER: linkify AFTER explode...
     def linkify(self):
-        
+
         #First linkify myself like for some global commands
         self.linkify_one_command_with_commands(self.commands, 'ocsp_command')
         self.linkify_one_command_with_commands(self.commands, 'ochp_command')
@@ -555,7 +555,7 @@ class Config(Item):
         #print "Services"
         #link services with hosts, commands, timeperiods, contacts and resultmodulations
         self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations)
-        
+
         #print "Service groups"
         #link servicegroups members with services
         self.servicegroups.linkify(self.services)
@@ -577,7 +577,7 @@ class Config(Item):
 
         #print "Servicedependancy"
         self.servicedependencies.linkify(self.hosts, self.services, self.timeperiods)
-        
+
         #print "Hostdependancy"
         self.hostdependencies.linkify(self.hosts, self.timeperiods)
 
@@ -597,7 +597,7 @@ class Config(Item):
         self.brokers.linkify(self.realms, self.modules)
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
-        
+
 
 
     #Some properties are dangerous to be send like that
@@ -635,7 +635,7 @@ class Config(Item):
         self.hosts.old_properties_names_to_new()
         self.services.old_properties_names_to_new()
 
-        
+
     #It's used to warn about useless parameter and print why it's not use.
     def notice_about_useless_parameters(self):
         if not self.disable_old_nagios_parameters_whining:
@@ -712,7 +712,7 @@ class Config(Item):
         #Now the architecture part
         #print "Realms"
         self.realms.explode()
-        
+
 
     #Remove elements will the same name, so twins :)
     #In fact only services should be acceptable with twins
@@ -774,7 +774,7 @@ class Config(Item):
         #first we create missing sat, so no other sat will
         #be created after this point
         self.fill_default_satellites()
-        #now we have all elements, we can create a default 
+        #now we have all elements, we can create a default
         #realm if need and it will be taged to sat that do
         #not have an realm
         self.fill_default_realm()
@@ -792,7 +792,7 @@ class Config(Item):
     def fill_predictive_missing_parameters(self):
         self.hosts.fill_predictive_missing_parameters()
 
-        
+
     #Will check if a realm is defined, if not
     #Create a new one (default) and tag everyone that do not have
     #a realm prop to be put in this realm
@@ -809,7 +809,7 @@ class Config(Item):
                     if not hasattr(elt, 'realm'):
                         elt.realm = 'Default'
                         Log().log("Notice : Tagging %s with realm %s" % (elt.get_name(), default.get_name()))
-                        
+
 
     #If a satellite is missing, we add them in the localhost
     #with defaults values
@@ -859,7 +859,7 @@ class Config(Item):
         #We list all modules we will add to brokers
         mod_to_add = []
         mod_to_add_to_schedulers = []
-        
+
         #For status_dat
         if self.status_file != '':
             #Ok, the user put such a value, we must look
@@ -902,7 +902,7 @@ class Config(Item):
         if self.service_perfdata_file != '':
             #Ok, we've got a path for a service perfdata file
             got_service_perfdata_module = self.got_broker_module_type_defined('service_perfdata')
-            
+
             #We need to create the module on the fly?
             if not got_service_perfdata_module:
                 data = {'module_type': 'service_perfdata', 'module_name': 'Service-Perfdata-Autogenerated', 'path' : self.service_perfdata_file, 'mode' : self.service_perfdata_file_mode, 'template' : self.service_perfdata_file_template}
@@ -923,7 +923,7 @@ class Config(Item):
         #The user can maybe want to use the retention thing
         if self.retention_update_interval != 0 and self.state_retention_file != '':
             got_retention_module = self.got_scheduler_module_type_defined('pickle_retention_file')
-            
+
             #We need to create the module on the fly?
             if not got_retention_module:
                 data = {'module_type': 'pickle_retention_file', 'module_name': 'Pickle-Retention-File-Autogenerated', 'path' : self.state_retention_file}
@@ -937,7 +937,7 @@ class Config(Item):
                 print "Warning : the module", m.module_name, "is autogenerated"
                 for b in self.brokers:
                     b.modules.append(m)
-        
+
         #Then for schedulers
         if mod_to_add_to_schedulers != []:
             print "Warning : I autogenerated some Scheduler modules, please look at your configuration"
@@ -954,13 +954,13 @@ class Config(Item):
             #first apply myself
             os.environ['TZ'] = self.use_timezone
             time.tzset()
-            
+
             tab = [self.schedulerlinks, self.pollers, self.brokers, self.reactionners]
             for t in tab:
                 for s in t:
                     if s.use_timezone == 'NOTSET':
                         setattr(s, 'use_timezone', self.use_timezone)
-            
+
 
 
     #Link templates with elements
@@ -971,8 +971,8 @@ class Config(Item):
         self.servicedependencies.linkify_templates()
         self.hostdependencies.linkify_templates()
         self.timeperiods.linkify_templates()
-        
-        
+
+
 
     #Reversed list is a dist with name for quick search by name
     def create_reversed_list(self):
@@ -1029,7 +1029,7 @@ class Config(Item):
         #Hosts got a special cehcks for loops
         r &= self.hosts.no_loop_in_parents()
         Log().log('\tChecked %d hosts' % len(self.hosts))
-        
+
         #Hostgroups
         Log().log('Checking hostgroups...')
         r &= self.hostgroups.is_correct()
@@ -1054,7 +1054,7 @@ class Config(Item):
         Log().log('Checking services')
         r &= self.services.is_correct()
         Log().log('\tChecked %d services' % len(self.services))
-        
+
         #Servicegroups
         Log().log('Checking servicegroups')
         r &= self.servicegroups.is_correct()
@@ -1102,7 +1102,7 @@ class Config(Item):
             Log().log('Checking brokers')
             r &= self.brokers.is_correct()
             Log().log('\tChecked %d brokers' % len(self.brokers))
-        
+
         #Timeperiods
         Log().log('Checking timeperiods')
         r &= self.timeperiods.is_correct()
@@ -1113,7 +1113,7 @@ class Config(Item):
             Log().log('Checking resultmodulations')
             r &= self.resultmodulations.is_correct()
             Log().log('\tChecked %d resultmodulations' % len(self.resultmodulations))
-        
+
         self.conf_is_correct = r
 
 
@@ -1159,7 +1159,7 @@ class Config(Item):
         self.timeperiods.clean_useless()
 
 
-    #Create packs of hosts and services so in a pack, 
+    #Create packs of hosts and services so in a pack,
     #all dependencies are resolved
     #It create a graph. All hosts are connected to their
     #parents, and hosts without parent are connected to host 'root'.
@@ -1169,7 +1169,7 @@ class Config(Item):
         #We create a graph with host in nodes
         g = Graph()
         g.add_nodes(self.hosts)
-        
+
         #links will be used for relations between hosts
         links = set()
 
@@ -1196,13 +1196,13 @@ class Config(Item):
             #The othe type of dep
             for (dep, tmp, tmp2, tmp3, tmp4) in s.chk_depend_of:
                 links.add((dep.host, s.host))
-        
+
         #Now we create links in the graph. With links (set)
         #We are sure to call the less add_edge
         for (dep, h) in links:
             g.add_edge(dep, h)
             g.add_edge(h, dep)
-        
+
         #Access_list from a node il all nodes that are connected
         #with it : it's a list of ours mini_packs
         tmp_packs = g.get_accessibility_packs()
@@ -1249,12 +1249,12 @@ class Config(Item):
             packs = {}
             #create roundrobin iterator for id of cfg
             #So dispatching is loadbalanced in a realm
-            #but add a entry in the roundrobin tourniquet for 
+            #but add a entry in the roundrobin tourniquet for
             #every weight point schedulers (so Weight round robin)
             weight_list = []
             no_spare_schedulers = [s for s in r.schedulers if not s.spare]
             nb_schedulers = len(no_spare_schedulers)
-            
+
             #Maybe there is no scheduler in the realm, it's can be a
             #big problem if there are elements in packs
             nb_elements = len([elt for elt in [pack for pack in r.packs]])
@@ -1266,7 +1266,7 @@ class Config(Item):
                 #The conf is incorrect
                 self.conf_is_correct = False
                 continue
-            
+
             packindex = 0
             packindices = {}
             for s in no_spare_schedulers:
@@ -1276,11 +1276,11 @@ class Config(Item):
                     weight_list.append(s.id)
 
             rr = itertools.cycle(weight_list)
-            
+
             #we must have nb_schedulers packs)
             for i in xrange(0, nb_schedulers):
                 packs[i] = []
-                
+
             #Now we explode the numerous packs into nb_packs reals packs:
             #we 'load balance' them in a roundrobin way
             for pack in r.packs:
@@ -1317,7 +1317,7 @@ class Config(Item):
             for prop in Config.properties:
                 val = getattr(self, prop)
                 setattr(self.confs[i], prop, val)
-            
+
             #we need a deepcopy because each conf
             #will have new hostgroups
             self.confs[i].id = i
@@ -1345,7 +1345,7 @@ class Config(Item):
                                               #accepted the conf
 
         Log().log("Creating packs for realms")
-        
+
         #Just create packs. There can be numerous ones
         #In pack we've got hosts and service
         #packs are in the realms
@@ -1366,7 +1366,7 @@ class Config(Item):
                 r.confs[i+offset] = self.confs[i+offset]
             offset += len(r.packs)
             del r.packs
-        
+
         #We've nearly have hosts and services. Now we want REALS hosts (Class)
         #And we want groups too
         #print "Finishing packs"

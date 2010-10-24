@@ -283,7 +283,7 @@ class TestConfig(ShinkenTest):
         self.assert_(self.count_actions() == 1)
         #-----------------------------------------------------------------
         # relax with a successful check
-        # there is 1 action, the eventhandler. 
+        # there is 1 action, the eventhandler.
         # there is a second action: the master recover notification
         # but it becomes a zombie very soon, because it has no effect
         #-----------------------------------------------------------------
@@ -297,7 +297,7 @@ class TestConfig(ShinkenTest):
         self.assert_(self.count_actions() == 2)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-		
+
 
     def test_host_in_downtime_or_down_service_critical(self):
         self.print_header()
@@ -308,7 +308,7 @@ class TestConfig(ShinkenTest):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0") 
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
         #To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
@@ -359,7 +359,7 @@ class TestConfig(ShinkenTest):
 
     def todo_test_notification_outside_notification_period(self):
         self.print_header()
-        # create notification_period which ends 5 min ago and starts in 5 min 
+        # create notification_period which ends 5 min ago and starts in 5 min
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -388,7 +388,7 @@ class TestConfig(ShinkenTest):
         print "---current_notification_number", svc.current_notification_number
         #-----------------------------------------------------------------
         # execute more checks with a bad result.
-        # we re-enter the notification_period and finally 
+        # we re-enter the notification_period and finally
         # a notification is sent (a log exists, next notification is scheduled
         #-----------------------------------------------------------------
         self.scheduler_loop(6, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -403,7 +403,7 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.current_notification_number == 1)
         #-----------------------------------------------------------------
         # execute a good check.
-        # expect a recover notification with number 0 
+        # expect a recover notification with number 0
         # a recover log for test_contact is written
         #-----------------------------------------------------------------
         print "- 1 x OK -------------------------------------"
@@ -413,7 +413,7 @@ class TestConfig(ShinkenTest):
         self.show_actions()
         #-----------------------------------------------------------------
         # again execute a good check.
-        # neither a notification nor a log must be found 
+        # neither a notification nor a log must be found
         #-----------------------------------------------------------------
         print "- 1 x OK -------------------------------------"
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)

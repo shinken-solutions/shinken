@@ -44,7 +44,7 @@ def get_obj_name(obj):
 def list_to_comma(lst):
     #For ['d', 'r', 'u'] will return d,r,u
     return ','.join(lst)
-    
+
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
@@ -418,7 +418,7 @@ class Merlindb_broker:
             from shinken.db_sqlite import DBSqlite
             print "Creating a sqlite backend"
             self.db_backend = DBSqlite(self.database_path)
-        
+
 
     def get_name(self):
         return self.name
@@ -463,7 +463,7 @@ class Merlindb_broker:
     def init(self):
         print "I connect to Merlin database"
         self.db_backend.connect_database()
-    
+
 
     #Get a brok, parse it, and put in in database
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
@@ -480,17 +480,17 @@ class Merlindb_broker:
                 self.db_backend.execute_query(q)
             return
 
-    
-    
+
+
     #Ok, we are at launch and a scheduler want him only, OK...
     #So ca create several queries with all tables we need to delete with
     #our instance_id
-    #This brob must be send at the begining of a scheduler session, 
+    #This brob must be send at the begining of a scheduler session,
     #if not, BAD THINGS MAY HAPPENED :)
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
-        tables = ['command', 'comment', 'contact', 'contactgroup', 'downtime', 'host', 
-                  'hostdependency', 'hostescalation', 'hostgroup', 'notification', 'program_status', 
+        tables = ['command', 'comment', 'contact', 'contactgroup', 'downtime', 'host',
+                  'hostdependency', 'hostescalation', 'hostgroup', 'notification', 'program_status',
                   'scheduled_downtime', 'service',  'serviceescalation',
                   'servicegroup', 'timeperiod']
         res = []
@@ -520,12 +520,12 @@ class Merlindb_broker:
         return [del_query,query]
 
 
-    #Initial service status is at start. We need an insert because we 
+    #Initial service status is at start. We need an insert because we
     #clean the base
     def manage_initial_service_status_brok(self, b):
         b.data['last_update'] = time.time()
         #It's a initial entry, so we need insert
-        query = self.db_backend.create_insert_query('service', b.data)		
+        query = self.db_backend.create_insert_query('service', b.data)
         return [query]
 
 
@@ -572,14 +572,14 @@ class Merlindb_broker:
         data = b.data
 
         #Here we've got a special case : in data, there is members
-        #and we do not want it in the INSERT query, so we crate a 
+        #and we do not want it in the INSERT query, so we crate a
         #tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         query = self.db_backend.create_insert_query('hostgroup', tmp_data)
         res = [query]
-		
-        #Ok, the hostgroup table is uptodate, now we add relations 
+
+        #Ok, the hostgroup table is uptodate, now we add relations
         #between hosts and hostgroups
         for (h_id, h_name) in b.data['members']:
             #First clean

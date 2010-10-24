@@ -30,11 +30,11 @@ from shinken.action import Action
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     def wait_finished(self, a):
         for i in xrange(1, 1000):
             if a.status == 'launched':
-                a.check_finished(8012)        
+                a.check_finished(8012)
 
     #Change ME :)
     def test_action(self):
@@ -67,7 +67,7 @@ class TestConfig(ShinkenTest):
         a.env = {'TITI' : 'est en vacance'}
 
         self.assert_(a.got_shell_caracters() == False)
-        
+
         a.execute()
 
         self.assert_(a.status == 'launched')
@@ -78,7 +78,7 @@ class TestConfig(ShinkenTest):
         for l in a.long_output.splitlines():
             if l == 'TITI=est en vacance':
                 titi_found = True
-            
+
         self.assert_(titi_found == True)
 
 

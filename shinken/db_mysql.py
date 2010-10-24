@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -59,7 +59,7 @@ class DBMysql(DB):
             self.db_cursor.execute(query)
             self.db.commit ()
         except IntegrityError , exp:
-            print "[MysqlDB] Warning : a query raise an integrity error : %s, %s" % (query, exp) 
+            print "[MysqlDB] Warning : a query raise an integrity error : %s, %s" % (query, exp)
         except ProgrammingError , exp:
-            print "[MysqlDB] Warning : a query raise a programming error : %s, %s" % (query, exp) 
+            print "[MysqlDB] Warning : a query raise a programming error : %s, %s" % (query, exp)
 

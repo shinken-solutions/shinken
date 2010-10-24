@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -71,7 +71,7 @@ class Worker:
         self._process.terminate()
         self._c.close()
         self._c.join_thread()
-        
+
 
     def join(self, timeout=None):
         self._process.join(timeout)
@@ -92,15 +92,15 @@ class Worker:
     def reset_idle(self):
         self._idletime = 0
 
-    
+
     def send_message(self, msg):
         self._c.put(msg)
 
-        
+
     #A zombie is immortal, so kill not be kill anymore
     def set_zombie(self):
         self._mortal = False
-        
+
 
     #Get new checks if less than nb_checks_max
     #If no new checks got and no check in queue,
@@ -150,7 +150,7 @@ class Worker:
                     self.returns_queue.append(action)#msg)
                 except IOError , exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
-                    sys.exit(2)               
+                    sys.exit(2)
         #Little sleep
         self.wait_time = wait_time
 
@@ -159,13 +159,13 @@ class Worker:
 
         #Little seep
         time.sleep(wait_time)
-            
 
-    #Check if our system time change. If so, change our 
+
+    #Check if our system time change. If so, change our
     def check_for_system_time_change(self):
         now = time.time()
         difference = now - self.t_each_loop
-        
+
         #Now set the new value for the tick loop
         self.t_each_loop = now
 
@@ -186,7 +186,7 @@ class Worker:
         self.checks = []
         self.returns_queue = returns_queue
         self.s = s
-        self.t_each_loop = time.time() 
+        self.t_each_loop = time.time()
         while True:
             begin = time.time()
             msg = None
@@ -207,7 +207,7 @@ class Worker:
                     break
             except :
                 pass
-                
+
             if self._mortal == True and self._idletime > 2 * self._timeout:
                 print "[%d]Timeout, Arakiri" % self.id
                 #The master must be dead and we are loonely, we must die
@@ -216,7 +216,7 @@ class Worker:
             #Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
             begin += diff
-            
+
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0

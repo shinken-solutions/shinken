@@ -30,11 +30,11 @@ class TestConfig(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_commands_perfdata.cfg')
-        
-        
+
+
     def test_service_perfdata_command(self):
         self.print_header()
-        
+
         #We want an eventhandelr (the perfdata command) to be put in the actions dict
         #after we got a service check
         now = time.time()
@@ -86,7 +86,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [[host, 0, 'UP | bibi=99%']])
         print "Actions", self.sched.actions
         self.assert_(self.count_actions() == 1)
-        
+
         #Ok now I disable the perfdata
         now = time.time()
         cmd = "[%lu] DISABLE_PERFORMANCE_DATA" % now

@@ -30,8 +30,8 @@ class TestConfig(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_obsess.cfg')
-        
-        
+
+
     def test_ocsp(self):
         self.print_header()
         # retry_interval 2
@@ -53,7 +53,7 @@ class TestConfig(ShinkenTest):
         self.assert_(self.count_actions() == 1)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.assert_(self.count_actions() == 1)
-        
+
         now = time.time()
         cmd = "[%lu] STOP_OBSESSING_OVER_SVC;test_host_0;test_ok_0" % now
         self.sched.run_external_command(cmd)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -34,9 +34,9 @@ from action import Action
 from brok import Brok
 
 class Notification(Action):
-    #id = 0 #Is in fact in the Action class to be common with Checks and 
+    #id = 0 #Is in fact in the Action class to be common with Checks and
     #events handlers
-    
+
     properties={
         'notification_type' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
         'start_time' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
@@ -67,8 +67,8 @@ class Notification(Action):
         'SERVICENOTIFICATIONNUMBER' : 'notif_nb',
         'SERVICENOTIFICATIONID' : 'id'
         }
-    
-    
+
+
     def __init__(self, type , status, command, command_call, ref, contact, t_to_go, \
                      contact_name='', host_name='', service_description='',
                      reason_type=1, state=0, ack_author='', ack_data='', \
@@ -80,7 +80,7 @@ class Notification(Action):
         if id == None: #id != None is for copy call only
             self.id = Action.id
             Action.id += 1
-        
+
 
         self._in_timeout = False
         self.timeout = timeout
@@ -123,12 +123,12 @@ class Notification(Action):
         return new_n
 
 
-    
+
 #    def execute(self):
 #        print "Notification %s" % self.command
 #        child = spawn ('/bin/sh -c "%s"' % self.command)
 #        self.status = 'launched'
-#        
+#
 #        try:
 #            child.expect_exact(EOF, timeout=5)
 #            self.output = child.before
@@ -154,7 +154,7 @@ class Notification(Action):
     def is_launchable(self, t):
         return t > self.t_to_go
 
-    
+
     def set_status(self, status):
         self.status = status
 
@@ -162,7 +162,7 @@ class Notification(Action):
     def get_status(self):
         return self.status
 
-    
+
     def get_output(self):
         return self.output
 
@@ -173,7 +173,7 @@ class Notification(Action):
         else:
             return True
 
-    
+
     def __str__(self):
         return "Notification %d status:%s command:%s ref:%s t_to_go:%s" % (self.id, self.status, self.command, self.ref, time.asctime(time.localtime(self.t_to_go)))
         #return ''#str(self.__dict__)
@@ -189,7 +189,7 @@ class Notification(Action):
         #self.check_time = c.check_time
         #self.execution_time = c.execution_time
 
-    
+
     #Fill data with info of item by looking at brok_type
     #in props of properties or running_propterties
     def fill_data_brok_from(self, data, brok_type):
@@ -204,7 +204,7 @@ class Notification(Action):
     #Get a brok with initial status
     def get_initial_status_brok(self):
         data = {'id' : self.id}
-        
+
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('notification_raise', data)
         return b

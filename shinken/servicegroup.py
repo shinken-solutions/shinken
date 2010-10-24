@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -34,7 +34,7 @@ class Servicegroup(Itemgroup):
         'notes_url' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'action_url' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'members' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        #Shinken specific 
+        #Shinken specific
         'unknown_members' : {'required': False, 'default': []}
         }
 
@@ -45,8 +45,8 @@ class Servicegroup(Itemgroup):
         'SERVICEGROUPNOTESURL' : 'notes_url',
         'SERVICEGROUPACTIONURL' : 'action_url'
         }
-    
-    
+
+
     def get_services(self):
         if self.has('members'):
             return self.members
@@ -72,7 +72,7 @@ class Servicegroup(Itemgroup):
         #First we tag the hg so it will not be explode
         #if a son of it already call it
         self.already_explode = True
-        
+
         #Now the recursiv part
         #rec_tag is set to False avery HG we explode
         #so if True here, it must be a loop in HG
@@ -104,11 +104,11 @@ class Servicegroup(Itemgroup):
 class Servicegroups(Itemgroups):
     name_property = "servicegroup_name" # is used for finding servicegroup
     inner_class = Servicegroup
-    
+
     def linkify(self, services):
         self.linkify_sg_by_srv(services)
-        
-        
+
+
     #We just search for each host the id of the host
     #and replace the name by the id
     #TODO: very slow for hight services, so search with host list,

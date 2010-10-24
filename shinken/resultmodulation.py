@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -38,7 +38,7 @@ class Resultmodulation(Item):
                   }
 
     running_properties = {}
-    
+
     macros = {}
 
 
@@ -60,11 +60,11 @@ class Resultmodulation(Item):
                 #First with the exit_code_match
                 if return_code in self.exit_codes_match:
                     return_code = self.exit_code_modulation
-                    
+
         return return_code
-     
-   
-    #We override the pythonize because we have special cases that we do not want 
+
+
+    #We override the pythonize because we have special cases that we do not want
     #to be do at running
     def pythonize(self):
         #First apply Item pythonize
@@ -85,17 +85,17 @@ class Resultmodulation(Item):
             self.exit_code_modulation = None
 
 
-        
+
 
 class Resultmodulations(Items):
     name_property = "resultmodulation_name"
     inner_class = Resultmodulation
 
-    
+
     def linkify(self, timeperiods):
         self.linkify_rm_by_tp(timeperiods)
 
-    
+
     #We just search for each timeperiod the tp
     #and replace the name by the tp
     def linkify_rm_by_tp(self, timeperiods):
@@ -104,6 +104,6 @@ class Resultmodulations(Items):
 
             #The new member list, in id
             mtp = timeperiods.find_by_name(mtp_name)
-            
+
             rm.modulation_period = mtp
 

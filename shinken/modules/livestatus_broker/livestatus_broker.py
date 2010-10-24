@@ -58,24 +58,24 @@ class Livestatus_broker:
         self.socket = socket
         self.database_file = database_file
         self.name = name
-        
+
         #Warning :
         #self.properties will be add by the modulesmanager !!
-        
+
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
         print "Initialisation of the livestatus broker"
-        
+
         #to_queue is where we get broks from Broker
         self.q = self.properties['to_queue']
-        
+
         #from_quue is where we push back objects like
         #external commands to the broker
         self.r = self.properties['from_queue']
-    
+
         #Our datas
         self.configs = {}
         self.hosts = {}
@@ -99,7 +99,7 @@ class Livestatus_broker:
         self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.r)
 
         self.number_of_objects = 0
-    
+
 
     def is_external(self):
         return True
@@ -147,7 +147,7 @@ class Livestatus_broker:
         h.contacts = self.get_contacts(h.contacts)
         #Escalations is not use for status_dat
         del h.escalations
-                
+
         h.service_ids = []
         h.services = []
         self.hosts[h_id] = h
@@ -653,7 +653,7 @@ class Livestatus_broker:
         return None
 
 
-        
+
     def update_element(self, e, data):
         #print "........%s........" % type(e)
         for prop in data:

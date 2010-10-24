@@ -51,13 +51,13 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # first check the normal behavior
         # service reaches hard;2
-        # at the end there must be 3 actions: eventhandler hard, 
+        # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assert_(svc.current_notification_number == 1)
-        self.assert_(self.count_actions() == 3) 
+        self.assert_(self.count_actions() == 3)
         self.assert_(self.log_match(5, 'SERVICE NOTIFICATION'))
         self.show_and_clear_logs()
         self.show_and_clear_actions()
@@ -65,7 +65,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.clear_logs()
         self.clear_actions()
-        
+
         #--------------------------------------------------------------
         # service reaches soft;1
         # there must not be any notification
@@ -90,7 +90,7 @@ class TestConfig(ShinkenTest):
         self.sched.update_downtimes_and_comments()
         self.assert_(len(svc.comments) == 1)
 
-        
+
         #--------------------------------------------------------------
         # service reaches hard;2
         # a notification must have been created but blocked
@@ -103,7 +103,7 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # recover
         # the acknowledgement must have been removed automatically
@@ -140,17 +140,17 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # first check the normal behavior
         # service reaches hard;2
-        # at the end there must be 3 actions: eventhandler hard, 
+        # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assert_(svc.current_notification_number == 1)
-        self.assert_(self.count_actions() == 3) 
+        self.assert_(self.count_actions() == 3)
         self.assert_(self.log_match(5, 'SERVICE NOTIFICATION'))
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
@@ -174,11 +174,11 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.problem_has_been_acknowledged)
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
-        self.assert_(self.count_logs() == 1) 
-        self.assert_(self.count_actions() == 1) 
+        self.assert_(self.count_logs() == 1)
+        self.assert_(self.count_actions() == 1)
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # remove acknowledgement
         # now notifications are sent again
@@ -202,7 +202,7 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.current_notification_number == 4)
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # recover
         # the acknowledgement must have been removed automatically
@@ -242,17 +242,17 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # first check the normal behavior
         # service reaches hard;2
-        # at the end there must be 3 actions: eventhandler hard, 
+        # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assert_(svc.current_notification_number == 1)
-        self.assert_(self.count_actions() == 3) 
+        self.assert_(self.count_actions() == 3)
         self.assert_(self.log_match(5, 'SERVICE NOTIFICATION'))
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
@@ -276,11 +276,11 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.problem_has_been_acknowledged)
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
-        self.assert_(self.count_logs() == 1) 
-        self.assert_(self.count_actions() == 1) 
+        self.assert_(self.count_logs() == 1)
+        self.assert_(self.count_actions() == 1)
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # now become warning
         # ack is deleted automatically and notifications are sent again
@@ -297,7 +297,7 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.current_notification_number == 4)
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # recover
         # the acknowledgement must have been removed automatically
@@ -337,17 +337,17 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # first check the normal behavior
         # service reaches hard;2
-        # at the end there must be 3 actions: eventhandler hard, 
+        # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assert_(svc.current_notification_number == 1)
-        self.assert_(self.count_actions() == 3) 
+        self.assert_(self.count_actions() == 3)
         self.assert_(self.log_match(5, 'SERVICE NOTIFICATION'))
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
@@ -371,11 +371,11 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.problem_has_been_acknowledged)
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True)
-        self.assert_(self.count_logs() == 1) 
-        self.assert_(self.count_actions() == 1) 
+        self.assert_(self.count_logs() == 1)
+        self.assert_(self.count_actions() == 1)
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # now become warning
         # ack remains set
@@ -391,7 +391,7 @@ class TestConfig(ShinkenTest):
         self.show_actions()
         self.assert_(len(svc.comments) == 1)
         self.assert_(svc.comments[0].comment == 'blablub')
-        
+
         #--------------------------------------------------------------
         # recover
         # the acknowledgement must have been removed automatically
@@ -432,13 +432,13 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # first check the normal behavior
         # service reaches hard;2
-        # at the end there must be 3 actions: eventhandler hard, 
+        # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
         print "- 3 x DOWN get hard -------------------------------------"
         self.scheduler_loop(3, [[host, 2, 'DOWN']])
         self.assert_(host.current_notification_number == 1)
-        self.assert_(self.count_actions() == 3) 
+        self.assert_(self.count_actions() == 3)
         self.assert_(self.log_match(7, 'HOST NOTIFICATION'))
         self.show_and_clear_logs()
         self.show_and_clear_actions()
@@ -446,7 +446,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [[host, 0, 'UP']])
         self.clear_logs()
         self.clear_actions()
-        
+
         #--------------------------------------------------------------
         # service reaches soft;1
         # there must not be any notification
@@ -468,7 +468,7 @@ class TestConfig(ShinkenTest):
         self.assert_(self.log_match(3, 'ACKNOWLEDGEMENT \(DOWN\)'))
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # service reaches hard;2
         # a notification must have been created but blocked
@@ -485,7 +485,7 @@ class TestConfig(ShinkenTest):
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # recover
         # the acknowledgement must have been removed automatically
@@ -522,17 +522,17 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # first check the normal behavior
         # service reaches hard;2
-        # at the end there must be 3 actions: eventhandler hard, 
+        # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
         self.scheduler_loop(3, [[host, 2, 'DOWN']])
         self.assert_(host.current_notification_number == 1)
-        self.assert_(self.count_actions() == 3) 
+        self.assert_(self.count_actions() == 3)
         self.assert_(self.log_match(7, 'HOST NOTIFICATION'))
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
@@ -556,11 +556,11 @@ class TestConfig(ShinkenTest):
         self.assert_(host.problem_has_been_acknowledged)
         self.assert_(self.log_match(1, 'ACKNOWLEDGEMENT \(DOWN\)'))
         self.scheduler_loop(2, [[host, 2, 'DOWN']], do_sleep=True)
-        self.assert_(self.count_logs() == 1) 
-        self.assert_(self.count_actions() == 1) 
+        self.assert_(self.count_logs() == 1)
+        self.assert_(self.count_actions() == 1)
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # remove acknowledgement
         # now notifications are sent again
@@ -582,7 +582,7 @@ class TestConfig(ShinkenTest):
         self.assert_(host.current_notification_number == 4)
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # recover
         # the acknowledgement must have been removed automatically
@@ -626,17 +626,17 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # first check the normal behavior
         # service reaches hard;2
-        # at the end there must be 3 actions: eventhandler hard, 
+        # at the end there must be 3 actions: eventhandler hard,
         #   master notification and contact notification
         #--------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assert_(svc.current_notification_number == 1)
-        self.assert_(self.count_actions() == 3) 
+        self.assert_(self.count_actions() == 3)
         self.assert_(self.log_match(5, 'SERVICE NOTIFICATION'))
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         #--------------------------------------------------------------
         # stay hard and wait for the second notification (notification_interval)
         #--------------------------------------------------------------
@@ -672,7 +672,7 @@ class TestConfig(ShinkenTest):
         self.assert_(self.log_match(2, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.assert_(self.log_match(3, 'ACKNOWLEDGEMENT \(CRITICAL\)'))
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True)
-        self.assert_(self.count_actions() == 1) 
+        self.assert_(self.count_actions() == 1)
         self.show_and_clear_logs()
         self.show_actions()
         self.assert_(len(svc.comments) == 3)
@@ -681,7 +681,7 @@ class TestConfig(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         self.assert_(svc.current_notification_number == 2)
-        
+
         #--------------------------------------------------------------
         # remove the ack. the 2 persistent comments must remain
         #--------------------------------------------------------------

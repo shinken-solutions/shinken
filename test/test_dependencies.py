@@ -75,7 +75,7 @@ class TestConfig(ShinkenTest):
         self.assert_(test_host_1 in [x[0] for x in test_host_1_test_ok_1.act_depend_of])
 
         # and final count the masters
-        self.assert_(len(test_host_0_test_ok_0.chk_depend_of) == 0) 
+        self.assert_(len(test_host_0_test_ok_0.chk_depend_of) == 0)
         self.assert_(len(test_host_0_test_ok_1.chk_depend_of) == 1)
         self.assert_(len(test_host_1_test_ok_0.chk_depend_of) == 0)
         self.assert_(len(test_host_1_test_ok_1.chk_depend_of) == 1)
@@ -91,13 +91,13 @@ class TestConfig(ShinkenTest):
         #
         #   A  <------  B  <--
         #   ^                 \---  C
-        #   |--------------------- 
+        #   |---------------------
         #
         host_A = self.sched.hosts.find_by_name("test_host_A")
         host_B = self.sched.hosts.find_by_name("test_host_B")
         host_C = self.sched.hosts.find_by_name("test_host_C")
         host_D = self.sched.hosts.find_by_name("test_host_D")
-        
+
 
         # the most important: test_ok_0 is in the chk_depend_of-list of test_ok_1
         #self.assert_(host_A in [x[0] for x in host_C.chk_depend_of])
@@ -120,7 +120,7 @@ class TestConfig(ShinkenTest):
         self.assert_(host_C in [x[0] for x in host_A.chk_depend_of_me])
         self.assert_(host_C in [x[0] for x in host_B.chk_depend_of_me])
         self.assert_(host_D in [x[0] for x in host_C.chk_depend_of_me])
-        
+
         # check the notification/execution criteria
         self.assert_([['d', 'u']] == [x[1] for x in host_C.act_depend_of if x[0] is host_B])
         self.assert_([['d']] == [x[1] for x in host_C.chk_depend_of if x[0] is host_B])
@@ -136,7 +136,7 @@ class TestConfig(ShinkenTest):
         #
         #   A  <------  B  <--
         #   ^                 \---  C   <--  D
-        #   |--------------------- 
+        #   |---------------------
         #
         host_A = self.sched.hosts.find_by_name("test_host_A")
         host_B = self.sched.hosts.find_by_name("test_host_B")
@@ -162,7 +162,7 @@ class TestConfig(ShinkenTest):
     def test_in_servicedef_dep(self):
         svc_parent = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_parent_svc")
         svc_son = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_son_svc")
-        
+
         print "DumP", self.conf.servicedependencies
 
         # the most important: test_parent is in the chk_depend_of-list of test_son
@@ -182,14 +182,14 @@ class TestConfig(ShinkenTest):
         host_C = self.sched.hosts.find_by_name("test_host_C")
         host_D = self.sched.hosts.find_by_name("test_host_D")
         host_E = self.sched.hosts.find_by_name("test_host_E")
-        
-        
+
+
         print "A depends on", ",".join([x[0].get_name() for x in host_A.chk_depend_of])
         print "B depends on", ",".join([x[0].get_name() for x in host_B.chk_depend_of])
         print "C depends on", ",".join([x[0].get_name() for x in host_C.chk_depend_of])
         print "D depends on", ",".join([x[0].get_name() for x in host_D.chk_depend_of])
         print "E depends on", ",".join([x[0].get_name() for x in host_E.chk_depend_of])
-        
+
         host_C.state = 'DOWN'
         print "D state", host_D.state
         print "E dep", host_E.chk_depend_of
@@ -198,9 +198,9 @@ class TestConfig(ShinkenTest):
         self.assert_(host_D.do_i_raise_dependency('d', inherit_parents=False) == False)
         #But he should raise a problem (C here) of we ask for its parents
         self.assert_(host_D.do_i_raise_dependency('d', inherit_parents=True) == True)
-        
-        
-        
+
+
+
 
 if __name__ == '__main__':
     import cProfile

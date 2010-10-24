@@ -28,7 +28,7 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     #Change ME :)
     def test_satellite_failed_check(self):
         print "Create a Scheduler dummy"

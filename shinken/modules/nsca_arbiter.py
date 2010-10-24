@@ -100,7 +100,7 @@ class NSCA_arbiter:
         h = {'name' : 'dummy host from dummy arbiter module',
              'register' : '0',
              }
-        
+
         r['hosts'].append(h)
         print "[Dummy] Returning to Arbiter the hosts:", r
         return r
@@ -150,10 +150,10 @@ class NSCA_arbiter:
 		extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp,hostname,rc,output)
 	else:
 		extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp,hostname,service,rc,output)
-		
+
 	e = ExternalCommand(extcmd)
 	self.return_queue.put(e)
- 
+
 
     #When you are in "external" mode, that is the main loop of your process
     def main(self):

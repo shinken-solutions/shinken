@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -60,9 +60,9 @@
 #
 #               '([a-z]*) ([0-9:, -]+)' => len = 6
 #               ex: thusday => normal values
-#               
-#Types: CALENDAR_DATE              
-#       MONTH WEEK DAY        
+#
+#Types: CALENDAR_DATE
+#       MONTH WEEK DAY
 #       WEEK DAY
 #       MONTH DATE
 #       MONTH DAY
@@ -92,7 +92,7 @@ class Timeperiod(Item):
         'register' : {'required' : False}
         }
 
-    
+
     def __init__(self, params={}):
         self.id = Timeperiod.id
         Timeperiod.id = Timeperiod.id + 1
@@ -114,7 +114,7 @@ class Timeperiod(Item):
 
     def get_name(self):
         return self.timeperiod_name
-        
+
 
     def clean(self):
         pass
@@ -179,7 +179,7 @@ class Timeperiod(Item):
         #first find from cache
         t = int(t)
         original_t = t
-        
+
         #print self.get_name(), "Check valid time for", time.asctime(time.localtime(t))
 
         res_from_cache = self.find_next_valid_time_from_cache(t)
@@ -196,7 +196,7 @@ class Timeperiod(Item):
             dr_mins = []
             for dr in self.dateranges:
                 dr_mins.append(dr.get_next_valid_time_from_t(t))
-            
+
             #print "TOTO", self.get_name(), 'Mins:', dr_mins
             #for o in dr_mins:
             #    print "FUCK",time.asctime(time.localtime(o)), "\n"
@@ -206,7 +206,7 @@ class Timeperiod(Item):
                 local_min = min([d for d in dr_mins if d!=None])
             except ValueError: #dr_mins if full of None, not good
                 local_min = None
-                
+
             #if local_min != None:
             #    print "Poposed?", local_min
             #    print "Proposed local min", time.asctime(time.localtime(local_min))
@@ -214,7 +214,7 @@ class Timeperiod(Item):
 
             #We do not loop unless the local_min is not valid
             still_loop = False
-            
+
             #if we've got a real value, we check it with the exclude
             if local_min != None:
                 #Now check if local_min is not valid
@@ -232,7 +232,7 @@ class Timeperiod(Item):
                         #print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
                     #else:
                     #    print self.get_name(), "Tp ca lui va", tp.get_name()
-                        
+
             if local_min == None:
                 still_loop = False
             else:
@@ -253,10 +253,10 @@ class Timeperiod(Item):
         t = int(t)
         original_t = t
         still_loop = True
-        
+
         if not self.is_time_valid(t):
             return t
-        
+
         local_min = t
         res = None
         #Loop for all minutes...
@@ -275,7 +275,7 @@ class Timeperiod(Item):
 
 #            #Maybe the min of exclude is not valid, it is the min we can find.
 #            if next_exclude != None and not self.is_time_valid(next_exclude):
-#                #print self.get_name(), "find a possible early exit for invalid ! with", time.asctime(time.localtime(next_exclude)) 
+#                #print self.get_name(), "find a possible early exit for invalid ! with", time.asctime(time.localtime(next_exclude))
 #                res = next_exclude
 #                still_loop = False
 
@@ -301,11 +301,11 @@ class Timeperiod(Item):
             if dr_mins != []:
                 local_min = min(dr_mins)
                 #print "After dr : found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
-                
+
             #print self.get_name(), 'Invalid: local min', time.asctime(time.localtime(local_min))
             #We do not loop unless the local_min is not valid
             still_loop = False
-            
+
             #if we've got a real value, we check it with the exclude
             if local_min != None:
                 #Now check if local_min is not valid
@@ -328,7 +328,7 @@ class Timeperiod(Item):
         #print "Finished Return the next invalid", time.asctime(time.localtime(local_min))
         return local_min
 
-    
+
     def has(self, prop):
         return hasattr(self, prop)
 
@@ -339,7 +339,7 @@ class Timeperiod(Item):
         b = True
         for dr in self.dateranges:
             b &= dr.is_correct()
-            
+
         #Even one invalid is non correct
         for e in self.invalid_entries:
             b = False
@@ -359,10 +359,10 @@ class Timeperiod(Item):
         s += '\nExclude'
         for elt in self.exclude:
             s += str(elt)
-                    
+
         return s
 
-        
+
     def resolve_daterange(self, dateranges, entry):
         #print "Trying to resolve ", entry
 
@@ -372,11 +372,11 @@ class Timeperiod(Item):
             (syear, smon, smday, eyear, emon, emday, skip_interval, other) = res.groups()
             dateranges.append(CalendarDaterange(syear, smon, smday, 0, 0, eyear, emon, emday, 0, 0, skip_interval, other))
             return
-        
+
         res = re.search('(\d{4})-(\d{2})-(\d{2}) / (\d+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
             #print "Good catch 2"
-            (syear, smon, smday, skip_interval, other) = res.groups() 
+            (syear, smon, smday, skip_interval, other) = res.groups()
             eyear = syear
             emon = smon
             emday = smday
@@ -406,7 +406,7 @@ class Timeperiod(Item):
             (swday, swday_offset, smon, ewday, ewday_offset, emon, skip_interval, other) = res.groups()
             dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset, 0, emon, 0, ewday, ewday_offset, skip_interval, other))
             return
-        
+
         res = re.search('([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
             #print "Googd catch 6"
@@ -456,7 +456,7 @@ class Timeperiod(Item):
             dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset, 0, emon, 0, ewday, ewday_offset, 0, other))
             return
 
-        
+
         res = re.search('([a-z]*) ([\d-]+) - ([\d-]+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
             #print "Googd catch 9"
@@ -612,7 +612,7 @@ class Timeperiods(Items):
     name_property = "timeperiod_name"
     inner_class = Timeperiod
 
-                                   
+
     def explode(self):
         for id in self.items:
             tp = self.items[id]
@@ -657,8 +657,8 @@ class Timeperiods(Items):
         #And check all timeperiods for correct (sounday is false)
         for tp in self:
             r &= tp.is_correct()
-        
-            
+
+
         return r
 
 

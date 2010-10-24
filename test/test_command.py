@@ -28,7 +28,7 @@ from shinken.command import CommandCall, Command, Commands
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     #Change ME :)
     def test_command(self):
         t = {'command_name' : 'check_command_test',
@@ -39,7 +39,7 @@ class TestConfig(ShinkenTest):
         self.assert_(c.command_name == 'check_command_test')
         b = c.get_initial_status_brok()
         self.assert_(b.type == 'initial_command_status')
-        
+
         #now create a commands packs
         cs = Commands([c])
         dummy_call = "check_command_test!titi!toto"
@@ -48,7 +48,7 @@ class TestConfig(ShinkenTest):
         self.assert_(cc.command == c)
         self.assert_(cc.poller_tag == 'DMZ')
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

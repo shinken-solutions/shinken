@@ -35,7 +35,7 @@ class TestConfig(ShinkenTest):
 
     def get_host(self):
         return self.sched.hosts.find_by_name("test_host_0")
-    
+
 
     def get_router(self):
         return self.sched.hosts.find_by_name("test_router_0")
@@ -45,11 +45,11 @@ class TestConfig(ShinkenTest):
         svc = self.get_svc()
         host = self.get_host()
         router = self.get_router()
-        
+
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [svc, 2, 'BAD | value1=0 value2=0'], ])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
-        
+
         #This service got a result modulation. So Criticals are in fact
         #Warnings. So even with some CRITICAL (2), it must be warning
         self.assert_(svc.state == 'WARNING')
@@ -64,10 +64,10 @@ class TestConfig(ShinkenTest):
         #and router define it, but not test_router_0/test_ok_0. So this service should also be impacted
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "test_ok_0")
         self.assert_(svc2.resultmodulations == router.resultmodulations)
-        
+
         self.scheduler_loop(2, [[svc2, 2, 'BAD | value1=0 value2=0']])
         self.assert_(svc2.state == 'WARNING')
-        
+
 
 if __name__ == '__main__':
     unittest.main()

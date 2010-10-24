@@ -29,7 +29,7 @@ from shinken.command import Command,CommandCall
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     def get_mr(self):
         mr = MacroResolver()
         mr.init(self.conf)
@@ -93,7 +93,7 @@ class TestConfig(ShinkenTest):
         self.assert_(env != {})
         self.assert_(env['NAGIOS_HOSTNAME'] == 'test_host_0')
         self.assert_(env['NAGIOS_SERVICEPERCENTCHANGE'] == '0.0')
-        
+
 
 
 

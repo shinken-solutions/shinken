@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -41,7 +41,7 @@ def find_day_by_weekday_offset(year, month, weekday, offset):
     if offset < 0:
         offset = abs(offset)
         cal.reverse()
-        
+
     #ok go for it
     nb_found = 0
     try:
@@ -79,7 +79,7 @@ class Timerange:
         eentries = end.split(':')
         self.hend = int(eentries[0])
         self.mend = int(eentries[1])
-        
+
     def __str__(self):
         return str(self.__dict__)
 
@@ -97,16 +97,16 @@ class Timerange:
     def is_time_valid(self, t):
         sec_from_morning = get_sec_from_morning(t)
         return self.hstart*3600 + self.mstart* 60  <= sec_from_morning <= self.hend*3600 + self.mend* 60
-            
 
-        
+
+
 class Daterange:
     weekdays = {'monday' : 0, 'tuesday' : 1, 'wednesday' : 2, 'thursday' : 3, \
                     'friday' : 4, 'saturday' : 5, 'sunday': 6 }
     months = {'january' : 1, 'february': 2, 'march' : 3, 'april' : 4, 'may' : 5, \
                   'june' : 6, 'july' : 7, 'august' : 8, 'september' : 9, \
                   'october' : 10, 'november' : 11, 'december' : 12}
-    def __init__(self, syear, smon, smday, swday, swday_offset, 
+    def __init__(self, syear, smon, smday, swday, swday_offset,
                  eyear, emon, emday, ewday, ewday_offset, skip_interval, other):
         self.syear = int(syear)
         self.smon = smon
@@ -126,11 +126,11 @@ class Daterange:
             self.timeranges.append(Timerange(timeinterval.strip()))
         self.is_valid_today = False
 
-        
+
     def __str__(self):
         return ''#str(self.__dict__)
 
-    
+
     #By default, daterange are correct
     def is_correct(self):
         return True
@@ -204,7 +204,7 @@ class Daterange:
         t_day_epoch = get_day(t)
         tr_mins = self.get_min_sec_from_morning(t)
         return t_day_epoch + tr_mins
-        
+
 
     def is_time_day_valid(self, t):
         (start_time, end_time) = self.get_start_and_end_time(t)
@@ -225,7 +225,7 @@ class Daterange:
             return True
 
 
-    #def have_future_tiremange_valid(self, t):        
+    #def have_future_tiremange_valid(self, t):
     #    starts = []
     #    for tr in self.timeranges:
     #        tr_start = tr.hstart * 3600 + tr.mstart * 3600
@@ -234,7 +234,7 @@ class Daterange:
     #    return False
 
 
-    def get_next_future_timerange_valid(self, t): 
+    def get_next_future_timerange_valid(self, t):
         sec_from_morning = get_sec_from_morning(t)
         starts = []
         for tr in self.timeranges:
@@ -247,7 +247,7 @@ class Daterange:
             return None
 
 
-    def get_next_future_timerange_invalid(self, t): 
+    def get_next_future_timerange_invalid(self, t):
         #print 'Call for get_next_future_timerange_invalid from ', time.asctime(time.localtime(t))
         sec_from_morning = get_sec_from_morning(t)
         #print 'sec from morning', sec_from_morning
@@ -280,7 +280,7 @@ class Daterange:
         #print "Get next valid day start/end for", time.asctime(time.localtime(t))
         #print "Start", time.asctime(time.localtime(start_time))
         #print "End", time.asctime(time.localtime(end_time))
-        
+
         if t <= start_time:
             return get_day(start_time)
 
@@ -295,12 +295,12 @@ class Daterange:
         #print "DR Get next valid from:", t
         if self.is_time_valid(t):
             return t
-        
+
         #print "DR Get next valid from:", time.asctime(time.localtime(t))
         #First we search fot the day of t
         t_day = self.get_next_valid_day(t)
         sec_from_morning = self.get_min_sec_from_morning()
-        
+
         #print "Search for t", time.asctime(time.localtime(t))
         #print "DR: next day", time.asctime(time.localtime(t_day))
         #print "DR: sec from morning", time.asctime(time.localtime(sec_from_morning))
@@ -339,7 +339,7 @@ class Daterange:
 
         next_future_timerange_invalid = self.get_next_future_timerange_invalid(t)
         #print "next_future_timerange_invalid:", next_future_timerange_invalid
-        
+
         #If today there is no more unavalable timerange, search the next day
         if next_future_timerange_invalid is None:
             #print 'DR: get_next_future_timerange_invalid is None'
@@ -377,7 +377,7 @@ class Daterange:
             return t
         #else:
         #    print "DR: Arg, t is valid", time.asctime(time.localtime(t))
-        
+
         #First we search fot the day of t
         t_day = self.get_next_invalid_day(t)
         #print "Get next invalid day:", time.asctime(time.localtime(t_day))
@@ -389,7 +389,7 @@ class Daterange:
         #    tr_start = tr.hstart * 3600 + tr.mstart * 3600
         #    if tr_start >= sec_from_morning:
         #        starts.append(tr_start)
-        
+
         #tr can't be valid, or it will be return at the begining
         sec_from_morning = self.get_next_future_timerange_invalid(t)
         #print "TOTO sec_from_morning:", sec_from_morning
@@ -411,14 +411,14 @@ class Daterange:
         sec_from_morning = self.get_next_future_timerange_invalid(t_day2)
         if t_day2 is not None and sec_from_morning is not None:
             return t_day2 + sec_from_morning + 1
-        
+
         if t_day2 is not None and sec_from_morning == None:
             return t_day2
         else:
             #I'm not find any valid time
             return None
 
-            
+
 
 
 #ex: 2007-01-01 - 2008-02-01
@@ -544,7 +544,7 @@ class MonthDateDaterange(Daterange):
                 end_time = get_end_of_day(self.eyear+1, month_end_id, day_end)
 
         return (start_time, end_time)
-        
+
 
 class WeekDayDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
@@ -598,7 +598,7 @@ class WeekDayDaterange(Daterange):
             end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
         return (start_time, end_time)
-        
+
 
 class MonthDayDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
@@ -618,7 +618,7 @@ class MonthDayDaterange(Daterange):
         end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
         now_epoch =  time.mktime(now)
-                
+
         if start_time > end_time:
             month_end_id = month_end_id + 1
             if month_end_id > 12:
@@ -626,7 +626,7 @@ class MonthDayDaterange(Daterange):
                 self.eyear += 1
             day_end = find_day_by_offset(self.eyear, month_end, self.emday)
             end_time = get_end_of_day(self.eyear, month_end_id, day_end)
-        
+
         if end_time < now_epoch:
             month_end_id = month_end_id + 1
             month_start_id = month_start_id + 1
@@ -646,5 +646,5 @@ class MonthDayDaterange(Daterange):
             month_end = Daterange.get_month_by_id(month_end_id)
             day_end = find_day_by_offset(self.eyear, month_end, self.emday)
             end_time = get_end_of_day(self.eyear, month_end_id, day_end)
-                    
+
         return (start_time, end_time)

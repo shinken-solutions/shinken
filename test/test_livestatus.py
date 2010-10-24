@@ -36,7 +36,7 @@ class TestConfig(ShinkenTest):
         self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
-            
+
             }
         self.livestatus_broker.init()
         print "Cleaning old broks?"
@@ -85,7 +85,7 @@ class TestConfig(ShinkenTest):
         data = 'GET hosts\nColumns: name address\nColumnHeaders: on'
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
-        
+
         #---------------------------------------------------------------
         # query_1
         #---------------------------------------------------------------
@@ -132,7 +132,7 @@ class TestConfig(ShinkenTest):
 
         #---------------------------------------------------------------
         # query_4
-        #---------------------------------------------------------------      
+        #---------------------------------------------------------------
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2\nFilter: in_notification_period = 1\nAnd: 2\nFilter: state = 0\nOr: 2\nFilter: host_name = test_host_0\nFilter: description = test_ok_0\nAnd: 3\nFilter: contacts >= harri\nFilter: contacts >= test_contact\nOr: 3'
         response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_4_______________\n%s\n%s\n' % (data, response)
@@ -140,16 +140,16 @@ class TestConfig(ShinkenTest):
 
         #---------------------------------------------------------------
         # query_6
-        #---------------------------------------------------------------      
-        data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3'        
+        #---------------------------------------------------------------
+        data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3'
         response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_6_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == '0;0;1;0\n')
 
         #---------------------------------------------------------------
         # query_7
-        #---------------------------------------------------------------      
-        data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nFilter: contacts >= test_contact'        
+        #---------------------------------------------------------------
+        data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nFilter: contacts >= test_contact'
         response = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_6_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == '0;0;1;0\n')
@@ -202,9 +202,9 @@ class TestConfig(ShinkenTest):
         data = 'GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length'
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
-        
+
         data = """GET hosts
-Stats: name != 
+Stats: name !=
 Stats: check_type = 0
 Stats: check_type = 1
 Stats: has_been_checked = 1
@@ -307,20 +307,20 @@ ResponseHeader: fixed16"""
         self.scheduler_loop(3, [[svc, 2, 'BAD']])
         self.update_broker()
         data = """GET downtimes
-Filter: service_description = 
+Filter: service_description =
 Columns: author comment end_time entry_time fixed host_name id start_time
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         data = """GET comments
-Filter: service_description = 
+Filter: service_description =
 Columns: author comment
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
-        
+
         data = """GET services
 Filter: has_been_checked = 1
 Filter: check_type = 0
@@ -330,7 +330,7 @@ Separators: 10 59 44 124
 ResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
-        
+
         data = """GET services
 Filter: has_been_checked = 1
 Filter: check_type = 0
@@ -349,15 +349,15 @@ ResponseHeader: fixed16"""
         data = """GET services\nFilter: has_been_checked = 1\nFilter: check_type = 0\nStats: sum has_been_checked as has_been_checked\nStats: sum latency as latency_sum\nStats: sum execution_time as execution_time_sum\nStats: min latency as latency_min\nStats: min execution_time as execution_time_min\nStats: max latency as latency_max\nStats: max execution_time as execution_time_max\n\nResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
-        
+
         data = """GET hostgroups\nColumnHeaders: on\nResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
-        
+
         data = """GET hosts\nColumns: name groups\nColumnHeaders: on\nResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
-        
+
         data = """GET hostgroups\nColumns: name num_services num_services_ok\nColumnHeaders: on\nResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
@@ -370,7 +370,7 @@ ResponseHeader: fixed16"""
         self.update_broker()
         self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
         self.update_broker()
-        
+
         print "WARNING SOFT;1"
         # worst_service_state 1, worst_service_hard_state 0
         data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
@@ -489,13 +489,13 @@ And: 3
 Filter: type ~ starting...
 Filter: type ~ shutting down...
 Or: 3
-Filter: current_service_description != 
+Filter: current_service_description !=
 
-Filter: service_description = 
-Filter: host_name != 
+Filter: service_description =
+Filter: host_name !=
 And: 2
-Filter: service_description = 
-Filter: host_name = 
+Filter: service_description =
+Filter: host_name =
 And: 2
 Or: 3"""
 
@@ -546,12 +546,12 @@ Filter: options ~ ;HARD;
 Filter: type = HOST ALERT
 Filter: time >= 1284056080
 Filter: time <= 1284660880
-Filter: current_service_description != 
-Filter: service_description = 
-Filter: host_name != 
+Filter: current_service_description !=
+Filter: service_description =
+Filter: host_name !=
 And: 2
-Filter: service_description = 
-Filter: host_name = 
+Filter: service_description =
+Filter: host_name =
 And: 2
 Or: 3
 Columns: time state state_type host_name service_description current_host_groups current_service_groups plugin_output"""
@@ -599,7 +599,7 @@ Columns: time state state_type host_name service_description current_host_groups
 #        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
 #        self.update_broker()
         end = time.time()
-        
+
         # show history for service
         data = """GET log
 Columns: time type options state current_host_name
@@ -668,7 +668,7 @@ And: 2"""
 #        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
 #        self.update_broker()
         end = time.time()
-        
+
         # show history for service
         data = """GET services
 Filter: has_been_checked = 1
@@ -927,7 +927,7 @@ test_host_0,test_host_0/test_ok_0;test_router_0
 """
         print response == good_response
         self.assert_(response == good_response)
-        
+
 
 
 

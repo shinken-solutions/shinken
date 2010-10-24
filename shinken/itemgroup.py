@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -45,7 +45,7 @@ class Itemgroup:
         new_i = cls() # create a new group
         new_i.id = self.id # with the same id
         cls.id = old_id #Reset the Class counter
-        
+
         #Copy all properties
         for prop in cls.properties:
             if prop is not 'members':
@@ -55,7 +55,7 @@ class Itemgroup:
         #but no members
         new_i.members = []
         return new_i
-                    
+
 
     #Change the members like item1 ,item2 to ['item1' , 'item2']
     #so a python list :)
