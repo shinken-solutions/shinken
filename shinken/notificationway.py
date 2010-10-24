@@ -19,7 +19,6 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from command import CommandCall
 from item import Item, Items
 from util import to_split, to_bool
 

@@ -22,7 +22,6 @@ import socket
 
 from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool, to_split
-from item import Items
 
 class ArbiterLink(SatelliteLink):
     id = 0

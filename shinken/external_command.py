@@ -26,7 +26,6 @@ from downtime import Downtime
 from comment import Comment
 from command import CommandCall
 from log import Log
-from check import Check
 
 class ExternalCommand:
     my_type = 'externalcommand'

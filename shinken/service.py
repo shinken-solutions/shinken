@@ -22,12 +22,9 @@
 import time
 
 from autoslots import AutoSlots
-from command import CommandCall
 from item import Items
 from schedulingitem import SchedulingItem
 from util import to_int, to_char, to_split, to_bool, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists
-from check import Check
-from notification import Notification
 from macroresolver import MacroResolver
 from eventhandler import EventHandler
 from log import Log

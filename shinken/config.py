@@ -45,7 +45,6 @@ from contactgroup import Contactgroup, Contactgroups
 from notificationway import NotificationWay, NotificationWays
 from servicegroup import Servicegroup, Servicegroups
 from item import Item
-from macroresolver import MacroResolver
 from servicedependency import Servicedependency, Servicedependencies
 from hostdependency import Hostdependency, Hostdependencies
 from arbiterlink import ArbiterLink, ArbiterLinks

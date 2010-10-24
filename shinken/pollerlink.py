@@ -24,7 +24,6 @@
 
 from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool, to_split
-from item import Items
 
 class PollerLink(SatelliteLink):
     id = 0

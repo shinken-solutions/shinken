@@ -25,7 +25,6 @@
 
 import shutil
 import os
-import signal
 import time
 import re
 

@@ -25,7 +25,6 @@
 print "Detected module : Memcache retention file for Scheduler"
 
 
-import time
 import memcache
 
 

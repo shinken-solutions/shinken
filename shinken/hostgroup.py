@@ -20,7 +20,6 @@
 
 
 from itemgroup import Itemgroup, Itemgroups
-from brok import Brok
 
 
 class Hostgroup(Itemgroup):

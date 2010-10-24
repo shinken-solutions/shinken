@@ -18,9 +18,6 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
-import os
-
 #Unix and windows do not have the same import
 #if os.name == 'nt':
 #    import subprocess, datetime, os, time, signal

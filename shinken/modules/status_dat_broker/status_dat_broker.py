@@ -23,10 +23,6 @@
 
 #And now classic include
 import time
-import select
-import socket
-import sys
-import cPickle
 
 #And now include from this global directory
 from shinken.host import Host

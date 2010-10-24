@@ -19,7 +19,6 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import os
 import time
 
 #Unix and windows do not have the same import

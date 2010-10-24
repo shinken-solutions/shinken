@@ -21,7 +21,6 @@
 
 #DBMysql is a MySQL access database class
 from db import DB
-import time
 
 
 connect_function = None

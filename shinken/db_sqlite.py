@@ -21,7 +21,6 @@
 
 #DBSqlite is a sqlite access database class
 from db import DB
-import copy
 import sqlite3
 
 

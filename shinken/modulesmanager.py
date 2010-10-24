@@ -24,12 +24,11 @@
 
 import os
 import os.path
-import imp
 import sys
 import traceback
 
 
-from multiprocessing import Process, Queue, active_children
+from multiprocessing import Process, Queue
 
 #modulepath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "modules/")
 #Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html

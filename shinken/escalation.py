@@ -19,7 +19,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from item import Item, Items
-from util import to_int, to_char, to_split, to_bool, strip_and_uniq
+from util import to_int, to_split, strip_and_uniq
 
 class Escalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here

@@ -20,8 +20,6 @@
 
 import time
 
-import os
-
 #Unix and windows do not have the same import
 #if os.name == 'nt':
 #    import subprocess, datetime, os, time, signal

@@ -26,7 +26,7 @@
 #dead to the spare
 
 
-from util import scheduler_no_spare_first, alive_then_spare_then_deads
+from util import alive_then_spare_then_deads
 from log import Log
 
 #Dispatcher Class

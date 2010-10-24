@@ -24,11 +24,9 @@
 #Maybe one day host data will be usefull too
 #It will need just a new file, and a new manager :)
 
-import time
 import select
 import socket
 import sys
-import cPickle
 import sqlite3
 import Queue
 
@@ -45,7 +43,7 @@ from schedulerlink import SchedulerLink
 from reactionnerlink import ReactionnerLink
 from pollerlink import PollerLink
 from brokerlink import BrokerLink
-from livestatus import LiveStatus, LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, LOGOBJECT_CONTACT, Logline
+from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
 
 

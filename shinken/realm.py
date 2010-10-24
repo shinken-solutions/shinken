@@ -20,7 +20,6 @@
 
 
 from itemgroup import Itemgroup, Itemgroups
-from brok import Brok
 from util import to_bool
 
 #It change from hostgroup Class because there is no members

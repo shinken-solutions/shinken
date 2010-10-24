@@ -25,7 +25,6 @@
 
 
 import copy
-import os
 import time
 
 from shinken.db_oracle import DBOracle

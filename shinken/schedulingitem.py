@@ -26,10 +26,8 @@ import time
 
 from check import Check
 from notification import Notification
-from timeperiod import Timeperiod
 from macroresolver import MacroResolver
 from eventhandler import EventHandler
-from log import Log
 
 
 class SchedulingItem(Item):

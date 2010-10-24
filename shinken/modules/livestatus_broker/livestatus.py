@@ -18,28 +18,15 @@
 
 
 #File for a Livestatus class which can be used by the status-dat-broker
-import time
-import os
 import re
-import tempfile
 import Queue
 import json
 import sqlite3
 
 from service import Service
-from host import Host
-from contact import Contact
-from hostgroup import Hostgroup
-from servicegroup import Servicegroup
-from contactgroup import Contactgroup
-from timeperiod import Timeperiod
-from command import Command
-from comment import Comment
-from downtime import Downtime
-from config import Config
 from external_command import ExternalCommand
 
-from util import from_bool_to_string,from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
+from util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
 
 LOGCLASS_INFO         = 0 # all messages not in any other class
 LOGCLASS_ALERT        = 1 # alerts: the change service/host state

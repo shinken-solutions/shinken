@@ -25,7 +25,6 @@
 print "Detected module : Picle retention file for Scheduler"
 
 
-import time
 import cPickle
 
 

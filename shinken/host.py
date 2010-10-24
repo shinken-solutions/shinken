@@ -19,7 +19,6 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-import re
 
 from autoslots import AutoSlots
 from item import Items

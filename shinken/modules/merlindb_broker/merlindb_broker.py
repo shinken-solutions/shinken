@@ -25,10 +25,7 @@
 
 
 import copy
-import MySQLdb
 import time
-from MySQLdb import IntegrityError
-from MySQLdb import ProgrammingError
 
 def get_objs_names(objs):
     s = ''

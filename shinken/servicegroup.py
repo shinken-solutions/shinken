@@ -20,7 +20,6 @@
 
 
 from itemgroup import Itemgroup, Itemgroups
-from brok import Brok
 
 class Servicegroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database

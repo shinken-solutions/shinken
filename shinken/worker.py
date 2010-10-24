@@ -27,9 +27,7 @@
 
 from Queue import Empty
 from multiprocessing import Process, Queue
-from message import Message
 
-import threading
 import time, sys
 
 #Worker class

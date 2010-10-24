@@ -23,11 +23,11 @@ import shlex
 
 #Unix and windows do not have the same import
 if os.name == 'nt':
-    import subprocess, datetime, signal
+    import subprocess
     import ctypes
     TerminateProcess = ctypes.windll.kernel32.TerminateProcess
 else:
-    import subprocess, datetime, signal
+    import subprocess
 
 #This class is use just for having a common id between actions and checks
 

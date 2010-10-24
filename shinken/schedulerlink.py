@@ -22,7 +22,6 @@
 #Scheduler is like a satellite for dispatcher
 from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool, to_split
-from item import Items
 
 class SchedulerLink(SatelliteLink):
     id = 0

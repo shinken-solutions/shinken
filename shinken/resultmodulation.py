@@ -22,7 +22,6 @@
 #like the return code or the output.
 
 import time
-import re
 
 from item import Item, Items
 from util import to_split

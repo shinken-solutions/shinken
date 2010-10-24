@@ -22,8 +22,6 @@
 #Allows you to acknowledge the current problem for the specified service.
 #By acknowledging the current problem, future notifications (for the same
 #servicestate) are disabled.
-import time
-
 class Acknowledge:
     id = 0
 

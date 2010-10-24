@@ -20,11 +20,10 @@
 
 
 import select, time, os
-import cPickle, zlib
 
 import shinken.pyro_wrapper
 
-from shinken.external_command import ExternalCommandManager, ExternalCommand
+from shinken.external_command import ExternalCommand
 from check import Check
 from notification import Notification
 from eventhandler import EventHandler
