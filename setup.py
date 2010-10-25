@@ -175,7 +175,7 @@ setup(
 
   scripts = [f for f in glob('bin/[!_]*.py')],
   data_files=[(etc_path, ["etc/nagios.cfg",'etc/brokerd.ini', 'etc/brokerd-windows.ini',
-                                'etc/commons.cfg', 'etc/commands.cfg', 'etc/timeperiods.cfg', 'etc/conf-windows.cfg', 'etc/host-150.cfg',
+                                'etc/commons.cfg', 'etc/commands.cfg', 'etc/timeperiods.cfg', 'etc/templates.cfg', 'etc/conf-windows.cfg', 'etc/host-150.cfg',
                                 'etc/services-150h-1500srv.cfg',
                                 'etc/nagios.cfg', 'etc/nagios-windows.cfg', 'etc/pollerd.ini',
                                 'etc/reactionnerd.ini', 'etc/resource.cfg', 'etc/schedulerd.ini',
