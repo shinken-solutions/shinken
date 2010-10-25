@@ -636,10 +636,9 @@ class Satellite(Daemon):
             try:
                 after = time.time()
                 timeout -= after-begin_loop
-                print "Timeout diff:", timeout
 
                 if timeout < 0: #for go in timeout
-                    print "Time out", timeout
+                    #print "Time out", timeout
                     raise Empty
                     
             except Empty , exp: #Time out Part
