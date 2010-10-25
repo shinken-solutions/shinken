@@ -177,6 +177,8 @@ setup(
   data_files=[(etc_path, ["etc/nagios.cfg",'etc/brokerd.ini', 'etc/brokerd-windows.ini',
                           'etc/commons.cfg', 'etc/commands.cfg', 'etc/timeperiods.cfg', 'etc/templates.cfg',
                           'etc/escalations.cfg', 'etc/dependencies.cfg',
+                          'etc/hostgroups.cfg', 'etc/servicegroups.cfg',
+                          'etc/contactgroups.cfg',
                           'etc/conf-windows.cfg', 'etc/host-150.cfg',
                           'etc/services-150h-1500srv.cfg',
                           'etc/nagios.cfg', 'etc/nagios-windows.cfg', 'etc/pollerd.ini',
@@ -187,7 +189,7 @@ setup(
                                 ]),
               (os.sep.join([etc_path, 'objects', 'hosts']), ['etc/objects/hosts/localhost.cfg']),
               (os.sep.join([etc_path, 'objects', 'services']), ['etc/objects/services/linux_disks.cfg']),
-              (os.sep.join([etc_path, 'objects', 'contacts']), ['etc/objects/contacts/linux_admin.cfg']),
+              (os.sep.join([etc_path, 'objects', 'contacts']), ['etc/objects/contacts/linux_admin.cfg', 'etc/objects/contacts/windows_admin.cfg']),
                
               ('/etc/init.d', ['bin/init.d/shinken-arbiter', 'bin/init.d/shinken-broker', 'bin/init.d/shinken-poller',
                                'bin/init.d/shinken-reactionner', 'bin/init.d/shinken-scheduler']),
