@@ -521,9 +521,18 @@ class Items(object):
 
     
     def find_id_by_name(self, name):
-        if name in self.reversed_list:
-            return self.reversed_list[name]
-        else:
+        if hasattr(self, 'reversed_list'):
+            if name in self.reversed_list:
+                return self.reversed_list[name]
+            else:
+                return None
+        else: #ok, an early ask, with no reversed list from now...
+            name_property = self.__class__.name_property
+            for i in self:
+                if hasattr(i, name_property):
+                    i_name = getattr(i, name_property)
+                    if i_name == name:
+                        return i.id
             return None
 
 

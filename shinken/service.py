@@ -97,6 +97,11 @@ class Service(SchedulingItem):
         'resultmodulations' : {'required' : False, 'default' : ''},
         'escalations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'maintenance_period' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+
+        #service generator
+        'duplicate_foreach' : {'required' : False, 'default' : ''},
+        'default_parameters' : {'required' : False, 'default' : ''},
+        
         }
     
     #properties used in the running state
@@ -860,6 +865,79 @@ class Services(Items):
             s.fill_daddy_dependancy()
 
 
+    #Add in our queue a service create from another. Special case :
+    #is a template : so hname is a name of template, so need to get all
+    #hosts that inherit from it.
+    def copy_create_service_from_another(self, hosts, s, hname):
+        for_hosts_to_create = []
+        #if we are not a template, it's easy : copy for all host_name
+        #because they are our final host_name after all
+        if not s.is_tpl():
+            for_hosts_to_create.append(hname)
+
+        #But for template it's more tricky : it's a template name
+        #we've got, not a real host_name/ So we must get a list of host_name
+        #that use this template
+        else:
+            hosts_from_tpl = hosts.find_hosts_that_use_template(hname)
+            #And now copy our real services
+            for n in hosts_from_tpl:
+                for_hosts_to_create.append(n)
+
+        #Now really create the services
+
+        for name in for_hosts_to_create:
+            if not hasattr(s, 'duplicate_foreach') or s.duplicate_foreach == '':
+                new_s = s.copy()
+                new_s.host_name = name
+                if s.is_tpl(): # if template, the new one is not
+                    new_s.register = 1
+                self.items[new_s.id] = new_s
+            else: #the generator case, we must create several new services
+                #we must find our host, and get all key:value we need
+                h = hosts.find_by_name(name.strip())
+                if h != None:
+                    prop = s.duplicate_foreach.strip()
+                    d = h.get_key_value_from_property(prop)
+                    if d != None:
+                        for key in d:
+                            value = d[key]
+                            new_s = s.copy()
+                            
+                            print "Got key:%s and value:%s" % (key, value)
+
+                            new_s.host_name = name
+                            if s.is_tpl(): # if template, the new one is not
+                                new_s.register = 1
+                        #change the service_description and check_command by
+                        #key:value
+                            if hasattr(s, 'service_description'):
+                                new_s.service_description = s.service_description.replace('$KEY$', key)
+
+                            #Maybe we do not have value, we must get the default_parameters
+                            #of the service if it got one
+                            if value == None:
+                                if hasattr(s, 'default_parameters'):
+                                    value = s.default_parameters
+                                else: 
+                                    #no parameters but the service do not have
+                                    #default ones!
+                                    err = "The key for the property '%s' on host '%s' doesn't have any parameters and the service '%s' do not have default_parameters configured" % (prop, name, new_s.get_name())
+                                    value = ''
+                                    new_s.configuration_errors.append(err)
+
+
+                            if hasattr(s, 'check_command'):
+                                new_s.check_command = new_s.check_command.replace('$KEY$', key)
+                                new_s.check_command = new_s.check_command.replace('$VALUE$', value)
+                            #And then add in our list this new service
+                            self.items[new_s.id] = new_s
+                            print "DBG: and finally got", new_s.service_description, new_s.check_command
+                            
+                else: #TODO : raise an error?
+                    pass
+
+
     #We create new service if necessery (host groups and co)
     def explode(self, hosts, hostgroups, contactgroups, servicegroups, servicedependencies):
         #The "old" services will be removed. All services with 
@@ -884,6 +962,10 @@ class Services(Items):
             duplicate_for_hosts = [] #get the list of our host_names if more than 1
             not_hosts = [] #the list of !host_name so we remove them after
             
+            print "Looking for s", s
+            if hasattr(s, 'duplicate_foreach'):
+                print s.duplicate_foreach
+
             #if not s.is_tpl(): #Exploding template is useless
             #Explode for real service or teplate with a host_name
             if hasattr(s, 'host_name'):
@@ -891,7 +973,8 @@ class Services(Items):
                 hnames = strip_and_uniq(hnames)
                 #We will duplicate if we have multiple host_name
                 #or if we are a template (so a clean service)
-                if len(hnames) >= 2 or s.is_tpl():
+                print "WHEre", len(hnames) >= 2 or s.is_tpl()
+                if len(hnames) >= 2 or s.is_tpl() or (hasattr(s, 'duplicate_foreach') and s.duplicate_foreach != ''):
                     for hname in hnames:
                         hname = hname.strip()
                         
@@ -915,26 +998,7 @@ class Services(Items):
                             
                     #Now we duplicate the service for all host_names
                     for hname in duplicate_for_hosts:
-                        #if we are not a template, it's easy : copy for all host_name
-                        #because they are our final host_name after all
-                        if not s.is_tpl():
-                            new_s = s.copy()
-                            new_s.host_name = hname
-                            self.items[new_s.id] = new_s
-                        #But for template ti's mroe tricky : it's a template name
-                        #we've got, not a real host_name/ So we must get a list of host_name
-                        #that use this template
-                        else:
-                            #print "Find hosts that use the template %s" % hname
-                            hosts_from_tpl = hosts.find_hosts_that_use_template(hname)
-                            #print 'And got', hosts_from_tpl
-                            #And now copy our real services
-                            for n in hosts_from_tpl:
-                                new_s = s.copy()
-                                new_s.host_name = n
-                                new_s.register = 1
-                                self.items[new_s.id] = new_s
-                                #print "New s", new_s.__dict__, new_s.is_tpl()
+                        self.copy_create_service_from_another(hosts, s, hname)
                         
                 else: #Maybe the hnames was full of same host,
                       #so we must reset the name

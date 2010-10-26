@@ -355,6 +355,85 @@ class Host(SchedulingItem):
         return None
 
 
+    #For service generator, get dict from a _custom properties
+    #as _disks   C$(80%!90%),D$(80%!90%)$,E$(80%!90%)$
+    #return {'C' : '80%!90%', 'D' : '80%!90%', 'E' : '80%!90%'}
+    def get_key_value_from_property(self, property):
+        print "My customs"
+        print self.customs
+
+        #In macro, it's all in UPPER case
+        prop = property.upper()
+
+        #If I do not have the property, we bail out
+        if not prop in self.customs:
+            return None
+
+        entry = self.customs[prop]
+        conf_entry = entry
+        #Here we need a special string to replace after
+        long_and_random = "Z"*10
+        print "My entry", entry
+        #Now entry is a dict from outside, and inner key start with a '
+        entry = "{'%s'}" % entry
+        print "Entry 1", entry
+        #first we make key look like C': 'blabla...
+        entry = entry.replace('$(', "': '")
+        print "Entry 2", entry
+        #And the end of value with a '
+        entry = entry.replace(')$', "'"+long_and_random)
+        print "Entry 3", entry
+        #Now we clean the ZZZ,D into a ,'D
+        entry = entry.replace(long_and_random+",", ",'")
+        print "Entry 4", entry
+        #And clean the trailing ZZZ' because it's not useful, there is no key after
+        entry = entry.replace(long_and_random+"'", '')
+        print "Entry 5", entry
+        #Now need to see the entry taht are alone, with no value
+        #the last one will be a 'G'} with no value if not set, and
+        #will raise an error
+        if len(entry) >= 2 and entry[-2:] == "'}":
+            entry = entry[:-2]
+            #And so add a None as value
+            entry = entry + "': None}"
+            print "Entry 6", entry
+
+        
+        try:
+            r = eval(entry)
+        except SyntaxError:
+            err = "The custom property '%s 'of the host '%s' is not a valid entry %s for a service generator" % (property, self.get_name(), conf_entry)
+            self.configuration_errors.append(err)
+            return None
+ 
+        #special case : key with a , are in fact KEY1, KEY2, ... KEYN and KEY1,2 got not real value
+        #only N got one
+        keys_to_del = []
+        keys_to_add = {}
+        for key in r:
+            if ',' in key:
+                keys_to_del.append(key)
+                value = r[key]
+                elts = key.split(',')
+                nb_elts = len(elts)
+                non_value_keys = elts[:-1]
+                for k in non_value_keys:
+                    keys_to_add[k] = None
+                keys_to_add[elts[-1]] = value
+
+        for k in keys_to_del:
+            del r[k]
+
+        for k in keys_to_add:
+            r.update(keys_to_add)
+
+        print "Final R", r
+       
+        return r
+                
+#        return {'C' : '80%!90%', 'D' : '80%!90%', 'E' : '80%!90%'}
+
+
     #Macro part
     def get_total_services(self):
         return str(len(self.services))

@@ -89,7 +89,11 @@ class Timeperiod(Item):
         'alias' : {'required' : False, 'fill_brok' : ['full_status']},
         'use' : {'required' : False},
         'exclude' : {'required' : False},
-        'register' : {'required' : False}
+        'register' : {'required' : False},
+        #All errors and warning raised during the configuration parsing
+        #and taht will raised real warning/errors during the is_correct
+        'configuration_warnings' : {'default' : []},
+        'configuration_errors' : {'default' : []},
         }
 
     
@@ -110,6 +114,8 @@ class Timeperiod(Item):
         self.is_valid_today = False
 
         self.cache = {} #For tunning purpose only
+        self.configuration_errors = []
+        self.configuration_warnings = []
 
 
     def get_name(self):
