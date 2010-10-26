@@ -562,9 +562,12 @@ class Items(object):
             tpls = i.get_templates()
             new_tpls = []
             for tpl in tpls:
-                t = self.find_tpl_by_name(tpl)
+                t = self.find_tpl_by_name(tpl.strip())
                 if t is not None:
                     new_tpls.append(t)
+                else: # not find? not good!
+                    err = "ERROR: the template '%s' defined for '%s' is unkown" % (tpl, i.get_name())
+                    i.configuration_errors.append(err)
             i.templates = new_tpls
             
 

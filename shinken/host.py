@@ -893,3 +893,27 @@ class Hosts(Items):
             r = False
 
         return r
+
+
+    #Return a list of the host_name of the hosts
+    #that gotthe template with name=tpl_name
+    def find_hosts_that_use_template(self, tpl_name):
+        res = []
+        #first find the template
+        tpl = None
+        for h in self:
+            #Look fortemplate with the good name
+            if h.is_tpl() and hasattr(h, 'name') and h.name == tpl_name:
+                tpl = h
+
+        #If we find noone, we return nothing (easy case:) )
+        if tpl == None:
+            return []
+
+        #Ok, we find the tpl
+        for h in self:
+            if tpl in h.templates and hasattr(h, 'host_name'):
+                res.append(h.host_name)
+        
+        return res
+        

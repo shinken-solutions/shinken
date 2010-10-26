@@ -874,22 +874,27 @@ class Services(Items):
         #items::explode_contact_groups_into_contacts
         #take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
- 
+        
         #Then for every host create a copy of the service with just the host
         #because we are adding services, we can't just loop in it
-        service_to_check = self.items.keys()
+        service_to_check = self.items.keys()       
         
         for id in service_to_check:
             s = self.items[id]
             duplicate_for_hosts = [] #get the list of our host_names if more than 1
             not_hosts = [] #the list of !host_name so we remove them after
-            if not s.is_tpl(): #Exploding template is useless
+            
+            #if not s.is_tpl(): #Exploding template is useless
+            #Explode for real service or teplate with a host_name
+            if hasattr(s, 'host_name'):
                 hnames = s.host_name.split(',')
                 hnames = strip_and_uniq(hnames)
-                if len(hnames) >= 2:
+                #We will duplicate if we have multiple host_name
+                #or if we are a template (so a clean service)
+                if len(hnames) >= 2 or s.is_tpl():
                     for hname in hnames:
                         hname = hname.strip()
-
+                        
                         #If the name begin with a !, we put it in
                         #the not list
                         if len(hname) > 0 and hname[0] == '!':
@@ -898,9 +903,10 @@ class Services(Items):
                             duplicate_for_hosts.append(hname)
 
                     #Multiple host_name -> the original service
-                    #must be delete
-                    srv_to_remove.append(id)
-
+                    #must be delete. But template are clean else where
+                    if not s.is_tpl():
+                        srv_to_remove.append(id)
+                    
                     #Ok now we clean the duplicate_for_hosts with all hosts
                     #of the not
                     for hname in not_hosts:
@@ -909,9 +915,26 @@ class Services(Items):
                             
                     #Now we duplicate the service for all host_names
                     for hname in duplicate_for_hosts:
-                        new_s = s.copy()
-                        new_s.host_name = hname
-                        self.items[new_s.id] = new_s
+                        #if we are not a template, it's easy : copy for all host_name
+                        #because they are our final host_name after all
+                        if not s.is_tpl():
+                            new_s = s.copy()
+                            new_s.host_name = hname
+                            self.items[new_s.id] = new_s
+                        #But for template ti's mroe tricky : it's a template name
+                        #we've got, not a real host_name/ So we must get a list of host_name
+                        #that use this template
+                        else:
+                            #print "Find hosts that use the template %s" % hname
+                            hosts_from_tpl = hosts.find_hosts_that_use_template(hname)
+                            #print 'And got', hosts_from_tpl
+                            #And now copy our real services
+                            for n in hosts_from_tpl:
+                                new_s = s.copy()
+                                new_s.host_name = n
+                                new_s.register = 1
+                                self.items[new_s.id] = new_s
+                                #print "New s", new_s.__dict__, new_s.is_tpl()
                         
                 else: #Maybe the hnames was full of same host,
                       #so we must reset the name
