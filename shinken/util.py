@@ -172,6 +172,15 @@ def alive_then_spare_then_deads(x, y):
         return 1
     return 0
 
+#-1 is x first, 0 equal, 1 is y first
+def sort_by_ids(x, y):
+    if x.id < y.id:
+        return -1
+    if x.id > y.id:
+        return 1
+    #So is equal
+    return 0
+    
 
 
 ##################### Cleaning ##############

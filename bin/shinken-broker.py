@@ -93,7 +93,7 @@ Pyro = shinken.pyro_wrapper.Pyro
 
 from shinken.satellite import Satellite
 from shinken.daemon import Daemon
-from shinken.util import to_int, to_bool
+from shinken.util import to_int, to_bool, sort_by_ids
 from shinken.module import Module, Modules
 from shinken.modulesmanager import ModulesManager
 from shinken.log import Log
@@ -439,7 +439,7 @@ class Broker(Satellite):
 
 		print "Init connexion with", links[id]['uri']
 		running_id = links[id]['running_id']
-                print "Running id", running_id
+                print "Running id before connexion", running_id
 		uri = links[id]['uri']
 		links[id]['con'] = Pyro.core.getProxyForURI(uri)
 
@@ -453,14 +453,16 @@ class Broker(Satellite):
 
 		        #The schedulers have been restart : it has a new run_id.
 		        #So we clear all verifs, they are obsolete now.
-			if running_id != 0 and new_run_id != running_id:
-                                print "New running id", new_run_id
-				links[id]['broks'].clear()
-			        #we must ask for a enw full broks if
-			        #it's a scheduler
-				if type == 'scheduler':
-					print "Ask for a broks generation"
-					links[id]['con'].fill_initial_broks()
+			if new_run_id != running_id:
+                            print "New running id", new_run_id
+                            links[id]['broks'].clear()
+                            #we must ask for a enw full broks if
+                            #it's a scheduler
+                            if type == 'scheduler':
+                                print "Ask for a broks generation"
+                                links[id]['con'].fill_initial_broks()
+                        #else:
+                        #    print "I do nto ask for brok generation"
 			links[id]['running_id'] = new_run_id
 		except Pyro.errors.ProtocolError, exp:
 			Log().log(str(exp))
@@ -509,11 +511,9 @@ class Broker(Satellite):
 		#internal modules
 		self.broks.extend(broks)
 
-		#and for external queues
-		#REF: doc/broker-modules.png (3)
-		for b in broks:
-			for q in self.modules_manager.get_external_to_queues():
-				q.put(b)
+                #Sort the brok list by id
+                self.broks.sort(sort_by_ids)
+
 
 
 	#Each turn we get all broks from
@@ -664,8 +664,17 @@ class Broker(Satellite):
 			#And for other satellites
 			self.get_new_broks(type='poller')
 			self.get_new_broks(type='reactionner')
+                        
+                        
+		        #and for external queues
+		        #REF: doc/broker-modules.png (3)
+                        for b in self.broks:
+                            if b.type != 'log':
+                                print "Broker : put brok id : %d" % b.id
+                            for q in self.modules_manager.get_external_to_queues():
+                                q.put(b)
 
-
+                        
 		        #We must had new broks at the end of the list, so we reverse the list
 			self.broks.reverse()
 

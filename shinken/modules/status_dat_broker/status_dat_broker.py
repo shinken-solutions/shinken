@@ -90,7 +90,8 @@ class Status_dat_broker:
     def manage_brok(self, b):
         type = b.type
         manager = 'manage_'+type+'_brok'
-#        print "I manage brok Number", b.id, ":", manager
+        if manager != 'manage_log_brok':
+            print "I manage brok Number", b.id, ":", manager
         #print "------------------------------------------- i receive", manager
         if hasattr(self, manager):
             #print "------------------------------------------- i manage", manager
