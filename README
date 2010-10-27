@@ -18,7 +18,7 @@ mv shinken /usr/local
 chown -R shinken:shinken /usr/local/shinken
 
 === Second way : district directory (clean way) ===
-You can install really the application by using the setup.py script. It 
+You can install really the application by using the setup.py script. It
 will install the shinken librairy in the python path, create the
 /etc/shinken and /var/lib/shinken directory (you can change them
 in the setup_parameters.cfg file before launching setup.py).

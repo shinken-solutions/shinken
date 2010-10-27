@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -19,8 +19,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#A Brok is a peace of information exported by Shinken to the Broker. 
-#Broker can do whatever 
+#A Brok is a peace of information exported by Shinken to the Broker.
+#Broker can do whatever
 #he wants with it.
 
 class Brok:

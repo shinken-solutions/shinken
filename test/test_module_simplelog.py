@@ -32,7 +32,7 @@ from shinken.brok import Brok
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     #Change ME :)
     def test_simplelog(self):
         print self.conf.modules

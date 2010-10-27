@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -83,7 +83,7 @@ except ImportError:
 
 
 try:
-    import shinken.pyro_wrapper    
+    import shinken.pyro_wrapper
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
@@ -170,7 +170,7 @@ class IForArbiter(Pyro.core.ObjBase):
 			self.arbiters[arb_id]['uri'] = uri
 			self.arbiters[arb_id]['broks'] = {}
 			self.arbiters[arb_id]['instance_id'] = 0 #No use so all to 0
-			self.arbiters[arb_id]['running_id'] = 0			
+			self.arbiters[arb_id]['running_id'] = 0
 		print "We have our arbiters :", self.arbiters
 
 		#Now for pollers
@@ -181,9 +181,9 @@ class IForArbiter(Pyro.core.ObjBase):
 			self.pollers[pol_id]['uri'] = uri
 			self.pollers[pol_id]['broks'] = {}
 			self.pollers[pol_id]['instance_id'] = 0 #No use so all to 0
-			self.pollers[pol_id]['running_id'] = 0			
+			self.pollers[pol_id]['running_id'] = 0
 		print "We have our pollers :", self.pollers
-		
+
 		#Now reactionners
 		for rea_id in conf['reactionners'] :
                         r = conf['reactionners'][rea_id]
@@ -194,7 +194,7 @@ class IForArbiter(Pyro.core.ObjBase):
                         self.reactionners[rea_id]['instance_id'] = 0 #No use so all to 0
                         self.reactionners[rea_id]['running_id'] = 0
                 print "We have our reactionners :", self.reactionners
-		
+
 		if not self.app.have_modules:
 			self.app.modules = conf['global']['modules']
 			self.app.have_modules = True
@@ -207,7 +207,7 @@ class IForArbiter(Pyro.core.ObjBase):
                     os.environ['TZ'] = use_timezone
                     time.tzset()
 
-		
+
 
 	#Arbiter ask us to do not manage a scheduler_id anymore
 	#I do it and don't ask why
@@ -241,8 +241,8 @@ class IForArbiter(Pyro.core.ObjBase):
 
 
 	#Use by arbiter to know if we have a conf or not
-	#can be usefull if we must do nothing but 
-	#we are not because it can KILL US! 
+	#can be usefull if we must do nothing but
+	#we are not because it can KILL US!
 	def have_conf(self):
 		return self.app.have_conf
 
@@ -252,7 +252,7 @@ class IForArbiter(Pyro.core.ObjBase):
 	#and wait a new conf)
 	#Us : No please...
 	#Arbiter : I don't care, hasta la vista baby!
-	#Us : ... <- Nothing! We are die! you don't follow 
+	#Us : ... <- Nothing! We are die! you don't follow
 	#anything or what??
 	def wait_new_conf(self):
 		print "Arbiter want me to wait a new conf"
@@ -274,7 +274,7 @@ class Broker(Satellite):
 		'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
 #		'modulespath' : {'default' :'/usr/local/shinken/shinken/modules' , 'pythonize' : None, 'path' : True}
 		}
-	
+
 
 	def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
 		self.print_header()
@@ -290,7 +290,7 @@ class Broker(Satellite):
 		#All broks to manage
 		self.broks = [] #broks to manage
 		#broks raised this turn and that need to be put in self.broks
-		self.broks_internal_raised = [] 
+		self.broks_internal_raised = []
 
 		#The config reading part
 		self.config_file = config_file
@@ -304,14 +304,14 @@ class Broker(Satellite):
 			self.relative_paths_to_full(os.path.dirname(config_file))
 
 
-                #BEWARE: this way of finding path is good if we still 
+                #BEWARE: this way of finding path is good if we still
                 #DO NOT HAVE CHANGE PWD!!!
                 #Now get the module path. It's in fact the directory modules
                 #inside the shinken directory. So let's find it.
                 print "modulemanager file", shinken.modulesmanager.__file__
                 modulespath = os.path.abspath(shinken.modulesmanager.__file__)
                 print "modulemanager absolute file", modulespath
-                #We got one of the files of 
+                #We got one of the files of
                 elts = os.path.dirname(modulespath).split(os.sep)[:-1]
                 elts.append('shinken')
                 elts.append('modules')
@@ -322,7 +322,7 @@ class Broker(Satellite):
 
                 #Check if another Scheduler is not running (with the same conf)
 		self.check_parallel_run(do_replace)
-                
+
                 #If the admin don't care about security, I allow root running
 		insane = not self.idontcareaboutsecurity
 
@@ -350,7 +350,7 @@ class Broker(Satellite):
 		#Our pollers and reactionners
 		self.pollers = {}
 		self.reactionners = {}
-		
+
 		#Modules are load one time
 		self.have_modules = False
 		self.modules = []
@@ -419,7 +419,7 @@ class Broker(Satellite):
 #            print "Call my command get_external_commands, I return ", res
             self.external_commands = []
             return res
-	
+
 
 	#initialise or re-initialise connexion with scheduler or
 	#arbiter if type == arbiter
@@ -429,7 +429,7 @@ class Broker(Satellite):
 		if links == None:
 			Log().log('DBG: Type unknown for connexion! %s' % type)
 			return
-		
+
 		if type == 'scheduler':
                         #If sched is not active, I do not try to init
 		        #it is just useless
@@ -461,7 +461,7 @@ class Broker(Satellite):
 				if type == 'scheduler':
 					print "Ask for a broks generation"
 					links[id]['con'].fill_initial_broks()
-			links[id]['running_id'] = new_run_id			
+			links[id]['running_id'] = new_run_id
 		except Pyro.errors.ProtocolError, exp:
 			Log().log(str(exp))
 			return
@@ -501,21 +501,21 @@ class Broker(Satellite):
 		for mod in to_del:
 			self.modules_manager.remove_instance(mod)
 
-	
+
 	#Add broks (a tab) to different queues for
 	#internal and external modules
 	def add_broks_to_queue(self, broks):
 		#Ok now put in queue brocks for manage by
 		#internal modules
 		self.broks.extend(broks)
-		
+
 		#and for external queues
 		#REF: doc/broker-modules.png (3)
 		for b in broks:
 			for q in self.modules_manager.get_external_to_queues():
 				q.put(b)
 
-				
+
 	#Each turn we get all broks from
 	#self.broks_internal_raised and we put them in
 	#self.broks
@@ -537,7 +537,7 @@ class Broker(Satellite):
                         self.add(o)
                     except Empty :
                         full_queue = False
-				
+
 
 
 	#We get new broks from schedulers
@@ -548,7 +548,7 @@ class Broker(Satellite):
 		if links == None:
 			Log().log('DBG: Type unknown for connexion! %s' % type)
 			return
-		
+
 		#We check for new check in each schedulers and put
 		#the result in new_checks
 		for sched_id in links:
@@ -565,7 +565,7 @@ class Broker(Satellite):
 				else: #no con? make the connexion
 					self.pynag_con_init(sched_id, type=type)
                         #Ok, con is not know, so we create it
-			except KeyError , exp: 
+			except KeyError , exp:
 				#print exp
 				self.pynag_con_init(sched_id, type=type)
 			except Pyro.errors.ProtocolError , exp:
@@ -573,7 +573,7 @@ class Broker(Satellite):
 				#we reinitialise the ccnnexion to pynag
 				self.pynag_con_init(sched_id, type=type)
                         #scheduler must not #be initialized
-			except AttributeError , exp: 
+			except AttributeError , exp:
 				Log().log(str(exp))
                         #scheduler must not have checks
 			except Pyro.errors.NamingError , exp:
@@ -583,7 +583,7 @@ class Broker(Satellite):
                                self.pynag_con_init(sched_id, type=type)
 			# What the F**k? We do not know what happenned,
 			#so.. bye bye :)
-			except Exception,x: 
+			except Exception,x:
                                 print x.__class__
                                 print x.__dict__
                                 Log().log(str(x))
@@ -602,7 +602,7 @@ class Broker(Satellite):
 
 	#Main function, will loop forever
 	def main(self):
-            
+
                 Log().log("Using working directory : %s" % os.path.abspath(self.workdir))
                 Pyro.config.PYRO_STORAGE = self.workdir
                 Pyro.config.PYRO_MULTITHREADED = 0
@@ -613,7 +613,7 @@ class Broker(Satellite):
 
                 self.uri2 = shinken.pyro_wrapper.register(self.daemon, IForArbiter(self), "ForArbiter")
 
-                
+
                 #We wait for initial conf
 		self.wait_for_initial_conf()
 
@@ -628,7 +628,7 @@ class Broker(Satellite):
                 #Connexion init with Schedulers
 		for sched_id in self.schedulers:
 			self.pynag_con_init(sched_id, type='scheduler')
-			
+
 		for pol_id in self.pollers:
 			self.pynag_con_init(pol_id, type='poller')
 
@@ -652,7 +652,7 @@ class Broker(Satellite):
 			#If so, we listen for it
 			#When it push us conf, we reinit connexions
 			self.watch_for_new_conf(0.0)
-			
+
 			#Maybe the last loop we raised some broks internally
 			#we should interger them in broks
 			self.interger_internal_broks()
@@ -664,11 +664,11 @@ class Broker(Satellite):
 			#And for other satellites
 			self.get_new_broks(type='poller')
 			self.get_new_broks(type='reactionner')
-			
-			
+
+
 		        #We must had new broks at the end of the list, so we reverse the list
-			self.broks.reverse()			
-			
+			self.broks.reverse()
+
 			start = time.time()
 			while(len(self.broks) != 0):
 				now = time.time()
@@ -681,7 +681,7 @@ class Broker(Satellite):
 			        #Ok, we can get the brok, and doing something with it
 				#REF: doc/broker-modules.png (4-5)
 				self.manage_brok(b)
-				
+
 				#Ok we manage brok, but we still want to listen to arbiter
 				self.watch_for_new_conf(0.0)
 
@@ -691,7 +691,7 @@ class Broker(Satellite):
 			#Maybe external modules raised 'objets'
 			#we should get them
 			self.get_objects_from_from_queues()
-			
+
 			#Maybe we do not have something to do, so we wait a little
 			if len(self.broks) == 0:
 				self.watch_for_new_conf(1.0)

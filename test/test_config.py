@@ -33,7 +33,7 @@ class TestConfig(ShinkenTest):
 
     def test_conf_is_correct(self):
         #
-        # Config is not correct because of a wrong relative path 
+        # Config is not correct because of a wrong relative path
         # in the main config file
         #
         self.assert_(not self.conf.conf_is_correct)

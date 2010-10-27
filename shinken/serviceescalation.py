@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -19,7 +19,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from item import Item, Items
-from util import to_int, to_char, to_split, to_bool, strip_and_uniq
+from util import to_int, to_split
 from escalation import Escalation
 
 class Serviceescalation(Item):
@@ -37,13 +37,13 @@ class Serviceescalation(Item):
                 'contacts' : {'required':True},
                 'contact_groups' : {'required':True},
                 }
-    
+
     running_properties = {}
-    
-    
+
+
     macros = {}
-    
-    
+
+
     #For debugging purpose only (nice name)
     def get_name(self):
         return ''
@@ -52,14 +52,14 @@ class Serviceescalation(Item):
 class Serviceescalations(Items):
     name_property = ""
     inner_class = Serviceescalation
-            
+
 
     #We look for contacts property in contacts and
     def explode(self, escalations):
         #Now we explode all escalations (host_name, service_description) to escalations
         for es in self:
             properties = es.__class__.properties
-            
+
             creation_dict = {'escalation_name' : 'Generated-Serviceescalation-%d' % es.id}
             for prop in properties:
                 if hasattr(es, prop):

@@ -31,7 +31,7 @@ def get_instance(plugin):
     print "Get a Merlin broker for plugin %s" % plugin.get_name()
     print "Get backend", plugin.backend
     backend = plugin.backend
-    
+
     #First try to import
     try:
         from merlindb_broker import Merlindb_broker
@@ -51,10 +51,10 @@ def get_instance(plugin):
                 character_set = plugin.character_set
             else:
                 character_set = 'utf8'
-        
+
             instance = Merlindb_broker(plugin.get_name(), backend, host=host, user=user, password=password, database=database, character_set=character_set)
             return instance
-            
+
         except ImportError , exp:
             print "Warning : the plugin type %s is unavalable : %s" % (properties['type'], exp)
             return None
@@ -68,6 +68,6 @@ def get_instance(plugin):
         except ImportError , exp:
             print "Warning : the plugin type %s is unavalable : %s" % (properties['type'], exp)
             return None
-        
+
     print "Not creating a instance!!!"
     return None

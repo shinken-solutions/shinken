@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -20,7 +20,6 @@
 
 
 from itemgroup import Itemgroup, Itemgroups
-from brok import Brok
 from util import to_bool
 
 #It change from hostgroup Class because there is no members
@@ -92,7 +91,7 @@ class Realm(Itemgroup):
         #First we tag the hg so it will not be explode
         #if a son of it already call it
         self.already_explode = True
-        
+
         #Now the recursiv part
         #rec_tag is set to False avery HG we explode
         #so if True here, it must be a loop in HG
@@ -239,7 +238,7 @@ class Realm(Itemgroup):
                     self.potential_brokers.append(broker)
         print self.get_name(),"Add potential brokers :", len(self.potential_brokers)
 
-        
+
     #Return the list of satellites of a certain type
     #like reactionner -> self.reactionners
     def get_satellties_by_type(self, type):
@@ -316,7 +315,7 @@ class Realm(Itemgroup):
             for p in self.get_all_subs_pollers():
                 cfg = p.give_satellite_cfg()
                 broker.cfg['pollers'][p.id] = cfg
-                
+
             #Now reactionners
             for r in self.get_all_subs_reactionners():
                 cfg = r.give_satellite_cfg()
@@ -352,7 +351,7 @@ class Realms(Itemgroups):
             p.packs = []
             p.confs = {}
 
-    
+
     #We just search for each realm the others realms
     #and replace the name by the realm
     def linkify_p_by_p(self):
@@ -374,7 +373,7 @@ class Realms(Itemgroups):
         #So after they can
         for p in self.itemgroups.values():
             p.higher_realms = []
-            
+
         for p in self.itemgroups.values():
             for sub_p in p.realm_members:
                 sub_p.higher_realms.append(p)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -26,7 +26,7 @@ class Singleton(type):
     def __init__(cls, name, bases, dict):
         print "Init de singleton"
         super(Singleton, cls).__init__(name, bases, dict)
-        cls.instance = None 
+        cls.instance = None
 
     def __call__(cls, *args, **kw):
         if cls.instance is None:

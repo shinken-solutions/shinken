@@ -18,28 +18,15 @@
 
 
 #File for a Livestatus class which can be used by the status-dat-broker
-import time
-import os
 import re
-import tempfile
 import Queue
 import json
 import sqlite3
 
 from service import Service
-from host import Host
-from contact import Contact
-from hostgroup import Hostgroup
-from servicegroup import Servicegroup
-from contactgroup import Contactgroup
-from timeperiod import Timeperiod
-from command import Command
-from comment import Comment
-from downtime import Downtime
-from config import Config
 from external_command import ExternalCommand
 
-from util import from_bool_to_string,from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
+from util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
 
 LOGCLASS_INFO         = 0 # all messages not in any other class
 LOGCLASS_ALERT        = 1 # alerts: the change service/host state
@@ -50,10 +37,10 @@ LOGCLASS_COMMAND      = 5 # external commands
 LOGCLASS_STATE        = 6 # initial or current states
 LOGCLASS_INVALID      = -1 # never stored
 LOGCLASS_ALL          = 0xffff
-LOGOBJECT_INFO        = 0 
+LOGOBJECT_INFO        = 0
 LOGOBJECT_HOST        = 1
 LOGOBJECT_SERVICE     = 2
-LOGOBJECT_CONTACT     = 3 
+LOGOBJECT_CONTACT     = 3
 
 #This is a dirty hack. Service.get_name only returns service_description.
 #For the servicegroup config we need more. host_name + separator + service_descriptio
@@ -87,7 +74,7 @@ def from_svc_hst_distinct_lists(dct):
     for s in dct['services']:
         t.append(s)
     return ','.join(t)
-    
+
 
 class Problem:
     def __init__(self, source, impacts):
@@ -115,8 +102,8 @@ class Logline(dict):
 class LiveStatus:
     separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
     #prop : is the internal name if it is different than the name in the output file
-    #required : 
-    #depythonize : 
+    #required :
+    #depythonize :
     #default :
     out_map = {
         'Host' : {
@@ -1602,7 +1589,7 @@ class LiveStatus:
             },
         },
 
-        
+
         #Timeperiods
         'Timeperiod' : {
             'alias' : {
@@ -1631,8 +1618,8 @@ class LiveStatus:
         },
 
 
-        ###Satellites 
-        #Schedulers 
+        ###Satellites
+        #Schedulers
         'SchedulerLink' : {
             'name' : {
                 'description' : 'The name of the scheduler',
@@ -4840,13 +4827,13 @@ class LiveStatus:
                                     value = [getattr(item, f)() for item in value if callable(getattr(item, f)) ] \
                                           + [getattr(item, f) for item in value if not callable(getattr(item, f)) ]
                                     #at least servicegroups are nested [host,service],.. The need some flattening
-                                    
+
                                     #I thin the 2 above lines are create a problem in json output at least
                                     #with service groups members that need to be [[hostname, desc], [hostname, desc]]
                                     #value = [y for x in value if isinstance(x, list) for y in x] + \
                                     #    [x for x in value if not isinstance(x, list)]
                                     print "DBG: Final value:", value
-                                   
+
                                 else:
                                     #ok not a direct function, maybe a functin provided by value...
                                     f = getattr(value, f)
@@ -4863,7 +4850,7 @@ class LiveStatus:
                         value = type_map[display]['default']
                     else:
                         value = ''
-                output[display] = value    
+                output[display] = value
         return output
 
 
@@ -4925,7 +4912,7 @@ class LiveStatus:
                     resultarr[maxidx - i - 1] = postprocess(filter(filtfunc, filtresult))
                 result = [resultarr]
             else:
-                #Results are host/service/etc dicts with the requested attributes 
+                #Results are host/service/etc dicts with the requested attributes
                 #Columns: = keys of the dicts
                 result = filtresult
         elif table == 'contacts':
@@ -4965,13 +4952,13 @@ class LiveStatus:
             for c in self.configs.values():
                 result.append(self.create_output(c, columns, filtercolumns))
         elif table == 'columns':
-            result.append({ 
+            result.append({
                 'description' : 'A description of the column' , 'name' : 'description' , 'table' : 'columns' , 'type' : 'string' })
-            result.append({ 
+            result.append({
                 'description' : 'The name of the column within the table' , 'name' : 'name' , 'table' : 'columns' , 'type' : 'string' })
-            result.append({ 
+            result.append({
                 'description' : 'The name of the table' , 'name' : 'table' , 'table' : 'columns' , 'type' : 'string' })
-            result.append({ 
+            result.append({
                 'description' : 'The data type of the column (int, float, string, list)' , 'name' : 'type' , 'table' : 'columns' , 'type' : 'string' })
             tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Logline' : 'log' }
             for obj in sorted(LiveStatus.out_map, key=lambda x: x):
@@ -5058,7 +5045,7 @@ class LiveStatus:
 
 
     def make_filter(self, operator, attribute, reference):
-        #The filters are closures. 
+        #The filters are closures.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         def eq_filter(ref):
             return ref[attribute] == reference
@@ -5127,7 +5114,7 @@ class LiveStatus:
 
         def std_postproc(ref):
             return 0
-        
+
         ##print "check operator", operator
         if operator == '=':
             return eq_filter
@@ -5222,7 +5209,7 @@ class LiveStatus:
 
 
     def make_sql_filter(self, operator, attribute, reference):
-        #The filters are closures. 
+        #The filters are closures.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         def eq_filter():
             if reference == '':
@@ -5464,13 +5451,13 @@ class LiveStatus:
                 print e
                 traceback.print_exc(32)
                 print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    
-    
+
+
             if responseheader == 'fixed16':
                 statuscode = 200
                 responselength = len(response) # no error
                 response = '%3d %11d\n' % (statuscode, responselength) + response
-    
+
             print "REQUEST", data
             print "RESPONSE\n%s\n" % response
             return response

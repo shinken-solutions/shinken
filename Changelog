@@ -1,8 +1,8 @@
 ########################
 Shinken ChangeLog
 #######################
-	
-	
+
+
 
 0.3 - 06/10/2010
 ------------------
@@ -21,8 +21,8 @@ ENHANCEMENTS
 	*Add : notificationways for contacts
 	*Add : warning about unmanaged parameters
 	*Add : log rotation and syslog managment
-	
-	
+
+
 FIXES
 	*Fix : install crash is now catch with Pyro 4 in Centos (python 2.4)
 	*Fix : host/service dep where not filled with default properties
@@ -35,7 +35,7 @@ FIXES
 	*Clean : dispatcher code about useless options
 	*Clean : tests cases setUp
 
-	
+
 0.2 - 06/09/2010
 ------------------
 ENHANCEMENTS
@@ -43,7 +43,7 @@ ENHANCEMENTS
 	*Installation is easy with the setup.py process (first version from Maximilien Bersoult)
 	*Now compatible with Pyro 3 AND 4
 	*Now compatible with Python 2.4 and 2.5 too
-	*Add sticky acknowledgement. Non-permanent ack-comments are now automatically removed	
+	*Add sticky acknowledgement. Non-permanent ack-comments are now automatically removed
 	*Add host acknowledgement and acknowledgement stickiness
 	*Finished service problem acknowledgement. one more testcase
 	*Add REMOVE_HOST/SVC_ACKNOWLEDGEMENT external command
@@ -86,7 +86,7 @@ ENHANCEMENTS
 	*Now external modules can return objects (from now nobody use it, but it can be useful in the future)
 	*Make easier to raise checks/notificatiosn from in deep objects class.
 	*repository cosmetics (Luke L)
-	
+
 FIXES
 	*Fix : now merlin is correctly filled with update program value
 	*Bug Fix : ndo do not have command_file, so do not export it.

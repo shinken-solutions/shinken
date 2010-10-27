@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -26,7 +26,7 @@
 #list when we add a new entry
 
 class AutoSlots(type):
-    #new is call when we create a new Class 
+    #new is call when we create a new Class
     #that have metaclass = AutoSlots
     #CLS is AutoSlots
     #name is s tring of the Class (like Service)

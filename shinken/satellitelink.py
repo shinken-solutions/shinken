@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -28,7 +28,6 @@ Pyro = shinken.pyro_wrapper.Pyro
 
 
 from item import Item, Items
-from util import to_int, to_bool
 
 class SatelliteLink(Item):
     #id = 0 each Class will have it's own id
@@ -37,7 +36,7 @@ class SatelliteLink(Item):
     #            'port' : {'required':  True, 'pythonize': to_int},
     #            'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
     #            }
- 
+
     #running_properties = {
     #                      'con' : {'default' : None}
     #                      }
@@ -72,7 +71,7 @@ class SatelliteLink(Item):
         #URI are differents between 3 and 4
         if shinken.pyro_wrapper.pyro_version == 3:
             self.uri = 'PYROLOC://'+self.address+":"+str(self.port)+"/ForArbiter"
-            self.con = Pyro.core.getProxyForURI(self.uri)            
+            self.con = Pyro.core.getProxyForURI(self.uri)
             #Ok, set timeout to 3 sec (ping timeout)
             self.con._setTimeout(self.timeout)
         else:
@@ -158,7 +157,7 @@ class SatelliteLink(Item):
         #check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
             self.set_dead()
-    
+
 
     def ping(self):
         print "Pinging %s" % self.get_name()
@@ -200,7 +199,7 @@ class SatelliteLink(Item):
     def have_conf(self, magic_hash=None):
         if self.con == None:
             self.create_connexion()
-            
+
         try:
             if magic_hash == None:
                 return self.con.have_conf()
@@ -315,7 +314,7 @@ class SatelliteLinks(Items):
         self.linkify_s_by_p(realms)
         self.linkify_s_by_plug(modules)
 
-        
+
     def linkify_s_by_p(self, realms):
         for s in self:
             p_name = s.realm.strip()

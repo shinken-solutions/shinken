@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -19,7 +19,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from item import Item, Items
-from util import to_int, to_char, to_split, to_bool, strip_and_uniq
+from util import to_int, to_split, strip_and_uniq
 
 class Escalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
@@ -34,13 +34,13 @@ class Escalation(Item):
                 'contacts' : {'required':True},
                 'contact_groups' : {'required':True},
                 }
-    
+
     running_properties = {}
-    
-    
+
+
     macros = {}
-    
-    
+
+
     #For debugging purpose only (nice name)
     def get_name(self):
         return self.escalation_name
@@ -61,7 +61,7 @@ class Escalation(Item):
         if notif_number < self.first_notification:
             print "Bad notif number, too early", self.first_notification
             return False
-        
+
         #self.last_notification = 0 mean no end
         if self.last_notification != 0 and notif_number > self.last_notification:
             print 'notif number too late', self.last_notification
@@ -70,7 +70,7 @@ class Escalation(Item):
         if status in small_states and small_states[status] not in self.escalation_options:
             print "Bad status", small_states[status], 'not in', self.escalation_options
             return False
-        
+
         #Maybe the time is not in our escalation_period
         if self.escalation_period != None and not self.escalation_period.is_time_valid(t):
             print "Bad time, no luck"
@@ -95,7 +95,7 @@ class Escalations(Items):
 
     def add_escalation(self, es):
         self.items[es.id] = es
-    
+
 
     #Will register esclations into service.escalations
     def linkify_es_by_s(self, services):
@@ -133,15 +133,15 @@ class Escalations(Items):
                             h.escalations.append(es)
                             #print "Now host", h.get_name(), 'have', h.escalations
 
-    
+
     #We look for contacts property in contacts and
     def explode(self, hosts, hostgroups, contactgroups):
-        
+
         #items::explode_host_groups_into_hosts
         #take all hosts from our hostgroup_name into our host_name property
         self.explode_host_groups_into_hosts(hosts, hostgroups)
-        
+
         #items::explode_contact_groups_into_contacts
         #take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
-        
+

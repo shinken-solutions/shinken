@@ -36,7 +36,7 @@ class TestConfig(ShinkenTest):
     #Change ME :)
     def test_dummy(self):
         #
-        # Config is not correct because of a wrong relative path 
+        # Config is not correct because of a wrong relative path
         # in the main config file
         #
         print "Get the hosts and services"

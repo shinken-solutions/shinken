@@ -28,7 +28,7 @@ from shinken_test import *
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     #Change ME :)
     def test_illegal_caracter_in_names(self):
         illegal_caracts = self.sched.conf.illegal_object_name_chars
@@ -36,7 +36,7 @@ class TestConfig(ShinkenTest):
         host = self.sched.hosts.find_by_name("test_host_0")
         #should be correct
         self.assert_(host.is_correct())
-        
+
         #Now change the name with incorrect caract
         for c in illegal_caracts:
             host.host_name = 'test_host_0'+c

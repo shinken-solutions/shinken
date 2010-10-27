@@ -32,7 +32,7 @@ from shinken.brok import Brok
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     #Change ME :)
     def test_service_perfdata(self):
         print self.conf.modules
@@ -91,7 +91,7 @@ class TestConfig(ShinkenTest):
         for b in self.sched.broks.values():
             if b.type == 'service_check_result':
                 sl2.manage_brok(b)
-        
+
         fd = open(mod.path)
         buf = fd.readline()
         print "BUF:", buf
@@ -100,7 +100,7 @@ class TestConfig(ShinkenTest):
         self.assert_(buf == comparison)
         fd.close()
         os.unlink(mod.path)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

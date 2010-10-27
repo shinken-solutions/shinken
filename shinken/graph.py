@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -49,8 +49,8 @@ class Graph:
         #If from_node do not exist, add it with it's son
         except KeyError:
             self.nodes[from_node] = [to_node]
-        
-    
+
+
     #Return all nodes that are in a loop. So if return [], no loop
     def loop_check(self):
         in_loop = []
@@ -91,8 +91,8 @@ class Graph:
                 self.dfs_loop_search(child)
                 child_status = child.dfs_loop_status
 
-            #If a child already temporary checked, its a problem, 
-            #loop inside, and its a acked status   
+            #If a child already temporary checked, its a problem,
+            #loop inside, and its a acked status
             if child_status == 'DFS_TEMPORARY_CHECKED':
                 child.dfs_loop_status = 'DFS_LOOP_INSIDE'
                 root.dfs_loop_status = 'DFS_LOOP_INSIDE'
@@ -106,7 +106,7 @@ class Graph:
                 child.dfs_loop_status = 'DFS_LOOP_INSIDE'
 
         #If root have been modified, do not set it OK
-        #A node is OK if and only if all of his childs are OK 
+        #A node is OK if and only if all of his childs are OK
         #if it does not have child, goes ok
         if root.dfs_loop_status == 'DFS_TEMPORARY_CHECKED':
             root.dfs_loop_status = 'DFS_OK'
@@ -131,7 +131,7 @@ class Graph:
         #Remove the tag
         for node in self.nodes:
             del node.dfs_loop_status
-            
+
         return packs
 
 
@@ -144,7 +144,7 @@ class Graph:
         ret.add(root)
         #And my sons
         ret.update(self.nodes[root])
-        
+
         for child in self.nodes[root]:
             #I just don't care about already check childs
             if child.dfs_loop_status == 'DFS_UNCHECKED':

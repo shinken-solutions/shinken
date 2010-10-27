@@ -67,7 +67,7 @@ class Dummy_arbiter:
         h = {'name' : 'dummy host from dummy arbiter module',
              'register' : '0',
              }
-        
+
         r['hosts'].append(h)
         print "[Dummy] Returning to Arbiter the hosts:", r
         return r

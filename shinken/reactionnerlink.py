@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -21,7 +21,6 @@
 
 from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool, to_split
-from item import Items
 
 class ReactionnerLink(SatelliteLink):
     id = 0
@@ -42,7 +41,7 @@ class ReactionnerLink(SatelliteLink):
                 'data_timeout' : {'required' : False, 'default' : '120', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'max_check_attempts' : {'required' : False, 'default' : '3','pythonize': to_int, 'fill_brok' : ['full_status']},
                 }
- 
+
     running_properties = {'con' : {'default' : None},
                           'alive' : {'default' : False, 'fill_brok' : ['full_status']},
                           'broks' : {'default' : []},

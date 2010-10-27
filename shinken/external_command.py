@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -26,7 +26,6 @@ from downtime import Downtime
 from comment import Comment
 from command import CommandCall
 from log import Log
-from check import Check
 
 class ExternalCommand:
     my_type = 'externalcommand'
@@ -196,7 +195,7 @@ class ExternalCommandManager:
         'STOP_OBSESSING_OVER_SVC_CHECKS' : {'global' : True, 'args' : []}
     }
 
-    
+
     def __init__(self, conf, mode):
         self.mode = mode
         self.conf = conf
@@ -223,7 +222,7 @@ class ExternalCommandManager:
         if self.fifo == None:
             if os.path.exists(self.pipe_path):
                 os.unlink(self.pipe_path)
-                
+
             if not os.path.exists(self.pipe_path):
                 os.umask(0)
                 try :
@@ -236,7 +235,7 @@ class ExternalCommandManager:
         #print 'Fifo:', self.fifo
         return self.fifo
 
-    
+
     def get(self):
         buf = os.read(self.fifo, 8096)
         os.close(self.fifo)
@@ -246,7 +245,7 @@ class ExternalCommandManager:
         return None
 
 
-    
+
     def resolve_command(self, excmd):
         command = excmd.cmd_line
         #Only log if we are in the Arbiter
@@ -255,7 +254,7 @@ class ExternalCommandManager:
         self.get_command_and_args(command)
 
 
-    #Ok the command is not for every one, so we search 
+    #Ok the command is not for every one, so we search
     #by the hostname which scheduler have the host. Then send
     #it the command
     def search_host_and_dispatch(self, host_name, command):
@@ -271,7 +270,7 @@ class ExternalCommandManager:
             else:
                 Log().log("Warning:  Passive check result was received for host '%s', but the host could not be found!" % host_name)
                 #print "Sorry but the host", host_name, "was not found"
-            
+
 
     #The command is global, so sent it to every schedulers
     def dispatch_global_command(self, command):
@@ -288,14 +287,14 @@ class ExternalCommandManager:
             command = command[:-1]
         elts = command.split(';')
         part1 = elts[0]
-        
+
         elts2 = part1.split(' ')
         print "Elts2:", elts2
         if len(elts2) != 2:
             print "Malformed command", command
             return None
         c_name = elts2[1]
-        
+
         print "Get command name", c_name
         if c_name not in ExternalCommandManager.commands:
             print "This command is not recognized, sorry"
@@ -322,10 +321,10 @@ class ExternalCommandManager:
 
                 print "For command arg", val
 
-                if not in_service:                    
+                if not in_service:
                     type_searched = ExternalCommandManager.commands[c_name]['args'][i-1]
                     print "Search for a arg", type_searched
-                    
+
                     if type_searched == 'host':
                         if self.mode == 'dispatcher':
                             self.search_host_and_dispatch(val, command)
@@ -374,7 +373,7 @@ class ExternalCommandManager:
                         cg = self.contact_groups.find_by_name(val)
                         if cg is not None:
                             args.append(cg)
-                    
+
                     #special case: service are TWO args host;service, so one more loop
                     #to get the two parts
                     elif type_searched == 'service':
@@ -383,11 +382,11 @@ class ExternalCommandManager:
 			print "TMP HOST", tmp_host
                         if tmp_host[-1] == '\n':
                             tmp_host = tmp_host[:-1]
-                            #If 
+                            #If
                         if self.mode == 'dispatcher':
                        	    self.search_host_and_dispatch(tmp_host, command)
                             return None
-                    
+
                     i += 1
                 else:
                     in_service = False
@@ -413,11 +412,11 @@ class ExternalCommandManager:
             print "Sorry, the arguments are not corrects", args
 
 
-    
+
     #CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODSATTR(self, contact, value):
         pass
-    
+
     #CHANGE_CONTACT_MODHATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODHATTR(self, contact, value):
         pass
@@ -451,7 +450,7 @@ class ExternalCommandManager:
     #TODO : add a better ACK management
     def ACKNOWLEDGE_HOST_PROBLEM(self, host, sticky, notify, persistent, author, comment):
         host.acknowledge_problem(sticky, notify, persistent, author, comment)
-        
+
     #CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
         contact.service_notification_period = notification_timeperiod
@@ -460,7 +459,7 @@ class ExternalCommandManager:
     #CHANGE_CUSTOM_CONTACT_VAR;<contact_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_CONTACT_VAR(self, contact, varname, varvalue):
         contact.customs[varname.upper()] = varvalue
-    
+
     #CHANGE_CUSTOM_HOST_VAR;<host_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_HOST_VAR(self, host, varname, varvalue):
         host.customs[varname.upper()] = varvalue
@@ -476,7 +475,7 @@ class ExternalCommandManager:
     #CHANGE_GLOBAL_SVC_EVENT_HANDLER;<event_handler_command>
     def CHANGE_GLOBAL_SVC_EVENT_HANDLER(self, event_handler_command):
         pass
-    
+
     #CHANGE_HOST_CHECK_COMMAND;<host_name>;<check_command>
     def CHANGE_HOST_CHECK_COMMAND(self, host, check_command):
         host.check_command = CommandCall(self.commands, check_command, poller_tag=host.poller_tag)
@@ -554,7 +553,7 @@ class ExternalCommandManager:
     def DELAY_HOST_NOTIFICATION(self, host, notification_time):
         host.first_notification_delay = notification_time
         self.sched.get_and_register_status_brok(host)
-    
+
     #DELAY_SVC_NOTIFICATION;<host_name>;<service_description>;<notification_time>
     def DELAY_SVC_NOTIFICATION(self, service, notification_time):
         service.first_notification_delay = notification_time
@@ -564,7 +563,7 @@ class ExternalCommandManager:
     def DEL_ALL_HOST_COMMENTS(self, host):
         for c in host.comments:
             self.DEL_HOST_COMMENT(c.id)
-    
+
     #DEL_ALL_SVC_COMMENTS;<host_name>;<service_description>
     def DEL_ALL_SVC_COMMENTS(self, service):
         for c in service.comments:
@@ -905,7 +904,7 @@ class ExternalCommandManager:
         for s in host.services:
             self.ENABLE_SVC_NOTIFICATIONS(s)
             self.sched.get_and_register_status_brok(s)
-    
+
     #ENABLE_NOTIFICATIONS
     def ENABLE_NOTIFICATIONS(self):
         self.conf.enable_notifications = True
@@ -927,17 +926,17 @@ class ExternalCommandManager:
         self.conf.process_performance_data = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
-    
+
     #ENABLE_SERVICEGROUP_HOST_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_HOST_CHECKS(self, servicegroup):
         for service in servicegroup:
             self.ENABLE_HOST_CHECK(service.host)
-    
+
     #ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS(self, servicegroup):
         for service in servicegroup:
             self.ENABLE_HOST_NOTIFICATIONS(service.host)
-    
+
     #ENABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS(self, servicegroup):
         for service in servicegroup:
@@ -988,7 +987,7 @@ class ExternalCommandManager:
     def PROCESS_FILE(self, file_name, delete):
         pass
 
-    #TODO : say that check is PASSIVE 
+    #TODO : say that check is PASSIVE
     #PROCESS_HOST_CHECK_RESULT;<host_name>;<status_code>;<plugin_output>
     def PROCESS_HOST_CHECK_RESULT(self, host, status_code, plugin_output):
         #raise a PASSIVE check only if needed
@@ -1244,20 +1243,20 @@ class ExternalCommandManager:
         self.conf.obsess_over_services = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
-    
-    
+
+
 if __name__ == '__main__':
     import os
-    
+
     FIFO_PATH = '/tmp/my_fifo'
-    
+
     if os.path.exists(FIFO_PATH):
         os.unlink(FIFO_PATH)
-        
+
     if not os.path.exists(FIFO_PATH):
         os.umask(0)
         os.mkfifo(FIFO_PATH, 0660)
         my_fifo = open(FIFO_PATH, 'w+')
         print "my_fifo:", my_fifo
-    
+
     print open(FIFO_PATH, 'r').readline()

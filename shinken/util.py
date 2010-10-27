@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -18,7 +18,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import re, time, calendar
+import time, calendar
 #from memoized import memoized
 
 ############################### SEQUENCES ###############################
@@ -27,7 +27,7 @@ def get_sequence():
     while True:
         i = i + 1
         yield i
-                            
+
 
 ################################### TIME ##################################
 #@memoized
@@ -153,7 +153,7 @@ def scheduler_no_spare_first(x, y):
         return -1
 
 
-#-1 is x first, 0 equal, 1 is y first 
+#-1 is x first, 0 equal, 1 is y first
 def alive_then_spare_then_deads(x, y):
     #First are alive
     if x.alive and not y.alive:
@@ -171,7 +171,7 @@ def alive_then_spare_then_deads(x, y):
     if not y.spare:
         return 1
     return 0
-        
+
 
 
 ##################### Cleaning ##############

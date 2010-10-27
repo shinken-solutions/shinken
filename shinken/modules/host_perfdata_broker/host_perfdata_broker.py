@@ -46,7 +46,7 @@ class Host_perfdata_broker:
     def init(self):
         print "I open the host-perfdata file '%s'" % self.path
         self.file = open(self.path, self.mode)
-    
+
 
     def get_name(self):
         return self.name

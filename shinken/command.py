@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -126,14 +126,14 @@ class Commands(object):
     def __iter__(self):
         return self.commands.itervalues()
 
-    
+
     def __str__(self):
         s = ''
         for c in self.commands.values():
             s += str(c)
         return s
 
-    
+
     def find_cmd_id_by_name(self, name):
         for id in self.commands:
             if self.commands[id].command_name == name:

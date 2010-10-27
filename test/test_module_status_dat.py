@@ -38,10 +38,10 @@ class TestConfig(ShinkenTest):
         for line in buf.splitlines():
             if line == s:
                 print "Find string"
-                nb_s += 1        
+                nb_s += 1
         return nb_s
 
-    
+
     #Change ME :)
     def test_simplelog(self):
         print self.conf.modules
@@ -96,7 +96,7 @@ class TestConfig(ShinkenTest):
 
         nb_hosts = self.nb_of_string(buf, "hoststatus {")
         self.assert_(nb_hosts == 2)
-        
+
         nb_services = self.nb_of_string(buf, "servicestatus {")
         self.assert_(nb_services  == 1)
 
@@ -138,7 +138,7 @@ class TestConfig(ShinkenTest):
 
         os.unlink(mod.status_file)
         os.unlink(mod.object_cache_file)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -23,10 +23,6 @@
 
 #And now classic include
 import time
-import select
-import socket
-import sys
-import cPickle
 
 #And now include from this global directory
 from shinken.host import Host
@@ -52,10 +48,10 @@ class Status_dat_broker:
         self.opath = opath
         self.name = name
         self.update_interval = update_interval
-        
+
         #Warning :
         #self.properties will be add by the modulesmanager !!
-        
+
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
@@ -63,7 +59,7 @@ class Status_dat_broker:
     def init(self):
         print "I am init"
         self.q = self.properties['to_queue']
-    
+
         #Our datas
         self.configs = {}
         self.hosts = {}
@@ -79,7 +75,7 @@ class Status_dat_broker:
         self.objects_cache = ObjectsCacheFile(self.opath, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
 
         self.number_of_objects = 0
-    
+
 
     def is_external(self):
         return True
@@ -129,7 +125,7 @@ class Status_dat_broker:
         for i in h_to_del:
             print "Deleting previous host %d" % i
             del self.hosts[i]
-            
+
         #same for services
         s_to_del = []
         for s in self.services.values():
@@ -149,22 +145,22 @@ class Status_dat_broker:
         print 'DBG: Creacting host with with brok :', b.id
         print "Creating host:", h_id, b.__dict__
 
-        
+
         h = Host({})
         for prop in data:
             setattr(h, prop, data[prop])
 
         #add instance_id to the host, so we know in which scheduler he is
         h.instance_id = b.instance_id
-        
+
         h.check_period = self.get_timeperiod(h.check_period)
         h.notification_period = self.get_timeperiod(h.notification_period)
-        
+
         h.contacts = self.get_contacts(h.contacts)
 
         #Escalations is not use for status_dat
         del h.escalations
-                
+
         #print "H:", h
         self.hosts[h_id] = h
         self.number_of_objects += 1
@@ -235,8 +231,8 @@ class Status_dat_broker:
         #print "Creating Contact:", c_id, data
         c = Contact({})
         self.update_element(c, data)
-        
-        
+
+
         #print "C:", c
         self.contacts[c_id] = c
         self.number_of_objects += 1
@@ -391,7 +387,7 @@ class Status_dat_broker:
                 return c
         return None
 
-        
+
     def update_element(self, e, data):
         #print "........%s........" % type(e)
         for prop in data:
@@ -410,7 +406,7 @@ class Status_dat_broker:
         while True:
             b = self.q.get()
             self.manage_brok(b)
-            
+
             if time.time() - last_generation > self.update_interval:
                 #from guppy import hpy
                 #hp=hpy()
@@ -431,5 +427,5 @@ class Status_dat_broker:
                     print "[status_dat] Error :", r
                     break
                 last_generation = time.time()
-            
+
 

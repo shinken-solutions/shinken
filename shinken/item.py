@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -37,7 +37,7 @@ class Item(object):
         setattr(self, 'id', self.__class__.id)
         self.__class__.id += 1
 
-        
+
         self.customs = {} # for custom variables
         self.plus = {} # for value with a +
 
@@ -48,7 +48,7 @@ class Item(object):
             #Type with __iter__ are list or dict, or tuple.
             #Item need it's own list, so qe copy
             val = cls.running_properties[prop]['default']
-            if hasattr(val, '__iter__'): 
+            if hasattr(val, '__iter__'):
                 setattr(self, prop, copy(val))
             else:
                 setattr(self, prop, val)
@@ -86,7 +86,7 @@ class Item(object):
     def clean(self):
         pass
 
-    
+
     def __str__(self):
         return str(self.__dict__)+'\n'
 
@@ -118,10 +118,10 @@ class Item(object):
     #Must be called after a change in a gloabl conf parameter
     def load_global_conf(cls, conf):
         #print "Load global conf=========================="
-        #conf have properties, if 'enable_notifications' : 
+        #conf have properties, if 'enable_notifications' :
         #{ [...] 'class_inherit' : [(Host, None), (Service, None),
         # (Contact, None)]}
-        #get the name and put the value if None, put the Name 
+        #get the name and put the value if None, put the Name
         #(not None) if not (not clear ?)
         for prop in conf.properties:
             if 'class_inherit' in conf.properties[prop]:
@@ -189,7 +189,7 @@ class Item(object):
         #Not event a plus... so None :)
         return None
 
-    
+
     #We fillfull properties with template ones if need
     def get_customs_properties_by_inheritance(self, items):
         for i in self.templates:
@@ -208,7 +208,7 @@ class Item(object):
             if self.has_plus(prop):
                 value = value = value+','+self.get_plus_and_delete(prop)
                 self.customs[prop] = value
-        #We can get custom properties in plus, we need to get all 
+        #We can get custom properties in plus, we need to get all
         #entires and put
         #them into customs
         cust_in_plus = self.get_all_plus_and_delete()
@@ -216,7 +216,7 @@ class Item(object):
             self.customs[prop] = cust_in_plus[prop]
         return self.customs
 
-    
+
     def has_plus(self, prop):
         try:
             self.plus[prop]
@@ -303,13 +303,13 @@ class Item(object):
                 self.create_notifications('ACKNOWLEDGEMENT')
             self.problem_has_been_acknowledged = True
             if sticky == 2:
-                sticky = True 
+                sticky = True
             else:
                 sticky = False
             a = Acknowledge(self, sticky, notify, persistent, author, comment)
             self.acknowledgement = a
             if self.my_type == 'host':
-                comment_type = 1 
+                comment_type = 1
             else :
                 comment_type = 2
             c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
@@ -329,9 +329,9 @@ class Item(object):
                     self.del_comment(c.id)
             self.broks.append(self.get_update_status_brok())
 
-    
+
     # Check if we have an acknowledgement and if this is marked as sticky.
-    # This is needed when a non-ok state changes 
+    # This is needed when a non-ok state changes
     def unacknowledge_problem_if_not_sticky(self):
         if hasattr(self, 'acknowledgement') and self.acknowledgement != None:
             if not self.acknowledgement.sticky:
@@ -362,7 +362,7 @@ class Item(object):
                         val = f(getattr(self, prop))
                         setattr(self, prop, val)
 
-        
+
 
 
     #Get the property for an object, with good value
@@ -420,7 +420,7 @@ class Item(object):
         cls = self.__class__
         my_type = cls.my_type
         data = {'id' : self.id}
-        
+
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_'+my_type+'_status', data)
         return b
@@ -430,7 +430,7 @@ class Item(object):
     def get_update_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        
+
         data = {'id' : self.id}
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('update_'+my_type+'_status', data)
@@ -441,13 +441,13 @@ class Item(object):
     def get_check_result_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        
+
         data = {}
         self.fill_data_brok_from(data, 'check_result')
         b = Brok(my_type+'_check_result', data)
         return b
 
-    
+
     #Get brok about the new schedule (next_check)
     def get_next_schedule_brok(self):
         cls = self.__class__
@@ -457,8 +457,8 @@ class Item(object):
         self.fill_data_brok_from(data, 'next_schedule')
         b = Brok(my_type+'_next_schedule', data)
         return b
-        
-        
+
+
     #Link one command property to a class (for globals like oc*p_command)
     def linkify_one_command_with_commands(self, commands, prop):
         if hasattr(self, prop):
@@ -473,7 +473,7 @@ class Item(object):
             else:
                 setattr(self, prop, None)
 
-            
+
 
 class Items(object):
     def __init__(self, items):
@@ -481,13 +481,13 @@ class Items(object):
         for i in items:
             self.items[i.id] = i
         self.templates = {}
-        
-    
-            
+
+
+
     def __iter__(self):
         return self.items.itervalues()
 
- 
+
     def __len__(self):
         return len(self.items)
 
@@ -502,7 +502,7 @@ class Items(object):
 
     def __getitem__(self, key):
         return self.items[key]
-    
+
 
     #We create the reversed list so search will be faster
     #We also create a twins list with id of twins (not the original
@@ -519,7 +519,7 @@ class Items(object):
                 else:
                     self.twins.append(id)
 
-    
+
     def find_id_by_name(self, name):
         if hasattr(self, 'reversed_list'):
             if name in self.reversed_list:
@@ -566,7 +566,7 @@ class Items(object):
 
     def linkify_templates(self):
         #First we create a list of all templates
-        self.create_tpl_list() 
+        self.create_tpl_list()
         for i in self:
             tpls = i.get_templates()
             new_tpls = []
@@ -578,7 +578,7 @@ class Items(object):
                     err = "ERROR: the template '%s' defined for '%s' is unkown" % (tpl, i.get_name())
                     i.configuration_errors.append(err)
             i.templates = new_tpls
-            
+
 
 
     def is_correct(self):
@@ -621,7 +621,7 @@ class Items(object):
         for i in self:
             i.fill_default()
 
-    
+
     def __str__(self):
         s = ''
         cls = self.__class__
@@ -654,7 +654,7 @@ class Items(object):
     #Services are also managed here but they are specials:
     #We remove twins services with the same host_name/service_description
     #Remember: host service are take into account first before hostgroup service
-    #Id of host service are lower than hostgroups one, so they are 
+    #Id of host service are lower than hostgroups one, so they are
     #in self.twins_services
     #and we can remove them.
     def remove_twins(self):
@@ -797,33 +797,33 @@ class Items(object):
         original_expr = expr
         #print "I'm trying to prepare the expression", expr
 
-        #We've got problem with the "-" sign. It can be in a 
+        #We've got problem with the "-" sign. It can be in a
         #valid name but it's a sign of difference for sets
         #so we change the - now by something, then we reverse after
         if '-' in expr:
             expr = expr.replace('-', 'MINUSSIGN')
-        
+
         #! (not) should be changed as "ALL-" (all but not...)
         if '!' in expr:
             ALLELEMENTS = self.get_all_host_names_set(hosts)
             #print "Changing ! by ALLELEMENTS- in ", expr
             expr = expr.replace('!', 'ALLELEMENTS-')
-        
+
         #print "Now finding all token to change in variable"
         #print "So I remove all non want caracters"
-        
+
         #We change all separaton token by 10 spaces (so names can still have some spaces
         #on them like Europe Servers because we wil cut byy this 10spaces after
         strip_expr = expr
         for c in ['|', '&', '(', ')', ',', '-']:
             strip_expr = strip_expr.replace(c, ' '*10)
         #print "Stripped expression:", strip_expr
-        
+
         tokens = strip_expr.split(' '*10)
         #Strip and non void token
         tokens = [token.strip() for  token in tokens if token != '']
         #print "Tokens:", tokens
-        
+
         #Now add in locals() dict (yes, real variables!)
         for token in tokens:
             #ALLELEMENTS is a private group for us
@@ -850,10 +850,10 @@ class Items(object):
                     if 'MINUSSIGN' in token:
                         token = token.replace('MINUSSIGN', '-')
                     print "ERROR: the group %s is unknown!" % token
-            
+
             #print "Now changing the exprtoken value with UPPER one (so less risk of problem..."
             expr = expr.replace(token, token.upper())
-            
+
         #print "Final expression:", expr
         try:
             evaluation = eval(expr)

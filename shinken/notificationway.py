@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -19,7 +19,6 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from command import CommandCall
 from item import Item, Items
 from util import to_split, to_bool
 
@@ -41,7 +40,7 @@ class NotificationWay(Item):
 
     running_properties = {}
 
-    
+
     macros = {
         }
 
@@ -163,7 +162,7 @@ class NotificationWay(Item):
         if not hasattr(self, 'host_notification_period') or self.host_notification_period==None:
             print self.get_name()," : the host_notification_period is invalid"
             state = False
-            
+
         return state
 
 
@@ -179,7 +178,7 @@ class NotificationWays(Items):
         self.linkify_command_list_with_commands(commands, 'service_notification_commands')
         self.linkify_command_list_with_commands(commands, 'host_notification_commands')
 
-        
+
     def new_inner_member(self, name=None, params={}):
         if name == None:
             name = NotificationWay.id

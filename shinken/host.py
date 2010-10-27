@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -19,7 +19,6 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-import re
 
 from autoslots import AutoSlots
 from item import Items
@@ -37,7 +36,7 @@ class Host(SchedulingItem):
     #AutoSlots create the __slots__ with properties and
     #running_properties names
     __metaclass__ = AutoSlots
-    
+
     id = 1 #0 is reserved for host (primary node for parents)
     ok_up = 'UP'
     my_type = 'host'
@@ -187,7 +186,7 @@ class Host(SchedulingItem):
         #and taht will raised real warning/errors during the is_correct
         'configuration_warnings' : {'default' : []},
         'configuration_errors' : {'default' : []},
-        
+
         #Issue/impact part
         'is_problem' : {'default' : False, 'fill_brok' : ['full_status']},
         'is_impact' : {'default' : False, 'fill_brok' : ['full_status']},
@@ -254,7 +253,7 @@ class Host(SchedulingItem):
         'normal_check_interval' : 'check_interval',
         'retry_check_interval' : 'retry_interval'
         }
-        
+
 
     def clean(self):
         pass
@@ -267,7 +266,7 @@ class Host(SchedulingItem):
     def __getstate__(self):
         cls = self.__class__
         #id is not in *_properties
-        res = [self.id] 
+        res = [self.id]
         for prop in cls.properties:
             res.append(getattr(self, prop))
         for prop in cls.running_properties:
@@ -469,7 +468,7 @@ class Host(SchedulingItem):
 
     def get_check_command(self):
         return self.check_command.get_name()
-    
+
 
     #For get a nice name
     def get_name(self):
@@ -496,7 +495,7 @@ class Host(SchedulingItem):
         self.chk_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
         #And I add me in it's list
         h.chk_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
-        
+
 
     #add one of our service to services (at linkify)
     def add_service_link(self, service):
@@ -505,7 +504,7 @@ class Host(SchedulingItem):
 
     #Set unreachable : all our parents are down!
     #We have a special state, but state was already set, we just need to
-    #update it. We are no DOWN, we are UNREACHABLE and 
+    #update it. We are no DOWN, we are UNREACHABLE and
     #got a state id is 2
     def set_unreachable(self):
         now = time.time()
@@ -539,7 +538,7 @@ class Host(SchedulingItem):
             self.state = self.state_before_impact
             self.state_id = self.state_id_before_impact
             #print "Reverting ME %s states to %s %s" % (self.get_dbg_name(), self.state, self.state_id)
-    
+
 
     #set the state in UP, DOWN, or UNDETERMINED
     #with the status of a check. Also update last_state
@@ -560,7 +559,7 @@ class Host(SchedulingItem):
         else:
             #print "Me %s take impact state %s and not %s" % (self.get_dbg_name(), self.state_before_impact, self.state)
             self.last_state = self.state
-        
+
         if status == 0:
             self.state = 'UP'
             self.state_id = 0
@@ -618,7 +617,7 @@ class Host(SchedulingItem):
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
         Log().log("Warning: The results of host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the host." \
                       % (self.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
-            
+
 
     #Raise a log entry with a Notification alert like
     #HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
@@ -812,26 +811,26 @@ class Host(SchedulingItem):
             return True
 
         return False
-    
-    
-    #Get a oc*p command if item has obsess_over_*  
+
+
+    #Get a oc*p command if item has obsess_over_*
     #command. It must be enabled locally and globally
     def get_obsessive_compulsive_processor_command(self):
         cls = self.__class__
         if not cls.obsess_over or not self.obsess_over_host:
             return
-        
+
         m = MacroResolver()
         data = self.get_data_for_event_handler()
         cmd = m.resolve_command(cls.ochp_command, data)
         e = EventHandler(cmd, timeout=cls.ochp_timeout)
-        
+
         #ok we can put it in our temp action queue
         self.actions.append(e)
 
-        
-        
-        
+
+
+
 class Hosts(Items):
     name_property = "host_name" #use for the search by name
     inner_class = Host #use for know what is in items
@@ -855,7 +854,7 @@ class Hosts(Items):
         self.linkify_h_by_h()
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
-        
+
         self.linkify_with_contacts(contacts)
         self.linkify_h_by_realms(realms)
         self.linkify_with_resultmodulations(resultmodulations)
@@ -869,7 +868,7 @@ class Hosts(Items):
     def fill_predictive_missing_parameters(self):
         for h in self:
             h.fill_predictive_missing_parameters()
-        
+
 
     #Link host with hosts (parents)
     def linkify_h_by_h(self):
@@ -905,7 +904,7 @@ class Hosts(Items):
             else:
                 print "Notice : applying default realm %s to host %s" % (default_realm.get_name(), h.get_name())
                 h.realm = default_realm
-                
+
 
     #It's used to change old Nagios2 names to
     #Nagios3 ones
@@ -914,13 +913,13 @@ class Hosts(Items):
             h.old_properties_names_to_new()
 
 
-    
+
     #We look for hostgroups property in hosts and
     def explode(self, hostgroups, contactgroups):
         #Hostgroups property need to be fullfill for got the informations
         #self.apply_partial_inheritance('hostgroups')
         #self.apply_partial_inheritance('contact_groups')
-        
+
         #Register host in the hostgroups
         for h in self:
             if not h.is_tpl():
@@ -935,13 +934,13 @@ class Hosts(Items):
         self.explode_contact_groups_into_contacts(contactgroups)
 
 
-        
+
     #Create depenancies:
     #Depencies at the host level: host parent
     def apply_dependancies(self):
         for h in self:
             h.fill_parents_dependancie()
-            
+
 
     #Parent graph: use to find quickly relations between all host, and loop
     #return True if tehre is a loop
@@ -951,12 +950,12 @@ class Hosts(Items):
 
         #Create parent graph
         parents = Graph()
-        
+
         #With all hosts as nodes
         for h in self:
             if h != None:
                 parents.add_node(h)
-        
+
         #And now fill edges
         for h in self:
             for p in h.parents:

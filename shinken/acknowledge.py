@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -19,22 +19,20 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#Allows you to acknowledge the current problem for the specified service. 
-#By acknowledging the current problem, future notifications (for the same 
+#Allows you to acknowledge the current problem for the specified service.
+#By acknowledging the current problem, future notifications (for the same
 #servicestate) are disabled.
-import time
-
 class Acknowledge:
     id = 0
 
-    #Allows you to acknowledge the current problem for the specified service. 
+    #Allows you to acknowledge the current problem for the specified service.
     #By acknowledging the current problem, future notifications (for the
     #same servicestate) are disabled.
-    #If the "sticky" option is set to one (1), the acknowledgement will remain 
-    #until the service returns to an OK state. Otherwise the acknowledgement 
+    #If the "sticky" option is set to one (1), the acknowledgement will remain
+    #until the service returns to an OK state. Otherwise the acknowledgement
     #will automatically be removed when the service changes state. In this case
-    #Web interfaces set a value of (2). 
-    #If the "notify" option is set to one (1), a notification will be sent out to 
+    #Web interfaces set a value of (2).
+    #If the "notify" option is set to one (1), a notification will be sent out to
     #contacts indicating that the current service problem has been acknowledged.
     #If the "persistent" option is set to one (1), the comment associated with
     #the acknowledgement will survive across restarts of the Shinken process.

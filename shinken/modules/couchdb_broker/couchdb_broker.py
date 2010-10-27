@@ -60,7 +60,7 @@ class Couchdb_broker:
     def init(self):
         print "I connect to Couchdb database"
         self.connect_database()
-    
+
 
     #Get a brok, parse it, and put in in database
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
@@ -93,8 +93,8 @@ class Couchdb_broker:
             sock = s.resource.http.connections[con].sock
             sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
-        tables = ['commands', 'comments', 'contacts', 'contactgroups', 'downtimes', 'hosts', 
-                  'hostdependencies', 'hostescalations', 'hostgroups', 'notifications', 'program_status', 
+        tables = ['commands', 'comments', 'contacts', 'contactgroups', 'downtimes', 'hosts',
+                  'hostdependencies', 'hostescalations', 'hostgroups', 'notifications', 'program_status',
                   'scheduled_downtimes', 'services',  'serviceescalations',
                   'servicegroups', 'timeperiods', 'host_hostgroup', 'contact_contactgroup', 'service_servicegroup']
 
@@ -118,11 +118,11 @@ class Couchdb_broker:
         #Couchdb index is _id
         if key != None:
             data['_id'] = key
-        
+
         #Now stringify datas in UTF-8
         for prop in data:
             val = data[prop]
-            
+
             if isinstance(val, str):
                 data[prop] = val.decode('utf-8')
                 data[prop].replace("'", "''")
@@ -130,7 +130,7 @@ class Couchdb_broker:
                 data[prop] = val
         db.create(data)
 
-    
+
     #Update a document into a table with data
     def update_document(self, table, data, key):
         db = self.dbs[table]
@@ -147,7 +147,7 @@ class Couchdb_broker:
         #Now stringify datas
         for prop in data:
             val = data[prop]
-            
+
             if isinstance(val, str):
                 data[prop] = val.decode('utf-8')
                 data[prop].replace("'", "''")
@@ -156,12 +156,12 @@ class Couchdb_broker:
 
             doc[prop] = data[prop]
         db.update([doc])
-    
+
 
     #Ok, we are at launch and a scheduler want him only, OK...
     #So ca create several queries with all tables we need to delete with
     #our instance_id
-    #This brob must be send at the begining of a scheduler session, 
+    #This brob must be send at the begining of a scheduler session,
     #if not, BAD THINGS MAY HAPPENED :)
     def manage_clean_all_my_instance_id_brok(self, b):
         return
@@ -176,7 +176,7 @@ class Couchdb_broker:
         self.create_document('program_status', b.data, b.data['instance_name'])
 
 
-    #Initial service status is at start. We need an insert because we 
+    #Initial service status is at start. We need an insert because we
     #clean the base
     def manage_initial_service_status_brok(self, b):
         #It's a initial entry, so we need creat
@@ -210,20 +210,20 @@ class Couchdb_broker:
     #They are for host_hostgroup table, with just host.id hostgroup.id
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
-        
+
         #Here we've got a special case : in data, there is members
-        #and we do not want it in the INSERT query, so we crate a 
+        #and we do not want it in the INSERT query, so we crate a
         #tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         self.create_document('hostgroups', tmp_data, data['hostgroup_name'])
-        
-        
-        #Ok, the hostgroup table is uptodate, now we add relations 
+
+
+        #Ok, the hostgroup table is uptodate, now we add relations
         #between hosts and hostgroups
         for (h_id, h_name) in b.data['members']:
             self.create_document('host_hostgroup', {'host' : h_id, 'hostgroup' : b.data['id']}, None)
-            
+
 
 
     #same from hostgroup, but with servicegroup
@@ -262,7 +262,7 @@ class Couchdb_broker:
     #A contact have just be created, database is clean, we INSERT it
     def manage_initial_contact_status_brok(self, b):
         self.create_document('contacts', b.data, b.data['contact_name'])
-        
+
 
     #same from hostgroup, but with servicegroup
     def manage_initial_contactgroup_status_brok(self, b):

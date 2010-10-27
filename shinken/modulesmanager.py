@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -24,12 +24,11 @@
 
 import os
 import os.path
-import imp
 import sys
 import traceback
 
 
-from multiprocessing import Process, Queue, active_children
+from multiprocessing import Process, Queue
 
 #modulepath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "modules/")
 #Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html
@@ -47,14 +46,14 @@ class ModulesManager(object):
     def load(self):
         #We get all modules file of our type (end with broker.py for example)
         modules_files = [fname[:-3] for fname in os.listdir(self.modules_path) if fname.endswith(self.modules_type+".py")]
-        
+
         #And directories (no remove of .py but still with broker for example at the end)
         modules_files.extend([fname for fname in os.listdir(self.modules_path) if fname.endswith(self.modules_type)])
-        
+
         #Now we try to load thems
         if not self.modules_path in sys.path:
             sys.path.append(self.modules_path)
-        
+
         self.imported_modules = []
         for fname in modules_files:
             try:
@@ -73,7 +72,7 @@ class ModulesManager(object):
             if not is_find:
                 #No module is suitable, we Raise a Warning
                 print "Warning : the module type %s for %s was not found in modules!" % (module_type, module.get_name())
-    
+
 
     #Get modules instance to give them after broks
     def get_instances(self):

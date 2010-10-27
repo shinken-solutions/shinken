@@ -72,7 +72,7 @@ class Ndodb_broker:
         print "I connect to NDO database"
         self.db = DBMysql(self.host, self.user, self.password, self.database, self.character_set, table_prefix='nagios_')
         self.connect_database()
-    
+
 
     #Get a brok, parse it, and put in in database
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
@@ -138,16 +138,16 @@ class Ndodb_broker:
         else:
             return row[0]
 
-    
+
     #Ok, we are at launch and a scheduler want him only, OK...
     #So ca create several queries with all tables we need to delete with
     #our instance_id
-    #This brob must be send at the begining of a scheduler session, 
+    #This brob must be send at the begining of a scheduler session,
     #if not, BAD THINGS MAY HAPPENED :)
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
         tables = ['commands', 'contacts', 'contactgroups', 'hosts',
-                  'hostescalations', 'hostgroups', 'notifications',  
+                  'hostescalations', 'hostgroups', 'notifications',
                   'services',  'serviceescalations', 'programstatus',
                   'servicegroups', 'timeperiods', 'hostgroup_members',
                   'contactgroup_members', 'objects', 'hoststatus',
@@ -225,7 +225,7 @@ class Ndodb_broker:
 
 
     #A host have just be create, database is clean, we INSERT it
-    def manage_initial_host_status_brok(self, b):            
+    def manage_initial_host_status_brok(self, b):
         new_b = copy.deepcopy(b)
 
         data = new_b.data
@@ -236,11 +236,11 @@ class Ndodb_broker:
                         }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
-        
+
         host_id = self.get_host_object_id_by_name(data['host_name'])
-        
+
         #print "DATA:", data
-        hosts_data = {'host_id' : data['id'], 'instance_id' : data['instance_id'], 
+        hosts_data = {'host_id' : data['id'], 'instance_id' : data['instance_id'],
                       'host_object_id' : host_id, 'alias' : data['alias'],
                       'display_name' : data['display_name'], 'address' : data['address'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
@@ -268,14 +268,14 @@ class Ndodb_broker:
                            'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data']
         }
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
-        
+
         return [query, hoststatus_query]
 
 
     #A host have just be create, database is clean, we INSERT it
     def manage_initial_service_status_brok(self, b):
         new_b = copy.deepcopy(b)
-        
+
         data = new_b.data
         #First add to nagios_objects
         objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 2,
@@ -283,16 +283,16 @@ class Ndodb_broker:
                         }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
-        
+
         host_id = self.get_host_object_id_by_name(data['host_name'])
         service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
 
         #print "DATA:", data
         #print "HOST ID:", host_id
         #print "SERVICE ID:", service_id
-        services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'], 
+        services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'],
                       'service_object_id' : service_id, 'host_object_id' : host_id,
-                      'display_name' : data['display_name'], 
+                      'display_name' : data['display_name'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
                       'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
                       'first_notification_delay' : data['first_notification_delay'], 'notification_interval' : data['notification_interval'],
@@ -335,9 +335,9 @@ class Ndodb_broker:
                         }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
-        
+
         hostgroup_id = self.get_hostgroup_object_id_by_name(data['hostgroup_name'])
-        
+
         hostgroups_data = {'hostgroup_id' : data['id'], 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'hostgroup_object_id' : hostgroup_id,
                            'alias' : data['alias']
@@ -345,8 +345,8 @@ class Ndodb_broker:
 
         query = self.db.create_insert_query('hostgroups', hostgroups_data)
         res = [query]
-		
-        #Ok, the hostgroups table is uptodate, now we add relations 
+
+        #Ok, the hostgroups table is uptodate, now we add relations
         #between hosts and hostgroups
         for (h_id, h_name) in b.data['members']:
             hostgroup_members_data = {'instance_id' : data['instance_id'], 'hostgroup_id' : data['id'],
@@ -362,14 +362,14 @@ class Ndodb_broker:
     #They are for host_hostgroup table, with just host.id hostgroup.id
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
-        
+
         #First add to nagios_objects
         objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 4,
                         'name1' : data['servicegroup_name'], 'is_active' : 1
                         }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
-        
+
         servicegroup_id = self.get_servicegroup_object_id_by_name(data['servicegroup_name'])
 
 
@@ -380,8 +380,8 @@ class Ndodb_broker:
 
         query = self.db.create_insert_query('servicegroups', servicegroups_data)
         res = [query]
-		
-        #Ok, the hostgroups table is uptodate, now we add relations 
+
+        #Ok, the hostgroups table is uptodate, now we add relations
         #between hosts and hostgroups
         for (s_id, s_name) in b.data['members']:
             servicegroup_members_data = {'instance_id' : data['instance_id'], 'servicegroup_id' : data['id'],
@@ -426,7 +426,7 @@ class Ndodb_broker:
 	host_id = self.get_host_object_id_by_name(data['host_name'])
 	#Only the host is impacted
         where_clause = {'host_object_id' : host_id}
-	
+
 	#Just update teh host status
 	hoststatus_data = {'next_check' : de_unixify(data['next_chk'])}
 	hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
@@ -439,7 +439,7 @@ class Ndodb_broker:
         data = b.data
         #print "DATA", data
         service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
-        
+
         #Only the service is impacted
         where_clause = {'service_object_id' : service_id}
         service_check_data = {'instance_id' : data['instance_id'],
@@ -459,9 +459,9 @@ class Ndodb_broker:
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
                            'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk'])
         }
-        
+
         servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
-        
+
         return [query, servicestatus_query]
 
 
@@ -486,7 +486,7 @@ class Ndodb_broker:
     #Ok the host is updated
     def manage_update_host_status_brok(self, b):
         data = b.data
-        hosts_data = {'instance_id' : data['instance_id'], 
+        hosts_data = {'instance_id' : data['instance_id'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
                       'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
                       'first_notification_delay' : data['first_notification_delay'], 'notification_interval' : data['notification_interval'],
@@ -509,11 +509,11 @@ class Ndodb_broker:
         data = new_b.data
         #print "DATA:", data
 
-        contacts_data = {'contact_id' : data['id'], 'instance_id' : data['instance_id'], 
+        contacts_data = {'contact_id' : data['id'], 'instance_id' : data['instance_id'],
                       'contact_object_id' : data['id'], 'contact_object_id' : data['id'],
-                      'alias' : data['alias'], 
+                      'alias' : data['alias'],
                       'email_address' : data['email'], 'pager_address' : data['pager'],
-                      'host_notifications_enabled' : data['host_notifications_enabled'], 
+                      'host_notifications_enabled' : data['host_notifications_enabled'],
                       'service_notifications_enabled' : data['service_notifications_enabled'],
             }
 
@@ -528,7 +528,7 @@ class Ndodb_broker:
     #They are for host_hostgroup table, with just host.id hostgroup.id
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
-        
+
         contactgroups_data = {'contactgroup_id' : data['id'], 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'contactgroup_object_id' : data['id'],
                            'alias' : data['alias']
@@ -536,8 +536,8 @@ class Ndodb_broker:
 
         query = self.db.create_insert_query('contactgroups', contactgroups_data)
         res = [query]
-		
-        #Ok, the hostgroups table is uptodate, now we add relations 
+
+        #Ok, the hostgroups table is uptodate, now we add relations
         #between hosts and hostgroups
         for (c_id, c_name) in b.data['members']:
             #print c_name

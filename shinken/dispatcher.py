@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -19,14 +19,14 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This is the class of the dispatcher. It's role is to dispatch 
-#configurations to other elements like schedulers, reactionner, 
+#This is the class of the dispatcher. It's role is to dispatch
+#configurations to other elements like schedulers, reactionner,
 #pollers and brokers. It is responsible for hight avaibility part. If an
-#element die and the element type have a spare, it send the confi of the 
+#element die and the element type have a spare, it send the confi of the
 #dead to the spare
 
 
-from util import scheduler_no_spare_first, alive_then_spare_then_deads
+from util import alive_then_spare_then_deads
 from log import Log
 
 #Dispatcher Class
@@ -149,7 +149,7 @@ class Dispatcher:
                         #So we are sure to raise a dispatch every loop a satellite is missing
                         if len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind):
                             Log().log("Warning : Missing satellite %s for configuration %d :" % (kind, cfg_id))
-                            
+
                             #TODO : less violent! Must resent to just who need?
                             #must be catch by satellite who see that it already have the conf (hash)
                             #and do nothing
@@ -169,7 +169,7 @@ class Dispatcher:
                             except TypeError, exp:
                                 print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
                                 satellite.reachable = False
-                                    
+
                             if not satellite.alive or (satellite.reachable and cfg_id not in satellite.what_i_managed()):
                                 Log().log('[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False #so we will redispatch all
@@ -203,7 +203,7 @@ class Dispatcher:
                         #The next loop wil resent it
                     #else:
                     #    print "No conf"
-        
+
         #I ask satellite witch sched_id they manage. If I am not agree, I ask
         #them to remove it
         for satellite in self.satellites:
@@ -233,7 +233,7 @@ class Dispatcher:
                         for id in id_to_delete:
                             Log().log("I ask to remove configuration N%d from %s" %(cfg_id, satellite.get_name()))
                             satellite.remove_from_conf(cfg_id)
-    
+
 
     #Make a ORDERED list of schedulers so we can
     #send them conf in this order for a specific realm
@@ -265,7 +265,7 @@ class Dispatcher:
             print_string += '%s ' % s
         Log().log(print_string)
         #END DBG
-        
+
         return scheds
 
 
@@ -289,7 +289,7 @@ class Dispatcher:
 
                 #Try to send only for alive members
                 scheds = [s for s in scheds if s.alive]
-                
+
                 #Now we do the real job
                 every_one_need_conf = False
                 for conf in conf_to_dispatch:
@@ -298,7 +298,7 @@ class Dispatcher:
                     #If there is no alive schedulers, not good...
                     if len(scheds) == 0:
                         Log().log('[%s] but there a no alive schedulers in this realm!' % r.get_name())
-                    
+
                     #we need to loop until the conf is assigned
                     #or when there are no more schedulers available
                     need_loop = True
@@ -308,7 +308,7 @@ class Dispatcher:
                             Log().log('[%s] Trying to send conf %d to scheduler %s' % (r.get_name(), conf.id, sched.get_name()))
                             if sched.need_conf:
                                 every_one_need_conf = True
-                                
+
                                 #We tag conf with the instance_name = scheduler_name
                                 conf.instance_name = sched.scheduler_name
                                 #REF: doc/shinken-conf-dispatching.png (3)
@@ -325,7 +325,7 @@ class Dispatcher:
                                     #Ok, the conf is dispatch, no more loop for this
                                     #configuration
                                     need_loop = False
-                                    
+
                                     #Now we generate the conf for satellites:
                                     cfg_id = conf.id
                                     for kind in ['reactionner', 'poller', 'broker']:
@@ -355,7 +355,7 @@ class Dispatcher:
             else:
                 Log().log("OK, all schedulers configurations are dispatched :)")
                 self.dispatch_ok = True
-            
+
             #Sched without conf in a dispatch ok are set to no need_conf
             #so they do not raise dispatch where no use
             if self.dispatch_ok:
@@ -363,7 +363,7 @@ class Dispatcher:
                     if sched.conf == None:
                         #print "Tagging sched", sched.get_name(), "so it do not ask anymore for conf"
                         sched.need_conf = False
-            
+
 
             arbiters_cfg = {}
             for arb in self.arbiters:
@@ -377,7 +377,7 @@ class Dispatcher:
                         if r.to_satellites_need_dispatch[kind][cfg_id]:
                             Log().log('[%s] Dispatching %s' % (r.get_name(),kind) + 's')
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
-                            
+
                             #print "Sched Config part for ", kind+'s',":", cfg_for_satellite_part
                             #make copies of potential_react list for sort
                             satellites = []
@@ -389,7 +389,7 @@ class Dispatcher:
                                 satellite_string += '%s (spare:%s), ' % (satellite.get_name(), str(satellite.spare))
 
                             Log().log(satellite_string)
-                            
+
                             #Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
                             for satellite in satellites:
@@ -415,4 +415,4 @@ class Dispatcher:
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
                                 Log().log("[%s] OK, no more %s sent need" % (r.get_name(), kind))
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
-                            
+

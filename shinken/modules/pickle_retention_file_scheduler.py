@@ -25,7 +25,6 @@
 print "Detected module : Picle retention file for Scheduler"
 
 
-import time
 import cPickle
 
 
@@ -80,14 +79,14 @@ class Pickle_retention_scheduler:
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))
             return
         log_mgr.log("Updating retention_file %s" % self.path)
-        
+
 
 
 
     #Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mgr):
         print "[PickleRetention] asking me to load the retention objects"
-        
+
         #Now the old flat file way :(
         log_mgr.log("[PickleRetention]Reading from retention_file %s" % self.path)
         try:
@@ -112,7 +111,7 @@ class Pickle_retention_scheduler:
             log_mgr.log(s)
             return False
 
-            
+
         #Now load interesting properties in hosts/services
         #Taging retention=False prop that not be directly load
         #Items will be with theirs status, but not in checking, so

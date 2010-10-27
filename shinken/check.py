@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -17,9 +17,6 @@
 #
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-
-import time
-import os
 
 #Unix and windows do not have the same import
 #if os.name == 'nt':
@@ -98,7 +95,7 @@ class Check(Action):
             setattr(new_c, prop, val)
         return new_c
 
-    
+
     def get_return_from(self, c):
         self.exit_status  = c.exit_status
         self.output = c.output
@@ -106,7 +103,7 @@ class Check(Action):
         self.check_time = c.check_time
         self.execution_time = c.execution_time
         self.perf_data = c.perf_data
-        
+
 
 #    def get_outputs(self, out):
 #        elts = out.split('\n')
@@ -121,14 +118,14 @@ class Check(Action):
 #        if len(elts) > 1:
 #            self.long_output = '\n'.join(elts[1:])
 
-            
+
 #    def execute(self):
 #        if os.name == 'nt':
 #            self.execute_windows()
 #        else:
 #            self.execute_unix()
 
-            
+
 #    def execute_windows(self):
 #        """call shell-command and either return its output or kill it
 #        if it doesn't normally exit within timeout seconds and return None"""
@@ -180,8 +177,8 @@ class Check(Action):
 
     def is_launchable(self, t):
         return t > self.t_to_go
-    
-    
+
+
     def set_status(self, status):
         self.status = status
 
@@ -189,11 +186,11 @@ class Check(Action):
     def get_status(self):
         return self.status
 
-    
+
     def get_output(self):
         return self.output
 
-    
+
     def __str__(self):
         return "Check %d status:%s command:%s ref:%s" % (self.id, self.status, self.command, self.ref)
 

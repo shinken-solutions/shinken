@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -23,11 +23,11 @@ import shlex
 
 #Unix and windows do not have the same import
 if os.name == 'nt':
-    import subprocess, datetime, signal
+    import subprocess
     import ctypes
     TerminateProcess = ctypes.windll.kernel32.TerminateProcess
 else:
-    import subprocess, datetime, signal
+    import subprocess
 
 #This class is use just for having a common id between actions and checks
 
@@ -36,7 +36,7 @@ class Action:
     def __init__(self):
         pass
 
-    
+
     #If the command line got shell caracters, we should go in a shell
     #mode. So look at theses parameters
     #Note : it's "hard", but in fact you can launch it 100000times
@@ -75,7 +75,7 @@ class Action:
         for p in self.env:
             local_env[p] = self.env[p]
         return local_env
-        
+
 
     def execute(self):
         if os.name == 'nt':
@@ -83,7 +83,7 @@ class Action:
         else:
             self.execute_unix()
 
- 
+
     def execute_windows(self):
         #self.timeout = 20
         self.status = 'launched'
@@ -110,7 +110,7 @@ class Action:
 
         #Get a local env variables with our additionnal values
         local_env = self.get_local_environnement()
-        
+
         try:
             #If got specials caracters (forshell) go in shell mode
             if self.got_shell_caracters():
@@ -131,7 +131,7 @@ class Action:
             self.check_finished_windows(max_plugins_output_length)
         else:
             self.check_finished_unix(max_plugins_output_length)
-    
+
 
     def check_finished_unix(self, max_plugins_output_length):
         #We must wait, but checks are variable in time
@@ -146,7 +146,7 @@ class Action:
             if (now - self.check_time) > self.timeout:
                 #process.kill()
                 #HEAD SHOT
-                os.kill(self.process.pid, 9) 
+                os.kill(self.process.pid, 9)
                 #print "Kill", self.process.pid, self.command, now - self.check_time
                 self.status = 'timeout'
                 self.execution_time = now - self.check_time
@@ -156,7 +156,7 @@ class Action:
         #Get standards outputs
         self.exit_status = self.process.returncode
         (stdoutdata, stderrdata) = self.process.communicate()
-        
+
         #if the exit status is anormal, we add stderr to the output
         if self.exit_status not in [0, 1, 2, 3]:
             stdoutdata = stdoutdata + stderrdata

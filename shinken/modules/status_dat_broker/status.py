@@ -22,7 +22,7 @@ import time
 import os
 import tempfile
 
-from shinken.util import from_bool_to_string 
+from shinken.util import from_bool_to_string
 
 class StatusFile:
     out_map = {
@@ -223,8 +223,8 @@ class StatusFile:
             'comment_data' : {'prop' : 'comment'},
         },
     }
-               
-                   
+
+
 
     def __init__(self, path, configs, hosts, services, contacts):
         #self.conf = scheduler.conf
@@ -246,14 +246,14 @@ class StatusFile:
                     prop = display
                 else:
                     prop = type_map[display]['prop']
-                    
+
                 if prop is not None and hasattr(elt, prop):
                     value = getattr(elt, prop)
 
                     #Maybe it's not a value, but a function link
                     if callable(value):
                         value = value()
-                        
+
                     if 'depythonize' in type_map[display]:
                         f = type_map[display]['depythonize']
                         if callable(f):
@@ -287,7 +287,7 @@ class StatusFile:
 '''
         now = time.time()
         output += 'info {\n' + '\tcreated=' + str(now) + '\n' + '\tversion=3.0.2\n\t}\n\n'
-        
+
         for c in self.configs.values():
             tmp = self.create_output(c)
             output += 'programstatus {\n' + tmp + '\t}\n\n'

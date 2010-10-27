@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -19,7 +19,6 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from command import CommandCall
 from item import Item, Items
 from util import to_split, to_bool, strip_and_uniq
 
@@ -54,7 +53,7 @@ class Contact(Item):
 
     running_properties = {}
 
-    
+
     macros = {
         'CONTACTNAME' : 'contact_name',
         'CONTACTALIAS' : 'alias',
@@ -81,7 +80,7 @@ class Contact(Item):
     def want_service_notification(self, t, state, type):
         if not self.service_notifications_enabled:
             return False
-        
+
         #Now the rest is for sub notificationways. If one is OK, we are ok
         for nw in self.notificationways:
             nw_b = nw.want_service_notification(t, state, type)
@@ -97,7 +96,7 @@ class Contact(Item):
     def want_host_notification(self, t, state, type):
         if not self.host_notifications_enabled:
             return False
-        
+
         #Now it's all for sub notificationways. If one is OK, we are OK
         for nw in self.notificationways:
             nw_b = nw.want_host_notification(t, state, type)
@@ -107,7 +106,7 @@ class Contact(Item):
         #Oh, nobody..so NO :)
         return False
 
-    
+
     #Useless function from now
     def clean(self):
         pass
@@ -135,13 +134,13 @@ class Contact(Item):
                                   'service_notification_period', 'host_notification_period', \
                                   'service_notification_options', 'host_notification_options', \
                                   'host_notification_commands']
-        
+
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
-                    
+
         #There is a case where there is no nw : when there is not special_prop defined
         #at all!!
         if self.notificationways == []:
@@ -153,7 +152,7 @@ class Contact(Item):
             for c in cls.illegal_object_name_chars:
                 if c in self.contact_name:
                     Log().log("%s : My contact_name got the caracter %s that is not allowed." % (self.get_name(), c))
-                    state = False            
+                    state = False
         return state
 
 
@@ -188,12 +187,12 @@ class Contacts(Items):
                 i.notificationways = list(set(new_notificationways))
 
 
-    
+
     #We look for contacts property in contacts and
     def explode(self, contactgroups, notificationways):
         #Contactgroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('contactgroups')
-        
+
         #Register ourself into the contactsgroups we are in
         for c in self:
             if not c.is_tpl():
@@ -216,7 +215,7 @@ class Contacts(Items):
                     if hasattr(c, p):
                         need_notificationway = True
                         params[p] = getattr(c, p)
-                
+
                 if need_notificationway:
                     #print "Create notif way with", params
                     if hasattr(c, 'contact_name'):
@@ -225,10 +224,10 @@ class Contacts(Items):
                         cname = None
                     nw_name = cname+'_inner_notificationway'
                     notificationways.new_inner_member(nw_name, params)
-                    
+
                     if not hasattr(c, 'notificationways'):
                         c.notificationways = nw_name
                     else:
                         c.notificationways = c.notificationways + ',' +nw_name
-                    
+
 

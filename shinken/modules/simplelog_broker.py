@@ -88,14 +88,14 @@ class Simple_log_broker:
         #print "Dates: t_last_mod : %d, t_last_mod_day: %d, today : %d" % (t_last_mod, t_last_mod_day, today)
         if t_last_mod_day != today:
             print "We are archiving the old log file"
-            
+
             #For the first pass, it's not already open
             if not first_pass:
                 self.file.close()
-                
+
             #Now we move it
             #Get a new name like MM
-            
+
             #f_name is like nagios.log
             f_name = os.path.basename(self.path)
             #remove the ext -> (nagios,.log)
@@ -107,13 +107,13 @@ class Simple_log_broker:
             archive_name = f_base_name+s_day+ext
             file_archive_path = os.sep.join([self.archive_path, archive_name])
             print "Moving the old log file from %s to %s" % (self.path, file_archive_path)
-            
+
             shutil.move(self.path, file_archive_path)
-            
+
             #and we overwrite it
-            print "I open the log file %s" % self.path            
+            print "I open the log file %s" % self.path
             self.file = open(self.path,'w')
-            
+
             return True
         return False
 
@@ -128,7 +128,7 @@ class Simple_log_broker:
         if not moved:
             print "I open the log file %s" % self.path
             self.file = open(self.path,'a')
-    
+
 
     def get_name(self):
         return self.name
@@ -156,4 +156,4 @@ class Simple_log_broker:
             self.check_and_do_archive()
             b = self.q.get() # can block here :)
             self.manage_brok(b)
-                        
+

@@ -25,10 +25,6 @@
 print "Detected module : Dummy module for Scheduler"
 
 
-import time
-from shinken.external_command import ExternalCommand
-
-
 
 properties = {
     'type' : 'dummy_scheduler',

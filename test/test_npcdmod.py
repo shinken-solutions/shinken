@@ -56,7 +56,7 @@ class TestConfig(ShinkenTest):
     def scheduler_loop(self, count, reflist):
         for ref in reflist:
             (obj, exit_status, output) = ref
-            obj.checks_in_progress = [] 
+            obj.checks_in_progress = []
         for loop in range(1, count + 1):
             print "processing check", loop
             for ref in reflist:
@@ -102,35 +102,35 @@ class TestConfig(ShinkenTest):
         print "#" * 80 + "\n" + "#" + " " * 78 + "#"
         print "#" + string.center(self.id(), 78) + "#"
         print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
-        
-        
+
+
     def write_correct_config(self):
         file = open("npcd.cfg", "w")
         file.write("perfdata_file = /tmp/pfnerf")
         file.write("perfdata_spool_dir = /tmp/pnp4shinken/var/perfdata")
         file.write("perfdata_spool_filename=pferf")
         flie.close()
-        
-        
-    def write_incomplete_config(self):   
+
+
+    def write_incomplete_config(self):
         file = open("npcd.cfg", "w")
         file.write("perfdata_file = /tmp/pfnerf")
         file.write("perfdata_spool_filename=pferf")
         flie.close()
 
-        
+
     def test_write_perfdata_file(self):
         self.print_header()
         if os.path.exists("./perfdata"):
             os.unlink("./perfdata")
-        
+
         self.npcdmod_broker = Npcd_broker('npcd', None, './perfdata', '.', 'perfdata-target', 15)
         self.npcdmod_broker.properties = {
             'to_queue' : 0
             }
         self.npcdmod_broker.init()
         self.sched.fill_initial_broks()
-        
+
         print "got initial broks"
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")

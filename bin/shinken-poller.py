@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -23,7 +23,7 @@
 #The poller listen configuration from Arbiter in a port (first argument)
 #the configuration gived by arbiter is schedulers where actionner will
 #take checks.
-#When already launch and have a conf, poller still listen to arbiter 
+#When already launch and have a conf, poller still listen to arbiter
 #(one a timeout) if arbiter whant it to have a new conf, poller forgot
 #old cheduler (and checks into) take new ones and do the (new) job.
 
@@ -88,7 +88,7 @@ class Poller (Satellite):
 	do_checks = True #I do checks
 	do_actions = False #but no actions
 	#default_port = 7771
-	
+
 	properties = {
 		'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
 		'pidfile' : {'default' : '/usr/local/shinken/var/pollerd.pid', 'pythonize' : None, 'path' : True},

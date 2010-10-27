@@ -36,7 +36,7 @@ class TestConfig(ShinkenTest):
         fd.write(s)
         fd.close()
 
-    
+
     #Change ME :)
     def test_external_comand(self):
         now = time.time()
@@ -46,7 +46,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
-        
+
         excmd = ExternalCommand('[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy' % int(time.time()))
 
         self.sched.run_external_command(excmd)

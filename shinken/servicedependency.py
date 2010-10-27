@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -46,7 +46,7 @@ class Servicedependency(Item):
                 'notification_failure_criteria' : {'required':False, 'default' : 'n', 'pythonize' : to_split},
                 'dependency_period' : {'required':False, 'default' : ''}
                 }
-    
+
     running_properties = {}
 
 
@@ -80,13 +80,13 @@ class Servicedependencies(Items):
 
     #We create new servicedep if necessery (host groups and co)
     def explode(self):
-        #The "old" services will be removed. All services with 
+        #The "old" services will be removed. All services with
         #more than one host or a host group will be in it
         srvdep_to_remove = []
-        
+
         #Then for every host create a copy of the service with just the host
         #because we are adding services, we can't just loop in it
-        servicedeps = self.items.keys() 
+        servicedeps = self.items.keys()
         for id in servicedeps:
             sd = self.items[id]
             if not sd.is_tpl(): #Exploding template is useless
@@ -106,7 +106,7 @@ class Servicedependencies(Items):
                         new_sd.dependent_host_name = hname
                         new_sd.dependent_service_description = sname
                         self.items[new_sd.id] = new_sd
-                    srvdep_to_remove.append(id)        
+                    srvdep_to_remove.append(id)
         self.delete_servicesdep_by_id(srvdep_to_remove)
 
 
@@ -127,14 +127,14 @@ class Servicedependencies(Items):
                 #The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 sd.dependent_service_description = s
-                
+
                 s_name = sd.service_description
                 hst_name = sd.host_name
-                
+
                 #The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 sd.service_description = s
-                
+
             except AttributeError , exp:
                 print exp
 
@@ -176,4 +176,4 @@ class Servicedependencies(Items):
         #self.apply_implicit_inheritance(hosts)
         for s in self:
             s.get_customs_properties_by_inheritance(self)
-            
+

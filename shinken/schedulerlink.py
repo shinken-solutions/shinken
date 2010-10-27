@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -22,14 +22,13 @@
 #Scheduler is like a satellite for dispatcher
 from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool, to_split
-from item import Items
 
 class SchedulerLink(SatelliteLink):
     id = 0
-    
+
     #Ok we lie a little here because we are a mere link in fact
     my_type = 'scheduler'
-    
+
     properties={'scheduler_name' : {'required' : True , 'fill_brok' : ['full_status']},#, 'pythonize': None},
                 'address' : {'required' : True, 'fill_brok' : ['full_status']},#, 'pythonize': to_bool},
                 'port' : {'required':  False, 'default' : '7768', 'pythonize': to_int, 'fill_brok' : ['full_status']},
@@ -42,7 +41,7 @@ class SchedulerLink(SatelliteLink):
                 'data_timeout' : {'required' : False, 'default' : '120', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'max_check_attempts' : {'required' : False, 'default' : '3','pythonize': to_int, 'fill_brok' : ['full_status']},
                 }
- 
+
     running_properties = {'con' : {'default' : None},
                           'alive' : {'default' : False, 'fill_brok' : ['full_status']}, # DEAD or not
                           'attempt' : {'default' : 0, 'fill_brok' : ['full_status']}, # the number of failed attempt

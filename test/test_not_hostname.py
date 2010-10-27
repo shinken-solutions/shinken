@@ -27,11 +27,11 @@ from shinken_test import *
 
 
 class TestConfig(ShinkenTest):
-    
+
     def setUp(self):
         self.setup_with_file('etc/nagios_not_hostname.cfg')
 
-    
+
     #Change ME :)
     def test_not_hostname_in_service(self):
         #The service is apply with a host_group on "test_host_0","test_host_1"
@@ -53,7 +53,7 @@ class TestConfig(ShinkenTest):
         self.assert_(svc != None)
         #check if the service for the not one (!) is not here
         self.assert_(svc_not == None)
-        
+
 
 
 if __name__ == '__main__':

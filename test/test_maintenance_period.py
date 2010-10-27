@@ -78,7 +78,7 @@ class TestConfig(ShinkenTest):
         nowday = time.strftime("%A", time.localtime(now + 60)).lower()
         soonstart = time.strftime("%H:%M", time.localtime(now + 60))
         soonend = time.strftime("%H:%M", time.localtime(now + 180))
-        
+
         range = "%s %s-%s" % (nowday, soonstart, soonend)
         print "range is ", range
         t = Timeperiod()
@@ -91,7 +91,7 @@ class TestConfig(ShinkenTest):
         svc3.maintenance_period = t
 
         self.assert_(not hasattr(svc3, 'in_maintenance'))
-        # 
+        #
         # now let the scheduler run and wait until the maintenance period begins
         #
         self.scheduler_loop(3, [[svc3, 0, 'OK']], do_sleep=True)
@@ -106,7 +106,7 @@ class TestConfig(ShinkenTest):
         self.assert_(not svc3.downtimes[0].can_be_deleted)
         self.assert_(svc3.in_maintenance == svc3.downtimes[0].id)
 
-        # 
+        #
         # now the downtime should expire...
         #
         self.scheduler_loop(3, [[svc3, 0, 'OK']], do_sleep=True)
@@ -116,7 +116,7 @@ class TestConfig(ShinkenTest):
         self.assert_(not svc3.in_scheduled_downtime)
         self.assert_(svc3.in_maintenance == False)
 
-      
+
 
 if __name__ == '__main__':
     unittest.main()

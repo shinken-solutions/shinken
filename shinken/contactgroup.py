@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -33,7 +33,7 @@ class Contactgroup(Itemgroup):
         'contactgroup_name' : {'required' : True, 'fill_brok' : ['full_status']},
         'alias' : {'required' : True, 'fill_brok' : ['full_status']},
         'members' : {'required' : True, 'fill_brok' : ['full_status']},
-        #Shinken specific 
+        #Shinken specific
         'unknown_members' : {'required': False, 'default': []}
         }
 
@@ -41,7 +41,7 @@ class Contactgroup(Itemgroup):
         'CONTACTGROUPALIAS' : 'alias',
         'CONTACTGROUPMEMBERS' : 'get_members'
         }
-    
+
 
     def get_contacts(self):
         return self.members
@@ -50,7 +50,7 @@ class Contactgroup(Itemgroup):
     def get_name(self):
         return self.contactgroup_name
 
-    
+
     def get_contactgroup_members(self):
         if self.has('contactgroup_members'):
             return self.contactgroup_members.split(',')
@@ -65,7 +65,7 @@ class Contactgroup(Itemgroup):
         #First we tag the hg so it will not be explode
         #if a son of it already call it
         self.already_explode = True
-        
+
         #Now the recursiv part
         #rec_tag is set to False avery CG we explode
         #so if True here, it must be a loop in HG
@@ -129,7 +129,7 @@ class Contactgroups(Itemgroups):
 
             #Make members uniq
             new_mbrs = list(set(new_mbrs))
-            
+
             #We find the id, we remplace the names
             self.itemgroups[id].replace_members(new_mbrs)
 
@@ -160,7 +160,7 @@ class Contactgroups(Itemgroups):
                 for tmp_cg in self.itemgroups.values():
                     tmp_cg.rec_tag = False
                 cg.get_contacts_by_explosion(self)
-                
+
         #We clean the tags
         for tmp_cg in self.itemgroups.values():
             if hasattr(tmp_cg, 'rec_tag'):

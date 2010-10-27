@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -39,12 +39,12 @@ class Daemon:
     #the instances will have their own init
     def __init__(self):
         pass
-    
-    
+
+
     def unlink(self):
         print "Unlinking", self.pidfile
         os.unlink(self.pidfile)
-            
+
 
     def findpid(self):
         f = open(self.pidfile)
@@ -69,7 +69,7 @@ class Daemon:
             else:
                 #if replace, kill the old process
                 if do_replace:
-                    print "Replacing",p 
+                    print "Replacing",p
                     os.kill(p, 3)
                 else:
                     raise SystemExit, "valid pidfile exists.  Exiting."
@@ -98,7 +98,7 @@ class Daemon:
             os.open(REDIRECT_TO, os.O_RDWR)
         os.dup2(0, 1)# standard output (1)
         os.dup2(0, 2)# standard error (2)
-    
+
         #Now the Fork/Fork
         try:
             pid = os.fork()
@@ -167,7 +167,7 @@ class Daemon:
             print "Error : cannot change user/group to %s/%s (%s [%d])" % (self.user, self.group, e.strerror, e.errno)
             print "Exiting"
             sys.exit(2)
-    
+
 
     #Parse self.config_file and get all properties in it
     #If properties need a pythonization, we do it. It
@@ -196,7 +196,7 @@ class Daemon:
                 setattr(self, prop, value)
                 print "Using default value :", prop, value
 
-    
+
     #Some paths can be relatives. We must have a full path by taking
     #the config file by reference
     def relative_paths_to_full(self, reference_path):
@@ -211,7 +211,7 @@ class Daemon:
                 #So we look for : on windows, / for Unixes
                 if os.name != 'nt':
                     #os.sep = / on Unix
-                    #so here if not 
+                    #so here if not
                     if path != '' and path[0] != os.sep :
                         new_path = reference_path + os.sep + path
                 else:

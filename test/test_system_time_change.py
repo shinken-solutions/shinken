@@ -28,7 +28,7 @@ import commands
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
-    
+
     def set_time(self, d):
         cmd = 'sudo date -s "%s"' % d
         print "CMD,", cmd
@@ -41,7 +41,7 @@ class TestConfig(ShinkenTest):
     #Change ME :)
     def test_dummy(self):
         #
-        # Config is not correct because of a wrong relative path 
+        # Config is not correct because of a wrong relative path
         # in the main config file
         #
         print "Get the hosts and services"
@@ -50,7 +50,7 @@ class TestConfig(ShinkenTest):
         now = time.time()
         now_str = time.asctime(time.localtime(now))
         print "Now:", now
-        print "Now:", time.asctime(time.localtime(now))        
+        print "Now:", time.asctime(time.localtime(now))
         tomorow = time.asctime(time.localtime(now+86400))
         yesterday = time.asctime(time.localtime(now-86400))
 
@@ -78,13 +78,13 @@ class TestConfig(ShinkenTest):
         self.assert_(host.last_state_change - last_state_change == -86400*2)
         svc.compensate_system_time_change(-86400*2)
         print "Yesterday Host last_state_change", time.asctime(time.localtime(host.last_state_change))
-        
+
         self.set_time(now_str)
 
         #Ok, now the scheduler and check things
         #Put checks in the scheduler
         self.sched.get_new_actions()
-        
+
         host_to_go = host_check.t_to_go
         srv_to_go = srv_check.t_to_go
         print "current Host check", time.asctime(time.localtime(host_check.t_to_go))
@@ -95,7 +95,7 @@ class TestConfig(ShinkenTest):
         print "Tomorow Service check", time.asctime(time.localtime(srv_check.t_to_go))
         self.assert_(host_check.t_to_go - host_to_go == 86400)
         self.assert_(srv_check.t_to_go - srv_to_go == 86400)
-        
+
         #and yesterday
         host_to_go = host_check.t_to_go
         srv_to_go = srv_check.t_to_go
@@ -111,7 +111,7 @@ class TestConfig(ShinkenTest):
 
         self.set_time(now_str)
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

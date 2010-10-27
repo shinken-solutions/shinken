@@ -39,10 +39,10 @@ class TestConfig(ShinkenTest):
 
         #First initialize routers 0 and 1
         now = time.time()
-        
+
         #The problem_impact_state change should be enabled in the configuration
         self.assert_(self.conf.enable_problem_impacts_states_change == True)
-        
+
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
         host_router_1 = self.sched.hosts.find_by_name("test_router_1")
@@ -57,17 +57,17 @@ class TestConfig(ShinkenTest):
         all_hosts = [host_router_0, host_router_1, host_0, host_1]
         all_routers = [host_router_0, host_router_1]
         all_servers = [host_0, host_1]
-        
+
         #--------------------------------------------------------------
         # initialize host states as UP
         #--------------------------------------------------------------
         print "- 4 x UP -------------------------------------"
         self.scheduler_loop(1, [[host_router_0, 0, 'UP'], [host_router_1, 0, 'UP'], [host_0, 0, 'UP'], [host_1, 0, 'UP']], do_sleep=False)
-        
+
         for h in all_hosts:
             self.assert_(h.state == 'UP')
             self.assert_(h.state_type == 'HARD')
-        
+
         #--------------------------------------------------------------
         # Now we add some problems to routers
         #--------------------------------------------------------------
@@ -89,8 +89,8 @@ class TestConfig(ShinkenTest):
         for h in all_routers:
             self.assert_(h.state == 'DOWN')
             self.assert_(h.state_type == 'HARD')
-        
-                         
+
+
         #--------------------------------------------------------------
         # Routers get HARD/DOWN
         # should be problems now!
@@ -106,7 +106,7 @@ class TestConfig(ShinkenTest):
                 self.assert_(s in h.impacts)
                 self.assert_(s.get_dbg_name() in host_router_0_brok.data['impacts']['hosts'])
                 self.assert_(s.get_dbg_name() in host_router_1_brok.data['impacts']['hosts'])
-        
+
         #Now impacts should really be .. impacts :)
         for s in all_servers:
             self.assert_(s.is_impact == True)
@@ -132,7 +132,7 @@ class TestConfig(ShinkenTest):
         #Ok here the problem/impact propagation is Checked. Now what
         #if one router get back? :)
         self.scheduler_loop(1, [[host_router_0, 0, 'UP']], do_sleep=False)
-        
+
         #should be UP/HARD now
         self.assert_(host_router_0.state == 'UP')
         self.assert_(host_router_0.state_type == 'HARD')
@@ -140,7 +140,7 @@ class TestConfig(ShinkenTest):
         #And should not be a problem any more!
         self.assert_(host_router_0.is_problem == False)
         self.assert_(host_router_0.impacts == [])
-        
+
         #And check if it's no more in sources problems of others servers
         for s in all_servers:
             #Still impacted by the other server
@@ -169,7 +169,7 @@ class TestConfig(ShinkenTest):
             self.assert_(s.is_impact == False)
             self.assert_(s.state == 'UP')
             self.assert_(s.source_problems == [])
-        
+
         #It's done :)
 
 

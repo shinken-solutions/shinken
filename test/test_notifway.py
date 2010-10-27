@@ -35,7 +35,7 @@ class TestConfig(ShinkenTest):
     #Change ME :)
     def test_contact_def(self):
         #
-        # Config is not correct because of a wrong relative path 
+        # Config is not correct because of a wrong relative path
         # in the main config file
         #
         print "Get the contact"
@@ -70,7 +70,7 @@ class TestConfig(ShinkenTest):
         self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM') == True)
         #But a SMS is now WAY for warning. When we sleep, we wake up for critical only guy!
         self.assert_(sms_the_night.want_service_notification(now, 'WARNING', 'PROBLEM') == False)
-        
+
         #Same with contacts now
         #First is ok for warning in the email_in_day nw
         self.assert_(contact.want_service_notification(now, 'WARNING', 'PROBLEM') == True)
@@ -83,7 +83,7 @@ class TestConfig(ShinkenTest):
         #Simple is not ok for it
         self.assert_(contact_simple.want_host_notification(now, 'FLAPPING', 'PROBLEM') == False)
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

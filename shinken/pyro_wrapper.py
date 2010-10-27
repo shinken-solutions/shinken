@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -46,7 +46,7 @@ except AttributeError:
     Pyro.errors.URIError = Pyro.errors.ProtocolError
     protocol = 'PYRO'
     Pyro.core.getProxyForURI = Pyro.core.Proxy
-    #Hack for Pyro 4 : with it, there is 
+    #Hack for Pyro 4 : with it, there is
     #no more way to send huge packet!
     import socket
     if hasattr(socket, 'MSG_WAITALL'):

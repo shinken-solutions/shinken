@@ -34,7 +34,7 @@ class Service_perfdata_broker:
         self.name = name
         self.mode = mode
         self.template = template
-        
+
         #Make some raw change
         self.template = self.template.replace(r'\t', '\t')
         self.template = self.template.replace(r'\n', '\n')
@@ -46,7 +46,7 @@ class Service_perfdata_broker:
     def init(self):
         print "I open the service-perfdata file '%s'" % self.path
         self.file = open(self.path, self.mode)
-    
+
 
     def get_name(self):
         return self.name

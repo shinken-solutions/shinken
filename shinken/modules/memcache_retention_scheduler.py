@@ -25,7 +25,6 @@
 print "Detected module : Memcache retention file for Scheduler"
 
 
-import time
 import memcache
 
 
@@ -88,10 +87,10 @@ class Memcache_retention_scheduler:
     #Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mgr):
         print "[MemcacheRetention] asking me to load the retention objects"
-        
+
         #Now the old flat file way :(
         log_mgr.log("[MemcacheRetention] asking me to load the retention objects")
-        
+
         #We got list of loaded data from retention server
         ret_hosts = []
         ret_services = []
@@ -112,7 +111,7 @@ class Memcache_retention_scheduler:
             if val != None:
                 ret_services.append(val)
 
-            
+
         #Now load interesting properties in hosts/services
         #Taging retention=False prop that not be directly load
         #Items will be with theirs status, but not in checking, so

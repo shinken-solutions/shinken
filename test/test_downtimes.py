@@ -244,7 +244,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1,[], do_sleep=False) # push the downtime notification
         self.show_actions()
         print "Launch worker loop"
-        #self.worker_loop() 
+        #self.worker_loop()
         self.show_actions()
         print "After both launchs"
         time.sleep(20)
@@ -302,7 +302,7 @@ class TestConfig(ShinkenTest):
         print "DBG2: host", host.state, host.state_type
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 0)    # 
+        self.assert_(self.count_logs() == 0)    #
         self.assert_(self.count_actions() == 1) # notif"
         self.clear_logs()
         #----------------------------------------------------------------
@@ -428,15 +428,15 @@ class TestConfig(ShinkenTest):
     def test_notification_after_cancel_flexible_svc_downtime(self):
         # schedule flexible downtime
         # good check
-        # bad check -> SOFT;1 
+        # bad check -> SOFT;1
         #  eventhandler SOFT;1
-        # bad check -> HARD;2 
+        # bad check -> HARD;2
         #  downtime alert
         #  eventhandler HARD;2
         # cancel downtime
         # bad check -> HARD;2
         #  notification critical
-        # 
+        #
         pass
 
 if __name__ == '__main__':

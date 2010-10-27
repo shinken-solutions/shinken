@@ -1,11 +1,11 @@
 == Fully compatible? ==
 
-Not 100%, and it will never be. Some Nagios features are just useless in a Shiken architecture. For theses differences, you can look at the Shinken website : 
+Not 100%, and it will never be. Some Nagios features are just useless in a Shiken architecture. For theses differences, you can look at the Shinken website :
 http://www.shinken-monitoring.org/what-is-in-shinken-not-in-nagios-and-vice-versa/
 
 == I need to change something ? ==
 
-No. 
+No.
 
 There are differences between some nagios parameters and shinken way of doing :
 status_file and log_file parameters are no more useful in the nagios.cfg file for Shinken. Theses things are now managed as "modules" by the Brokers, and are in the shinken-specific.cfg file (look at Simple-log and Status-Dat modules, and put your paths on it).

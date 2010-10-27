@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 : 
-#    Gabes Jean, naparuba@gmail.com 
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
 #This file is part of Shinken.
@@ -24,7 +24,7 @@
 class DB(object):
     def __init__(self, table_prefix = ''):
         self.table_prefix = table_prefix
-    
+
 
     #Create a INSERT query in table with all data of data (a dict)
     def create_insert_query(self, table, data):

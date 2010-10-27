@@ -123,11 +123,11 @@ class TestTimeperiods(ShinkenTest):
         t_next = t.get_next_valid_time_from_t(july_the_12)
         t_exclude = t2.get_next_valid_time_from_t(july_the_12)
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
-        
+
         print "T next raw", t_next
         t_next = time.asctime(time.localtime(t_next))
         print "TOTO T next", t_next
-        
+
         self.assert_(t_next == 'Tue Jul 13 23:58:01 2010')
 
 
@@ -163,11 +163,11 @@ class TestTimeperiods(ShinkenTest):
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
-        
+
         print "T next raw JEAN", t_next
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
-        
+
         self.assert_(t_next == 'Tue Sep 14 16:30:00 2010')
 
 
@@ -192,7 +192,7 @@ class TestTimeperiods(ShinkenTest):
 
         #Now we add this timeperiod an exception
         #And a good one : from april (so before so agust (after), and full time.
-        #But the 27 is nw not possible? So what next? Add a month! 
+        #But the 27 is nw not possible? So what next? Add a month!
         #last tuesday of august, the 31 :)
         t2 = Timeperiod()
         t2.timeperiod_name = 'T2'
@@ -208,11 +208,11 @@ class TestTimeperiods(ShinkenTest):
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
-        
+
         print "T next raw JEAN2", t_next
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
-        
+
         self.assert_(t_next == 'Tue Aug 31 16:30:00 2010')
 
 
@@ -235,7 +235,7 @@ class TestTimeperiods(ShinkenTest):
 
         #Now we add this timeperiod an exception
         #And a good one : from april (so before so agust (after), and full time.
-        #But the 27 is nw not possible? So what next? Add a month! 
+        #But the 27 is nw not possible? So what next? Add a month!
         #But maybe it's not enoutgth? :)
         #The withoutthe 2nd exclude, it's the Tues Aug 31, btu it's inside
         #saturday -1 - monday 1 because saturday -1 is the 28 august, so no.
@@ -257,11 +257,11 @@ class TestTimeperiods(ShinkenTest):
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
-        
+
         print "T next raw", t_next
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
-        
+
         self.assert_(t_next == 'Tue Oct 26 16:30:00 2010')
         print "Finish this Funky test :)"
 
@@ -300,13 +300,13 @@ class TestTimeperiods(ShinkenTest):
         t_exclude_inv = t2.get_next_invalid_time_from_t(july_the_12)
         #print "T2 next valid", time.asctime(time.localtime(t_exclude))
         print "Next invalid T2", time.asctime(time.localtime(t_exclude_inv))
-        
+
         print "T next raw", t_next
         print "T next?", time.asctime(time.localtime(t_next))
         t_next = time.asctime(time.localtime(t_next))
-        
+
         self.assert_(t_next == 'Tue Aug 17 16:30:00 2010')
-        
+
 
 
 if __name__ == '__main__':

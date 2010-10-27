@@ -29,9 +29,9 @@ properties = {
 
 #called by the plugin manager to get a instance
 def get_instance(plugin):
-    
+
     print "Get a ndoDB instance for plugin %s" % plugin.get_name()
-    
+
     #First try to import
     try:
         from ndodb_broker import Ndodb_broker
