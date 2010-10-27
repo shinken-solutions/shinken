@@ -100,7 +100,7 @@ class Service(SchedulingItem):
 
         #service generator
         'duplicate_foreach' : {'required' : False, 'default' : ''},
-        'default_parameters' : {'required' : False, 'default' : ''},
+        'default_value' : {'required' : False, 'default' : ''},
         
         }
     
@@ -914,15 +914,15 @@ class Services(Items):
                             if hasattr(s, 'service_description'):
                                 new_s.service_description = s.service_description.replace('$KEY$', key)
 
-                            #Maybe we do not have value, we must get the default_parameters
+                            #Maybe we do not have value, we must get the default_value
                             #of the service if it got one
                             if value == None:
-                                if hasattr(s, 'default_parameters'):
-                                    value = s.default_parameters
+                                if hasattr(s, 'default_value'):
+                                    value = s.default_value
                                 else: 
                                     #no parameters but the service do not have
                                     #default ones!
-                                    err = "The key for the property '%s' on host '%s' doesn't have any parameters and the service '%s' do not have default_parameters configured" % (prop, name, new_s.get_name())
+                                    err = "The key for the property '%s' on host '%s' doesn't have any parameters and the service '%s' do not have default_value configured" % (prop, name, new_s.get_name())
                                     value = ''
                                     new_s.configuration_errors.append(err)
 
