@@ -708,8 +708,6 @@ class Service(SchedulingItem):
 
 
 
-
-
 class Services(Items):
     inner_class = Service #use for know what is in items
     #Create the reversed list for speedup search by host_name/name
@@ -748,7 +746,7 @@ class Services(Items):
             #Runtinme first, available only after linkify
             if hasattr(s, 'service_description') and hasattr(s, 'host'):
                 if s.service_description == name and s.host == host_name:
-                        return s.id
+                    return s.id
             #At config part, available before linkify
             if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
                 if s.service_description == name and s.host_name == host_name:
