@@ -20,8 +20,19 @@
 #File for a Livestatus class which can be used by the status-dat-broker
 import re
 import Queue
-import json
-import sqlite3
+
+try:
+    Queue.LifoQueue
+except AttributeError: # Ptyhon 2.4 and 2.5 do nto have it
+    #try to use a standard queue instead
+    Queue.LifoQueue = Queue.Queue
+
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
+#import sqlite3
 
 from service import Service
 from external_command import ExternalCommand
@@ -74,6 +85,26 @@ def from_svc_hst_distinct_lists(dct):
     for s in dct['services']:
         t.append(s)
     return ','.join(t)
+
+#For 2 hosts state, return the worse state
+def worst_host_state(state_1, state_2):
+    #lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),    
+    if state_2 == 0:
+        return state_1
+    if state_1 == 1:
+        return state_1
+    return state_2
+
+##The worst state of all services that belong to a host of this group (OK <= WARN <= UNKNOWN <= CRIT)
+def worst_service_state(state_1, state_2):
+    #reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
+    if state_2 == 0:
+        return state_1
+    if state_1 == 2:
+        return state_1
+    if state_1 == 3 and state_2 != 2:
+        return state_1
+    return state_2
 
 
 class Problem:
@@ -1360,19 +1391,19 @@ class LiveStatus:
                 'type' : 'list',
             },
             'worst_host_state' : {
-                'depythonize' : lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),
+                'depythonize' : lambda x: reduce(worst_host_state, (y.state_id for y in x), 0),
                 'description' : 'The worst state of all of the groups\' hosts (UP <= UNREACHABLE <= DOWN)',
                 'prop' : 'get_hosts',
                 'type' : 'list',
             },
             'worst_service_hard_state' : {
-                'depythonize' : lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
+                'depythonize' : lambda x: reduce(worst_service_state, (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
                 'description' : 'The worst state of all services that belong to a host of this group (OK <= WARN <= UNKNOWN <= CRIT)',
                 'prop' : 'get_hosts',
                 'type' : 'list',
             },
             'worst_service_state' : {
-                'depythonize' : lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services), 0),
+                'depythonize' : lambda x: reduce(worst_service_state, (z.state_id for y in x for z in y.services), 0),
                 'description' : 'The worst state of all services that belong to a host of this group (OK <= WARN <= UNKNOWN <= CRIT)',
                 'prop' : 'get_hosts',
                 'type' : 'list',
@@ -1477,7 +1508,7 @@ class LiveStatus:
                 'type' : 'list',
             },
             'worst_service_state' : {
-                'depythonize' : lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (y.state_id for y in x), 0),
+                'depythonize' : lambda x: reduce(worst_service_state, (y.state_id for y in x), 0),
                 'description' : 'The worst soft state of all of the groups services (OK <= WARN <= UNKNOWN <= CRIT)',
                 'prop' : 'get_services',
                 'type' : 'list',
@@ -4964,7 +4995,10 @@ class LiveStatus:
             for obj in sorted(LiveStatus.out_map, key=lambda x: x):
                 if obj in tablenames:
                     for attr in LiveStatus.out_map[obj]:
-                        result.append({ 'description' : LiveStatus.out_map[obj][attr]['description'] if 'description' in LiveStatus.out_map[obj][attr] and LiveStatus.out_map[obj][attr]['description'] else 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
+                        if 'description' in LiveStatus.out_map[obj][attr] and LiveStatus.out_map[obj][attr]['description']:
+                            result.append({ 'description' : LiveStatus.out_map[obj][attr]['description'], 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
+                        else:
+                            result.append({'description' : 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
 
         #print "result is", result
         return result
@@ -5013,7 +5047,16 @@ class LiveStatus:
                         lines.append(separators[1].join(columns))
                 for object in result:
                     #construct one line of output for each object found
-                    lines.append(separators[1].join(separators[2].join(str(y) for y in x) if isinstance(x, list) else str(x) for x in [object[c] for c in columns]))
+                    l = ''
+                    for x in [object[c] for c in columns]:
+                        if isinstance(x, list):
+                            l = l + separators[1].join(separators[2].join(str(y) for y in x))
+                        else:
+                            if l != '':
+                                l = separators[1].join([l, str(x)])
+                            else: # the first l do not need a ; at the begining
+                                l = str(x)
+                    lines.append(l)
             else:
                 if columnheaders == 'on':
                     if len(aliases) > 0:
@@ -5444,7 +5487,7 @@ class LiveStatus:
 
                 #Now bring the retrieved information to a form which can be sent back to the client
                 response = self.format_live_data(result, columns, outputformat, columnheaders, separators, aliases) + "\n"
-            except BaseException, e:
+            except Exception, e:
                 import traceback
                 print "REQUEST produces an exception", data
                 print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"

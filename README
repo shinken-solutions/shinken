@@ -31,7 +31,10 @@ For the compilation part in both way it's easy : there is no compilation part!
 == Dependancies ==
 The only dependancies are Python >= 2.4 and the Pyro module.
 
-For 2.4 and 2.5 python version, you will need an additionnal package : multiprocessing from http://pypi.python.org/pypi/multiprocessing/.
+For 2.4 and 2.5 python version, you will need an additionnal packages : 
+*multiprocessing from http://pypi.python.org/pypi/multiprocessing/
+*for livestatus only: simplejson : http://pypi.python.org/pypi/simplejson/ and pysqlite http://code.google.com/p/pysqlite/
+
 Just untar and launch python setup.py install (and be sure to have installed the python-devel package too).
 
 Beware : Python 2.4 and 2.5 users should not be able to use the livestatus broker module. We are working on this issue.

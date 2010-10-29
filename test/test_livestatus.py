@@ -725,6 +725,7 @@ othernode;1;scheduler-2;7768;1;1
 localhost;1;scheduler-1;7768;0;1
 """
         print response, 'FUCK'
+        print "FUCK", response, "TOTO"
         self.assert_(response == good_response)
 
         #Now we update a scheduler state and we check
@@ -932,7 +933,7 @@ test_host_0,test_host_0/test_ok_0;test_router_0
 
 
 if __name__ == '__main__':
-    import cProfile
+    #import cProfile
     command = """unittest.main()"""
     unittest.main()
     #cProfile.runctx( command, globals(), locals(), filename="Thruk.profile" )

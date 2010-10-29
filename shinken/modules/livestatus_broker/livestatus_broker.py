@@ -27,7 +27,10 @@
 import select
 import socket
 import sys
-import sqlite3
+try:
+    import sqlite3
+except ImportError: # python 2.4 do not have it
+    import pysqlite2.dbapi2 as sqlite3 # but need the pysqlite2 install from http://code.google.com/p/pysqlite/downloads/list
 import Queue
 
 from host import Host
