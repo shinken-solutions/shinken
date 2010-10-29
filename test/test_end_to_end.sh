@@ -68,23 +68,23 @@ function string_in_file {
 
 function check_good_run {
     VAR="$1"
-    echo "Check for 1 Scheduler"
+    echo "Check for $NB_SCHEDULERS Scheduler"
     check_process_nb scheduler $NB_SCHEDULERS
     is_file_present $VAR/schedulerd.pid
 
-    echo "Check for 6 pollers (1 master, 1 for multiporcess module (queue manager), 4 workers)"
+    echo "Check for $NB_POLLERS pollers (1 master, 1 for multiporcess module (queue manager), 4 workers)"
     check_process_nb poller $NB_POLLERS
     is_file_present $VAR/pollerd.pid
 
-    echo "Check for 2 reactionners (1 master, 1 for multiporcess module (queue manager) 1 worker)"
+    echo "Check for $NB_REACTIONNERS reactionners (1 master, 1 for multiporcess module (queue manager) 1 worker)"
     check_process_nb reactionner $NB_REACTIONNERS
     is_file_present $VAR/reactionnerd.pid
 
-    echo "Check for 3 brokers (one master, one for status.dat, one for log)"
+    echo "Check for $NB_BROKERS brokers (one master, one for status.dat, one for log)"
     check_process_nb broker $NB_BROKERS
     is_file_present $VAR/brokerd.pid
 
-    echo "Check for 1 arbiter"
+    echo "Check for $NB_ARBITERS arbiter"
     check_process_nb arbiter $NB_ARBITERS
     is_file_present $VAR/arbiterd.pid
 
