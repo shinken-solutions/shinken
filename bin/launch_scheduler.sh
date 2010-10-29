@@ -5,4 +5,4 @@ BIN=$DIR"/../bin"
 ETC=$DIR"/../etc"
 
 echo "Launching Scheduler (that do scheduling only)"
-$BIN/shinken-scheduler.py -d -c $ETC/schedulerd.ini
+$BIN/shinken-scheduler -d -c $ETC/schedulerd.ini

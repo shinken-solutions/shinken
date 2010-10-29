@@ -164,7 +164,7 @@ ETC=/etc/shinken
 is_file_present $ETC/nagios.cfg
 is_file_present $ETC/shinken-specific.cfg
 string_in_file "host-150.cfg" $ETC/nagios.cfg
-is_file_present /usr/bin/shinken-arbiter.py
+is_file_present /usr/bin/shinken-arbiter
 
 echo "Now we can test a real run guy"
 /etc/init.d/shinken-scheduler start

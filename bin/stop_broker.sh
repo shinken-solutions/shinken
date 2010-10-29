@@ -9,7 +9,7 @@ echo "Stopping broker"
 parent=`cat $DIR/../var/brokerd.pid`
 
 # kill parent and childs broker processes
-for brokerpid in $(ps -aef | grep $parent | grep "shinken-broker.py" | awk '{print $2}')
+for brokerpid in $(ps -aef | grep $parent | grep "shinken-broker" | awk '{print $2}')
 do
 	kill $brokerpid
 done

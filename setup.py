@@ -173,7 +173,7 @@ setup(
                       required_pkgs
                       ],
 
-  scripts = [f for f in glob('bin/[!_]*.py')],
+  scripts = [f for f in glob('bin/shinken-[!_]*')],
   data_files=[(etc_path, ["etc/nagios.cfg",'etc/brokerd.ini', 'etc/brokerd-windows.ini',
                           'etc/commons.cfg', 'etc/commands.cfg', 'etc/timeperiods.cfg', 'etc/templates.cfg',
                           'etc/escalations.cfg', 'etc/dependencies.cfg',
