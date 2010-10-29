@@ -28,21 +28,8 @@ DIR=$(cd $(dirname "$0"); pwd)
 echo "Going to dir $DIR/.."
 cd $DIR/..
 
-echo "Clean old tests and kill remaining processes"
-./clean.sh
 
 
-echo "####################################################################################"
-echo "#                                                                                  #"
-echo "#                           SIMPLE START                                           #"
-echo "#                                                                                  #"
-echo "####################################################################################"
-
-echo "Now we can start some launch tests"
-bin/launch_all_debug.sh
-
-
-echo "Now checking for existing apps"
 
 
 #check for a process existance with good number
@@ -82,23 +69,23 @@ function string_in_file {
 function check_good_run {
     VAR="$1"
     echo "Check for 1 Scheduler"
-    check_process_nb scheduler 1
+    check_process_nb scheduler $NB_SCHEDULERS
     is_file_present $VAR/schedulerd.pid
 
     echo "Check for 6 pollers (1 master, 1 for multiporcess module (queue manager), 4 workers)"
-    check_process_nb poller 6
+    check_process_nb poller $NB_POLLERS
     is_file_present $VAR/pollerd.pid
 
     echo "Check for 2 reactionners (1 master, 1 for multiporcess module (queue manager) 1 worker)"
-    check_process_nb reactionner 3
+    check_process_nb reactionner $NB_REACTIONNERS
     is_file_present $VAR/reactionnerd.pid
 
     echo "Check for 3 brokers (one master, one for status.dat, one for log)"
-    check_process_nb broker 3
+    check_process_nb broker $NB_BROKERS
     is_file_present $VAR/brokerd.pid
 
     echo "Check for 1 arbiter"
-    check_process_nb arbiter 1
+    check_process_nb arbiter $NB_ARBITERS
     is_file_present $VAR/arbiterd.pid
 
     echo "Now checking for good file prensence"
@@ -113,6 +100,30 @@ function check_good_run {
 }
 
 
+#Standard launch process packets
+NB_SCHEDULERS=1
+NB_POLLERS=6
+NB_REACTIONNERS=3
+NB_BROKERS=3
+NB_ARBITERS=1
+
+
+
+echo "Clean old tests and kill remaining processes"
+./clean.sh
+
+
+echo "####################################################################################"
+echo "#                                                                                  #"
+echo "#                           SIMPLE START                                           #"
+echo "#                                                                                  #"
+echo "####################################################################################"
+
+echo "Now we can start some launch tests"
+bin/launch_all_debug.sh
+
+
+echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
 sleep 5
@@ -163,7 +174,7 @@ echo "Real install OK"
 ETC=/etc/shinken
 is_file_present $ETC/nagios.cfg
 is_file_present $ETC/shinken-specific.cfg
-string_in_file "host-150.cfg" $ETC/nagios.cfg
+string_in_file "servicegroups.cfg" $ETC/nagios.cfg
 is_file_present /usr/bin/shinken-arbiter
 
 echo "Now we can test a real run guy"
