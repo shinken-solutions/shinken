@@ -4775,6 +4775,7 @@ class LiveStatus:
         self.debuglevel = 2
         self.dbconn.row_factory = self.row_factory
         self.return_queue = return_queue
+        self.inversed_stack_queue = (Queue.LifoQueue == Queue.Queue) # if the Queue is not in the good order for python 2.4
 
 
     def debug(self, debuglevel, message):
@@ -4940,7 +4941,12 @@ class LiveStatus:
                     filtfunc = stats_filter_stack.get()
                     #Then, postprocess (sum, max, min,...) the results
                     postprocess = stats_postprocess_stack.get()
-                    resultarr[maxidx - i - 1] = postprocess(filter(filtfunc, filtresult))
+                    #If we are not inversed (like >=2.6) we are like a stack
+                    if not self.inversed_stack_queue:
+                        ind = maxidx - i - 1
+                    else: # we take FIFO, so the order is the inversed!
+                        ind = i
+                    resultarr[ind] = postprocess(filter(filtfunc, filtresult))
                 result = [resultarr]
             else:
                 #Results are host/service/etc dicts with the requested attributes
