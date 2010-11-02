@@ -5408,10 +5408,14 @@ class LiveStatus:
             elif line.find('Stats: ') != -1:
                 try:
                     cmd, attribute, operator, reference = line.split(' ', 3)
-                    if attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference.find('as ', 3):
+                    if attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference.find('as ', 3) != -1:
                         attribute, operator = operator, attribute
                         asas, alias = reference.split(' ')
                         aliases.append(alias)
+                    elif attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference == '=':
+                        # workaround for thruk-cmds like: Stats: sum latency =
+                        attribute, operator = operator, attribute
+                        reference = ''
                 except:
                     cmd, attribute, operator = line.split(' ', 3)
                     if attribute in ['sum', 'min', 'max', 'avg', 'std']:
