@@ -770,9 +770,9 @@ class Scheduler:
         #Ok, now all is initilised, we can make the inital broks
         self.fill_initial_broks()
 
-        Log().log("First scheduling")
+        Log().log("[%s] First scheduling launched" % self.instance_name)
         self.schedule()
-        Log().log("Done")
+        Log().log("[%s] First scheduling done" % self.instance_name)
         #Ticks is for recurrent function call like consume
         #del zombies etc
         ticks = 0

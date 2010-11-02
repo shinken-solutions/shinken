@@ -226,7 +226,6 @@ class IForArbiter(Pyro.core.ObjBase):
 
 	#Use for arbiter to know if we are alive
 	def ping(self):
-		print "We ask us for a ping"
 		return True
 
 
@@ -437,9 +436,9 @@ class Broker(Satellite):
 			if not is_active:
 				return
 
-		print "Init connexion with", links[id]['uri']
+                #DBG: print "Init connexion with", links[id]['uri']
 		running_id = links[id]['running_id']
-                print "Running id before connexion", running_id
+                #DBG: print "Running id before connexion", running_id
 		uri = links[id]['uri']
 		links[id]['con'] = Pyro.core.getProxyForURI(uri)
 
@@ -459,7 +458,7 @@ class Broker(Satellite):
                             #we must ask for a enw full broks if
                             #it's a scheduler
                             if type == 'scheduler':
-                                print "Ask for a broks generation"
+                                print "[Broker] I ask for a broks generation to the scheduler %s" % links[id]['name']
                                 links[id]['con'].fill_initial_broks()
                         #else:
                         #    print "I do nto ask for brok generation"
@@ -468,19 +467,19 @@ class Broker(Satellite):
 			Log().log(str(exp))
 			return
 		except Pyro.errors.NamingError, exp:
-			Log().log("%s is not initilised : %s" % (type, str(exp)))
+                        Log().log("[Broker] the %s '%s' is not initilised : %s" % (type, links[id]['name'], str(exp)))
 			links[id]['con'] = None
 			return
 		except KeyError , exp:
-			Log().log("%s is not initilised : %s" % (type, str(exp)))
+                        Log().log("[Broker] the %s '%s' is not initilised : %s" % (type, links[id]['name'], str(exp)))
                         links[id]['con'] = None
                         return
                 except Pyro.errors.CommunicationError, exp:
-                        Log().log("%s got CommunicationError : %s" % (type, str(exp)))
+                        Log().log("[Broker] the %s '%s' got CommunicationError : %s" % (type, links[id]['name'], str(exp)))
                         links[id]['con'] = None
                         return
 
-		Log().log("Connexion OK")
+		Log().log("[Broker] Connexion OK to the %s %s" % (type, links[id]['name']))
 
 
 	#Get a brok. Our role is to put it in the modules
@@ -637,14 +636,8 @@ class Broker(Satellite):
 
 
 		#Now main loop
-		i = 0
 		#timeout = 1.0
 		while True:
-			i = i + 1
-			if not i % 50:
-				print "Loop ", i
-			#begin_loop = time.time()
-
 			#Begin to clean modules
 			self.check_and_del_zombie_modules()
 

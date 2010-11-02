@@ -307,9 +307,7 @@ class ObjectsCacheFile:
             output += 'define timeperiod {\n' + tmp + '\t}\n\n'
 
         for cmd in self.commands.values():
-            print "+++++++++++++++++++++++++++++++++++++++++++++++++"
-            print cmd
-            print "+++++++++++++++++++++++++++++++++++++++++++++++++"
+            #print cmd
             tmp = self.create_output(cmd)
             output += 'define command {\n' + tmp + '\t}\n\n'
 
