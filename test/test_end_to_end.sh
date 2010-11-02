@@ -191,4 +191,48 @@ check_good_run /var/lib/shinken
 echo "OK Great. Even the real launch test pass. Great. I can clean after me."
 ./clean.sh
 
+
+
+
+echo "####################################################################################"
+echo "#                                                                                  #"
+echo "#                                    HA launch                                     #"
+echo "#                                                                                  #"
+echo "####################################################################################"
+
+echo "Now we can start some launch tests"
+bin/launch_all_debug2.sh
+
+
+echo "Now checking for existing apps"
+
+echo "we can sleep 5sec for conf dispatching and so good number of process"
+sleep 5
+
+#The number of process changed, we mush look for it
+
+
+#Standard launch process packets
+NB_SCHEDULERS=2
+#6 for stack 1, and 2 for 2 (not active, so no worker)
+NB_POLLERS=8
+#3 for stack1, 2 for stack2 (no worker from now)
+NB_REACTIONNERS=5
+#3 for stack 1, 1 for stack2 (no status.dat nor log worker launch)
+NB_BROKERS=4
+#still 1
+NB_ARBITERS=1
+
+#Now check if the run looks good with var in the direct directory
+check_good_run var
+
+echo "All launch of HA daemons is OK"
+
+#And now we begin to KILL :)
+
+echo "Now we clean it and test an install"
+./clean.sh
+
+
+
 echo "All check are OK. Congrats! You can go take a Beer ;)"
