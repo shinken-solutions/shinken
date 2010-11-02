@@ -669,8 +669,8 @@ class Broker(Satellite):
 		        #and for external queues
 		        #REF: doc/broker-modules.png (3)
                         for b in self.broks:
-                            if b.type != 'log':
-                                print "Broker : put brok id : %d" % b.id
+                            #if b.type != 'log':
+                            #    print "Broker : put brok id : %d" % b.id
                             for q in self.modules_manager.get_external_to_queues():
                                 q.put(b)
 

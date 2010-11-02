@@ -90,8 +90,8 @@ class Status_dat_broker:
     def manage_brok(self, b):
         type = b.type
         manager = 'manage_'+type+'_brok'
-        if manager != 'manage_log_brok':
-            print "I manage brok Number", b.id, ":", manager
+        #if manager != 'manage_log_brok':
+        #    print "I manage brok Number", b.id, ":", manager
         #print "------------------------------------------- i receive", manager
         if hasattr(self, manager):
             #print "------------------------------------------- i manage", manager
@@ -115,7 +115,7 @@ class Status_dat_broker:
         data = b.data
         instance_id = data['instance_id']
 
-        print 'DBG: Cleann all my instance with brok :', b.id
+        #print 'DBG: Cleann all my instance with brok :', b.id
 
         #We clean all previous hosts and services from this instance_id
         h_to_del = []
@@ -124,7 +124,7 @@ class Status_dat_broker:
                 h_to_del.append(h.id)
 
         for i in h_to_del:
-            print "Deleting previous host %d" % i
+            #print "Deleting previous host %d" % i
             del self.hosts[i]
 
         #same for services
@@ -134,7 +134,7 @@ class Status_dat_broker:
                 s_to_del.append(s.id)
 
         for i in s_to_del:
-            print "Deleting previous service %d" % i
+            #print "Deleting previous service %d" % i
             del self.services[i]
 
 
@@ -143,8 +143,8 @@ class Status_dat_broker:
         data = b.data
         h_id = data['id']
 
-        print 'DBG: Creacting host with with brok :', b.id
-        print "Creating host:", h_id, b.__dict__
+        #print 'DBG: Creacting host with with brok :', b.id
+        #print "Creating host:", h_id, b.__dict__
 
 
         h = Host({})
@@ -213,7 +213,7 @@ class Status_dat_broker:
         sg_id = data['id']
         members = data['members']
         del data['members']
-        print "Creating servicegroup:", sg_id, data
+        #print "Creating servicegroup:", sg_id, data
         sg = Servicegroup()
         for prop in data:
             setattr(sg, prop, data[prop])
@@ -221,7 +221,7 @@ class Status_dat_broker:
         for (s_id, s_name) in members:
             if s_id in self.services:
                 sg.members.append(self.services[s_id])
-        print "SG:", sg
+        #print "SG:", sg
         self.servicegroups[sg_id] = sg
         self.number_of_objects += 1
 
@@ -244,7 +244,7 @@ class Status_dat_broker:
         cg_id = data['id']
         members = data['members']
         del data['members']
-        print "Creating contactgroup:", cg_id, data
+        #print "Creating contactgroup:", cg_id, data
         cg = Contactgroup()
         for prop in data:
             setattr(cg, prop, data[prop])
@@ -252,7 +252,7 @@ class Status_dat_broker:
         for (c_id, c_name) in members:
             if c_id in self.contacts:
                 cg.members.append(self.contacts[c_id])
-        print "CG:", cg
+        #print "CG:", cg
         self.contactgroups[cg_id] = cg
         self.number_of_objects += 1
 
@@ -260,10 +260,10 @@ class Status_dat_broker:
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
         tp_id = data['id']
-        print "Creating Timeperiod:", tp_id, data
+        #print "Creating Timeperiod:", tp_id, data
         tp = Timeperiod({})
         self.update_element(tp, data)
-        print "TP:", tp
+        #print "TP:", tp
         self.timeperiods[tp_id] = tp
         self.number_of_objects += 1
 
@@ -271,10 +271,10 @@ class Status_dat_broker:
     def manage_initial_command_status_brok(self, b):
         data = b.data
         c_id = data['id']
-        print "Creating Command:", c_id, data
+        #print "Creating Command:", c_id, data
         c = Command({})
         self.update_element(c, data)
-        print "CMD:", c
+        #print "CMD:", c
         self.commands[c_id] = c
         self.number_of_objects += 1
 

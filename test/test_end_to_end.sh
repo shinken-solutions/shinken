@@ -228,7 +228,20 @@ check_good_run var
 
 echo "All launch of HA daemons is OK"
 
-#And now we begin to KILL :)
+#Now we kill and see if all is OK :)
+#We clean the log file
+#$VAR/nagios.log
+
+#We kill the most important thing first : the scheduler-Master
+bin/stop_scheduler.sh
+
+#We sleep to be sruethe scheduler see us
+sleep 5
+NB_SCHEDULERS=1
+#string_in_file "Warning : Scheduler scheduler-Master had the configuration 0 but is dead, I am not happy." $VAR/nagios.log
+
+#check_good_run var
+
 
 echo "Now we clean it and test an install"
 ./clean.sh
