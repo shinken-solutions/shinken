@@ -253,8 +253,13 @@ string_in_file "Dispatch OK of for conf in scheduler scheduler-Spare" $VAR/nagio
 #then is the broker know it and try to connect to the new scheduler-spare
 string_in_file "\[broker-Master\] Connexion OK to the scheduler scheduler-Spare" $VAR/nagios.log
 
+echo "Now stop the poller-Master"
+#Now we stop the poller. We will see the sapre take the job (we hope in fact :) )
+bin/stop_poller.sh
 #check_good_run var
-
+sleep 5
+print_date
+#string_in_file "\[All\] Dispatch OK of for configuration 0 to poller poller-Slave" $VAR/nagios.log
 
 echo "Now we clean it and test an install"
 #./clean.sh

@@ -170,6 +170,7 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.schedulers[sched_id]['instance_id'] = s['instance_id']
                     self.schedulers[sched_id]['running_id'] = 0
                     self.schedulers[sched_id]['active'] = s['active']
+                    self.schedulers[sched_id]['last_connexion'] = 0
 
                     #And we connect to it
                     self.app.pynag_con_init(sched_id, 'scheduler')
@@ -191,6 +192,7 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.arbiters[arb_id]['broks'] = broks
                     self.arbiters[arb_id]['instance_id'] = 0 #No use so all to 0
                     self.arbiters[arb_id]['running_id'] = 0
+                    self.arbiters[arb_id]['last_connexion'] = 0
 
                     #We do not connect to the arbiter. To connexion hang
 
@@ -211,6 +213,7 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.pollers[pol_id]['broks'] = broks
                     self.pollers[pol_id]['instance_id'] = 0 #No use so all to 0
                     self.pollers[pol_id]['running_id'] = 0
+                    self.pollers[pol_id]['last_connexion'] = 0
 
                     #And we connect to it
                     self.app.pynag_con_init(pol_id, 'poller')
@@ -233,7 +236,8 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.reactionners[rea_id]['broks'] = broks
                     self.reactionners[rea_id]['instance_id'] = 0 #No use so all to 0
                     self.reactionners[rea_id]['running_id'] = 0
-                    
+                    self.reactionners[rea_id]['last_connexion'] = 0                    
+
                     #And we connect to it
                     self.app.pynag_con_init(rea_id, 'reactionner')
 
@@ -463,6 +467,15 @@ class Broker(Satellite):
             return res
 
 
+        #Check if we do not connect to ofthen to this
+        def is_connexion_try_too_close(self, elt):
+            now = time.time()
+            last_connexion = elt['last_connexion']
+            if now - last_connexion < 5:
+                return  True
+            return False
+
+
 	#initialise or re-initialise connexion with scheduler or
 	#arbiter if type == arbiter
 	def pynag_con_init(self, id, type='scheduler'):
@@ -478,7 +491,14 @@ class Broker(Satellite):
                     is_active = links[id]['active']
                     if not is_active:
                         return
+                    
+                #If we try to connect too much, we slow down our tests
+                if self.is_connexion_try_too_close(links[id]):
+                    return
 
+                #Ok, we can now update it
+                links[id]['last_connexion'] = time.time()
+                
                 #DBG: print "Init connexion with", links[id]['uri']
 		running_id = links[id]['running_id']
                 #DBG: print "Running id before connexion", running_id
@@ -671,13 +691,13 @@ class Broker(Satellite):
 
                 #Connexion init with Schedulers
 		for sched_id in self.schedulers:
-			self.pynag_con_init(sched_id, type='scheduler')
+                    self.pynag_con_init(sched_id, type='scheduler')
 
 		for pol_id in self.pollers:
-			self.pynag_con_init(pol_id, type='poller')
+                    self.pynag_con_init(pol_id, type='poller')
 
 		for rea_id in self.reactionners:
-                        self.pynag_con_init(rea_id, type='reactionner')
+                    self.pynag_con_init(rea_id, type='reactionner')
 
 
 		#Now main loop

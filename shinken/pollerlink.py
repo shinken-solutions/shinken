@@ -48,7 +48,7 @@ class PollerLink(SatelliteLink):
                 }
 
     running_properties = {'con' : {'default' : None},
-                          'alive' : {'default' : False, 'fill_brok' : ['full_status']},
+                          'alive' : {'default' : False, 'fill_brok' : ['full_status'], 'to_send' : True},
                           'broks' : {'default' : []},
                           'attempt' : {'default' : 0, 'fill_brok' : ['full_status']}, # the number of failed attempt
                           'reachable' : {'default' : False, 'fill_brok' : ['full_status']}, # can be network ask or not (dead or check in timeout or error)
