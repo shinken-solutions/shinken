@@ -105,9 +105,9 @@ class IForArbiter(Pyro.core.ObjBase):
                 self.schedulers[sched_id]['wait_homerun'] = {}
             self.schedulers[sched_id]['running_id'] = 0
             self.schedulers[sched_id]['active'] = s['active']
-            #We cannot reinit connexions because this code in in a thread, and
-            #pyro do not allow thread to create new connexions...
-            #So we do it just after.
+
+            #And then we connect to it :)
+            self.app.pynag_con_init(sched_id)
         
         #Now the limit part
         self.app.max_workers = conf['global']['max_workers']
@@ -444,7 +444,7 @@ class Satellite(Daemon):
         w = Worker(1, self.s, self.returns_queue, self.processes_by_worker, \
                    mortal=mortal,max_plugins_output_length = self.max_plugins_output_length )
         self.workers[w.id] = w
-        Log().log("Allocating new Worker : %s" % w.id)
+        Log().log("[%s] Allocating new Worker : %s" % (self.name, w.id))
         self.workers[w.id].start()
 
 
@@ -676,7 +676,7 @@ class Satellite(Daemon):
                 #must wait more or at least have more workers
                 wait_ratio = self.wait_ratio.get_load()
                 if self.s.qsize() != 0 and wait_ratio < 5*self.polling_interval:
-                    Log().log("I decide to up wait ratio")
+                    print "I decide to up wait ratio"
                     self.wait_ratio.update_load(wait_ratio * 2)
                 else:
                     #Go to self.polling_interval on normal run, if wait_ratio
