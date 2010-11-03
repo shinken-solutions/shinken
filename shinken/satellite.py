@@ -287,17 +287,17 @@ class Satellite(Daemon):
             shinken.pyro_wrapper.set_timeout(sched['con'], 5)
             new_run_id = sched['con'].get_running_id()
         except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
-            Log().log("Scheduler is not initilised : %s" % str(exp))
+            Log().log("[%s] Scheduler %s is not initilised : %s" % (self.name, sched['name'], str(exp)))
             sched['con'] = None
             return
 
         #The schedulers have been restart : it has a new run_id.
         #So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
-            Log().log("The running id of the scheduler changed, we must clear it's actions")
+            Log().log("[%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sched['name']))
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
-        Log().log("Connexion OK")
+        Log().log("[%s] Connexion OK with scheduler %s" % (self.name, sched['name']))
 
 
     #Manage action return from Workers
