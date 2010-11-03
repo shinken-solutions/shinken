@@ -32,6 +32,7 @@
 from Queue import Empty
 from multiprocessing import Queue, Manager, active_children
 import os
+import copy
 import time
 import sys
 import select
@@ -489,7 +490,7 @@ class Satellite(Daemon):
 
     #Someone ask us our broks. We send them, and clean the queue
     def get_broks(self):
-        res = self.broks
+        res = copy.copy(self.broks)
         self.broks.clear()
         return res
 
