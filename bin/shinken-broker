@@ -171,10 +171,9 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.schedulers[sched_id]['running_id'] = 0
                     self.schedulers[sched_id]['active'] = s['active']
 
-                    #We cannot reinit connexions because this code in
-                    #in a thread, and
-                    #pyro do not allow thread to create new connexions...
-                    #So we do it just after.
+                    #And we connect to it
+                    self.app.pynag_con_init(sched_id, 'scheduler')
+
                 Log().log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
 
 		#Now get arbiter
@@ -192,6 +191,9 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.arbiters[arb_id]['broks'] = broks
                     self.arbiters[arb_id]['instance_id'] = 0 #No use so all to 0
                     self.arbiters[arb_id]['running_id'] = 0
+
+                    #We do not connect to the arbiter. To connexion hang
+
                 Log().log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
 
 		#Now for pollers
@@ -209,6 +211,10 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.pollers[pol_id]['broks'] = broks
                     self.pollers[pol_id]['instance_id'] = 0 #No use so all to 0
                     self.pollers[pol_id]['running_id'] = 0
+
+                    #And we connect to it
+                    self.app.pynag_con_init(pol_id, 'poller')
+
                 Log().log("[%s] We have our pollers : %s" % (self.name, self.pollers))
 
 		#Now reactionners
@@ -227,6 +233,10 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.reactionners[rea_id]['broks'] = broks
                     self.reactionners[rea_id]['instance_id'] = 0 #No use so all to 0
                     self.reactionners[rea_id]['running_id'] = 0
+                    
+                    #And we connect to it
+                    self.app.pynag_con_init(rea_id, 'reactionner')
+
                 Log().log("[%s] We have our reactionners : %s" % (self.name, self.reactionners))
 
 		if not self.app.have_modules:
@@ -449,7 +459,6 @@ class Broker(Satellite):
         #Call by arbiter to get our external commands
         def get_external_commands(self):
             res = self.external_commands
-#            print "Call my command get_external_commands, I return ", res
             self.external_commands = []
             return res
 
@@ -460,15 +469,15 @@ class Broker(Satellite):
 		#Get teh good links tab for looping..
 		links = self.get_links_from_type(type)
 		if links == None:
-			Log().log('DBG: Type unknown for connexion! %s' % type)
-			return
+                    Log().log('DBG: Type unknown for connexion! %s' % type)
+                    return
 
 		if type == 'scheduler':
-                        #If sched is not active, I do not try to init
-		        #it is just useless
-			is_active = links[id]['active']
-			if not is_active:
-				return
+                    #If sched is not active, I do not try to init
+                    #it is just useless
+                    is_active = links[id]['active']
+                    if not is_active:
+                        return
 
                 #DBG: print "Init connexion with", links[id]['uri']
 		running_id = links[id]['running_id']
@@ -487,7 +496,7 @@ class Broker(Satellite):
 		        #The schedulers have been restart : it has a new run_id.
 		        #So we clear all verifs, they are obsolete now.
 			if new_run_id != running_id:
-                            print "New running id", new_run_id
+                            print "[%s] New running id for the %s %s : %s" % (self.name, type, links[id]['name'], new_run_id)
                             links[id]['broks'].clear()
                             #we must ask for a enw full broks if
                             #it's a scheduler
@@ -498,7 +507,8 @@ class Broker(Satellite):
                         #    print "I do nto ask for brok generation"
 			links[id]['running_id'] = new_run_id
 		except Pyro.errors.ProtocolError, exp:
-			Log().log(str(exp))
+			Log().log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
+                        links[id]['con'] = None
 			return
 		except Pyro.errors.NamingError, exp:
                         Log().log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
@@ -601,38 +611,37 @@ class Broker(Satellite):
 					self.pynag_con_init(sched_id, type=type)
                         #Ok, con is not know, so we create it
 			except KeyError , exp:
-				#print exp
-				self.pynag_con_init(sched_id, type=type)
+                            #print exp
+                            self.pynag_con_init(sched_id, type=type)
 			except Pyro.errors.ProtocolError , exp:
-				Log().log(str(exp))
-				#we reinitialise the ccnnexion to pynag
-				self.pynag_con_init(sched_id, type=type)
+                            Log().log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                            links[sched_id]['con'] = None
                         #scheduler must not #be initialized
 			except AttributeError , exp:
-				Log().log(str(exp))
+                            Log().log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                         #scheduler must not have checks
 			except Pyro.errors.NamingError , exp:
-				Log().log(str(exp))
+                            Log().log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                         except Pyro.errors.ConnectionClosedError , exp:
-                               Log().log(str(exp))
-                               self.pynag_con_init(sched_id, type=type)
-			# What the F**k? We do not know what happenned,
+                            Log().log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                            links[sched_id]['con'] = None
+                        # What the F**k? We do not know what happenned,
 			#so.. bye bye :)
 			except Exception,x:
-                                print x.__class__
-                                print x.__dict__
-                                Log().log(str(x))
-				Log().log(''.join(Pyro.util.getPyroTraceback(x)))
-				sys.exit(0)
+                            print x.__class__
+                            print x.__dict__
+                            Log().log(str(x))
+                            Log().log(''.join(Pyro.util.getPyroTraceback(x)))
+                            sys.exit(1)
 
 
 
 
 	#modules can have process, and they can die
 	def check_and_del_zombie_modules(self):
-                #Active children make a join with every one, useful :)
-		act = active_children()
-		self.modules_manager.check_alive_instances()
+            #Active children make a join with every one, useful :)
+            act = active_children()
+            self.modules_manager.check_alive_instances()
 
 
 	#Main function, will loop forever
