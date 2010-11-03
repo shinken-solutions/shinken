@@ -538,7 +538,7 @@ class Scheduler:
         #We now have all full broks
         self.has_full_broks = True
 
-        Log().log("Created initial Broks: %d" % len(self.broks))
+        Log().log("[%s] Created initial Broks: %d" % (self.instance_name, len(self.broks)))
 
 
     #Crate a brok with program status info

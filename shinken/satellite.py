@@ -75,12 +75,20 @@ class IForArbiter(Pyro.core.ObjBase):
     def put_conf(self, conf):
         self.app.have_conf = True
         self.app.have_new_conf = True
-        print "Sending us ", conf
+        #Gout our name from the globals
+        if 'poller_name' in conf['global']:
+            self.name = conf['global']['poller_name']
+        elif 'reactionner_name' in conf['global']:
+            self.name = conf['global']['reactionner_name']
+        else:
+            self.name = 'Unnamed satellite'
+
+        print "[%s] Sending us a configuration %s " % (self.name, conf)
         #If we've got something in the schedulers, we do not want it anymore
         for sched_id in conf['schedulers'] :
             already_got = False
             if sched_id in self.schedulers:
-                Log().log("We already got the conf %d" % sched_id)
+                Log().log("[%s] We already got the conf %d" % (self.name, sched_id))
                 already_got = True
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
             s = conf['schedulers'][sched_id]
@@ -115,9 +123,10 @@ class IForArbiter(Pyro.core.ObjBase):
         #Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
-            print "Setting our timezone to", use_timezone
+            Log().log("[%s] Setting our timezone to %s" %(self.name, use_timezone))
             os.environ['TZ'] = use_timezone
             time.tzset()
+
         Log().log("We have our schedulers : %s" % (str(self.schedulers)))
 
 
@@ -392,7 +401,7 @@ class Satellite(Daemon):
                     #so another handle will not make a con_init
                     if self.have_new_conf:
                         for sched_id in self.schedulers:
-                            Log().log("Init watch_for_new_conf")
+                            print "Got a new conf"
                             self.pynag_con_init(sched_id)
                         self.have_new_conf = False
 

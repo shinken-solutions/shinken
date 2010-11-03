@@ -66,6 +66,10 @@ function string_in_file {
 }
 
 
+function print_date {
+    date +%s
+}
+
 function check_good_run {
     VAR="$1"
     echo "Check for $NB_SCHEDULERS Scheduler"
@@ -238,14 +242,24 @@ bin/stop_scheduler.sh
 #We sleep to be sruethe scheduler see us
 sleep 5
 NB_SCHEDULERS=1
-#string_in_file "Warning : Scheduler scheduler-Master had the configuration 0 but is dead, I am not happy." $VAR/nagios.log
+
+print_date
+
+#First we look is the arbiter saw the scheduler as dead
+string_in_file "Warning : Scheduler scheduler-Master had the configuration 0 but is dead, I am not happy." $VAR/nagios.log
+#Then we look if the scheduler-spare got a conf from arbiter (here, view from the arbiter)
+string_in_file "Dispatch OK of for conf in scheduler scheduler-Spare" $VAR/nagios.log
+
+#then is the broker know it and try to connect to the new scheduler-spare
+string_in_file "\[broker-Master\] Connexion OK to the scheduler scheduler-Spare" $VAR/nagios.log
 
 #check_good_run var
 
 
 echo "Now we clean it and test an install"
-./clean.sh
+#./clean.sh
 
 
-
+echo ""
+echo ""
 echo "All check are OK. Congrats! You can go take a Beer ;)"

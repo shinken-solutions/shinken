@@ -29,7 +29,7 @@ class PollerLink(SatelliteLink):
     id = 0
     my_type = 'poller'
     #To_send : send or not to satellite conf
-    properties={'poller_name' : {'required' : True , 'fill_brok' : ['full_status']},
+    properties={'poller_name' : {'required' : True , 'fill_brok' : ['full_status'], 'to_send' : True},
                 'address' : {'required' : True, 'fill_brok' : ['full_status']},
                 'port' : {'required':  False, 'default' : 7771, 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'fill_brok' : ['full_status']},

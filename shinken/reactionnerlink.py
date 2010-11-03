@@ -25,7 +25,7 @@ from util import to_int, to_bool, to_split
 class ReactionnerLink(SatelliteLink):
     id = 0
     my_type = 'reactionner'
-    properties={'reactionner_name' : {'required' : True , 'fill_brok' : ['full_status']},
+    properties={'reactionner_name' : {'required' : True , 'fill_brok' : ['full_status'], 'to_send' : True},
                 'address' : {'required' : True, 'fill_brok' : ['full_status']},
                 'port' : {'required':  False, 'default' : '7769', 'pythonize': to_int, 'fill_brok' : ['full_status']},
                 'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'fill_brok' : ['full_status']},

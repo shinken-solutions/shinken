@@ -143,67 +143,101 @@ class IForArbiter(Pyro.core.ObjBase):
 	def put_conf(self, conf):
 		self.app.have_conf = True
 		self.app.have_new_conf = True
-		print "Sending us ", conf
+
+                #Got our name from the globals
+                if 'broker_name' in conf['global']:
+                    self.name = conf['global']['broker_name']
+                else:
+                    self.name = 'Unnamed broker'
+                self.app.name = self.name
+
+		print "[%s] Sending us configuration %s" %(self.name, conf)
 		#If we've got something in the schedulers, we do not
 		#want it anymore
 		#self.schedulers.clear()
 		for sched_id in conf['schedulers'] :
-			s = conf['schedulers'][sched_id]
-			self.schedulers[sched_id] = s
-                        uri = shinken.pyro_wrapper.create_uri(s['address'], s['port'], 'Broks')
-			self.schedulers[sched_id]['uri'] = uri
-			self.schedulers[sched_id]['broks'] = {}
-			self.schedulers[sched_id]['instance_id'] = s['instance_id']
-			self.schedulers[sched_id]['running_id'] = 0
-			self.schedulers[sched_id]['active'] = s['active']
-			#We cannot reinit connexions because this code in
-			#in a thread, and
-			#pyro do not allow thread to create new connexions...
-			#So we do it just after.
-		print "We have our schedulers :", self.schedulers
+                    #Must look if we already have it to do nto overdie our broks
+                    already_got = sched_id in self.schedulers
+                    if already_got:
+                        broks = self.schedulers[sched_id]['broks']
+                    else:
+                        broks = {}
+                    s = conf['schedulers'][sched_id]
+                    self.schedulers[sched_id] = s
+                    uri = shinken.pyro_wrapper.create_uri(s['address'], s['port'], 'Broks')
+                    self.schedulers[sched_id]['uri'] = uri
+                    self.schedulers[sched_id]['broks'] = broks
+                    self.schedulers[sched_id]['instance_id'] = s['instance_id']
+                    self.schedulers[sched_id]['running_id'] = 0
+                    self.schedulers[sched_id]['active'] = s['active']
+
+                    #We cannot reinit connexions because this code in
+                    #in a thread, and
+                    #pyro do not allow thread to create new connexions...
+                    #So we do it just after.
+                Log().log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
 
 		#Now get arbiter
 		for arb_id in conf['arbiters'] :
-			a = conf['arbiters'][arb_id]
-			self.arbiters[arb_id] = a
-                        uri = shinken.pyro_wrapper.create_uri(a['address'], a['port'], 'Broks')
-			self.arbiters[arb_id]['uri'] = uri
-			self.arbiters[arb_id]['broks'] = {}
-			self.arbiters[arb_id]['instance_id'] = 0 #No use so all to 0
-			self.arbiters[arb_id]['running_id'] = 0
-		print "We have our arbiters :", self.arbiters
+                    #Must look if we already have it
+                    already_got = arb_id in self.arbiters
+                    if already_got:
+                        broks = self.arbiters[arb_id]['broks']
+                    else:
+                        broks = {}
+                    a = conf['arbiters'][arb_id]
+                    self.arbiters[arb_id] = a
+                    uri = shinken.pyro_wrapper.create_uri(a['address'], a['port'], 'Broks')
+                    self.arbiters[arb_id]['uri'] = uri
+                    self.arbiters[arb_id]['broks'] = broks
+                    self.arbiters[arb_id]['instance_id'] = 0 #No use so all to 0
+                    self.arbiters[arb_id]['running_id'] = 0
+                Log().log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
 
 		#Now for pollers
 		for pol_id in conf['pollers'] :
-			p = conf['pollers'][pol_id]
-			self.pollers[pol_id] = p
-                        uri = shinken.pyro_wrapper.create_uri(p['address'], p['port'], 'Broks')
-			self.pollers[pol_id]['uri'] = uri
-			self.pollers[pol_id]['broks'] = {}
-			self.pollers[pol_id]['instance_id'] = 0 #No use so all to 0
-			self.pollers[pol_id]['running_id'] = 0
-		print "We have our pollers :", self.pollers
+                    #Must look if we already have it
+                    already_got = pol_id in self.pollers
+                    if already_got:
+                        broks = self.pollers[pol_id]['broks']
+                    else:
+                        broks = {}
+                    p = conf['pollers'][pol_id]
+                    self.pollers[pol_id] = p
+                    uri = shinken.pyro_wrapper.create_uri(p['address'], p['port'], 'Broks')
+                    self.pollers[pol_id]['uri'] = uri
+                    self.pollers[pol_id]['broks'] = broks
+                    self.pollers[pol_id]['instance_id'] = 0 #No use so all to 0
+                    self.pollers[pol_id]['running_id'] = 0
+                Log().log("[%s] We have our pollers : %s" % (self.name, self.pollers))
 
 		#Now reactionners
 		for rea_id in conf['reactionners'] :
-                        r = conf['reactionners'][rea_id]
-                        self.reactionners[rea_id] = r
-                        uri = shinken.pyro_wrapper.create_uri(r['address'], r['port'], 'Broks')
-                        self.reactionners[rea_id]['uri'] = uri
-                        self.reactionners[rea_id]['broks'] = {}
-                        self.reactionners[rea_id]['instance_id'] = 0 #No use so all to 0
-                        self.reactionners[rea_id]['running_id'] = 0
-                print "We have our reactionners :", self.reactionners
+                    #Must look if we already have it
+                    already_got = rea_id in self.reactionners
+                    if already_got:
+                        broks = self.reactionners[rea_id]['broks']
+                    else:
+                        broks = {}
+
+                    r = conf['reactionners'][rea_id]
+                    self.reactionners[rea_id] = r
+                    uri = shinken.pyro_wrapper.create_uri(r['address'], r['port'], 'Broks')
+                    self.reactionners[rea_id]['uri'] = uri
+                    self.reactionners[rea_id]['broks'] = broks
+                    self.reactionners[rea_id]['instance_id'] = 0 #No use so all to 0
+                    self.reactionners[rea_id]['running_id'] = 0
+                Log().log("[%s] We have our reactionners : %s" % (self.name, self.reactionners))
 
 		if not self.app.have_modules:
-			self.app.modules = conf['global']['modules']
-			self.app.have_modules = True
-			print "We received modules", self.app.modules
+                    self.app.modules = conf['global']['modules']
+                    self.app.have_modules = True
+                    Log().log("[%s] We received modules %s " %(self.name,  self.app.modules))
 
                 #Set our giving timezone from arbiter
                 use_timezone = conf['global']['use_timezone']
                 if use_timezone != 'NOTSET':
-                    print "Setting our timezone to", use_timezone
+                    Log().log("[%s] Setting our timezone to" %(self.name, use_timezone))
                     os.environ['TZ'] = use_timezone
                     time.tzset()
 
@@ -212,10 +246,10 @@ class IForArbiter(Pyro.core.ObjBase):
 	#Arbiter ask us to do not manage a scheduler_id anymore
 	#I do it and don't ask why
 	def remove_from_conf(self, sched_id):
-		try:
-			del self.schedulers[sched_id]
-		except KeyError:
-			pass
+            try:
+                del self.schedulers[sched_id]
+            except KeyError:
+                pass
 
 
 	#Arbiter ask me which sched_id I manage, If it is not ok with it
@@ -231,8 +265,8 @@ class IForArbiter(Pyro.core.ObjBase):
 
 	#Use by the Arbiter to push broks to broker
 	def push_broks(self, broks):
-		self.app.add_broks_to_queue(broks.values())
-		return True
+            self.app.add_broks_to_queue(broks.values())
+            return True
 
         #The arbiter ask us our external commands in queue
         def get_external_commands(self):
@@ -458,7 +492,7 @@ class Broker(Satellite):
                             #we must ask for a enw full broks if
                             #it's a scheduler
                             if type == 'scheduler':
-                                print "[Broker] I ask for a broks generation to the scheduler %s" % links[id]['name']
+                                print "[%s] I ask for a broks generation to the scheduler %s" % (self.name, links[id]['name'])
                                 links[id]['con'].fill_initial_broks()
                         #else:
                         #    print "I do nto ask for brok generation"
@@ -467,19 +501,20 @@ class Broker(Satellite):
 			Log().log(str(exp))
 			return
 		except Pyro.errors.NamingError, exp:
-                        Log().log("[Broker] the %s '%s' is not initilised : %s" % (type, links[id]['name'], str(exp)))
+                        Log().log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
 			links[id]['con'] = None
 			return
 		except KeyError , exp:
-                        Log().log("[Broker] the %s '%s' is not initilised : %s" % (type, links[id]['name'], str(exp)))
+                        Log().log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
                         links[id]['con'] = None
+                        traceback.print_stack()
                         return
                 except Pyro.errors.CommunicationError, exp:
-                        Log().log("[Broker] the %s '%s' got CommunicationError : %s" % (type, links[id]['name'], str(exp)))
+                        Log().log("[%s] the %s '%s' got CommunicationError : %s" % (self.name, type, links[id]['name'], str(exp)))
                         links[id]['con'] = None
                         return
 
-		Log().log("[Broker] Connexion OK to the %s %s" % (type, links[id]['name']))
+		Log().log("[%s] Connexion OK to the %s %s" % (self.name, type, links[id]['name']))
 
 
 	#Get a brok. Our role is to put it in the modules
@@ -493,8 +528,8 @@ class Broker(Satellite):
 				mod.manage_brok(b)
 			except Exception , exp:
 				print exp.__dict__
-				Log().log("Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
-				print "DBG:", type(exp)
+				Log().log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.name, mod.get_name(),str(exp)))
+				Log().log("[%s] Exception type : %s" % (self.name, type(exp)))
                                 print "Back trace of this kill:"
                                 traceback.print_stack()
 				to_del.append(mod)
@@ -506,12 +541,13 @@ class Broker(Satellite):
 	#Add broks (a tab) to different queues for
 	#internal and external modules
 	def add_broks_to_queue(self, broks):
-		#Ok now put in queue brocks for manage by
-		#internal modules
-		self.broks.extend(broks)
+            
+            #Ok now put in queue brocks for manage by
+            #internal modules
+            self.broks.extend(broks)
 
-                #Sort the brok list by id
-                self.broks.sort(sort_by_ids)
+            #Sort the brok list by id
+            self.broks.sort(sort_by_ids)
 
 
 
@@ -545,8 +581,8 @@ class Broker(Satellite):
 		#Get teh good links tab for looping..
 		links = self.get_links_from_type(type)
 		if links == None:
-			Log().log('DBG: Type unknown for connexion! %s' % type)
-			return
+                    Log().log('DBG: Type unknown for connexion! %s' % type)
+                    return
 
 		#We check for new check in each schedulers and put
 		#the result in new_checks
@@ -601,12 +637,11 @@ class Broker(Satellite):
 
 	#Main function, will loop forever
 	def main(self):
-
-                Log().log("Using working directory : %s" % os.path.abspath(self.workdir))
+                Log().log("[Broker] Using working directory : %s" % os.path.abspath(self.workdir))
                 Pyro.config.PYRO_STORAGE = self.workdir
                 Pyro.config.PYRO_MULTITHREADED = 0
 
-		Log().log("Opening port: %s" % self.port)
+		Log().log("[Broker] Opening port: %s" % self.port)
 
                 self.daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port)
 
@@ -638,6 +673,7 @@ class Broker(Satellite):
 		#Now main loop
 		#timeout = 1.0
 		while True:
+                        #print "Begin Loop : manage broks", len(self.broks)
 			#Begin to clean modules
 			self.check_and_del_zombie_modules()
 
@@ -649,16 +685,13 @@ class Broker(Satellite):
 			#Maybe the last loop we raised some broks internally
 			#we should interger them in broks
 			self.interger_internal_broks()
-
-			#Now we can get new broks from arbiters in self.broks
-			#self.get_new_broks(type='arbiter')
+                        
 			#And from schedulers
 			self.get_new_broks(type='scheduler')
 			#And for other satellites
 			self.get_new_broks(type='poller')
 			self.get_new_broks(type='reactionner')
-                        
-                        
+
 		        #and for external queues
 		        #REF: doc/broker-modules.png (3)
                         for b in self.broks:
@@ -684,8 +717,16 @@ class Broker(Satellite):
 				#REF: doc/broker-modules.png (4-5)
 				self.manage_brok(b)
 
+                                nb_broks = len(self.broks)
+                                
 				#Ok we manage brok, but we still want to listen to arbiter
 				self.watch_for_new_conf(0.0)
+
+                                #if we got new broks here from arbiter, we should breack the loop
+                                #because such broks will not be managed by the
+                                #external modules before this loop (we pop them!)
+                                if len(self.broks) != nb_broks:
+                                    break
 
 		        #Restore the good sense
 			self.broks.reverse()
@@ -696,10 +737,9 @@ class Broker(Satellite):
 
 			#Maybe we do not have something to do, so we wait a little
 			if len(self.broks) == 0:
-				self.watch_for_new_conf(1.0)
-
-			#TODO : sleep better...
-			#time.sleep(1)
+                            #print "watch new conf 1 : begin", len(self.broks)
+                            self.watch_for_new_conf(1.0)
+                            #print "get enw broks watch new conf 1 : end", len(self.broks)
 
 
 
