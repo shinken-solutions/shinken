@@ -287,7 +287,7 @@ class Satellite(Daemon):
             shinken.pyro_wrapper.set_timeout(sched['con'], 5)
             new_run_id = sched['con'].get_running_id()
         except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
-            Log().log("[%s] Scheduler %s is not initilised : %s" % (self.name, sched['name'], str(exp)))
+            Log().log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sched['name'], str(exp)))
             sched['con'] = None
             return
 
@@ -512,7 +512,7 @@ class Satellite(Daemon):
             #good : we can think having a worker and it's not True
             #So we del it
             if not w.is_alive():
-                Log().log("Warning : the worker %s goes down unexpectly!" % w.id)
+                Log().log("[%s] Warning : the worker %s goes down unexpectly!" % (self.name, w.id))
                 #AIM ... Press FIRE ... <B>HEAD SHOT!</B>
                 w.terminate()
                 w.join(timeout=1)
@@ -631,9 +631,9 @@ class Satellite(Daemon):
                 print "Begin wait initial"
                 self.wait_for_initial_conf()
                 print "End wait initial"
-                for sched_id in self.schedulers:
-                    print "Init main2"
-                    self.pynag_con_init(sched_id)
+                #for sched_id in self.schedulers:
+                #    print "Init main2"
+                #    self.pynag_con_init(sched_id)
 
             #Now we check if arbiter speek to us in the daemon.
             #If so, we listen for it
