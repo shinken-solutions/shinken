@@ -601,6 +601,8 @@ class Broker(Satellite):
 				con = links[sched_id]['con']
 				if con is not None: #None = not initilized
 					tmp_broks = con.get_broks()
+                                        if type == 'poller':
+                                            print "Got nsew broks from poller", tmp_broks
 					for b in tmp_broks.values():
 						b.instance_id = links[sched_id]['instance_id']
 

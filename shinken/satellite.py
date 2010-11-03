@@ -82,13 +82,14 @@ class IForArbiter(Pyro.core.ObjBase):
             self.name = conf['global']['reactionner_name']
         else:
             self.name = 'Unnamed satellite'
+        self.app.name = self.name
 
         print "[%s] Sending us a configuration %s " % (self.name, conf)
         #If we've got something in the schedulers, we do not want it anymore
         for sched_id in conf['schedulers'] :
             already_got = False
             if sched_id in self.schedulers:
-                Log().log("[%s] We already got the conf %d" % (self.name, sched_id))
+                Log().log("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
                 already_got = True
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
             s = conf['schedulers'][sched_id]
@@ -106,6 +107,7 @@ class IForArbiter(Pyro.core.ObjBase):
             #We cannot reinit connexions because this code in in a thread, and
             #pyro do not allow thread to create new connexions...
             #So we do it just after.
+        
         #Now the limit part
         self.app.max_workers = conf['global']['max_workers']
         self.app.min_workers = conf['global']['min_workers']
@@ -274,7 +276,7 @@ class Satellite(Daemon):
         if not sched['active']:
             return
 
-        Log().log("Init de connexion with %s" % sched['uri'])
+        Log().log("[%s] Init de connexion with %s at %s" % (self.name, sched['name'], sched['uri']))
         running_id = sched['running_id']
         sched['con'] = Pyro.core.getProxyForURI(sched['uri'])
 
