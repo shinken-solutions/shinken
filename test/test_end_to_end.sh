@@ -302,8 +302,55 @@ string_in_file "\[broker-Slave\] Connexion problem to the poller poller-Master :
 string_in_file "\[broker-Slave\] I correctly load the modules : \['Simple-log', 'Status-Dat'\]" $VAR/nagios.log
 
 
-echo "Now we clean it and test an install"
-#./clean.sh
+echo "Now we clean it"
+./clean.sh
+
+
+
+echo "####################################################################################"
+echo "#                                                                                  #"
+echo "#                          Load balancing launch                                   #"
+echo "#                                                                                  #"
+echo "####################################################################################"
+
+echo "Now we can start some launch tests"
+bin/launch_all_debug3.sh
+
+
+echo "Now checking for existing apps"
+
+echo "we can sleep 5sec for conf dispatching and so good number of process"
+sleep 5
+
+#The number of process changed, we mush look for it
+
+
+#Standard launch process packets
+NB_SCHEDULERS=2
+#6 for stack 1, and 6 for stack 2
+NB_POLLERS=12
+#3 for stack1, same for stack 2
+NB_REACTIONNERS=6
+#3 for stack 1, 1 for stack2 (no status.dat nor log worker launch)
+NB_BROKERS=4
+#still 1
+NB_ARBITERS=1
+
+#Now check if the run looks good with var in the direct directory
+check_good_run var
+
+echo "All launch of LB daemons is OK"
+
+
+#Now look if it's also good in the log file too
+string_in_file "Dispatch OK of for conf in scheduler scheduler-Master-2" $VAR/nagios.log
+string_in_file "Dispatch OK of for conf in scheduler scheduler-Master-1" $VAR/nagios.log
+string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
+string_in_file "OK, no more poller sent need" $VAR/nagios.log
+string_in_file "OK, no more broker sent need" $VAR/nagios.log
+
+echo "Now we clean it"
+./clean.sh
 
 
 echo ""
