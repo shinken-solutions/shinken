@@ -236,13 +236,13 @@ echo "All launch of HA daemons is OK"
 #We clean the log file
 #$VAR/nagios.log
 
+
 #We kill the most important thing first : the scheduler-Master
 bin/stop_scheduler.sh
 
 #We sleep to be sruethe scheduler see us
 sleep 2
 NB_SCHEDULERS=1
-
 print_date
 
 #First we look is the arbiter saw the scheduler as dead
@@ -252,6 +252,7 @@ string_in_file "Dispatch OK of for conf in scheduler scheduler-Spare" $VAR/nagio
 
 #then is the broker know it and try to connect to the new scheduler-spare
 string_in_file "\[broker-Master\] Connexion OK to the scheduler scheduler-Spare" $VAR/nagios.log
+
 
 echo "Now stop the poller-Master"
 #Now we stop the poller. We will see the sapre take the job (we hope in fact :) )
@@ -267,6 +268,7 @@ string_in_file "\[All\] Dispatch OK of for configuration 0 to poller poller-Slav
 #And he should got the scheduler link (the sapre one)
 string_in_file "\[poller-Slave\] Connexion OK with scheduler scheduler-Spare" $VAR/nagios.log
 
+
 echo "Now stop the reactionner"
 bin/stop_reactionner.sh
 #check_good_run var
@@ -279,6 +281,22 @@ string_in_file "\[All\] Warning : The reactionner reactionner-Master seems to be
 string_in_file "\[All\] Dispatch OK of for configuration 0 to reactionner reactionner-Spare" $VAR/nagios.log
 #And he should got the scheduler link (the sapre one)
 string_in_file "\[reactionner-Spare\] Connexion OK with scheduler scheduler-Spare" $VAR/nagios.log
+
+
+echo "Now we stop... the Broker!"
+bin/stop_broker.sh
+#check_good_run var
+sleep 2
+print_date
+
+#The master should be look dead
+string_in_file "\[All\] Warning : The broker broker-Master seems to be down, I must re-dispatch its role to someone else." $VAR/nagios.log
+#The spare should got the conf
+string_in_file "\[All\] Dispatch OK of for configuration 0 to broker broker-Slave" $VAR/nagios.log
+#And he should got the scheduler link (the spare one)
+string_in_file "\[broker-Slave\] Connexion OK to the scheduler scheduler-Spare" $VAR/nagios.log
+#And should have load the modules
+string_in_file "\[broker-Slave\] I correctly load the modules : \['Simple-log', 'Status-Dat'\]" $VAR/nagios.log
 
 
 echo "Now we clean it and test an install"
