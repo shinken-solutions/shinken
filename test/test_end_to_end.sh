@@ -240,7 +240,7 @@ echo "All launch of HA daemons is OK"
 bin/stop_scheduler.sh
 
 #We sleep to be sruethe scheduler see us
-sleep 5
+sleep 2
 NB_SCHEDULERS=1
 
 print_date
@@ -257,9 +257,16 @@ echo "Now stop the poller-Master"
 #Now we stop the poller. We will see the sapre take the job (we hope in fact :) )
 bin/stop_poller.sh
 #check_good_run var
-sleep 5
+sleep 2
 print_date
-#string_in_file "\[All\] Dispatch OK of for configuration 0 to poller poller-Slave" $VAR/nagios.log
+
+#The master should be look dead
+string_in_file "Warning : The poller poller-Master seems to be down, I must re-dispatch its role to someone else." $VAR/nagios.log
+#The spare should got the conf
+string_in_file "\[All\] Dispatch OK of for configuration 0 to poller poller-Slave" $VAR/nagios.log
+#And he should got the scheduler link (the sapre one)
+string_in_file "\[poller-Slave\] Connexion OK with scheduler scheduler-Spare" $VAR/nagios.log
+
 
 echo "Now we clean it and test an install"
 #./clean.sh
