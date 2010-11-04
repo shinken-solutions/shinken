@@ -310,7 +310,18 @@ class Realm(Itemgroup):
         #First we create/void theses links
         broker.cfg['pollers'] = {}
         broker.cfg['reactionners'] = {}
-        if not broker.spare and broker.manage_sub_realms:
+
+        #First our own level
+        for p in self.get_pollers():
+            cfg = p.give_satellite_cfg()
+            broker.cfg['pollers'][p.id] = cfg
+
+        for r in self.get_reactionners():
+            cfg = r.give_satellite_cfg()
+            broker.cfg['reactionners'][r.id] = cfg
+        
+        #Then sub if we must to it
+        if broker.manage_sub_realms:
             #Now pollers
             for p in self.get_all_subs_pollers():
                 cfg = p.give_satellite_cfg()

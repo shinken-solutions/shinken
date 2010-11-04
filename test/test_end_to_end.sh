@@ -295,6 +295,9 @@ string_in_file "\[All\] Warning : The broker broker-Master seems to be down, I m
 string_in_file "\[All\] Dispatch OK of for configuration 0 to broker broker-Slave" $VAR/nagios.log
 #And he should got the scheduler link (the spare one)
 string_in_file "\[broker-Slave\] Connexion OK to the scheduler scheduler-Spare" $VAR/nagios.log
+#And to other satellites
+string_in_file "\[broker-Slave\] Connexion OK to the reactionner reactionner-Spare" $VAR/nagios.log
+string_in_file "\[broker-Slave\] Connexion problem to the poller poller-Master : connection failed" $VAR/nagios.log
 #And should have load the modules
 string_in_file "\[broker-Slave\] I correctly load the modules : \['Simple-log', 'Status-Dat'\]" $VAR/nagios.log
 
