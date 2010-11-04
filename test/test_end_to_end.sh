@@ -205,7 +205,7 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
-bin/launch_all_debug2.sh
+test/bin/launch_all_debug2.sh
 
 
 echo "Now checking for existing apps"
@@ -314,7 +314,7 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
-bin/launch_all_debug3.sh
+test/bin/launch_all_debug3.sh
 
 
 echo "Now checking for existing apps"

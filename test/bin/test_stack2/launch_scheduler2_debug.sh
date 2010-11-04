@@ -1,8 +1,8 @@
 #!/bin/bash
 
 DIR=$(cd $(dirname "$0"); pwd)
-BIN=$DIR"/../../bin"
-ETC=$DIR"/../../etc/test_stack2"
+BIN=$DIR"/../../../bin"
+ETC=$DIR"/../../../test/etc/test_stack2"
 DEBUG_PATH="/tmp/scheduler-2.debug"
 
 echo "Launching Scheduler (that do scheduling only) in debug mode to the file $DEBUG_PATH"
