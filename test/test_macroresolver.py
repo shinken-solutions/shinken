@@ -95,6 +95,14 @@ class TestConfig(ShinkenTest):
         self.assert_(env['NAGIOS_SERVICEPERCENTCHANGE'] == '0.0')
 
 
+    def test_resource_file(self):
+        mr = self.get_mr()
+        (svc, hst) = self.get_hst_svc()
+        data = svc.get_data_for_checks()
+        dummy_call = "special_macro!$USER1$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        self.assert_(com == 'plugins/nothing plugins')
 
 
 if __name__ == '__main__':
