@@ -267,6 +267,19 @@ string_in_file "\[All\] Dispatch OK of for configuration 0 to poller poller-Slav
 #And he should got the scheduler link (the sapre one)
 string_in_file "\[poller-Slave\] Connexion OK with scheduler scheduler-Spare" $VAR/nagios.log
 
+echo "Now stop the reactionner"
+bin/stop_reactionner.sh
+#check_good_run var
+sleep 2
+print_date
+
+#The master should be look dead
+string_in_file "\[All\] Warning : The reactionner reactionner-Master seems to be down, I must re-dispatch its role to someone else." $VAR/nagios.log
+#The spare should got the conf
+string_in_file "\[All\] Dispatch OK of for configuration 0 to reactionner reactionner-Spare" $VAR/nagios.log
+#And he should got the scheduler link (the sapre one)
+string_in_file "\[reactionner-Spare\] Connexion OK with scheduler scheduler-Spare" $VAR/nagios.log
+
 
 echo "Now we clean it and test an install"
 #./clean.sh
