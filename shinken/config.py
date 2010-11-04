@@ -214,6 +214,10 @@ class Config(Item):
 
                 #Now for problem/impact states changes
                 'enable_problem_impacts_states_change' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
+
+
+                #More a running value in fact
+                'resource_macros_names' : {'required' : False, 'default':[]}
     }
 
 
@@ -268,12 +272,14 @@ class Config(Item):
 
     def __init__(self):
         self.params = {}
+        self.resource_macros_names = []
         #By default the conf is correct
         self.conf_is_correct = True
         #We tag the conf with a magic_hash, a random value to
         #idify this conf
         random.seed(time.time())
         self.magic_hash = random.randint(1, 100000)
+
 
 
     def fill_usern_macros(cls):
@@ -288,10 +294,16 @@ class Config(Item):
     fill_usern_macros = classmethod(fill_usern_macros)
 
 
+    #We've got macro in the resource file and we want
+    #to update our MACRO dict with it
+    def fill_resource_macros_names_macros(self):
+        macros = self.__class__.macros
+        for macro_name in self.resource_macros_names:
+            macros[macro_name] = '$'+macro_name+'$'
+   
 
     def load_params(self, params):
         for elt in params:
-            #print "Loading param", elt
             elts = elt.split('=')
             if len(elts) == 1: #error, there is no = !
                 self.conf_is_correct = False
@@ -299,6 +311,13 @@ class Config(Item):
             else:
                 self.params[elts[0]] = elts[1]
                 setattr(self, elts[0], elts[1])
+                #Maybe it's a variable as $USER$ or $ANOTHERVATRIABLE$
+                #so look at the first character. If it's a $, it's a variable
+                #and if it's end like it too
+                if elts[0][0] == '$' and elts[0][-1] == '$':
+                    macro_name = elts[0][1:-1]
+                    self.resource_macros_names.append(macro_name)
+
 
 
     def _cut_line(self, line):
@@ -457,6 +476,8 @@ class Config(Item):
 
         #print "Params", params
         self.load_params(params)
+        #And then update our MACRO dict
+        self.fill_resource_macros_names_macros()
 
         for type in objectscfg:
             objects[type] = []

@@ -108,6 +108,8 @@ class TestConfig(ShinkenTest):
         cc = CommandCall(self.conf.commands, dummy_call)
         com = mr.resolve_command(cc, data)
         print "CUCU", com
+        self.assert_(com == 'plugins/nothing interestingvalue')
+
 
 if __name__ == '__main__':
     unittest.main()

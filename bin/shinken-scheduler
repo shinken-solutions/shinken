@@ -480,7 +480,9 @@ class Shinken(Daemon):
 
         self.sched.load_modules(self.modules_manager, self.mod_instances)
 
-        #self.conf.is_correct()
+        #We must update our Config dict macro with good value
+        #from the config parameters
+        self.sched.conf.fill_resource_macros_names_macros()
 
 
         #Creating the Macroresolver Class & unique instance

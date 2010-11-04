@@ -236,10 +236,8 @@ class MacroResolver(Borg):
                 macros[macro]['type'] = 'ARGN'
                 continue
             #USERN macros
-            #elif re.match('USER\d', macro):
-            #    macros[macro]['type'] = 'USERN'
-            #    continue
-            #CUSTOM
+            #are managed in the Config class, so no
+            #need to look that here
             elif re.match('_HOST\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
                 macros[macro]['class'] = 'HOST'
