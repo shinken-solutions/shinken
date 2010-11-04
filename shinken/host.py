@@ -108,6 +108,9 @@ class Host(SchedulingItem):
         'resultmodulations' : {'required' : False, 'default' : ''},
         'escalations' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'maintenance_period' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+
+        #Importance value
+        'importance' : {'required' : False, 'default' : '3', 'pythonize' : to_int, 'fill_brok' : ['full_status']},
         }
 
 

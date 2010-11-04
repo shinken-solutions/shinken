@@ -98,7 +98,9 @@ class Service(SchedulingItem):
         #service generator
         'duplicate_foreach' : {'required' : False, 'default' : ''},
         'default_value' : {'required' : False, 'default' : ''},
-        
+
+        #Importance value
+        'importance' : {'required' : False, 'default' : '3', 'pythonize' : to_int, 'fill_brok' : ['full_status']},
         }
 
     #properties used in the running state
@@ -187,6 +189,7 @@ class Service(SchedulingItem):
 
         #Easy Service dep definition
         'service_dependencies' : {'required' : False, 'default' : '', 'pythonize' : to_split}, #TODO : find a way to brok it?
+        
 
         }
 
@@ -832,7 +835,7 @@ class Services(Items):
     def apply_implicit_inheritance(self, hosts):
         for prop in ['contacts', 'contact_groups', 'notification_interval', \
                          'notification_period', 'resultmodulations', 'escalations', \
-                         'poller_tag', 'check_period']:
+                         'poller_tag', 'check_period', 'importance']:
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):

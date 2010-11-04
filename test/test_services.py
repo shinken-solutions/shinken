@@ -203,6 +203,10 @@ class TestConfig(ShinkenTest):
         self.assert_(self.log_match(1, 'Warning: The results of service'))
 
 
+    def test_importance_value(self):
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        #This service inherit the improtance value from his father, 5
+        self.assert_(svc.importance == 5)
 
 
 if __name__ == '__main__':
