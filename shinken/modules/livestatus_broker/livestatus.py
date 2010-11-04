@@ -568,6 +568,11 @@ class LiveStatus:
                 'description' : '3D-Coordinates: Z',
                 'type' : 'float',
             },
+            'importance' : {
+                'converter' : int,
+                'description' : 'The importance we gave to this host between hte minimum 0 and the maximum 5',
+                'type' : 'int',
+            },
         },
 
         'Service' : {
@@ -1269,6 +1274,11 @@ class LiveStatus:
                 'converter' : int,
                 'description' : 'The type of the current state (0: soft, 1: hard)',
                 'prop' : 'state_type_id',
+                'type' : 'int',
+            },
+            'importance' : {
+                'converter' : int,
+                'description' : 'The importance we gave to this service between hte minimum 0 and the maximum 5',
                 'type' : 'int',
             },
         },
