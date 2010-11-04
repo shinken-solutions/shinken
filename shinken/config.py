@@ -291,6 +291,7 @@ class Config(Item):
 
     def load_params(self, params):
         for elt in params:
+            #print "Loading param", elt
             elts = elt.split('=')
             if len(elts) == 1: #error, there is no = !
                 self.conf_is_correct = False
@@ -346,6 +347,8 @@ class Config(Item):
                         fd = open(cfg_file_name)
                         Log().log("Processing object config file '%s'" % cfg_file_name)
                         res += fd.read()
+                        #Be sure to add a line return so we won't mix files
+                        res += '\n'
                         fd.close()
                     except IOError, exp:
                         Log().log("Error: Cannot open config file '%s' for reading: %s" % (cfg_file_name, exp))
