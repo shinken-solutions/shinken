@@ -447,33 +447,28 @@ class Host(SchedulingItem):
             value = r[key]
             orig_key = key
             while still_loop:
-                #print "looking for the key", key
                 m = pat.search(key)
                 if m != None:
                     (x,y) = m.groups()
                     (x,y) = (int(x), int(y))
-                    #print "Find (X,Y)", x, y
                     xy_couples.append((x,y))
                     key = key.replace('[%d-%d]' % (x,y), 'Z'*10)
-                    #print "new key", key
                 else:
                     still_loop = False
             
             if xy_couples != []:
-                #The key was just a generator
+                #The key was just a generator, we can remove it
                 keys_to_del.append(orig_key)
-                #print "Got to change key match", xy_couples
-                new_key = orig_key
                 
+                #We search all patern change rules
                 rules = got_generation_rule_patern_change(xy_couples)
-                all_res = []
+
+                #Then we apply them all to get ours final keys
                 for rule in rules:
-                    #print "Rule:", rule
-                    res = apply_change_recursive_patern_change(new_key, rule)
-                    #print "Got Res:", res
-                    all_res.append(res)
+                    res = apply_change_recursive_patern_change(orig_key, rule)
                     keys_to_add[res] = value
-        
+
+        #We apply it
         for k in keys_to_del:
             del r[k]
         for k in keys_to_add:
