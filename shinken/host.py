@@ -358,17 +358,13 @@ class Host(SchedulingItem):
         return None
 
 
-
-
     #For service generator, get dict from a _custom properties
     #as _disks   C$(80%!90%),D$(80%!90%)$,E$(80%!90%)$
     #return {'C' : '80%!90%', 'D' : '80%!90%', 'E' : '80%!90%'}
+    #And if we have a key that look like [X-Y] we will expand it
+    #into Y-X+1 keys
     def get_key_value_from_property(self, property):
-        #print "My customs"
-        #print self.customs
-
         property = property.strip()
-        
 
         #In macro, it's all in UPPER case
         prop = property.upper()
@@ -378,8 +374,6 @@ class Host(SchedulingItem):
             return None
 
         entry = self.customs[prop]
-
-        #print "Property", entry
 
         #Look if we end with a "value" so a $
         #because we will have problem if we don't end
@@ -443,19 +437,22 @@ class Host(SchedulingItem):
         pat = re.compile('\[(\d*)-(\d*)\]')
         for key in r:
             still_loop = True
-            xy_couples = []
+            xy_couples = [] # will get all X-Y couples
             value = r[key]
             orig_key = key
             while still_loop:
                 m = pat.search(key)
-                if m != None:
+                if m != None: # we've find one X-Y
                     (x,y) = m.groups()
                     (x,y) = (int(x), int(y))
                     xy_couples.append((x,y))
+                    #We must search if we've gotother X-Y, so
+                    #we delete this one, and loop
                     key = key.replace('[%d-%d]' % (x,y), 'Z'*10)
-                else:
+                else:#no more X-Y in it
                     still_loop = False
-            
+            #Now we've got our couples of X-Y. If no void,
+            #we were with a "key generator"
             if xy_couples != []:
                 #The key was just a generator, we can remove it
                 keys_to_del.append(orig_key)
@@ -474,8 +471,6 @@ class Host(SchedulingItem):
         for k in keys_to_add:
             r.update(keys_to_add)
 
-        #print "Final R", r
-       
         return r
                 
 
