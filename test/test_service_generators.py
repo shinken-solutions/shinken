@@ -70,6 +70,41 @@ class TestConfig(ShinkenTest):
         #and the tricky last one (with no value :) )
         self.assert_(svc_g.check_command.args == ['G', '38%', '24%'])
 
+
+    #Change ME :)
+    def test_service_generators_key_generator(self):
+        
+        host = self.sched.hosts.find_by_name("sw_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+
+        print "All service of", "sw_0"
+        for s in host.services:
+            print s.get_name()
+        #We ask for 4 services with our disks :)
+        svc_c = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service C")
+        svc_d = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service D")
+        svc_e = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service E")
+        svc_f = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service F")
+        svc_g = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service G")
+        
+        self.assert_(svc_c != None)
+        self.assert_(svc_d != None)
+        self.assert_(svc_e != None)
+        self.assert_(svc_f != None)
+        self.assert_(svc_g != None)
+        
+        #two classics
+        self.assert_(svc_c.check_command.args == ['C', '80%', '90%'])
+        self.assert_(svc_d.check_command.args == ['D', '95%', '70%'])
+        #a default parameters
+        self.assert_(svc_e.check_command.args == ['E', '38%', '24%'])
+        #and another one
+        self.assert_(svc_f.check_command.args == ['F', '95%', '70%'])
+        #and the tricky last one (with no value :) )
+        self.assert_(svc_g.check_command.args == ['G', '38%', '24%'])
+
+
 if __name__ == '__main__':
     unittest.main()
 

@@ -364,6 +364,9 @@ class Host(SchedulingItem):
         print "My customs"
         print self.customs
 
+        property = property.strip()
+        
+
         #In macro, it's all in UPPER case
         prop = property.upper()
 
@@ -372,6 +375,15 @@ class Host(SchedulingItem):
             return None
 
         entry = self.customs[prop]
+
+        print "Property", entry
+
+        #Look if we end with a "value" so a $
+        #because we will have problem if we don't end
+        #like it
+        end_with_value = (entry[-1] == '$')
+        print "End with value?", end_with_value
+
         conf_entry = entry
         #Here we need a special string to replace after
         long_and_random = "Z"*10
@@ -394,7 +406,7 @@ class Host(SchedulingItem):
         #Now need to see the entry taht are alone, with no value
         #the last one will be a 'G'} with no value if not set, and
         #will raise an error
-        if len(entry) >= 2 and entry[-2:] == "'}":
+        if len(entry) >= 2 and not end_with_value:
             entry = entry[:-2]
             #And so add a None as value
             entry = entry + "': None}"
