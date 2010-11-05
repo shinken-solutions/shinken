@@ -189,3 +189,49 @@ def strip_and_uniq(tab):
     for elt in tab:
         new_tab.add(elt.strip())
     return list(new_tab)
+
+
+
+#################### Patern change application (mainly for host) #######
+
+#This function is used to generate all patern change as
+#recursive list.
+#for example, for a [(1,3),(1,4),(1,5)] xy_couples,
+#it will generate a 60 item list with:
+#Rule: [1, '[1-5]', [1, '[1-4]', [1, '[1-3]', []]]]
+#Rule: [1, '[1-5]', [1, '[1-4]', [2, '[1-3]', []]]]
+#...
+def got_generation_rule_patern_change(xy_couples):
+    res = []
+    xy_cpl = xy_couples
+    if xy_couples == []:
+        return []
+    (x, y) = xy_cpl[0]
+    for i in xrange(x, y+1):
+        n = got_generation_rule_patern_change(xy_cpl[1:])
+        if n != []:
+            for e in n:
+                res.append( [i, '[%d-%d]'%(x,y), e])
+        else:
+            res.append( [i, '[%d-%d]'%(x,y), []])
+    return res
+    
+
+#this fuction apply a recursive patern change
+#generate by the got_generation_rule_patern_change
+#function.
+#It take one entry of this list, and apply
+#recursivly the change to s like :
+#s = "Unit [1-3] Port [1-4] Admin [1-5]"
+#rule = [1, '[1-5]', [2, '[1-4]', [3, '[1-3]', []]]]
+#output = Unit 3 Port 2 Admin 1
+def apply_change_recursive_patern_change(s, rule):
+    #print "Try to change %s" % s, 'with', rule
+    new_s = s
+    (i, m, t) = rule
+    #print "replace %s by %s" % (r'%s' % m, str(i)), 'in', s
+    s = s.replace(r'%s' % m, str(i))
+    #print "And got", s
+    if t == []:
+        return s
+    return apply_change_recursive_patern_change(s, t)

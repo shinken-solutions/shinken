@@ -19,11 +19,12 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import re #for keys generator
 
 from autoslots import AutoSlots
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists
+from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, got_generation_rule_patern_change, apply_change_recursive_patern_change
 #from macroresolver import MacroResolver
 #from check import Check
 #from notification import Notification
@@ -357,12 +358,14 @@ class Host(SchedulingItem):
         return None
 
 
+
+
     #For service generator, get dict from a _custom properties
     #as _disks   C$(80%!90%),D$(80%!90%)$,E$(80%!90%)$
     #return {'C' : '80%!90%', 'D' : '80%!90%', 'E' : '80%!90%'}
     def get_key_value_from_property(self, property):
-        print "My customs"
-        print self.customs
+        #print "My customs"
+        #print self.customs
 
         property = property.strip()
         
@@ -376,33 +379,28 @@ class Host(SchedulingItem):
 
         entry = self.customs[prop]
 
-        print "Property", entry
+        #print "Property", entry
 
         #Look if we end with a "value" so a $
         #because we will have problem if we don't end
         #like it
         end_with_value = (entry[-1] == '$')
-        print "End with value?", end_with_value
+        #print "End with value?", end_with_value
 
         conf_entry = entry
         #Here we need a special string to replace after
         long_and_random = "Z"*10
-        print "My entry", entry
         #Now entry is a dict from outside, and inner key start with a '
         entry = "{'%s'}" % entry
-        print "Entry 1", entry
         #first we make key look like C': 'blabla...
         entry = entry.replace('$(', "': '")
-        print "Entry 2", entry
         #And the end of value with a '
         entry = entry.replace(')$', "'"+long_and_random)
-        print "Entry 3", entry
         #Now we clean the ZZZ,D into a ,'D
         entry = entry.replace(long_and_random+",", ",'")
-        print "Entry 4", entry
         #And clean the trailing ZZZ' because it's not useful, there is no key after
         entry = entry.replace(long_and_random+"'", '')
-        print "Entry 5", entry
+
         #Now need to see the entry taht are alone, with no value
         #the last one will be a 'G'} with no value if not set, and
         #will raise an error
@@ -410,9 +408,8 @@ class Host(SchedulingItem):
             entry = entry[:-2]
             #And so add a None as value
             entry = entry + "': None}"
-            print "Entry 6", entry
 
-        
+        #Ok we've got our dict, we can evel it (and pray)
         try:
             r = eval(entry)
         except SyntaxError:
@@ -434,18 +431,58 @@ class Host(SchedulingItem):
                 for k in non_value_keys:
                     keys_to_add[k] = None
                 keys_to_add[elts[-1]] = value
-
+        #clean/update what we got
         for k in keys_to_del:
             del r[k]
-
         for k in keys_to_add:
             r.update(keys_to_add)
 
-        print "Final R", r
+        #Now create new one but for [X-Y] matchs
+        keys_to_del = []
+        keys_to_add = {}
+        pat = re.compile('\[(\d*)-(\d*)\]')
+        for key in r:
+            still_loop = True
+            xy_couples = []
+            value = r[key]
+            orig_key = key
+            while still_loop:
+                #print "looking for the key", key
+                m = pat.search(key)
+                if m != None:
+                    (x,y) = m.groups()
+                    (x,y) = (int(x), int(y))
+                    #print "Find (X,Y)", x, y
+                    xy_couples.append((x,y))
+                    key = key.replace('[%d-%d]' % (x,y), 'Z'*10)
+                    #print "new key", key
+                else:
+                    still_loop = False
+            
+            if xy_couples != []:
+                #The key was just a generator
+                keys_to_del.append(orig_key)
+                #print "Got to change key match", xy_couples
+                new_key = orig_key
+                
+                rules = got_generation_rule_patern_change(xy_couples)
+                all_res = []
+                for rule in rules:
+                    #print "Rule:", rule
+                    res = apply_change_recursive_patern_change(new_key, rule)
+                    #print "Got Res:", res
+                    all_res.append(res)
+                    keys_to_add[res] = value
+        
+        for k in keys_to_del:
+            del r[k]
+        for k in keys_to_add:
+            r.update(keys_to_add)
+
+        #print "Final R", r
        
         return r
                 
-#        return {'C' : '80%!90%', 'D' : '80%!90%', 'E' : '80%!90%'}
 
 
     #Macro part

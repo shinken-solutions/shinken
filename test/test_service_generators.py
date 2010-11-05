@@ -81,28 +81,22 @@ class TestConfig(ShinkenTest):
         print "All service of", "sw_0"
         for s in host.services:
             print s.get_name()
-        #We ask for 4 services with our disks :)
-        svc_c = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service C")
-        svc_d = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service D")
-        svc_e = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service E")
-        svc_f = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service F")
-        svc_g = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service G")
-        
-        self.assert_(svc_c != None)
-        self.assert_(svc_d != None)
-        self.assert_(svc_e != None)
-        self.assert_(svc_f != None)
-        self.assert_(svc_g != None)
-        
-        #two classics
-        self.assert_(svc_c.check_command.args == ['C', '80%', '90%'])
-        self.assert_(svc_d.check_command.args == ['D', '95%', '70%'])
-        #a default parameters
-        self.assert_(svc_e.check_command.args == ['E', '38%', '24%'])
-        #and another one
-        self.assert_(svc_f.check_command.args == ['F', '95%', '70%'])
-        #and the tricky last one (with no value :) )
-        self.assert_(svc_g.check_command.args == ['G', '38%', '24%'])
+
+        #We ask for our 6*46 + 6 services with our ports :)
+        #_ports			 Unit [1-6] Port [0-46]$(80%!90%)$,Unit [1-6] Port 47$(80%!90%)$
+        for unit_id in xrange(1, 7):
+            for port_id in xrange(0, 47):
+                n = "Unit %d Port %d" % (unit_id, port_id)
+                print "Look for port", 'Generated Service ' + n
+                svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
+                self.assert_(svc != None)
+        for unit_id in xrange(1, 7):
+            port_id = 47
+            n = "Unit %d Port %d" % (unit_id, port_id)
+            print "Look for port", 'Generated Service ' + n
+            svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
+            self.assert_(svc != None)
+
 
 
 if __name__ == '__main__':

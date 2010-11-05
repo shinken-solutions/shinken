@@ -902,7 +902,7 @@ class Services(Items):
                             value = d[key]
                             new_s = s.copy()
                             
-                            print "Got key:%s and value:%s" % (key, value)
+                            #print "Got key:%s and value:%s" % (key, value)
 
                             new_s.host_name = name
                             if s.is_tpl(): # if template, the new one is not
@@ -930,7 +930,7 @@ class Services(Items):
                                 new_s.check_command = new_s.check_command.replace('$VALUE$', value)
                             #And then add in our list this new service
                             self.items[new_s.id] = new_s
-                            print "DBG: and finally got", new_s.service_description, new_s.check_command
+                            #print "DBG: and finally got", new_s.service_description, new_s.check_command
                             
                 else: #TODO : raise an error?
                     pass
@@ -960,7 +960,7 @@ class Services(Items):
             duplicate_for_hosts = [] #get the list of our host_names if more than 1
             not_hosts = [] #the list of !host_name so we remove them after
             
-            print "Looking for s", s
+            #print "Looking for s", s
             if hasattr(s, 'duplicate_foreach'):
                 print s.duplicate_foreach
 
@@ -971,7 +971,7 @@ class Services(Items):
                 hnames = strip_and_uniq(hnames)
                 #We will duplicate if we have multiple host_name
                 #or if we are a template (so a clean service)
-                print "WHEre", len(hnames) >= 2 or s.is_tpl()
+                #print "WHEre", len(hnames) >= 2 or s.is_tpl()
                 if len(hnames) >= 2 or s.is_tpl() or (hasattr(s, 'duplicate_foreach') and s.duplicate_foreach != ''):
                     for hname in hnames:
                         hname = hname.strip()
