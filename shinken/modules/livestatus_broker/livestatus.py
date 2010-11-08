@@ -5369,14 +5369,21 @@ class LiveStatus:
                 cmd, columns = p.split(line, 1)
                 columns = p.split(columns)
                 columnheaders = 'off'
-            elif line.find('ResponseHeader: ') != -1:
-                cmd, responseheader = line.split(' ', 1)
-            elif line.find('OutputFormat: ') != -1:
-                cmd, outputformat = line.split(' ', 1)
+            elif line.find('ResponseHeader:') != -1:
+                cmd, responseheader = line.split(':', 1)
+                #strip the responseheader because a   can be here
+                responseheader = responseheader.strip()
+                print "responseheader", responseheader
+            elif line.find('OutputFormat:') != -1:
+                cmd, outputformat = line.split(':', 1)
+                #Maybe we have a space before it
+                outputformat = outputformat.strip()
+                print "Output format:", outputformat
                 get_full_name.outputformat = outputformat
-            elif line.find('ColumnHeaders: ') != -1:
-                cmd, columnheaders = line.split(' ', 1)
-            elif line.find('Filter: ') != -1:
+            elif line.find('ColumnHeaders:') != -1:
+                cmd, columnheaders = line.split(':', 1)
+                columnheaders = columnheaders.strip()
+            elif line.find('Filter:') != -1:
                 try:
                     cmd, attribute, operator, reference = line.split(' ', 3)
                 except:
@@ -5460,8 +5467,7 @@ class LiveStatus:
                 cmd, extcmd = line.split(' ', 1)
             else:
                 # This line is not valid or not implemented
-                print "Received a line of input which i can't handle"
-                print line
+                print "Received a line of input which i can't handle : '%s'" % line
                 pass
         #External command are send back to broker
         if extcmd:
@@ -5520,6 +5526,7 @@ class LiveStatus:
                 statuscode = 200
                 responselength = len(response) # no error
                 response = '%3d %11d\n' % (statuscode, responselength) + response
+
 
             print "REQUEST", data
             print "RESPONSE\n%s\n" % response
