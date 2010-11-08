@@ -703,13 +703,14 @@ class Livestatus_broker:
                 print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
                 raise
             inputready,outputready,exceptready = select.select(input,[],[], 0)
-
+            
             for s in inputready:
                 if s == server:
                     # handle the server socket
                     client, address = server.accept()
                     input.append(client)
                 else:
+                    print "Handle connexion", s
                     # handle all other sockets
                     data = s.recv(size)
                     if s in databuffer:
@@ -717,16 +718,26 @@ class Livestatus_broker:
                     else:
                         databuffer[s] = data
                     if not data or databuffer[s].endswith('\n\n'):
-                        # end-of-transmission or an empty line was received
-                        response = self.livestatus.handle_request(databuffer[s].rstrip())
-                        del databuffer[s]
-                        s.send(response)
-                        try:
-                            s.shutdown(2)
-                        except Exception , exp:
-                            print exp
-                        s.close()
-                        input.remove(s)
+                        #We will just close the connexion if we do nto read anything this turn
+                        #so we know that the other guy stop sending use queries
+                        #like NagVis
+                        close_con = (data == '')
+                        print "*********Should I close the connexion?", close_con
+                        #Maybe it's no more in input, so no need to shut ti down again
+                        if close_con:
+                            try:
+                                s.shutdown(2)
+                                input.remove(s)
+                            except Exception , exp:
+                                print exp
+                                s.close()
+                                input.remove(s)
+                        else:
+                            # end-of-transmission or an empty line was received
+                            response = self.livestatus.handle_request(databuffer[s].rstrip())
+                            del databuffer[s]
+                            s.send(response)
+
 
             if self.number_of_objects > last_number_of_objects:
                 # Still in the initialization phase
