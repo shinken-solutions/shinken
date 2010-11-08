@@ -21,10 +21,15 @@
 import time
 import re #for keys generator
 
+try:
+    from ClusterShell.NodeSet import NodeSet,NodeSetParseRangeError
+except ImportError:
+    NodeSet = None
+
 from autoslots import AutoSlots
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, got_generation_rule_patern_change, apply_change_recursive_patern_change
+from util import to_int, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, got_generation_rule_patern_change, apply_change_recursive_patern_change, expand_xy_patern
 #from macroresolver import MacroResolver
 #from check import Check
 #from notification import Notification
@@ -434,42 +439,90 @@ class Host(SchedulingItem):
         #Now create new one but for [X-Y] matchs
         keys_to_del = []
         keys_to_add = {}
-        pat = re.compile('\[(\d*)-(\d*)\]')
+        #import time
+        #t0 = time.time()
+        #NodeSet = None
+        if NodeSet == None:
+            #The patern that will say if we have a [X-Y] key.
+            pat = re.compile('\[(\d*)-(\d*)\]')
+
         for key in r:
-            still_loop = True
-            xy_couples = [] # will get all X-Y couples
+
             value = r[key]
             orig_key = key
-            while still_loop:
+
+            #We have no choice, we cannot use NodeSet, so we use the
+            #simple regexp
+            if NodeSet == None:
                 m = pat.search(key)
-                if m != None: # we've find one X-Y
-                    (x,y) = m.groups()
-                    (x,y) = (int(x), int(y))
-                    xy_couples.append((x,y))
-                    #We must search if we've gotother X-Y, so
-                    #we delete this one, and loop
-                    key = key.replace('[%d-%d]' % (x,y), 'Z'*10)
-                else:#no more X-Y in it
-                    still_loop = False
+                got_xy = (m != None)
+            else: # Try to look with a nodeset check directly
+                try:
+                    ns = NodeSet(key)
+                    #If we have more than 1 element, we have a xy thing
+                    got_xy = (len(ns) != 1)
+                except NodeSetParseRangeError:
+                    err = "The host property key '%s 'of the host '%s' is not a valid entry %s for a service generator" % (key, self.get_name(), conf_entry)
+                    self.configuration_errors.append(err)
+                    pass # go in the next key
+
             #Now we've got our couples of X-Y. If no void,
             #we were with a "key generator"
-            if xy_couples != []:
-                #The key was just a generator, we can remove it
-                keys_to_del.append(orig_key)
-                
-                #We search all patern change rules
-                rules = got_generation_rule_patern_change(xy_couples)
+            
+            if got_xy:
+                #Ok 2 cases : we have the NodeSet lib or not.
+                #if not, we use the dumb algo (quick, but manage less
+                #cases like /N or , in paterns)
+                if NodeSet == None: #us the old algo
+                    still_loop = True
+                    xy_couples = [] # will get all X-Y couples
+                    while still_loop:
+                        m = pat.search(key)
+                        if m != None: # we've find one X-Y
+                            (x,y) = m.groups()
+                            (x,y) = (int(x), int(y))
+                            xy_couples.append((x,y))
+                            #We must search if we've gotother X-Y, so
+                            #we delete this one, and loop
+                            key = key.replace('[%d-%d]' % (x,y), 'Z'*10)
+                        else:#no more X-Y in it
+                            still_loop = False
 
-                #Then we apply them all to get ours final keys
-                for rule in rules:
-                    res = apply_change_recursive_patern_change(orig_key, rule)
-                    keys_to_add[res] = value
+                    #Now we have our xy_couples, we can manage them
+                    #The key was just a generator, we can remove it
+                    keys_to_del.append(orig_key)
+                
+                    #We search all patern change rules
+                    rules = got_generation_rule_patern_change(xy_couples)
+
+                    #Then we apply them all to get ours final keys
+                    for rule in rules:
+                        res = apply_change_recursive_patern_change(orig_key, rule)
+                        keys_to_add[res] = value
+
+                else: 
+                    #The key was just a generator, we can remove it
+                    keys_to_del.append(orig_key)
+
+                    #We search all patern change rules
+                    #rules = got_generation_rule_patern_change(xy_couples)
+                    nodes_set = expand_xy_patern(orig_key)
+                    new_keys = list(nodes_set)
+
+                    #Then we apply them all to get ours final keys
+                    for new_key in new_keys:
+                    #res = apply_change_recursive_patern_change(orig_key, rule)
+                        keys_to_add[new_key] = value
+
 
         #We apply it
         for k in keys_to_del:
             del r[k]
         for k in keys_to_add:
             r.update(keys_to_add)
+
+        #t1 = time.time()
+        #print "***********Diff", t1 -t0
 
         return r
                 

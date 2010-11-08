@@ -19,6 +19,11 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time, calendar
+try:
+    from ClusterShell.NodeSet import NodeSet
+except ImportError:
+    NodeSet = None
+
 #from memoized import memoized
 
 ############################### SEQUENCES ###############################
@@ -193,6 +198,18 @@ def strip_and_uniq(tab):
 
 
 #################### Patern change application (mainly for host) #######
+
+def expand_xy_patern(pattern):
+    ns = NodeSet(pattern)
+    if len(ns) > 1:
+        for elem in ns:
+            for a in expand_xy_patern(elem):
+                yield a
+    else:
+        yield pattern
+
+
+
 
 #This function is used to generate all patern change as
 #recursive list.
