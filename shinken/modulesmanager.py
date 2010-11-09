@@ -175,5 +175,9 @@ class ModulesManager(object):
 
 
     def stop_all(self):
+        #Ask internal to quit if they can
+        for inst in self.get_internal_instances():
+            if hasattr(inst, 'quit') and callable(inst.quit):
+                inst.quit()
         for inst in self.get_external_instances():
             self.remove_instance(inst)

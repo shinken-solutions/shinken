@@ -28,6 +28,7 @@
 import time
 import shutil
 import os
+import sys
 import datetime
 
 
@@ -151,7 +152,30 @@ class Simple_log_broker:
         self.file.flush()
 
 
+    def manage_signal(self, sig, frame):
+        print "[SimpleLog] I receive a signal %s" % sig
+        print "[SimpleLog] So I quit"
+        sys.exit(0)
+
+
+
+    #Set an exit function that is call when we quit
+    def set_exit_handler(self):
+        func = self.manage_signal
+        if os.name == "nt":
+            try:
+                import win32api
+                win32api.SetConsoleCtrlHandler(func, True)
+            except ImportError:
+                version = ".".join(map(str, sys.version_info[:2]))
+                raise Exception("pywin32 not installed for Python " + version)
+        else:
+            import signal
+            signal.signal(signal.SIGTERM, func)
+
+
     def main(self):
+        self.set_exit_handler()
         while True:
             self.check_and_do_archive()
             b = self.q.get() # can block here :)

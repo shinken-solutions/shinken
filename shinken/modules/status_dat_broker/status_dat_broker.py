@@ -23,6 +23,8 @@
 
 #And now classic include
 import time
+import sys
+import os
 
 #And now include from this global directory
 from shinken.host import Host
@@ -399,7 +401,31 @@ class Status_dat_broker:
             setattr(e, prop, data[prop])
 
 
+    def manage_signal(self, sig, frame):
+        print "[StatusDat] I receive a signal %s" % sig
+        print "[StatusDat] So I quit"
+        sys.exit(0)
+
+
+
+    #Set an exit function that is call when we quit
+    def set_exit_handler(self):
+        func = self.manage_signal
+        if os.name == "nt":
+            try:
+                import win32api
+                win32api.SetConsoleCtrlHandler(func, True)
+            except ImportError:
+                version = ".".join(map(str, sys.version_info[:2]))
+                raise Exception("pywin32 not installed for Python " + version)
+        else:
+            import signal
+            signal.signal(signal.SIGTERM, func)
+
+
+
     def main(self):
+        self.set_exit_handler()
         last_generation = time.time()
         objects_cache_written = False
         number_of_objects_written = 0

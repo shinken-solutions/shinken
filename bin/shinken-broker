@@ -415,9 +415,9 @@ class Broker(Satellite):
 	def manage_signal(self, sig, frame):
             Log().log("\nExiting with signal %s" % sig)
             #Maybe we quit before even launch modules
-            if hasattr(self, 'modulesmanager'):
+            if hasattr(self, 'modules_manager'):
                 Log().log('Stopping all modules')
-                self.modulesmanager.stop_all()
+                self.modules_manager.stop_all()
             act = active_children()
             for a in act:
                 a.terminate()

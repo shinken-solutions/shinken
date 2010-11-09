@@ -44,8 +44,12 @@ class Service_perfdata_broker:
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
-        print "I open the service-perfdata file '%s'" % self.path
+        print "[%s] I open the service-perfdata file '%s'" % (self.name, self.path)
         self.file = open(self.path, self.mode)
+
+
+    def quit(self):
+        print "[%s] I quit and close the file '%s'" % (self.name, self.path)
 
 
     def get_name(self):
