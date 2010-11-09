@@ -36,7 +36,7 @@ def get_instance(plugin):
     try:
         from ndodb_broker import Ndodb_broker
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavalable : %s" % (get_type(), exp)
+        print "Warning : the plugin type %s is unavalable : %s" % ('ndo_mysql', exp)
         return None
 
 

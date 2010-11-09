@@ -173,9 +173,9 @@ class MacroResolver(Borg):
         #until we reach the botom. So the last loop is when we do
         #not still have macros :)
         still_got_macros = True
-
+	nb_loop = 0
         while still_got_macros:
-
+	    nb_loop += 1
             #Ok, we want the macros in the command line
             macros = self.get_macros(c_line)
 
@@ -218,6 +218,9 @@ class MacroResolver(Borg):
             #We resolved all we can, now replace the macro in the command call
             for macro in macros:
                 c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
+
+	    if nb_loop > 32: #too mouch loop, we exit
+		still_got_macros = False	
 
         #print "Retuning c_line", c_line.strip()
         return c_line.strip()

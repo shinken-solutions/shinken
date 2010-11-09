@@ -53,7 +53,7 @@ class DBMysql(DB):
     #Just run the query
     #TODO: finish catch
     def execute_query(self, query):
-        print "[MysqlDB]I run query", query, "\n"
+        #print "[MysqlDB]I run query", query, "\n"
         try:
             self.db_cursor.execute(query)
             self.db.commit ()

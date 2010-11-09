@@ -125,6 +125,14 @@ class NotificationWay(Item):
 
         special_properties = ['service_notification_commands', 'service_notification_commands', \
                                   'service_notification_period', 'host_notification_period']
+
+	#A null notif way is a notif way that will do nothing (service = n, hot =n)
+	is_null_notifway = False
+	if hasattr(self, 'service_notification_options') and self.service_notification_options==['n']:
+	   if hasattr(self, 'host_notification_options') and self.host_notification_options==['n']:
+	      is_null_notifway = True
+	      return True
+
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop]['required']:

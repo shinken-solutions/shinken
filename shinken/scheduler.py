@@ -191,7 +191,7 @@ class Scheduler:
                 self.add(b)
             return
         if isinstance(elt, EventHandler):
-            print "Add an event Handler", elt.id
+            #print "Add an event Handler", elt.id
             self.actions[elt.id] = elt
             return
         if isinstance(elt, Downtime):
