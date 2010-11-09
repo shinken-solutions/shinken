@@ -957,7 +957,7 @@ class SchedulingItem(Item):
             command_line = m.resolve_command(self.check_command, data)
 
             #And get all environnement varialbe if need
-            if cls.enable_environment_macros or cls.use_large_installation_tweaks:
+            if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
                 env = m.get_env_macros(data)
             else:
                 env = {}
