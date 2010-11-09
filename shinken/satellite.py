@@ -233,6 +233,9 @@ class Satellite(Daemon):
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity
 
+        #Keep broks so they can be eaten by a broker
+        self.broks = {}
+
         #Try to change the user (not nt for the moment)
         #TODO: change user on nt
         if os.name != 'nt':
@@ -263,8 +266,6 @@ class Satellite(Daemon):
         #Init stats like Load for workers
         self.wait_ratio = Load(initial_value=1)
 
-        #Keep broks so they can be eaten by a broker
-        self.broks = {}
 
         self.t_each_loop = time.time() #use to track system time change
 
