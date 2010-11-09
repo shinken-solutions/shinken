@@ -381,6 +381,8 @@ class Shinken(Daemon):
     #Frame is just garbage
     def manage_signal(self, sig, frame):
         print "\nExiting with signal", sig
+        print "Asking for a retention save"
+        self.sched.update_retention_file(forced=True)
         print "Stopping all network connexions"
         self.poller_daemon.shutdown(True)
         print "Unlinking pid file"
