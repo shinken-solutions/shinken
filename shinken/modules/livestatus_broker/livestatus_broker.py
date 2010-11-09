@@ -27,6 +27,7 @@
 import select
 import socket
 import sys
+import os
 try:
     import sqlite3
 except ImportError: # python 2.4 do not have it
@@ -65,8 +66,6 @@ class Livestatus_broker:
 
 
     #Called by Broker so we can do init stuff
-    #TODO : add conf param to get pass with init
-    #Conf from arbiter!
     def init(self):
         print "Initialisation of the livestatus broker"
 
@@ -679,15 +678,45 @@ class Livestatus_broker:
         # rowfactory will later be redefined (in livestatus.py)
 
 
+
+    def manage_signal(self, sig, frame):
+        print "[LiveStatus] I receive a signal %s" % sig
+        print "[liveStatus] So I quit"
+        for s in self.input:
+            s.close()
+        sys.exit(0)
+
+
+
+    #Set an exit function that is call when we quit
+    def set_exit_handler(self):
+        func = self.manage_signal
+        if os.name == "nt":
+            try:
+                import win32api
+                win32api.SetConsoleCtrlHandler(func, True)
+            except ImportError:
+                version = ".".join(map(str, sys.version_info[:2]))
+                raise Exception("pywin32 not installed for Python " + version)
+        else:
+            import signal
+            print "Register the func", func, "as exit function"
+            signal.signal(signal.SIGTERM, func)
+
+
+
     def main(self):
+        #I register my exit function
+        self.set_exit_handler()
+
         last_number_of_objects = 0
         backlog = 5
         size = 8192
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.setblocking(0)
-        server.bind((self.host, self.port))
-        server.listen(backlog)
-        input = [server]
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.setblocking(0)
+        self.server.bind((self.host, self.port))
+        self.server.listen(backlog)
+        self.input = [self.server]
         databuffer = {}
         # todo. open self.socket and add it to input
 
@@ -702,13 +731,13 @@ class Livestatus_broker:
             except Exception:
                 print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
                 raise
-            inputready,outputready,exceptready = select.select(input,[],[], 0)
+            inputready,outputready,exceptready = select.select(self.input,[],[], 0)
             
             for s in inputready:
-                if s == server:
+                if s == self.server:
                     # handle the server socket
-                    client, address = server.accept()
-                    input.append(client)
+                    client, address = self.server.accept()
+                    self.input.append(client)
                 else:
                     print "Handle connexion", s
                     # handle all other sockets
@@ -727,11 +756,11 @@ class Livestatus_broker:
                         if close_con:
                             try:
                                 s.shutdown(2)
-                                input.remove(s)
+                                self.input.remove(s)
                             except Exception , exp:
                                 print exp
                                 s.close()
-                                input.remove(s)
+                                self.input.remove(s)
                         else:
                             # end-of-transmission or an empty line was received
                             response = self.livestatus.handle_request(databuffer[s].rstrip())
