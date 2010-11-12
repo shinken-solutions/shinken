@@ -508,7 +508,6 @@ class Ndodb_broker:
         data = b.data
         
         services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'],
-                      'service_object_id' : service_id, 'host_object_id' : host_id,
                       'display_name' : data['display_name'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
                       'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],

@@ -406,7 +406,8 @@ class SchedulingItem(Item):
 
         #If next time is None, do not go
         if self.next_chk == None:
-            self.raise_no_next_check_log_entry()
+            #Nagios do not raise it, I'm wondering if we should
+            #self.raise_no_next_check_log_entry()
             return None
 
         #Get the command to launch, and put it in queue
