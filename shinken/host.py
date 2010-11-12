@@ -975,6 +975,7 @@ class Hosts(Items):
             #The new member list
             new_parents = []
             for parent in parents:
+                parent = parent.strip()
                 p = self.find_by_name(parent)
                 if p != None:
                     new_parents.append(p)
