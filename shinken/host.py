@@ -397,7 +397,10 @@ class Host(SchedulingItem):
 
     #For get a nice name
     def get_name(self):
-        return self.host_name
+        if not self.is_tpl():
+            return self.host_name
+        else:
+            return self.name
 
 
     #For debugin purpose only
@@ -802,7 +805,13 @@ class Hosts(Items):
             #The new member list
             new_parents = []
             for parent in parents:
-                new_parents.append(self.find_by_name(parent))
+                parent = parent.strip()
+                p = self.find_by_name(parent)
+                if p != None:
+                    new_parents.append(p)
+                else:
+                    err = "Error : the parent '%s' on host '%s' is unknown!" % (parent, h.get_name())
+                    self.configuration_errors.append(err)
             #print "Me,", h.host_name, "define my parents", new_parents
             #We find the id, we remplace the names
             h.parents = new_parents

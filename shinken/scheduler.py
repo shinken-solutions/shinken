@@ -148,6 +148,8 @@ class Scheduler:
     #Oh... Arbiter want us to die... For launch a new Scheduler
     #"Mais qu'a-t-il de plus que je n'ais pas?"
     def die(self):
+        #first update our retention data
+        self.update_retention_file(forced=True)
         self.must_run = False
 
 

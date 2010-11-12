@@ -58,7 +58,12 @@ class Hostescalations(Items):
         #Now we explode all escalations (host_name, service_description) to escalations
         for es in self:
             properties = es.__class__.properties
-            creation_dict = {'escalation_name' : 'Generated-Hostescalation-%d' % es.id}
+            name = ''
+            if hasattr(es, 'host_name'):
+                name = es.host_name
+            elif hasattr(es, 'hostgroup_name'):
+                name = es.hostgroup_name
+            creation_dict = {'escalation_name' : 'Generated-Hostescalation-%d-%s' % (es.id, name)}
             for prop in properties:
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)

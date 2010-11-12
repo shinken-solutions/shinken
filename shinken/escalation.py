@@ -35,7 +35,12 @@ class Escalation(Item):
                 'contact_groups' : {'required':True},
                 }
 
-    running_properties = {}
+    running_properties = {
+        #All errors and warning raised during the configuration parsing
+        #and taht will raised real warning/errors during the is_correct
+        'configuration_warnings' : {'default' : []},
+        'configuration_errors' : {'default' : []},
+        }
 
 
     macros = {}

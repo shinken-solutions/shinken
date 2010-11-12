@@ -265,8 +265,11 @@ class Ndodb_broker:
                            'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
                            'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                           'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data']
-        }
+                           'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data'],
+                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                           'execution_time' : data['execution_time'], 'latency' : data['latency'],
+                           'output' : data['output'], 'perfdata' : data['perf_data'],'last_check' : de_unixify(data['last_chk']),
+                           }
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
 
         return [query, hoststatus_query]
@@ -315,8 +318,12 @@ class Ndodb_broker:
                               'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                               'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
                               'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                              'obsess_over_service' : data['obsess_over_service'],'process_performance_data' : data['process_perf_data']
-        }
+                              'obsess_over_service' : data['obsess_over_service'],'process_performance_data' : data['process_perf_data'],
+
+                              'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                              'execution_time' : data['execution_time'], 'latency' : data['latency'],
+                              'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
+                              }
         servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
         return [query, servicestatus_query]
@@ -486,6 +493,8 @@ class Ndodb_broker:
     #Ok the host is updated
     def manage_update_host_status_brok(self, b):
         data = b.data
+	host_id = self.get_host_object_id_by_name(data['host_name'])
+
         hosts_data = {'instance_id' : data['instance_id'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
                       'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
@@ -497,10 +506,40 @@ class Ndodb_broker:
                       'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
                       'obsess_over_host' : data['obsess_over_host'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
             }
-        #Only this host
-        where_clause = {'host_name' : data['host_name']}
-        query = self.db.create_update_query('host', hosts_data, where_clause)
+	#Only the host is impacted
+        where_clause = {'host_object_id' : host_id}
+
+        query = self.db.create_update_query('hosts', hosts_data, where_clause)
         return [query]
+
+
+    #Ok the host is updated
+    def manage_update_service_status_brok(self, b):
+        data = b.data
+
+        service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
+
+
+        
+        services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'],
+                      'display_name' : data['display_name'],
+                      'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
+                      'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
+                      'first_notification_delay' : data['first_notification_delay'], 'notification_interval' : data['notification_interval'],
+                      'flap_detection_enabled' : data['flap_detection_enabled'], 'low_flap_threshold' : data['low_flap_threshold'],
+                      'high_flap_threshold' : data['high_flap_threshold'], 'process_performance_data' : data['process_perf_data'],
+                      'freshness_checks_enabled' : data['check_freshness'], 'freshness_threshold' : data['freshness_threshold'],
+                      'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
+                      'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
+                      'obsess_over_service' : data['obsess_over_service'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
+            }
+
+        #Only the service is impacted
+        where_clause = {'service_object_id' : service_id}
+        #where_clause = {'host_name' : data['host_name']}
+        query = self.db.create_update_query('services', services_data, where_clause)
+        return [query]
+
 
 
     #A host have just be create, database is clean, we INSERT it
