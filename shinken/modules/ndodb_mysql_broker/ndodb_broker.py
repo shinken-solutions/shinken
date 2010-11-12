@@ -268,10 +268,8 @@ class Ndodb_broker:
                            'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data'],
                            'check_type' : 0, 'current_check_attempt' : data['attempt'],
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                           'output' : data['output'], 'perfdata' : data['perf_data'],'last_check' : de_unixify(data['last_chk'],
-
-
-        }
+                           'output' : data['output'], 'perfdata' : data['perf_data'],'last_check' : de_unixify(data['last_chk']),
+                           }
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
 
         return [query, hoststatus_query]
