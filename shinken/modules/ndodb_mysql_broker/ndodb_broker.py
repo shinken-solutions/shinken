@@ -499,8 +499,34 @@ class Ndodb_broker:
             }
         #Only this host
         where_clause = {'host_name' : data['host_name']}
-        query = self.db.create_update_query('host', hosts_data, where_clause)
+        query = self.db.create_update_query('hosts', hosts_data, where_clause)
         return [query]
+
+
+    #Ok the host is updated
+    def manage_update_service_status_brok(self, b):
+        data = b.data
+        
+        services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'],
+                      'service_object_id' : service_id, 'host_object_id' : host_id,
+                      'display_name' : data['display_name'],
+                      'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
+                      'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
+                      'first_notification_delay' : data['first_notification_delay'], 'notification_interval' : data['notification_interval'],
+                      'flap_detection_enabled' : data['flap_detection_enabled'], 'low_flap_threshold' : data['low_flap_threshold'],
+                      'high_flap_threshold' : data['high_flap_threshold'], 'process_performance_data' : data['process_perf_data'],
+                      'freshness_checks_enabled' : data['check_freshness'], 'freshness_threshold' : data['freshness_threshold'],
+                      'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
+                      'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
+                      'obsess_over_service' : data['obsess_over_service'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
+            }
+
+        #Only this host
+        where_clause = {'host_name' : data['host_name'], 'service_description' : data['service_description']}
+        #where_clause = {'host_name' : data['host_name']}
+        query = self.db.create_update_query('services', services_data, where_clause)
+        return [query]
+
 
 
     #A host have just be create, database is clean, we INSERT it
