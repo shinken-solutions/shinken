@@ -265,7 +265,12 @@ class Ndodb_broker:
                            'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
                            'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                           'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data']
+                           'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data'],
+                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                           'execution_time' : data['execution_time'], 'latency' : data['latency'],
+                           'output' : data['output'], 'perfdata' : data['perf_data'],'last_check' : de_unixify(data['last_chk'],
+
+
         }
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
 
@@ -315,7 +320,13 @@ class Ndodb_broker:
                               'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                               'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
                               'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                              'obsess_over_service' : data['obsess_over_service'],'process_performance_data' : data['process_perf_data']
+                              'obsess_over_service' : data['obsess_over_service'],'process_performance_data' : data['process_perf_data'],
+
+                              'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                              'execution_time' : data['execution_time'], 'latency' : data['latency'],
+                              'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk'],
+
+
         }
         servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
