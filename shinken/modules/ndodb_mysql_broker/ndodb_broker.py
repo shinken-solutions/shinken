@@ -486,6 +486,8 @@ class Ndodb_broker:
     #Ok the host is updated
     def manage_update_host_status_brok(self, b):
         data = b.data
+	host_id = self.get_host_object_id_by_name(data['host_name'])
+
         hosts_data = {'instance_id' : data['instance_id'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
                       'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
@@ -497,8 +499,9 @@ class Ndodb_broker:
                       'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
                       'obsess_over_host' : data['obsess_over_host'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
             }
-        #Only this host
-        where_clause = {'host_name' : data['host_name']}
+	#Only the host is impacted
+        where_clause = {'host_object_id' : host_id}
+
         query = self.db.create_update_query('hosts', hosts_data, where_clause)
         return [query]
 
