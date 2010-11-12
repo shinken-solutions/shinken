@@ -77,13 +77,13 @@ class Config(Item):
     #in Shinken
     #usage_text : if present, will print it to explain why it's no more useful
     properties={'prefix' : {'required':False, 'default' : '/usr/local/shinken/'},
-                'log_file' : {'required':False, 'default' : '', 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the log broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
-                'object_cache_file' : {'required':False, 'default' : '/tmp/object.dat', 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
-                'precached_object_file' : {'required':False , 'default' : '/tmp/object.precache', 'usage' : 'unused', 'usage_text' : 'Shinken is faster enough to do not need precached object file.'},
+                'log_file' : {'required':False, 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the log broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
+                'object_cache_file' : {'required':False, 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
+                'precached_object_file' : {'required':False , 'usage' : 'unused', 'usage_text' : 'Shinken is faster enough to do not need precached object file.'},
                 'resource_file' : {'required':False , 'default':'/tmp/ressources.txt'},
-                'temp_file' : {'required':False, 'default':'/tmp/temp_file.txt','usage' : 'unused', 'usage_text' : ' temporary files are not used in the shinken architecture.'},
-                'status_file' : {'required':False, 'default':'', 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
-                'status_update_interval' : {'required':False, 'default':'15', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
+                'temp_file' : {'required':False, 'usage' : 'unused', 'usage_text' : ' temporary files are not used in the shinken architecture.'},
+                'status_file' : {'required':False, 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
+                'status_update_interval' : {'required':False, 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
                 'nagios_user' : {'required':False, 'default':'shinken'},
                 'nagios_group' : {'required':False, 'default':'shinken'},
                 'enable_notifications' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
@@ -95,23 +95,23 @@ class Config(Item):
                 'log_rotation_method' : {'required':False, 'default':'d', 'pythonize': to_char},
                 'log_archive_path' : {'required':False, 'default':'/usr/local/shinken/var/archives'},
                 'check_external_commands' : {'required':False, 'default':'1', 'pythonize': to_bool},
-                'command_check_interval' : {'required':False, 'default':'-1', 'usage' : 'unused', 'usage_text' : 'anoter value than look always the file is useless, so we fix it.'},
+                'command_check_interval' : {'required':False, 'usage' : 'unused', 'usage_text' : 'anoter value than look always the file is useless, so we fix it.'},
                 'command_file' : {'required':False, 'default':'/tmp/command.cmd'},
-                'external_command_buffer_slots' : {'required':False, 'default':'512', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'We do not limit the ewxternal command slot.'},
-                'check_for_updates' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'network administrators will never allow such communication between server and the external world. Use your distribution packet manager to know if updates are available or go to the http://www.shinken-monitoring.org website instead.'},
-                'bare_update_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused'},
+                'external_command_buffer_slots' : {'required':False, 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'We do not limit the ewxternal command slot.'},
+                'check_for_updates' : {'required':False, 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'network administrators will never allow such communication between server and the external world. Use your distribution packet manager to know if updates are available or go to the http://www.shinken-monitoring.org website instead.'},
+                'bare_update_checks' : {'required':False, 'pythonize': to_bool, 'usage' : 'unused'},
                 'lock_file' : {'required':False, 'default':'/usr/local/shinken/var/arbiterd.pid'},
-                'retain_state_information' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, retain state information will not be implemented because it is useless.'},
+                'retain_state_information' : {'required':False, 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'sorry, retain state information will not be implemented because it is useless.'},
                 'state_retention_file' : {'required':False, 'default':''},
                 'retention_update_interval' : {'required':False, 'default':'0', 'pythonize': to_int},
-                'use_retained_program_state' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
-                'use_retained_scheduling_info' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
-                'retained_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
-                'retained_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Service, 'retained_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
-                'retained_process_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_process_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
-                'retained_process_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_process_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
-                'retained_contact_host_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Host, 'retained_contact_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
-                'retained_contact_service_attribute_mask' : {'required':False, 'default':'0', 'class_inherit' : [(Service, 'retained_contact_attribute_mask')], 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'use_retained_program_state' : {'required':False, 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'use_retained_scheduling_info' : {'required':False, 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_host_attribute_mask' : {'required':False, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_service_attribute_mask' : {'required':False, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_process_host_attribute_mask' : {'required':False, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_process_service_attribute_mask' : {'required':False, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_contact_host_attribute_mask' : {'required':False,  'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
+                'retained_contact_service_attribute_mask' : {'required':False, 'usage' : 'unused', 'usage_text' : 'We do not think such an option is interesting to manage.'},
                 'use_syslog' : {'required':False, 'default':'0', 'pythonize': to_bool},
                 'log_notifications' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'log_service_retries' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'log_retries')]},
@@ -122,38 +122,38 @@ class Config(Item):
                 'log_passive_checks' : {'required':False, 'default':'1', 'pythonize': to_bool},
                 'global_host_event_handler' : {'required':False, 'default':'', 'class_inherit' : [(Host, 'global_event_handler')]},
                 'global_service_event_handler' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'global_event_handler')]},
-                'sleep_time' : {'required':False, 'default':'1', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'this deprecated option is useless in the shinken way of doing.'},
-                'service_inter_check_delay_method' : {'required':False, 'default':'s', 'class_inherit' : [(Service, 'inter_check_delay_method')], 'usage' : 'unused', 'usage_text' : 'This option is useless in the Shinken scheduling. The only way is the smart way.'},
+                'sleep_time' : {'required':False, 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'this deprecated option is useless in the shinken way of doing.'},
+                'service_inter_check_delay_method' : {'required':False, 'usage' : 'unused', 'usage_text' : 'This option is useless in the Shinken scheduling. The only way is the smart way.'},
                 'max_service_check_spread' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Service, 'max_check_spread')]},
-                'service_interleave_factor' : {'required':False, 'default':'s', 'class_inherit' : [(Service, 'interleave_factor')], 'usage' : 'unused', 'usage_text' : 'This option is useless in the Shinken scheduling because it use a random distribution for initial checks.'},
-                'max_concurrent_checks' : {'required':False, 'default':'200', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Limiting the max concurrent checks is not helful to got a good running monitoring server.'},
-                'check_result_reaper_frequency' : {'required':False, 'default':'5', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Shinken do not use reaper process.'},
-                'max_check_result_reaper_time' : {'required':False, 'default':'30', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Shinken do not use reaper process.'},
-                'check_result_path' : {'required':False, 'default':'/tmp/', 'usage' : 'unused', 'usage_text' : 'Shinken use in memory returns, not check results on flat file.'},
-                'max_check_result_file_age' : {'required':False, 'default':'3600', 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Shinken do not use flat file check resultfiles.'},
-                'host_inter_check_delay_method' : {'required':False, 'default':'s', 'class_inherit' : [(Host, 'inter_check_delay_method')], 'usage' : 'unused', 'usage_text' : 'This option is unused in the Shinken scheduling because distribution of the initial check is a random one.'},
+                'service_interleave_factor' : {'required':False, 'usage' : 'unused', 'usage_text' : 'This option is useless in the Shinken scheduling because it use a random distribution for initial checks.'},
+                'max_concurrent_checks' : {'required':False, 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Limiting the max concurrent checks is not helful to got a good running monitoring server.'},
+                'check_result_reaper_frequency' : {'required':False, 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Shinken do not use reaper process.'},
+                'max_check_result_reaper_time' : {'required':False, 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Shinken do not use reaper process.'},
+                'check_result_path' : {'required':False, 'usage' : 'unused', 'usage_text' : 'Shinken use in memory returns, not check results on flat file.'},
+                'max_check_result_file_age' : {'required':False, 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'Shinken do not use flat file check resultfiles.'},
+                'host_inter_check_delay_method' : {'required':False, 'usage' : 'unused', 'usage_text' : 'This option is unused in the Shinken scheduling because distribution of the initial check is a random one.'},
                 'max_host_check_spread' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Host, 'max_check_spread')]},
                 'interval_length' : {'required':False, 'default':'60', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
-                'auto_reschedule_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
-                'auto_rescheduling_interval' : {'required':False, 'default':'30', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
-                'auto_rescheduling_window' : {'required':False, 'default':'180', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
-                'use_aggressive_host_checking' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None)], 'usage' : 'unused', 'usage_text' : 'Host agressive checking is an heritage from Nagios 1 and is really useless now.'},
-                'translate_passive_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'translate_passive_checks')], 'usage' : 'unmanaged'},
-                'passive_host_checks_are_soft' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'passive_checks_are_soft')], 'usage' : 'unmanaged'},
+                'auto_reschedule_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged'},
+                'auto_rescheduling_interval' : {'required':False, 'pythonize': to_int, 'usage' : 'unmanaged'},
+                'auto_rescheduling_window' : {'required':False, 'default':'180', 'pythonize': to_int, 'usage' : 'unmanaged'},
+                'use_aggressive_host_checking' : {'required':False, 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'Host agressive checking is an heritage from Nagios 1 and is really useless now.'},
+                'translate_passive_host_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged'},
+                'passive_host_checks_are_soft' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'enable_predictive_host_dependency_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'enable_predictive_dependency_checks')], 'usage' : 'unmanaged'},
-                'enable_predictive_service_dependency_checks' : {'required':False, 'default':'1', 'class_inherit' : [(Service, 'enable_predictive_dependency_checks')], 'usage' : 'unmanaged'},
+                'enable_predictive_service_dependency_checks' : {'required':False, 'default':'1', 'usage' : 'unmanaged'},
                 'cached_host_check_horizon' : {'required':False, 'default':'0', 'pythonize': to_int, 'class_inherit' : [(Host, 'cached_check_horizon')]},
                 'cached_service_check_horizon' : {'required':False, 'default':'0', 'pythonize': to_int, 'class_inherit' : [(Service, 'cached_check_horizon')]},
                 'use_large_installation_tweaks' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
-                'free_child_process_memory' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'this option is automatic in Python processes'},
-                'child_processes_fork_twice' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'fork twice is not use.'},
+                'free_child_process_memory' : {'required':False, 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'this option is automatic in Python processes'},
+                'child_processes_fork_twice' : {'required':False, 'pythonize': to_bool, 'usage' : 'unused', 'usage_text' : 'fork twice is not use.'},
                 'enable_environment_macros' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'enable_flap_detection' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
                 'low_service_flap_threshold' : {'required':False, 'default':'25', 'pythonize': to_int, 'class_inherit' : [(Service, 'low_flap_threshold')]},
                 'high_service_flap_threshold' : {'required':False, 'default':'50', 'pythonize': to_int, 'class_inherit' : [(Service, 'high_flap_threshold')]},
                 'low_host_flap_threshold' : {'required':False, 'default':'25', 'pythonize': to_int, 'class_inherit' : [(Host, 'low_flap_threshold')]},
                 'high_host_flap_threshold' : {'required':False, 'default':'50', 'pythonize': to_int, 'class_inherit' : [(Host, 'high_flap_threshold')]},
-                'soft_state_dependencies' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)], 'usage' : 'unmanaged'},
+                'soft_state_dependencies' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
                 'service_check_timeout' : {'required':False, 'default':'10', 'pythonize': to_int, 'class_inherit' : [(Service, 'check_timeout')]},
                 'host_check_timeout' : {'required':False, 'default':'10', 'pythonize': to_int, 'class_inherit' : [(Host, 'check_timeout')]},
                 'event_handler_timeout' : {'required':False, 'default':'10', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
@@ -177,7 +177,7 @@ class Config(Item):
                 'host_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int, 'usage' : 'unmanaged'},
                 'service_perfdata_file_processing_interval' : {'required':False, 'default':'15', 'pythonize': to_int, 'usage' : 'unmanaged'},
                 'host_perfdata_file_processing_command' : {'required':False, 'default':'', 'class_inherit' : [(Host, 'perfdata_file_processing_command')], 'usage' : 'unmanaged'},
-                'service_perfdata_file_processing_command' : {'required':False, 'default':'', 'class_inherit' : [(Service, 'perfdata_file_processing_command')], 'usage' : 'unmanaged'},
+                'service_perfdata_file_processing_command' : {'required':False, 'usage' : 'unmanaged'},
                 'check_for_orphaned_services' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'check_for_orphaned')]},
                 'check_for_orphaned_hosts' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, 'check_for_orphaned')]},
                 'check_service_freshness' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'check_freshness')]},
@@ -187,20 +187,20 @@ class Config(Item):
                 'additional_freshness_latency' : {'required':False, 'default':'15', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
                 'enable_embedded_perl' : {'required':False, 'default':'1', 'pythonize': to_bool, 'usage' : 'unmanaged', 'usage_text' : 'It will surely never be managed, but it should not be useful with poller performances.'},
                 'use_embedded_perl_implicitly' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged'},
-                'date_format' : {'required':False, 'default':'us', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
+                'date_format' : {'required':False, 'usage' : 'unmanaged'},
                 'use_timezone' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
                 'illegal_object_name_chars' : {'required':False, 'default':"""`~!$%^&*"|'<>?,()=""", 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
                 'illegal_macro_output_chars' : {'required':False, 'default':'', 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
-                'use_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged', 'usage_text' : ' if you go some host or service definition like prod*, it will surely failed from now, sorry.'},
-                'use_true_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)], 'usage' : 'unmanaged'},
-                'admin_email' : {'required':False, 'default':'admin@localhost', 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'admin_pager' : {'required':False, 'default':'', 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
-                'event_broker_options' : {'required':False, 'default':'', 'usage' : 'unused', 'usage_text' : 'event broker are replaced by modules with a real configuration template.'},
+                'use_regexp_matching' : {'required':False, 'default':'0', 'pythonize': to_bool, 'usage' : 'unmanaged', 'usage_text' : ' if you go some host or service definition like prod*, it will surely failed from now, sorry.'},
+                'use_true_regexp_matching' : {'required':False, 'pythonize': to_bool, 'usage' : 'unmanaged'},
+                'admin_email' : {'required':False, 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
+                'admin_pager' : {'required':False, 'usage' : 'unused', 'usage_text' : 'sorry, not yet implemented.'},
+                'event_broker_options' : {'required':False, 'usage' : 'unused', 'usage_text' : 'event broker are replaced by modules with a real configuration template.'},
                 'broker_module' : {'required':False, 'default':''},
-                'debug_file' : {'required':False, 'default':'/tmp/debug.txt'},
-                'debug_level' : {'required':False, 'default':'0'},
-                'debug_verbosity' : {'required':False, 'default':'1'},
-                'max_debug_file_size' : {'required':False, 'default':'10000', 'pythonize': to_int},
+                'debug_file' : {'required':False, 'usage' : 'unused' },
+                'debug_level' : {'required':False, 'usage' : 'unused'},
+                'debug_verbosity' : {'required':False,'usage' : 'unused'},
+                'max_debug_file_size' : {'required':False, 'pythonize': to_int ,'usage' : 'unused'},
                 #'$USERn$ : {'required':False, 'default':''} # Add at run in __init__
 
                 #SHINKEN SPECIFIC
@@ -636,10 +636,10 @@ class Config(Item):
         print "Slots", Service.__slots__
         print 'Hosts:'
         for h in self.hosts:
-            print '\t', h.get_name(), h.__dict__
+            print '\t', h.get_name(), h.contacts
         print 'Services:'
         for s in self.services:
-            print '\t', s.get_name(), s.__dict__
+            print '\t', s.get_name(), s.contacts
         #print 'Templates:', self.hosts_tpl
         #print 'Hosts:',self.hosts,'\n'
         #print 'Contacts:', self.contacts
@@ -884,7 +884,7 @@ class Config(Item):
         mod_to_add_to_schedulers = []
 
         #For status_dat
-        if self.status_file != '':
+        if hasattr(self, 'status_file') and self.status_file != '' and hasattr(self, 'object_cache_file'):
             #Ok, the user put such a value, we must look
             #if he forget to put a module for Brokers
             got_status_dat_module = self.got_broker_module_type_defined('status_dat')
@@ -895,11 +895,14 @@ class Config(Item):
                         'status_file': self.status_file,
                         'module_name': 'Status-Dat-Autogenerated', 'module_type': 'status_dat'}
                 mod = Module(data)
-                mod.status_update_interval = self.status_update_interval
+                if hassattr(self, 'status_update_interval'):
+                    mod.status_update_interval = self.status_update_interval
+                else:
+                    mod.status_update_interval = 15
                 mod_to_add.append(mod)
 
         #Now the log_file
-        if self.log_file != '':
+        if hasattr(self, 'log_file') and self.log_file != '':
             #Ok, the user put such a value, we must look
             #if he forget to put a module for Brokers
             got_simple_log_module = self.got_broker_module_type_defined('simple_log')
@@ -1072,6 +1075,11 @@ class Config(Item):
         Log().log('Checking notificationways...')
         r &= self.notificationways.is_correct()
         Log().log('\tChecked %d notificationways' % len(self.notificationways))
+
+        #Escalations
+        Log().log('Checking escalations...')
+        r &= self.escalations.is_correct()
+        Log().log('\tChecked %d escalations' % len(self.escalations))
 
         #Services
         Log().log('Checking services')
@@ -1338,8 +1346,9 @@ class Config(Item):
 
             #Now we copy all properties of conf into the new ones
             for prop in Config.properties:
-                val = getattr(self, prop)
-                setattr(self.confs[i], prop, val)
+                if not 'usage' in Config.properties[prop] or not (Config.properties[prop]['usage'] == 'unused' or  Config.properties[prop]['usage'] == 'unmanaged'):
+                    val = getattr(self, prop)
+                    setattr(self.confs[i], prop, val)
 
             #we need a deepcopy because each conf
             #will have new hostgroups

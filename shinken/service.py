@@ -247,7 +247,10 @@ class Service(SchedulingItem):
 
     #Give a nice name output
     def get_name(self):
-        return self.service_description
+        if not self.is_tpl():
+            return self.service_description
+        else:
+            return self.name
 
 
     #Need the whole name for debugin purpose
@@ -305,7 +308,7 @@ class Service(SchedulingItem):
             for err in self.configuration_errors:
                 Log().log(err)
 
-        #Ok now we manage special cases...
+         #Ok now we manage special cases...
         if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups') and  self.notifications_enabled == True:
             Log().log('%s : I do not have contacts nor contact_groups' % self.get_name())
             state = False

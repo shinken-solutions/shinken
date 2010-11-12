@@ -124,7 +124,8 @@ class Item(object):
         #get the name and put the value if None, put the Name
         #(not None) if not (not clear ?)
         for prop in conf.properties:
-            if 'class_inherit' in conf.properties[prop]:
+            #If we have a class_inherit, and the arbtier really send us it
+            if 'class_inherit' in conf.properties[prop] and hasattr(conf, prop):
                 for (cls_dest, change_name) in conf.properties[prop]['class_inherit']:
                     if cls_dest == cls:#ok, we've got something to get
                         value = getattr(conf, prop)
@@ -478,6 +479,8 @@ class Item(object):
 class Items(object):
     def __init__(self, items):
         self.items = {}
+        self.configuration_warnings = []
+        self.configuration_errors = []
         for i in items:
             self.items[i.id] = i
         self.templates = {}
@@ -592,6 +595,14 @@ class Items(object):
                 i = self.items[id]
                 print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated"
                 r = False
+        #Then look if we have some errors in the conf
+        #Juts print warnings, but raise errors
+        for err in self.configuration_warnings:
+            print err            
+        for err in self.configuration_errors:
+            print err
+            r = False
+
         #Then look for individual ok
         for i in self:
             r &= i.is_correct()
@@ -732,6 +743,11 @@ class Items(object):
                 cgnames = i.contact_groups.split(',')
                 cgnames = strip_and_uniq(cgnames)
                 for cgname in cgnames:
+                    cg = contactgroups.find_by_name(cgname)
+                    if cg == None:
+                        err = "The contact group '%s'defined on the %s '%s' do not exist" % (cgname, i.__class__.my_type, i.get_name())
+                        i.configuration_errors.append(err)
+                        continue
                     cnames = contactgroups.get_members_by_name(cgname)
                     #We add contacts into our contacts
                     if cnames != []:
@@ -849,7 +865,11 @@ class Items(object):
                 else:
                     if 'MINUSSIGN' in token:
                         token = token.replace('MINUSSIGN', '-')
-                    print "ERROR: the group %s is unknown!" % token
+                    print self.__dict__, type(self)
+                    err = "ERROR: the group %s is unknown !" % (token,)
+                    print err
+                    self.configuration_errors.append(err)
+                    return res
 
             #print "Now changing the exprtoken value with UPPER one (so less risk of problem..."
             expr = expr.replace(token, token.upper())
