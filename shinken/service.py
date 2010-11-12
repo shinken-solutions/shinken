@@ -21,10 +21,16 @@
 
 import time
 
+try:
+    from ClusterShell.NodeSet import NodeSet,NodeSetParseRangeError
+except ImportError:
+    NodeSet = None
+
+
 from autoslots import AutoSlots
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists
+from util import to_int, to_char, to_split, to_bool, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE
 from macroresolver import MacroResolver
 from eventhandler import EventHandler
 from log import Log
@@ -709,6 +715,56 @@ class Service(SchedulingItem):
         self.actions.append(e)
 
 
+    def duplicate(self, host):
+        duplicates = []
+
+        #In macro, it's all in UPPER case
+        prop = self.duplicate_foreach.strip().upper()
+        #If I do not have the property, we bail out
+        if prop in host.customs:
+            entry = host.customs[prop]
+
+            default_value = getattr(self, 'default_value', None)
+            # Transform the generator string to a list
+            # Missing values are filled with the default value
+            (key_values, errcode) = get_key_value_sequence(entry, default_value)
+
+            if key_values:
+                for key in key_values:
+                    value = key_values[key]
+                    new_s = self.copy()
+                
+                    if isinstance(value, list):
+                        pass #this is for key/value/value1/value2
+                    else:
+                        #print "Got key:%s and value:%s" % (key, value)
+                        new_s.host_name = host.get_name()
+                        if self.is_tpl(): # if template, the new one is not
+                            new_s.register = 1 
+                        #change the service_description and check_command by
+                        #key:value
+                        if hasattr(self, 'service_description'):
+                            new_s.service_description = self.service_description.replace('$KEY$', key)
+                        if hasattr(self, 'check_command'):
+                            new_s.check_command = new_s.check_command.replace('$KEY$', key)
+                            new_s.check_command = new_s.check_command.replace('$VALUE$', value)
+
+                    #And then add in our list this new service
+                    duplicates.append(new_s)
+                    #print "DBG: and finally got", new_s.service_description, new_s.check_command
+
+            else:
+                if errcode == GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX:
+                    err = "The custom property '%s' of the host '%s' is not a valid entry %s for a service generator" % (self.duplicate_foreach.strip(), host.get_name(), entry)
+                    self.configuration_errors.append(err)
+                elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT:
+                    err = "The custom property '%s 'of the host '%s' has empty values %s but the service %s has no default_value" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
+                    self.configuration_errors.append(err)
+                elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODE:
+                    err = "The custom property '%s 'of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
+                    self.configuration_errors.append(err)
+        return duplicates
+    
 
 
 class Services(Items):
@@ -893,45 +949,12 @@ class Services(Items):
                 self.items[new_s.id] = new_s
             else: #the generator case, we must create several new services
                 #we must find our host, and get all key:value we need
+
                 h = hosts.find_by_name(name.strip())
                 if h != None:
-                    prop = s.duplicate_foreach.strip()
-                    d = h.get_key_value_from_property(prop)
-                    if d != None:
-                        for key in d:
-                            value = d[key]
-                            new_s = s.copy()
-                            
-                            #print "Got key:%s and value:%s" % (key, value)
+                    for new_s in s.duplicate(h):
+                        self.items[new_s.id] = new_s
 
-                            new_s.host_name = name
-                            if s.is_tpl(): # if template, the new one is not
-                                new_s.register = 1
-                        #change the service_description and check_command by
-                        #key:value
-                            if hasattr(s, 'service_description'):
-                                new_s.service_description = s.service_description.replace('$KEY$', key)
-
-                            #Maybe we do not have value, we must get the default_value
-                            #of the service if it got one
-                            if value == None:
-                                if hasattr(s, 'default_value'):
-                                    value = s.default_value
-                                else: 
-                                    #no parameters but the service do not have
-                                    #default ones!
-                                    err = "The key for the property '%s' on host '%s' doesn't have any parameters and the service '%s' do not have default_value configured" % (prop, name, new_s.get_name())
-                                    value = ''
-                                    new_s.configuration_errors.append(err)
-
-
-                            if hasattr(s, 'check_command'):
-                                new_s.check_command = new_s.check_command.replace('$KEY$', key)
-                                new_s.check_command = new_s.check_command.replace('$VALUE$', value)
-                            #And then add in our list this new service
-                            self.items[new_s.id] = new_s
-                            #print "DBG: and finally got", new_s.service_description, new_s.check_command
-                            
                 else: #TODO : raise an error?
                     pass
 
@@ -1041,3 +1064,5 @@ class Services(Items):
                                     #print "DBG : registering", hname, desc, "for", s.host_name, s.service_description
                                     servicedependencies.add_service_dependency(s.host_name, s.service_description, hname, desc)
                             i += 1
+
+
