@@ -322,10 +322,8 @@ class Ndodb_broker:
 
                               'check_type' : 0, 'current_check_attempt' : data['attempt'],
                               'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                              'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk'],
-
-
-        }
+                              'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
+                              }
         servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
         return [query, servicestatus_query]
