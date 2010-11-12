@@ -506,6 +506,10 @@ class Ndodb_broker:
     #Ok the host is updated
     def manage_update_service_status_brok(self, b):
         data = b.data
+
+        service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
+
+
         
         services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'],
                       'display_name' : data['display_name'],
@@ -520,8 +524,8 @@ class Ndodb_broker:
                       'obsess_over_service' : data['obsess_over_service'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
             }
 
-        #Only this host
-        where_clause = {'host_name' : data['host_name'], 'service_description' : data['service_description']}
+        #Only the service is impacted
+        where_clause = {'service_object_id' : service_id}
         #where_clause = {'host_name' : data['host_name']}
         query = self.db.create_update_query('services', services_data, where_clause)
         return [query]
