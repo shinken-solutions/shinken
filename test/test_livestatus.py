@@ -433,13 +433,20 @@ ResponseHeader: fixed16"""
 
         #data = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
         data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
-        data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nColumnHeaders: on\n"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """200          17
 [[[1,2],[],0,0]]
 """
-        self.assert_(response == good_response)
+        self.assert_(response == good_response) # json
+
+        data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\n"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """200           9
+1,2;;0;0
+"""
+        self.assert_(response == good_response) # csv
 
 
     def test_thruk_logs(self):

@@ -5069,16 +5069,13 @@ class LiveStatus:
                         lines.append(separators[1].join(columns))
                 for object in result:
                     #construct one line of output for each object found
-                    l = ''
+                    l = []
                     for x in [object[c] for c in columns]:
                         if isinstance(x, list):
-                            l = l + separators[1].join(separators[2].join(str(y) for y in x))
+                            l.append(separators[2].join(str(y) for y in x))
                         else:
-                            if l != '':
-                                l = separators[1].join([l, str(x)])
-                            else: # the first l do not need a ; at the begining
-                                l = str(x)
-                    lines.append(l)
+                            l.append(str(x))
+                    lines.append(separators[1].join(l))
             else:
                 if columnheaders == 'on':
                     if len(aliases) > 0:
