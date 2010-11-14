@@ -423,15 +423,23 @@ ResponseHeader: fixed16"""
         now = time.time()
         cmd = "[%lu] ADD_SVC_COMMENT;test_host_0;test_ok_0;1;lausser;comment" % now
         self.sched.run_external_command(cmd)
+        #cmd = "[%lu] ADD_HOST_COMMENT;test_host_0;1;lausser;hcomment" % now
+        #self.sched.run_external_command(cmd)
         self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
         self.assert_(len(self.sched.comments) == 2)
         self.assert_(len(svc.comments) == 2)
 
         self.update_broker()
 
-        data = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
+        #data = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
+        data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
+        data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nColumnHeaders: on\n"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
+        good_response = """200          17
+[[[1,2],[],0,0]]
+"""
+        self.assert_(response == good_response)
 
 
     def test_thruk_logs(self):

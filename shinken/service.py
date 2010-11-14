@@ -113,7 +113,7 @@ class Service(SchedulingItem):
     running_properties = {
         'last_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'next_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'next_schedule']},
-        'in_checking' : {'default' : False, 'fill_brok' : ['full_status'], 'retention' : True},
+        'in_checking' : {'default' : False, 'fill_brok' : ['full_status', 'check_result', 'next_schedule'], 'retention' : True},
         'latency' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'attempt' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'state' : {'default' : 'PENDING', 'fill_brok' : ['full_status'], 'retention' : True},

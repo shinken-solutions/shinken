@@ -321,7 +321,9 @@ class LiveStatus:
                 'type' : 'int',
             },
             'is_executing' : {
+                'depythonize' : from_bool_to_int,
                 'description' : 'is there a host check currently running... (0/1)',
+                'prop' : 'in_checking',
                 'type' : 'int',
             },
             'is_flapping' : {
@@ -788,7 +790,7 @@ class LiveStatus:
             },
             'host_comments' : {
                 'default' : '',
-                'depythonize' : lambda h: ','.join([str(c.id) for c in h.comments]),
+                'depythonize' : lambda h: ([c.id for c in h.comments]),
                 'description' : 'A list of the ids of all comments of this host',
                 'prop' : 'host',
                 'type' : 'list',
@@ -883,7 +885,9 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_is_executing' : {
+                'depythonize' : lambda x: from_bool_to_int(x.in_checking),
                 'description' : 'is there a host check currently running... (0/1)',
+                'prop' : 'host',
                 'type' : 'int',
             },
             'host_is_flapping' : {
@@ -1137,7 +1141,9 @@ class LiveStatus:
                 'type' : 'int',
             },
             'is_executing' : {
+                'depythonize' : from_bool_to_int,
                 'description' : 'is there a service check currently running... (0/1)',
+                'prop' : 'in_checking',
                 'type' : 'int',
             },
             'is_flapping' : {
