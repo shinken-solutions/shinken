@@ -1126,7 +1126,7 @@ class Config(Item):
         if hasattr(self, 'pollers'):
             Log().log('Checking pollers')
             r &= self.pollers.is_correct()
-            Log().log('\tChecked %d reactionners' % len(self.pollers))
+            Log().log('\tChecked %d pollers' % len(self.pollers))
 
         #Brokers
         if hasattr(self, 'brokers'):
