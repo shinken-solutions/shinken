@@ -4902,36 +4902,54 @@ class LiveStatus:
         return output
 
 
-    def get_live_data(self, table, columns, filtercolumns, filter_stack, stats_filter_stack, stats_postprocess_stack):
+    def get_live_data(self, table, columns, filtercolumns, limit, filter_stack, stats_filter_stack, stats_postprocess_stack):
         result = []
         if table in ['hosts', 'services', 'downtimes', 'comments', 'hostgroups', 'servicegroups']:
             #Scan through the objects and apply the Filter: rules
             if table == 'hosts':
-                if len(filtercolumns) == 0:
-                    filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.hosts.values()] if filter_stack(y)]
+                if not limit:
+                    if len(filtercolumns) == 0:
+                        filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.hosts.values()] if filter_stack(y)]
+                    else:
+                        # If there we had Filter: statements, it makes sense to make two steps
+                        # 1. Walk through the complete list of hosts, but only resolve those attributes
+                        #    which are needed for the filtering
+                        #    Hopefully after this step there are only a few host objects left
+                        prefiltresult = (x for x in self.hosts.values() if filter_stack(self.create_output(x, [], filtercolumns)))
+                        # 2. Then take the remaining objects and resolve the whole list of attributes (which may be a lot if there was no short Columns: list)
+                        filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
                 else:
-                    # If there we had Filter: statements, it makes sense to make two steps
-                    # 1. Walk through the complete list of hosts, but only resolve those attributes
-                    #    which are needed for the filtering
-                    #    Hopefully after this step there are only a few host objects left
-                    prefiltresult = (x for x in self.hosts.values() if filter_stack(self.create_output(x, [], filtercolumns)))
-                    # 2. Then take the remaining objects and resolve the whole list of attributes (which may be a lot if there was no short Columns: list)
-                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                    hosts = sorted(self.hosts.values(), key = lambda k: k.host_name)
+                    if len(filtercolumns) == 0:
+                        filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in hosts] if filter_stack(y)]
+                    else:
+                        prefiltresult = (x for x in hosts if filter_stack(self.create_output(x, [], filtercolumns)))
+                        filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                    filtresult = filtresult[:limit]
             elif table == 'services':
-                if len(filtercolumns) == 0:
-                    filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.services.values()] if filter_stack(y)]
+                if not limit:
+                    if len(filtercolumns) == 0:
+                        filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.services.values()] if filter_stack(y)]
+                    else:
+                        prefiltresult = (x for x in self.services.values() if filter_stack(self.create_output(x, [], filtercolumns)))
+                        filtresult = [self.create_output(x, columns, []) for x in prefiltresult]
                 else:
-                    prefiltresult = (x for x in self.services.values() if filter_stack(self.create_output(x, [], filtercolumns)))
-                    filtresult = [self.create_output(x, columns, []) for x in prefiltresult]
+                    services = sorted(self.services.values(), key = lambda k: (k.host_name, k.service_description))
+                    if len(filtercolumns) == 0:
+                        filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in services] if filter_stack(y)]
+                    else:
+                        prefiltresult = (x for x in services if filter_stack(self.create_output(x, [], filtercolumns)))
+                        filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                    filtresult = filtresult[:limit]
             elif table == 'downtimes':
                 if len(filtercolumns) == 0:
-                    filtresult = [self.create_output(y, columns, filtercolumns) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() +self.hosts.values() if len(x.downtimes) > 0], [])]
+                    filtresult = [self.create_output(y, columns, filtercolumns) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], [])]
                 else:
                     prefiltresult = [d for d in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], []) if filter_stack(self.create_output(d, [], filtercolumns))]
                     filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'comments':
                 if len(filtercolumns) == 0:
-                    filtresult = [self.create_output(y, columns, filtercolumns) for y in reduce(list.__add__, [x.comments for x in self.services.values() +self.hosts.values() if len(x.comments) > 0], [])]
+                    filtresult = [self.create_output(y, columns, filtercolumns) for y in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], [])]
                 else:
                     prefiltresult = [c for c in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], []) if filter_stack(self.create_output(c, [], filtercolumns))]
                     filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
@@ -5026,7 +5044,7 @@ class LiveStatus:
         return result
 
 
-    def get_live_data_log(self, table, columns, filtercolumns, filter_stack, sql_filter_stack):
+    def get_live_data_log(self, table, columns, filtercolumns, limit, filter_stack, sql_filter_stack):
         result = []
         if table == 'log':
             # we can apply the filterstack here as well. we have columns and filtercolumns.
@@ -5344,6 +5362,7 @@ class LiveStatus:
         filtercolumns = []
         responseheader = 'off'
         outputformat = 'csv'
+        limit = None
 
         #So set first this format in out global function
         get_full_name.outputformat = outputformat
@@ -5386,6 +5405,9 @@ class LiveStatus:
             elif line.find('ColumnHeaders:') != -1:
                 cmd, columnheaders = line.split(':', 1)
                 columnheaders = columnheaders.strip()
+            elif line.find('Limit:') != -1:
+                cmd, limit = line.split(':', 1)
+                limit = int(limit.strip())
             elif line.find('Filter:') != -1:
                 try:
                     cmd, attribute, operator, reference = line.split(' ', 3)
@@ -5500,12 +5522,12 @@ class LiveStatus:
                     if sql_filter_stack.qsize() > 1:
                         sql_filter_stack = self.and_sql_filter_stack(sql_filter_stack.qsize(), sql_filter_stack)
                     sql_simplefilter_stack = self.get_sql_filter_stack(sql_filter_stack)
-                    result = self.get_live_data_log(table, columns, filtercolumns, simplefilter_stack, sql_simplefilter_stack)
+                    result = self.get_live_data_log(table, columns, filtercolumns, limit, simplefilter_stack, sql_simplefilter_stack)
                 else:
                     #Get the function which implements the Stats: statements
                     stats = stats_filter_stack.qsize()
                     #Apply the filters on the broker's host/service/etc elements
-                    result = self.get_live_data(table, columns, filtercolumns, simplefilter_stack, stats_filter_stack, stats_postprocess_stack)
+                    result = self.get_live_data(table, columns, filtercolumns, limit, simplefilter_stack, stats_filter_stack, stats_postprocess_stack)
                     if stats > 0:
                         columns = range(stats)
                         if len(aliases) == 0:

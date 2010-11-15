@@ -57,6 +57,16 @@ class TestConfig(ShinkenTest):
         self.sched.broks = {}
 
 
+    def lines_equal(self, text1, text2):
+        # gets two multiline strings and compares the contents
+        # lifestatus output may not be in alphabetical order, so this
+        # function is used to compare unordered output with unordered
+        # expected output
+        sorted1 = "\n".join(sorted(text1.split("\n")))
+        sorted2 = "\n".join(sorted(text2.split("\n")))
+        return sorted1 == sorted2
+
+
     def test_status(self):
         self.print_header()
         print "got initial broks"
@@ -742,7 +752,7 @@ localhost;1;scheduler-1;7768;0;1
 """
         print response, 'FUCK'
         print "FUCK", response, "TOTO"
-        self.assert_(response == good_response)
+        self.assert_(self.lines_equal(response, good_response))
 
         #Now we update a scheduler state and we check
         #here the N2
@@ -756,7 +766,7 @@ localhost;1;scheduler-1;7768;0;1
 othernode;0;scheduler-2;7768;1;1
 localhost;1;scheduler-1;7768;0;1
 """
-        self.assert_(response == good_response)
+        self.assert_(self.lines_equal(response, good_response))
 
 
 
@@ -788,7 +798,7 @@ localhost;1;reactionner-1;7769;0
 othernode;1;reactionner-2;7769;1
 """
         print response == good_response
-        self.assert_(response == good_response)
+        self.assert_(self.lines_equal(response, good_response))
 
         #Now the update part
         reac.alive = False
@@ -803,8 +813,7 @@ localhost;1;reactionner-1;7769;0
 othernode;0;reactionner-2;7769;1
 """
         print response == good_response
-        self.assert_(response == good_response)
-
+        self.assert_(self.lines_equal(response, good_response))
 
 
 
@@ -837,7 +846,7 @@ localhost;1;poller-1;7771;0
 othernode;1;poller-2;7771;1
 """
         print response == good_response
-        self.assert_(response == good_response)
+        self.assert_(self.lines_equal(response, good_response))
 
         #Now the update part
         pol.alive = False
@@ -856,7 +865,7 @@ localhost;1;poller-1;7771;0
 othernode;0;poller-2;7771;1
 """
         print response == good_response
-        self.assert_(response == good_response)
+        self.assert_(self.lines_equal(response, good_response))
 
 
 
@@ -945,6 +954,31 @@ test_host_0,test_host_0/test_ok_0;test_router_0
         print response == good_response
         self.assert_(response == good_response)
 
+
+
+    def test_limit(self):
+        self.print_header() 
+        now = time.time()
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get the full hosts table
+        #---------------------------------------------------------------
+        data = 'GET hosts\nColumns: host_name\n'
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """test_host_0
+test_router_0
+"""
+        self.assert_(self.lines_equal(response, good_response))
+
+        data = 'GET hosts\nColumns: host_name\nLimit: 1\n'
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """test_host_0
+"""
+        # it must be test_host_0 because with Limit: the output is 
+        # alphabetically ordered
+        self.assert_(response == good_response)
 
 
 
