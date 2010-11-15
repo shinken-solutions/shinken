@@ -430,13 +430,14 @@ ResponseHeader: fixed16"""
         self.assert_(len(svc.comments) == 2)
 
         self.update_broker()
+        svc_comment_list = (',').join([str(c.id) for c in svc.comments])
 
         #data = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
         data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """200          17
-[[[1,2],[],0,0]]
+[[[""" + svc_comment_list +"""],[],0,0]]
 """
         self.assert_(response == good_response) # json
 
@@ -444,7 +445,7 @@ ResponseHeader: fixed16"""
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """200           9
-1,2;;0;0
+""" + svc_comment_list + """;;0;0
 """
         self.assert_(response == good_response) # csv
 
