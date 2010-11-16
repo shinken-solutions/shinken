@@ -733,25 +733,20 @@ class Service(SchedulingItem):
             (key_values, errcode) = get_key_value_sequence(entry, default_value)
 
             if key_values:
-                for key in key_values:
-                    value = key_values[key]
+                for key_value in key_values:
+                    key = key_value['KEY']
+                    value = key_value['VALUE']
                     new_s = self.copy()
-                
-                    if isinstance(value, list):
-                        pass #this is for key/value/value1/value2
-                    else:
-                        #print "Got key:%s and value:%s" % (key, value)
-                        new_s.host_name = host.get_name()
-                        if self.is_tpl(): # if template, the new one is not
-                            new_s.register = 1 
-                        #change the service_description and check_command by
-                        #key:value
-                        if hasattr(self, 'service_description'):
-                            new_s.service_description = self.service_description.replace('$KEY$', key)
+                    new_s.host_name = host.get_name()
+                    if self.is_tpl(): # if template, the new one is not
+                        new_s.register = 1 
+                    for key in key_value:
+                        if key == 'KEY':
+                            if hasattr(self, 'service_description'):
+                                new_s.service_description = self.service_description.replace('$'+key+'$', key_value[key])
                         if hasattr(self, 'check_command'):
-                            new_s.check_command = new_s.check_command.replace('$KEY$', key)
-                            new_s.check_command = new_s.check_command.replace('$VALUE$', value)
-
+                            # here we can replace VALUE, VALUE1, VALUE2,...
+                            new_s.check_command = new_s.check_command.replace('$'+key+'$', key_value[key])
                     #And then add in our list this new service
                     duplicates.append(new_s)
                     #print "DBG: and finally got", new_s.service_description, new_s.check_command

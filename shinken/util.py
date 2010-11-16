@@ -264,70 +264,57 @@ GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX = 1
 GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT = 2
 GET_KEY_VALUE_SEQUENCE_ERROR_NODE= 3
 def get_key_value_sequence(entry, default_value=None):
-    #Look if we end with a "value" so a $
-    #because we will have problem if we don't end
-    #like it
-    end_with_value = (entry[-1] == '$')
-    print "End with value?", end_with_value
-
+    array1 = []
+    array2 = []
     conf_entry = entry
-    #Here we need a special string to replace after
-    long_and_random = "Z"*10
-    #Now entry is a dict from outside, and inner key start with a '
-    entry = "{'%s'}" % entry
-    #first we make key look like C': 'blabla...
-    entry = entry.replace('$(', "': '")
-    #And the end of value with a '
-    entry = entry.replace(')$', "'"+long_and_random)
-    #Now we clean the ZZZ,D into a ,'D
-    entry = entry.replace(long_and_random+",", ",'")
-    #And clean the trailing ZZZ' because it's not useful, there is no key after
-    entry = entry.replace(long_and_random+"'", '')
 
-    #Now need to see the entry taht are alone, with no value
-    #the last one will be a 'G'} with no value if not set, and
-    #will raise an error
-    if len(entry) >= 2 and not end_with_value:
-        entry = entry[:-2]
-        #And so add a None as value
-        entry = entry + "': None}"
+    # match a key$(value1..n)$
+    keyval_pattern_txt = r"""
+\s*(?P<key>[^,]+?)(?P<values>(\$\(.*?\)\$)*)(?:[,]|$)
+"""
+    keyval_pattern = re.compile('(?x)' + keyval_pattern_txt)
+    # match a whole sequence of key$(value1..n)$
+    all_keyval_pattern = re.compile('(?x)^(' + keyval_pattern_txt + ')+$')
+    # match a single value
+    value_pattern = re.compile('(?:\$\((?P<val>.*?)\)\$)')
+    # match a sequence of values
+    all_value_pattern = re.compile('^(?:\$\(.*?\)\$)+$')
 
-    #Ok we've got our dict, we can evel it (and pray)
-    try:
-        r = eval(entry)
-    except SyntaxError:
+    if all_keyval_pattern.match(conf_entry):
+        for mat in re.finditer(keyval_pattern, conf_entry):
+            r = { 'KEY' : mat.group('key') }
+            # The key is in mat.group('key')
+            # If there are also value(s)...
+            if mat.group('values'):
+                if all_value_pattern.match(mat.group('values')):
+                    # If there are multiple values, loop over them
+                    valnum = 1
+                    for val in re.finditer(value_pattern, mat.group('values')):
+                        r['VALUE' + str(valnum)] = val.group('val')
+                        valnum += 1
+                else:
+                    # Value syntax error
+                    return (None, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX)
+            else:
+                r['VALUE1'] = None
+            array1.append(r)
+    else:
+        # Something is wrong with the values. (Maybe unbalanced '$(')
+        # TODO: count opening and closing brackets in the pattern
         return (None, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX)
 
-    #special case : key with a , are in fact KEY1, KEY2, ... KEYN and KEY1,2 got not real value
-    #only N got one
-    keys_to_del = []
-    keys_to_add = {}
-    for key in r:
-        if ',' in key:
-            keys_to_del.append(key)
-            value = r[key]
-            elts = key.split(',')
-            nb_elts = len(elts)
-            non_value_keys = elts[:-1]
-            for k in non_value_keys:
-                keys_to_add[k] = None
-            keys_to_add[elts[-1]] = value
-    #clean/update what we got
-    for k in keys_to_del:
-        del r[k]
-    for k in keys_to_add:
-        r.update(keys_to_add)
     # now fill the empty values with the default value
-    for key in r:
-        if r[key] == None:
+    for r in array1:
+        if r['VALUE1'] == None:
             if default_value == None:
                 return (None, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT)
             else:
-                r[key] = default_value
+                r['VALUE1'] = default_value
+        r['VALUE'] = r['VALUE1']
 
     #Now create new one but for [X-Y] matchs
-    keys_to_del = []
-    keys_to_add = {}
+    # array1 holds the original entries. Some of the keys may contain wildcards
+    # array2 is filled with originals and inflated wildcards
     #import time
     #t0 = time.time()
     #NodeSet = None
@@ -335,10 +322,10 @@ def get_key_value_sequence(entry, default_value=None):
         #The patern that will say if we have a [X-Y] key.
         pat = re.compile('\[(\d*)-(\d*)\]')
 
-    for key in r:
+    for r in array1:
 
-        value = r[key]
-        orig_key = key
+        key = r['KEY']
+        orig_key = r['KEY']
 
         #We have no choice, we cannot use NodeSet, so we use the
         #simple regexp
@@ -377,8 +364,6 @@ def get_key_value_sequence(entry, default_value=None):
                         still_loop = False
 
                 #Now we have our xy_couples, we can manage them
-                #The key was just a generator, we can remove it
-                keys_to_del.append(orig_key)
 
                 #We search all patern change rules
                 rules = got_generation_rule_patern_change(xy_couples)
@@ -386,7 +371,11 @@ def get_key_value_sequence(entry, default_value=None):
                 #Then we apply them all to get ours final keys
                 for rule in rules:
                     res = apply_change_recursive_patern_change(orig_key, rule)
-                    keys_to_add[res] = value
+                    new_r = {}
+                    for key in r:
+                        new_r[key] = r[key]
+                    new_r['KEY'] = res
+                    array2.append(new_r)
 
             else:
                 #The key was just a generator, we can remove it
@@ -400,18 +389,19 @@ def get_key_value_sequence(entry, default_value=None):
                 #Then we apply them all to get ours final keys
                 for new_key in new_keys:
                 #res = apply_change_recursive_patern_change(orig_key, rule)
-                    keys_to_add[new_key] = value
+                    new_r = {}
+                    for key in r:
+                        new_r[key] = r[key]
+                    new_r['KEY'] = new_key
+                    array2.append(new_r)
+        else:
+            # There were no wildcards
+            array2.append(r)
 
-
-    #We apply it
-    for k in keys_to_del:
-        del r[k]
-    for k in keys_to_add:
-        r.update(keys_to_add)
 
     #t1 = time.time()
     #print "***********Diff", t1 -t0
 
-    return (r, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR)
+    return (array2, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR)
 
 

@@ -99,6 +99,33 @@ class TestConfig(ShinkenTest):
 
 
 
+    def test_service_generators_array(self):
+
+        host = self.sched.hosts.find_by_name("sw_1")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+
+        print "All service of", "sw_1"
+        for s in host.services:
+            print s.get_name()
+
+        svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Gigabit0/1')
+        self.assert_(svc != None)
+        self.assert_(svc.check_command.call == 'check_service!1!80%!90%')
+
+        svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Gigabit0/2')
+        self.assert_(svc != None)
+        self.assert_(svc.check_command.call == 'check_service!2!80%!90%')
+
+        svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Ethernet0/1')
+        self.assert_(svc != None)
+        self.assert_(svc.check_command.call == 'check_service!3!80%!95%')
+
+        svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service ISDN1')
+        self.assert_(svc != None)
+        self.assert_(svc.check_command.call == 'check_service!4!80%!95%')
+
+
 if __name__ == '__main__':
     unittest.main()
 
