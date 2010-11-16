@@ -575,6 +575,19 @@ class LiveStatus:
                 'description' : 'The importance we gave to this host between hte minimum 0 and the maximum 5',
                 'type' : 'int',
             },
+            'source_problems' : {
+                'description' : 'The name of the source problems (host or service)',
+                'prop' : 'source_problems',
+                'type' : 'list',
+                'depythonize' : from_svc_hst_distinct_lists,
+            },
+            'impacts' : {
+                'description' : 'List of what the source impact (list of hosts and services)',
+                'prop' : 'impacts',
+                'type' : 'list',
+                'depythonize' : from_svc_hst_distinct_lists,
+            },
+            
         },
 
         'Service' : {
@@ -1287,6 +1300,19 @@ class LiveStatus:
                 'description' : 'The importance we gave to this service between hte minimum 0 and the maximum 5',
                 'type' : 'int',
             },
+            'source_problems' : {
+                'description' : 'The name of the source problems (host or service)',
+                'prop' : 'source_problems',
+                'type' : 'list',
+                'depythonize' : from_svc_hst_distinct_lists,
+            },
+            'impacts' : {
+                'description' : 'List of what the source impact (list of hosts and services)',
+                'prop' : 'impacts',
+                'type' : 'list',
+                'depythonize' : from_svc_hst_distinct_lists,
+            },
+            
         },
 
         'Hostgroup' : {

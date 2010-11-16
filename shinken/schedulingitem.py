@@ -191,10 +191,6 @@ class SchedulingItem(Item):
             if not was_an_impact:
                 self.set_impact_state()
 
-            #And we register a new broks for update status
-            b = self.get_update_status_brok()
-            self.broks.append(b)
-
             #Ok now we can be a simple impact
             impacts.append(self)
             if pb not in self.source_problems:
@@ -213,6 +209,11 @@ class SchedulingItem(Item):
                             #print "I can call %s for registering a root problem (%s)" % (impact.get_dbg_name(), pb.get_dbg_name())
                             new_impacts = impact.register_a_problem(pb)
                             impacts.extend(new_impacts)
+
+            #And we register a new broks for update status
+            b = self.get_update_status_brok()
+            self.broks.append(b)
+
 
         #now we return all impacts (can be void of course)
         #DBG

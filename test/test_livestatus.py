@@ -982,6 +982,86 @@ test_router_0
 
 
 
+    def test_problem_impact_in_host_service(self):
+        self.print_header() 
+        now = time.time()
+        self.update_broker()
+
+        host_router_0 = self.sched.hosts.find_by_name("test_router_0")
+        host_router_0.checks_in_progress = []
+
+        #Then initialize host under theses routers
+        host_0 = self.sched.hosts.find_by_name("test_host_0")
+        host_0.checks_in_progress = []
+
+        all_hosts = [host_router_0, host_0]
+        all_routers = [host_router_0]
+        all_servers = [host_0]
+
+        print "- 4 x UP -------------------------------------"
+        self.scheduler_loop(1, [[host_router_0, 0, 'UP'], [host_0, 0, 'UP']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN']], do_sleep=False)
+
+        #Max attempt is reach, should be HARD now
+        for h in all_routers:
+            self.assert_(h.state == 'DOWN')
+            self.assert_(h.state_type == 'HARD')
+
+        for b in self.sched.broks.values():
+            print "All broks", b.type, b
+            if b.type == 'update_host_status':
+                print "***********"
+                print "Impacts", b.data['impacts']
+                print "Sources",  b.data['source_problems']
+
+        for b in host_router_0.broks:
+            print " host_router_0.broks", b
+
+        self.update_broker()
+        
+        print "source de host_0", host_0.source_problems
+        for i in host_0.source_problems:
+            print "source", i.get_name()
+        print "impacts de host_router_0", host_router_0.impacts
+        for i in host_router_0.impacts:
+            print "impact", i.get_name()
+
+        #---------------------------------------------------------------
+        # get the full hosts table
+        #---------------------------------------------------------------
+        print "Got source problems"
+        data = 'GET hosts\nColumns: host_name is_impact source_problems\n'
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print "moncul", response
+        #good_response = """test_host_0
+#test_router_0
+#"""
+        #self.assert_(self.lines_equal(response, good_response))
+
+        print "Now got impact"
+        data = 'GET hosts\nColumns: host_name is_problem impacts\n'
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print "moncul", response
+        good_response = """test_host_0
+test_router_0
+"""
+#        self.assert_(self.lines_equal(response, good_response))
+
+        data = 'GET hosts\nColumns: host_name\nLimit: 1\n'
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        good_response = """test_host_0
+"""
+        # it must be test_host_0 because with Limit: the output is 
+        # alphabetically ordered
+#        self.assert_(response == good_response)
+
+
+
 if __name__ == '__main__':
     #import cProfile
     command = """unittest.main()"""
