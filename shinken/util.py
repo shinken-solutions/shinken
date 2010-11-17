@@ -379,7 +379,7 @@ def get_key_value_sequence(entry, default_value=None):
 
             else:
                 #The key was just a generator, we can remove it
-                keys_to_del.append(orig_key)
+                #keys_to_del.append(orig_key)
 
                 #We search all patern change rules
                 #rules = got_generation_rule_patern_change(xy_couples)
