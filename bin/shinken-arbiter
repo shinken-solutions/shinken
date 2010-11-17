@@ -481,8 +481,8 @@ class Arbiter(Daemon):
         #TODO : check OK or not
         self.pidfile = self.conf.lock_file
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
-        self.user = self.conf.nagios_user
-        self.group = self.conf.nagios_group
+        self.user = self.conf.shinken_user
+        self.group = self.conf.shinken_group
         self.workdir = os.path.expanduser('~'+self.user)
 
         #If we go, we must go in daemon or not

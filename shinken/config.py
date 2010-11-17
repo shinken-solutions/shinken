@@ -84,8 +84,8 @@ class Config(Item):
                 'temp_file' : {'required':False, 'usage' : 'unused', 'usage_text' : ' temporary files are not used in the shinken architecture.'},
                 'status_file' : {'required':False, 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
                 'status_update_interval' : {'required':False, 'pythonize': to_int, 'usage' : 'unused', 'usage_text' : 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'},
-                'nagios_user' : {'required':False, 'default':'shinken'},
-                'nagios_group' : {'required':False, 'default':'shinken'},
+                'shinken_user' : {'required':False, 'default':'shinken'},
+                'shinken_group' : {'required':False, 'default':'shinken'},
                 'enable_notifications' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None), (Contact, None)]},
                 'execute_service_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'execute_checks')]},
                 'accept_passive_service_checks' : {'required':False, 'default':'1', 'pythonize': to_bool, 'class_inherit' : [(Service, 'accept_passive_checks')]},
@@ -268,6 +268,14 @@ class Config(Item):
                        'serviceescalation' : (Serviceescalation, Serviceescalations, 'serviceescalations'),
                        'hostescalation' : (Hostescalation, Hostescalations, 'hostescalations'),
                        }
+
+    #This tab is used to transform old parameters name into new ones
+    #so from Nagios2 format, to Nagios3 ones
+    old_properties = {
+        'nagios_user' : 'shinken_user',
+        'nagios_group' : 'shinken_group'
+        }
+
 
 
     def __init__(self):
@@ -655,6 +663,7 @@ class Config(Item):
     #It's used to change Nagios2 names to Nagios3 ones
     #For hosts and services
     def old_properties_names_to_new(self):
+        super(Config, self).old_properties_names_to_new()
         self.hosts.old_properties_names_to_new()
         self.services.old_properties_names_to_new()
 
