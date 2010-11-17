@@ -1,0 +1,222 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          shinken
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      S 0 1 6
+# Short-Description: shinken
+# Description:       shinken monitoring daemon
+### END INIT INFO
+
+NAME="shinken"
+SCRIPTNAME=$0
+AVAIL_MODULES="scheduler poller reactionner broker arbiter"
+BIN="/usr/local/shinken/bin"
+VAR="/usr/local/shinken/var"
+ETC="/usr/local/shinken/etc"
+
+usage() {
+    echo "Usage: $SCRIPTNAME [ -d ] {start|stop|restart|status|check} [ <$AVAIL_MODULES> ]" >&2
+    echo ""                                                                           >&2
+    echo " -d  start module in debug mode, only useful with start|restart"            >&2
+    echo ""                                                                           >&2
+    exit 3
+}
+
+DEBUG=0
+while getopts "d" flag; do
+    case "$flag" in
+        d)
+            DEBUG=1
+        ;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+CMD=$1
+shift
+SUBMODULES=$*
+
+if [ -z "$SUBMODULES" ]; then
+    SUBMODULES=$AVAIL_MODULES
+else
+    # verify given modules
+    for mod1 in $SUBMODULES; do
+        found=0
+        for mod2 in $AVAIL_MODULES; do
+            [ $mod1 = $mod2 ] && found=1;
+        done
+        [ $found = 0 ] && usage
+    done
+fi
+
+
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+[ -f /etc/default/rcS ] && . /etc/default/rcS
+
+# Define LSB log_* functions.
+. /lib/lsb/init-functions
+
+#
+# return the pid for a submodule
+#
+getmodpid() {
+    mod=$1
+    pidfile="$VAR/${mod}d.pid"
+    if [ -s $pidfile ]; then
+        cat $pidfile
+    fi
+}
+
+#
+# stop modules
+#
+do_stop() {
+    ok=0
+    fail=0
+    echo "stoping $NAME...";
+    for mod in $SUBMODULES; do
+        pid=`getmodpid $mod`;
+        printf "%-15s: " $mod
+        if [ ! -z $pid ]; then
+            for cpid in $(ps -aef | grep $pid | grep "shinken-" | awk '{print $2}'); do
+                kill $cpid > /dev/null 2>&1
+            done
+        fi
+        echo "done"
+    done
+    return 0
+}
+
+
+#
+# Display status
+#
+do_status() {
+    MODULES=$1
+    [ -z $MODULES ] && MODULES=$SUBMODULES;
+    ok=0
+    fail=0
+    echo "status $NAME: ";
+    for mod in $MODULES; do
+        pid=`getmodpid $mod`;
+        printf "%-15s: " $mod
+        if [ ! -z $pid ]; then
+            ps -p $pid >/dev/null 2>&1
+            if [ $? = 0 ]; then
+                echo "RUNNING (pid $pid)"
+                ok=$((ok+1))
+            else
+                echo "NOT RUNNING"
+                fail=$((fail+1))
+            fi
+        else
+            echo "NOT RUNNING"
+            fail=$((fail+1))
+        fi
+    done
+    if [ $fail -gt 0 ]; then
+        return 1
+    fi
+    return 0
+}
+
+#
+# start our modules
+#
+do_start() {
+    printf "starting $NAME";
+    [ $DEBUG = 1 ] && printf " (DEBUG Mode)"
+    echo ": "
+    for mod in $SUBMODULES; do
+        printf "%-15s: " $mod
+        DEBUGCMD=""
+        [ $DEBUG = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
+        `do_status $mod  > /dev/null 2>&1`
+        if [ $? = 0 ]; then
+            pid=`getmodpid $mod`;
+            echo "ALREADY RUNNING (pid $pid)"
+        else
+            if [ $mod != "arbiter" ]; then
+                output=`$BIN/shinken-${mod} -d -c $ETC/${mod}d.ini $DEBUGCMD 2>&1`
+            else
+                output=`$BIN/shinken-${mod} -d -c $ETC/nagios.cfg -c $ETC/shinken-specific.cfg $DEBUGCMD 2>&1`
+            fi
+            if [ $? = 0 ]; then
+                echo "OK"
+            else
+                output=`echo $output | tail -1` # only show one line of error output...
+                echo "FAILED $output" 
+            fi
+        fi
+    done
+}
+
+#
+# do the config check
+#
+do_check() {
+    $BIN/shinken-arbiter -v -c $ETC/../shinken.cfg -c $ETC/shinken-specific.cfg $DEBUGCMD 2>&1
+    return $?
+}
+
+#
+# check for our command
+#
+case "$CMD" in
+  start)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Starting $NAME"
+    do_start
+    do_status > /dev/null 2>&1
+    case "$?" in
+        0) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+        1) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
+  stop)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $NAME"
+    do_stop
+    do_status > /dev/null 2>&1
+    case "$?" in
+        0) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+        1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+    esac
+    ;;
+  restart)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Restarting $NAME"
+    do_stop
+    do_status > /dev/null 2>&1
+    case "$?" in
+      1)
+        do_start
+        do_status > /dev/null 2>&1
+        case "$?" in
+            0) log_end_msg 0 ;;
+            *) log_end_msg 1 ;; # Failed to start
+        esac
+        ;;
+      *)
+        # Failed to stop
+        log_end_msg 1
+        ;;
+    esac
+    ;;
+  status)
+    do_status
+    ;;
+  check|checkconfig)
+    do_check
+    case "$?" in
+        0) log_end_msg 0 ;;
+        *) log_end_msg 1 ;; # Failed config check
+    esac
+    ;;
+  *)
+    usage;
+    ;;
+esac
