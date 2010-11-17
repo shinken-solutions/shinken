@@ -57,7 +57,7 @@ class Item(object):
         #[0] = +  -> new key-plus
         #[0] = _  -> new custom entry in UPPER case
         for key in params:
-            if params[key][0] == '+':
+            if len(params[key]) >= 1 and params[key][0]  == '+':
                 #Special case : a _MACRO can be a plus. so add to plus
                 #but upper the key for the macro name
                 if key[0] == "_":

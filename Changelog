@@ -3,6 +3,63 @@ Shinken ChangeLog
 #######################
 
 
+0.4 - 18/11/2010
+------------------
+ENHANCEMENTS
+	*Add : Service generators
+	*Add : "Limit :" in livestatus
+	*Add : the scheduler now save retention data before stop or take a new conf
+	*Add : the broker clean quit the modules before quitting
+	*Add : better output to know which external process for the broker is who in the log
+	*Add : NodeSet lib use if available for the [X-Y] keys in service generators.
+	*Add : retention modules, Memcache, Redis or simple file.
+	*Add : lot of tests, even a end_to_end one for Ha and load balanced installations
+	*Add : user can put what he want as MACRO in resources.cfg
+	*Add : lot of log output, and clean a lot of others
+	*Add : conf sample for PNP integration.
+	*Add : (Nicolas Dupeux) add a NSCA server module for the Arbiter! (only XOR and none encryption from now)
+	*Add : now the retention_update_interval parameter is managed.
+	*Add : the ! character before a host_name is now managed in the services. (even if host was defined in a hostgroup). And with test.
+	*Add : perfdata command management for host/service
+	*Add : manage modules in the Arbtier and in the schedulers
+	*Add : nowthe whole documentation is done in the wiki
+	*Add : obsess_over_host/service and executing oc*p_commands like eventhandlers
+	*Add : "templates" and modes and more for service/host perf data module.
+	*Add : now host with no address are fill with host_name for this value.
+	*Add : timeperiod inheritance
+	*Add : Allow "members *" in a hostgroup definition
+	*Add : manage inherit_parents for dependencies.
+	*Add : system time change catch for satellites.
+	*Add : enable_environment_macros now create or not the env dict for checks
+	*Add : O*HP command management
+
+FIXES
+	*Fix : Some missing properties in the livestatus tables
+	*Fix : Some missing properties in the NDO/Mysql export
+	*Fix : parents property was not stripped(), and a error value was not catched as error
+	*fix : missing some errors catch in contact definitions
+	*Fix : Nagios allow contact_name to miss if there is an alias
+	*Fix : Nagios allow a contact with no 'action' if his options are n/n
+	*Fix : Resolv macro can loop forever with special output. Now limit it at 32 loop max!
+	*Fix : the env_macros were enable if we use the tweaks, not good. And they are REALLY CPU killers.
+	*Fix : LiveStatus : do not close the socket before we are sure the other peer send us nothing. If so, we can close it.
+	*Fix : solve a case where config files do not end with a line return and will mix parameters.
+	*Fix : broker spare not look at pollers/reactionners when he come active.
+	*Fix : now the poller/reactionner REALLY raise broks to the broker (it was clear before...)
+	*Fix : bug in the Broker that make in some cases broks lost for extarnal modules if they come from the arbiter. (like logs)
+	*Fix : add a workaround to the livestatus module so it can handle requests from thruk 0.71.1 (which uses strange Stats: requests)
+	*Fix : rename all 'binaries' without the .py extention so distrib will be happy.
+	*Fix : livestatus work now with Python 2.4
+	*Fix : (Hermann Lauer) important bug in status.dat (and in fact all other 'external modules') that make the brok not manage in the good order in some case or Arbtier restart. Thanks a lot to Hermann Lauer that help me a LOT with all the debug logs!
+	*Fix : (Zoran Zaric) big indentation cleanup
+	*Fix : error handling in timeperiod inheritance
+	*Fix : clean on the default configuration
+	*Fix : manage additional_freshness_latency parameter with a test for check_freshness now.
+	*Fix : setup.py can create a zip file (egg) for the librairy under Centos. It's not a good thing. It should avoid it
+	*Fix : From Nicolas Dupeux : error in livestatus split.
+
+	
+	
 
 0.3 - 06/10/2010
 ------------------
@@ -13,7 +70,7 @@ ENHANCEMENTS
 	*Add : livestatus export about problem/impacts
 	*Add : clean quit on daemons (pid file and sub processes)
 	*Add : maintenance_period parameter in hosts and services
-	*Add :even more unit test cases
+	*Add : even more unit test cases
 	*Add : now external commands raised in livestatus module are taken by the arbiter
 	*Add : satellites states are now exported by livestatus
 	*Add : arbiter module managment

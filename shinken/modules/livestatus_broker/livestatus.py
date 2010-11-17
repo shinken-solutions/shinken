@@ -570,7 +570,7 @@ class LiveStatus:
                 'description' : '3D-Coordinates: Z',
                 'type' : 'float',
             },
-            'importance' : {
+            'criticity' : {
                 'converter' : int,
                 'description' : 'The importance we gave to this host between hte minimum 0 and the maximum 5',
                 'type' : 'int',
@@ -1295,7 +1295,7 @@ class LiveStatus:
                 'prop' : 'state_type_id',
                 'type' : 'int',
             },
-            'importance' : {
+            'criticity' : {
                 'converter' : int,
                 'description' : 'The importance we gave to this service between hte minimum 0 and the maximum 5',
                 'type' : 'int',
