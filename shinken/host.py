@@ -153,7 +153,7 @@ class Host(SchedulingItem):
         'services' : {'default' : []}, #no brok ,to much links
         'checks_in_progress' : {'default' : []},#No broks, it's just internal, and checks have too links
         'notifications_in_progress' : {'default' : {}, 'retention' : True},#No broks, it's just internal, and checks have too links
-        'downtimes' : {'default' : [], 'fill_brok' : ['full_status']},
+        'downtimes' : {'default' : [], 'fill_brok' : ['full_status'], 'retention' : True},
         'comments' : {'default' : [], 'fill_brok' : ['full_status'], 'retention' : True},
         'flapping_changes' : {'default' : [], 'fill_brok' : ['full_status'], 'retention' : True},
         'percent_state_change' : {'default' : 0.0, 'fill_brok' : ['full_status'], 'retention' : True, 'pythonize' : to_float},

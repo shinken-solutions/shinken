@@ -144,7 +144,7 @@ class Service(SchedulingItem):
         'last_state_update' : {'default' : time.time(), 'fill_brok' : ['full_status'], 'retention' : True},
         'checks_in_progress' : {'default' : []}, # no brok because checks are too linked
         'notifications_in_progress' : {'default' : {}, 'retention' : True}, # no broks because notifications are too linked
-        'downtimes' : {'default' : [], 'fill_brok' : ['full_status']},
+        'downtimes' : {'default' : [], 'fill_brok' : ['full_status'], 'retention' : True},
         'comments' : {'default' : [], 'fill_brok' : ['full_status'], 'retention' : True},
         'flapping_changes' : {'default' : [], 'fill_brok' : ['full_status'], 'retention' : True},
         'flapping_comment_id' : {'default' : 0, 'fill_brok' : ['full_status'], 'retention' : True},
