@@ -82,6 +82,9 @@ def format_t_into_dhms_format(t):
 def to_int(val):
     return int(float(val))
 
+def to_float(val):
+    return float(val)
+
 def to_char(val):
     return val[0]
 

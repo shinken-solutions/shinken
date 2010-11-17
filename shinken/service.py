@@ -30,7 +30,7 @@ except ImportError:
 from autoslots import AutoSlots
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE
+from util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE
 from macroresolver import MacroResolver
 from eventhandler import EventHandler
 from log import Log
@@ -114,7 +114,7 @@ class Service(SchedulingItem):
         'last_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'next_chk' : {'default' : 0, 'fill_brok' : ['full_status', 'next_schedule']},
         'in_checking' : {'default' : False, 'fill_brok' : ['full_status', 'check_result', 'next_schedule'], 'retention' : True},
-        'latency' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
+        'latency' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True, 'pythonize' : to_float}, 
         'attempt' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'state' : {'default' : 'PENDING', 'fill_brok' : ['full_status'], 'retention' : True},
         'state_id' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
@@ -132,9 +132,9 @@ class Service(SchedulingItem):
         'duration_sec' : {'default' : 0, 'fill_brok' : ['full_status'], 'retention' : True},
         'state_type' : {'default' : 'HARD', 'fill_brok' : ['full_status'], 'retention' : True},
         'state_type_id' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
-        'output' : {'default' : '', 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
-        'long_output' : {'default' : '', 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
-        'is_flapping' : {'default' : False, 'fill_brok' : ['full_status'], 'retention' : True},
+        'output' : {'default' : '', 'fill_brok' : ['full_status', 'check_result'], 'retention' : True, 'pythonize' : None},
+        'long_output' : {'default' : '', 'fill_brok' : ['full_status', 'check_result'], 'retention' : True, 'pythonize' : None},
+        'is_flapping' : {'default' : False, 'fill_brok' : ['full_status'], 'retention' : True, 'pythonize' : to_bool},
         'act_depend_of' : {'default' : [] }, #dependencies for actions like notif of event handler, so AFTER check return
         'chk_depend_of' : {'default' : []}, #dependencies for checks raise, so BEFORE checks
 
@@ -148,7 +148,7 @@ class Service(SchedulingItem):
         'comments' : {'default' : [], 'fill_brok' : ['full_status'], 'retention' : True},
         'flapping_changes' : {'default' : [], 'fill_brok' : ['full_status'], 'retention' : True},
         'flapping_comment_id' : {'default' : 0, 'fill_brok' : ['full_status'], 'retention' : True},
-        'percent_state_change' : {'default' : 0.0, 'fill_brok' : ['full_status'], 'retention' : True},
+        'percent_state_change' : {'default' : 0.0, 'fill_brok' : ['full_status'], 'retention' : True, 'pythonize' : to_float},
         'problem_has_been_acknowledged' : {'default' : False, 'fill_brok' : ['full_status'], 'retention' : True},
         'acknowledgement' : {'default' : None, 'retention' : True},
         'acknowledgement_type' : {'default' : 1, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
@@ -157,7 +157,7 @@ class Service(SchedulingItem):
         'should_be_scheduled' : {'default' : 1, 'fill_brok' : ['full_status'], 'retention' : True},
         'last_problem_id' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'current_problem_id' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
-        'execution_time' : {'default' : 0.0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
+        'execution_time' : {'default' : 0.0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True, 'pythonize' : to_float},
         'last_notification' : {'default' : time.time(), 'fill_brok' : ['full_status'], 'retention' : True},
         'current_notification_number' : {'default' : 0, 'fill_brok' : ['full_status'], 'retention' : True},
         'current_notification_id' : {'default' : 0, 'fill_brok' : ['full_status'], 'retention' : True},
@@ -169,7 +169,7 @@ class Service(SchedulingItem):
         'end_time' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'early_timeout' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
         'return_code' : {'default' : 0, 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
-        'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result'], 'retention' : True},
+        'perf_data' : {'default' : '', 'fill_brok' : ['full_status', 'check_result'], 'retention' : True, 'pythonize' : None},
         'last_perf_data' : {'default' : '', 'retention' : True},
         'host' : {'default' : None},
         'customs' : {'default' : {}},
