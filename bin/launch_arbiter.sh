@@ -5,4 +5,4 @@ BIN=$DIR"/../bin"
 ETC=$DIR"/../etc"
 
 echo "Launching Arbiter (that read configuration and dispatch it)"
-$BIN/shinken-arbiter.py -d -c $ETC/nagios.cfg -c $ETC/shinken-specific.cfg
+$BIN/shinken-arbiter -d -c $ETC/nagios.cfg -c $ETC/shinken-specific.cfg
