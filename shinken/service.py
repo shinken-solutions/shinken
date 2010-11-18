@@ -831,11 +831,12 @@ class Services(Items):
     #service -> command
     #service -> timepriods
     #service -> contacts
-    def linkify(self, hosts, commands, timeperiods, contacts, resultmodulations, escalations):
+    def linkify(self, hosts, commands, timeperiods, contacts, resultmodulations, escalations, servicegroups):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
         self.linkify_s_by_hst(hosts)
+        self.linkify_s_by_sg(servicegroups)
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
         self.linkify_with_contacts(contacts)
@@ -868,6 +869,26 @@ class Services(Items):
                     hst.add_service_link(s)
             except AttributeError , exp:
                 pass #Will be catch at the is_correct moment
+
+
+    #We look for servicegroups property in services and
+    #link them
+    def linkify_s_by_sg(self, servicegroups):
+        for s in self:
+            if not s.is_tpl():
+                new_servicegroups = []
+                if hasattr(s, 'servicegroups') and s.servicegroups != '':
+                    sgs = s.servicegroups.split(',')
+                    for sg_name in sgs:
+                        sg_name = sg_name.strip()
+                        sg = servicegroups.find_by_name(sg_name)
+                        if sg != None:
+                            new_servicegroups.append(sg)
+                        else:
+                            err = "Error : the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
+                            s.configuration_errors.append(err)
+                s.servicegroups = new_servicegroups
+
 
 
     #Delete services by ids

@@ -775,11 +775,12 @@ class Hosts(Items):
     #hosts -> hosts (parents, etc)
     #hosts -> commands (check_command)
     #hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, escalations=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, escalations=None, hostgroups=None):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
         self.linkify_h_by_h()
+        self.linkify_h_by_hg(hostgroups)
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
 
@@ -838,6 +839,30 @@ class Hosts(Items):
             else:
                 print "Notice : applying default realm %s to host %s" % (default_realm.get_name(), h.get_name())
                 h.realm = default_realm
+
+    #We look for hostgroups property in hosts and
+    #link them
+    def linkify_h_by_hg(self, hostgroups):
+        #Hostgroups property need to be fullfill for got the informations
+        #self.apply_partial_inheritance('hostgroups')
+        #self.apply_partial_inheritance('contact_groups')
+
+        #Register host in the hostgroups
+        for h in self:
+            if not h.is_tpl():
+                new_hostgroups = []
+                if hasattr(h, 'hostgroups') and h.hostgroups != '':
+                    hgs = h.hostgroups.split(',')
+                    for hg_name in hgs:
+                        hg_name = hg_name.strip()
+                        hg = hostgroups.find_by_name(hg_name)
+                        if hg != None:
+                            new_hostgroups.append(hg)
+                        else:
+                            err = "Error : the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
+                            h.configuration_errors.append(err)
+                h.hostgroups = new_hostgroups
+                            
 
 
     #It's used to change old Nagios2 names to

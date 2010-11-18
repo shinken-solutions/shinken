@@ -140,6 +140,12 @@ class Hostgroups(Itemgroups):
             #We find the id, we remplace the names
             hg.replace_members(new_mbrs)
 
+            #Now register us in our members
+            for h in hg.members:
+                h.hostgroups.append(hg)
+                #and be sure we are uniq in it
+                h.hostgroups = list(set(h.hostgroups))
+
 
     #More than an explode function, but we need to already
     #have members so... Will be really linkify just after
