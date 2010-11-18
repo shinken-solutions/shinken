@@ -67,6 +67,19 @@ class TestConfig(ShinkenTest):
         return sorted1 == sorted2
 
 
+    def show_broks(self, title):
+        print
+        print "--- ", title
+        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+            if re.compile('^service_').match(brok.type):
+                print "BROK:", brok.type
+                print "BROK   ", brok.data['in_checking']
+        self.update_broker()
+        data = 'GET services\nColumns: service_description is_executing\n'
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+
+
     def test_status(self):
         self.print_header()
         print "got initial broks"
@@ -1060,6 +1073,101 @@ test_router_0
         # alphabetically ordered
 #        self.assert_(response == good_response)
 
+
+
+    def test_thruk_servicegroup(self):
+        self.print_header()
+        now = time.time()
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get services of a certain servicegroup
+        # test_host_0/test_ok_0 is in 
+        #   servicegroup_01,ok via service.servicegroups
+        #   servicegroup_02 via servicegroup.members
+        #---------------------------------------------------------------
+        data = """GET services
+Columns: host_name service_description
+Filter: groups >= servicegroup_01
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        self.assert_(response == """200          22
+test_host_0;test_ok_0
+""")
+        data = """GET services
+Columns: host_name service_description
+Filter: groups >= servicegroup_02
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        self.assert_(response == """200          22
+test_host_0;test_ok_0
+""")
+
+
+
+    def test_is_executing(self):
+        self.print_header()
+        #---------------------------------------------------------------
+        # make sure that the is_executing flag is updated regularly
+        #---------------------------------------------------------------
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+
+        for loop in range(1, 2):
+            print "processing check", loop
+            self.show_broks("update_in_checking")
+            svc.update_in_checking()
+            self.show_broks("fake_check")
+            self.fake_check(svc, 2, 'BAD')
+            self.show_broks("sched.consume_results")
+            self.sched.consume_results()
+            self.show_broks("sched.get_new_actions")
+            self.sched.get_new_actions()
+            self.show_broks("sched.get_new_broks")
+            self.sched.get_new_broks()
+            self.show_broks("sched.delete_zombie_checks")
+            self.sched.delete_zombie_checks()
+            self.show_broks("sched.delete_zombie_actions")
+            self.sched.delete_zombie_actions()
+            self.show_broks("sched.get_to_run_checks")
+            checks = self.sched.get_to_run_checks(True, False)
+            self.show_broks("sched.get_to_run_checks")
+            actions = self.sched.get_to_run_checks(False, True)
+            #self.show_actions()
+            for a in actions:
+                a.status = 'inpoller'
+                a.check_time = time.time()
+                a.exit_status = 0
+                self.sched.put_results(a)
+            #self.show_actions()
+
+            svc.checks_in_progress = []
+            self.show_broks("sched.update_downtimes_and_comments")
+            self.sched.update_downtimes_and_comments()
+            time.sleep(5)
+
+        print "-------------------------------------------------"
+        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+            if re.compile('^service_').match(brok.type):
+                print "BROK:", brok.type
+                print "BROK   ", brok.data['in_checking']
+        self.update_broker()
+        print "-------------------------------------------------"
+        data = 'GET services\nColumns: service_description is_executing\n'
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        print response
+        
 
 
 if __name__ == '__main__':
