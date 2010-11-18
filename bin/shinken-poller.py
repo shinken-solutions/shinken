@@ -49,15 +49,17 @@ if int(python_version[0]) == 3:
 #Pyro 4 dbg
 sys.path.insert(0,'.')
 
+
 #Try to load shinken lib.
 #Maybe it's not in our python path, so we detect it
 #it so (it's a untar install) we add .. in the path
 try :
     from shinken.util import to_bool
-    my_path = os.path.abspath(sys.modules['__main__'].__file__)
-    elts = os.path.dirname(my_path).split(os.sep)[:-1]
-    elts.append('shinken')
-    sys.path.append(os.sep.join(elts))
+    if os.name != 'nt':
+      my_path = os.path.abspath(sys.modules['__main__'].__file__)
+      elts = os.path.dirname(my_path).split(os.sep)[:-1]
+      elts.append('shinken')
+      sys.path.append(os.sep.join(elts))
 except ImportError:
     #Now add in the python path the shinken lib
     #if we launch it in a direct way and

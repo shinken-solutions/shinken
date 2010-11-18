@@ -7,4 +7,4 @@ DEBUG_PATH="/tmp/arbiter.debug"
 
 
 echo "Launching Arbiter (that read configuration and dispatch it) in debug mode to the file $DEBUG_PATH"
-$BIN/shinken-arbiter -d -c $ETC/nagios.cfg -c $ETC/../test/etc/test_stack2/shinken-specific-ha-only.cfg --debug $DEBUG_PATH
+$BIN/shinken-arbiter.py -d -c $ETC/nagios.cfg -c $ETC/../test/etc/test_stack2/shinken-specific-ha-only.cfg --debug $DEBUG_PATH

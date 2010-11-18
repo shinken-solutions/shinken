@@ -13,7 +13,7 @@ SHINKENCFG="$ETC$/nagios.cfg"
 SHINKENSPECIFICCFG="$ETC$/shinken-specific.cfg"
 
 # The command to launch
-ARBITERDAEMON=$SCRIPTS_BIN$/shinken-arbiter
+ARBITERDAEMON=$SCRIPTS_BIN$/shinken-arbiter.py
 
 #The ARBITER PID
 ARBITERPID=$(grep lock_file $SHINKENCFG | cut -d= -f2)
@@ -23,7 +23,7 @@ ARBITERPID=$(grep lock_file $SHINKENCFG | cut -d= -f2)
 SCHEDULERCFG="$ETC$/schedulerd.ini"
 
 # The command to launch
-SCHEDULERDAEMON=$SCRIPTS_BIN$/shinken-scheduler
+SCHEDULERDAEMON=$SCRIPTS_BIN$/shinken-scheduler.py
 
 #The SCHEDULER PID
 SCHEDULERPID="$VAR$/schedulerd.pid"
@@ -34,7 +34,7 @@ SCHEDULERPID="$VAR$/schedulerd.pid"
 POLLERCFG="$ETC$/pollerd.ini"
 
 # The command to launch
-POLLERDAEMON=$SCRIPTS_BIN$/shinken-poller
+POLLERDAEMON=$SCRIPTS_BIN$/shinken-poller.py
 
 #The poller pid
 POLLERPID="$VAR$/pollerd.pid"
@@ -45,7 +45,7 @@ POLLERPID="$VAR$/pollerd.pid"
 REACTIONNERCFG="$ETC$/reactionnerd.ini"
 
 # The command to launch
-REACTIONNERDAEMON=$SCRIPTS_BIN$/shinken-reactionner
+REACTIONNERDAEMON=$SCRIPTS_BIN$/shinken-reactionner.py
 
 #The reactionner pid
 REACTIONNERPID="$VAR$/reactionnerd.pid"
@@ -56,7 +56,7 @@ REACTIONNERPID="$VAR$/reactionnerd.pid"
 BROKERCFG="$ETC$/brokerd.ini"
 
 # The command to launch
-BROKERDAEMON=$SCRIPTS_BIN$/shinken-broker
+BROKERDAEMON=$SCRIPTS_BIN$/shinken-broker.py
 
 #The broker pid
 BROKERPID="$VAR$/brokerd.pid"
