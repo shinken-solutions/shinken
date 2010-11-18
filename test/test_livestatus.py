@@ -1074,6 +1074,40 @@ test_router_0
 #        self.assert_(response == good_response)
 
 
+
+    def test_thruk_servicegroup(self):
+        self.print_header()
+        now = time.time()
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get services of a certain servicegroup
+        # test_host_0/test_ok_0 is in 
+        #   servicegroup_01,ok via service.servicegroups
+        #   servicegroup_02 via servicegroup.members
+        #---------------------------------------------------------------
+        data = """GET services
+Columns: host_name service_description
+Filter: groups >= servicegroup_01
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        self.assert_(response == """200          22
+test_host_0;test_ok_0
+""")
+        data = """GET services
+Columns: host_name service_description
+Filter: groups >= servicegroup_02
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response = self.livestatus_broker.livestatus.handle_request(data)
+        self.assert_(response == """200          22
+test_host_0;test_ok_0
+""")
+
+
+
     def test_is_executing(self):
         self.print_header()
         #---------------------------------------------------------------
