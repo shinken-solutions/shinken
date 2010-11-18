@@ -121,6 +121,9 @@ def from_float_to_int(val):
     val = int(val)
     return val
 
+def to_list_string_of_names(tab):
+    return ",".join([e.get_name() for e in tab])
+
 #take a list of hosts and return a list
 #of all host_names
 def to_hostnames_list(tab):

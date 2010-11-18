@@ -30,7 +30,7 @@ except ImportError:
 from autoslots import AutoSlots
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE
+from util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names
 from macroresolver import MacroResolver
 from eventhandler import EventHandler
 from log import Log
@@ -56,7 +56,7 @@ class Service(SchedulingItem):
         'hostgroup_name' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'service_description' : {'required' : True, 'fill_brok' : ['full_status', 'check_result', 'next_schedule']},
         'display_name' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'servicegroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'servicegroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status'], 'brok_transformation' : to_list_string_of_names},
         'is_volatile' : {'required' : False, 'default' : '0', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
         'check_command' : {'required' : True, 'fill_brok' : ['full_status']},
         'initial_state' : {'required' : False, 'default' : 'o', 'pythonize' : to_char, 'fill_brok' : ['full_status']},
@@ -257,6 +257,10 @@ class Service(SchedulingItem):
             return self.service_description
         else:
             return self.name
+
+    #Get the servicegroups names
+    def get_groupnames(self):
+        return ','.join([sg.get_name() for sg in self.servicegroups])
 
 
     #Need the whole name for debugin purpose
@@ -831,11 +835,12 @@ class Services(Items):
     #service -> command
     #service -> timepriods
     #service -> contacts
-    def linkify(self, hosts, commands, timeperiods, contacts, resultmodulations, escalations):
+    def linkify(self, hosts, commands, timeperiods, contacts, resultmodulations, escalations, servicegroups):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
         self.linkify_s_by_hst(hosts)
+        self.linkify_s_by_sg(servicegroups)
         self.linkify_one_command_with_commands(commands, 'check_command')
         self.linkify_one_command_with_commands(commands, 'event_handler')
         self.linkify_with_contacts(contacts)
@@ -868,6 +873,26 @@ class Services(Items):
                     hst.add_service_link(s)
             except AttributeError , exp:
                 pass #Will be catch at the is_correct moment
+
+
+    #We look for servicegroups property in services and
+    #link them
+    def linkify_s_by_sg(self, servicegroups):
+        for s in self:
+            if not s.is_tpl():
+                new_servicegroups = []
+                if hasattr(s, 'servicegroups') and s.servicegroups != '':
+                    sgs = s.servicegroups.split(',')
+                    for sg_name in sgs:
+                        sg_name = sg_name.strip()
+                        sg = servicegroups.find_by_name(sg_name)
+                        if sg != None:
+                            new_servicegroups.append(sg)
+                        else:
+                            err = "Error : the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
+                            s.configuration_errors.append(err)
+                s.servicegroups = new_servicegroups
+
 
 
     #Delete services by ids

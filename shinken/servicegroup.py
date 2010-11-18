@@ -137,6 +137,10 @@ class Servicegroups(Itemgroups):
 
             #We find the id, we remplace the names
             self.itemgroups[id].replace_members(new_mbrs)
+            for s in self.itemgroups[id].members:
+                s.servicegroups.append(self.itemgroups[id])
+                #and make this uniq
+                s.servicegroups = list(set(s.servicegroups))
 
 
     #Add a service string to a service member

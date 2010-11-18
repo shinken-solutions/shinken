@@ -163,6 +163,13 @@ class TestConfig(ShinkenTest):
         self.assert_(hst.is_state('d') == True)
 
 
+    def test_hostgroup(self):
+        hg = self.sched.hostgroups.find_by_name("hostgroup_01")
+        self.assert_(hg != None)
+        h = self.sched.hosts.find_by_name('test_host_0')
+        self.assert_(h in hg.members)
+        self.assert_(hg in h.hostgroups)
+
 
 if __name__ == '__main__':
     unittest.main()

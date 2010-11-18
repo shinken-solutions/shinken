@@ -105,7 +105,7 @@ class TestConfig(ShinkenTest):
         #---------------------------------------------------------------
         # get only the host names and addresses
         #---------------------------------------------------------------
-        data = 'GET hosts\nColumns: name address\nColumnHeaders: on'
+        data = 'GET hosts\nColumns: name address hostgroups\nColumnHeaders: on'
         response = self.livestatus_broker.livestatus.handle_request(data)
         print response
 

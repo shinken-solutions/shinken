@@ -574,18 +574,18 @@ class Config(Item):
         self.linkify_one_command_with_commands(self.commands, 'host_perfdata_command')
         self.linkify_one_command_with_commands(self.commands, 'service_perfdata_command')
 
+        #print "Hosts"
+        #link hosts with timeperiods and commands
+        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms, self.resultmodulations, self.escalations, self.hostgroups)
+
         #Do the simplify AFTER explode groups
         #print "Hostgroups"
         #link hostgroups with hosts
         self.hostgroups.linkify(self.hosts)
 
-        #print "Hosts"
-        #link hosts with timeperiods and commands
-        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms, self.resultmodulations, self.escalations)
-
         #print "Services"
         #link services with hosts, commands, timeperiods, contacts and resultmodulations
-        self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations)
+        self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations, self.servicegroups)
 
         #print "Service groups"
         #link servicegroups members with services
