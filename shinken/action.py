@@ -118,7 +118,8 @@ class Action:
             else:#instead, launch by execve
                 self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, env=local_env)
         except OSError , exp:
-            print "Debug : Error in launching command:", exp
+            print "Debug : Error in launching command:", self.command, exp
+	    print "Way: launch command?", self.got_shell_caracters()
             self.output = exp.__str__()
             self.exit_status = 2
             self.status = 'done'

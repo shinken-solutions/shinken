@@ -352,9 +352,11 @@ class Scheduler:
                                 # If notifications were sent, then host/service-counter will also be incremented
                                 item.current_notification_number = a.notif_nb
 
-                            if item.notification_interval != 0:
+                            if item.notification_interval != 0 and a.t_to_go != None:
                                 # We must continue to send notifications.
                                 # Just leave it in the actions list and set it to "scheduled" and it will be found again later
+#				if a.t_to_go == None or item.notification_interval == None:
+#					print "A to go", a, a.t_to_go, item.notification_interval
                                 a.t_to_go = a.t_to_go + item.notification_interval * item.__class__.interval_length
                                 a.notif_nb = item.current_notification_number + 1
                                 a.status = 'scheduled'

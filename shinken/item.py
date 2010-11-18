@@ -323,7 +323,9 @@ class Item(object):
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
             self.problem_has_been_acknowledged = False
-            del self.acknowledgement
+	    #Should not be deleted, a None is Good
+            self.acknowledgement = None
+            #del self.acknowledgement
             # find comments of non-persistent ack-comments and delete them too
             for c in self.comments:
                 if c.entry_type == 4 and not c.persistent:
