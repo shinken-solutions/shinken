@@ -24,7 +24,7 @@ import re #for keys generator
 from autoslots import AutoSlots
 from item import Items
 from schedulingitem import SchedulingItem
-from util import to_int, to_float, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists
+from util import to_int, to_float, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
 #from macroresolver import MacroResolver
 #from check import Check
 #from notification import Notification
@@ -60,7 +60,7 @@ class Host(SchedulingItem):
         'display_name' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
         'address' : {'required' : True, 'fill_brok' : ['full_status']},
         'parents' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'fill_brok' : ['full_status'], 'brok_transformation' : to_hostnames_list},
-        'hostgroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'hostgroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status'], 'brok_transformation' : to_list_string_of_names},
         'check_command' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
         'initial_state' : {'required' : False, 'default' : 'u', 'pythonize' : to_char, 'fill_brok' : ['full_status']},
         'max_check_attempts' : {'required' : True, 'pythonize' : to_int, 'fill_brok' : ['full_status']},
