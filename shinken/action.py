@@ -110,21 +110,38 @@ class Action:
 
         #Get a local env variables with our additionnal values
         local_env = self.get_local_environnement()
+        shell_launch = self.got_shell_caracters()
+        still_loop = True #Maybe we will failed in our first attempt, we can retry
 
-        try:
-            #If got specials caracters (forshell) go in shell mode
-            if self.got_shell_caracters():
-                self.process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True, env=local_env)
-            else:#instead, launch by execve
-                self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, env=local_env)
-        except OSError , exp:
-            print "Debug : Error in launching command:", self.command, exp
-	    print "Way: launch command?", self.got_shell_caracters()
-            self.output = exp.__str__()
-            self.exit_status = 2
-            self.status = 'done'
-            self.execution_time = time.time() - self.check_time
-            return
+        while still_loop:
+            if shell_launch:
+                try:
+                    self.process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, shell=True, env=local_env)
+                    return
+                except OSError , exp:
+                    print "Debug : Error in launching shell command:", self.command, exp
+                    print "Way: launch command?", self.got_shell_caracters()
+                    self.output = exp.__str__()
+                    self.exit_status = 2
+                    self.status = 'done'
+                    self.execution_time = time.time() - self.check_time
+                    return
+            else: # Direct exec, quicker
+                try:
+                    self.process = subprocess.Popen(shlex.split(self.command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, env=local_env)
+                    return
+                except OSError , exp:
+                #Maybe it's just a shell we try to exec. So we must retry
+                    if exp.errno == 8 and exp.strerror == 'Exec format error':
+                        shell_launch = True
+                        continue # loop and go in the shell launch this time
+                    #Here, we are with a real error
+                    print "Debug : Error in launching direct exec command:", self.command, exp
+                    self.output = exp.__str__()
+                    self.exit_status = 2
+                    self.status = 'done'
+                    self.execution_time = time.time() - self.check_time
+                    return
 
 
     def check_finished(self, max_plugins_output_length):

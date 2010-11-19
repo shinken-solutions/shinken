@@ -80,6 +80,25 @@ class TestConfig(ShinkenTest):
                 titi_found = True
 
         self.assert_(titi_found == True)
+        
+
+    #Some commands are shell without bangs! (like in Centreon...)
+    #We can show it in the launch, and it should be managed
+    def test_noshell_bang_command(self):
+        a = Action()
+        a.timeout = 10
+        a.command = "./dummy_command_nobang.sh"
+        a.env = {}
+        if os.name == 'nt':
+            return
+        self.assert_(a.got_shell_caracters() == False)
+        a.execute()
+
+        self.assert_(a.status == 'launched')
+        self.wait_finished(a)
+        print "FUck", a.status, a.output
+        self.assert_(a.exit_status == 0)
+        self.assert_(a.status == 'done')
 
 
 if __name__ == '__main__':
