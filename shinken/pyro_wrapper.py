@@ -33,12 +33,12 @@ try:
     #Some one already go here, so we are in 4 if None
     if Pyro.core.ObjBase == None:
         raise AttributeError
-    print "Using Pyro 3"
+    print "Using Pyro", Pyro.constants.VERSION
     pyro_version = 3
     protocol = 'PYROLOC'
     Pyro.errors.CommunicationError = Pyro.errors.ProtocolError
 except AttributeError:
-    print "Using Pyro 4"
+    print "Using Pyro", Pyro.constants.VERSION
     pyro_version = 4
     #Ok, in Pyro 4, interface do not need to
     #inherit from ObjBase, just object is good
