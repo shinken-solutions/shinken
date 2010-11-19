@@ -379,12 +379,17 @@ class SchedulingItem(Item):
         if (not self.active_checks_enabled or not cls.execute_checks) and not force:
             return None
 
+        #If the check_interval is 0, we should not add it
+        if self.check_interval == 0 and not force:
+            return None
+
         #If I do not have an check_timeperiod and no force time, i do nothing
         if (not hasattr(self, 'check_period') or self.check_period == None and force_time==None):
             return None
 
         #Interval change is in a HARD state or not
-        if self.state_type == 'HARD':
+        #If the retry is 0, take the normal value
+        if self.state_type == 'HARD' or self.retry_interval == 0:
             interval = self.check_interval * 60
         else: #TODO : if no retry_interval?
             interval = self.retry_interval * 60
