@@ -214,8 +214,15 @@ class Nagios_retention_scheduler:
                 else: #no pythonize, int by default
                     # if cls.my_type != 'service':
                     #  print "Intify", prop, getattr(obj, prop)
-                    val = int(getattr(obj, prop))
-                    setattr(obj, prop, val)
+                    if prop != 'state_type':
+                        val = int(getattr(obj, prop))
+                        setattr(obj, prop, val)
+                    else:#state type is a int, but should be set HARd or SOFT
+                        val = int(getattr(obj, prop))
+                        if val == 1:
+                            setattr(obj, prop, 'HARD')
+                        else:
+                            setattr(obj, prop, 'SOFT')
 
 
                     
