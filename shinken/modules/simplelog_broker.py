@@ -125,10 +125,6 @@ class Simple_log_broker:
     def init(self):
         self.q = self.properties['to_queue']
         #print "Checking for archive need"
-        moved = self.check_and_do_archive(first_pass=True)
-        if not moved:
-            print "I open the log file %s" % self.path
-            self.file = open(self.path,'a')
 
 
     def get_name(self):
@@ -173,8 +169,15 @@ class Simple_log_broker:
             import signal
             signal.signal(signal.SIGTERM, func)
 
+    def opening(self):
+        moved = self.check_and_do_archive(first_pass=True)
+        if not moved:
+            print "I open the log file %s" % self.path
+            self.file = open(self.path,'a')        
+
 
     def main(self):
+        self.opening()
         self.set_exit_handler()
         while True:
             self.check_and_do_archive()

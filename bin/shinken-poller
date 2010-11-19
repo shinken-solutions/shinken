@@ -64,11 +64,12 @@ except ImportError:
     #Now add in the python path the shinken lib
     #if we launch it in a direct way and
     #the shinken is not a python lib
-    my_path = os.path.abspath(sys.modules['__main__'].__file__)
-    elts = os.path.dirname(my_path).split(os.sep)[:-1]
-    sys.path.append(os.sep.join(elts))
-    elts.append('shinken')
-    sys.path.append(os.sep.join(elts))
+    if os.name != 'nt':
+        my_path = os.path.abspath(sys.modules['__main__'].__file__)
+        elts = os.path.dirname(my_path).split(os.sep)[:-1]
+        sys.path.append(os.sep.join(elts))
+        elts.append('shinken')
+        sys.path.append(os.sep.join(elts))
 
 try:
     import shinken.pyro_wrapper
