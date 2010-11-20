@@ -321,9 +321,9 @@ class LiveStatus:
                 'type' : 'int',
             },
             'is_executing' : {
-                'depythonize' : from_bool_to_int,
+                'default' : 0 # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
-                'prop' : 'in_checking',
+                #'prop' : 'in_checking',
                 'type' : 'int',
             },
             'is_flapping' : {
@@ -898,9 +898,8 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_is_executing' : {
-                'depythonize' : lambda x: from_bool_to_int(x.in_checking),
+                'default' : 0 # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
-                'prop' : 'host',
                 'type' : 'int',
             },
             'host_is_flapping' : {
@@ -1154,9 +1153,8 @@ class LiveStatus:
                 'type' : 'int',
             },
             'is_executing' : {
-                'depythonize' : from_bool_to_int,
+                'default' : 0 # value in scheduler is not real-time
                 'description' : 'is there a service check currently running... (0/1)',
-                'prop' : 'in_checking',
                 'type' : 'int',
             },
             'is_flapping' : {
@@ -2111,7 +2109,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_is_executing' : {
-                'default' : None,
+                'default' : 0 # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -2629,7 +2627,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'service_is_executing' : {
-                'default' : None,
+                'default' : 0 # value in scheduler is not real-time
                 'description' : 'is there a service check currently running... (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -3097,7 +3095,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_is_executing' : {
-                'default' : None,
+                'default' : 0 # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -3622,7 +3620,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'service_is_executing' : {
-                'default' : None,
+                'default' : 0 # value in scheduler is not real-time
                 'description' : 'is there a service check currently running... (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -4281,6 +4279,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'current_host_is_executing' : {
+                'default' : 0 # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
                 'type' : 'int',
             },
@@ -4627,6 +4626,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'current_service_is_executing' : {
+                'default' : 0 # value in scheduler is not real-time
                 'description' : 'is there a service check currently running... (0/1)',
                 'type' : 'int',
             },
