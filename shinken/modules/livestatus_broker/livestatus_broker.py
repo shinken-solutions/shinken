@@ -28,6 +28,7 @@ import select
 import socket
 import sys
 import os
+import time
 try:
     import sqlite3
 except ImportError: # python 2.4 do not have it
@@ -718,6 +719,7 @@ class Livestatus_broker:
         self.server.listen(backlog)
         self.input = [self.server]
         databuffer = {}
+        open_connections = {}
         # todo. open self.socket and add it to input
 
         while True:
@@ -733,40 +735,144 @@ class Livestatus_broker:
                 raise
             inputready,outputready,exceptready = select.select(self.input,[],[], 0)
             
-            for s in inputready:
-                if s == self.server:
-                    # handle the server socket
-                    client, address = self.server.accept()
-                    self.input.append(client)
-                else:
-                    print "Handle connexion", s
-                    # handle all other sockets
-                    data = s.recv(size)
-                    if s in databuffer:
-                        databuffer[s] += data
+            now = time.time()
+            # At the end of this loop we probably will discard connections
+            kick_connections = []
+            if len(exceptready) > 0:
+                    pass
+            if len(outputready) > 0:
+                    pass
+            if len(inputready) > 0:
+                for s in inputready:
+                    # We will identify sockets by their filehandle number
+                    # during the rest of this loop
+                    socketid = s.fileno()
+                    if s == self.server:
+                        # handle the server socket
+                        client, address = self.server.accept()
+                        self.input.append(client)
                     else:
-                        databuffer[s] = data
-                    if not data or databuffer[s].endswith('\n\n'):
-                        #We will just close the connexion if we do nto read anything this turn
-                        #so we know that the other guy stop sending use queries
-                        #like NagVis
-                        close_con = (data == '')
-                        print "*********Should I close the connexion?", close_con
-                        #Maybe it's no more in input, so no need to shut ti down again
-                        if close_con:
-                            try:
-                                s.shutdown(2)
-                                self.input.remove(s)
-                            except Exception , exp:
-                                print exp
-                                s.close()
-                                self.input.remove(s)
+                        if socketid in open_connections:
+                            # This is a known connection. Register the activity
+                            open_connections[socketid]['lastseen'] = now
                         else:
-                            # end-of-transmission or an empty line was received
-                            response = self.livestatus.handle_request(databuffer[s].rstrip())
-                            del databuffer[s]
-                            s.send(response)
+                            # This is a new connection
+                            open_connections[socketid] = { 'keepalive' : False, 'lastseen' : now, 'buffer' : None, 'state' : 'receiving' }
 
+                        data = ''
+                        try:
+                            data = s.recv(size)
+                        except socket.error, e:
+                            # Maybe the other side has already closed the socket
+                            if e.args[0] == errno.EWOULDBLOCK:
+                                # don't know yet how to handle this case
+                                pass
+                            else:
+                                print "other error", errno
+
+                        # These two flags decide whether the databuffer is
+                        # passed to the livestatus module for execution
+                        # and whether the socket will be closed afterwards
+                        close_it = False
+                        handle_it = False
+
+                        # A connection has two states
+                        # receiving = collect input until a query 
+                        #             is complete or aborted by empty input
+                        # idle      = response was sent
+                        if open_connections[socketid]['state'] == 'receiving':
+                            if not data:
+                                if open_connections[socketid]['buffer']:
+                                    # Empty packet follows some input.
+                                    # Request is considered to be complete
+                                    handle_it = True
+                                else:
+                                    # Empty packet follows empty packet. 
+                                    # Terminate this connection
+                                    close_it = True
+                            else:
+                                if open_connections[socketid]['buffer']:
+                                    # Additional input was received
+                                    open_connections[socketid]['buffer'] += data
+                                else:
+                                    # First input was received
+                                    open_connections[socketid]['buffer'] = data
+                                if open_connections[socketid]['buffer'].endswith('\n\n') or \
+                                        open_connections[socketid]['buffer'].endswith('\r\n\r\n'):
+                                    # Two \n (= an empty line) mean
+                                    # client sends "request complete, go ahead"
+                                    if open_connections[socketid]['buffer'].rstrip():
+                                        handle_it = True
+                                    else:
+                                        # Someone with telnet hits the enter-key like crazy
+                                        # Only whitespace is like an empty request
+                                        close_it = True
+    
+                        elif open_connections[socketid]['state'] == 'idle':
+                            if not data:
+                                # Thats it. Client closed the connection
+                                close_it = True
+                            else:
+                                # Got data after is sent a sresponse.
+                                # Too late...."
+                                close_it = True
+    
+                        else:
+                            # This code should never be executed
+                            if not data:
+                                if open_connections[socketid]['buffer']:
+                                    print "undef state nodata buffer", open_connections[socketid]['state']
+                                else:
+                                    print "undef state nodata nobuffer", open_connections[socketid]['state']
+                            else:
+                                if open_connections[socketid]['buffer']:
+                                    print "undef state data buffer", open_connections[socketid]['state']
+                                else:
+                                    print "undef state data nobuffer", open_connections[socketid]['state']
+    
+                        if handle_it:
+                            response, keepalive = self.livestatus.handle_request(open_connections[socketid]['buffer'].rstrip())
+                            s.send(response)
+                            # Empty the input buffer for the next request
+                            open_connections[socketid]['buffer'] = None
+                            if keepalive == 'on':
+                                open_connections[socketid]['keepalive'] = True
+                                open_connections[socketid]['state'] = 'receiving'
+                            else:
+                                open_connections[socketid]['state'] = 'idle'
+    
+                        if close_it:
+                            # Register this socket for deletion
+                            kick_connections.append(s.fileno())
+    
+    
+                # Now the work is done. Cleanup
+                for socketid in open_connections:
+                    print "connection %d is idle since %d seconds (%s)\n" % (socketid, now - open_connections[socketid]['lastseen'], open_connections[socketid]['state'])
+                    if now - open_connections[socketid]['lastseen'] > 300:
+                        # After 5 minutes of inactivity we close connections
+                        open_connections[socketid]['keepalive'] = False
+                        open_connections[socketid]['state'] = 'idle'
+                        kick_connections.append(socketid)
+
+                # Close connections which timed out or are no longer needed
+                for socketid in kick_connections:
+                    kick_socket = None
+                    for s in self.input:
+                        if s.fileno() == socketid:
+                            kick_socket = s
+                    if kick_socket:
+                        try:
+                            kick_socket.shutdown(2)
+                            del open_connections[socketid]
+                            self.input.remove(kick_socket)
+                            print "shutdown socket", socketid
+                        except Exception , exp:
+                            print exp
+                            kick_socket.close()
+                            del open_connections[socketid]
+                            self.input.remove(kick_socket)
+                            print "closed socket", socketid
 
             if self.number_of_objects > last_number_of_objects:
                 # Still in the initialization phase

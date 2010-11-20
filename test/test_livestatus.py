@@ -76,7 +76,7 @@ class TestConfig(ShinkenTest):
                 print "BROK   ", brok.data['in_checking']
         self.update_broker()
         data = 'GET services\nColumns: service_description is_executing\n'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
 
@@ -99,28 +99,28 @@ class TestConfig(ShinkenTest):
         # get the full hosts table
         #---------------------------------------------------------------
         data = 'GET hosts'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         #---------------------------------------------------------------
         # get only the host names and addresses
         #---------------------------------------------------------------
         data = 'GET hosts\nColumns: name address hostgroups\nColumnHeaders: on'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         #---------------------------------------------------------------
         # query_1
         #---------------------------------------------------------------
         data = 'GET contacts'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_1_______________\n%s\n%s\n' % (data, response)
 
         #---------------------------------------------------------------
         # query_2
         #---------------------------------------------------------------
         data = 'GET contacts\nColumns: name alias'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_2_______________\n%s\n%s\n' % (data, response)
 
         #---------------------------------------------------------------
@@ -128,15 +128,15 @@ class TestConfig(ShinkenTest):
         #---------------------------------------------------------------
         #self.scheduler_loop(3, svc, 2, 'BAD')
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2\nColumnHeaders: on'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == 'host_name;description;state\ntest_host_0;test_ok_0;2\n')
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == 'test_host_0;test_ok_0;2\n')
         data = 'GET services\nColumns: host_name description state\nFilter: state = 0'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == '\n')
         duration = 180
@@ -149,7 +149,7 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(3, [[svc, 2, 'BAD']])
         self.update_broker()
         data = 'GET services\nColumns: host_name description scheduled_downtime_depth\nFilter: state = 2\nFilter: scheduled_downtime_depth = 1'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_3_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == 'test_host_0;test_ok_0;1\n')
 
@@ -157,7 +157,7 @@ class TestConfig(ShinkenTest):
         # query_4
         #---------------------------------------------------------------
         data = 'GET services\nColumns: host_name description state\nFilter: state = 2\nFilter: in_notification_period = 1\nAnd: 2\nFilter: state = 0\nOr: 2\nFilter: host_name = test_host_0\nFilter: description = test_ok_0\nAnd: 3\nFilter: contacts >= harri\nFilter: contacts >= test_contact\nOr: 3'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_4_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == 'test_host_0;test_ok_0;2\n')
 
@@ -165,7 +165,7 @@ class TestConfig(ShinkenTest):
         # query_6
         #---------------------------------------------------------------
         data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_6_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == '0;0;1;0\n')
 
@@ -173,7 +173,7 @@ class TestConfig(ShinkenTest):
         # query_7
         #---------------------------------------------------------------
         data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nFilter: contacts >= test_contact'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'query_6_______________\n%s\n%s\n' % (data, response)
         self.assert_(response == '0;0;1;0\n')
 
@@ -194,11 +194,11 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
         self.update_broker()
         data = 'GET services\nColumns: host_name description state\nOutputFormat: json'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'json wo headers__________\n%s\n%s\n' % (data, response)
         self.assert_(response == '[["test_host_0","test_ok_0",2]]\n')
         data = 'GET services\nColumns: host_name description state\nOutputFormat: json\nColumnHeaders: on'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print 'json with headers__________\n%s\n%s\n' % (data, response)
         self.assert_(response == '[["host_name","description","state"],["test_host_0","test_ok_0",2]]\n')
         #100% mklivesttaus: self.assert_(response == '[["host_name","description","state"],\n["test_host_0","test_ok_0",2]]\n')
@@ -223,7 +223,7 @@ class TestConfig(ShinkenTest):
         # get the full hosts table
         #---------------------------------------------------------------
         data = 'GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET hosts
@@ -300,20 +300,20 @@ Stats: childs !=
 StatsAnd: 2
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET comments
 Columns: host_name source type author comment entry_time entry_type expire_time
 Filter: service_description ="""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET hosts
 Columns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change plugin_output next_check long_plugin_output
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         duration = 180
@@ -334,14 +334,14 @@ Filter: service_description =
 Columns: author comment end_time entry_time fixed host_name id start_time
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         data = """GET comments
 Filter: service_description =
 Columns: author comment
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET services
@@ -351,7 +351,7 @@ Stats: sum has_been_checked
 Stats: sum latency
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET services
@@ -366,27 +366,27 @@ Stats: max latency
 Stats: max execution_time
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET services\nFilter: has_been_checked = 1\nFilter: check_type = 0\nStats: sum has_been_checked as has_been_checked\nStats: sum latency as latency_sum\nStats: sum execution_time as execution_time_sum\nStats: min latency as latency_min\nStats: min execution_time as execution_time_min\nStats: max latency as latency_max\nStats: max execution_time as execution_time_max\n\nResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET hostgroups\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET hosts\nColumns: name groups\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET hostgroups\nColumns: name num_services num_services_ok\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warning num_services_critical num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
         self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']])
@@ -397,14 +397,14 @@ ResponseHeader: fixed16"""
         print "WARNING SOFT;1"
         # worst_service_state 1, worst_service_hard_state 0
         data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
         self.update_broker()
         print "WARNING HARD;3"
         # worst_service_state 1, worst_service_hard_state 1
         data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         for s in self.livestatus_broker.livestatus.services.values():
             print "%s %d %s;%d" % (s.state, s.state_id, s.state_type, s.attempt)
@@ -457,7 +457,7 @@ ResponseHeader: fixed16"""
 
         #data = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
         data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """200          17
 [[[""" + svc_comment_list +"""],[],0,0]]
@@ -465,7 +465,7 @@ ResponseHeader: fixed16"""
         self.assert_(response == good_response) # json
 
         data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\n"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """200           9
 """ + svc_comment_list + """;;0;0
@@ -538,7 +538,7 @@ Filter: host_name =
 And: 2
 Or: 3"""
 
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
     def test_thruk_logs_alerts_summary(self):
@@ -595,7 +595,7 @@ And: 2
 Or: 3
 Columns: time state state_type host_name service_description current_host_groups current_service_groups plugin_output"""
 
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
 
@@ -662,7 +662,7 @@ Filter: current_host_name = test_host_0
 Filter: current_service_description = test_ok_0
 And: 2"""
 
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
 
@@ -720,7 +720,7 @@ Stats: min execution_time
 Stats: max latency
 Stats: max execution_time"""
 
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
 
@@ -731,7 +731,7 @@ Stats: max execution_time"""
         # get the columns meta-table
         #---------------------------------------------------------------
         data = """GET columns"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
 
@@ -757,7 +757,7 @@ Stats: max execution_time"""
         # get the columns meta-table
         #---------------------------------------------------------------
         data = """GET schedulers"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """address;alive;name;port;spare;weight
 othernode;1;scheduler-2;7768;1;1
@@ -774,7 +774,7 @@ localhost;1;scheduler-1;7768;0;1
         self.sched.add(b)
         self.update_broker()
         data = """GET schedulers"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         good_response = """address;alive;name;port;spare;weight
 othernode;0;scheduler-2;7768;1;1
 localhost;1;scheduler-1;7768;0;1
@@ -804,7 +804,7 @@ localhost;1;scheduler-1;7768;0;1
         # get the columns meta-table
         #---------------------------------------------------------------
         data = """GET reactionners"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;reactionner-1;7769;0
@@ -819,7 +819,7 @@ othernode;1;reactionner-2;7769;1
         self.sched.add(b2)
         self.update_broker()
         data = """GET reactionners"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;reactionner-1;7769;0
@@ -852,7 +852,7 @@ othernode;0;reactionner-2;7769;1
         # get the columns meta-table
         #---------------------------------------------------------------
         data = """GET pollers"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;poller-1;7771;0
@@ -871,7 +871,7 @@ othernode;1;poller-2;7771;1
         # get the columns meta-table
         #---------------------------------------------------------------
         data = """GET pollers"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;poller-1;7771;0
@@ -904,7 +904,7 @@ othernode;0;poller-2;7771;1
         # get the columns meta-table
         #---------------------------------------------------------------
         data = """GET brokers"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;broker-1;7772;0
@@ -923,7 +923,7 @@ othernode;1;broker-2;7772;1
         # get the columns meta-table
         #---------------------------------------------------------------
         data = """GET brokers"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;broker-1;7772;0
@@ -959,7 +959,7 @@ othernode;0;broker-2;7772;1
         # get the columns meta-table
         #---------------------------------------------------------------
         data = """GET problems"""
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print "FUCK", response
         good_response = """impacts;source
 test_host_0,test_host_0/test_ok_0;test_router_0
@@ -977,7 +977,7 @@ test_host_0,test_host_0/test_ok_0;test_router_0
         # get the full hosts table
         #---------------------------------------------------------------
         data = 'GET hosts\nColumns: host_name\n'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """test_host_0
 test_router_0
@@ -985,7 +985,7 @@ test_router_0
         self.assert_(self.lines_equal(response, good_response))
 
         data = 'GET hosts\nColumns: host_name\nLimit: 1\n'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """test_host_0
 """
@@ -1048,7 +1048,7 @@ test_router_0
         #---------------------------------------------------------------
         print "Got source problems"
         data = 'GET hosts\nColumns: host_name is_impact source_problems\n'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print "moncul", response
         #good_response = """test_host_0
 #test_router_0
@@ -1057,7 +1057,7 @@ test_router_0
 
         print "Now got impact"
         data = 'GET hosts\nColumns: host_name is_problem impacts\n'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print "moncul", response
         good_response = """test_host_0
 test_router_0
@@ -1065,7 +1065,7 @@ test_router_0
 #        self.assert_(self.lines_equal(response, good_response))
 
         data = 'GET hosts\nColumns: host_name\nLimit: 1\n'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         good_response = """test_host_0
 """
@@ -1091,7 +1091,7 @@ Filter: groups >= servicegroup_01
 OutputFormat: csv
 ResponseHeader: fixed16
 """
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         self.assert_(response == """200          22
 test_host_0;test_ok_0
 """)
@@ -1101,7 +1101,7 @@ Filter: groups >= servicegroup_02
 OutputFormat: csv
 ResponseHeader: fixed16
 """
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         self.assert_(response == """200          22
 test_host_0;test_ok_0
 """)
@@ -1165,7 +1165,7 @@ test_host_0;test_ok_0
         self.update_broker()
         print "-------------------------------------------------"
         data = 'GET services\nColumns: service_description is_executing\n'
-        response = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
         
 

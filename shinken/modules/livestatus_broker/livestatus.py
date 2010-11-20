@@ -321,7 +321,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'is_executing' : {
-                'default' : 0 # value in scheduler is not real-time
+                'default' : 0, # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
                 #'prop' : 'in_checking',
                 'type' : 'int',
@@ -898,7 +898,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_is_executing' : {
-                'default' : 0 # value in scheduler is not real-time
+                'default' : 0, # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
                 'type' : 'int',
             },
@@ -1153,7 +1153,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'is_executing' : {
-                'default' : 0 # value in scheduler is not real-time
+                'default' : 0, # value in scheduler is not real-time
                 'description' : 'is there a service check currently running... (0/1)',
                 'type' : 'int',
             },
@@ -2109,7 +2109,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_is_executing' : {
-                'default' : 0 # value in scheduler is not real-time
+                'default' : 0, # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -2627,7 +2627,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'service_is_executing' : {
-                'default' : 0 # value in scheduler is not real-time
+                'default' : 0, # value in scheduler is not real-time
                 'description' : 'is there a service check currently running... (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -3095,7 +3095,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_is_executing' : {
-                'default' : 0 # value in scheduler is not real-time
+                'default' : 0, # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -3620,7 +3620,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'service_is_executing' : {
-                'default' : 0 # value in scheduler is not real-time
+                'default' : 0, # value in scheduler is not real-time
                 'description' : 'is there a service check currently running... (0/1)',
                 'prop' : None,
                 'type' : 'int',
@@ -4279,7 +4279,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'current_host_is_executing' : {
-                'default' : 0 # value in scheduler is not real-time
+                'default' : 0, # value in scheduler is not real-time
                 'description' : 'is there a host check currently running... (0/1)',
                 'type' : 'int',
             },
@@ -4626,7 +4626,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'current_service_is_executing' : {
-                'default' : 0 # value in scheduler is not real-time
+                'default' : 0, # value in scheduler is not real-time
                 'description' : 'is there a service check currently running... (0/1)',
                 'type' : 'int',
             },
@@ -5388,6 +5388,7 @@ class LiveStatus:
         filtercolumns = []
         responseheader = 'off'
         outputformat = 'csv'
+        keepalive = 'off'
         limit = None
 
         #So set first this format in out global function
@@ -5428,6 +5429,9 @@ class LiveStatus:
                 outputformat = outputformat.strip()
                 print "Output format:", outputformat
                 get_full_name.outputformat = outputformat
+            elif line.find('KeepAlive:') != -1:
+                cmd, keepalive = line.split(':', 1)
+                keepalive = keepalive.strip()
             elif line.find('ColumnHeaders:') != -1:
                 cmd, columnheaders = line.split(':', 1)
                 columnheaders = columnheaders.strip()
@@ -5581,7 +5585,7 @@ class LiveStatus:
 
             print "REQUEST", data
             print "RESPONSE\n%s\n" % response
-            return response
+            return response, keepalive
 
     def row_factory(self, cursor, row):
         return Logline(cursor, row)
