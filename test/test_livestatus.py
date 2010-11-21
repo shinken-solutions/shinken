@@ -1169,6 +1169,132 @@ test_host_0;test_ok_0
         print response
         
 
+class TestConfigBig(ShinkenTest):
+    def setUp(self):
+        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live', '/tmp/livelogs.db')
+        self.livestatus_broker.properties = {
+            'to_queue' : 0,
+            'from_queue' : 0
+
+            }
+        self.livestatus_broker.init()
+        print "Cleaning old broks?"
+        self.sched.fill_initial_broks()
+        self.update_broker()
+
+
+    def contains_line(self, text, pattern):
+        regex = re.compile(pattern)
+        for line in text.splitlines():
+            if re.search(regex, line):
+                return True
+        return False
+
+
+    def update_broker(self):
+        #The brok should be manage in the good order
+        ids = self.sched.broks.keys()
+        ids.sort()
+        for brok_id in ids:
+            brok = self.sched.broks[brok_id]
+            #print "Managing a brok type", brok.type, "of id", brok_id
+            #if brok.type == 'update_service_status':
+            #    print "Problem?", brok.data['is_problem']
+            self.livestatus_broker.manage_brok(brok)
+        self.sched.broks = {}
+
+
+    def test_stats(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
+        print svc1
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_15")
+        print svc2
+        svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
+        print svc3
+        svc4 = self.sched.services.find_srv_by_name_and_hostname("test_host_007", "test_ok_05")
+        print svc4
+        svc5 = self.sched.services.find_srv_by_name_and_hostname("test_host_007", "test_ok_11")
+        svc6 = self.sched.services.find_srv_by_name_and_hostname("test_host_025", "test_ok_01")
+        svc7 = self.sched.services.find_srv_by_name_and_hostname("test_host_025", "test_ok_03")
+        self.scheduler_loop(1, [[svc1, 1, 'W'], [svc2, 1, 'W'], [svc3, 1, 'W'], [svc4, 2, 'C'], [svc5, 3, 'U'], [svc6, 2, 'C'], [svc7, 2, 'C']])
+        self.update_broker()
+        # 1993O, 3xW, 3xC, 1xU
+
+        data = """GET services
+Filter: contacts >= test_contact
+Stats: state != 9999
+Stats: state = 0
+Stats: state = 1
+Stats: state = 2
+Stats: state = 3"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        print 'query_6_______________\n%s\n%s\n' % (data, response)
+        self.assert_(response == '2000;1993;3;3;1\n')
+
+
+    def test_statsgroupby(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
+        print svc1
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_15")
+        print svc2
+        svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
+        print svc3
+        svc4 = self.sched.services.find_srv_by_name_and_hostname("test_host_007", "test_ok_05")
+        print svc4
+        svc5 = self.sched.services.find_srv_by_name_and_hostname("test_host_007", "test_ok_11")
+        svc6 = self.sched.services.find_srv_by_name_and_hostname("test_host_025", "test_ok_01")
+        svc7 = self.sched.services.find_srv_by_name_and_hostname("test_host_025", "test_ok_03")
+        self.scheduler_loop(1, [[svc1, 1, 'W'], [svc2, 1, 'W'], [svc3, 1, 'W'], [svc4, 2, 'C'], [svc5, 3, 'U'], [svc6, 2, 'C'], [svc7, 2, 'C']])
+        self.update_broker()
+        # 1993O, 3xW, 3xC, 1xU
+
+        request = 'GET services\nFilter: contacts >= test_contact\nStats: state != 9999\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nStatsGroupBy: host_name'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(self.contains_line(response, 'test_host_005;20;17;3;0;0'))
+        self.assert_(self.contains_line(response, 'test_host_007;20;18;0;1;1'))
+        self.assert_(self.contains_line(response, 'test_host_025;20;18;0;2;0'))
+        self.assert_(self.contains_line(response, 'test_host_026;20;20;0;0;0'))
+
+        request = """GET services
+Stats: state != 9999
+StatsGroupBy: state
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(self.contains_line(response, '0;1993'))
+        self.assert_(self.contains_line(response, '1;3'))
+        self.assert_(self.contains_line(response, '2;3'))
+        self.assert_(self.contains_line(response, '3;1'))
+
+        #need to check if check_commands really contains arguments
+        #request = """GET services
+#Stats: state != 9999
+#StatsGroupBy: check_command
+#"""
+        #response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
+
+
 
 if __name__ == '__main__':
     #import cProfile

@@ -4906,7 +4906,7 @@ class LiveStatus:
                                     #with service groups members that need to be [[hostname, desc], [hostname, desc]]
                                     #value = [y for x in value if isinstance(x, list) for y in x] + \
                                     #    [x for x in value if not isinstance(x, list)]
-                                    print "DBG: Final value:", value
+                                    #print "DBG: Final value:", value
 
                                 else:
                                     #ok not a direct function, maybe a functin provided by value...
@@ -4928,7 +4928,7 @@ class LiveStatus:
         return output
 
 
-    def get_live_data(self, table, columns, filtercolumns, limit, filter_stack, stats_filter_stack, stats_postprocess_stack):
+    def get_live_data(self, table, columns, filtercolumns, limit, filter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by):
         result = []
         if table in ['hosts', 'services', 'downtimes', 'comments', 'hostgroups', 'servicegroups']:
             #Scan through the objects and apply the Filter: rules
@@ -4991,11 +4991,24 @@ class LiveStatus:
                 else:
                     prefiltresult = [x for x in self.servicegroups.values() if filter_stack(self.create_output(x, [], filtercolumns))]
                     filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+
             if stats_filter_stack.qsize() > 0:
+                resultarr = {}
+                if stats_group_by:
+                    # Break up filtresult and prepare resultarr
+                    # rseultarr is not a simple array (for a single result line)
+                    # It is a dict with the statsgroupyby: as key
+                    groupedresult = {}
+                    for elem in filtresult:
+                        if not elem[stats_group_by] in groupedresult:
+                            groupedresult[elem[stats_group_by]] = []
+                        groupedresult[elem[stats_group_by]].append(elem)
+                    for group in groupedresult:
+                        resultarr[group] = { stats_group_by : group }
+
                 #The number of Stats: statements
                 #For each statement there is one function on the stack
                 maxidx = stats_filter_stack.qsize()
-                resultarr = {}
                 for i in range(maxidx):
                     #First, get a filter for the attributes mentioned in Stats: statements
                     filtfunc = stats_filter_stack.get()
@@ -5006,8 +5019,21 @@ class LiveStatus:
                         ind = maxidx - i - 1
                     else: # we take FIFO, so the order is the inversed!
                         ind = i
-                    resultarr[ind] = postprocess(filter(filtfunc, filtresult))
-                result = [resultarr]
+                    if stats_group_by:
+                        # Calc statistics over _all_ elements of groups
+                        # which share the same stats_filter_by
+                        for group in groupedresult:
+                            resultarr[group][ind] = postprocess(filter(filtfunc, groupedresult[group]))
+                        
+                    else:
+                        # Calc statistics over _all_ elements of filtresult
+                        resultarr[ind] = postprocess(filter(filtfunc, filtresult))
+                if stats_group_by:
+                    for group in groupedresult:
+                        result.append(resultarr[group])
+                else:
+                    # Without StatsGroupBy: we have only one line
+                    result = [resultarr]
             else:
                 #Results are host/service/etc dicts with the requested attributes
                 #Columns: = keys of the dicts
@@ -5111,7 +5137,9 @@ class LiveStatus:
                             # Show all available columns
                             columns = sorted(result[0].keys())
                         lines.append(separators[1].join(columns))
+                print "all my clomuns are", columns
                 for object in result:
+                    print "my object is", object
                     #construct one line of output for each object found
                     l = []
                     for x in [object[c] for c in columns]:
@@ -5395,7 +5423,7 @@ class LiveStatus:
         get_full_name.outputformat = outputformat
 
         columnheaders = 'off'
-        groupby = False
+        stats_group_by = False
         aliases = []
         extcmd = False
         print "REQUEST", data
@@ -5475,8 +5503,8 @@ class LiveStatus:
                 # Put the function back onto the stack
                 filter_stack = self.or_filter_stack(ornum, filter_stack)
             elif line.find('StatsGroupBy: ') != -1:
-                cmd, groupby = line.split(' ', 1)
-                filtercolumns.append(groupby)
+                cmd, stats_group_by = line.split(' ', 1)
+                filtercolumns.append(stats_group_by)
             elif line.find('Stats: ') != -1:
                 try:
                     cmd, attribute, operator, reference = line.split(' ', 3)
@@ -5499,11 +5527,11 @@ class LiveStatus:
                     if converter:
                         reference = converter(reference)
                     stats_filter_stack.put(self.make_filter(operator, attribute, reference))
-                    stats_postprocess_stack.put(self.make_filter('count', attribute, groupby))
+                    stats_postprocess_stack.put(self.make_filter('count', attribute, None))
                 elif operator in ['sum', 'min', 'max', 'avg', 'std']:
                     columns.append(attribute)
                     stats_filter_stack.put(self.make_filter('dummy', attribute, None))
-                    stats_postprocess_stack.put(self.make_filter(operator, attribute, groupby))
+                    stats_postprocess_stack.put(self.make_filter(operator, attribute, None))
                 else:
                     print "illegal operation", operator
                     pass # illegal operation
@@ -5557,9 +5585,12 @@ class LiveStatus:
                     #Get the function which implements the Stats: statements
                     stats = stats_filter_stack.qsize()
                     #Apply the filters on the broker's host/service/etc elements
-                    result = self.get_live_data(table, columns, filtercolumns, limit, simplefilter_stack, stats_filter_stack, stats_postprocess_stack)
+                    result = self.get_live_data(table, columns, filtercolumns, limit, simplefilter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by)
                     if stats > 0:
                         columns = range(stats)
+                        if stats_group_by:
+                            columns.insert(0, stats_group_by)
+                        print "all my columns", columns
                         if len(aliases) == 0:
                             #If there were Stats: staments without "as", show no column headers at all
                             columnheaders = 'off'
