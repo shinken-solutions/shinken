@@ -47,7 +47,8 @@ class TestConfig(ShinkenTest):
         where = {'id' : "1", "is_master" : True}
         q = self.db.create_update_query('instances' , data, where)
         #beware of the last space
-        self.assert_(q == "UPDATE test_instances set is_master='1' , id='1' , plop='master of the universe'  WHERE is_master='1' and id='1' ")
+        print "Q", q
+        self.assert_(q == "UPDATE test_instances set plop='master of the universe'  WHERE is_master='1' and id='1' ")
 
 
 
