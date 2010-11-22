@@ -45,6 +45,7 @@ class DB(object):
                 val = val.encode('utf-8').replace("'", "''")
             else:
                 val = str(val)
+                val = val.replace("'", "''")
             if i == 1:
                 props_str = props_str + "%s " % prop
                 values_str = values_str + "'%s' " % val
@@ -96,6 +97,11 @@ class DB(object):
                     val = 1
                 else:
                     val = 0
+            if isinstance(val, unicode):
+                val = val.encode('utf-8').replace("'", "''")
+            else:
+                val = str(val)
+                val = val.replace("'", "''")
             if i == 1:
                 where_clause += "%s='%s' " % (prop, val)
             else:
