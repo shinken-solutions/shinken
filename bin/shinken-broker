@@ -748,7 +748,7 @@ class Broker(Satellite):
 				self.manage_brok(b)
 
                                 nb_broks = len(self.broks)
-                                
+
 				#Ok we manage brok, but we still want to listen to arbiter
 				self.watch_for_new_conf(0.0)
 
@@ -830,6 +830,6 @@ if __name__ == "__main__":
     #import cProfile
     p.main()
     #command = """p.main()"""
-    #cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
+    #cProfile.runctx( command, globals(), locals(), filename="/tmp/broker.profile" )
 
 
