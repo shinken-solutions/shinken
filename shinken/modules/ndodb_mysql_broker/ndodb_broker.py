@@ -176,8 +176,8 @@ class Ndodb_broker:
             res.append(q)
 
         #We also clean cache, because we are not sure about this data now
-        self.services_cache = []
-        self.hosts_cache = []
+        self.services_cache = {}
+        self.hosts_cache = {}
 
         return res
 
