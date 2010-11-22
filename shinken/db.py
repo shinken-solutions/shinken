@@ -68,18 +68,21 @@ class DB(object):
         query_folow = ''
         i = 0 #for the , problem...
         for prop in data:
-            i += 1
-            val = data[prop]
+            #Do not need to update a property that is in where
+            #it is even dangerous, will raise a warning
+            if prop not in where_data:
+                i += 1
+                val = data[prop]
             #Boolean must be catch, because we want 0 or 1, not True or False
-            if isinstance(val, bool):
-                if val:
-                    val = 1
+                if isinstance(val, bool):
+                    if val:
+                        val = 1
+                    else:
+                        val = 0
+                if i == 1:
+                    query_folow += "%s='%s' " % (prop, str(val).replace("'", "''"))
                 else:
-                    val = 0
-            if i == 1:
-                query_folow += "%s='%s' " % (prop, str(val).replace("'", "''"))
-            else:
-                query_folow += ", %s='%s' " % (prop, str(val).replace("'", "''"))
+                    query_folow += ", %s='%s' " % (prop, str(val).replace("'", "''"))
 
         #Ok for data, now WHERE, same things
         where_clause = " WHERE "
