@@ -34,10 +34,10 @@ except ImportError:
     import simplejson as json
 #import sqlite3
 
-from service import Service
-from external_command import ExternalCommand
+from shinken.service import Service
+from shinken.external_command import ExternalCommand
 
-from util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
+from shinken.util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
 
 LOGCLASS_INFO         = 0 # all messages not in any other class
 LOGCLASS_ALERT        = 1 # alerts: the change service/host state

@@ -84,7 +84,7 @@ function check_good_run {
     check_process_nb reactionner $NB_REACTIONNERS
     is_file_present $VAR/reactionnerd.pid
 
-    echo "Check for $NB_BROKERS brokers (one master, one for status.dat, one for log)"
+    echo "Check for $NB_BROKERS brokers (one master, one for livestatus.dat, one for log)"
     check_process_nb broker $NB_BROKERS
     is_file_present $VAR/brokerd.pid
 
@@ -222,7 +222,7 @@ NB_SCHEDULERS=2
 NB_POLLERS=8
 #3 for stack1, 2 for stack2 (no worker from now)
 NB_REACTIONNERS=5
-#3 for stack 1, 1 for stack2 (no status.dat nor log worker launch)
+#3 for stack 1, 1 for stack2 (no livesatus.dat nor log worker launch)
 NB_BROKERS=4
 #still 1
 NB_ARBITERS=1
@@ -299,7 +299,7 @@ string_in_file "\[broker-Slave\] Connexion OK to the scheduler scheduler-Spare" 
 string_in_file "\[broker-Slave\] Connexion OK to the reactionner reactionner-Spare" $VAR/nagios.log
 string_in_file "\[broker-Slave\] Connexion problem to the poller poller-Master : connection failed" $VAR/nagios.log
 #And should have load the modules
-string_in_file "\[broker-Slave\] I correctly load the modules : \['Simple-log', 'Status-Dat'\]" $VAR/nagios.log
+string_in_file "\[broker-Slave\] I correctly load the modules : \['Simple-log', 'Livestatus'\]" $VAR/nagios.log
 
 
 echo "Now we clean it"
@@ -331,7 +331,7 @@ NB_SCHEDULERS=2
 NB_POLLERS=12
 #3 for stack1, same for stack 2
 NB_REACTIONNERS=6
-#3 for stack 1, 1 for stack2 (no status.dat nor log worker launch)
+#3 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
 NB_BROKERS=4
 #still 1
 NB_ARBITERS=1

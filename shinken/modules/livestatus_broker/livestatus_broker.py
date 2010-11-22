@@ -35,19 +35,19 @@ except ImportError: # python 2.4 do not have it
     import pysqlite2.dbapi2 as sqlite3 # but need the pysqlite2 install from http://code.google.com/p/pysqlite/downloads/list
 import Queue
 
-from host import Host
-from hostgroup import Hostgroup
-from service import Service
-from servicegroup import Servicegroup
-from contact import Contact
-from contactgroup import Contactgroup
-from timeperiod import Timeperiod
-from command import Command
-from config import Config
-from schedulerlink import SchedulerLink
-from reactionnerlink import ReactionnerLink
-from pollerlink import PollerLink
-from brokerlink import BrokerLink
+from shinken.host import Host
+from shinken.hostgroup import Hostgroup
+from shinken.service import Service
+from shinken.servicegroup import Servicegroup
+from shinken.contact import Contact
+from shinken.contactgroup import Contactgroup
+from shinken.timeperiod import Timeperiod
+from shinken.command import Command
+from shinken.config import Config
+from shinken.schedulerlink import SchedulerLink
+from shinken.reactionnerlink import ReactionnerLink
+from shinken.pollerlink import PollerLink
+from shinken.brokerlink import BrokerLink
 from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
 
