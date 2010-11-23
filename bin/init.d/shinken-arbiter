@@ -1,8 +1,8 @@
 #! /bin/sh
 ### BEGIN INIT INFO
 # Provides:          shinken-arbiter
-# Required-Start:
-# Required-Stop:
+# Required-Start:    $all
+# Required-Stop:     $all
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Start Shinken arbiter daemon
@@ -10,13 +10,6 @@
 #                    is one of its daemon. This one read the configuration
 #                    cuts its into parts and dispatch it. Then it wait
 #                    for orders from the users to dispatch them too.
-### END INIT INFO
-
-### BEGIN INIT INFO Redhat
-# Shinken        Starts Shinken Arbiter
-#
-# chkconfig: 345 99 01
-# description: Start Shinken arbiter daemon
 ### END INIT INFO
 
 # Author: Gabes Jean <naparuba@gmail.com>
@@ -117,6 +110,19 @@ do_reload() {
 	return 0
 }
 
+do_status() {
+  if pidofproc -p "$ARBITERPID" >/dev/null; then
+    log_action_end_msg 0 "running"
+  else
+    if [ -e "$ARBITERPID" ]; then
+      log_action_end_msg 1 "$NAME failed"
+    else
+      log_action_end_msg 0 "not running"
+    fi
+  fi
+
+}
+
 case "$1" in
   start)
 	[ -n "$VERBOSE" ] && [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
@@ -135,7 +141,7 @@ case "$1" in
 	esac
 	;;
   status)
-       status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+	do_status
        ;;
   #reload|force-reload)
 	#
