@@ -192,6 +192,29 @@ echo "We will sleep again 5sec so every one is quite stable...."
 sleep 5
 check_good_run /var/lib/shinken
 
+sudo /etc/init.d/shinken-arbiter status
+sudo /etc/init.d/shinken-scheduler status
+sudo /etc/init.d/shinken-poller status
+sudo /etc/init.d/shinken-reactionner status
+sudo /etc/init.d/shinken-broker status
+
+sudo /etc/init.d/shinken-arbiter stop
+sudo /etc/init.d/shinken-scheduler stop
+sudo /etc/init.d/shinken-poller stop
+sudo /etc/init.d/shinken-reactionner stop
+sudo /etc/init.d/shinken-broker stop
+
+sleep 2
+ps -fu shinken
+
+check_process_nb arbiter 0
+check_process_nb scheduler 0
+check_process_nb broker 0
+check_process_nb poller 0
+check_process_nb reactionner 0
+
+
+
 echo "OK Great. Even the real launch test pass. Great. I can clean after me."
 ./clean.sh
 
