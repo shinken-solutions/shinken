@@ -174,8 +174,8 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.schedulers[sched_id]['active'] = s['active']
                     self.schedulers[sched_id]['last_connexion'] = 0
 
-                    #And we connect to it
-                    self.app.pynag_con_init(sched_id, 'scheduler')
+#                    #And we connect to it
+#                    self.app.pynag_con_init(sched_id, 'scheduler')
 
                 Log().log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
 
@@ -219,8 +219,8 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.pollers[pol_id]['running_id'] = running_id
                     self.pollers[pol_id]['last_connexion'] = 0
 
-                    #And we connect to it
-                    self.app.pynag_con_init(pol_id, 'poller')
+#                    #And we connect to it
+#                    self.app.pynag_con_init(pol_id, 'poller')
 
                 Log().log("[%s] We have our pollers : %s" % (self.name, self.pollers))
 
@@ -244,8 +244,8 @@ class IForArbiter(Pyro.core.ObjBase):
                     self.reactionners[rea_id]['running_id'] = running_id
                     self.reactionners[rea_id]['last_connexion'] = 0                    
 
-                    #And we connect to it
-                    self.app.pynag_con_init(rea_id, 'reactionner')
+#                    #And we connect to it
+#                    self.app.pynag_con_init(rea_id, 'reactionner')
 
                 Log().log("[%s] We have our reactionners : %s" % (self.name, self.reactionners))
 

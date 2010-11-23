@@ -288,6 +288,7 @@ class Service(SchedulingItem):
 
     #Inversed funtion of getstate
     def __setstate__(self, state):
+#        print "Set a service state"
         cls = self.__class__
         self.id = state.pop()
         for prop in cls.properties:
