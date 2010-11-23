@@ -176,6 +176,7 @@ class Ndodb_broker:
             res.append(q)
 
         #We also clean cache, because we are not sure about this data now
+	print "[MySQL/NDO] Flushing caches"
         self.services_cache = {}
         self.hosts_cache = {}
 
