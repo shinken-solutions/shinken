@@ -393,7 +393,8 @@ class Dispatcher:
                             #Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
                             for satellite in satellites:
-                                if nb_cfg_sent < r.get_nb_of_must_have_satellites(kind):
+                                #Send only if we need, and if we can
+                                if nb_cfg_sent < r.get_nb_of_must_have_satellites(kind) and satellite.alive:
                                     Log().log('[%s] Trying to send configuration to %s %s' %(r.get_name(), kind, satellite.get_name()))
                                     #cfg_for_satellite = {'schedulers' : {cfg_id : cfg_for_satellite_part}}
                                     satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part

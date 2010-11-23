@@ -169,7 +169,7 @@ class Ndodb_broker:
                   'services',  'serviceescalations', 'programstatus',
                   'servicegroups', 'timeperiods', 'hostgroup_members',
                   'contactgroup_members', 'objects', 'hoststatus',
-                  'servicestatus', 'instances']
+                  'servicestatus', 'instances', 'servicegroup_members']
         res = []
         for table in tables:
             q = "DELETE FROM %s WHERE instance_id = '%s' " % ('nagios_'+table, instance_id)
