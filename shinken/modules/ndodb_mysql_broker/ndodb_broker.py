@@ -292,6 +292,7 @@ class Ndodb_broker:
                            'check_type' : 0, 'current_check_attempt' : data['attempt'],
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
                            'output' : data['output'], 'perfdata' : data['perf_data'],'last_check' : de_unixify(data['last_chk']),
+                           'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                            #set check to 1 so nagvis is happy
                            'has_been_checked' : 1,
                            }
@@ -348,6 +349,7 @@ class Ndodb_broker:
                               'check_type' : 0, 'current_check_attempt' : data['attempt'],
                               'execution_time' : data['execution_time'], 'latency' : data['latency'],
                               'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
+                              'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                               #set check to 1 so nagvis is happy
                               'has_been_checked' : 1,
                               }
@@ -537,7 +539,26 @@ class Ndodb_broker:
         where_clause = {'host_object_id' : host_id}
 
         query = self.db.create_update_query('hosts', hosts_data, where_clause)
-        return [query]
+
+        #Now update an hoststatus entry
+        hoststatus_data = {'instance_id' : data['instance_id'],
+                           'host_object_id' : host_id,
+                           'normal_check_interval' : data['check_interval'],
+                           'retry_check_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
+                           'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
+                           'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
+                           'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
+                           'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data'],
+                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                           'execution_time' : data['execution_time'], 'latency' : data['latency'],
+                           'output' : data['output'], 'perfdata' : data['perf_data'],'last_check' : de_unixify(data['last_chk']),
+                           'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
+                           #set check to 1 so nagvis is happy
+                           'has_been_checked' : 1,
+                           }
+        hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
+
+        return [query, hoststatus_query]
 
 
     #Ok the host is updated
@@ -565,7 +586,27 @@ class Ndodb_broker:
         where_clause = {'service_object_id' : service_id, 'service_id' : data['id']}
         #where_clause = {'host_name' : data['host_name']}
         query = self.db.create_update_query('services', services_data, where_clause)
-        return [query]
+
+        #Now create an hoststatus entry
+        servicestatus_data = {'instance_id' : data['instance_id'],
+                              'service_object_id' : service_id,
+                              'normal_check_interval' : data['check_interval'],
+                              'retry_check_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
+                              'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
+                              'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
+                              'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
+                              'obsess_over_service' : data['obsess_over_service'],'process_performance_data' : data['process_perf_data'],
+
+                              'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                              'execution_time' : data['execution_time'], 'latency' : data['latency'],
+                              'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
+                              'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
+                              #set check to 1 so nagvis is happy
+                              'has_been_checked' : 1,
+                              }
+        servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
+
+        return [query, servicestatus_query]
 
 
 
