@@ -292,6 +292,8 @@ class Ndodb_broker:
                            'check_type' : 0, 'current_check_attempt' : data['attempt'],
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
                            'output' : data['output'], 'perfdata' : data['perf_data'],'last_check' : de_unixify(data['last_chk']),
+                           #set check to 1 so nagvis is happy
+                           'has_been_checked' : 1,
                            }
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
 
@@ -346,6 +348,8 @@ class Ndodb_broker:
                               'check_type' : 0, 'current_check_attempt' : data['attempt'],
                               'execution_time' : data['execution_time'], 'latency' : data['latency'],
                               'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
+                              #set check to 1 so nagvis is happy
+                              'has_been_checked' : 1,
                               }
         servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
@@ -544,7 +548,7 @@ class Ndodb_broker:
 
 
         
-        services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'],
+        services_data = {'instance_id' : data['instance_id'],
                       'display_name' : data['display_name'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
                       'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
@@ -558,7 +562,7 @@ class Ndodb_broker:
             }
 
         #Only the service is impacted
-        where_clause = {'service_object_id' : service_id}
+        where_clause = {'service_object_id' : service_id, 'service_id' : data['id']}
         #where_clause = {'host_name' : data['host_name']}
         query = self.db.create_update_query('services', services_data, where_clause)
         return [query]

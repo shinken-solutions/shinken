@@ -273,6 +273,7 @@ class Service(SchedulingItem):
     #We create a list with properties inlined
     #The setstate function do the inverse
     def __getstate__(self):
+#        print "Asking a getstate for service", self.get_dbg_name()
         cls = self.__class__
         #id is not in *_properties
         res = [self.id]
@@ -288,11 +289,12 @@ class Service(SchedulingItem):
 
     #Inversed funtion of getstate
     def __setstate__(self, state):
-#        print "Set a service state"
+#        print "Set a service state", state['host_name'], state['service_description']
         cls = self.__class__
         self.id = state.pop()
         for prop in cls.properties:
-            setattr(self, prop, state.pop())
+	    val = state.pop()
+            setattr(self, prop, val)
         for prop in cls.running_properties:
             setattr(self, prop, state.pop())
 

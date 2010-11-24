@@ -632,7 +632,9 @@ class Broker(Satellite):
 
                                         #DBG
 #                                        for b in tmp_broks.values():
+#					    print b.type, b
 #                                            data = b.data
+#					    print data
 #                                            for k in data:
 #                                                if isinstance(data[k], Service):
 #                                                    print "Fucking service in data!", b

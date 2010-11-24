@@ -410,6 +410,9 @@ class Scheduler:
         res = self.broks
         #They are gone, we keep none!
         self.broks = {}
+#	print "returning broks"
+#	for b in res:
+#		print b, res[b]
         return res
 
 
