@@ -20,6 +20,7 @@
 #File for a Livestatus class which can be used by the status-dat-broker
 import re
 import Queue
+import copy
 
 try:
     Queue.LifoQueue
@@ -3813,6 +3814,313 @@ class LiveStatus:
             },
         },
 
+        # loop over hostgroups then over members
+        'Hostsbygroup' : {
+            'hostgroup_action_url' : {
+                'description' : 'An optional URL to custom actions or information about the hostgroup',
+                'prop' : 'hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_alias' : {
+                'description' : 'An alias of the hostgroup',
+                'prop' : 'hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_members' : {
+                'description' : 'A list of all host names that are members of the hostgroup',
+                'prop' : 'hostgroup',
+                'type' : 'list',
+            },
+            'hostgroup_members_with_state' : {
+                'description' : 'A list of all host names that are members of the hostgroup together with state and has_been_checked',
+                'prop' : 'hostgroup',
+                'type' : 'list',
+            },
+            'hostgroup_name' : {
+                'depythonize' : lambda x: getattr(x, 'hostgroup_name', ''),
+                'description' : 'Name of the hostgroup',
+                'prop' : 'hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_notes' : {
+                'description' : 'Optional notes to the hostgroup',
+                'prop' : 'hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_notes_url' : {
+                'description' : 'An optional URL with further information about the hostgroup',
+                'prop' : 'hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_num_hosts' : {
+                'description' : 'The total number of hosts in the group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_hosts_down' : {
+                'description' : 'The number of hosts in the group that are down',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_hosts_pending' : {
+                'description' : 'The number of hosts in the group that are pending',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_hosts_unreach' : {
+                'description' : 'The number of hosts in the group that are unreachable',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_hosts_up' : {
+                'description' : 'The number of hosts in the group that are up',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services' : {
+                'description' : 'The total number of services of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_crit' : {
+                'description' : 'The total number of services with the state CRIT of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_hard_crit' : {
+                'description' : 'The total number of services with the state CRIT of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_hard_ok' : {
+                'description' : 'The total number of services with the state OK of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_hard_unknown' : {
+                'description' : 'The total number of services with the state UNKNOWN of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_hard_warn' : {
+                'description' : 'The total number of services with the state WARN of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_ok' : {
+                'description' : 'The total number of services with the state OK of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_pending' : {
+                'description' : 'The total number of services with the state Pending of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_unknown' : {
+                'description' : 'The total number of services with the state UNKNOWN of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_warn' : {
+                'description' : 'The total number of services with the state WARN of hosts in this group',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_worst_host_state' : {
+                'description' : 'The worst state of all of the groups\' hosts (UP <= UNREACHABLE <= DOWN)',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_worst_service_hard_state' : {
+                'description' : 'The worst state of all services that belong to a host of this group (OK <= WARN <= UNKNOWN <= CRIT)',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+            'hostgroup_worst_service_state' : {
+                'description' : 'The worst state of all services that belong to a host of this group (OK <= WARN <= UNKNOWN <= CRIT)',
+                'prop' : 'hostgroup',
+                'type' : 'int',
+            },
+        },
+
+        'Servicesbygroup' : {
+            'servicegroup_action_url' : {
+                'description' : 'An optional URL to custom notes or actions on the service group',
+                'type' : 'string',
+            },
+            'servicegroup_alias' : {
+                'description' : 'An alias of the service group',
+                'type' : 'string',
+            },
+            'servicegroup_members' : {
+                'description' : 'A list of all members of the service group as host/service pairs',
+                'type' : 'list',
+            },
+            'servicegroup_members_with_state' : {
+                'description' : 'A list of all members of the service group with state and has_been_checked',
+                'type' : 'list',
+            },
+            'servicegroup_name' : {
+                'description' : 'The name of the service group',
+                'type' : 'string',
+            },
+            'servicegroup_notes' : {
+                'description' : 'Optional additional notes about the service group',
+                'type' : 'string',
+            },
+            'servicegroup_notes_url' : {
+                'description' : 'An optional URL to further notes on the service group',
+                'type' : 'string',
+            },
+            'servicegroup_num_services' : {
+                'description' : 'The total number of services in the group',
+                'type' : 'int',
+            },
+            'servicegroup_num_services_crit' : {
+                'description' : 'The number of services in the group that are CRIT',
+                'type' : 'int',
+            },
+            'servicegroup_num_services_hard_crit' : {
+                'description' : 'The number of services in the group that are CRIT',
+                'type' : 'int',
+            },
+            'servicegroup_num_services_hard_ok' : {
+                'description' : 'The number of services in the group that are OK',
+                'type' : 'int',
+            },
+            'servicegroup_num_services_hard_unknown' : {
+                'description' : 'The number of services in the group that are UNKNOWN',
+                'type' : 'int',
+            },
+            'servicegroup_num_services_hard_warn' : {
+                'description' : 'The number of services in the group that are WARN',
+                'type' : 'int',
+            },
+            'servicegroup_num_services_ok' : {
+                'description' : 'The number of services in the group that are OK',
+                'type' : 'int',
+            },
+            'servicegroup_num_services_pending' : {
+                'description' : 'The number of services in the group that are PENDING',
+                'type' : 'int',
+            },
+            'servicegroup_num_services_unknown' : {
+                'description' : 'The number of services in the group that are UNKNOWN',
+                'type' : 'int',
+            },
+            'servicegroup_num_services_warn' : {
+                'description' : 'The number of services in the group that are WARN',
+                'type' : 'int',
+            },
+            'servicegroup_worst_service_state' : {
+                'description' : 'The worst soft state of all of the groups services (OK <= WARN <= UNKNOWN <= CRIT)',
+                'type' : 'int',
+            },
+        },
+
+        'Servicesbyhostgroup' : {
+            'hostgroup_action_url' : {
+                'description' : 'An optional URL to custom actions or information about the hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_alias' : {
+                'description' : 'An alias of the hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_members' : {
+                'description' : 'A list of all host names that are members of the hostgroup',
+                'type' : 'list',
+            },
+            'hostgroup_members_with_state' : {
+                'description' : 'A list of all host names that are members of the hostgroup together with state and has_been_checked',
+                'type' : 'list',
+            },
+            'hostgroup_name' : {
+                'description' : 'Name of the hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_notes' : {
+                'description' : 'Optional notes to the hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_notes_url' : {
+                'description' : 'An optional URL with further information about the hostgroup',
+                'type' : 'string',
+            },
+            'hostgroup_num_hosts' : {
+                'description' : 'The total number of hosts in the group',
+                'type' : 'int',
+            },
+            'hostgroup_num_hosts_down' : {
+                'description' : 'The number of hosts in the group that are down',
+                'type' : 'int',
+            },
+            'hostgroup_num_hosts_pending' : {
+                'description' : 'The number of hosts in the group that are pending',
+                'type' : 'int',
+            },
+            'hostgroup_num_hosts_unreach' : {
+                'description' : 'The number of hosts in the group that are unreachable',
+                'type' : 'int',
+            },
+            'hostgroup_num_hosts_up' : {
+                'description' : 'The number of hosts in the group that are up',
+                'type' : 'int',
+            },
+            'hostgroup_num_services' : {
+                'description' : 'The total number of services of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_crit' : {
+                'description' : 'The total number of services with the state CRIT of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_hard_crit' : {
+                'description' : 'The total number of services with the state CRIT of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_hard_ok' : {
+                'description' : 'The total number of services with the state OK of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_hard_unknown' : {
+                'description' : 'The total number of services with the state UNKNOWN of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_hard_warn' : {
+                'description' : 'The total number of services with the state WARN of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_ok' : {
+                'description' : 'The total number of services with the state OK of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_pending' : {
+                'description' : 'The total number of services with the state Pending of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_unknown' : {
+                'description' : 'The total number of services with the state UNKNOWN of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_num_services_warn' : {
+                'description' : 'The total number of services with the state WARN of hosts in this group',
+                'type' : 'int',
+            },
+            'hostgroup_worst_host_state' : {
+                'description' : 'The worst state of all of the groups\' hosts (UP <= UNREACHABLE <= DOWN)',
+                'type' : 'int',
+            },
+            'hostgroup_worst_service_hard_state' : {
+                'description' : 'The worst state of all services that belong to a host of this group (OK <= WARN <= UNKNOWN <= CRIT)',
+                'type' : 'int',
+            },
+            'hostgroup_worst_service_state' : {
+                'description' : 'The worst state of all services that belong to a host of this group (OK <= WARN <= UNKNOWN <= CRIT)',
+                'type' : 'int',
+            },
+        },
 
         #All the global config parameters
 
@@ -4818,6 +5126,13 @@ class LiveStatus:
         self.dbconn.row_factory = self.row_factory
         self.return_queue = return_queue
         self.inversed_stack_queue = (Queue.LifoQueue == Queue.Queue) # if the Queue is not in the good order for python 2.4
+        # add Host attributes to Hostsbygroup
+        for attribute in LiveStatus.out_map['Host']:
+            LiveStatus.out_map['Hostsbygroup'][attribute] = LiveStatus.out_map['Host'][attribute]
+        for attribute in LiveStatus.out_map['Service']:
+            LiveStatus.out_map['Servicesbygroup'][attribute] = LiveStatus.out_map['Service'][attribute]
+        for attribute in LiveStatus.out_map['Service']:
+            LiveStatus.out_map['Servicesbyhostgroup'][attribute] = LiveStatus.out_map['Service'][attribute]
 
 
     def debug(self, debuglevel, message):
@@ -4842,6 +5157,9 @@ class LiveStatus:
             'downtimes' : LiveStatus.out_map['Downtime'],
             'commands' : LiveStatus.out_map['Command'],
             'timeperiods' : LiveStatus.out_map['Timeperiod'],
+            'hostsbygroup' : LiveStatus.out_map['Hostsbygroup'],
+            'servicesbygroup' : LiveStatus.out_map['Servicesbygroup'],
+            'servicesbyhostgroup' : LiveStatus.out_map['Servicesbyhostgroup'],
             'status' : LiveStatus.out_map['Config'],
             'log' : LiveStatus.out_map['Logline'],
             'schedulers' : LiveStatus.out_map['SchedulerLink'],
@@ -4860,137 +5178,228 @@ class LiveStatus:
         return None
 
 
-    def create_output(self, elt, attributes, filterattributes):
+    def create_output(self, type_map, elt, attributes, filterattributes):
         output = {}
-        elt_type = elt.__class__.__name__
-        if elt_type in LiveStatus.out_map:
-            type_map = LiveStatus.out_map[elt_type]
-            if len(attributes + filterattributes) == 0:
-                #display_attributes = LiveStatus.default_attributes[elt_type]
-                display_attributes = LiveStatus.out_map[elt_type].keys()
+        # type_map is usually LiveStatus.out_map[elt.__class__.__name__]
+        # But instead of Host it can also be Hostbygroup
+        if len(attributes + filterattributes) == 0:
+            display_attributes = type_map.keys()
+        else:
+            display_attributes = list(set(attributes + filterattributes))
+        for display in display_attributes:
+            value = ''
+            if display not in type_map:
+                # no mapping, use it as a direct attribute
+                value = getattr(elt, display, '')
             else:
-                display_attributes = list(set(attributes + filterattributes))
-            for display in display_attributes:
-                value = ''
-                if display not in type_map:
-                    # no mapping, use it as a direct attribute
-                    value = getattr(elt, display, '')
+                if 'prop' not in type_map[display] or type_map[display]['prop'] == None:
+                    # display is listed, but prop is not set. this must be a direct attribute
+                    prop = display
                 else:
-                    if 'prop' not in type_map[display] or type_map[display]['prop'] == None:
-                        # display is listed, but prop is not set. this must be a direct attribute
-                        prop = display
-                    else:
-                        # We have a prop, this means some kind of mapping between the display name (livestatus column)
-                        # and an internal name must happen
-                        prop = type_map[display]['prop']
-                    value = getattr(elt, prop, None)
-                    if value != None:
-                        # The name/function listed in prop exists
-                        #Maybe it's not a value, but a function link
-                        if callable(value):
-                            value = value()
-                        if display in type_map and 'depythonize' in type_map[display]:
-                            f = type_map[display]['depythonize']
-                            if callable(f):
-                                #for example "from_list_to_split". value is an array and f takes the array as an argument
-                                value = f(value)
+                    # We have a prop, this means some kind of mapping between the display name (livestatus column)
+                    # and an internal name must happen
+                    prop = type_map[display]['prop']
+                value = getattr(elt, prop, None)
+                if value != None:
+                    # The name/function listed in prop exists
+                    #Maybe it's not a value, but a function link
+                    if callable(value):
+                        value = value()
+                    if display in type_map and 'depythonize' in type_map[display]:
+                        f = type_map[display]['depythonize']
+                        if callable(f):
+                            #for example "from_list_to_split". value is an array and f takes the array as an argument
+                            value = f(value)
+                        else:
+                            if isinstance(value, list):
+                                #depythonize's argument might be an attribute or a method
+                                #example: members is an array of hosts and we want get_name() of each element
+                                value = [getattr(item, f)() for item in value if callable(getattr(item, f)) ] \
+                                      + [getattr(item, f) for item in value if not callable(getattr(item, f)) ]
+                                #at least servicegroups are nested [host,service],.. The need some flattening
+
+                                #I thin the 2 above lines are create a problem in json output at least
+                                #with service groups members that need to be [[hostname, desc], [hostname, desc]]
+                                #value = [y for x in value if isinstance(x, list) for y in x] + \
+                                #    [x for x in value if not isinstance(x, list)]
+                                #print "DBG: Final value:", value
+
                             else:
-                                if isinstance(value, list):
-                                    #depythonize's argument might be an attribute or a method
-                                    #example: members is an array of hosts and we want get_name() of each element
-                                    value = [getattr(item, f)() for item in value if callable(getattr(item, f)) ] \
-                                          + [getattr(item, f) for item in value if not callable(getattr(item, f)) ]
-                                    #at least servicegroups are nested [host,service],.. The need some flattening
-
-                                    #I thin the 2 above lines are create a problem in json output at least
-                                    #with service groups members that need to be [[hostname, desc], [hostname, desc]]
-                                    #value = [y for x in value if isinstance(x, list) for y in x] + \
-                                    #    [x for x in value if not isinstance(x, list)]
-                                    #print "DBG: Final value:", value
-
+                                #ok not a direct function, maybe a functin provided by value...
+                                f = getattr(value, f)
+                                if callable(f):
+                                    value = f()
                                 else:
-                                    #ok not a direct function, maybe a functin provided by value...
-                                    f = getattr(value, f)
-                                    if callable(f):
-                                        value = f()
-                                    else:
-                                        value = f
+                                    value = f
 
-                        if len(str(value)) == 0:
-                            value = ''
-                    elif 'default' in type_map[display]:
-                        # display is not a known attribute, there is no prop for mapping, but
-                        # at least we have a default value
-                        value = type_map[display]['default']
-                    else:
+                    if len(str(value)) == 0:
                         value = ''
-                output[display] = value
+                elif 'default' in type_map[display]:
+                    # display is not a known attribute, there is no prop for mapping, but
+                    # at least we have a default value
+                    value = type_map[display]['default']
+                else:
+                    value = ''
+            output[display] = value
         return output
 
 
     def get_live_data(self, table, columns, filtercolumns, limit, filter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by):
         result = []
-        if table in ['hosts', 'services', 'downtimes', 'comments', 'hostgroups', 'servicegroups']:
+        if table in ['hosts', 'services', 'downtimes', 'comments', 'hostgroups', 'servicegroups', 'hostsbygroup', 'servicesbygroup', 'servicesbyhostgroup']:
             #Scan through the objects and apply the Filter: rules
             if table == 'hosts':
+                type_map = LiveStatus.out_map['Host']
                 if not limit:
                     if len(filtercolumns) == 0:
-                        filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.hosts.values()] if filter_stack(y)]
+                        filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in self.hosts.values()] if filter_stack(y)]
                     else:
                         # If there we had Filter: statements, it makes sense to make two steps
                         # 1. Walk through the complete list of hosts, but only resolve those attributes
                         #    which are needed for the filtering
                         #    Hopefully after this step there are only a few host objects left
-                        prefiltresult = (x for x in self.hosts.values() if filter_stack(self.create_output(x, [], filtercolumns)))
+                        prefiltresult = (x for x in self.hosts.values() if filter_stack(self.create_output(type_map, x, [], filtercolumns)))
                         # 2. Then take the remaining objects and resolve the whole list of attributes (which may be a lot if there was no short Columns: list)
-                        filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
                 else:
                     hosts = sorted(self.hosts.values(), key = lambda k: k.host_name)
                     if len(filtercolumns) == 0:
-                        filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in hosts] if filter_stack(y)]
+                        filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in hosts] if filter_stack(y)]
                     else:
-                        prefiltresult = (x for x in hosts if filter_stack(self.create_output(x, [], filtercolumns)))
+                        prefiltresult = (x for x in hosts if filter_stack(self.create_output(type_map, x, [], filtercolumns)))
                         filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
                     filtresult = filtresult[:limit]
-            elif table == 'services':
+            elif table == 'hostsbygroup':
+                type_map = LiveStatus.out_map['Hostsbygroup']
+                # instead of self.hosts.values() 
+                # loop over hostgroups, then over members, then flatten the list, then add a hostgroup attribute to each host
                 if not limit:
                     if len(filtercolumns) == 0:
-                        filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.services.values()] if filter_stack(y)]
+                        prefiltresult = []
+                        for hg in [x for x in self.hostgroups.values() if x.members]:
+                            prefiltresult.extend([h for h in (setattr(ho, 'hostgroup', hg) or ho for ho in [copy.copy(item) for item in sorted(hg.members, key = lambda k: k.host_name)])])
+                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
                     else:
-                        prefiltresult = (x for x in self.services.values() if filter_stack(self.create_output(x, [], filtercolumns)))
-                        filtresult = [self.create_output(x, columns, []) for x in prefiltresult]
+                        prefiltresult = []
+                        for hg in [x for x in self.hostgroups.values() if x.members]:
+                            prefiltresult.extend([h for h in (setattr(ho, 'hostgroup', hg) or ho for ho in [copy.copy(item) for item in sorted(hg.members, key = lambda k: k.host_name)]) if filter_stack(self.create_output(type_map, h, [], filtercolumns))])
+                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
+                else:
+                    # Now implemented. Why would one limit this anyway?
+                    pass
+            elif table == 'services':
+                type_map = LiveStatus.out_map['Service']
+                if not limit:
+                    if len(filtercolumns) == 0:
+                        filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in self.services.values()] if filter_stack(y)]
+                    else:
+                        prefiltresult = (x for x in self.services.values() if filter_stack(self.create_output(type_map, x, [], filtercolumns)))
+                        filtresult = [self.create_output(type_map, x, columns, []) for x in prefiltresult]
                 else:
                     services = sorted(self.services.values(), key = lambda k: (k.host_name, k.service_description))
                     if len(filtercolumns) == 0:
-                        filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in services] if filter_stack(y)]
+                        filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in services] if filter_stack(y)]
                     else:
-                        prefiltresult = (x for x in services if filter_stack(self.create_output(x, [], filtercolumns)))
-                        filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                        prefiltresult = (x for x in services if filter_stack(self.create_output(type_map, x, [], filtercolumns)))
+                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
                     filtresult = filtresult[:limit]
+            elif table == 'servicesbygroup':
+                type_map = LiveStatus.out_map['Servicesbygroup']
+                if not limit:
+                    if len(filtercolumns) == 0:
+                        prefiltresult = []
+                        for sg in [x for x in self.servicegroups.values() if x.members]:
+                            prefiltresult.extend([s for s in (setattr(se, 'servicegroup', sg) or se for se in [copy.copy(item) for item in sorted(sg.members, key = lambda k: k.get_full_name())])])
+                        filtresult = [self.create_output(type_map, x, columns, []) for x in prefiltresult]
+                    else:
+                        prefiltresult = []
+                        for sg in [x for x in self.servicegroups.values() if x.members]:
+                            prefiltresult.extend([s for s in (setattr(se, 'servicegroup', sg) or se for se in [copy.copy(item) for item in sorted(sg.members, key = lambda k: k.get_full_name())]) if filter_stack(self.create_output(type_map, s, [], filtercolumns))])
+                        filtresult = [self.create_output(type_map, x, columns, []) for x in prefiltresult]
+                else:
+                    # Now implemented. Why would one limit this anyway?
+                    pass
+            elif table == 'servicesbyhostgroup':
+                type_map = LiveStatus.out_map['Servicesbyhostgroup']
+                # Filter: host_groups >= linux-servers
+                # host_groups is a service attribute
+                # We can get all services of all hosts of all hostgroups and filter at the end
+                # But it would save a lot of time to already filter the hostgroups. This means host_groups must be hard-coded
+                # Also host_name, but then we must filter the second step.
+                # And a mixture host_groups/host_name with FilterAnd/Or? Must have several filter functions
+#setattr(ho, 'hostgroup', hg) or ho
+                if not limit:
+                    if len(filtercolumns) == 0:
+
+                        x = [
+                                  setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in [
+                                    # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
+                                    (copy.copy(item1), inner_list1[1]) for inner_list1 in [
+                                      # ([service, service, ...], hostgroup), ([service, ...], hostgroup), ...  flattened by host. only if a host has services. sorted by service_description
+                                      (sorted(item0.services, key = lambda k: k.service_description), inner_list0[1]) for inner_list0 in [
+                                        # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
+                                        (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
+                                          # hostgroups, sorted by hostgroup_name
+                                          sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
+                                      ] for item0 in inner_list0[0] if item0.services
+                                    ] for item1 in inner_list1[0]
+                                  ]
+                        ]
+                        for host in x:
+                            print "->", host
+                            #print "name, group", host.host_name, host.hgrpnamknorx
+
+                        #x = [flathosts for members in [hg1.members for hg1 in sorted([hg for hg in self.hostgroups.values() if hg.members], key = lambda k: k.hostgroup_name)] for flathosts in members]
+                        print "x is", x
+                        raise
+
+
+
+
+                        prefiltresult = []
+                        for hg in [x for x in self.hostgroups.values() if x.members]:
+                            prefiltresult.extend([s for s in (setattr(se, 'hostgroup', hg) or se for se in 
+[copy.copy(item) for item in sorted([sitem for li in hg.members for sitem in li], key = lambda k: k.host_name)
+]
+)])
+                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
+                    else:
+                        prefiltresult = []
+                        for hg in [x for x in self.hostgroups.values() if x.members]:
+                            prefiltresult.extend([h for h in (setattr(ho, 'hostgroup', hg) or ho for ho in [copy.copy(item) for item in sorted(hg.members, key = lambda k: k.host_name)]) if filter_stack(self.create_output(type_map, h, [], filtercolumns))])
+                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
+                else:
+                    # Now implemented. Why would one limit this anyway?
+                    pass
             elif table == 'downtimes':
+                type_map = LiveStatus.out_map['Downtime']
+                need_filter = len(filtercolumns) > 0
                 if len(filtercolumns) == 0:
                     filtresult = [self.create_output(y, columns, filtercolumns) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], [])]
                 else:
                     prefiltresult = [d for d in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], []) if filter_stack(self.create_output(d, [], filtercolumns))]
                     filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'comments':
+                type_map = LiveStatus.out_map['Comment']
                 if len(filtercolumns) == 0:
-                    filtresult = [self.create_output(y, columns, filtercolumns) for y in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], [])]
+                    filtresult = [self.create_output(type_map, y, columns, filtercolumns) for y in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], [])]
                 else:
-                    prefiltresult = [c for c in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], []) if filter_stack(self.create_output(c, [], filtercolumns))]
-                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                    prefiltresult = [c for c in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], []) if filter_stack(self.create_output(type_map, c, [], filtercolumns))]
+                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'hostgroups':
+                type_map = LiveStatus.out_map['Hostgroup']
                 if len(filtercolumns) == 0:
-                    filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.hostgroups.values()] if filter_stack(y)]
+                    filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in self.hostgroups.values()] if filter_stack(y)]
                 else:
-                    prefiltresult = [x for x in self.hostgroups.values() if filter_stack(self.create_output(x, [], filtercolumns))]
-                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                    prefiltresult = [x for x in self.hostgroups.values() if filter_stack(self.create_output(type_map, x, [], filtercolumns))]
+                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'servicegroups':
+                type_map = LiveStatus.out_map['Servicegroup']
                 if len(filtercolumns) == 0:
-                    filtresult = [y for y in [self.create_output(x, columns, filtercolumns) for x in self.servicegroups.values()] if filter_stack(y)]
+                    filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in self.servicegroups.values()] if filter_stack(y)]
                 else:
-                    prefiltresult = [x for x in self.servicegroups.values() if filter_stack(self.create_output(x, [], filtercolumns))]
-                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                    prefiltresult = [x for x in self.servicegroups.values() if filter_stack(self.create_output(type_map, x, [], filtercolumns))]
+                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
 
             if stats_filter_stack.qsize() > 0:
                 resultarr = {}
@@ -5039,24 +5448,31 @@ class LiveStatus:
                 #Columns: = keys of the dicts
                 result = filtresult
         elif table == 'contacts':
+            type_map = LiveStatus.out_map['Contact']
             for c in self.contacts.values():
-                result.append(self.create_output(c, columns, filtercolumns))
+                result.append(self.create_output(type_map, c, columns, filtercolumns))
         elif table == 'commands':
+            type_map = LiveStatus.out_map['Command']
             for c in self.commands.values():
-                result.append(self.create_output(c, columns, filtercolumns))
+                result.append(self.create_output(type_map, c, columns, filtercolumns))
         elif table == 'schedulers':
+            type_map = LiveStatus.out_map['SchedulerLink']
             for s in self.schedulers.values():
-                result.append(self.create_output(s, columns, filtercolumns))
+                result.append(self.create_output(type_map, s, columns, filtercolumns))
         elif table == 'pollers':
+            type_map = LiveStatus.out_map['PollerLink']
             for s in self.pollers.values():
-                result.append(self.create_output(s, columns, filtercolumns))
+                result.append(self.create_output(type_map, s, columns, filtercolumns))
         elif table == 'reactionners':
+            type_map = LiveStatus.out_map['ReactionnerLink']
             for s in self.reactionners.values():
-                result.append(self.create_output(s, columns, filtercolumns))
+                result.append(self.create_output(type_map, s, columns, filtercolumns))
         elif table == 'brokers':
+            type_map = LiveStatus.out_map['BrokerLink']
             for s in self.brokers.values():
-                result.append(self.create_output(s, columns, filtercolumns))
+                result.append(self.create_output(type_map, s, columns, filtercolumns))
         elif table == 'problems':
+            type_map = LiveStatus.out_map['Problem']
             #We will crate a problems list first with all problems and source in it
             #TODO : create with filter
             problems = []
@@ -5070,10 +5486,11 @@ class LiveStatus:
                     problems.append(pb)
             #Then return
             for pb in problems:
-                result.append(self.create_output(pb, columns, filtercolumns))
+                result.append(self.create_output(type_map, pb, columns, filtercolumns))
         elif table == 'status':
+            type_map = LiveStatus.out_map['Config']
             for c in self.configs.values():
-                result.append(self.create_output(c, columns, filtercolumns))
+                result.append(self.create_output(type_map, c, columns, filtercolumns))
         elif table == 'columns':
             result.append({
                 'description' : 'A description of the column' , 'name' : 'description' , 'table' : 'columns' , 'type' : 'string' })
@@ -5099,6 +5516,7 @@ class LiveStatus:
     def get_live_data_log(self, table, columns, filtercolumns, limit, filter_stack, sql_filter_stack):
         result = []
         if table == 'log':
+            type_map = LiveStatus.out_map['Log']
             # we can apply the filterstack here as well. we have columns and filtercolumns.
             # the only additional step is to enrich log lines with host/service-attributes
             # a timerange can be useful for a faster preselection of lines
@@ -5112,9 +5530,9 @@ class LiveStatus:
             prefiltresult = []
             dbresult = c.fetchall()
             # make a generator: fill in the missing columns in the logline and filter it with filtercolumns
-            prefiltresult = (y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(columns + filtercolumns)) for x in dbresult) if filter_stack(self.create_output(y, [], filtercolumns)))
+            prefiltresult = (y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(columns + filtercolumns)) for x in dbresult) if filter_stack(self.create_output(type_map, y, [], filtercolumns)))
             # add output columns
-            filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+            filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
             result = filtresult
             pass
             # CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options INT, plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))

@@ -80,6 +80,50 @@ class TestConfig(ShinkenTest):
         print response
 
 
+    def test_servicesbyhostgroup(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET servicesbyhostgroup
+Columns: hostgroup_name host_name service_description groups
+OutputFormat:json
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
+
+    def test_hostsbygroup(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hostsbygroup
+ColumnHeaders: on
+Columns: host_name hostgroup_name
+Filter: groups >= allhosts
+OutputFormat: csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
+
+
     def test_status(self):
         self.print_header()
         print "got initial broks"
@@ -1293,6 +1337,109 @@ StatsGroupBy: state
 #"""
         #response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         #print response
+
+
+
+    def test_hostsbygroup(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+#Filter: groups >= hostgroup_04
+        request = """GET hostsbygroup
+ColumnHeaders: on
+Columns: host_name hostgroup_name
+OutputFormat: csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
+
+    def test_servicesbyhostgroup(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET servicesbyhostgroup
+Filter: host_groups >= linux-servers
+Stats: has_been_checked = 0
+Stats: state = 0
+Stats: has_been_checked != 0
+Stats: scheduled_downtime_depth = 0
+Stats: host_scheduled_downtime_depth = 0
+StatsAnd: 4
+Stats: state = 0
+Stats: scheduled_downtime_depth > 0
+Stats: host_scheduled_downtime_depth > 0
+StatsAnd: 3
+Stats: state = 1
+Stats: acknowledged = 0
+Stats: host_acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+Stats: host_scheduled_downtime_depth = 0
+StatsAnd: 5
+Stats: state = 1
+Stats: acknowledged = 1
+Stats: host_acknowledged = 1
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 1
+Stats: scheduled_downtime_depth > 0
+Stats: host_scheduled_downtime_depth > 0
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 2
+Stats: acknowledged = 0
+Stats: host_acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+Stats: host_scheduled_downtime_depth = 0
+StatsAnd: 5
+Stats: state = 2
+Stats: acknowledged = 1
+Stats: host_acknowledged = 1
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 2
+Stats: scheduled_downtime_depth > 0
+Stats: host_scheduled_downtime_depth > 0
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 3
+Stats: acknowledged = 0
+Stats: host_acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+Stats: host_scheduled_downtime_depth = 0
+StatsAnd: 5
+Stats: state = 3
+Stats: acknowledged = 1
+Stats: host_acknowledged = 1
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 3
+Stats: scheduled_downtime_depth > 0
+Stats: host_scheduled_downtime_depth > 0
+StatsOr: 2
+StatsAnd: 2
+StatsGroupBy: hostgroup_name
+OutputFormat:json
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
 
 
 
