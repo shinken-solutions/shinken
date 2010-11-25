@@ -273,9 +273,11 @@ class Host(SchedulingItem):
         #id is not in *_properties
         res = {'id' : self.id}
         for prop in cls.properties:
-            res[prop] = getattr(self, prop)
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
         for prop in cls.running_properties:
-            res[prop] = getattr(self, prop)
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
         return res
 
 
@@ -284,9 +286,11 @@ class Host(SchedulingItem):
         cls = self.__class__
         self.id = state['id']
         for prop in cls.properties:
-            setattr(self, prop, state[prop])
+            if prop in state:
+                setattr(self, prop, state[prop])
         for prop in cls.running_properties:
-            setattr(self, prop, state[prop])
+            if prop in state:
+                setattr(self, prop, state[prop])
 
 
 

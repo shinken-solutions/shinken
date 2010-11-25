@@ -91,8 +91,9 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, objlist)
         self.update_broker()
         request = """GET servicesbyhostgroup
+Filter: host_groups >= allhosts
 Columns: hostgroup_name host_name service_description groups
-OutputFormat:json
+OutputFormat: csv
 KeepAlive: on
 ResponseHeader: fixed16
 """
@@ -1374,7 +1375,7 @@ ResponseHeader: fixed16
         self.scheduler_loop(1, objlist)
         self.update_broker()
         request = """GET servicesbyhostgroup
-Filter: host_groups >= linux-servers
+Filter: host_groups >= up
 Stats: has_been_checked = 0
 Stats: state = 0
 Stats: has_been_checked != 0
@@ -1434,7 +1435,7 @@ Stats: host_scheduled_downtime_depth > 0
 StatsOr: 2
 StatsAnd: 2
 StatsGroupBy: hostgroup_name
-OutputFormat:json
+OutputFormat: csv
 KeepAlive: on
 ResponseHeader: fixed16
 """

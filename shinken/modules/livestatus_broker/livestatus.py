@@ -4037,7 +4037,9 @@ class LiveStatus:
                 'type' : 'list',
             },
             'hostgroup_name' : {
+                'depythonize' : lambda x: getattr(x, 'hostgroup_name', ''),
                 'description' : 'Name of the hostgroup',
+                'prop' : 'hostgroup',
                 'type' : 'string',
             },
             'hostgroup_notes' : {
@@ -5327,11 +5329,27 @@ class LiveStatus:
                 # But it would save a lot of time to already filter the hostgroups. This means host_groups must be hard-coded
                 # Also host_name, but then we must filter the second step.
                 # And a mixture host_groups/host_name with FilterAnd/Or? Must have several filter functions
-#setattr(ho, 'hostgroup', hg) or ho
+                # This is still under construction. The code can be made simpler
                 if not limit:
                     if len(filtercolumns) == 0:
-
-                        x = [
+                        prefiltresult = [
+                            setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in [
+                                # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
+                                (copy.copy(item1), inner_list1[1]) for inner_list1 in [
+                                     # ([service, service, ...], hostgroup), ([service, ...], hostgroup), ...  flattened by host. only if a host has services. sorted by service_description
+                                     (sorted(item0.services, key = lambda k: k.service_description), inner_list0[1]) for inner_list0 in [
+                                         # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
+                                         (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
+                                             # hostgroups, sorted by hostgroup_name
+                                             sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
+                                     ] for item0 in inner_list0[0] if item0.services
+                                ] for item1 in inner_list1[0]
+                            ]
+                        ]
+                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
+                    else:
+                        prefiltresult = [
+                                svc for svc in [
                                   setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in [
                                     # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
                                     (copy.copy(item1), inner_list1[1]) for inner_list1 in [
@@ -5344,29 +5362,8 @@ class LiveStatus:
                                       ] for item0 in inner_list0[0] if item0.services
                                     ] for item1 in inner_list1[0]
                                   ]
+                                ] if filter_stack(self.create_output(type_map, svc, [], filtercolumns))
                         ]
-                        for host in x:
-                            print "->", host
-                            #print "name, group", host.host_name, host.hgrpnamknorx
-
-                        #x = [flathosts for members in [hg1.members for hg1 in sorted([hg for hg in self.hostgroups.values() if hg.members], key = lambda k: k.hostgroup_name)] for flathosts in members]
-                        print "x is", x
-                        raise
-
-
-
-
-                        prefiltresult = []
-                        for hg in [x for x in self.hostgroups.values() if x.members]:
-                            prefiltresult.extend([s for s in (setattr(se, 'hostgroup', hg) or se for se in 
-[copy.copy(item) for item in sorted([sitem for li in hg.members for sitem in li], key = lambda k: k.host_name)
-]
-)])
-                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
-                    else:
-                        prefiltresult = []
-                        for hg in [x for x in self.hostgroups.values() if x.members]:
-                            prefiltresult.extend([h for h in (setattr(ho, 'hostgroup', hg) or ho for ho in [copy.copy(item) for item in sorted(hg.members, key = lambda k: k.host_name)]) if filter_stack(self.create_output(type_map, h, [], filtercolumns))])
                         filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
                 else:
                     # Now implemented. Why would one limit this anyway?
@@ -5375,10 +5372,10 @@ class LiveStatus:
                 type_map = LiveStatus.out_map['Downtime']
                 need_filter = len(filtercolumns) > 0
                 if len(filtercolumns) == 0:
-                    filtresult = [self.create_output(y, columns, filtercolumns) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], [])]
+                    filtresult = [self.create_output(type_map, y, columns, filtercolumns) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], [])]
                 else:
-                    prefiltresult = [d for d in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], []) if filter_stack(self.create_output(d, [], filtercolumns))]
-                    filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                    prefiltresult = [d for d in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], []) if filter_stack(self.create_output(type_map, d, [], filtercolumns))]
+                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
             elif table == 'comments':
                 type_map = LiveStatus.out_map['Comment']
                 if len(filtercolumns) == 0:
@@ -5633,6 +5630,7 @@ class LiveStatus:
 
         def ge_contains_filter(ref):
             if isinstance(ref[attribute], list):
+                print "is %s in %s" % (reference, ref[attribute])
                 return reference in ref[attribute]
             else:
                 return ref[attribute] >= reference
