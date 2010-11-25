@@ -392,6 +392,7 @@ class Nagios_retention_scheduler:
                 for prop in running_properties:
                     entry = running_properties[prop]
                     if 'retention' in entry and entry['retention']:
+#                        print "Set host value", getattr(ret_h, prop)
                         setattr(h, prop, getattr(ret_h, prop))
                 for a in h.notifications_in_progress.values():
                     a.ref = h
@@ -416,6 +417,7 @@ class Nagios_retention_scheduler:
                 for prop in running_properties:
                     entry = running_properties[prop]
                     if 'retention' in entry and entry['retention']:
+#                        print "Set service value", getattr(ret_s, prop)
                         setattr(s, prop, getattr(ret_s, prop))
                 for a in s.notifications_in_progress.values():
                     a.ref = s

@@ -72,6 +72,12 @@ class Ndodb_broker:
         print "I connect to NDO database"
         self.db = DBMysql(self.host, self.user, self.password, self.database, self.character_set, table_prefix='nagios_')
         self.connect_database()
+        
+        #Cache for hosts and services
+        #will be flushed when we got a net instance id
+        #or something like that
+        self.services_cache = {}
+        self.hosts_cache = {}
 
 
     #Get a brok, parse it, and put in in database
@@ -100,12 +106,18 @@ class Ndodb_broker:
 
 
     def get_host_object_id_by_name(self, host_name):
+        #First look in cache.
+        if host_name in self.hosts_cache:
+            return self.hosts_cache[host_name]
+
+        #Not in cache, not good
         query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='1'" % host_name
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row == None or len(row) < 1:
             return 0
         else:
+            self.hosts_cache[host_name] = row[0]
             return row[0]
 
 
@@ -120,12 +132,18 @@ class Ndodb_broker:
 
 
     def get_service_object_id_by_name(self, host_name, service_description):
+        #first look in cache
+        if (host_name, service_description) in self.services_cache:
+            return self.services_cache[(host_name, service_description)]
+
+        #else; not in cache :(
         query = "SELECT object_id from nagios_objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row == None or len(row) < 1:
             return 0
         else:
+            self.services_cache[(host_name, service_description)] = row[0]
             return row[0]
 
 
@@ -151,11 +169,16 @@ class Ndodb_broker:
                   'services',  'serviceescalations', 'programstatus',
                   'servicegroups', 'timeperiods', 'hostgroup_members',
                   'contactgroup_members', 'objects', 'hoststatus',
-                  'servicestatus', 'instances']
+                  'servicestatus', 'instances', 'servicegroup_members']
         res = []
         for table in tables:
             q = "DELETE FROM %s WHERE instance_id = '%s' " % ('nagios_'+table, instance_id)
             res.append(q)
+
+        #We also clean cache, because we are not sure about this data now
+	print "[MySQL/NDO] Flushing caches"
+        self.services_cache = {}
+        self.hosts_cache = {}
 
         return res
 
@@ -226,9 +249,9 @@ class Ndodb_broker:
 
     #A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
-        new_b = copy.deepcopy(b)
+        #new_b = copy.deepcopy(b)
 
-        data = new_b.data
+        data = b.data
 
         #First add to nagios_objects
         objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 1,
@@ -269,6 +292,9 @@ class Ndodb_broker:
                            'check_type' : 0, 'current_check_attempt' : data['attempt'],
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
                            'output' : data['output'], 'perfdata' : data['perf_data'],'last_check' : de_unixify(data['last_chk']),
+                           'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
+                           #set check to 1 so nagvis is happy
+                           'has_been_checked' : 1,
                            }
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
 
@@ -277,9 +303,9 @@ class Ndodb_broker:
 
     #A host have just be create, database is clean, we INSERT it
     def manage_initial_service_status_brok(self, b):
-        new_b = copy.deepcopy(b)
+        #new_b = copy.deepcopy(b)
 
-        data = new_b.data
+        data = b.data
         #First add to nagios_objects
         objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 2,
                         'name1' : data['host_name'], 'name2' : data['service_description'], 'is_active' : data['active_checks_enabled']
@@ -323,6 +349,9 @@ class Ndodb_broker:
                               'check_type' : 0, 'current_check_attempt' : data['attempt'],
                               'execution_time' : data['execution_time'], 'latency' : data['latency'],
                               'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
+                              'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
+                              #set check to 1 so nagvis is happy
+                              'has_been_checked' : 1,
                               }
         servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
@@ -510,7 +539,26 @@ class Ndodb_broker:
         where_clause = {'host_object_id' : host_id}
 
         query = self.db.create_update_query('hosts', hosts_data, where_clause)
-        return [query]
+
+        #Now update an hoststatus entry
+        hoststatus_data = {'instance_id' : data['instance_id'],
+                           'host_object_id' : host_id,
+                           'normal_check_interval' : data['check_interval'],
+                           'retry_check_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
+                           'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
+                           'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
+                           'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
+                           'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data'],
+                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                           'execution_time' : data['execution_time'], 'latency' : data['latency'],
+                           'output' : data['output'], 'perfdata' : data['perf_data'],'last_check' : de_unixify(data['last_chk']),
+                           'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
+                           #set check to 1 so nagvis is happy
+                           'has_been_checked' : 1,
+                           }
+        hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
+
+        return [query, hoststatus_query]
 
 
     #Ok the host is updated
@@ -521,7 +569,7 @@ class Ndodb_broker:
 
 
         
-        services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'],
+        services_data = {'instance_id' : data['instance_id'],
                       'display_name' : data['display_name'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
                       'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
@@ -535,17 +583,39 @@ class Ndodb_broker:
             }
 
         #Only the service is impacted
-        where_clause = {'service_object_id' : service_id}
+        where_clause = {'service_object_id' : service_id, 'service_id' : data['id']}
         #where_clause = {'host_name' : data['host_name']}
         query = self.db.create_update_query('services', services_data, where_clause)
-        return [query]
+
+        #Now create an hoststatus entry
+        servicestatus_data = {'instance_id' : data['instance_id'],
+                              'service_object_id' : service_id,
+                              'normal_check_interval' : data['check_interval'],
+                              'retry_check_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
+                              'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
+                              'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
+                              'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
+                              'obsess_over_service' : data['obsess_over_service'],'process_performance_data' : data['process_perf_data'],
+
+                              'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                              'execution_time' : data['execution_time'], 'latency' : data['latency'],
+                              'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
+                              'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
+                              #set check to 1 so nagvis is happy
+                              'has_been_checked' : 1,
+                              }
+        
+        where_clause = {'service_object_id' : service_id}
+        servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
+
+        return [query, servicestatus_query]
 
 
 
     #A host have just be create, database is clean, we INSERT it
     def manage_initial_contact_status_brok(self, b):
-        new_b = copy.deepcopy(b)
-        data = new_b.data
+        #new_b = copy.deepcopy(b)
+        data = b.data
         #print "DATA:", data
 
         contacts_data = {'contact_id' : data['id'], 'instance_id' : data['instance_id'],

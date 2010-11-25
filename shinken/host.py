@@ -264,31 +264,29 @@ class Host(SchedulingItem):
 
 
     #Call by picle for dataify service
-    #Here we do not want a dict, it's too heavy
-    #We create a list with properties inlined
+    #we do a dict because list are too dangerous for
+    #retention save and co :( even if it's more
+    #extensive
     #The setstate function do the inverse
     def __getstate__(self):
         cls = self.__class__
         #id is not in *_properties
-        res = [self.id]
+        res = {'id' : self.id}
         for prop in cls.properties:
-            res.append(getattr(self, prop))
+            res[prop] = getattr(self, prop)
         for prop in cls.running_properties:
-            res.append(getattr(self, prop))
-        #We reverse because we want to recreate
-        #By check at properties in the same order
-        res.reverse()
+            res[prop] = getattr(self, prop)
         return res
 
 
     #Inversed funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
-        self.id = state.pop()
+        self.id = state['id']
         for prop in cls.properties:
-            setattr(self, prop, state.pop())
+            setattr(self, prop, state[prop])
         for prop in cls.running_properties:
-            setattr(self, prop, state.pop())
+            setattr(self, prop, state[prop])
 
 
 

@@ -23,6 +23,9 @@
 from satellitelink import SatelliteLink, SatelliteLinks
 from util import to_int, to_bool, to_split
 
+import shinken.pyro_wrapper
+Pyro = shinken.pyro_wrapper.Pyro
+
 class SchedulerLink(SatelliteLink):
     id = 0
 
@@ -63,7 +66,20 @@ class SchedulerLink(SatelliteLink):
         if not self.alive:
             return None
         print "Send command", command
-        self.con.run_external_command(command)
+        try:
+            self.con.run_external_command(command)
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return False
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return False
+        except TypeError , exp:
+            print ''.join(Pyro.util.getPyroTraceback(exp))
+        except Pyro.errors.CommunicationError , exp:
+            self.con = None
+            return False
+
 
 
     def register_to_my_realm(self):

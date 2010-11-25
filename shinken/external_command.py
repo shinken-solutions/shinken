@@ -239,15 +239,21 @@ class ExternalCommandManager:
     def get(self):
         buf = os.read(self.fifo, 8096)
         os.close(self.fifo)
+        r = []
         if buf != '':
-            excmd = ExternalCommand(buf)
-            return excmd
-        return None
+            t = buf.split('\n')
+            for s in t:
+                if s != '':
+                    excmd = ExternalCommand(s)
+                    r.append(excmd)
+            return r
+        return []
 
 
 
     def resolve_command(self, excmd):
         command = excmd.cmd_line
+        command = command.strip()
         #Only log if we are in the Arbiter
         if self.mode == 'dispatcher':
             Log().log('EXTERNAL COMMAND: '+command.rstrip())
@@ -264,6 +270,7 @@ class ExternalCommandManager:
                 print "Host", host_name, "found in a configuration"
                 if cfg.is_assigned :
                     sched = cfg.assigned_to
+                    print "Sending command to the scheduler", sched.get_name()
                     sched.run_external_command(command)
                 else:
                     print "Problem: a configuration is found, but is not assigned!"

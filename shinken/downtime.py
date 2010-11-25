@@ -25,6 +25,25 @@ from comment import Comment
 class Downtime:
     id = 1
 
+    #Just to list the properties we will send as pickle
+    #so to others daemons, so all but NOT REF
+    properties = {
+        'activate_me' : None,
+        'entry_time' : None,
+        'fixed' : None,
+        'start_time' : None,
+        'duration' : None,
+        'trigger_id' : None,
+        'end_time' : None,
+        'real_end_time' : None,
+        'author' : None,
+        'comment' : None,
+        'is_in_effect' : None,
+        'has_been_triggered' : None,
+        'can_be_deleted' : None,
+        }
+
+
     #Schedules downtime for a specified service. If the "fixed" argument is set
     #to one (1), downtime will start and end at the times specified by the
     #"start" and "end" arguments.
@@ -170,3 +189,26 @@ class Downtime:
         self.extra_comment.can_be_deleted = True
         #self.ref.del_comment(self.comment_id)
 
+
+    #Call by picle for dataify the coment
+    #because we DO NOT WANT REF in this pickleisation!
+    def __getstate__(self):
+#        print "Asking a getstate for a downtime on", self.ref.get_dbg_name()
+        cls = self.__class__
+        #id is not in *_properties
+        res = [self.id]
+        for prop in cls.properties:
+            res.append(getattr(self, prop))
+        #We reverse because we want to recreate
+        #By check at properties in the same order
+        res.reverse()
+        return res
+
+
+    #Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state.pop()
+        for prop in cls.properties:
+	    val = state.pop()
+            setattr(self, prop, val)

@@ -265,7 +265,10 @@ class SatelliteLink(Item):
         if self.con == None:
             self.create_connexion()
         try:
-            return self.con.get_external_commands()
+	    tab = self.con.get_external_commands()
+	    if isinstance(tab, bool):
+                return []
+	    return tab
         except Pyro.errors.URIError , exp:
             self.con = None
             return []
