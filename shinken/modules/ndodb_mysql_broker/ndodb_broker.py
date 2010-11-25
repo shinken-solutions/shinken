@@ -604,6 +604,8 @@ class Ndodb_broker:
                               #set check to 1 so nagvis is happy
                               'has_been_checked' : 1,
                               }
+        
+        where_clause = {'service_object_id' : service_id}
         servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
 
         return [query, servicestatus_query]

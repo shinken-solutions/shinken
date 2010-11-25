@@ -522,7 +522,7 @@ class SchedulingItem(Item):
 
         #Now get data from check
         self.execution_time = c.execution_time
-        self.last_chk = c.check_time
+        self.last_chk = int(c.check_time)
         self.output = c.output
         self.long_output = c.long_output
 
