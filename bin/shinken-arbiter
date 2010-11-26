@@ -36,6 +36,11 @@ import getopt
 import random
 from Queue import Empty
 
+
+#All the pickle will ask a lot of recursion, so we must be
+#sure to set it at max
+sys.setrecursionlimit(sys.maxint)
+
 #We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
 python_version = platform.python_version_tuple()
