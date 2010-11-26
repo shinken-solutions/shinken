@@ -24,25 +24,29 @@
 #
 
 from shinken_test import *
+import os
+import re
+import subprocess
+import shutil
 
 sys.path.append("../shinken/modules/livestatus_broker")
 from livestatus_broker import Livestatus_broker
 sys.setcheckinterval(10000)
 
 class TestConfig(ShinkenTest):
-    def setUp(self):
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live', '/tmp/livelogs.db')
-        self.livestatus_broker.properties = {
-            'to_queue' : 0,
-            'from_queue' : 0
+    def contains_line(self, text, pattern):
+        regex = re.compile(pattern)
+        for line in text.splitlines():
+            if re.search(regex, line):
+                return True
+        return False
 
-            }
-        self.livestatus_broker.init()
-        print "Cleaning old broks?"
-        self.sched.fill_initial_broks()
-        self.update_broker()
 
+    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
+        super(TestConfig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
+        if self.nagios_installed():
+            self.nagios_loop(1, reflist)
+  
 
     def update_broker(self):
         #The brok should be manage in the good order
@@ -64,7 +68,9 @@ class TestConfig(ShinkenTest):
         # expected output
         sorted1 = "\n".join(sorted(text1.split("\n")))
         sorted2 = "\n".join(sorted(text2.split("\n")))
-        return sorted1 == sorted2
+        len1 = len(text1.split("\n"))
+        len2 = len(text2.split("\n"))
+        return sorted1 == sorted2 and len1 == len2
 
 
     def show_broks(self, title):
@@ -79,8 +85,160 @@ class TestConfig(ShinkenTest):
         response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
         print response
 
+    def nagios_installed(self, path='/usr/local/nagios/bin/nagios', livestatus='/usr/local/nagios/lib/mk-livestatus/livestatus.o'):
+        if os.path.exists(path) and os.access(path, os.X_OK) and os.path.exists(livestatus):
+            self.nagios_path = path
+            self.livestatus_path = livestatus
+            return True
+        else:
+            return False
+
+
+    # shinkenize_nagios_config('nagios_1r_1h_1s')
+    # We assume that there is a nagios_1r_1h_1s.cfg and a nagios_1r_1h_1s directory for the objects
+    def unshinkenize_config(self, configname):
+        new_configname = configname + '_' + str(os.getpid())
+        config = open('etc/nagios_' + configname + '.cfg')
+        text = config.readlines()
+        config.close()
+
+        newconfig = open('etc/nagios_' + new_configname + '.cfg', 'w')
+        for line in text:
+            if re.search('^resource_file=', line):
+                newconfig.write("resource_file=etc/resource.cfg\n")
+            elif re.search('shinken\-specific\.cfg', line):
+                pass
+            elif re.search('enable_problem_impacts_states_change', line):
+                pass
+            elif re.search('cfg_dir=', line):
+                newconfig.write(re.sub(configname, new_configname, line))
+            elif re.search('cfg_file=', line):
+                newconfig.write(re.sub(configname, new_configname, line))
+            elif re.search('execute_host_checks=', line):
+                newconfig.write("execute_host_checks=0\n")
+            elif re.search('execute_service_checks=', line):
+                newconfig.write("execute_service_checks=0\n")
+            elif re.search('^debug_level=', line):
+                newconfig.write("debug_level=0\n")
+            elif re.search('^debug_verbosity=', line):
+                newconfig.write("debug_verbosity=0\n")
+            elif re.search('^status_update_interval=', line):
+                newconfig.write("status_update_interval=30\n")
+            elif re.search('^command_file=', line):
+                newconfig.write("command_file=var/nagios.cmd\n")
+            elif re.search('^command_check_interval=', line):
+                newconfig.write("command_check_interval=1s\n")
+            else:
+                newconfig.write(line)
+        newconfig.write('broker_module=/usr/local/nagios/lib/mk-livestatus/livestatus.o var/live' + "\n")
+        newconfig.close()
+        for dirfile in os.walk('etc/' + configname):
+            dirpath, dirlist, filelist = dirfile
+            newdirpath = re.sub(configname, new_configname, dirpath)
+            os.mkdir(newdirpath)
+            for file in [f for f in filelist if re.search('\.cfg$', f)]:
+                config = open(dirpath + '/' + file)
+                text = config.readlines()
+                config.close()
+                newconfig = open(newdirpath + '/' + file, 'w')
+                for line in text:
+                    if re.search('^\s*criticity', line):
+                        pass
+                    elif re.search('enable_problem_impacts_states_change', line):
+                        pass
+                    else:
+                        newconfig.write(line)
+                newconfig.close()
+        return new_configname
+
+
+    
+    def start_nagios(self, config):
+        self.nagios_config = self.unshinkenize_config(config)
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
+        self.nagios_proc = subprocess.Popen([self.nagios_path, 'etc/nagios_' + self.nagios_config + '.cfg'], close_fds=True)
+        self.nagios_started = time.time()
+        time.sleep(2)
+
+
+    def stop_nagios(self):
+        attempt = 1
+        while self.nagios_proc.poll() == None and attempt < 4:
+            self.nagios_proc.terminate()
+            attempt += 1
+            time.sleep(1)
+        if self.nagios_proc.poll() == None:
+            self.nagios_proc.kill()
+        shutil.rmtree('etc/' + self.nagios_config)
+        os.remove('etc/nagios_' + self.nagios_config + '.cfg')
+
+
+    def ask_nagios(self, request):
+        if time.time() - self.nagios_started < 2:
+            time.sleep(1)
+        if not request.endswith("\n"):
+            request = request + "\n"
+        unixcat = subprocess.Popen([os.path.dirname(self.nagios_path) + '/' + 'unixcat', 'var/live'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = unixcat.communicate(request)
+        attempt = 1
+        while unixcat.poll() == None and attempt < 4:
+            unixcat.terminate()
+            attempt += 1
+            time.sleep(1)
+        if unixcat.poll() == None:
+            unixcat.kill()
+        return out
+        
+    
+    def nagios_loop(self, count, reflist, do_sleep=False, sleep_time=61):
+        now = time.time()
+        buffer = open('var/pipebuffer', 'w')
+        for ref in reflist:
+            (obj, exit_status, output) = ref
+            if obj.my_type == 'service':
+                cmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (now, obj.host_name, obj.service_description, exit_status, output)
+                print cmd
+                buffer.write(cmd)
+            else:
+                cmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (now, obj.host_name, exit_status, output)
+                buffer.write(cmd)
+        buffer.close()
+        print "open pipe", self.conf.command_file
+        fifo = open('var/nagios.cmd', 'w')
+        cmd = "[%lu] PROCESS_FILE;%s;0\n" % (now, 'var/pipebuffer')
+        fifo.write(cmd)
+        fifo.flush()
+        fifo.close()
+        time.sleep(2)
+
+
+
+
+class TestConfigSmall(TestConfig):
+    def setUp(self):
+        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live', '/tmp/livelogs.db')
+        self.livestatus_broker.properties = {
+            'to_queue' : 0,
+            'from_queue' : 0
+
+            }
+        self.livestatus_broker.init()
+        print "Cleaning old broks?"
+        self.sched.fill_initial_broks()
+        self.update_broker()
+        self.nagios_path = None
+        self.livestatus_path = None
+        self.nagios_config = None
+
+
 
     def test_servicesbyhostgroup(self):
+        if self.nagios_installed():
+            self.start_nagios()
         self.print_header()
         now = time.time()
         objlist = []
@@ -98,6 +256,12 @@ KeepAlive: on
 ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+        print "response-------------------------------------------------"
         print response
 
 
@@ -1214,7 +1378,7 @@ test_host_0;test_ok_0
         print response
         
 
-class TestConfigBig(ShinkenTest):
+class TestConfigBig(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
         self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live', '/tmp/livelogs.db')
@@ -1227,27 +1391,6 @@ class TestConfigBig(ShinkenTest):
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()
-
-
-    def contains_line(self, text, pattern):
-        regex = re.compile(pattern)
-        for line in text.splitlines():
-            if re.search(regex, line):
-                return True
-        return False
-
-
-    def update_broker(self):
-        #The brok should be manage in the good order
-        ids = self.sched.broks.keys()
-        ids.sort()
-        for brok_id in ids:
-            brok = self.sched.broks[brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
 
 
     def test_stats(self):
@@ -1289,6 +1432,8 @@ Stats: state = 3"""
 
     def test_statsgroupby(self):
         self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -1330,19 +1475,18 @@ StatsGroupBy: state
         self.assert_(self.contains_line(response, '1;3'))
         self.assert_(self.contains_line(response, '2;3'))
         self.assert_(self.contains_line(response, '3;1'))
-
-        #need to check if check_commands really contains arguments
-        #request = """GET services
-#Stats: state != 9999
-#StatsGroupBy: check_command
-#"""
-        #response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        #print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
 
 
     def test_hostsbygroup(self):
         self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -1351,7 +1495,8 @@ StatsGroupBy: state
             objlist.append([service, 0, 'OK'])
         self.scheduler_loop(1, objlist)
         self.update_broker()
-#Filter: groups >= hostgroup_04
+        if self.nagios_installed():
+            self.nagios_loop(1, objlist)
         request = """GET hostsbygroup
 ColumnHeaders: on
 Columns: host_name hostgroup_name
@@ -1362,10 +1507,17 @@ ResponseHeader: fixed16
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
 
     def test_servicesbyhostgroup(self):
         self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -1374,6 +1526,8 @@ ResponseHeader: fixed16
             objlist.append([service, 0, 'OK'])
         self.scheduler_loop(1, objlist)
         self.update_broker()
+        if self.nagios_installed():
+            self.nagios_loop(1, objlist)
         request = """GET servicesbyhostgroup
 Filter: host_groups >= up
 Stats: has_been_checked = 0
@@ -1441,6 +1595,12 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
+
 
 
 

@@ -5630,7 +5630,6 @@ class LiveStatus:
 
         def ge_contains_filter(ref):
             if isinstance(ref[attribute], list):
-                print "is %s in %s" % (reference, ref[attribute])
                 return reference in ref[attribute]
             else:
                 return ref[attribute] >= reference
