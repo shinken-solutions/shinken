@@ -108,9 +108,9 @@ class SchedulingItem(Item):
             if cls.check_freshness:
                 if self.check_freshness and self.freshness_threshold != 0:
                     if self.last_state_update < now - (self.freshness_threshold + cls.additional_freshness_latency):
-                        #Raise a log
+                        # Raise a log
                         self.raise_freshness_log_entry(int(now-self.last_state_update), int(now-self.freshness_threshold))
-                        #And a new check
+                        # And a new check
                         return self.launch_check(now)
         return None
 
@@ -133,7 +133,6 @@ class SchedulingItem(Item):
                     #now check if we should bailout because of a
                     #not good timeperiod for dep
                     if tp is None or tp.is_time_valid(now):
-                        #print "I can call %s for registering me as a problem" % impact.get_dbg_name()
                         new_impacts = impact.register_a_problem(self)
                         self.impacts.extend(new_impacts)
                         #Make element unique in this list

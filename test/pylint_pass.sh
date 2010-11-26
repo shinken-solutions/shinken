@@ -25,7 +25,7 @@ echo `pwd`
 
 echo "Launching pylint stat pass"
 cd ..
-pylint -f parseable shinken/ > $DIR/pylint.txt
+pylint -f parseable --disable=C0111,C0103,W0201,E1101 shinken/ > $DIR/pylint.txt
 cd $DIR
 echo "Pylint pass done, congrats or not? ;) "
 
