@@ -23,9 +23,12 @@ DIR=$(cd $(dirname "$0"); pwd)
 cd $DIR
 echo `pwd`
 
+#delete the resul of nosetest, for coverage
+rm nosetests.xml
+
 function launch_and_assert {
     SCRIPT=$1
-    ./$SCRIPT
+    nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
     if [ $? != 0 ]
 	then
 	echo "Error : the test $SCRIPT failed"
