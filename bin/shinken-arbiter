@@ -39,7 +39,18 @@ from Queue import Empty
 
 #All the pickle will ask a lot of recursion, so we must be
 #sure to set it at max
-sys.setrecursionlimit(sys.maxint)
+still_raise = True
+size_set = 1024
+while still_raise:
+    try :
+        sys.setrecursionlimit(size_set - 1)
+        size_set = size_set * 2
+        #should got a Overflo, but I'm not sure for 64bits
+        #so stop at maxint
+        if size_set > sys.maxint:
+            still_raise = False
+    except OverflowError:
+        still_raise = False
 
 #We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
