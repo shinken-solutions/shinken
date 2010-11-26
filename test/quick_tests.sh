@@ -66,7 +66,7 @@ launch_and_assert test_notification_warning.py
 launch_and_assert test_timeperiod_inheritance.py
 launch_and_assert test_bad_timeperiods.py
 launch_and_assert test_maintenance_period.py
-
+launch_and_assert test_external_commands.py
 
 #Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py
