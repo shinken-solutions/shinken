@@ -108,9 +108,9 @@ class SchedulingItem(Item):
             if cls.check_freshness:
                 if self.check_freshness and self.freshness_threshold != 0:
                     if self.last_state_update < now - (self.freshness_threshold + cls.additional_freshness_latency):
-                        #Raise a log
+                        # Raise a log
                         self.raise_freshness_log_entry(int(now-self.last_state_update), int(now-self.freshness_threshold))
-                        #And a new check
+                        # And a new check
                         return self.launch_check(now)
         return None
 
@@ -133,7 +133,6 @@ class SchedulingItem(Item):
                     #now check if we should bailout because of a
                     #not good timeperiod for dep
                     if tp is None or tp.is_time_valid(now):
-                        #print "I can call %s for registering me as a problem" % impact.get_dbg_name()
                         new_impacts = impact.register_a_problem(self)
                         self.impacts.extend(new_impacts)
                         #Make element unique in this list
@@ -551,6 +550,9 @@ class SchedulingItem(Item):
             #Ok, no more need because checks are not
             #take by host/service, and not returned
 
+        #remember how we was before this check
+        last_state_type = self.state_type
+
         self.set_state_from_exit_status(c.exit_status)
 
         #we change the state, do whatever we are or not in
@@ -763,6 +765,14 @@ class SchedulingItem(Item):
         self.broks.append(self.get_check_result_brok())
         self.get_obsessive_compulsive_processor_command()
         self.get_perfdata_command()
+
+        #fill last_hard_state_change to now
+        #if we just change from SOFT->HARD or
+        #in HARD we change of state (Warning->critical, or critical->ok, etc etc)
+        if last_state_type == 'SOFT' and self.state_type == 'HARD' or \
+                self.state_type == 'HARD' and (self.last_state != self.state):
+            self.last_hard_state_change = int(time.time())
+
 
 
     def update_event_and_problem_id(self):

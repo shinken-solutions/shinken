@@ -217,6 +217,39 @@ class TestConfig(ShinkenTest):
         self.assert_(svc in sg.members)
         self.assert_(sg in svc.servicegroups)
 
+    #Look at the good of the last_hard_state_change
+    def test_service_last_hard_state(self):
+        self.print_header()
+        #We want an eventhandelr (the perfdata command) to be put in the actions dict
+        #after we got a service check
+        now = time.time()
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        #--------------------------------------------------------------
+        # initialize host/service state
+        #--------------------------------------------------------------
+        #We do not want to be just a string but a real command
+        self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
+        print "FUCK", svc.last_hard_state_change
+        orig = svc.last_hard_state_change
+        
+        #now still ok
+        self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
+        self.assert_(svc.last_hard_state_change == orig)
+
+        #now error but still SOFT
+        self.scheduler_loop(1, [[svc, 2, 'CRITICAL | bibi=99%']])
+        print "FUCK", svc.state_type
+        self.assert_(svc.last_hard_state_change == orig)
+
+        #now go hard!
+        now = int(time.time())
+        self.scheduler_loop(1, [[svc, 2, 'CRITICAL | bibi=99%']])
+        print "FUCK", svc.state_type
+        self.assert_(svc.last_hard_state_change == now)
+
+
 if __name__ == '__main__':
     unittest.main()
 

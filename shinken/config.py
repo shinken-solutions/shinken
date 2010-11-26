@@ -203,20 +203,19 @@ class Config(Item):
                 'max_debug_file_size' : {'required':False, 'pythonize': to_int ,'usage' : 'unused'},
                 #'$USERn$ : {'required':False, 'default':''} # Add at run in __init__
 
-                #SHINKEN SPECIFIC
+                # SHINKEN SPECIFIC
                 'idontcareaboutsecurity' : {'required':False, 'default':'0', 'pythonize': to_bool},
-                #'conf_is_correct' : {'required' : False, 'default' : '1', 'pythonize': to_bool},
                 'flap_history' : {'required':False, 'default':'20', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
                 'max_plugins_output_length' : {'required':False, 'default':'8192', 'pythonize': to_int, 'class_inherit' : [(Host, None), (Service, None)]},
 
-                #Enable or not the notice about old Nagios parameters
+                # Enable or not the notice about old Nagios parameters
                 'disable_old_nagios_parameters_whining' : {'required':False, 'default':'0', 'pythonize': to_bool},
 
-                #Now for problem/impact states changes
+                # Now for problem/impact states changes
                 'enable_problem_impacts_states_change' : {'required':False, 'default':'0', 'pythonize': to_bool, 'class_inherit' : [(Host, None), (Service, None)]},
 
 
-                #More a running value in fact
+                # More a running value in fact
                 'resource_macros_names' : {'required' : False, 'default':[]}
     }
 
@@ -245,29 +244,30 @@ class Config(Item):
     #We create dict of objects
     #Type: 'name in objects' : {Class of object, Class of objects,
     #'property for self for the objects(config)'
-    types_creations = {'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
-                       'service' : (Service, Services, 'services'),
-                       'servicegroup' : (Servicegroup, Servicegroups, 'servicegroups'),
-                       'command' : (Command, Commands, 'commands'),
-                       'host' : (Host, Hosts, 'hosts'),
-                       'hostgroup' : (Hostgroup, Hostgroups, 'hostgroups'),
-                       'contact' : (Contact, Contacts, 'contacts'),
-                       'contactgroup' : (Contactgroup, Contactgroups, 'contactgroups'),
-                       'notificationway' : (NotificationWay, NotificationWays, 'notificationways'),
-                       'servicedependency' : (Servicedependency, Servicedependencies, 'servicedependencies'),
-                       'hostdependency' : (Hostdependency, Hostdependencies, 'hostdependencies'),
-                       'arbiter' : (ArbiterLink, ArbiterLinks, 'arbiterlinks'),
-                       'scheduler' : (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
-                       'reactionner' : (ReactionnerLink, ReactionnerLinks, 'reactionners'),
-                       'broker' : (BrokerLink, BrokerLinks, 'brokers'),
-                       'poller' : (PollerLink, PollerLinks, 'pollers'),
-                       'realm' : (Realm, Realms, 'realms'),
-                       'module' : (Module, Modules, 'modules'),
-                       'resultmodulation' : (Resultmodulation, Resultmodulations, 'resultmodulations'),
-                       'escalation' : (Escalation, Escalations, 'escalations'),
-                       'serviceescalation' : (Serviceescalation, Serviceescalations, 'serviceescalations'),
-                       'hostescalation' : (Hostescalation, Hostescalations, 'hostescalations'),
-                       }
+    types_creations = {
+        'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
+        'service' : (Service, Services, 'services'),
+        'servicegroup' : (Servicegroup, Servicegroups, 'servicegroups'),
+        'command' : (Command, Commands, 'commands'),
+        'host' : (Host, Hosts, 'hosts'),
+        'hostgroup' : (Hostgroup, Hostgroups, 'hostgroups'),
+        'contact' : (Contact, Contacts, 'contacts'),
+        'contactgroup' : (Contactgroup, Contactgroups, 'contactgroups'),
+        'notificationway' : (NotificationWay, NotificationWays, 'notificationways'),
+        'servicedependency' : (Servicedependency, Servicedependencies, 'servicedependencies'),
+        'hostdependency' : (Hostdependency, Hostdependencies, 'hostdependencies'),
+        'arbiter' : (ArbiterLink, ArbiterLinks, 'arbiterlinks'),
+        'scheduler' : (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
+        'reactionner' : (ReactionnerLink, ReactionnerLinks, 'reactionners'),
+        'broker' : (BrokerLink, BrokerLinks, 'brokers'),
+        'poller' : (PollerLink, PollerLinks, 'pollers'),
+        'realm' : (Realm, Realms, 'realms'),
+        'module' : (Module, Modules, 'modules'),
+        'resultmodulation' : (Resultmodulation, Resultmodulations, 'resultmodulations'),
+        'escalation' : (Escalation, Escalations, 'escalations'),
+        'serviceescalation' : (Serviceescalation, Serviceescalations, 'serviceescalations'),
+        'hostescalation' : (Hostescalation, Hostescalations, 'hostescalations'),
+        }
 
     #This tab is used to transform old parameters name into new ones
     #so from Nagios2 format, to Nagios3 ones
@@ -403,7 +403,7 @@ class Config(Item):
                                     fd.close()
                                 except IOError, exp:
                                     Log().log("Error: Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
-                                #The configuration is invalid because we have a bad file!
+                                    # The configuration is invalid because we have a bad file!
                                     self.conf_is_correct = False
         return res
 #        self.read_config_buf(res)
@@ -562,36 +562,42 @@ class Config(Item):
 
 
 
-    #We use linkify to make the config more efficient : elements will be
-    #linked, like pointers. For example, a host will have it's service,
-    #and contacts directly in it's properties
-    #REMEMBER: linkify AFTER explode...
+    # We use linkify to make the config more efficient : elements will be
+    # linked, like pointers. For example, a host will have it's service,
+    # and contacts directly in it's properties
+    # REMEMBER: linkify AFTER explode...
     def linkify(self):
 
-        #First linkify myself like for some global commands
+        # First linkify myself like for some global commands
         self.linkify_one_command_with_commands(self.commands, 'ocsp_command')
         self.linkify_one_command_with_commands(self.commands, 'ochp_command')
         self.linkify_one_command_with_commands(self.commands, 'host_perfdata_command')
         self.linkify_one_command_with_commands(self.commands, 'service_perfdata_command')
 
         #print "Hosts"
-        #link hosts with timeperiods and commands
-        self.hosts.linkify(self.timeperiods, self.commands, self.contacts, self.realms, self.resultmodulations, self.escalations, self.hostgroups)
+        # link hosts with timeperiods and commands
+        self.hosts.linkify(self.timeperiods, self.commands, \
+                               self.contacts, self.realms, \
+                               self.resultmodulations, self.escalations,\
+                               self.hostgroups)
 
-        #Do the simplify AFTER explode groups
+        # Do the simplify AFTER explode groups
         #print "Hostgroups"
-        #link hostgroups with hosts
+        # link hostgroups with hosts
         self.hostgroups.linkify(self.hosts)
 
         #print "Services"
-        #link services with hosts, commands, timeperiods, contacts and resultmodulations
-        self.services.linkify(self.hosts, self.commands, self.timeperiods, self.contacts, self.resultmodulations, self.escalations, self.servicegroups)
+        # link services with other objects
+        self.services.linkify(self.hosts, self.commands, \
+                                  self.timeperiods, self.contacts,\
+                                  self.resultmodulations, self.escalations,\
+                                  self.servicegroups)
 
         #print "Service groups"
-        #link servicegroups members with services
+        # link servicegroups members with services
         self.servicegroups.linkify(self.services)
 
-        #link notificationways with timeperiods and commands
+        # link notificationways with timeperiods and commands
         self.notificationways.linkify(self.timeperiods, self.commands)
 
         #print "Contactgroups"
@@ -616,7 +622,8 @@ class Config(Item):
         self.resultmodulations.linkify(self.timeperiods)
 
         #print "Escalations"
-        self.escalations.linkify(self.timeperiods, self.contacts, self.services, self.hosts)
+        self.escalations.linkify(self.timeperiods, self.contacts, \
+                                     self.services, self.hosts)
 
         #print "Realms"
         self.realms.linkify()
@@ -985,7 +992,7 @@ class Config(Item):
 
 
 
-    #Set our timezone value and give it too to unset satellites
+    # Set our timezone value and give it too to unset satellites
     def propagate_timezone_option(self):
         if self.use_timezone != '':
             #first apply myself
@@ -1000,7 +1007,7 @@ class Config(Item):
 
 
 
-    #Link templates with elements
+    # Link templates with elements
     def linkify_templates(self):
         self.hosts.linkify_templates()
         self.contacts.linkify_templates()
@@ -1011,7 +1018,7 @@ class Config(Item):
 
 
 
-    #Reversed list is a dist with name for quick search by name
+    # Reversed list is a dist with name for quick search by name
     def create_reversed_list(self):
         self.hosts.create_reversed_list()
         self.hostgroups.create_reversed_list()
