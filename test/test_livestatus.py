@@ -197,8 +197,10 @@ class TestConfig(ShinkenTest):
             time.sleep(1)
         if self.nagios_proc.poll() == None:
             self.nagios_proc.kill()
-        shutil.rmtree('etc/' + self.nagios_config)
-        os.remove('etc/nagios_' + self.nagios_config + '.cfg')
+        if os.path.exists('etc/' + self.nagios_config):
+            shutil.rmtree('etc/' + self.nagios_config)
+        if os.path.exists('etc/nagios_' + self.nagios_config + '.cfg'):
+            os.remove('etc/nagios_' + self.nagios_config + '.cfg')
 
 
     def ask_nagios(self, request):
@@ -1026,7 +1028,7 @@ And: 2"""
     def test_thruk_tac_svc(self):
         self.print_header()
         if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
+            self.start_nagios('1r_1h_1s')
         self.update_broker()
 
         start = time.time()
@@ -1082,9 +1084,9 @@ Stats: max execution_time"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         # nagios comparison makes no sense, because the latencies/execution times will surely differ
-        #if self.nagios_installed():
-        #    nagresponse = self.ask_nagios(request)
-        #    self.stop_nagios()
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
         #    print nagresponse
         #    self.assert_(self.lines_equal(response, nagresponse))
 
@@ -1337,7 +1339,7 @@ test_host_0,test_host_0/test_ok_0;test_router_0
     def test_limit(self):
         self.print_header() 
         if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
+            self.start_nagios('1r_1h_1s')
         now = time.time()
         self.update_broker()
         #---------------------------------------------------------------
@@ -1360,9 +1362,9 @@ test_router_0
         # alphabetically ordered
         self.assert_(response == good_response)
         # TODO look whats wrong
-        #if self.nagios_installed():
-        #    nagresponse = self.ask_nagios(request)
-        #    self.stop_nagios()
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
         #    print nagresponse
         #    self.assert_(self.lines_equal(response, nagresponse))
 
