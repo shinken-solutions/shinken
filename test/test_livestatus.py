@@ -44,7 +44,7 @@ class TestConfig(ShinkenTest):
 
     def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         super(TestConfig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
-        if self.nagios_installed():
+        if self.nagios_installed() and hasattr(self, 'nagios_started'):
             self.nagios_loop(1, reflist)
   
 
@@ -70,8 +70,26 @@ class TestConfig(ShinkenTest):
         sorted2 = "\n".join(sorted(text2.split("\n")))
         len1 = len(text1.split("\n"))
         len2 = len(text2.split("\n"))
-        return sorted1 == sorted2 and len1 == len2
-
+        #print "%s == %s text cmp %s" % (len1, len2, sorted1 == sorted2)
+        #print "text1 //%s//" % sorted(text1.split("\n"))
+        #print "text2 //%s//" % sorted(text2.split("\n"))
+        if sorted1 == sorted2 and len1 == len2:
+            return True
+        else:
+            # Maybe list members are different
+            # allhosts;test_host_0;test_ok_0;servicegroup_02,servicegroup_01,ok
+            # allhosts;test_host_0;test_ok_0;servicegroup_02,ok,servicegroup_01
+            # break it up to
+            # [['allhosts'], ['test_host_0'], ['test_ok_0'],
+            #     ['ok', 'servicegroup_01', 'servicegroup_02']]
+            [line for line in sorted(text1.split("\n"))]
+            data1 = [[sorted(c.split(',')) for c in columns] for columns in [line.split(';') for line in sorted(text1.split("\n")) if line]]
+            data2 = [[sorted(c.split(',')) for c in columns] for columns in [line.split(';') for line in sorted(text2.split("\n")) if line]]
+            #print "text1 //%s//" % data1
+            #print "text2 //%s//" % data2
+            # cmp is clever enough to handle nested arrays 
+            return cmp(data1, data2) == 0
+            
 
     def show_broks(self, title):
         print
@@ -81,9 +99,10 @@ class TestConfig(ShinkenTest):
                 print "BROK:", brok.type
                 print "BROK   ", brok.data['in_checking']
         self.update_broker()
-        data = 'GET services\nColumns: service_description is_executing\n'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET services\nColumns: service_description is_executing\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+
 
     def nagios_installed(self, path='/usr/local/nagios/bin/nagios', livestatus='/usr/local/nagios/lib/mk-livestatus/livestatus.o'):
         if os.path.exists(path) and os.access(path, os.X_OK) and os.path.exists(livestatus):
@@ -151,9 +170,11 @@ class TestConfig(ShinkenTest):
                 newconfig.close()
         return new_configname
 
-
     
     def start_nagios(self, config):
+        for dir in ['tmp', 'var/tmp', 'var/spool', 'var/spool/checkresults', 'var/archives']:
+            if not os.path.exists(dir):
+                os.mkdir(dir)
         self.nagios_config = self.unshinkenize_config(config)
         if os.path.exists('var/retention.dat'):
             os.remove('var/retention.dat')
@@ -190,6 +211,7 @@ class TestConfig(ShinkenTest):
             time.sleep(1)
         if unixcat.poll() == None:
             unixcat.kill()
+        print "unixcat says", out
         return out
         
     
@@ -212,8 +234,15 @@ class TestConfig(ShinkenTest):
         fifo.write(cmd)
         fifo.flush()
         fifo.close()
-        time.sleep(2)
+        time.sleep(5)
 
+
+    def nagios_extcmd(self, cmd):
+        fifo = open('var/nagios.cmd', 'w')
+        fifo.write(cmd)
+        fifo.flush()
+        fifo.close()
+        time.sleep(5)
 
 
 
@@ -238,7 +267,7 @@ class TestConfigSmall(TestConfig):
 
     def test_servicesbyhostgroup(self):
         if self.nagios_installed():
-            self.start_nagios()
+            self.start_nagios('1r_1h_1s')
         self.print_header()
         now = time.time()
         objlist = []
@@ -256,17 +285,34 @@ KeepAlive: on
 ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
+
+        # Again, but without filter
+        request = """GET servicesbyhostgroup
+Columns: hostgroup_name host_name service_description groups
+OutputFormat: csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
             self.stop_nagios()
             print "nagresponse----------------------------------------------"
             print nagresponse
-        print "response-------------------------------------------------"
-        print response
+            self.assert_(self.lines_equal(response, nagresponse))
 
 
     def test_hostsbygroup(self):
         self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('1r_1h_1s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -286,12 +332,18 @@ ResponseHeader: fixed16
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
 
     def test_status(self):
         self.print_header()
-        print "got initial broks"
+        if self.nagios_installed():
+            self.start_nagios('1r_1h_1s')
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -307,46 +359,70 @@ ResponseHeader: fixed16
         #---------------------------------------------------------------
         # get the full hosts table
         #---------------------------------------------------------------
-        data = 'GET hosts'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET hosts'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            # todo 1 != 1.0000000000e+00
+            #self.assert_(self.lines_equal(response, nagresponse))
 
         #---------------------------------------------------------------
         # get only the host names and addresses
         #---------------------------------------------------------------
-        data = 'GET hosts\nColumns: name address hostgroups\nColumnHeaders: on'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET hosts\nColumns: name address groups\nColumnHeaders: on'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
         #---------------------------------------------------------------
         # query_1
         #---------------------------------------------------------------
-        data = 'GET contacts'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_1_______________\n%s\n%s\n' % (data, response)
+        request = 'GET contacts'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_1_______________\n%s\n%s\n' % (request, response)
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            # There are some sick columns in the livestatus response like
+            # modified_attributes;modified_attributes_list
+            # These are not implemented in shinken-livestatus (never, i think)
+            #self.assert_(self.lines_equal(response, nagresponse))
 
         #---------------------------------------------------------------
         # query_2
         #---------------------------------------------------------------
-        data = 'GET contacts\nColumns: name alias'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_2_______________\n%s\n%s\n' % (data, response)
+        request = 'GET contacts\nColumns: name alias'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_2_______________\n%s\n%s\n' % (request, response)
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
         #---------------------------------------------------------------
         # query_3
         #---------------------------------------------------------------
         #self.scheduler_loop(3, svc, 2, 'BAD')
-        data = 'GET services\nColumns: host_name description state\nFilter: state = 2\nColumnHeaders: on'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_3_______________\n%s\n%s\n' % (data, response)
+        request = 'GET services\nColumns: host_name description state\nFilter: state = 2\nColumnHeaders: on'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_3_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == 'host_name;description;state\ntest_host_0;test_ok_0;2\n')
-        data = 'GET services\nColumns: host_name description state\nFilter: state = 2'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_3_______________\n%s\n%s\n' % (data, response)
+        request = 'GET services\nColumns: host_name description state\nFilter: state = 2'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_3_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == 'test_host_0;test_ok_0;2\n')
-        data = 'GET services\nColumns: host_name description state\nFilter: state = 0'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_3_______________\n%s\n%s\n' % (data, response)
+        request = 'GET services\nColumns: host_name description state\nFilter: state = 0'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_3_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == '\n')
         duration = 180
         now = time.time()
@@ -357,34 +433,41 @@ ResponseHeader: fixed16
         self.update_broker()
         self.scheduler_loop(3, [[svc, 2, 'BAD']])
         self.update_broker()
-        data = 'GET services\nColumns: host_name description scheduled_downtime_depth\nFilter: state = 2\nFilter: scheduled_downtime_depth = 1'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_3_______________\n%s\n%s\n' % (data, response)
+        request = 'GET services\nColumns: host_name description scheduled_downtime_depth\nFilter: state = 2\nFilter: scheduled_downtime_depth = 1'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_3_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == 'test_host_0;test_ok_0;1\n')
 
         #---------------------------------------------------------------
         # query_4
         #---------------------------------------------------------------
-        data = 'GET services\nColumns: host_name description state\nFilter: state = 2\nFilter: in_notification_period = 1\nAnd: 2\nFilter: state = 0\nOr: 2\nFilter: host_name = test_host_0\nFilter: description = test_ok_0\nAnd: 3\nFilter: contacts >= harri\nFilter: contacts >= test_contact\nOr: 3'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_4_______________\n%s\n%s\n' % (data, response)
+        request = 'GET services\nColumns: host_name description state\nFilter: state = 2\nFilter: in_notification_period = 1\nAnd: 2\nFilter: state = 0\nOr: 2\nFilter: host_name = test_host_0\nFilter: description = test_ok_0\nAnd: 3\nFilter: contacts >= harri\nFilter: contacts >= test_contact\nOr: 3'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_4_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == 'test_host_0;test_ok_0;2\n')
 
         #---------------------------------------------------------------
         # query_6
         #---------------------------------------------------------------
-        data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_6_______________\n%s\n%s\n' % (data, response)
+        request = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_6_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == '0;0;1;0\n')
 
         #---------------------------------------------------------------
         # query_7
         #---------------------------------------------------------------
-        data = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nFilter: contacts >= test_contact'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_6_______________\n%s\n%s\n' % (data, response)
+        request = 'GET services\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nFilter: contacts >= test_contact'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_6_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == '0;0;1;0\n')
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            # TODO looks like a timing problem with nagios
+            #self.assert_(self.lines_equal(response, nagresponse))
 
 
     def test_json(self):
@@ -402,20 +485,21 @@ ResponseHeader: fixed16
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
         self.update_broker()
-        data = 'GET services\nColumns: host_name description state\nOutputFormat: json'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'json wo headers__________\n%s\n%s\n' % (data, response)
+        request = 'GET services\nColumns: host_name description state\nOutputFormat: json'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'json wo headers__________\n%s\n%s\n' % (request, response)
         self.assert_(response == '[["test_host_0","test_ok_0",2]]\n')
-        data = 'GET services\nColumns: host_name description state\nOutputFormat: json\nColumnHeaders: on'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'json with headers__________\n%s\n%s\n' % (data, response)
+        request = 'GET services\nColumns: host_name description state\nOutputFormat: json\nColumnHeaders: on'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'json with headers__________\n%s\n%s\n' % (request, response)
         self.assert_(response == '[["host_name","description","state"],["test_host_0","test_ok_0",2]]\n')
         #100% mklivesttaus: self.assert_(response == '[["host_name","description","state"],\n["test_host_0","test_ok_0",2]]\n')
 
 
     def test_thruk(self):
         self.print_header()
-        print "got initial broks"
+        if self.nagios_installed():
+            self.start_nagios('1r_1h_1s')
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -431,11 +515,11 @@ ResponseHeader: fixed16
         #---------------------------------------------------------------
         # get the full hosts table
         #---------------------------------------------------------------
-        data = 'GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-        data = """GET hosts
+        request = """GET hosts
 Stats: name !=
 Stats: check_type = 0
 Stats: check_type = 1
@@ -509,20 +593,33 @@ Stats: childs !=
 StatsAnd: 2
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-
-        data = """GET comments
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            #self.stop_nagios()
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            # TODO timing problem?
+            #self.assert_(self.lines_equal(response, nagresponse))
+        
+        request = """GET comments
 Columns: host_name source type author comment entry_time entry_type expire_time
 Filter: service_description ="""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            #self.stop_nagios()
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
-        data = """GET hosts
+        request = """GET hosts
 Columns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change plugin_output next_check long_plugin_output
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
         duration = 180
@@ -530,40 +627,61 @@ ResponseHeader: fixed16"""
         cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_warning_00;%d;%d;0;0;%d;lausser;blablubsvc" % (now, now, now + duration, duration)
         print cmd
         self.sched.run_external_command(cmd)
+        if self.nagios_installed():
+            self.nagios_extcmd(cmd)
         cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_0;%d;%d;0;0;%d;lausser;blablubhost" % (now, now, now + duration, duration)
         print cmd
         self.sched.run_external_command(cmd)
+        if self.nagios_installed():
+            self.nagios_extcmd(cmd)
         self.update_broker()
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.update_broker()
         self.scheduler_loop(3, [[svc, 2, 'BAD']])
         self.update_broker()
-        data = """GET downtimes
+        request = """GET downtimes
 Filter: service_description =
 Columns: author comment end_time entry_time fixed host_name id start_time
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        data = """GET comments
+        if self.nagios_installed():
+            #time.sleep(10)
+            nagresponse = self.ask_nagios(request)
+            #self.stop_nagios()
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            #TODO the entry_times are different. find a way to round the numbers
+            # so that they are equal
+            #self.assert_(self.lines_equal(response, nagresponse))
+
+        request = """GET comments
 Filter: service_description =
 Columns: author comment
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            time.sleep(10)
+            nagresponse = self.ask_nagios(request)
+            #self.stop_nagios()
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            #self.assert_(self.lines_equal(response, nagresponse))
 
-        data = """GET services
+        request = """GET services
 Filter: has_been_checked = 1
 Filter: check_type = 0
 Stats: sum has_been_checked
 Stats: sum latency
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-        data = """GET services
+        request = """GET services
 Filter: has_been_checked = 1
 Filter: check_type = 0
 Stats: sum has_been_checked
@@ -575,27 +693,43 @@ Stats: max latency
 Stats: max execution_time
 Separators: 10 59 44 124
 ResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-        data = """GET services\nFilter: has_been_checked = 1\nFilter: check_type = 0\nStats: sum has_been_checked as has_been_checked\nStats: sum latency as latency_sum\nStats: sum execution_time as execution_time_sum\nStats: min latency as latency_min\nStats: min execution_time as execution_time_min\nStats: max latency as latency_max\nStats: max execution_time as execution_time_max\n\nResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET services\nFilter: has_been_checked = 1\nFilter: check_type = 0\nStats: sum has_been_checked as has_been_checked\nStats: sum latency as latency_sum\nStats: sum execution_time as execution_time_sum\nStats: min latency as latency_min\nStats: min execution_time as execution_time_min\nStats: max latency as latency_max\nStats: max execution_time as execution_time_max\n\nResponseHeader: fixed16"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-        data = """GET hostgroups\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET hostgroups\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            # TODO members_with_state
+            #self.assert_(self.lines_equal(response, nagresponse))
 
-        data = """GET hosts\nColumns: name groups\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET hosts\nColumns: name groups\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
-        data = """GET hostgroups\nColumns: name num_services num_services_ok\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET hostgroups\nColumns: name num_services num_services_ok\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
-        data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warning num_services_critical num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warning num_services_critical num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
         self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']])
@@ -605,18 +739,21 @@ ResponseHeader: fixed16"""
 
         print "WARNING SOFT;1"
         # worst_service_state 1, worst_service_hard_state 0
-        data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
         self.update_broker()
         print "WARNING HARD;3"
         # worst_service_state 1, worst_service_hard_state 1
-        data = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         for s in self.livestatus_broker.livestatus.services.values():
             print "%s %d %s;%d" % (s.state, s.state_id, s.state_type, s.attempt)
+
+        if self.nagios_installed():
+            self.stop_nagios()
 
 
     def test_thruk_comments(self):
@@ -664,17 +801,17 @@ ResponseHeader: fixed16"""
         self.update_broker()
         svc_comment_list = (',').join([str(c.id) for c in svc.comments])
 
-        #data = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
-        data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        #request = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
+        request = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """200          17
 [[[""" + svc_comment_list +"""],[],0,0]]
 """
         self.assert_(response == good_response) # json
 
-        data = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\n"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\n"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """200           9
 """ + svc_comment_list + """;;0;0
@@ -720,7 +857,7 @@ ResponseHeader: fixed16"""
         end = time.time()
 
         # show history for service
-        data = """GET log
+        request = """GET log
 Columns: time type options state
 Filter: time >= """ + str(int(start)) + """
 Filter: time <= """ + str(int(end)) + """
@@ -747,7 +884,7 @@ Filter: host_name =
 And: 2
 Or: 3"""
 
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
     def test_thruk_logs_alerts_summary(self):
@@ -789,7 +926,7 @@ Or: 3"""
 
         # is this an error in thruk?
 
-        data = """GET log
+        request = """GET log
 Filter: options ~ ;HARD;
 Filter: type = HOST ALERT
 Filter: time >= 1284056080
@@ -804,7 +941,7 @@ And: 2
 Or: 3
 Columns: time state state_type host_name service_description current_host_groups current_service_groups plugin_output"""
 
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
 
@@ -849,7 +986,7 @@ Columns: time state state_type host_name service_description current_host_groups
         end = time.time()
 
         # show history for service
-        data = """GET log
+        request = """GET log
 Columns: time type options state current_host_name
 Filter: time >= """ + str(int(start)) + """
 Filter: time <= """ + str(int(end)) + """
@@ -863,7 +1000,7 @@ Or: 6
 Filter: current_host_name = test_host_0
 Filter: current_service_description = test_ok_0
 And: 2"""
-        data = """GET log
+        request = """GET log
 Columns: time type options state current_host_name
 Filter: time >= """ + str(int(start)) + """
 Filter: time <= """ + str(int(end)) + """
@@ -871,12 +1008,14 @@ Filter: current_host_name = test_host_0
 Filter: current_service_description = test_ok_0
 And: 2"""
 
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
 
     def test_thruk_tac_svc(self):
         self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('5r_100h_2000s')
         self.update_broker()
 
         start = time.time()
@@ -918,7 +1057,7 @@ And: 2"""
         end = time.time()
 
         # show history for service
-        data = """GET services
+        request = """GET services
 Filter: has_been_checked = 1
 Filter: check_type = 0
 Stats: sum has_been_checked
@@ -929,8 +1068,13 @@ Stats: min execution_time
 Stats: max latency
 Stats: max execution_time"""
 
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
 
     def test_columns(self):
@@ -939,8 +1083,8 @@ Stats: max execution_time"""
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------
-        data = """GET columns"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET columns"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
 
@@ -965,8 +1109,8 @@ Stats: max execution_time"""
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------
-        data = """GET schedulers"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET schedulers"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """address;alive;name;port;spare;weight
 othernode;1;scheduler-2;7768;1;1
@@ -982,8 +1126,8 @@ localhost;1;scheduler-1;7768;0;1
         b = schedlink.get_update_status_brok()
         self.sched.add(b)
         self.update_broker()
-        data = """GET schedulers"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET schedulers"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         good_response = """address;alive;name;port;spare;weight
 othernode;0;scheduler-2;7768;1;1
 localhost;1;scheduler-1;7768;0;1
@@ -1012,8 +1156,8 @@ localhost;1;scheduler-1;7768;0;1
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------
-        data = """GET reactionners"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET reactionners"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;reactionner-1;7769;0
@@ -1027,8 +1171,8 @@ othernode;1;reactionner-2;7769;1
         b2 = reac.get_update_status_brok()
         self.sched.add(b2)
         self.update_broker()
-        data = """GET reactionners"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET reactionners"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;reactionner-1;7769;0
@@ -1060,8 +1204,8 @@ othernode;0;reactionner-2;7769;1
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------
-        data = """GET pollers"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET pollers"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;poller-1;7771;0
@@ -1079,8 +1223,8 @@ othernode;1;poller-2;7771;1
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------
-        data = """GET pollers"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET pollers"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;poller-1;7771;0
@@ -1112,8 +1256,8 @@ othernode;0;poller-2;7771;1
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------
-        data = """GET brokers"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET brokers"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;broker-1;7772;0
@@ -1131,8 +1275,8 @@ othernode;1;broker-2;7772;1
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------
-        data = """GET brokers"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET brokers"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """address;alive;name;port;spare
 localhost;1;broker-1;7772;0
@@ -1167,8 +1311,8 @@ othernode;0;broker-2;7772;1
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------
-        data = """GET problems"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = """GET problems"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "FUCK", response
         good_response = """impacts;source
 test_host_0,test_host_0/test_ok_0;test_router_0
@@ -1180,27 +1324,34 @@ test_host_0,test_host_0/test_ok_0;test_router_0
 
     def test_limit(self):
         self.print_header() 
+        if self.nagios_installed():
+            self.start_nagios('5r_100h_2000s')
         now = time.time()
         self.update_broker()
         #---------------------------------------------------------------
         # get the full hosts table
         #---------------------------------------------------------------
-        data = 'GET hosts\nColumns: host_name\n'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET hosts\nColumns: host_name\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """test_host_0
 test_router_0
 """
         self.assert_(self.lines_equal(response, good_response))
 
-        data = 'GET hosts\nColumns: host_name\nLimit: 1\n'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET hosts\nColumns: host_name\nLimit: 1\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """test_host_0
 """
         # it must be test_host_0 because with Limit: the output is 
         # alphabetically ordered
         self.assert_(response == good_response)
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
 
 
@@ -1256,8 +1407,8 @@ test_router_0
         # get the full hosts table
         #---------------------------------------------------------------
         print "Got source problems"
-        data = 'GET hosts\nColumns: host_name is_impact source_problems\n'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET hosts\nColumns: host_name is_impact source_problems\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "moncul", response
         #good_response = """test_host_0
 #test_router_0
@@ -1265,16 +1416,16 @@ test_router_0
         #self.assert_(self.lines_equal(response, good_response))
 
         print "Now got impact"
-        data = 'GET hosts\nColumns: host_name is_problem impacts\n'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET hosts\nColumns: host_name is_problem impacts\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "moncul", response
         good_response = """test_host_0
 test_router_0
 """
 #        self.assert_(self.lines_equal(response, good_response))
 
-        data = 'GET hosts\nColumns: host_name\nLimit: 1\n'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET hosts\nColumns: host_name\nLimit: 1\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         good_response = """test_host_0
 """
@@ -1294,23 +1445,23 @@ test_router_0
         #   servicegroup_01,ok via service.servicegroups
         #   servicegroup_02 via servicegroup.members
         #---------------------------------------------------------------
-        data = """GET services
+        request = """GET services
 Columns: host_name service_description
 Filter: groups >= servicegroup_01
 OutputFormat: csv
 ResponseHeader: fixed16
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         self.assert_(response == """200          22
 test_host_0;test_ok_0
 """)
-        data = """GET services
+        request = """GET services
 Columns: host_name service_description
 Filter: groups >= servicegroup_02
 OutputFormat: csv
 ResponseHeader: fixed16
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         self.assert_(response == """200          22
 test_host_0;test_ok_0
 """)
@@ -1373,10 +1524,11 @@ test_host_0;test_ok_0
                 print "BROK   ", brok.data['in_checking']
         self.update_broker()
         print "-------------------------------------------------"
-        data = 'GET services\nColumns: service_description is_executing\n'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
+        request = 'GET services\nColumns: service_description is_executing\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         
+
 
 class TestConfigBig(TestConfig):
     def setUp(self):
@@ -1395,6 +1547,8 @@ class TestConfigBig(TestConfig):
 
     def test_stats(self):
         self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -1418,16 +1572,21 @@ class TestConfigBig(TestConfig):
         self.update_broker()
         # 1993O, 3xW, 3xC, 1xU
 
-        data = """GET services
+        request = """GET services
 Filter: contacts >= test_contact
 Stats: state != 9999
 Stats: state = 0
 Stats: state = 1
 Stats: state = 2
 Stats: state = 3"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(data)
-        print 'query_6_______________\n%s\n%s\n' % (data, response)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_6_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == '2000;1993;3;3;1\n')
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            self.stop_nagios()
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
 
     def test_statsgroupby(self):
@@ -1482,7 +1641,6 @@ StatsGroupBy: state
             self.assert_(self.lines_equal(response, nagresponse))
 
 
-
     def test_hostsbygroup(self):
         self.print_header()
         if self.nagios_installed():
@@ -1495,8 +1653,6 @@ StatsGroupBy: state
             objlist.append([service, 0, 'OK'])
         self.scheduler_loop(1, objlist)
         self.update_broker()
-        if self.nagios_installed():
-            self.nagios_loop(1, objlist)
         request = """GET hostsbygroup
 ColumnHeaders: on
 Columns: host_name hostgroup_name
@@ -1526,10 +1682,80 @@ ResponseHeader: fixed16
             objlist.append([service, 0, 'OK'])
         self.scheduler_loop(1, objlist)
         self.update_broker()
-        if self.nagios_installed():
-            self.nagios_loop(1, objlist)
         request = """GET servicesbyhostgroup
 Filter: host_groups >= up
+Stats: has_been_checked = 0
+Stats: state = 0
+Stats: has_been_checked != 0
+Stats: scheduled_downtime_depth = 0
+Stats: host_scheduled_downtime_depth = 0
+StatsAnd: 4
+Stats: state = 0
+Stats: scheduled_downtime_depth > 0
+Stats: host_scheduled_downtime_depth > 0
+StatsAnd: 3
+Stats: state = 1
+Stats: acknowledged = 0
+Stats: host_acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+Stats: host_scheduled_downtime_depth = 0
+StatsAnd: 5
+Stats: state = 1
+Stats: acknowledged = 1
+Stats: host_acknowledged = 1
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 1
+Stats: scheduled_downtime_depth > 0
+Stats: host_scheduled_downtime_depth > 0
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 2
+Stats: acknowledged = 0
+Stats: host_acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+Stats: host_scheduled_downtime_depth = 0
+StatsAnd: 5
+Stats: state = 2
+Stats: acknowledged = 1
+Stats: host_acknowledged = 1
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 2
+Stats: scheduled_downtime_depth > 0
+Stats: host_scheduled_downtime_depth > 0
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 3
+Stats: acknowledged = 0
+Stats: host_acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+Stats: host_scheduled_downtime_depth = 0
+StatsAnd: 5
+Stats: state = 3
+Stats: acknowledged = 1
+Stats: host_acknowledged = 1
+StatsOr: 2
+StatsAnd: 2
+Stats: state = 3
+Stats: scheduled_downtime_depth > 0
+Stats: host_scheduled_downtime_depth > 0
+StatsOr: 2
+StatsAnd: 2
+StatsGroupBy: hostgroup_name
+OutputFormat: csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
+
+        # Again, without Filter:
+        request = """GET servicesbyhostgroup
 Stats: has_been_checked = 0
 Stats: state = 0
 Stats: has_been_checked != 0
@@ -1600,7 +1826,6 @@ ResponseHeader: fixed16
             self.stop_nagios()
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
-
 
 
 

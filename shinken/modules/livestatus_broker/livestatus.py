@@ -1624,6 +1624,7 @@ class LiveStatus:
             },
             'name' : {
                 'description' : 'The login name of the contact person',
+                'prop' : 'contact_name',
                 'type' : 'string',
             },
             'pager' : {
@@ -5202,6 +5203,10 @@ class LiveStatus:
                     # and an internal name must happen
                     prop = type_map[display]['prop']
                 value = getattr(elt, prop, None)
+                # Some attributes of Contact/Host are by defautl 'none'
+                # TODO: look if this can be None in contact.py, host.py
+                if value == 'none':
+                    value = None
                 if value != None:
                     # The name/function listed in prop exists
                     #Maybe it's not a value, but a function link
@@ -5331,40 +5336,23 @@ class LiveStatus:
                 # And a mixture host_groups/host_name with FilterAnd/Or? Must have several filter functions
                 # This is still under construction. The code can be made simpler
                 if not limit:
-                    if len(filtercolumns) == 0:
-                        prefiltresult = [
+                    needs_filter = len(filtercolumns) != 0
+                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in [
+                        svc for svc in [
                             setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in [
                                 # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
                                 (copy.copy(item1), inner_list1[1]) for inner_list1 in [
-                                     # ([service, service, ...], hostgroup), ([service, ...], hostgroup), ...  flattened by host. only if a host has services. sorted by service_description
-                                     (sorted(item0.services, key = lambda k: k.service_description), inner_list0[1]) for inner_list0 in [
-                                         # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
-                                         (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
-                                             # hostgroups, sorted by hostgroup_name
-                                             sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
-                                     ] for item0 in inner_list0[0] if item0.services
-                                ] for item1 in inner_list1[0]
-                            ]
-                        ]
-                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
-                    else:
-                        prefiltresult = [
-                                svc for svc in [
-                                  setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in [
-                                    # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
-                                    (copy.copy(item1), inner_list1[1]) for inner_list1 in [
-                                      # ([service, service, ...], hostgroup), ([service, ...], hostgroup), ...  flattened by host. only if a host has services. sorted by service_description
-                                      (sorted(item0.services, key = lambda k: k.service_description), inner_list0[1]) for inner_list0 in [
+                                    # ([service, service, ...], hostgroup), ([service, ...], hostgroup), ...  flattened by host. only if a host has services. sorted by service_description
+                                    (sorted(item0.services, key = lambda k: k.service_description), inner_list0[1]) for inner_list0 in [
                                         # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
                                         (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
-                                          # hostgroups, sorted by hostgroup_name
-                                          sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
-                                      ] for item0 in inner_list0[0] if item0.services
-                                    ] for item1 in inner_list1[0]
-                                  ]
-                                ] if filter_stack(self.create_output(type_map, svc, [], filtercolumns))
-                        ]
-                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
+                                            # hostgroups, sorted by hostgroup_name
+                                            sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
+                                    ] for item0 in inner_list0[0] if item0.services
+                                ] for item1 in inner_list1[0]
+                            ]
+                        ] if (needs_filter and filter_stack(self.create_output(type_map, svc, [], filtercolumns)))
+                    ]]
                 else:
                     # Now implemented. Why would one limit this anyway?
                     pass
