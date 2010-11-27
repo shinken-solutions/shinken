@@ -5281,6 +5281,20 @@ class LiveStatus:
                 # instead of self.hosts.values() 
                 # loop over hostgroups, then over members, then flatten the list, then add a hostgroup attribute to each host
                 if not limit:
+                    needs_filter = len(filtercolumns) != 0
+
+#          setattr(hogh[0], 'hostgroup', hohg[1]) or hohg[0] for hohg in [
+#             # (host, hg), (host, hg), ... host objects are individuals
+#             (copy.copy(item0), inner_list0[1]) for inner_list0 in [
+#                # ([host, host, ...], hg), ([host], hg), ...
+#                (sorted(hg1.members, key = lambda k: k.host_name), hg1 )for hg1 in [
+#                   # hostgroups sorted by hostgroup_name
+#                   sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
+#                ]
+#             ] for item0 in inner_list0[0]
+#          ]
+
+
                     if len(filtercolumns) == 0:
                         prefiltresult = []
                         for hg in [x for x in self.hostgroups.values() if x.members]:
@@ -5313,16 +5327,20 @@ class LiveStatus:
             elif table == 'servicesbygroup':
                 type_map = LiveStatus.out_map['Servicesbygroup']
                 if not limit:
-                    if len(filtercolumns) == 0:
-                        prefiltresult = []
-                        for sg in [x for x in self.servicegroups.values() if x.members]:
-                            prefiltresult.extend([s for s in (setattr(se, 'servicegroup', sg) or se for se in [copy.copy(item) for item in sorted(sg.members, key = lambda k: k.get_full_name())])])
-                        filtresult = [self.create_output(type_map, x, columns, []) for x in prefiltresult]
-                    else:
-                        prefiltresult = []
-                        for sg in [x for x in self.servicegroups.values() if x.members]:
-                            prefiltresult.extend([s for s in (setattr(se, 'servicegroup', sg) or se for se in [copy.copy(item) for item in sorted(sg.members, key = lambda k: k.get_full_name())]) if filter_stack(self.create_output(type_map, s, [], filtercolumns))])
-                        filtresult = [self.create_output(type_map, x, columns, []) for x in prefiltresult]
+                    needs_filter = len(filtercolumns) != 0
+                    filtresult = [self.create_output(type_map, x, columns, []) for x in [
+                        svc for svc in [
+                            setattr(servicesg[0], 'servicegroup', servicesg[1]) or servicesg[0] for servicesg in [
+                                # (service, sg), (service, sg), ...  service objects are individuals
+                                (copy.copy(item0), inner_list0[1]) for inner_list0 in [
+                                    # ([service, service], sg), ([service, service, ...], sg), ... services are sorted
+                                    (sorted(sg1.members, key = lambda k: k.get_full_name()), sg1) for sg1 in
+                                        # servicegroups, sorted by their servicegroup_name
+                                        sorted([sg0 for sg0 in self.servicegroups.values() if sg0.members], key = lambda k: k.servicegroup_name)
+                                ] for item0 in inner_list0[0]
+                            ]
+                        ] if (needs_filter and filter_stack(self.create_output(type_map, svc, [], filtercolumns)))
+                    ]]
                 else:
                     # Now implemented. Why would one limit this anyway?
                     pass
