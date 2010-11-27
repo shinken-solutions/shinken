@@ -28,6 +28,7 @@ import os
 import re
 import subprocess
 import shutil
+import time
 
 sys.path.append("../shinken/modules/livestatus_broker")
 from livestatus_broker import Livestatus_broker
@@ -172,6 +173,9 @@ class TestConfig(ShinkenTest):
 
     
     def start_nagios(self, config):
+        if os.path.exists('var/spool/checkresults'):
+            # Cleanup leftover checkresults
+            shutil.rmtree('var/spool/checkresults')
         for dir in ['tmp', 'var/tmp', 'var/spool', 'var/spool/checkresults', 'var/archives']:
             if not os.path.exists(dir):
                 os.mkdir(dir)
@@ -203,7 +207,10 @@ class TestConfig(ShinkenTest):
         if not request.endswith("\n"):
             request = request + "\n"
         unixcat = subprocess.Popen([os.path.dirname(self.nagios_path) + '/' + 'unixcat', 'var/live'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        tic = time.clock()
         out, err = unixcat.communicate(request)
+        tac = time.clock()
+        print "mklivestatus duration %f" % (tac - tic)
         attempt = 1
         while unixcat.poll() == None and attempt < 4:
             unixcat.terminate()
@@ -249,7 +256,7 @@ class TestConfig(ShinkenTest):
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live', '/tmp/livelogs.db')
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', '/tmp/livelogs.db' + str(os.getpid()))
         self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
@@ -263,6 +270,10 @@ class TestConfigSmall(TestConfig):
         self.livestatus_path = None
         self.nagios_config = None
 
+
+    def tearDown(self):
+        if os.path.exists('/tmp/livelogs.db' + str(os.getpid())):
+            os.remove('/tmp/livelogs.db' + str(os.getpid()))
 
 
     def test_servicesbyhostgroup(self):
@@ -1533,7 +1544,7 @@ test_host_0;test_ok_0
 class TestConfigBig(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', '50000', 'live', '/tmp/livelogs.db')
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', '/tmp/livelogs.db' + str(os.getpid()))
         self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
@@ -1543,6 +1554,11 @@ class TestConfigBig(TestConfig):
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()
+
+
+    def tearDown(self):
+        if os.path.exists('/tmp/livelogs.db' + str(os.getpid())):
+            os.remove('/tmp/livelogs.db' + str(os.getpid()))
 
 
     def test_stats(self):
@@ -1747,7 +1763,10 @@ OutputFormat: csv
 KeepAlive: on
 ResponseHeader: fixed16
 """
+        tic = time.clock()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        tac = time.clock()
+        print "livestatus duration %f" % (tac - tic)
         print response
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
