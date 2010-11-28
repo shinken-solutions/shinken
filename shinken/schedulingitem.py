@@ -973,16 +973,17 @@ class SchedulingItem(Item):
             data = self.get_data_for_checks()
             command_line = m.resolve_command(self.check_command, data)
 
-            #And get all environnement varialbe if need
+            #by default env is void
+            env = {}
+
+            #And get all environnement varialbe only if need
             if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
                 env = m.get_env_macros(data)
-            else:
-                env = {}
 
             #Make the Check object and put the service in checking
             #print "Asking for a check with command:", command_line
             #Make the check inherit poller_tag from the command
-            c = Check('scheduled', command_line, self, t, ref_check, timeout=cls.check_timeout, poller_tag=self.check_command.poller_tag)
+            c = Check('scheduled', command_line, self, t, ref_check, timeout=cls.check_timeout, poller_tag=self.check_command.poller_tag, env=env)
             #We keep a trace of all checks in progress
             #to know if we are in checking_or not
             self.checks_in_progress.append(c)
