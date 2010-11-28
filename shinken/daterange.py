@@ -172,7 +172,7 @@ class Daterange:
 
 
 
-    def get_start_and_end_time(self):
+    def get_start_and_end_time(self, ref=None):
         print "Not implemented"
 
 
@@ -202,7 +202,7 @@ class Daterange:
         if self.is_time_valid(t):
             return t
         t_day_epoch = get_day(t)
-        tr_mins = self.get_min_sec_from_morning(t)
+        tr_mins = self.get_min_sec_from_morning()
         return t_day_epoch + tr_mins
 
 
@@ -446,7 +446,7 @@ class StandardDaterange(Daterange):
     def is_correct(self):
         b = self.day in Daterange.weekdays
         if not b:
-            print "Error : %s is not a valid day" % day
+            print "Error : %s is not a valid day" % self.day
         return b
 
 
