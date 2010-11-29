@@ -54,7 +54,7 @@ from brokerlink import BrokerLink, BrokerLinks
 from pollerlink import PollerLink, PollerLinks
 from module import Module, Modules
 from graph import Graph
-from log import Log
+from log import logger
 
 from util import to_int, to_char, to_bool
 #import psyco
@@ -356,7 +356,7 @@ class Config(Item):
                 fd.close()
                 config_base_dir = os.path.dirname(file)
             except IOError, exp:
-                Log().log("Error: Cannot open config file '%s' for reading: %s" % (file, exp))
+                logger.log("Error: Cannot open config file '%s' for reading: %s" % (file, exp))
                 #The configuration is invalid because we have a bad file!
                 self.conf_is_correct = False
                 continue
@@ -372,13 +372,13 @@ class Config(Item):
                         cfg_file_name = os.path.join(config_base_dir, elts[1])
                     try:
                         fd = open(cfg_file_name)
-                        Log().log("Processing object config file '%s'" % cfg_file_name)
+                        logger.log("Processing object config file '%s'" % cfg_file_name)
                         res += fd.read()
                         #Be sure to add a line return so we won't mix files
                         res += '\n'
                         fd.close()
                     except IOError, exp:
-                        Log().log("Error: Cannot open config file '%s' for reading: %s" % (cfg_file_name, exp))
+                        logger.log("Error: Cannot open config file '%s' for reading: %s" % (cfg_file_name, exp))
                     #The configuration is invalid because we have a bad file!
                         self.conf_is_correct = False
                 elif re.search("^cfg_dir", line):
@@ -389,20 +389,20 @@ class Config(Item):
                         cfg_dir_name = os.path.join(config_base_dir, elts[1])
                     #Ok, look if it's really a directory
                     if not os.path.isdir(cfg_dir_name):
-                        Log().log("Error: Cannot open config dir '%s' for reading" % cfg_dir_name)
+                        logger.log("Error: Cannot open config dir '%s' for reading" % cfg_dir_name)
                         self.conf_is_correct = False
                     #Now walk for it
                     for root, dirs, files in os.walk(cfg_dir_name):
                         for file in files:
                             if re.search("\.cfg$", file):
-                                Log().log("Processing object config file '%s'" % os.path.join(root, file))
+                                logger.log("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
 
                                     fd = open(os.path.join(root, file))
                                     res += fd.read()
                                     fd.close()
                                 except IOError, exp:
-                                    Log().log("Error: Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
+                                    logger.log("Error: Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
                                     # The configuration is invalid because we have a bad file!
                                     self.conf_is_correct = False
         return res
@@ -546,7 +546,7 @@ class Config(Item):
         self.modules.create_reversed_list()
 
         if len(self.arbiterlinks) == 0:
-            Log().log("Warning : there is no arbiter, I add one in localhost:7770")
+            logger.log("Warning : there is no arbiter, I add one in localhost:7770")
             a = ArbiterLink({'arbiter_name' : 'Default-Arbiter', 'host_name' : socket.gethostname(), 'address' : 'localhost', 'port' : '7770', 'spare' : '0'})
             self.arbiterlinks = ArbiterLinks([a])
 
@@ -687,7 +687,7 @@ class Config(Item):
                     else:
                         usage_text = "this parameter is no longer useful in the Shinken architecture."
                     text = 'Notice : the parameter %s is useless and can be removed from the configuration (Reason: %s)' %  (prop, usage_text)
-                    Log().log(text)
+                    logger.log(text)
 
 
     #It's used to raise warning if the user got parameter that we do not manage from now
@@ -706,11 +706,11 @@ class Config(Item):
             print "\n"
             mailing_list_uri = "https://lists.sourceforge.net/lists/listinfo/shinken-devel"
             text = 'Warning : the folowing parameter(s) are not curently managed.'
-            Log().log(text)
+            logger.log(text)
             for s in unmanaged:
-                Log().log(s)
+                logger.log(s)
             text = 'Please look if you really need it. If so, please register at the devel mailing list (%s) and ask for it or propose us a patch :)' % mailing_list_uri
-            Log().log(text)
+            logger.log(text)
             print "\n"
 
 
@@ -841,32 +841,32 @@ class Config(Item):
             #so all hosts without realm wil be link with it
             default = Realm({'realm_name' : 'Default', 'default' : '1'})
             self.realms = Realms([default])
-            Log().log("Notice : the is no defined realms, so I add a new one %s" % default.get_name())
+            logger.log("Notice : the is no defined realms, so I add a new one %s" % default.get_name())
             lists = [self.pollers, self.brokers, self.reactionners, self.schedulerlinks]
             for l in lists:
                 for elt in l:
                     if not hasattr(elt, 'realm'):
                         elt.realm = 'Default'
-                        Log().log("Notice : Tagging %s with realm %s" % (elt.get_name(), default.get_name()))
+                        logger.log("Notice : Tagging %s with realm %s" % (elt.get_name(), default.get_name()))
 
 
     #If a satellite is missing, we add them in the localhost
     #with defaults values
     def fill_default_satellites(self):
         if len(self.schedulerlinks) == 0:
-            Log().log("Warning : there is no scheduler, I add one in localhost:7768")
+            logger.log("Warning : there is no scheduler, I add one in localhost:7768")
             s = SchedulerLink({'scheduler_name' : 'Default-Scheduler', 'address' : 'localhost', 'port' : '7768'})
             self.schedulerlinks = SchedulerLinks([s])
         if len(self.pollers) == 0:
-            Log().log("Warning : there is no poller, I add one in localhost:7771")
+            logger.log("Warning : there is no poller, I add one in localhost:7771")
             p = PollerLink({'poller_name' : 'Default-Poller', 'address' : 'localhost', 'port' : '7771'})
             self.pollers = PollerLinks([p])
         if len(self.reactionners) == 0:
-            Log().log("Warning : there is no reactionner, I add one in localhost:7769")
+            logger.log("Warning : there is no reactionner, I add one in localhost:7769")
             r = ReactionnerLink({'reactionner_name' : 'Default-Reactionner', 'address' : 'localhost', 'port' : '7769'})
             self.reactionners = ReactionnerLinks([r])
         if len(self.brokers) == 0:
-            Log().log("Warning : there is no broker, I add one in localhost:7772")
+            logger.log("Warning : there is no broker, I add one in localhost:7772")
             b = BrokerLink({'broker_name' : 'Default-Broker', 'address' : 'localhost', 'port' : '7772', 'manage_arbiters' : '1'})
             self.brokers = BrokerLinks([b])
 
@@ -1044,13 +1044,13 @@ class Config(Item):
     def check_error_on_hard_unmanaged_parameters(self):
         r = True
         if self.use_regexp_matching:
-            Log().log("Error : the use_regexp_matching parameter is not managed.")
+            logger.log("Error : the use_regexp_matching parameter is not managed.")
             r &= False
         #if self.ochp_command != '':
-        #    Log().log("Error : the ochp_command parameter is not managed.")
+        #    logger.log("Error : the ochp_command parameter is not managed.")
         #    r &= False
         #if self.ocsp_command != '':
-        #    Log().log("Error : the ocsp_command parameter is not managed.")
+        #    logger.log("Error : the ocsp_command parameter is not managed.")
         #    r &= False
         return r
 
@@ -1060,108 +1060,108 @@ class Config(Item):
     #from and scheduler. The first one got everything, the second
     #does not have the satellites.
     def is_correct(self):
-        Log().log('Running pre-flight check on configuration data...')
+        logger.log('Running pre-flight check on configuration data...')
         r = self.conf_is_correct
 
         #Globally unamanged parameters
-        Log().log('Checking global parameters...')
+        logger.log('Checking global parameters...')
         r &= self.check_error_on_hard_unmanaged_parameters()
 
         #Hosts
-        Log().log('Checking hosts...')
+        logger.log('Checking hosts...')
         r &= self.hosts.is_correct()
         #Hosts got a special cehcks for loops
         r &= self.hosts.no_loop_in_parents()
-        Log().log('\tChecked %d hosts' % len(self.hosts))
+        logger.log('\tChecked %d hosts' % len(self.hosts))
 
         #Hostgroups
-        Log().log('Checking hostgroups...')
+        logger.log('Checking hostgroups...')
         r &= self.hostgroups.is_correct()
-        Log().log('\tChecked %d hostgroups' % len(self.hostgroups))
+        logger.log('\tChecked %d hostgroups' % len(self.hostgroups))
 
         #Contacts
-        Log().log('Checking contacts...')
+        logger.log('Checking contacts...')
         r &= self.contacts.is_correct()
-        Log().log('\tChecked %d contacts' % len(self.contacts))
+        logger.log('\tChecked %d contacts' % len(self.contacts))
 
         #Contactgroups
-        Log().log('Checking contactgroups')
+        logger.log('Checking contactgroups')
         r &= self.contactgroups.is_correct()
-        Log().log('\tChecked %d contactgroups' % len(self.contactgroups))
+        logger.log('\tChecked %d contactgroups' % len(self.contactgroups))
 
         #Notificationways
-        Log().log('Checking notificationways...')
+        logger.log('Checking notificationways...')
         r &= self.notificationways.is_correct()
-        Log().log('\tChecked %d notificationways' % len(self.notificationways))
+        logger.log('\tChecked %d notificationways' % len(self.notificationways))
 
         #Escalations
-        Log().log('Checking escalations...')
+        logger.log('Checking escalations...')
         r &= self.escalations.is_correct()
-        Log().log('\tChecked %d escalations' % len(self.escalations))
+        logger.log('\tChecked %d escalations' % len(self.escalations))
 
         #Services
-        Log().log('Checking services')
+        logger.log('Checking services')
         r &= self.services.is_correct()
-        Log().log('\tChecked %d services' % len(self.services))
+        logger.log('\tChecked %d services' % len(self.services))
 
         #Servicegroups
-        Log().log('Checking servicegroups')
+        logger.log('Checking servicegroups')
         r &= self.servicegroups.is_correct()
-        Log().log('\tChecked %d servicegroups' % len(self.servicegroups))
+        logger.log('\tChecked %d servicegroups' % len(self.servicegroups))
 
         #Servicedependencies
         if hasattr(self, 'servicedependencies'):
-            Log().log('Checking servicedependencies')
+            logger.log('Checking servicedependencies')
             r &= self.servicedependencies.is_correct()
-            Log().log('\tChecked %d servicedependencies' % len(self.servicedependencies))
+            logger.log('\tChecked %d servicedependencies' % len(self.servicedependencies))
 
         #Hostdependencies
         if hasattr(self, 'hostdependencies'):
-            Log().log('Checking hostdependencies')
+            logger.log('Checking hostdependencies')
             r &= self.hostdependencies.is_correct()
-            Log().log('\tChecked %d hostdependencies' % len(self.hostdependencies))
+            logger.log('\tChecked %d hostdependencies' % len(self.hostdependencies))
 
 
         #Arbiters
         if hasattr(self, 'arbiterlinks'):
-            Log().log('Checking arbiters')
+            logger.log('Checking arbiters')
             r &= self.arbiterlinks.is_correct()
-            Log().log('\tChecked %d arbiters' % len(self.arbiterlinks))
+            logger.log('\tChecked %d arbiters' % len(self.arbiterlinks))
 
         #Schedulers
         if hasattr(self, 'schedulerlinks'):
-            Log().log('Checking schedulers')
+            logger.log('Checking schedulers')
             r &= self.schedulerlinks.is_correct()
-            Log().log('\tChecked %d schedulers' % len(self.schedulerlinks))
+            logger.log('\tChecked %d schedulers' % len(self.schedulerlinks))
 
         #Reactionners
         if hasattr(self, 'reactionners'):
-            Log().log('Checking reactionners')
+            logger.log('Checking reactionners')
             r &= self.reactionners.is_correct()
-            Log().log('\tChecked %d reactionners' % len(self.reactionners))
+            logger.log('\tChecked %d reactionners' % len(self.reactionners))
 
         #Pollers
         if hasattr(self, 'pollers'):
-            Log().log('Checking pollers')
+            logger.log('Checking pollers')
             r &= self.pollers.is_correct()
-            Log().log('\tChecked %d pollers' % len(self.pollers))
+            logger.log('\tChecked %d pollers' % len(self.pollers))
 
         #Brokers
         if hasattr(self, 'brokers'):
-            Log().log('Checking brokers')
+            logger.log('Checking brokers')
             r &= self.brokers.is_correct()
-            Log().log('\tChecked %d brokers' % len(self.brokers))
+            logger.log('\tChecked %d brokers' % len(self.brokers))
 
         #Timeperiods
-        Log().log('Checking timeperiods')
+        logger.log('Checking timeperiods')
         r &= self.timeperiods.is_correct()
-        Log().log('\tChecked %d timeperiods' % len(self.timeperiods))
+        logger.log('\tChecked %d timeperiods' % len(self.timeperiods))
 
         #Resultmodulations
         if hasattr(self, 'resultmodulations'):
-            Log().log('Checking resultmodulations')
+            logger.log('Checking resultmodulations')
             r &= self.resultmodulations.is_correct()
-            Log().log('\tChecked %d resultmodulations' % len(self.resultmodulations))
+            logger.log('\tChecked %d resultmodulations' % len(self.resultmodulations))
 
         self.conf_is_correct = r
 
@@ -1271,12 +1271,12 @@ class Config(Item):
                 if elt.realm != None:
                     tmp_realms.add(elt.realm)
             if len(tmp_realms) > 1:
-                Log().log("Error : the realm configuration of yours hosts is not good because there a more than one realm in one pack (host relations) :")
+                logger.log("Error : the realm configuration of yours hosts is not good because there a more than one realm in one pack (host relations) :")
                 for h in pack:
                     if h.realm == None:
-                        Log().log('Error : the host %s do not have a realm' % h.get_name())
+                        logger.log('Error : the host %s do not have a realm' % h.get_name())
                     else:
-                        Log().log('Error : the host %s is in the realm %s' % (h.get_name(), h.realm.get_name()))
+                        logger.log('Error : the host %s is in the realm %s' % (h.get_name(), h.realm.get_name()))
             if len(tmp_realms) == 1: # Ok, good
                 r = tmp_realms.pop() #There is just one element
                 r.packs.append(pack)
@@ -1285,9 +1285,9 @@ class Config(Item):
                     #print "I prefer add to default realm", default_realm.get_name()
                     default_realm.packs.append(pack)
                 else:
-                    Log().log("Error : some hosts do not have a realm and you do not defined a default realm!")
+                    logger.log("Error : some hosts do not have a realm and you do not defined a default realm!")
                     for h in pack:
-                        Log().log('Host in this pack : %s ' % h.get_name())
+                        logger.log('Host in this pack : %s ' % h.get_name())
 
         #The load balancing is for a loop, so all
         #hosts of a realm (in a pack) will be dispatch
@@ -1307,10 +1307,10 @@ class Config(Item):
             #Maybe there is no scheduler in the realm, it's can be a
             #big problem if there are elements in packs
             nb_elements = len([elt for elt in [pack for pack in r.packs]])
-            Log().log("Number of hosts in the realm %s : %d" %(r.get_name(), nb_elements))
+            logger.log("Number of hosts in the realm %s : %d" %(r.get_name(), nb_elements))
 
             if nb_schedulers == 0 and nb_elements != 0:
-                Log().log("ERROR : The realm %s have hosts but no scheduler!" %r.get_name())
+                logger.log("ERROR : The realm %s have hosts but no scheduler!" %r.get_name())
                 r.packs = [] #Dumb pack
                 #The conf is incorrect
                 self.conf_is_correct = False
@@ -1394,7 +1394,7 @@ class Config(Item):
             self.confs[i].is_assigned = False #if a scheduler have
                                               #accepted the conf
 
-        Log().log("Creating packs for realms")
+        logger.log("Creating packs for realms")
 
         #Just create packs. There can be numerous ones
         #In pack we've got hosts and service

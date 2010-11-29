@@ -48,7 +48,7 @@ from shinken.brokerlink import BrokerLink, BrokerLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.module import Module, Modules
 from shinken.graph import Graph
-from shinken.log import Log
+from shinken.log import logger
 from shinken.comment import Comment
 from shinken.downtime import Downtime
 

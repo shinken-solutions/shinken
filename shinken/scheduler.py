@@ -30,7 +30,7 @@ from eventhandler import EventHandler
 from brok import Brok
 from downtime import Downtime
 from comment import Comment
-from log import Log
+from log import logger
 
 
 
@@ -78,7 +78,7 @@ class Scheduler:
         self.nb_check_received = 0
 
         #Log init
-        self.log = Log()
+        self.log = logger
         self.log.load_obj(self)
 
         self.instance_id = 0 # Temporary set. Will be erase later
@@ -266,7 +266,7 @@ class Scheduler:
 
         if nb_checks_drops != 0 or nb_broks_drops != 0 or nb_actions_drops != 0:
             print "WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops)
-            Log().log("WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
+            logger.log("WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
 
 
     #For tunning purpose we use caches but we do not whant them to explode
@@ -387,21 +387,21 @@ class Scheduler:
                 item.last_notification = c.check_time
                 #If we' ve got a problem with the notification, raise a Warning log
                 if c.exit_status != 0:
-                    Log().log("Warning : the notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
+                    logger.log("Warning : the notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
             except KeyError , exp:
-                Log().log("Warning : received an notification of an unknown id! %s" % str(exp))
+                logger.log("Warning : received an notification of an unknown id! %s" % str(exp))
 
         elif c.is_a == 'check':
             try:
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
             except KeyError , exp:
-                Log().log("Warning : received an check of an unknown id! %s" % str(exp))
+                logger.log("Warning : received an check of an unknown id! %s" % str(exp))
         elif c.is_a == 'eventhandler':
             #It just die
             self.actions[c.id].status = 'zombie'
         else:
-            Log().log("Error : the received result type in unknown ! %s" % str(c.is_a))
+            logger.log("Error : the received result type in unknown ! %s" % str(c.is_a))
 
 
     #Call by brokers to have broks
@@ -431,7 +431,7 @@ class Scheduler:
             if 'retention' in inst.properties['phases']:
                 #Ask it with self to they have full access, and a log object
                 #so they can easily raise log
-                inst.update_retention_objects(self, Log())
+                inst.update_retention_objects(self, logger)
 
 
 
@@ -442,7 +442,7 @@ class Scheduler:
         for inst in self.mod_instances:
             if 'retention' in inst.properties['phases']:
                 #give us ourself (full control!) and a log manager object
-                b = inst.load_retention_objects(self, Log())
+                b = inst.load_retention_objects(self, logger)
                 #Stop at the first module that succeed to load the retention
                 if b:
                     return
@@ -463,7 +463,7 @@ class Scheduler:
     #If we've got a system time change, we need to compensate it
     #So change our value, and all checks/notif ones
     def compensate_system_time_change(self, difference):
-        Log().log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
+        logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
         #We only need to change some value
         self.program_start = max(0, self.program_start + difference)
 
@@ -545,7 +545,7 @@ class Scheduler:
         #We now have all full broks
         self.has_full_broks = True
 
-        Log().log("[%s] Created initial Broks: %d" % (self.instance_name, len(self.broks)))
+        logger.log("[%s] Created initial Broks: %d" % (self.instance_name, len(self.broks)))
 
 
     #Crate a brok with program status info
@@ -758,11 +758,11 @@ class Scheduler:
         now = int(time.time())
         for c in self.checks.values():
             if c.status == 'inpoller' and c.t_to_go < now - 300:
-                Log().log("Warning : the results of check %d never came back. I'm reenable it for polling" % c.id)
+                logger.log("Warning : the results of check %d never came back. I'm reenable it for polling" % c.id)
                 c.status = 'scheduled'
         for a in self.actions.values():
             if a.status == 'inpoller' and a.t_to_go < now - 300:
-                Log().log("Warning : the results of action %d never came back. I'm reenable it for polling" % a.id)
+                logger.log("Warning : the results of action %d never came back. I'm reenable it for polling" % a.id)
                 a.status = 'scheduled'
 
 
@@ -777,9 +777,9 @@ class Scheduler:
         #Ok, now all is initilised, we can make the inital broks
         self.fill_initial_broks()
 
-        Log().log("[%s] First scheduling launched" % self.instance_name)
+        logger.log("[%s] First scheduling launched" % self.instance_name)
         self.schedule()
-        Log().log("[%s] First scheduling done" % self.instance_name)
+        logger.log("[%s] First scheduling done" % self.instance_name)
         #Ticks is for recurrent function call like consume
         #del zombies etc
         ticks = 0

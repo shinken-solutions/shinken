@@ -20,29 +20,36 @@
 
 import time
 
-from borg import Borg
 from brok import Brok
 
-class Log(Borg):
+obj = None
+name = None
 
+class Log:
     #We load the object where we will put log broks
     #with the 'add' method
-    def load_obj(self, obj, name = None):
-        self.obj = obj
-        self.name = name
+    def load_obj(self, object, name_ = None):
+        global obj
+        global name
+        obj = object
+        name = name_
 
     #We enter a log message, we format it, and we add the log brok
     def log(self, message, format = None):
+        global obj
+        global name
         print message
         if format == None:
-            if self.name == None:
+            if name == None:
             #We format the log in UTF-8
                 s = u'[%d] %s\n' % (int(time.time()), message.decode('UTF-8', 'replace'))
             else:
-                s = u'[%d] [%s] %s\n' % (int(time.time()), self.name, message.decode('UTF-8', 'replace'))
+                s = u'[%d] [%s] %s\n' % (int(time.time()), name, message.decode('UTF-8', 'replace'))
         else:
             s = format % message
 
         #Wecreate and add the brok
         b = Brok('log', {'log' : s})
-        self.obj.add(b)
+        obj.add(b)
+
+logger = Log()

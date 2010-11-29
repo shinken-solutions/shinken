@@ -90,7 +90,7 @@ from shinken.daemon import Daemon
 from shinken.util import to_int, to_bool, sort_by_ids
 from shinken.module import Module, Modules
 from shinken.modulesmanager import ModulesManager
-from shinken.log import Log
+from shinken.log import logger
 from shinken.brok import Brok
 
 #Load to be used by modules
@@ -171,7 +171,7 @@ class IForArbiter(Pyro.core.ObjBase):
 #                    #And we connect to it
 #                    self.app.pynag_con_init(sched_id, 'scheduler')
 
-                Log().log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
+                logger.log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
 
 		#Now get arbiter
 		for arb_id in conf['arbiters'] :
@@ -192,7 +192,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
                     #We do not connect to the arbiter. To connexion hang
 
-                Log().log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
+                logger.log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
 
 		#Now for pollers
 		for pol_id in conf['pollers'] :
@@ -216,7 +216,7 @@ class IForArbiter(Pyro.core.ObjBase):
 #                    #And we connect to it
 #                    self.app.pynag_con_init(pol_id, 'poller')
 
-                Log().log("[%s] We have our pollers : %s" % (self.name, self.pollers))
+                logger.log("[%s] We have our pollers : %s" % (self.name, self.pollers))
 
 		#Now reactionners
 		for rea_id in conf['reactionners'] :
@@ -241,17 +241,17 @@ class IForArbiter(Pyro.core.ObjBase):
 #                    #And we connect to it
 #                    self.app.pynag_con_init(rea_id, 'reactionner')
 
-                Log().log("[%s] We have our reactionners : %s" % (self.name, self.reactionners))
+                logger.log("[%s] We have our reactionners : %s" % (self.name, self.reactionners))
 
 		if not self.app.have_modules:
                     self.app.modules = conf['global']['modules']
                     self.app.have_modules = True
-                    Log().log("[%s] We received modules %s " %(self.name,  self.app.modules))
+                    logger.log("[%s] We received modules %s " %(self.name,  self.app.modules))
 
                 #Set our giving timezone from arbiter
                 use_timezone = conf['global']['use_timezone']
                 if use_timezone != 'NOTSET':
-                    Log().log("[%s] Setting our timezone to" %(self.name, use_timezone))
+                    logger.log("[%s] Setting our timezone to" %(self.name, use_timezone))
                     os.environ['TZ'] = use_timezone
                     time.tzset()
 
@@ -331,7 +331,7 @@ class Broker(Satellite):
 		self.set_exit_handler()
 
                 #Log init
-                self.log = Log()
+                self.log = logger
 		self.log.load_obj(self)
 
 		#All broks to manage
@@ -363,7 +363,7 @@ class Broker(Satellite):
                 elts.append('shinken')
                 elts.append('modules')
                 self.modulespath = os.sep.join(elts)
-                Log().log("Using modules path : %s" % os.sep.join(elts))
+                logger.log("Using modules path : %s" % os.sep.join(elts))
 
 
 
@@ -378,7 +378,7 @@ class Broker(Satellite):
 		if os.name != 'nt':
 			self.change_user(insane)
 		else:
-			Log().log("Sorry, you can't change user on this system")
+			logger.log("Sorry, you can't change user on this system")
 
                 #Now the daemon part if need
 		if is_daemon:
@@ -413,23 +413,23 @@ class Broker(Satellite):
 	#TODO : manage more than just quit
 	#Frame is just garbage
 	def manage_signal(self, sig, frame):
-            Log().log("\nExiting with signal %s" % sig)
+            logger.log("\nExiting with signal %s" % sig)
             #Maybe we quit before even launch modules
             if hasattr(self, 'modules_manager'):
-                Log().log('Stopping all modules')
+                logger.log('Stopping all modules')
                 self.modules_manager.stop_all()
             act = active_children()
             for a in act:
                 a.terminate()
                 a.join(1)
-            Log().log('Stopping all network connexions')
+            logger.log('Stopping all network connexions')
             self.daemon.shutdown(True)
-            Log().log("Unlinking pid file")
+            logger.log("Unlinking pid file")
             try:
                 os.unlink(self.pidfile)
             except OSError, exp:
                 print "Error un deleting pid file:", exp
-            Log().log("Exiting")
+            logger.log("Exiting")
             sys.exit(0)
 
 
@@ -482,7 +482,7 @@ class Broker(Satellite):
 		#Get teh good links tab for looping..
 		links = self.get_links_from_type(type)
 		if links == None:
-                    Log().log('DBG: Type unknown for connexion! %s' % type)
+                    logger.log('DBG: Type unknown for connexion! %s' % type)
                     return
 
 		if type == 'scheduler':
@@ -527,24 +527,24 @@ class Broker(Satellite):
                         #    print "I do nto ask for brok generation"
 			links[id]['running_id'] = new_run_id
 		except Pyro.errors.ProtocolError, exp:
-			Log().log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
+			logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
                         links[id]['con'] = None
 			return
 		except Pyro.errors.NamingError, exp:
-                        Log().log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
+                        logger.log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
 			links[id]['con'] = None
 			return
 		except KeyError , exp:
-                        Log().log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
+                        logger.log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
                         links[id]['con'] = None
                         traceback.print_stack()
                         return
                 except Pyro.errors.CommunicationError, exp:
-                        Log().log("[%s] the %s '%s' got CommunicationError : %s" % (self.name, type, links[id]['name'], str(exp)))
+                        logger.log("[%s] the %s '%s' got CommunicationError : %s" % (self.name, type, links[id]['name'], str(exp)))
                         links[id]['con'] = None
                         return
 
-		Log().log("[%s] Connexion OK to the %s %s" % (self.name, type, links[id]['name']))
+		logger.log("[%s] Connexion OK to the %s %s" % (self.name, type, links[id]['name']))
 
 
 	#Get a brok. Our role is to put it in the modules
@@ -558,8 +558,8 @@ class Broker(Satellite):
 				mod.manage_brok(b)
 			except Exception , exp:
 				print exp.__dict__
-				Log().log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.name, mod.get_name(),str(exp)))
-				Log().log("[%s] Exception type : %s" % (self.name, type(exp)))
+				logger.log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.name, mod.get_name(),str(exp)))
+				logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
                                 print "Back trace of this kill:"
                                 traceback.print_stack()
 				to_del.append(mod)
@@ -611,7 +611,7 @@ class Broker(Satellite):
 		#Get teh good links tab for looping..
 		links = self.get_links_from_type(type)
 		if links == None:
-                    Log().log('DBG: Type unknown for connexion! %s' % type)
+                    logger.log('DBG: Type unknown for connexion! %s' % type)
                     return
 
 		#We check for new check in each schedulers and put
@@ -643,24 +643,24 @@ class Broker(Satellite):
                             print exp
                             self.pynag_con_init(sched_id, type=type)
 			except Pyro.errors.ProtocolError , exp:
-                            Log().log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                            logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                             links[sched_id]['con'] = None
                         #scheduler must not #be initialized
 			except AttributeError , exp:
-                            Log().log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                            logger.log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                         #scheduler must not have checks
 			except Pyro.errors.NamingError , exp:
-                            Log().log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                            logger.log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                         except Pyro.errors.ConnectionClosedError , exp:
-                            Log().log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                            logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                             links[sched_id]['con'] = None
                         # What the F**k? We do not know what happenned,
 			#so.. bye bye :)
 			except Exception,x:
                             print x.__class__
                             print x.__dict__
-                            Log().log(str(x))
-                            Log().log(''.join(Pyro.util.getPyroTraceback(x)))
+                            logger.log(str(x))
+                            logger.log(''.join(Pyro.util.getPyroTraceback(x)))
                             sys.exit(1)
 
 
@@ -675,11 +675,11 @@ class Broker(Satellite):
 
 	#Main function, will loop forever
 	def main(self):
-                Log().log("[Broker] Using working directory : %s" % os.path.abspath(self.workdir))
+                logger.log("[Broker] Using working directory : %s" % os.path.abspath(self.workdir))
                 Pyro.config.PYRO_STORAGE = self.workdir
                 Pyro.config.PYRO_MULTITHREADED = 0
 
-		Log().log("[Broker] Opening port: %s" % self.port)
+		logger.log("[Broker] Opening port: %s" % self.port)
 
                 self.daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port)
 
@@ -696,7 +696,7 @@ class Broker(Satellite):
 		self.modules_manager.load()
 		self.mod_instances = self.modules_manager.get_instances()
 
-                Log().log("[%s] I correctly load the modules : %s " % (self.name, [inst.get_name() for inst in self.mod_instances]))
+                logger.log("[%s] I correctly load the modules : %s " % (self.name, [inst.get_name() for inst in self.mod_instances]))
 
                 #Connexion init with Schedulers
 		for sched_id in self.schedulers:

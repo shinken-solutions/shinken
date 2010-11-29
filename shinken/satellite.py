@@ -52,7 +52,7 @@ from message import Message
 from worker import Worker
 from load import Load
 from daemon import Daemon
-from log import Log
+from log import logger
 from brok import Brok
 from check import Check
 from notification import Notification
@@ -90,7 +90,7 @@ class IForArbiter(Pyro.core.ObjBase):
         for sched_id in conf['schedulers'] :
             already_got = False
             if sched_id in self.schedulers:
-                Log().log("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
+                logger.log("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
                 already_got = True
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
             s = conf['schedulers'][sched_id]
@@ -126,11 +126,11 @@ class IForArbiter(Pyro.core.ObjBase):
         #Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
-            Log().log("[%s] Setting our timezone to %s" %(self.name, use_timezone))
+            logger.log("[%s] Setting our timezone to %s" %(self.name, use_timezone))
             os.environ['TZ'] = use_timezone
             time.tzset()
 
-        Log().log("We have our schedulers : %s" % (str(self.schedulers)))
+        logger.log("We have our schedulers : %s" % (str(self.schedulers)))
 
 
     #Arbiter ask us to do not manage a scheduler_id anymore
@@ -213,7 +213,7 @@ class Satellite(Daemon):
         self.set_exit_handler()
 
         #Log init
-        self.log = Log()
+        self.log = logger
         self.log.load_obj(self)
 
         #The config reading part
@@ -241,7 +241,7 @@ class Satellite(Daemon):
         if os.name != 'nt':
             self.change_user(insane)
         else:
-            Log().log("Sorry, you can't change user on this system")
+            logger.log("Sorry, you can't change user on this system")
 
 
         #Now the daemon part if need
@@ -278,7 +278,7 @@ class Satellite(Daemon):
         if not sched['active']:
             return
 
-        Log().log("[%s] Init de connexion with %s at %s" % (self.name, sched['name'], sched['uri']))
+        logger.log("[%s] Init de connexion with %s at %s" % (self.name, sched['name'], sched['uri']))
         running_id = sched['running_id']
         sched['con'] = Pyro.core.getProxyForURI(sched['uri'])
 
@@ -288,17 +288,17 @@ class Satellite(Daemon):
             shinken.pyro_wrapper.set_timeout(sched['con'], 5)
             new_run_id = sched['con'].get_running_id()
         except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
-            Log().log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sched['name'], str(exp)))
+            logger.log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sched['name'], str(exp)))
             sched['con'] = None
             return
 
         #The schedulers have been restart : it has a new run_id.
         #So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
-            Log().log("[%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sched['name']))
+            logger.log("[%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sched['name']))
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
-        Log().log("[%s] Connexion OK with scheduler %s" % (self.name, sched['name']))
+        logger.log("[%s] Connexion OK with scheduler %s" % (self.name, sched['name']))
 
 
     #Manage action return from Workers
@@ -349,7 +349,7 @@ class Satellite(Daemon):
                 sched['wait_homerun'].clear()
             else:
                 self.pynag_con_init(sched_id)
-                Log().log("Sent failed!")
+                logger.log("Sent failed!")
 
 
 
@@ -358,7 +358,7 @@ class Satellite(Daemon):
     #if he send us something
     #(it can just do a ping)
     def wait_for_initial_conf(self):
-        Log().log("Waiting for initial configuration")
+        logger.log("Waiting for initial configuration")
         timeout = 1.0
         #Arbiter do not already set our have_conf param
         while not self.have_conf :
@@ -433,7 +433,7 @@ class Satellite(Daemon):
     #If we've got a system time change, we need to compensate it
     #from now, we do not do anything in fact.
     def compensate_system_time_change(self, difference):
-        Log().log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
+        logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
         #We only need to change some value
 
 
@@ -445,7 +445,7 @@ class Satellite(Daemon):
         w = Worker(1, self.s, self.returns_queue, self.processes_by_worker, \
                    mortal=mortal,max_plugins_output_length = self.max_plugins_output_length )
         self.workers[w.id] = w
-        Log().log("[%s] Allocating new Worker : %s" % (self.name, w.id))
+        logger.log("[%s] Allocating new Worker : %s" % (self.name, w.id))
         self.workers[w.id].start()
 
 
@@ -453,8 +453,8 @@ class Satellite(Daemon):
     #TODO : manage more than just quit
     #Frame is just garbage
     def manage_signal(self, sig, frame):
-        Log().log("\nExiting with signal %s" % sig)
-        Log().log('Stopping all workers')
+        logger.log("\nExiting with signal %s" % sig)
+        logger.log('Stopping all workers')
         for w in self.workers.values():
             try:
                 w.terminate()
@@ -465,16 +465,16 @@ class Satellite(Daemon):
                 pass
             except AssertionError: #In a worker
                 pass
-        Log().log('Stopping all network connexions')
+        logger.log('Stopping all network connexions')
         self.daemon.disconnect(self.interface)
         self.daemon.disconnect(self.brok_interface)
         self.daemon.shutdown(True)
-        Log().log("Unlinking pid file")
+        logger.log("Unlinking pid file")
         try:
             os.unlink(self.pidfile)
         except OSError, exp:
             print "Error un deleting pid file:", exp
-        Log().log("Exiting")
+        logger.log("Exiting")
         sys.exit(0)
 
 
@@ -513,7 +513,7 @@ class Satellite(Daemon):
             #good : we can think having a worker and it's not True
             #So we del it
             if not w.is_alive():
-                Log().log("[%s] Warning : the worker %s goes down unexpectly!" % (self.name, w.id))
+                logger.log("[%s] Warning : the worker %s goes down unexpectly!" % (self.name, w.id))
                 #AIM ... Press FIRE ... <B>HEAD SHOT!</B>
                 w.terminate()
                 w.join(timeout=1)
@@ -595,8 +595,8 @@ class Satellite(Daemon):
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0
         Pyro.config.PYRO_STORAGE = self.workdir
-        Log().log("Using working directory : %s" % os.path.abspath(self.workdir))
-        Log().log("Opening port: %s" % self.port)
+        logger.log("Using working directory : %s" % os.path.abspath(self.workdir))
+        logger.log("Opening port: %s" % self.port)
         #Daemon init
         self.daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port)
 

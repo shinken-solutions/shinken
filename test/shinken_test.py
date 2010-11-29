@@ -16,7 +16,7 @@ sys.path.append("..")
 sys.path.append("../shinken")
 from shinken.config import Config
 from shinken.dispatcher import Dispatcher
-from shinken.log import Log
+from shinken.log import logger
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager, ExternalCommand
@@ -38,7 +38,7 @@ class ShinkenTest(unittest.TestCase):
         Config.fill_usern_macros()
         self.broks = {}
         self.me = None
-        self.log = Log()
+        self.log = logger
         self.log.load_obj(self)
         self.config_files = [path]
         self.conf = Config()
