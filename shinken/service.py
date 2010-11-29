@@ -27,13 +27,13 @@ except ImportError:
     NodeSet = None
 
 
-from autoslots import AutoSlots
-from item import Items
-from schedulingitem import SchedulingItem
-from util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names
-from macroresolver import MacroResolver
-from eventhandler import EventHandler
-from log import logger
+from shinken.autoslots import AutoSlots
+from shinken.item import Items
+from shinken.schedulingitem import SchedulingItem
+from shinken.util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names
+from shinken.macroresolver import MacroResolver
+from shinken.eventhandler import EventHandler
+from shinken.log import logger
 
 class Service(SchedulingItem):
     #AutoSlots create the __slots__ with properties and

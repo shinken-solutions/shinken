@@ -23,8 +23,8 @@
 
 import time
 
-from item import Item, Items
-from util import to_split
+from shinken.item import Item, Items
+from shinken.util import to_split
 
 class Resultmodulation(Item):
     id = 1#0 is always special in database, so we do not take risk here

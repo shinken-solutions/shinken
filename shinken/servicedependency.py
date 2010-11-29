@@ -19,8 +19,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from util import to_split, to_bool
-from item import Item, Items
+from shinken.util import to_split, to_bool
+from shinken.item import Item, Items
 
 class Servicedependency(Item):
     id = 0

@@ -22,8 +22,8 @@
 #This class is the link between Arbiter and Poller. With It, arbiter
 #can see if a poller is alive, and can send it new configuration
 
-from satellitelink import SatelliteLink, SatelliteLinks
-from util import to_int, to_bool, to_split
+from shinken.satellitelink import SatelliteLink, SatelliteLinks
+from shinken.util import to_int, to_bool, to_split
 
 class PollerLink(SatelliteLink):
     id = 0

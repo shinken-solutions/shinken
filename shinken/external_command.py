@@ -21,11 +21,11 @@
 
 import os, time
 
-from util import to_int, to_bool
-from downtime import Downtime
-from comment import Comment
-from command import CommandCall
-from log import logger
+from shinken.util import to_int, to_bool
+from shinken.downtime import Downtime
+from shinken.comment import Comment
+from shinken.command import CommandCall
+from shinken.log import logger
 
 class ExternalCommand:
     my_type = 'externalcommand'

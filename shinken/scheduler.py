@@ -24,13 +24,13 @@ import select, time, os
 import shinken.pyro_wrapper
 
 from shinken.external_command import ExternalCommand
-from check import Check
-from notification import Notification
-from eventhandler import EventHandler
-from brok import Brok
-from downtime import Downtime
-from comment import Comment
-from log import logger
+from shinken.check import Check
+from shinken.notification import Notification
+from shinken.eventhandler import EventHandler
+from shinken.brok import Brok
+from shinken.downtime import Downtime
+from shinken.comment import Comment
+from shinken.log import logger
 
 
 

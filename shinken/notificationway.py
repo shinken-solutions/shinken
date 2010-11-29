@@ -19,8 +19,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from item import Item, Items
-from util import to_split, to_bool
+from shinken.item import Item, Items
+from shinken.util import to_split, to_bool
 
 class NotificationWay(Item):
     id = 1#0 is always special in database, so we do not take risk here

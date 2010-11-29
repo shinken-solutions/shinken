@@ -69,13 +69,13 @@
 #
 import re, time
 
-from item import Item, Items
-from util import *
+from shinken.item import Item, Items
+from shinken.util import *
 
 
-from daterange import Daterange,CalendarDaterange,StandardDaterange,MonthWeekDayDaterange
-from daterange import MonthDateDaterange,WeekDayDaterange,MonthDayDaterange
-from brok import Brok
+from shinken.daterange import Daterange,CalendarDaterange,StandardDaterange,MonthWeekDayDaterange
+from shinken.daterange import MonthDateDaterange,WeekDayDaterange,MonthDayDaterange
+from shinken.brok import Brok
 
 
 class Timeperiod(Item):

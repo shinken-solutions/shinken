@@ -20,8 +20,8 @@
 
 import socket
 
-from satellitelink import SatelliteLink, SatelliteLinks
-from util import to_int, to_bool, to_split
+from shinken.satellitelink import SatelliteLink, SatelliteLinks
+from shinken.util import to_int, to_bool, to_split
 
 class ArbiterLink(SatelliteLink):
     id = 0

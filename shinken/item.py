@@ -22,12 +22,12 @@
 #from command import CommandCall
 #from util import to_int, to_char, to_split, to_bool
 from copy import copy
-from brok import Brok
 
-from util import strip_and_uniq
-from command import CommandCall
-from acknowledge import Acknowledge
-from comment import Comment
+from shinken.brok import Brok
+from shinken.util import strip_and_uniq
+from shinken.command import CommandCall
+from shinken.acknowledge import Acknowledge
+from shinken.comment import Comment
 
 class Item(object):
     def __init__(self, params={}):

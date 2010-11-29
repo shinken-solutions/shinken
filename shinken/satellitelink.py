@@ -27,7 +27,7 @@ import shinken.pyro_wrapper
 Pyro = shinken.pyro_wrapper.Pyro
 
 
-from item import Item, Items
+from shinken.item import Item, Items
 
 class SatelliteLink(Item):
     #id = 0 each Class will have it's own id

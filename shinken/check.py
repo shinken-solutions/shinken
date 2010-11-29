@@ -26,7 +26,7 @@
 #else:
 #    from pexpect import *
 
-from action import Action
+from shinken.action import Action
 
 
 class Check(Action):

@@ -20,8 +20,8 @@
 
 
 #Scheduler is like a satellite for dispatcher
-from satellitelink import SatelliteLink, SatelliteLinks
-from util import to_int, to_bool, to_split
+from shinken.satellitelink import SatelliteLink, SatelliteLinks
+from shinken.util import to_int, to_bool, to_split
 
 import shinken.pyro_wrapper
 Pyro = shinken.pyro_wrapper.Pyro

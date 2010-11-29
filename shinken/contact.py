@@ -19,8 +19,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from item import Item, Items
-from util import to_split, to_bool, strip_and_uniq
+from shinken.item import Item, Items
+from shinken.util import to_split, to_bool, strip_and_uniq
 
 class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here

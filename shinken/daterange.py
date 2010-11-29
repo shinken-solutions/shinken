@@ -18,7 +18,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from util import *
+from shinken.util import *
 
 
 #Get the day number (like 27 in July tuesday 27 2010 for call:

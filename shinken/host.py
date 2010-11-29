@@ -21,17 +21,17 @@
 import time
 import re #for keys generator
 
-from autoslots import AutoSlots
-from item import Items
-from schedulingitem import SchedulingItem
-from util import to_int, to_float, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
+from shinken.autoslots import AutoSlots
+from shinken.item import Items
+from shinken.schedulingitem import SchedulingItem
+from shinken.util import to_int, to_float, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
 #from macroresolver import MacroResolver
 #from check import Check
 #from notification import Notification
-from graph import Graph
-from macroresolver import MacroResolver
-from eventhandler import EventHandler
-from log import logger
+from shinken.graph import Graph
+from shinken.macroresolver import MacroResolver
+from shinken.eventhandler import EventHandler
+from shinken.log import logger
 
 class Host(SchedulingItem):
     #AutoSlots create the __slots__ with properties and

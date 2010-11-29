@@ -26,8 +26,8 @@
 #dead to the spare
 
 
-from util import alive_then_spare_then_deads
-from log import logger
+from shinken.util import alive_then_spare_then_deads
+from shinken.log import logger
 
 #Dispatcher Class
 class Dispatcher:

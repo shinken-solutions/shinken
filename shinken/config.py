@@ -30,33 +30,33 @@ import itertools
 import time
 import random
 
-from timeperiod import Timeperiod, Timeperiods
-from service import Service, Services
-from command import Command, Commands
-from resultmodulation import Resultmodulation, Resultmodulations
-from escalation import Escalation, Escalations
-from serviceescalation import Serviceescalation, Serviceescalations
-from hostescalation import Hostescalation, Hostescalations
-from host import Host, Hosts
-from hostgroup import Hostgroup, Hostgroups
-from realm import Realm, Realms
-from contact import Contact, Contacts
-from contactgroup import Contactgroup, Contactgroups
-from notificationway import NotificationWay, NotificationWays
-from servicegroup import Servicegroup, Servicegroups
-from item import Item
-from servicedependency import Servicedependency, Servicedependencies
-from hostdependency import Hostdependency, Hostdependencies
-from arbiterlink import ArbiterLink, ArbiterLinks
-from schedulerlink import SchedulerLink, SchedulerLinks
-from reactionnerlink import ReactionnerLink, ReactionnerLinks
-from brokerlink import BrokerLink, BrokerLinks
-from pollerlink import PollerLink, PollerLinks
-from module import Module, Modules
-from graph import Graph
-from log import logger
+from shinken.timeperiod import Timeperiod, Timeperiods
+from shinken.service import Service, Services
+from shinken.command import Command, Commands
+from shinken.resultmodulation import Resultmodulation, Resultmodulations
+from shinken.escalation import Escalation, Escalations
+from shinken.serviceescalation import Serviceescalation, Serviceescalations
+from shinken.hostescalation import Hostescalation, Hostescalations
+from shinken.host import Host, Hosts
+from shinken.hostgroup import Hostgroup, Hostgroups
+from shinken.realm import Realm, Realms
+from shinken.contact import Contact, Contacts
+from shinken.contactgroup import Contactgroup, Contactgroups
+from shinken.notificationway import NotificationWay, NotificationWays
+from shinken.servicegroup import Servicegroup, Servicegroups
+from shinken.item import Item
+from shinken.servicedependency import Servicedependency, Servicedependencies
+from shinken.hostdependency import Hostdependency, Hostdependencies
+from shinken.arbiterlink import ArbiterLink, ArbiterLinks
+from shinken.schedulerlink import SchedulerLink, SchedulerLinks
+from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
+from shinken.brokerlink import BrokerLink, BrokerLinks
+from shinken.pollerlink import PollerLink, PollerLinks
+from shinken.module import Module, Modules
+from shinken.graph import Graph
+from shinken.log import logger
 
-from util import to_int, to_char, to_bool
+from shinken.util import to_int, to_char, to_bool
 #import psyco
 #psyco.full()
 

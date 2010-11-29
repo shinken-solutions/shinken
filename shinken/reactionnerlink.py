@@ -19,8 +19,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from satellitelink import SatelliteLink, SatelliteLinks
-from util import to_int, to_bool, to_split
+from shinken.satellitelink import SatelliteLink, SatelliteLinks
+from shinken.util import to_int, to_bool, to_split
 
 class ReactionnerLink(SatelliteLink):
     id = 0

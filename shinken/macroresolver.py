@@ -27,7 +27,7 @@
 # len(host.services)
 
 import re
-from borg import Borg
+from shinken.borg import Borg
 #from singleton import Singleton
 import time
 #from contact import Contact

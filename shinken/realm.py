@@ -19,8 +19,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from itemgroup import Itemgroup, Itemgroups
-from util import to_bool
+from shinken.itemgroup import Itemgroup, Itemgroups
+from shinken.util import to_bool
 
 #It change from hostgroup Class because there is no members
 #propertie, just the realm_members that we rewrite on it.
