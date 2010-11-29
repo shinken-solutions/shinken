@@ -29,7 +29,6 @@
 
 import os
 import time
-import platform
 import sys
 import select
 import getopt
@@ -52,16 +51,11 @@ while still_raise:
     except OverflowError:
         still_raise = False
 
-#We know that a Python 2.3 or Python3K will fail.
-#We can say why and quit.
-python_version = platform.python_version_tuple()
-
 ## Make sure people are using Python 2.5 or higher
-if int(python_version[0]) == 2 and int(python_version[1]) < 4:
-    print "Shinken require as a minimum Python 2.4.x, sorry"
+if sys.version_info < (2,4):
+    print "Shinken requires as a minimum Python 2.4.x, sorry"
     sys.exit(1)
-
-if int(python_version[0]) == 3:
+elif sys.version_info >= (3,):
     print "Shinken is not yet compatible with Python3k, sorry"
     sys.exit(1)
 
