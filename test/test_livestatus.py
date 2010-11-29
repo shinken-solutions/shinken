@@ -105,7 +105,7 @@ class TestConfig(ShinkenTest):
         print response
 
 
-    def nagios_installed(self, path='/usr/local/nagios/bin/nagios', livestatus='/usr/local/nagios/lib/mk-livestatus/livestatus.o'):
+    def nagios_installed(self, path='/usr/ocal/nagios/bin/nagios', livestatus='/usr/local/nagios/lib/mk-livestatus/livestatus.o'):
         if os.path.exists(path) and os.access(path, os.X_OK) and os.path.exists(livestatus):
             self.nagios_path = path
             self.livestatus_path = livestatus

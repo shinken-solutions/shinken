@@ -5251,7 +5251,7 @@ class LiveStatus:
         return output
 
 
-    def get_live_data(self, table, columns, filtercolumns, limit, filter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by):
+    def get_live_data(self, table, columns, prefiltercolumns, filtercolumns, limit, filter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by):
         result = []
         if table in ['hosts', 'services', 'downtimes', 'comments', 'hostgroups', 'servicegroups', 'hostsbygroup', 'servicesbygroup', 'servicesbyhostgroup']:
             #Scan through the objects and apply the Filter: rules
@@ -5326,6 +5326,10 @@ class LiveStatus:
                     # Now implemented. Why would one limit this anyway?
                     pass
             elif table == 'servicesbyhostgroup':
+                # We will use prefiltercolumns here for some serious speedup.
+                # For example, if nagvis wants Filter: host_groups >= hgxy
+                # we don't have to use the while list of hostgroups in 
+                # the innermost loop
                 type_map = LiveStatus.out_map['Servicesbyhostgroup']
                 # Filter: host_groups >= linux-servers
                 # host_groups is a service attribute
@@ -5497,7 +5501,7 @@ class LiveStatus:
         return result
 
 
-    def get_live_data_log(self, table, columns, filtercolumns, limit, filter_stack, sql_filter_stack):
+    def get_live_data_log(self, table, columns, prefiltercolumns, filtercolumns, limit, filter_stack, sql_filter_stack):
         result = []
         if table == 'log':
             type_map = LiveStatus.out_map['Log']
@@ -5814,6 +5818,7 @@ class LiveStatus:
         response = ''
         columns = []
         filtercolumns = []
+        prefiltercolumns = []
         responseheader = 'off'
         outputformat = 'csv'
         keepalive = 'off'
@@ -5876,6 +5881,7 @@ class LiveStatus:
                     # Put a function on top of the filter_stack which implements
                     # the desired operation
                     filtercolumns.append(attribute)
+                    prefiltercolumns.append(attribute)
                     # reference is now datatype string. The referring object attribute on the other hand
                     # may be an integer. (current_attempt for example)
                     # So for the filter to work correctly (the two values compared must be
@@ -5980,12 +5986,12 @@ class LiveStatus:
                     if sql_filter_stack.qsize() > 1:
                         sql_filter_stack = self.and_sql_filter_stack(sql_filter_stack.qsize(), sql_filter_stack)
                     sql_simplefilter_stack = self.get_sql_filter_stack(sql_filter_stack)
-                    result = self.get_live_data_log(table, columns, filtercolumns, limit, simplefilter_stack, sql_simplefilter_stack)
+                    result = self.get_live_data_log(table, columns, prefiltercolumns, filtercolumns, limit, simplefilter_stack, sql_simplefilter_stack)
                 else:
                     #Get the function which implements the Stats: statements
                     stats = stats_filter_stack.qsize()
                     #Apply the filters on the broker's host/service/etc elements
-                    result = self.get_live_data(table, columns, filtercolumns, limit, simplefilter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by)
+                    result = self.get_live_data(table, columns, prefiltercolumns, filtercolumns, limit, simplefilter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by)
                     if stats > 0:
                         columns = range(stats)
                         if stats_group_by:
