@@ -19,6 +19,10 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+""" This class is a base class for nearly all configuration
+ elements like service, hosts or contacts.
+"""
+
 #from command import CommandCall
 #from util import to_int, to_char, to_split, to_bool
 from copy import copy
@@ -73,6 +77,7 @@ class Item(object):
 
     #return a copy of the item, but give him a new id
     def copy(self):
+        """ Copy a copy of the item, but give him a new id """
         cls = self.__class__
         i = cls({})#Dummy item but with it's own running properties
         properties = cls.properties
@@ -92,6 +97,7 @@ class Item(object):
 
 
     def is_tpl(self):
+        """ Return if the elements is a template """
         try:
             return self.register == '0'
         except:
@@ -105,6 +111,7 @@ class Item(object):
 
     #If a prop is absent and is not required, put the default value
     def fill_default(self):
+        """ Fill missing properties if they are missing """
         cls = self.__class__
         properties = cls.properties
 
@@ -117,7 +124,8 @@ class Item(object):
     #We load every usefull parameter so no need to access global conf later
     #Must be called after a change in a gloabl conf parameter
     def load_global_conf(cls, conf):
-        #print "Load global conf=========================="
+        """ Used to put global values in the sub Class like 
+        hosts ro services """
         #conf have properties, if 'enable_notifications' :
         #{ [...] 'class_inherit' : [(Host, None), (Service, None),
         # (Contact, None)]}
@@ -126,7 +134,8 @@ class Item(object):
         for prop in conf.properties:
             #If we have a class_inherit, and the arbtier really send us it
             if 'class_inherit' in conf.properties[prop] and hasattr(conf, prop):
-                for (cls_dest, change_name) in conf.properties[prop]['class_inherit']:
+                entry = conf.properties[prop]['class_inherit']
+                for (cls_dest, change_name) in entry:
                     if cls_dest == cls:#ok, we've got something to get
                         value = getattr(conf, prop)
                         if change_name is None:
@@ -313,7 +322,8 @@ class Item(object):
                 comment_type = 1
             else :
                 comment_type = 2
-            c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
+            c = Comment(self, persistent, author, comment, 
+                        comment_type, 4, 0, False, 0)
             self.add_comment(c)
             self.broks.append(self.get_update_status_brok())
 
@@ -400,22 +410,14 @@ class Item(object):
             if 'fill_brok' in cls.properties[prop]:
                 if brok_type in cls.properties[prop]['fill_brok']:
                     data[prop] = self.get_property_value_for_brok(prop, cls.properties)
-#                    if hasattr(self, prop):
-#                        data[prop] = getattr(self, prop)
-#                    elif 'default' in cls.properties[prop]:
-#                        data[prop] = cls.properties[prop]['default']
 
-        #Maybe the class do not have running_properties
+        # Maybe the class do not have running_properties
         if hasattr(cls, 'running_properties'):
-        #We've got prop in running_properties too
+            # We've got prop in running_properties too
             for prop in cls.running_properties:
                 if 'fill_brok' in cls.running_properties[prop]:
                     if brok_type in cls.running_properties[prop]['fill_brok']:
                         data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
-#                        if hasattr(self, prop):
-#                            data[prop] = getattr(self, prop)
-#                        elif 'default' in cls.properties[prop]:
-#                            data[prop] = cls.running_properties[prop]['default']
 
 
     #Get a brok with initial status
@@ -468,10 +470,10 @@ class Item(object):
             command = getattr(self, prop).strip()
             if command != '':
                 if hasattr(self, 'poller_tag'):
-                    cmdCall = CommandCall(commands, command, poller_tag=self.poller_tag)
+                    cmdCall = CommandCall(commands, command, 
+                                          poller_tag=self.poller_tag)
                 else:
                     cmdCall = CommandCall(commands, command)
-                    #TODO: catch None?
                     setattr(self, prop, cmdCall)
             else:
                 setattr(self, prop, None)
@@ -618,7 +620,6 @@ class Items(object):
         for id in tpls:
             del self.items[id]
         #Ok now delete useless in items
-        #TODO : move into item class
         for i in self:
             try:
                 del i.templates
@@ -643,7 +644,7 @@ class Items(object):
         return s
 
 
-    #Inheritance forjust a property
+    # Inheritance forjust a property
     def apply_partial_inheritance(self, prop):
         for i in self:
             i.get_property_by_inheritance(self, prop)
@@ -695,14 +696,16 @@ class Items(object):
                         c = contacts.find_by_name(c_name)
                         if c != None:
                             new_contacts.append(c)
-                        else: #Add in the errors tab. will be raised at is_correct
+                        # Else : Add in the errors tab.
+                        # will be raised at is_correct
+                        else:
                             err = "ERROR: the contact '%s' defined for '%s' is unkown" % (c_name, i.get_name())
                             i.configuration_errors.append(err)
-                #Get the list, but first make elements uniq
+                # Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
 
 
-    #Make link between service and it's escalations
+    # Make link between an object and its escalations
     def linkify_with_escalations(self, escalations):
         for i in self:
             if hasattr(i, 'escalations'):
@@ -775,7 +778,8 @@ class Items(object):
                 command = getattr(i, prop).strip()
                 if command != '':
                     if hasattr(i, 'poller_tag'):
-                        cmdCall = CommandCall(commands, command, poller_tag=i.poller_tag)
+                        cmdCall = CommandCall(commands, command, 
+                                              poller_tag=i.poller_tag)
                     else:
                         cmdCall = CommandCall(commands, command)
                     #TODO: catch None?
@@ -794,7 +798,8 @@ class Items(object):
                 for com in coms:
                     if com != '':
                         if hasattr(i, 'poller_tag'):
-                            cmdCall = CommandCall(commands, com, poller_tag=i.poller_tag)
+                            cmdCall = CommandCall(commands, com, 
+                                                  poller_tag=i.poller_tag)
                         else:
                             cmdCall = CommandCall(commands, com)
                         #TODO: catch None?
@@ -806,7 +811,8 @@ class Items(object):
 
     #Return a set with ALL hosts (used in ! expressions)
     def get_all_host_names_set(self, hosts):
-        hnames = [h.host_name for h in hosts.items.values() if hasattr(h, 'host_name')]
+        hnames = [h.host_name for h in hosts.items.values() 
+                  if hasattr(h, 'host_name')]
         return set(hnames)
 
 
@@ -821,24 +827,22 @@ class Items(object):
         if '-' in expr:
             expr = expr.replace('-', 'MINUSSIGN')
 
-        #! (not) should be changed as "ALL-" (all but not...)
+        # ! (not) should be changed as "ALL-" (all but not...)
         if '!' in expr:
             ALLELEMENTS = self.get_all_host_names_set(hosts)
             #print "Changing ! by ALLELEMENTS- in ", expr
             expr = expr.replace('!', 'ALLELEMENTS-')
 
-        #print "Now finding all token to change in variable"
-        #print "So I remove all non want caracters"
-
-        #We change all separaton token by 10 spaces (so names can still have some spaces
-        #on them like Europe Servers because we wil cut byy this 10spaces after
+        # We change all separaton token by 10 spaces
+        # (so names can still have some spaces
+        # on them like Europe Servers because we wil cut byy this 10spaces after
         strip_expr = expr
         for c in ['|', '&', '(', ')', ',', '-']:
             strip_expr = strip_expr.replace(c, ' '*10)
         #print "Stripped expression:", strip_expr
 
         tokens = strip_expr.split(' '*10)
-        #Strip and non void token
+        # Strip and non void token
         tokens = [token.strip() for  token in tokens if token != '']
         #print "Tokens:", tokens
 
@@ -863,7 +867,6 @@ class Items(object):
                     #print "Elements:", elts
                     #print "Now set in locals the token new values"
                     locals()[token.upper()] = elts
-                #TODO : raise error
                 else:
                     if 'MINUSSIGN' in token:
                         token = token.replace('MINUSSIGN', '-')
@@ -873,7 +876,8 @@ class Items(object):
                     self.configuration_errors.append(err)
                     return res
 
-            #print "Now changing the exprtoken value with UPPER one (so less risk of problem..."
+            # Now changing the exprtoken value with
+            # UPPER one (so less risk of problem...
             expr = expr.replace(token, token.upper())
 
         #print "Final expression:", expr
@@ -887,8 +891,9 @@ class Items(object):
             return res
         #print "Evaluation :", evaluation
 
-        #In evaluation we can have multiples values because of , (so it make a tuple in fact)
-        #we must OR them in the result
+        # In evaluation we can have multiples values because
+        # of , (so it make a tuple in fact)
+        # we must OR them in the result
         if ',' in expr:
             for part in evaluation:
                 #print "PART", part
@@ -906,7 +911,8 @@ class Items(object):
     def explode_host_groups_into_hosts(self, hosts, hostgroups):
         for i in self:
             if hasattr(i, 'hostgroup_name'):
-                hnames = self.evaluate_hostgroup_expression(i.hostgroup_name, hosts, hostgroups)
+                hnames = self.evaluate_hostgroup_expression(i.hostgroup_name,
+                                                            hosts, hostgroups)
                 if hnames != []:
                     if hasattr(i, 'host_name'):
                         i.host_name += ',' + str(hnames)
