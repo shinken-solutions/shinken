@@ -20,14 +20,7 @@
 
 import os, time, copy
 import shlex
-import platform
-
-#We need to to bypass a fu%cking 2.4->2.6 bugs when we got OSError
-#on a popen, it don't release the file handle, so we get out of files
-#quite quickly!
-python_version = platform.python_version_tuple()
-python_sub_version = int(python_version[1])
-
+import sys
 
 #Unix and windows do not have the same import
 if os.name == 'nt':
@@ -110,7 +103,6 @@ class Action:
 
 
     def execute_unix(self):
-        global python_sub_version
         self.status = 'launched'
         self.check_time = time.time()
         self.last_poll = self.check_time
@@ -121,10 +113,10 @@ class Action:
         # Get a local env variables with our additionnal values
         local_env = self.get_local_environnement()
 
-        #We allow direct lunach only for 2.7 and higher version
-        #because if a direct launch crash, under this the file hanldes
-        #are not releases, it's not good.
-        if python_sub_version >= 7:
+        # We allow direct launch only for 2.7 and higher version
+        # because if a direct launch crash, under this the file hanldes
+        # are not releases, it's not good.
+        if sys.version_info >= (2,7):
             shell_launch = self.got_shell_caracters()
         else:
             shell_launch = True
