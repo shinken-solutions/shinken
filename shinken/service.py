@@ -1405,8 +1405,8 @@ class Services(Items):
             not_hosts = [] # the list of !host_name so we remove them after
             
             # print "Looking for s", s
-            if hasattr(s, 'duplicate_foreach'):
-                print s.duplicate_foreach
+#            if hasattr(s, 'duplicate_foreach'):
+#                print s.duplicate_foreach
 
             # if not s.is_tpl(): # Exploding template is useless
             # Explode for real service or teplate with a host_name
@@ -1427,11 +1427,6 @@ class Services(Items):
                             not_hosts.append(hname[1:])
                         else: # the standard list
                             duplicate_for_hosts.append(hname)
-
-                    # Multiple host_name -> the original service
-                    # must be delete. But template are clean else where
-                    if not s.is_tpl():
-                        srv_to_remove.append(id)
                     
                     # Ok now we clean the duplicate_for_hosts with all hosts
                     # of the not
@@ -1442,6 +1437,12 @@ class Services(Items):
                     # Now we duplicate the service for all host_names
                     for hname in duplicate_for_hosts:
                         self.copy_create_service_from_another(hosts, s, hname)
+
+                    # Multiple host_name -> the original service
+                    # must be delete. But template are clean else where
+                    # and only the the servce not got an error in it's conf
+                    if not s.is_tpl() and s.configuration_errors == []:
+                        srv_to_remove.append(id)
                         
                 else: # Maybe the hnames was full of same host,
                       # so we must reset the name

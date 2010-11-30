@@ -94,9 +94,9 @@ class Action:
         local_env = self.get_local_environnement()
         try:
             self.process = subprocess.Popen(shlex.split(self.command),
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=local_env)
-        except WindowsError:
-            print "On le kill"
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=local_env, shell=True)
+        except WindowsError, exp:
+            print "We kill the process : ", exp, self.command
             self.status = 'timeout'
             self.execution_time = time.time() - self.check_time
             return
@@ -225,6 +225,9 @@ class Action:
         self.exit_status = self.process.returncode
         (stdoutdata, stderrdata) = self.process.communicate()
 
+        #we should not keep the process now
+        del self.process
+        
         # if the exit status is anormal, we add stderr to the output
         if self.exit_status not in [0, 1, 2, 3]:
             stdoutdata = stdoutdata + stderrdata
