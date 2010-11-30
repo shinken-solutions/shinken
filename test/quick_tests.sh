@@ -53,6 +53,7 @@ launch_and_assert test_command.py
 launch_and_assert test_module_simplelog.py
 launch_and_assert test_module_service_perfdata.py
 launch_and_assert test_module_host_perfdata.py
+launch_and_assert test_module_pickle_retention.py
 launch_and_assert test_service_tpl_on_host_tpl.py
 launch_and_assert test_db.py
 launch_and_assert test_macroresolver.py
