@@ -5971,7 +5971,7 @@ class LiveStatus:
             #        os.close(fifo)
             #    except:
             #        print "Unable to open/write the external command pipe"
-            return '\n'
+            return '\n', keepalive
         else:
             # make filtercolumns unique
             filtercolumns = list(set(filtercolumns))
