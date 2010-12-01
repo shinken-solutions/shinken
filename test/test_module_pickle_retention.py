@@ -51,6 +51,7 @@ class TestConfig(ShinkenTest):
         sl.properties['to_queue'] = None
         sl.init()
         l = logger
+
         #updte the hosts and service in the scheduler in the retentino-file
         sl.update_retention_objects(self.sched, l)
         
@@ -59,14 +60,14 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.state == 'PENDING')
         print "State", svc.state
         svc.state = 'UP' #was PENDING in the save time
-
+        
         r = sl.load_retention_objects(self.sched, l)
         self.assert_(r == True)
-
+        
         #search if the host is not changed by the loading thing
         svc2 = self.sched.hosts.find_by_name("test_host_0")
         self.assert_(svc == svc2)
-
+        
         self.assert_(svc.state == 'PENDING')
 
         #Ok, we can delete the retention file

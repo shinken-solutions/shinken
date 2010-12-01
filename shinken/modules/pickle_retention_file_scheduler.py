@@ -69,7 +69,30 @@ class Pickle_retention_scheduler:
             f = open(self.path, 'wb')
             #Just put hosts/services becauses checks and notifications
             #are already link into
-            all_data = {'hosts' : sched.hosts, 'services' : sched.services}
+            #all_data = {'hosts' : sched.hosts, 'services' : sched.services}
+            
+            # We create a all_data dict with lsit of dict of retention useful
+            # data of our hosts and services
+            all_data = {'hosts' : {}, 'services' : {}}
+            for h in sched.hosts:
+                d = {}
+                running_properties = h.__class__.running_properties
+                for prop in running_properties:
+                    entry = running_properties[prop]
+                    if 'retention' in entry and entry['retention']:
+                        d[prop] = getattr(h, prop)
+                all_data['hosts'][h.host_name] = d
+
+            #Now same for services
+            for s in sched.services:
+                d = {}
+                running_properties = s.__class__.running_properties
+                for prop in running_properties:
+                    entry = running_properties[prop]
+                    if 'retention' in entry and entry['retention']:
+                        d[prop] = getattr(s, prop)
+                all_data['services'][(s.host.host_name, s.service_description)] = d
+
             #s = cPickle.dumps(all_data)
             #s_compress = zlib.compress(s)
             cPickle.dump(all_data, f)
@@ -119,32 +142,42 @@ class Pickle_retention_scheduler:
         #scheduling)
 
         ret_hosts = all_data['hosts']
-        for ret_h in ret_hosts:
-            h = sched.hosts.find_by_name(ret_h.host_name)
+        for ret_h_name in ret_hosts:
+            #We take the dict of our value to load
+            d = all_data['hosts'][ret_h_name]
+            h = sched.hosts.find_by_name(ret_h_name)
             if h != None:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
                     if 'retention' in entry and entry['retention']:
-                        setattr(h, prop, getattr(ret_h, prop))
-                        for a in h.notifications_in_progress.values():
-                            a.ref = h
-                            sched.add(a)
-                        h.update_in_checking()
+                        # Mayeb the save was not with this value, so
+                        # we just bypass this
+                        if prop in d:
+                            setattr(h, prop, d[prop])
+                for a in h.notifications_in_progress.values():
+                    a.ref = h
+                    sched.add(a)
+                h.update_in_checking()
 
         ret_services = all_data['services']
-        for ret_s in ret_services:
-            s = sched.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
+        for (ret_s_h_name, ret_s_desc) in ret_services:
+            #We take the dict of our value to load
+            d = all_data['services'][(ret_s_h_name, ret_s_desc)]
+            s = sched.services.find_srv_by_name_and_hostname(ret_s_h_name, ret_s_desc)
             if s != None:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
                     if 'retention' in entry and entry['retention']:
-                        setattr(s, prop, getattr(ret_s, prop))
-                        for a in s.notifications_in_progress.values():
-                            a.ref = s
-                            sched.add(a)
-                        s.update_in_checking()
+                        # Mayeb the save was not with this value, so
+                        # we just bypass this
+                        if prop in d:
+                            setattr(s, prop, d[prop])
+                for a in s.notifications_in_progress.values():
+                    a.ref = s
+                    sched.add(a)
+                s.update_in_checking()
 
         log_mgr.log("[PickleRetention] OK we've load data from retention file")
 
