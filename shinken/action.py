@@ -57,12 +57,13 @@ class Action:
         elts = out.split('\n')
         # For perf data
         elts_line1 = elts[0].split('|')
-        # First line before | is output
-        self.output = elts_line1[0]
-        # After | is perfdata
+        # First line before | is output, and strip it
+        self.output = elts_line1[0].strip()
+        # After | is perfdata, and strip it
         if len(elts_line1) > 1:
-            self.perf_data = elts_line1[1]
+            self.perf_data = elts_line1[1].strip()
         # The others lines are long_output
+        # but others are are not stripped
         if len(elts) > 1:
             self.long_output = '\n'.join(elts[1:])
 

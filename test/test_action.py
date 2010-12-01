@@ -53,8 +53,8 @@ class TestConfig(ShinkenTest):
         self.wait_finished(a)
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
-        self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really ")
-        self.assert_(a.perf_data == " Hip=99% Bob=34mm")
+        self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really")
+        self.assert_(a.perf_data == "Hip=99% Bob=34mm")
 
 
     def test_environnement_variables(self):
@@ -99,6 +99,7 @@ class TestConfig(ShinkenTest):
         print "FUck", a.status, a.output
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
+
 
 
 if __name__ == '__main__':
