@@ -398,8 +398,12 @@ class Scheduler:
             except KeyError , exp:
                 logger.log("Warning : received an check of an unknown id! %s" % str(exp))
         elif c.is_a == 'eventhandler':
-            #It just die
-            self.actions[c.id].status = 'zombie'
+            # It just die
+            try:
+                self.actions[c.id].status = 'zombie'
+            # Maybe we reveied a return of a old even handler, so we can forget it
+            except KeyError:
+                pass
         else:
             logger.log("Error : the received result type in unknown ! %s" % str(c.is_a))
 
