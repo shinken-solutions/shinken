@@ -212,8 +212,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'childs' : {
-                'default' : '',
-                'depythonize' : from_list_to_split,
+                'depythonize' : lambda x: ','.join(x),
                 'description' : 'A list of all direct childs of the host',
                 'type' : 'list',
             },
@@ -497,11 +496,6 @@ class LiveStatus:
             'parents' : {
                 'depythonize' : lambda x: ','.join(x),
                 'description' : 'A list of all direct parents of the host',
-                'type' : 'list',
-            },
-            'childs' : {
-                'depythonize' : lambda x: ','.join(x),
-                'description' : 'A list of all direct childs of the host',
                 'type' : 'list',
             },
             'pending_flex_downtime' : {
