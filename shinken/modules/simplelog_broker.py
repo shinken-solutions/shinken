@@ -113,7 +113,7 @@ class Simple_log_broker:
 
             #and we overwrite it
             print "I open the log file %s" % self.path
-            self.file = open(self.path,'w')
+            self.file = open(self.path,'a')
 
             return True
         return False
