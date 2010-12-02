@@ -171,6 +171,15 @@ class TestConfig(ShinkenTest):
         self.assert_(hg in h.hostgroups)
 
 
+    def test_childs(self):
+        h = self.sched.hosts.find_by_name('test_host_0')
+        r = self.sched.hosts.find_by_name('test_router_0')
+
+        #Search if h is in r.childs
+        self.assert_(h in r.childs)
+        #and the reverse
+        self.assert_(r in h.parents)
+
 if __name__ == '__main__':
     unittest.main()
 

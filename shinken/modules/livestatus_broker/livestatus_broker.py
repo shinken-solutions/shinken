@@ -833,6 +833,18 @@ class Livestatus_broker:
                         if handle_it:
                             response, keepalive = self.livestatus.handle_request(open_connections[socketid]['buffer'].rstrip())
                             s.send(response)
+
+                            # Write request/response in a tracefile
+#                            if os.path.exists('/tmp/shinken.modules.livestatus.trace'):
+#                               try:
+#                                   trace = open('/tmp/shinken.modules.livestatus.trace', 'a')
+#                                   trace.write("REQUEST>>>>>\n" + open_connections[socketid]['buffer'].rstrip() + "\n\n")
+#                                   trace.write("RESPONSE<<<<\n" + response + "\n\n")
+#                                   trace.close()
+#                               except Exception , exp:
+#                                   print str(exp)
+#                                   print "please check the permissions on the tracefile"
+
                             # Empty the input buffer for the next request
                             open_connections[socketid]['buffer'] = None
                             if keepalive == 'on':

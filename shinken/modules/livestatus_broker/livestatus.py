@@ -499,6 +499,11 @@ class LiveStatus:
                 'description' : 'A list of all direct parents of the host',
                 'type' : 'list',
             },
+            'childs' : {
+                'depythonize' : lambda x: ','.join(x),
+                'description' : 'A list of all direct childs of the host',
+                'type' : 'list',
+            },
             'pending_flex_downtime' : {
                 'description' : 'Wether a flex downtime is pending (0/1)',
                 'type' : 'int',

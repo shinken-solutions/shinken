@@ -185,6 +185,7 @@ class Host(SchedulingItem):
         'in_scheduled_downtime_during_last_check' : {'default' : False, 'retention' : True},
         'actions' : {'default' : []}, #put here checks and notif raised
         'broks' : {'default' : []}, #and here broks raised
+        'childs' : {'default' : [], 'fill_brok' : ['full_status'], 'brok_transformation' : to_hostnames_list},
 
         #All errors and warning raised during the configuration parsing
         #and taht will raised real warning/errors during the is_correct
@@ -637,8 +638,18 @@ class Host(SchedulingItem):
             if parent is not None:
                 #I add my parent in my list
                 self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
+
                 #And I register myself in my parent list too
-                parent.act_depend_of_me.append( (self, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
+                parent.register_child(self)
+
+    
+    # Register a child in our lists
+    def register_child(self, child):
+        # We've got 2 list : a list for our child
+        # where we just put the pointer, it's jsut for broking
+        # and anotehr with all data, useful for 'running' part
+        self.childs.append(child)
+        self.act_depend_of_me.append( (child, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
 
 
     #Give data for checks's macros
