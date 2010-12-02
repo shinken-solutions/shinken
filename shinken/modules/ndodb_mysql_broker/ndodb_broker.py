@@ -111,7 +111,7 @@ class Ndodb_broker:
             return self.hosts_cache[host_name]
 
         #Not in cache, not good
-        query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='1'" % host_name
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='1'" % host_name
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row == None or len(row) < 1:
@@ -122,7 +122,7 @@ class Ndodb_broker:
 
 
     def get_hostgroup_object_id_by_name(self, hostgroup_name):
-        query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='3'" % hostgroup_name
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='3'" % hostgroup_name
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row == None or len(row) < 1:
@@ -137,7 +137,7 @@ class Ndodb_broker:
             return self.services_cache[(host_name, service_description)]
 
         #else; not in cache :(
-        query = "SELECT object_id from nagios_objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
+        query = u"SELECT object_id from nagios_objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row == None or len(row) < 1:
@@ -148,7 +148,7 @@ class Ndodb_broker:
 
 
     def get_servicegroup_object_id_by_name(self, servicegroup_name):
-        query = "SELECT object_id from nagios_objects where name1='%s' and objecttype_id='4'" % servicegroup_name
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='4'" % servicegroup_name
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row == None or len(row) < 1:
@@ -192,7 +192,7 @@ class Ndodb_broker:
         new_b = copy.deepcopy(b)
 
 	#Must delete me first
-	query_delete_instance = "DELETE FROM %s WHERE instance_name = '%s' " % ('nagios_instances', b.data['instance_name'])
+	query_delete_instance = u"DELETE FROM %s WHERE instance_name = '%s' " % ('nagios_instances', b.data['instance_name'])
 
 	query_instance = self.db.create_insert_query('instances', {'instance_name' : new_b.data['instance_name'],\
 	 'instance_description' : new_b.data['instance_name'], \
