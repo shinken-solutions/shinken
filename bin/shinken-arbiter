@@ -43,11 +43,11 @@ from Queue import Empty
 # The factors used were aquired by testing a broad range of installations
 stacksize_soft, stacksize_hard = resource.getrlimit(3)
 if sys.version_info < (2,6):
-    sys.setrecursionlimit(stacksize_soft * 0.65 + 1100)
+    sys.setrecursionlimit(int(stacksize_soft * 0.65 + 1100))
 elif sys.version_info < (3,):
-    sys.setrecursionlimit(stacksize_soft * 1.9 + 3200)
+    sys.setrecursionlimit(int(stacksize_soft * 1.9 + 3200))
 else:
-    sys.setrecursionlimit(stacksize_soft * 2.4 + 3200)
+    sys.setrecursionlimit(int(stacksize_soft * 2.4 + 3200))
 
 
 ## Make sure people are using Python 2.5 or higher
