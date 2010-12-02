@@ -179,6 +179,8 @@ class TestConfig(ShinkenTest):
         self.assert_(h in r.childs)
         #and the reverse
         self.assert_(r in h.parents)
+        print "r.childs", r.childs
+        print "h.childs", h.childs
 
 if __name__ == '__main__':
     unittest.main()

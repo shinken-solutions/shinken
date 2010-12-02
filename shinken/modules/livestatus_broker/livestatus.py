@@ -212,7 +212,8 @@ class LiveStatus:
                 'type' : 'int',
             },
             'childs' : {
-                'depythonize' : lambda x: ','.join(x),
+                #'depythonize' : lambda x: ','.join(x),
+                #'depythonize' : lambda x: [y.get_name() for y in x],
                 'description' : 'A list of all direct childs of the host',
                 'type' : 'list',
             },
@@ -5487,7 +5488,7 @@ class LiveStatus:
                 'description' : 'The name of the table' , 'name' : 'table' , 'table' : 'columns' , 'type' : 'string' })
             result.append({
                 'description' : 'The data type of the column (int, float, string, list)' , 'name' : 'type' , 'table' : 'columns' , 'type' : 'string' })
-            tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Logline' : 'log' }
+            tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Logline' : 'log', 'Statsbygroup' : 'statsgroupby', 'Hostsbygroup' : 'hostsbygroup', 'Servicesbygroup' : 'servicesbygroup', 'Servicesbyhostgroup' : 'servicesbyhostgroup' }
             for obj in sorted(LiveStatus.out_map, key=lambda x: x):
                 if obj in tablenames:
                     for attr in LiveStatus.out_map[obj]:
@@ -5503,7 +5504,7 @@ class LiveStatus:
     def get_live_data_log(self, table, columns, prefiltercolumns, filtercolumns, limit, filter_stack, sql_filter_stack):
         result = []
         if table == 'log':
-            type_map = LiveStatus.out_map['Log']
+            type_map = LiveStatus.out_map['Logline']
             # we can apply the filterstack here as well. we have columns and filtercolumns.
             # the only additional step is to enrich log lines with host/service-attributes
             # a timerange can be useful for a faster preselection of lines

@@ -67,6 +67,13 @@ class TestConfig(ShinkenTest):
         # lifestatus output may not be in alphabetical order, so this
         # function is used to compare unordered output with unordered
         # expected output
+        # sometimes mklivestatus returns 0 or 1 on an empty result
+        text1 = text1.replace("200           1", "200           0")
+        text2 = text2.replace("200           1", "200           0")
+        text1 = text1.rstrip()
+        text2 = text2.rstrip()
+        #print "text1 //%s//" % text1
+        #print "text2 //%s//" % text2
         sorted1 = "\n".join(sorted(text1.split("\n")))
         sorted2 = "\n".join(sorted(text2.split("\n")))
         len1 = len(text1.split("\n"))
@@ -190,17 +197,23 @@ class TestConfig(ShinkenTest):
 
 
     def stop_nagios(self):
-        attempt = 1
-        while self.nagios_proc.poll() == None and attempt < 4:
-            self.nagios_proc.terminate()
-            attempt += 1
-            time.sleep(1)
-        if self.nagios_proc.poll() == None:
-            self.nagios_proc.kill()
-        if os.path.exists('etc/' + self.nagios_config):
-            shutil.rmtree('etc/' + self.nagios_config)
-        if os.path.exists('etc/nagios_' + self.nagios_config + '.cfg'):
-            os.remove('etc/nagios_' + self.nagios_config + '.cfg')
+        print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        time.sleep(5)
+        if hasattr(self, 'nagios_proc'):
+            attempt = 1
+            while self.nagios_proc.poll() == None and attempt < 4:
+                self.nagios_proc.terminate()
+                attempt += 1
+                time.sleep(1)
+            if self.nagios_proc.poll() == None:
+                self.nagios_proc.kill()
+            if os.path.exists('etc/' + self.nagios_config):
+                shutil.rmtree('etc/' + self.nagios_config)
+            if os.path.exists('etc/nagios_' + self.nagios_config + '.cfg'):
+                os.remove('etc/nagios_' + self.nagios_config + '.cfg')
 
 
     def ask_nagios(self, request):
@@ -274,8 +287,52 @@ class TestConfigSmall(TestConfig):
 
 
     def tearDown(self):
+        self.stop_nagios()
         if os.path.exists('/tmp/livelogs.db' + str(os.getpid())):
             os.remove('/tmp/livelogs.db' + str(os.getpid()))
+
+
+    def test_childs(self):
+        if self.nagios_installed():
+            self.start_nagios('1r_1h_1s')
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hosts
+Columns: childs
+Filter: name = test_host_0
+OutputFormat:csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
+        request = """GET hosts
+Columns: childs
+Filter: name = test_router_0
+OutputFormat:csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
+
 
 
     def test_servicesbyhostgroup(self):
@@ -316,7 +373,6 @@ ResponseHeader: fixed16
         print response
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            self.stop_nagios()
             print "nagresponse----------------------------------------------"
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
@@ -347,7 +403,6 @@ ResponseHeader: fixed16
         print response
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            self.stop_nagios()
             print "nagresponse----------------------------------------------"
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
@@ -476,7 +531,6 @@ ResponseHeader: fixed16
         self.assert_(response == '0;0;1;0\n')
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            self.stop_nagios()
             print "nagresponse----------------------------------------------"
             print nagresponse
             # TODO looks like a timing problem with nagios
@@ -610,7 +664,6 @@ ResponseHeader: fixed16"""
         print response
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            #self.stop_nagios()
             print "nagresponse----------------------------------------------"
             print nagresponse
             # TODO timing problem?
@@ -623,7 +676,6 @@ Filter: service_description ="""
         print response
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            #self.stop_nagios()
             print "nagresponse----------------------------------------------"
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
@@ -662,7 +714,6 @@ ResponseHeader: fixed16"""
         if self.nagios_installed():
             #time.sleep(10)
             nagresponse = self.ask_nagios(request)
-            #self.stop_nagios()
             print "nagresponse----------------------------------------------"
             print nagresponse
             #TODO the entry_times are different. find a way to round the numbers
@@ -679,7 +730,6 @@ ResponseHeader: fixed16"""
         if self.nagios_installed():
             time.sleep(10)
             nagresponse = self.ask_nagios(request)
-            #self.stop_nagios()
             print "nagresponse----------------------------------------------"
             print nagresponse
             #self.assert_(self.lines_equal(response, nagresponse))
@@ -764,9 +814,6 @@ ResponseHeader: fixed16"""
         print response
         for s in self.livestatus_broker.livestatus.services.values():
             print "%s %d %s;%d" % (s.state, s.state_id, s.state_type, s.attempt)
-
-        if self.nagios_installed():
-            self.stop_nagios()
 
 
     def test_thruk_comments(self):
@@ -899,6 +946,8 @@ Or: 3"""
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        self.assert_(self.contains_line(response, 'SERVICE DOWNTIME ALERT;test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime'))
+
 
     def test_thruk_logs_alerts_summary(self):
         self.print_header()
@@ -1086,7 +1135,6 @@ Stats: max execution_time"""
         # nagios comparison makes no sense, because the latencies/execution times will surely differ
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            self.stop_nagios()
         #    print nagresponse
         #    self.assert_(self.lines_equal(response, nagresponse))
 
@@ -1364,7 +1412,6 @@ test_router_0
         # TODO look whats wrong
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            self.stop_nagios()
         #    print nagresponse
         #    self.assert_(self.lines_equal(response, nagresponse))
 
@@ -1561,6 +1608,7 @@ class TestConfigBig(TestConfig):
 
 
     def tearDown(self):
+        self.stop_nagios()
         if os.path.exists('/tmp/livelogs.db' + str(os.getpid())):
             os.remove('/tmp/livelogs.db' + str(os.getpid()))
 
@@ -1604,7 +1652,6 @@ Stats: state = 3"""
         self.assert_(response == '2000;1993;3;3;1\n')
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            self.stop_nagios()
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
@@ -1656,7 +1703,6 @@ StatsGroupBy: state
         self.assert_(self.contains_line(response, '3;1'))
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            self.stop_nagios()
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
@@ -1685,7 +1731,6 @@ ResponseHeader: fixed16
         print response
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            self.stop_nagios()
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
@@ -1846,10 +1891,50 @@ ResponseHeader: fixed16
         print response
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
-            self.stop_nagios()
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
+
+    def test_childs(self):
+        if self.nagios_installed():
+            self.start_nagios('5r_100h_2000s')
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hosts
+Columns: childs
+Filter: name = test_host_0
+OutputFormat:csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
+        request = """GET hosts
+Columns: childs
+Filter: name = test_router_0
+OutputFormat:csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        if self.nagios_installed():
+            nagresponse = self.ask_nagios(request)
+            print "nagresponse----------------------------------------------"
+            print nagresponse
+            self.assert_(self.lines_equal(response, nagresponse))
 
 
 if __name__ == '__main__':
