@@ -43,6 +43,7 @@ class ArbiterLink(SatelliteLink):
 
     running_properties = {'con' : {'default' : None},
                           'broks' : {'default' : []},
+                          'alive' : {'default' : False, 'fill_brok' : ['full_status']}, # DEAD or not
                           'attempt' : {'default' : 0, 'fill_brok' : ['full_status']}, # the number of failed attempt
                           'reachable' : {'default' : False, 'fill_brok' : ['full_status']}, # can be network ask or not (dead or check in timeout or error)
                           }
