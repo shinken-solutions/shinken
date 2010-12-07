@@ -26,13 +26,6 @@ except ImportError:
 
 #from memoized import memoized
 
-############################### SEQUENCES ###############################
-def get_sequence():
-    i = 0
-    while True:
-        i = i + 1
-        yield i
-
 
 ################################### TIME ##################################
 #@memoized
