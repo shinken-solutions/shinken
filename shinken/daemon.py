@@ -33,7 +33,7 @@ else:
     REDIRECT_TO = "/dev/null"
 
 UMASK = 0
-VERSION = "0.3"
+VERSION = "0.4"
 
 class Daemon:
     #the instances will have their own init

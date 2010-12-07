@@ -147,7 +147,7 @@ if python_version < (2, 6):
 
 setup(
   name = "Shinken",
-  version = "0.3",
+  version = "0.4",
   packages = find_packages(),
   package_data = {'':['*.py','modules/*.py','modules/*/*.py']},
   description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
