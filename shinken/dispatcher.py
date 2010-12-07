@@ -97,8 +97,9 @@ class Dispatcher:
     #checks alive elements
     def check_alive(self):
         for elt in self.elements:
+            #print "Updating elements", elt.get_name(), elt.__dict__
             elt.update_infos()
-            #print "Element", elt.get_name(), " alive:", elt.alive, "
+
 
             #Not alive need new need_conf
             #and spare too if they do not have already a conf

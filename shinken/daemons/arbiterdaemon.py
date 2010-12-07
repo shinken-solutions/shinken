@@ -94,6 +94,11 @@ class IForArbiter(Interface):
         return None
 
 
+    # Dummy call. We are a master, we managed what we want
+    def what_i_managed(self):
+        return []
+
+
 # Main Arbiter Class
 class Arbiter(Daemon):
 
