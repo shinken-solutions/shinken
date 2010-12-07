@@ -1,5 +1,7 @@
 # Django settings for sconf project.
 
+SHINKEN_PATH="/applis/pydev/workspace/shinken"
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -8,6 +10,8 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
+
+
 
 DATABASES = {
     'default': {
@@ -75,16 +79,16 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'sconf.urls'
+ROOT_URLCONF = 'skonf.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/applis/pydev/workspace/sconf/templates"
+    SHINKEN_PATH+"/skonf/templates"
 )
 
-STATICFILES_ROOT = "/applis/pydev/workspace/sconf/static"
+STATICFILES_ROOT = SHINKEN_PATH+"/skonf/static"
 
 INSTALLED_APPS = (
     'django.contrib.auth',
