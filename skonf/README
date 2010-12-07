@@ -23,7 +23,11 @@ Installation
 +----------------------------------------------------------------------------+
 
 	SKonf is now bundled with Shinken. There are a few steps to do manualy
-	in order to activate SKonf. You will need an apache2 server and 
+	in order to activate SKonf. Running skonf through apache is not ready yet
+	Edit shinken/skon/settings.py and modify SHINKEN_PATH to match your 
+	installation. Then run 'python manage.py runserver' to start the
+	config tool. You can now access it in your browser at the following
+	URL :  http://localhost:8000
 
 Credits :
 +----------------------------------------------------------------------------+
