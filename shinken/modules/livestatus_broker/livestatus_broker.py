@@ -916,7 +916,7 @@ class Livestatus_broker(BaseModule):
                 pass
                 self.livestatus.counters.calc_rate()
             except IOError, e:
-                if e.errno != os.errno.EINTR:
+                if hasattr(os, 'errno') and e.errno != os.errno.EINTR:
                     raise
             #But others are importants
             except Exception, exp:

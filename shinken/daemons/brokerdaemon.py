@@ -76,6 +76,7 @@ class Broker(BaseSatellite):
 
         self.timeout = 1.0
 
+
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
     # Brok -> self.broks
@@ -449,6 +450,23 @@ class Broker(BaseSatellite):
 
         for rea_id in self.reactionners:
             self.pynag_con_init(rea_id, type='reactionner')
+
+
+    # An arbiter ask us to wait a new conf, so we must clean
+    # all our mess we did, and close modules too
+    def clean_previous_run(self):
+        # Clean all lists
+        self.schedulers.clear()
+        self.pollers.clear()
+        self.reactionners.clear()
+        self.broks = self.broks[:]
+        self.broks_internal_raised = self.broks_internal_raised[:]
+        self.external_commands = self.external_commands[:]
+
+        # And now modules
+        self.have_modules = False
+        self.modules_manager.clear_instances()
+
         
 
     def do_loop_turn(self):
@@ -456,6 +474,20 @@ class Broker(BaseSatellite):
 
         # Begin to clean modules
         self.check_and_del_zombie_modules()
+
+        # Maybe the arbiter ask us to wait for a new conf
+        # If true, we must restart all...
+        if self.cur_conf is None:
+            # Clean previous run from useless objects
+            # and close modules
+            self.clean_previous_run()
+            
+            self.wait_for_initial_conf()
+            # we may have been interrupted or so; then 
+            # just return from this loop turn
+            if not self.new_conf:  
+                return
+            self.setup_new_conf()
 
         # Now we check if arbiter speek to us in the pyro_daemon.
         # If so, we listen for it
