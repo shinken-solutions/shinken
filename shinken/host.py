@@ -628,7 +628,7 @@ class Host(SchedulingItem):
             if c.output != self.output:
                 need_stalk = False
         if need_stalk:
-            logger.log("Stalking %s : %s", self.get_name(), self.output)
+            logger.log("Stalking %s : %s" % (self.get_name(), self.output))
 
 
     #fill act_depend_of with my parents (so network dep)
