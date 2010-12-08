@@ -4,7 +4,9 @@ Hi,
 
 Welcome in the Shinken project.
 
-Shinken is a new implementation of Nagios in AGPLv3 written in Python. The main goal of Shinken is to allow users to have a fully flexible architecture for their monitoring system that can easily scale to large environments. Shinken is backward compatible with the Nagios configuration standard and plugins. It works on any operative system and architecture that supports Python, which includes Windows and Mac OS X/Darwin.
+Shinken is a new, Nagios compatible monitoring tool, written in Python. The main goal of Shinken is to allow users to have a fully flexible architecture for their monitoring system that can easily scale to large environments. It’s as simple as in all the marketing “cloud computing” slides, but here, it’s real!
+
+Shinken is backwards-compatible with the Nagios configuration standard and plugins. It works on any operating system and architecture that supports Python, which includes Windows and GNU/Linux.
 
 
 == How to install it ==
@@ -36,8 +38,6 @@ For 2.4 and 2.5 python version, you will need an additionnal packages :
 *for livestatus only: simplejson : http://pypi.python.org/pypi/simplejson/ and pysqlite http://code.google.com/p/pysqlite/
 
 Just untar and launch python setup.py install (and be sure to have installed the python-devel package too).
-
-Beware : Python 2.4 and 2.5 users should not be able to use the livestatus broker module. We are working on this issue.
 
 For Python, it should be ok with nearly all distribution.
 
@@ -77,4 +77,6 @@ $ /etc/init.d/shinken-arbiter start
 
 
 == Known bugs ==
-*The only know bug not already 'fix ok' is in the status.dat module. In fact the objects.dat file is 'shrink' after a conf reload. If so, just restart the broker too (and we take debug message if you got it of course :) ). Thanks a lot.
+None we know :)
+
+If you find one, please psot it in our trac site : https://sourceforge.net/apps/trac/shinken/report/2
