@@ -322,8 +322,8 @@ class Host(SchedulingItem):
                 logger.log(err)
 
         #Ok now we manage special cases...
-        if not hasattr(self, 'contacts') and not hasattr(self, 'contacgroups') and self.notifications_enabled == True:
-            logger.log("%s : I do not have contacts nor contacgroups" % self.get_name())
+        if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups') and self.notifications_enabled == True:
+            logger.log("%s : I do not have contacts nor contact_groups" % self.get_name())
             state = False
         if not hasattr(self, 'check_command') or self.check_command == None:
             logger.log("%s : I've got no check_command" % self.get_name())
