@@ -912,9 +912,9 @@ class SchedulingItem(Item):
             else:
                 # The old way. Only send recover notifications to those contacts
                 # who also got problem notifications
-                #contacts = list(self.notified_contacts)
+                contacts = list(self.notified_contacts)
                 # The new way. Allow recover-only contacts
-                contacts = self.contacts
+                #contacts = self.contacts
             self.notified_contacts.clear()
         else:
             #Check is an escalation match. If yes, get all contacts from escalations
@@ -941,11 +941,11 @@ class SchedulingItem(Item):
                     self.raise_notification_log_entry(child_n)
                     self.notifications_in_progress[child_n.id] = child_n
                     childnotifications.append(child_n)
-
-            if n.type == 'PROBLEM':
-                # Remember the contacts. We might need them later in the
-                # recovery code some lines above
-                self.notified_contacts.add(contact)
+                    
+                    if n.type == 'PROBLEM':
+                    # Remember the contacts. We might need them later in the
+                    # recovery code some lines above
+                        self.notified_contacts.add(contact)
 
         return childnotifications
 

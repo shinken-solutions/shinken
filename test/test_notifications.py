@@ -421,6 +421,127 @@ class TestConfig(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
 
+    def test_only_notified_contacts_notifications(self):
+        self.print_header()
+        # retry_interval 2
+        # critical notification
+        # run loop -> another notification
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+
+        #To make tests quicker we make notifications send very quickly
+        svc.notification_interval = 0.001
+
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+
+        #We want the contact to do not have a mail, so we remove tyhe 'u'
+        test_contact = self.sched.contacts.find_by_name('test_contact')
+        for nw in test_contact.notificationways:
+            nw.service_notification_options.remove('u')
+
+        #--------------------------------------------------------------
+        # initialize host/service state
+        #--------------------------------------------------------------
+        self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True, sleep_time=0.1)
+        print "- 1 x OK -------------------------------------"
+        self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
+
+        self.assert_(svc.current_notification_number == 0)
+        #--------------------------------------------------------------
+        # service reaches soft;1
+        # there must not be any notification
+        #--------------------------------------------------------------
+        print "- 1 x BAD get soft -------------------------------------"
+        self.scheduler_loop(1, [[svc, 3, 'UNKNOWN']], do_sleep=True, sleep_time=0.1)
+        # check_notification: not (soft)
+        print "---current_notification_number", svc.current_notification_number
+        print "Contact we notified", svc.notified_contacts
+        #--------------------------------------------------------------
+        # service reaches hard;2
+        # a notification must have been created
+        # notification number must be 1
+        #--------------------------------------------------------------
+        print "- 1 x BAD get hard -------------------------------------"
+        self.scheduler_loop(1, [[svc, 3, 'UNKNOWN']], do_sleep=True, sleep_time=0.1)
+        self.show_and_clear_logs()
+        #self.show_and_clear_actions()
+        print "TOTO2"
+        self.show_actions()
+        print "notif in progress", svc.notifications_in_progress
+        for n in svc.notifications_in_progress.values():
+            print "TOTO", n.__dict__
+        # check_notification: yes (hard)
+        print "---current_notification_number", svc.current_notification_number
+        # The contact refuse our notification, so we are still at 0
+        self.assert_(svc.current_notification_number == 0)
+        print "---------------------------------1st round with a hard"
+        print "find a way to get the number of the last reaction"
+        cnn = svc.current_notification_number
+        print "- 5 x BAD repeat -------------------------------------"
+        self.scheduler_loop(1, [[svc, 3, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.show_and_clear_logs()
+        self.show_actions()
+        print "cnn and cur", cnn, svc.current_notification_number
+        
+        cnn = svc.current_notification_number
+        self.scheduler_loop(1, [[svc, 3, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.show_and_clear_logs()
+        self.show_actions()
+        print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
+
+        #--------------------------------------------------------------
+        # 2 cycles = 2 minutes = 2 new notifications
+        #--------------------------------------------------------------
+        cnn = svc.current_notification_number
+        self.scheduler_loop(2, [[svc, 3, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.show_and_clear_logs()
+        self.show_actions()
+        print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
+
+        #--------------------------------------------------------------
+        # 2 cycles = 2 minutes = 2 new notifications (theoretically)
+        # BUT: test_contact filters notifications
+        # we do not raise current_notification_number if no mail was sent
+        #--------------------------------------------------------------
+        now = time.time()
+        cmd = "[%lu] DISABLE_CONTACT_SVC_NOTIFICATIONS;test_contact" % now
+        self.sched.run_external_command(cmd)
+        cnn = svc.current_notification_number
+        self.scheduler_loop(1, [[svc, 3, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.show_and_clear_logs()
+        self.show_actions()
+        self.assert_(svc.current_notification_number == cnn)
+        #--------------------------------------------------------------
+        # again a normal cycle
+        # test_contact receives his mail
+        #--------------------------------------------------------------
+        now = time.time()
+        cmd = "[%lu] ENABLE_CONTACT_SVC_NOTIFICATIONS;test_contact" % now
+        self.sched.run_external_command(cmd)
+        #cnn = svc.current_notification_number
+        self.scheduler_loop(1, [[svc, 3, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.show_and_clear_logs()
+        self.show_actions()
+        print "svc.current_notification_number, cnn", svc.current_notification_number, cnn
+        #self.assert_(svc.current_notification_number == cnn + 1)
+        #--------------------------------------------------------------
+        # now recover. there must be no scheduled/inpoller notification
+        #--------------------------------------------------------------
+        self.scheduler_loop(1, [[svc, 0, 'GOOD']], do_sleep=True, sleep_time=0.1)
+
+        print "prout"
+        # I do not want a notification of a recovery because
+        # the user did not have the notif first!
+        self.assert_(not self.any_log_match('notify-service'))
+        self.show_and_clear_logs()
+        self.show_and_clear_actions()
+        self.assert_(svc.current_notification_number == 0)
+
+
 
 if __name__ == '__main__':
     unittest.main()
