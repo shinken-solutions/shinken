@@ -80,6 +80,7 @@ class Notification(Action):
         'env': StringProp(
             default={}),
         }
+
     macros = {
         'NOTIFICATIONTYPE' : 'type',
         'NOTIFICATIONRECIPIENTS' : 'recipients',
@@ -236,3 +237,25 @@ class Notification(Action):
         return b
 
 
+    #Call by picle for dataify the coment
+    #because we DO NOT WANT REF in this pickleisation!
+    def __getstate__(self):
+#        print "Asking a getstate for a downtime on", self.ref.get_dbg_name()
+        cls = self.__class__
+        #id is not in *_properties
+        res = [self.id]
+        for prop in cls.properties:
+            res.append(getattr(self, prop))
+        #We reverse because we want to recreate
+        #By check at properties in the same order
+        res.reverse()
+        return res
+
+
+    #Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state.pop()
+        for prop in cls.properties:
+	    val = state.pop()
+            setattr(self, prop, val)
