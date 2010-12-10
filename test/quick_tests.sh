@@ -29,6 +29,7 @@ rm nosetests.xml
 function launch_and_assert {
     SCRIPT=$1
     nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
+#    ./$SCRIPT
     if [ $? != 0 ]
 	then
 	echo "Error : the test $SCRIPT failed"

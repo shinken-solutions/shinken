@@ -79,7 +79,7 @@ class Pickle_retention_scheduler:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
                         d[prop] = getattr(h, prop)
                 all_data['hosts'][h.host_name] = d
 
@@ -89,7 +89,7 @@ class Pickle_retention_scheduler:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
                         d[prop] = getattr(s, prop)
                 all_data['services'][(s.host.host_name, s.service_description)] = d
 
@@ -150,7 +150,7 @@ class Pickle_retention_scheduler:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
                         # Mayeb the save was not with this value, so
                         # we just bypass this
                         if prop in d:
@@ -169,7 +169,7 @@ class Pickle_retention_scheduler:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
                         # Mayeb the save was not with this value, so
                         # we just bypass this
                         if prop in d:

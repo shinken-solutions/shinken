@@ -79,11 +79,12 @@ class Itemgroup:
     def fill_default(self):
         cls = self.__class__
         properties = cls.properties
+
         not_required = [prop for prop in properties \
-                            if not properties[prop]['required']]
+                            if not properties[prop].required]
         for prop in not_required:
             if not hasattr(self, prop):
-                value = properties[prop]['default']
+                value = properties[prop].default
                 setattr(self, prop, value)
 
 
@@ -124,7 +125,7 @@ class Itemgroup:
         data = {}
         #Now config properties
         for prop in cls.properties:
-            if 'fill_brok' in cls.properties[prop]:
+            if cls.properties[prop].fill_brok != []:
                 if self.has(prop):
                     data[prop] = getattr(self, prop)
         #Here members is just a bunch of host, I need name in place

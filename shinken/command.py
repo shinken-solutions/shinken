@@ -19,18 +19,20 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from brok import Brok
-
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class Command(object):
     id = 0
     my_type = "command"
 
     properties={
-        'command_name' : {'required' : True, 'fill_brok' : ['full_status']},
-        'command_line' : {'required' : True, 'fill_brok' : ['full_status']},
-        'poller_tag' : {'required' : False, 'default' : None},
+        'command_name': StringProp(
+            fill_brok=['full_status']),
+        'command_line': StringProp(
+            fill_brok=['full_status']),
+        'poller_tag': StringProp(
+            default=None),
         }
-
 
     def __init__(self, params={}):
         self.id = self.__class__.id
@@ -69,12 +71,12 @@ class Command(object):
         #Now config properties
         for prop in cls.properties:
             #Is this property intended for brokking?
-            if 'fill_brok' in cls.properties[prop]:
-                if brok_type in cls.properties[prop]['fill_brok']:
-                    if hasattr(self, prop):
-                        data[prop] = getattr(self, prop)
-                    elif 'default' in cls.properties[prop]:
-                        data[prop] = cls.properties[prop]['default']
+#            if 'fill_brok' in cls.properties[prop]:
+            if brok_type in cls.properties[prop].fill_brok:
+                if hasattr(self, prop):
+                    data[prop] = getattr(self, prop)
+                elif 'default' in cls.properties[prop]:
+                    data[prop] = cls.properties[prop].default
 
 
 

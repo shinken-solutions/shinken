@@ -21,6 +21,7 @@
 
 from shinken.itemgroup import Itemgroup, Itemgroups
 from shinken.util import to_bool
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 #It change from hostgroup Class because there is no members
 #propertie, just the realm_members that we rewrite on it.
@@ -30,15 +31,15 @@ class Realm(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'realm'
 
-    properties={'id': {'required': False, 'default': 0, 'fill_brok' : ['full_status']},
-                'realm_name': {'required': True, 'fill_brok' : ['full_status']},
+    properties={'id': IntegerProp(default=0, fill_brok=['full_status']),
+                'realm_name': StringProp(fill_brok=['full_status']),
                 #'alias': {'required':  True, 'fill_brok' : ['full_status']},
                 #'notes': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
                 #'notes_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
                 #'action_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
-                'realm_members' : {'required': False},#No status_broker_name because it put hosts, not host_name
-                'higher_realms' : {'required': False},
-                'default' : {'required' : False, 'default' : 0, 'pythonize': to_bool}
+                'realm_members' : StringProp(default=''),#No status_broker_name because it put hosts, not host_name
+                'higher_realms' : StringProp(default=''),
+                'default' : BoolProp(default='0'),
                 }
 
     macros = {
@@ -73,12 +74,11 @@ class Realm(Itemgroup):
         for prop in cls.properties:
             try:
                 tab = cls.properties[prop]
-                if 'pythonize' in tab:
-                    f = tab['pythonize']
-                    old_val = getattr(self, prop)
-                    new_val = f(old_val)
-                    #print "Changing ", old_val, "by", new_val
-                    setattr(self, prop, new_val)
+                f = tab.pythonize
+                old_val = getattr(self, prop)
+                new_val = f(old_val)
+                #print "Changing ", old_val, "by", new_val
+                setattr(self, prop, new_val)
             except AttributeError , exp:
                 #print self.get_name(), ' : ', exp
                 pass # Will be catch at the is_correct moment

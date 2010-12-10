@@ -24,35 +24,78 @@
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.util import to_int, to_bool, to_split
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class PollerLink(SatelliteLink):
     id = 0
     my_type = 'poller'
     #To_send : send or not to satellite conf
-    properties={'poller_name' : {'required' : True , 'fill_brok' : ['full_status'], 'to_send' : True},
-                'address' : {'required' : True, 'fill_brok' : ['full_status']},
-                'port' : {'required':  False, 'default' : 7771, 'pythonize': to_int, 'fill_brok' : ['full_status']},
-                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'fill_brok' : ['full_status']},
-                'manage_sub_realms' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'fill_brok' : ['full_status']},
-                'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
-                'min_workers' : {'required' : False, 'default' : '1', 'pythonize' : to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
-                'max_workers' : {'required' : False, 'default' : '30', 'pythonize' : to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
-                'processes_by_worker' : {'required' : False, 'default' : '256', 'pythonize' : to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
-                'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True, 'fill_brok' : ['full_status']},
-                'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
-                'poller_tags' : {'required' : False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
-                'use_timezone' : {'required' : False, 'default' : 'NOTSET', 'to_send' : True},
-                'timeout' : {'required' : False, 'default' : '3', 'pythonize': to_int, 'fill_brok' : ['full_status']},
-                'data_timeout' : {'required' : False, 'default' : '120', 'pythonize': to_int, 'fill_brok' : ['full_status']},
-                'max_check_attempts' : {'required' : False, 'default' : '3','pythonize': to_int, 'fill_brok' : ['full_status']},
+    properties={'poller_name': StringProp(
+            fill_brok=['full_status'],
+            to_send=True),
+                'address': StringProp(
+            fill_brok=['full_status']),
+                'port': IntegerProp(
+            default=7771,
+            fill_brok=['full_status']),
+                'spare': BoolProp(
+            default='0',
+            fill_brok=['full_status']),
+                'manage_sub_realms': BoolProp(
+            default='0',
+            fill_brok=['full_status']),
+                'modules': ListProp(
+            default='',
+            to_send=True),
+                'min_workers': IntegerProp(
+            default='1',
+            fill_brok=['full_status'],
+            to_send=True),
+                'max_workers': IntegerProp(
+            default='30',
+            fill_brok=['full_status'],
+            to_send=True),
+                'processes_by_worker': IntegerProp(
+            default='256',
+            fill_brok=['full_status'],
+            to_send=True),
+                'polling_interval': IntegerProp(
+            default='1',
+            fill_brok=['full_status'],
+            to_send=True),
+                'manage_arbiters': IntegerProp(
+            default='0'),
+                'poller_tags': ListProp(
+            default='',
+            to_send=True),
+                'use_timezone': StringProp(
+            default='NOTSET',
+            to_send=True),
+                'timeout': IntegerProp(
+            default='3',
+            fill_brok=['full_status']),
+                'data_timeout': IntegerProp(
+            default='120',
+            fill_brok=['full_status']),
+                'max_check_attempts': IntegerProp(
+            default='3',
+            fill_brok=['full_status']),
                 }
-
-    running_properties = {'con' : {'default' : None},
-                          'alive' : {'default' : False, 'fill_brok' : ['full_status'], 'to_send' : True},
-                          'broks' : {'default' : []},
-                          'attempt' : {'default' : 0, 'fill_brok' : ['full_status']}, # the number of failed attempt
-                          'reachable' : {'default' : False, 'fill_brok' : ['full_status']}, # can be network ask or not (dead or check in timeout or error)
-                          }
+    running_properties = {'con': StringProp(
+            default=None),
+                          'alive': StringProp(
+            default=False,
+            fill_brok=['full_status'],
+            to_send=True),
+                          'broks': StringProp(
+            default=[]),
+                          'attempt': StringProp(
+            default=0,
+            fill_brok=['full_status']), # the number of failed attempt
+                          'reachable': StringProp(
+            default=False,
+            fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+                          }   
     macros = {}
 
     def get_name(self):

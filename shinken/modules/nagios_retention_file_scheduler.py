@@ -204,13 +204,13 @@ class Nagios_retention_scheduler:
         for prop in running_properties:
             entry = running_properties[prop]
             if hasattr(obj, prop) and prop in obj_cfg:
-                if 'pythonize' in entry:
-                    f = entry['pythonize']
-                    if f != None: # mean it's a string
+#                if 'pythonize' in entry:
+                f = entry.pythonize
+                if f != None: # mean it's a string
                         #print "Apply", f, "to the property", prop, "for ", cls.my_type
-                        val = getattr(obj, prop)
-                        val = f(val)
-                        setattr(obj, prop, val)
+                    val = getattr(obj, prop)
+                    val = f(val)
+                    setattr(obj, prop, val)
                 else: #no pythonize, int by default
                     # if cls.my_type != 'service':
                     #  print "Intify", prop, getattr(obj, prop)
@@ -391,7 +391,7 @@ class Nagios_retention_scheduler:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
 #                        print "Set host value", getattr(ret_h, prop)
                         setattr(h, prop, getattr(ret_h, prop))
                 for a in h.notifications_in_progress.values():
@@ -416,7 +416,7 @@ class Nagios_retention_scheduler:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
 #                        print "Set service value", getattr(ret_s, prop)
                         setattr(s, prop, getattr(ret_s, prop))
                 for a in s.notifications_in_progress.values():

@@ -29,25 +29,37 @@ import time
 #    from pexpect import *
 
 from action import Action
-
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class EventHandler(Action):
-    properties={'is_a' : {'required': False, 'default':'eventhandler'},
-                'type' : {'required': False, 'default': ''},
-                '_in_timeout' : {'required': False, 'default': False},
-                'status' : {'required': False, 'default':''},
-                'exit_status' : {'required': False, 'default':3},
-                'state' : {'required': False, 'default':0},
-                'output' : {'required': False, 'default':''},
-                'long_output' : {'required': False, 'default':''},
-                'ref' : {'required': False, 'default': -1},
+    properties={'is_a': StringProp(
+            default='eventhandler'),
+                'type': StringProp(
+            default=''),
+                '_in_timeout': StringProp(
+            default=False),
+                'status': StringProp(
+            default=''),
+                'exit_status': StringProp(
+            default=3),
+                'state': StringProp(
+            default=0),
+                'output': StringProp(
+            default=''),
+                'long_output': StringProp(
+            default=''),
+                'ref': StringProp(
+            default=-1),
                 #'ref_type' : {'required': False, 'default':''},
-                't_to_go' : {'required': False, 'default': 0},
-                'check_time' : {'required': False, 'default': 0},
-                'execution_time' : {'required': False, 'default': 0},
-                'env' : {'required' : False, 'default' : {}},
+                't_to_go': StringProp(
+            default=0),
+                'check_time': StringProp(
+            default=0),
+                'execution_time': StringProp(
+            default=0),
+                'env': StringProp(
+            default={}),
                 }
-
     #id = 0 #Is common to Actions
     def __init__(self, command, id=None, timeout=10, env={}):
         self.is_a = 'eventhandler'

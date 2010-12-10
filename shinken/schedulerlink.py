@@ -22,6 +22,7 @@
 #Scheduler is like a satellite for dispatcher
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.util import to_int, to_bool, to_split
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 import shinken.pyro_wrapper
 Pyro = shinken.pyro_wrapper.Pyro
@@ -32,27 +33,54 @@ class SchedulerLink(SatelliteLink):
     #Ok we lie a little here because we are a mere link in fact
     my_type = 'scheduler'
 
-    properties={'scheduler_name' : {'required' : True , 'fill_brok' : ['full_status']},#, 'pythonize': None},
-                'address' : {'required' : True, 'fill_brok' : ['full_status']},#, 'pythonize': to_bool},
-                'port' : {'required':  False, 'default' : '7768', 'pythonize': to_int, 'fill_brok' : ['full_status']},
-                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool, 'fill_brok' : ['full_status']},
-                'modules' : {'required' : False, 'default' : '', 'pythonize' : to_split},
-                'weight': {'required':  False, 'default' : '1', 'pythonize': to_int, 'fill_brok' : ['full_status']},
-                'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
-                'use_timezone' : {'required' : False, 'default' : 'NOTSET', 'override' : True},
-                'timeout' : {'required' : False, 'default' : '3', 'pythonize': to_int, 'fill_brok' : ['full_status']},
-                'data_timeout' : {'required' : False, 'default' : '120', 'pythonize': to_int, 'fill_brok' : ['full_status']},
-                'max_check_attempts' : {'required' : False, 'default' : '3','pythonize': to_int, 'fill_brok' : ['full_status']},
+    properties={'scheduler_name': StringProp(
+            fill_brok=['full_status']),#, 'pythonize': None},
+                'address': StringProp(
+            fill_brok=['full_status']),#, 'pythonize': to_bool},
+                'port': IntegerProp(
+            default='7768',
+            fill_brok=['full_status']),
+                'spare': BoolProp(
+            default='0',
+            fill_brok=['full_status']),
+                'modules': ListProp(
+            default=''),
+                'weight': IntegerProp(
+            default='1',
+            fill_brok=['full_status']),
+                'manage_arbiters': IntegerProp(
+            default='0'),
+                'use_timezone': StringProp(
+            default='NOTSET',
+            override=True),
+                'timeout': IntegerProp(
+            default='3',
+            fill_brok=['full_status']),
+                'data_timeout': IntegerProp(
+            default='120',
+            fill_brok=['full_status']),
+                'max_check_attempts': IntegerProp(
+            default='3',
+            fill_brok=['full_status']),
                 }
-
-    running_properties = {'con' : {'default' : None},
-                          'alive' : {'default' : False, 'fill_brok' : ['full_status']}, # DEAD or not
-                          'attempt' : {'default' : 0, 'fill_brok' : ['full_status']}, # the number of failed attempt
-                          'reachable' : {'default' : False, 'fill_brok' : ['full_status']}, # can be network ask or not (dead or check in timeout or error)
-                          'conf' : {'default' : None},
-                          'need_conf' : {'default' : True},
-                          'broks' : {'default' : []},
-                          }
+    running_properties = {'con': StringProp(
+            default=None),
+                          'alive': StringProp(
+            default=False,
+            fill_brok=['full_status']), # DEAD or not
+                          'attempt': StringProp(
+            default=0,
+            fill_brok=['full_status']), # the number of failed attempt
+                          'reachable': StringProp(
+            default=False,
+            fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+                          'conf': StringProp(
+            default=None),
+                          'need_conf': StringProp(
+            default=True),
+                          'broks': StringProp(
+            default=[]),
+     }
     macros = {}
 
 
@@ -97,7 +125,7 @@ class SchedulerLink(SatelliteLink):
         properties = self.__class__.properties
         for prop in properties:
             entry = properties[prop]
-            if 'override' in entry and entry['override']:
+            if entry.override:
                 r[prop] = getattr(self, prop)
         return r
 

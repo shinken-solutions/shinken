@@ -76,6 +76,7 @@ from shinken.util import *
 from shinken.daterange import Daterange,CalendarDaterange,StandardDaterange,MonthWeekDayDaterange
 from shinken.daterange import MonthDateDaterange,WeekDayDaterange,MonthDayDaterange
 from shinken.brok import Brok
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 
 class Timeperiod(Item):
@@ -83,15 +84,15 @@ class Timeperiod(Item):
     my_type = 'timeperiod'
 
     properties={
-        'timeperiod_name' : {'required' : True, 'fill_brok' : ['full_status']},
-        'alias' : {'required' : False, 'fill_brok' : ['full_status']},
-        'use' : {'required' : False},
-        'exclude' : {'required' : False},
-        'register' : {'required' : False},
+        'timeperiod_name' : StringProp(fill_brok=['full_status']),
+        'alias' : StringProp(default='',fill_brok=['full_status']),
+        'use' : StringProp(default=''),
+        'exclude' : StringProp(default=''),
+        'register' : IntegerProp(default='1'),
         #All errors and warning raised during the configuration parsing
         #and taht will raised real warning/errors during the is_correct
-        'configuration_warnings' : {'default' : []},
-        'configuration_errors' : {'default' : []},
+        'configuration_warnings' : ListProp(default=[]),
+        'configuration_errors' : ListProp(default=[]),
         }
 
 
@@ -592,12 +593,12 @@ class Timeperiod(Item):
         #Now config properties
         for prop in cls.properties:
             #Is this property intended for brokking?
-            if 'fill_brok' in cls.properties[prop]:
-                if brok_type in cls.properties[prop]['fill_brok']:
-                    if hasattr(self, prop):
-                        data[prop] = getattr(self, prop)
-                    elif 'default' in cls.properties[prop]:
-                        data[prop] = cls.properties[prop]['default']
+#            if 'fill_brok' in cls.properties[prop]:
+            if brok_type in cls.properties[prop].fill_brok:
+                if hasattr(self, prop):
+                    data[prop] = getattr(self, prop)
+                elif 'default' in cls.properties[prop]:
+                    data[prop] = cls.properties[prop].default
 
 
     #Get a brok with initial status

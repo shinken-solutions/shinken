@@ -42,12 +42,10 @@ class AutoSlots(type):
         if 'properties' in dct:
             props = dct['properties']
             slots.update((p for p in props 
-                          if not 'no_slots' in props[p] 
-                          or not props[p]['no_slots']))
+                          if not props[p].no_slots))
         if 'running_properties' in dct:
             props = dct['running_properties']
             slots.update((p for p in props 
-                          if not 'no_slots' in props[p] 
-                          or not props[p]['no_slots']))
+                          if not props[p].no_slots))
         dct['__slots__'] = tuple(slots)
         return type.__new__(cls, name, bases, dct)

@@ -21,41 +21,42 @@
 
 from shinken.item import Item, Items
 from shinken.util import to_split, to_bool, strip_and_uniq
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'contact'
 
     properties={
-        'contact_name' : {'required' : True, 'fill_brok' : ['full_status']},
-        'alias' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'contactgroups' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'host_notifications_enabled' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'service_notifications_enabled' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'host_notification_period' : {'required' : True, 'fill_brok' : ['full_status']},
-        'service_notification_period' : {'required' : True, 'fill_brok' : ['full_status']},
-        'host_notification_options' : {'required' : True, 'pythonize' : to_split, 'fill_brok' : ['full_status']},
-        'service_notification_options' : {'required' : True, 'pythonize' : to_split, 'fill_brok' : ['full_status']},
-        'host_notification_commands' : {'required' : True, 'fill_brok' : ['full_status']},
-        'service_notification_commands' : {'required' : True, 'fill_brok' : ['full_status']},
-        'email' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'pager' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address1' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address2' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address3' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address4' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address5' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'address6' : {'required' : False, 'default' : 'none', 'fill_brok' : ['full_status']},
-        'can_submit_commands' : {'required' : False, 'default' : '0', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'retain_status_information' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'notificationways' : {'required' : False, 'default' : ''},
+        'contact_name' : StringProp(fill_brok=['full_status']),
+        'alias' : StringProp(default='none', fill_brok=['full_status']),
+        'contactgroups' : StringProp(default='', fill_brok=['full_status']),
+        'host_notifications_enabled' : BoolProp(default='1', fill_brok=['full_status']),
+        'service_notifications_enabled' : BoolProp(default='1', fill_brok=['full_status']),
+        'host_notification_period' : StringProp(fill_brok=['full_status']),
+        'service_notification_period' : StringProp(fill_brok=['full_status']),
+        'host_notification_options' : ListProp(fill_brok=['full_status']),
+        'service_notification_options' : ListProp(fill_brok=['full_status']),
+        'host_notification_commands' : StringProp(fill_brok=['full_status']),
+        'service_notification_commands' : StringProp(fill_brok=['full_status']),
+        'email' : StringProp(default='none', fill_brok=['full_status']),
+        'pager' : StringProp(default='none', fill_brok=['full_status']),
+        'address1' : StringProp(default='none', fill_brok=['full_status']),
+        'address2' : StringProp(default='none', fill_brok=['full_status']),
+        'address3' : StringProp(default='none', fill_brok=['full_status']),
+        'address4' : StringProp(default='none', fill_brok=['full_status']),
+        'address5' : StringProp(default='none', fill_brok=['full_status']),
+        'address6' : StringProp(default='none', fill_brok=['full_status']),
+        'can_submit_commands' : BoolProp(default='0', fill_brok=['full_status']),
+        'retain_status_information' : BoolProp(default='1', fill_brok=['full_status']),
+        'notificationways' : StringProp(default=''),
         }
 
     running_properties = {
         #All errors and warning raised during the configuration parsing
         #and taht will raised real warning/errors during the is_correct
-        'configuration_warnings' : {'default' : []},
-        'configuration_errors' : {'default' : []},
+        'configuration_warnings' : ListProp(default=[]),
+        'configuration_errors' : ListProp(default=[]),
         }
 
 
