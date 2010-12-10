@@ -215,21 +215,21 @@ class Host(SchedulingItem):
     #properties set only for running purpose
     #retention : save/load this property from retention
     running_properties = {
-        'last_chk': StringProp(
+        'last_chk': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'next_chk': StringProp(
+        'next_chk': IntegerProp(
             default=0,
             fill_brok=['full_status', 'next_schedule']),
-        'in_checking': StringProp(
+        'in_checking': BoolProp(
             default=False,
             fill_brok=['full_status', 'check_result', 'next_schedule']),
         'latency': FloatProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'attempt': StringProp(
+        'attempt': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
@@ -237,7 +237,7 @@ class Host(SchedulingItem):
             default='PENDING',
             fill_brok=['full_status'],
             retention=True),
-        'state_id': StringProp(
+        'state_id': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
@@ -245,7 +245,7 @@ class Host(SchedulingItem):
             default='HARD',
             fill_brok=['full_status'],
             retention=True),
-        'state_type_id': StringProp(
+        'state_type_id': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
@@ -253,7 +253,7 @@ class Host(SchedulingItem):
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'last_event_id': StringProp(
+        'last_event_id': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
@@ -261,35 +261,35 @@ class Host(SchedulingItem):
             default='PENDING',
             fill_brok=['full_status'],
             retention=True),
-        'last_state_id': StringProp(
+        'last_state_id': IntegerProp(
             default=0,
             fill_brok=['full_status'],
             retention=True),
-        'last_state_change': StringProp(
+        'last_state_change': FloatProp(
             default=time.time(),
             fill_brok=['full_status'],
             retention=True),
-        'last_hard_state_change': StringProp(
+        'last_hard_state_change': FloatProp(
             default=time.time(),
             fill_brok=['full_status'],
             retention=True),
-        'last_hard_state': StringProp(
+        'last_hard_state': FloatProp(
             default=time.time(),
             fill_brok=['full_status'],
             retention=True),
-        'last_time_up': StringProp(
+        'last_time_up': IntegerProp(
             default=int(time.time()),
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'last_time_down': StringProp(
+        'last_time_down': IntegerProp(
             default=int(time.time()),
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'last_time_unreachable': StringProp(
+        'last_time_unreachable': IntegerProp(
             default=int(time.time()),
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'duration_sec': StringProp(
+        'duration_sec': IntegerProp(
             default=0,
             fill_brok=['full_status'],
             retention=True),
@@ -305,7 +305,7 @@ class Host(SchedulingItem):
             default=False,
             fill_brok=['full_status'],
             retention=True),
-        'flapping_comment_id': StringProp(
+        'flapping_comment_id': IntegerProp(
             default=0,
             fill_brok=['full_status'],
             retention=True),
@@ -347,34 +347,34 @@ class Host(SchedulingItem):
             default=0.0,
             fill_brok=['full_status'],
             retention=True),
-        'problem_has_been_acknowledged': StringProp(
+        'problem_has_been_acknowledged': BoolProp(
             default=False,
             fill_brok=['full_status'],
             retention=True),
         'acknowledgement': StringProp(
             default=None,
             retention=True),
-        'acknowledgement_type': StringProp(
+        'acknowledgement_type': IntegerProp(
             default=1,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'check_type': StringProp(
+        'check_type': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'has_been_checked': StringProp(
+        'has_been_checked': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'should_be_scheduled': StringProp(
+        'should_be_scheduled': IntegerProp(
             default=1,
             fill_brok=['full_status'],
             retention=True),
-        'last_problem_id': StringProp(
+        'last_problem_id': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'current_problem_id': StringProp(
+        'current_problem_id': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
@@ -382,47 +382,47 @@ class Host(SchedulingItem):
             default=0.0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'last_notification': StringProp(
+        'last_notification': FloatProp(
             default=time.time(),
             fill_brok=['full_status'],
             retention=True),
-        'current_notification_number': StringProp(
+        'current_notification_number': IntegerProp(
             default=0,
             fill_brok=['full_status'],
             retention=True),
-        'current_notification_id': StringProp(
+        'current_notification_id': IntegerProp(
             default=0,
             fill_brok=['full_status'],
             retention=True),
-        'check_flapping_recovery_notification': StringProp(
+        'check_flapping_recovery_notification': BoolProp(
             default=True,
             fill_brok=['full_status'],
             retention=True),
-        'scheduled_downtime_depth': StringProp(
+        'scheduled_downtime_depth': IntegerProp(
             default=0,
             fill_brok=['full_status'],
             retention=True),
-        'pending_flex_downtime': StringProp(
+        'pending_flex_downtime': IntegerProp(
             default=0,
             fill_brok=['full_status'],
             retention=True),
-        'timeout': StringProp(
+        'timeout': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'start_time': StringProp(
+        'start_time': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'end_time': StringProp(
+        'end_time': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'early_timeout': StringProp(
+        'early_timeout': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
-        'return_code': StringProp(
+        'return_code': IntegerProp(
             default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
@@ -437,10 +437,10 @@ class Host(SchedulingItem):
             default={}),
         'notified_contacts': StringProp(
             default=set()), #use for having all contacts we have notified
-        'in_scheduled_downtime': StringProp(
+        'in_scheduled_downtime': BoolProp(
             default=False,
             retention=True),
-        'in_scheduled_downtime_during_last_check': StringProp(
+        'in_scheduled_downtime_during_last_check': BoolProp(
             default=False,
             retention=True),
         'actions': StringProp(

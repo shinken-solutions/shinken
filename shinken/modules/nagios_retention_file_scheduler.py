@@ -392,19 +392,21 @@ class Nagios_retention_scheduler:
                 for prop in running_properties:
                     entry = running_properties[prop]
                     if entry.retention:
-#                        print "Set host value", getattr(ret_h, prop)
                         setattr(h, prop, getattr(ret_h, prop))
                 for a in h.notifications_in_progress.values():
                     a.ref = h
                     sched.add(a)
                 h.update_in_checking()
+
                 #And also add downtimes and comments
                 for dt in h.downtimes:
                     dt.ref = h
+                    dt.extra_comment.ref = h
                     sched.add(dt)
                 for c in h.comments:
                     c.ref = h
                     sched.add(c)
+
 
 
         ret_services = all_obj['service']
@@ -426,6 +428,7 @@ class Nagios_retention_scheduler:
                 #And also add downtimes and comments
                 for dt in s.downtimes:
                     dt.ref = s
+                    dt.extra_comment.ref = s
                     sched.add(dt)
                 for c in s.comments:
                     c.ref = s
