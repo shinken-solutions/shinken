@@ -51,7 +51,7 @@ class Item(object):
             #Copy is slow, so we check type
             #Type with __iter__ are list or dict, or tuple.
             #Item need it's own list, so qe copy
-            val = cls.running_properties[prop]['default']
+            val = cls.running_properties[prop].default
             if hasattr(val, '__iter__'):
                 setattr(self, prop, copy(val))
             else:
@@ -116,8 +116,8 @@ class Item(object):
         properties = cls.properties
 
         for prop in properties:
-            if not hasattr(self, prop) and 'default' in properties[prop]:
-                value = properties[prop]['default']
+            if not hasattr(self, prop) and properties[prop].has_default:
+                value = properties[prop].default
                 setattr(self, prop, value)
 
 
@@ -133,8 +133,9 @@ class Item(object):
         #(not None) if not (not clear ?)
         for prop in conf.properties:
             #If we have a class_inherit, and the arbtier really send us it
-            if 'class_inherit' in conf.properties[prop] and hasattr(conf, prop):
-                entry = conf.properties[prop]['class_inherit']
+#            if 'class_inherit' in conf.properties[prop] and hasattr(conf, prop):
+            if hasattr(conf, prop):
+                entry = conf.properties[prop].class_inherit
                 for (cls_dest, change_name) in entry:
                     if cls_dest == cls:#ok, we've got something to get
                         value = getattr(conf, prop)
@@ -147,17 +148,21 @@ class Item(object):
     load_global_conf = classmethod(load_global_conf)
 
 
-    #Use to make pyton properties
+    #Use to make python properties
     def pythonize(self):
         cls = self.__class__
         for prop in cls.properties:
+            tab = cls.properties[prop]
             try:
-                tab = cls.properties[prop]
-                if 'pythonize' in tab:
-                    f = tab['pythonize']
-                    old_val = getattr(self, prop)
-                    new_val = f(old_val)
-                    #print "Changing ", old_val, "by", new_val
+#                if isinstance(tab, dict):
+#                    if 'pythonize' in tab:
+#                        f = tab['pythonize']
+#                        old_val = getattr(self, prop)
+#                        new_val = f(old_val)
+#                        #print "Changing ", old_val, "by", new_val
+#                        setattr(self, prop, new_val)
+#                else: #new style for service
+                    new_val = tab.pythonize(getattr(self, prop))
                     setattr(self, prop, new_val)
             except AttributeError , exp:
                 #print self.get_name(), ' : ', exp
@@ -359,8 +364,8 @@ class Item(object):
         for prop in cls.properties:
             entry = cls.properties[prop]
             #Is this property need preparation for sending?
-            if 'conf_send_preparation' in entry:
-                f = entry['conf_send_preparation']
+            if entry.conf_send_preparation is not None:
+                f = entry.conf_send_preparation
                 if f != None:
                     val = f(getattr(self, prop))
                     setattr(self, prop, val)
@@ -369,8 +374,8 @@ class Item(object):
             for prop in cls.running_properties:
                 entry = cls.running_properties[prop]
             #Is this property need preparation for sending?
-                if 'conf_send_preparation' in entry:
-                    f = entry['conf_send_preparation']
+                if entry.conf_send_preparation is not None:
+                    f = entry.conf_send_preparation
                     if f != None:
                         val = f(getattr(self, prop))
                         setattr(self, prop, val)
@@ -383,15 +388,15 @@ class Item(object):
     def get_property_value_for_brok(self, prop, tab):
         pre_op = None
         entry = tab[prop]
-        if 'brok_transformation' in entry:
-            pre_op = entry['brok_transformation']
+        if entry.brok_transformation is not None:
+            pre_op = entry.brok_transformation
 
         value = None
         #Get the current value, or the default if need
         if hasattr(self, prop):
             value = getattr(self, prop)
-        elif 'default' in entry:
-            value = entry['default']
+        elif entry.default:
+            value = entry.default
 
         #Apply brok_transformation if need
         if pre_op != None:
@@ -407,17 +412,17 @@ class Item(object):
         #Now config properties
         for prop in cls.properties:
             #Is this property intended for brokking?
-            if 'fill_brok' in cls.properties[prop]:
-                if brok_type in cls.properties[prop]['fill_brok']:
-                    data[prop] = self.get_property_value_for_brok(prop, cls.properties)
+#            if 'fill_brok' in cls.properties[prop]:
+            if brok_type in cls.properties[prop].fill_brok:
+                data[prop] = self.get_property_value_for_brok(prop, cls.properties)
 
         # Maybe the class do not have running_properties
         if hasattr(cls, 'running_properties'):
             # We've got prop in running_properties too
             for prop in cls.running_properties:
-                if 'fill_brok' in cls.running_properties[prop]:
-                    if brok_type in cls.running_properties[prop]['fill_brok']:
-                        data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
+#                if 'fill_brok' in cls.running_properties[prop]:
+                if brok_type in cls.running_properties[prop].fill_brok:
+                    data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
 
 
     #Get a brok with initial status

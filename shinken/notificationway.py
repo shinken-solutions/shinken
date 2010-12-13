@@ -21,25 +21,35 @@
 
 from shinken.item import Item, Items
 from shinken.util import to_split, to_bool
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class NotificationWay(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'notificationway'
 
     properties={
-        'notificationway_name' : {'required' : True, 'fill_brok' : ['full_status']},
-        'host_notifications_enabled' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'service_notifications_enabled' : {'required' : False, 'default' : '1', 'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'host_notification_period' : {'required' : True, 'fill_brok' : ['full_status']},
-        'service_notification_period' : {'required' : True, 'fill_brok' : ['full_status']},
-        'host_notification_options' : {'required' : True, 'pythonize' : to_split, 'fill_brok' : ['full_status']},
-        'service_notification_options' : {'required' : True, 'pythonize' : to_split, 'fill_brok' : ['full_status']},
-        'host_notification_commands' : {'required' : True, 'fill_brok' : ['full_status']},
-        'service_notification_commands' : {'required' : True, 'fill_brok' : ['full_status']},
+        'notificationway_name': StringProp(
+            fill_brok=['full_status']),
+        'host_notifications_enabled': BoolProp(
+            default='1',
+            fill_brok=['full_status']),
+        'service_notifications_enabled': BoolProp(
+            default='1',
+            fill_brok=['full_status']),
+        'host_notification_period': StringProp(
+            fill_brok=['full_status']),
+        'service_notification_period': StringProp(
+            fill_brok=['full_status']),
+        'host_notification_options': ListProp(
+            fill_brok=['full_status']),
+        'service_notification_options': ListProp(
+            fill_brok=['full_status']),
+        'host_notification_commands': StringProp(
+            fill_brok=['full_status']),
+        'service_notification_commands': StringProp(
+            fill_brok=['full_status']),
         }
-
     running_properties = {}
-
 
     macros = {
         }

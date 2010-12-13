@@ -34,14 +34,16 @@ from shinken.autoslots import AutoSlots
 from shinken.item import Items
 from shinken.schedulingitem import SchedulingItem
 from shinken.util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger
 
+
 class Service(SchedulingItem):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
-    __metaclass__ = AutoSlots
+#    __metaclass__ = AutoSlots
 
     # Every service have a unique ID, and 0 is always special in
     # database and co...
@@ -59,504 +61,161 @@ class Service(SchedulingItem):
     #  full_status for initial and update status, check_result for check results
     # no_slots : do not take this property for __slots__
     properties = {
-        'host_name' : {
-            'required' : True,
-            'fill_brok' : ['full_status', 'check_result', 'next_schedule']},
-        'hostgroup_name' : {
-            'required' : False,
-            'default' : '',
-            'fill_brok' : ['full_status']},
-        'service_description' : {
-            'required' : True, 
-            'fill_brok' : ['full_status', 'check_result', 'next_schedule']},
-        'display_name' : {
-            'required' : False, 
-            'default' : '',
-            'fill_brok' : ['full_status']},
-        'servicegroups' : {
-            'required' : False,
-            'default' : '',
-            'fill_brok' : ['full_status'],
-            'brok_transformation' : to_list_string_of_names},
-        'is_volatile' : {
-            'required' : False,
-            'default' : '0',
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
-        'check_command' : {
-            'required' : True,
-            'fill_brok' : ['full_status']},
-        'initial_state' : {
-            'required' : False,
-            'default' : 'o',
-            'pythonize' : to_char,
-            'fill_brok' : ['full_status']},
-        'max_check_attempts' : {
-            'required' : True,
-            'pythonize' : to_int,
-            'fill_brok' : ['full_status']},
-        'check_interval' : {
-            'required' : True,
-            'pythonize' : to_int,
-            'fill_brok' : ['full_status']},
-        'retry_interval' : {
-            'required' : True,
-            'pythonize' : to_int,
-            'fill_brok' : ['full_status']},
-        'active_checks_enabled' : {
-            'required' : False, 
-            'default' : '1',
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
-        'passive_checks_enabled' : {
-            'required' : False,
-            'default' : '1',
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
-        'check_period' : {
-            'required' : True,
-            'fill_brok' : ['full_status']},
-        'obsess_over_service' : {
-            'required' : False,
-            'default' : '0', 
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
-        'check_freshness' : {
-            'required' : False, 
-            'default' : '0', 
-            'pythonize' : to_bool, 
-            'fill_brok' : ['full_status']},
-        'freshness_threshold' : {
-            'required' : False, 
-            'default' : '0',
-            'pythonize' : to_int,
-            'fill_brok' : ['full_status']},
-        'event_handler' : {
-            'required' : False,
-            'default' : '', 
-            'fill_brok' : ['full_status']},
-        'event_handler_enabled' : {
-            'required' : False,
-            'default' : '0',
-            'pythonize' : to_bool, 'fill_brok' : ['full_status']},
-        'low_flap_threshold' : {
-            'required' : False,
-            'default' : '-1',
-            'pythonize' : to_int, 
-            'fill_brok' : ['full_status']},
-        'high_flap_threshold' : {
-            'required' : False, 
-            'default' : '-1', 
-            'pythonize' : to_int,
-            'fill_brok' : ['full_status']},
-        'flap_detection_enabled' : {
-            'required' : False,
-            'default' : '1',
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
-        'flap_detection_options' : {
-            'required' : False, 
-            'default' : 'o,w,c,u', 
-            'pythonize' : to_split, 
-            'fill_brok' : ['full_status']},
-        'process_perf_data' : {
-            'required' : False, 
-            'default' : '1',
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
-        'retain_status_information' : {
-            'required' : False, 
-            'default' : '1',
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
-        'retain_nonstatus_information' : {
-            'required' : False, 
-            'default' : '1',
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
-        'notification_interval' : {
-            'required' : False,
-            'default' : '60', 
-            'pythonize' : to_int, 
-            'fill_brok' : ['full_status']},
-        'first_notification_delay' : { 
-            'required' : False, 
-            'default' : '0', 
-            'pythonize' : to_int,
-            'fill_brok' : ['full_status']},
-        'notification_period' : {
-            'required' : True,
-            'fill_brok' : ['full_status']},
-        'notification_options' : {
-            'required' : False, 
-            'default' : 'w,u,c,r,f,s',
-            'pythonize' : to_split,
-            'fill_brok' : ['full_status']},
-        'notifications_enabled' : {
-            'required' : False, 
-            'default' : '1', 
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
-        'contacts' : {
-            'required' : True,
-            'fill_brok' : ['full_status']},
-        'contact_groups' : {
-            'required' : True,
-            'fill_brok' : ['full_status']},
-        'stalking_options' : {
-            'required' : False, 
-            'default' : '', 
-            'pythonize' : to_split,
-            'fill_brok' : ['full_status']},
-        'notes' : {
-            'required' : False, 
-            'default' : '',
-            'fill_brok' : ['full_status']},
-        'notes_url' : {
-            'required' : False, 
-            'default' : '',
-            'fill_brok' : ['full_status']},
-        'action_url' : {
-            'required' : False,
-            'default' : '',
-            'fill_brok' : ['full_status']},
-        'icon_image' : {
-            'required' : False, 
-            'default' : '', 
-            'fill_brok' : ['full_status']},
-        'icon_image_alt' : {
-            'required' : False,
-            'default' : '',
-            'fill_brok' : ['full_status']},
-        'failure_prediction_enabled' : {
-            'required' : False,
-            'default' : '0',
-            'pythonize' : to_bool, 
-            'fill_brok' : ['full_status']},
-        'parallelize_check' : {
-            'required' : False, 
-            'default' : '1',
-            'pythonize' : to_bool,
-            'fill_brok' : ['full_status']},
+        'host_name' : StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
+        'hostgroup_name' : StringProp(default = '', fill_brok=['full_status']),
+        'service_description' : StringProp(fill_brok= ['full_status', 'check_result', 'next_schedule']),
+        'display_name' : StringProp(default='', fill_brok=['full_status']),
+        'servicegroups' : StringProp(default='', fill_brok=['full_status'], brok_transformation=to_list_string_of_names),
+        'is_volatile' : BoolProp(default='0', fill_brok=['full_status']),
+        'check_command' : StringProp(fill_brok = ['full_status']),
+        'initial_state' : CharProp(default='o', fill_brok=['full_status']),
+        'max_check_attempts' : IntegerProp(fill_brok=['full_status']),
+        'check_interval' : IntegerProp(fill_brok=['full_status']),
+        'retry_interval' : IntegerProp(fill_brok=['full_status']),
+        'active_checks_enabled' : BoolProp(default='1', fill_brok= ['full_status']),
+        'passive_checks_enabled' : BoolProp(default='1', fill_brok=['full_status']),
+        'check_period' : StringProp(fill_brok= ['full_status']),
+        'obsess_over_service' : BoolProp(default='0', fill_brok=['full_status']),
+        'check_freshness' : BoolProp(default='0', fill_brok=['full_status']),
+        'freshness_threshold' : IntegerProp(default='0', fill_brok=['full_status']),
+        'event_handler' : StringProp(default='', fill_brok=['full_status']),
+        'event_handler_enabled' : BoolProp(default='0',fill_brok=['full_status']),
+        'low_flap_threshold' : IntegerProp(default='-1', fill_brok= ['full_status']),
+        'high_flap_threshold' : IntegerProp(default='-1', fill_brok=['full_status']),
+        'flap_detection_enabled' : BoolProp(default='1', fill_brok=['full_status']),
+        'flap_detection_options' : ListProp(default='o,w,c,u', fill_brok=['full_status']),
+        'process_perf_data' : BoolProp(default='1', fill_brok=['full_status']),
+        'retain_status_information' : BoolProp(default='1', fill_brok=['full_status']),
+        'retain_nonstatus_information' : BoolProp(default='1', fill_brok=['full_status']),
+        'notification_interval' : IntegerProp(default='60', fill_brok=['full_status']),
+        'first_notification_delay' : IntegerProp(default='0', fill_brok=['full_status']),
+        'notification_period' : StringProp(fill_brok=['full_status']),
+        'notification_options' : ListProp(default='w,u,c,r,f,s',fill_brok=['full_status']),
+        'notifications_enabled' : BoolProp(default='1', fill_brok=['full_status']),
+        'contacts' : StringProp(fill_brok=['full_status']),
+        'contact_groups' : StringProp(fill_brok=['full_status']),
+        'stalking_options' : ListProp(default='', fill_brok=['full_status']),
+        'notes' : StringProp(default='', fill_brok=['full_status']),
+        'notes_url' : StringProp(default='', fill_brok=['full_status']),
+        'action_url' : StringProp(default='', fill_brok=['full_status']),
+        'icon_image' : StringProp(default='', fill_brok=['full_status']),
+        'icon_image_alt' : StringProp(default='', fill_brok=['full_status']),
+        'failure_prediction_enabled' : BoolProp(default='0', fill_brok=['full_status']),
+        'parallelize_check' : BoolProp(default='1', fill_brok=['full_status']),
 
         # Shinken specific
-        'poller_tag' : {
-            'required' : False,
-            'default' : None},
+        'poller_tag' : StringProp(default=None),
 
-        'resultmodulations' : {
-            'required' : False, 
-            'default' : ''},
-        'escalations' : {
-            'required' : False,
-            'default' : '', 
-            'fill_brok' : ['full_status']},
-        'maintenance_period' : {
-            'required' : False, 
-            'default' : '',
-            'fill_brok' : ['full_status']},
+        'resultmodulations' : StringProp(default=''),
+        'escalations' : StringProp(default='', fill_brok=['full_status']),
+        'maintenance_period' : StringProp(default='', fill_brok=['full_status']),
 
         # service generator
-        'duplicate_foreach' : {
-            'required' : False,
-            'default' : ''},
-        'default_value' : {
-            'required' : False, 
-            'default' : ''},
+        'duplicate_foreach' : StringProp(default=''),
+        'default_value' : StringProp(default=''),
 
         # Criticity value
-        'criticity' : {
-            'required' : False, 
-            'default' : '3', 
-            'pythonize' : to_int, 
-            'fill_brok' : ['full_status']},
+        'criticity' : IntegerProp(default='3', fill_brok=['full_status']),
+
+        #Fix it button
+        'automatic_event_handler' : BoolProp(default='1', fill_brok=['full_status']),
         }
 
     # properties used in the running state
     running_properties = {
-        'last_chk' : {
-            'default' : 0,
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'next_chk' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'next_schedule']},
-        'in_checking' : {
-            'default' : False,
-            'fill_brok' : ['full_status', 'check_result', 'next_schedule'],
-            'retention' : True},
-        'latency' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'], 
-            'retention' : True,
-            'pythonize' : to_float}, 
-        'attempt' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'state' : {
-            'default' : 'PENDING', 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'state_id' : {
-            'default' : 0,
-            'fill_brok' : ['full_status', 'check_result'], 
-            'retention' : True},
-        'current_event_id' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'last_event_id' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'last_state' : {
-            'default' : 'PENDING', 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'last_state_id' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'last_state_change' : {
-            'default' : time.time(),
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'last_hard_state_change' : {
-            'default' : time.time(), 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'last_hard_state' : {
-            'default' : time.time(), 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'last_time_ok' : {
-            'default' : int(time.time()),
-            'fill_brok' : ['full_status', 'check_result'], 
-            'retention' : True},
-        'last_time_warning' : {
-            'default' : int(time.time()),
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'last_time_critical' : {
-            'default' : int(time.time()),
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'last_time_unknown' : {
-            'default' : int(time.time()),
-            'fill_brok' : ['full_status', 'check_result'], 
-            'retention' : True},
-        'duration_sec' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'state_type' : {
-            'default' : 'HARD', 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'state_type_id' : {
-            'default' : 0,
-            'fill_brok' : ['full_status', 'check_result'], 
-            'retention' : True},
-        'output' : {
-            'default' : '', 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True, 
-            'pythonize' : None},
-        'long_output' : {
-            'default' : '',
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True, 
-            'pythonize' : None},
-        'is_flapping' : {
-            'default' : False, 
-            'fill_brok' : ['full_status'],
-            'retention' : True,
-            'pythonize' : to_bool},
+        'last_chk' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'next_chk' : IntegerProp(default=0, fill_brok=['full_status', 'next_schedule']),
+        'in_checking' : BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule'], retention=True),
+        'latency' : FloatProp(default=0, fill_brok=['full_status', 'check_result'], retention=True,),
+        'attempt' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'],retention=True),
+        'state' : StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
+        'state_id' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'current_event_id' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_event_id' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state' : StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
+        'last_state_id' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'last_state_change' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_hard_state_change' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_hard_state' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_time_ok' : IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_warning' : IntegerProp(default=int(time.time()), fill_brok = ['full_status', 'check_result'], retention=True),
+        'last_time_critical' : IntegerProp(default=int(time.time()), fill_brok =['full_status', 'check_result'], retention=True),
+        'last_time_unknown' : IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
+        'duration_sec' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'state_type' : StringProp(default='HARD', fill_brok=['full_status'], retention=True),
+        'state_type_id' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'output' : StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
+        'long_output' : StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
+        'is_flapping' : BoolProp(default=False, fill_brok=['full_status'], retention=True),
         #  dependencies for actions like notif of event handler, 
         # so AFTER check return
-        'act_depend_of' : {
-            'default' : []}, 
+        'act_depend_of' : ListProp(default=[]), 
         # dependencies for checks raise, so BEFORE checks
-        'chk_depend_of' : {
-            'default' : []}, 
+        'chk_depend_of' : ListProp(default=[]),
         # elements that depend of me, so the reverse than just uppper
-        'act_depend_of_me' : {
-            'default' : [] },
+        'act_depend_of_me' : ListProp(default=[]),
         # elements that depend of me 
-        'chk_depend_of_me' : {
-            'default' : []}, 
+        'chk_depend_of_me' : ListProp(default=[]),
 
-        'last_state_update' : {
-            'default' : time.time(), 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'checks_in_progress' : {
-            'default' : []}, # no brok because checks are too linked
-        'notifications_in_progress' : {
-            'default' : {},
-            'retention' : True}, # no broks because notifications are too linked
-        'downtimes' : {
-            'default' : [],
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'comments' : {
-            'default' : [], 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'flapping_changes' : {
-            'default' : [],
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'flapping_comment_id' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'percent_state_change' : {
-            'default' : 0.0, 
-            'fill_brok' : ['full_status'],
-            'retention' : True,
-            'pythonize' : to_float},
-        'problem_has_been_acknowledged' : {
-            'default' : False,
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'acknowledgement' : {
-            'default' : None,
-            'retention' : True},
-        'acknowledgement_type' : {
-            'default' : 1, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'check_type' : {
-            'default' : 0,
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'has_been_checked' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'should_be_scheduled' : {
-            'default' : 1,
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'last_problem_id' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'current_problem_id' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'execution_time' : {
-            'default' : 0.0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True, 
-            'pythonize' : to_float},
-        'last_notification' : {
-            'default' : time.time(),
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'current_notification_number' : {
-            'default' : 0,
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'current_notification_id' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status'], 
-            'retention' : True},
-        'check_flapping_recovery_notification' : {
-            'default' : True,
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'scheduled_downtime_depth' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'pending_flex_downtime' : {
-            'default' : 0,
-            'fill_brok' : ['full_status'],
-            'retention' : True},
-        'timeout' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'start_time' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'end_time' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'early_timeout' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'return_code' : {
-            'default' : 0, 
-            'fill_brok' : ['full_status', 'check_result'],
-            'retention' : True},
-        'perf_data' : {
-            'default' : '', 
-            'fill_brok' : ['full_status', 'check_result'], 
-            'retention' : True, 
-            'pythonize' : None},
-        'last_perf_data' : {
-            'default' : '', 
-            'retention' : True},
-        'host' : {
-            'default' : None},
-        'customs' : {
-            'default' : {}},
-        'notified_contacts' : {
-            'default' : set()}, # use for having all contacts we have notified
-        'in_scheduled_downtime' : {
-            'default' : False, 
-            'retention' : True},
-        'in_scheduled_downtime_during_last_check' : {
-            'default' : False,
-            'retention' : True},
-        'actions' : {'default' : []}, #put here checks and notif raised
-        'broks' : {'default' : []}, #and here broks raised
+        'last_state_update' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'checks_in_progress' : ListProp(default=[]), # no brok because checks are too linked
+        'notifications_in_progress' : ListProp(default={}, retention=True), # no broks because notifications are too linked
+        'downtimes' : ListProp(default=[], fill_brok=['full_status'], retention=True),
+        'comments' : ListProp(default=[], fill_brok=['full_status'], retention=True),
+        'flapping_changes' : ListProp(default=[], fill_brok=['full_status'], retention=True),
+        'flapping_comment_id' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'percent_state_change' : FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
+        'problem_has_been_acknowledged' : BoolProp(default=False, fill_brok=['full_status'], retention=True),
+        'acknowledgement' : StringProp(default=None, retention=True),
+        'acknowledgement_type' : IntegerProp(default=1, fill_brok=['full_status', 'check_result'], retention=True),
+        'check_type' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'has_been_checked' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'should_be_scheduled' : IntegerProp(default=1, fill_brok=['full_status'], retention=True),
+        'last_problem_id' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'current_problem_id' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'execution_time' : FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_notification' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'current_notification_number' : IntegerProp(default=0, fill_brok=['full_status'],retention=True),
+        'current_notification_id' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'check_flapping_recovery_notification' : BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'scheduled_downtime_depth' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'pending_flex_downtime' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'timeout' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'start_time' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'end_time' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'early_timeout' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'return_code' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'perf_data' : StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
+        'last_perf_data' : StringProp(default='', retention=True),
+        'host' : StringProp(default=None),
+        'customs' : ListProp(default={}),
+        'notified_contacts' : ListProp(default=set()), # use for having all contacts we have notified
+        'in_scheduled_downtime' : BoolProp(default=False, retention=True),
+        'in_scheduled_downtime_during_last_check' : BoolProp(default=False, retention=True),
+        'actions' : ListProp(default=[]), #put here checks and notif raised
+        'broks' : ListProp(default=[]), #and here broks raised
 
         # All errors and warning raised during the configuration parsing
         # and taht will raised real warning/errors during the is_correct
-        'configuration_warnings' : {'default' : []},
-        'configuration_errors' : {'default' : []},
+        'configuration_warnings' : ListProp(default=[]),
+        'configuration_errors' : ListProp(default=[]),
 
         # Problem/impact part
-        'is_problem' : {
-            'default' : False,
-            'fill_brok' : ['full_status']},
-        'is_impact' : {
-            'default' : False,
-            'fill_brok' : ['full_status']},
+        'is_problem' : BoolProp(default=False, fill_brok=['full_status']),
+        'is_impact' : BoolProp(default=False, fill_brok=['full_status']),
         # list of problems that make us an impact
-        'source_problems' : {
-            'default' : [],
-            'fill_brok' : ['full_status'],
-            'brok_transformation' : to_svc_hst_distinct_lists},
+        'source_problems' : ListProp(default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
         # list of the impact I'm the cause of
-        'impacts' : {
-            'default' : [], 
-            'fill_brok' : ['full_status'],
-            'brok_transformation' : to_svc_hst_distinct_lists}, 
+        'impacts' : ListProp( default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists), 
         # keep a trace of the old state before being an impact
-        'state_before_impact' : {
-            'default' : 'PENDING'}, 
+        'state_before_impact' : StringProp(default='PENDING'), 
         # keep a trace of the old state id before being an impact
-        'state_id_before_impact' : {
-            'default' : 0}, 
+        'state_id_before_impact' : IntegerProp(default=0), 
         # if the state change, we know so we do not revert it
-        'state_changed_since_impact' : {
-            'default' : False}, 
+        'state_changed_since_impact' : BoolProp(default=False), 
 
         # Easy Service dep definition
-        'service_dependencies' : {
-            'required' : False, 
-            'default' : '', 
-            'pythonize' : to_split}, # TODO : find a way to brok it?
+        'service_dependencies' : ListProp(default=''),# TODO : find a way to brok it?
         
 
         }
@@ -674,7 +333,7 @@ class Service(SchedulingItem):
                                   'hostgroup_name']
         for prop in cls.properties:
             if prop not in special_properties:
-                if not hasattr(self, prop) and cls.properties[prop]['required']:
+                if not hasattr(self, prop) and cls.properties[prop].required:
                     logger.log('%s : I do not have %s' % (self.get_name(), prop))
                     state = False # Bad boy...
 

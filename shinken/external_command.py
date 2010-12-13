@@ -192,7 +192,9 @@ class ExternalCommandManager:
         'STOP_OBSESSING_OVER_HOST' : {'global' : False, 'args' : ['host']},
         'STOP_OBSESSING_OVER_HOST_CHECKS' : {'global' : True, 'args' : []},
         'STOP_OBSESSING_OVER_SVC' : {'global' : False, 'args' : ['service']},
-        'STOP_OBSESSING_OVER_SVC_CHECKS' : {'global' : True, 'args' : []}
+        'STOP_OBSESSING_OVER_SVC_CHECKS' : {'global' : True, 'args' : []},
+        'LAUNCH_SVC_EVENT_HANDLER' : {'global' : False, 'args' : ['service']},
+        'LAUNCH_HOST_EVENT_HANDLER' : {'global' : False, 'args' : ['host']},
     }
 
 
@@ -1250,6 +1252,17 @@ class ExternalCommandManager:
         self.conf.obsess_over_services = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
+
+
+    ### Now the shinken specific ones
+    #LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
+    def LAUNCH_SVC_EVENT_HANDLER(self, service):
+        service.get_event_handlers(automatic=False)
+
+    #LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
+    def LAUNCH_HOST_EVENT_HANDLER(self, host):
+        host.get_event_handlers(automatic=False)
+
 
 
 if __name__ == '__main__':

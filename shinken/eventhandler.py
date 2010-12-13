@@ -29,25 +29,37 @@ import time
 #    from pexpect import *
 
 from action import Action
-
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class EventHandler(Action):
-    properties={'is_a' : {'required': False, 'default':'eventhandler'},
-                'type' : {'required': False, 'default': ''},
-                '_in_timeout' : {'required': False, 'default': False},
-                'status' : {'required': False, 'default':''},
-                'exit_status' : {'required': False, 'default':3},
-                'state' : {'required': False, 'default':0},
-                'output' : {'required': False, 'default':''},
-                'long_output' : {'required': False, 'default':''},
-                'ref' : {'required': False, 'default': -1},
+    properties={'is_a': StringProp(
+            default='eventhandler'),
+                'type': StringProp(
+            default=''),
+                '_in_timeout': StringProp(
+            default=False),
+                'status': StringProp(
+            default=''),
+                'exit_status': StringProp(
+            default=3),
+                'state': StringProp(
+            default=0),
+                'output': StringProp(
+            default=''),
+                'long_output': StringProp(
+            default=''),
+#                'ref': StringProp(
+#            default=-1),
                 #'ref_type' : {'required': False, 'default':''},
-                't_to_go' : {'required': False, 'default': 0},
-                'check_time' : {'required': False, 'default': 0},
-                'execution_time' : {'required': False, 'default': 0},
-                'env' : {'required' : False, 'default' : {}},
+                't_to_go': StringProp(
+            default=0),
+                'check_time': StringProp(
+            default=0),
+                'execution_time': StringProp(
+            default=0),
+                'env': StringProp(
+            default={}),
                 }
-
     #id = 0 #Is common to Actions
     def __init__(self, command, id=None, timeout=10, env={}):
         self.is_a = 'eventhandler'
@@ -146,3 +158,27 @@ class EventHandler(Action):
 
     def get_id(self):
         return self.id
+
+
+    #Call by picle for dataify the coment
+    #because we DO NOT WANT REF in this pickleisation!
+    def __getstate__(self):
+#        print "Asking a getstate for a downtime on", self.ref.get_dbg_name()
+        cls = self.__class__
+        #id is not in *_properties
+        res = [self.id]
+        for prop in cls.properties:
+            res.append(getattr(self, prop))
+        #We reverse because we want to recreate
+        #By check at properties in the same order
+        res.reverse()
+        return res
+
+
+    #Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state.pop()
+        for prop in cls.properties:
+	    val = state.pop()
+            setattr(self, prop, val)

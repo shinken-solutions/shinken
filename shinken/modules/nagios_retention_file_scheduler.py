@@ -204,13 +204,13 @@ class Nagios_retention_scheduler:
         for prop in running_properties:
             entry = running_properties[prop]
             if hasattr(obj, prop) and prop in obj_cfg:
-                if 'pythonize' in entry:
-                    f = entry['pythonize']
-                    if f != None: # mean it's a string
+#                if 'pythonize' in entry:
+                f = entry.pythonize
+                if f != None: # mean it's a string
                         #print "Apply", f, "to the property", prop, "for ", cls.my_type
-                        val = getattr(obj, prop)
-                        val = f(val)
-                        setattr(obj, prop, val)
+                    val = getattr(obj, prop)
+                    val = f(val)
+                    setattr(obj, prop, val)
                 else: #no pythonize, int by default
                     # if cls.my_type != 'service':
                     #  print "Intify", prop, getattr(obj, prop)
@@ -391,20 +391,22 @@ class Nagios_retention_scheduler:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
-#                        print "Set host value", getattr(ret_h, prop)
+                    if entry.retention:
                         setattr(h, prop, getattr(ret_h, prop))
                 for a in h.notifications_in_progress.values():
                     a.ref = h
                     sched.add(a)
                 h.update_in_checking()
+
                 #And also add downtimes and comments
                 for dt in h.downtimes:
                     dt.ref = h
+                    dt.extra_comment.ref = h
                     sched.add(dt)
                 for c in h.comments:
                     c.ref = h
                     sched.add(c)
+
 
 
         ret_services = all_obj['service']
@@ -416,7 +418,7 @@ class Nagios_retention_scheduler:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
 #                        print "Set service value", getattr(ret_s, prop)
                         setattr(s, prop, getattr(ret_s, prop))
                 for a in s.notifications_in_progress.values():
@@ -426,6 +428,7 @@ class Nagios_retention_scheduler:
                 #And also add downtimes and comments
                 for dt in s.downtimes:
                     dt.ref = s
+                    dt.extra_comment.ref = s
                     sched.add(dt)
                 for c in s.comments:
                     c.ref = s

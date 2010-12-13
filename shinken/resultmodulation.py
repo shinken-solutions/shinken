@@ -25,19 +25,21 @@ import time
 
 from shinken.item import Item, Items
 from shinken.util import to_split
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class Resultmodulation(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'resultmodulation'
 
-    properties = {'resultmodulation_name' : {'required':True},
-                  'exit_codes_match' : {'required':False, 'default':'', 'pythonize' : to_split},
-                  'exit_code_modulation' : {'required':False, 'default':None},
-                  'modulation_period' : {'required':False, 'default':None},
+    properties = {'resultmodulation_name': StringProp(),
+                  'exit_codes_match': ListProp(
+            default=''),
+                  'exit_code_modulation': StringProp(
+            default=None),
+                  'modulation_period': StringProp(
+            default=None),
                   }
-
     running_properties = {}
-
     macros = {}
 
 

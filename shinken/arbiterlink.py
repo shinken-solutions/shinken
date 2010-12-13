@@ -22,30 +22,29 @@ import socket
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.util import to_int, to_bool, to_split
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class ArbiterLink(SatelliteLink):
     id = 0
     my_type = 'arbiter'
-    properties={'arbiter_name' : {'required' : True },
-                'host_name' : {'required' : False, 'default' : socket.gethostname()},
-                'address' : {'required' : True},
-                'port' : {'required':  False, 'default' : '7770', 'pythonize': to_int},
-                'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
-#                'manage_sub_realms' : {'required':  False, 'default' : '1', 'pythonize': to_bool},
-#                'manage_arbiter' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
-                'modules' : {'required':  False, 'default' : '', 'pythonize' : to_split, 'to_send' : True},
+    properties={'arbiter_name' : StringProp(),
+                'host_name' : StringProp(default=socket.gethostname()),
+                'address' : StringProp(),
+                'port' : IntegerProp(default='7770'),
+                'spare' : BoolProp(default='0'),
+                'modules' : ListProp(default='', to_send=True),
 #                'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
-                'manage_arbiters' : {'required' : False, 'default' : '0', 'pythonize' : to_int},
-                'timeout' : {'required' : False, 'default' : '3', 'pythonize': to_int, 'fill_brok' : ['full_status']},
-                'data_timeout' : {'required' : False, 'default' : '120', 'pythonize': to_int, 'fill_brok' : ['full_status']},
-                'max_check_attempts' : {'required' : False, 'default' : '3','pythonize': to_int, 'fill_brok' : ['full_status']},
+                'manage_arbiters' : BoolProp(default='0'),
+                'timeout' : IntegerProp(default='3', fill_brok=['full_status']),
+                'data_timeout' : IntegerProp(default='120', fill_brok=['full_status']),
+                'max_check_attempts' : IntegerProp(default='3', fill_brok=['full_status']),
                 }
 
-    running_properties = {'con' : {'default' : None},
-                          'broks' : {'default' : []},
-                          'alive' : {'default' : False, 'fill_brok' : ['full_status']}, # DEAD or not
-                          'attempt' : {'default' : 0, 'fill_brok' : ['full_status']}, # the number of failed attempt
-                          'reachable' : {'default' : False, 'fill_brok' : ['full_status']}, # can be network ask or not (dead or check in timeout or error)
+    running_properties = {'con' : StringProp(default=None),
+                          'broks' : ListProp(default=[]),
+                          'alive' : BoolProp(default=False, fill_brok=['full_status']), # DEAD or not
+                          'attempt' : IntegerProp(default=0, fill_brok=['full_status']), # the number of failed attempt
+                          'reachable' : IntegerProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
                           }
 
     macros = {}

@@ -31,26 +31,54 @@ import time
 
 from action import Action
 from brok import Brok
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class Notification(Action):
     #id = 0 #Is in fact in the Action class to be common with Checks and
     #events handlers
 
     properties={
-        'notification_type' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
-        'start_time' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
-        'end_time' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
-        'contact_name' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'host_name' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'service_description' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'reason_type' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
-        'state' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
-        'output' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'ack_author' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'ack_data' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'escalated' : {'required' : False, 'default' : False, 'fill_brok' : ['full_status']},
-        'contacts_notified' : {'required': False, 'default':0, 'fill_brok' : ['full_status']},
-        'env' : {'required' : False, 'default' : {}},
+        'notification_type': StringProp(
+            default=0,
+            fill_brok=['full_status']),
+        'start_time': StringProp(
+            default=0,
+            fill_brok=['full_status']),
+        'end_time': StringProp(
+            default=0,
+            fill_brok=['full_status']),
+        'contact_name': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'host_name': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'service_description': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'reason_type': StringProp(
+            default=0,
+            fill_brok=['full_status']),
+        'state': StringProp(
+            default=0,
+            fill_brok=['full_status']),
+        'output': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'ack_author': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'ack_data': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'escalated': StringProp(
+            default=False,
+            fill_brok=['full_status']),
+        'contacts_notified': StringProp(
+            default=0,
+            fill_brok=['full_status']),
+        'env': StringProp(
+            default={}),
         }
 
     macros = {
@@ -209,3 +237,25 @@ class Notification(Action):
         return b
 
 
+    #Call by picle for dataify the coment
+    #because we DO NOT WANT REF in this pickleisation!
+    def __getstate__(self):
+#        print "Asking a getstate for a downtime on", self.ref.get_dbg_name()
+        cls = self.__class__
+        #id is not in *_properties
+        res = [self.id]
+        for prop in cls.properties:
+            res.append(getattr(self, prop))
+        #We reverse because we want to recreate
+        #By check at properties in the same order
+        res.reverse()
+        return res
+
+
+    #Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state.pop()
+        for prop in cls.properties:
+	    val = state.pop()
+            setattr(self, prop, val)

@@ -20,23 +20,36 @@
 
 
 from itemgroup import Itemgroup, Itemgroups
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class Servicegroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'servicegroup'
 
     properties={
-        'id' : {'required' : False, 'default' : 0, 'fill_brok' : ['full_status']},
-        'servicegroup_name' : {'required' : True, 'fill_brok' : ['full_status']},
-        'alias' : {'required' : True, 'fill_brok' : ['full_status']},
-        'notes' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'notes_url' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'action_url' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
-        'members' : {'required' : False, 'default' : '', 'fill_brok' : ['full_status']},
+        'id': StringProp(
+            default=0,
+            fill_brok=['full_status']),
+        'servicegroup_name': StringProp(
+            fill_brok=['full_status']),
+        'alias': StringProp(
+            fill_brok=['full_status']),
+        'notes': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'notes_url': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'action_url': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'members': StringProp(
+            default='',
+            fill_brok=['full_status']),
         #Shinken specific
-        'unknown_members' : {'required': False, 'default': []}
+        'unknown_members': StringProp(
+            default=[])
         }
-
     macros = {
         'SERVICEGROUPALIAS' : 'alias',
         'SERVICEGROUPMEMBERS' : 'members',

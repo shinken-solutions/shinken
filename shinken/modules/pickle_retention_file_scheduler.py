@@ -79,7 +79,7 @@ class Pickle_retention_scheduler:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
                         d[prop] = getattr(h, prop)
                 all_data['hosts'][h.host_name] = d
 
@@ -89,7 +89,7 @@ class Pickle_retention_scheduler:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
                         d[prop] = getattr(s, prop)
                 all_data['services'][(s.host.host_name, s.service_description)] = d
 
@@ -150,7 +150,7 @@ class Pickle_retention_scheduler:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
                         # Mayeb the save was not with this value, so
                         # we just bypass this
                         if prop in d:
@@ -159,6 +159,15 @@ class Pickle_retention_scheduler:
                     a.ref = h
                     sched.add(a)
                 h.update_in_checking()
+                #And also add downtimes and comments
+                for dt in h.downtimes:
+                    dt.ref = h
+                    dt.extra_comment.ref = h
+                    sched.add(dt)
+                for c in h.comments:
+                    c.ref = h
+                    sched.add(c)
+
 
         ret_services = all_data['services']
         for (ret_s_h_name, ret_s_desc) in ret_services:
@@ -169,7 +178,7 @@ class Pickle_retention_scheduler:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
-                    if 'retention' in entry and entry['retention']:
+                    if entry.retention:
                         # Mayeb the save was not with this value, so
                         # we just bypass this
                         if prop in d:
@@ -178,6 +187,14 @@ class Pickle_retention_scheduler:
                     a.ref = s
                     sched.add(a)
                 s.update_in_checking()
+                #And also add downtimes and comments
+                for dt in s.downtimes:
+                    dt.ref = s
+                    dt.extra_comment.ref = s
+                    sched.add(dt)
+                for c in s.comments:
+                    c.ref = s
+                    sched.add(c)
 
         log_mgr.log("[PickleRetention] OK we've load data from retention file")
 

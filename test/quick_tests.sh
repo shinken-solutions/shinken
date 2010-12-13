@@ -29,6 +29,7 @@ rm nosetests.xml
 function launch_and_assert {
     SCRIPT=$1
     nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
+#    ./$SCRIPT
     if [ $? != 0 ]
 	then
 	echo "Error : the test $SCRIPT failed"
@@ -71,6 +72,7 @@ launch_and_assert test_timeperiod_inheritance.py
 launch_and_assert test_bad_timeperiods.py
 launch_and_assert test_maintenance_period.py
 launch_and_assert test_external_commands.py
+launch_and_assert test_on_demand_event_handlers.py
 
 #Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py

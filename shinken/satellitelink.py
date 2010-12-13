@@ -286,7 +286,8 @@ class SatelliteLink(Item):
         #cfg_for_satellite['modules'] = satellite.modules
         properties = self.__class__.properties
         for prop in properties:
-            if 'to_send' in properties[prop] and properties[prop]['to_send']:
+#            if 'to_send' in properties[prop] and properties[prop]['to_send']:
+            if properties[prop].to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
 
     #Some parameters for satellites are not defined in the satellites conf

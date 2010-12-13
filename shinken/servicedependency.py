@@ -21,6 +21,7 @@
 
 from shinken.util import to_split, to_bool
 from shinken.item import Item, Items
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class Servicedependency(Item):
     id = 0
@@ -35,20 +36,18 @@ class Servicedependency(Item):
 #       inherits_parent		1
 #       dependency_period       24x7
 
-    properties={'dependent_host_name' : {'required':True},
-                'dependent_hostgroup_name' : {'required':False, 'default' : ''},
-                'dependent_service_description' : {'required':True},
-                'host_name' : {'required':True},
-                'hostgroup_name' : {'required':False, 'default' : ''},
-                'service_description' : {'required':True},
-                'inherits_parent' : {'required':False, 'default' : '0', 'pythonize' : to_bool},
-                'execution_failure_criteria' : {'required':False, 'default' : 'n', 'pythonize' : to_split},
-                'notification_failure_criteria' : {'required':False, 'default' : 'n', 'pythonize' : to_split},
-                'dependency_period' : {'required':False, 'default' : ''}
+    properties={'dependent_host_name': StringProp(),
+                'dependent_hostgroup_name': StringProp(default=''),
+                'dependent_service_description': StringProp(),
+                'host_name': StringProp(),
+                'hostgroup_name': StringProp(default=''),
+                'service_description': StringProp(),
+                'inherits_parent': BoolProp(default='0'),
+                'execution_failure_criteria': ListProp(default='n'),
+                'notification_failure_criteria': ListProp(default='n'),
+                'dependency_period': StringProp(default='')
                 }
-
     running_properties = {}
-
 
     #Give a nice name output, for debbuging purpose
     #(Yes, debbuging CAN happen...)

@@ -20,28 +20,28 @@
 
 from shinken.item import Item, Items
 from shinken.util import to_int, to_split, strip_and_uniq
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class Escalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'escalation'
 
-    properties={'escalation_name' : {'required' : True},
-                'first_notification' : {'required' : True, 'pythonize' : to_int},
-                'last_notification' : {'required': True, 'pythonize' : to_int},
-                'notification_interval' : {'required' : True, 'pythonize' : to_int},
-                'escalation_period' : {'required': False, 'default' : None},
-                'escalation_options' : {'required': False, 'default': 'd,u,r,w,c', 'pythonize' : to_split},
-                'contacts' : {'required':True},
-                'contact_groups' : {'required':True},
+    properties={'escalation_name': StringProp(),
+                'first_notification': IntegerProp(),
+                'last_notification': IntegerProp(),
+                'notification_interval': IntegerProp(),
+                'escalation_period': StringProp(default=None),
+                'escalation_options': ListProp(
+            default='d,u,r,w,c'),
+                'contacts': StringProp(),
+                'contact_groups': StringProp(),
                 }
-
     running_properties = {
         #All errors and warning raised during the configuration parsing
         #and taht will raised real warning/errors during the is_correct
-        'configuration_warnings' : {'default' : []},
-        'configuration_errors' : {'default' : []},
+        'configuration_warnings': StringProp(default=[]),
+        'configuration_errors': StringProp(default=[]),
         }
-
 
     macros = {}
 

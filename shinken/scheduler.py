@@ -104,6 +104,9 @@ class Scheduler:
         self.services.create_reversed_list()
         self.services.optimize_service_search(conf.hosts)
         self.hosts = conf.hosts
+        #DBG: 
+#        for h in self.hosts:
+#            print h.get_name(), h.parents
         self.hosts.create_reversed_list()
 
         self.notificationways = conf.notificationways
