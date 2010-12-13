@@ -894,12 +894,8 @@ class Config(Item):
             properties = self.__class__.properties
             for prop in properties:
                 entry = properties[prop]
-                if entry.unused and hasattr(self, prop):
-                    if entry.text:
-                        usage_text = entry.text
-                    else:
-                        usage_text = "this parameter is no longer useful in the Shinken architecture."
-                    text = 'Notice : the parameter %s is useless and can be removed from the configuration (Reason: %s)' %  (prop, usage_text)
+                if isinstance(entry, UnusedProp): 
+                    text = 'Notice : the parameter %s is useless and can be removed from the configuration (Reason: %s)' %  (prop, entry.text)
                     logger.log(text)
 
 
@@ -1607,7 +1603,7 @@ class Config(Item):
 #               or not (Config.properties[prop]['usage'] == 'unused' \
 #               or  Config.properties[prop]['usage'] == 'unmanaged'):
                 if Config.properties[prop].managed \
-                        and not Config.properties[prop].unused:
+                        and not isinstance(Config.properties[prop], UnusedProp):
                     val = getattr(self, prop)
                     setattr(self.confs[i], prop, val)
 
