@@ -78,7 +78,7 @@ Pyro = shinken.pyro_wrapper.Pyro
 from shinken.satellite import Satellite
 from shinken.util import to_int, to_bool
 
-VERSION = "0.3"
+VERSION = "0.4"
 
 
 #Our main APP class

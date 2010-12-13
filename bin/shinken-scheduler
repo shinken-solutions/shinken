@@ -61,20 +61,22 @@ import sys
 import select
 import random
 import getopt
-import resource
 
-
-# All the pickle will ask for a lot of recursion, so we must make
-# sure to set it at a high value. The maximum recursion depth depends
-# on the Python version and the process limit "stack size".
-# The factors used were aquired by testing a broad range of installations
-stacksize_soft, stacksize_hard = resource.getrlimit(3)
-if sys.version_info < (2,6):
-    sys.setrecursionlimit(int(stacksize_soft * 0.65 + 1100))
-elif sys.version_info < (3,):
-    sys.setrecursionlimit(int(stacksize_soft * 1.9 + 3200))
-else:
-    sys.setrecursionlimit(int(stacksize_soft * 2.4 + 3200))
+# We try to raise up recusion limit on
+# but we don't have resource module on windows
+if os.name != 'nt':
+    import resource
+    # All the pickle will ask for a lot of recursion, so we must make
+    # sure to set it at a high value. The maximum recursion depth depends
+    # on the Python version and the process limit "stack size".
+    # The factors used were aquired by testing a broad range of installations
+    stacksize_soft, stacksize_hard = resource.getrlimit(3)
+    if sys.version_info < (2,6):
+        sys.setrecursionlimit(int(stacksize_soft * 0.65 + 1100))
+    elif sys.version_info < (3,):
+        sys.setrecursionlimit(int(stacksize_soft * 1.9 + 3200))
+    else:
+        sys.setrecursionlimit(int(stacksize_soft * 2.4 + 3200))
 
 
 ## Make sure people are using Python 2.5 or higher
@@ -129,7 +131,7 @@ from shinken.util import to_int, to_bool
 from shinken.modulesmanager import ModulesManager
 
 
-VERSION = "0.3"
+VERSION = "0.4"
 
 
 
