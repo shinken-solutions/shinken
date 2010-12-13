@@ -176,7 +176,7 @@ class Npcd_broker:
 
 
     def rotate(self):
-        target = '%s/%s.%s' % (self.perfdata_spool_dir, self.perfdata_spool_filename, time.time())
+        target = '%s/%s.%s' % (self.perfdata_spool_dir, self.perfdata_spool_filename, int(time.time()))
         try:
             self.logfile.close()
             if os.path.exists(self.perfdata_file) and os.path.getsize(self.perfdata_file) > 0:
