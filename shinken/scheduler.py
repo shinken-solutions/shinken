@@ -506,7 +506,9 @@ class Scheduler:
             #Already launch checks should not be touch
             if c.status == 'scheduled':
                 t_to_go = c.t_to_go
-                ref = c.ref
+
+                # Event handler do not have ref
+                ref = getattr(c, 'ref', None)
                 new_t = max(0, t_to_go + difference)
 
                 #Notification should be check with notification_period
