@@ -211,8 +211,6 @@ class Host(SchedulingItem):
             default='3',
             fill_brok=['full_status']),
 
-        #Fix it button
-        'automatic_event_handler' : BoolProp(default='1', fill_brok=['full_status']),
         }
 
     #properties set only for running purpose

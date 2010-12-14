@@ -47,7 +47,7 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
-        self.assert_(svc.automatic_event_handler == False)
+        self.assert_(svc.event_handler_enabled == False)
 
         self.scheduler_loop(5, [[svc, 2, 'CRITICAL']])
         # We should NOT see any event hnalder here :)

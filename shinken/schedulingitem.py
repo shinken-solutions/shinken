@@ -462,14 +462,12 @@ class SchedulingItem(Item):
 
     #Get a event handler if item got an event handler
     #command. It must be enabled locally and globally
-    def get_event_handlers(self, automatic=True):
+    def get_event_handlers(self, externalcmd=False):
         cls = self.__class__
-        if self.event_handler == None or not self.event_handler_enabled or not cls.enable_event_handlers:
-            return
-
-        # If we are an automatic launch, and this item do not
-        # want them, we bail out
-        if automatic and not self.automatic_event_handler:
+        
+        # The external command always pass
+        # if not, only if we enable them (auto launch)
+        if self.event_handler == None or ((not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd):
             return
 
         print self.event_handler.__dict__

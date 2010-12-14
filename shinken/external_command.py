@@ -1257,11 +1257,11 @@ class ExternalCommandManager:
     ### Now the shinken specific ones
     #LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_SVC_EVENT_HANDLER(self, service):
-        service.get_event_handlers(automatic=False)
+        service.get_event_handlers(externalcmd=True)
 
     #LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_HOST_EVENT_HANDLER(self, host):
-        host.get_event_handlers(automatic=False)
+        host.get_event_handlers(externalcmd=True)
 
 
 
