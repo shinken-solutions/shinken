@@ -26,7 +26,7 @@ print "Detected module : Picle retention file for Scheduler"
 
 
 import cPickle
-
+import shutil
 
 
 properties = {
@@ -66,7 +66,9 @@ class Pickle_retention_scheduler:
         print "[PickleRetention] asking me to update the retention objects"
         #Now the flat file method
         try:
-            f = open(self.path, 'wb')
+            # Open a file near the path, with .tmp extension
+            # so in cae or problem, we do not lost the old one
+            f = open(self.path+'.tmp', 'wb')
             #Just put hosts/services becauses checks and notifications
             #are already link into
             #all_data = {'hosts' : sched.hosts, 'services' : sched.services}
@@ -98,6 +100,8 @@ class Pickle_retention_scheduler:
             cPickle.dump(all_data, f)
             #f.write(s_compress)
             f.close()
+            # Now move the .tmp fiel to the real path
+            shutil.move(self.path+'.tmp', self.path)
         except IOError , exp:
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))
             return
