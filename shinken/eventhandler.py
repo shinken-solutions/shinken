@@ -57,7 +57,7 @@ class EventHandler(Action):
             default=0),
                 'env': StringProp(
             default={}),
-                'perf_data' ; StringProp(default=''),
+                'perf_data' : StringProp(default=''),
                 }
 
     #id = 0 #Is common to Actions
