@@ -258,7 +258,6 @@ class Notification(Action):
         #id is not in *_properties
         res = [self.id]
         for prop in cls.properties:
-            print "Save prop", prop
             res.append(getattr(self, prop))
         #We reverse because we want to recreate
         #By check at properties in the same order

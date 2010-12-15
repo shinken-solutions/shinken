@@ -42,7 +42,6 @@ class EventHandler(Action):
             default=''),
                 'exit_status': StringProp(
             default=3),
-                'state': StringProp(default=0),
                 'output': StringProp(
             default=''),
                 'long_output': StringProp(
@@ -58,6 +57,7 @@ class EventHandler(Action):
             default=0),
                 'env': StringProp(
             default={}),
+                'perf_data' ; StringProp(default=''),
                 }
 
     #id = 0 #Is common to Actions
@@ -163,7 +163,7 @@ class EventHandler(Action):
     #Call by picle for dataify the coment
     #because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
-#        print "Asking a getstate for a downtime on", self.ref.get_dbg_name()
+        print "Asking a getstate for a even handler on", self.ref.get_dbg_name()
         cls = self.__class__
         #id is not in *_properties
         res = [self.id]
