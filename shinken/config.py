@@ -707,6 +707,14 @@ class Config(Item):
 
         return objects
 
+    
+    # We need to have some ghost objects like
+    # the check_command bp_rule for business
+    # correlator rules
+    def add_ghost_objects(self, raw_objects):
+        bp_rule = {'command_name' : 'bp_rule', 'command_line' : 'bp_rule'}
+        raw_objects['command'].append(bp_rule)
+
 
     #We've got raw objects in string, now create real Instances
     def create_objects(self, raw_objects):
@@ -715,6 +723,10 @@ class Config(Item):
 
         #some types are already created in this time
         early_created_types = ['arbiter', 'module']
+
+        # Before really create the objects, we add
+        # ghost ones like the bp_rule for correlation
+        self.add_ghost_objects(raw_objects)
 
         for t in types_creations:
             if t not in early_created_types:
