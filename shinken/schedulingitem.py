@@ -1016,3 +1016,9 @@ class SchedulingItem(Item):
 
             #ok we can put it in our temp action queue
             self.actions.append(e)
+
+
+    # Create the whole business rule tree
+    # if we need it
+    def create_business_rules(self):
+        pass

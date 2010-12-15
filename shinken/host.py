@@ -1247,3 +1247,9 @@ class Hosts(Items):
         
         return res
         
+
+    # Will create all business tree for the
+    # services
+    def create_business_rules(self):
+        for s in self:
+            s.create_business_rules()

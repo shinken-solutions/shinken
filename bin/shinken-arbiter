@@ -432,6 +432,9 @@ class Arbiter(Daemon):
         #set ourown timezone and propagate it to other satellites
         self.conf.propagate_timezone_option()
 
+        # Look for business rules, and create teh dep trees
+        self.conf.create_business_rules()
+
         #************* Print warning about useless parameters in Shinken **************"
         self.conf.notice_about_useless_parameters()
 

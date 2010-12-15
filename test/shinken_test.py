@@ -63,6 +63,8 @@ class ShinkenTest(unittest.TestCase):
         self.conf.linkify()
         self.conf.apply_dependancies()
         self.conf.explode_global_conf()
+        self.conf.propagate_timezone_option()
+        self.conf.create_business_rules()
         self.conf.is_correct()
         self.confs = self.conf.cut_into_parts()
         self.dispatcher = Dispatcher(self.conf, self.me)
