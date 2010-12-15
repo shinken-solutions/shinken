@@ -33,7 +33,7 @@ class TestConfig(ShinkenTest):
     #setUp is in shinken_test
 
     #Change ME :)
-    def test_host_perfdata(self):
+    def test_pickle_retention(self):
         print self.conf.modules
         #get our modules
         mod = None
@@ -72,6 +72,15 @@ class TestConfig(ShinkenTest):
 
         #Ok, we can delete the retention file
         os.unlink(mod.path)
+
+
+        # Now make real loops with notifications
+        self.scheduler_loop(10, [[svc, 2, 'CRITICAL | bibi=99%']])
+        #updte the hosts and service in the scheduler in the retentino-file
+        sl.update_retention_objects(self.sched, l)
+
+        r = sl.load_retention_objects(self.sched, l)
+        self.assert_(r == True)
 
 
 

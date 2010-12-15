@@ -83,6 +83,12 @@ class Pickle_retention_scheduler:
                     entry = running_properties[prop]
                     if entry.retention:
                         d[prop] = getattr(h, prop)
+#                        if prop == 'notifications_in_progress':
+#                            v = getattr(h, prop)
+#                            if v != {}:
+#                                print "DUMP", getattr(h, prop)
+#                                for n in v.values():
+#                                    print n.__dict__
                 all_data['hosts'][h.host_name] = d
 
             #Now same for services
@@ -160,6 +166,7 @@ class Pickle_retention_scheduler:
                         if prop in d:
                             setattr(h, prop, d[prop])
                 for a in h.notifications_in_progress.values():
+#                    print "AA,", a.__dict__
                     a.ref = h
                     sched.add(a)
                 h.update_in_checking()

@@ -42,8 +42,7 @@ class EventHandler(Action):
             default=''),
                 'exit_status': StringProp(
             default=3),
-                'state': StringProp(
-            default=0),
+                'state': StringProp(default=0),
                 'output': StringProp(
             default=''),
                 'long_output': StringProp(
@@ -60,6 +59,7 @@ class EventHandler(Action):
                 'env': StringProp(
             default={}),
                 }
+
     #id = 0 #Is common to Actions
     def __init__(self, command, id=None, timeout=10, env={}):
         self.is_a = 'eventhandler'

@@ -38,7 +38,8 @@ class Notification(Action):
     #events handlers
 
     properties={
-        'notification_type': StringProp(
+        'type' : StringProp(default=''),
+        'notification_type': IntegerProp(
             default=0,
             fill_brok=['full_status']),
         'start_time': StringProp(
@@ -71,7 +72,7 @@ class Notification(Action):
         'ack_data': StringProp(
             default='',
             fill_brok=['full_status']),
-        'escalated': StringProp(
+        'escalated': BoolProp(
             default=False,
             fill_brok=['full_status']),
         'contacts_notified': StringProp(
@@ -79,6 +80,18 @@ class Notification(Action):
             fill_brok=['full_status']),
         'env': StringProp(
             default={}),
+        'exit_status' : IntegerProp(default=3),
+        'command_call' : StringProp(default=None),
+        'contact' : StringProp(default=None),
+        '_in_timeout' : BoolProp(default=False),
+        'notif_nb' : IntegerProp(default=0),
+        'status' : StringProp(default='scheduled'),
+        't_to_go' : IntegerProp(default=0),
+        'is_a' : StringProp(default=''),
+        'command' : StringProp(default=''),
+        'host_name' : StringProp(default=''),
+        
+        
         }
 
     macros = {
@@ -240,11 +253,12 @@ class Notification(Action):
     #Call by picle for dataify the coment
     #because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
-#        print "Asking a getstate for a downtime on", self.ref.get_dbg_name()
+#        print "Asking a getstate for a notification on", self.ref.get_dbg_name()
         cls = self.__class__
         #id is not in *_properties
         res = [self.id]
         for prop in cls.properties:
+            print "Save prop", prop
             res.append(getattr(self, prop))
         #We reverse because we want to recreate
         #By check at properties in the same order
