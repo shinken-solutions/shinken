@@ -53,10 +53,15 @@ class TestConfig(ShinkenTest):
         
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
+        self.assert_(svc_bd1.business_rule == None)
         svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
         self.assert_(svc_bd2.got_business_rule == False)
+        self.assert_(svc_bd2.business_rule == None)
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_Or")
         self.assert_(svc_cor.got_business_rule == True)
+        self.assert_(svc_cor.business_rule != None)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.operand == '|')
         
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         self.assert_(host.state == 'UP')

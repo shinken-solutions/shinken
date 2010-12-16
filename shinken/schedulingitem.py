@@ -24,11 +24,11 @@ from item import Item
 import random
 import time
 
-from check import Check
-from notification import Notification
-from macroresolver import MacroResolver
-from eventhandler import EventHandler
-
+from shinken.check import Check
+from shinken.notification import Notification
+from shinken.macroresolver import MacroResolver
+from shinken.eventhandler import EventHandler
+from shinken.business_rule import DependencyNodeFactory, DependencyNode
 
 class SchedulingItem(Item):
 
@@ -1026,7 +1026,7 @@ class SchedulingItem(Item):
         # If we do not have a command, we bailout
         if cmdCall == None:
             return
-        
+
         # we get our based command, like
         # check_tcp!80 -> check_tcp
         cmd = cmdCall.call
@@ -1035,5 +1035,13 @@ class SchedulingItem(Item):
         
         # If it's bp_rule, we got a rule :)
         if base_cmd == 'bp_rule':
+            print "Got rule", elts, cmd
             self.got_business_rule = True
-            
+            rule = ''
+            if len(elts) >= 2:
+                rule = elts[1]
+                print "Got rules", rule
+            fact = DependencyNodeFactory()
+            node = fact.eval_cor_patern(rule)
+            print "got node", node
+            self.business_rule = node

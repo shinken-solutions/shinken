@@ -215,8 +215,11 @@ class Service(SchedulingItem):
         # Easy Service dep definition
         'service_dependencies' : ListProp(default=''),# TODO : find a way to brok it?
 
+        #BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
         'got_business_rule' : BoolProp(default=False),
+        # Our Dependency node for the business rule
+        'business_rule' : StringProp(default=None),
 
         }
 

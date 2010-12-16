@@ -482,8 +482,12 @@ class Host(SchedulingItem):
         'state_changed_since_impact': StringProp(
             default=False), #if teh state change, we know so we do not revert it
 
+        #BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
         'got_business_rule' : BoolProp(default=False),
+        # Our Dependency node for the business rule
+        'business_rule' : StringProp(default=None),
+
 
         }
     #Hosts macros and prop that give the information
