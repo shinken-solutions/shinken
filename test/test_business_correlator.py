@@ -51,9 +51,12 @@ class TestConfig(ShinkenTest):
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         
-        svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "bd1")
-        svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "bd2")
+        svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
+        self.assert_(svc_bd1.got_business_rule == False)
+        svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
+        self.assert_(svc_bd2.got_business_rule == False)
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_Or")
+        self.assert_(svc_cor.got_business_rule == True)
         
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         self.assert_(host.state == 'UP')

@@ -214,7 +214,9 @@ class Service(SchedulingItem):
 
         # Easy Service dep definition
         'service_dependencies' : ListProp(default=''),# TODO : find a way to brok it?
-        
+
+        # Say if we are business based rule or not
+        'got_business_rule' : BoolProp(default=False),
 
         }
 

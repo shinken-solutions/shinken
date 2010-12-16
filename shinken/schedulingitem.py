@@ -1021,4 +1021,19 @@ class SchedulingItem(Item):
     # Create the whole business rule tree
     # if we need it
     def create_business_rules(self):
-        pass
+        cmdCall = getattr(self, 'check_command', None)
+        
+        # If we do not have a command, we bailout
+        if cmdCall == None:
+            return
+        
+        # we get our based command, like
+        # check_tcp!80 -> check_tcp
+        cmd = cmdCall.call
+        elts = cmd.split('!')
+        base_cmd = elts[0]
+        
+        # If it's bp_rule, we got a rule :)
+        if base_cmd == 'bp_rule':
+            self.got_business_rule = True
+            

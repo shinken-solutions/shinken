@@ -481,6 +481,10 @@ class Host(SchedulingItem):
             default=0), #keep a trace of the old state id before being an impact
         'state_changed_since_impact': StringProp(
             default=False), #if teh state change, we know so we do not revert it
+
+        # Say if we are business based rule or not
+        'got_business_rule' : BoolProp(default=False),
+
         }
     #Hosts macros and prop that give the information
     #the prop can be callable or not
