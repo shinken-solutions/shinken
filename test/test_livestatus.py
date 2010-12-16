@@ -113,6 +113,8 @@ class TestConfig(ShinkenTest):
 
 
     def nagios_installed(self, path='/usr/local/nagios/bin/nagios', livestatus='/usr/local/nagios/lib/mk-livestatus/livestatus.o'):
+        return False
+        raise
         if os.path.exists(path) and os.access(path, os.X_OK) and os.path.exists(livestatus):
             self.nagios_path = path
             self.livestatus_path = livestatus
@@ -197,23 +199,21 @@ class TestConfig(ShinkenTest):
 
 
     def stop_nagios(self):
-        print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        time.sleep(5)
-        if hasattr(self, 'nagios_proc'):
-            attempt = 1
-            while self.nagios_proc.poll() == None and attempt < 4:
-                self.nagios_proc.terminate()
-                attempt += 1
-                time.sleep(1)
-            if self.nagios_proc.poll() == None:
-                self.nagios_proc.kill()
-            if os.path.exists('etc/' + self.nagios_config):
-                shutil.rmtree('etc/' + self.nagios_config)
-            if os.path.exists('etc/nagios_' + self.nagios_config + '.cfg'):
-                os.remove('etc/nagios_' + self.nagios_config + '.cfg')
+        if self.nagios_installed():
+            print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            time.sleep(5)
+            if hasattr(self, 'nagios_proc'):
+                attempt = 1
+                while self.nagios_proc.poll() == None and attempt < 4:
+                    self.nagios_proc.terminate()
+                    attempt += 1
+                    time.sleep(1)
+                if self.nagios_proc.poll() == None:
+                    self.nagios_proc.kill()
+                if os.path.exists('etc/' + self.nagios_config):
+                    shutil.rmtree('etc/' + self.nagios_config)
+                if os.path.exists('etc/nagios_' + self.nagios_config + '.cfg'):
+                    os.remove('etc/nagios_' + self.nagios_config + '.cfg')
 
 
     def ask_nagios(self, request):
@@ -271,7 +271,7 @@ class TestConfig(ShinkenTest):
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', '/tmp/livelogs.db' + str(os.getpid()))
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', '/tmp/livelogs.db' + str(os.getpid()), '/tmp/pnp4nagios_test' + str(os.getpid()))
         self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
@@ -290,6 +290,8 @@ class TestConfigSmall(TestConfig):
         self.stop_nagios()
         if os.path.exists('/tmp/livelogs.db' + str(os.getpid())):
             os.remove('/tmp/livelogs.db' + str(os.getpid()))
+        if os.path.exists('/tmp/pnp4nagios_test' + str(os.getpid())):
+            shutil.rmtree('/tmp/pnp4nagios_test' + str(os.getpid()))
 
 
     def test_childs(self):
@@ -1590,6 +1592,78 @@ test_host_0;test_ok_0
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         
+
+
+    def test_pnp_path(self):
+        self.print_header()
+        now = time.time()
+        self.update_broker()
+        #---------------------------------------------------------------
+        # pnp_path is a parameter for the module
+        # column pnpgraph_present checks if a file
+        #  <pnp_path>/host/service.xml
+        #  <pnp_path>/host/_HOST_.xml
+        # exists
+        #---------------------------------------------------------------
+        pnp_path = '/tmp/pnp4nagios_test' + str(os.getpid())
+        try:
+            os.removedirs(pnp_path)
+        except:
+            pass
+        else:
+            print "there is no spool dir", pnp_path
+
+        request = """GET services
+Columns: host_name service_description pnpgraph_present
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        requesth = """GET hosts
+Columns: host_name pnpgraph_present
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """200          24
+test_host_0;test_ok_0;0
+""")
+        #self.assert_(not self.livestatus_broker.livestatus.pnp_path)
+
+        try:
+            os.makedirs(pnp_path)
+            print "there is an empty spool dir", pnp_path
+        except:
+            pass
+        
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """200          24
+test_host_0;test_ok_0;0
+""")
+        self.assert_(self.livestatus_broker.livestatus.pnp_path == pnp_path + '/')
+
+        try:
+            os.makedirs(pnp_path + '/test_host_0')
+            open(pnp_path + '/test_host_0/_HOST_.xml', 'w').close() 
+            open(pnp_path + '/test_host_0/test_ok_0.xml', 'w').close() 
+            print "there is a spool dir with data", pnp_path
+        except:
+            pass
+        
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """200          24
+test_host_0;test_ok_0;1
+""")
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(requesth)
+        print response
+        self.assert_(response == """200          30
+test_router_0;0
+test_host_0;1
+""")
+
+
 
 
 class TestConfigBig(TestConfig):

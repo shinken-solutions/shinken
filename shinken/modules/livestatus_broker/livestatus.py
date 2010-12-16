@@ -21,6 +21,7 @@
 import re
 import Queue
 import copy
+import os
 
 try:
     Queue.LifoQueue
@@ -108,6 +109,20 @@ def worst_service_state(state_1, state_2):
     return state_2
 
 
+def find_pnp_perfdata_xml(name):
+    if LiveStatus.pnp_path_readable:
+        if '/' in name:
+            # It is a service
+            if os.access(LiveStatus.pnp_path + '/' + name + '.xml', os.R_OK):
+                return 1
+        else:
+            # It is a host
+            if os.access(LiveStatus.pnp_path + '/' + name + '/_HOST_.xml', os.R_OK):
+                return 1
+    # If in doubt, there is no pnp file
+    return 0
+
+
 class Problem:
     def __init__(self, source, impacts):
         self.source = source
@@ -133,6 +148,8 @@ class Logline(dict):
 
 class LiveStatus:
     separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
+    pnp_path = False
+    pnp_path_readable = False
     #prop : is the internal name if it is different than the name in the output file
     #required :
     #depythonize :
@@ -515,6 +532,12 @@ class LiveStatus:
                 'description' : 'Output of the last host check',
                 'prop' : 'output',
                 'type' : 'string',
+            },
+            'pnpgraph_present' : {
+                'depythonize' : find_pnp_perfdata_xml,
+                'description' : 'Whether there is a PNP4Nagios graph present for this host (0/1)',
+                'prop' : 'host_name',
+                'type' : 'int',
             },
             'process_performance_data' : {
                 'depythonize' : from_bool_to_int,
@@ -1266,6 +1289,12 @@ class LiveStatus:
                 'description' : 'Output of the last check plugin',
                 'prop' : 'output',
                 'type' : 'string',
+            },
+            'pnpgraph_present' : {
+                'depythonize' : find_pnp_perfdata_xml,
+                'description' : 'Whether there is a PNP4Nagios graph present for this service (0/1)',
+                'prop' : 'get_dbg_name',
+                'type' : 'int',
             },
             'process_performance_data' : {
                 'depythonize' : from_bool_to_int,
@@ -5106,7 +5135,7 @@ class LiveStatus:
     }
 
 
-    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, return_queue):
+    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
         self.configs = configs
@@ -5125,6 +5154,7 @@ class LiveStatus:
         self.reactionners = reactionners
         self.brokers = brokers
         self.dbconn = dbconn
+        LiveStatus.pnp_path = pnp_path
         self.debuglevel = 2
         self.dbconn.row_factory = self.row_factory
         self.return_queue = return_queue
@@ -5988,6 +6018,12 @@ class LiveStatus:
                     sql_simplefilter_stack = self.get_sql_filter_stack(sql_filter_stack)
                     result = self.get_live_data_log(table, columns, prefiltercolumns, filtercolumns, limit, simplefilter_stack, sql_simplefilter_stack)
                 else:
+                    # If the pnpgraph_present column is involved, then check
+                    # with each request if the pnp perfdata path exists
+                    if 'pnpgraph_present' in columns + filtercolumns + prefiltercolumns and LiveStatus.pnp_path and os.access(LiveStatus.pnp_path, os.R_OK):
+                        LiveStatus.pnp_path_readable = True
+                    else:
+                        LiveStatus.pnp_path_readable = False
                     #Get the function which implements the Stats: statements
                     stats = stats_filter_stack.qsize()
                     #Apply the filters on the broker's host/service/etc elements

@@ -55,11 +55,12 @@ from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NO
 #Class for the Livestatus Broker
 #Get broks and listen to livestatus query language requests
 class Livestatus_broker:
-    def __init__(self, name, host, port, socket, database_file):
+    def __init__(self, name, host, port, socket, database_file, pnp_path):
         self.host = host
         self.port = port
         self.socket = socket
         self.database_file = database_file
+        self.pnp_path = pnp_path
         self.name = name
 
         #Warning :
@@ -97,7 +98,8 @@ class Livestatus_broker:
         self.servicename_lookup_table = {}
 
         self.prepare_log_db()
-        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.r)
+        self.prepare_pnp_path()
+        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.r)
 
         self.number_of_objects = 0
 
@@ -200,7 +202,6 @@ class Livestatus_broker:
         self.number_of_objects += 1
 
 
-
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
         sg_id = data['id']
@@ -293,7 +294,6 @@ class Livestatus_broker:
             #print "S:", s
 
 
-
     def manage_initial_poller_status_brok(self, b):
         data = b.data
         reac_id = data['id']
@@ -308,13 +308,13 @@ class Livestatus_broker:
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
 
+
     def manage_update_poller_status_brok(self, b):
         data = b.data
         s = self.find_poller(data['poller_name'])
         if s != None:
             self.update_element(s, data)
             #print "S:", s
-
 
 
     def manage_initial_reactionner_status_brok(self, b):
@@ -340,7 +340,6 @@ class Livestatus_broker:
             #print "S:", s
 
 
-
     def manage_initial_broker_status_brok(self, b):
         data = b.data
         reac_id = data['id']
@@ -362,7 +361,6 @@ class Livestatus_broker:
         if s != None:
             self.update_element(s, data)
             #print "S:", s
-
 
 
     #A service check have just arrived, we UPDATE data info with this
@@ -654,7 +652,6 @@ class Livestatus_broker:
         return None
 
 
-
     def update_element(self, e, data):
         #print "........%s........" % type(e)
         for prop in data:
@@ -679,6 +676,16 @@ class Livestatus_broker:
         # rowfactory will later be redefined (in livestatus.py)
 
 
+    def prepare_pnp_path(self):
+        if not self.pnp_path:
+            self.pnp_path = False
+        elif not os.access(self.pnp_path, os.R_OK):
+            print "PNP perfdata path %s is not readable" % self.pnp_path
+        elif not os.access(self.pnp_path, os.F_OK):
+            print "PNP perfdata path %s does not exist" % self.pnp_path
+        if self.pnp_path and not self.pnp_path.endswith('/'):
+            self.pnp_path += '/'
+
 
     def manage_signal(self, sig, frame):
         print "[LiveStatus] I receive a signal %s" % sig
@@ -686,7 +693,6 @@ class Livestatus_broker:
         for s in self.input:
             s.close()
         sys.exit(0)
-
 
 
     #Set an exit function that is call when we quit
@@ -703,7 +709,6 @@ class Livestatus_broker:
             import signal
             print "Register the func", func, "as exit function"
             signal.signal(signal.SIGTERM, func)
-
 
 
     def main(self):
