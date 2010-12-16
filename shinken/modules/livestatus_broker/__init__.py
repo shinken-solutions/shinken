@@ -61,6 +61,10 @@ def get_instance(plugin):
     else:
         database_file = os.sep.join([os.path.abspath(''), 'var', 'livestatus.db'])
 
-    instance = Livestatus_broker(plugin.get_name(), host, port, socket, database_file)
+    if hasattr(plugin, 'pnp_path'):
+        pnp_path = plugin.pnp_path
+    else:
+        pnp_path = ''
+    instance = Livestatus_broker(plugin.get_name(), host, port, socket, database_file, pnp_path)
     return instance
 
