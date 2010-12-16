@@ -27,7 +27,7 @@
 import copy
 import time
 
-from db_mysql import DBMysql
+from shinken.db_mysql import DBMysql
 
 
 def de_unixify(t):
