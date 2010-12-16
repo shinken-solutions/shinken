@@ -271,7 +271,7 @@ class TestConfig(ShinkenTest):
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', '/tmp/livelogs.db' + str(os.getpid()), '/tmp/pnp4nagios_test' + str(os.getpid()))
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', 'tmp/livelogs.db' + str(os.getpid()), 'tmp/pnp4nagios_test' + str(os.getpid()))
         self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
@@ -288,10 +288,10 @@ class TestConfigSmall(TestConfig):
 
     def tearDown(self):
         self.stop_nagios()
-        if os.path.exists('/tmp/livelogs.db' + str(os.getpid())):
-            os.remove('/tmp/livelogs.db' + str(os.getpid()))
-        if os.path.exists('/tmp/pnp4nagios_test' + str(os.getpid())):
-            shutil.rmtree('/tmp/pnp4nagios_test' + str(os.getpid()))
+        if os.path.exists('tmp/livelogs.db' + str(os.getpid())):
+            os.remove('tmp/livelogs.db' + str(os.getpid()))
+        if os.path.exists('tmp/pnp4nagios_test' + str(os.getpid())):
+            shutil.rmtree('tmp/pnp4nagios_test' + str(os.getpid()))
 
 
     def test_childs(self):
@@ -1605,7 +1605,7 @@ test_host_0;test_ok_0
         #  <pnp_path>/host/_HOST_.xml
         # exists
         #---------------------------------------------------------------
-        pnp_path = '/tmp/pnp4nagios_test' + str(os.getpid())
+        pnp_path = 'tmp/pnp4nagios_test' + str(os.getpid())
         try:
             os.removedirs(pnp_path)
         except:
@@ -1669,7 +1669,7 @@ test_host_0;1
 class TestConfigBig(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', '/tmp/livelogs.db' + str(os.getpid()))
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', 'tmp/livelogs.db' + str(os.getpid()), 'tmp/pnp4nagios_test' + str(os.getpid()))
         self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
@@ -1683,8 +1683,8 @@ class TestConfigBig(TestConfig):
 
     def tearDown(self):
         self.stop_nagios()
-        if os.path.exists('/tmp/livelogs.db' + str(os.getpid())):
-            os.remove('/tmp/livelogs.db' + str(os.getpid()))
+        if os.path.exists('tmp/livelogs.db' + str(os.getpid())):
+            os.remove('tmp/livelogs.db' + str(os.getpid()))
 
 
     def test_stats(self):
