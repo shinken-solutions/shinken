@@ -1122,8 +1122,8 @@ class Config(Item):
     # check_command is a bp rule. If so, it will create
     # a tree structures with the rules
     def create_business_rules(self):
-        self.hosts.create_business_rules()
-        self.services.create_business_rules()
+        self.hosts.create_business_rules(self.hosts, self.services)
+        self.services.create_business_rules(self.hosts, self.services)
 
 
     #It's used to hack some old Nagios parameters like

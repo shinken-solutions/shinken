@@ -1153,6 +1153,6 @@ class Services(Items):
 
     # Will create all business tree for the
     # services
-    def create_business_rules(self):
+    def create_business_rules(self, hosts, services):
         for s in self:
-            s.create_business_rules()
+            s.create_business_rules(hosts, services)

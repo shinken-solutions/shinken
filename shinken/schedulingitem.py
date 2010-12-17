@@ -28,7 +28,7 @@ from shinken.check import Check
 from shinken.notification import Notification
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
-from shinken.business_rule import DependencyNodeFactory, DependencyNode
+from shinken.dependencynode import DependencyNodeFactory, DependencyNode
 
 class SchedulingItem(Item):
 
@@ -1020,7 +1020,7 @@ class SchedulingItem(Item):
 
     # Create the whole business rule tree
     # if we need it
-    def create_business_rules(self):
+    def create_business_rules(self, hosts, services):
         cmdCall = getattr(self, 'check_command', None)
         
         # If we do not have a command, we bailout
@@ -1042,6 +1042,6 @@ class SchedulingItem(Item):
                 rule = elts[1]
                 print "Got rules", rule
             fact = DependencyNodeFactory()
-            node = fact.eval_cor_patern(rule)
+            node = fact.eval_cor_patern(rule, hosts, services)
             print "got node", node
             self.business_rule = node

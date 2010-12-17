@@ -43,7 +43,7 @@ class DependencyNodeFactory(object):
         pass
 
     # the () will be eval in a recursiv way, only one level of ()
-    def eval_cor_patern(self, patern):
+    def eval_cor_patern(self, patern, hosts, services):
         patern = patern.strip()
         print "*****Loop", patern
         complex_node = False
@@ -66,14 +66,18 @@ class DependencyNodeFactory(object):
             node.of_values = int(m.groups()[0])
             patern = m.groups()[1]
     
-        print "Is complex?", patern, complex_node
+        print "Is so complex?", patern, complex_node
     
-    # if it's a single host/service
+        # if it's a single host/service
         if not complex_node:
+            print "Try to find?", patern
             node.operand = 'object'
-            node.sons.append(patern)
+            obj = self.find_object(patern, hosts, services)
+            node.sons.append(obj)
             return node
-    
+        else:
+            print "Is complex"
+
         in_par = False
         tmp = ''
         for c in patern:
@@ -81,7 +85,7 @@ class DependencyNodeFactory(object):
                 in_par = True
                 tmp = tmp.strip()
                 if tmp != '':
-                    o = self.eval_cor_patern(tmp)
+                    o = self.eval_cor_patern(tmp, hosts, services)
                     print "1( I've %s got new sons" % patern , o
                     node.sons.append(o)
                 continue
@@ -90,7 +94,7 @@ class DependencyNodeFactory(object):
                 tmp = tmp.strip()
                 if tmp != '':
                     print "Evaling sub pat", tmp
-                    o = self.eval_cor_patern(tmp)
+                    o = self.eval_cor_patern(tmp, hosts, services)
                     print "2) I've %s got new sons" % patern , o
                     node.sons.append(o)
                 else:
@@ -109,7 +113,7 @@ class DependencyNodeFactory(object):
                         node.operand = c
                     tmp = tmp.strip()
                     if tmp != '':
-                        o = self.eval_cor_patern(tmp)
+                        o = self.eval_cor_patern(tmp, hosts, services)
                         print "3&| I've %s got new sons" % patern , o
                         node.sons.append(o)
                     tmp = ''
@@ -121,10 +125,34 @@ class DependencyNodeFactory(object):
 
         tmp = tmp.strip()
         if tmp != '':
-            o = self.eval_cor_patern(tmp)
+            o = self.eval_cor_patern(tmp, hosts, services)
             print "4end I've %s got new sons" % patern , o
             node.sons.append(o)
 
         print "End, tmp", tmp
         print "R %s :" % patern, node
         return node
+
+
+    # We've got an object, like h1,db1 that mean the
+    # db1 service of the host db1, or just h1, that mean
+    # the host h1.
+    def find_object(self, patern, hosts, services):
+        print "Finding object", patern
+        is_service = False
+        # h_name, service_desc are , separated
+        elts = patern.split(',')
+        host_name = elts[0]
+        # Look if we have a service
+        if len(elts) > 1:
+            is_service = True
+            service_description = elts[1]
+        if is_service:
+            obj = services.find_srv_by_name_and_hostname(host_name, service_description)
+            print "Find service", obj.get_name()
+            return obj
+        else:
+            obj = hosts.find_by_name(host_name)
+            print "Find host", obj.get_name()
+            return obj
+
