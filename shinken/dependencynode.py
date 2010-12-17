@@ -78,6 +78,12 @@ class DependencyNode(object):
             else:
                 print "I send the better no good state...in an OR", better_no_good, states
                 return better_no_good
+
+        # With an AND, we just send the worse state
+        if self.operand == '&':
+            print "We raise worse state for a AND", worse_state,states
+            return worse_state
+            
         
         return 0
 
