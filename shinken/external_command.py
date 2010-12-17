@@ -52,7 +52,6 @@ class ExternalCommandManager:
         'CHANGE_GLOBAL_SVC_EVENT_HANDLER' : {'global' : True, 'args' : ['command']},
         'CHANGE_HOST_CHECK_COMMAND' : {'global' : False, 'args' : ['host', 'command']},
         'CHANGE_HOST_CHECK_TIMEPERIOD' : {'global' : False, 'args' : ['host', 'time_period']},
-        'CHANGE_HOST_CHECK_TIMEPERIOD' : {'global' : False, 'args' : ['host', 'time_period']},
         'CHANGE_HOST_EVENT_HANDLER' : {'global' : False, 'args' : ['host', 'command']},
         'CHANGE_HOST_MODATTR' : {'global' : False, 'args' : ['host', 'to_int']},
         'CHANGE_MAX_HOST_CHECK_ATTEMPTS': {'global' : False, 'args' : ['host', 'to_int']},
@@ -266,7 +265,7 @@ class ExternalCommandManager:
     #by the hostname which scheduler have the host. Then send
     #it the command
     def search_host_and_dispatch(self, host_name, command):
-	print "Calling search_host_and_dispatch", 'for', host_name
+        print "Calling search_host_and_dispatch", 'for', host_name
         for cfg in self.confs.values():
             if cfg.hosts.find_by_name(host_name) is not None:
                 print "Host", host_name, "found in a configuration"
