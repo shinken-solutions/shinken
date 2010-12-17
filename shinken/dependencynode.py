@@ -83,9 +83,22 @@ class DependencyNode(object):
         if self.operand == '&':
             print "We raise worse state for a AND", worse_state,states
             return worse_state
-            
-        
-        return 0
+
+        # Ok we've got a 'of:' rule
+        nb_search = self.of_values
+        # Look if we've got enouth 0
+        if len([s for s in states if s == 0]) >= nb_search:
+            print "Good, we find at least %d 0 in states for a of:" % nb_search, states
+            return 0
+
+        # Now maybe at least enouth WARNING, still beter than CRITICAL...
+        if len([s for s in states if s == 1]) >= nb_search:
+            print "Beter than nothing, we find at least %d 1 in states for a of:" % nb_search, states
+            return 1
+
+        # Sic... not good, return 2
+        print "ARG, not enough 1 or 0, return 2..."
+        return 2
 
         
 
