@@ -233,21 +233,25 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
         print "FUCK", svc.last_hard_state_change
         orig = svc.last_hard_state_change
+        self.assert_(svc.last_hard_state == 'OK')
         
         #now still ok
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
         self.assert_(svc.last_hard_state_change == orig)
+        self.assert_(svc.last_hard_state == 'OK')
 
         #now error but still SOFT
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL | bibi=99%']])
         print "FUCK", svc.state_type
         self.assert_(svc.last_hard_state_change == orig)
+        self.assert_(svc.last_hard_state == 'OK')
 
         #now go hard!
         now = int(time.time())
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL | bibi=99%']])
         print "FUCK", svc.state_type
         self.assert_(svc.last_hard_state_change == now)
+        self.assert_(svc.last_hard_state == 'CRITICAL')
 
 
     # Check if the autoslots are fill like it should

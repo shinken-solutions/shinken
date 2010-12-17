@@ -274,8 +274,8 @@ class Host(SchedulingItem):
             default=time.time(),
             fill_brok=['full_status'],
             retention=True),
-        'last_hard_state': FloatProp(
-            default=time.time(),
+        'last_hard_state': StringProp(
+            default='PENDING',
             fill_brok=['full_status'],
             retention=True),
         'last_time_up': IntegerProp(

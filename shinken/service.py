@@ -134,7 +134,7 @@ class Service(SchedulingItem):
         'last_state_id' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_state_change' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
         'last_hard_state_change' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
-        'last_hard_state' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_hard_state' : StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'last_time_ok' : IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
         'last_time_warning' : IntegerProp(default=int(time.time()), fill_brok = ['full_status', 'check_result'], retention=True),
         'last_time_critical' : IntegerProp(default=int(time.time()), fill_brok =['full_status', 'check_result'], retention=True),

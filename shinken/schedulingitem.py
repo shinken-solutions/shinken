@@ -758,8 +758,10 @@ class SchedulingItem(Item):
         self.in_scheduled_downtime_during_last_check == False
 
         #now is the time to update state_type_id
+        #and our last_hard_state
         if self.state_type == 'HARD':
             self.state_type_id = 1
+            self.last_hard_state = self.state
         else:
             self.state_type_id = 0
 
