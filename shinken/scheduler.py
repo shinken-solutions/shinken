@@ -69,6 +69,8 @@ class Scheduler:
             #Check for system time change. And AFTER get new checks
             #so they are changed too.
             12 : ('check_for_system_time_change', self.check_for_system_time_change, 1),
+            #launch if need all internal checks
+            13 : ('manage_internal_checks', self.manage_internal_checks, 1),
             }
 
         #stats part
@@ -317,18 +319,19 @@ class Scheduler:
         #If poller want to do checks
         if do_checks:
             for c in self.checks.values():
-                #If the command is untagged, and the poller too, or if both are taggued
-                #with same name, go for it
+                # If the command is untagged, and the poller too, or if both are taggued
+                # with same name, go for it
                 if (c.poller_tag == None and poller_tags == []) or c.poller_tag in poller_tags:
-                    if c.status == 'scheduled' and c.is_launchable(now):
+                    # must be ok to launch, and not an internal one (business rules based)
+                    if c.status == 'scheduled' and c.is_launchable(now) and not c.internal:
                         c.status = 'inpoller'
-                        #We do not send c, because it it link (c.ref) to
-                        #host/service and poller do not need it. It just
-                        #need a shell with id, command and defaults
-                        #parameters. It's the goal of copy_shell
+                        # We do not send c, because it it link (c.ref) to
+                        # host/service and poller do not need it. It just
+                        # need a shell with id, command and defaults
+                        # parameters. It's the goal of copy_shell
                         res.append(c.copy_shell())
 
-        #If poller want to notify too
+        #If reactionner want to notify too
         if do_actions:
             for a in self.actions.values():
                 if a.status == 'scheduled' and a.is_launchable(now):
@@ -409,6 +412,20 @@ class Scheduler:
                 pass
         else:
             logger.log("Error : the received result type in unknown ! %s" % str(c.is_a))
+
+
+    # Some checks are purely internal, like business based one
+    # simply ask their ref to manage it when it's ok to run
+    def manage_internal_checks(self):
+        now = time.time()
+        for c in self.checks.values():
+            # must be ok to launch, and not an internal one (business rules based)
+            if c.status == 'scheduled' and c.is_launchable(now) and c.internal:
+                c.ref.manage_internal_check(c)
+                # it manage it, now just ask to consume it
+                # like for all checks
+                c.status = 'waitconsume'
+
 
 
     #Call by brokers to have broks

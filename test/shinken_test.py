@@ -117,6 +117,7 @@ class ShinkenTest(unittest.TestCase):
                 (obj, exit_status, output) = ref
                 obj.update_in_checking()
                 self.fake_check(obj, exit_status, output)
+            self.sched.manage_internal_checks()
             self.sched.consume_results()
             self.sched.get_new_actions()
             self.sched.get_new_broks()

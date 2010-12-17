@@ -970,6 +970,11 @@ class SchedulingItem(Item):
             c = Check('scheduled', command_line, self, t, ref_check, \
                           timeout=cls.check_timeout, \
                           poller_tag=self.check_command.poller_tag, env=env)
+
+            # If it's a business rule, manage it as a special check
+            if self.got_business_rule:
+                c.internal = True
+
             # We keep a trace of all checks in progress
             # to know if we are in checking_or not
             self.checks_in_progress.append(c)
@@ -1027,3 +1032,12 @@ class SchedulingItem(Item):
             node = fact.eval_cor_patern(rule, hosts, services)
             print "got node", node
             self.business_rule = node
+
+
+    # We ask us to manage our own internal check,
+    # like a business based one
+    def manage_internal_check(self, c):
+        print "DBG, ask me to manage a check!"
+        state = self.business_rule.get_state()
+        c.exit_status = state
+        print "DBG, setting state", state
