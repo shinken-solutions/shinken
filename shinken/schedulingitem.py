@@ -738,6 +738,7 @@ class SchedulingItem(Item):
         if self.state_type == 'HARD':
             self.state_type_id = 1
             self.last_hard_state = self.state
+            self.last_hard_state_id = self.state_id
         else:
             self.state_type_id = 0
 

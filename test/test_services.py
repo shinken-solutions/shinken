@@ -252,6 +252,8 @@ class TestConfig(ShinkenTest):
         print "FUCK", svc.state_type
         self.assert_(svc.last_hard_state_change == now)
         self.assert_(svc.last_hard_state == 'CRITICAL')
+        print "Last hard state id", svc.last_hard_state_id
+        self.assert_(svc.last_hard_state_id == 2)
 
 
     # Check if the autoslots are fill like it should

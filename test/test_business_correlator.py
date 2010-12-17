@@ -82,6 +82,47 @@ class TestConfig(ShinkenTest):
         state = bp_rule.get_state()
         self.assert_(state == 0)
         
+        # Now we set the bd1 as soft/CRITICAL
+        self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
+        self.assert_(svc_bd1.state == 'CRITICAL')
+        self.assert_(svc_bd1.state_type == 'SOFT')
+        self.assert_(svc_bd1.last_hard_state_id == 0)
+
+        # The business rule must still be 0
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+        
+        # Now we get bd1 CRITICAL/HARD
+        self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
+        self.assert_(svc_bd1.state == 'CRITICAL')
+        self.assert_(svc_bd1.state_type == 'HARD')
+        self.assert_(svc_bd1.last_hard_state_id == 2)
+        
+        # The rule must still be a 0 (or inside)
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+
+        # Now we also set bd2 as CRITICAL/HARD... byebye 0 :)
+        self.scheduler_loop(2, [[svc_bd2, 2, 'CRITICAL | value1=1 value2=2']])
+        self.assert_(svc_bd2.state == 'CRITICAL')
+        self.assert_(svc_bd2.state_type == 'HARD')
+        self.assert_(svc_bd2.last_hard_state_id == 2)
+        
+        # And now the state of the rule must be 2
+        state = bp_rule.get_state()
+        self.assert_(state == 2)
+
+        # And If we set one WARNING?
+        self.scheduler_loop(2, [[svc_bd2, 1, 'WARNING | value1=1 value2=2']])
+        self.assert_(svc_bd2.state == 'WARNING')
+        self.assert_(svc_bd2.state_type == 'HARD')
+        self.assert_(svc_bd2.last_hard_state_id == 1)
+
+        # Must be WARNING
+        state = bp_rule.get_state()
+        self.assert_(state == 1)
+
+        
 
 
 if __name__ == '__main__':

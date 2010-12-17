@@ -64,6 +64,11 @@ class DependencyNode(object):
         # We will surely need the worse state
         worse_state = max(states)
 
+        # We look for the better state but not OK/UP
+        no_ok = [s for s in states if s != 0]
+        if len(no_ok) != 0:
+            better_no_good = min(no_ok)
+
         # Now look at the rule. For a or
         if self.operand == '|':
             if 0 in states:
@@ -71,9 +76,8 @@ class DependencyNode(object):
                 return 0
             # no ok/UP-> return worse state
             else:
-                print "I send the worse_state...in an OR", worse_state, states
-                return worse_state
-                
+                print "I send the better no good state...in an OR", better_no_good, states
+                return better_no_good
         
         return 0
 
