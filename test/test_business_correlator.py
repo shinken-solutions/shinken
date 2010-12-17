@@ -62,10 +62,26 @@ class TestConfig(ShinkenTest):
         self.assert_(svc_cor.business_rule != None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == '|')
+
+        sons = bp_rule.sons
+        print "Sons,", sons
+        #We(ve got 2 sons, 2 services nodes
+        self.assert_(len(sons) == 2)
+        self.assert_(sons[0].operand == 'object')
+        self.assert_(sons[0].sons[0] == svc_bd1)
+        self.assert_(sons[1].operand == 'object')
+        self.assert_(sons[1].sons[0] == svc_bd2)
         
-        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(host.state == 'UP')
-        self.assert_(host.state_type == 'HARD')
+        # Now state working on the states
+        self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10']])        
+        self.assert_(svc_bd1.state == 'OK')
+        self.assert_(svc_bd1.state_type == 'HARD')
+        self.assert_(svc_bd2.state == 'OK')
+        self.assert_(svc_bd2.state_type == 'HARD')
+        
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+        
 
 
 if __name__ == '__main__':

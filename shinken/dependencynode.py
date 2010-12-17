@@ -38,6 +38,28 @@ class DependencyNode(object):
         return "Op:'%s' Val:'%s' Sons:'[%s]'" % (self.operand, self.of_values, ','.join([str(s) for s in self.sons]))
 
 
+    # We will get the state of this node, by looking at the state of
+    # our sons, and apply our operand
+    def get_state(self):
+        print "Ask state of me", self
+
+        # If we are a 'object', wee just git the host/service
+        # hard state
+        if self.operand == 'object':
+            state = self.sons[0].last_hard_state
+            print "Get the hard state %s for the object %s" % (state, self.sons[0].get_name())
+            return state
+        
+        # First we get teh state of all our sons
+        states = []
+        for s in self.sons:
+            st = s.get_state()
+
+        return 0
+
+        
+
+
 class DependencyNodeFactory(object):
     def __init__(self):
         pass
