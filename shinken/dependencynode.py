@@ -1,25 +1,27 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# here is a node class for dependency_node(s) and a factory to create them
+"""
+Here is a node class for dependency_node(s) and a factory to create them
+"""
 
 import re
 
@@ -43,18 +45,36 @@ class DependencyNode(object):
     def get_state(self):
         print "Ask state of me", self
 
-        # If we are a 'object', wee just git the host/service
+        # If we are a host or a service, wee just got the host/service
         # hard state
-        if self.operand == 'object':
-            state = self.sons[0].last_hard_state
-            print "Get the hard state %s for the object %s" % (state, self.sons[0].get_name())
+        if self.operand in ['host', 'service']:
+            state = self.sons[0].last_hard_state_id
+            print "Get the hard state (%s) for the object %s" % (state, self.sons[0].get_name())
+            # Make DOWN look as CRITICAL (2 instead of 1)
+            if self.operand == 'host' and state == 1:
+                state = 2
             return state
         
         # First we get teh state of all our sons
         states = []
         for s in self.sons:
             st = s.get_state()
+            states.append(st)
 
+        # We will surely need the worse state
+        worse_state = max(states)
+
+        # Now look at the rule. For a or
+        if self.operand == '|':
+            if 0 in states:
+                print "We find a OK/UP match in an OR", states
+                return 0
+            # no ok/UP-> return worse state
+            else:
+                print "I send the worse_state...in an OR", worse_state, states
+                return worse_state
+                
+        
         return 0
 
         
@@ -95,7 +115,10 @@ class DependencyNodeFactory(object):
             print "Try to find?", patern
             node.operand = 'object'
             obj = self.find_object(patern, hosts, services)
-            node.sons.append(obj)
+            if obj != None:
+                # Set host or service
+                node.operand = obj.__class__.my_type
+                node.sons.append(obj)
             return node
         else:
             print "Is complex"

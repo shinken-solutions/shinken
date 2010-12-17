@@ -195,6 +195,7 @@ class Host(SchedulingItem):
         'last_hard_state': StringProp(default='PENDING',
                                       fill_brok=['full_status'],
                                       retention=True),
+        'last_hard_state_id' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_time_up': IntegerProp(default=int(time.time()),
                                     fill_brok=['full_status', 'check_result'],
                                     retention=True),

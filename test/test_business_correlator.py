@@ -67,9 +67,9 @@ class TestConfig(ShinkenTest):
         print "Sons,", sons
         #We(ve got 2 sons, 2 services nodes
         self.assert_(len(sons) == 2)
-        self.assert_(sons[0].operand == 'object')
+        self.assert_(sons[0].operand == 'service')
         self.assert_(sons[0].sons[0] == svc_bd1)
-        self.assert_(sons[1].operand == 'object')
+        self.assert_(sons[1].operand == 'service')
         self.assert_(sons[1].sons[0] == svc_bd2)
         
         # Now state working on the states
