@@ -43,7 +43,7 @@ from shinken.log import logger
 class Service(SchedulingItem):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
-#    __metaclass__ = AutoSlots
+    __metaclass__ = AutoSlots
 
     # Every service have a unique ID, and 0 is always special in
     # database and co...

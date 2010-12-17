@@ -43,7 +43,7 @@ class Property(object):
 
     """
     def __init__(self, default='ididnotsetdefault', class_inherit=[],
-                 unmanaged=False, help='', no_slots=True,
+                 unmanaged=False, help='', no_slots=False,
                  fill_brok=[], conf_send_preparation=None,
                  brok_transformation=None,retention=False,to_send=False,
                  override=False,managed=True):

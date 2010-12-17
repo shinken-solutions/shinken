@@ -250,6 +250,12 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.last_hard_state_change == now)
 
 
+    # Check if the autoslots are fill like it should
+    def test_autoslots(self):
+        svc = self.get_svc()
+        self.assert_("check_period" not in svc.__dict__)
+
+
 if __name__ == '__main__':
     unittest.main()
 
