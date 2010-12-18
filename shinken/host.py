@@ -47,179 +47,271 @@ class Host(SchedulingItem):
     my_type = 'host'
 
 
-    #properties defined by configuration
-    #*required : is required in conf
-    #*default : default value if no set in conf
-    #*pythonize : function to call when transfort string to python object
-    #*fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
-    #*no_slots : do not take this property for __slots__
-    # Only for the inital call
-    #conf_send_preparation : if set, will pass the property to this function. It's used to "flatten"
-    # some dangerous properties like realms that are too 'linked' to be send like that.
-    #brok_transformation : if set, will call the function with the value of the property
-    # the major times it will be to flatten the data (like realm_name instead of the realm object).
+    # properties defined by configuration
+    # *required : is required in conf
+    # *default : default value if no set in conf
+    # *pythonize : function to call when transfort string to python object
+    # *fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
+    # *no_slots : do not take this property for __slots__
+    #  Only for the inital call
+    # conf_send_preparation : if set, will pass the property to this function. It's used to "flatten"
+    #  some dangerous properties like realms that are too 'linked' to be send like that.
+    # brok_transformation : if set, will call the function with the value of the property
+    #  the major times it will be to flatten the data (like realm_name instead of the realm object).
     properties={
         'host_name': StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'alias': StringProp(fill_brok=['full_status']),
-        'display_name': StringProp(default='none',
-                                   fill_brok=['full_status']),
+        'display_name': StringProp(
+            default='none',
+            fill_brok=['full_status']),
         'address': StringProp(fill_brok=['full_status']),
-        'parents': ListProp(brok_transformation=to_hostnames_list,
-                            default='',
-                            fill_brok=['full_status']),
-        'hostgroups': StringProp(brok_transformation=to_list_string_of_names,
-                                 default='',
-                                 fill_brok=['full_status']),
-        'check_command': StringProp(default='', fill_brok=['full_status']),
-        'initial_state': CharProp(default='u', fill_brok=['full_status']),
+        'parents': ListProp(
+            brok_transformation=to_hostnames_list,
+            default='',
+            fill_brok=['full_status']),
+        'hostgroups': StringProp(
+            brok_transformation=to_list_string_of_names,
+            default='',
+            fill_brok=['full_status']),
+        'check_command': StringProp(
+            default='', 
+            fill_brok=['full_status']),
+        'initial_state': CharProp(
+            default='u',
+            fill_brok=['full_status']),
         'max_check_attempts': IntegerProp(fill_brok=['full_status']),
-        'check_interval': IntegerProp(default='0', fill_brok=['full_status']),
-        'retry_interval': IntegerProp(default='0', fill_brok=['full_status']),
-        'active_checks_enabled': BoolProp(default='1', 
-                                          fill_brok=['full_status']),
-        'passive_checks_enabled': BoolProp(default='1', 
-                                           fill_brok=['full_status']),
+        'check_interval': IntegerProp(
+            default='0',
+            fill_brok=['full_status']),
+        'retry_interval': IntegerProp(
+            default='0',
+            fill_brok=['full_status']),
+        'active_checks_enabled': BoolProp(
+            default='1', 
+            fill_brok=['full_status']),
+        'passive_checks_enabled': BoolProp(
+            default='1', 
+            fill_brok=['full_status']),
         'check_period': StringProp(fill_brok=['full_status']),
-        'obsess_over_host': BoolProp(default='0', fill_brok=['full_status']),
-        'check_freshness': BoolProp(default='0', fill_brok=['full_status']),
-        'freshness_threshold': IntegerProp(default='0',
-                                           fill_brok=['full_status']),
-        'event_handler': StringProp(default='', fill_brok=['full_status']),
-        'event_handler_enabled': BoolProp(default='0', fill_brok=['full_status']),
-        'low_flap_threshold': IntegerProp(default='25',
-                                          fill_brok=['full_status']),
-        'high_flap_threshold': IntegerProp(default='50',
-                                           fill_brok=['full_status']),
-        'flap_detection_enabled': BoolProp(default='1',
-                                           fill_brok=['full_status']),
-        'flap_detection_options': ListProp(default='o,d,u',
-                                           fill_brok=['full_status']),
-        'process_perf_data': BoolProp(default='1',
-                                      fill_brok=['full_status']),
-        'retain_status_information': BoolProp(default='1',
-                                              fill_brok=['full_status']),
-        'retain_nonstatus_information': BoolProp(default='1',
-                                                 fill_brok=['full_status']),
-        'contacts': StringProp(default='', fill_brok=['full_status']),
-        'contact_groups': StringProp(default='', fill_brok=['full_status']),
-        'notification_interval': IntegerProp(default='60',
-                                             fill_brok=['full_status']),
-        'first_notification_delay': IntegerProp(default='0',
-                                                fill_brok=['full_status']),
+        'obsess_over_host': BoolProp(
+            default='0',
+            fill_brok=['full_status']),
+        'check_freshness': BoolProp(
+            default='0',
+            fill_brok=['full_status']),
+        'freshness_threshold': IntegerProp(
+            default='0',
+            fill_brok=['full_status']),
+        'event_handler': StringProp(
+            default='', 
+            fill_brok=['full_status']),
+        'event_handler_enabled': BoolProp(
+            default='0',
+            fill_brok=['full_status']),
+        'low_flap_threshold': IntegerProp(
+            default='25',
+            fill_brok=['full_status']),
+        'high_flap_threshold': IntegerProp(
+            default='50',
+            fill_brok=['full_status']),
+        'flap_detection_enabled': BoolProp(
+            default='1',
+            fill_brok=['full_status']),
+        'flap_detection_options': ListProp(
+            default='o,d,u',
+            fill_brok=['full_status']),
+        'process_perf_data': BoolProp(
+            default='1',
+            fill_brok=['full_status']),
+        'retain_status_information': BoolProp(
+            default='1',
+            fill_brok=['full_status']),
+        'retain_nonstatus_information': BoolProp(
+            default='1',
+            fill_brok=['full_status']),
+        'contacts': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'contact_groups': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'notification_interval': IntegerProp(
+            default='60',
+            fill_brok=['full_status']),
+        'first_notification_delay': IntegerProp(
+            default='0',
+            fill_brok=['full_status']),
         'notification_period': StringProp(fill_brok=['full_status']),
-        'notification_options': ListProp(default='d,u,r,f',
-                                         fill_brok=['full_status']),
-        'notifications_enabled': BoolProp(default='1',
-                                          fill_brok=['full_status']),
-        'stalking_options': ListProp(default='',
-                                     fill_brok=['full_status']),
-        'notes': StringProp(default='', fill_brok=['full_status']),
-        'notes_url': StringProp(default='', fill_brok=['full_status']),
-        'action_url': StringProp(default='', fill_brok=['full_status']),
-        'icon_image': StringProp(default='', fill_brok=['full_status']),
-        'icon_image_alt': StringProp(default='', fill_brok=['full_status']),
-        'vrml_image': StringProp(default='', fill_brok=['full_status']),
-        'statusmap_image': StringProp(default='', fill_brok=['full_status']),
+        'notification_options': ListProp(
+            default='d,u,r,f',
+            fill_brok=['full_status']),
+        'notifications_enabled': BoolProp(
+            default='1',
+            fill_brok=['full_status']),
+        'stalking_options': ListProp(
+            default='',
+            fill_brok=['full_status']),
+        'notes': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'notes_url': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'action_url': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'icon_image': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'icon_image_alt': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'vrml_image': StringProp(
+            default='',
+            fill_brok=['full_status']),
+        'statusmap_image': StringProp(
+            default='',
+            fill_brok=['full_status']),
 
         # No slots for this 2 because begin property by a number seems bad
         # it's stupid!
-        '2d_coords': StringProp(default='', fill_brok=['full_status'],
-                                no_slots=True),
-        '3d_coords': StringProp(default='', fill_brok=['full_status'],
-                                no_slots=True),
-        'failure_prediction_enabled': BoolProp(default='0',
-                                               fill_brok=['full_status']),
+        '2d_coords': StringProp(
+            default='', 
+            fill_brok=['full_status'],
+            no_slots=True),
+        '3d_coords': StringProp(
+            default='',
+            fill_brok=['full_status'],
+            no_slots=True),
+        'failure_prediction_enabled': BoolProp(
+            default='0',
+            fill_brok=['full_status']),
 
         ### New to shinken
         # 'fill_brok' is ok because in scheduler it's already
         # a string from conf_send_preparation
-        'realm': StringProp(default=None, fill_brok=['full_status'],
-                            conf_send_preparation=get_obj_name),
+        'realm': StringProp(
+            default=None,
+            fill_brok=['full_status'],
+            conf_send_preparation=get_obj_name),
         'poller_tag': StringProp(default=None),
 
         'resultmodulations': StringProp(default=''),
-        'escalations': StringProp(default='', fill_brok=['full_status']),
-        'maintenance_period': StringProp(default='', fill_brok=['full_status']),
+        'escalations': StringProp(
+            default='', 
+            fill_brok=['full_status']),
+        'maintenance_period': StringProp(
+            default='',
+            fill_brok=['full_status']),
 
         # Criticity value
-        'criticity': IntegerProp(default='3', fill_brok=['full_status']),
+        'criticity': IntegerProp(
+            default='3',
+            fill_brok=['full_status']),
         
         }
 
     # properties set only for running purpose
     # retention : save/load this property from retention
     running_properties = {
-        'last_chk': IntegerProp(default=0, 
-                                fill_brok=['full_status', 'check_result'],
-                                retention=True),
-        'next_chk': IntegerProp(default=0,
-                                fill_brok=['full_status', 'next_schedule']),
-        'in_checking': BoolProp(default=False,
-                                fill_brok=['full_status', 'check_result', 'next_schedule']),
-        'latency': FloatProp(default=0,
-                             fill_brok=['full_status', 'check_result'],
-                             retention=True),
-        'attempt': IntegerProp(default=0,
-                               fill_brok=['full_status', 'check_result'],
-                               retention=True),
-        'state': StringProp(default='PENDING',
-                            fill_brok=['full_status'],
-                            retention=True),
-        'state_id': IntegerProp(default=0,
-                                fill_brok=['full_status', 'check_result'],
-                                retention=True),
-        'state_type': StringProp(default='HARD',
-                                 fill_brok=['full_status'],
-                                 retention=True),
-        'state_type_id': IntegerProp(default=0,
-                                     fill_brok=['full_status', 'check_result'],
-                                     retention=True),
-        'current_event_id': StringProp(default=0,
-                                       fill_brok=['full_status', 'check_result'],
-                                       retention=True),
-        'last_event_id': IntegerProp(default=0,
-                                     fill_brok=['full_status', 'check_result'],
-                                     retention=True),
-        'last_state': StringProp(default='PENDING',
-                                 fill_brok=['full_status'],
-                                 retention=True),
-        'last_state_id': IntegerProp(default=0,
-                                     fill_brok=['full_status'],
-                                     retention=True),
-        'last_state_change': FloatProp(default=time.time(),
-                                       fill_brok=['full_status'],
-                                       retention=True),
-        'last_hard_state_change': FloatProp(default=time.time(),
-                                            fill_brok=['full_status'],
-                                            retention=True),
-        'last_hard_state': StringProp(default='PENDING',
-                                      fill_brok=['full_status'],
-                                      retention=True),
-        'last_hard_state_id' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
-        'last_time_up': IntegerProp(default=int(time.time()),
-                                    fill_brok=['full_status', 'check_result'],
-                                    retention=True),
-        'last_time_down': IntegerProp(default=int(time.time()),
-                                      fill_brok=['full_status', 'check_result'],
-                                      retention=True),
-        'last_time_unreachable': IntegerProp(default=int(time.time()),
-                                             fill_brok=['full_status', 'check_result'],
-                                             retention=True),
-        'duration_sec': IntegerProp(default=0,
-                                    fill_brok=['full_status'],
-                                    retention=True),
-        'output': StringProp(default='',
-                             fill_brok=['full_status', 'check_result'],
-                             retention=True),
-        'long_output': StringProp(default='',
-                                  fill_brok=['full_status', 'check_result'],
-                                  retention=True),
-        'is_flapping': BoolProp(default=False,
-                                fill_brok=['full_status'],
-                                retention=True),
-        'flapping_comment_id': IntegerProp(default=0,
-                                           fill_brok=['full_status'],
-                                           retention=True),
+        'last_chk': IntegerProp(
+            default=0, 
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'next_chk': IntegerProp(
+            default=0,
+            fill_brok=['full_status', 'next_schedule']),
+        'in_checking': BoolProp(
+            default=False,
+            fill_brok=['full_status', 'check_result', 'next_schedule']),
+        'latency': FloatProp(
+            default=0,
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'attempt': IntegerProp(
+            default=0,
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'state': StringProp(
+            default='PENDING',
+            fill_brok=['full_status'],
+            retention=True),
+        'state_id': IntegerProp(
+            default=0,
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'state_type': StringProp(
+            default='HARD',
+            fill_brok=['full_status'],
+            retention=True),
+        'state_type_id': IntegerProp(
+            default=0,
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'current_event_id': StringProp(
+            default=0,
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'last_event_id': IntegerProp(
+            default=0,
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'last_state': StringProp(
+            default='PENDING',
+            fill_brok=['full_status'],
+            retention=True),
+        'last_state_id': IntegerProp(
+            default=0,
+            fill_brok=['full_status'],
+            retention=True),
+        'last_state_change': FloatProp(
+            default=time.time(),
+            fill_brok=['full_status'],
+            retention=True),
+        'last_hard_state_change': FloatProp(
+            default=time.time(),
+            fill_brok=['full_status'],
+            retention=True),
+        'last_hard_state': StringProp(
+            default='PENDING',
+            fill_brok=['full_status'],
+            retention=True),
+        'last_hard_state_id' : IntegerProp(
+            default=0,
+            fill_brok=['full_status'], 
+            retention=True),
+        'last_time_up': IntegerProp(
+            default=int(time.time()),
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'last_time_down': IntegerProp(
+            default=int(time.time()),
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'last_time_unreachable': IntegerProp(
+            default=int(time.time()),
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'duration_sec': IntegerProp(
+            default=0,
+            fill_brok=['full_status'],
+            retention=True),
+        'output': StringProp(
+            default='',
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'long_output': StringProp(
+            default='',
+            fill_brok=['full_status', 'check_result'],
+            retention=True),
+        'is_flapping': BoolProp(
+            default=False,
+            fill_brok=['full_status'],
+            retention=True),
+        'flapping_comment_id': IntegerProp(
+            default=0,
+            fill_brok=['full_status'],
+            retention=True),
         # No broks for _depend_of because of to much links to hosts/services
         # dependencies for actions like notif of event handler, so AFTER check return
         'act_depend_of': StringProp(default=[]),
@@ -233,9 +325,10 @@ class Host(SchedulingItem):
         # elements that depend of me
         'chk_depend_of_me': StringProp(default=[]), 
 
-        'last_state_update': StringProp(default=time.time(),
-                                        fill_brok=['full_status'],
-                                        retention=True),
+        'last_state_update': StringProp(
+            default=time.time(),
+            fill_brok=['full_status'],
+            retention=True),
 
         # no brok ,to much links
         'services': StringProp(default=[]),
@@ -244,23 +337,29 @@ class Host(SchedulingItem):
         'checks_in_progress': StringProp(default=[]),
 
         # No broks, it's just internal, and checks have too links
-        'notifications_in_progress': StringProp(default={},
-                                                retention=True),
-        'downtimes': StringProp(default=[],
-                                fill_brok=['full_status'],
-                                retention=True),
-        'comments': StringProp(default=[],
-                               fill_brok=['full_status'],
-                               retention=True),
-        'flapping_changes': StringProp(default=[],
-                                       fill_brok=['full_status'],
-                                       retention=True),
-        'percent_state_change': FloatProp(default=0.0,
-                                          fill_brok=['full_status'],
-                                          retention=True),
-        'problem_has_been_acknowledged': BoolProp(default=False,
-                                                  fill_brok=['full_status'],
-                                                  retention=True),
+        'notifications_in_progress': StringProp(
+            default={},
+            retention=True),
+        'downtimes': StringProp(
+            default=[],
+            fill_brok=['full_status'],
+            retention=True),
+        'comments': StringProp(
+            default=[],
+            fill_brok=['full_status'],
+            retention=True),
+        'flapping_changes': StringProp(
+            default=[],
+            fill_brok=['full_status'],
+            retention=True),
+        'percent_state_change': FloatProp(
+            default=0.0,
+            fill_brok=['full_status'],
+            retention=True),
+        'problem_has_been_acknowledged': BoolProp(
+            default=False,
+            fill_brok=['full_status'],
+            retention=True),
         'acknowledgement': StringProp(
             default=None,
             retention=True),
@@ -374,8 +473,12 @@ class Host(SchedulingItem):
         'configuration_errors': StringProp(default=[]),
 
         ### Problem/impact part
-        'is_problem': StringProp(default=False, fill_brok=['full_status']),
-        'is_impact': StringProp(default=False, fill_brok=['full_status']),
+        'is_problem': StringProp(
+            default=False,
+            fill_brok=['full_status']),
+        'is_impact': StringProp(
+            default=False, 
+            fill_brok=['full_status']),
 
         # list of problems that make us an impact
         'source_problems': StringProp(

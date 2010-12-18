@@ -24,7 +24,9 @@ cd $DIR
 echo `pwd`
 
 #delete the resul of nosetest, for coverage
-rm nosetests.xml
+rm -f nosetests.xml
+rm -f coverage.xml
+rm -f .coverage
 
 function launch_and_assert {
     SCRIPT=$1
@@ -78,6 +80,9 @@ launch_and_assert test_properties.py
 
 #Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py
+
+# And create the coverage file
+coverage xml --omit=/usr/lib
 
 echo "All quick unit tests passed :)"
 echo "But please launch a test.sh pass too for long tests too!"
