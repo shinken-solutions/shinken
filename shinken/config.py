@@ -1126,6 +1126,12 @@ class Config(Item):
         self.services.create_business_rules(self.hosts, self.services)
 
 
+    # Will fill dep list for business rules
+    def create_business_rules_dependencies(self):
+        self.hosts.create_business_rules_dependencies()
+        self.services.create_business_rules_dependencies()
+
+
     #It's used to hack some old Nagios parameters like
     #log_file or status_file : if they are present in
     #the global configuration and there is no such modules

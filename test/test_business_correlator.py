@@ -530,10 +530,14 @@ class TestConfig(ShinkenTest):
         
         print "All elements", bp_rule.list_all_elements()
 
-        
-
         print "IMPACT:", svc_bd2.impacts
+        for i in svc_bd2.impacts:
+            print i.get_name()
 
+        # Assert that Simple_Or Is an impact of the problem bd2
+        self.assert_(svc_cor in svc_bd2.impacts)
+        # and bd1 too
+        self.assert_(svc_cor in svc_bd1.impacts)
 
 
     def test_dep_node_list_elements(self):
@@ -554,6 +558,8 @@ class TestConfig(ShinkenTest):
 
         self.assert_(svc_bd2 in all_elt)
         self.assert_(svc_bd1 in all_elt)
+
+        print "DBG: bd2 depend_on_me", svc_bd2.act_depend_of_me
 
 
 if __name__ == '__main__':

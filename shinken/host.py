@@ -726,6 +726,22 @@ class Host(SchedulingItem):
         h.act_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
 
 
+    # Register the dependancy between 2 service for action (notification etc)
+    # but based on a BUSINESS rule, so on fact:
+    # ERP depend on database, so we fill just database.act_depend_of_me
+    # because we will want ERP mails to go on! So call this
+    # on the database service with the srv=ERP service
+    def add_business_rule_act_dependancy(self, h, status, timeperiod, inherits_parent):
+        # first I add the other the I depend on in MY list
+#        self.act_depend_of.append( (srv, status, 'logic_dep', 
+#                                    timeperiod, inherits_parent) )
+        # I only register so he know that I WILL be a inpact
+        self.act_depend_of_me.append( (h, status, 'business_dep', 
+                                      timeperiod, inherits_parent) )
+
+
+
+
     # Add a dependancy for check (so before launch)
     def add_host_chk_dependancy(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
@@ -1274,5 +1290,12 @@ class Hosts(Items):
     # Will create all business tree for the
     # services
     def create_business_rules(self, hosts, services):
-        for s in self:
-            s.create_business_rules(hosts, services)
+        for h in self:
+            h.create_business_rules(hosts, services)
+
+
+    # Will link all business service/host with theirs
+    # dep for problem/impact link
+    def create_business_rules_dependencies(self):
+        for h in self:
+            h.create_business_rules_dependencies()

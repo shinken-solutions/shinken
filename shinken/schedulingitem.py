@@ -1041,3 +1041,17 @@ class SchedulingItem(Item):
         state = self.business_rule.get_state()
         c.exit_status = state
         print "DBG, setting state", state
+
+
+    # If I'm a business rule service/hsot, I register myself to the
+    # elements I will depend on, so They will have ME as an impact
+    def create_business_rules_dependencies(self):
+        if self.got_business_rule:
+            print "DBG: ask me to register me in my dependencies", self.get_name()
+            elts = self.business_rule.list_all_elements()
+            # I will register myself in this
+            for e in elts:
+                print "I register to the element", e.get_name()
+                # all states, every timeperiod, and inherit parents
+                e.add_business_rule_act_dependancy(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
+
