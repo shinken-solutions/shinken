@@ -528,6 +528,32 @@ class TestConfig(ShinkenTest):
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 1)
         
+        print "All elements", bp_rule.list_all_elements()
+
+        
+
+        print "IMPACT:", svc_bd2.impacts
+
+
+
+    def test_dep_node_list_elements(self):
+        svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
+        self.assert_(svc_bd1.got_business_rule == False)
+        self.assert_(svc_bd1.business_rule == None)
+        svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
+        self.assert_(svc_bd2.got_business_rule == False)
+        self.assert_(svc_bd2.business_rule == None)
+        svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_Or")
+        self.assert_(svc_cor.got_business_rule == True)
+        self.assert_(svc_cor.business_rule != None)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.operand == '|')
+
+        print "All elements", bp_rule.list_all_elements()
+        all_elt = bp_rule.list_all_elements()
+
+        self.assert_(svc_bd2 in all_elt)
+        self.assert_(svc_bd1 in all_elt)
 
 
 if __name__ == '__main__':

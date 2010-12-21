@@ -100,6 +100,20 @@ class DependencyNode(object):
         print "ARG, not enough 1 or 0, return 2..."
         return 2
 
+
+    #return a list of all host/service in our node and below
+    def list_all_elements(self):
+        r = []
+
+        #We are a host/service
+        if self.operand in ['host', 'service']:
+            return [self.sons[0]]
+
+        for s in self.sons:
+            r.extend(s.list_all_elements())
+
+        #and uniq the result
+        return list(set(r))
         
 
 
