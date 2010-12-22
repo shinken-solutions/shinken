@@ -78,6 +78,7 @@ launch_and_assert test_on_demand_event_handlers.py
 launch_and_assert test_business_correlator.py
 launch_and_assert test_properties.py
 launch_and_assert test_realms.py
+launch_and_assert test_host_without_cmd.py
 
 #Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py

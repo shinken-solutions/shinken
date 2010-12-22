@@ -74,7 +74,7 @@ class Host(SchedulingItem):
             default='',
             fill_brok=['full_status']),
         'check_command': StringProp(
-            default='', 
+            default='_internal_host_up', 
             fill_brok=['full_status']),
         'initial_state': CharProp(
             default='u',

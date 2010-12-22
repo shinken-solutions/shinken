@@ -714,6 +714,8 @@ class Config(Item):
     def add_ghost_objects(self, raw_objects):
         bp_rule = {'command_name' : 'bp_rule', 'command_line' : 'bp_rule'}
         raw_objects['command'].append(bp_rule)
+        host_up = {'command_name' : '_internal_host_up', 'command_line' : '_internal_host_up'}
+        raw_objects['command'].append(host_up)
 
 
     #We've got raw objects in string, now create real Instances

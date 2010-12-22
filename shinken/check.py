@@ -76,7 +76,11 @@ class Check(Action):
         self.perf_data = ''
         self.poller_tag = poller_tag
         self.env = env
-        self.internal = False
+        # If it's a business rule, manage it as a special check
+        if ref and ref.got_business_rule or command.startswith('_internal'):
+            self.internal = True
+        else:
+            self.internal = False
 
 
     #return a copy of the check but just what is important for execution

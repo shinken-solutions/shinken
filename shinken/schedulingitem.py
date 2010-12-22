@@ -992,10 +992,6 @@ class SchedulingItem(Item):
                           timeout=cls.check_timeout, \
                           poller_tag=self.check_command.poller_tag, env=env)
 
-            # If it's a business rule, manage it as a special check
-            if self.got_business_rule:
-                c.internal = True
-
             # We keep a trace of all checks in progress
             # to know if we are in checking_or not
             self.checks_in_progress.append(c)
@@ -1059,7 +1055,14 @@ class SchedulingItem(Item):
     # like a business based one
     def manage_internal_check(self, c):
         print "DBG, ask me to manage a check!"
-        state = self.business_rule.get_state()
+        if c.command.startswith('bp_'):
+            state = self.business_rule.get_state()
+        elif c.command == '_internal_host_up':
+            state = 0
+            c.execution_time = 0
+            c.check_time = time.time()
+            c.output = 'Host assumed to be UP'
+            c.long_output = c.output
         c.exit_status = state
         print "DBG, setting state", state
 
