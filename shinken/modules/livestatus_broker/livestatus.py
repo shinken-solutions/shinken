@@ -4276,7 +4276,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'livestatus_version' : {
-                'default' : '1.1.3',
+                'default' : '1.1.3-shinken',
                 'description' : 'The version of the MK Livestatus module',
                 'prop' : None,
                 'type' : 'string',
