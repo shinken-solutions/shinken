@@ -48,8 +48,10 @@ class Hostgroup(Itemgroup):
             fill_brok=['full_status']),
         #Shinken specific
         'unknown_members': StringProp(
-            default=[])
+            default=[]),
+        'configuration_errors' : StringProp(default = []),
         }
+    
     macros = {
         'HOSTGROUPALIAS' : 'alias',
         'HOSTGROUPMEMBERS' : 'members',
@@ -124,9 +126,9 @@ class Hostgroups(Itemgroups):
         return self.itemgroups[id].get_hosts()
 
 
-    def linkify(self, hosts=None):
+    def linkify(self, hosts=None, realms=None):
         self.linkify_hg_by_hst(hosts)
-        self.linkify_hg_by_realms()
+        self.linkify_hg_by_realms(realms)
 
 
     #We just search for each hostgroup the id of the hosts
@@ -163,18 +165,28 @@ class Hostgroups(Itemgroups):
     #have members so... Will be really linkify just after
     #And we explode realm in ours members, but do not overide
     #a host realm value if it's already set
-    def linkify_hg_by_realms(self):
+    def linkify_hg_by_realms(self, realms):
         #Now we explode the realm value if we've got one
         #The group realm must not overide a host one (warning?)
         for hg in self:
+            print "DBG LINK REALM for hostgropup", hg.get_name()
             if hasattr(hg, 'realm'):
+                r = realms.find_by_name(hg.realm.strip())
+                if r != None:
+                    hg.realm = r
+                    print "Hostgroup", hg.get_name(), "is in the realm", r.get_name()
+                else:
+                    err = "The hostgroup %s got an unknown realm '%s'" % (hg.get_name(), hg.realm)
+                    hg.configuration_errors.append(err)
+                    hg.realm = None
+                    continue
                 for h in hg:
                     if h != None:
-                        if h.realm == None:#default value not hasattr(h, 'realm'):
-                            print "Apply a realm", hg.realm, "to host", h.get_name()
+                        if h.realm == None or h.got_default_realm: #default value not hasattr(h, 'realm'):
+                            print "Apply a realm", hg.realm.get_name(), "to host", h.get_name(), "from a hostgroup rule (%s)" % hg.get_name()
                             h.realm = hg.realm
                         else:
-                            if h.realm.strip() != hg.realm.strip():
+                            if h.realm != hg.realm:
                                 print "Warning : host", h.get_name(), "is not in the same realm than it's hostgroup", hg.get_name()
 
 

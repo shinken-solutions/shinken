@@ -445,6 +445,8 @@ class Host(SchedulingItem):
         'customs': StringProp(
             default={}),
 
+        'got_default_realm' : BoolProp(default=False),
+
         # use for having all contacts we have notified
         'notified_contacts': StringProp(
             default=set()), 
@@ -1172,6 +1174,8 @@ class Hosts(Items):
             else:
                 #print "Notice : applying default realm %s to host %s" % (default_realm.get_name(), h.get_name())
                 h.realm = default_realm
+                h.got_default_realm = True
+
 
     #We look for hostgroups property in hosts and
     #link them

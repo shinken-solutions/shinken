@@ -807,7 +807,7 @@ class Config(Item):
         # Do the simplify AFTER explode groups
         #print "Hostgroups"
         # link hostgroups with hosts
-        self.hostgroups.linkify(self.hosts)
+        self.hostgroups.linkify(self.hosts, self.realms)
 
         #print "Services"
         # link services with other objects
