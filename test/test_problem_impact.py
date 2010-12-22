@@ -112,6 +112,13 @@ class TestConfig(ShinkenTest):
                 self.assert_(s.get_dbg_name() in host_router_0_brok.data['impacts']['hosts'])
                 self.assert_(s.get_dbg_name() in host_router_1_brok.data['impacts']['hosts'])
 
+        # Should have host notification, but it's not so simple:
+        # our contact say : not under 5, and our hosts are 3. But
+        # the impacts have huge criticity, so the hosts gain such criticity
+        self.assert_(self.any_log_match('HOST NOTIFICATION.*;'))
+        self.show_and_clear_logs()
+
+
         #Now impacts should really be .. impacts :)
         for s in all_servers:
             self.assert_(s.is_impact == True)
