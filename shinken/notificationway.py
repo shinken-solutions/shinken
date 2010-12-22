@@ -65,8 +65,12 @@ class NotificationWay(Item):
 
     #Search for notification_options with state and if t is
     #in service_notification_period
-    def want_service_notification(self, t, state, type):
+    def want_service_notification(self, t, state, type, criticity):
         if not self.service_notifications_enabled:
+            return False
+
+        # If the criticity is not high enough, we bail out
+        if criticity < self.min_criticity:
             return False
         
         b = self.service_notification_period.is_time_valid(t)
@@ -94,9 +98,14 @@ class NotificationWay(Item):
 
     #Search for notification_options with state and if t is in
     #host_notification_period
-    def want_host_notification(self, t, state, type):
+    def want_host_notification(self, t, state, type, criticity):
         if not self.host_notifications_enabled:
             return False
+
+        # If the criticity is not high enough, we bail out
+        if criticity < self.min_criticity:
+            return False
+
         b = self.host_notification_period.is_time_valid(t)
         if 'n' in self.host_notification_options:
             return False
@@ -137,7 +146,7 @@ class NotificationWay(Item):
         state = True #guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['service_notification_commands', 'service_notification_commands', \
+        special_properties = ['service_notification_commands', 'host_notification_commands', \
                                   'service_notification_period', 'host_notification_period']
 
 	#A null notif way is a notif way that will do nothing (service = n, hot =n)
@@ -152,6 +161,7 @@ class NotificationWay(Item):
                 if not hasattr(self, prop) and cls.properties[prop].required:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
+
         #Ok now we manage special cases...
         #Service part
         if not hasattr(self, 'service_notification_commands') :

@@ -70,25 +70,35 @@ class TestConfig(ShinkenTest):
             print "\t", nw.notificationway_name
         self.assert_(test_contact_simple_inner_notificationway in contact_simple.notificationways)
 
+        # we take as criticity a huge value from now
+        huge_criticity = 5
+
         #Now all want* functions
         #First is ok with warning alerts
-        self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM') == True)
+        self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == True)
 
         #But a SMS is now WAY for warning. When we sleep, we wake up for critical only guy!
-        self.assert_(sms_the_night.want_service_notification(now, 'WARNING', 'PROBLEM') == False)
+        self.assert_(sms_the_night.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == False)
 
         #Same with contacts now
         #First is ok for warning in the email_in_day nw
-        self.assert_(contact.want_service_notification(now, 'WARNING', 'PROBLEM') == True)
+        self.assert_(contact.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == True)
         #Simple is not ok for it
-        self.assert_(contact_simple.want_service_notification(now, 'WARNING', 'PROBLEM') == False)
+        self.assert_(contact_simple.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == False)
 
         #Then for host notification
         #First is ok for warning in the email_in_day nw
-        self.assert_(contact.want_host_notification(now, 'FLAPPING', 'PROBLEM') == True)
+        self.assert_(contact.want_host_notification(now, 'FLAPPING', 'PROBLEM', huge_criticity) == True)
         #Simple is not ok for it
-        self.assert_(contact_simple.want_host_notification(now, 'FLAPPING', 'PROBLEM') == False)
+        self.assert_(contact_simple.want_host_notification(now, 'FLAPPING', 'PROBLEM', huge_criticity) == False)
 
+        # And now we check that we refuse SMS for a low level criticity
+        # I do not want to be awaken by a dev server! When I sleep, I sleep!
+        # (and my wife will kill me if I do...)
+
+        # We take the EMAIL test because SMS got the night ony, so we take a very low value for criticity here
+        self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', -1) == False)
+        
 
 
 if __name__ == '__main__':

@@ -988,7 +988,7 @@ class Host(SchedulingItem):
 
     #See if the notification is launchable (time is OK and contact is OK too)
     def notification_is_blocked_by_contact(self, n, contact):
-        return not contact.want_host_notification(self.last_chk, self.state, n.type)
+        return not contact.want_host_notification(self.last_chk, self.state, n.type, self.criticity)
 
 
     #MACRO PART

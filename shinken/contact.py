@@ -84,13 +84,13 @@ class Contact(Item):
 
     #Search for notification_options with state and if t is
     #in service_notification_period
-    def want_service_notification(self, t, state, type):
+    def want_service_notification(self, t, state, type, criticity):
         if not self.service_notifications_enabled:
             return False
 
         #Now the rest is for sub notificationways. If one is OK, we are ok
         for nw in self.notificationways:
-            nw_b = nw.want_service_notification(t, state, type)
+            nw_b = nw.want_service_notification(t, state, type, criticity)
             if nw_b:
                 return True
 
@@ -100,13 +100,13 @@ class Contact(Item):
 
     #Search for notification_options with state and if t is in
     #host_notification_period
-    def want_host_notification(self, t, state, type):
+    def want_host_notification(self, t, state, type, criticity):
         if not self.host_notifications_enabled:
             return False
 
         #Now it's all for sub notificationways. If one is OK, we are OK
         for nw in self.notificationways:
-            nw_b = nw.want_host_notification(t, state, type)
+            nw_b = nw.want_host_notification(t, state, type, criticity)
             if nw_b:
                 return True
 
@@ -137,7 +137,7 @@ class Contact(Item):
         cls = self.__class__
 
         #All of the above are checks in the notificationways part
-        special_properties = ['service_notification_commands', 'service_notification_commands', \
+        special_properties = ['service_notification_commands', 'host_notification_commands', \
                                   'service_notification_period', 'host_notification_period', \
                                   'service_notification_options', 'host_notification_options', \
                                   'host_notification_commands', 'contact_name']
@@ -217,7 +217,7 @@ class Contacts(Items):
         #contacts
         simple_way_parameters = ['service_notification_period', 'host_notification_period', \
                                      'service_notification_options', 'host_notification_options', \
-                                     'service_notification_commands', 'host_notification_commands' \
+                                     'service_notification_commands', 'host_notification_commands', \
                                      'min_criticity']
         for c in self:
             if not c.is_tpl():
