@@ -42,11 +42,13 @@ class TestConfig(ShinkenTest):
 
         #The problem_impact_state change should be enabled in the configuration
         self.assert_(self.conf.enable_problem_impacts_states_change == True)
-
+        
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
+        self.assert_(host_router_0.criticity == 3)
         host_router_1 = self.sched.hosts.find_by_name("test_router_1")
         host_router_1.checks_in_progress = []
+        self.assert_(host_router_1.criticity == 3)
 
         #Then initialize host under theses routers
         host_0 = self.sched.hosts.find_by_name("test_host_0")
@@ -102,6 +104,9 @@ class TestConfig(ShinkenTest):
         #Should be problems and have sub servers as impacts
         for h in all_routers:
             self.assert_(h.is_problem == True)
+            # Now routers are problems, they should have take the max
+            # criticity value ofthe impacts, so here 5
+            self.assert_(h.criticity == 5)
             for s in all_servers:
                 self.assert_(s in h.impacts)
                 self.assert_(s.get_dbg_name() in host_router_0_brok.data['impacts']['hosts'])
@@ -170,6 +175,10 @@ class TestConfig(ShinkenTest):
             self.assert_(s.state == 'UP')
             self.assert_(s.source_problems == [])
 
+        # And our "criticity" should have failed back to our
+        # conf value, so 3
+        self.assert_(host_router_0.criticity == 3)
+        self.assert_(host_router_1.criticity == 3)
         #It's done :)
 
 

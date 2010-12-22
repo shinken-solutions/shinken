@@ -142,11 +142,29 @@ class SchedulingItem(Item):
                         # Make element unique in this list
                         self.impacts = list(set(self.impacts))
 
+        # We can update our criticity value now
+        self.update_criticity_value()
+
         # And we register a new broks for update status
         b = self.get_update_status_brok()
         self.broks.append(b)
 
 
+    # We update our 'criticity' value with the max of
+    # the impacts criticy if we got impacts. And save our 'configuration'
+    # criticity if we do not have do it before
+    # If we do not have impacts, we revert our value
+    def update_criticity_value(self):
+        # First save our criticity if not already do
+        if self.my_own_criticity == -1:
+            self.my_own_criticity = self.criticity
+
+        # If we trully have impacts, we get teh max criticity
+        if len(self.impacts) != 0:
+            self.criticity = max([e.criticity for e in self.impacts])
+        elif self.my_own_criticity != -1:
+            self.criticity = self.my_own_criticity
+            
 
     # Look for my impacts, and remove me from theirs problems list
     def no_more_a_problem(self):
@@ -163,6 +181,9 @@ class SchedulingItem(Item):
             # And we register a new broks for update status
             b = self.get_update_status_brok()
             self.broks.append(b)
+
+        # We update our criticy value, it's not a huge thing :)
+        self.update_criticity_value()
 
 
     # call recursively by potentials impacts so they
@@ -209,7 +230,6 @@ class SchedulingItem(Item):
             # And we register a new broks for update status
             b = self.get_update_status_brok()
             self.broks.append(b)
-
 
         # now we return all impacts (can be void of course)
         return impacts

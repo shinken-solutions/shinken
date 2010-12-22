@@ -481,7 +481,8 @@ class Host(SchedulingItem):
         'is_impact': StringProp(
             default=False, 
             fill_brok=['full_status']),
-
+        # the save value of our criticity for "problems"
+        'my_own_criticity': IntegerProp(default=-1),
         # list of problems that make us an impact
         'source_problems': StringProp(
             brok_transformation=to_svc_hst_distinct_lists,

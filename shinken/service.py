@@ -202,6 +202,8 @@ class Service(SchedulingItem):
         # Problem/impact part
         'is_problem' : BoolProp(default=False, fill_brok=['full_status']),
         'is_impact' : BoolProp(default=False, fill_brok=['full_status']),
+        # the save value of our criticity for "problems"
+        'my_own_criticity': IntegerProp(default=-1),
         # list of problems that make us an impact
         'source_problems' : ListProp(default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
         # list of the impact I'm the cause of
