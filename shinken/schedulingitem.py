@@ -159,9 +159,10 @@ class SchedulingItem(Item):
         if self.my_own_criticity == -1:
             self.my_own_criticity = self.criticity
 
-        # If we trully have impacts, we get teh max criticity
+        # If we trully have impacts, we get the max criticity
+        # if it's huge than ourselve
         if len(self.impacts) != 0:
-            self.criticity = max([e.criticity for e in self.impacts])
+            self.criticity = max(self.criticity, max([e.criticity for e in self.impacts]))
         elif self.my_own_criticity != -1:
             self.criticity = self.my_own_criticity
             
