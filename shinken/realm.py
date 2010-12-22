@@ -409,3 +409,10 @@ class Realms(Itemgroups):
             if hasattr(tmp_p, 'rec_tag'):
                 del tmp_p.rec_tag
             del tmp_p.already_explode
+
+
+    def get_default(self):
+        for r in self:
+            if r.default:
+                return r
+        return None

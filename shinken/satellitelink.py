@@ -322,11 +322,21 @@ class SatelliteLinks(Items):
     def linkify_s_by_p(self, realms):
         for s in self:
             p_name = s.realm.strip()
-            p = realms.find_by_name(p_name)
-            s.realm = p
+            # If no realm name, take the default one
+            if p_name == '':
+                p = realms.get_default()
+                s.realm = p
+            else: # find the realm one
+                p = realms.find_by_name(p_name)
+                s.realm = p
+            # Check if what we get is OK or not
             if p is not None:
                 print "Me", s.get_name(), "is linked with realm", s.realm.get_name()
                 s.register_to_my_realm()
+            else:
+                err = "The %s %s got a unknown realm '%s'" % (s.__class__.my_type, s.get_name(), p_name)
+                s.configuration_errors.append(err)
+                print err
 
 
     def linkify_s_by_plug(self, modules):

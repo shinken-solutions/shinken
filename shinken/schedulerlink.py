@@ -33,35 +33,37 @@ class SchedulerLink(SatelliteLink):
     #Ok we lie a little here because we are a mere link in fact
     my_type = 'scheduler'
 
-    properties={'scheduler_name': StringProp(
+    properties={
+        'scheduler_name': StringProp(
             fill_brok=['full_status']),#, 'pythonize': None},
-                'address': StringProp(
+        'address': StringProp(
             fill_brok=['full_status']),#, 'pythonize': to_bool},
-                'port': IntegerProp(
+        'port': IntegerProp(
             default='7768',
             fill_brok=['full_status']),
-                'spare': BoolProp(
+        'spare': BoolProp(
             default='0',
             fill_brok=['full_status']),
-                'modules': ListProp(
+        'modules': ListProp(
             default=''),
-                'weight': IntegerProp(
+        'weight': IntegerProp(
             default='1',
             fill_brok=['full_status']),
-                'manage_arbiters': IntegerProp(
+        'manage_arbiters': IntegerProp(
             default='0'),
-                'use_timezone': StringProp(
+        'use_timezone': StringProp(
             default='NOTSET',
             override=True),
-                'timeout': IntegerProp(
+        'timeout': IntegerProp(
             default='3',
             fill_brok=['full_status']),
-                'data_timeout': IntegerProp(
+        'data_timeout': IntegerProp(
             default='120',
             fill_brok=['full_status']),
-                'max_check_attempts': IntegerProp(
+        'max_check_attempts': IntegerProp(
             default='3',
             fill_brok=['full_status']),
+        'realm' : StringProp(default=''),
                 }
     running_properties = {'con': StringProp(
             default=None),

@@ -80,7 +80,9 @@ class PollerLink(SatelliteLink):
                 'max_check_attempts': IntegerProp(
             default='3',
             fill_brok=['full_status']),
+                'realm' : StringProp(default=''),
                 }
+
     running_properties = {'con': StringProp(
             default=None),
                           'alive': StringProp(

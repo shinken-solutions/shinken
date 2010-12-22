@@ -1166,10 +1166,11 @@ class Hosts(Items):
                     h.realm = p
                     print "Host", h.get_name(), "is in the realm", p.get_name()
                 else:
-                    print "Warning : the host %s git a invalid realm (%s)!" % (h.get_name(), h.realm)
+                    err = "Error : the host %s got a invalid realm (%s)!" % (h.get_name(), h.realm)
+                    h.configuration_errors.append(err)
                     h.realm = None
             else:
-                print "Notice : applying default realm %s to host %s" % (default_realm.get_name(), h.get_name())
+                #print "Notice : applying default realm %s to host %s" % (default_realm.get_name(), h.get_name())
                 h.realm = default_realm
 
     #We look for hostgroups property in hosts and
