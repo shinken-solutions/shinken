@@ -48,6 +48,9 @@ class NotificationWay(Item):
             fill_brok=['full_status']),
         'service_notification_commands': StringProp(
             fill_brok=['full_status']),
+        'min_criticity' : IntegerProp(
+            default = '0', 
+            fill_brok=['full_status']),
         }
     running_properties = {}
 
@@ -65,6 +68,7 @@ class NotificationWay(Item):
     def want_service_notification(self, t, state, type):
         if not self.service_notifications_enabled:
             return False
+        
         b = self.service_notification_period.is_time_valid(t)
         if 'n' in self.service_notification_options:
             return False
@@ -145,7 +149,7 @@ class NotificationWay(Item):
 
         for prop in cls.properties:
             if prop not in special_properties:
-                if not hasattr(self, prop) and cls.properties[prop]['required']:
+                if not hasattr(self, prop) and cls.properties[prop].required:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
         #Ok now we manage special cases...

@@ -41,7 +41,7 @@ class TestConfig(ShinkenTest):
         print "Get the contact"
         now = time.time()
         contact = self.sched.contacts.find_by_name("test_contact")
-        print "The service", contact.__dict__
+        print "The contact", contact.__dict__
 
         print "All notification Way :"
         for nw in self.sched.notificationways:
@@ -52,6 +52,11 @@ class TestConfig(ShinkenTest):
 
         sms_the_night = self.sched.notificationways.find_by_name('sms_the_night')
         self.assert_(sms_the_night in contact.notificationways)
+        
+        # And check the criticity values
+        self.assert_(email_in_day.min_criticity == 0)
+        self.assert_(sms_the_night.min_criticity == 5)
+        
 
         print "Contact notification way(s) :"
         for nw in contact.notificationways:
@@ -68,6 +73,7 @@ class TestConfig(ShinkenTest):
         #Now all want* functions
         #First is ok with warning alerts
         self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM') == True)
+
         #But a SMS is now WAY for warning. When we sleep, we wake up for critical only guy!
         self.assert_(sms_the_night.want_service_notification(now, 'WARNING', 'PROBLEM') == False)
 

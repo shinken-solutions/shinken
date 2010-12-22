@@ -39,6 +39,7 @@ class Contact(Item):
         'service_notification_options' : ListProp(fill_brok=['full_status']),
         'host_notification_commands' : StringProp(fill_brok=['full_status']),
         'service_notification_commands' : StringProp(fill_brok=['full_status']),
+        'min_criticity' : IntegerProp(default = '0', fill_brok=['full_status']),
         'email' : StringProp(default='none', fill_brok=['full_status']),
         'pager' : StringProp(default='none', fill_brok=['full_status']),
         'address1' : StringProp(default='none', fill_brok=['full_status']),
@@ -143,7 +144,7 @@ class Contact(Item):
 
         for prop in cls.properties:
             if prop not in special_properties:
-                if not hasattr(self, prop) and cls.properties[prop]['required']:
+                if not hasattr(self, prop) and cls.properties[prop].required:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
 
@@ -216,7 +217,8 @@ class Contacts(Items):
         #contacts
         simple_way_parameters = ['service_notification_period', 'host_notification_period', \
                                      'service_notification_options', 'host_notification_options', \
-                                     'service_notification_commands', 'host_notification_commands']
+                                     'service_notification_commands', 'host_notification_commands' \
+                                     'min_criticity']
         for c in self:
             if not c.is_tpl():
                 need_notificationway = False
