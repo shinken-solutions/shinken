@@ -157,6 +157,59 @@ class MacroResolver(Borg):
         return env
 
 
+    def resolve_simple_macros_in_string(self, c_line, data):
+        data.append(self.conf) # For USERN macros
+        clss = [d.__class__ for d in data]
+        still_got_macros = True
+	nb_loop = 0
+        while still_got_macros:
+	    nb_loop += 1
+            #Ok, we want the macros in the command line
+            macros = self.get_macros(c_line)
+
+            #We can get out if we do not have macros this loop
+            still_got_macros = (len(macros)!=0)
+            #print "Still go macros:", still_got_macros
+
+            #Put in the macros the type of macro for all macros
+            self.get_type_of_macro(macros, clss)
+            #Now we get values from elements
+            for macro in macros:
+                #If class, get value from properties
+                if macros[macro]['type'] == 'class':
+                    cls = macros[macro]['class']
+                    for elt in data:
+                        if elt is not None and elt.__class__ == cls:
+                            prop = cls.macros[macro]
+                            macros[macro]['val'] = self.get_value_from_element(elt, prop)
+                            #Now check if we do not have a 'output' macro. If so, we must
+                            #delete all special caracters that can be dangerous
+                            if macro in self.output_macros:
+                                macros[macro]['val'] = self.delete_unwanted_caracters(macros[macro]['val'])
+                if macros[macro]['type'] == 'CUSTOM':
+                    cls_type = macros[macro]['class']
+                    macro_name = re.split('_'+cls_type, macro)[1].upper()
+                    #Ok, we've got the macro like MAC_ADDRESS for _HOSTMAC_ADDRESS
+                    #Now we get the element in data that have the type HOST
+                    #and we check if it gots the custom value
+                    for elt in data:
+                        if elt is not None and elt.__class__.my_type.upper() == cls_type:
+                            if '_'+macro_name in elt.customs:
+                                macros[macro]['val'] = elt.customs['_'+macro_name]
+                if macros[macro]['type'] == 'ONDEMAND':
+                    macros[macro]['val'] = self.resolve_ondemand(macro, data)
+
+            #We resolved all we can, now replace the macro in the command call
+            for macro in macros:
+                c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
+
+	    if nb_loop > 32: #too mouch loop, we exit
+		still_got_macros = False	
+
+        #print "Retuning c_line", c_line.strip()
+        return c_line.strip()
+
+
     #Resolve a command with macro by looking at data classes.macros
     #And get macro from item properties.
     def resolve_command(self, com, data):

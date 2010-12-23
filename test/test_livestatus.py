@@ -288,6 +288,7 @@ class TestConfigSmall(TestConfig):
 
     def tearDown(self):
         self.stop_nagios()
+        self.livestatus_broker.dbconn.close()
         if os.path.exists('tmp/livelogs.db' + str(os.getpid())):
             os.remove('tmp/livelogs.db' + str(os.getpid()))
         if os.path.exists('tmp/pnp4nagios_test' + str(os.getpid())):
@@ -1664,6 +1665,45 @@ test_host_0;1
 """)
 
 
+    def test_thruk_action_notes_url(self):
+        self.print_header()
+        now = time.time()
+        self.update_broker()
+        request = """GET services
+Columns: host_name service_description action_url
+Filter: host_name = test_host_0
+Filter: service_description = test_ok_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response == """200          78
+test_host_0;test_ok_0;/nagios/pnp/index.php?host=$HOSTNAME$&srv=$SERVICEDESC$
+""")
+
+        request = """GET services
+Columns: host_name service_description action_url_expanded
+Filter: host_name = test_host_0
+Filter: service_description = test_ok_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response == """200          75
+test_host_0;test_ok_0;/nagios/pnp/index.php?host=test_host_0&srv=test_ok_0
+""")
+
+        request = """GET hosts
+Columns: host_name action_url_expanded notes_url_expanded
+Filter: host_name = test_host_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response == """200          85
+test_host_0;/nagios/pnp/index.php?host=test_host_0;/nagios/wiki/doku.php/test_host_0
+""")
+
 
 
 class TestConfigBig(TestConfig):
@@ -1683,6 +1723,7 @@ class TestConfigBig(TestConfig):
 
     def tearDown(self):
         self.stop_nagios()
+        self.livestatus_broker.dbconn.close()
         if os.path.exists('tmp/livelogs.db' + str(os.getpid())):
             os.remove('tmp/livelogs.db' + str(os.getpid()))
 
