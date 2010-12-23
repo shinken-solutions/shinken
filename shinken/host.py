@@ -30,7 +30,7 @@ import re #for keys generator
 from shinken.autoslots import AutoSlots
 from shinken.item import Items
 from shinken.schedulingitem import SchedulingItem
-from shinken.util import to_int, to_float, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
+from shinken.util import to_int, to_float, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, expand_with_macros
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver
@@ -153,10 +153,12 @@ class Host(SchedulingItem):
             fill_brok=['full_status']),
         'notes': StringProp(
             default='',
-            fill_brok=['full_status']),
+            fill_brok=['full_status'],
+            brok_transformation=expand_with_macros),
         'notes_url': StringProp(
             default='',
-            fill_brok=['full_status']),
+            fill_brok=['full_status'],
+            brok_transformation=expand_with_macros),
         'action_url': StringProp(
             default='',
             fill_brok=['full_status']),

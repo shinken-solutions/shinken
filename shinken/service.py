@@ -33,7 +33,7 @@ except ImportError:
 from shinken.autoslots import AutoSlots
 from shinken.item import Items
 from shinken.schedulingitem import SchedulingItem
-from shinken.util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names
+from shinken.util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, expand_with_macros
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
@@ -96,8 +96,8 @@ class Service(SchedulingItem):
         'contact_groups' : StringProp(fill_brok=['full_status']),
         'stalking_options' : ListProp(default='', fill_brok=['full_status']),
         'notes' : StringProp(default='', fill_brok=['full_status']),
-        'notes_url' : StringProp(default='', fill_brok=['full_status']),
-        'action_url' : StringProp(default='', fill_brok=['full_status']),
+        'notes_url' : StringProp(default='', fill_brok=['full_status'], brok_transformation=expand_with_macros),
+        'action_url' : StringProp(default='', fill_brok=['full_status'], brok_transformation=expand_with_macros),
         'icon_image' : StringProp(default='', fill_brok=['full_status']),
         'icon_image_alt' : StringProp(default='', fill_brok=['full_status']),
         'failure_prediction_enabled' : BoolProp(default='0', fill_brok=['full_status']),

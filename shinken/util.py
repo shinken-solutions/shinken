@@ -24,6 +24,7 @@ try:
 except ImportError:
     NodeSet = None
 
+from shinken.macroresolver import MacroResolver
 #from memoized import memoized
 
 
@@ -147,6 +148,13 @@ def to_svc_hst_distinct_lists(ref, tab):
             name = e.get_dbg_name()
             r['hosts'].append(name)
     return r
+
+
+# Will expaand the value with macros from the
+# host/service ref before brok it
+def expand_with_macros(ref, value):
+    return MacroResolver().resolve_simple_macros_in_string(value, ref.get_data_for_checks())
+
 
 # Just get the string name of the object
 # (like for realm)
