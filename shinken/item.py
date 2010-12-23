@@ -388,6 +388,8 @@ class Item(object):
     def get_property_value_for_brok(self, prop, tab):
         pre_op = None
         entry = tab[prop]
+
+        # Look if we must preprocess the value first
         if entry.brok_transformation is not None:
             pre_op = entry.brok_transformation
 
@@ -400,7 +402,7 @@ class Item(object):
 
         #Apply brok_transformation if need
         if pre_op != None:
-            value = pre_op(value)
+            value = pre_op(self, value)
 
         return value
 

@@ -114,22 +114,29 @@ def from_float_to_int(val):
     val = int(val)
     return val
 
-def to_list_string_of_names(tab):
+
+### Functions for brok_transformations
+### They take 2 parameters : ref, and a value
+### ref is the item like a service, and value
+### if the value to preprocess
+
+# Just a string list of all names, with ,
+def to_list_string_of_names(ref, tab):
     return ",".join([e.get_name() for e in tab])
 
-#take a list of hosts and return a list
-#of all host_names
-def to_hostnames_list(tab):
+# take a list of hosts and return a list
+# of all host_names
+def to_hostnames_list(ref, tab):
     r = []
     for h in tab:
         if hasattr(h, 'host_name'):
             r.append(h.host_name)
     return r
 
-#Wil lcreate a dict with 2 lists:
-#*services : all services of the tab
-#*hosts : all hosts of the tab
-def to_svc_hst_distinct_lists(tab):
+# Will create a dict with 2 lists:
+# *services : all services of the tab
+# *hosts : all hosts of the tab
+def to_svc_hst_distinct_lists(ref, tab):
     r = {'hosts' : [], 'services' : []}
     for e in tab:
         cls = e.__class__
@@ -141,8 +148,8 @@ def to_svc_hst_distinct_lists(tab):
             r['hosts'].append(name)
     return r
 
-#Just get the string name of the object
-#(like for realm)
+# Just get the string name of the object
+# (like for realm)
 def get_obj_name(obj):
     return obj.get_name()
 
