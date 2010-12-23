@@ -169,7 +169,6 @@ class Hostgroups(Itemgroups):
         #Now we explode the realm value if we've got one
         #The group realm must not overide a host one (warning?)
         for hg in self:
-            print "DBG LINK REALM for hostgropup", hg.get_name()
             if hasattr(hg, 'realm'):
                 r = realms.find_by_name(hg.realm.strip())
                 if r != None:

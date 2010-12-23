@@ -38,6 +38,7 @@ except ImportError:
 
 from shinken.service import Service
 from shinken.external_command import ExternalCommand
+from shinken.macroresolver import MacroResolver
 
 from shinken.util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
 
@@ -177,7 +178,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'action_url_expanded' : {
+                'fulldepythonize' : lambda s: MacroResolver().resolve_simple_macros_in_string(s.action_url, s.get_data_for_checks()),
                 'description' : 'The same as action_url, but with the most important macros expanded',
+                'prop' : 'action_url',
                 'type' : 'string',
             },
             'active_checks_enabled' : {
@@ -428,7 +431,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'notes_url_expanded' : {
+                'fulldepythonize' : lambda s: MacroResolver().resolve_simple_macros_in_string(s.notes_url, s.get_data_for_checks()),
                 'description' : 'Same es notes_url, but with the most important macros expanded',
+                'prop' : 'notes_url',
                 'type' : 'string',
             },
             'notification_interval' : {
@@ -636,7 +641,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'action_url_expanded' : {
+                'fulldepythonize' : lambda s: MacroResolver().resolve_simple_macros_in_string(s.action_url, s.get_data_for_checks()),
                 'description' : 'The action_url with (the most important) macros expanded',
+                'prop' : 'action_url',
                 'type' : 'string',
             },
             'active_checks_enabled' : {
@@ -1255,7 +1262,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'notes_url_expanded' : {
+                'fulldepythonize' : lambda s: MacroResolver().resolve_simple_macros_in_string(s.notes_url, s.get_data_for_checks()),
                 'description' : 'The notes_url with (the most important) macros expanded',
+                'prop' : 'notes_url',
                 'type' : 'string',
             },
             'notification_interval' : {
@@ -5242,7 +5251,12 @@ class LiveStatus:
                     #Maybe it's not a value, but a function link
                     if callable(value):
                         value = value()
-                    if display in type_map and 'depythonize' in type_map[display]:
+                    if display in type_map and 'fulldepythonize' in type_map[display]:
+                        f = type_map[display]['fulldepythonize']
+                        if callable(f):
+                            # Pass the whole element (host/service) to the depythonizer
+                            value = f(elt)
+                    elif display in type_map and 'depythonize' in type_map[display]:
                         f = type_map[display]['depythonize']
                         if callable(f):
                             #for example "from_list_to_split". value is an array and f takes the array as an argument

@@ -82,6 +82,7 @@ class SchedulerLink(SatelliteLink):
             default=True),
                           'broks': StringProp(
             default=[]),
+                'configuration_errors' : StringProp(default=[]),
      }
     macros = {}
 

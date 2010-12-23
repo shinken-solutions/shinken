@@ -157,11 +157,9 @@ class MacroResolver(Borg):
         return env
 
 
-    #Resolve a command with macro by looking at data classes.macros
-    #And get macro from item properties.
-    def resolve_command(self, com, data):
-        c_line = com.command.command_line
-
+    # This function will look at elements in data (and args if it filled)
+    # to replace the macros in c_line with real value.
+    def resolve_simple_macros_in_string(self, c_line, data, args=None):
         #Now we prepare the classes for looking at the class.macros
         data.append(self) #For getting global MACROS
         data.append(self.conf) # For USERN macros
@@ -173,7 +171,7 @@ class MacroResolver(Borg):
         #until we reach the botom. So the last loop is when we do
         #not still have macros :)
         still_got_macros = True
-	nb_loop = 0
+        nb_loop = 0
         while still_got_macros:
 	    nb_loop += 1
             #Ok, we want the macros in the command line
@@ -188,8 +186,8 @@ class MacroResolver(Borg):
             #Now we get values from elements
             for macro in macros:
                 #If type ARGN, look at ARGN cutting
-                if macros[macro]['type'] == 'ARGN':
-                    macros[macro]['val'] = self.resolve_argn(macro, com.args)
+                if macros[macro]['type'] == 'ARGN' and args!= None:
+                    macros[macro]['val'] = self.resolve_argn(macro, args)
                     macros[macro]['type'] = 'resolved'
                 #If class, get value from properties
                 if macros[macro]['type'] == 'class':
@@ -225,6 +223,13 @@ class MacroResolver(Borg):
         #print "Retuning c_line", c_line.strip()
         return c_line.strip()
 
+
+    #Resolve a command with macro by looking at data classes.macros
+    #And get macro from item properties.
+    def resolve_command(self, com, data):
+        c_line = com.command.command_line
+        return self.resolve_simple_macros_in_string(c_line, data, args=com.args)
+    
 
     #For all Macros in macros, set the type by looking at the
     #MACRO name (ARGN? -> argn_type,
