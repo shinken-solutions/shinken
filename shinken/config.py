@@ -1508,6 +1508,28 @@ class Config(Item):
             for (dep, tmp, tmp2, tmp3, tmp4) in s.chk_depend_of:
                 links.add((dep.host, s.host))
 
+        # For host/service that are business based, we need to
+        # link them too
+        for s in [s for s in self.services if s.got_business_rule]:
+            for e in s.business_rule.list_all_elements():
+                if hasattr(e, 'host'): # if it's a service
+                    if e.host != s.host: # do not an host with itself
+                        links.add((e.host, s.host))
+                else: # it's already a host
+                    if e != s.host:
+                        links.add((e, s.host))
+
+        # Same for hosts of course
+        for h in [ h for h in self.hosts if h.got_business_rule]:
+            for e in h.business_rule.list_all_elements():
+                if hasattr(e, 'host'): # if it's a service
+                    if e.host != h:
+                        links.add((e.host, h))
+                else: # e is a host
+                    if e != h:
+                        links.add((e, h))
+
+
         #Now we create links in the graph. With links (set)
         #We are sure to call the less add_edge
         for (dep, h) in links:
