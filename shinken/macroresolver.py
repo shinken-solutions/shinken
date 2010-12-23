@@ -162,7 +162,8 @@ class MacroResolver(Borg):
     def resolve_simple_macros_in_string(self, c_line, data, args=None):
         #Now we prepare the classes for looking at the class.macros
         data.append(self) #For getting global MACROS
-        data.append(self.conf) # For USERN macros
+        if hasattr(self, 'conf'):
+            data.append(self.conf) # For USERN macros
         clss = [d.__class__ for d in data]
 
         #we should do some loops for nested macros
