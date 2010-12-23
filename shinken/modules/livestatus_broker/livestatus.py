@@ -5310,7 +5310,7 @@ class LiveStatus:
                         filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in hosts] if filter_stack(y)]
                     else:
                         prefiltresult = (x for x in hosts if filter_stack(self.create_output(type_map, x, [], filtercolumns)))
-                        filtresult = [self.create_output(x, columns, filtercolumns) for x in prefiltresult]
+                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
                     filtresult = filtresult[:limit]
             elif table == 'hostsbygroup':
                 type_map = LiveStatus.out_map['Hostsbygroup']
