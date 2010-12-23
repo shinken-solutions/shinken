@@ -153,12 +153,10 @@ class Host(SchedulingItem):
             fill_brok=['full_status']),
         'notes': StringProp(
             default='',
-            fill_brok=['full_status'],
-            brok_transformation=expand_with_macros),
+            fill_brok=['full_status']),
         'notes_url': StringProp(
             default='',
-            fill_brok=['full_status'],
-            brok_transformation=expand_with_macros),
+            fill_brok=['full_status']),
         'action_url': StringProp(
             default='',
             fill_brok=['full_status']),

@@ -1677,9 +1677,9 @@ OutputFormat: csv
 ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-#        self.assert_(response == """200          78
-#test_host_0;test_ok_0;/nagios/pnp/index.php?host=$HOSTNAME$&srv=$SERVICEDESC$
-#""")
+        self.assert_(response == """200          78
+test_host_0;test_ok_0;/nagios/pnp/index.php?host=$HOSTNAME$&srv=$SERVICEDESC$
+""")
 
         request = """GET services
 Columns: host_name service_description action_url_expanded
