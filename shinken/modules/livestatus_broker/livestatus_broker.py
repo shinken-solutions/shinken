@@ -857,7 +857,12 @@ class Livestatus_broker:
     
                         if handle_it:
                             response, keepalive = self.livestatus.handle_request(open_connections[socketid]['buffer'].rstrip())
-                            s.send(response)
+                            try:
+                                s.send(response)
+                            except:
+                                # Maybe the request was an external command and
+                                # the peer is not interested in a response at all
+                                pass
 
                             # Write request/response in a tracefile
 #                            if os.path.exists('/tmp/shinken.modules.livestatus.trace'):
