@@ -49,6 +49,7 @@ from shinken.schedulerlink import SchedulerLink
 from shinken.reactionnerlink import ReactionnerLink
 from shinken.pollerlink import PollerLink
 from shinken.brokerlink import BrokerLink
+from shinken.macroresolver import MacroResolver
 from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
 
@@ -103,6 +104,9 @@ class Livestatus_broker:
         self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.r)
 
         self.number_of_objects = 0
+
+        m = MacroResolver()
+        m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
 
 
     def is_external(self):
