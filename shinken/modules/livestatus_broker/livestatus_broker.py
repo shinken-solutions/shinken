@@ -29,6 +29,7 @@ import socket
 import sys
 import os
 import time
+import errno
 try:
     import sqlite3
 except ImportError: # python 2.4 do not have it
@@ -691,7 +692,12 @@ class Livestatus_broker:
         print "[LiveStatus] I receive a signal %s" % sig
         print "[liveStatus] So I quit"
         for s in self.input:
-            s.close()
+            try:
+                s.shutdown()
+                s.close()
+            except:
+                # no matter what comes, i'm finished
+                pass
         sys.exit(0)
 
 
@@ -718,14 +724,24 @@ class Livestatus_broker:
         last_number_of_objects = 0
         backlog = 5
         size = 8192
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.setblocking(0)
-        self.server.bind((self.host, self.port))
-        self.server.listen(backlog)
-        self.input = [self.server]
+        self.listeners = []
+        if self.port:
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server.setblocking(0)
+            server.bind((self.host, self.port))
+            server.listen(backlog)
+            self.listeners.append(server)
+        if self.socket:
+            if os.path.exists(self.socket):
+                os.remove(self.socket)
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.setblocking(0)
+            sock.bind(self.socket)
+            sock.listen(backlog)
+            self.listeners.append(sock)
+        self.input = self.listeners[:]
         databuffer = {}
         open_connections = {}
-        # todo. open self.socket and add it to input
 
         while True:
             try:
@@ -752,9 +768,9 @@ class Livestatus_broker:
                     # We will identify sockets by their filehandle number
                     # during the rest of this loop
                     socketid = s.fileno()
-                    if s == self.server:
+                    if s in self.listeners:
                         # handle the server socket
-                        client, address = self.server.accept()
+                        client, address = s.accept()
                         self.input.append(client)
                     else:
                         if socketid in open_connections:

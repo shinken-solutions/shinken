@@ -48,14 +48,14 @@ def get_instance(plugin):
             host = plugin.host
     else:
         host = '127.0.0.1'
-    if hasattr(plugin, 'port'):
+    if hasattr(plugin, 'port') and plugin.port != 'none':
         port = int(plugin.port)
     else:
-        port = 6557
-    if hasattr(plugin, 'socket'):
+        port = None
+    if hasattr(plugin, 'socket') and plugin.socket != 'none':
         socket = plugin.socket
     else:
-        socket = os.sep.join([os.path.abspath(''), 'var', 'rw', 'live'])
+        socket = None
     if hasattr(plugin, 'database_file'):
         database_file = plugin.database_file
     else:
