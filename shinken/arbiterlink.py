@@ -45,6 +45,7 @@ class ArbiterLink(SatelliteLink):
                           'alive' : BoolProp(default=False, fill_brok=['full_status']), # DEAD or not
                           'attempt' : IntegerProp(default=0, fill_brok=['full_status']), # the number of failed attempt
                           'reachable' : IntegerProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+                          'configuration_errors' : StringProp(default=[]),
                           }
 
     macros = {}

@@ -80,6 +80,7 @@ class BrokerLink(SatelliteLink):
                           'reachable': StringProp(
             default=False,
             fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+                'configuration_errors' : StringProp(default=[]),
                           } 
     macros = {}
 
