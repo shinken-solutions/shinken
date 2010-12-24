@@ -323,7 +323,7 @@ class Arbiter(Daemon):
         #so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
-
+ 
 
         self.conf.early_arbiter_linking()
 
@@ -363,17 +363,26 @@ class Arbiter(Daemon):
             self.modules_manager.load()
             self.mod_instances = self.modules_manager.get_instances()
 
+            # Now we ask for configuration modules if they
+            # got items for us
             for inst in self.mod_instances:
                 if 'configuration' in inst.properties['phases']:
                     try :
                         r = inst.get_objects()
-                        for h in r['hosts']:
-                            raw_objects['host'].append(h)
+			types_creations = self.conf.types_creations
+			for k in types_creations:
+                            (cls, clss, prop) = types_creations[k]
+                            for x in r[prop]:
+                                # test if raw_objects[k] is already set - if not, add empty array
+                                if not k in raw_objects:
+                                    raw_objects[k] = []
+                                # now append the object
+                                raw_objects[k].append(x)
+                            print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
                     except Exception, exp:
-                        print "The instance %s raise an exception %s. I remove it" % (inst.get_name(), str(exp))
+                        print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
 
-
-        ### Resume standard operations ###
+       ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
 
 	#Maybe conf is already invalid
@@ -434,9 +443,9 @@ class Arbiter(Daemon):
 
         # Look for business rules, and create teh dep trees
         self.conf.create_business_rules()
-
         # And link them
         self.conf.create_business_rules_dependencies()
+
 
         #************* Print warning about useless parameters in Shinken **************"
         self.conf.notice_about_useless_parameters()
