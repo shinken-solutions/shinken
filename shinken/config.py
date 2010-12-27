@@ -566,6 +566,8 @@ class Config(Item):
                 continue
 
             for line in buf:
+		if os.name != 'nt':
+			line = line.replace("\r\n", "\n")
                 res += line
                 line = line[:-1]
                 if re.search("^cfg_file", line) or re.search("^resource_file", line):
