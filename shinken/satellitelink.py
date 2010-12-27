@@ -68,16 +68,9 @@ class SatelliteLink(Item):
 
 
     def create_connexion(self):
-        #URI are differents between 3 and 4
-        if shinken.pyro_wrapper.pyro_version == 3:
-            self.uri = 'PYROLOC://'+self.address+":"+str(self.port)+"/ForArbiter"
-            self.con = Pyro.core.getProxyForURI(self.uri)
-            #Ok, set timeout to 3 sec (ping timeout)
-            self.con._setTimeout(self.timeout)
-        else:
-            self.uri = 'PYRO:ForArbiter@'+self.address+":"+str(self.port)
-            self.con = Pyro.core.Proxy(self.uri)
-            self.con._pyroTimeout = self.timeout
+        self.uri = shinken.pyro_wrapper.create_uri(self.address, self.port, "ForArbiter")
+        self.con = shinken.pyro_wrapper.getProxy(self.uri)
+        shinken.pyro_wrapper.set_timeout(self.con, 5)
 
 
     def put_conf(self, conf):
@@ -86,18 +79,10 @@ class SatelliteLink(Item):
         #print "Connexion is OK, now we put conf", conf
         #print "Try to put conf:", conf
         try:
-            #Still fun with pyro 3 and 4...
-            if shinken.pyro_wrapper.pyro_version == 3:
-                #Data timeout is far longer than timeout (ping one)
-                self.con._setTimeout(self.data_timeout)
-                self.con.put_conf(conf)
-                self.con._setTimeout(self.timeout)
-                return True
-            else:
-                self.con._pyroTimeout = self.data_timeout
-                self.con.put_conf(conf)
-                self.con._pyroTimeout = self.timeout
-                return True
+            shinken.pyro_wrapper.set_timeout(self.con, 120)
+            self.con.put_conf(conf)
+            shinken.pyro_wrapper.set_timeout(self.con, 5)
+            return True
         except Pyro.errors.URIError , exp:
             self.con = None
             return False
