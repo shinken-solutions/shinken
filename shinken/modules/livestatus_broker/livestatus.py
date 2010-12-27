@@ -352,6 +352,16 @@ class LiveStatus:
                 'description' : 'Wether the host state is flapping (0/1)',
                 'type' : 'int',
             },
+            'is_impact' : {
+                'depythonize' : from_bool_to_int,
+                'description' : 'Wether the host state is an impact or not (0/1)',
+                'type' : 'int',
+            },
+            'is_problem' : {
+                'depythonize' : from_bool_to_int,
+                'description' : 'Wether the host state is a problem or not (0/1)',
+                'type' : 'int',
+            },
             'last_check' : {
                 'converter' : int,
                 'depythonize' : from_float_to_int,
@@ -1191,6 +1201,16 @@ class LiveStatus:
             'is_flapping' : {
                 'depythonize' : from_bool_to_int,
                 'description' : 'Wether the service is flapping (0/1)',
+                'type' : 'int',
+            },
+            'is_impact' : {
+                'depythonize' : from_bool_to_int,
+                'description' : 'Wether the host state is an impact or not (0/1)',
+                'type' : 'int',
+            },
+            'is_problem' : {
+                'depythonize' : from_bool_to_int,
+                'description' : 'Wether the host state is a problem or not (0/1)',
                 'type' : 'int',
             },
             'last_check' : {

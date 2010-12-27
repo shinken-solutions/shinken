@@ -1474,20 +1474,19 @@ test_router_0
         print "Got source problems"
         request = 'GET hosts\nColumns: host_name is_impact source_problems\n'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print "moncul", response
-        #good_response = """test_host_0
-#test_router_0
-#"""
+        print "moncullulu2", response
+        good_response = """test_router_0;0;
+test_host_0;1;test_router_0
+"""
         #self.assert_(self.lines_equal(response, good_response))
 
         print "Now got impact"
         request = 'GET hosts\nColumns: host_name is_problem impacts\n'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print "moncul", response
-        good_response = """test_host_0
-test_router_0
-"""
-#        self.assert_(self.lines_equal(response, good_response))
+        print "moncululu", response
+        good_response = """test_router_0;1;test_host_0,test_host_0/test_ok_0
+test_host_0;0;"""
+        self.assert_(self.lines_equal(response.strip(), good_response.strip()))
 
         request = 'GET hosts\nColumns: host_name\nLimit: 1\n'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
@@ -1496,7 +1495,7 @@ test_router_0
 """
         # it must be test_host_0 because with Limit: the output is 
         # alphabetically ordered
-#        self.assert_(response == good_response)
+        self.assert_(response == good_response)
 
 
 
