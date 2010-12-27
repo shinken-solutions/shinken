@@ -40,12 +40,12 @@ import cPickle
 import random
 
 try:
-    import shinken.pyro_wrapper
+    import shinken.pyro_wrapper as pyro
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
 
-Pyro = shinken.pyro_wrapper.Pyro
+Pyro = pyro.Pyro
 
 
 from message import Message
@@ -96,7 +96,7 @@ class IForArbiter(Pyro.core.ObjBase):
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
 
-            uri = shinken.pyro_wrapper.create_uri(s['address'], s['port'], 'Checks')
+            uri = pyro.create_uri(s['address'], s['port'], 'Checks')
 
             self.schedulers[sched_id]['uri'] = uri
             if already_got:
@@ -285,7 +285,7 @@ class Satellite(Daemon):
         #timeout of 120 s
         #and get the running id
         try:
-            shinken.pyro_wrapper.set_timeout(sched['con'], 5)
+            pyro.set_timeout(sched['con'], 5)
             new_run_id = sched['con'].get_running_id()
         except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
             logger.log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sched['name'], str(exp)))
@@ -362,7 +362,7 @@ class Satellite(Daemon):
         timeout = 1.0
         #Arbiter do not already set our have_conf param
         while not self.have_conf :
-            socks = shinken.pyro_wrapper.get_sockets(self.daemon)
+            socks = pyro.get_sockets(self.daemon)
 
             avant = time.time()
             ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
@@ -374,7 +374,7 @@ class Satellite(Daemon):
             if ins != []:
                 for sock in socks:
                     if sock in ins:
-                        shinken.pyro_wrapper.handleRequests(self.daemon, sock)
+                        pyro.handleRequests(self.daemon, sock)
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff
@@ -393,13 +393,13 @@ class Satellite(Daemon):
     #wait, timeout = 0s
     #If it send us a new conf, we reinit the connexions of all schedulers
     def watch_for_new_conf(self, timeout_daemon):
-        socks = shinken.pyro_wrapper.get_sockets(self.daemon)
+        socks = pyro.get_sockets(self.daemon)
 
         ins,outs,exs = select.select(socks,[],[],timeout_daemon)
         if ins != []:
             for sock in socks:
                 if sock in ins:
-                    shinken.pyro_wrapper.handleRequests(self.daemon, sock)
+                    pyro.handleRequests(self.daemon, sock)
 
                     #have_new_conf is set with put_conf
                     #so another handle will not make a con_init
@@ -555,7 +555,7 @@ class Satellite(Daemon):
             try:
                 con = sched['con']
                 if con is not None: #None = not initilized
-                    shinken.pyro_wrapper.set_timeout(con, 120)
+                    pyro.set_timeout(con, 120)
                     #OK, go for it :)
                     tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, poller_tags=self.poller_tags)
                     print "Ask actions to", sched_id, "got", len(tmp)
@@ -598,15 +598,15 @@ class Satellite(Daemon):
         logger.log("Using working directory : %s" % os.path.abspath(self.workdir))
         logger.log("Opening port: %s" % self.port)
         #Daemon init
-        self.daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port)
+        self.daemon = pyro.init_daemon(self.host, self.port)
 
         #Now we create the interfaces
         self.interface = IForArbiter(self)
         self.brok_interface = IBroks(self)
 
         #And we register them
-        self.uri2 = shinken.pyro_wrapper.register(self.daemon, self.interface, "ForArbiter")
-        self.uri3 = shinken.pyro_wrapper.register(self.daemon, self.brok_interface, "Broks")
+        self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
+        self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
 
         #We wait for initial conf
         self.wait_for_initial_conf()

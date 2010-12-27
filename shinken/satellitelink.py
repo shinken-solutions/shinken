@@ -23,8 +23,8 @@
 #Arbiter with Conf Dispatcher.
 
 
-import shinken.pyro_wrapper
-Pyro = shinken.pyro_wrapper.Pyro
+import shinken.pyro_wrapper as pyro
+Pyro = pyro.Pyro
 
 
 from shinken.item import Item, Items
@@ -68,9 +68,9 @@ class SatelliteLink(Item):
 
 
     def create_connexion(self):
-        self.uri = shinken.pyro_wrapper.create_uri(self.address, self.port, "ForArbiter")
-        self.con = shinken.pyro_wrapper.getProxy(self.uri)
-        shinken.pyro_wrapper.set_timeout(self.con, self.timeout)
+        self.uri = pyro.create_uri(self.address, self.port, "ForArbiter")
+        self.con = pyro.getProxy(self.uri)
+        pyro.set_timeout(self.con, self.timeout)
 
 
     def put_conf(self, conf):
@@ -79,9 +79,9 @@ class SatelliteLink(Item):
         #print "Connexion is OK, now we put conf", conf
         #print "Try to put conf:", conf
         try:
-            shinken.pyro_wrapper.set_timeout(self.con, self.data_timeout)
+            pyro.set_timeout(self.con, self.data_timeout)
             self.con.put_conf(conf)
-            shinken.pyro_wrapper.set_timeout(self.con, self.timeout)
+            pyro.set_timeout(self.con, self.timeout)
             return True
         except Pyro.errors.URIError , exp:
             self.con = None

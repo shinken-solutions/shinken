@@ -24,8 +24,8 @@ from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.util import to_int, to_bool, to_split
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
-import shinken.pyro_wrapper
-Pyro = shinken.pyro_wrapper.Pyro
+from shinken.pyro_wrapper import Pyro
+
 
 class SchedulerLink(SatelliteLink):
     id = 0

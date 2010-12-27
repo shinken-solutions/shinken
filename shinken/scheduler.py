@@ -21,7 +21,7 @@
 
 import select, time, os
 
-import shinken.pyro_wrapper
+import shinken.pyro_wrapper as pyro
 
 from shinken.external_command import ExternalCommand
 from shinken.check import Check
@@ -815,7 +815,7 @@ class Scheduler:
         self.t_each_loop = time.time() #use to track system time change
 
         while self.must_run :
-            socks = shinken.pyro_wrapper.get_sockets(self.daemon)
+            socks = pyro.get_sockets(self.daemon)
             t_begin = time.time()
             #socks.append(self.fifo)
             # 'foreign' event loop
@@ -823,7 +823,7 @@ class Scheduler:
             if ins != []:
                 for s in socks:
                     if s in ins:
-                        shinken.pyro_wrapper.handleRequests(self.daemon, s)
+                        pyro.handleRequests(self.daemon, s)
                         t_after = time.time()
                         diff = t_after-t_begin
                         timeout = timeout - diff
