@@ -815,11 +815,7 @@ class Scheduler:
         self.t_each_loop = time.time() #use to track system time change
 
         while self.must_run :
-            #Ok, still a difference between 3 and 4 ...
-            if shinken.pyro_wrapper.pyro_version == 3:
-                socks = self.daemon.getServerSockets()
-            else:
-                socks = self.daemon.sockets()
+            socks = shinken.pyro_wrapper.get_sockets(self.daemon)
             t_begin = time.time()
             #socks.append(self.fifo)
             # 'foreign' event loop
@@ -827,11 +823,7 @@ class Scheduler:
             if ins != []:
                 for s in socks:
                     if s in ins:
-                        #Yes, even here there is a difference :)
-                        if shinken.pyro_wrapper.pyro_version == 3:
-                            self.daemon.handleRequests()
-                        else:
-                            self.daemon.handleRequests([s])
+                        shinken.pyro_wrapper.handleRequests(self.daemon, s)
                         t_after = time.time()
                         diff = t_after-t_begin
                         timeout = timeout - diff

@@ -72,6 +72,9 @@ try:
     def set_timeout(con, timeout):
         con._setTimeout(timeout)
 
+    def getProxy(uri):
+        return Pyro.core.getProxyForURI(self.uri)
+
 
 except AttributeError:
     print "Using Pyro", Pyro.constants.VERSION
@@ -124,4 +127,8 @@ except AttributeError:
     
     def set_timeout(con, timeout):
         con._pyroTimeout = timeout
+
+    def getProxy(uri):
+        return Pyro.core.Proxy(self.uri)
+
 
