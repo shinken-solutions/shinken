@@ -364,19 +364,19 @@ class Satellite(Daemon):
         while not self.have_conf :
             socks = pyro.get_sockets(self.daemon)
 
-            avant = time.time()
+            before = time.time()
             ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
 
             #Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
-            avant += diff
+            before += diff
 
             if ins != []:
                 for sock in socks:
                     if sock in ins:
                         pyro.handleRequests(self.daemon, sock)
-                        apres = time.time()
-                        diff = apres-avant
+                        after = time.time()
+                        diff = after-before
                         timeout = timeout - diff
                         break    # no need to continue with the for loop
             else: #Timeout
@@ -642,7 +642,7 @@ class Satellite(Daemon):
             #Sleep in waiting a new conf :)
             self.watch_for_new_conf(timeout)
 
-            #Manage a possible time change (our avant will be change with the diff)
+            #Manage a possible time change (our before will be change with the diff)
             diff = self.check_for_system_time_change()
             begin_loop += diff
 
