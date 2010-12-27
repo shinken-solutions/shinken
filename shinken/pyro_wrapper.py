@@ -37,6 +37,42 @@ try:
     pyro_version = 3
     protocol = 'PYROLOC'
     Pyro.errors.CommunicationError = Pyro.errors.ProtocolError
+
+
+    def register(daemon, obj, name):
+        return daemon.connect(obj, name)
+
+
+    def unregister(daemon, obj):
+        daemon.disconnect(obj)
+
+    
+    def get_sockets(daemon):
+        return daemon.getServerSockets()
+
+
+    def handleRequests(daemon, s):
+        daemon.handleRequests()
+
+    
+    def init_daemon(host, port):
+        Pyro.core.initServer()
+        daemon = Pyro.core.Daemon(host=host, port=port)
+        if daemon.port != port:
+            print "Sorry, the port %d is not free" % port
+            sys.exit(1)
+        return daemon
+
+
+    def create_uri(address, port, obj_name):
+        return "PYROLOC://%s:%d/%s" % (address, port, obj_name)
+    
+    #Timeout way is also changed between 3 and 4
+    #it's a method in 3, a property in 4
+    def set_timeout(con, timeout):
+        con._setTimeout(timeout)
+
+
 except AttributeError:
     print "Using Pyro", Pyro.constants.VERSION
     pyro_version = 4
@@ -53,53 +89,23 @@ except AttributeError:
         del socket.MSG_WAITALL
 
 
-#Registering an object as an interface change between Pyro 3 and 4
-#So this function know which one call
-def register(daemon, obj, name):
-    global pyro_version
-    if pyro_version == 3:
-        return daemon.connect(obj, name)
-    else:
-        return daemon.register(obj, name)
+    def register(daemon, obj, name):
+        daemon.register(obj)
 
 
-#Same that upper, but for deregister
-def unregister(daemon, obj):
-    global pyro_version
-    if pyro_version == 3:
-        daemon.disconnect(obj)
-    else:
+    def unregister(daemon, obj, name):
         daemon.unregister(obj)
 
-#The method to get sockets are differents too
-def get_sockets(daemon):
-    global pyro_version
-    if pyro_version == 3:
-        return daemon.getServerSockets()
-    else:
+    
+    def get_sockets(daemon):
         return daemon.sockets()
 
-
-#The method handleRequests take none in 3
-#but [s] in 4
-def handleRequests(daemon, s):
-    global pyro_version
-    if pyro_version == 3:
-        daemon.handleRequests()
-    else:
+    
+    def handleRequests(daemon, s):
         daemon.handleRequests([s])
 
-#The way we init daemons in 3 and 4 change
-#So return the daemon in the good mode here
-def init_daemon(host, port):
-    global pyro_version
-    if pyro_version == 3:
-        Pyro.core.initServer()
-        daemon = Pyro.core.Daemon(host=host, port=port)
-        if daemon.port != port:
-            print "Sorry, the port %d is not free" % port
-            sys.exit(1)
-    else:
+    
+    def init_daemon(host, port):
         #Pyro 4 i by default thread, should do select
         #(I hate threads!)
         Pyro.config.SERVERTYPE="select"
@@ -109,25 +115,13 @@ def init_daemon(host, port):
         except socket.error, exp:
             print "Sorry, the port %d is not free : %s" % (port, str(exp))
             sys.exit(1)
-    return daemon
+        return daemon
 
 
-#Generate a URI with the good form
-#for 3 and 4 version of Pyro
-def create_uri(address, port, obj_name):
-    global pyro_version
-    if pyro_version == 3:
-        return "PYROLOC://%s:%d/%s" % (address, port, obj_name)
-    else:
+    def create_uri(address, port, obj_name):
         return "PYRO:%s@%s:%d" % (obj_name, address, port)
 
-
-#Timeout way is also changed between 3 and 4
-#it's a method in 3, a property in 4
-def set_timeout(con, timeout):
-    global pyro_version
-    if pyro_version == 3:
-        con._setTimeout(timeout)
-    else:
+    
+    def set_timeout(con, timeout):
         con._pyroTimeout = timeout
 
