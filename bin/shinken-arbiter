@@ -372,13 +372,14 @@ class Arbiter(Daemon):
 			types_creations = self.conf.types_creations
 			for k in types_creations:
                             (cls, clss, prop) = types_creations[k]
-                            for x in r[prop]:
-                                # test if raw_objects[k] is already set - if not, add empty array
-                                if not k in raw_objects:
-                                    raw_objects[k] = []
-                                # now append the object
-                                raw_objects[k].append(x)
-                            print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
+                            if prop in r:
+                                for x in r[prop]:
+                                    # test if raw_objects[k] is already set - if not, add empty array
+                                    if not k in raw_objects:
+                                        raw_objects[k] = []
+                                    # now append the object
+                                    raw_objects[k].append(x)
+                                print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
                     except Exception, exp:
                         print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
 
