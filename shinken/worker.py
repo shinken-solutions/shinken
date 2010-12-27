@@ -52,7 +52,8 @@ class Worker:
         self.max_plugins_output_length = max_plugins_output_length
 	#Thread version : not good in cpython :(
         #self._process = threading.Thread(target=self.work, args=(s, returns_queue, self._c))
-
+        self.i_am_dying = False
+        
 
     def is_mortal(self):
         return self._mortal
@@ -125,7 +126,12 @@ class Worker:
         for chk in self.checks:
             if chk.status == 'queue':
                 self._idletime = 0
-                chk.execute()
+                r = chk.execute()
+                # Maybe we got a true big problem in the
+                # action lanching
+                if r == 'toomanyopenfiles':
+                    # We should die as soon as we return all checks
+                    self.i_am_dying = True
 
 
     #Check the status of checks
@@ -190,10 +196,13 @@ class Worker:
             msg = None
             cmsg = None
 
-            #REF: doc/shinken-action-queues.png (3)
-            self.get_new_checks()
-            #REF: doc/shinken-action-queues.png (4)
-            self.launch_new_checks()
+            # If we are diyin (big problem!) we do not
+            # take new jobs, we just finished the current one
+            if not self.i_am_dying:
+                #REF: doc/shinken-action-queues.png (3)
+                self.get_new_checks()
+                #REF: doc/shinken-action-queues.png (4)
+                self.launch_new_checks()
             #REF: doc/shinken-action-queues.png (5)
             self.manage_finished_checks()
 
@@ -209,6 +218,13 @@ class Worker:
             if self._mortal == True and self._idletime > 2 * self._timeout:
                 print "[%d]Timeout, Arakiri" % self.id
                 #The master must be dead and we are loonely, we must die
+                break
+            
+            # Look if we are dying, and if we finishe all current checks
+            # if so, we really die, our master poller will launch a new
+            # worker because we were too weack to manage our job :(
+            if len(self.checks) == 0 and self.i_am_dying:
+                print "[%d] I DIE because I cannot do my job as I should (too many open files?)... forgot me please." % self.id
                 break
 
             #Manage a possible time change (our avant will be change with the diff)

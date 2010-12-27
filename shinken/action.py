@@ -138,6 +138,11 @@ class Action:
                     self.exit_status = 2
                     self.status = 'done'
                     self.execution_time = time.time() - self.check_time
+
+                    # Maybe we run out of file descriptor. It's not good at all!
+                    if exp.errno == 24 and exp.strerror == 'Too many open files':
+                        return 'toomanyopenfiles'
+
                     return
             else:
                 # Direct exec, quicker but only for 2.7 and higher, sorry.
@@ -158,6 +163,11 @@ class Action:
                     self.exit_status = 2
                     self.status = 'done'
                     self.execution_time = time.time() - self.check_time
+
+                    # Maybe we run out of file descriptor. It's not good at all!
+                    if exp.errno == 24 and exp.strerror == 'Too many open files':
+                        return 'toomanyopenfiles'
+
                     return
 
 
