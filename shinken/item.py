@@ -573,7 +573,7 @@ class Items(object):
     def find_tpl_by_name(self, name):
         for id in self.templates:
             i = self.items[id]
-            if i.name == name:
+            if hasattr(i, 'name') and i.name == name:
                 return i
         return None
 
