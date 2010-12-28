@@ -155,7 +155,7 @@ class Servicedependencies(Items):
         for sd in self:
             if not sd.is_tpl():
                 s = sd.dependent_service_description
-                if s is not None:
+                if s is not None and sd.service_description != None:
                     if hasattr(sd, 'dependency_period'):
                         s.add_service_act_dependancy(sd.service_description, sd.notification_failure_criteria, sd.dependency_period, sd.inherits_parent)
                         s.add_service_chk_dependancy(sd.service_description, sd.execution_failure_criteria, sd.dependency_period, sd.inherits_parent)
