@@ -79,7 +79,7 @@ def get_common_full_name(self):
         return self.host_name
 
 
-#It's a dict with 2 entries : hosts a,d services. Will return a string with just
+#It's a dict with 2 entries : hosts a,d services. Will return a list with just
 #full name of all elements
 def from_svc_hst_distinct_lists(dct):
     t = []
@@ -87,7 +87,8 @@ def from_svc_hst_distinct_lists(dct):
         t.append(h)
     for s in dct['services']:
         t.append(s)
-    return ','.join(t)
+    return t
+
 
 #For 2 hosts state, return the worse state
 def worst_host_state(state_1, state_2):
