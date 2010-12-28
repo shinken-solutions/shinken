@@ -555,7 +555,8 @@ class Config(Item):
             res += os.linesep
             print "Opening configuration file", file
             try:
-                fd = open(file)
+                # Open in Universal way for Windows, Mac, Linux
+                fd = open(file, 'rU')
                 buf = fd.readlines()
                 fd.close()
                 config_base_dir = os.path.dirname(file)
@@ -566,8 +567,9 @@ class Config(Item):
                 continue
 
             for line in buf:
-		if os.name != 'nt':
-			line = line.replace("\r\n", "\n")
+                # Should not be useful anymore with the Universal open
+                # if os.name != 'nt':
+                #  line = line.replace("\r\n", "\n")
                 res += line
                 line = line[:-1]
                 if re.search("^cfg_file", line) or re.search("^resource_file", line):
@@ -577,7 +579,7 @@ class Config(Item):
                     else:
                         cfg_file_name = os.path.join(config_base_dir, elts[1])
                     try:
-                        fd = open(cfg_file_name)
+                        fd = open(cfg_file_name, 'rU')
                         logger.log("Processing object config file '%s'" % cfg_file_name)
                         res += fd.read()
                         #Be sure to add a line return so we won't mix files
@@ -604,7 +606,7 @@ class Config(Item):
                                 logger.log("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
 
-                                    fd = open(os.path.join(root, file))
+                                    fd = open(os.path.join(root, file), 'rU')
                                     res += fd.read()
                                     fd.close()
                                 except IOError, exp:
