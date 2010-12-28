@@ -40,7 +40,7 @@ from shinken.service import Service
 from shinken.external_command import ExternalCommand
 from shinken.macroresolver import MacroResolver
 
-from shinken.util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split
+from shinken.util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split,get_customs_keys,get_customs_values
 
 LOGCLASS_INFO         = 0 # all messages not in any other class
 LOGCLASS_ALERT        = 1 # alerts: the change service/host state
@@ -261,12 +261,16 @@ class LiveStatus:
                 'type' : 'int',
             },
             'custom_variable_names' : {
+                'prop' : 'customs',
                 'description' : 'A list of the names of all custom variables',
                 'type' : 'list',
+                'depythonize' : get_customs_keys,
             },
             'custom_variable_values' : {
+                'prop' : 'customs',
                 'description' : 'A list of the values of the custom variables',
                 'type' : 'list',
+                'depythonize' : get_customs_values,
             },
             'display_name' : {
                 'description' : 'Optional display name of the host - not used by Nagios\' web interface',
@@ -713,12 +717,16 @@ class LiveStatus:
                 'type' : 'int',
             },
             'custom_variable_names' : {
+                'prop' : 'customs',
                 'description' : 'A list of the names of all custom variables of the service',
                 'type' : 'list',
+                'depythonize' : get_customs_keys,
             },
             'custom_variable_values' : {
+                'prop' : 'customs',
                 'description' : 'A list of the values of all custom variable of the service',
                 'type' : 'list',
+                'depythonize' : get_customs_values,
             },
             'description' : {
                 'description' : 'Description of the service (also used as key)',

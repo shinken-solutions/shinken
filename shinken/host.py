@@ -442,8 +442,7 @@ class Host(SchedulingItem):
         'last_perf_data': StringProp(
             default='',
             retention=True),
-        'customs': StringProp(
-            default={}),
+        'customs': StringProp(default={}, fill_brok=['full_status']),
 
         'got_default_realm' : BoolProp(default=False),
 

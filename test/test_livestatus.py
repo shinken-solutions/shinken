@@ -1705,6 +1705,35 @@ test_host_0;/nagios/pnp/index.php?host=test_host_0;/nagios/wiki/doku.php/test_ho
 
 
 
+    def test_thruk_custom_variables(self):
+        self.print_header()
+        now = time.time()
+        self.update_broker()
+        request = """GET hosts
+Columns: host_name custom_variable_names custom_variable_values
+Filter: host_name = test_host_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response == """200          42
+test_host_0;OSLICENSE,OSTYPE;gpl,gnulinux
+""")
+
+        request = """GET services
+Columns: host_name service_description custom_variable_names custom_variable_values
+Filter: host_name = test_host_0
+Filter: service_description = test_ok_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response == """200          41
+test_host_0;test_ok_0;CUSTNAME;custvalue
+""")
+
+
+
 class TestConfigBig(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')

@@ -161,6 +161,19 @@ def expand_with_macros(ref, value):
 def get_obj_name(obj):
     return obj.get_name()
 
+# return the list of keys of the custom dict
+# but without the _ before
+def get_customs_keys(d):
+    keys = d.keys()
+    r = []
+    for k in keys:
+        r.append(k[1:])
+    return r
+
+# return the values of the dict
+def get_customs_values(d):
+    return d.values()
+
 
 ###################### Sorting ################
 def scheduler_no_spare_first(x, y):
