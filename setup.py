@@ -192,7 +192,7 @@ setup(
               (os.sep.join([etc_path, 'objects', 'contacts']), ['etc/objects/contacts/linux_admin.cfg', 'etc/objects/contacts/windows_admin.cfg']),
                
               ('/etc/init.d', ['bin/init.d/shinken-arbiter', 'bin/init.d/shinken-broker', 'bin/init.d/shinken-poller',
-                               'bin/init.d/shinken-reactionner', 'bin/init.d/shinken-scheduler']),
+                               'bin/init.d/shinken-reactionner', 'bin/init.d/shinken-scheduler', 'bin/init.d/shinken']),
               ('/etc/default/', ['bin/default/shinken']),
               (var_path, ['var/void_for_git']),
               (libexec_path, ['libexec/check.sh']),
