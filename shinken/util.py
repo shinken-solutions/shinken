@@ -164,11 +164,7 @@ def get_obj_name(obj):
 # return the list of keys of the custom dict
 # but without the _ before
 def get_customs_keys(d):
-    keys = d.keys()
-    r = []
-    for k in keys:
-        r.append(k[1:])
-    return r
+    return [k[1:] for k in d.keys()]
 
 
 # return the values of the dict
