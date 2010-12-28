@@ -185,11 +185,9 @@ setup(
                           'etc/shinken-specific.cfg', 'etc/shinken-specific-high-availability.cfg',
                           'etc/shinken-specific-load-balanced-only.cfg'
                                 ]),
-              (os.sep.join([etc_path, 'objects', 'hosts']), ['etc/objects/hosts/localhost.cfg', 'etc/objects/hosts/databasehost1.cfg',
-                                                             'etc/objects/hosts/router1.cfg', 'etc/objects/hosts/srv-web-1.cfg']),
-              (os.sep.join([etc_path, 'objects', 'services']), ['etc/objects/services/linux_disks.cfg', 'etc/objects/services/apache.cfg',
-                                                                'etc/objects/services/mysql.cfg', 'etc/objects/services/router_ports.cfg']),
-              (os.sep.join([etc_path, 'objects', 'contacts']), ['etc/objects/contacts/linux_admin.cfg', 'etc/objects/contacts/windows_admin.cfg']),
+              (os.sep.join([etc_path, 'objects', 'hosts']), [f for f in glob('etc/objects/hosts/[!_]*.cfg')]),
+              (os.sep.join([etc_path, 'objects', 'services']), [f for f in glob('etc/objects/services/[!_]*.cfg')]),
+              (os.sep.join([etc_path, 'objects', 'contacts']), [f for f in glob('etc/objects/contacts/[!_]*.cfg')]),
                
               ('/etc/init.d', ['bin/init.d/shinken-arbiter', 'bin/init.d/shinken-broker', 'bin/init.d/shinken-poller',
                                'bin/init.d/shinken-reactionner', 'bin/init.d/shinken-scheduler', 'bin/init.d/shinken']),
