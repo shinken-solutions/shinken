@@ -1218,7 +1218,7 @@ class Hosts(Items):
 
         #Register host in the hostgroups
         for h in self:
-            if not h.is_tpl():
+            if not h.is_tpl() and hasattr(h, 'host_name'):
                 hname = h.host_name
                 if hasattr(h, 'hostgroups'):
                     hgs = h.hostgroups.split(',')
