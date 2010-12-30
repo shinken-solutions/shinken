@@ -750,8 +750,7 @@ class Service(SchedulingItem):
                 return True
 
         # When in downtime, only allow end-of-downtime notifications
-        if self.scheduled_downtime_depth > 1 \
-                and (type != 'DOWNTIMEEND' or type != 'DOWNTIMECANCELLED'):
+        if self.scheduled_downtime_depth > 1 and type not in ('DOWNTIMEEND', 'DOWNTIMECANCELLED'):
             return True
 
         # Block if host is in a scheduled downtime

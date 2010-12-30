@@ -1055,7 +1055,7 @@ class Host(SchedulingItem):
 
         # When in deep downtime, only allow end-of-downtime notifications
         # In depth 1 the downtime just started and can be notified
-        if self.scheduled_downtime_depth > 1 and (type != 'DOWNTIMEEND' or type != 'DOWNTIMECANCELLED'):
+        if self.scheduled_downtime_depth > 1 and not type in ('DOWNTIMEEND', 'DOWNTIMECANCELLED'):
             return True
 
         # Block if in a scheduled downtime and a problem arises
