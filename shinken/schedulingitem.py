@@ -772,8 +772,7 @@ class SchedulingItem(Item):
         # fill last_hard_state_change to now
         # if we just change from SOFT->HARD or
         # in HARD we change of state (Warning->critical, or critical->ok, etc etc)
-        if last_state_type == 'SOFT' and self.state_type == 'HARD' or \
-                self.state_type == 'HARD' and (self.last_state != self.state):
+        if self.state_type == 'HARD' and (last_state_type == 'SOFT' or self.last_state != self.state):
             self.last_hard_state_change = int(time.time())
 
 
