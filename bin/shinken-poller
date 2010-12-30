@@ -82,19 +82,19 @@ VERSION = "0.4"
 
 #Our main APP class
 class Poller (Satellite):
-	do_checks = True #I do checks
-	do_actions = False #but no actions
-	#default_port = 7771
+    do_checks = True #I do checks
+    do_actions = False #but no actions
+    #default_port = 7771
 
-	properties = {
-		'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
-		'pidfile' : {'default' : '/usr/local/shinken/var/pollerd.pid', 'pythonize' : None, 'path' : True},
-		'port' : {'default' : '7771', 'pythonize' : to_int},
-		'host' : {'default' : '0.0.0.0', 'pythonize' : None},
-		'user' : {'default' : 'shinken', 'pythonize' : None},
-		'group' : {'default' : 'shinken', 'pythonize' : None},
-		'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool}
-		}
+    properties = {
+            'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
+            'pidfile' : {'default' : '/usr/local/shinken/var/pollerd.pid', 'pythonize' : None, 'path' : True},
+            'port' : {'default' : '7771', 'pythonize' : to_int},
+            'host' : {'default' : '0.0.0.0', 'pythonize' : None},
+            'user' : {'default' : 'shinken', 'pythonize' : None},
+            'group' : {'default' : 'shinken', 'pythonize' : None},
+            'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool}
+            }
 
 
 ################### Process launch part
@@ -136,18 +136,18 @@ if __name__ == "__main__":
         if o in ("-h", "--help"):
             usage(sys.argv[0])
             sys.exit()
-	elif o in ("-r", "--replace"):
+        elif o in ("-r", "--replace"):
             do_replace = True
         elif o in ("-c", "--config"):
             config_file = a
         elif o in ("-d", "--daemon"):
             is_daemon = True
-	elif o in ("--debug"):
+        elif o in ("--debug"):
             debug = True
-	    debug_file = a
+            debug_file = a
         else:
             print "Sorry, the option",o, a, "is unknown"
-	    usage(sys.argv[0])
+            usage(sys.argv[0])
             sys.exit()
 
     p = Poller(config_file, is_daemon, do_replace, debug, debug_file)
@@ -155,4 +155,3 @@ if __name__ == "__main__":
     p.main()
     #command = """p.main()"""
     #cProfile.runctx( command, globals(), locals(), filename="/tmp/Poller.profile" )
-

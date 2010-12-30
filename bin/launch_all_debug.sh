@@ -9,5 +9,3 @@ $DIR/launch_poller_debug.sh
 $DIR/launch_reactionner_debug.sh
 $DIR/launch_broker_debug.sh
 $DIR/launch_arbiter_debug.sh
-
-

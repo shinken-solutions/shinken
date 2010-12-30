@@ -555,9 +555,9 @@ def usage(name):
 
 
 #if __name__ == '__main__':
-#	p = Shinken()
+#       p = Shinken()
 #        import cProfile
-#	#p.main()
+#       #p.main()
 #        command = """p.main()"""
 #        cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
 
@@ -609,4 +609,3 @@ if __name__ == "__main__":
     p.main()
     #command = """p.main()"""
     #cProfile.runctx( command, globals(), locals(), filename="/tmp/scheduler.profile" )
-

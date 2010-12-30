@@ -303,7 +303,7 @@ class Arbiter(Daemon):
         for line in self.get_header():
             self.log.log(line)#, format = 'TOTO %s\n')
 
-	#Use to know if we must still be alive or not
+        #Use to know if we must still be alive or not
         self.must_run = True
 
         print "Loading configuration"
@@ -323,7 +323,7 @@ class Arbiter(Daemon):
         #so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
- 
+
 
         self.conf.early_arbiter_linking()
 
@@ -369,8 +369,8 @@ class Arbiter(Daemon):
                 if 'configuration' in inst.properties['phases']:
                     try :
                         r = inst.get_objects()
-			types_creations = self.conf.types_creations
-			for k in types_creations:
+                        types_creations = self.conf.types_creations
+                        for k in types_creations:
                             (cls, clss, prop) = types_creations[k]
                             if prop in r:
                                 for x in r[prop]:
@@ -386,7 +386,7 @@ class Arbiter(Daemon):
        ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
 
-	#Maybe conf is already invalid
+        #Maybe conf is already invalid
         if not self.conf.conf_is_correct:
             print "***> One or more problems was encountered while processing the config files..."
             sys.exit(1)
@@ -395,7 +395,7 @@ class Arbiter(Daemon):
         #************** Change Nagios2 names to Nagios3 ones ******
         self.conf.old_properties_names_to_new()
 
-	#print "****************** Create Template links **********"
+        #print "****************** Create Template links **********"
         self.conf.linkify_templates()
 
         #print "****************** Inheritance *******************"
@@ -474,7 +474,7 @@ class Arbiter(Daemon):
             sys.exit(1)
 
 
-	#If I am a spare, I must wait a (true) conf from Arbiter Master
+        #If I am a spare, I must wait a (true) conf from Arbiter Master
         self.wait_conf = self.me.spare
 
         #print "Dump realms"
@@ -488,14 +488,14 @@ class Arbiter(Daemon):
         self.confs = self.conf.cut_into_parts()
 
         #The conf can be incorrect here if the cut into parts see errors like
-	#a realm with hosts and not schedulers for it
+        #a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
             print "Configuration is incorrect, sorry, I bail out"
             sys.exit(1)
 
         logger.log('Things look okay - No serious problems were detected during the pre-flight check')
 
-	#Exit if we are just here for config checking
+        #Exit if we are just here for config checking
         if self.verify_only:
             sys.exit(0)
 
@@ -553,8 +553,8 @@ class Arbiter(Daemon):
 
         #Main loop
         while True:
-	    #If I am a spare, I wait for the master arbiter to send me
-	    #true conf. When
+            #If I am a spare, I wait for the master arbiter to send me
+            #true conf. When
             if self.me.spare:
                 self.wait_initial_conf()
             else:#I'm the master, I've got a conf
@@ -693,15 +693,15 @@ class Arbiter(Daemon):
         #Now we can get all initial broks for our satellites
         self.get_initial_broks_from_satellitelinks()
 
-	#Now create the external commander
+        #Now create the external commander
         if os.name != 'nt':
-          e = ExternalCommandManager(self.conf, 'dispatcher')
+            e = ExternalCommandManager(self.conf, 'dispatcher')
 
-	#Scheduler need to know about external command to activate it
+        #Scheduler need to know about external command to activate it
         #if necessary
-          self.load_external_command(e)
+            self.load_external_command(e)
         else:
-          self.fifo = None
+            self.fifo = None
 
         print "Run baby, run..."
         timeout = 1.0
@@ -843,4 +843,3 @@ if __name__ == "__main__":
     p.main()
     #command = """p.main()"""
     #cProfile.runctx( command, globals(), locals(), filename="/tmp/Arbiter.profile" )
-

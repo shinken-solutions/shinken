@@ -11,6 +11,5 @@ parent=`cat $DIR/../var/brokerd.pid`
 # kill parent and childs broker processes
 for brokerpid in $(ps -aef | grep $parent | grep "shinken-broker" | awk '{print $2}')
 do
-	kill $brokerpid
+    kill $brokerpid
 done
-
