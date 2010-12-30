@@ -185,7 +185,7 @@ class DependencyNodeFactory(object):
                 continue
 
             if not in_par:
-                if c == '&' or c == '|':
+                if c in ('&', '|'):
                     current_rule = node.operand
                     print "Current rule", current_rule
                     if current_rule != None and current_rule != 'of:' and c != current_rule:

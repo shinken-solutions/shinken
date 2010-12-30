@@ -98,7 +98,7 @@ class Graph:
                 root.dfs_loop_status = 'DFS_LOOP_INSIDE'
 
             #If a child already temporary checked, its a problem, loop inside
-            if child_status == 'DFS_NEAR_LOOP' or child_status == 'DFS_LOOP_INSIDE':
+            if child_status in ('DFS_NEAR_LOOP', 'DFS_LOOP_INSIDE'):
                 #if a node is know to be part of a loop, do not let it be less
                 if root.dfs_loop_status != 'DFS_LOOP_INSIDE':
                     root.dfs_loop_status = 'DFS_NEAR_LOOP'

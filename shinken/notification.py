@@ -208,7 +208,7 @@ class Notification(Action):
 
 
     def is_administrative(self):
-        if self.type == 'PROBLEM' or self.type == 'RECOVERY':
+        if self.type in ('PROBLEM', 'RECOVERY'):
             return False
         else:
             return True

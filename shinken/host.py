@@ -817,7 +817,7 @@ class Host(SchedulingItem):
             self.state_id = 0
             self.last_time_up = int(self.last_state_update)
             state_code = 'u'
-        elif status == 1 or status == 2 or status == 3:
+        elif status in (1, 2, 3):
             self.state = 'DOWN'
             self.state_id = 1
             self.last_time_down = int(self.last_state_update)
@@ -1028,16 +1028,18 @@ class Host(SchedulingItem):
         if 'n' in self.notification_options:
             return True
 
-        if type == 'PROBLEM' or type == 'RECOVERY':
+        if type in ('PROBLEM', 'RECOVERY'):
             if self.state == 'DOWN' and not 'd' in self.notification_options:
                 return True
             if self.state == 'UP' and not 'r' in self.notification_options:
                 return True
             if self.state == 'UNREACHABLE' and not 'u' in self.notification_options:
                 return True
-        if (type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED') and not 'f' in self.notification_options:
+        if (type in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED') 
+                and not 'f' in self.notification_options):
             return True
-        if (type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED') and not 's' in self.notification_options:
+        if (type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED') 
+                and not 's' in self.notification_options):
             return True
 
         # Acknowledgements make no sense when the status is ok/up
@@ -1046,7 +1048,7 @@ class Host(SchedulingItem):
                 return True
 
         # Flapping
-        if type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
+        if type in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
         # todo    block if not notify_on_flapping
             if self.scheduled_downtime_depth > 0:
                 return True
@@ -1057,7 +1059,7 @@ class Host(SchedulingItem):
             return True
 
         # Block if in a scheduled downtime and a problem arises
-        if self.scheduled_downtime_depth > 0 and (type == 'PROBLEM' or type == 'RECOVERY'):
+        if self.scheduled_downtime_depth > 0 and type in ('PROBLEM', 'RECOVERY'):
             return True
 
         # Block if the status is SOFT

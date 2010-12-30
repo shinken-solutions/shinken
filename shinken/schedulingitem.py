@@ -600,7 +600,7 @@ class SchedulingItem(Item):
             self.check_and_set_unreachability()
 
         # OK following a previous OK. perfect if we were not in SOFT
-        if c.exit_status == 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
+        if c.exit_status == 0 and self.last_state in (OK_UP, 'PENDING'):
             #print "Case 1 (OK following a previous OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
             self.unacknowledge_problem()
             # action in return can be notification or other checks (dependancies)
@@ -667,7 +667,7 @@ class SchedulingItem(Item):
                 self.set_myself_as_problem()
 
         # NON-OK follows OK. Everything was fine, but now trouble is ahead
-        elif c.exit_status != 0 and (self.last_state == OK_UP or self.last_state == 'PENDING'):
+        elif c.exit_status != 0 and self.last_state in (OK_UP, 'PENDING'):
             #print "Case 4 : NON-OK follows OK : code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.is_max_attempts():
                 # if max_attempts == 1 we're already in deep trouble

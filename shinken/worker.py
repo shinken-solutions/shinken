@@ -146,7 +146,7 @@ class Worker:
                 action.check_finished(self.max_plugins_output_length)
                 wait_time = min(wait_time, action.wait_time)
                 #If action done, we can launch a new one
-            if action.status == 'done' or action.status == 'timeout':
+            if action.status in ('done', 'timeout'):
                 to_del.append(action)
                 #We answer to the master
                 #msg = Message(id=self.id, type='Result', data=action)

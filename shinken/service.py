@@ -728,7 +728,7 @@ class Service(SchedulingItem):
         # Block if the current status is in the notification_options w,u,c,r,f,s
         if 'n' in self.notification_options:
             return True
-        if type == 'PROBLEM' or type == 'RECOVERY':
+        if type in ('PROBLEM', 'RECOVERY'):
             if self.state == 'UNKNOWN' and not 'u' in self.notification_options:
                 return True
             if self.state == 'WARNING' and not 'w' in self.notification_options:
@@ -737,11 +737,11 @@ class Service(SchedulingItem):
                 return True
             if self.state == 'OK' and not 'r' in self.notification_options:
                 return True
-        if (type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED') \
-                and not 'f' in self.notification_options:
+        if (type in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED')
+                and not 'f' in self.notification_options):
             return True
-        if (type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED') \
-                and not 's' in self.notification_options:
+        if (type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED')
+                and not 's' in self.notification_options):
             return True
 
         # Acknowledgements make no sense when the status is ok/up
@@ -759,8 +759,7 @@ class Service(SchedulingItem):
             return True
 
         # Block if in a scheduled downtime and a problem arises
-        if self.scheduled_downtime_depth > 0 \
-                and (type == 'PROBLEM' or type == 'RECOVERY'):
+        if self.scheduled_downtime_depth > 0 and type in ('PROBLEM', 'RECOVERY'):
             return True
 
         # Block if the status is SOFT

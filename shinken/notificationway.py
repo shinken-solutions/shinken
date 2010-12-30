@@ -86,9 +86,9 @@ class NotificationWay(Item):
                 return b and t[type] in self.service_notification_options
         elif type == 'ACKNOWLEDGEMENT':
             return b
-        elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
+        elif type in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return b and 'f' in self.service_notification_options
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
+        elif type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED'):
             #No notification when a downtime was cancelled. Is that true??
             # According to the documentation we need to look at _host_ options
             return b and 's' in self.host_notification_options
@@ -119,9 +119,9 @@ class NotificationWay(Item):
                 return b and t[type] in self.host_notification_options
         elif type == 'ACKNOWLEDGEMENT':
              return b
-        elif type == 'FLAPPINGSTART' or type == 'FLAPPINGSTOP' or type == 'FLAPPINGDISABLED':
+        elif type in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return b and 'f' in self.host_notification_options
-        elif type == 'DOWNTIMESTART' or type == 'DOWNTIMEEND' or type == 'DOWNTIMECANCELLED':
+        elif type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED'):
             return b and 's' in self.host_notification_options
 
         return False

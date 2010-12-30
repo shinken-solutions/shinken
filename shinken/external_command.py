@@ -357,7 +357,7 @@ class ExternalCommandManager:
                     elif type_searched == 'to_int':
                         args.append(to_int(val))
 
-                    elif type_searched == 'author' or type_searched == None:
+                    elif type_searched in ('author', None):
                         args.append(val)
 
                     elif type_searched == 'command':
