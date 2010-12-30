@@ -99,7 +99,7 @@ class Npcd_broker:
         manager = 'manage_'+type+'_brok'
         if hasattr(self, manager):
             # if perfdata processing is off, only accept program status broks
-            if (not self.process_performance_data and (type == 'program_status' or type == 'update_program_status')) or self.process_performance_data:
+            if self.process_performance_data or type in ('program_status', 'update_program_status'): 
                 f = getattr(self, manager)
                 f(b)
 
