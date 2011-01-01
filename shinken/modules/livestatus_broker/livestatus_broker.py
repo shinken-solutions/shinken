@@ -33,7 +33,10 @@ import errno
 try:
     import sqlite3
 except ImportError: # python 2.4 do not have it
-    import pysqlite2.dbapi2 as sqlite3 # but need the pysqlite2 install from http://code.google.com/p/pysqlite/downloads/list
+    try:
+        import pysqlite2.dbapi2 as sqlite3 # but need the pysqlite2 install from http://code.google.com/p/pysqlite/downloads/list
+    except ImportError: # python 2.4 do not have it
+        import sqlite as sqlite3 # one last try
 import Queue
 
 from shinken.host import Host
