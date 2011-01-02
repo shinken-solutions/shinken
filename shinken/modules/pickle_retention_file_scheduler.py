@@ -72,7 +72,7 @@ class Pickle_retention_scheduler:
             #Just put hosts/services becauses checks and notifications
             #are already link into
             #all_data = {'hosts' : sched.hosts, 'services' : sched.services}
-            
+
             # We create a all_data dict with lsit of dict of retention useful
             # data of our hosts and services
             all_data = {'hosts' : {}, 'services' : {}}
@@ -210,4 +210,3 @@ class Pickle_retention_scheduler:
         log_mgr.log("[PickleRetention] OK we've load data from retention file")
 
         return True
-

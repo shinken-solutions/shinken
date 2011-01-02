@@ -225,7 +225,7 @@ class Nagios_retention_scheduler:
                             setattr(obj, prop, 'SOFT')
 
 
-                    
+
     def create_objects_for_type(self, raw_objects, type, types_creations):
         t = type
         #Ex: the above code do for timeperiods:
@@ -347,7 +347,7 @@ class Nagios_retention_scheduler:
         print "Fin read config"
         raw_objects = self.read_retention_buf(buf)
         print "Fun raw"
-        
+
         types_creations = {'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
                    'service' : (Service, Services, 'services'),
                    'host' : (Host, Hosts, 'hosts'),
@@ -438,4 +438,3 @@ class Nagios_retention_scheduler:
         log_mgr.log("[NagiosRetention] OK we've load data from retention file")
 
         return True
-

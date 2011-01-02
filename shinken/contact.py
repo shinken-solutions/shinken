@@ -160,9 +160,9 @@ class Contact(Item):
                 if c in self.contact_name:
                     logger.log("%s : My contact_name got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
-	else:
-	    if hasattr(self, 'alias'): #take the alias if we miss the contact_name
-		self.contact_name = self.alias
+        else:
+            if hasattr(self, 'alias'): #take the alias if we miss the contact_name
+                self.contact_name = self.alias
         return state
 
 
@@ -206,12 +206,12 @@ class Contacts(Items):
         #Register ourself into the contactsgroups we are in
         for c in self:
             if not c.is_tpl():
-		if hasattr(c, 'contact_name'):
-                	cname = c.contact_name
-                	if hasattr(c, 'contactgroups'):
-                    		cgs = c.contactgroups.split(',')
-                    		for cg in cgs:
-                        		contactgroups.add_member(cname, cg.strip())
+                if hasattr(c, 'contact_name'):
+                    cname = c.contact_name
+                    if hasattr(c, 'contactgroups'):
+                        cgs = c.contactgroups.split(',')
+                        for cg in cgs:
+                            contactgroups.add_member(cname, cg.strip())
 
         #Now create a notification way with the simple parameter of the
         #contacts
@@ -233,10 +233,10 @@ class Contacts(Items):
                     if hasattr(c, 'contact_name'):
                         cname = c.contact_name
                     else: #Will be change with an unique id, but will be an error in the end
-			if hasattr(c, 'alias'):
-				cname = c.alias
-			else:
-                        	cname = ''
+                        if hasattr(c, 'alias'):
+                            cname = c.alias
+                        else:
+                            cname = ''
                     nw_name = cname+'_inner_notificationway'
                     notificationways.new_inner_member(nw_name, params)
 
@@ -244,5 +244,3 @@ class Contacts(Items):
                         c.notificationways = nw_name
                     else:
                         c.notificationways = c.notificationways + ',' +nw_name
-
-

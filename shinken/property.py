@@ -62,14 +62,14 @@ class Property(object):
         `fill_brok`: if set, send to broker. There are two categories:
                      FULL_STATUS for initial and update status,
                      CHECK_RESULT for check results
-        
+
         Only for the inital call:
 
         conf_send_preparation: if set, will pass the property to this
                      function. It's used to 'flatten' some dangerous
                      properties like realms that are too 'linked' to
                      be send like that.
-    
+
         brok_transformation: if set, will call the function with the
                      value of the property the major times it will be
                      to flatten the data (like realm_name instead of
@@ -110,7 +110,7 @@ class UnusedProp(Property):
         """
         Since this property is not used, there is no use for other
         parameters than `text`.
-        
+
         `text` a some usage text if present, will print it to explain
         why it's no more useful
         """
@@ -163,7 +163,7 @@ class StringProp(Property):
     def pythonize(self, val):
         return val
 
- 	  	 
+
 class ListProp(Property):
 #    @staticmethod
     def pythonize(self, val):

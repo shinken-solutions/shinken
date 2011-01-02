@@ -99,7 +99,7 @@ class Npcd_broker:
         manager = 'manage_'+type+'_brok'
         if hasattr(self, manager):
             # if perfdata processing is off, only accept program status broks
-            if self.process_performance_data or type in ('program_status', 'update_program_status'): 
+            if self.process_performance_data or type in ('program_status', 'update_program_status'):
                 f = getattr(self, manager)
                 f(b)
 
@@ -201,4 +201,3 @@ class Npcd_broker:
                 self.rotate()
                 last_rotated = time.time()
         self.logfile.close()
-

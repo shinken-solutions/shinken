@@ -149,4 +149,3 @@ class Escalations(Items):
         #items::explode_contact_groups_into_contacts
         #take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
-

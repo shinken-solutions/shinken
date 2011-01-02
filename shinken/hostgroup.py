@@ -51,7 +51,7 @@ class Hostgroup(Itemgroup):
             default=[]),
         'configuration_errors' : StringProp(default = []),
         }
-    
+
     macros = {
         'HOSTGROUPALIAS' : 'alias',
         'HOSTGROUPMEMBERS' : 'members',
@@ -220,5 +220,3 @@ class Hostgroups(Itemgroups):
             if hasattr(tmp_hg, 'rec_tag'):
                 del tmp_hg.rec_tag
             del tmp_hg.already_explode
-
-

@@ -99,5 +99,3 @@ class Service_perfdata_broker:
         #                                  current_state, data['perf_data'] )
         self.file.write(s)
         self.file.flush()
-
-

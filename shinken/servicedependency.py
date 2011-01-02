@@ -27,13 +27,13 @@ class Servicedependency(Item):
     id = 0
 
 #F is dep of D
-#host_name			Host B
-#	service_description		Service D
-#	dependent_host_name		Host C
-#	dependent_service_description	Service F
-#	execution_failure_criteria	o
-#	notification_failure_criteria	w,u
-#       inherits_parent		1
+#host_name                      Host B
+#       service_description             Service D
+#       dependent_host_name             Host C
+#       dependent_service_description   Service F
+#       execution_failure_criteria      o
+#       notification_failure_criteria   w,u
+#       inherits_parent         1
 #       dependency_period       24x7
 
     properties={'dependent_host_name': StringProp(),
@@ -175,4 +175,3 @@ class Servicedependencies(Items):
         #self.apply_implicit_inheritance(hosts)
         for s in self:
             s.get_customs_properties_by_inheritance(self)
-

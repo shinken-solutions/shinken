@@ -2,19 +2,19 @@
 # Copyright (C) 2009-2010 :
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
-# 
+#
 # This file is part of Shinken.
-# 
+#
 # Shinken is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Shinken is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -47,17 +47,17 @@ class Service(SchedulingItem):
 
     # Every service have a unique ID, and 0 is always special in
     # database and co...
-    id = 1 
+    id = 1
     # The host and service do not have the same 0 value, now yes :)
     ok_up = 'OK'
     # used by item class for format specific value like for Broks
-    my_type = 'service' 
+    my_type = 'service'
 
     # properties defined by configuration
     # required : is required in conf
     # default : default value if no set in conf
     # pythonize : function to call when transfort string to python object
-    # fill_brok : if set, send to broker. there are two categories: 
+    # fill_brok : if set, send to broker. there are two categories:
     #  full_status for initial and update status, check_result for check results
     # no_slots : do not take this property for __slots__
     properties = {
@@ -146,14 +146,14 @@ class Service(SchedulingItem):
         'output' : StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
         'long_output' : StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
         'is_flapping' : BoolProp(default=False, fill_brok=['full_status'], retention=True),
-        #  dependencies for actions like notif of event handler, 
+        #  dependencies for actions like notif of event handler,
         # so AFTER check return
-        'act_depend_of' : ListProp(default=[]), 
+        'act_depend_of' : ListProp(default=[]),
         # dependencies for checks raise, so BEFORE checks
         'chk_depend_of' : ListProp(default=[]),
         # elements that depend of me, so the reverse than just uppper
         'act_depend_of_me' : ListProp(default=[]),
-        # elements that depend of me 
+        # elements that depend of me
         'chk_depend_of_me' : ListProp(default=[]),
 
         'last_state_update' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
@@ -207,13 +207,13 @@ class Service(SchedulingItem):
         # list of problems that make us an impact
         'source_problems' : ListProp(default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
         # list of the impact I'm the cause of
-        'impacts' : ListProp( default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists), 
+        'impacts' : ListProp( default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
         # keep a trace of the old state before being an impact
-        'state_before_impact' : StringProp(default='PENDING'), 
+        'state_before_impact' : StringProp(default='PENDING'),
         # keep a trace of the old state id before being an impact
-        'state_id_before_impact' : IntegerProp(default=0), 
+        'state_id_before_impact' : IntegerProp(default=0),
         # if the state change, we know so we do not revert it
-        'state_changed_since_impact' : BoolProp(default=False), 
+        'state_changed_since_impact' : BoolProp(default=False),
 
         # Easy Service dep definition
         'service_dependencies' : ListProp(default=''),# TODO : find a way to brok it?
@@ -388,9 +388,9 @@ class Service(SchedulingItem):
         # and do not have timeperiod, and folow parents dep
         if self.host is not None:
             # I add the dep in MY list
-            self.act_depend_of.append( (self.host, 
-                                        ['d', 'u', 's', 'f'], 
-                                        'network_dep', 
+            self.act_depend_of.append( (self.host,
+                                        ['d', 'u', 's', 'f'],
+                                        'network_dep',
                                         None, True) )
             # I add the dep in Daddy list
             self.host.act_depend_of_me.append( (self,
@@ -402,10 +402,10 @@ class Service(SchedulingItem):
     # Register the dependancy between 2 service for action (notification etc)
     def add_service_act_dependancy(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
-        self.act_depend_of.append( (srv, status, 'logic_dep', 
+        self.act_depend_of.append( (srv, status, 'logic_dep',
                                     timeperiod, inherits_parent) )
         # then I register myself in the other service dep list
-        srv.act_depend_of_me.append( (self, status, 'logic_dep', 
+        srv.act_depend_of_me.append( (self, status, 'logic_dep',
                                       timeperiod, inherits_parent) )
 
 
@@ -417,17 +417,17 @@ class Service(SchedulingItem):
     def add_business_rule_act_dependancy(self, srv, status, timeperiod, inherits_parent):
         print srv.get_name(), "is asking to me", self.get_name(), "to add him in my act_depend_of_me list"
         # first I add the other the I depend on in MY list
-#        self.act_depend_of.append( (srv, status, 'logic_dep', 
+#        self.act_depend_of.append( (srv, status, 'logic_dep',
 #                                    timeperiod, inherits_parent) )
         # I only register so he know that I WILL be a inpact
-        self.act_depend_of_me.append( (srv, status, 'business_dep', 
+        self.act_depend_of_me.append( (srv, status, 'business_dep',
                                       timeperiod, inherits_parent) )
 
 
     # Register the dependancy between 2 service for checks
     def add_service_chk_dependancy(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
-        self.chk_depend_of.append( (srv, status, 'logic_dep', 
+        self.chk_depend_of.append( (srv, status, 'logic_dep',
                                     timeperiod, inherits_parent) )
         # then I register myself in the other service dep list
         srv.chk_depend_of_me.append( (self, status, 'logic_dep',
@@ -552,9 +552,9 @@ class Service(SchedulingItem):
     # Add a log entry with a SERVICE ALERT like:
     # SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        logger.log('SERVICE ALERT: %s;%s;%s;%s;%d;%s' % (self.host.get_name(), 
-                                                         self.get_name(), 
-                                                         self.state, 
+        logger.log('SERVICE ALERT: %s;%s;%s;%s;%d;%s' % (self.host.get_name(),
+                                                         self.get_name(),
+                                                         self.state,
                                                          self.state_type,
                                                          self.attempt,
                                                          self.output))
@@ -573,14 +573,14 @@ class Service(SchedulingItem):
     def raise_notification_log_entry(self, n):
         contact = n.contact
         command = n.command_call
-        if n.type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED', 
+        if n.type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED',
                       'CUSTOM', 'ACKNOWLEDGEMENT', 'FLAPPINGSTART',
                       'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             state = '%s (%s)' % (n.type, self.state)
         else:
             state = self.state
         if self.__class__.log_notifications:
-            logger.log("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s" % (contact.get_name(), 
+            logger.log("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s" % (contact.get_name(),
                                                                     self.host.get_name(),
                                                                     self.get_name(), state,
                                                                     command.get_name(), self.output))
@@ -819,7 +819,7 @@ class Service(SchedulingItem):
                     new_s = self.copy()
                     new_s.host_name = host.get_name()
                     if self.is_tpl(): # if template, the new one is not
-                        new_s.register = 1 
+                        new_s.register = 1
                     for key in key_value:
                         if key == 'KEY':
                             if hasattr(self, 'service_description'):
@@ -840,7 +840,7 @@ class Service(SchedulingItem):
                     err = "The custom property '%s 'of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
                     self.configuration_errors.append(err)
         return duplicates
-    
+
 
 
 class Services(Items):
@@ -909,7 +909,7 @@ class Services(Items):
     # service -> command
     # service -> timepriods
     # service -> contacts
-    def linkify(self, hosts, commands, timeperiods, contacts, 
+    def linkify(self, hosts, commands, timeperiods, contacts,
                 resultmodulations, escalations, servicegroups):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
@@ -1058,7 +1058,7 @@ class Services(Items):
 
 
     # We create new service if necessery (host groups and co)
-    def explode(self, hosts, hostgroups, contactgroups, 
+    def explode(self, hosts, hostgroups, contactgroups,
                 servicegroups, servicedependencies):
         # The "old" services will be removed. All services with
         # more than one host or a host group will be in it
@@ -1072,16 +1072,16 @@ class Services(Items):
         # items::explode_contact_groups_into_contacts
         # take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
-        
+
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
-        service_to_check = self.items.keys()       
-        
+        service_to_check = self.items.keys()
+
         for id in service_to_check:
             s = self.items[id]
             duplicate_for_hosts = [] # get the list of our host_names if more than 1
             not_hosts = [] # the list of !host_name so we remove them after
-            
+
             # print "Looking for s", s
 #            if hasattr(s, 'duplicate_foreach'):
 #                print s.duplicate_foreach
@@ -1098,14 +1098,14 @@ class Services(Items):
                         or (hasattr(s, 'duplicate_foreach') and s.duplicate_foreach != ''):
                     for hname in hnames:
                         hname = hname.strip()
-                        
+
                         # If the name begin with a !, we put it in
                         # the not list
                         if len(hname) > 0 and hname[0] == '!':
                             not_hosts.append(hname[1:])
                         else: # the standard list
                             duplicate_for_hosts.append(hname)
-                    
+
                     # Ok now we clean the duplicate_for_hosts with all hosts
                     # of the not
                     for hname in not_hosts:
@@ -1121,7 +1121,7 @@ class Services(Items):
                     # and only the the servce not got an error in it's conf
                     if not s.is_tpl() and s.configuration_errors == []:
                         srv_to_remove.append(id)
-                        
+
                 else: # Maybe the hnames was full of same host,
                       # so we must reset the name
                     for hname in hnames: # So even if len == 0, we are protected

@@ -102,6 +102,3 @@ def myip():
     import urllib
     f = urllib.urlopen("http://whatismyip.org/")
     print f.read()
-
-
-

@@ -250,10 +250,10 @@ class SatelliteLink(Item):
         if self.con == None:
             self.create_connexion()
         try:
-	    tab = self.con.get_external_commands()
-	    if isinstance(tab, bool):
+            tab = self.con.get_external_commands()
+            if isinstance(tab, bool):
                 return []
-	    return tab
+            return tab
         except Pyro.errors.URIError , exp:
             self.con = None
             return []
@@ -334,4 +334,3 @@ class SatelliteLinks(Items):
                 else:
                     print "Error : the module %s is unknow for %s" % (plug_name, s.get_name())
             s.modules = new_modules
-

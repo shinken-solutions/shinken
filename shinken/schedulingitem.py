@@ -2,19 +2,19 @@
 # Copyright (C) 2009-2010 :
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
-# 
+#
 # This file is part of Shinken.
-# 
+#
 # Shinken is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Shinken is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -165,7 +165,7 @@ class SchedulingItem(Item):
             self.criticity = max(self.criticity, max([e.criticity for e in self.impacts]))
         elif self.my_own_criticity != -1:
             self.criticity = self.my_own_criticity
-            
+
 
     # Look for my impacts, and remove me from theirs problems list
     def no_more_a_problem(self):
@@ -476,7 +476,7 @@ class SchedulingItem(Item):
     # command. It must be enabled locally and globally
     def get_event_handlers(self, externalcmd=False):
         cls = self.__class__
-        
+
         # The external command always pass
         # if not, only if we enable them (auto launch)
         if self.event_handler == None or ((not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd):
@@ -808,8 +808,8 @@ class SchedulingItem(Item):
                 self.current_problem_id = SchedulingItem.current_problem_id
 
 
-    # Called by scheduler when a notification is 
-    # ok to be send (so fuilly prepared to be send 
+    # Called by scheduler when a notification is
+    # ok to be send (so fuilly prepared to be send
     # to reactionner). Here we update the command with
     # status of now, and we add the contact to set of
     # contact we notified. And we raise the log entry
@@ -947,7 +947,7 @@ class SchedulingItem(Item):
                     self.raise_notification_log_entry(child_n)
                     self.notifications_in_progress[child_n.id] = child_n
                     childnotifications.append(child_n)
-                    
+
                     if n.type == 'PROBLEM':
                     # Remember the contacts. We might need them later in the
                     # recovery code some lines above
@@ -1025,7 +1025,7 @@ class SchedulingItem(Item):
     # if we need it
     def create_business_rules(self, hosts, services):
         cmdCall = getattr(self, 'check_command', None)
-        
+
         # If we do not have a command, we bailout
         if cmdCall == None:
             return
@@ -1035,7 +1035,7 @@ class SchedulingItem(Item):
         cmd = cmdCall.call
         elts = cmd.split('!')
         base_cmd = elts[0]
-        
+
         # If it's bp_rule, we got a rule :)
         if base_cmd == 'bp_rule':
             print "Got rule", elts, cmd
@@ -1077,4 +1077,3 @@ class SchedulingItem(Item):
                 print "I register to the element", e.get_name()
                 # all states, every timeperiod, and inherit parents
                 e.add_business_rule_act_dependancy(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
-

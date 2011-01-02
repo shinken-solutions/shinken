@@ -87,5 +87,5 @@ class DBOracle(DB):
         except OperationalError_exp , exp:
             print "[DBOracle] Warning : a query raise an operational error : %s, %s" % (query, exp)
         except Exception , exp:
-             print "[DBOracle] Warning : a query raise an unknow error : %s, %s" % (query, exp)
-             print exp.__dict__
+            print "[DBOracle] Warning : a query raise an unknow error : %s, %s" % (query, exp)
+            print exp.__dict__

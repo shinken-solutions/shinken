@@ -670,29 +670,29 @@ class Timeperiods(Items):
 
 if __name__ == '__main__':
     t = Timeperiod()
-    test = ['1999-01-28	 00:00-24:00',
-            'monday 3			00:00-24:00		',
-            'day 2			00:00-24:00',
-            'february 10		00:00-24:00',
+    test = ['1999-01-28  00:00-24:00',
+            'monday 3                   00:00-24:00             ',
+            'day 2                      00:00-24:00',
+            'february 10                00:00-24:00',
             'february -1 00:00-24:00',
-            'friday -2			00:00-24:00',
+            'friday -2                  00:00-24:00',
             'thursday -1 november 00:00-24:00',
-            '2007-01-01 - 2008-02-01	00:00-24:00',
-            'monday 3 - thursday 4	00:00-24:00',
-            'day 1 - 15		00:00-24:00',
-            'day 20 - -1		00:00-24:00',
-            'july -10 - -1		00:00-24:00',
-            'april 10 - may 15		00:00-24:00',
+            '2007-01-01 - 2008-02-01    00:00-24:00',
+            'monday 3 - thursday 4      00:00-24:00',
+            'day 1 - 15         00:00-24:00',
+            'day 20 - -1                00:00-24:00',
+            'july -10 - -1              00:00-24:00',
+            'april 10 - may 15          00:00-24:00',
             'tuesday 1 april - friday 2 may 00:00-24:00',
             '2007-01-01 - 2008-02-01 / 3 00:00-24:00',
-            '2008-04-01 / 7		00:00-24:00',
-            'day 1 - 15 / 5		00:00-24:00',
+            '2008-04-01 / 7             00:00-24:00',
+            'day 1 - 15 / 5             00:00-24:00',
             'july 10 - 15 / 2 00:00-24:00',
             'tuesday 1 april - friday 2 may / 6 00:00-24:00',
             'tuesday 1 october - friday 2 may / 6 00:00-24:00',
             'monday 3 - thursday 4 / 2 00:00-24:00',
             'monday 4 - thursday 3 / 2 00:00-24:00',
-            'day -1 - 15 / 5		01:00-24:00,00:30-05:60',
+            'day -1 - 15 / 5            01:00-24:00,00:30-05:60',
             'tuesday 00:00-24:00',
             'sunday 00:00-24:00',
             'saturday 03:00-24:00,00:32-01:02',
@@ -700,7 +700,7 @@ if __name__ == '__main__':
             'may 7 - february 2 00:00-10:00',
             'day -1 - 5 00:00-10:00',
             'tuesday 1 february - friday 1 may 01:00-24:00,00:30-05:60',
-            'december 2 - may -15		00:00-24:00',
+            'december 2 - may -15               00:00-24:00',
             ]
     for entry in test:
         print "**********************"
@@ -745,4 +745,3 @@ if __name__ == '__main__':
     t_no_next = t.get_next_invalid_time_from_t(now)
     print "Get next valid for now ==>", time.asctime(time.localtime(t_next)),"<=="
     print "Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)),"<=="
-

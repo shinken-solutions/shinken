@@ -147,4 +147,3 @@ class Redis_retention_scheduler:
         log_mgr.log("[RedisRetention] OK we've load data from redis server")
 
         return True
-

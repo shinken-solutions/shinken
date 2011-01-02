@@ -101,4 +101,3 @@ class Glpi_importer_arbiter:
             r['hosts'].append(h)
         print "Returning to Arbiter the hosts:", r
         return r
-

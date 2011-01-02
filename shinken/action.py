@@ -238,7 +238,7 @@ class Action:
 
         #we should not keep the process now
         del self.process
-        
+
         # if the exit status is anormal, we add stderr to the output
         if self.exit_status not in [0, 1, 2, 3]:
             stdoutdata = stdoutdata + stderrdata

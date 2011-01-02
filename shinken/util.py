@@ -209,7 +209,7 @@ def sort_by_ids(x, y):
         return 1
     #So is equal
     return 0
-    
+
 
 
 ##################### Cleaning ##############
@@ -256,7 +256,7 @@ def got_generation_rule_patern_change(xy_couples):
         else:
             res.append( [i, '[%d-%d]'%(x,y), []])
     return res
-    
+
 
 #this fuction apply a recursive patern change
 #generate by the got_generation_rule_patern_change
@@ -427,5 +427,3 @@ def get_key_value_sequence(entry, default_value=None):
     #print "***********Diff", t1 -t0
 
     return (array2, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR)
-
-

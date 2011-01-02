@@ -54,7 +54,7 @@ class DependencyNode(object):
             if self.operand == 'host' and state == 1:
                 state = 2
             return state
-        
+
         # First we get teh state of all our sons
         states = []
         for s in self.sons:
@@ -114,7 +114,7 @@ class DependencyNode(object):
 
         #and uniq the result
         return list(set(r))
-        
+
 
 
 class DependencyNodeFactory(object):
@@ -126,13 +126,13 @@ class DependencyNodeFactory(object):
         patern = patern.strip()
         print "*****Loop", patern
         complex_node = False
-    
+
         # Look if it's a complex patern (with rule) or
         # if it's a leef ofit, like a host/service
         for m in '()+&|':
             if m in patern:
                 complex_node = True
-    
+
         is_of_nb = False
 
         node = DependencyNode()
@@ -144,9 +144,9 @@ class DependencyNodeFactory(object):
             node.operand = 'of:'
             node.of_values = int(m.groups()[0])
             patern = m.groups()[1]
-    
+
         print "Is so complex?", patern, complex_node
-    
+
         # if it's a single host/service
         if not complex_node:
             print "Try to find?", patern
@@ -237,4 +237,3 @@ class DependencyNodeFactory(object):
             obj = hosts.find_by_name(host_name)
             print "Find host", obj.get_name()
             return obj
-

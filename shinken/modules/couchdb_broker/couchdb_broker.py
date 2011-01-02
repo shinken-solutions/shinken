@@ -172,7 +172,7 @@ class Couchdb_broker:
     #Like pid, daemon mode, last activity, etc
     #We aleady clean database, so insert
     def manage_program_status_brok(self, b):
-	instance_id = b.data['instance_id']
+        instance_id = b.data['instance_id']
         self.create_document('program_status', b.data, b.data['instance_name'])
 
 

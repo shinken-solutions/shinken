@@ -46,4 +46,3 @@ def get_instance(plugin):
     update_interval = int(plugin.status_update_interval)
     instance = Status_dat_broker(plugin.get_name(), path, opath, update_interval)
     return instance
-

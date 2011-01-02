@@ -112,4 +112,3 @@ class ArbiterLinks(SatelliteLinks):
                 else:
                     print "Error : the module %s is unknow for %s" % (plug_name, s.get_name())
             s.modules = new_modules
-

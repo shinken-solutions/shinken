@@ -90,7 +90,7 @@ class ReactionnerLink(SatelliteLink):
             default=False,
             fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
                 'configuration_errors' : StringProp(default=[]),
-                          }  
+                          }
     macros = {}
 
     def get_name(self):
@@ -105,4 +105,3 @@ class ReactionnerLink(SatelliteLink):
 class ReactionnerLinks(SatelliteLinks):#(Items):
     name_property = "name"
     inner_class = ReactionnerLink
-

@@ -149,4 +149,3 @@ class Memcache_retention_scheduler:
         log_mgr.log("[MemcacheRetention] OK we've load data from memcache server")
 
         return True
-

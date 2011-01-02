@@ -106,7 +106,7 @@ class Scheduler:
         self.services.create_reversed_list()
         self.services.optimize_service_search(conf.hosts)
         self.hosts = conf.hosts
-        #DBG: 
+        #DBG:
 #        for h in self.hosts:
 #            print h.get_name(), h.parents
         self.hosts.create_reversed_list()
@@ -361,8 +361,8 @@ class Scheduler:
                             if item.notification_interval != 0 and a.t_to_go != None:
                                 # We must continue to send notifications.
                                 # Just leave it in the actions list and set it to "scheduled" and it will be found again later
-#				if a.t_to_go == None or item.notification_interval == None:
-#					print "A to go", a, a.t_to_go, item.notification_interval
+#                               if a.t_to_go == None or item.notification_interval == None:
+#                                       print "A to go", a, a.t_to_go, item.notification_interval
                                 a.t_to_go = a.t_to_go + item.notification_interval * item.__class__.interval_length
                                 a.notif_nb = item.current_notification_number + 1
                                 a.status = 'scheduled'
@@ -434,9 +434,9 @@ class Scheduler:
         res = self.broks
         #They are gone, we keep none!
         self.broks = {}
-#	print "returning broks"
-#	for b in res:
-#		print b, res[b]
+#       print "returning broks"
+#       for b in res:
+#               print b, res[b]
         return res
 
 

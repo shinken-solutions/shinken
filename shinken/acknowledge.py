@@ -25,7 +25,7 @@ servicestate) are disabled.
 """
 class Acknowledge:
     id = 0
-    
+
     # If the "sticky" option is set to one (1), the acknowledgement
     # will remain until the service returns to an OK state. Otherwise
     # the acknowledgement will automatically be removed when the

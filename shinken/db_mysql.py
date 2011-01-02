@@ -61,4 +61,3 @@ class DBMysql(DB):
             print "[MysqlDB] Warning : a query raise an integrity error : %s, %s" % (query, exp)
         except ProgrammingError , exp:
             print "[MysqlDB] Warning : a query raise a programming error : %s, %s" % (query, exp)
-

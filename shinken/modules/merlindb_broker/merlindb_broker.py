@@ -447,7 +447,7 @@ class Merlindb_broker:
             for prop in to_del:
                 del new_brok.data[prop]
             for (name, val) in to_add:
-                    new_brok.data[name] = val
+                new_brok.data[name] = val
         else:
             print "No preprocess type", brok.type
             print brok.data
@@ -501,8 +501,8 @@ class Merlindb_broker:
     #Like pid, daemon mode, last activity, etc
     #We aleady clean database, so insert
     def manage_program_status_brok(self, b):
-	instance_id = b.data['instance_id']
-	del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
+        instance_id = b.data['instance_id']
+        del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
         query = self.db_backend.create_insert_query('program_status', b.data)
         return [del_query,query]
 
@@ -511,8 +511,8 @@ class Merlindb_broker:
     #Like pid, daemon mode, last activity, etc
     #We aleady clean database, so insert
     def manage_update_program_status_brok(self, b):
-	instance_id = b.data['instance_id']
-	del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
+        instance_id = b.data['instance_id']
+        del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
         query = self.db_backend.create_insert_query('program_status', b.data)
         return [del_query,query]
 

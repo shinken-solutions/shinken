@@ -20,7 +20,7 @@
 
 """ This is the main class for the Host. In fact it's mainly
 about the configuration part. for the running one, it's better
-to look at the schedulingitem class that manage all 
+to look at the schedulingitem class that manage all
 scheduling/consome check smart things :)
 """
 
@@ -74,7 +74,7 @@ class Host(SchedulingItem):
             default='',
             fill_brok=['full_status']),
         'check_command': StringProp(
-            default='_internal_host_up', 
+            default='_internal_host_up',
             fill_brok=['full_status']),
         'initial_state': CharProp(
             default='u',
@@ -87,10 +87,10 @@ class Host(SchedulingItem):
             default='0',
             fill_brok=['full_status']),
         'active_checks_enabled': BoolProp(
-            default='1', 
+            default='1',
             fill_brok=['full_status']),
         'passive_checks_enabled': BoolProp(
-            default='1', 
+            default='1',
             fill_brok=['full_status']),
         'check_period': StringProp(fill_brok=['full_status']),
         'obsess_over_host': BoolProp(
@@ -103,7 +103,7 @@ class Host(SchedulingItem):
             default='0',
             fill_brok=['full_status']),
         'event_handler': StringProp(
-            default='', 
+            default='',
             fill_brok=['full_status']),
         'event_handler_enabled': BoolProp(
             default='0',
@@ -176,7 +176,7 @@ class Host(SchedulingItem):
         # No slots for this 2 because begin property by a number seems bad
         # it's stupid!
         '2d_coords': StringProp(
-            default='', 
+            default='',
             fill_brok=['full_status'],
             no_slots=True),
         '3d_coords': StringProp(
@@ -198,7 +198,7 @@ class Host(SchedulingItem):
 
         'resultmodulations': StringProp(default=''),
         'escalations': StringProp(
-            default='', 
+            default='',
             fill_brok=['full_status']),
         'maintenance_period': StringProp(
             default='',
@@ -208,14 +208,14 @@ class Host(SchedulingItem):
         'criticity': IntegerProp(
             default='3',
             fill_brok=['full_status']),
-        
+
         }
 
     # properties set only for running purpose
     # retention : save/load this property from retention
     running_properties = {
         'last_chk': IntegerProp(
-            default=0, 
+            default=0,
             fill_brok=['full_status', 'check_result'],
             retention=True),
         'next_chk': IntegerProp(
@@ -278,7 +278,7 @@ class Host(SchedulingItem):
             retention=True),
         'last_hard_state_id' : IntegerProp(
             default=0,
-            fill_brok=['full_status'], 
+            fill_brok=['full_status'],
             retention=True),
         'last_time_up': IntegerProp(
             default=int(time.time()),
@@ -317,13 +317,13 @@ class Host(SchedulingItem):
         'act_depend_of': StringProp(default=[]),
 
         # dependencies for checks raise, so BEFORE checks
-        'chk_depend_of': StringProp(default=[]), 
+        'chk_depend_of': StringProp(default=[]),
 
         # elements that depend of me, so the reverse than just uppper
-        'act_depend_of_me': StringProp(default=[]), 
+        'act_depend_of_me': StringProp(default=[]),
 
         # elements that depend of me
-        'chk_depend_of_me': StringProp(default=[]), 
+        'chk_depend_of_me': StringProp(default=[]),
 
         'last_state_update': StringProp(
             default=time.time(),
@@ -448,7 +448,7 @@ class Host(SchedulingItem):
 
         # use for having all contacts we have notified
         'notified_contacts': StringProp(
-            default=set()), 
+            default=set()),
 
         'in_scheduled_downtime': BoolProp(
             default=False,
@@ -459,10 +459,10 @@ class Host(SchedulingItem):
 
         # put here checks and notif raised
         'actions': StringProp(
-            default=[]), 
+            default=[]),
         # and here broks raised
         'broks': StringProp(
-            default=[]), 
+            default=[]),
         'childs': StringProp(
             brok_transformation=to_hostnames_list,
             default=[],
@@ -478,7 +478,7 @@ class Host(SchedulingItem):
             default=False,
             fill_brok=['full_status']),
         'is_impact': StringProp(
-            default=False, 
+            default=False,
             fill_brok=['full_status']),
         # the save value of our criticity for "problems"
         'my_own_criticity': IntegerProp(default=-1),
@@ -486,17 +486,17 @@ class Host(SchedulingItem):
         'source_problems': StringProp(
             brok_transformation=to_svc_hst_distinct_lists,
             default=[],
-            fill_brok=['full_status']), 
+            fill_brok=['full_status']),
         # list of the impact I'm the cause of
         'impacts': StringProp(
             brok_transformation=to_svc_hst_distinct_lists,
             default=[],
-            fill_brok=['full_status']), 
+            fill_brok=['full_status']),
 
         # keep a trace of the old state before being an impact
-        'state_before_impact': StringProp(default='PENDING'), 
+        'state_before_impact': StringProp(default='PENDING'),
         # keep a trace of the old state id before being an impact
-        'state_id_before_impact': StringProp(default=0), 
+        'state_id_before_impact': StringProp(default=0),
         # if the state change, we know so we do not revert it
         'state_changed_since_impact': StringProp(default=False),
 
@@ -735,10 +735,10 @@ class Host(SchedulingItem):
     # on the database service with the srv=ERP service
     def add_business_rule_act_dependancy(self, h, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
-#        self.act_depend_of.append( (srv, status, 'logic_dep', 
+#        self.act_depend_of.append( (srv, status, 'logic_dep',
 #                                    timeperiod, inherits_parent) )
         # I only register so he know that I WILL be a inpact
-        self.act_depend_of_me.append( (h, status, 'business_dep', 
+        self.act_depend_of_me.append( (h, status, 'business_dep',
                                       timeperiod, inherits_parent) )
 
 
@@ -833,7 +833,7 @@ class Host(SchedulingItem):
             self.last_state_change = self.last_state_update
         self.duration_sec = now - self.last_state_change
 
-        
+
     # See if status is status. Can be low of high format (o/UP, d/DOWN, ...)
     def is_state(self, status):
         if status == self.state:
@@ -963,7 +963,7 @@ class Host(SchedulingItem):
                 #And I register myself in my parent list too
                 parent.register_child(self)
 
-    
+
     # Register a child in our lists
     def register_child(self, child):
         # We've got 2 list : a list for our child
@@ -1035,10 +1035,10 @@ class Host(SchedulingItem):
                 return True
             if self.state == 'UNREACHABLE' and not 'u' in self.notification_options:
                 return True
-        if (type in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED') 
+        if (type in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED')
                 and not 'f' in self.notification_options):
             return True
-        if (type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED') 
+        if (type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED')
                 and not 's' in self.notification_options):
             return True
 
@@ -1201,7 +1201,7 @@ class Hosts(Items):
                             err = "Error : the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
                             h.configuration_errors.append(err)
                 h.hostgroups = new_hostgroups
-                            
+
 
 
     #It's used to change old Nagios2 names to
@@ -1290,9 +1290,9 @@ class Hosts(Items):
         for h in self:
             if tpl in h.templates and hasattr(h, 'host_name'):
                 res.append(h.host_name)
-        
+
         return res
-        
+
 
     # Will create all business tree for the
     # services

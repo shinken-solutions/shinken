@@ -67,4 +67,3 @@ def get_instance(plugin):
         pnp_path = ''
     instance = Livestatus_broker(plugin.get_name(), host, port, socket, database_file, pnp_path)
     return instance
-

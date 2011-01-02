@@ -107,4 +107,3 @@ class Resultmodulations(Items):
             mtp = timeperiods.find_by_name(mtp_name)
 
             rm.modulation_period = mtp
-

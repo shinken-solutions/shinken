@@ -85,4 +85,3 @@ class Syslog_broker:
 #        while True:
 #            b = self.q.get() # can block here :)
 #            self.manage_brok(b)
-

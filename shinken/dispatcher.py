@@ -416,4 +416,3 @@ class Dispatcher:
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
                                 logger.log("[%s] OK, no more %s sent need" % (r.get_name(), kind))
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
-

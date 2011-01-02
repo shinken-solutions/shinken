@@ -49,7 +49,7 @@ class NotificationWay(Item):
         'service_notification_commands': StringProp(
             fill_brok=['full_status']),
         'min_criticity' : IntegerProp(
-            default = '0', 
+            default = '0',
             fill_brok=['full_status']),
         }
     running_properties = {}
@@ -72,7 +72,7 @@ class NotificationWay(Item):
         # If the criticity is not high enough, we bail out
         if criticity < self.min_criticity:
             return False
-        
+
         b = self.service_notification_period.is_time_valid(t)
         if 'n' in self.service_notification_options:
             return False
@@ -118,7 +118,7 @@ class NotificationWay(Item):
             if type in t:
                 return b and t[type] in self.host_notification_options
         elif type == 'ACKNOWLEDGEMENT':
-             return b
+            return b
         elif type in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return b and 'f' in self.host_notification_options
         elif type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED'):
@@ -149,12 +149,12 @@ class NotificationWay(Item):
         special_properties = ['service_notification_commands', 'host_notification_commands', \
                                   'service_notification_period', 'host_notification_period']
 
-	#A null notif way is a notif way that will do nothing (service = n, hot =n)
-	is_null_notifway = False
-	if hasattr(self, 'service_notification_options') and self.service_notification_options==['n']:
-	   if hasattr(self, 'host_notification_options') and self.host_notification_options==['n']:
-	      is_null_notifway = True
-	      return True
+        #A null notif way is a notif way that will do nothing (service = n, hot =n)
+        is_null_notifway = False
+        if hasattr(self, 'service_notification_options') and self.service_notification_options==['n']:
+            if hasattr(self, 'host_notification_options') and self.host_notification_options==['n']:
+                is_null_notifway = True
+                return True
 
         for prop in cls.properties:
             if prop not in special_properties:

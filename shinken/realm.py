@@ -319,7 +319,7 @@ class Realm(Itemgroup):
         for r in self.get_reactionners():
             cfg = r.give_satellite_cfg()
             broker.cfg['reactionners'][r.id] = cfg
-        
+
         #Then sub if we must to it
         if broker.manage_sub_realms:
             #Now pollers

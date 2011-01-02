@@ -86,5 +86,5 @@ class Comment:
         cls = self.__class__
         self.id = state.pop()
         for prop in cls.properties:
-	    val = state.pop()
+            val = state.pop()
             setattr(self, prop, val)

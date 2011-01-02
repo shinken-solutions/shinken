@@ -174,7 +174,7 @@ class MacroResolver(Borg):
         still_got_macros = True
         nb_loop = 0
         while still_got_macros:
-	    nb_loop += 1
+            nb_loop += 1
             #Ok, we want the macros in the command line
             macros = self.get_macros(c_line)
 
@@ -218,8 +218,8 @@ class MacroResolver(Borg):
             for macro in macros:
                 c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
 
-	    if nb_loop > 32: #too mouch loop, we exit
-		still_got_macros = False	
+            if nb_loop > 32: #too mouch loop, we exit
+                still_got_macros = False
 
         #print "Retuning c_line", c_line.strip()
         return c_line.strip()
@@ -230,7 +230,7 @@ class MacroResolver(Borg):
     def resolve_command(self, com, data):
         c_line = com.command.command_line
         return self.resolve_simple_macros_in_string(c_line, data, args=com.args)
-    
+
 
     #For all Macros in macros, set the type by looking at the
     #MACRO name (ARGN? -> argn_type,

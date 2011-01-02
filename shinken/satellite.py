@@ -108,12 +108,12 @@ class IForArbiter(Pyro.core.ObjBase):
 
             #And then we connect to it :)
             self.app.pynag_con_init(sched_id)
-        
+
         #Now the limit part
         self.app.max_workers = conf['global']['max_workers']
         self.app.min_workers = conf['global']['min_workers']
         self.app.processes_by_worker = conf['global']['processes_by_worker']
-	self.app.polling_interval = conf['global']['polling_interval']
+        self.app.polling_interval = conf['global']['polling_interval']
         if 'poller_tags' in conf['global']:
             self.app.poller_tags = conf['global']['poller_tags']
         else: #for reactionner, poler_tag is [None]
@@ -529,7 +529,7 @@ class Satellite(Daemon):
         wish_worker = 1
         #I want at least min_workers or wish_workers (the biggest) but not more than max_workers
         while len(self.workers) < self.min_workers \
-		    or (wish_worker > len(self.workers) and len(self.workers) < self.max_workers):
+                    or (wish_worker > len(self.workers) and len(self.workers) < self.max_workers):
             self.create_and_launch_worker()
         #TODO : if len(workers) > 2*wish, maybe we can kill a worker?
 
@@ -663,13 +663,13 @@ class Satellite(Daemon):
                 #If so : KILL THEM ALL!!!
                 self.check_and_del_zombie_workers()
 
-		#Print stats for debug
+                #Print stats for debug
                 for sched_id in self.schedulers:
                     sched = self.schedulers[sched_id]
                     #In workers we've got actions send to queue - queue size
                     print '[%d][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
-			(sched_id, sched['name'],len(self.workers), self.s.qsize(), \
-				 self.nb_actions_in_workers - self.s.qsize(), len(self.returns_queue))
+                        (sched_id, sched['name'],len(self.workers), self.s.qsize(), \
+                                 self.nb_actions_in_workers - self.s.qsize(), len(self.returns_queue))
 
 
                 #Before return or get new actions, see how we manage
@@ -708,5 +708,3 @@ class Satellite(Daemon):
                 #We send all finished checks
                 #REF: doc/shinken-action-queues.png (6)
                 self.manage_returns()
-
-

@@ -135,4 +135,3 @@ class SchedulerLink(SatelliteLink):
 class SchedulerLinks(SatelliteLinks):
     name_property = "name"
     inner_class = SchedulerLink
-

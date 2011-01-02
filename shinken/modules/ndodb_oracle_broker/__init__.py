@@ -48,4 +48,3 @@ def get_instance(plugin):
     database = plugin.database
     instance = Ndodb_Oracle_broker(plugin.get_name(), user, password, database)
     return instance
-

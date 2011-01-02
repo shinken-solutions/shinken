@@ -51,4 +51,3 @@ def get_instance(plugin):
         character_set = 'utf8'
     instance = Ndodb_broker(plugin.get_name(), host, user, password, database, character_set)
     return instance
-

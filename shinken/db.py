@@ -41,13 +41,13 @@ class DB(object):
                     val = 1
                 else:
                     val = 0
-            
+
             if isinstance(val, unicode) or isinstance(val, str):
                 val = val.decode('utf8', 'ignore').replace("'", "''")
             else:
                 val = str(val)
                 val = val.replace("'", "''")
-                
+
             if i == 1:
                 props_str = props_str + u"%s " % prop
                 values_str = values_str + u"'%s' " % val

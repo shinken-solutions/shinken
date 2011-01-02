@@ -92,7 +92,7 @@ def from_svc_hst_distinct_lists(dct):
 
 #For 2 hosts state, return the worse state
 def worst_host_state(state_1, state_2):
-    #lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),    
+    #lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),
     if state_2 == 0:
         return state_1
     if state_1 == 1:
@@ -631,7 +631,7 @@ class LiveStatus:
                 'type' : 'list',
                 'depythonize' : from_svc_hst_distinct_lists,
             },
-            
+
         },
 
         'Service' : {
@@ -1378,7 +1378,7 @@ class LiveStatus:
                 'type' : 'list',
                 'depythonize' : from_svc_hst_distinct_lists,
             },
-            
+
         },
 
         'Hostgroup' : {
@@ -5343,7 +5343,7 @@ class LiveStatus:
                     filtresult = filtresult[:limit]
             elif table == 'hostsbygroup':
                 type_map = LiveStatus.out_map['Hostsbygroup']
-                # instead of self.hosts.values() 
+                # instead of self.hosts.values()
                 # loop over hostgroups, then over members, then flatten the list, then add a hostgroup attribute to each host
                 without_filter = len(filtercolumns) == 0
                 if not limit:
@@ -5353,7 +5353,7 @@ class LiveStatus:
                                 # (host, hg), (host, hg), ... host objects are individuals
                                 (copy.copy(item0), inner_list0[1]) for inner_list0 in [
                                     # ([host, host, ...], hg), ([host], hg), ...
-                                    (sorted(hg1.members, key = lambda k: k.host_name), hg1 ) for hg1 in 
+                                    (sorted(hg1.members, key = lambda k: k.host_name), hg1 ) for hg1 in
                                         # hostgroups sorted by hostgroup_name
                                         sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
                                 ] for item0 in inner_list0[0]
@@ -5401,7 +5401,7 @@ class LiveStatus:
             elif table == 'servicesbyhostgroup':
                 # We will use prefiltercolumns here for some serious speedup.
                 # For example, if nagvis wants Filter: host_groups >= hgxy
-                # we don't have to use the while list of hostgroups in 
+                # we don't have to use the while list of hostgroups in
                 # the innermost loop
                 type_map = LiveStatus.out_map['Servicesbyhostgroup']
                 # Filter: host_groups >= linux-servers
@@ -5494,7 +5494,7 @@ class LiveStatus:
                         # which share the same stats_filter_by
                         for group in groupedresult:
                             resultarr[group][ind] = postprocess(filter(filtfunc, groupedresult[group]))
-                        
+
                     else:
                         # Calc statistics over _all_ elements of filtresult
                         resultarr[ind] = postprocess(filter(filtfunc, filtresult))

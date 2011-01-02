@@ -762,18 +762,18 @@ class Livestatus_broker:
                 print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
                 raise
             inputready,outputready,exceptready = select.select(self.input,[],[], 0)
-            
+
             now = time.time()
             # At the end of this loop we probably will discard connections
             kick_connections = []
             if len(exceptready) > 0:
-                    pass
+                pass
             if len(outputready) > 0:
-                    pass
+                pass
             if len(inputready) > 0:
                 for s in inputready:
-                    # We will identify sockets by their filehandle number
-                    # during the rest of this loop
+                # We will identify sockets by their filehandle number
+                # during the rest of this loop
                     socketid = s.fileno()
                     if s in self.listeners:
                         # handle the server socket
@@ -805,7 +805,7 @@ class Livestatus_broker:
                         handle_it = False
 
                         # A connection has two states
-                        # receiving = collect input until a query 
+                        # receiving = collect input until a query
                         #             is complete or aborted by empty input
                         # idle      = response was sent
                         if open_connections[socketid]['state'] == 'receiving':
@@ -815,7 +815,7 @@ class Livestatus_broker:
                                     # Request is considered to be complete
                                     handle_it = True
                                 else:
-                                    # Empty packet follows empty packet. 
+                                    # Empty packet follows empty packet.
                                     # Terminate this connection
                                     close_it = True
                             else:
@@ -835,7 +835,7 @@ class Livestatus_broker:
                                         # Someone with telnet hits the enter-key like crazy
                                         # Only whitespace is like an empty request
                                         close_it = True
-    
+
                         elif open_connections[socketid]['state'] == 'idle':
                             if not data:
                                 # Thats it. Client closed the connection
@@ -844,7 +844,7 @@ class Livestatus_broker:
                                 # Got data after is sent a sresponse.
                                 # Too late...."
                                 close_it = True
-    
+
                         else:
                             # This code should never be executed
                             if not data:
@@ -857,7 +857,7 @@ class Livestatus_broker:
                                     print "undef state data buffer", open_connections[socketid]['state']
                                 else:
                                     print "undef state data nobuffer", open_connections[socketid]['state']
-    
+
                         if handle_it:
                             response, keepalive = self.livestatus.handle_request(open_connections[socketid]['buffer'].rstrip())
                             try:
@@ -885,12 +885,12 @@ class Livestatus_broker:
                                 open_connections[socketid]['state'] = 'receiving'
                             else:
                                 open_connections[socketid]['state'] = 'idle'
-    
+
                         if close_it:
                             # Register this socket for deletion
                             kick_connections.append(s.fileno())
-    
-    
+
+
                 # Now the work is done. Cleanup
                 for socketid in open_connections:
                     print "connection %d is idle since %d seconds (%s)\n" % (socketid, now - open_connections[socketid]['lastseen'], open_connections[socketid]['state'])

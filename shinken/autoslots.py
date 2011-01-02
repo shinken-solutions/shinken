@@ -41,11 +41,11 @@ class AutoSlots(type):
         # Now get properties from properties and running_properties
         if 'properties' in dct:
             props = dct['properties']
-            slots.update((p for p in props 
+            slots.update((p for p in props
                           if not props[p].no_slots))
         if 'running_properties' in dct:
             props = dct['running_properties']
-            slots.update((p for p in props 
+            slots.update((p for p in props
                           if not props[p].no_slots))
         dct['__slots__'] = tuple(slots)
         return type.__new__(cls, name, bases, dct)

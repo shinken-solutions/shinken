@@ -173,7 +173,7 @@ class Simple_log_broker:
         moved = self.check_and_do_archive(first_pass=True)
         if not moved:
             print "I open the log file %s" % self.path
-            self.file = open(self.path,'a')        
+            self.file = open(self.path,'a')
 
 
     def main(self):
@@ -183,4 +183,3 @@ class Simple_log_broker:
             self.check_and_do_archive()
             b = self.q.get() # can block here :)
             self.manage_brok(b)
-

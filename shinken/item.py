@@ -124,7 +124,7 @@ class Item(object):
     #We load every usefull parameter so no need to access global conf later
     #Must be called after a change in a gloabl conf parameter
     def load_global_conf(cls, conf):
-        """ Used to put global values in the sub Class like 
+        """ Used to put global values in the sub Class like
         hosts ro services """
         #conf have properties, if 'enable_notifications' :
         #{ [...] 'class_inherit' : [(Host, None), (Service, None),
@@ -162,8 +162,8 @@ class Item(object):
 #                        #print "Changing ", old_val, "by", new_val
 #                        setattr(self, prop, new_val)
 #                else: #new style for service
-                    new_val = tab.pythonize(getattr(self, prop))
-                    setattr(self, prop, new_val)
+                new_val = tab.pythonize(getattr(self, prop))
+                setattr(self, prop, new_val)
             except AttributeError , exp:
                 #print self.get_name(), ' : ', exp
                 pass # Will be catch at the is_correct moment
@@ -327,7 +327,7 @@ class Item(object):
                 comment_type = 1
             else :
                 comment_type = 2
-            c = Comment(self, persistent, author, comment, 
+            c = Comment(self, persistent, author, comment,
                         comment_type, 4, 0, False, 0)
             self.add_comment(c)
             self.broks.append(self.get_update_status_brok())
@@ -338,7 +338,7 @@ class Item(object):
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
             self.problem_has_been_acknowledged = False
-	    #Should not be deleted, a None is Good
+            #Should not be deleted, a None is Good
             self.acknowledgement = None
             #del self.acknowledgement
             # find comments of non-persistent ack-comments and delete them too
@@ -477,7 +477,7 @@ class Item(object):
             command = getattr(self, prop).strip()
             if command != '':
                 if hasattr(self, 'poller_tag'):
-                    cmdCall = CommandCall(commands, command, 
+                    cmdCall = CommandCall(commands, command,
                                           poller_tag=self.poller_tag)
                 else:
                     cmdCall = CommandCall(commands, command)
@@ -609,7 +609,7 @@ class Items(object):
         #Then look if we have some errors in the conf
         #Juts print warnings, but raise errors
         for err in self.configuration_warnings:
-            print err            
+            print err
         for err in self.configuration_errors:
             print err
             r = False
@@ -785,7 +785,7 @@ class Items(object):
                 command = getattr(i, prop).strip()
                 if command != '':
                     if hasattr(i, 'poller_tag'):
-                        cmdCall = CommandCall(commands, command, 
+                        cmdCall = CommandCall(commands, command,
                                               poller_tag=i.poller_tag)
                     else:
                         cmdCall = CommandCall(commands, command)
@@ -805,7 +805,7 @@ class Items(object):
                 for com in coms:
                     if com != '':
                         if hasattr(i, 'poller_tag'):
-                            cmdCall = CommandCall(commands, com, 
+                            cmdCall = CommandCall(commands, com,
                                                   poller_tag=i.poller_tag)
                         else:
                             cmdCall = CommandCall(commands, com)
@@ -818,7 +818,7 @@ class Items(object):
 
     #Return a set with ALL hosts (used in ! expressions)
     def get_all_host_names_set(self, hosts):
-        hnames = [h.host_name for h in hosts.items.values() 
+        hnames = [h.host_name for h in hosts.items.values()
                   if hasattr(h, 'host_name')]
         return set(hnames)
 
@@ -925,5 +925,3 @@ class Items(object):
                         i.host_name += ',' + str(hnames)
                     else:
                         i.host_name = str(hnames)
-
-

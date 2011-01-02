@@ -312,8 +312,8 @@ class ExternalCommandManager:
             print "This command is a global one, we resent it to all schedulers"
             self.dispatch_global_command(command)
             return None
-	print "Is bloabl?", c_name, ExternalCommandManager.commands[c_name]['global']
-	print "Mode:", self.mode
+        print "Is bloabl?", c_name, ExternalCommandManager.commands[c_name]['global']
+        print "Mode:", self.mode
         print "This command have arguments:", ExternalCommandManager.commands[c_name]['args'], len(ExternalCommandManager.commands[c_name]['args'])
 
         args = []
@@ -387,12 +387,12 @@ class ExternalCommandManager:
                     elif type_searched == 'service':
                         in_service = True
                         tmp_host = elt.strip()
-			print "TMP HOST", tmp_host
+                        print "TMP HOST", tmp_host
                         if tmp_host[-1] == '\n':
                             tmp_host = tmp_host[:-1]
                             #If
                         if self.mode == 'dispatcher':
-                       	    self.search_host_and_dispatch(tmp_host, command)
+                            self.search_host_and_dispatch(tmp_host, command)
                             return None
 
                     i += 1

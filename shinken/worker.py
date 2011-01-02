@@ -50,10 +50,10 @@ class Worker:
         self._process = Process(target=self.work, args=(s, returns_queue, self._c))
         self.returns_queue = returns_queue
         self.max_plugins_output_length = max_plugins_output_length
-	#Thread version : not good in cpython :(
+        #Thread version : not good in cpython :(
         #self._process = threading.Thread(target=self.work, args=(s, returns_queue, self._c))
         self.i_am_dying = False
-        
+
 
     def is_mortal(self):
         return self._mortal
@@ -219,7 +219,7 @@ class Worker:
                 print "[%d]Timeout, Arakiri" % self.id
                 #The master must be dead and we are loonely, we must die
                 break
-            
+
             # Look if we are dying, and if we finishe all current checks
             # if so, we really die, our master poller will launch a new
             # worker because we were too weack to manage our job :(

@@ -107,7 +107,7 @@ class Itemgroup:
     #so if unknown_members is still []
     def is_correct(self):
         b = True
-        
+
         if self.unknown_members != []:
             for m in self.unknown_members:
                 print "Error : the", self.__class__.my_type, self.get_name(), "got a unknown member" , m
@@ -224,4 +224,3 @@ class Itemgroups:
                     self.reversed_list[name] = id
                 else:
                     self.twins.append(id)
-

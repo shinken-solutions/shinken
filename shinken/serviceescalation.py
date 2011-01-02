@@ -68,5 +68,3 @@ class Serviceescalations(Items):
             #print "Creation an escalation with :", creation_dict
             s = Escalation(creation_dict)
             escalations.add_escalation(s)
-
-

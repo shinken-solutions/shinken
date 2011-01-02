@@ -54,4 +54,3 @@ def get_instance(plugin):
 
     instance = Service_perfdata_broker(plugin.get_name(), path, mode, template)
     return instance
-

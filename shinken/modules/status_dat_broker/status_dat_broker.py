@@ -454,5 +454,3 @@ class Status_dat_broker:
                     print "[status_dat] Error :", r
                     break
                 last_generation = time.time()
-
-

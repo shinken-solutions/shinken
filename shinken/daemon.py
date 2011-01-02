@@ -176,9 +176,9 @@ class Daemon:
     def parse_config_file(self):
         properties = self.__class__.properties
         if self.config_file != None:
-	    config = ConfigParser.ConfigParser()
-	    config.read(self.config_file)
-	    if config._sections == {}:
+            config = ConfigParser.ConfigParser()
+            config.read(self.config_file)
+            if config._sections == {}:
                 print "Bad or missing config file : %s " % self.config_file
                 sys.exit(2)
             for (key, value) in config.items('daemon'):
@@ -186,7 +186,7 @@ class Daemon:
                     value = properties[key]['pythonize'](value)
                 setattr(self, key, value)
         else:
-	    print "No config file specified, use defaults parameters"
+            print "No config file specified, use defaults parameters"
         #Now fill all defaults where missing parameters
         for prop in properties:
             if not hasattr(self, prop):
@@ -244,7 +244,7 @@ class Daemon:
 
     def get_header(self):
         return ["Shinken %s" % VERSION,
-                "Copyright (c) 2009-2010 :", 
+                "Copyright (c) 2009-2010 :",
                 "Gabes Jean (naparuba@gmail.com)",
                 "Gerhard Lausser, Gerhard.Lausser@consol.de",
                 "License: AGPL"]

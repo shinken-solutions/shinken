@@ -72,7 +72,7 @@ class Ndodb_broker:
         print "I connect to NDO database"
         self.db = DBMysql(self.host, self.user, self.password, self.database, self.character_set, table_prefix='nagios_')
         self.connect_database()
-        
+
         #Cache for hosts and services
         #will be flushed when we got a net instance id
         #or something like that
@@ -85,9 +85,9 @@ class Ndodb_broker:
     def manage_brok(self, b):
         type = b.type
         manager = 'manage_'+type+'_brok'
-	#We've got problem with instance_id == 0 so we add 1 every where
-	if 'instance_id' in b.data:
-	    b.data['instance_id'] = b.data['instance_id'] + 1
+        #We've got problem with instance_id == 0 so we add 1 every where
+        if 'instance_id' in b.data:
+            b.data['instance_id'] = b.data['instance_id'] + 1
         #print "(Ndo) I search manager:", manager
         if self.has(manager):
             f = getattr(self, manager)
@@ -176,7 +176,7 @@ class Ndodb_broker:
             res.append(q)
 
         #We also clean cache, because we are not sure about this data now
-	print "[MySQL/NDO] Flushing caches"
+        print "[MySQL/NDO] Flushing caches"
         self.services_cache = {}
         self.hosts_cache = {}
 
@@ -191,13 +191,13 @@ class Ndodb_broker:
     def manage_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
 
-	#Must delete me first
-	query_delete_instance = u"DELETE FROM %s WHERE instance_name = '%s' " % ('nagios_instances', b.data['instance_name'])
+        #Must delete me first
+        query_delete_instance = u"DELETE FROM %s WHERE instance_name = '%s' " % ('nagios_instances', b.data['instance_name'])
 
-	query_instance = self.db.create_insert_query('instances', {'instance_name' : new_b.data['instance_name'],\
-	 'instance_description' : new_b.data['instance_name'], \
-	'instance_id' : new_b.data['instance_id']
-	})
+        query_instance = self.db.create_insert_query('instances', {'instance_name' : new_b.data['instance_name'],\
+         'instance_description' : new_b.data['instance_name'], \
+        'instance_id' : new_b.data['instance_id']
+        })
 
         to_del = ['instance_name', 'command_file']
         to_add = []
@@ -460,14 +460,14 @@ class Ndodb_broker:
     #The next schedule got it's own brok. got it and just update the
     #next_check with it
     def manage_host_next_schedule_brok(self, b):
-	data = b.data
-	host_id = self.get_host_object_id_by_name(data['host_name'])
-	#Only the host is impacted
+        data = b.data
+        host_id = self.get_host_object_id_by_name(data['host_name'])
+        #Only the host is impacted
         where_clause = {'host_object_id' : host_id}
 
-	#Just update teh host status
-	hoststatus_data = {'next_check' : de_unixify(data['next_chk'])}
-	hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
+        #Just update teh host status
+        hoststatus_data = {'next_check' : de_unixify(data['next_chk'])}
+        hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
         return [hoststatus_query]
 
@@ -506,7 +506,7 @@ class Ndodb_broker:
     #The next schedule got it's own brok. got it and just update the
     #next_check with it
     def manage_service_next_schedule_brok(self, b):
-	data = b.data
+        data = b.data
         #print "DATA", data
         service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
 
@@ -524,7 +524,7 @@ class Ndodb_broker:
     #Ok the host is updated
     def manage_update_host_status_brok(self, b):
         data = b.data
-	host_id = self.get_host_object_id_by_name(data['host_name'])
+        host_id = self.get_host_object_id_by_name(data['host_name'])
 
         hosts_data = {'instance_id' : data['instance_id'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
@@ -537,7 +537,7 @@ class Ndodb_broker:
                       'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
                       'obsess_over_host' : data['obsess_over_host'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
             }
-	#Only the host is impacted
+        #Only the host is impacted
         where_clause = {'host_object_id' : host_id}
 
         query = self.db.create_update_query('hosts', hosts_data, where_clause)
@@ -571,7 +571,7 @@ class Ndodb_broker:
         service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
 
 
-        
+
         services_data = {'instance_id' : data['instance_id'],
                       'display_name' : data['display_name'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
@@ -608,7 +608,7 @@ class Ndodb_broker:
                               #set check to 1 so nagvis is happy
                               'has_been_checked' : 1,
                               }
-        
+
         where_clause = {'service_object_id' : service_id}
         servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
 

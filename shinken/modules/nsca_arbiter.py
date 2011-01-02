@@ -63,7 +63,7 @@ def get_instance(plugin):
     if hasattr(plugin, 'encryption_method'):
         encryption_method = int(plugin.encryption_method)
     else:
-	encryption_method = 0
+        encryption_method = 0
     if hasattr(plugin, 'password'):
         password = plugin.password
     else:
@@ -115,7 +115,7 @@ class NSCA_arbiter:
         iv = ''.join([chr(self.rng.randrange(256)) for i in xrange(128)])
         init_packet.raw=struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
         socket.send(init_packet)
-	return iv
+        return iv
 
     def read_check_result(self, data, iv):
         '''
@@ -133,26 +133,26 @@ class NSCA_arbiter:
             return None
 
         if self.encryption_method == 1:
-		data = decrypt_xor(data,self.password)
-		data = decrypt_xor(data,iv)
+            data = decrypt_xor(data,self.password)
+            data = decrypt_xor(data,iv)
 
         (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
-	hostname, sep, dish =  hostname_dirty.partition("\0")
-	service, sep, dish = service_dirty.partition("\0")
-	output, sep, dish = output_dirty.partition("\0")
+        hostname, sep, dish =  hostname_dirty.partition("\0")
+        service, sep, dish = service_dirty.partition("\0")
+        output, sep, dish = output_dirty.partition("\0")
         return (timestamp, rc, hostname, service, output)
 
     def post_command(self, timestamp, rc, hostname, service, output):
         '''
         Send a check result command to the arbiter
         '''
-	if len(service) == 0:
-		extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp,hostname,rc,output)
-	else:
-		extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp,hostname,service,rc,output)
+        if len(service) == 0:
+            extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp,hostname,rc,output)
+        else:
+            extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp,hostname,service,rc,output)
 
-	e = ExternalCommand(extcmd)
-	self.return_queue.put(e)
+        e = ExternalCommand(extcmd)
+        self.return_queue.put(e)
 
 
     #When you are in "external" mode, that is the main loop of your process
@@ -165,7 +165,7 @@ class NSCA_arbiter:
         server.listen(backlog)
         input = [server]
         databuffer = {}
-	IVs = {}
+        IVs = {}
 
         while True:
             inputready,outputready,exceptready = select.select(input,[],[], 0)
@@ -189,11 +189,10 @@ class NSCA_arbiter:
                         (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s],IVs[s])
                         del databuffer[s]
                         del IVs[s]
-			self.post_command(timestamp,rc,hostname,service,output)
+                        self.post_command(timestamp,rc,hostname,service,output)
                         try:
                             s.shutdown(2)
                         except Exception , exp:
                             print exp
                         s.close()
                         input.remove(s)
-

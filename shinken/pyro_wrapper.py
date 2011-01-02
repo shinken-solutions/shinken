@@ -46,7 +46,7 @@ try:
     def unregister(daemon, obj):
         daemon.disconnect(obj)
 
-    
+
     def get_sockets(daemon):
         return daemon.getServerSockets()
 
@@ -54,7 +54,7 @@ try:
     def handleRequests(daemon, s):
         daemon.handleRequests()
 
-    
+
     def init_daemon(host, port):
         Pyro.core.initServer()
         daemon = Pyro.core.Daemon(host=host, port=port)
@@ -66,7 +66,7 @@ try:
 
     def create_uri(address, port, obj_name):
         return "PYROLOC://%s:%d/%s" % (address, port, obj_name)
-    
+
     #Timeout way is also changed between 3 and 4
     #it's a method in 3, a property in 4
     def set_timeout(con, timeout):
@@ -100,15 +100,15 @@ except AttributeError:
     def unregister(daemon, obj, name):
         daemon.unregister(obj)
 
-    
+
     def get_sockets(daemon):
         return daemon.sockets()
 
-    
+
     def handleRequests(daemon, s):
         daemon.handleRequests([s])
 
-    
+
     def init_daemon(host, port):
         #Pyro 4 i by default thread, should do select
         #(I hate threads!)
@@ -125,12 +125,10 @@ except AttributeError:
     def create_uri(address, port, obj_name):
         return "PYRO:%s@%s:%d" % (obj_name, address, port)
 
-    
+
     def set_timeout(con, timeout):
         con._pyroTimeout = timeout
 
 
     def getProxy(uri):
         return Pyro.core.Proxy(uri)
-
-
