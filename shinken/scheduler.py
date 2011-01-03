@@ -353,23 +353,26 @@ class Scheduler:
 
                         # If we have notification_interval then schedule the next notification (problems only)
                         if a.type == 'PROBLEM':
+                            # Update the ref notif number after raise the one of the notification
                             if len(childnotifications) != 0:
                                 # notif_nb of the master notification was already current_notification_number+1.
                                 # If notifications were sent, then host/service-counter will also be incremented
                                 item.current_notification_number = a.notif_nb
-
+                            
                             if item.notification_interval != 0 and a.t_to_go != None:
                                 # We must continue to send notifications.
                                 # Just leave it in the actions list and set it to "scheduled" and it will be found again later
 #                               if a.t_to_go == None or item.notification_interval == None:
 #                                       print "A to go", a, a.t_to_go, item.notification_interval
                                 a.t_to_go = a.t_to_go + item.notification_interval * item.__class__.interval_length
+                                
                                 a.notif_nb = item.current_notification_number + 1
                                 a.status = 'scheduled'
                             else:
                                 # Wipe out this master notification. One problem notification is enough.
                                 item.remove_in_progress_notification(a)
                                 self.actions[a.id].status = 'zombie'
+
                         else:
                             # Wipe out this master notification. We don't repeat recover/downtime/flap/etc...
                             item.remove_in_progress_notification(a)
