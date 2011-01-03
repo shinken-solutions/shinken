@@ -181,16 +181,6 @@ class Notification(Action):
 #            child.terminate(force=True)
 
 
-    def get_return_from(self, c):
-        self.exit_status  = c.exit_status
-        self.output = c.output
-        #self.long_output = c.long_output
-        #self.check_time = c.check_time
-        #self.execution_time = c.execution_time
-        #self.perf_data = c.perf_data
-
-
-
     def is_launchable(self, t):
         return t > self.t_to_go
 
