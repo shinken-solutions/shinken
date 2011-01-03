@@ -30,16 +30,17 @@ class Escalation(Item):
     properties={'escalation_name': StringProp(),
                 'first_notification': IntegerProp(),
                 'last_notification': IntegerProp(),
+                'first_notification_time': IntegerProp(),
+                'last_notification_time': IntegerProp(),
                 'notification_interval': IntegerProp(),
                 'escalation_period': StringProp(default=None),
-                'escalation_options': ListProp(
-            default='d,u,r,w,c'),
+                'escalation_options': ListProp(default='d,u,r,w,c'),
                 'contacts': StringProp(),
                 'contact_groups': StringProp(),
                 }
     running_properties = {
-        #All errors and warning raised during the configuration parsing
-        #and taht will raised real warning/errors during the is_correct
+        # All errors and warning raised during the configuration parsing
+        # and that will raised real warning/errors during the is_correct
         'configuration_warnings': StringProp(default=[]),
         'configuration_errors': StringProp(default=[]),
         'time_based' : BoolProp(default=False),
@@ -47,32 +48,46 @@ class Escalation(Item):
 
     macros = {}
 
-
-    #For debugging purpose only (nice name)
+    
+    # For debugging purpose only (nice name)
     def get_name(self):
         return self.escalation_name
 
 
-    #Return True if :
-    #*time in in escalation_period or we do not have escalation_period
-    #*status is in escalation_options
-    #*the notification number is in our interval [[first_notification .. last_notification]]
-    def is_eligible(self, t, status, notif_number):
+    # Return True if :
+    # *time in in escalation_period or we do not have escalation_period
+    # *status is in escalation_options
+    # *the notification number is in our interval [[first_notification .. last_notification]]
+    def is_eligible(self, t, status, notif_number, in_notif_time, interval):
         small_states = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
              'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's',
              'DOWN' : 'd', 'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'}
 
-        print self.get_name(), 'ask for eligible with', status, small_states[status], self.escalation_period.is_time_valid(t), 'level:%d' % notif_number
+        #print self.get_name(), 'ask for eligible with', status, small_states[status], self.escalation_period.is_time_valid(t), 'level:%d' % notif_number
 
-        #Begin with the easy cases
-        if notif_number < self.first_notification:
-            print "Bad notif number, too early", self.first_notification
-            return False
+        # If we are not time based, we check notification numbers:
+        if not self.time_based:
+            # Begin with the easy cases
+            if notif_number < self.first_notification:
+                print "Bad notif number, too early", self.first_notification
+                return False
 
-        #self.last_notification = 0 mean no end
-        if self.last_notification != 0 and notif_number > self.last_notification:
-            print 'notif number too late', self.last_notification
-            return False
+            #self.last_notification = 0 mean no end
+            if self.last_notification != 0 and notif_number > self.last_notification:
+                print 'notif number too late', self.last_notification
+                return False
+        # Else we are time based, we must check for the good value
+        else:
+            # Begin with the easy cases
+            if in_notif_time < self.first_notification_time * interval:
+                print "Bad nfirst_notification_time, too early", self.first_notification_time * interval
+                return False
+
+            #self.last_notification = 0 mean no end
+            if self.last_notification_time != 0 and in_notif_time > self.last_notification_time * interval:
+                print 'notif time too late', self.last_notification_time
+                return False
+
 
         if status in small_states and small_states[status] not in self.escalation_options:
             print "Bad status", small_states[status], 'not in', self.escalation_options
@@ -95,7 +110,13 @@ class Escalation(Item):
         state = True # guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['contacts', 'contact_groups']
+        # If we got the _time parameters, we are time based. Unless, we are not :)
+        if hasattr(self, 'first_notification_time') or hasattr(self, 'last_notification_time'):
+            self.time_based = True
+            special_properties = ['contacts', 'contact_groups', 'first_notification', 'last_notification']
+        else: #classic ones
+            special_properties = ['contacts', 'contact_groups', 'first_notification_time', 'last_notification_time']
+            
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop].required:
@@ -112,6 +133,22 @@ class Escalation(Item):
         if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups'):
             logger.log('%s : I do not have contacts nor contact_groups' % self.get_name())
             state = False
+
+        # If time_based or not, we do not check all properties
+        if self.time_based:
+            if not hasattr(self, 'first_notification_time'):
+                logger.log('%s : I do not have first_notification_time' % self.get_name())
+                state = False
+            if not hasattr(self, 'last_notification_time'):
+                logger.log('%s : I do not have last_notification_time' % self.get_name())
+                state = False
+        else: # we check classical properties
+            if not hasattr(self, 'first_notification'):
+                logger.log('%s : I do not have first_notification' % self.get_name())
+                state = False
+            if not hasattr(self, 'last_notification'):
+                logger.log('%s : I do not have last_notification' % self.get_name())
+                state = False
 
         return state
 

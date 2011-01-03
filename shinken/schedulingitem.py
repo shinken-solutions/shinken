@@ -832,18 +832,30 @@ class SchedulingItem(Item):
 
     # See if an escalation is eligible at t and notif nb=n
     def is_escalable(self, t, n):
+        cls = self.__class__
+
+        # We search since when we are in notification for escalations
+        # that are based on time
+        in_notif_time = cls.interval_length * self.first_notification_delay + (n-1) * self.notification_interval
+
         # Check is an escalation match the current_notification_number
         for es in self.escalations:
-            if es.is_eligible(t, self.state, n):
+            if es.is_eligible(t, self.state, n, in_notif_time, cls.interval_length):
                 return True
         return False
 
 
     # Get all contacts (uniq) from eligible escalations
     def get_escalable_contacts(self, t, n):
+        cls = self.__class__
+        
+        # We search since when we are in notification for escalations
+        # that are based on this time
+        in_notif_time = cls.interval_length * self.first_notification_delay + (n-1) * self.notification_interval
+
         contacts = set()
         for es in self.escalations:
-            if es.is_eligible(t, self.state, n):
+            if es.is_eligible(t, self.state, n, in_notif_time, cls.interval_length):
                 contacts.update(es.contacts)
         return list(contacts)
 
@@ -929,6 +941,7 @@ class SchedulingItem(Item):
             # else take normal contacts
             else:
                 contacts = self.contacts
+
 
         for contact in contacts:
             # Get the property name for notif commands, like

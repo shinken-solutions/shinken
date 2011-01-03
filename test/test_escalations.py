@@ -158,7 +158,7 @@ class TestEscalations(ShinkenTest):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0_time")
 
         #To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
@@ -174,12 +174,12 @@ class TestEscalations(ShinkenTest):
 
         self.assert_(svc.current_notification_number == 0)
         
-        tolevel2 = self.sched.conf.escalations.find_by_name('ToLevel2')
-        self.assert_(tolevel2 != None)
-        self.assert_(tolevel2 in svc.escalations)
-        tolevel3 = self.sched.conf.escalations.find_by_name('ToLevel3')
-        self.assert_(tolevel3 != None)
-        self.assert_(tolevel3 in svc.escalations)
+        tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
+        self.assert_(tolevel2_time != None)
+        self.assert_(tolevel2_time in svc.escalations)
+        tolevel3_time = self.sched.conf.escalations.find_by_name('ToLevel3-time')
+        self.assert_(tolevel3_time != None)
+        self.assert_(tolevel3_time in svc.escalations)
 
 
         for es in svc.escalations:
@@ -221,7 +221,15 @@ class TestEscalations(ShinkenTest):
         print "find a way to get the number of the last reaction"
         cnn = svc.current_notification_number
         print "- 1 x BAD repeat -------------------------------------"
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
+        
+        # For the test, we hack the notif value
+        print "DBG:", svc.notifications_in_progress
+        for n in svc.notifications_in_progress.values():
+            print "COCO", n.__dict__
+            # HOP, we say : it's already 3600 second since the last notif,
+            svc.notification_interval = 3600
+
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
         
         # Now we raise the notif number of 2, so we can escalade
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
@@ -231,24 +239,42 @@ class TestEscalations(ShinkenTest):
         self.assert_(svc.current_notification_number > cnn)
         cnn = svc.current_notification_number
 
-        # One more bad, we go 3
+        #svc.notification_interval = 0.001
+        for n in svc.notifications_in_progress.values():
+            print "COCO", n.__dict__
+            # HOP, we say : it's already 3600 second since the last notif,
+            n.t_to_go = time.time()
+            
+
+
+        # One more bad, we say : he, it's 7200 sc of notif, so must be still level2
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
         self.show_and_clear_logs()
 
-        # We go 4, still level2
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
-        self.show_and_clear_logs()
+        #svc.notification_interval = 0.001
+        for n in svc.notifications_in_progress.values():
+            print "COCO", n.__dict__
+            # HOP, we say : it's already 3600 second since the last notif,
+            n.t_to_go = time.time()
+            
 
-        # We go 5! we escalade to level3
-
+        # One more, we bypass 7200, so now it's level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
         self.show_and_clear_logs()
 
+        #One more time...
+        #svc.notification_interval = 0.001
+
+
         # Now we send 10 more notif, we must be still level5
         for i in range(10):
+            for n in svc.notifications_in_progress.values():
+                print "COCO", n.__dict__
+                # HOP, we say : it's already 3600 second since the last notif,
+                n.t_to_go = time.time()
+
             self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
             self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
             self.show_and_clear_logs()
