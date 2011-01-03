@@ -262,7 +262,7 @@ class Item(object):
         state = True
         properties = self.__class__.properties
         for prop in properties:
-            if not hasattr(self, prop) and properties[prop]['required']:
+            if not hasattr(self, prop) and properties[prop].required:
                 print self.get_name(), "missing property :", prop
                 state = False
         return state

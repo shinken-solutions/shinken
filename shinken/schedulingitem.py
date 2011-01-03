@@ -487,8 +487,8 @@ class SchedulingItem(Item):
         data = self.get_data_for_event_handler()
         cmd = m.resolve_command(self.event_handler, data)
         e = EventHandler(cmd, timeout=cls.event_handler_timeout)
-        print "DBG: Event handler call created"
-        print "DBG: ",e.__dict__
+        #print "DBG: Event handler call created"
+        #print "DBG: ",e.__dict__
         self.raise_event_handler_log_entry(self.event_handler)
 
         # ok we can put it in our temp action queue
@@ -830,20 +830,32 @@ class SchedulingItem(Item):
 
 
 
-    # See if an escalation is eligible
-    def is_escalable(self, t):
+    # See if an escalation is eligible at t and notif nb=n
+    def is_escalable(self, t, n):
+        cls = self.__class__
+
+        # We search since when we are in notification for escalations
+        # that are based on time
+        in_notif_time = cls.interval_length * self.first_notification_delay + (n-1) * self.notification_interval
+
         # Check is an escalation match the current_notification_number
         for es in self.escalations:
-            if es.is_eligible(t, self.state, self.current_notification_number):
+            if es.is_eligible(t, self.state, n, in_notif_time, cls.interval_length):
                 return True
         return False
 
 
     # Get all contacts (uniq) from eligible escalations
-    def get_escalable_contacts(self, t):
+    def get_escalable_contacts(self, t, n):
+        cls = self.__class__
+        
+        # We search since when we are in notification for escalations
+        # that are based on this time
+        in_notif_time = cls.interval_length * self.first_notification_delay + (n-1) * self.notification_interval
+
         contacts = set()
         for es in self.escalations:
-            if es.is_eligible(t, self.state, self.current_notification_number):
+            if es.is_eligible(t, self.state, n, in_notif_time, cls.interval_length):
                 contacts.update(es.contacts)
         return list(contacts)
 
@@ -924,11 +936,12 @@ class SchedulingItem(Item):
             self.notified_contacts.clear()
         else:
             # Check is an escalation match. If yes, get all contacts from escalations
-            if self.is_escalable(n.t_to_go):
-                contacts = self.get_escalable_contacts(n.t_to_go)
+            if self.is_escalable(n.t_to_go, n.notif_nb):
+                contacts = self.get_escalable_contacts(n.t_to_go, n.notif_nb)
             # else take normal contacts
             else:
                 contacts = self.contacts
+
 
         for contact in contacts:
             # Get the property name for notif commands, like
@@ -1053,7 +1066,7 @@ class SchedulingItem(Item):
     # We ask us to manage our own internal check,
     # like a business based one
     def manage_internal_check(self, c):
-        print "DBG, ask me to manage a check!"
+        #print "DBG, ask me to manage a check!"
         if c.command.startswith('bp_'):
             state = self.business_rule.get_state()
         elif c.command == '_internal_host_up':
@@ -1063,17 +1076,17 @@ class SchedulingItem(Item):
             c.output = 'Host assumed to be UP'
             c.long_output = c.output
         c.exit_status = state
-        print "DBG, setting state", state
+        #print "DBG, setting state", state
 
 
     # If I'm a business rule service/hsot, I register myself to the
     # elements I will depend on, so They will have ME as an impact
     def create_business_rules_dependencies(self):
         if self.got_business_rule:
-            print "DBG: ask me to register me in my dependencies", self.get_name()
+            #print "DBG: ask me to register me in my dependencies", self.get_name()
             elts = self.business_rule.list_all_elements()
             # I will register myself in this
             for e in elts:
-                print "I register to the element", e.get_name()
+                #print "I register to the element", e.get_name()
                 # all states, every timeperiod, and inherit parents
                 e.add_business_rule_act_dependancy(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
