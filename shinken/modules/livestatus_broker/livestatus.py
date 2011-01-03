@@ -23,18 +23,40 @@ import Queue
 import copy
 import os
 
+
+# This is a quick and dirty implementation of a Lifo 
+class MyLifoQueue(Queue.Queue):
+    def _init(self, maxsize):
+        self.maxsize = maxsize
+        self.queue = []
+
+    def _qsize(self, len=len):
+        return len(self.queue)
+
+    def _put(self, item):
+        self.queue.append(item)
+
+    def _get(self):
+        return self.queue.pop()
+
 try:
     Queue.LifoQueue
-except AttributeError: # Ptyhon 2.4 and 2.5 do nto have it
-    #try to use a standard queue instead
-    Queue.LifoQueue = Queue.Queue
-
-
+except AttributeError:
+    # Ptyhon 2.4 and 2.5 do not have it.
+    # Use our own implementation.
+    Queue.LifoQueue = MyLifoQueue
 try:
     import json
 except ImportError:
     import simplejson as json
-#import sqlite3
+try:
+    import sqlite3
+except ImportError:
+    try:
+        import pysqlite2.dbapi2 as sqlite3
+    except ImportError:
+        import sqlite as sqlite3
+
 
 from shinken.service import Service
 from shinken.external_command import ExternalCommand
@@ -5584,19 +5606,22 @@ class LiveStatus:
             filter_clause, filter_values = sql_filter_stack()
             c = self.dbconn.cursor()
             try:
-                #print "sql:", 'SELECT * FROM logs WHERE %s' % (filter_clause)
+                if sqlite3.paramstyle == 'pyformat':
+                    matchcount = 0
+                    for m in re.finditer(r"\?", filter_clause):
+                        filter_clause = re.sub('\\?', '%(' + str(matchcount) + ')s', filter_clause, 1)
+                        matchcount += 1
+                    filter_values = dict(zip([str(x) for x in xrange(len(filter_values))], filter_values))
                 c.execute('SELECT * FROM logs WHERE %s' % filter_clause, filter_values)
             except sqlite3.Error, e:
                 print "An error occurred:", e.args[0]
-            prefiltresult = []
             dbresult = c.fetchall()
-            # make a generator: fill in the missing columns in the logline and filter it with filtercolumns
-            prefiltresult = (y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(columns + filtercolumns)) for x in dbresult) if filter_stack(self.create_output(type_map, y, [], filtercolumns)))
-            # add output columns
+            if sqlite3.paramstyle == 'pyformat':
+                dbresult = [self.row_factory(c, d) for d in dbresult]
+            prefiltresult = [y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(columns + filtercolumns)) for x in dbresult) if filter_stack(self.create_output(type_map, y, [], filtercolumns))]
             filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
             result = filtresult
-            pass
-            # CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options INT, plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))
+            # CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options VARCHAR(512), plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))
 
         #print "result is", result
         return result
