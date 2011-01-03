@@ -86,6 +86,34 @@ class Escalation(Item):
 
 
 
+    # Check is required prop are set:
+    # template are always correct
+    # contacts OR contactgroups is need
+    def is_correct(self):
+        state = True # guilty or not? :)
+        cls = self.__class__
+
+        special_properties = ['contacts', 'contact_groups']
+        for prop in cls.properties:
+            if prop not in special_properties:
+                if not hasattr(self, prop) and cls.properties[prop].required:
+                    logger.log('%s : I do not have %s' % (self.get_name(), prop))
+                    state = False # Bad boy...
+
+        # Raised all previously saw errors like unknown contacts and co
+        if self.configuration_errors != []:
+            state = False
+            for err in self.configuration_errors:
+                logger.log(err)
+
+         # Ok now we manage special cases...
+        if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups'):
+            logger.log('%s : I do not have contacts nor contact_groups' % self.get_name())
+            state = False
+
+        return state
+
+
 
 class Escalations(Items):
     name_property = "escalation_name"
