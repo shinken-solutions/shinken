@@ -21,6 +21,7 @@
 from shinken.item import Item, Items
 from shinken.util import to_int, to_split, strip_and_uniq
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.log import logger
 
 class Escalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
@@ -41,6 +42,7 @@ class Escalation(Item):
         #and taht will raised real warning/errors during the is_correct
         'configuration_warnings': StringProp(default=[]),
         'configuration_errors': StringProp(default=[]),
+        'time_based' : BoolProp(default=False),
         }
 
     macros = {}
