@@ -25,6 +25,7 @@
 import time
 import sys
 import os
+import Queue
 
 #And now include from this global directory
 from shinken.host import Host
@@ -431,8 +432,12 @@ class Status_dat_broker:
         number_of_objects_written = 0
 
         while True:
-            b = self.q.get()
-            self.manage_brok(b)
+            try:
+                b = self.q.get(True, 5)
+                self.manage_brok(b)
+            except Queue.Empty:
+                # No items arrived in the queue, but we must write a status.dat at regular intervals
+                pass
 
             if time.time() - last_generation > self.update_interval:
                 #from guppy import hpy
