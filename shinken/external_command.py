@@ -70,6 +70,7 @@ class ExternalCommandManager:
         'DELAY_SVC_NOTIFICATION' : {'global' : False, 'args' : ['service', 'to_int']},
         'DEL_ALL_HOST_COMMENTS' : {'global' : False, 'args' : ['host']},
         'DEL_ALL_SVC_COMMENTS' : {'global' : False, 'args' : ['service']},
+        'DEL_CONTACT_DOWNTIME' : {'global' : True, 'args' : ['to_int']},
         'DEL_HOST_COMMENT' : {'global' : True, 'args' : ['to_int']},
         'DEL_HOST_DOWNTIME' : {'global' : True, 'args' : ['to_int']},
         'DEL_SVC_COMMENT' : {'global' : True, 'args' : ['to_int']},
@@ -578,6 +579,12 @@ class ExternalCommandManager:
     def DEL_ALL_SVC_COMMENTS(self, service):
         for c in service.comments:
             self.DEL_SVC_COMMENT(c.id)
+
+    #DEL_CONTACT_DOWNTIME;<downtime_id>
+    def DEL_CONTACT_DOWNTIME(self, downtime_id):
+        if downtime_id in self.sched.contact_downtimes:
+            self.sched.contact_downtimes[downtime_id].cancel()
+
 
     #DEL_HOST_COMMENT;<comment_id>
     def DEL_HOST_COMMENT(self, comment_id):
