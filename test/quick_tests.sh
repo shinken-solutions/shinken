@@ -81,6 +81,7 @@ launch_and_assert test_realms.py
 launch_and_assert test_host_without_cmd.py
 launch_and_assert test_escalations.py
 launch_and_assert test_notifications.py
+launch_and_assert test_contactdowntimes.py
 
 #Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py

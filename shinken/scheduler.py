@@ -29,6 +29,7 @@ from shinken.notification import Notification
 from shinken.eventhandler import EventHandler
 from shinken.brok import Brok
 from shinken.downtime import Downtime
+from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.log import logger
 
@@ -88,6 +89,7 @@ class Scheduler:
         self.checks = {}
         self.actions = {}
         self.downtimes = {}
+        self.contact_downtimes = {}
         self.comments = {}
         self.broks = {}
         self.has_full_broks = False #have a initial_broks in broks queue?
@@ -176,6 +178,7 @@ class Scheduler:
     #Check -> self.checks
     #Notification -> self.actions
     #Downtime -> self.downtimes
+    #ContactDowntime -> self.contact_downtimes
     def add(self, elt):
         #For checks and notif, add is also an update function
         if isinstance(elt, Check):
@@ -204,6 +207,9 @@ class Scheduler:
         if isinstance(elt, Downtime):
             self.downtimes[elt.id] = elt
             self.add(elt.extra_comment)
+            return
+        if isinstance(elt, ContactDowntime):
+            self.contact_downtimes[elt.id] = elt
             return
         if isinstance(elt, Comment):
             self.comments[elt.id] = elt
@@ -302,6 +308,12 @@ class Scheduler:
             self.downtimes[dt_id].ref.del_downtime(dt_id)
             del self.downtimes[dt_id]
 
+    #We do not want this downtime id
+    def del_contact_downtime(self, dt_id):
+        if dt_id in self.contact_downtimes:
+            self.contact_downtimes[dt_id].ref.del_downtime(dt_id)
+            del self.contact_downtimes[dt_id]
+
 
     #We do not want this comment id
     def del_comment(self, c_id):
@@ -337,8 +349,10 @@ class Scheduler:
                 if a.status == 'scheduled' and a.is_launchable(now):
                     a.status = 'inpoller'
                     if a.is_a == 'notification' and not a.contact:
-                        # This is a "master" notification created by create_notifications. It will not be sent itself because it has no contact.
-                        # We use it to create "child" notifications (for the contacts and notification_commands) which are executed in the reactionner.
+                        # This is a "master" notification created by create_notifications.
+                        # It will not be sent itself because it has no contact.
+                        # We use it to create "child" notifications (for the contacts and
+                        # notification_commands) which are executed in the reactionner.
                         item = a.ref
                         childnotifications = []
                         if not item.notification_is_blocked_by_item(a.type, now):
@@ -713,12 +727,24 @@ class Scheduler:
                     # the maint downtimes has expired or was manually deleted
                     elt.in_maintenance = False
 
+        # Check the validity of contact downtimes
+        for elt in self.contacts:
+            for dt in elt.downtimes:
+                dt.check_activation()
+
         #A loop where those downtimes are removed
         #which were marked for deletion (mostly by dt.exit())
         for dt in self.downtimes.values():
             if dt.can_be_deleted == True:
                 ref = dt.ref
                 self.del_downtime(dt.id)
+                broks.append(ref.get_update_status_brok())
+
+        # Same for contact downtimes:
+        for dt in self.contact_downtimes.values():
+            if dt.can_be_deleted == True:
+                ref = dt.ref
+                self.del_contact_downtime(dt.id)
                 broks.append(ref.get_update_status_brok())
 
         #Downtimes are usually accompanied by a comment.

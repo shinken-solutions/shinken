@@ -23,6 +23,7 @@ import os, time
 
 from shinken.util import to_int, to_bool
 from shinken.downtime import Downtime
+from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.command import CommandCall
 from shinken.log import logger
@@ -158,6 +159,7 @@ class ExternalCommandManager:
         'SAVE_STATE_INFORMATION' : {'global' : True, 'args' : []},
         'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME' : {'global' : False, 'args' : ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author',None]},
         'SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME' : {'global' : False, 'args' : ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
+        'SCHEDULE_CONTACT_DOWNTIME' : {'global' : True, 'args' : ['contact', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_FORCED_HOST_CHECK' : {'global' : False, 'args' : ['host', 'to_int']},
         'SCHEDULE_FORCED_HOST_SVC_CHECKS' : {'global' : False, 'args' : ['host', 'to_int']},
         'SCHEDULE_FORCED_SVC_CHECK' : {'global' : False, 'args' : ['service', 'to_int']},
@@ -1067,6 +1069,13 @@ class ExternalCommandManager:
     #SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME(self, host, start_time, end_time, fixed, trigger_id, duration, author, comment):
         pass
+
+    #SCHEDULE_CONTACT_DOWNTIME;<contact_name>;<start_time>;<end_time>;<author>;<comment>
+    def SCHEDULE_CONTACT_DOWNTIME(self, contact, start_time, end_time, author, comment):
+        dt = ContactDowntime(contact, start_time, end_time, author, comment)
+        contact.add_downtime(dt)
+        self.sched.add(dt)
+        self.sched.get_and_register_status_brok(contact)
 
     #SCHEDULE_FORCED_HOST_CHECK;<host_name>;<check_time>
     def SCHEDULE_FORCED_HOST_CHECK(self, host, check_time):

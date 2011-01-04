@@ -22,6 +22,7 @@
 from shinken.item import Item, Items
 from shinken.util import to_split, to_bool, strip_and_uniq
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.log import logger
 
 class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
@@ -58,6 +59,10 @@ class Contact(Item):
         #and taht will raised real warning/errors during the is_correct
         'configuration_warnings' : ListProp(default=[]),
         'configuration_errors' : ListProp(default=[]),
+        'downtimes': StringProp(
+            default=[],
+            fill_brok=['full_status'],
+            retention=True),
         }
 
 
@@ -88,6 +93,11 @@ class Contact(Item):
         if not self.service_notifications_enabled:
             return False
 
+        # If we are in downtime, we do nto want notification
+        for dt in self.downtimes:
+            if dt.is_in_effect:
+                return False
+
         #Now the rest is for sub notificationways. If one is OK, we are ok
         for nw in self.notificationways:
             nw_b = nw.want_service_notification(t, state, type, criticity)
@@ -103,6 +113,11 @@ class Contact(Item):
     def want_host_notification(self, t, state, type, criticity):
         if not self.host_notifications_enabled:
             return False
+
+        # If we are in downtime, we do nto want notification
+        for dt in self.downtimes:
+            if dt.is_in_effect:
+                return False
 
         #Now it's all for sub notificationways. If one is OK, we are OK
         for nw in self.notificationways:
@@ -166,6 +181,23 @@ class Contact(Item):
         return state
 
 
+
+    # Raise a log entry when a downtime begins
+    # CONTACT DOWNTIME ALERT: test_contact;STARTED; Contact has entered a period of scheduled downtime
+    def raise_enter_downtime_log_entry(self):
+        logger.log("CONTACT DOWNTIME ALERT: %s;STARTED; Contact has entered a period of scheduled downtime" % self.get_name())
+
+
+    # Raise a log entry when a downtime has finished
+    # CONTACT DOWNTIME ALERT: test_contact;STOPPED; Contact has exited from a period of scheduled downtime
+    def raise_exit_downtime_log_entry(self):
+        logger.log("CONTACT DOWNTIME ALERT: %s;STOPPED; Contact has exited from a period of scheduled downtime" % self.get_name())
+
+
+    # Raise a log entry when a downtime prematurely ends
+    # CONTACT DOWNTIME ALERT: test_contact;CANCELLED; Contact has entered a period of scheduled downtime
+    def raise_cancel_downtime_log_entry(self):
+        logger.log("CONTACT DOWNTIME ALERT: %s;CANCELLED; Scheduled downtime for contact has been cancelled." % self.get_name())
 
 
 class Contacts(Items):

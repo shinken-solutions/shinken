@@ -971,9 +971,6 @@ class SchedulingItem(Item):
             # else take normal contacts
             else:
                 contacts = self.contacts
-        print "Finally raise for contacts"
-        for contact in contacts:
-            print contact.get_name()
 
         for contact in contacts:
             # Get the property name for notif commands, like
