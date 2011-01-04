@@ -362,9 +362,11 @@ class Scheduler:
                             if item.notification_interval != 0 and a.t_to_go != None:
                                 # We must continue to send notifications.
                                 # Just leave it in the actions list and set it to "scheduled" and it will be found again later
-#                               if a.t_to_go == None or item.notification_interval == None:
-#                                       print "A to go", a, a.t_to_go, item.notification_interval
-                                a.t_to_go = a.t_to_go + item.notification_interval * item.__class__.interval_length
+                                #a.t_to_go = a.t_to_go + item.notification_interval * item.__class__.interval_length
+                                # Ask the service/host to compute the next notif time. It can be just
+                                # a.t_to_go + item.notification_interval * item.__class__.interval_length
+                                # or maybe before because we have an escalation that need to raise up before
+                                a.t_to_go = item.get_next_notification_time(a)
                                 
                                 a.notif_nb = item.current_notification_number + 1
                                 a.status = 'scheduled'
@@ -535,6 +537,8 @@ class Scheduler:
                 if c.is_a == 'notification':
                     #But it's no so simple, we must match the timeperiod
                     new_t = ref.notification_period.get_next_valid_time_from_t(new_t)
+                    # And got a creation_time variable too
+                    c.creation_time = c.creation_time + difference
 
                 #But maybe no there is no more new value! Not good :(
                 #Say as error, with error output

@@ -831,31 +831,61 @@ class SchedulingItem(Item):
 
 
     # See if an escalation is eligible at t and notif nb=n
-    def is_escalable(self, t, n):
+    def is_escalable(self, n):#t, n):
         cls = self.__class__
 
         # We search since when we are in notification for escalations
         # that are based on time
-        in_notif_time = cls.interval_length * self.first_notification_delay + (n-1) * self.notification_interval
+        in_notif_time = cls.interval_length * self.first_notification_delay + (n.notif_nb-1) * self.notification_interval
+        print "In notif time orig:", in_notif_time
+        in_notif_time = time.time() - n.creation_time
+        print "In notif time mod:", in_notif_time
 
         # Check is an escalation match the current_notification_number
         for es in self.escalations:
-            if es.is_eligible(t, self.state, n, in_notif_time, cls.interval_length):
+            if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
                 return True
         return False
 
 
-    # Get all contacts (uniq) from eligible escalations
-    def get_escalable_contacts(self, t, n):
+    # Give for a notification the next notification time
+    # by taking the standard notification_interval or ask for
+    # our escalation if one of them need a smaller value to escalade
+    def get_next_notification_time(self, n):
+        t = []
+        now = time.time()
         cls = self.__class__
+
+        # Get the standard time like if we got no escalations
+        std_time = n.t_to_go + self.notification_interval * cls.interval_length
+
+        # standard time is a good one
+        t.append(std_time)
         
+        creation_time = n.creation_time
+        in_notif_time = time.time() - n.creation_time
+
+        for es in self.escalations:
+            r = es.get_next_notif_time(std_time, self.state, creation_time, cls.interval_length)
+            # If we got a real result (time base escalation), we add it
+            if r != None:
+                t.append(r)
+
+        #And we take the minimum of this result. Can be standard or escalation asked
+        return min(t)
+
+
+    # Get all contacts (uniq) from eligible escalations
+    def get_escalable_contacts(self,n):
+        cls = self.__class__
+
         # We search since when we are in notification for escalations
         # that are based on this time
-        in_notif_time = cls.interval_length * self.first_notification_delay + (n-1) * self.notification_interval
-
+        in_notif_time = time.time() - n.creation_time
+        
         contacts = set()
         for es in self.escalations:
-            if es.is_eligible(t, self.state, n, in_notif_time, cls.interval_length):
+            if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
                 contacts.update(es.contacts)
         return list(contacts)
 
@@ -936,12 +966,14 @@ class SchedulingItem(Item):
             self.notified_contacts.clear()
         else:
             # Check is an escalation match. If yes, get all contacts from escalations
-            if self.is_escalable(n.t_to_go, n.notif_nb):
-                contacts = self.get_escalable_contacts(n.t_to_go, n.notif_nb)
+            if self.is_escalable(n):#.t_to_go, n.notif_nb):
+                contacts = self.get_escalable_contacts(n)#.t_to_go, n.notif_nb)
             # else take normal contacts
             else:
                 contacts = self.contacts
-
+        print "Finally raise for contacts"
+        for contact in contacts:
+            print contact.get_name()
 
         for contact in contacts:
             # Get the property name for notif commands, like

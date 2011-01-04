@@ -150,6 +150,9 @@ class Notification(Action):
         self.end_time = end_time
         self.notification_type = notification_type
 
+        #DBG
+        self.creation_time = time.time()
+
 
     #return a copy of the check but just what is important for execution
     #So we remove the ref and all

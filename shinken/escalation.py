@@ -58,48 +58,73 @@ class Escalation(Item):
     # *time in in escalation_period or we do not have escalation_period
     # *status is in escalation_options
     # *the notification number is in our interval [[first_notification .. last_notification]]
+    # if we are a classic escalation.
+    # *If we are time based, we check if the time that we were in notification
+    # is in our time interval
     def is_eligible(self, t, status, notif_number, in_notif_time, interval):
         small_states = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
              'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's',
              'DOWN' : 'd', 'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'}
 
-        #print self.get_name(), 'ask for eligible with', status, small_states[status], self.escalation_period.is_time_valid(t), 'level:%d' % notif_number
-
         # If we are not time based, we check notification numbers:
         if not self.time_based:
             # Begin with the easy cases
             if notif_number < self.first_notification:
-                print "Bad notif number, too early", self.first_notification
                 return False
 
             #self.last_notification = 0 mean no end
             if self.last_notification != 0 and notif_number > self.last_notification:
-                print 'notif number too late', self.last_notification
                 return False
         # Else we are time based, we must check for the good value
         else:
             # Begin with the easy cases
             if in_notif_time < self.first_notification_time * interval:
-                print "Bad nfirst_notification_time, too early", self.first_notification_time * interval
                 return False
 
             #self.last_notification = 0 mean no end
             if self.last_notification_time != 0 and in_notif_time > self.last_notification_time * interval:
-                print 'notif time too late', self.last_notification_time
                 return False
 
-
+        # If our status is not good, we bail out too
         if status in small_states and small_states[status] not in self.escalation_options:
-            print "Bad status", small_states[status], 'not in', self.escalation_options
             return False
 
         #Maybe the time is not in our escalation_period
         if self.escalation_period != None and not self.escalation_period.is_time_valid(t):
-            print "Bad time, no luck"
             return False
 
         #Ok, I do not see why not escalade. So it's True :)
         return True
+
+
+    # t = the reference time
+    def get_next_notif_time(self, t_wished, status, creation_time, interval):
+        small_states = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
+             'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's',
+             'DOWN' : 'd', 'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'}
+
+        # If we are not time based, we bail out!
+        if not self.time_based:
+            return None
+
+        # Check if we are valid
+        if status in small_states and small_states[status] not in self.escalation_options:
+            return None
+
+        # Look for the min of our future validify
+        start = self.first_notification_time * interval + creation_time
+
+        # If we are after the classic next time, we are not asking for a smaller interval
+        if start > t_wished:
+            return None
+
+        # Maybe the time we found is not a valid one....
+        if self.escalation_period != None and not self.escalation_period.is_time_valid(start):
+            return None
+
+        # Ok so I ask for my start as a possibility for the next notification time
+        return start
+
 
 
 
