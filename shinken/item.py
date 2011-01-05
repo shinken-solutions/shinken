@@ -182,6 +182,11 @@ class Item(object):
         #add a plus porperty
         if hasattr(self, prop):
             value = getattr(self, prop)
+            # Maybe this value is 'null'. If so, we should NOT inherit
+            # and just delete this entry, and hope of course.
+            if value == 'null':
+                delattr(self, prop)
+                return None
             #Manage the additive inheritance for the property,
             #if property is in plus, add or replace it
             if self.has_plus(prop):
