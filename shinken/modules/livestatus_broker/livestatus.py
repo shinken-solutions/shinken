@@ -832,11 +832,15 @@ class LiveStatus:
                 'type' : 'int',
             },
             'host_address' : {
+                'depythonize' : lambda x: x.address,
                 'description' : 'IP address',
+                'prop' : 'host',
                 'type' : 'string',
             },
             'host_alias' : {
+                'depythonize' : lambda x: x.alias,
                 'description' : 'An alias name for the host',
+                'prop' : 'host',
                 'type' : 'string',
             },
             'host_check_command' : {
@@ -894,10 +898,14 @@ class LiveStatus:
             },
             'host_custom_variable_names' : {
                 'description' : 'A list of the names of all custom variables',
+                'depythonize' : lambda h: get_customs_keys(h.customs),
+                'prop' : 'host',
                 'type' : 'list',
             },
             'host_custom_variable_values' : {
                 'description' : 'A list of the values of the custom variables',
+                'depythonize' : lambda h: get_customs_values(h.customs),
+                'prop' : 'host',
                 'type' : 'list',
             },
             'host_display_name' : {
@@ -1213,10 +1221,12 @@ class LiveStatus:
                 'type' : 'string',
             },
             'in_check_period' : {
+                'default' : 0, # not real-time and unknown to shinken
                 'description' : 'Wether the service is currently in its check period (0/1)',
                 'type' : 'int',
             },
             'in_notification_period' : {
+                'default' : 0, # not real-time and unknown to shinken
                 'description' : 'Wether the service is currently in its notification period (0/1)',
                 'type' : 'int',
             },
@@ -5341,7 +5351,11 @@ class LiveStatus:
                     # at least we have a default value
                     value = type_map[display]['default']
                 else:
-                    value = ''
+                    if 'type' in type_map[display] and type_map[display]['type'] == 'int':
+                        value = 0
+                    else:
+                        value = ''
+
             output[display] = value
         return output
 
@@ -5658,7 +5672,7 @@ class LiveStatus:
                         lines.append(separators[1].join(columns))
             return separators[0].join(lines)
 
-        elif outputformat == 'json':
+        elif outputformat == 'json' or outputformat == 'python':
             if len(result) > 0:
                 if columnheaders != 'off' or len(columns) == 0:
                     if len(aliases) > 0:
@@ -5677,7 +5691,10 @@ class LiveStatus:
                         lines.append([aliases[col] for col in columns])
                     else:
                         lines.append(columns)
-            return json.dumps(lines, separators=(',', ':'))
+            if outputformat == 'json':
+                return json.dumps(lines, separators=(',', ':'))
+            else:
+                return str(json.loads(json.dumps(lines, separators=(',', ':'))))
 
 
     def make_filter(self, operator, attribute, reference):
@@ -5761,7 +5778,7 @@ class LiveStatus:
         elif operator == '>=':
             return ge_contains_filter
         elif operator == '<':
-            return gt_filter
+            return lt_filter
         elif operator == '<=':
             return le_filter
         elif operator == '=~':
@@ -5857,16 +5874,24 @@ class LiveStatus:
                 return ['%s IS NOT NULL' % attribute, ()]
             else:
                 return ['%s != ?' % attribute, (reference, )]
+        def gt_filter():
+            return ['%s > ?' % attribute, (reference, )]
         def ge_filter():
             return ['%s >= ?' % attribute, (reference, )]
+        def lt_filter():
+            return ['%s < ?' % attribute, (reference, )]
         def le_filter():
             return ['%s <= ?' % attribute, (reference, )]
         def match_filter():
             return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
         if operator == '=':
             return eq_filter
+        if operator == '>':
+            return gt_filter
         if operator == '>=':
             return ge_filter
+        if operator == '<':
+            return lt_filter
         if operator == '<=':
             return le_filter
         if operator == '!=':
@@ -5877,7 +5902,7 @@ class LiveStatus:
 
     def get_sql_filter_stack(self, filter_stack):
         if filter_stack.qsize() == 0:
-            return ["1 = ?", 1]
+            return ["1 = ?", [1]]
         else:
             return filter_stack.get()
         pass
@@ -5905,6 +5930,11 @@ class LiveStatus:
         and_values = reduce(lambda x, y: x+y, [ x()[1] for x in filters ])
         filter_stack.put(lambda : [and_clause, and_values])
         return filter_stack
+
+
+    def strip_table_from_column(self, table, column):
+        # cut off the table name, because it is possible to say service_state instead of state
+        return re.sub(re.sub('s$', '', table) + '_', '', column, 1)
 
 
     def handle_request(self, data):
@@ -5947,18 +5977,16 @@ class LiveStatus:
                 # Get the names of the desired columns
                 p = re.compile(r'\s+')
                 cmd, columns = p.split(line, 1)
-                columns = p.split(columns)
+                columns = [self.strip_table_from_column(table, c) for c in p.split(columns)]
                 columnheaders = 'off'
             elif line.find('ResponseHeader:') != -1:
                 cmd, responseheader = line.split(':', 1)
                 #strip the responseheader because a   can be here
                 responseheader = responseheader.strip()
-                print "responseheader", responseheader
             elif line.find('OutputFormat:') != -1:
                 cmd, outputformat = line.split(':', 1)
                 #Maybe we have a space before it
                 outputformat = outputformat.strip()
-                print "Output format:", outputformat
                 get_full_name.outputformat = outputformat
             elif line.find('KeepAlive:') != -1:
                 cmd, keepalive = line.split(':', 1)
@@ -5976,6 +6004,8 @@ class LiveStatus:
                     cmd, attribute, operator = line.split(' ', 3)
                     reference = ''
                 if operator in ['=', '!=', '>', '>=', '<', '<=', '=~', '~', '~~']:
+                    # Cut off the table name
+                    attribute = self.strip_table_from_column(table, attribute)
                     # Put a function on top of the filter_stack which implements
                     # the desired operation
                     filtercolumns.append(attribute)
@@ -6008,6 +6038,7 @@ class LiveStatus:
                 filter_stack = self.or_filter_stack(ornum, filter_stack)
             elif line.find('StatsGroupBy: ') != -1:
                 cmd, stats_group_by = line.split(' ', 1)
+                stats_group_by = self.strip_table_from_column(table, stats_group_by)
                 filtercolumns.append(stats_group_by)
             elif line.find('Stats: ') != -1:
                 try:
@@ -6025,6 +6056,7 @@ class LiveStatus:
                     if attribute in ['sum', 'min', 'max', 'avg', 'std']:
                         attribute, operator = operator, attribute
                     reference = ''
+                attribute = self.strip_table_from_column(table, attribute)
                 if operator in ['=', '!=', '>', '>=']:
                     filtercolumns.append(attribute)
                     converter = self.find_converter(table, attribute)
@@ -6073,6 +6105,7 @@ class LiveStatus:
         else:
             # make filtercolumns unique
             filtercolumns = list(set(filtercolumns))
+            prefiltercolumns = list(set(prefiltercolumns))
             if filter_stack.qsize() > 1:
                 #If we have Filter: statements but no FilterAnd/Or statements
                 #Make one big filter where the single filters are anded
@@ -6100,7 +6133,6 @@ class LiveStatus:
                         columns = range(stats)
                         if stats_group_by:
                             columns.insert(0, stats_group_by)
-                        print "all my columns", columns
                         if len(aliases) == 0:
                             #If there were Stats: staments without "as", show no column headers at all
                             columnheaders = 'off'
