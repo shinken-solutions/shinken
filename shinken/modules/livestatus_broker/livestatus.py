@@ -653,6 +653,18 @@ class LiveStatus:
                 'type' : 'list',
                 'depythonize' : from_svc_hst_distinct_lists,
             },
+            'parent_dependencies' : {
+                'description' : 'List of the dependencies (logical, network or business one) of this host.',
+                'prop' : 'parent_dependencies',
+                'type' : 'list',
+                'depythonize' : from_svc_hst_distinct_lists,
+            },
+            'child_dependencies' : {
+                'description' : 'List of the host/service that depend on this host (logical, network or business one).',
+                'prop' : 'child_dependencies',
+                'type' : 'list',
+                'depythonize' : from_svc_hst_distinct_lists,
+            },
 
         },
 
@@ -1407,6 +1419,18 @@ class LiveStatus:
             'impacts' : {
                 'description' : 'List of what the source impact (list of hosts and services)',
                 'prop' : 'impacts',
+                'type' : 'list',
+                'depythonize' : from_svc_hst_distinct_lists,
+            },
+            'parent_dependencies' : {
+                'description' : 'List of the dependencies (logical, network or business one) of this service.',
+                'prop' : 'parent_dependencies',
+                'type' : 'list',
+                'depythonize' : from_svc_hst_distinct_lists,
+            },
+            'child_dependencies' : {
+                'description' : 'List of the host/service that depend on this service (logical, network or business one).',
+                'prop' : 'child_dependencies',
                 'type' : 'list',
                 'depythonize' : from_svc_hst_distinct_lists,
             },

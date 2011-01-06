@@ -1386,6 +1386,40 @@ test_host_0,test_host_0/test_ok_0;test_router_0
         self.assert_(response == good_response)
 
 
+    def test_parent_childs_dep_lists(self):
+        self.print_header()
+        self.update_broker()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        router = self.sched.hosts.find_by_name("test_router_0")
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        
+        #---------------------------------------------------------------
+        # get the columns meta-table
+        #---------------------------------------------------------------
+        # first test if test_router_0 is in the host parent list
+        request = 'GET hosts\nColumns: host_name parent_dependencies\nFilter: host_name = test_host_0\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        good_response = """test_host_0;test_router_0"""
+        self.assert_(response.strip() == good_response.strip())
+
+        # Now check if host is in the child router list
+        request = 'GET hosts\nColumns: host_name child_dependencies\nFilter: host_name = test_router_0\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        good_response = """test_router_0;test_host_0"""
+        self.assert_(response.strip() == good_response.strip())
+
+        # Now check with the service
+        request = 'GET hosts\nColumns: host_name child_dependencies\nFilter: host_name = test_host_0\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        good_response = """test_host_0;test_host_0/test_ok_0"""
+        self.assert_(response.strip() == good_response.strip())
+
+        # And check the parent for the service
+        request = 'GET services\nColumns: parent_dependencies\nFilter: host_name = test_host_0\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        good_response = """test_host_0"""
+        self.assert_(response.strip() == good_response.strip())
+
 
     def test_limit(self):
         self.print_header() 
