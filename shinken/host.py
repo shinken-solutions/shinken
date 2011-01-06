@@ -463,8 +463,27 @@ class Host(SchedulingItem):
         # and here broks raised
         'broks': StringProp(
             default=[]),
+
+        # For knowing with which elements we are in relation
+        # of dep.
+        # childs are the hosts that have US as parent, so
+        # only a network dep
         'childs': StringProp(
             brok_transformation=to_hostnames_list,
+            default=[],
+            fill_brok=['full_status']),
+        # Here it's the elements we are depending on
+        # so our parents as network relation, or a host
+        # we are depending in a hostdependency
+        # or even if we are businesss based.
+        'parent_dependencies' : StringProp(
+            brok_transformation=to_svc_hst_distinct_lists,
+            default=[],
+            fill_brok=['full_status']),
+        # Here it's the guys taht depend on us. So it's the total
+        # oposite of the parent_dependencies 
+        'child_dependencies': StringProp(
+            brok_transformation=to_svc_hst_distinct_lists,
             default=[],
             fill_brok=['full_status']),
 
@@ -482,11 +501,13 @@ class Host(SchedulingItem):
             fill_brok=['full_status']),
         # the save value of our criticity for "problems"
         'my_own_criticity': IntegerProp(default=-1),
+
         # list of problems that make us an impact
         'source_problems': StringProp(
             brok_transformation=to_svc_hst_distinct_lists,
             default=[],
             fill_brok=['full_status']),
+
         # list of the impact I'm the cause of
         'impacts': StringProp(
             brok_transformation=to_svc_hst_distinct_lists,
@@ -727,6 +748,9 @@ class Host(SchedulingItem):
         # And I add me in it's list
         h.act_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
 
+        # And the parent/child dep lists too
+        h.register_son_in_parent_child_dependencies(self)
+
 
     # Register the dependancy between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
@@ -741,7 +765,8 @@ class Host(SchedulingItem):
         self.act_depend_of_me.append( (h, status, 'business_dep',
                                       timeperiod, inherits_parent) )
 
-
+        # And the parent/child dep lists too
+        self.register_son_in_parent_child_dependencies(h)
 
 
     # Add a dependancy for check (so before launch)
@@ -750,6 +775,10 @@ class Host(SchedulingItem):
         self.chk_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
         # And I add me in it's list
         h.chk_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
+
+        # And we fill parent/childs dep for brok purpose
+        # Here self depend on h
+        h.register_son_in_parent_child_dependencies(self)
 
 
     # Add one of our service to services (at linkify)
@@ -962,6 +991,9 @@ class Host(SchedulingItem):
 
                 #And I register myself in my parent list too
                 parent.register_child(self)
+
+                # And add the parent/child dep filling too, for broking
+                parent.register_son_in_parent_child_dependencies(self)
 
 
     # Register a child in our lists

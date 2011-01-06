@@ -63,6 +63,14 @@ class TestConfig(ShinkenTest):
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == '|')
 
+        # We check for good parent/childs links
+        # So svc_cor should be a son of svc_bd1 and svc_bd2
+        # and bd1 and bd2 should be parents of svc_cor
+        self.assert_(svc_cor in svc_bd1.child_dependencies)
+        self.assert_(svc_cor in svc_bd2.child_dependencies)
+        self.assert_(svc_bd1 in svc_cor.parent_dependencies)
+        self.assert_(svc_bd2 in svc_cor.parent_dependencies)
+
         sons = bp_rule.sons
         print "Sons,", sons
         #We(ve got 2 sons, 2 services nodes

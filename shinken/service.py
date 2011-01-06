@@ -224,6 +224,22 @@ class Service(SchedulingItem):
         # Our Dependency node for the business rule
         'business_rule' : StringProp(default=None),
 
+        # Here it's the elements we are depending on
+        # so our parents as network relation, or a host
+        # we are depending in a hostdependency
+        # or even if we are businesss based.
+        'parent_dependencies' : StringProp(
+            brok_transformation=to_svc_hst_distinct_lists,
+            default=[],
+            fill_brok=['full_status']),
+        # Here it's the guys taht depend on us. So it's the total
+        # oposite of the parent_dependencies 
+        'child_dependencies': StringProp(
+            brok_transformation=to_svc_hst_distinct_lists,
+            default=[],
+            fill_brok=['full_status']),
+
+
         }
 
     # Mapping between Macros and properties (can be prop or a function)
@@ -398,6 +414,9 @@ class Service(SchedulingItem):
                                                 'network_dep',
                                                 None, True) )
 
+            # And the parent/child dep lists too
+            self.host.register_son_in_parent_child_dependencies(self)
+
 
     # Register the dependancy between 2 service for action (notification etc)
     def add_service_act_dependancy(self, srv, status, timeperiod, inherits_parent):
@@ -408,6 +427,10 @@ class Service(SchedulingItem):
         srv.act_depend_of_me.append( (self, status, 'logic_dep',
                                       timeperiod, inherits_parent) )
 
+        # And the parent/child dep lists too
+        srv.register_son_in_parent_child_dependencies(self)
+
+
 
     # Register the dependancy between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
@@ -415,13 +438,13 @@ class Service(SchedulingItem):
     # because we will want ERP mails to go on! So call this
     # on the database service with the srv=ERP service
     def add_business_rule_act_dependancy(self, srv, status, timeperiod, inherits_parent):
-        print srv.get_name(), "is asking to me", self.get_name(), "to add him in my act_depend_of_me list"
-        # first I add the other the I depend on in MY list
-#        self.act_depend_of.append( (srv, status, 'logic_dep',
-#                                    timeperiod, inherits_parent) )
         # I only register so he know that I WILL be a inpact
         self.act_depend_of_me.append( (srv, status, 'business_dep',
                                       timeperiod, inherits_parent) )
+
+        # And the parent/child dep lists too
+        self.register_son_in_parent_child_dependencies(srv)
+
 
 
     # Register the dependancy between 2 service for checks
@@ -432,6 +455,9 @@ class Service(SchedulingItem):
         # then I register myself in the other service dep list
         srv.chk_depend_of_me.append( (self, status, 'logic_dep',
                                       timeperiod, inherits_parent) )
+
+        # And the parent/child dep lists too
+        srv.register_son_in_parent_child_dependencies(self)
 
 
     # Set unreachable : our host is DOWN, but it mean nothing for a service

@@ -262,6 +262,15 @@ class TestConfig(ShinkenTest):
         self.assert_("check_period" not in svc.__dict__)
 
 
+    # Check if the parent/childs dependencies are fill like it should
+    def test_parent_child_dep_list(self):
+        svc = self.get_svc()
+        # Look if our host is a parent
+        self.assert_(svc.host in svc.parent_dependencies)
+        # and if we are a child of it
+        self.assert_(svc in svc.host.child_dependencies)
+        
+
 if __name__ == '__main__':
     unittest.main()
 

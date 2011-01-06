@@ -40,6 +40,18 @@ class SchedulingItem(Item):
     current_event_id = 0
     current_problem_id = 0
 
+
+    # Register the son in my child_dependencies, and
+    #myself in its parent_dependencies
+    def register_son_in_parent_child_dependencies(self, son):
+        # So we register it in our list
+        self.child_dependencies.append(son)
+        self.child_dependencies = list(set(self.child_dependencies))
+        # and us to its parents
+        son.parent_dependencies.append(self)
+        son.parent_dependencies = list(set(son.parent_dependencies))
+
+
     # Add a flapping change, but no more than 20 states
     # Then update the self.is_flapping bool by calling update_flapping
     def add_flapping_change(self, b):

@@ -182,6 +182,12 @@ class TestConfig(ShinkenTest):
         print "r.childs", r.childs
         print "h.childs", h.childs
 
+        # And also in the parent/childs dep list
+        self.assert_(h in r.child_dependencies)
+        #and the reverse
+        self.assert_(r in h.parent_dependencies)
+
+
 if __name__ == '__main__':
     unittest.main()
 
