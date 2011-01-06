@@ -5228,7 +5228,6 @@ class LiveStatus:
         self.debuglevel = 2
         self.dbconn.row_factory = self.row_factory
         self.return_queue = return_queue
-        self.inversed_stack_queue = (Queue.LifoQueue == Queue.Queue) # if the Queue is not in the good order for python 2.4
         # add Host attributes to Hostsbygroup
         for attribute in LiveStatus.out_map['Host']:
             LiveStatus.out_map['Hostsbygroup'][attribute] = LiveStatus.out_map['Host'][attribute]
@@ -5499,50 +5498,10 @@ class LiveStatus:
                     filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
 
             if stats_filter_stack.qsize() > 0:
-                resultarr = {}
-                if stats_group_by:
-                    # Break up filtresult and prepare resultarr
-                    # rseultarr is not a simple array (for a single result line)
-                    # It is a dict with the statsgroupyby: as key
-                    groupedresult = {}
-                    for elem in filtresult:
-                        if not elem[stats_group_by] in groupedresult:
-                            groupedresult[elem[stats_group_by]] = []
-                        groupedresult[elem[stats_group_by]].append(elem)
-                    for group in groupedresult:
-                        resultarr[group] = { stats_group_by : group }
-
-                #The number of Stats: statements
-                #For each statement there is one function on the stack
-                maxidx = stats_filter_stack.qsize()
-                for i in range(maxidx):
-                    #First, get a filter for the attributes mentioned in Stats: statements
-                    filtfunc = stats_filter_stack.get()
-                    #Then, postprocess (sum, max, min,...) the results
-                    postprocess = stats_postprocess_stack.get()
-                    #If we are not inversed (like >=2.6) we are like a stack
-                    if not self.inversed_stack_queue:
-                        ind = maxidx - i - 1
-                    else: # we take FIFO, so the order is the inversed!
-                        ind = i
-                    if stats_group_by:
-                        # Calc statistics over _all_ elements of groups
-                        # which share the same stats_filter_by
-                        for group in groupedresult:
-                            resultarr[group][ind] = postprocess(filter(filtfunc, groupedresult[group]))
-
-                    else:
-                        # Calc statistics over _all_ elements of filtresult
-                        resultarr[ind] = postprocess(filter(filtfunc, filtresult))
-                if stats_group_by:
-                    for group in groupedresult:
-                        result.append(resultarr[group])
-                else:
-                    # Without StatsGroupBy: we have only one line
-                    result = [resultarr]
+                result = self.statsify_result(filtresult, stats_filter_stack, stats_postprocess_stack, stats_group_by)
             else:
-                #Results are host/service/etc dicts with the requested attributes
-                #Columns: = keys of the dicts
+                # Results are host/service/etc dicts with the requested attributes
+                # Columns: = keys of the dicts
                 result = filtresult
         elif table == 'contacts':
             type_map = LiveStatus.out_map['Contact']
@@ -5570,8 +5529,8 @@ class LiveStatus:
                 result.append(self.create_output(type_map, s, columns, filtercolumns))
         elif table == 'problems':
             type_map = LiveStatus.out_map['Problem']
-            #We will crate a problems list first with all problems and source in it
-            #TODO : create with filter
+            # We will crate a problems list first with all problems and source in it
+            # TODO : create with filter
             problems = []
             for h in self.hosts.values():
                 if h.is_problem:
@@ -5581,7 +5540,7 @@ class LiveStatus:
                 if s.is_problem:
                     pb = Problem(s, s.impacts)
                     problems.append(pb)
-            #Then return
+            # Then return
             for pb in problems:
                 result.append(self.create_output(type_map, pb, columns, filtercolumns))
         elif table == 'status':
@@ -5610,13 +5569,13 @@ class LiveStatus:
         return result
 
 
-    def get_live_data_log(self, table, columns, prefiltercolumns, filtercolumns, limit, filter_stack, sql_filter_stack):
+    def get_live_data_log(self, table, columns, prefiltercolumns, filtercolumns, limit, filter_stack, sql_filter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by):
         result = []
         if table == 'log':
             type_map = LiveStatus.out_map['Logline']
-            # we can apply the filterstack here as well. we have columns and filtercolumns.
+            # We can apply the filterstack here as well. we have columns and filtercolumns.
             # the only additional step is to enrich log lines with host/service-attributes
-            # a timerange can be useful for a faster preselection of lines
+            # A timerange can be useful for a faster preselection of lines
             filter_clause, filter_values = sql_filter_stack()
             c = self.dbconn.cursor()
             try:
@@ -5634,10 +5593,96 @@ class LiveStatus:
                 dbresult = [self.row_factory(c, d) for d in dbresult]
             prefiltresult = [y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(columns + filtercolumns)) for x in dbresult) if filter_stack(self.create_output(type_map, y, [], filtercolumns))]
             filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
-            result = filtresult
-            # CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options VARCHAR(512), plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))
+            if stats_filter_stack.qsize() > 0:
+                result = self.statsify_result(filtresult, stats_filter_stack, stats_postprocess_stack, stats_group_by)
+            else:
+                # Results are host/service/etc dicts with the requested attributes
+                # Columns: = keys of the dicts
+                result = filtresult
 
         #print "result is", result
+        return result
+
+
+    def statsify_result(self, filtresult, stats_filter_stack, stats_postprocess_stack, stats_group_by):
+        """Explanation:
+        stats_group_by is ["service_description", "host_name"]
+        filtresult is a list of elements which have, among others, service_description and host_name attributes
+
+        Step 1:
+        groupedresult is a dict where the keys are unique combinations of the stats_group_by attributes
+                                where the values are arrays of elements which have those attributes in common
+        Example:
+            groupedresult[("host1","svc1")] = { host_name : "host1", service_description : "svc1", state : 2, in_downtime : 0 }
+            groupedresult[("host1","svc2")] = { host_name : "host1", service_description : "svc2", state : 0, in_downtime : 0 }
+            groupedresult[("host1","svc2")] = { host_name : "host1", service_description : "svc2", state : 1, in_downtime : 1 }
+
+        resultdict is a dict where the keys are unique combinations of the stats_group_by attributes
+                            where the values are dicts
+        resultdict values are dicts where the keys are attribute names from stats_group_by
+                                   where the values are attribute values
+        Example:
+            resultdict[("host1","svc1")] = { host_name : "host1", service_description : "svc1" }
+            resultdict[("host1","svc2")] = { host_name : "host1", service_description : "svc2" }
+        These attributes are later used as output columns
+
+        Step 2:
+        Run the filters (1 filter for each Stats: statement) and the postprocessors (default: len)
+        The filters are numbered. After each run, add the result to resultdictay as <filterno> : <result>
+        Example for Stats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\n
+            resultdict[("host1","svc1")] = { host_name : "host1", service_description : "svc1", 0 : 0, 1 : 0, 2 : 1, 3 : 0 }
+            resultdict[("host1","svc2")] = { host_name : "host1", service_description : "svc2", 0 : 1, 1 : 1, 2 : 0, 3 : 0 }
+
+        Step 3:
+        Create the final result array from resultdict
+        """
+        result = []
+        resultdict = {}
+        if stats_group_by:
+            # stats_group_by is a list in newer implementations
+            if isinstance(stats_group_by, list):
+                stats_group_by = tuple(stats_group_by)
+            else:
+                stats_group_by = tuple([stats_group_by])
+            # Break up filtresult and prepare resultdict
+            # rseultarr is not a simple array (for a single result line)
+            # It is a dict with the statsgroupyby: as key
+            groupedresult = {}
+            for elem in filtresult:
+                # Make a tuple consisting of the stats_group_by values
+                stats_group_by_values = tuple([elem[c] for c in stats_group_by])
+                if not stats_group_by_values in groupedresult:
+                    groupedresult[stats_group_by_values] = []
+                groupedresult[stats_group_by_values].append(elem)
+            for group in groupedresult:
+                # All possible combinations of stats_group_by values. group is a tuple
+                resultdict[group] = dict(zip(stats_group_by, group))
+
+        #The number of Stats: statements
+        #For each statement there is one function on the stack
+        maxidx = stats_filter_stack.qsize()
+        for i in range(maxidx):
+            # Stats:-statements were put on a Lifo, so we need to reverse the number
+            stats_number = maxidx - i - 1
+            # First, get a filter for the attributes mentioned in Stats: statements
+            filtfunc = stats_filter_stack.get()
+            # Then, postprocess (sum, max, min,...) the results
+            postprocess = stats_postprocess_stack.get()
+            if stats_group_by:
+                # Calc statistics over _all_ elements of groups
+                # which share the same stats_filter_by
+                for group in groupedresult:
+                    resultdict[group][stats_number] = postprocess(filter(filtfunc, groupedresult[group]))
+
+            else:
+                # Calc statistics over _all_ elements of filtresult
+                resultdict[stats_number] = postprocess(filter(filtfunc, filtresult))
+        if stats_group_by:
+            for group in resultdict:
+                result.append(resultdict[group])
+        else:
+            # Without StatsGroupBy: we have only one line
+            result = [resultdict]
         return result
 
 
@@ -5648,7 +5693,7 @@ class LiveStatus:
             if len(result) > 0:
                 if columnheaders != 'off' or len(columns) == 0:
                     if len(aliases) > 0:
-                        #This is for statements like "Stats: .... as alias_column
+                        # This is for statements like "Stats: .... as alias_column
                         lines.append(separators[1].join([aliases[col] for col in columns]))
                     else:
                         if (len(columns) == 0):
@@ -5656,7 +5701,7 @@ class LiveStatus:
                             columns = sorted(result[0].keys())
                         lines.append(separators[1].join(columns))
                 for object in result:
-                    #construct one line of output for each object found
+                    # Construct one line of output for each object found
                     l = []
                     for x in [object[c] for c in columns]:
                         if isinstance(x, list):
@@ -5676,7 +5721,7 @@ class LiveStatus:
             if len(result) > 0:
                 if columnheaders != 'off' or len(columns) == 0:
                     if len(aliases) > 0:
-                        #This is for statements like "Stats: .... as alias_column
+                        # This is for statements like "Stats: .... as alias_column
                         lines.append([str(aliases[col]) for col in columns])
                     else:
                         if (len(columns) == 0):
@@ -5698,7 +5743,7 @@ class LiveStatus:
 
 
     def make_filter(self, operator, attribute, reference):
-        #The filters are closures.
+        # The filters are closures.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         def eq_filter(ref):
             return ref[attribute] == reference
@@ -5768,7 +5813,6 @@ class LiveStatus:
         def std_postproc(ref):
             return 0
 
-        ##print "check operator", operator
         if operator == '=':
             return eq_filter
         elif operator == '!=':
@@ -5862,7 +5906,7 @@ class LiveStatus:
 
 
     def make_sql_filter(self, operator, attribute, reference):
-        #The filters are closures.
+        # The filters are text fragments which are put together to form a sql where-condition finally.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         def eq_filter():
             if reference == '':
@@ -5933,13 +5977,13 @@ class LiveStatus:
 
 
     def strip_table_from_column(self, table, column):
-        # cut off the table name, because it is possible to say service_state instead of state
+        # Cut off the table name, because it is possible to say service_state instead of state
         return re.sub(re.sub('s$', '', table) + '_', '', column, 1)
 
 
     def handle_request(self, data):
-        #Dirty hack to change the output of get_full_name for services
-        #for cvs and json
+        # Dirty hack to change the output of get_full_name for services
+        # for cvs and json
         global get_full_name
         title = ''
         content = ''
@@ -5952,11 +5996,11 @@ class LiveStatus:
         keepalive = 'off'
         limit = None
 
-        #So set first this format in out global function
+        # So set first this format in our global function
         get_full_name.outputformat = outputformat
 
         columnheaders = 'off'
-        stats_group_by = False
+        stats_group_by = []
         aliases = []
         extcmd = False
         print "REQUEST", data
@@ -5981,11 +6025,11 @@ class LiveStatus:
                 columnheaders = 'off'
             elif line.find('ResponseHeader:') != -1:
                 cmd, responseheader = line.split(':', 1)
-                #strip the responseheader because a   can be here
+                # Strip the responseheader because a   can be here
                 responseheader = responseheader.strip()
             elif line.find('OutputFormat:') != -1:
                 cmd, outputformat = line.split(':', 1)
-                #Maybe we have a space before it
+                # Maybe we have a space before it
                 outputformat = outputformat.strip()
                 get_full_name.outputformat = outputformat
             elif line.find('KeepAlive:') != -1:
@@ -6010,7 +6054,7 @@ class LiveStatus:
                     # the desired operation
                     filtercolumns.append(attribute)
                     prefiltercolumns.append(attribute)
-                    # reference is now datatype string. The referring object attribute on the other hand
+                    # Reference is now datatype string. The referring object attribute on the other hand
                     # may be an integer. (current_attempt for example)
                     # So for the filter to work correctly (the two values compared must be
                     # of the same type), we need to convert the reference to the desired type
@@ -6037,9 +6081,12 @@ class LiveStatus:
                 # Put the function back onto the stack
                 filter_stack = self.or_filter_stack(ornum, filter_stack)
             elif line.find('StatsGroupBy: ') != -1:
-                cmd, stats_group_by = line.split(' ', 1)
-                stats_group_by = self.strip_table_from_column(table, stats_group_by)
-                filtercolumns.append(stats_group_by)
+                p = re.compile(r'\s+')
+                cmd, stats_group_by = p.split(line, 1)
+                stats_group_by = [self.strip_table_from_column(table, c) for c in p.split(stats_group_by)]
+                filtercolumns.extend(stats_group_by)
+                # Deprecated. If your query contains at least one Stats:-header
+                # then Columns: has the meaning of the old StatsGroupBy: header
             elif line.find('Stats: ') != -1:
                 try:
                     cmd, attribute, operator, reference = line.split(' ', 3)
@@ -6048,7 +6095,7 @@ class LiveStatus:
                         asas, alias = reference.split(' ')
                         aliases.append(alias)
                     elif attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference == '=':
-                        # workaround for thruk-cmds like: Stats: sum latency =
+                        # Workaround for thruk-cmds like: Stats: sum latency =
                         attribute, operator = operator, attribute
                         reference = ''
                 except:
@@ -6079,7 +6126,6 @@ class LiveStatus:
                 cmd, ornum = line.split(' ', 1)
                 stats_filter_stack = self.or_filter_stack(ornum, stats_filter_stack)
             elif line.find('Separators: ') != -1:
-                # check Class.attribute exists
                 cmd, sep1, sep2, sep3, sep4 = line.split(' ', 5)
                 separators = map(lambda x: chr(int(x)), [sep1, sep2, sep3, sep4])
             elif line.find('COMMAND') != -1:
@@ -6088,36 +6134,36 @@ class LiveStatus:
                 # This line is not valid or not implemented
                 print "Received a line of input which i can't handle : '%s'" % line
                 pass
-        #External command are send back to broker
+
         if extcmd:
-            print "Managing an external command", extcmd
+            # External command are send back to broker
             e = ExternalCommand(extcmd)
             self.return_queue.put(e)
-            #command_file = self.configs[0].command_file
-            #if os.path.exists(command_file):
-            #    try:
-            #        fifo = os.open(command_file, os.O_NONBLOCK|os.O_WRONLY)
-            #        os.write(fifo, extcmd)
-            #        os.close(fifo)
-            #    except:
-            #        print "Unable to open/write the external command pipe"
             return '\n', keepalive
         else:
-            # make filtercolumns unique
+            # Did we have Stats:-statements?
+            stats = stats_filter_stack.qsize()
+            if stats > 0 and len(columns) > 0:
+                # StatsGroupBy is deprecated. Columns: can be used instead
+                #filtercolumns.append(columns)
+                stats_group_by = columns
+
+            # Make filtercolumns unique
             filtercolumns = list(set(filtercolumns))
             prefiltercolumns = list(set(prefiltercolumns))
+
             if filter_stack.qsize() > 1:
-                #If we have Filter: statements but no FilterAnd/Or statements
-                #Make one big filter where the single filters are anded
+                # If we have Filter: statements but no FilterAnd/Or statements
+                # Make one big filter where the single filters are anded
                 filter_stack = self.and_filter_stack(filter_stack.qsize(), filter_stack)
             try:
-                #Get the function which implements the Filter: statements
+                # Get the function which implements the Filter: statements
                 simplefilter_stack = self.get_filter_stack(filter_stack)
                 if table == 'log':
                     if sql_filter_stack.qsize() > 1:
                         sql_filter_stack = self.and_sql_filter_stack(sql_filter_stack.qsize(), sql_filter_stack)
                     sql_simplefilter_stack = self.get_sql_filter_stack(sql_filter_stack)
-                    result = self.get_live_data_log(table, columns, prefiltercolumns, filtercolumns, limit, simplefilter_stack, sql_simplefilter_stack)
+                    result = self.get_live_data_log(table, columns, prefiltercolumns, filtercolumns, limit, simplefilter_stack, sql_simplefilter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by)
                 else:
                     # If the pnpgraph_present column is involved, then check
                     # with each request if the pnp perfdata path exists
@@ -6125,21 +6171,19 @@ class LiveStatus:
                         LiveStatus.pnp_path_readable = True
                     else:
                         LiveStatus.pnp_path_readable = False
-                    #Get the function which implements the Stats: statements
-                    stats = stats_filter_stack.qsize()
-                    #Apply the filters on the broker's host/service/etc elements
+                    # Apply the filters on the broker's host/service/etc elements
                     result = self.get_live_data(table, columns, prefiltercolumns, filtercolumns, limit, simplefilter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by)
-                    if stats > 0:
-                        columns = range(stats)
-                        if stats_group_by:
-                            columns.insert(0, stats_group_by)
-                        if len(aliases) == 0:
-                            #If there were Stats: staments without "as", show no column headers at all
-                            columnheaders = 'off'
-                        else:
-                            columnheaders = 'on'
+                if stats > 0:
+                    columns = range(stats)
+                    if stats_group_by:
+                        columns = stats_group_by + columns
+                    if len(aliases) == 0:
+                        #If there were Stats: staments without "as", show no column headers at all
+                        columnheaders = 'off'
+                    else:
+                        columnheaders = 'on'
 
-                #Now bring the retrieved information to a form which can be sent back to the client
+                # Now bring the retrieved information to a form which can be sent back to the client
                 response = self.format_live_data(result, columns, outputformat, columnheaders, separators, aliases) + "\n"
             except Exception, e:
                 import traceback
@@ -6149,12 +6193,10 @@ class LiveStatus:
                 traceback.print_exc(32)
                 print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
-
             if responseheader == 'fixed16':
                 statuscode = 200
                 responselength = len(response) # no error
                 response = '%3d %11d\n' % (statuscode, responselength) + response
-
 
             print "REQUEST", data
             print "RESPONSE\n%s\n" % response
