@@ -29,6 +29,7 @@ import re
 import subprocess
 import shutil
 import time
+from timeperiod import Timeperiod
 
 sys.path.append("../shinken/modules/livestatus_broker")
 from livestatus_broker import Livestatus_broker
@@ -1738,7 +1739,6 @@ test_host_0;/nagios/pnp/index.php?host=test_host_0;/nagios/wiki/doku.php/test_ho
 """)
 
 
-
     def test_thruk_custom_variables(self):
         self.print_header()
         now = time.time()
@@ -1764,6 +1764,48 @@ ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         self.assert_(response == """200          41
 test_host_0;test_ok_0;CUSTNAME;custvalue
+""")
+
+
+    def test_multisite_in_check_period(self):
+        self.print_header()
+        self.update_broker()
+        # timeperiods must be manipulated in the broker, because status-broks
+        # contain timeperiod names, not objects.
+        lshost = self.livestatus_broker.find_host("test_host_0")
+        now = time.time()
+        localnow = time.localtime(now)
+        if localnow[5] > 45:
+            time.sleep(15)
+        nextminute = time.localtime(time.time() + 60)
+        tonextminute = '%s 00:00-%02d:%02d' % (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][nextminute[6]], nextminute[3], nextminute[4])
+        fromnextminute = '%s %02d:%02d-23:59' % (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][nextminute[6]], nextminute[3], nextminute[4])
+
+        lshost.notification_period = Timeperiod()
+        lshost.notification_period.resolve_daterange(lshost.notification_period.dateranges, tonextminute)
+        lshost.check_period = Timeperiod()
+        lshost.check_period.resolve_daterange(lshost.check_period.dateranges, fromnextminute)
+        self.update_broker()
+        print "now it is", time.asctime()
+        print "notification_period is", tonextminute
+        print "check_period is", fromnextminute
+        request = """GET hosts
+Columns: host_name in_notification_period in_check_period
+Filter: host_name = test_host_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+
+        # inside notification_period, outside check_period
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response == """200          16
+test_host_0;1;0
+""")
+        time.sleep(60)
+        # a minute later it's the other way round
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response == """200          16
+test_host_0;0;1
 """)
 
 

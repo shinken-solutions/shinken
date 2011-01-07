@@ -93,6 +93,9 @@ class Timeperiod(Item):
         #and taht will raised real warning/errors during the is_correct
         'configuration_warnings' : ListProp(default=[]),
         'configuration_errors' : ListProp(default=[]),
+        # These are needed if a broker module calls methods on timeperiod objects
+        'dateranges' : ListProp(fill_brok=['full_status'], default=[]),
+        'exclude' : ListProp(fill_brok=['full_status'], default=[]),
         }
 
 
@@ -110,7 +113,6 @@ class Timeperiod(Item):
                 setattr(self, key, params[key])
             else:
                 self.unresolved.append(key+' '+params[key])
-        self.is_valid_today = False
 
         self.cache = {} #For tunning purpose only
         self.configuration_errors = []
@@ -718,7 +720,6 @@ if __name__ == '__main__':
             print "Get next valid for now + 5 min ==>", time.asctime(time.localtime(t_next)),"<=="
         else:
             print "===> No future time!!!"
-        #print "Is valid?", t.is_valid_today
         #print "End date:", t.get_end_time()
         #print "Next valid", time.asctime(time.localtime(t.get_next_valid_time()))
         print str(t)+'\n\n'

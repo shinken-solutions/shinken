@@ -124,7 +124,6 @@ class Daterange:
 
         for timeinterval in other.split(','):
             self.timeranges.append(Timerange(timeinterval.strip()))
-        self.is_valid_today = False
 
 
     def __str__(self):
@@ -439,7 +438,6 @@ class StandardDaterange(Daterange):
         for timeinterval in other.split(','):
             self.timeranges.append(Timerange(timeinterval.strip()))
         self.day = day
-        self.is_valid_today = False
 
 
     #It's correct only if the weekday (sunday, etc) is a valid one
