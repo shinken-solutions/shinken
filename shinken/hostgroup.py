@@ -66,10 +66,7 @@ class Hostgroup(Itemgroup):
 
 
     def get_hosts(self):
-        if self.has('members'):
-            return self.members
-        else:
-            return ''
+        return getattr(self, 'members', '')
 
 
     def get_hostgroup_members(self):
@@ -93,10 +90,7 @@ class Hostgroup(Itemgroup):
         #calls... not GOOD!
         if self.rec_tag:
             print "Error : we've got a loop in hostgroup definition", self.get_name()
-            if self.has('members'):
-                return self.members
-            else:
-                return ''
+            return self.get_hosts()
         #Ok, not a loop, we tag it and continue
         self.rec_tag = True
 
@@ -108,10 +102,7 @@ class Hostgroup(Itemgroup):
                 if value is not None:
                     self.add_string_member(value)
 
-        if self.has('members'):
-            return self.members
-        else:
-            return ''
+        return self.get_hosts()
 
 
 
@@ -169,24 +160,26 @@ class Hostgroups(Itemgroups):
         #Now we explode the realm value if we've got one
         #The group realm must not overide a host one (warning?)
         for hg in self:
-            if hasattr(hg, 'realm'):
-                r = realms.find_by_name(hg.realm.strip())
-                if r != None:
-                    hg.realm = r
-                    print "Hostgroup", hg.get_name(), "is in the realm", r.get_name()
+            if not hasattr(hg, 'realm'): continue
+
+            r = realms.find_by_name(hg.realm.strip())
+            if r != None:
+                hg.realm = r
+                print "Hostgroup", hg.get_name(), "is in the realm", r.get_name()
+            else:
+                err = "The hostgroup %s got an unknown realm '%s'" % (hg.get_name(), hg.realm)
+                hg.configuration_errors.append(err)
+                hg.realm = None
+                continue
+            
+            for h in hg:
+                if h is None: continue
+                if h.realm == None or h.got_default_realm: #default value not hasattr(h, 'realm'):
+                    print "Apply a realm", hg.realm.get_name(), "to host", h.get_name(), "from a hostgroup rule (%s)" % hg.get_name()
+                    h.realm = hg.realm
                 else:
-                    err = "The hostgroup %s got an unknown realm '%s'" % (hg.get_name(), hg.realm)
-                    hg.configuration_errors.append(err)
-                    hg.realm = None
-                    continue
-                for h in hg:
-                    if h != None:
-                        if h.realm == None or h.got_default_realm: #default value not hasattr(h, 'realm'):
-                            print "Apply a realm", hg.realm.get_name(), "to host", h.get_name(), "from a hostgroup rule (%s)" % hg.get_name()
-                            h.realm = hg.realm
-                        else:
-                            if h.realm != hg.realm:
-                                print "Warning : host", h.get_name(), "is not in the same realm than it's hostgroup", hg.get_name()
+                    if h.realm != hg.realm:
+                        print "Warning : host", h.get_name(), "is not in the same realm than it's hostgroup", hg.get_name()
 
 
     #Add a host string to a hostgroup member

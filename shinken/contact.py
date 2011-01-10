@@ -215,18 +215,16 @@ class Contacts(Items):
     #and we want have a list of NotificationWay
     def linkify_with_notificationways(self, notificationways):
         for i in self:
-            if hasattr(i, 'notificationways'):
-                notificationways_tab = i.notificationways.split(',')
-                notificationways_tab = strip_and_uniq(notificationways_tab)
-                new_notificationways = []
-                for nw_name in notificationways_tab:
-                    nw = notificationways.find_by_name(nw_name)
-                    if nw != None:
-                        new_notificationways.append(nw)
-                    else: #TODO: What?
-                        pass
-                #Get the list, but first make elements uniq
-                i.notificationways = list(set(new_notificationways))
+            if not hasattr(i, 'notificationways'): continue
+            new_notificationways = []
+            for nw_name in strip_and_uniq(i.notificationways.split(',')):
+                nw = notificationways.find_by_name(nw_name)
+                if nw != None:
+                    new_notificationways.append(nw)
+                else: #TODO: What?
+                    pass
+            #Get the list, but first make elements uniq
+            i.notificationways = list(set(new_notificationways))
 
 
 
@@ -237,13 +235,10 @@ class Contacts(Items):
 
         #Register ourself into the contactsgroups we are in
         for c in self:
-            if not c.is_tpl():
-                if hasattr(c, 'contact_name'):
-                    cname = c.contact_name
-                    if hasattr(c, 'contactgroups'):
-                        cgs = c.contactgroups.split(',')
-                        for cg in cgs:
-                            contactgroups.add_member(cname, cg.strip())
+            if c.is_tpl() or not (hasattr(c, 'contact_name') and hasattr(c, 'contactgroups')):
+                continue
+            for cg in c.contactgroups.split(','):
+                contactgroups.add_member(c.contact_name, cg.strip())
 
         #Now create a notification way with the simple parameter of the
         #contacts
@@ -262,13 +257,7 @@ class Contacts(Items):
 
                 if need_notificationway:
                     #print "Create notif way with", params
-                    if hasattr(c, 'contact_name'):
-                        cname = c.contact_name
-                    else: #Will be change with an unique id, but will be an error in the end
-                        if hasattr(c, 'alias'):
-                            cname = c.alias
-                        else:
-                            cname = ''
+                    cname = getattr(c, 'contact_name', getattr(c, 'alias', ''))
                     nw_name = cname+'_inner_notificationway'
                     notificationways.new_inner_member(nw_name, params)
 

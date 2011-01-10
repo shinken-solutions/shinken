@@ -175,7 +175,8 @@ class NotificationWay(Item):
                 if not cmd.is_valid():
                     print self.get_name()," : a service_notification_command is invalid", cmd.get_name()
                     state = False
-        if not hasattr(self, 'service_notification_period') or self.service_notification_period==None:
+        
+        if getattr(self, 'service_notification_period', None) is None:
             print self.get_name()," : the service_notification_period is invalid"
             state = False
 
@@ -191,7 +192,8 @@ class NotificationWay(Item):
                 if not cmd.is_valid():
                     print self.get_name()," : a host_notification_command is invalid", cmd.get_name(), cmd.__dict__
                     state = False
-        if not hasattr(self, 'host_notification_period') or self.host_notification_period==None:
+
+        if getattr(self, 'host_notification_period', None) is None:
             print self.get_name()," : the host_notification_period is invalid"
             state = False
 

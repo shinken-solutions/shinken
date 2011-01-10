@@ -198,19 +198,17 @@ class Escalations(Items):
     def linkify_es_by_s(self, services):
         for es in self:
             #If no host, no hope of having a service
-            if hasattr(es, 'host_name') and es.host_name.strip() != '':
-                #Is is an escalation for services?
-                if hasattr(es, 'service_description') and es.service_description.strip() != '':
-                    snames = es.service_description.split(',')
-                    snames = strip_and_uniq(snames)
-                    hnames = es.host_name.split(',')
-                    hnames = strip_and_uniq(hnames)
-                    for hname in hnames:
-                        for sname in snames:
-                            s = services.find_srv_by_name_and_hostname(hname, sname)
-                            if s != None:
-                                #print "Linking service", s.get_name(), 'with me', es.get_name()
-                                s.escalations.append(es)
+            if not (hasattr(es, 'host_name') and hasattr(es, 'service_description')):
+                continue
+            es_hname, sdesc = es.host_name, es.service_description
+            if '' in (es_hname.strip(), sdesc.strip()):
+                continue
+            for hname in strip_and_uniq( es_hname.split(',') ):
+                for sname in strip_and_uniq( sdesc.split(',') ):
+                    s = services.find_srv_by_name_and_hostname(hname, sname)
+                    if s != None:
+                        #print "Linking service", s.get_name(), 'with me', es.get_name()
+                        s.escalations.append(es)
                                 #print "Now service", s.get_name(), 'have', s.escalations
 
 
@@ -218,17 +216,16 @@ class Escalations(Items):
     def linkify_es_by_h(self, hosts):
         for es in self:
             #If no host, no hope of having a service
-            if hasattr(es, 'host_name') and es.host_name.strip() != '':
-                #I must be NOT a escalati on for service
-                if not hasattr(es, 'service_description') or es.service_description.strip() == '':
-                    hnames = es.host_name.split(',')
-                    hnames = strip_and_uniq(hnames)
-                    for hname in hnames:
-                        h = hosts.find_by_name(hname)
-                        if h != None:
-                            #print "Linking host", h.get_name(), 'with me', es.get_name()
-                            h.escalations.append(es)
-                            #print "Now host", h.get_name(), 'have', h.escalations
+            if (not hasattr(es, 'host_name') or es.host_name.strip() == ''
+                    or (hasattr(es, 'service_description') and es.service_description.strip() != '')):
+                continue
+            #I must be NOT a escalati on for service
+            for hname in strip_and_uniq(es.host_name.split(',')):
+                h = hosts.find_by_name(hname)
+                if h != None:
+                    #print "Linking host", h.get_name(), 'with me', es.get_name()
+                    h.escalations.append(es)
+                    #print "Now host", h.get_name(), 'have', h.escalations
 
 
     #We look for contacts property in contacts and
