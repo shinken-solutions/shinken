@@ -61,13 +61,9 @@ class Itemgroup:
     #so a python list :)
     #We also strip elements because spaces Stinks!
     def pythonize(self):
-        if hasattr(self, 'members') and self.members != '':
-            mbrs = self.members.split(',')
-        else:
-            mbrs = []
-        self.members = []
-        for mbr in mbrs:
-            self.members.append(mbr.strip())
+        self.members = [ mbr for mbr in 
+                            ( m.strip() for m in getattr(self, 'members', '').split(',') )
+                        if mbr != '' ]
 
 
     def replace_members(self, members):

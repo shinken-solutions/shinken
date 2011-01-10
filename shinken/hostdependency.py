@@ -71,15 +71,16 @@ class Hostdependencies(Items):
         hostdeps = self.items.keys()
         for id in hostdeps:
             hd = self.items[id]
-            if not hd.is_tpl(): #Exploding template is useless
-                hnames = hd.dependent_host_name.split(',')
-                if len(hnames) >= 1:
-                    for hname in hnames:
-                        hname = hname.strip()
-                        new_hd = hd.copy()
-                        new_hd.dependent_host_name = hname
-                        self.items[new_hd.id] = new_hd
-                    hstdep_to_remove.append(id)
+            if hd.is_tpl(): #Exploding template is useless
+                continue
+            hnames = hd.dependent_host_name.split(',')
+            if len(hnames) >= 1:
+                for hname in hnames:
+                    hname = hname.strip()
+                    new_hd = hd.copy()
+                    new_hd.dependent_host_name = hname
+                    self.items[new_hd.id] = new_hd
+                hstdep_to_remove.append(id)
         self.delete_hostsdep_by_id(hstdep_to_remove)
 
 
@@ -117,15 +118,11 @@ class Hostdependencies(Items):
     #We backport host dep to host. So HD is not need anymore
     def linkify_h_by_hd(self):
         for hd in self:
-            if not hd.is_tpl():
-                h = hd.dependent_host_name
-                if h is not None:
-                    if hasattr(hd, 'dependency_period'):
-                        h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, hd.dependency_period, hd.inherits_parent)
-                        h.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, hd.dependency_period, hd.inherits_parent)
-                    else:
-                        h.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, None, hd.inherits_parent)
-                        h.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, None, hd.inherits_parent)
+            depdt_hname = hd.dependent_host_name
+            if hd.is_tpl() or depdt_hname is None: continue
+            dp = getattr(hd, 'dependency_period', None)
+            depdt_hname.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, dp, hd.inherits_parent)
+            depdt_hname.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent)
 
 
     #Apply inheritance for all properties

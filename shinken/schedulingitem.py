@@ -407,7 +407,7 @@ class SchedulingItem(Item):
             return None
 
         # If I do not have an check_timeperiod and no force time, i do nothing
-        if (not hasattr(self, 'check_period') or self.check_period == None and force_time==None):
+        if getattr(self, 'check_period', None) is None and force_time is None:
             return None
 
         # Interval change is in a HARD state or not
@@ -626,7 +626,7 @@ class SchedulingItem(Item):
                 self.state_type = 'HARD'
 
         # OK following a NON-OK.
-        elif c.exit_status == 0 and (self.last_state != OK_UP and self.last_state != 'PENDING'):
+        elif c.exit_status == 0 and self.last_state not in (OK_UP, 'PENDING'):
             self.unacknowledge_problem()
             #print "Case 2 (OK following a NON-OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.state_type == 'SOFT':
@@ -656,7 +656,7 @@ class SchedulingItem(Item):
 
         # Volatile part
         # Only for service
-        elif c.exit_status != 0 and hasattr(self, 'is_volatile') and self.is_volatile:
+        elif c.exit_status != 0 and getattr(self, 'is_volatile', False):
             #print "Case 3 (volatile only)"
             # There are no repeated attempts, so the first non-ok results
             # in a hard state
@@ -791,7 +791,8 @@ class SchedulingItem(Item):
 
     def update_event_and_problem_id(self):
         OK_UP = self.__class__.ok_up #OK for service, UP for host
-        if self.state != self.last_state and self.last_state != 'PENDING' or self.state != OK_UP and self.last_state == 'PENDING':
+        if ( self.state != self.last_state and self.last_state != 'PENDING' 
+                or self.state != OK_UP and self.last_state == 'PENDING' ):
             SchedulingItem.current_event_id += 1
             self.last_event_id = self.current_event_id
             self.current_event_id = SchedulingItem.current_event_id
