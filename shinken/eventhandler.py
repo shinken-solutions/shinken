@@ -58,8 +58,9 @@ class EventHandler(Action):
                 'env': StringProp(
             default={}),
                 'perf_data' : StringProp(default=''),
-        'sched_id' : IntegerProp(default=0),
-        'timeout' : IntegerProp(default=10),
+                'sched_id' : IntegerProp(default=0),
+                'timeout' : IntegerProp(default=10),
+                'check_time' : IntegerProp(default=0),
 
                 }
 

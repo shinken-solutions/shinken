@@ -92,6 +92,7 @@ class Notification(Action):
         'host_name' : StringProp(default=''),
         'sched_id' : IntegerProp(default=0),
         'timeout' : IntegerProp(default=10),
+        'check_time' : IntegerProp(default=0),
         }
 
     macros = {
