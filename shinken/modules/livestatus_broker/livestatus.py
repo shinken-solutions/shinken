@@ -22,6 +22,7 @@ import re
 import Queue
 import copy
 import os
+import time
 
 
 # This is a quick and dirty implementation of a Lifo 
@@ -362,11 +363,15 @@ class LiveStatus:
                 'type' : 'string',
             },
             'in_check_period' : {
+                'depythonize' : lambda tp: from_bool_to_int((tp == None and [False] or [tp.is_time_valid(time.time())])[0]),
                 'description' : 'Wether this host is currently in its check period (0/1)',
+                'prop' : 'check_period',
                 'type' : 'int',
             },
             'in_notification_period' : {
+                'depythonize' : lambda tp: from_bool_to_int((tp == None and [False] or [tp.is_time_valid(time.time())])[0]),
                 'description' : 'Wether this host is currently in its notification period (0/1)',
+                'prop' : 'notification_period',
                 'type' : 'int',
             },
             'initial_state' : {
@@ -988,11 +993,15 @@ class LiveStatus:
                 'type' : 'string',
             },
             'host_in_check_period' : {
+                'depythonize' : lambda h: from_bool_to_int((h.check_period == None and [False] or [h.check_period.is_time_valid(time.time())])[0]),
                 'description' : 'Wether this host is currently in its check period (0/1)',
+                'prop' : 'host',
                 'type' : 'int',
             },
             'host_in_notification_period' : {
+                'depythonize' : lambda h: from_bool_to_int((h.notification_period == None and [False] or [h.notification_period.is_time_valid(time.time())])[0]),
                 'description' : 'Wether this host is currently in its notification period (0/1)',
+                'prop' : 'host',
                 'type' : 'int',
             },
             'host_initial_state' : {
@@ -1243,13 +1252,15 @@ class LiveStatus:
                 'type' : 'string',
             },
             'in_check_period' : {
-                'default' : 0, # not real-time and unknown to shinken
+                'depythonize' : lambda tp: from_bool_to_int((tp == None and [False] or [tp.is_time_valid(time.time())])[0]),
                 'description' : 'Wether the service is currently in its check period (0/1)',
+                'prop' : 'check_period',
                 'type' : 'int',
             },
             'in_notification_period' : {
-                'default' : 0, # not real-time and unknown to shinken
+                'depythonize' : lambda tp: from_bool_to_int((tp == None and [False] or [tp.is_time_valid(time.time())])[0]),
                 'description' : 'Wether the service is currently in its notification period (0/1)',
+                'prop' : 'notification_period',
                 'type' : 'int',
             },
             'initial_state' : {
@@ -5320,6 +5331,8 @@ class LiveStatus:
         # But instead of Host it can also be Hostbygroup
         if len(attributes + filterattributes) == 0:
             display_attributes = type_map.keys()
+            # We must find out if the request was a Stats:-request. In this case
+            # it is not necessary to get all the attributes
         else:
             display_attributes = list(set(attributes + filterattributes))
         for display in display_attributes:
