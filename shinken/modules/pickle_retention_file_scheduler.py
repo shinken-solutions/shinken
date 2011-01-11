@@ -209,7 +209,7 @@ class Pickle_retention_scheduler:
                     c.ref = s
                     sched.add(c)
                 if s.acknowledgement != None:
-                    h.acknowledgement.ref = h
+                    s.acknowledgement.ref = s
 
 
         log_mgr.log("[PickleRetention] OK we've load data from retention file")

@@ -66,25 +66,49 @@ class Comment:
         return "Comment id=%d %s" % (self.id, self.comment)
 
 
-    #Call by picle for dataify the coment
+    #Call by picle for dataify the ackn
     #because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
-#        print "Asking a getstate for a comment on", self.ref.get_dbg_name()
         cls = self.__class__
-        #id is not in *_properties
-        res = [self.id]
+        # id is not in *_properties
+        res = {'id' : self.id}
         for prop in cls.properties:
-            res.append(getattr(self, prop))
-        #We reverse because we want to recreate
-        #By check at properties in the same order
-        res.reverse()
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
         return res
 
 
     #Inversed funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
+        
+        # Maybe it's not a dict but a list like in the old 0.4 format
+        # so we should call the 0.4 function for it
+        if isinstance(state, list):
+            self.__setstate_deprecated__(state)
+            return 
+            
+        self.id = state['id']
+        for prop in cls.properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
+
+
+    # Theses 2 functions are DEPRECATED and will be removed in a future version of
+    # Shinken. They should not be useful any more after a first load/save pass.
+
+    #Inversed funtion of getstate
+    def __setstate_deprecated__(self, state):
+        cls = self.__class__
+        #Check if the len of this state is like the previous,
+        # if not, we will do errors!
+        # -1 because of the 'id' prop
+        if len(cls.properties) != (len(state) - 1):
+            print "Passing comment"
+            return
+        
         self.id = state.pop()
         for prop in cls.properties:
             val = state.pop()
             setattr(self, prop, val)
+
