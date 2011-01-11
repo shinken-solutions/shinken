@@ -103,7 +103,7 @@ class Pickle_retention_scheduler:
 
             #s = cPickle.dumps(all_data)
             #s_compress = zlib.compress(s)
-            cPickle.dump(all_data, f)
+            cPickle.dump(all_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
             #f.write(s_compress)
             f.close()
             # Now move the .tmp fiel to the real path
