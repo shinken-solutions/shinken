@@ -72,7 +72,7 @@ class Pickle_retention_scheduler:
             #Just put hosts/services becauses checks and notifications
             #are already link into
             #all_data = {'hosts' : sched.hosts, 'services' : sched.services}
-
+            
             # We create a all_data dict with lsit of dict of retention useful
             # data of our hosts and services
             all_data = {'hosts' : {}, 'services' : {}}
@@ -83,12 +83,9 @@ class Pickle_retention_scheduler:
                     entry = running_properties[prop]
                     if entry.retention:
                         d[prop] = getattr(h, prop)
-#                        if prop == 'notifications_in_progress':
-#                            v = getattr(h, prop)
-#                            if v != {}:
-#                                print "DUMP", getattr(h, prop)
-#                                for n in v.values():
-#                                    print n.__dict__
+                #f2 = open('/tmp/moncul2/'+h.host_name, 'wb')
+                #cPickle.dump(d, f2)
+                #f2.close()
                 all_data['hosts'][h.host_name] = d
 
             #Now same for services
@@ -99,6 +96,9 @@ class Pickle_retention_scheduler:
                     entry = running_properties[prop]
                     if entry.retention:
                         d[prop] = getattr(s, prop)
+                #f2 = open('/tmp/moncul2/'+s.host_name+'__'+s.service_description, 'wb')
+                #cPickle.dump(d, f2)
+                #f2.close()
                 all_data['services'][(s.host.host_name, s.service_description)] = d
 
             #s = cPickle.dumps(all_data)
@@ -178,6 +178,8 @@ class Pickle_retention_scheduler:
                 for c in h.comments:
                     c.ref = h
                     sched.add(c)
+                if h.acknowledgement != None:
+                    h.acknowledgement.ref = h
 
 
         ret_services = all_data['services']
@@ -206,6 +208,9 @@ class Pickle_retention_scheduler:
                 for c in s.comments:
                     c.ref = s
                     sched.add(c)
+                if s.acknowledgement != None:
+                    h.acknowledgement.ref = h
+
 
         log_mgr.log("[PickleRetention] OK we've load data from retention file")
 

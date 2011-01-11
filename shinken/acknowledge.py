@@ -26,6 +26,17 @@ servicestate) are disabled.
 class Acknowledge:
     id = 0
 
+    #Just to list the properties we will send as pickle
+    #so to others daemons, so all but NOT REF
+    properties = {
+        'id' : None,
+        'sticky' : None,
+        'notify' : None,
+        'author' : None,
+        'comment' : None,
+        }
+
+
     # If the "sticky" option is set to one (1), the acknowledgement
     # will remain until the service returns to an OK state. Otherwise
     # the acknowledgement will automatically be removed when the
@@ -50,3 +61,27 @@ class Acknowledge:
         self.notify = notify
         self.author = author
         self.comment = comment
+
+
+    #Call by picle for dataify the ackn
+    #because we DO NOT WANT REF in this pickleisation!
+    def __getstate__(self):
+#        print "Asking a getstate for a comment on", self.ref.get_dbg_name()
+        cls = self.__class__
+        #id is not in *_properties
+        res = [self.id]
+        for prop in cls.properties:
+            res.append(getattr(self, prop))
+        #We reverse because we want to recreate
+        #By check at properties in the same order
+        res.reverse()
+        return res
+
+
+    #Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state.pop()
+        for prop in cls.properties:
+            val = state.pop()
+            setattr(self, prop, val)
