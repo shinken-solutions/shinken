@@ -61,7 +61,7 @@ class EventHandler(Action):
                 'sched_id' : IntegerProp(default=0),
                 'timeout' : IntegerProp(default=10),
                 'check_time' : IntegerProp(default=0),
-
+                'command' : StringProp(default=''),
                 }
 
     #id = 0 #Is common to Actions
