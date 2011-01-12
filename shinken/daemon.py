@@ -27,10 +27,7 @@ if os.name != 'nt':
 
 ##########################   DAEMON PART    ###############################
 # The standard I/O file descriptors are redirected to /dev/null by default.
-if (hasattr(os, "devnull")):
-    REDIRECT_TO = os.devnull
-else:
-    REDIRECT_TO = "/dev/null"
+REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
 UMASK = 0
 VERSION = "0.4"

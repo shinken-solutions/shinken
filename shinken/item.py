@@ -187,10 +187,10 @@ class Item(object):
             if value == 'null':
                 delattr(self, prop)
                 return None
-            #Manage the additive inheritance for the property,
-            #if property is in plus, add or replace it
+            # Manage the additive inheritance for the property,
+            # if property is in plus, add or replace it
             if self.has_plus(prop):
-                value = value+','+self.get_plus_and_delete(prop)
+                value += ',' + self.get_plus_and_delete(prop)
             return value
         #Ok, I do not have prop, Maybe my templates do?
         #Same story for plus
@@ -198,7 +198,7 @@ class Item(object):
             value = i.get_property_by_inheritance(items, prop)
             if value is not None:
                 if self.has_plus(prop):
-                    value = value+','+self.get_plus_and_delete(prop)
+                    value += ','+self.get_plus_and_delete(prop)
                 setattr(self, prop, value)
                 return value
         #I do not have prop, my templates too... Maybe a plus?
@@ -391,21 +391,13 @@ class Item(object):
     #Get the property for an object, with good value
     #and brok_transformation if need
     def get_property_value_for_brok(self, prop, tab):
-        pre_op = None
         entry = tab[prop]
-
-        # Look if we must preprocess the value first
-        if entry.brok_transformation is not None:
-            pre_op = entry.brok_transformation
-
-        value = None
         #Get the current value, or the default if need
-        if hasattr(self, prop):
-            value = getattr(self, prop)
-        elif entry.default:
-            value = entry.default
+        value = getattr(self, prop, entry.default)
 
         #Apply brok_transformation if need
+        # Look if we must preprocess the value first
+        pre_op = entry.brok_transformation
         if pre_op != None:
             value = pre_op(self, value)
 

@@ -26,6 +26,17 @@ servicestate) are disabled.
 class Acknowledge:
     id = 0
 
+    #Just to list the properties we will send as pickle
+    #so to others daemons, so all but NOT REF
+    properties = {
+        'id' : None,
+        'sticky' : None,
+        'notify' : None,
+        'author' : None,
+        'comment' : None,
+        }
+
+
     # If the "sticky" option is set to one (1), the acknowledgement
     # will remain until the service returns to an OK state. Otherwise
     # the acknowledgement will automatically be removed when the
@@ -50,3 +61,24 @@ class Acknowledge:
         self.notify = notify
         self.author = author
         self.comment = comment
+
+
+    #Call by picle for dataify the ackn
+    #because we DO NOT WANT REF in this pickleisation!
+    def __getstate__(self):
+        cls = self.__class__
+        # id is not in *_properties
+        res = {'id' : self.id}
+        for prop in cls.properties:
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+        return res
+
+
+    #Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state['id']
+        for prop in cls.properties:
+            if prop in state:
+                setattr(self, prop, state[prop])

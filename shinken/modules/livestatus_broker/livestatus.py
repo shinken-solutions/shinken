@@ -382,6 +382,11 @@ class LiveStatus:
                 'description' : 'Wether flap detection is enabled (0/1)',
                 'type' : 'int',
             },
+            'got_business_rule' : {
+                'depythonize' : from_bool_to_int,
+                'description' : 'Wether the host state is an business rule based host or not (0/1)',
+                'type' : 'int',
+            },
             'groups' : {
                 'default' : '',
                 'depythonize' : to_split,
@@ -861,6 +866,11 @@ class LiveStatus:
             'flap_detection_enabled' : {
                 'depythonize' : from_bool_to_int,
                 'description' : 'Wether flap detection is enabled for the service (0/1)',
+                'type' : 'int',
+            },
+            'got_business_rule' : {
+                'depythonize' : from_bool_to_int,
+                'description' : 'Wether the service state is an business rule based host or not (0/1)',
                 'type' : 'int',
             },
             'groups' : {

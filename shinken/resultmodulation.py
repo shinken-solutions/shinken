@@ -72,20 +72,13 @@ class Resultmodulation(Item):
         super(self.__class__, self).pythonize()
 
         #Then very special cases
-        if hasattr(self, 'exit_codes_match'):
-            ecm = []
-            for ec in self.exit_codes_match:
-                ecm.append(int(ec))
-            self.exit_codes_match = ecm
-        else:
-            self.exit_codes_match = []
+        # Intify the exit_codes_match, and make list
+        self.exit_codes_match = [ int(ec) for ec in getattr(self, 'exit_codes_match', []) ]
 
         if hasattr(self, 'exit_code_modulation'):
             self.exit_code_modulation = int(self.exit_code_modulation)
         else:
             self.exit_code_modulation = None
-
-
 
 
 class Resultmodulations(Items):

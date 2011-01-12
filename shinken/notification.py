@@ -90,8 +90,9 @@ class Notification(Action):
         'is_a' : StringProp(default=''),
         'command' : StringProp(default=''),
         'host_name' : StringProp(default=''),
-
-
+        'sched_id' : IntegerProp(default=0),
+        'timeout' : IntegerProp(default=10),
+        'check_time' : IntegerProp(default=0),
         }
 
     macros = {
@@ -246,22 +247,20 @@ class Notification(Action):
     #Call by picle for dataify the coment
     #because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
-#        print "Asking a getstate for a notification on", self.ref.get_dbg_name()
         cls = self.__class__
-        #id is not in *_properties
-        res = [self.id]
+        # id is not in *_properties
+        res = {'id' : self.id}
         for prop in cls.properties:
-            res.append(getattr(self, prop))
-        #We reverse because we want to recreate
-        #By check at properties in the same order
-        res.reverse()
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+
         return res
 
 
-    #Inversed funtion of getstate
+    # Inversed funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
-        self.id = state.pop()
+        self.id = state['id']
         for prop in cls.properties:
-            val = state.pop()
-            setattr(self, prop, val)
+            if prop in state:
+                setattr(self, prop, state[prop])

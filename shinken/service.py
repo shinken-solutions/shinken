@@ -220,7 +220,7 @@ class Service(SchedulingItem):
 
         #BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
-        'got_business_rule' : BoolProp(default=False),
+        'got_business_rule' : BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule' : StringProp(default=None),
 
@@ -350,9 +350,9 @@ class Service(SchedulingItem):
         state = True # guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['contacts', 'contact_groups', 'check_period', \
-                                  'notification_interval', 'host_name', \
-                                  'hostgroup_name']
+        special_properties = ( 'contacts', 'contact_groups', 'check_period',
+                                  'notification_interval', 'host_name',
+                                  'hostgroup_name' )
         for prop in cls.properties:
             if prop not in special_properties:
                 if not hasattr(self, prop) and cls.properties[prop].required:
@@ -1013,9 +1013,9 @@ class Services(Items):
     # contact_groups, notification_interval , notification_period
     # So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
-        for prop in ['contacts', 'contact_groups', 'notification_interval', \
-                         'notification_period', 'resultmodulations', 'escalations', \
-                         'poller_tag', 'check_period', 'criticity']:
+        for prop in ( 'contacts', 'contact_groups', 'notification_interval',
+                         'notification_period', 'resultmodulations', 'escalations',
+                         'poller_tag', 'check_period', 'criticity' ):
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):
@@ -1062,26 +1062,27 @@ class Services(Items):
             for n in hosts_from_tpl:
                 for_hosts_to_create.append(n)
 
-        # Now really create the services
-
-        for name in for_hosts_to_create:
-            if not hasattr(s, 'duplicate_foreach') or s.duplicate_foreach == '':
+        if getattr(s, 'duplicate_foreach', '') == '':
+            def _loop(name):
                 new_s = s.copy()
                 new_s.host_name = name
                 if s.is_tpl(): #  if template, the new one is not
                     new_s.register = 1
                 self.items[new_s.id] = new_s
-            else: # the generator case, we must create several new services
+        else:
+            def _loop(name):
+                # the generator case, we must create several new services
                 # we must find our host, and get all key:value we need
-
                 h = hosts.find_by_name(name.strip())
                 if h != None:
                     for new_s in s.duplicate(h):
                         self.items[new_s.id] = new_s
-
                 else: # TODO : raise an error?
                     pass
 
+        # Now really create the services
+        for name in for_hosts_to_create:
+            _loop(name)
 
     # We create new service if necessery (host groups and co)
     def explode(self, hosts, hostgroups, contactgroups,

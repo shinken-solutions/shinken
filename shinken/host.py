@@ -523,7 +523,7 @@ class Host(SchedulingItem):
 
         #BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
-        'got_business_rule' : BoolProp(default=False),
+        'got_business_rule' : BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule' : StringProp(default=None),
         }
@@ -654,7 +654,8 @@ class Host(SchedulingItem):
         if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups') and self.notifications_enabled == True:
             logger.log("%s : I do not have contacts nor contact_groups" % self.get_name())
             state = False
-        if not hasattr(self, 'check_command') or self.check_command == None:
+        
+        if getattr(self, 'check_command', None) is None:
             logger.log("%s : I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
@@ -662,14 +663,19 @@ class Host(SchedulingItem):
             if not self.check_command.is_valid():
                 logger.log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
+        
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
             logger.log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
+
         # If active check is enabled with a check_interval!=0, we must have a check_period
-        if (hasattr(self, 'active_checks_enabled') and self.active_checks_enabled) and (not hasattr(self, 'check_period') or self.check_period == None) and (hasattr(self, 'check_interval') and self.check_interval!=0):
+        if ( getattr(self, 'active_checks_enabled', False) 
+             and getattr(self, 'check_period', None) is None 
+             and getattr(self, 'check_interval', 1) != 0 ):
             logger.log("%s : My check_period is not correct" % self.get_name())
             state = False
-        if not hasattr(self, 'realm') or self.realm == None:
+        
+        if getattr(self, 'realm', None) is None:
             logger.log("%s : My realm is not correct" % self.get_name())
             state = False
         if not hasattr(self, 'check_period'):
@@ -1190,7 +1196,7 @@ class Hosts(Items):
     def linkify_h_by_realms(self, realms):
         default_realm = None
         for r in realms:
-            if hasattr(r, 'default') and r.default:
+            if getattr(r, 'default', False):
                 default_realm = r
         if default_realm == None:
             print "Error : there is no default realm defined!"

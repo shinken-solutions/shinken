@@ -60,8 +60,8 @@ class SatelliteLink(Item):
                 if not hasattr(self, prop) and cls.properties[prop]['required']:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
-        #Ok now we manage special cases...
-        if not hasattr(self, 'realm') or  hasattr(self, 'realm') and self.realm == None:
+        # Ok now we manage special cases...
+        if getattr(self, 'realm', None) is None: 
             print self.get_name()," : I do not have a valid realm"
             state = False
         return state
