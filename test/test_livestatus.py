@@ -313,7 +313,7 @@ class TestConfigSmall(TestConfig):
         request = """GET hosts
 Columns: childs
 Filter: name = test_host_0
-OutputFormat:csv
+OutputFormat: csv
 KeepAlive: on
 ResponseHeader: fixed16
 """
@@ -327,7 +327,7 @@ ResponseHeader: fixed16
         request = """GET hosts
 Columns: childs
 Filter: name = test_router_0
-OutputFormat:csv
+OutputFormat: csv
 KeepAlive: on
 ResponseHeader: fixed16
 """
@@ -2290,7 +2290,7 @@ ResponseHeader: fixed16
         request = """GET hosts
 Columns: childs
 Filter: name = test_host_0
-OutputFormat:csv
+OutputFormat: csv
 KeepAlive: on
 ResponseHeader: fixed16
 """
@@ -2304,7 +2304,7 @@ ResponseHeader: fixed16
         request = """GET hosts
 Columns: childs
 Filter: name = test_router_0
-OutputFormat:csv
+OutputFormat: csv
 KeepAlive: on
 ResponseHeader: fixed16
 """
@@ -2315,6 +2315,60 @@ ResponseHeader: fixed16
             print "nagresponse----------------------------------------------"
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
+
+
+
+class TestConfigComplex(TestConfig):
+    def setUp(self):
+        self.setup_with_file('etc/nagios_problem_impact.cfg')
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', 'tmp/livelogs.db' + str(os.getpid()), 'tmp/pnp4nagios_test' + str(os.getpid()))
+        self.livestatus_broker.properties = {
+            'to_queue' : 0,
+            'from_queue' : 0
+
+            }
+        self.livestatus_broker.init()
+        print "Cleaning old broks?"
+        self.sched.fill_initial_broks()
+        self.update_broker()
+        self.nagios_path = None
+        self.livestatus_path = None
+        self.nagios_config = None
+
+
+    def tearDown(self):
+        self.stop_nagios()
+        self.livestatus_broker.dbconn.close()
+        if os.path.exists('tmp/livelogs.db' + str(os.getpid())):
+            os.remove('tmp/livelogs.db' + str(os.getpid()))
+        if os.path.exists('tmp/pnp4nagios_test' + str(os.getpid())):
+            shutil.rmtree('tmp/pnp4nagios_test' + str(os.getpid()))
+
+
+    #  test_host_0  has parents test_router_0,test_router_1
+    def test_thruk_parents(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hosts
+Columns: host_name parents childs
+OutputFormat: csv
+"""
+        good_response = """test_router_0;;test_host_0,test_host_1
+test_router_1;;test_host_0,test_host_1
+test_host_0;test_router_0,test_router_1;
+test_host_1;test_router_0,test_router_1;
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(self.lines_equal(response, good_response))
+
 
 
 if __name__ == '__main__':

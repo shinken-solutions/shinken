@@ -316,8 +316,6 @@ class LiveStatus:
                 'type' : 'int',
             },
             'childs' : {
-                #'depythonize' : lambda x: ','.join(x),
-                #'depythonize' : lambda x: [y.get_name() for y in x],
                 'description' : 'A list of all direct childs of the host',
                 'type' : 'list',
             },
@@ -619,7 +617,6 @@ class LiveStatus:
                 'type' : 'int',
             },
             'parents' : {
-                'depythonize' : lambda x: ','.join(x),
                 'description' : 'A list of all direct parents of the host',
                 'type' : 'list',
             },
