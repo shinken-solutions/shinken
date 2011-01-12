@@ -114,8 +114,6 @@ class Pickle_retention_scheduler:
         log_mgr.log("Updating retention_file %s" % self.path)
 
 
-
-
     #Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mgr):
         print "[PickleRetention] asking me to load the retention objects"
