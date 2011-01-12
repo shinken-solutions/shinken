@@ -30,7 +30,9 @@
 
 import time
 import sys
-import sys, os
+import sys
+import os
+import stat
 import getopt
 import traceback
 
@@ -673,6 +675,15 @@ class Broker(Satellite):
 
     #Main function, will loop forever
     def main(self):
+        # First check the /dev/shm
+        # on linux host for write access
+        if os.name == 'posix' and os.path.exists('/dev/shm'):
+            # We get the access rights, and we check them
+            mode = stat.S_IMODE(os.lstat('/dev/shm')[stat.ST_MODE])
+            if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
+                logger.log("The directory /dev/shm is not writable or readable. Please launch as root chmod 777 /dev/shm")
+                sys.exit(2)
+
         logger.log("[Broker] Using working directory : %s" % os.path.abspath(self.workdir))
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_MULTITHREADED = 0

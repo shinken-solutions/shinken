@@ -32,12 +32,14 @@
 from Queue import Empty
 from multiprocessing import Queue, Manager, active_children
 import os
+import stat
 import copy
 import time
 import sys
 import select
 import cPickle
 import random
+
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -592,6 +594,17 @@ class Satellite(Daemon):
 
     #Main function, will loop forever
     def main(self):
+        
+        # First check the /dev/shm
+        # on linux host for write access
+        if os.name == 'posix' and os.path.exists('/dev/shm'):
+            # We get the access rights, and we check them
+            mode = stat.S_IMODE(os.lstat('/dev/shm')[stat.ST_MODE])
+            if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
+                logger.log("The directory /dev/shm is not writable or readable. Please launch as root chmod 777 /dev/shm")
+                sys.exit(2)
+        
+
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0
         Pyro.config.PYRO_STORAGE = self.workdir
