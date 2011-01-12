@@ -1332,7 +1332,7 @@ localhost;1;broker-1;7772;0
 othernode;1;broker-2;7772;1
 """
         print response == good_response
-        self.assert_(response == good_response)
+        self.assert_(self.lines_equal(response, good_response))
 
         #Now the update part
         pol.alive = False
@@ -1351,7 +1351,7 @@ localhost;1;broker-1;7772;0
 othernode;0;broker-2;7772;1
 """
         print response == good_response
-        self.assert_(response == good_response)
+        self.assert_(self.lines_equal(response, good_response))
 
 
 
