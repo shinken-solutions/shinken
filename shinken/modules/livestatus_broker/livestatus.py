@@ -59,12 +59,20 @@ LOGOBJECT_CONTACT     = 3
 
 #Another for hosts. We must have the same function for hosts and service in
 #problem's source. So must define such a function for hosts too
-def get_common_full_name(prop, ref, request):
+def get_livestatus_full_name(prop, ref, request):
     cls_name = prop.__class__.my_type
-    if cls_name == 'service':
-        return prop.host_name + request.response.separators[3] + prop.service_description
-    else:
-        return prop.host_name
+    if request.response.outputformat == 'csv':
+        if cls_name == 'service':
+            return prop.host_name + request.response.separators[3] + prop.service_description
+        else:
+            return prop.host_name
+    elif request.response.outputformat == 'json' or request.response.outputformat == 'python':
+        if cls_name == 'service':
+            return [prop.host_name, prop.service_description]
+        else:
+            return prop.host_name
+        pass
+
 
 
 #It's a dict with 2 entries : hosts a,d services. Will return a list with just
@@ -239,6 +247,13 @@ except AttributeError:
 
 
 class LiveStatus:
+    # description (optional): no need to explain this
+    # prop (optional): the property of the object. If this is missing, the key is the property
+    # type (mandatory): int, float, string, list
+    # depythonize : use it if the property needs to be post-processed. 
+    # fulldepythonize : the same, but the postprocessor takes three arguments. property, object, request
+    # delegate : get the property of a different object
+    # as : use it together with delegate, if the property of the other object has another name
     out_map = {
         'Host' : {
             'accept_passive_checks' : {
@@ -1662,7 +1677,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'members' : {
-                'depythonize' : 'get_full_name',
+                'fulldepythonize' : get_livestatus_full_name,
                 'description' : 'A list of all members of the service group as host/service pairs ',
                 'type' : 'list',
             },
@@ -2033,7 +2048,7 @@ class LiveStatus:
                 'description' : 'The source name of the problem (host or service)',
                 'prop' : 'source',
                 'type' : 'string',
-                'fulldepythonize' : get_common_full_name
+                'fulldepythonize' : get_livestatus_full_name
             },
             'impacts' : {
                 'description' : 'List of what the source impact (list of hosts and services)',
@@ -5353,13 +5368,14 @@ class LiveStatus:
         request = LiveStatusRequest(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue)
         request.parse_input(data)
         print "REQUEST\n%s\n" % data
-        print request
+        #print request
         result = request.launch_query()
         # Now bring the retrieved information to a form which can be sent back to the client
         response = request.response
         response.format_live_data(result, request.columns, request.aliases)
         output, keepalive = response.respond()
         print "RESPONSE\n%s\n" % output
+        print "DURATION %.4fs" % (time.time() - request.tic)
         return output, keepalive
 
 
@@ -5371,12 +5387,12 @@ class LiveStatus:
 
 
         def hook_get_prop_depythonize(elt):
-            if hasattr(elt, prop):
+            try:
                 attr = getattr(elt, prop)
                 if callable(attr):
                     attr = attr()
                 return func(attr)
-            else:
+            except:
                 return default
 
 
@@ -5392,7 +5408,7 @@ class LiveStatus:
                         + [getattr(item, func) for item in value if not callable(getattr(item, func)) ]
                     return value
                 else:
-                    f = getattr(getattr(elt, prop), func)
+                    f = getattr(value, func)
                     if callable(f):
                         return f()
                     else:
@@ -5402,12 +5418,17 @@ class LiveStatus:
 
 
         def hook_get_prop_full_depythonize(elt):
-            if hasattr(elt, prop):
-                attr = getattr(elt, prop)
-                if callable(attr):
-                    attr = attr()
-                return func(attr, elt, self)
-            else:
+            try:
+                value = getattr(elt, prop)
+                if callable(value):
+                    value = value()
+                if value == None or value == 'none':
+                    raise
+                elif isinstance(value, list):
+                    return [func(item, elt, self) for item in value]
+                else:
+                    return func(value, elt, self)
+            except:
                 return default
 
 

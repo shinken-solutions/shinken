@@ -2317,6 +2317,38 @@ ResponseHeader: fixed16
             self.assert_(self.lines_equal(response, nagresponse))
 
 
+    def test_thruk_servicegroup(self):
+        self.print_header()
+        now = time.time()
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get services of a certain servicegroup
+        # test_host_0/test_ok_0 is in 
+        #   servicegroup_01,ok via service.servicegroups
+        #   servicegroup_02 via servicegroup.members
+        #---------------------------------------------------------------
+        request = """GET services
+Columns: host_name service_description
+Filter: groups >= servicegroup_01
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        # 400 services => 400 lines + header + empty last line
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(len(response.split("\n")) == 402)
+
+        request = """GET servicegroups
+Columns: name members
+Filter: name = servicegroup_01
+OutputFormat: csv
+"""
+        # 400 services => 400 lines
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        # take first line, take members column, count list elements = 400 services
+        self.assert_(len(((response.split("\n")[0]).split(';')[1]).split(',')) == 400)
+
 
 class TestConfigComplex(TestConfig):
     def setUp(self):
