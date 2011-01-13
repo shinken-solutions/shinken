@@ -51,6 +51,7 @@ class Check(Action):
 
     #id = 0 #Is common to Actions
     def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag=None, env={}):
+
         self.is_a = 'check'
         self.type = ''
         if id == None: #id != None is for copy call only
@@ -87,12 +88,7 @@ class Check(Action):
     #So we remove the ref and all
     def copy_shell(self):
         #We create a dummy check with nothing in it, jsut defaults values
-        new_c = Check('', '', '', '', '', id=self.id)
-        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout', 'env']
-        for prop in only_copy_prop:
-            val = getattr(self, prop)
-            setattr(new_c, prop, val)
-        return new_c
+        return self.copy_shell__( Check('', '', '', '', '', id=self.id) )
 
 
     def get_return_from(self, c):
@@ -102,76 +98,6 @@ class Check(Action):
         self.check_time = c.check_time
         self.execution_time = c.execution_time
         self.perf_data = c.perf_data
-
-
-#    def get_outputs(self, out):
-#        elts = out.split('\n')
-#        #For perf data
-#        elts_line1 = elts[0].split('|')
-#        #First line before | is output
-#        self.output = elts_line1[0]
-#        #After | is perfdata
-#        if len(elts_line1) > 1:
-#            self.perf_data = elts_line1[1]
-#        #The others lines are long_output
-#        if len(elts) > 1:
-#            self.long_output = '\n'.join(elts[1:])
-
-
-#    def execute(self):
-#        if os.name == 'nt':
-#            self.execute_windows()
-#        else:
-#            self.execute_unix()
-
-
-#    def execute_windows(self):
-#        """call shell-command and either return its output or kill it
-#        if it doesn't normally exit within timeout seconds and return None"""
-#        timeout = 5
-#        self.status = 'launched'
-#        self.check_time = time.time()
-#        start = datetime.datetime.now()
-#        try:
-#            process = subprocess.Popen(self.command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#        except WindowsError:
-#            print "On le kill"
-#            self.status = 'timeout'
-#            self.execution_time = time.time() - self.check_time
-#            return
-#        while process.poll() is None:
-#            time.sleep(0.01)
-#            now = datetime.datetime.now()
-#            if (now - start).seconds> timeout:
-#                TerminateProcess(int(process._handle), -1)
-#                print "On le kill"
-#                self.status = 'timeout'
-#                self.execution_time = time.time() - self.check_time
-#                return
-#        self.get_outputs(process.stdout.read())
-#        self.exit_status = process.returncode
-#        print "Output:", self.output, self.long_output, "exit status", self.exit_status
-#        self.status = 'done'
-#        self.execution_time = time.time() - self.check_time
-
-
-#    def execute_unix(self):
-#        #print "Launching command", self.command
-#        child = spawn ('/bin/sh -c "%s"' % self.command)
-#        self.status = 'launched'
-#        self.check_time = time.time()
-#
-#        try:
-#            child.expect_exact(EOF, timeout=5)
-#            self.get_outputs(child.before)
-#            child.terminate(force=True)
-#            self.exit_status = child.exitstatus
-#            self.status = 'done'
-#        except TIMEOUT:
-#            print "On le kill"
-#            self.status = 'timeout'
-#            child.terminate(force=True)
-#        self.execution_time = time.time() - self.check_time
 
 
     def is_launchable(self, t):

@@ -90,12 +90,7 @@ class EventHandler(Action):
     #So we remove the ref and all
     def copy_shell(self):
         #We create a dummy check with nothing in it, jsut defaults values
-        new_n = EventHandler('', id=self.id)
-        only_copy_prop = ['id', 'status', 'command', 't_to_go', 'timeout', 'env']
-        for prop in only_copy_prop:
-            val = getattr(self, prop)
-            setattr(new_n, prop, val)
-        return new_n
+        return self.copy_shell__( EventHandler('', id=self.id) )
 
 
     def get_return_from(self, e):
@@ -119,25 +114,6 @@ class EventHandler(Action):
         #The others lines are long_output
         if len(elts) > 1:
             self.long_output = '\n'.join(elts[1:])
-
-
-#    def execute(self):
-#        print "Launching EVENT HANDLER command", self.command
-#        child = spawn ('/bin/sh -c "%s"' % self.command)
-#        self.status = 'launched'
-#        self.check_time = time.time()
-#
-#        try:
-#            child.expect_exact(EOF, timeout=5)
-#            self.get_outputs(child.before)
-#            child.terminate(force=True)
-#            self.exit_status = child.exitstatus
-#            self.status = 'done'
-#        except TIMEOUT:
-#            print "On le kill"
-#            self.status = 'timeout'
-#            child.terminate(force=True)
-#        self.execution_time = time.time() - self.check_time
 
 
     def is_launchable(self, t):

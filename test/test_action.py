@@ -46,7 +46,7 @@ class TestConfig(ShinkenTest):
             a.command = "./dummy_command.cmd"
         else:
             a.command = "./dummy_command.sh"
-        self.assert_(a.got_shell_caracters() == False)
+        self.assert_(a.got_shell_characters() == False)
         a.execute()
         self.assert_(a.status == 'launched')
         #Give also the max output we want for the command
@@ -66,7 +66,7 @@ class TestConfig(ShinkenTest):
             a.command = "/usr/bin/env"
         a.env = {'TITI' : 'est en vacance'}
 
-        self.assert_(a.got_shell_caracters() == False)
+        self.assert_(a.got_shell_characters() == False)
 
         a.execute()
 
@@ -91,7 +91,7 @@ class TestConfig(ShinkenTest):
         a.env = {}
         if os.name == 'nt':
             return
-        self.assert_(a.got_shell_caracters() == False)
+        self.assert_(a.got_shell_characters() == False)
         a.execute()
 
         self.assert_(a.status == 'launched')
@@ -101,7 +101,25 @@ class TestConfig(ShinkenTest):
         self.assert_(a.status == 'done')
 
 
+    def test_got_shell_characters(self):
+        a = Action()
+        a.timeout = 10
+        a.command = "./dummy_command_nobang.sh && echo finished ok"
+        a.env = {}
+        if os.name == 'nt':
+            return
+        self.assert_(a.got_shell_characters() == True)
+        a.execute()
+
+        self.assert_(a.status == 'launched')
+        self.wait_finished(a)
+        print "FUck", a.status, a.output
+        self.assert_(a.exit_status == 0)
+        self.assert_(a.status == 'done')
 
 if __name__ == '__main__':
+    import sys
+   
+    os.chdir(os.path.dirname(sys.argv[0]))
     unittest.main()
 
