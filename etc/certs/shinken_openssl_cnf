@@ -1,0 +1,91 @@
+
+# OpenSSL configuration file.
+#
+
+# Establish working directory.
+
+dir                                     = .
+
+[ ca ]
+default_ca                              = CA_default
+
+[ CA_default ]
+serial                                  = $dir/serial
+database                                = $dir/certindex.txt
+certs                                   = $dir/certs
+new_certs_dir                           = $dir/
+certificate                             = $dir/demoCA/cacert.pem
+private_key                             = $dir/demoCA/private/cakey.pem
+default_days                            = 3650
+default_md                              = sha1
+preserve                                = no
+email_in_dn                             = no
+#nameopt                                        = default_ca
+#certopt                                        = default_ca
+copy_extensions                         = none
+policy                                  = policy_match
+
+basicConstraints                        = critical, CA:true
+authorityKeyIdentifier                  = keyid:always,issuer:always
+subjectKeyIdentifier                    = hash
+keyUsage                                = critical, keyCertSign, cRLSign
+
+[ policy_match ]
+countryName                             = match
+stateOrProvinceName                     = match
+organizationName                        = match
+organizationalUnitName                  = optional
+commonName                              = supplied
+emailAddress                            = optional
+
+[ req ]
+default_bits                            = 2048                  # Size of keys
+default_keyfile                         = key.pem               # name of generated keys
+default_md                              = sha1                          # message digest algorithm
+string_mask                             = nombstr               # permitted characters
+distinguished_name                      = req_distinguished_name
+req_extensions                          = v3_req
+#x509_extensions                         = subca_req
+
+
+[ req_distinguished_name ]
+# Variable name                         Prompt string
+#-------------------------        ----------------------------------
+organizationName                        = Organisation
+
+organizationalUnitName                  = Nom de l'unite organisationnelle (department, division)
+
+emailAddress                            = Adresse e-mail
+emailAddress_max                        = 40
+
+localityName                            = Ville
+
+stateOrProvinceName                     = Region
+
+countryName                             = Pays (en 2 lettres)
+countryName_min                         = 2
+countryName_max                         = 2
+
+commonName                              = Nom du certificat (hostname, IP, ou nom)
+commonName_max                          = 64
+
+# Default values for the above, for consistency and less typing.
+# Variable name                         Value
+#------------------------         ------------------------------
+organizationName_default                = CAShinken
+organizationalUnitName_default          = MAIN
+localityName_default                    = World
+stateOrProvinceName_default             = Some-State
+countryName_default                     = FR
+
+
+[ v3_ca ]
+basicConstraints                        = CA:TRUE
+subjectKeyIdentifier                    = hash
+authorityKeyIdentifier                  = keyid:always,issuer:always
+
+[ v3_req ]
+basicConstraints                        = CA:FALSE
+subjectKeyIdentifier                    = hash
+
+

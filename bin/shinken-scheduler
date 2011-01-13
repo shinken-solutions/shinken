@@ -299,7 +299,12 @@ class Shinken(Daemon):
         'host' : {'default' : '0.0.0.0', 'pythonize' : None},
         'user' : {'default' : 'shinken', 'pythonize' : None},
         'group' : {'default' : 'shinken', 'pythonize' : None},
-        'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool}
+        'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
+        'use_ssl' : {'default' : '0', 'pythonize' : to_bool},
+        'certs_dir' : {'default' : 'etc/certs', 'pythonize' : None},
+        'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
+        'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
+        'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
         }
 
     #Create the shinken class:
@@ -341,6 +346,20 @@ class Shinken(Daemon):
         self.modulespath = os.sep.join(elts)
         print "Using modules path : %s" % os.sep.join(elts)
 
+
+        # The SSL part
+        if self.use_ssl:
+            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(self.certs_dir)
+            print "Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR
+            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(self.ca_cert)
+            print "Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT
+            Pyro.config.PYROSSL_CERT = os.path.abspath(self.server_cert)
+            print"Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT
+            if self.hard_ssl_name_check:
+                Pyro.config.PYROSSL_POSTCONNCHECK=1
+            else:
+                Pyro.config.PYROSSL_POSTCONNCHECK=0
+
         #Try to change the user (not nt for the moment)
         #TODO: change user on nt
         if os.name != 'nt':
@@ -365,7 +384,9 @@ class Shinken(Daemon):
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0
 
-        self.poller_daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port)
+        
+
+        self.poller_daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port, self.use_ssl)
 
         print "Listening on:", self.host, ":", self.port
 

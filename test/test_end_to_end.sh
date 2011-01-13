@@ -159,6 +159,7 @@ echo "Dummy install OK"
 echo "I reclean all for a real install"
 ./clean.sh
 
+
 echo "####################################################################################"
 echo "#                                                                                  #"
 echo "#                           REAL INSTALL                                           #"
@@ -180,6 +181,9 @@ is_file_present $ETC/nagios.cfg
 is_file_present $ETC/shinken-specific.cfg
 string_in_file "servicegroups.cfg" $ETC/nagios.cfg
 is_file_present /usr/bin/shinken-arbiter
+
+ps -fu shinken
+
 
 echo "Now we can test a real run guy"
 /etc/init.d/shinken-scheduler start

@@ -26,7 +26,6 @@ import sys
 import Pyro.core
 
 
-
 #Try to see if we are Python 3 or 4
 try:
     Pyro.core.ObjBase
@@ -55,17 +54,23 @@ try:
         daemon.handleRequests()
 
 
-    def init_daemon(host, port):
+    def init_daemon(host, port, use_ssl=False):
         Pyro.core.initServer()
-        daemon = Pyro.core.Daemon(host=host, port=port)
+        if use_ssl:
+            daemon = Pyro.core.Daemon(host=host, port=port, prtcol='PYROSSL')
+        else:
+            daemon = Pyro.core.Daemon(host=host, port=port)
         if daemon.port != port:
             print "Sorry, the port %d is not free" % port
             sys.exit(1)
         return daemon
 
 
-    def create_uri(address, port, obj_name):
-        return "PYROLOC://%s:%d/%s" % (address, port, obj_name)
+    def create_uri(address, port, obj_name, use_ssl):
+        if not use_ssl:
+            return "PYROLOC://%s:%d/%s" % (address, port, obj_name)
+        else:
+            return "PYROLOCSSL://%s:%d/%s" % (address, port, obj_name)
 
     #Timeout way is also changed between 3 and 4
     #it's a method in 3, a property in 4
@@ -94,7 +99,7 @@ except AttributeError:
 
 
     def register(daemon, obj, name):
-        daemon.register(obj)
+        return daemon.register(obj, name)
 
 
     def unregister(daemon, obj, name):
@@ -109,7 +114,7 @@ except AttributeError:
         daemon.handleRequests([s])
 
 
-    def init_daemon(host, port):
+    def init_daemon(host, port, use_ssl=False):
         #Pyro 4 i by default thread, should do select
         #(I hate threads!)
         Pyro.config.SERVERTYPE="select"
@@ -122,7 +127,7 @@ except AttributeError:
         return daemon
 
 
-    def create_uri(address, port, obj_name):
+    def create_uri(address, port, obj_name, use_ssl=False):
         return "PYRO:%s@%s:%d" % (obj_name, address, port)
 
 
