@@ -73,7 +73,7 @@ class SatelliteLink(Item):
         pyro.set_timeout(self.con, self.timeout)
 
 
-    def put_conf(self, conf, use_ssl):
+    def put_conf(self, conf):
 
         if self.con == None:
             self.create_connexion()
@@ -150,7 +150,7 @@ class SatelliteLink(Item):
             self.set_dead()
 
 
-    def ping(self, use_ssl):
+    def ping(self):
         print "Pinging %s" % self.get_name()
         try:
             if self.con == None:
@@ -174,7 +174,7 @@ class SatelliteLink(Item):
             self.add_failed_check_attempt()
 
 
-    def wait_new_conf(self, use_ssl):
+    def wait_new_conf(self):
         if self.con == None:
             self.create_connexion()
         try:
@@ -194,7 +194,7 @@ class SatelliteLink(Item):
 
     #To know if the satellite have a conf (magic_hash = None)
     #OR to know if the satellite have THIS conf (magic_hash != None)
-    def have_conf(self, use_ssl, magic_hash=None):
+    def have_conf(self,  magic_hash=None):
         if self.con == None:
             self.create_connexion()
 
@@ -215,7 +215,7 @@ class SatelliteLink(Item):
 
 
 
-    def remove_from_conf(self, sched_id, use_ssl):
+    def remove_from_conf(self, sched_id):
         if self.con == None:
             self.create_connexion()
         try:
@@ -232,7 +232,7 @@ class SatelliteLink(Item):
             return False
 
 
-    def what_i_managed(self, use_ssl):
+    def what_i_managed(self):
         if self.con == None:
             self.create_connexion()
         try:
@@ -253,7 +253,7 @@ class SatelliteLink(Item):
             return []
 
 
-    def push_broks(self, broks, use_ssl):
+    def push_broks(self, broks):
         if self.con == None:
             self.create_connexion()
         try:
@@ -273,7 +273,7 @@ class SatelliteLink(Item):
 
 
 
-    def get_external_commands(self, use_ssl):
+    def get_external_commands(self):
         if self.con == None:
             self.create_connexion()
         try:

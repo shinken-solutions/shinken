@@ -223,7 +223,7 @@ class Arbiter(Daemon):
         for brk in self.conf.brokers:
             #Send only if alive of course
             if brk.manage_arbiters and brk.alive:
-                is_send = brk.push_broks(self.broks, self.conf.use_ssl)
+                is_send = brk.push_broks(self.broks)
                 if is_send:
                     #They are gone, we keep none!
                     self.broks = {}
@@ -234,7 +234,7 @@ class Arbiter(Daemon):
         for brk in self.conf.brokers:
             #Get only if alive of course
             if brk.alive:
-                new_cmds = brk.get_external_commands(self.conf.use_ssl)
+                new_cmds = brk.get_external_commands()
                 for new_cmd in new_cmds:
                     self.external_commands.append(new_cmd)
 
@@ -697,7 +697,7 @@ class Arbiter(Daemon):
                 self.me = arb
 
         logger.log("Begin to dispatch configurations to satellites")
-        self.dispatcher = Dispatcher(self.conf, self.me, self.conf.use_ssl)
+        self.dispatcher = Dispatcher(self.conf, self.me)
         self.dispatcher.check_alive()
         self.dispatcher.check_dispatch()
         #REF: doc/shinken-conf-dispatching.png (3)

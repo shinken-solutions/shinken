@@ -33,11 +33,10 @@ from shinken.log import logger
 class Dispatcher:
     #Load all elements, set them no assigned
     #and add them to elements, so loop will be easier :)
-    def __init__(self, conf, arbiter, use_ssl):
+    def __init__(self, conf, arbiter):
         self.arbiter = arbiter
         #Pointer to the whole conf
         self.conf = conf
-        self.use_ssl = use_ssl
         self.realms = conf.realms
         #Direct pointer to importants elements for us
         self.arbiters = self.conf.arbiterlinks
@@ -89,7 +88,7 @@ class Dispatcher:
     #checks alive elements
     def check_alive(self):
         for elt in self.elements:
-            elt.ping(self.use_ssl)
+            elt.ping()
             #print "Element", elt.get_name(), " alive:", elt.alive, "
 
             #Not alive need new need_conf
@@ -101,7 +100,7 @@ class Dispatcher:
         for arb in self.arbiters:
             #If not me...
             if arb != self.arbiter:
-                arb.ping(self.use_ssl)
+                arb.ping()
                 #print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
 
 
@@ -113,8 +112,8 @@ class Dispatcher:
         for arb in self.arbiters:
             #If not me...
             if arb != self.arbiter:
-                if not arb.have_conf(self.conf.magic_hash, self.use_ssl):
-                    arb.put_conf(self.conf, self.use_ssl)
+                if not arb.have_conf(self.conf.magic_hash):
+                    arb.put_conf(self.conf)
                 else:
                     #Ok, he already have the conf. I remember him that
                     #he do not have to run, I'm stil alive!
@@ -166,12 +165,12 @@ class Dispatcher:
                             #but ot doesn't. I ask a full redispatch of these cfg for both cases
                             #DBG:
                             try :
-                                satellite.reachable and cfg_id not in satellite.what_i_managed(self.use_ssl)
+                                satellite.reachable and cfg_id not in satellite.what_i_managed()
                             except TypeError, exp:
                                 print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
                                 satellite.reachable = False
 
-                            if not satellite.alive or (satellite.reachable and cfg_id not in satellite.what_i_managed(self.use_ssl)):
+                            if not satellite.alive or (satellite.reachable and cfg_id not in satellite.what_i_managed()):
                                 logger.log('[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False #so we will redispatch all
                                 r.to_satellites_nb_assigned[kind][cfg_id] = 0
@@ -196,10 +195,10 @@ class Dispatcher:
                 #If die : I do not ask it something, it won't respond..
                 if elt.conf == None and elt.reachable:
                     #print "Ask", elt.get_name() , 'if it got conf'
-                    if elt.have_conf(self.use_ssl):
+                    if elt.have_conf():
                         logger.log('Warning : The element %s have a conf and should not have one! I ask it to idle now' % elt.get_name())
                         elt.active = False
-                        elt.wait_new_conf(self.use_ssl)
+                        elt.wait_new_conf()
                         #I do not care about order not send or not. If not,
                         #The next loop wil resent it
                     #else:
@@ -210,7 +209,7 @@ class Dispatcher:
         for satellite in self.satellites:
             kind = satellite.get_my_type()
             if satellite.reachable:
-                cfg_ids = satellite.what_i_managed(self.use_ssl)
+                cfg_ids = satellite.what_i_managed()
                 #I do nto care about satellites that do nothing, it already
                 #do what I want :)
                 if len(cfg_ids) != 0:
@@ -229,11 +228,11 @@ class Dispatcher:
                     if len(id_to_delete) == len(cfg_ids):
                         satellite.active = False
                         logger.log("I ask %s to wait a new conf" % satellite.get_name())
-                        satellite.wait_new_conf(self.use_ssl)
+                        satellite.wait_new_conf()
                     else:#It is not fully idle, just less cfg
                         for id in id_to_delete:
                             logger.log("I ask to remove configuration N%d from %s" %(cfg_id, satellite.get_name()))
-                            satellite.remove_from_conf(cfg_id, self.use_ssl)
+                            satellite.remove_from_conf(cfg_id)
 
 
     #Make a ORDERED list of schedulers so we can
@@ -316,7 +315,7 @@ class Dispatcher:
                                 #REF: doc/shinken-scheduler-lost.png (2)
                                 override_conf = sched.get_override_configuration()
                                 conf_package = (conf, override_conf, sched.modules)
-                                is_sent = sched.put_conf(conf_package, self.use_ssl)
+                                is_sent = sched.put_conf(conf_package)
                                 if is_sent:
                                     logger.log('[%s] Dispatch OK of for conf in scheduler %s' % (r.get_name(), sched.get_name()))
                                     sched.conf = conf
@@ -405,7 +404,7 @@ class Dispatcher:
                                     if kind == "broker":
                                         r.fill_broker_with_poller_reactionner_links(satellite)
                                     #cfg_for_satellite['modules'] = satellite.modules
-                                    is_sent = satellite.put_conf(satellite.cfg, self.use_ssl)#_for_satellite)
+                                    is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
                                     if is_sent:
                                         satellite.active = True
                                         logger.log('[%s] Dispatch OK of for configuration %s to %s %s' %(r.get_name(), cfg_id, kind, satellite.get_name()))
