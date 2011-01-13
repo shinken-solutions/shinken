@@ -424,7 +424,16 @@ class Config(Item):
 
         # More a running value in fact
         'resource_macros_names': StringProp(
-            default=[])
+            default=[]),
+
+        # SSL PART
+        # global boolean for know if we use ssl or not
+        'use_ssl' : BoolProp(default='0'),
+        'certs_dir' : StringProp(default='etc/certs'),
+        'ca_cert' : StringProp(default='etc/certs/ca.pem'),
+        'server_cert' : StringProp(default='etc/certs/server.pem'),
+        'hard_ssl_name_check' : BoolProp(default='0'),
+
     }
 
     macros = {

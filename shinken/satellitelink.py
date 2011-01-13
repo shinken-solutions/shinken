@@ -67,19 +67,25 @@ class SatelliteLink(Item):
         return state
 
 
-    def create_connexion(self):
-        self.uri = pyro.create_uri(self.address, self.port, "ForArbiter")
+    def create_connexion(self, use_ssl):
+        self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", use_ssl)
         self.con = pyro.getProxy(self.uri)
         pyro.set_timeout(self.con, self.timeout)
 
 
-    def put_conf(self, conf):
+    def put_conf(self, conf, use_ssl):
+
         if self.con == None:
-            self.create_connexion()
+            self.create_connexion(use_ssl)
         #print "Connexion is OK, now we put conf", conf
         #print "Try to put conf:", conf
+
         try:
             pyro.set_timeout(self.con, self.data_timeout)
+            #del conf[0].schedulerlinks
+            import cPickle
+            buf=cPickle.dumps(conf)
+            print "DBG: put conf to", self.con.__dict__
             self.con.put_conf(conf)
             pyro.set_timeout(self.con, self.timeout)
             return True
@@ -144,11 +150,11 @@ class SatelliteLink(Item):
             self.set_dead()
 
 
-    def ping(self):
+    def ping(self, use_ssl):
         print "Pinging %s" % self.get_name()
         try:
             if self.con == None:
-                self.create_connexion()
+                self.create_connexion(use_ssl)
             self.con.ping()
             self.set_alive()
         except Pyro.errors.ProtocolError , exp:
@@ -163,11 +169,14 @@ class SatelliteLink(Item):
         except Pyro.errors.DaemonError , exp:
             print exp
             self.add_failed_check_attempt()
+        except Exception, exp:
+            print exp
+            self.add_failed_check_attempt()
 
 
-    def wait_new_conf(self):
+    def wait_new_conf(self, use_ssl):
         if self.con == None:
-            self.create_connexion()
+            self.create_connexion(use_ssl)
         try:
             self.con.wait_new_conf()
             return True
@@ -177,13 +186,17 @@ class SatelliteLink(Item):
         except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
+        except Exception, exp:
+            self.con = False
+            return False
+            
 
 
     #To know if the satellite have a conf (magic_hash = None)
     #OR to know if the satellite have THIS conf (magic_hash != None)
-    def have_conf(self, magic_hash=None):
+    def have_conf(self, use_ssl, magic_hash=None):
         if self.con == None:
-            self.create_connexion()
+            self.create_connexion(use_ssl)
 
         try:
             if magic_hash == None:
@@ -196,11 +209,15 @@ class SatelliteLink(Item):
         except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
+        except Exception, exp:
+            self.con = False
+            return False
 
 
-    def remove_from_conf(self, sched_id):
+
+    def remove_from_conf(self, sched_id, use_ssl):
         if self.con == None:
-            self.create_connexion()
+            self.create_connexion(use_ssl)
         try:
             self.con.remove_from_conf(sched_id)
             return True
@@ -210,11 +227,14 @@ class SatelliteLink(Item):
         except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
+        except Exception, exp:
+            self.con = False
+            return False
 
 
-    def what_i_managed(self):
+    def what_i_managed(self, use_ssl):
         if self.con == None:
-            self.create_connexion()
+            self.create_connexion(use_ssl)
         try:
             tab = self.con.what_i_managed()
             #I don't know why, but tab can be a bool. Not good here
@@ -228,11 +248,14 @@ class SatelliteLink(Item):
         except Pyro.errors.ProtocolError , exp:
             self.con = None
             return []
+        except Exception, exp:
+            self.con = False
+            return []
 
 
-    def push_broks(self, broks):
+    def push_broks(self, broks, use_ssl):
         if self.con == None:
-            self.create_connexion()
+            self.create_connexion(use_ssl)
         try:
             return self.con.push_broks(broks)
         except Pyro.errors.URIError , exp:
@@ -244,11 +267,15 @@ class SatelliteLink(Item):
         except AttributeError , exp:
             print exp
             return False
+        except Exception, exp:
+            self.con = False
+            return False
 
 
-    def get_external_commands(self):
+
+    def get_external_commands(self, use_ssl):
         if self.con == None:
-            self.create_connexion()
+            self.create_connexion(use_ssl)
         try:
             tab = self.con.get_external_commands()
             if isinstance(tab, bool):
@@ -262,6 +289,9 @@ class SatelliteLink(Item):
             return []
         except AttributeError , exp:
             print exp
+            return []
+        except Exception, exp:
+            self.con = False
             return []
 
 
@@ -291,6 +321,37 @@ class SatelliteLink(Item):
     #Here for poller and reactionner. Scheduler have it's own function
     def give_satellite_cfg(self):
         return {'port' : self.port, 'address' : self.address, 'name' : self.get_name(), 'instance_id' : self.id, 'active' : True}
+
+
+
+    #Call by picle for dataify the downtime
+    #because we DO NOT WANT REF in this pickleisation!
+    def __getstate__(self):
+        cls = self.__class__
+        # id is not in *_properties
+        res = {'id' : self.id}
+        for prop in cls.properties:
+            if prop != 'realm':
+                if hasattr(self, prop):
+                    res[prop] = getattr(self, prop)
+        for prop in cls.running_properties:
+            if prop != 'con':
+                if hasattr(self, prop):
+                    res[prop] = getattr(self, prop)
+        return res
+
+
+    #Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        
+        self.id = state['id']
+        for prop in cls.properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
+        for prop in cls.running_properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
 
 
 

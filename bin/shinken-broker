@@ -126,7 +126,7 @@ class IForArbiter(Pyro.core.ObjBase):
         self.arbiters = app.arbiters
         self.pollers = app.pollers
         self.reactionners = app.reactionners
-
+        self.use_ssl = app.use_ssl
 
     #function called by arbiter for giving us our conf
     #conf must be a dict with:
@@ -160,7 +160,7 @@ class IForArbiter(Pyro.core.ObjBase):
                 running_id = 0
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
-            uri = shinken.pyro_wrapper.create_uri(s['address'], s['port'], 'Broks')
+            uri = shinken.pyro_wrapper.create_uri(s['address'], s['port'], 'Broks', self.use_ssl)
             self.schedulers[sched_id]['uri'] = uri
             self.schedulers[sched_id]['broks'] = broks
             self.schedulers[sched_id]['instance_id'] = s['instance_id']
@@ -168,8 +168,6 @@ class IForArbiter(Pyro.core.ObjBase):
             self.schedulers[sched_id]['active'] = s['active']
             self.schedulers[sched_id]['last_connexion'] = 0
 
-#                    #And we connect to it
-#                    self.app.pynag_con_init(sched_id, 'scheduler')
 
         logger.log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
 
@@ -183,7 +181,7 @@ class IForArbiter(Pyro.core.ObjBase):
                 broks = {}
             a = conf['arbiters'][arb_id]
             self.arbiters[arb_id] = a
-            uri = shinken.pyro_wrapper.create_uri(a['address'], a['port'], 'Broks')
+            uri = shinken.pyro_wrapper.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
             self.arbiters[arb_id]['uri'] = uri
             self.arbiters[arb_id]['broks'] = broks
             self.arbiters[arb_id]['instance_id'] = 0 #No use so all to 0
@@ -206,7 +204,7 @@ class IForArbiter(Pyro.core.ObjBase):
                 running_id = 0
             p = conf['pollers'][pol_id]
             self.pollers[pol_id] = p
-            uri = shinken.pyro_wrapper.create_uri(p['address'], p['port'], 'Broks')
+            uri = shinken.pyro_wrapper.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
             self.pollers[pol_id]['uri'] = uri
             self.pollers[pol_id]['broks'] = broks
             self.pollers[pol_id]['instance_id'] = 0 #No use so all to 0
@@ -231,7 +229,7 @@ class IForArbiter(Pyro.core.ObjBase):
 
             r = conf['reactionners'][rea_id]
             self.reactionners[rea_id] = r
-            uri = shinken.pyro_wrapper.create_uri(r['address'], r['port'], 'Broks')
+            uri = shinken.pyro_wrapper.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
             self.reactionners[rea_id]['uri'] = uri
             self.reactionners[rea_id]['broks'] = broks
             self.reactionners[rea_id]['instance_id'] = 0 #No use so all to 0
@@ -320,6 +318,11 @@ class Broker(Satellite):
             'group' : {'default' : 'shinken', 'pythonize' : None},
             'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
 #               'modulespath' : {'default' :'/usr/local/shinken/shinken/modules' , 'pythonize' : None, 'path' : True}
+            'use_ssl' : {'default' : '0', 'pythonize' : to_bool},
+            'certs_dir' : {'default' : 'etc/certs', 'pythonize' : None},
+            'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
+            'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
+            'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
             }
 
 
@@ -372,6 +375,19 @@ class Broker(Satellite):
 
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity
+
+        # The SSL part
+        if self.use_ssl:
+            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(self.certs_dir)
+            print "Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR
+            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(self.ca_cert)
+            print "Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT
+            Pyro.config.PYROSSL_CERT = os.path.abspath(self.server_cert)
+            print"Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT
+            if self.hard_ssl_name_check:
+                Pyro.config.PYROSSL_POSTCONNCHECK=1
+            else:
+                Pyro.config.PYROSSL_POSTCONNCHECK=0
 
         #Try to change the user (not nt for the moment)
         #TODO: change user on nt
@@ -690,10 +706,10 @@ class Broker(Satellite):
 
         logger.log("[Broker] Opening port: %s" % self.port)
 
-        self.daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port)
+        self.daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port, self.use_ssl)
 
         self.uri2 = shinken.pyro_wrapper.register(self.daemon, IForArbiter(self), "ForArbiter")
-
+        print "The Arbtier uri it at", self.uri2
 
         #We wait for initial conf
         self.wait_for_initial_conf()

@@ -223,7 +223,7 @@ class Arbiter(Daemon):
         for brk in self.conf.brokers:
             #Send only if alive of course
             if brk.manage_arbiters and brk.alive:
-                is_send = brk.push_broks(self.broks)
+                is_send = brk.push_broks(self.broks, self.conf.use_ssl)
                 if is_send:
                     #They are gone, we keep none!
                     self.broks = {}
@@ -234,7 +234,7 @@ class Arbiter(Daemon):
         for brk in self.conf.brokers:
             #Get only if alive of course
             if brk.alive:
-                new_cmds = brk.get_external_commands()
+                new_cmds = brk.get_external_commands(self.conf.use_ssl)
                 for new_cmd in new_cmds:
                     self.external_commands.append(new_cmd)
 
@@ -519,9 +519,22 @@ class Arbiter(Daemon):
         #Check if another Scheduler is not running (with the same conf)
         self.check_parallel_run(do_replace)
 
+
+        # And set SSL things too
+        if self.conf.use_ssl:
+            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(self.conf.certs_dir)
+            logger.log("Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR)
+            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(self.conf.ca_cert)
+            logger.log("Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT)
+            Pyro.config.PYROSSL_CERT = os.path.abspath(self.conf.server_cert)
+            logger.log("Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT)
+            if self.conf.hard_ssl_name_check:
+                Pyro.config.PYROSSL_POSTCONNCHECK=1
+            else:
+                Pyro.config.PYROSSL_POSTCONNCHECK=0
+
         #If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity
-
 
         #Try to change the user (not nt for the moment)
         #TODO: change user on nt
@@ -541,7 +554,7 @@ class Arbiter(Daemon):
         Pyro.config.PYRO_MULTITHREADED = 0
         logger.log("Using working directory : %s" % os.path.abspath(self.workdir))
 
-        self.poller_daemon = shinken.pyro_wrapper.init_daemon(self.me.address, self.me.port)
+        self.poller_daemon = shinken.pyro_wrapper.init_daemon(self.me.address, self.me.port, self.conf.use_ssl)
 
         logger.log("Listening on %s:%d" % (self.me.address, self.me.port))
 
@@ -684,7 +697,7 @@ class Arbiter(Daemon):
                 self.me = arb
 
         logger.log("Begin to dispatch configurations to satellites")
-        self.dispatcher = Dispatcher(self.conf, self.me)
+        self.dispatcher = Dispatcher(self.conf, self.me, self.conf.use_ssl)
         self.dispatcher.check_alive()
         self.dispatcher.check_dispatch()
         #REF: doc/shinken-conf-dispatching.png (3)

@@ -68,6 +68,7 @@ class IForArbiter(Pyro.core.ObjBase):
         Pyro.core.ObjBase.__init__(self)
         self.app = app
         self.schedulers = app.schedulers
+        self.use_ssl = app.use_ssl
 
 
     #function called by arbiter for giving us our conf
@@ -98,7 +99,8 @@ class IForArbiter(Pyro.core.ObjBase):
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
 
-            uri = pyro.create_uri(s['address'], s['port'], 'Checks')
+            uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
+            print "DBG: scheduler UIR:", uri
 
             self.schedulers[sched_id]['uri'] = uri
             if already_got:
@@ -237,6 +239,20 @@ class Satellite(Daemon):
 
         #Keep broks so they can be eaten by a broker
         self.broks = {}
+
+        # The SSL part
+        if self.use_ssl:
+            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(self.certs_dir)
+            print "Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR
+            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(self.ca_cert)
+            print "Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT
+            Pyro.config.PYROSSL_CERT = os.path.abspath(self.server_cert)
+            print"Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT
+            if self.hard_ssl_name_check:
+                Pyro.config.PYROSSL_POSTCONNCHECK=1
+            else:
+                Pyro.config.PYROSSL_POSTCONNCHECK=0
+
 
         #Try to change the user (not nt for the moment)
         #TODO: change user on nt
@@ -611,7 +627,7 @@ class Satellite(Daemon):
         logger.log("Using working directory : %s" % os.path.abspath(self.workdir))
         logger.log("Opening port: %s" % self.port)
         #Daemon init
-        self.daemon = pyro.init_daemon(self.host, self.port)
+        self.daemon = pyro.init_daemon(self.host, self.port, self.use_ssl)
 
         #Now we create the interfaces
         self.interface = IForArbiter(self)
