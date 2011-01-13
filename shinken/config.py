@@ -428,7 +428,10 @@ class Config(Item):
 
         # SSL PART
         # global boolean for know if we use ssl or not
-        'use_ssl' : BoolProp(default='0'),
+        'use_ssl' : BoolProp(default='0',
+                             class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
+                                            (BrokerLink, None), (PollerLink, None), (ArbiterLink, None)],
+                             ),
         'certs_dir' : StringProp(default='etc/certs'),
         'ca_cert' : StringProp(default='etc/certs/ca.pem'),
         'server_cert' : StringProp(default='etc/certs/server.pem'),
@@ -1465,9 +1468,11 @@ class Config(Item):
     #Service class in a cached_check_horizon manner, o*hp commands
     #, etc
     def explode_global_conf(self):
-        Service.load_global_conf(self)
-        Host.load_global_conf(self)
-        Contact.load_global_conf(self)
+        clss = [Service, Host, Contact, SchedulerLink,
+                PollerLink, ReactionnerLink, BrokerLink,
+                ArbiterLink]
+        for cls in clss:
+            cls.load_global_conf(self)
 
 
     #Clean useless elements like templates because they are not needed anymore
