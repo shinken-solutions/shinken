@@ -5624,6 +5624,8 @@ class LiveStatusRequest(LiveStatus):
 
         # Set a timestamp for this specific request
         self.tic = time.time()
+        # Clients can also send their local time with the request
+        self.client_localtime = time.time()
 
 
     def find_converter(self, attribute):
@@ -5747,9 +5749,12 @@ class LiveStatusRequest(LiveStatus):
                     cmd, attribute, operator, reference = self.split_option(line, 3)
                 except:
                     cmd, attribute, operator, reference = self.split_option(line, 2) + ['']
-                if operator in ['=', '!=', '>', '>=', '<', '<=', '=~', '~', '~~']:
+                if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
                     # Cut off the table name
                     attribute = self.strip_table_from_column(attribute)
+                    # Some operators can simply be negated
+                    if operator in ['!>', '!>=', '!<', '!<=']:
+                        operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
                     # Put a function on top of the filter_stack which implements
                     # the desired operation
                     self.filtercolumns.append(attribute)
@@ -5818,6 +5823,8 @@ class LiveStatusRequest(LiveStatus):
             elif keyword == 'Separators':
                 cmd, sep1, sep2, sep3, sep4 = line.split(' ', 5)
                 self.response.separators = map(lambda x: chr(int(x)), [sep1, sep2, sep3, sep4])
+            elif keyword == 'Localtime':
+                cmd, self.client_localtime = self.split_option(line)
             elif keyword == 'COMMAND':
                 cmd, self.extcmd = line.split(' ', 1)
             else:
