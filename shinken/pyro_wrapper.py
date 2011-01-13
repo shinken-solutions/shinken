@@ -99,7 +99,7 @@ except AttributeError:
 
 
     def register(daemon, obj, name):
-        daemon.register(obj)
+        return daemon.register(obj, name)
 
 
     def unregister(daemon, obj, name):
@@ -114,7 +114,7 @@ except AttributeError:
         daemon.handleRequests([s])
 
 
-    def init_daemon(host, port):
+    def init_daemon(host, port, use_ssl=False):
         #Pyro 4 i by default thread, should do select
         #(I hate threads!)
         Pyro.config.SERVERTYPE="select"
@@ -127,7 +127,7 @@ except AttributeError:
         return daemon
 
 
-    def create_uri(address, port, obj_name):
+    def create_uri(address, port, obj_name, use_ssl=False):
         return "PYRO:%s@%s:%d" % (obj_name, address, port)
 
 
