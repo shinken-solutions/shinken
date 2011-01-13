@@ -23,29 +23,6 @@ import Queue
 import copy
 import os
 import time
-
-
-# This is a quick and dirty implementation of a Lifo 
-class MyLifoQueue(Queue.Queue):
-    def _init(self, maxsize):
-        self.maxsize = maxsize
-        self.queue = []
-
-    def _qsize(self, len=len):
-        return len(self.queue)
-
-    def _put(self, item):
-        self.queue.append(item)
-
-    def _get(self):
-        return self.queue.pop()
-
-try:
-    Queue.LifoQueue
-except AttributeError:
-    # Ptyhon 2.4 and 2.5 do not have it.
-    # Use our own implementation.
-    Queue.LifoQueue = MyLifoQueue
 try:
     import json
 except ImportError:
@@ -62,8 +39,8 @@ except ImportError:
 from shinken.service import Service
 from shinken.external_command import ExternalCommand
 from shinken.macroresolver import MacroResolver
-
 from shinken.util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split,get_customs_keys,get_customs_values
+
 
 LOGCLASS_INFO         = 0 # all messages not in any other class
 LOGCLASS_ALERT        = 1 # alerts: the change service/host state
@@ -79,27 +56,15 @@ LOGOBJECT_HOST        = 1
 LOGOBJECT_SERVICE     = 2
 LOGOBJECT_CONTACT     = 3
 
-#This is a dirty hack. Service.get_name only returns service_description.
-#For the servicegroup config we need more. host_name + separator + service_descriptio
-def get_full_name(self):
-    if get_full_name.outputformat == 'csv':
-        return self.host_name + LiveStatus.separators[3] + self.service_description
-    elif get_full_name.outputformat == 'json':
-        return [self.host_name , self.service_description]
-    else:
-        print "Unknow output format!"
-        return ''
-Service.get_full_name = get_full_name
-
 
 #Another for hosts. We must have the same function for hosts and service in
 #problem's source. So must define such a function for hosts too
-def get_common_full_name(self):
-    cls_name = self.__class__.my_type
+def get_common_full_name(prop, ref, request):
+    cls_name = prop.__class__.my_type
     if cls_name == 'service':
-        return self.host_name + LiveStatus.separators[3] + self.service_description
+        return prop.host_name + request.response.separators[3] + prop.service_description
     else:
-        return self.host_name
+        return prop.host_name
 
 
 #It's a dict with 2 entries : hosts a,d services. Will return a list with just
@@ -122,6 +87,7 @@ def worst_host_state(state_1, state_2):
         return state_1
     return state_2
 
+
 ##The worst state of all services that belong to a host of this group (OK <= WARN <= UNKNOWN <= CRIT)
 def worst_service_state(state_1, state_2):
     #reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
@@ -134,15 +100,15 @@ def worst_service_state(state_1, state_2):
     return state_2
 
 
-def find_pnp_perfdata_xml(name):
-    if LiveStatus.pnp_path_readable:
+def find_pnp_perfdata_xml(name, ref, request):
+    if request.pnp_path_readable:
         if '/' in name:
             # It is a service
-            if os.access(LiveStatus.pnp_path + '/' + name + '.xml', os.R_OK):
+            if os.access(request.pnp_path + '/' + name + '.xml', os.R_OK):
                 return 1
         else:
             # It is a host
-            if os.access(LiveStatus.pnp_path + '/' + name + '/_HOST_.xml', os.R_OK):
+            if os.access(request.pnp_path + '/' + name + '/_HOST_.xml', os.R_OK):
                 return 1
     # If in doubt, there is no pnp file
     return 0
@@ -154,10 +120,12 @@ class Problem:
         self.impacts = impacts
 
 
+
 class Logline(dict):
     def __init__(self, cursor, row):
         for idx, col in enumerate(cursor.description):
             setattr(self, col[0], row[idx])
+
 
     def fill(self, hosts, services, hostname_lookup_table, servicename_lookup_table, columns):
         if self.logobject == LOGOBJECT_HOST:
@@ -171,14 +139,106 @@ class Logline(dict):
         return self
 
 
+
+# This is a quick and dirty implementation of a Lifo 
+class MyLifoQueue(Queue.Queue):
+    def _init(self, maxsize):
+        self.maxsize = maxsize
+        self.queue = []
+
+
+    def _qsize(self, len=len):
+        return len(self.queue)
+
+
+    def _put(self, item):
+        self.queue.append(item)
+
+
+    def _get(self):
+        return self.queue.pop()
+
+
+
+class LiveStatusStack:
+    def __init__(self, *args, **kw):
+        self.type = 'lambda'
+        self.__class__.__bases__[0].__init__(self, *args, **kw)
+
+
+    def and_elements(self, num):
+        if num > 1:
+            filters = []
+            for i in range(num):
+                filters.append(self.get())
+            # Take from the stack:
+            # Make a combined anded function
+            # Put it on the stack
+            if self.type == 'sql':
+                # Must be a SQL filter
+                and_clause = '(' + (' AND ').join([ x()[0] for x in filters ]) + ')'
+                and_values = reduce(lambda x, y: x+y, [ x()[1] for x in filters ])
+                and_filter = lambda : [and_clause, and_values]
+            else:
+                # List of functions taking parameter ref
+                def and_filter(ref):
+                    myfilters = filters
+                    failed = False
+                    for filter in myfilters:
+                        if not filter(ref):
+                            failed = True
+                            break
+                        else:
+                            pass
+                    return not failed
+            self.put(and_filter)
+
+
+    def or_elements(self, num):
+        if num > 1:
+            filters = []
+            for i in range(num):
+                filters.append(self.get())
+            if self.type == 'sql':
+                or_clause = '(' + (' OR ').join([ x()[0] for x in filters ]) + ')'
+                or_values = reduce(lambda x, y: x+y, [ x()[1] for x in filters ])
+                or_filter = lambda : [or_clause, or_values]
+            else:
+                def or_filter(ref):
+                    myfilters = filters
+                    failed = True
+                    for filter in myfilters:
+                        if filter(ref):
+                            failed = False
+                            break
+                        else:
+                            pass
+                    return not failed
+            self.put(or_filter)
+
+
+    def get_stack(self):
+        if self.qsize() == 0:
+            if self.type == 'sql':
+                return lambda : ["1 = ?", [1]]
+            else:
+                return lambda x : True
+        else:
+            return self.get()
+
+
+
+try:
+    Queue.LifoQueue
+    LiveStatusStack.__bases__ = (Queue.LifoQueue,)
+except AttributeError:
+    # Ptyhon 2.4 and 2.5 do not have it.
+    # Use our own implementation.
+    LiveStatusStack.__bases__ = (MyLifoQueue,)
+
+
+
 class LiveStatus:
-    separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
-    pnp_path = False
-    pnp_path_readable = False
-    #prop : is the internal name if it is different than the name in the output file
-    #required :
-    #depythonize :
-    #default :
     out_map = {
         'Host' : {
             'accept_passive_checks' : {
@@ -202,7 +262,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'action_url_expanded' : {
-                'fulldepythonize' : lambda s: MacroResolver().resolve_simple_macros_in_string(s.action_url, s.get_data_for_checks()),
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The same as action_url, but with the most important macros expanded',
                 'prop' : 'action_url',
                 'type' : 'string',
@@ -256,8 +316,6 @@ class LiveStatus:
                 'type' : 'int',
             },
             'childs' : {
-                #'depythonize' : lambda x: ','.join(x),
-                #'depythonize' : lambda x: [y.get_name() for y in x],
                 'description' : 'A list of all direct childs of the host',
                 'type' : 'list',
             },
@@ -363,13 +421,13 @@ class LiveStatus:
                 'type' : 'string',
             },
             'in_check_period' : {
-                'depythonize' : lambda tp: from_bool_to_int((tp == None and [False] or [tp.is_time_valid(time.time())])[0]),
+                'fulldepythonize' : lambda p, e, r: from_bool_to_int((p == None and [False] or [p.is_time_valid(r.tic)])[0]),
                 'description' : 'Wether this host is currently in its check period (0/1)',
                 'prop' : 'check_period',
                 'type' : 'int',
             },
             'in_notification_period' : {
-                'depythonize' : lambda tp: from_bool_to_int((tp == None and [False] or [tp.is_time_valid(time.time())])[0]),
+                'fulldepythonize' : lambda p, e, r: from_bool_to_int((p == None and [False] or [p.is_time_valid(r.tic)])[0]),
                 'description' : 'Wether this host is currently in its notification period (0/1)',
                 'prop' : 'notification_period',
                 'type' : 'int',
@@ -478,7 +536,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'notes_url_expanded' : {
-                'fulldepythonize' : lambda s: MacroResolver().resolve_simple_macros_in_string(s.notes_url, s.get_data_for_checks()),
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'Same es notes_url, but with the most important macros expanded',
                 'prop' : 'notes_url',
                 'type' : 'string',
@@ -564,7 +622,6 @@ class LiveStatus:
                 'type' : 'int',
             },
             'parents' : {
-                'depythonize' : lambda x: ','.join(x),
                 'description' : 'A list of all direct parents of the host',
                 'type' : 'list',
             },
@@ -586,7 +643,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'pnpgraph_present' : {
-                'depythonize' : find_pnp_perfdata_xml,
+                'fulldepythonize' : find_pnp_perfdata_xml,
                 'description' : 'Whether there is a PNP4Nagios graph present for this host (0/1)',
                 'prop' : 'host_name',
                 'type' : 'int',
@@ -700,7 +757,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'action_url_expanded' : {
-                'fulldepythonize' : lambda s: MacroResolver().resolve_simple_macros_in_string(s.action_url, s.get_data_for_checks()),
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The action_url with (the most important) macros expanded',
                 'prop' : 'action_url',
                 'type' : 'string',
@@ -1356,7 +1413,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'notes_url_expanded' : {
-                'fulldepythonize' : lambda s: MacroResolver().resolve_simple_macros_in_string(s.notes_url, s.get_data_for_checks()),
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The notes_url with (the most important) macros expanded',
                 'prop' : 'notes_url',
                 'type' : 'string',
@@ -1394,7 +1451,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'pnpgraph_present' : {
-                'depythonize' : find_pnp_perfdata_xml,
+                'fulldepythonize' : find_pnp_perfdata_xml,
                 'description' : 'Whether there is a PNP4Nagios graph present for this service (0/1)',
                 'prop' : 'get_dbg_name',
                 'type' : 'int',
@@ -1976,7 +2033,7 @@ class LiveStatus:
                 'description' : 'The source name of the problem (host or service)',
                 'prop' : 'source',
                 'type' : 'string',
-                'depythonize' : get_common_full_name
+                'fulldepythonize' : get_common_full_name
             },
             'impacts' : {
                 'description' : 'List of what the source impact (list of hosts and services)',
@@ -3967,6 +4024,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'hostgroup_alias' : {
+                'depythonize' : lambda x: getattr(x, 'hostgroup_alias', ''),
                 'description' : 'An alias of the hostgroup',
                 'prop' : 'hostgroup',
                 'type' : 'string',
@@ -5249,6 +5307,8 @@ class LiveStatus:
 
     }
 
+    separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
+
 
     def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue):
         #self.conf = scheduler.conf
@@ -5271,165 +5331,567 @@ class LiveStatus:
         self.dbconn = dbconn
         LiveStatus.pnp_path = pnp_path
         self.debuglevel = 2
-        self.dbconn.row_factory = self.row_factory
+        self.dbconn.row_factory = self.row_factory 
         self.return_queue = return_queue
-        # add Host attributes to Hostsbygroup
+
+        self.create_out_map_delegates()
+        self.create_out_map_hooks()
+        # add Host attributes to Hostsbygroup etc.
         for attribute in LiveStatus.out_map['Host']:
             LiveStatus.out_map['Hostsbygroup'][attribute] = LiveStatus.out_map['Host'][attribute]
-        for attribute in LiveStatus.out_map['Service']:
+        for attribute in self.out_map['Service']:
             LiveStatus.out_map['Servicesbygroup'][attribute] = LiveStatus.out_map['Service'][attribute]
-        for attribute in LiveStatus.out_map['Service']:
+        for attribute in self.out_map['Service']:
             LiveStatus.out_map['Servicesbyhostgroup'][attribute] = LiveStatus.out_map['Service'][attribute]
 
 
-    def debug(self, debuglevel, message):
-        f = open("/tmp/livestatus.debug", "a")
-        f.write(message)
-        f.write("\n")
-        f.close()
-        if self.debuglevel >= debuglevel:
-            print message
+    def row_factory(self, cursor, row):
+        return Logline(cursor, row)
 
 
-    # Find the converter function for a table/attribute pair
-    def find_converter(self, table, attribute):
-        out_map = {
-            'hosts' : LiveStatus.out_map['Host'],
-            'services' : LiveStatus.out_map['Service'],
-            'hostgroups' : LiveStatus.out_map['Hostgroup'],
-            'servicegroups' : LiveStatus.out_map['Servicegroup'],
-            'contacts' : LiveStatus.out_map['Contact'],
-            'contactgroups' : LiveStatus.out_map['Contactgroup'],
-            'comments' : LiveStatus.out_map['Comment'],
-            'downtimes' : LiveStatus.out_map['Downtime'],
-            'commands' : LiveStatus.out_map['Command'],
-            'timeperiods' : LiveStatus.out_map['Timeperiod'],
-            'hostsbygroup' : LiveStatus.out_map['Hostsbygroup'],
-            'servicesbygroup' : LiveStatus.out_map['Servicesbygroup'],
-            'servicesbyhostgroup' : LiveStatus.out_map['Servicesbyhostgroup'],
-            'status' : LiveStatus.out_map['Config'],
-            'log' : LiveStatus.out_map['Logline'],
-            'schedulers' : LiveStatus.out_map['SchedulerLink'],
-            'pollers' : LiveStatus.out_map['PollerLink'],
-            'reactionners' : LiveStatus.out_map['ReactionnerLink'],
-            'brokers' : LiveStatus.out_map['BrokerLink'],
-            'problems' : LiveStatus.out_map['Problem'],
-        }[table]
+    def handle_request(self, data):
+        request = LiveStatusRequest(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue)
+        request.parse_input(data)
+        print "REQUEST\n%s\n" % data
+        print request
+        result = request.launch_query()
+        # Now bring the retrieved information to a form which can be sent back to the client
+        response = request.response
+        response.format_live_data(result, request.columns, request.aliases)
+        output, keepalive = response.respond()
+        print "RESPONSE\n%s\n" % output
+        return output, keepalive
+
+
+    def make_hook(self, hook, prop, default, func, as_prop):
+
+
+        def hook_get_prop(elt):
+            return getattr(elt, prop, default)
+
+
+        def hook_get_prop_depythonize(elt):
+            if hasattr(elt, prop):
+                attr = getattr(elt, prop)
+                if callable(attr):
+                    attr = attr()
+                return func(attr)
+            else:
+                return default
+
+
+        def hook_get_prop_depythonize_notcallable(elt):
+            if hasattr(elt, prop):
+                value = getattr(elt, prop)
+                if value == None or value == 'none':
+                    return default
+                elif isinstance(value, list):
+                    # Example: Service['comments'] = { type : 'list', depythonize : 'id' }
+                    # 
+                    value = [getattr(item, func)() for item in value if callable(getattr(item, func)) ] \
+                        + [getattr(item, func) for item in value if not callable(getattr(item, func)) ]
+                    return value
+                else:
+                    f = getattr(getattr(elt, prop), func)
+                    if callable(f):
+                        return f()
+                    else:
+                        return f
+            else:
+                return default
+
+
+        def hook_get_prop_full_depythonize(elt):
+            if hasattr(elt, prop):
+                attr = getattr(elt, prop)
+                if callable(attr):
+                    attr = attr()
+                return func(attr, elt, self)
+            else:
+                return default
+
+
+        def hook_get_prop_delegate(elt):
+            if not as_prop:
+                new_prop = prop
+            else:
+                new_prop = as_prop
+            if hasattr(elt, func):
+                attr = getattr(elt, func)
+                if callable(attr):
+                    attr = attr()
+                new_hook = self.out_map[attr.__class__.__name__][new_prop]['hook']
+                return new_hook(attr)
+            else:
+                return default
+
+
+        if hook == 'get_prop':
+            return hook_get_prop
+        elif hook == 'get_prop_depythonize':
+            return hook_get_prop_depythonize
+        elif hook == 'get_prop_depythonize_notcallable':
+            return hook_get_prop_depythonize_notcallable
+        elif hook == 'get_prop_full_depythonize':
+            return hook_get_prop_full_depythonize
+        elif hook == 'get_prop_delegate':
+            return hook_get_prop_delegate
+
+
+    def create_out_map_hooks(self):
+        for objtype in LiveStatus.out_map:
+            for attribute in LiveStatus.out_map[objtype]:
+                entry =  LiveStatus.out_map[objtype][attribute]
+                if 'prop' not in entry or entry['prop'] == None:
+                    prop = attribute
+                else:
+                    prop = entry['prop']
+                if 'default' in entry:
+                    default = entry['default']
+                else:
+                    if 'type' in entry and (entry['type'] == 'int' or entry['type'] == 'float'):
+                        default = 0
+                    else:
+                        default = ''
+                if 'delegate' in entry: 
+                    entry['hook'] = self.make_hook('get_prop_delegate', prop, default, entry['delegate'], entry.setdefault('as', None))
+                else:
+                    if 'depythonize' in entry:
+                        func = entry['depythonize']
+                        if callable(func):
+                            entry['hook'] = self.make_hook('get_prop_depythonize', prop, default, func, None)
+                        else:
+                            entry['hook'] = self.make_hook('get_prop_depythonize_notcallable', prop, default, func, None)
+                    elif 'fulldepythonize' in entry:
+                        func = entry['fulldepythonize']
+                        entry['hook'] = self.make_hook('get_prop_full_depythonize', prop, default, func, None)
+                        entry['hooktype'] = 'depythonize'
+                    else:
+                        entry['hook'] = self.make_hook('get_prop', prop, default, None, None)
+                    
+
+    def create_out_map_delegates(self):
+        delegate_map = {
+            'Logline' : {
+                'current_service_' : 'log_service',
+                'current_host_' : 'log_host',
+            },
+        }
+        for objtype in LiveStatus.out_map:
+            for attribute in LiveStatus.out_map[objtype]:
+                entry =  LiveStatus.out_map[objtype][attribute]
+                if objtype in delegate_map:
+                    for prefix in delegate_map[objtype]:
+                        if attribute.startswith(prefix):
+                            if 'delegate' not in entry:
+                                entry['delegate'] = delegate_map[objtype][prefix]
+                                entry['as'] = attribute.replace(prefix, '')
+
+
+
+class LiveStatusResponse:
+    def __init__(self, responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'off', separators = LiveStatus.separators):
+        self.responseheader = responseheader
+        self.outputformat = outputformat
+        self.keepalive = keepalive
+        self.columnheaders = columnheaders
+        self.separators = separators
+        self.output = ''
+        pass
+
+
+    def respond(self):
+        self.output += '\n'
+        if self.responseheader == 'fixed16':
+            statuscode = 200 
+            responselength = len(self.output) # no error
+            self.output = '%3d %11d\n' % (statuscode, responselength) + self.output
+
+        return self.output, self.keepalive
+
+
+    def format_live_data(self, result, columns, aliases):
+        lines = []
+        header = ''
+        showheader = False
+        if len(result) > 0:
+            if self.columnheaders != 'off' or len(columns) == 0:
+                if len(aliases) > 0:
+                    showheader = True
+                else:
+                    showheader = True
+                    if len(columns) == 0:
+                        # Show all available columns
+                        columns = sorted(result[0].keys())
+        elif self.columnheaders == 'on':
+            showheader = True
+        if self.outputformat == 'csv':
+            for object in result:
+                # Construct one line of output for each object found
+                l = []
+                for x in [object[c] for c in columns]:
+                    if isinstance(x, list):
+                        l.append(self.separators[2].join(str(y) for y in x))
+                    else:
+                        l.append(str(x))
+                lines.append(self.separators[1].join(l))
+            if showheader:
+                if len(aliases) > 0:
+                    # This is for statements like "Stats: .... as alias_column
+                    lines.insert(0, self.separators[1].join([aliases[col] for col in columns]))
+                else:
+                    lines.insert(0, self.separators[1].join(columns))
+            self.output = self.separators[0].join(lines)
+        elif self.outputformat == 'json' or self.outputformat == 'python':
+            for object in result:
+                lines.append([object[c] for c in columns])
+            if self.columnheaders == 'on':
+                if len(aliases) > 0:
+                    lines.insert(0, [str(aliases[col]) for col in columns])
+                else:
+                    lines.insert(0, columns)
+            if self.outputformat == 'json':
+                self.output = json.dumps(lines, separators=(',', ':'))
+            else:
+                self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
+
+
+
+class LiveStatusRequest(LiveStatus):
+    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue):
+        # Runtime data form the global LiveStatus object
+        self.configs = configs
+        self.hostname_lookup_table = hostname_lookup_table
+        self.servicename_lookup_table = servicename_lookup_table
+        self.hosts = hosts
+        self.services = services
+        self.contacts = contacts
+        self.hostgroups = hostgroups
+        self.servicegroups = servicegroups
+        self.contactgroups = contactgroups
+        self.timeperiods = timeperiods
+        self.commands = commands
+        self.schedulers = schedulers
+        self.pollers = pollers
+        self.reactionners = reactionners
+        self.brokers = brokers
+        self.dbconn = dbconn
+        self.pnp_path = pnp_path
+        self.return_queue = return_queue
+
+        # Private attributes for this specific request
+        self.response = LiveStatusResponse(responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'undef', separators = LiveStatus.separators)
+        self.table = None
+        self.columns = []
+        self.filtercolumns = []
+        self.prefiltercolumns = []
+        self.stats_group_by = []
+        self.stats_columns = []
+        self.aliases = []
+        self.limit = None
+        self.extcmd = False
+        self.out_map = self.copy_out_map_hooks()
+
+        # Initialize the stacks which are needed for the Filter: and Stats:
+        # filter- and count-operations
+        self.filter_stack = LiveStatusStack()
+        self.sql_filter_stack = LiveStatusStack()
+        self.sql_filter_stack.type = 'sql'
+        self.stats_filter_stack = LiveStatusStack()
+        self.stats_postprocess_stack = LiveStatusStack()
+        self.stats_request = False
+
+        # Set a timestamp for this specific request
+        self.tic = time.time()
+
+
+    def find_converter(self, attribute):
+        out_map = LiveStatus.out_map[self.out_map_name]
         if attribute in out_map and 'type' in out_map[attribute]:
             if out_map[attribute]['type'] == 'int':
                 return int
             elif out_map[attribute]['type'] == 'float':
                 return float
-        #if attribute in out_map and 'converter' in out_map[attribute]:
-        #    return out_map[attribute]['converter']
         return None
 
 
-    def create_output(self, type_map, elt, attributes, filterattributes):
-        output = {}
-        # type_map is usually LiveStatus.out_map[elt.__class__.__name__]
-        # But instead of Host it can also be Hostbygroup
-        if len(attributes + filterattributes) == 0:
-            display_attributes = type_map.keys()
-            # We must find out if the request was a Stats:-request. In this case
-            # it is not necessary to get all the attributes
-        else:
-            display_attributes = list(set(attributes + filterattributes))
-        for display in display_attributes:
-            value = ''
-            if display not in type_map:
-                # no mapping, use it as a direct attribute
-                value = getattr(elt, display, '')
-            else:
-                if 'prop' not in type_map[display] or type_map[display]['prop'] == None:
-                    # display is listed, but prop is not set. this must be a direct attribute
-                    prop = display
-                else:
-                    # We have a prop, this means some kind of mapping between the display name (livestatus column)
-                    # and an internal name must happen
-                    prop = type_map[display]['prop']
-                value = getattr(elt, prop, None)
-                # Some attributes of Contact/Host are by defautl 'none'
-                # TODO: look if this can be None in contact.py, host.py
-                if value == 'none':
-                    value = None
-                if value != None:
-                    # The name/function listed in prop exists
-                    #Maybe it's not a value, but a function link
-                    if callable(value):
-                        value = value()
-                    if display in type_map and 'fulldepythonize' in type_map[display]:
-                        f = type_map[display]['fulldepythonize']
-                        if callable(f):
-                            # Pass the whole element (host/service) to the depythonizer
-                            value = f(elt)
-                    elif display in type_map and 'depythonize' in type_map[display]:
-                        f = type_map[display]['depythonize']
-                        if callable(f):
-                            #for example "from_list_to_split". value is an array and f takes the array as an argument
-                            value = f(value)
-                        else:
-                            if isinstance(value, list):
-                                #depythonize's argument might be an attribute or a method
-                                #example: members is an array of hosts and we want get_name() of each element
-                                value = [getattr(item, f)() for item in value if callable(getattr(item, f)) ] \
-                                      + [getattr(item, f) for item in value if not callable(getattr(item, f)) ]
-                                #at least servicegroups are nested [host,service],.. The need some flattening
+    def set_default_out_map_name(self):
+        self.out_map_name = {
+            'hosts' : 'Host',
+            'services' : 'Service',
+            'hostgroups' : 'Hostgroup',
+            'servicegroups' : 'Servicegroup',
+            'contacts' : 'Contact',
+            'contactgroups' : 'Contactgroup',
+            'comments' : 'Comment',
+            'downtimes' : 'Downtime',
+            'commands' : 'Command',
+            'timeperiods' : 'Timeperiod',
+            'hostsbygroup' : 'Hostsbygroup',
+            'servicesbygroup' : 'Servicesbygroup',
+            'servicesbyhostgroup' : 'Servicesbyhostgroup',
+            'status' : 'Config',
+            'log' : 'Logline',
+            'schedulers' : 'SchedulerLink',
+            'pollers' : 'PollerLink',
+            'reactionners' : 'ReactionnerLink',
+            'brokers' : 'BrokerLink',
+            'problems' : 'Problem',
+            'columns' : 'Config', # just a dummy
+        }[self.table]
 
-                                #I thin the 2 above lines are create a problem in json output at least
-                                #with service groups members that need to be [[hostname, desc], [hostname, desc]]
-                                #value = [y for x in value if isinstance(x, list) for y in x] + \
-                                #    [x for x in value if not isinstance(x, list)]
-                                #print "DBG: Final value:", value
 
-                            else:
-                                #ok not a direct function, maybe a functin provided by value...
-                                f = getattr(value, f)
-                                if callable(f):
-                                    value = f()
-                                else:
-                                    value = f
-
-                    if len(str(value)) == 0:
-                        value = ''
-                elif 'default' in type_map[display]:
-                    # display is not a known attribute, there is no prop for mapping, but
-                    # at least we have a default value
-                    value = type_map[display]['default']
-                else:
-                    if 'type' in type_map[display] and type_map[display]['type'] == 'int':
-                        value = 0
+    def copy_out_map_hooks(self):
+        new_map = {}
+        for objtype in LiveStatus.out_map:
+            new_map[objtype] = {}
+            for attribute in LiveStatus.out_map[objtype]:
+                new_map[objtype][attribute] = {}
+                entry =  LiveStatus.out_map[objtype][attribute]
+                if 'hooktype' in entry:
+                    if 'prop' not in entry or entry['prop'] == None:
+                        prop = attribute
                     else:
-                        value = ''
+                        prop = entry['prop']
+                    if 'default' in entry:
+                        default = entry['default']
+                    else:
+                        if entry['type'] == 'int' or entry['type'] == 'float':
+                            default = 0
+                        else:
+                            default = ''
+                    func = entry['fulldepythonize']
+                    new_map[objtype][attribute]['hook'] = self.make_hook('get_prop_full_depythonize', prop, default, func, None)
+                else:
+                    new_map[objtype][attribute]['hook'] = entry['hook']
+        return new_map
 
-            output[display] = value
+
+    def __str__(self):
+        output = "LiveStatusRequest:\n"
+        for attr in ["table", "columns", "filtercolumns", "prefiltercolumns", "aliases", "stats_group_by", "stats_request"]:
+            output += "request %s: %s\n" % (attr, getattr(self, attr))
         return output
+  
+
+    def split_command(self, line, splits=1):
+        return line.split(' ', splits)
 
 
-    def get_live_data(self, table, columns, prefiltercolumns, filtercolumns, limit, filter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by):
+    def split_option(self, line, splits=1):
+        #x = [int(i) if i.isdigit() else i for i in [token.strip() for token in re.split(r"[\s]+", line, splits)]]
+        x = map (lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
+        return x
+
+
+    def split_option_with_columns(self, line):
+        cmd, columns = self.split_option(line)
+        return cmd, [self.strip_table_from_column(c) for c in re.compile(r'\s+').split(columns)]
+
+
+    def strip_table_from_column(self, column):
+        # Cut off the table name, because it is possible to say service_state instead of state
+        bygroupmatch = re.compile('(\w+)by.*group').search(self.table)
+        if bygroupmatch:
+            return re.sub(re.sub('s$', '', bygroupmatch.group(1)) + '_', '', column, 1)
+        else:
+            return re.sub(re.sub('s$', '', self.table) + '_', '', column, 1)
+
+
+    def parse_input(self, data):
+        for line in [line.strip() for line in data.splitlines()]:
+            keyword = line.split(' ')[0].rstrip(':')
+            if keyword == 'GET': # Get the name of the base table
+                cmd, self.table = self.split_command(line)
+                self.set_default_out_map_name()
+            elif keyword == 'Columns': # Get the names of the desired columns
+                cmd, self.columns = self.split_option_with_columns(line)
+                self.response.columnheaders = 'off'
+            elif keyword == 'ResponseHeader':
+                cmd, responseheader = self.split_option(line)
+                self.response.responseheader = responseheader
+            elif keyword == 'OutputFormat':
+                cmd, outputformat = self.split_option(line)
+                self.response.outputformat = outputformat
+            elif keyword == 'KeepAlive':
+                cmd, keepalive = self.split_option(line)
+                self.response.keepalive = keepalive
+            elif keyword == 'ColumnHeaders':
+                cmd, columnheaders = self.split_option(line)
+                self.response.columnheaders = columnheaders
+            elif keyword == 'Limit':
+                cmd, self.limit = self.split_option(line)
+            elif keyword == 'Filter':
+                try:
+                    cmd, attribute, operator, reference = self.split_option(line, 3)
+                except:
+                    cmd, attribute, operator, reference = self.split_option(line, 2) + ['']
+                if operator in ['=', '!=', '>', '>=', '<', '<=', '=~', '~', '~~']:
+                    # Cut off the table name
+                    attribute = self.strip_table_from_column(attribute)
+                    # Put a function on top of the filter_stack which implements
+                    # the desired operation
+                    self.filtercolumns.append(attribute)
+                    self.prefiltercolumns.append(attribute)
+                    self.filter_stack.put(self.make_filter(operator, attribute, reference))
+                    if self.table == 'log':
+                        if attribute == 'time':
+                            self.sql_filter_stack.put(self.make_sql_filter(operator, attribute, reference))
+                else:
+                    print "illegal operation", operator
+                    pass # illegal operation
+            elif keyword == 'And':
+                cmd, andnum = self.split_option(line)
+                # Take the last andnum functions from the stack
+                # Construct a new function which makes a logical and
+                # Put the function back onto the stack
+                self.filter_stack.and_elements(andnum)
+            elif keyword == 'Or':
+                cmd, ornum = self.split_option(line)
+                # Take the last ornum functions from the stack
+                # Construct a new function which makes a logical or
+                # Put the function back onto the stack
+                self.filter_stack.or_elements(ornum)
+            elif keyword == 'StatsGroupBy':
+                cmd, stats_group_by = self.split_option_with_columns(line)
+                self.filtercolumns.extend(stats_group_by)
+                self.stats_group_by.extend(stats_group_by)
+                # Deprecated. If your query contains at least one Stats:-header
+                # then Columns: has the meaning of the old StatsGroupBy: header
+            elif keyword == 'Stats':
+                self.stats_request = True
+                try:
+                    cmd, attribute, operator, reference = self.split_option(line, 3)
+                    if attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference.find('as ', 3) != -1:
+                        attribute, operator = operator, attribute
+                        asas, alias = reference.split(' ')
+                        self.aliases.append(alias)
+                    elif attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference == '=':
+                        # Workaround for thruk-cmds like: Stats: sum latency =
+                        attribute, operator = operator, attribute
+                        reference = ''
+                except:
+                    cmd, attribute, operator = self.split_option(line, 3)
+                    if attribute in ['sum', 'min', 'max', 'avg', 'std']:
+                        attribute, operator = operator, attribute
+                    reference = ''
+                attribute = self.strip_table_from_column(attribute)
+                if operator in ['=', '!=', '>', '>=']:
+                    self.filtercolumns.append(attribute)
+                    self.stats_columns.append(attribute)
+                    self.stats_filter_stack.put(self.make_filter(operator, attribute, reference))
+                    self.stats_postprocess_stack.put(self.make_filter('count', attribute, None))
+                elif operator in ['sum', 'min', 'max', 'avg', 'std']:
+                    self.stats_columns.append(attribute)
+                    self.stats_filter_stack.put(self.make_filter('dummy', attribute, None))
+                    self.stats_postprocess_stack.put(self.make_filter(operator, attribute, None))
+                else:
+                    print "illegal operation", operator
+                    pass # illegal operation
+            elif keyword == 'StatsAnd':
+                cmd, andnum = self.split_option(line)
+                self.stats_filter_stack.and_elements(andnum)
+            elif keyword == 'StatsOr':
+                cmd, ornum = self.split_option(line)
+                self.stats_filter_stack.or_elements(ornum)
+            elif keyword == 'Separators':
+                cmd, sep1, sep2, sep3, sep4 = line.split(' ', 5)
+                self.response.separators = map(lambda x: chr(int(x)), [sep1, sep2, sep3, sep4])
+            elif keyword == 'COMMAND':
+                cmd, self.extcmd = line.split(' ', 1)
+            else:
+                # This line is not valid or not implemented
+                print "Received a line of input which i can't handle : '%s'" % line
+                pass
+
+
+    def launch_query(self):
+        if self.extcmd:
+            # External command are send back to broker
+            e = ExternalCommand(self.extcmd)
+            self.return_queue.put(e)
+            return []
+        else:
+            # A minimal integrity check
+            if not self.table:
+               return []
+
+            # Make columns unique
+            self.filtercolumns = list(set(self.filtercolumns))
+            self.prefiltercolumns = list(set(self.prefiltercolumns))
+            self.stats_columns = list(set(self.stats_columns))
+
+            if self.stats_request:
+                if len(self.columns) > 0:
+                    # StatsGroupBy is deprecated. Columns: can be used instead
+                    self.stats_group_by = self.columns
+                elif len(self.stats_group_by) > 0:
+                    self.columns = self.stats_group_by + self.stats_columns
+                #if len(self.stats_columns) > 0 and len(self.columns) == 0:
+                if len(self.stats_columns) > 0:
+                    self.columns = self.stats_columns + self.columns
+
+            # Make one big filter where the single filters are anded
+            self.filter_stack.and_elements(self.filter_stack.qsize())
+            try:
+                # Remember the number of stats filters. We need these numbers as columns later.
+                # But we need to ask now, because get_live_data() will empty the stack
+                num_stats_filters = self.stats_filter_stack.qsize()
+                if self.table == 'log':
+                    self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
+                    result = self.get_live_data_log()
+                else:
+                    # If the pnpgraph_present column is involved, then check
+                    # with each request if the pnp perfdata path exists
+                    if 'pnpgraph_present' in self.columns + self.filtercolumns + self.prefiltercolumns and self.pnp_path and os.access(self.pnp_path, os.R_OK):
+                        self.pnp_path_readable = True
+                    else:
+                        self.pnp_path_readable = False
+                    # Apply the filters on the broker's host/service/etc elements
+              
+                    result = self.get_live_data()
+                if self.stats_request:
+                    self.columns = range(num_stats_filters)
+                    if self.stats_group_by:
+                        self.columns = tuple(list(self.stats_group_by) + list(self.columns))
+                    if len(self.aliases) == 0:
+                        #If there were Stats: staments without "as", show no column headers at all
+                        self.response.columnheaders = 'off'
+                    else:
+                        self.response.columnheaders = 'on'
+
+                return result
+            except Exception, e:
+                import traceback
+                print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                print e
+                traceback.print_exc(32) 
+                print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+
+
+    def get_live_data(self):
         result = []
-        if table in ['hosts', 'services', 'downtimes', 'comments', 'hostgroups', 'servicegroups', 'hostsbygroup', 'servicesbygroup', 'servicesbyhostgroup']:
+        # Get the function which implements the Filter: statements
+        filter_func = self.filter_stack.get_stack()
+        out_map = self.out_map[self.out_map_name]
+        filter_map = dict([(k, out_map.get(k)) for k in self.filtercolumns])
+        output_map = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
+        without_filter = len(self.filtercolumns) == 0
+        
+        if self.table in ['hosts', 'services', 'downtimes', 'comments', 'hostgroups', 'servicegroups', 'hostsbygroup', 'servicesbygroup', 'servicesbyhostgroup']:
             #Scan through the objects and apply the Filter: rules
-            if table == 'hosts':
-                type_map = LiveStatus.out_map['Host']
-                without_filter = len(filtercolumns) == 0
-                if not limit:
-                    filtresult = [self.create_output(type_map, y, columns, []) for y in (x for x in self.hosts.values() if (without_filter or filter_stack(self.create_output(type_map, x, [], filtercolumns))))]
+            if self.table == 'hosts':
+                if not self.limit:
+                    filtresult = [self.create_output(output_map, y) for y in (x for x in self.hosts.values() if (without_filter or filter_func(self.create_output(filter_map, x))))]
                 else:
                     hosts = sorted(self.hosts.values(), key = lambda k: k.host_name)
-                    if len(filtercolumns) == 0:
-                        filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in hosts] if filter_stack(y)]
-                    else:
-                        prefiltresult = (x for x in hosts if filter_stack(self.create_output(type_map, x, [], filtercolumns)))
-                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
-                    filtresult = filtresult[:limit]
-            elif table == 'hostsbygroup':
-                type_map = LiveStatus.out_map['Hostsbygroup']
+                    filtresult = [self.create_output(output_map, y) for y in (x for x in hosts if (without_filter or filter_func(self.create_output(filter_map, x))))]
+                    filtresult = filtresult[:self.limit]
+            elif self.table == 'hostsbygroup':
                 # instead of self.hosts.values()
                 # loop over hostgroups, then over members, then flatten the list, then add a hostgroup attribute to each host
-                without_filter = len(filtercolumns) == 0
-                if not limit:
-                    filtresult = [self.create_output(type_map, x, columns, []) for x in [
+                if True:
+                    filtresult = [self.create_output(output_map, x) for x in [
                         host for host in [
                             setattr(hohg[0], 'hostgroup', hohg[1]) or hohg[0] for hohg in [
                                 # (host, hg), (host, hg), ... host objects are individuals
@@ -5440,31 +5902,23 @@ class LiveStatus:
                                         sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
                                 ] for item0 in inner_list0[0]
                             ]
-                        ] if (without_filter or filter_stack(self.create_output(type_map, host, [], filtercolumns)))
+                        ] if (without_filter or filter_func(self.create_output(filter_map, host)))
                     ]]
-                else:
-                    # Now implemented. Why would one limit this anyway?
-                    pass
-            elif table == 'services':
-                type_map = LiveStatus.out_map['Service']
-                without_filter = len(filtercolumns) == 0
-                if not limit:
-                    filtresult = [self.create_output(type_map, y, columns, []) for y in (x for x in self.services.values() if (without_filter or filter_stack(self.create_output(type_map, x, [], filtercolumns))))]
+                if self.limit:
+                    filtresult = filtresult[:self.limit]
+            elif self.table == 'services':
+                if not self.limit:
+                    filtresult = [self.create_output(output_map, y) for y in (x for x in self.services.values() if (without_filter or filter_func(self.create_output(filter_map, x))))]
                 else:
                     services = sorted(self.services.values(), key = lambda k: (k.host_name, k.service_description))
-                    if len(filtercolumns) == 0:
-                        filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in services] if filter_stack(y)]
-                    else:
-                        prefiltresult = (x for x in services if filter_stack(self.create_output(type_map, x, [], filtercolumns)))
-                        filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
-                    filtresult = filtresult[:limit]
-            elif table == 'servicesbygroup':
-                type_map = LiveStatus.out_map['Servicesbygroup']
-                without_filter = len(filtercolumns) == 0
+                    filtresult = [self.create_output(output_map, y) for y in (x for x in services if (without_filter or filter_func(self.create_output(filter_map, x))))]
+                    filtresult = filtresult[:self.limit]
+            elif self.table == 'servicesbygroup':
                 # Here we have more generators instead of list comprehensions, but in fact it makes no difference
                 # (Tested with 2000 services)
-                if not limit:
-                    filtresult = [self.create_output(type_map, x, columns, []) for x in (
+                # Multisite actually uses this with limit. This is a temporary workaround because limiting requires sorting
+                if True:
+                    filtresult = [self.create_output(output_map, x) for x in (
                         svc for svc in (
                             setattr(servicesg[0], 'servicegroup', servicesg[1]) or servicesg[0] for servicesg in (
                                 # (service, sg), (service, sg), ...  service objects are individuals
@@ -5475,17 +5929,15 @@ class LiveStatus:
                                         sorted([sg0 for sg0 in self.servicegroups.values() if sg0.members], key = lambda k: k.servicegroup_name)
                                 ) for item0 in inner_list0[0]
                             )
-                        ) if (without_filter or filter_stack(self.create_output(type_map, svc, [], filtercolumns)))
+                        ) if (without_filter or filter_func(self.create_output(filter_map, svc)))
                     )]
-                else:
-                    # Now implemented. Why would one limit this anyway?
-                    pass
-            elif table == 'servicesbyhostgroup':
+                if self.limit:
+                    filtresult = filtresult[:self.limit]
+            elif self.table == 'servicesbyhostgroup':
                 # We will use prefiltercolumns here for some serious speedup.
                 # For example, if nagvis wants Filter: host_groups >= hgxy
                 # we don't have to use the while list of hostgroups in
                 # the innermost loop
-                type_map = LiveStatus.out_map['Servicesbyhostgroup']
                 # Filter: host_groups >= linux-servers
                 # host_groups is a service attribute
                 # We can get all services of all hosts of all hostgroups and filter at the end
@@ -5493,9 +5945,8 @@ class LiveStatus:
                 # Also host_name, but then we must filter the second step.
                 # And a mixture host_groups/host_name with FilterAnd/Or? Must have several filter functions
                 # This is still under construction. The code can be made simpler
-                without_filter = len(filtercolumns) == 0
-                if not limit:
-                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in (
+                if True:
+                    filtresult = [self.create_output(output_map, x) for x in (
                         svc for svc in (
                             setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
                                 # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
@@ -5509,73 +5960,56 @@ class LiveStatus:
                                     ) for item0 in inner_list0[0] if item0.services
                                 ) for item1 in inner_list1[0]
                             )
-                        ) if (without_filter or filter_stack(self.create_output(type_map, svc, [], filtercolumns)))
+                        ) if (without_filter or filter_func(self.create_output(filter_map, svc)))
                     )]
+                if self.limit:
+                    filtresult = filtresult[:self.limit]
+            elif self.table == 'downtimes':
+                if without_filter:
+                    filtresult = [self.create_output(output_map, y) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], [])]
                 else:
-                    # Now implemented. Why would one limit this anyway?
-                    pass
-            elif table == 'downtimes':
-                type_map = LiveStatus.out_map['Downtime']
-                need_filter = len(filtercolumns) > 0
-                if len(filtercolumns) == 0:
-                    filtresult = [self.create_output(type_map, y, columns, filtercolumns) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], [])]
+                    prefiltresult = [d for d in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], []) if filter_func(self.create_output(filter_map, d))]
+                    filtresult = [self.create_output(output_map, x) for x in prefiltresult]
+            elif self.table == 'comments':
+                if without_filter:
+                    filtresult = [self.create_output(output_map, y) for y in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], [])]
                 else:
-                    prefiltresult = [d for d in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], []) if filter_stack(self.create_output(type_map, d, [], filtercolumns))]
-                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
-            elif table == 'comments':
-                type_map = LiveStatus.out_map['Comment']
-                if len(filtercolumns) == 0:
-                    filtresult = [self.create_output(type_map, y, columns, filtercolumns) for y in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], [])]
+                    prefiltresult = [c for c in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], []) if filter_func(self.create_output(filter_map, c))]
+                    filtresult = [self.create_output(output_map, x) for x in prefiltresult]
+            elif self.table == 'hostgroups':
+                if without_filter:
+                    filtresult = [y for y in [self.create_output(output_map, x) for x in self.hostgroups.values()] if filter_func(y)]
                 else:
-                    prefiltresult = [c for c in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], []) if filter_stack(self.create_output(type_map, c, [], filtercolumns))]
-                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
-            elif table == 'hostgroups':
-                type_map = LiveStatus.out_map['Hostgroup']
-                if len(filtercolumns) == 0:
-                    filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in self.hostgroups.values()] if filter_stack(y)]
+                    prefiltresult = [x for x in self.hostgroups.values() if filter_func(self.create_output(filter_map, x))]
+                    filtresult = [self.create_output(output_map, x) for x in prefiltresult]
+            elif self.table == 'servicegroups':
+                if without_filter:
+                    filtresult = [y for y in [self.create_output(output_map, x) for x in self.servicegroups.values()] if filter_func(y)]
                 else:
-                    prefiltresult = [x for x in self.hostgroups.values() if filter_stack(self.create_output(type_map, x, [], filtercolumns))]
-                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
-            elif table == 'servicegroups':
-                type_map = LiveStatus.out_map['Servicegroup']
-                if len(filtercolumns) == 0:
-                    filtresult = [y for y in [self.create_output(type_map, x, columns, filtercolumns) for x in self.servicegroups.values()] if filter_stack(y)]
-                else:
-                    prefiltresult = [x for x in self.servicegroups.values() if filter_stack(self.create_output(type_map, x, [], filtercolumns))]
-                    filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
+                    prefiltresult = [x for x in self.servicegroups.values() if filter_func(self.create_output(filter_map, x))]
+                    filtresult = [self.create_output(output_map, x) for x in prefiltresult]
 
-            if stats_filter_stack.qsize() > 0:
-                result = self.statsify_result(filtresult, stats_filter_stack, stats_postprocess_stack, stats_group_by)
-            else:
-                # Results are host/service/etc dicts with the requested attributes
-                # Columns: = keys of the dicts
-                result = filtresult
-        elif table == 'contacts':
-            type_map = LiveStatus.out_map['Contact']
-            for c in self.contacts.values():
-                result.append(self.create_output(type_map, c, columns, filtercolumns))
-        elif table == 'commands':
-            type_map = LiveStatus.out_map['Command']
+            result = filtresult
+        elif self.table == 'contacts':
+            filtresult = [self.create_output(output_map, y) for y in (x for x in self.contacts.values() if (without_filter or filter_func(self.create_output(filter_map, x))))]
+            if self.limit:
+                filtresult = filtresult[:self.limit]
+        elif self.table == 'commands':
             for c in self.commands.values():
-                result.append(self.create_output(type_map, c, columns, filtercolumns))
-        elif table == 'schedulers':
-            type_map = LiveStatus.out_map['SchedulerLink']
+                result.append(self.create_output(output_map, c))
+        elif self.table == 'schedulers':
             for s in self.schedulers.values():
-                result.append(self.create_output(type_map, s, columns, filtercolumns))
-        elif table == 'pollers':
-            type_map = LiveStatus.out_map['PollerLink']
+                result.append(self.create_output(output_map, s))
+        elif self.table == 'pollers':
             for s in self.pollers.values():
-                result.append(self.create_output(type_map, s, columns, filtercolumns))
-        elif table == 'reactionners':
-            type_map = LiveStatus.out_map['ReactionnerLink']
+                result.append(self.create_output(output_map, s))
+        elif self.table == 'reactionners':
             for s in self.reactionners.values():
-                result.append(self.create_output(type_map, s, columns, filtercolumns))
-        elif table == 'brokers':
-            type_map = LiveStatus.out_map['BrokerLink']
+                result.append(self.create_output(output_map, s))
+        elif self.table == 'brokers':
             for s in self.brokers.values():
-                result.append(self.create_output(type_map, s, columns, filtercolumns))
-        elif table == 'problems':
-            type_map = LiveStatus.out_map['Problem']
+                result.append(self.create_output(output_map, s))
+        elif self.table == 'problems':
             # We will crate a problems list first with all problems and source in it
             # TODO : create with filter
             problems = []
@@ -5589,12 +6023,12 @@ class LiveStatus:
                     problems.append(pb)
             # Then return
             for pb in problems:
-                result.append(self.create_output(type_map, pb, columns, filtercolumns))
-        elif table == 'status':
-            type_map = LiveStatus.out_map['Config']
+                result.append(self.create_output(output_map, pb))
+        elif self.table == 'status':
+            out_map = self.out_map['Config']
             for c in self.configs.values():
-                result.append(self.create_output(type_map, c, columns, filtercolumns))
-        elif table == 'columns':
+                result.append(self.create_output(output_map, c))
+        elif self.table == 'columns':
             result.append({
                 'description' : 'A description of the column' , 'name' : 'description' , 'table' : 'columns' , 'type' : 'string' })
             result.append({
@@ -5612,18 +6046,26 @@ class LiveStatus:
                         else:
                             result.append({'description' : 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
 
+        if self.stats_request:
+            result = self.statsify_result(result)
         #print "result is", result
         return result
 
 
-    def get_live_data_log(self, table, columns, prefiltercolumns, filtercolumns, limit, filter_stack, sql_filter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by):
+    def get_live_data_log(self):
+        filter_func = self.filter_stack.get_stack()
+        sql_filter_func = self.sql_filter_stack.get_stack()
+        out_map = self.out_map[self.out_map_name]
+        filter_map = dict([(k, out_map.get(k)) for k in self.filtercolumns])
+        output_map = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
+        without_filter = len(self.filtercolumns) == 0
         result = []
-        if table == 'log':
-            type_map = LiveStatus.out_map['Logline']
+        if self.table == 'log':
+            out_map = self.out_map['Logline']
             # We can apply the filterstack here as well. we have columns and filtercolumns.
             # the only additional step is to enrich log lines with host/service-attributes
             # A timerange can be useful for a faster preselection of lines
-            filter_clause, filter_values = sql_filter_stack()
+            filter_clause, filter_values = sql_filter_func()
             c = self.dbconn.cursor()
             try:
                 if sqlite3.paramstyle == 'pyformat':
@@ -5638,10 +6080,11 @@ class LiveStatus:
             dbresult = c.fetchall()
             if sqlite3.paramstyle == 'pyformat':
                 dbresult = [self.row_factory(c, d) for d in dbresult]
-            prefiltresult = [y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(columns + filtercolumns)) for x in dbresult) if filter_stack(self.create_output(type_map, y, [], filtercolumns))]
-            filtresult = [self.create_output(type_map, x, columns, filtercolumns) for x in prefiltresult]
-            if stats_filter_stack.qsize() > 0:
-                result = self.statsify_result(filtresult, stats_filter_stack, stats_postprocess_stack, stats_group_by)
+
+            prefiltresult = [y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
+            filtresult = [self.create_output(output_map, x) for x in prefiltresult]
+            if self.stats_request:
+                result = self.statsify_result(filtresult)
             else:
                 # Results are host/service/etc dicts with the requested attributes
                 # Columns: = keys of the dicts
@@ -5651,7 +6094,20 @@ class LiveStatus:
         return result
 
 
-    def statsify_result(self, filtresult, stats_filter_stack, stats_postprocess_stack, stats_group_by):
+    def create_output(self, out_map, elt):
+        output = {} 
+        display_attributes = out_map.keys()
+        for display in display_attributes:
+            try:
+                hook = out_map[display]['hook']
+                value = hook(elt)
+            except:
+                value = ''
+            output[display] = value
+        return output
+
+
+    def statsify_result(self, filtresult):
         """Explanation:
         stats_group_by is ["service_description", "host_name"]
         filtresult is a list of elements which have, among others, service_description and host_name attributes
@@ -5685,46 +6141,46 @@ class LiveStatus:
         """
         result = []
         resultdict = {}
-        if stats_group_by:
+        if self.stats_group_by:
             # stats_group_by is a list in newer implementations
-            if isinstance(stats_group_by, list):
-                stats_group_by = tuple(stats_group_by)
+            if isinstance(self.stats_group_by, list):
+                self.stats_group_by = tuple(self.stats_group_by)
             else:
-                stats_group_by = tuple([stats_group_by])
+                self.stats_group_by = tuple([self.stats_group_by])
             # Break up filtresult and prepare resultdict
             # rseultarr is not a simple array (for a single result line)
             # It is a dict with the statsgroupyby: as key
             groupedresult = {}
             for elem in filtresult:
                 # Make a tuple consisting of the stats_group_by values
-                stats_group_by_values = tuple([elem[c] for c in stats_group_by])
+                stats_group_by_values = tuple([elem[c] for c in self.stats_group_by])
                 if not stats_group_by_values in groupedresult:
                     groupedresult[stats_group_by_values] = []
                 groupedresult[stats_group_by_values].append(elem)
             for group in groupedresult:
                 # All possible combinations of stats_group_by values. group is a tuple
-                resultdict[group] = dict(zip(stats_group_by, group))
+                resultdict[group] = dict(zip(self.stats_group_by, group))
 
         #The number of Stats: statements
         #For each statement there is one function on the stack
-        maxidx = stats_filter_stack.qsize()
+        maxidx = self.stats_filter_stack.qsize()
         for i in range(maxidx):
             # Stats:-statements were put on a Lifo, so we need to reverse the number
+            #stats_number = str(maxidx - i - 1)
             stats_number = maxidx - i - 1
             # First, get a filter for the attributes mentioned in Stats: statements
-            filtfunc = stats_filter_stack.get()
+            filtfunc = self.stats_filter_stack.get()
             # Then, postprocess (sum, max, min,...) the results
-            postprocess = stats_postprocess_stack.get()
-            if stats_group_by:
+            postprocess = self.stats_postprocess_stack.get()
+            if self.stats_group_by:
                 # Calc statistics over _all_ elements of groups
                 # which share the same stats_filter_by
                 for group in groupedresult:
                     resultdict[group][stats_number] = postprocess(filter(filtfunc, groupedresult[group]))
-
             else:
                 # Calc statistics over _all_ elements of filtresult
                 resultdict[stats_number] = postprocess(filter(filtfunc, filtresult))
-        if stats_group_by:
+        if self.stats_group_by:
             for group in resultdict:
                 result.append(resultdict[group])
         else:
@@ -5733,63 +6189,16 @@ class LiveStatus:
         return result
 
 
-    def format_live_data(self, result, columns, outputformat, columnheaders, separators, aliases):
-        output = ''
-        lines = []
-        if outputformat == 'csv':
-            if len(result) > 0:
-                if columnheaders != 'off' or len(columns) == 0:
-                    if len(aliases) > 0:
-                        # This is for statements like "Stats: .... as alias_column
-                        lines.append(separators[1].join([aliases[col] for col in columns]))
-                    else:
-                        if (len(columns) == 0):
-                            # Show all available columns
-                            columns = sorted(result[0].keys())
-                        lines.append(separators[1].join(columns))
-                for object in result:
-                    # Construct one line of output for each object found
-                    l = []
-                    for x in [object[c] for c in columns]:
-                        if isinstance(x, list):
-                            l.append(separators[2].join(str(y) for y in x))
-                        else:
-                            l.append(str(x))
-                    lines.append(separators[1].join(l))
-            else:
-                if columnheaders == 'on':
-                    if len(aliases) > 0:
-                        lines.append(separators[1].join([aliases[col] for col in columns]))
-                    else:
-                        lines.append(separators[1].join(columns))
-            return separators[0].join(lines)
-
-        elif outputformat == 'json' or outputformat == 'python':
-            if len(result) > 0:
-                if columnheaders != 'off' or len(columns) == 0:
-                    if len(aliases) > 0:
-                        # This is for statements like "Stats: .... as alias_column
-                        lines.append([str(aliases[col]) for col in columns])
-                    else:
-                        if (len(columns) == 0):
-                            # Show all available columns
-                            columns = sorted(result[0].keys())
-                        lines.append(columns)
-                for object in result:
-                    lines.append([object[c] for c in columns])
-            else:
-                if columnheaders == 'on':
-                    if len(aliases) > 0:
-                        lines.append([aliases[col] for col in columns])
-                    else:
-                        lines.append(columns)
-            if outputformat == 'json':
-                return json.dumps(lines, separators=(',', ':'))
-            else:
-                return str(json.loads(json.dumps(lines, separators=(',', ':'))))
-
-
     def make_filter(self, operator, attribute, reference):
+        if reference != None:
+            # Reference is now datatype string. The referring object attribute on the other hand
+            # may be an integer. (current_attempt for example)
+            # So for the filter to work correctly (the two values compared must be
+            # of the same type), we need to convert the reference to the desired type
+            converter = self.find_converter(attribute)
+            if converter:
+                reference = converter(reference)
+
         # The filters are closures.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         def eq_filter(ref):
@@ -5900,58 +6309,6 @@ class LiveStatus:
             raise "wrong operation", operator
 
 
-    def get_filter_stack(self, filter_stack):
-        if filter_stack.qsize() == 0:
-            return lambda x : True
-        else:
-            return filter_stack.get()
-        pass
-
-
-    def and_filter_stack(self, num, filter_stack):
-        filters = []
-        for i in range(int(num)):
-            filters.append(filter_stack.get())
-        # Take from the stack:
-        # List of functions taking parameter ref
-        # Make a combined anded function
-        # Put it on the stack
-        def and_filter(ref):
-            myfilters = filters
-            failed = False
-            for filter in myfilters:
-                if not filter(ref):
-                    failed = True
-                    break
-                else:
-                    pass
-            return not failed
-        filter_stack.put(and_filter)
-        return filter_stack
-
-
-    def or_filter_stack(self, num, filter_stack):
-        filters = []
-        for i in range(int(num)):
-            filters.append(filter_stack.get())
-        # Take from the stack:
-        # List of functions taking parameter ref
-        # Make a combined ored function
-        # Put it on the stack
-        def or_filter(ref):
-            myfilters = filters
-            failed = True
-            for filter in myfilters:
-                if filter(ref):
-                    failed = False
-                    break
-                else:
-                    pass
-            return not failed
-        filter_stack.put(or_filter)
-        return filter_stack
-
-
     def make_sql_filter(self, operator, attribute, reference):
         # The filters are text fragments which are put together to form a sql where-condition finally.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
@@ -5963,11 +6320,11 @@ class LiveStatus:
         def ne_filter():
             if reference == '':
                 return ['%s IS NOT NULL' % attribute, ()]
-            else:
+            else: 
                 return ['%s != ?' % attribute, (reference, )]
         def gt_filter():
             return ['%s > ?' % attribute, (reference, )]
-        def ge_filter():
+        def ge_filter(): 
             return ['%s >= ?' % attribute, (reference, )]
         def lt_filter():
             return ['%s < ?' % attribute, (reference, )]
@@ -5991,263 +6348,3 @@ class LiveStatus:
             return match_filter
 
 
-    def get_sql_filter_stack(self, filter_stack):
-        if filter_stack.qsize() == 0:
-            return ["1 = ?", [1]]
-        else:
-            return filter_stack.get()
-        pass
-
-
-    def and_sql_filter_stack(self, num, filter_stack):
-        filters = []
-        for i in range(int(num)):
-            filters.append(filter_stack.get())
-        # Take from the stack:
-        # List of functions returning [a where clause with ?, a tuple with the values for ?]
-        # Combine the clauses with "and", merge the value tuples
-        # Put a new function on the stack (returns anded clause and merged values)
-        and_clause = '(' + (' AND ').join([ x()[0] for x in filters ]) + ')'
-        and_values = reduce(lambda x, y: x+y, [ x()[1] for x in filters ])
-        filter_stack.put(lambda : [and_clause, and_values])
-        return filter_stack
-
-
-    def or_sql_filter_stack(self, num, filter_stack):
-        filters = []
-        for i in range(int(num)):
-            filters.append(filter_stack.get())
-        and_clause = '(' + (' OR ').join([ x()[0] for x in filters ]) + ')'
-        and_values = reduce(lambda x, y: x+y, [ x()[1] for x in filters ])
-        filter_stack.put(lambda : [and_clause, and_values])
-        return filter_stack
-
-
-    def strip_table_from_column(self, table, column):
-        # Cut off the table name, because it is possible to say service_state instead of state
-        return re.sub(re.sub('s$', '', table) + '_', '', column, 1)
-
-
-    def handle_request(self, data):
-        # Dirty hack to change the output of get_full_name for services
-        # for cvs and json
-        global get_full_name
-        title = ''
-        content = ''
-        response = ''
-        columns = []
-        filtercolumns = []
-        prefiltercolumns = []
-        responseheader = 'off'
-        outputformat = 'csv'
-        keepalive = 'off'
-        limit = None
-
-        # So set first this format in our global function
-        get_full_name.outputformat = outputformat
-
-        columnheaders = 'off'
-        stats_group_by = []
-        aliases = []
-        extcmd = False
-        print "REQUEST", data
-        # Set the default values for the separators
-        separators = LiveStatus.separators
-        # Initialize the stacks which are needed for the Filter: and Stats:
-        # filter- and count-operations
-        filter_stack = Queue.LifoQueue()
-        sql_filter_stack = Queue.LifoQueue()
-        stats_filter_stack = Queue.LifoQueue()
-        stats_postprocess_stack = Queue.LifoQueue()
-        for line in data.splitlines():
-            line = line.strip()
-            if line.find('GET ') != -1:
-                # Get the name of the base table
-                cmd, table = line.split(' ', 1)
-            elif line.find('Columns: ') != -1:
-                # Get the names of the desired columns
-                p = re.compile(r'\s+')
-                cmd, columns = p.split(line, 1)
-                columns = [self.strip_table_from_column(table, c) for c in p.split(columns)]
-                columnheaders = 'off'
-            elif line.find('ResponseHeader:') != -1:
-                cmd, responseheader = line.split(':', 1)
-                # Strip the responseheader because a   can be here
-                responseheader = responseheader.strip()
-            elif line.find('OutputFormat:') != -1:
-                cmd, outputformat = line.split(':', 1)
-                # Maybe we have a space before it
-                outputformat = outputformat.strip()
-                get_full_name.outputformat = outputformat
-            elif line.find('KeepAlive:') != -1:
-                cmd, keepalive = line.split(':', 1)
-                keepalive = keepalive.strip()
-            elif line.find('ColumnHeaders:') != -1:
-                cmd, columnheaders = line.split(':', 1)
-                columnheaders = columnheaders.strip()
-            elif line.find('Limit:') != -1:
-                cmd, limit = line.split(':', 1)
-                limit = int(limit.strip())
-            elif line.find('Filter:') != -1:
-                try:
-                    cmd, attribute, operator, reference = line.split(' ', 3)
-                except:
-                    cmd, attribute, operator = line.split(' ', 3)
-                    reference = ''
-                if operator in ['=', '!=', '>', '>=', '<', '<=', '=~', '~', '~~']:
-                    # Cut off the table name
-                    attribute = self.strip_table_from_column(table, attribute)
-                    # Put a function on top of the filter_stack which implements
-                    # the desired operation
-                    filtercolumns.append(attribute)
-                    prefiltercolumns.append(attribute)
-                    # Reference is now datatype string. The referring object attribute on the other hand
-                    # may be an integer. (current_attempt for example)
-                    # So for the filter to work correctly (the two values compared must be
-                    # of the same type), we need to convert the reference to the desired type
-                    converter = self.find_converter(table, attribute)
-                    if converter:
-                        reference = converter(reference)
-                    filter_stack.put(self.make_filter(operator, attribute, reference))
-                    if table == 'log':
-                        if attribute == 'time':
-                            sql_filter_stack.put(self.make_sql_filter(operator, attribute, reference))
-                else:
-                    print "illegal operation", operator
-                    pass # illegal operation
-            elif line.find('And: ', 0, 5) != -1:
-                cmd, andnum = line.split(' ', 1)
-                # Take the last andnum functions from the stack
-                # Construct a new function which makes a logical and
-                # Put the function back onto the stack
-                filter_stack = self.and_filter_stack(andnum, filter_stack)
-            elif line.find('Or: ', 0, 4) != -1:
-                cmd, ornum = line.split(' ', 1)
-                # Take the last ornum functions from the stack
-                # Construct a new function which makes a logical or
-                # Put the function back onto the stack
-                filter_stack = self.or_filter_stack(ornum, filter_stack)
-            elif line.find('StatsGroupBy: ') != -1:
-                p = re.compile(r'\s+')
-                cmd, stats_group_by = p.split(line, 1)
-                stats_group_by = [self.strip_table_from_column(table, c) for c in p.split(stats_group_by)]
-                filtercolumns.extend(stats_group_by)
-                # Deprecated. If your query contains at least one Stats:-header
-                # then Columns: has the meaning of the old StatsGroupBy: header
-            elif line.find('Stats: ') != -1:
-                try:
-                    cmd, attribute, operator, reference = line.split(' ', 3)
-                    if attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference.find('as ', 3) != -1:
-                        attribute, operator = operator, attribute
-                        asas, alias = reference.split(' ')
-                        aliases.append(alias)
-                    elif attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference == '=':
-                        # Workaround for thruk-cmds like: Stats: sum latency =
-                        attribute, operator = operator, attribute
-                        reference = ''
-                except:
-                    cmd, attribute, operator = line.split(' ', 3)
-                    if attribute in ['sum', 'min', 'max', 'avg', 'std']:
-                        attribute, operator = operator, attribute
-                    reference = ''
-                attribute = self.strip_table_from_column(table, attribute)
-                if operator in ['=', '!=', '>', '>=']:
-                    filtercolumns.append(attribute)
-                    converter = self.find_converter(table, attribute)
-                    if converter:
-                        reference = converter(reference)
-                    stats_filter_stack.put(self.make_filter(operator, attribute, reference))
-                    stats_postprocess_stack.put(self.make_filter('count', attribute, None))
-                elif operator in ['sum', 'min', 'max', 'avg', 'std']:
-                    columns.append(attribute)
-                    stats_filter_stack.put(self.make_filter('dummy', attribute, None))
-                    stats_postprocess_stack.put(self.make_filter(operator, attribute, None))
-                else:
-                    print "illegal operation", operator
-                    pass # illegal operation
-
-            elif line.find('StatsAnd: ') != -1:
-                cmd, andnum = line.split(' ', 1)
-                stats_filter_stack = self.and_filter_stack(andnum, stats_filter_stack)
-            elif line.find('StatsOr: ') != -1:
-                cmd, ornum = line.split(' ', 1)
-                stats_filter_stack = self.or_filter_stack(ornum, stats_filter_stack)
-            elif line.find('Separators: ') != -1:
-                cmd, sep1, sep2, sep3, sep4 = line.split(' ', 5)
-                separators = map(lambda x: chr(int(x)), [sep1, sep2, sep3, sep4])
-            elif line.find('COMMAND') != -1:
-                cmd, extcmd = line.split(' ', 1)
-            else:
-                # This line is not valid or not implemented
-                print "Received a line of input which i can't handle : '%s'" % line
-                pass
-
-        if extcmd:
-            # External command are send back to broker
-            e = ExternalCommand(extcmd)
-            self.return_queue.put(e)
-            return '\n', keepalive
-        else:
-            # Did we have Stats:-statements?
-            stats = stats_filter_stack.qsize()
-            if stats > 0 and len(columns) > 0:
-                # StatsGroupBy is deprecated. Columns: can be used instead
-                #filtercolumns.append(columns)
-                stats_group_by = columns
-
-            # Make filtercolumns unique
-            filtercolumns = list(set(filtercolumns))
-            prefiltercolumns = list(set(prefiltercolumns))
-
-            if filter_stack.qsize() > 1:
-                # If we have Filter: statements but no FilterAnd/Or statements
-                # Make one big filter where the single filters are anded
-                filter_stack = self.and_filter_stack(filter_stack.qsize(), filter_stack)
-            try:
-                # Get the function which implements the Filter: statements
-                simplefilter_stack = self.get_filter_stack(filter_stack)
-                if table == 'log':
-                    if sql_filter_stack.qsize() > 1:
-                        sql_filter_stack = self.and_sql_filter_stack(sql_filter_stack.qsize(), sql_filter_stack)
-                    sql_simplefilter_stack = self.get_sql_filter_stack(sql_filter_stack)
-                    result = self.get_live_data_log(table, columns, prefiltercolumns, filtercolumns, limit, simplefilter_stack, sql_simplefilter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by)
-                else:
-                    # If the pnpgraph_present column is involved, then check
-                    # with each request if the pnp perfdata path exists
-                    if 'pnpgraph_present' in columns + filtercolumns + prefiltercolumns and LiveStatus.pnp_path and os.access(LiveStatus.pnp_path, os.R_OK):
-                        LiveStatus.pnp_path_readable = True
-                    else:
-                        LiveStatus.pnp_path_readable = False
-                    # Apply the filters on the broker's host/service/etc elements
-                    result = self.get_live_data(table, columns, prefiltercolumns, filtercolumns, limit, simplefilter_stack, stats_filter_stack, stats_postprocess_stack, stats_group_by)
-                if stats > 0:
-                    columns = range(stats)
-                    if stats_group_by:
-                        columns = stats_group_by + columns
-                    if len(aliases) == 0:
-                        #If there were Stats: staments without "as", show no column headers at all
-                        columnheaders = 'off'
-                    else:
-                        columnheaders = 'on'
-
-                # Now bring the retrieved information to a form which can be sent back to the client
-                response = self.format_live_data(result, columns, outputformat, columnheaders, separators, aliases) + "\n"
-            except Exception, e:
-                import traceback
-                print "REQUEST produces an exception", data
-                print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-                print e
-                traceback.print_exc(32)
-                print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-
-            if responseheader == 'fixed16':
-                statuscode = 200
-                responselength = len(response) # no error
-                response = '%3d %11d\n' % (statuscode, responselength) + response
-
-            print "REQUEST", data
-            print "RESPONSE\n%s\n" % response
-            return response, keepalive
-
-    def row_factory(self, cursor, row):
-        return Logline(cursor, row)
