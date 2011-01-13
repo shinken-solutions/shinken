@@ -5802,7 +5802,9 @@ class LiveStatusRequest(LiveStatus):
                         attribute, operator = operator, attribute
                     reference = ''
                 attribute = self.strip_table_from_column(attribute)
-                if operator in ['=', '!=', '>', '>=']:
+                if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
+                    if operator in ['!>', '!>=', '!<', '!<=']:
+                        operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
                     self.filtercolumns.append(attribute)
                     self.stats_columns.append(attribute)
                     self.stats_filter_stack.put(self.make_filter(operator, attribute, reference))
