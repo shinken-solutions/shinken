@@ -188,7 +188,8 @@ setup(
               (os.sep.join([etc_path, 'objects', 'hosts']), [f for f in glob('etc/objects/hosts/[!_]*.cfg')]),
               (os.sep.join([etc_path, 'objects', 'services']), [f for f in glob('etc/objects/services/[!_]*.cfg')]),
               (os.sep.join([etc_path, 'objects', 'contacts']), [f for f in glob('etc/objects/contacts/[!_]*.cfg')]),
-               
+              (os.sep.join([etc_path, 'certs']) , [f for f in glob('etc/certs/[!_]*.pem')]),
+              
               ('/etc/init.d', ['bin/init.d/shinken-arbiter', 'bin/init.d/shinken-broker', 'bin/init.d/shinken-poller',
                                'bin/init.d/shinken-reactionner', 'bin/init.d/shinken-scheduler', 'bin/init.d/shinken']),
               ('/etc/default/', ['bin/default/shinken']),
