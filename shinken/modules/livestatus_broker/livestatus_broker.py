@@ -696,7 +696,7 @@ class Livestatus_broker:
         if sqlite3.paramstyle == 'pyformat':
             self.dbcursor.execute('DELETE FROM LOGS WHERE time < %(limit)s', { 'limit' : limit })
         else:
-            self.dbcursor.execute('DELETE FROM LOGS WHERE time < ?', (limit))
+            self.dbcursor.execute('DELETE FROM LOGS WHERE time < ?', (limit,))
         self.dbconn.commit()
         
 
