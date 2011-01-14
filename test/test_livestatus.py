@@ -274,7 +274,7 @@ class TestConfig(ShinkenTest):
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', 'tmp/livelogs.db' + str(os.getpid()), 'tmp/pnp4nagios_test' + str(os.getpid()))
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', [], 'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()))
         self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
@@ -1974,7 +1974,7 @@ Limit: 1001"""
 class TestConfigBig(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', 'tmp/livelogs.db' + str(os.getpid()), 'tmp/pnp4nagios_test' + str(os.getpid()))
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', [], 'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()))
         self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
@@ -2353,7 +2353,7 @@ OutputFormat: csv
 class TestConfigComplex(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_problem_impact.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', 'tmp/livelogs.db' + str(os.getpid()), 'tmp/pnp4nagios_test' + str(os.getpid()))
+        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', [],  'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()), )
         self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
