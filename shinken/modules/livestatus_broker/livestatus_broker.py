@@ -148,6 +148,17 @@ class Livestatus_broker:
         self.configs[c_id] = c
 
 
+    def manage_update_program_status_brok(self, b):
+        data = b.data
+        c_id = data['instance_id']
+        # We have only one config here, with id 0
+        c = self.configs[0]
+        print c
+        for prop in data:
+            setattr(c, prop, data[prop])
+        #print "CFG:", c
+
+
     def manage_initial_host_status_brok(self, b):
         data = b.data
         h_id = data['id']
