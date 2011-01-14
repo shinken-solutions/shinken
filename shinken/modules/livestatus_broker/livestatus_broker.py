@@ -60,11 +60,13 @@ from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NO
 #Class for the Livestatus Broker
 #Get broks and listen to livestatus query language requests
 class Livestatus_broker:
-    def __init__(self, name, host, port, socket, database_file, pnp_path):
+    def __init__(self, name, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path):
         self.host = host
         self.port = port
         self.socket = socket
+        self.allowed_hosts = allowed_hosts
         self.database_file = database_file
+        self.max_logs_age = max_logs_age
         self.pnp_path = pnp_path
         self.name = name
 
@@ -688,6 +690,16 @@ class Livestatus_broker:
         # rowfactory will later be redefined (in livestatus.py)
 
 
+    def cleanup_log_db(self):
+        limit = int(time.time() - self.max_logs_age * 86400)
+        print "Deleting messages from the log database older than %s" % time.asctime(time.localtime(limit))
+        if sqlite3.paramstyle == 'pyformat':
+            self.dbcursor.execute('DELETE FROM LOGS WHERE time < %(limit)s', { 'limit' : limit })
+        else:
+            self.dbcursor.execute('DELETE FROM LOGS WHERE time < ?', (limit))
+        self.dbconn.commit()
+        
+
     def prepare_pnp_path(self):
         if not self.pnp_path:
             self.pnp_path = False
@@ -733,6 +745,7 @@ class Livestatus_broker:
         self.set_exit_handler()
 
         last_number_of_objects = 0
+        last_db_cleanup_time = 0
         backlog = 5
         size = 8192
         self.listeners = []
@@ -753,7 +766,7 @@ class Livestatus_broker:
         self.input = self.listeners[:]
         databuffer = {}
         open_connections = {}
-
+ 
         while True:
             try:
                 b = self.q.get(True, .01)  # do not block indefinitely
@@ -782,6 +795,16 @@ class Livestatus_broker:
                     if s in self.listeners:
                         # handle the server socket
                         client, address = s.accept()
+                        if isinstance(address, tuple):
+                            client_ip, client_port = address
+                            if self.allowed_hosts and address not in self.allowed_hosts:
+                                print "Connection attempt from illegal ip address", client_ip
+                                try:
+                                    #client.send('Buh!\n')
+                                    client.shutdown(2)
+                                except:
+                                    client.close()
+                                continue
                         self.input.append(client)
                     else:
                         if socketid in open_connections:
@@ -922,6 +945,12 @@ class Livestatus_broker:
                             del open_connections[socketid]
                             self.input.remove(kick_socket)
                             print "closed socket", socketid
+
+            else:
+                # There are no incoming requests, so there's time for some housekeeping
+                if now - last_db_cleanup_time > 86400:
+                    self.cleanup_log_db()
+                    last_db_cleanup_time = now
 
             if self.number_of_objects > last_number_of_objects:
                 # Still in the initialization phase

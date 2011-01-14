@@ -17,6 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 
 #This text is print at the import
 print "I am Livestatus Broker"
@@ -48,22 +49,55 @@ def get_instance(plugin):
             host = plugin.host
     else:
         host = '127.0.0.1'
+
     if hasattr(plugin, 'port') and plugin.port != 'none':
         port = int(plugin.port)
     else:
         port = None
+
     if hasattr(plugin, 'socket') and plugin.socket != 'none':
         socket = plugin.socket
     else:
         socket = None
+
+    if hasattr(plugin, 'allowed_hosts'):
+        ips = [ip.strip() for ip in plugin.allowed_hosts.split(',')]
+        allowed_hosts = [ip for ip in ips if re.match(r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', ip)]
+        if len(ips) != len(allowed_hosts):
+            print "Warning : the list of allowed hosts is invalid"
+            return None
+    else:
+        allowed_hosts = []
+
     if hasattr(plugin, 'database_file'):
         database_file = plugin.database_file
     else:
         database_file = os.sep.join([os.path.abspath(''), 'var', 'livestatus.db'])
 
+    if hasattr(plugin, 'max_logs_age'):
+        maxmatch = re.match(r'^(\d+)([dwm])$', plugin.max_logs_age)
+        if maxmatch == None:
+            print 'Warning : wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number>'
+            return None
+        else:
+            if not maxmatch.group(2):
+                max_logs_age = int(maxmatch.group(1))
+            elif maxmatch.group(2) == 'd':
+                max_logs_age = int(maxmatch.group(1))
+            elif maxmatch.group(2) == 'w':
+                max_logs_age = int(maxmatch.group(1)) * 7
+            elif maxmatch.group(2) == 'm':
+                max_logs_age = int(maxmatch.group(1)) * 31
+            elif maxmatch.group(2) == 'y':
+                max_logs_age = int(maxmatch.group(1)) * 365
+    else:
+        max_logs_age = 365
+
     if hasattr(plugin, 'pnp_path'):
         pnp_path = plugin.pnp_path
     else:
         pnp_path = ''
-    instance = Livestatus_broker(plugin.get_name(), host, port, socket, database_file, pnp_path)
+    instance = Livestatus_broker(plugin.get_name(), host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path)
     return instance
+
+
