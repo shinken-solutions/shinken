@@ -27,7 +27,10 @@
 import copy
 import time
 
-from shinken.db_mysql import DBMysql
+try:
+    from shinken.db_mysql import DBMysql
+except : # TODO : fix this, python2.4 is not happy here?
+    from db_mysql import DBMysql
 
 
 def de_unixify(t):

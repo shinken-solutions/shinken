@@ -171,7 +171,10 @@ class Pickle_retention_scheduler:
                 #And also add downtimes and comments
                 for dt in h.downtimes:
                     dt.ref = h
-                    dt.extra_comment.ref = h
+                    if hasattr(dt, 'extra_comment'):
+                        dt.extra_comment.ref = h
+                    else:
+                        dt.extra_comment = None
                     sched.add(dt)
                 for c in h.comments:
                     c.ref = h
@@ -201,7 +204,10 @@ class Pickle_retention_scheduler:
                 #And also add downtimes and comments
                 for dt in s.downtimes:
                     dt.ref = s
-                    dt.extra_comment.ref = s
+                    if hasattr(dt, 'extra_comment'):
+                        dt.extra_comment.ref = s
+                    else:
+                        dt.extra_comment = None
                     sched.add(dt)
                 for c in s.comments:
                     c.ref = s

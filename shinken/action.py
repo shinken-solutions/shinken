@@ -122,7 +122,10 @@ class __Action:
 
 
     def got_shell_characters(self):
-        return any( c in shellchars for c in self.command )
+        for c in self.command:
+            if c in shellchars:
+                return True
+        return False
 
 
 ###
@@ -139,8 +142,11 @@ if os.name != 'nt':
             # If the command line got shell characters, we should go in a shell
             # mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
-          
-            cmd = self.command if force_shell else shlex.split(self.command)
+
+            if force_shell:
+                cmd = self.command
+            else :
+                shlex.split(self.command)
               
             try:
                 self.process = subprocess.Popen(cmd,
