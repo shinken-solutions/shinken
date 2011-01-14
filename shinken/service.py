@@ -296,10 +296,14 @@ class Service(SchedulingItem):
 
     # Give a nice name output
     def get_name(self):
-        if not self.is_tpl():
-            return self.service_description
-        else:
-            return self.name
+        try:
+            if not self.is_tpl():
+                return self.service_description
+            else:
+                return self.name
+        except AttributeError :
+            return 'SERVICE-DESCRIPTION-MISSING'
+
 
     # Get the servicegroups names
     def get_groupnames(self):

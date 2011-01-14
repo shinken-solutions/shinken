@@ -36,6 +36,10 @@ done
 shift `expr $OPTIND - 1`
 
 CMD=$1
+if [ $# -eq 0 ]; then
+	usage
+	exit 3
+fi
 shift
 SUBMODULES=$*
 
