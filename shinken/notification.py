@@ -151,7 +151,6 @@ class Notification(Action):
         self.end_time = end_time
         self.notification_type = notification_type
 
-        #DBG
         self.creation_time = time.time()
 
 
@@ -241,3 +240,7 @@ class Notification(Action):
         for prop in cls.properties:
             if prop in state:
                 setattr(self, prop, state[prop])
+        # Hook for load of 0.4 notification : there were no
+        # creation time, must put one
+        if not hasattr(self, 'creation_time'):
+            self.creation_time = time.time()
