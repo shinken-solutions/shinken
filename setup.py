@@ -257,6 +257,8 @@ def update_file_with_string(path, match, new_string):
     f.close()
 
 
+if '--help' in sys.argv:
+    sys.exit(1)
 
 #If there is another root, it's strange, it must be a special case...
 if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv) and re.search("--root", ' '.join(sys.argv)) == None:
