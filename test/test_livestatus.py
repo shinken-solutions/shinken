@@ -30,6 +30,7 @@ import subprocess
 import shutil
 import time
 from timeperiod import Timeperiod
+from brok import Brok
 
 sys.path.append("../shinken/modules/livestatus_broker")
 from livestatus_broker import Livestatus_broker
@@ -1816,6 +1817,11 @@ test_host_0;0;1
     def test_thruk_log_current_groups(self):
         self.print_header() 
         now = time.time()
+        b = Brok('log', {'log' : "[%lu] EXTERNAL COMMAND: [%lu] DISABLE_NOTIFICATIONS" % (now, now) })
+        self.livestatus_broker.manage_log_brok(b)
+        b = Brok('log', {'log' : "[%lu] EXTERNAL COMMAND: [%lu] STOP_EXECUTING_SVC_CHECKS" % (now, now) })
+        self.livestatus_broker.manage_log_brok(b)
+        self.update_broker()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
@@ -1828,6 +1834,26 @@ test_host_0;0;1
         self.update_broker()
         self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, 'WARNING']])
         self.update_broker()
+        # select messages which are not host or service related. current_service_groups must be an empty list
+        request = """GET log
+Filter: current_host_name =
+Filter: current_service_description =
+And: 2
+Columns: message current_service_groups
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        request = """GET log
+Filter: current_host_name =
+Filter: current_service_description =
+And: 2
+Columns: message current_service_groups
+OutputFormat: json
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        good_response = "[[\"[%lu] EXTERNAL COMMAND: [%lu] DISABLE_NOTIFICATIONS\",[]],[\"[%lu] EXTERNAL COMMAND: [%lu] STOP_EXECUTING_SVC_CHECKS\",[]]]\n" % (now, now, now, now)
+        print response
+        self.assert_(response == good_response)
+
         request = """GET log
 Columns: time current_host_name current_service_description current_host_groups current_service_groups
 Filter: time >= """ + str(int(now)) + """

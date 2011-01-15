@@ -5470,9 +5470,14 @@ class LiveStatus:
                 if 'default' in entry:
                     default = entry['default']
                 else:
-                    if 'type' in entry and (entry['type'] == 'int' or entry['type'] == 'float'):
-                        default = 0
-                    else:
+                    try:
+                        if entry['type'] == 'int' or entry['type'] == 'float':
+                            default = 0
+                        elif entry['type'] == 'list':
+                            default = []
+                        else:
+                            raise
+                    except:
                         default = ''
                 if 'delegate' in entry: 
                     entry['hook'] = self.make_hook('get_prop_delegate', prop, default, entry['delegate'], entry.setdefault('as', None))
