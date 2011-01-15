@@ -257,7 +257,7 @@ def update_file_with_string(path, match, new_string):
     f.close()
 
 
-if '--help' in sys.argv:
+if '-h' in sys.argv or '--help' in sys.argv:
     sys.exit(1)
 
 #If there is another root, it's strange, it must be a special case...
