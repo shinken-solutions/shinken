@@ -33,9 +33,8 @@ from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.log import logger
 
-
-
 #from guppy import hpy
+
 
 class Scheduler:
     def __init__(self, daemon):
@@ -604,12 +603,12 @@ class Scheduler:
         b = self.get_program_status_brok()
         self.add(b)
 
-        #We cant initial_status from all this types
-        #The order is important, service need host...
-        initial_status_types = [self.timeperiods, self.commands, \
-                                    self.contacts, self.contactgroups, \
-                                    self.hosts, self.hostgroups,  \
-                                    self.services, self.servicegroups]
+        # We can't initial_status from all this types
+        # The order is important, service need host...
+        initial_status_types = ( self.timeperiods, self.commands,
+                          self.contacts, self.contactgroups,
+                          self.hosts, self.hostgroups,
+                          self.services, self.servicegroups )
 
         for tab in initial_status_types:
             for i in tab:

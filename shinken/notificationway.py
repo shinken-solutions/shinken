@@ -23,6 +23,11 @@ from shinken.item import Item, Items
 from shinken.util import to_split, to_bool
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
+
+_special_properties = ( 'service_notification_commands', 'host_notification_commands',
+                        'service_notification_period', 'host_notification_period' )
+
+
 class NotificationWay(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'notificationway'
@@ -146,9 +151,6 @@ class NotificationWay(Item):
         state = True #guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['service_notification_commands', 'host_notification_commands', \
-                                  'service_notification_period', 'host_notification_period']
-
         #A null notif way is a notif way that will do nothing (service = n, hot =n)
         is_null_notifway = False
         if hasattr(self, 'service_notification_options') and self.service_notification_options==['n']:
@@ -157,7 +159,7 @@ class NotificationWay(Item):
                 return True
 
         for prop in cls.properties:
-            if prop not in special_properties:
+            if prop not in _special_properties:
                 if not hasattr(self, prop) and cls.properties[prop].required:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...

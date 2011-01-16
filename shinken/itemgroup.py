@@ -76,8 +76,8 @@ class Itemgroup:
         cls = self.__class__
         properties = cls.properties
 
-        not_required = [prop for prop in properties \
-                            if not properties[prop].required]
+        not_required = tuple( prop for prop in properties 
+                         if not properties[prop].required )
         for prop in not_required:
             if not hasattr(self, prop):
                 value = properties[prop].default

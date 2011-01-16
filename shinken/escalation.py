@@ -23,6 +23,11 @@ from shinken.util import to_int, to_split, strip_and_uniq
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.log import logger
 
+
+_special_properties = ( 'contacts', 'contact_groups', 'first_notification_time', 'last_notification_time' )
+_special_properties_time_based = ( 'contacts', 'contact_groups', 'first_notification', 'last_notification' )
+
+
 class Escalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'escalation'
@@ -126,8 +131,6 @@ class Escalation(Item):
         return start
 
 
-
-
     # Check is required prop are set:
     # template are always correct
     # contacts OR contactgroups is need
@@ -138,9 +141,9 @@ class Escalation(Item):
         # If we got the _time parameters, we are time based. Unless, we are not :)
         if hasattr(self, 'first_notification_time') or hasattr(self, 'last_notification_time'):
             self.time_based = True
-            special_properties = ['contacts', 'contact_groups', 'first_notification', 'last_notification']
+            special_properties = _special_properties_time_based
         else: #classic ones
-            special_properties = ['contacts', 'contact_groups', 'first_notification_time', 'last_notification_time']
+            special_properties = _special_properties
             
         for prop in cls.properties:
             if prop not in special_properties:

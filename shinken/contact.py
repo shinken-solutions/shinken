@@ -24,6 +24,18 @@ from shinken.util import to_split, to_bool, strip_and_uniq
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.log import logger
 
+
+_special_properties = ( 'service_notification_commands', 'host_notification_commands',
+                        'service_notification_period', 'host_notification_period',
+                        'service_notification_options', 'host_notification_options',
+                        'host_notification_commands', 'contact_name' )
+
+_simple_way_parameters = ( 'service_notification_period', 'host_notification_period',
+                           'service_notification_options', 'host_notification_options',
+                           'service_notification_commands', 'host_notification_commands',
+                           'min_criticity' )
+
+
 class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'contact'
@@ -152,13 +164,8 @@ class Contact(Item):
         cls = self.__class__
 
         #All of the above are checks in the notificationways part
-        special_properties = ['service_notification_commands', 'host_notification_commands', \
-                                  'service_notification_period', 'host_notification_period', \
-                                  'service_notification_options', 'host_notification_options', \
-                                  'host_notification_commands', 'contact_name']
-
         for prop in cls.properties:
-            if prop not in special_properties:
+            if prop not in _special_properties:
                 if not hasattr(self, prop) and cls.properties[prop].required:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
@@ -166,7 +173,7 @@ class Contact(Item):
         #There is a case where there is no nw : when there is not special_prop defined
         #at all!!
         if self.notificationways == []:
-            for p in special_properties:
+            for p in _special_properties:
                 print self.get_name()," : I'm missing the property %s" % p
                 state = False
 
@@ -242,15 +249,11 @@ class Contacts(Items):
 
         #Now create a notification way with the simple parameter of the
         #contacts
-        simple_way_parameters = ['service_notification_period', 'host_notification_period', \
-                                     'service_notification_options', 'host_notification_options', \
-                                     'service_notification_commands', 'host_notification_commands', \
-                                     'min_criticity']
         for c in self:
             if not c.is_tpl():
                 need_notificationway = False
                 params = {}
-                for p in simple_way_parameters:
+                for p in _simple_way_parameters:
                     if hasattr(c, p):
                         need_notificationway = True
                         params[p] = getattr(c, p)
