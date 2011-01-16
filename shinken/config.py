@@ -1338,105 +1338,36 @@ class Config(Item):
         logger.log('Running pre-flight check on configuration data...')
         r = self.conf_is_correct
 
-        #Globally unamanged parameters
+        # Globally unamanged parameters
         logger.log('Checking global parameters...')
-        r &= self.check_error_on_hard_unmanaged_parameters()
+        if not self.check_error_on_hard_unmanaged_parameters():
+            r = False
+            logger.log("check global parameters failed")
+            
+        for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
+                  'escalations', 'services', 'servicegroups', 'timeperiods'):
+            logger.log('Checking %s...' % (x))
+            cur = getattr(self, x)
+            if not cur.is_correct():
+                r = False
+                logger.log("\t%s conf incorrect !!" % (x))
+            logger.log('\tChecked %d %s' % (len(cur), x))
 
-        #Hosts
-        logger.log('Checking hosts...')
-        r &= self.hosts.is_correct()
-        #Hosts got a special cehcks for loops
-        r &= self.hosts.no_loop_in_parents()
-        logger.log('\tChecked %d hosts' % len(self.hosts))
-
-        #Hostgroups
-        logger.log('Checking hostgroups...')
-        r &= self.hostgroups.is_correct()
-        logger.log('\tChecked %d hostgroups' % len(self.hostgroups))
-
-        #Contacts
-        logger.log('Checking contacts...')
-        r &= self.contacts.is_correct()
-        logger.log('\tChecked %d contacts' % len(self.contacts))
-
-        #Contactgroups
-        logger.log('Checking contactgroups')
-        r &= self.contactgroups.is_correct()
-        logger.log('\tChecked %d contactgroups' % len(self.contactgroups))
-
-        #Notificationways
-        logger.log('Checking notificationways...')
-        r &= self.notificationways.is_correct()
-        logger.log('\tChecked %d notificationways' % len(self.notificationways))
-
-        #Escalations
-        logger.log('Checking escalations...')
-        r &= self.escalations.is_correct()
-        logger.log('\tChecked %d escalations' % len(self.escalations))
-
-        #Services
-        logger.log('Checking services')
-        r &= self.services.is_correct()
-        logger.log('\tChecked %d services' % len(self.services))
-
-        #Servicegroups
-        logger.log('Checking servicegroups')
-        r &= self.servicegroups.is_correct()
-        logger.log('\tChecked %d servicegroups' % len(self.servicegroups))
-
-        #Servicedependencies
-        if hasattr(self, 'servicedependencies'):
-            logger.log('Checking servicedependencies')
-            r &= self.servicedependencies.is_correct()
-            logger.log('\tChecked %d servicedependencies' % len(self.servicedependencies))
-
-        #Hostdependencies
-        if hasattr(self, 'hostdependencies'):
-            logger.log('Checking hostdependencies')
-            r &= self.hostdependencies.is_correct()
-            logger.log('\tChecked %d hostdependencies' % len(self.hostdependencies))
-
-
-        #Arbiters
-        if hasattr(self, 'arbiterlinks'):
-            logger.log('Checking arbiters')
-            r &= self.arbiterlinks.is_correct()
-            logger.log('\tChecked %d arbiters' % len(self.arbiterlinks))
-
-        #Schedulers
-        if hasattr(self, 'schedulerlinks'):
-            logger.log('Checking schedulers')
-            r &= self.schedulerlinks.is_correct()
-            logger.log('\tChecked %d schedulers' % len(self.schedulerlinks))
-
-        #Reactionners
-        if hasattr(self, 'reactionners'):
-            logger.log('Checking reactionners')
-            r &= self.reactionners.is_correct()
-            logger.log('\tChecked %d reactionners' % len(self.reactionners))
-
-        #Pollers
-        if hasattr(self, 'pollers'):
-            logger.log('Checking pollers')
-            r &= self.pollers.is_correct()
-            logger.log('\tChecked %d pollers' % len(self.pollers))
-
-        #Brokers
-        if hasattr(self, 'brokers'):
-            logger.log('Checking brokers')
-            r &= self.brokers.is_correct()
-            logger.log('\tChecked %d brokers' % len(self.brokers))
-
-        #Timeperiods
-        logger.log('Checking timeperiods')
-        r &= self.timeperiods.is_correct()
-        logger.log('\tChecked %d timeperiods' % len(self.timeperiods))
-
-        #Resultmodulations
-        if hasattr(self, 'resultmodulations'):
-            logger.log('Checking resultmodulations')
-            r &= self.resultmodulations.is_correct()
-            logger.log('\tChecked %d resultmodulations' % len(self.resultmodulations))
+        # Hosts got a special check for loops
+        if not self.hosts.no_loop_in_parents():
+            r = False
+            logger.log("hosts: detected loop in parents ; conf incorrect")
+        
+        for x in ( 'servicedependencies', 'hostdependencies', 'arbiterlinks', 'schedulerlinks',
+                   'reactionners', 'pollers', 'brokers', 'resultmodulations'):
+            try: cur = getattr(self, x)
+            except: continue
+            logger.log('Checking %s' % (x))
+            if not cur.is_correct():
+                r = False
+                logger.log("\t%s conf incorrect !!" % (x))
+            logger.log('\tChecked %d %s' % (len(cur), x))
+    
 
         self.conf_is_correct = r
 

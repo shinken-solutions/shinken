@@ -17,6 +17,13 @@ BIN="/usr/local/shinken/bin"
 VAR="/usr/local/shinken/var"
 ETC="/usr/local/shinken/etc"
 
+## This permit to overhidde the default "default shinken cfg file" : 
+[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME" 
+## so you can now do:
+## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
+## to easily use your own config
+
+
 usage() {
     echo "Usage: $SCRIPTNAME [ -d ] {start|stop|restart|status|check} [ <$AVAIL_MODULES> ]" >&2
     echo ""                                                                           >&2
@@ -58,7 +65,7 @@ fi
 
 
 # Read configuration variable file if it is present
-[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
 
 # Load the VERBOSE setting and other rcS variables
 [ -f /etc/default/rcS ] && . /etc/default/rcS

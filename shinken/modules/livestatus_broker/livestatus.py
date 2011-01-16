@@ -57,9 +57,16 @@ LOGOBJECT_SERVICE     = 2
 LOGOBJECT_CONTACT     = 3
 
 
-#Another for hosts. We must have the same function for hosts and service in
-#problem's source. So must define such a function for hosts too
 def get_livestatus_full_name(prop, ref, request):
+    """Returns a host's or a service's name in livestatus notation.
+    
+    This function takes either a host or service object as it's first argument. 
+    The third argument is a livestatus request object. The important information
+    in the request object is the separators array. It contains the character
+    that separates host_name and service_description which is used for services'
+    names with the csv output format. If the output format is json, services' names
+    are lists composed of host_name and service_description. 
+    """
     cls_name = prop.__class__.my_type
     if request.response.outputformat == 'csv':
         if cls_name == 'service':
@@ -74,10 +81,8 @@ def get_livestatus_full_name(prop, ref, request):
         pass
 
 
-
-#It's a dict with 2 entries : hosts a,d services. Will return a list with just
-#full name of all elements
 def from_svc_hst_distinct_lists(dct):
+    """Transform a dict with keys hosts and services to a list."""
     t = []
     for h in dct['hosts']:
         t.append(h)
@@ -86,8 +91,8 @@ def from_svc_hst_distinct_lists(dct):
     return t
 
 
-#For 2 hosts state, return the worse state
 def worst_host_state(state_1, state_2):
+    """Return the worst of two host states."""
     #lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),
     if state_2 == 0:
         return state_1
@@ -96,8 +101,8 @@ def worst_host_state(state_1, state_2):
     return state_2
 
 
-##The worst state of all services that belong to a host of this group (OK <= WARN <= UNKNOWN <= CRIT)
 def worst_service_state(state_1, state_2):
+    """Return the worst of two service states."""
     #reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
     if state_2 == 0:
         return state_1
@@ -109,6 +114,7 @@ def worst_service_state(state_1, state_2):
 
 
 def find_pnp_perfdata_xml(name, ref, request):
+    """Check if a pnp xml file exists for a given host or service name."""
     if request.pnp_path_readable:
         if '/' in name:
             # It is a service
@@ -130,12 +136,27 @@ class Problem:
 
 
 class Logline(dict):
+    """A class which represents a line from the logfile
+    
+    Public functions:
+    fill -- Attach host and/or service objects to a Logline object
+    
+    """
+    
     def __init__(self, cursor, row):
         for idx, col in enumerate(cursor.description):
             setattr(self, col[0], row[idx])
 
 
     def fill(self, hosts, services, hostname_lookup_table, servicename_lookup_table, columns):
+        """Attach host and/or service objects to a Logline object
+        
+        Lines describing host or service events only contain host_name
+        and/or service_description. This method finds the corresponding
+        objects and adds them to the line as attributes log_host
+        and/or log_service
+        
+        """
         if self.logobject == LOGOBJECT_HOST:
             if self.host_name in hostname_lookup_table:
                 setattr(self, 'log_host', hosts[hostname_lookup_table[self.host_name]])
@@ -148,8 +169,15 @@ class Logline(dict):
 
 
 
-# This is a quick and dirty implementation of a Lifo 
 class MyLifoQueue(Queue.Queue):
+    """A class that implements a Fifo.
+    
+    Python versions < 2.5 do not have the Queue.LifoQueue class.
+    MyLifoQueue overwrites methods of the Queue.Queue class and
+    then behaves like Queue.LifoQueue.
+    
+    """
+    
     def _init(self, maxsize):
         self.maxsize = maxsize
         self.queue = []
@@ -169,12 +197,31 @@ class MyLifoQueue(Queue.Queue):
 
 
 class LiveStatusStack:
+    """A Lifo queue for filter functions.
+    
+    This class inherits either from MyLifoQueue or Queue.LifoQueue
+    whatever is available with the current python version.
+    
+    Public functions:
+    and_elements -- takes a certain number (given as argument)
+    of filters from the stack, creates a new filter and puts
+    this filter on the stack. If these filters are lambda functions,
+    the new filter is a boolean and of the underlying filters.
+    If the filters are sql where-conditions, they are also concatenated
+    with and to form a new string containing a more complex where-condition.
+    
+    or_elements --- the same, only that the single filters are
+    combined with a logical or.
+    
+    """
+    
     def __init__(self, *args, **kw):
         self.type = 'lambda'
         self.__class__.__bases__[0].__init__(self, *args, **kw)
 
 
     def and_elements(self, num):
+        """Take num filters from the stack, and them and put the result back"""
         if num > 1:
             filters = []
             for i in range(num):
@@ -203,6 +250,7 @@ class LiveStatusStack:
 
 
     def or_elements(self, num):
+        """Take num filters from the stack, or them and put the result back"""
         if num > 1:
             filters = []
             for i in range(num):
@@ -226,6 +274,7 @@ class LiveStatusStack:
 
 
     def get_stack(self):
+        """Return the top element from the stack or a filter which is always true"""
         if self.qsize() == 0:
             if self.type == 'sql':
                 return lambda : ["1 = ?", [1]]
@@ -247,6 +296,9 @@ except AttributeError:
 
 
 class LiveStatus:
+    """A class that represents the status of all objects in the broker
+    
+    """
     # description (optional): no need to explain this
     # prop (optional): the property of the object. If this is missing, the key is the property
     # type (mandatory): int, float, string, list
@@ -4546,9 +4598,6 @@ class LiveStatus:
             },
         },
 
-
-        #Logs
-
         'Logline' : {
             'attempt' : {
                 'description' : 'The number of the check attempt',
@@ -5326,8 +5375,6 @@ class LiveStatus:
 
 
     def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue):
-        #self.conf = scheduler.conf
-        #self.scheduler = scheduler
         self.configs = configs
         self.hostname_lookup_table = hostname_lookup_table
         self.servicename_lookup_table = servicename_lookup_table
@@ -5361,10 +5408,17 @@ class LiveStatus:
 
 
     def row_factory(self, cursor, row):
+        """Handler for the sqlite fetch method."""
         return Logline(cursor, row)
 
 
     def handle_request(self, data):
+        """Execute the livestatus request.
+        
+        This function creates a LiveStatusRequest method, calls the parser,
+        handles the execution of the request and formatting of the result.
+        
+        """
         request = LiveStatusRequest(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue)
         request.parse_input(data)
         print "REQUEST\n%s\n" % data
@@ -5460,6 +5514,15 @@ class LiveStatus:
 
 
     def create_out_map_hooks(self):
+        """Add hooks to the elements of the LiveStatus.out_map.
+        
+        This function analyzes the elements of the out_map.
+        Depending on the existence of several keys like
+        default, prop, depythonize, etc. it creates a function which
+        resolves an attribute as fast as possible and adds this function
+        as a new key called hook.
+        
+        """
         for objtype in LiveStatus.out_map:
             for attribute in LiveStatus.out_map[objtype]:
                 entry =  LiveStatus.out_map[objtype][attribute]
@@ -5470,9 +5533,14 @@ class LiveStatus:
                 if 'default' in entry:
                     default = entry['default']
                 else:
-                    if 'type' in entry and (entry['type'] == 'int' or entry['type'] == 'float'):
-                        default = 0
-                    else:
+                    try:
+                        if entry['type'] == 'int' or entry['type'] == 'float':
+                            default = 0
+                        elif entry['type'] == 'list':
+                            default = []
+                        else:
+                            raise
+                    except:
                         default = ''
                 if 'delegate' in entry: 
                     entry['hook'] = self.make_hook('get_prop_delegate', prop, default, entry['delegate'], entry.setdefault('as', None))
@@ -5492,6 +5560,26 @@ class LiveStatus:
                     
 
     def create_out_map_delegates(self):
+        """Add delegate keys for certain attributes.
+        
+        Some attributes are not directly reachable via prop or
+        need a complicated depythonize function.
+        Example: Logline (the objects created for a "GET log" request
+        have the column current_host_state. The Logline object does
+        not have an attribute of this name, but a log_host attribute.
+        The Host object represented by log_host has an attribute state
+        which is the desired current_host_state. Because it's the same
+        for all columns starting with current_host, a rule can
+        be applied that automatically redirects the resolving to the
+        corresponding object. Instead of creating a complicated
+        depythonize handler which gets log_host and then state, two new
+        keys for Logline/current_host_state are added:
+        delegate = log_host
+        as = state
+        This instructs the hook function to first get attribute state of
+        the object represented by log_host.
+        
+        """
         delegate_map = {
             'Logline' : {
                 'current_service_' : 'log_service',
@@ -5511,6 +5599,16 @@ class LiveStatus:
 
 
 class LiveStatusResponse:
+    
+    """A class which represents the response to a livestatus request.
+    
+    Public functions:
+    respond -- Add a header to the response text
+    format_live_data -- Take the raw output and format it according to
+    the desired output format (csv or json)
+    
+    """
+    
     def __init__(self, responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'off', separators = LiveStatus.separators):
         self.responseheader = responseheader
         self.outputformat = outputformat
@@ -5525,7 +5623,7 @@ class LiveStatusResponse:
         self.output += '\n'
         if self.responseheader == 'fixed16':
             statuscode = 200 
-            responselength = len(self.output) # no error
+            responselength = len(self.output)
             self.output = '%3d %11d\n' % (statuscode, responselength) + self.output
 
         return self.output, self.keepalive
@@ -5579,6 +5677,9 @@ class LiveStatusResponse:
 
 
 class LiveStatusRequest(LiveStatus):
+    
+    """A class describing a livestatus request."""
+    
     def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue):
         # Runtime data form the global LiveStatus object
         self.configs = configs
@@ -5629,6 +5730,8 @@ class LiveStatusRequest(LiveStatus):
 
 
     def find_converter(self, attribute):
+        """Return a function that converts textual numbers
+        in the request to the correct data type"""
         out_map = LiveStatus.out_map[self.out_map_name]
         if attribute in out_map and 'type' in out_map[attribute]:
             if out_map[attribute]['type'] == 'int':
@@ -5639,6 +5742,7 @@ class LiveStatusRequest(LiveStatus):
 
 
     def set_default_out_map_name(self):
+        """Translate the table name to the corresponding out_map key."""
         self.out_map_name = {
             'hosts' : 'Host',
             'services' : 'Service',
@@ -5665,6 +5769,14 @@ class LiveStatusRequest(LiveStatus):
 
 
     def copy_out_map_hooks(self):
+        """Update the hooks for some out_map entries.
+        
+        Livestatus columns which have a fulldepythonize postprocessor
+        need an updated argument list. The third argument needs to
+        be the request object. (When the out_map is first supplied
+        with hooks, the third argument is the Livestatus object.)
+        
+        """
         new_map = {}
         for objtype in LiveStatus.out_map:
             new_map[objtype] = {}
@@ -5698,22 +5810,26 @@ class LiveStatusRequest(LiveStatus):
   
 
     def split_command(self, line, splits=1):
+        """Create a list from the words of a line"""
         return line.split(' ', splits)
 
 
     def split_option(self, line, splits=1):
+        """Like split_commands, but converts numbers to int data type"""
         #x = [int(i) if i.isdigit() else i for i in [token.strip() for token in re.split(r"[\s]+", line, splits)]]
         x = map (lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
         return x
 
 
     def split_option_with_columns(self, line):
+        """Split a line in a command and a list of words"""
         cmd, columns = self.split_option(line)
         return cmd, [self.strip_table_from_column(c) for c in re.compile(r'\s+').split(columns)]
 
 
     def strip_table_from_column(self, column):
-        # Cut off the table name, because it is possible to say service_state instead of state
+        """Cut off the table name, because it is possible 
+        to say service_state instead of state"""
         bygroupmatch = re.compile('(\w+)by.*group').search(self.table)
         if bygroupmatch:
             return re.sub(re.sub('s$', '', bygroupmatch.group(1)) + '_', '', column, 1)
@@ -5722,6 +5838,12 @@ class LiveStatusRequest(LiveStatus):
 
 
     def parse_input(self, data):
+        """Parse the lines of a livestatus request.
+        
+        This function looks for keywords in input lines and
+        sets the attributes of the request object
+        
+        """
         for line in [line.strip() for line in data.splitlines()]:
             keyword = line.split(' ')[0].rstrip(':')
             if keyword == 'GET': # Get the name of the base table
@@ -5836,6 +5958,7 @@ class LiveStatusRequest(LiveStatus):
 
 
     def launch_query(self):
+        """Prepare the request object's filter stacks"""
         if self.extcmd:
             # External command are send back to broker
             e = ExternalCommand(self.extcmd)
@@ -5900,6 +6023,14 @@ class LiveStatusRequest(LiveStatus):
 
 
     def get_live_data(self):
+        """Find the objects which match the request.
+        
+        This function scans a list of objects (hosts, services, etc.) and
+        applies the filter functions first. The remaining objects are
+        converted to simple dicts which have only the keys that were
+        requested through Column: attributes.
+        
+        """
         result = []
         # Get the function which implements the Filter: statements
         filter_func = self.filter_stack.get_stack()
@@ -6083,6 +6214,7 @@ class LiveStatusRequest(LiveStatus):
 
 
     def get_live_data_log(self):
+        """Like get_live_data, but for log objects"""
         filter_func = self.filter_stack.get_stack()
         sql_filter_func = self.sql_filter_stack.get_stack()
         out_map = self.out_map[self.out_map_name]
@@ -6125,6 +6257,7 @@ class LiveStatusRequest(LiveStatus):
 
 
     def create_output(self, out_map, elt):
+        """Convert an object to a dict with selected keys.""" 
         output = {} 
         display_attributes = out_map.keys()
         for display in display_attributes:
@@ -6138,7 +6271,9 @@ class LiveStatusRequest(LiveStatus):
 
 
     def statsify_result(self, filtresult):
-        """Explanation:
+        """Applies the stats filter functions to the result.
+        
+        Explanation:
         stats_group_by is ["service_description", "host_name"]
         filtresult is a list of elements which have, among others, service_description and host_name attributes
 
@@ -6168,6 +6303,7 @@ class LiveStatusRequest(LiveStatus):
 
         Step 3:
         Create the final result array from resultdict
+        
         """
         result = []
         resultdict = {}
