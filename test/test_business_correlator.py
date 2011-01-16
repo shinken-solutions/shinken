@@ -22,6 +22,7 @@
 # This file is used to test reading and processing of config files
 #
 
+import re
 #It's ugly I know....
 from shinken_test import *
 
@@ -864,8 +865,7 @@ class TestConfig(ShinkenTest):
 
 
 class TestConfigBroken(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
+    """A class with a broken configuration, where business rules reference unknown hosts/services"""
     def setUp(self):
         self.setup_with_file('etc/nagios_business_correlator_broken.cfg')
 
@@ -876,8 +876,29 @@ class TestConfigBroken(ShinkenTest):
         # the arbiter to output an error message and exit
         # in a controlled manner.
         #
-        #self.assert_(not self.conf.conf_is_correct)
-        self.show_logs()
+        print "conf_is_correct", self.conf.conf_is_correct
+        self.assert_(not self.conf.conf_is_correct)
+
+        # Get the arbiter's log broks
+        logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
+
+        # Simple_1Of_1unk_svc : my business rule is invalid
+        # Simple_1Of_1unk_svc : Business rule uses unknown service test_host_0/db3
+        self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_svc', log)]) == 2)
+        self.assert_(len([log for log in logs if re.search('service test_host_0/db3', log)]) == 1)
+        # ERP_unk_svc : my business rule is invalid
+        # ERP_unk_svc : Business rule uses unknown service test_host_0/web100
+        # ERP_unk_svc : Business rule uses unknown service test_host_0/lvs100
+        self.assert_(len([log for log in logs if re.search('ERP_unk_svc', log)]) == 3)
+        self.assert_(len([log for log in logs if re.search('service test_host_0/web100', log)]) == 1)
+        self.assert_(len([log for log in logs if re.search('service test_host_0/lvs100', log)]) == 1)
+        # Simple_1Of_1unk_host : my business rule is invalid
+        # Simple_1Of_1unk_host : Business rule uses unknown host test_host_9
+        self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_host', log)]) == 2)
+        self.assert_(len([log for log in logs if re.search('host test_host_9', log)]) == 1)
+
+        # Now the number of all failed business rules.
+        self.assert_(len([log for log in logs if re.search('my business rule is invalid', log)]) == 3)
 
 
 

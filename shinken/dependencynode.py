@@ -35,6 +35,7 @@ class DependencyNode(object):
         self.operand = None
         self.sons = []
         self.of_values = 0
+        self.configuration_errors = []
 
     def __str__(self):
         return "Op:'%s' Val:'%s' Sons:'[%s]'" % (self.operand, self.of_values, ','.join([str(s) for s in self.sons]))
@@ -116,6 +117,20 @@ class DependencyNode(object):
         return list(set(r))
 
 
+    def is_valid(self):
+        """Check for empty (= not found) leaf nodes"""
+        valid = True
+        if not self.sons:
+            valid = False
+        else:
+            for s in self.sons:
+                if isinstance(s, DependencyNode) and not s.is_valid():
+                    self.configuration_errors.extend(s.configuration_errors)
+                    valid = False
+        return valid
+            
+
+
 
 class DependencyNodeFactory(object):
     def __init__(self):
@@ -151,11 +166,13 @@ class DependencyNodeFactory(object):
         if not complex_node:
             print "Try to find?", patern
             node.operand = 'object'
-            obj = self.find_object(patern, hosts, services)
+            obj, error = self.find_object(patern, hosts, services)
             if obj != None:
                 # Set host or service
                 node.operand = obj.__class__.my_type
                 node.sons.append(obj)
+            else:
+                node.configuration_errors.append(error)
             return node
         else:
             print "Is complex"
@@ -222,6 +239,7 @@ class DependencyNodeFactory(object):
     def find_object(self, patern, hosts, services):
         print "Finding object", patern
         obj = None
+        error = None
         is_service = False
         # h_name, service_desc are , separated
         elts = patern.split(',')
@@ -231,19 +249,11 @@ class DependencyNodeFactory(object):
             is_service = True
             service_description = elts[1]
         if is_service:
-            try:
-                obj = services.find_srv_by_name_and_hostname(host_name, service_description)
-                print "Find service", obj.get_name()
-            except:
-                print "Business rule uses unknown service %s/%s" % (host_name, service_description)
-                raise
-            finally:
-                return obj
+            obj = services.find_srv_by_name_and_hostname(host_name, service_description)
+            if not obj:
+                error = "Business rule uses unknown service %s/%s" % (host_name, service_description)
         else:
-            try:
-                obj = hosts.find_by_name(host_name)
-                print "Find host", obj.get_name()
-            except:
-                print "Business rule uses unknown host %s/%s" % (host_name,)
-            finally:
-                return obj
+            obj = hosts.find_by_name(host_name)
+            if not obj:
+                error = "Business rule uses unknown host %s" % (host_name,)
+        return obj, error

@@ -663,6 +663,12 @@ class Host(SchedulingItem):
             if not self.check_command.is_valid():
                 logger.log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
+            if self.got_business_rule:
+                if not self.business_rule.is_valid():
+                    logger.log("%s : my business rule is invalid" % (self.get_name(),))
+                    for bperror in self.business_rule.configuration_errors:
+                        logger.log("%s : %s" % (self.get_name(), bperror))
+                    state = False
         
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
             logger.log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
