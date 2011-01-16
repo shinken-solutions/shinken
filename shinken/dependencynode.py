@@ -221,6 +221,7 @@ class DependencyNodeFactory(object):
     # the host h1.
     def find_object(self, patern, hosts, services):
         print "Finding object", patern
+        obj = None
         is_service = False
         # h_name, service_desc are , separated
         elts = patern.split(',')
@@ -230,10 +231,19 @@ class DependencyNodeFactory(object):
             is_service = True
             service_description = elts[1]
         if is_service:
-            obj = services.find_srv_by_name_and_hostname(host_name, service_description)
-            print "Find service", obj.get_name()
-            return obj
+            try:
+                obj = services.find_srv_by_name_and_hostname(host_name, service_description)
+                print "Find service", obj.get_name()
+            except:
+                print "Business rule uses unknown service %s/%s" % (host_name, service_description)
+                raise
+            finally:
+                return obj
         else:
-            obj = hosts.find_by_name(host_name)
-            print "Find host", obj.get_name()
-            return obj
+            try:
+                obj = hosts.find_by_name(host_name)
+                print "Find host", obj.get_name()
+            except:
+                print "Business rule uses unknown host %s/%s" % (host_name,)
+            finally:
+                return obj

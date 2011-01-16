@@ -863,6 +863,24 @@ class TestConfig(ShinkenTest):
         
 
 
+class TestConfigBroken(ShinkenTest):
+    # Uncomment this is you want to use a specific configuration
+    # for your test
+    def setUp(self):
+        self.setup_with_file('etc/nagios_business_correlator_broken.cfg')
+
+
+    def test_conf_is_correct(self):
+        #
+        # Business rules use services which don't exist. We want
+        # the arbiter to output an error message and exit
+        # in a controlled manner.
+        #
+        #self.assert_(not self.conf.conf_is_correct)
+        self.show_logs()
+
+
+
 if __name__ == '__main__':
     unittest.main()
 
