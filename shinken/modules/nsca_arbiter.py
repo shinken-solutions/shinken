@@ -168,7 +168,7 @@ class NSCA_arbiter:
         IVs = {}
 
         while True:
-            inputready,outputready,exceptready = select.select(input,[],[], 0)
+            inputready,outputready,exceptready = select.select(input,[],[], 1)
 
             for s in inputready:
                 if s == server:
