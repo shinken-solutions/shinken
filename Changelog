@@ -2,6 +2,70 @@
 Shinken ChangeLog
 #######################
 
+0.5 - XX/01/2011
+------------------
+ENHANCEMENTS
+	*Add : Business rules
+	*Add : Downtime for contacts
+	*Add : Escalations based on time, with notification period shorting capabilities
+	*Add : options allowed_hosts and max_logs_age to the livestatus broker
+	*Add : some rarely used operators to the livestatus module (!>=)
+	*Add : SSL connexions between daemons with certificates and a CA
+	*Add : module exception/kill catch in the scheduler.
+	*Add : use the binary format for the pickle, so it take less space.
+	*Add : (Hartmut Goebel) use universal open way for conf reading.
+	*Add : support for unix sockets to the livestatus module
+	*Add : criticity value for host/services, with problem/impacts max criticity management
+	*Add : min_criticity definition in cotnact and notificationways.
+	*Add : pylint and coverage pass in the integration server
+	*Add : the new column pnpgraph_present to the livestatus module
+	*Add : now create the pickle retention file with a .tmp, so in case of problem, we do not lost the old one.
+	*Add : event handlers command can now be send by external commands
+
+FIXES
+	*Fix : (Laurent Guyon) select with no timeout in NSCA arbiter module.
+	*Fix : shinken init script: enable use of another "default" shinken file than hardcoded one by env variable.
+	*Fix : (current_service_groups needs to return an empty list instead of string) in the livestatus module
+	*Fix : 'setup.py -h install' now also exit
+	*Fix : () crash for some bad conf, should raise a message instead.
+	*Fix : missing check for no args in 'shinken' init script
+	*Fix : a bug in livestatus Servicegroup.members, minor cosmetics, test case for thruk
+	*Fix : a bug in host.parents livestatus representation to make thruk happy
+	*Fix : check for /dev/shm access for the satellites.
+	*Clean : Redesign of the livestatus module
+	*Fix : testing with multisite and thruk
+	*Clean: factorized .is_correct() call for all object types & added log to see more clearly wherer the error is.
+	*Clean: factorization/simplification of code in action.py (and related) for spawning checks processes.+ clean of old deprecated commented code (& "related" too).
+	*Fix : downtime and comment are now pickle in a dict, not a list.	
+	*Fix : pickle pass for look at tyype, so downtime and comment from 0.4 still ok.
+	*Fix : acknoledge got too much information in the pickle pass, making the pickle save very very huge. Now fit from 100Mo to..2Mo :)
+	*Clean : big clean of hasattr->getattr with default value
+	*Clean : repalce dict for properties with real objects
+	*Fix : Implement in_check_period/in_notification_period for livestatus to make multisite happy
+	*Fix : Remove a leftover atribute from timeperiod&daterange
+	*Fix : Transmit dateranges in timeperiod-full_status-broks
+	*Fix : Replaced the deprecated StatsGroupBy, implemented Stats: for log entries, making Multisite happy with shinken-livestatus
+	*Fix : manage the 'null' for inheritance.
+	*Fix : add timeout to the status_dat module so that the status.dat is written even if no broks are sent.
+	*Fix : escalations were offset of notif number by -1.
+	*Fix : Replace Queue with an own implementation of LifoQueue for Python 2.4 (livestatus)
+	*Fix : Fallback to sqlite 1.x for Python 2.4 (livestatus)
+	*Fix : bug in the table structure where logging messages are kept (livestatus)
+	*Fix : problem/impacts should be list, not string.
+	*Fix : missing customs values in host/service tables in livestatus and Thruk was not happy.
+	*Fix : is_impact/is_problem got bad format in lviestatus tables.
+	*Fix : (Kristoffer Moegle) missing check in generic object configuration module.
+	*Fix : a bug in livestatus. Catch the exception if a peer is not listening for the response
+	*Fix : support for hosts without check_command (assumed to be always up)
+	*Fix : hostgroup realm assoc was broken. Now it's tested.
+	*Fix : (Maximilien Bersoult) fix mysql_db module search path.
+	*Fix : bug in compensate time when thecore got event handler
+	*Fix : a bug in the npcd module (spoolfile timestamp extension was float, not int)
+	*Fix : windows registry paths.
+	*Fix : problem with Nagios retention that was not happy about host properties type.
+	*Fix : pickle/nagios retention was loading a retention host/service in the comment.ref link!
+	*Fix : now only previously notified contacts are send for recovery notifications.
+	
 
 0.4 - 08/12/2010
 ------------------
