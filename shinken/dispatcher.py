@@ -404,7 +404,7 @@ class Dispatcher:
                                     #Brokers should have poller/reactionners links too
                                     if kind == "broker":
                                         r.fill_broker_with_poller_reactionner_links(satellite)
-                                        r.fill_broker_with_scheduler_links(satellite)
+                                        #r.fill_broker_with_scheduler_links(satellite)
                                     #cfg_for_satellite['modules'] = satellite.modules
                                     is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
                                     if is_sent:
