@@ -390,7 +390,7 @@ class Ndodb_broker:
         #Ok, the hostgroups table is uptodate, now we add relations
         #between hosts and hostgroups
         for (h_id, h_name) in b.data['members']:
-            host_id = self.get_host_object_id_by_name(data['host_name'])
+            host_id = self.get_host_object_id_by_name(h_name)
             hostgroup_members_data = {'instance_id' : data['instance_id'], 'hostgroup_id' : data['id'],
                                       'host_object_id' : host_id}
             q = self.db.create_insert_query('hostgroup_members', hostgroup_members_data)
