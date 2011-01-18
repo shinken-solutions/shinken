@@ -377,6 +377,7 @@ class Dispatcher:
                         if r.to_satellites_need_dispatch[kind][cfg_id]:
                             logger.log('[%s] Dispatching %s' % (r.get_name(),kind) + 's')
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
+                            print "*"*10, "DBG: cfg_for_satellite_part", cfg_for_satellite_part, r.get_name(), cfg_id
 
                             #print "Sched Config part for ", kind+'s',":", cfg_for_satellite_part
                             #make copies of potential_react list for sort
@@ -403,6 +404,7 @@ class Dispatcher:
                                     #Brokers should have poller/reactionners links too
                                     if kind == "broker":
                                         r.fill_broker_with_poller_reactionner_links(satellite)
+                                        r.fill_broker_with_scheduler_links(satellite)
                                     #cfg_for_satellite['modules'] = satellite.modules
                                     is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
                                     if is_sent:

@@ -786,7 +786,7 @@ class Livestatus_broker:
             except Queue.Empty:
                 pass
             #But others are importants
-            except Exception:
+            except Exception, exp:
                 print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
                 raise
             inputready,outputready,exceptready = select.select(self.input,[],[], 0)

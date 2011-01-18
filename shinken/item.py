@@ -262,29 +262,6 @@ class Item(object):
     #Check is required prop are set:
     #template are always correct
     def is_correct(self):
-        #if self.is_tpl:
-        #    return True
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
-        print "i am in item.is_correct"
         state = True
         properties = self.__class__.properties
         for prop in properties:
