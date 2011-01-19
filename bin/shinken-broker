@@ -111,7 +111,7 @@ from shinken.contactgroup import Contactgroup, Contactgroups
 from shinken.config import Config
 
 
-VERSION = "0.4"
+VERSION = "0.5"
 
 
 

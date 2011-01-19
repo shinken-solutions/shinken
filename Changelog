@@ -2,7 +2,7 @@
 Shinken ChangeLog
 #######################
 
-0.5 - XX/01/2011
+0.5 - 19/01/2011
 ------------------
 ENHANCEMENTS
 	*Add : Business rules
@@ -65,6 +65,7 @@ FIXES
 	*Fix : problem with Nagios retention that was not happy about host properties type.
 	*Fix : pickle/nagios retention was loading a retention host/service in the comment.ref link!
 	*Fix : now only previously notified contacts are send for recovery notifications.
+	*Fix : bug in NDO module for hostgroups
 	
 
 0.4 - 08/12/2010

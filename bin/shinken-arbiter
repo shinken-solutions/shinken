@@ -110,7 +110,7 @@ from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 
 
-VERSION = "0.4"
+VERSION = "0.5"
 
 
 

@@ -30,7 +30,7 @@ if os.name != 'nt':
 REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
 UMASK = 0
-VERSION = "0.4"
+VERSION = "0.5"
 
 class Daemon:
     #the instances will have their own init

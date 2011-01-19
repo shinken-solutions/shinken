@@ -131,7 +131,7 @@ from shinken.util import to_int, to_bool
 from shinken.modulesmanager import ModulesManager
 
 
-VERSION = "0.4"
+VERSION = "0.5"
 
 
 

@@ -44,13 +44,13 @@ class DependencyNode(object):
     # We will get the state of this node, by looking at the state of
     # our sons, and apply our operand
     def get_state(self):
-        print "Ask state of me", self
+        #print "Ask state of me", self
 
         # If we are a host or a service, wee just got the host/service
         # hard state
         if self.operand in ['host', 'service']:
             state = self.sons[0].last_hard_state_id
-            print "Get the hard state (%s) for the object %s" % (state, self.sons[0].get_name())
+            #print "Get the hard state (%s) for the object %s" % (state, self.sons[0].get_name())
             # Make DOWN look as CRITICAL (2 instead of 1)
             if self.operand == 'host' and state == 1:
                 state = 2
@@ -73,32 +73,32 @@ class DependencyNode(object):
         # Now look at the rule. For a or
         if self.operand == '|':
             if 0 in states:
-                print "We find a OK/UP match in an OR", states
+                #print "We find a OK/UP match in an OR", states
                 return 0
             # no ok/UP-> return worse state
             else:
-                print "I send the better no good state...in an OR", better_no_good, states
+                #print "I send the better no good state...in an OR", better_no_good, states
                 return better_no_good
 
         # With an AND, we just send the worse state
         if self.operand == '&':
-            print "We raise worse state for a AND", worse_state,states
+            #print "We raise worse state for a AND", worse_state,states
             return worse_state
 
         # Ok we've got a 'of:' rule
         nb_search = self.of_values
         # Look if we've got enouth 0
         if len([s for s in states if s == 0]) >= nb_search:
-            print "Good, we find at least %d 0 in states for a of:" % nb_search, states
+            #print "Good, we find at least %d 0 in states for a of:" % nb_search, states
             return 0
 
         # Now maybe at least enouth WARNING, still beter than CRITICAL...
         if len([s for s in states if s == 1]) >= nb_search:
-            print "Beter than nothing, we find at least %d 1 in states for a of:" % nb_search, states
+            #print "Beter than nothing, we find at least %d 1 in states for a of:" % nb_search, states
             return 1
 
         # Sic... not good, return 2
-        print "ARG, not enough 1 or 0, return 2..."
+        #print "ARG, not enough 1 or 0, return 2..."
         return 2
 
 
@@ -139,7 +139,7 @@ class DependencyNodeFactory(object):
     # the () will be eval in a recursiv way, only one level of ()
     def eval_cor_patern(self, patern, hosts, services):
         patern = patern.strip()
-        print "*****Loop", patern
+        #print "*****Loop", patern
         complex_node = False
 
         # Look if it's a complex patern (with rule) or
@@ -155,16 +155,16 @@ class DependencyNodeFactory(object):
         r = re.compile(p)
         m = r.search(patern)
         if m != None:
-            print "Match the of: thing N=", m.groups()
+            #print "Match the of: thing N=", m.groups()
             node.operand = 'of:'
             node.of_values = int(m.groups()[0])
             patern = m.groups()[1]
 
-        print "Is so complex?", patern, complex_node
+        #print "Is so complex?", patern, complex_node
 
         # if it's a single host/service
         if not complex_node:
-            print "Try to find?", patern
+            #print "Try to find?", patern
             node.operand = 'object'
             obj, error = self.find_object(patern, hosts, services)
             if obj != None:
@@ -174,8 +174,8 @@ class DependencyNodeFactory(object):
             else:
                 node.configuration_errors.append(error)
             return node
-        else:
-            print "Is complex"
+        #else:
+        #    print "Is complex"
 
         in_par = False
         tmp = ''
@@ -185,35 +185,35 @@ class DependencyNodeFactory(object):
                 tmp = tmp.strip()
                 if tmp != '':
                     o = self.eval_cor_patern(tmp, hosts, services)
-                    print "1( I've %s got new sons" % patern , o
+                    #print "1( I've %s got new sons" % patern , o
                     node.sons.append(o)
                 continue
             if c == ')':
                 in_par = False
                 tmp = tmp.strip()
                 if tmp != '':
-                    print "Evaling sub pat", tmp
+                    #print "Evaling sub pat", tmp
                     o = self.eval_cor_patern(tmp, hosts, services)
-                    print "2) I've %s got new sons" % patern , o
+                    #print "2) I've %s got new sons" % patern , o
                     node.sons.append(o)
-                else:
-                    print "Fuck a node son!"
+                #else:
+                    #print "Fuck a node son!"
                 tmp = ''
                 continue
 
             if not in_par:
                 if c in ('&', '|'):
                     current_rule = node.operand
-                    print "Current rule", current_rule
+                    #print "Current rule", current_rule
                     if current_rule != None and current_rule != 'of:' and c != current_rule:
-                        print "Fuck, you mix all dumbass!"
+                        #print "Fuck, you mix all dumbass!"
                         return None
                     if current_rule != 'of:':
                         node.operand = c
                     tmp = tmp.strip()
                     if tmp != '':
                         o = self.eval_cor_patern(tmp, hosts, services)
-                        print "3&| I've %s got new sons" % patern , o
+                        #print "3&| I've %s got new sons" % patern , o
                         node.sons.append(o)
                     tmp = ''
                     continue
@@ -225,11 +225,11 @@ class DependencyNodeFactory(object):
         tmp = tmp.strip()
         if tmp != '':
             o = self.eval_cor_patern(tmp, hosts, services)
-            print "4end I've %s got new sons" % patern , o
+            #print "4end I've %s got new sons" % patern , o
             node.sons.append(o)
 
-        print "End, tmp", tmp
-        print "R %s :" % patern, node
+        #print "End, tmp", tmp
+        #print "R %s :" % patern, node
         return node
 
 
@@ -237,7 +237,7 @@ class DependencyNodeFactory(object):
     # db1 service of the host db1, or just h1, that mean
     # the host h1.
     def find_object(self, patern, hosts, services):
-        print "Finding object", patern
+        #print "Finding object", patern
         obj = None
         error = None
         is_service = False

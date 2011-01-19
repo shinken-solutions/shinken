@@ -1093,15 +1093,15 @@ class SchedulingItem(Item):
 
         # If it's bp_rule, we got a rule :)
         if base_cmd == 'bp_rule':
-            print "Got rule", elts, cmd
+            #print "Got rule", elts, cmd
             self.got_business_rule = True
             rule = ''
             if len(elts) >= 2:
                 rule = elts[1]
-                print "Got rules", rule
+                #print "Got rules", rule
             fact = DependencyNodeFactory()
             node = fact.eval_cor_patern(rule, hosts, services)
-            print "got node", node
+            #print "got node", node
             self.business_rule = node
 
 
