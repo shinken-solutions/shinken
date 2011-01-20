@@ -2,7 +2,7 @@
 Shinken ChangeLog
 #######################
 
-0.5 - 19/01/2011
+0.5.1 - 19/01/2011
 ------------------
 ENHANCEMENTS
 	*Add : Business rules
@@ -66,7 +66,7 @@ FIXES
 	*Fix : pickle/nagios retention was loading a retention host/service in the comment.ref link!
 	*Fix : now only previously notified contacts are send for recovery notifications.
 	*Fix : bug in NDO module for hostgroups
-	
+	*Fix : (0.5.1) bugs in LiveStatus module for Service get_full_name call and queries with no space after :
 
 0.4 - 08/12/2010
 ------------------
