@@ -44,10 +44,13 @@ class Daemon:
 
 
     def findpid(self):
-        f = open(self.pidfile)
-        p = f.read()
-        f.close()
-        return int(p)
+        try: 
+            f = open(self.pidfile)
+            p = f.read()
+            f.close()
+            return int(p)
+        except: 
+            return None
 
 
     #Check if previous run are still launched by reading the pidfile
@@ -57,19 +60,27 @@ class Daemon:
     def check_parallel_run(self, do_replace):
         if os.path.exists(self.pidfile):
             p = self.findpid()
+            if p is None:
+                print "stale pidfile exists (no or invalid or unreadable content).  removing it."
+                os.unlink(self.pidfile)
+                return
+
             try:
                 os.kill(p, 0)
             except os.error, detail:
                 if detail.errno == errno.ESRCH:
-                    print "stale pidfile exists.  removing it."
+                    print("stale pidfile exists (pid=%d not exists).  removing it." % (p))
                     os.unlink(self.pidfile)
+                    return
+                raise
+
+            #if replace, kill the old process
+            if do_replace:
+                print "Replacing",p
+                os.kill(p, 3)
+                ## TODO: wait that 'p' really exit ?
             else:
-                #if replace, kill the old process
-                if do_replace:
-                    print "Replacing",p
-                    os.kill(p, 3)
-                else:
-                    raise SystemExit, "valid pidfile exists.  Exiting."
+                raise SystemExit, "valid pidfile exists and not forced to replace.  Exiting."
 
 
     #Make the program a daemon. It can redirect all outputs (stdout, stderr) to debug file if need
