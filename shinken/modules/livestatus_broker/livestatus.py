@@ -5845,6 +5845,10 @@ class LiveStatusRequest(LiveStatus):
         
         """
         for line in [line.strip() for line in data.splitlines()]:
+            # Tools like NagVis send KEYWORK:option, and we rpefer to have
+            # a space folowing the :
+            if ':' in line and not ' ' in line:
+                line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
             if keyword == 'GET': # Get the name of the base table
                 cmd, self.table = self.split_command(line)
@@ -6085,7 +6089,7 @@ class LiveStatusRequest(LiveStatus):
                                 # (service, sg), (service, sg), ...  service objects are individuals
                                 (copy.copy(item0), inner_list0[1]) for inner_list0 in (
                                     # ([service, service], sg), ([service, service, ...], sg), ... services are sorted
-                                    (sorted(sg1.members, key = lambda k: k.get_full_name()), sg1) for sg1 in
+                                    (sorted(sg1.members, key = lambda k: k.get_name()), sg1) for sg1 in
                                         # servicegroups, sorted by their servicegroup_name
                                         sorted([sg0 for sg0 in self.servicegroups.values() if sg0.members], key = lambda k: k.servicegroup_name)
                                 ) for item0 in inner_list0[0]
