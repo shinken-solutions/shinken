@@ -319,7 +319,7 @@ class Arbiter(Daemon):
 
         #### Loading Arbiter module part ####
 
-        #first we need to get arbtiers and modules first
+        #first we need to get arbiters and modules first
         #so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
