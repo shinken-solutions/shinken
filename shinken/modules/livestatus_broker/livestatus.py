@@ -5845,7 +5845,7 @@ class LiveStatusRequest(LiveStatus):
         
         """
         for line in [line.strip() for line in data.splitlines()]:
-            # Tools like NagVis send KEYWORK:option, and we rpefer to have
+            # Tools like NagVis send KEYWORK:option, and we prefer to have
             # a space folowing the :
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
