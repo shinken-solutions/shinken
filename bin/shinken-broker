@@ -329,7 +329,7 @@ class Broker(Satellite):
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
         
-        Daemon.__init__(self)
+        Daemon.__init__(self, config_file, is_daemon, do_replace, debug, debug_file)
         
         self.name = "broker (conf not received)"
         
@@ -337,7 +337,7 @@ class Broker(Satellite):
 
         self.check_shm()
 
-        self.is_daemon = is_daemon
+        
 
         #Bool to know if we have received conf from arbiter
         self.have_conf = False
@@ -373,7 +373,6 @@ class Broker(Satellite):
         self.broks_internal_raised = []
 
         #The config reading part
-        self.config_file = config_file
         #Read teh config file if exist
         #if not, default properties are used
         self.parse_config_file()
@@ -397,20 +396,6 @@ class Broker(Satellite):
         elts.append('modules')
         self.modulespath = os.sep.join(elts)
         logger.log("Using modules path : %s" % os.sep.join(elts))
-
-        # The SSL part
-        if self.use_ssl:
-            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(self.certs_dir)
-            print "Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR
-            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(self.ca_cert)
-            print "Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT
-            Pyro.config.PYROSSL_CERT = os.path.abspath(self.server_cert)
-            print"Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT
-            if self.hard_ssl_name_check:
-                Pyro.config.PYROSSL_POSTCONNCHECK=1
-            else:
-                Pyro.config.PYROSSL_POSTCONNCHECK=0
-
 
 
 
@@ -741,27 +726,11 @@ class Broker(Satellite):
     def main(self):
         
         logger.log("[Broker] Using working directory : %s" % os.path.abspath(self.workdir))
-        Pyro.config.PYRO_STORAGE = self.workdir
-        Pyro.config.PYRO_MULTITHREADED = 0
-
-        logger.log("[Broker] Opening port: %s" % self.port)
-
-        self.daemon = pyro.init_daemon(self.host, self.port, self.use_ssl)
+        
+        self.do_daemon_init_and_start()
 
         self.uri2 = pyro.register(self.daemon, IForArbiter(self), "ForArbiter")
         print "The Arbtier uri it at", self.uri2
-        
-        self.check_parallel_run(do_replace)
-        self.change_to_workdir()
-        self.change_to_user_group()
-        
-        # Now the daemon part if need
-        if self.is_daemon:
-            daemon_socket_fds = tuple( sock.fileno() for sock in pyro.get_sockets(self.daemon) )
-            self.daemonize(do_debug=debug, debug_file=debug_file, skip_close_fds=daemon_socket_fds)
-        else:
-            self.write_pid()
-
 
         # We wait for initial conf
         self.wait_for_initial_conf()

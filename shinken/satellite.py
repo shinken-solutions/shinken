@@ -212,12 +212,8 @@ class IBroks(Pyro.core.ObjBase):
 class Satellite(Daemon):
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
         
-        Daemon.__init__(self)
+        Daemon.__init__(self, config_file, is_daemon, do_replace, debug, debug_file)
         
-        self.is_daemon = is_daemon
-        self.debug = debug
-        self.debug_file = debug_file
-
         self.check_shm()
 
         self.print_header()
@@ -227,7 +223,7 @@ class Satellite(Daemon):
         self.log.load_obj(self)
 
         #The config reading part
-        self.config_file = config_file
+
         #Read teh config file if exist
         #if not, default properties are used
         self.parse_config_file()
@@ -256,34 +252,8 @@ class Satellite(Daemon):
         #Bool to know if we have received conf from arbiter
         self.have_conf = False
         self.have_new_conf = False
-
-        # The SSL part
-        if self.use_ssl:
-            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(self.certs_dir)
-            print "Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR
-            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(self.ca_cert)
-            print "Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT
-            Pyro.config.PYROSSL_CERT = os.path.abspath(self.server_cert)
-            print"Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT
-            if self.hard_ssl_name_check:
-                Pyro.config.PYROSSL_POSTCONNCHECK=1
-            else:
-                Pyro.config.PYROSSL_POSTCONNCHECK=0
-
-        Pyro.config.PYRO_COMPRESSION = 1
-        Pyro.config.PYRO_MULTITHREADED = 0
-        Pyro.config.PYRO_STORAGE = self.workdir
-        logger.log("Using working directory : %s" % os.path.abspath(self.workdir))
-        logger.log("Opening port: %s" % self.port)
-        
-        # Daemon init
-        self.daemon = pyro.init_daemon(self.host, self.port, self.use_ssl)
-
-        # Check if another Scheduler is not running (with the same conf)
-        self.check_parallel_run(do_replace)
-        self.change_to_user_group()
-        self.change_to_workdir()  ## must be done AFTER pyro daemon init
-
+ 
+        self.do_daemon_init_and_start()
 
         # Now we create the interfaces
         self.interface = IForArbiter(self)
@@ -292,15 +262,6 @@ class Satellite(Daemon):
         # And we register them
         self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
         self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
-
-        # Now the daemonize part if need
-        ####################################################################
-        ## NB NB NB: We must daemonize BEFORE instanciating our Queue !!
-        if self.is_daemon:
-            daemon_socket_fds = tuple( sock.fileno() for sock in pyro.get_sockets(self.daemon) )
-            self.daemonize(do_debug=self.debug, debug_file=self.debug_file, skip_close_fds=daemon_socket_fds)
-        else:
-            self.write_pid()
         
         self.s = Queue() #Global Master -> Slave
         self.manager = Manager()

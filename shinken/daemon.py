@@ -23,6 +23,9 @@ import time
 import signal
 import select
 
+import shinken.pyro_wrapper as pyro
+Pyro = pyro.Pyro
+
 
 if os.name != 'nt':
     from pwd import getpwnam
@@ -38,8 +41,14 @@ VERSION = "0.5"
 
 class Daemon:
 
-    def __init__(self):
+    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+        self.config_file = config_file
+        self.is_daemon = is_daemon
+        self.do_replace = do_replace
+        self.debug = debug
+        self.debug_file = debug_file
         self.interrupted = False
+        
         os.umask(UMASK)
         self.set_exit_handler()
  
@@ -182,7 +191,44 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.fpid.close()
         del self.fpid
         print("We are now fully daemonized :) pid=", os.getpid())
- 
+
+
+    def do_daemon_init_and_start(self, ssl_conf=None):
+        self.check_parallel_run(self.do_replace)
+        self.setup_pyro_daemon(ssl_conf)
+        self.change_to_user_group()
+        self.change_to_workdir()  ## must be done AFTER pyro daemon init
+        if self.is_daemon:
+            daemon_socket_fds = tuple( sock.fileno() for sock in pyro.get_sockets(self.daemon) )
+            self.daemonize(skip_close_fds=daemon_socket_fds)
+        else:
+            self.write_pid()
+
+
+    def setup_pyro_daemon(self, ssl_conf=None):
+        if ssl_conf is None: 
+            ssl_conf = self
+        
+        # The SSL part
+        if ssl_conf.use_ssl:
+            Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
+            print "Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR
+            Pyro.config.PYROSSL_CA_CERT = os.path.abspath(ssl_conf.ca_cert)
+            print "Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT
+            Pyro.config.PYROSSL_CERT = os.path.abspath(ssl_conf.server_cert)
+            print"Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT
+            if self.hard_ssl_name_check:
+                Pyro.config.PYROSSL_POSTCONNCHECK=1
+            else:
+                Pyro.config.PYROSSL_POSTCONNCHECK=0
+
+        #create the server
+        Pyro.config.PYRO_STORAGE = self.workdir
+        Pyro.config.PYRO_COMPRESSION = 1
+        Pyro.config.PYRO_MULTITHREADED = 0        
+
+        self.daemon = pyro.init_daemon(self.host, self.port, ssl_conf.use_ssl)
+
 
     def get_socks_activity(self, socks, timeout):
         try:
