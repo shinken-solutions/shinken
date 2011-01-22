@@ -19,12 +19,14 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This is the class of the Arbiter. It's role is to read configuration,
-#cuts it, and send it to other elements like schedulers, reactionner
-#or pollers. It is responsible for hight avaibility part. If a scheduler
-#is dead,
-#it send it's conf to another if available.
-#It also read order form users (nagios.cmd) and send orders to schedulers.
+"""
+This is the class of the Arbiter. It's role is to read configuration,
+cuts it, and send it to other elements like schedulers, reactionner
+or pollers. It is responsible for hight avaibility part. If a scheduler
+is dead,
+it send it's conf to another if available.
+It also read order form users (nagios.cmd) and send orders to schedulers.
+"""
 
 
 import os
@@ -62,13 +64,13 @@ elif sys.version_info >= (3,):
     sys.exit(1)
 
 
-#In fact it's useful for installed daemon
+# In fact it's useful for installed daemon
 sys.path.insert(0, '.')
 
 
-#Try to load shinken lib.
-#Maybe it's not in our python path, so we detect it
-#it so (it's a untar install) we add .. in the path
+# Try to load shinken lib.
+# Maybe it's not in our python path, so we detect it
+# it so (it's a untar install) we add .. in the path
 try :
     from shinken.util import to_bool
     if hasattr(sys.modules['__main__'], '__file__'):
@@ -77,10 +79,11 @@ try :
         elts.append('shinken')
         sys.path.append(os.sep.join(elts))
 except ImportError:
+    # this is a protection for windows way of working
     if hasattr(sys.modules['__main__'], '__file__'):
-    #Now add in the python path the shinken lib
-    #if we launch it in a direct way and
-    #the shinken is not a python lib
+    # Now add in the python path the shinken lib
+    # if we launch it in a direct way and
+    # the shinken is not a python lib
         my_path = os.path.abspath(sys.modules['__main__'].__file__)
         elts = os.path.dirname(my_path).split(os.sep)[:-1]
         sys.path.append(os.sep.join(elts))
@@ -99,7 +102,6 @@ Pyro = shinken.pyro_wrapper.Pyro
 
 
 from shinken.util import to_bool
-#from scheduler import Scheduler
 from shinken.config import Config
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
@@ -110,35 +112,35 @@ from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 
 
-VERSION = "0.5"
+VERSION = "0.5+"
 
 
 
-#Interface for the other Arbiter
-#It connect, and we manage who is the Master, slave etc.
-#Here is a also a fnction to have a new conf from the master
+# Interface for the other Arbiter
+# It connect, and we manage who is the Master, slave etc.
+# Here is a also a fnction to have a new conf from the master
 class IArbiters(Pyro.core.ObjBase):
-    #we keep arbiter link
+    # we keep arbiter link
     def __init__(self, arbiter):
         Pyro.core.ObjBase.__init__(self)
         self.arbiter = arbiter
         self.running_id = random.random()
 
 
-    #Broker need to void it's broks?
+    # Broker need to void it's broks?
     def get_running_id(self):
         return self.running_id
 
 
     def have_conf(self, magic_hash):
-        #I've got a conf and the good one
+        # I've got a conf and the good one
         if self.arbiter.have_conf and self.arbiter.conf.magic_hash == magic_hash:
             return True
         else: #No conf or a bad one
             return False
 
 
-    #The master Arbiter is sending us a new conf. Ok, we take it
+    # The master Arbiter is sending us a new conf. Ok, we take it
     def put_conf(self, conf):
         self.arbiter.conf = conf
         print "Get conf:", self.arbiter.conf
@@ -147,37 +149,26 @@ class IArbiters(Pyro.core.ObjBase):
         self.arbiter.must_run = False
 
 
-    #Ping? Pong!
+    # Ping? Pong!
     def ping(self):
         return None
 
 
-    #the master arbiter ask me to do not run!
+    # the master arbiter ask me to do not run!
     def do_not_run(self):
-        #If i'm the master, just FUCK YOU!
+        # If i'm the master, just FUCK YOU!
         if self.arbiter.is_master:
             print "Some fucking idiot ask me to do not run. I'm a proud master, so I'm still running"
-        #Else I'm just a spare, so I listen to my master
+        # Else I'm just a spare, so I listen to my master
         else:
             print "Someone ask me to do not run"
             self.arbiter.last_master_speack = time.time()
             self.arbiter.must_run = False
 
 
-#Main Arbiter Class
+# Main Arbiter Class
 class Arbiter(Daemon):
-
-
-    properties = {
-        #'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None},
-        #'pidfile' : {'default' : '/usr/local/shinken/var/arbiterd.pid', 'pythonize' : None},
-        #'port' : {'default' : '7768', 'pythonize' : to_int},
-        #'host' : {'default' : '0.0.0.0', 'pythonize' : None},
-        #'user' : {'default' : 'shinken', 'pythonize' : None},
-        #'group' : {'default' : 'shinken', 'pythonize' : None},
-        #'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool}
-        }
-
+    properties = {}
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
         self.config_file = config_files[0]
@@ -188,8 +179,8 @@ class Arbiter(Daemon):
         self.debug = debug
         self.debug_file = debug_file
 
-        #From daemon to manage signal. Call self.manage_signal if
-        #exists, a dummy function otherwise
+        # From daemon to manage signal. Call self.manage_signal if
+        # exists, a dummy function otherwise
         self.set_exit_handler()
         self.broks = {}
         self.is_master = False
@@ -197,13 +188,14 @@ class Arbiter(Daemon):
 
         self.nb_broks_send = 0
 
-        #Now tab for external_commands
+        # Now tab for external_commands
         self.external_commands = []
 
-        self.t_each_loop = time.time() # to track system time change
+        # to track system time change
+        self.t_each_loop = time.time()
 
 
-    #Use for adding things like broks
+    # Use for adding things like broks
     def add(self, b):
         if isinstance(b, Brok):
             self.broks[b.id] = b
@@ -212,34 +204,34 @@ class Arbiter(Daemon):
         else:
             logger.log('Warning : cannot manage object type %s (%s)' % (type(b), b))
 
-
-    #We must push our broks to the broker
-    #because it's stupid to make a crossing connexion
-    #so we find the broker responbile for our broks,
-    #and we send him it
-    #TODO : better find the broker, here it can be dead?
-    #or not the good one?
+            
+    # We must push our broks to the broker
+    # because it's stupid to make a crossing connexion
+    # so we find the broker responbile for our broks,
+    # and we send him it
+    # TODO : better find the broker, here it can be dead?
+    # or not the good one?
     def push_broks_to_broker(self):
         for brk in self.conf.brokers:
-            #Send only if alive of course
+            # Send only if alive of course
             if brk.manage_arbiters and brk.alive:
                 is_send = brk.push_broks(self.broks)
                 if is_send:
-                    #They are gone, we keep none!
+                    # They are gone, we keep none!
                     self.broks = {}
 
 
-    #We must take external_commands from all brokers
+    # We must take external_commands from all brokers
     def get_external_commands_from_brokers(self):
         for brk in self.conf.brokers:
-            #Get only if alive of course
+            # Get only if alive of course
             if brk.alive:
                 new_cmds = brk.get_external_commands()
                 for new_cmd in new_cmds:
                     self.external_commands.append(new_cmd)
 
 
-    #Our links to satellites can raise broks. We must send them
+    # Our links to satellites can raise broks. We must send them
     def get_broks_from_satellitelinks(self):
         tabs = [self.conf.brokers, self.conf.schedulerlinks, \
                     self.conf.pollers, self.conf.reactionners]
@@ -250,7 +242,7 @@ class Arbiter(Daemon):
                     self.add(b)
 
 
-    #Our links to satellites can raise broks. We must send them
+    # Our links to satellites can raise broks. We must send them
     def get_initial_broks_from_satellitelinks(self):
         tabs = [self.conf.brokers, self.conf.schedulerlinks, \
                     self.conf.pollers, self.conf.reactionners]
@@ -260,74 +252,74 @@ class Arbiter(Daemon):
                 self.add(b)
 
 
-    #Load the external commander
+    # Load the external commander
     def load_external_command(self, e):
         self.external_command = e
         self.fifo = e.open()
 
 
-    #Check if our system time change. If so, change our
+    # Check if our system time change. If so, change our
     def check_for_system_time_change(self):
         now = time.time()
         difference = now - self.t_each_loop
-        #If we have more than 15 min time change, we need to compensate
-        #it
+        # If we have more than 15 min time change, we need to
+        # compensate it
 
         if abs(difference) > 900:
             self.compensate_system_time_change(difference)
 
-        #Now set the new value for the tick loop
+        # Now set the new value for the tick loop
         self.t_each_loop = now
 
-        #return the diff if it need, of just 0
+        # return the diff if it need, of just 0
         if abs(difference) > 900:
             return difference
         else:
             return 0
 
 
-    #If we've got a system time change, we need to compensate it
-    #from now, we do not do anything in fact.
+    # If we've got a system time change, we need to compensate it
+    # from now, we do not do anything in fact.
     def compensate_system_time_change(self, difference):
         logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
         #We only need to change some value
 
 
-
+    # Main loop function
     def main(self):
-        #Log will be broks
+        # Log will be broks
         self.log = logger
         self.log.load_obj(self)
 
         self.print_header()
         for line in self.get_header():
-            self.log.log(line)#, format = 'TOTO %s\n')
+            self.log.log(line)
 
-        #Use to know if we must still be alive or not
+        # Use to know if we must still be alive or not
         self.must_run = True
 
         print "Loading configuration"
         self.conf = Config()
-        #The config Class must have the USERN macro
-        #There are 256 of them, so we create online
+        # The config Class must have the USERN macro
+        # There are 256 of them, so we create online
         Config.fill_usern_macros()
 
-        #REF: doc/shinken-conf-dispatching.png (1)
+        # REF: doc/shinken-conf-dispatching.png (1)
         buf = self.conf.read_config(self.config_files)
 
         raw_objects = self.conf.read_config_buf(buf)
 
         #### Loading Arbiter module part ####
 
-        #first we need to get arbiters and modules first
-        #so we can ask them some objects too
+        # First we need to get arbiters and modules first
+        # so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
 
 
         self.conf.early_arbiter_linking()
 
-        #Search wich Arbiterlink I am
+        # Search wich Arbiterlink I am
         for arb in self.conf.arbiterlinks:
             if arb.is_me():
                 arb.need_conf = False
@@ -337,21 +329,21 @@ class Arbiter(Daemon):
             else: #not me
                 arb.need_conf = True
 
-        #If None, there will be huge problems. The conf will be invalid
-        #And we will bail out after print all errors
+        # If None, there will be huge problems. The conf will be invalid
+        # And we will bail out after print all errors
         if self.me != None:
             print "My own modules :"
             for m in self.me.modules:
                 print m
 
-            #BEWARE: this way of finding path is good if we still
-            #DO NOT HAVE CHANGE PWD!!!
-            #Now get the module path. It's in fact the directory modules
-            #inside the shinken directory. So let's find it.
+            # BEWARE: this way of finding path is good if we still
+            # DO NOT HAVE CHANGE PWD!!!
+            # Now get the module path. It's in fact the directory modules
+            # inside the shinken directory. So let's find it.
             print "modulemanager file", shinken.modulesmanager.__file__
             modulespath = os.path.abspath(shinken.modulesmanager.__file__)
             print "modulemanager absolute file", modulespath
-            #We got one of the files of
+            # We got one of the files of
             elts = os.path.dirname(modulespath).split(os.sep)[:-1]
             elts.append('shinken')
             elts.append('modules')
@@ -383,63 +375,63 @@ class Arbiter(Daemon):
                     except Exception, exp:
                         print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
 
-       ### Resume standard operations ###
+        ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
 
-        #Maybe conf is already invalid
+        # Maybe conf is already invalid
         if not self.conf.conf_is_correct:
             print "***> One or more problems was encountered while processing the config files..."
             sys.exit(1)
 
 
-        #************** Change Nagios2 names to Nagios3 ones ******
+        # Change Nagios2 names to Nagios3 ones
         self.conf.old_properties_names_to_new()
 
-        #print "****************** Create Template links **********"
+        # Create Template links
         self.conf.linkify_templates()
 
-        #print "****************** Inheritance *******************"
+        # All inheritances
         self.conf.apply_inheritance()
 
-        #print "****************** Explode ***********************"
+        # Explode between types
         self.conf.explode()
 
-        #print "***************** Create Name reversed list ******"
+        # Create Name reversed list for searching list
         self.conf.create_reversed_list()
 
-        #print "***************** Cleaning Twins *****************"
+        # Cleaning Twins objects
         self.conf.remove_twins()
 
-        #print "****************** Implicit inheritance *******************"
+        # Implicit inheritance for services
         self.conf.apply_implicit_inheritance()
 
-        #print "****************** Fill default ******************"
+        # Fill default values
         self.conf.fill_default()
 
-        #print "****************** Clean templates ******************"
+        # Clean templates
         self.conf.clean_useless()
 
-        #print "****************** Pythonize ******************"
+        # Pythonize values
         self.conf.pythonize()
 
-        #print "****************** Linkify ******************"
+        # Linkify objects each others
         self.conf.linkify()
 
-        #print "*************** applying dependancies ************"
+        # applying dependancies
         self.conf.apply_dependancies()
 
-        #Hacking some global parameter inherited from Nagios to create
-        #on the fly some Broker modules like for status.dat parameters
-        #or nagios.log one if there are no already available
+        # Hacking some global parameter inherited from Nagios to create
+        # on the fly some Broker modules like for status.dat parameters
+        # or nagios.log one if there are no already available
         self.conf.hack_old_nagios_parameters()
 
-        #Raise warning about curently unmanaged parameters
+        # Raise warning about curently unmanaged parameters
         self.conf.warn_about_unmanaged_parameters()
 
-        #print "************** Exlode global conf ****************"
+        # Exlode global conf parameters into Classes
         self.conf.explode_global_conf()
 
-        #set ourown timezone and propagate it to other satellites
+        # set ourown timezone and propagate it to other satellites
         self.conf.propagate_timezone_option()
 
         # Look for business rules, and create teh dep trees
@@ -448,10 +440,10 @@ class Arbiter(Daemon):
         self.conf.create_business_rules_dependencies()
 
 
-        #************* Print warning about useless parameters in Shinken **************"
+        # Warn about useless parameters in Shinken
         self.conf.notice_about_useless_parameters()
-
-        #print "****************** Correct ?******************"
+        
+        # Correct conf?
         self.conf.is_correct()
 
         #If the conf is not correct, we must get out now
@@ -459,14 +451,14 @@ class Arbiter(Daemon):
             print "Configuration is incorrect, sorry, I bail out"
             sys.exit(1)
 
-
+        #Debug to see memory and objects :)
         #self.conf.dump()
-
         #from guppy import hpy
         #hp=hpy()
         #print hp.heap()
         #print hp.heapu()
 
+        # Search myself as an arbiter object
         if self.me == None:
             print "Error : I cannot find my own Arbiter object, I bail out"
             print "To solve it : please change the host_name parameter in the object Arbiter"
@@ -474,49 +466,41 @@ class Arbiter(Daemon):
             sys.exit(1)
 
 
-        #If I am a spare, I must wait a (true) conf from Arbiter Master
+        # If I am a spare, I must wait a (true) conf from Arbiter Master
         self.wait_conf = self.me.spare
 
-        #print "Dump realms"
-        #for r in self.conf.realms:
-        #    print r.get_name(), r.__dict__
-        print "\n"
-
-
-        #REF: doc/shinken-conf-dispatching.png (2)
+        # REF: doc/shinken-conf-dispatching.png (2)
         logger.log("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
 
-        #The conf can be incorrect here if the cut into parts see errors like
-        #a realm with hosts and not schedulers for it
+        # The conf can be incorrect here if the cut into parts see errors like
+        # a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
             print "Configuration is incorrect, sorry, I bail out"
             sys.exit(1)
 
         logger.log('Things look okay - No serious problems were detected during the pre-flight check')
 
-        #Exit if we are just here for config checking
+        # Exit if we are just here for config checking
         if self.verify_only:
             sys.exit(0)
 
-        #self.conf.debug()
-
-        #Some properties need to be "flatten" (put in strings)
-        #before being send, like realms for hosts for example
-        #BEWARE: after the cutting part, because we stringify some properties
+        # Some properties need to be "flatten" (put in strings)
+        # before being send, like realms for hosts for example
+        # BEWARE: after the cutting part, because we stringify some properties
         self.conf.prepare_for_sending()
 
 
-        #Ok, here we must check if we go on or not.
-        #TODO : check OK or not
+        # Ok, here we must check if we go on or not.
+        # TODO : check OK or not
         self.pidfile = self.conf.lock_file
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
         self.workdir = os.path.expanduser('~'+self.user)
 
-        #If we go, we must go in daemon or not
-        #Check if another Scheduler is not running (with the same conf)
+        # If we go, we must go in daemon or not
+        # Check if another Scheduler is not running (with the same conf)
         self.check_parallel_run(do_replace)
 
 
@@ -533,22 +517,22 @@ class Arbiter(Daemon):
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK=0
 
-        #If the admin don't care about security, I allow root running
+        # If the admin don't care about security, I allow root running
         insane = not self.idontcareaboutsecurity
 
-        #Try to change the user (not nt for the moment)
-        #TODO: change user on nt
+        # Try to change the user (not nt for the moment)
+        # TODO: change user on nt
         if os.name != 'nt':
             self.change_user(insane)
         else:
             logger.log("Warning : you can't change user on this system")
 
-        #Now the daemon part if need
+        # Now the daemon part if need
         if is_daemon:
             self.create_daemon(do_debug=debug, debug_file=debug_file)
 
         logger.log("Opening of the network port")
-        #Now open the daemon port for Broks and other Arbiter sends
+        # Now open the daemon port for Broks and other Arbiter sends
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0
@@ -564,29 +548,29 @@ class Arbiter(Daemon):
 
         logger.log("Configuration Loaded")
 
-        #Main loop
+        # Main loop
         while True:
-            #If I am a spare, I wait for the master arbiter to send me
-            #true conf. When
+            # If I am a spare, I wait for the master arbiter to send me
+            # true conf. When
             if self.me.spare:
                 self.wait_initial_conf()
-            else:#I'm the master, I've got a conf
+            else:# I'm the master, I've got a conf
                 self.is_master = True
                 self.have_conf = True
-
-            #Ok, now It've got a True conf, Now I wait to get too much
-            #time without
+                
+            # Ok, now It've got a True conf, Now I wait to get too much
+            # time without
             if self.me.spare:
                 print "I must wait now"
                 self.wait_for_master_death()
 
             if self.must_run:
-                #Main loop
+                # Main loop
                 self.run()
 
 
-    #Get 'objects' from external modules
-    #It can be used for get external commands for example
+    # Get 'objects' from external modules
+    # It can be used for get external commands for example
     def get_objects_from_from_queues(self):
         for f in self.modules_manager.get_external_from_queues():
             print "Groking from module instance %s" % f
@@ -601,7 +585,7 @@ class Arbiter(Daemon):
 
 
 
-    #We wait (block) for arbiter to send us conf
+    # We wait (block) for arbiter to send us conf
     def wait_initial_conf(self):
         self.have_conf = False
         print "Waiting for configuration from master"
@@ -613,7 +597,7 @@ class Arbiter(Daemon):
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
 
-            #Manage a possible time change (our avant will be change with the diff)
+            # Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
             avant += diff
 
@@ -634,7 +618,7 @@ class Arbiter(Daemon):
                 timeout = 1.0
 
 
-    #We wait (block) for arbiter to send us something
+    # We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
         print "Waiting for master death"
         timeout = 1.0
@@ -646,7 +630,7 @@ class Arbiter(Daemon):
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
 
-            #Manage a possible time change (our avant will be change with the diff)
+            # Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
             avant += diff
 
@@ -658,7 +642,7 @@ class Arbiter(Daemon):
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff
-            else: #Timeout
+            else: # Timeout
                 sys.stdout.write(".")
                 sys.stdout.flush()
                 timeout = 1.0
@@ -674,8 +658,8 @@ class Arbiter(Daemon):
                 is_master_dead = True
 
 
-    #Manage signal function
-    #Frame is just garbage
+    # Manage signal function
+    # Frame is just garbage
     def manage_signal(self, sig, frame):
         print "\nExiting with signal", sig
         print "Stopping all network connexions"
@@ -688,10 +672,10 @@ class Arbiter(Daemon):
         sys.exit(0)
 
 
-    #Main function
+    # Main function
     def run(self):
-        #Before running, I must be sure who am I
-        #The arbiters change, so we must refound the new self.me
+        # Before running, I must be sure who am I
+        # The arbiters change, so we must refound the new self.me
         for arb in self.conf.arbiterlinks:
             if arb.is_me():
                 self.me = arb
@@ -700,18 +684,18 @@ class Arbiter(Daemon):
         self.dispatcher = Dispatcher(self.conf, self.me)
         self.dispatcher.check_alive()
         self.dispatcher.check_dispatch()
-        #REF: doc/shinken-conf-dispatching.png (3)
+        # REF: doc/shinken-conf-dispatching.png (3)
         self.dispatcher.dispatch()
 
-        #Now we can get all initial broks for our satellites
+        # Now we can get all initial broks for our satellites
         self.get_initial_broks_from_satellitelinks()
 
-        #Now create the external commander
+        # Now create the external commander
         if os.name != 'nt':
             e = ExternalCommandManager(self.conf, 'dispatcher')
 
-        #Scheduler need to know about external command to activate it
-        #if necessary
+            # Arbiter need to know about external command to activate it
+            # if necessary
             self.load_external_command(e)
         else:
             self.fifo = None
@@ -728,7 +712,7 @@ class Arbiter(Daemon):
             # 'foreign' event loop
             ins, outs, exs = select.select(socks, [], [], timeout)
 
-            #Manage a possible time change (our avant will be change with the diff)
+            # Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
             avant += diff
 
@@ -741,43 +725,41 @@ class Arbiter(Daemon):
                             diff = apres-avant
                             timeout = timeout - diff
                             break    # no need to continue with the for loop
-                        #If FIFO, read external command
+                        # If FIFO, read external command
                         if s == self.fifo:
                             ext_cmds = self.external_command.get()
                             for ext_cmd in ext_cmds:
                                 self.external_commands.append(ext_cmd)
                             self.fifo = self.external_command.open()
 
-            else: #Timeout
+            else: # Timeout
                 self.dispatcher.check_alive()
                 self.dispatcher.check_dispatch()
-                #REF: doc/shinken-conf-dispatching.png (3)
+                # REF: doc/shinken-conf-dispatching.png (3)
                 self.dispatcher.dispatch()
                 self.dispatcher.check_bad_dispatch()
 
-                #Now get things from our module instances
+                # Now get things from our module instances
                 self.get_objects_from_from_queues()
 
-                #Maybe our satellites links raise new broks. Must reap them
+                # Maybe our satellites links raise new broks. Must reap them
                 self.get_broks_from_satellitelinks()
 
-                #One broker is responsible for our broks,
-                #we must give him our broks
+                # One broker is responsible for our broks,
+                # we must give him our broks
                 self.push_broks_to_broker()
                 self.get_external_commands_from_brokers()
-                #send_conf_to_schedulers()
+                # send_conf_to_schedulers()
                 timeout = 1.0
 
                 print "Nb Broks send:", self.nb_broks_send
-                #logger.log("Nb Broks send: %d" % self.nb_broks_send)
                 self.nb_broks_send = 0
 
-
-                #Now send all external commands to schedulers
+                # Now send all external commands to schedulers
                 for ext_cmd in self.external_commands:
                     self.external_command.resolve_command(ext_cmd)
-                #It's send, do not keep them
-                #TODO: check if really send. Queue by scheduler?
+                # It's send, do not keep them
+                # TODO: check if really send. Queue by scheduler?
                 self.external_commands = []
 
             if timeout < 0:
@@ -806,9 +788,9 @@ def usage(name):
 
 
 
-#Here we go!
+# Here we go!
 if __name__ == "__main__":
-    #Manage the options
+    # Manage the options
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hvrdc::w", ["help", "verify-config", "replace", "daemon", "config=", "debug=", "easter"])
     except getopt.GetoptError, err:
@@ -816,7 +798,7 @@ if __name__ == "__main__":
         print str(err) # will print something like "option -a not recognized"
         usage(sys.argv[0])
         sys.exit(2)
-    #Default params
+    # Default params
     config_files = []
     verify_only = False
     is_daemon = False
@@ -849,7 +831,7 @@ if __name__ == "__main__":
         sys.exit()
 
     p = Arbiter(config_files, is_daemon, do_replace, verify_only, debug, debug_file)
-    #Ok, now we load the config
+    # Ok, now we load the config
 
     #p = Shinken(conf)
     #import cProfile
