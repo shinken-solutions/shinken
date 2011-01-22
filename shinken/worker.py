@@ -29,6 +29,8 @@ from Queue import Empty
 from multiprocessing import Process, Queue
 
 import time, sys
+import signal
+
 
 #Worker class
 class Worker:
@@ -50,8 +52,6 @@ class Worker:
         self._process = Process(target=self.work, args=(s, returns_queue, self._c))
         self.returns_queue = returns_queue
         self.max_plugins_output_length = max_plugins_output_length
-        #Thread version : not good in cpython :(
-        #self._process = threading.Thread(target=self.work, args=(s, returns_queue, self._c))
         self.i_am_dying = False
 
 
@@ -63,9 +63,9 @@ class Worker:
         self._process.start()
 
 
-    #Kill the backgroup process
-    #AND close correctly the queue
-    #the queue have a thread, so close it too....
+    # Kill the background process
+    # AND close correctly the queue
+    # the queue have a thread, so close it too....
     def terminate(self):
         self._process.terminate()
         self._c.close()
@@ -96,15 +96,15 @@ class Worker:
         self._c.put(msg)
 
 
-    #A zombie is immortal, so kill not be kill anymore
+    # A zombie is immortal, so kill not be kill anymore
     def set_zombie(self):
         self._mortal = False
 
 
-    #Get new checks if less than nb_checks_max
-    #If no new checks got and no check in queue,
-    #sleep for 1 sec
-    #REF: doc/shinken-action-queues.png (3)
+    # Get new checks if less than nb_checks_max
+    # If no new checks got and no check in queue,
+    # sleep for 1 sec
+    # REF: doc/shinken-action-queues.png (3)
     def get_new_checks(self):
         try:
             while(len(self.checks) < self.processes_by_worker):
@@ -186,6 +186,8 @@ class Worker:
     #return_queue = queue managed by manager
     #c = Control Queue for the worker
     def work(self, s, returns_queue, c):
+        ## restore default signal handler for the workers:
+        signal.signal(signal.SIGTERM, signal.SIG_DFL)
         timeout = 1.0
         self.checks = []
         self.returns_queue = returns_queue

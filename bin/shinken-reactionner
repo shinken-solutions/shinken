@@ -67,12 +67,12 @@ except ImportError:
         sys.path.append(os.sep.join(elts))
 
 try:
-    import shinken.pyro_wrapper
+    import shinken.pyro_wrapper as pyro
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
 
-Pyro = shinken.pyro_wrapper.Pyro
+Pyro = pyro.Pyro
 
 
 from shinken.satellite import Satellite

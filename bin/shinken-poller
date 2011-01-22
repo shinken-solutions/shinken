@@ -66,12 +66,12 @@ except ImportError:
         sys.path.append(os.sep.join(elts))
 
 try:
-    import shinken.pyro_wrapper
+    import shinken.pyro_wrapper as pyro
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
 
-Pyro = shinken.pyro_wrapper.Pyro
+Pyro = pyro.Pyro
 
 from shinken.satellite import Satellite
 from shinken.util import to_int, to_bool
@@ -81,7 +81,7 @@ VERSION = "0.5"
 
 
 #Our main APP class
-class Poller (Satellite):
+class Poller(Satellite):
     do_checks = True #I do checks
     do_actions = False #but no actions
     #default_port = 7771
@@ -156,7 +156,6 @@ if __name__ == "__main__":
             sys.exit()
 
     p = Poller(config_file, is_daemon, do_replace, debug, debug_file)
-    #import cProfile
+
     p.main()
-    #command = """p.main()"""
-    #cProfile.runctx( command, globals(), locals(), filename="/tmp/Poller.profile" )
+

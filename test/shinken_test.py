@@ -69,7 +69,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.is_correct()
         self.confs = self.conf.cut_into_parts()
         self.dispatcher = Dispatcher(self.conf, self.me)
-        self.sched = Scheduler(None)
+        self.sched = Scheduler(None, None)
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf)

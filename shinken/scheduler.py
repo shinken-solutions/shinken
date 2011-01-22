@@ -19,7 +19,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import select, time, os
+import select, time, os, errno
 import traceback
 
 import shinken.pyro_wrapper as pyro
@@ -37,8 +37,9 @@ from shinken.log import logger
 
 
 class Scheduler:
-    def __init__(self, daemon):
+    def __init__(self, daemon, scheduler_daemon):
         self.daemon = daemon #Pyro daemon for incomming orders/askings
+        self.sched_daemon = scheduler_daemon
         self.must_run = True #When set to false by us, we die and
                              #arbiter launch a new Scheduler
 
@@ -157,6 +158,7 @@ class Scheduler:
         #first update our retention data
         self.update_retention_file(forced=True)
         self.must_run = False
+        self.sched_daemon.interrupted = True ## to make the do_main_loop exit
 
 
     #Load the external commander
@@ -873,12 +875,10 @@ class Scheduler:
         gogogo = time.time()
         self.t_each_loop = time.time() #use to track system time change
 
-        while self.must_run :
-            socks = pyro.get_sockets(self.daemon)
+        while self.must_run and not self.sched_daemon.interrupted:
             t_begin = time.time()
-            #socks.append(self.fifo)
-            # 'foreign' event loop
-            ins,outs,exs = select.select(socks,[],[],timeout)
+            socks = pyro.get_sockets(self.daemon)
+            ins = self.sched_daemon.get_socks_activity(socks, timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:

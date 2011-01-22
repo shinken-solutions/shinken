@@ -143,8 +143,8 @@ do_start() {
     mod=$1
     modfilepath="$BIN/shinken-${mod}"
     [ -e "$modfilepath" ] || {
-    	echo "FAILED: did not found $mod file ($modfilepath) ; are you sure shinken-$mod is installed ?"
-    	return 5
+        echo "FAILED: did not found $mod file ($modfilepath) ; are you sure shinken-$mod is installed ?"
+        return 5
     }
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
     if [ "$mod" != "arbiter" ]; then
@@ -155,8 +155,10 @@ do_start() {
         rc=$?
     fi
     if [ $rc != 0 ]; then
+        resfile="/tmp/bad_start_for_$mod"
+        echo "$output" > "$resfile" || true
         output=$(echo "$output" | tail -1)
-        echo "FAILED: $output"
+        echo "FAILED: $output (full output is in $resfile)"
         return 1
     fi
     echo "OK"
@@ -175,22 +177,47 @@ do_stop() {
         return 0
     }
     if [ ! -z "$pid" ]; then
+        kill "$pid"
+        sleep 0.5
+        ## TODO: instead of 'sleep 1' : wait up to when pid file is removed (with timeout) ?
+        for i in 1 2 3
+        do
+            # TODO : use a better way to get the children pids..
+            allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+            if [ -z "$allpids" ]; then
+                echo "OK"
+                return 0
+            fi
+            sleep 1
+        done
+        echo "there are still remaining processes to $mod running.. ; trying to kill them (SIGTERM).."
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
         for cpid in $(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}'); do
             kill $cpid > /dev/null 2>&1
         done
-        sleep 1
-        ## TODO: instead of 'sleep 1' : wait up to when pid file is removed (with timeout) ?
-        pid=$(getmodpid $mod)
-        if [ ! -z "$pid" ]; then
+        for i in 1 2 3
+        do
+            # TODO : eventually use a better way to get the children pids..
             allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
-            ## TODO: we could 'kill -9' the remaining processes.. if we are sure they are the good one..
-            if [ ! -z "$allpids" ]; then
-                echo "FAILED: one or more process for $mod are still running after kill !"
-                echo "Remaining processes are (pids="$allpids"):"
-                ps -lf $(for p in $allpids ; do echo -n "-p$p " ; done)
-                echo "You should maybe check and see this." 
-                return 1
+            if [ -z "$allpids" ]; then
+                echo "OK"
+            	return 0
             fi
+            sleep 1
+        done
+        echo "there are still remaining processes to $mod running.. ; trying to kill -9 them.."
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+        for cpid in $(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}'); do
+            kill -9 $cpid > /dev/null 2>&1
+        done
+        sleep 1
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+        if [ ! -z "$allpids" ]; then
+            echo "FAILED: one or more process for $mod are still running after kill -9 !"
+            echo "Remaining processes are (pids="$allpids"):"
+            ps -lf $(for p in $allpids ; do echo -n "-p$p " ; done)
+            echo "You should maybe check and see this." 
+            return 1
         fi
         echo "OK"
     else
@@ -302,14 +329,14 @@ do_cmd_on() {
 ## Main:
 
 case "$CMD" in
-	start|stop|restart|status)
-		do_cmd_on "$CMD" "$SUBMODULES"
-    	;;
-	check|checkconfig)
-		do_cmd_on "$CMD" "arbiter"
-		;;
-	*)
-    	usage >&2
-    	exit 2
-    	;;
+    start|stop|restart|status)
+        do_cmd_on "$CMD" "$SUBMODULES"
+        ;;
+    check|checkconfig)
+        do_cmd_on "$CMD" "arbiter"
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
 esac

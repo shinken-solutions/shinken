@@ -32,6 +32,7 @@
 from Queue import Empty
 from multiprocessing import Queue, Manager, active_children
 import os
+import errno
 import stat
 import copy
 import time
@@ -210,11 +211,16 @@ class IBroks(Pyro.core.ObjBase):
 #Our main APP class
 class Satellite(Daemon):
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-        self.print_header()
+        
+        Daemon.__init__(self)
+        
+        self.is_daemon = is_daemon
+        self.debug = debug
+        self.debug_file = debug_file
 
-        #From daemon to manage signal. Call self.manage_signal if
-        #exists, a dummy function otherwise
-        self.set_exit_handler()
+        self.check_shm()
+
+        self.print_header()
 
         #Log init
         self.log = logger
@@ -231,14 +237,25 @@ class Satellite(Daemon):
             #the config file by reference
             self.relative_paths_to_full(os.path.dirname(config_file))
 
-        #Check if another Scheduler is not running (with the same conf)
-        self.check_parallel_run(do_replace)
-
-        #If the admin don't care about security, I allow root running
-        insane = not self.idontcareaboutsecurity
-
+        
         #Keep broks so they can be eaten by a broker
         self.broks = {}
+
+        #Ours schedulers
+        self.schedulers = {}
+        self.workers = {} #dict of active workers
+
+        self.nb_actions_in_workers = 0
+
+        #Init stats like Load for workers
+        self.wait_ratio = Load(initial_value=1)
+
+        self.t_each_loop = time.time() #use to track system time change
+
+        #Now the specific stuff
+        #Bool to know if we have received conf from arbiter
+        self.have_conf = False
+        self.have_new_conf = False
 
         # The SSL part
         if self.use_ssl:
@@ -253,43 +270,45 @@ class Satellite(Daemon):
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK=0
 
+        Pyro.config.PYRO_COMPRESSION = 1
+        Pyro.config.PYRO_MULTITHREADED = 0
+        Pyro.config.PYRO_STORAGE = self.workdir
+        logger.log("Using working directory : %s" % os.path.abspath(self.workdir))
+        logger.log("Opening port: %s" % self.port)
+        
+        # Daemon init
+        self.daemon = pyro.init_daemon(self.host, self.port, self.use_ssl)
 
-        #Try to change the user (not nt for the moment)
-        #TODO: change user on nt
-        if os.name != 'nt':
-            self.change_user(insane)
+        # Check if another Scheduler is not running (with the same conf)
+        self.check_parallel_run(do_replace)
+        self.change_to_user_group()
+        self.change_to_workdir()  ## must be done AFTER pyro daemon init
+
+
+        # Now we create the interfaces
+        self.interface = IForArbiter(self)
+        self.brok_interface = IBroks(self)
+
+        # And we register them
+        self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
+        self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
+
+        # Now the daemonize part if need
+        ####################################################################
+        ## NB NB NB: We must daemonize BEFORE instanciating our Queue !!
+        if self.is_daemon:
+            daemon_socket_fds = tuple( sock.fileno() for sock in pyro.get_sockets(self.daemon) )
+            self.daemonize(do_debug=self.debug, debug_file=self.debug_file, skip_close_fds=daemon_socket_fds)
         else:
-            logger.log("Sorry, you can't change user on this system")
-
-
-        #Now the daemon part if need
-        if is_daemon:
-            self.create_daemon(do_debug=debug, debug_file=debug_file)
-
-        #Now the specific stuff
-        #Bool to know if we have received conf from arbiter
-        self.have_conf = False
-        self.have_new_conf = False
+            self.write_pid()
+        
         self.s = Queue() #Global Master -> Slave
-        #self.m = Queue() #Slave -> Master
         self.manager = Manager()
         self.returns_queue = self.manager.list()
 
-        #Ours schedulers
-        self.schedulers = {}
-        self.workers = {} #dict of active workers
 
-        self.nb_actions_in_workers = 0
-
-        #Init stats like Load for workers
-        self.wait_ratio = Load(initial_value=1)
-
-
-        self.t_each_loop = time.time() #use to track system time change
-
-
-    #initialise or re-initialise connexion with scheduler
     def pynag_con_init(self, id):
+        """ Initialize or re-initialize connexion with scheduler """
         sched = self.schedulers[id]
         #If sched is not active, I do not try to init
         #it is just useless
@@ -379,12 +398,12 @@ class Satellite(Daemon):
         logger.log("Waiting for initial configuration")
         timeout = 1.0
         #Arbiter do not already set our have_conf param
-        while not self.have_conf :
-            socks = pyro.get_sockets(self.daemon)
-
+        while not self.have_conf and not self.interrupted:
             before = time.time()
-            ins,outs,exs = select.select(socks,[],[],timeout)   # 'foreign' event loop
-
+            
+            socks = pyro.get_sockets(self.daemon)
+            ins = self.get_socks_activity(socks, timeout)
+            
             #Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
             before += diff
@@ -405,6 +424,9 @@ class Satellite(Daemon):
             if timeout < 0:
                 timeout = 1.0
 
+        if self.interrupted:
+            self.request_stop()
+
 
     #The arbiter can resent us new conf in the daemon port.
     #We do not want to loose time about it, so it's not a bloking
@@ -412,8 +434,7 @@ class Satellite(Daemon):
     #If it send us a new conf, we reinit the connexions of all schedulers
     def watch_for_new_conf(self, timeout_daemon):
         socks = pyro.get_sockets(self.daemon)
-
-        ins,outs,exs = select.select(socks,[],[],timeout_daemon)
+        ins = self.get_socks_activity(socks, timeout_daemon)
         if ins != []:
             for sock in socks:
                 if sock in ins:
@@ -467,11 +488,7 @@ class Satellite(Daemon):
         self.workers[w.id].start()
 
 
-    #Manage signal function
-    #TODO : manage more than just quit
-    #Frame is just garbage
-    def manage_signal(self, sig, frame):
-        logger.log("\nExiting with signal %s" % sig)
+    def do_stop(self):
         logger.log('Stopping all workers')
         for w in self.workers.values():
             try:
@@ -487,13 +504,6 @@ class Satellite(Daemon):
         self.daemon.disconnect(self.interface)
         self.daemon.disconnect(self.brok_interface)
         self.daemon.shutdown(True)
-        logger.log("Unlinking pid file")
-        try:
-            os.unlink(self.pidfile)
-        except OSError, exp:
-            print "Error un deleting pid file:", exp
-        logger.log("Exiting")
-        sys.exit(0)
 
 
     #A simple fucntion to add objects in self
@@ -607,133 +617,109 @@ class Satellite(Daemon):
                 sys.exit(0)
 
 
+    def do_loop_turn(self):
+        begin_loop = time.time()
 
-    #Main function, will loop forever
+        #Maybe the arbiter ask us to wait for a new conf
+        #If true, we must restart all...
+        if self.have_conf == False:
+            print "Begin wait initial"
+            self.wait_for_initial_conf()
+            print "End wait initial"
+            #for sched_id in self.schedulers:
+            #    print "Init main2"
+            #    self.pynag_con_init(sched_id)
+
+        #Now we check if arbiter speek to us in the daemon.
+        #If so, we listen for it
+        #When it push us conf, we reinit connexions
+        #Sleep in waiting a new conf :)
+        self.watch_for_new_conf(self.timeout)
+
+        #Manage a possible time change (our before will be change with the diff)
+        diff = self.check_for_system_time_change()
+        begin_loop += diff
+
+        try:
+            after = time.time()
+            self.timeout -= after-begin_loop
+
+            if self.timeout < 0: #for go in timeout
+                #print "Time out", timeout
+                raise Empty
+
+        except Empty , exp: #Time out Part
+            print " ======================== "
+            after = time.time()
+            self.timeout = self.polling_interval
+
+            #Check if zombies workers are among us :)
+            #If so : KILL THEM ALL!!!
+            self.check_and_del_zombie_workers()
+
+            #Print stats for debug
+            for sched_id in self.schedulers:
+                sched = self.schedulers[sched_id]
+                #In workers we've got actions send to queue - queue size
+                print '[%d][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
+                    (sched_id, sched['name'],len(self.workers), self.s.qsize(), \
+                             self.nb_actions_in_workers - self.s.qsize(), len(self.returns_queue))
+
+
+            #Before return or get new actions, see how we manage
+            #old ones : are they still in queue (s)? If True, we
+            #must wait more or at least have more workers
+            wait_ratio = self.wait_ratio.get_load()
+            if self.s.qsize() != 0 and wait_ratio < 5*self.polling_interval:
+                print "I decide to up wait ratio"
+                self.wait_ratio.update_load(wait_ratio * 2)
+            else:
+                #Go to self.polling_interval on normal run, if wait_ratio
+                #was >5*self.polling_interval,
+                #it make it come near 5 because if < 5, go up :)
+                self.wait_ratio.update_load(self.polling_interval)
+            wait_ratio = self.wait_ratio.get_load()
+            print "Wait ratio:", wait_ratio
+
+            # We can wait more than 1s if need,
+            # no more than 5s, but no less than 1
+            timeout = self.timeout * wait_ratio
+            timeout = max(self.polling_interval, timeout)
+            self.timeout = min(5*self.polling_interval, timeout)
+
+            # Maybe we do not have enouth workers, we check for it
+            # and launch new ones if need
+            self.adjust_worker_number_by_load()
+
+            # Manage all messages we've got in the last timeout
+            # for queue in self.return_messages:
+            while len(self.returns_queue) != 0:
+                self.manage_action_return(self.returns_queue.pop())
+
+            # Now we can get new actions from schedulers
+            self.get_new_actions()
+
+            # We send all finished checks
+            # REF: doc/shinken-action-queues.png (6)
+            self.manage_returns()
+
+
     def main(self):
-        
-        # First check the /dev/shm
-        # on linux host for write access
-        if os.name == 'posix' and os.path.exists('/dev/shm'):
-            # We get the access rights, and we check them
-            mode = stat.S_IMODE(os.lstat('/dev/shm')[stat.ST_MODE])
-            if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
-                logger.log("The directory /dev/shm is not writable or readable. Please launch as root chmod 777 /dev/shm")
-                sys.exit(2)
-        
 
-        Pyro.config.PYRO_COMPRESSION = 1
-        Pyro.config.PYRO_MULTITHREADED = 0
-        Pyro.config.PYRO_STORAGE = self.workdir
-        logger.log("Using working directory : %s" % os.path.abspath(self.workdir))
-        logger.log("Opening port: %s" % self.port)
-        #Daemon init
-        self.daemon = pyro.init_daemon(self.host, self.port, self.use_ssl)
-
-        #Now we create the interfaces
-        self.interface = IForArbiter(self)
-        self.brok_interface = IBroks(self)
-
-        #And we register them
-        self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
-        self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
-
-        #We wait for initial conf
+        # We wait for initial conf
         self.wait_for_initial_conf()
 
-        #Connexion init with PyNag server
+        # Connexion init with PyNag server
         for sched_id in self.schedulers:
             print "Init main"
             self.pynag_con_init(sched_id)
         self.have_new_conf = False
 
-        #Allocate Mortal Threads
-        for i in xrange(1, self.min_workers):
-            self.create_and_launch_worker() #create mortal worker
+        # Allocate Mortal Threads
+        for _ in xrange(1, self.min_workers):
+            self.create_and_launch_worker()
 
-        #Now main loop
-        timeout = self.polling_interval #default 1.0
-        while True:
-            begin_loop = time.time()
-
-            #Maybe the arbiter ask us to wait for a new conf
-            #If true, we must restart all...
-            if self.have_conf == False:
-                print "Begin wait initial"
-                self.wait_for_initial_conf()
-                print "End wait initial"
-                #for sched_id in self.schedulers:
-                #    print "Init main2"
-                #    self.pynag_con_init(sched_id)
-
-            #Now we check if arbiter speek to us in the daemon.
-            #If so, we listen for it
-            #When it push us conf, we reinit connexions
-            #Sleep in waiting a new conf :)
-            self.watch_for_new_conf(timeout)
-
-            #Manage a possible time change (our before will be change with the diff)
-            diff = self.check_for_system_time_change()
-            begin_loop += diff
-
-            try:
-                after = time.time()
-                timeout -= after-begin_loop
-
-                if timeout < 0: #for go in timeout
-                    #print "Time out", timeout
-                    raise Empty
-
-            except Empty , exp: #Time out Part
-                print " ======================== "
-                after = time.time()
-                timeout = self.polling_interval
-
-                #Check if zombies workers are among us :)
-                #If so : KILL THEM ALL!!!
-                self.check_and_del_zombie_workers()
-
-                #Print stats for debug
-                for sched_id in self.schedulers:
-                    sched = self.schedulers[sched_id]
-                    #In workers we've got actions send to queue - queue size
-                    print '[%d][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
-                        (sched_id, sched['name'],len(self.workers), self.s.qsize(), \
-                                 self.nb_actions_in_workers - self.s.qsize(), len(self.returns_queue))
-
-
-                #Before return or get new actions, see how we manage
-                #old ones : are they still in queue (s)? If True, we
-                #must wait more or at least have more workers
-                wait_ratio = self.wait_ratio.get_load()
-                if self.s.qsize() != 0 and wait_ratio < 5*self.polling_interval:
-                    print "I decide to up wait ratio"
-                    self.wait_ratio.update_load(wait_ratio * 2)
-                else:
-                    #Go to self.polling_interval on normal run, if wait_ratio
-                    #was >5*self.polling_interval,
-                    #it make it come near 5 because if < 5, go up :)
-                    self.wait_ratio.update_load(self.polling_interval)
-                wait_ratio = self.wait_ratio.get_load()
-                print "Wait ratio:", wait_ratio
-
-                #We can wait more than 1s if need,
-                #no more than 5s, but no less than 1
-                timeout = timeout * wait_ratio
-                timeout = max(self.polling_interval, timeout)
-                timeout = min(5*self.polling_interval, timeout)
-
-                #Maybe we do not have enouth workers, we check for it
-                #and launch new ones if need
-                self.adjust_worker_number_by_load()
-
-                #Manage all messages we've got in the last timeout
-                #for queue in self.return_messages:
-                while(len(self.returns_queue) != 0):
-                    self.manage_action_return(self.returns_queue.pop())
-
-                #Now we can get new actions from schedulers
-                self.get_new_actions()
-
-                #We send all finished checks
-                #REF: doc/shinken-action-queues.png (6)
-                self.manage_returns()
+        # Now main loop
+        self.timeout = self.polling_interval
+        
+        self.do_mainloop()

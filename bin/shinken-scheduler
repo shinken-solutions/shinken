@@ -114,14 +114,14 @@ except ImportError:
 sys.path.insert(0, '.')
 
 try:
-    import shinken.pyro_wrapper
+    import shinken.pyro_wrapper as pyro
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
 
-Pyro = shinken.pyro_wrapper.Pyro
+Pyro = pyro.Pyro
 
-
+import shinken
 from shinken.scheduler import Scheduler
 from shinken.config import Config
 from shinken.macroresolver import MacroResolver
@@ -259,7 +259,7 @@ class IForArbiter(Pyro.core.ObjBase):
             #if app already have a scheduler, we must say him to
             #DIE Mouahahah
             #So It will quit, and will load a new conf (and create a brand new scheduler)
-            if hasattr(self.app, "sched"):
+            if self.app.sched:
                 self.app.sched.die()
 
 
@@ -312,11 +312,10 @@ class Shinken(Daemon):
     #then create the interface for arbiter
     #Then, it wait for a first configuration
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+        
+        Daemon.__init__(self)
+        
         self.print_header()
-
-        #From daemon to manage signal. Call self.manage_signal if
-        #exists, a dummy function otherwise
-        self.set_exit_handler()
 
         self.config_file = config_file
         #Read teh config file if exist
@@ -328,11 +327,11 @@ class Shinken(Daemon):
             #the config file by reference
             self.relative_paths_to_full(os.path.dirname(config_file))
 
-        #Check if another Scheduler is not running (with the same conf)
-        self.check_parallel_run(do_replace)
+        self.sched = None
+        self.ichecks = None
+        self.ibroks = None
+        self.must_run = True
 
-        #If the admin don't care about security, I allow root running
-        insane = not self.idontcareaboutsecurity
 
         #The module grabber part should be run BEFORE change the pwd with
         #the daemon mode
@@ -347,6 +346,9 @@ class Shinken(Daemon):
         print "Using modules path : %s" % os.sep.join(elts)
 
 
+        #Config Class must be filled with USERN Macro
+        Config.fill_usern_macros()
+
         # The SSL part
         if self.use_ssl:
             Pyro.config.PYROSSL_CERTDIR = os.path.abspath(self.certs_dir)
@@ -360,68 +362,45 @@ class Shinken(Daemon):
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK=0
 
-        #Try to change the user (not nt for the moment)
-        #TODO: change user on nt
-        if os.name != 'nt':
-            self.change_user(insane)
-        else:
-            print "Sorry, you can't change user on this system"
-
-        #Now the daemon part if need
-        if is_daemon:
-            self.create_daemon(do_debug=debug, debug_file=debug_file)
-
-
-        #TODO : signal managment
-        #atexit.register(unlink, pidfile=conf['pidfile'])
-
-        #Config Class must be filled with USERN Macro
-        Config.fill_usern_macros()
 
         #create the server
         print "Using working directory : %s" % os.path.abspath(self.workdir)
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_COMPRESSION = 1
-        Pyro.config.PYRO_MULTITHREADED = 0
+        Pyro.config.PYRO_MULTITHREADED = 0        
 
-        
-
-        self.poller_daemon = shinken.pyro_wrapper.init_daemon(self.host, self.port, self.use_ssl)
-
+        self.poller_daemon = pyro.init_daemon(self.host, self.port, self.use_ssl)
         print "Listening on:", self.host, ":", self.port
-
+        
         #Now the interface
         i_for_arbiter = IForArbiter(self)
 
-        self.uri2 = shinken.pyro_wrapper.register(self.poller_daemon, i_for_arbiter, "ForArbiter")
+        self.uri2 = pyro.register(self.poller_daemon, i_for_arbiter, "ForArbiter")
 
         print "The Arbiter Interface is at:", self.uri2
 
-        #Ok, now the conf
-        self.must_run = True
-        self.wait_initial_conf()
-        print "Ok we've got conf"
+        self.check_parallel_run(do_replace)
+        self.change_to_workdir()
+        self.change_to_user_group()
 
-        #Interface for Broks and Checks
-        self.ichecks = None
-        self.ibroks = None
+        # Now the daemon part if need
+        if is_daemon:
+            daemon_socket_fds = tuple( sock.fileno() for sock in pyro.get_sockets(self.poller_daemon) )
+            self.daemonize(do_debug=debug, debug_file=debug_file, skip_close_fds=daemon_socket_fds)
+        else:
+            self.write_pid()
 
 
-    #Manage signal function
-    #Frame is just garbage
-    def manage_signal(self, sig, frame):
-        print "\nExiting with signal", sig
-        if hasattr(self, 'sched'):
+
+    def do_stop(self):
+        #if hasattr(self, 'sched'):
+        if self.sched:
             print "Asking for a retention save"
             self.sched.update_retention_file(forced=True)
+        
         print "Stopping all network connexions"
         self.poller_daemon.shutdown(True)
-        print "Unlinking pid file"
-        try:
-            os.unlink(self.pidfile)
-        except OSError, exp:
-            print "Error un deleting pid file:", exp
-        sys.exit(0)
+
 
 
     #We wait (block) for arbiter to send us conf
@@ -430,18 +409,18 @@ class Shinken(Daemon):
         self.have_conf = False
         print "Waiting for initial configuration"
         timeout = 1.0
-        while not self.have_conf :
-            socks = shinken.pyro_wrapper.get_sockets(self.poller_daemon)
+        while not self.have_conf and not self.interrupted:
 
             avant = time.time()
-            # 'foreign' event loop
-            ins, outs, exs = select.select(socks, [], [], timeout)
+            
+            socks = pyro.get_sockets(self.poller_daemon)            
+            ins = self.get_socks_activity(socks, timeout)
             if ins != []:
                 for s in socks:
                     if s in ins:
                         #Cal the wrapper to manage the good
                         #handleRequests call of daemon
-                        shinken.pyro_wrapper.handleRequests(self.poller_daemon, s)
+                        pyro.handleRequests(self.poller_daemon, s)
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff
@@ -453,6 +432,9 @@ class Shinken(Daemon):
 
             if timeout < 0:
                 timeout = 1.0
+        
+        if self.interrupted:
+            self.request_stop()
 
 
     #Load and init all modules we've got
@@ -460,7 +442,6 @@ class Shinken(Daemon):
         self.modules_manager = ModulesManager('scheduler', self.modulespath, self.modules)
         self.modules_manager.load()
         self.mod_instances = self.modules_manager.get_instances()
-
 
 
     #OK, we've got the conf, now we load it
@@ -483,27 +464,27 @@ class Shinken(Daemon):
         self.load_modules()
 
         #create scheduler with ref of our daemon
-        self.sched = Scheduler(self.poller_daemon)
+        self.sched = Scheduler(self.poller_daemon, self)
 
         #give it an interface
         #But first remove previous interface if exists
         if self.ichecks != None:
             print "Deconnecting previous Check Interface from daemon"
-            shinken.pyro_wrapper.unregister(self.poller_daemon, self.ichecks)
+            pyro.unregister(self.poller_daemon, self.ichecks)
 
         #Now create and connect it
         self.ichecks = IChecks(self.sched)
-        self.uri = shinken.pyro_wrapper.register(self.poller_daemon, self.ichecks, "Checks")
+        self.uri = pyro.register(self.poller_daemon, self.ichecks, "Checks")
         print "The Checks Interface uri is:", self.uri
 
         #Same for Broks
         if self.ibroks != None:
             print "Deconnecting previous Broks Interface from daemon"
-            shinken.pyro_wrapper.unregister(self.poller_daemon, self.ibroks)
+            pyro.unregister(self.poller_daemon, self.ibroks)
 
         #Create and connect it
         self.ibroks = IBroks(self.sched)
-        self.uri2 = shinken.pyro_wrapper.register(self.poller_daemon, self.ibroks, "Broks")
+        self.uri2 = pyro.register(self.poller_daemon, self.ibroks, "Broks")
         print "The Broks Interface uri is:", self.uri2
 
         print "Loading configuration"
@@ -537,23 +518,31 @@ class Shinken(Daemon):
         #External command need the sched because he can raise checks
         e.load_scheduler(self.sched)
 
+    def do_loop_turn(self):
+        self.sched.run()
+        # Ok, we quit scheduler, but maybe it's just for
+        # reloading our configuration
+        if self.must_run:
+            if self.have_conf:
+                self.load_conf()
+            else:
+                self.wait_initial_conf()
+                self.load_conf()
 
     #our main function, launch after the init
     def main(self):
+        
+        #Ok, now the conf
+        self.wait_initial_conf()
+        print "Ok we've got conf"
+
         #ok, if we are here, we've got the conf
         self.load_conf()
 
         print "Configuration Loaded"
-        while self.must_run:
-            self.sched.run()
-            #Ok, we quit scheduler, but maybe it's just for
-            #reloading our configuration
-            if self.must_run:
-                if self.have_conf:
-                    self.load_conf()
-                else:
-                    self.wait_initial_conf()
-                    self.load_conf()
+
+        self.do_mainloop()
+            
 
 
 ################### Process launch part
@@ -573,19 +562,6 @@ def usage(name):
     print "\tPrint detailed help screen"
     print " --debug"
     print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-
-
-
-#if __name__ == '__main__':
-#       p = Shinken()
-#        import cProfile
-#       #p.main()
-#        command = """p.main()"""
-#        cProfile.runctx( command, globals(), locals(), filename="var/Shinken.profile" )
-
-
-
-
 
 
 

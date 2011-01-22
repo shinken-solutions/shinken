@@ -35,6 +35,7 @@ import sys
 import select
 import getopt
 import random
+import errno
 from Queue import Empty
 
 
@@ -91,16 +92,15 @@ except ImportError:
         sys.path.append(os.sep.join(elts))
 
 
-
 try:
-    import shinken.pyro_wrapper
+    import shinken.pyro_wrapper as pyro
 except ImportError:
     print "Shinken require the Python Pyro module. Please install it."
     sys.exit(1)
 
-Pyro = shinken.pyro_wrapper.Pyro
+Pyro = pyro.Pyro
 
-
+import shinken
 from shinken.util import to_bool
 from shinken.config import Config
 from shinken.external_command import ExternalCommandManager
@@ -171,6 +171,9 @@ class Arbiter(Daemon):
     properties = {}
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
+        
+        Daemon.__init__(self)
+        
         self.config_file = config_files[0]
         self.config_files = config_files
         self.is_daemon = is_daemon
@@ -179,9 +182,6 @@ class Arbiter(Daemon):
         self.debug = debug
         self.debug_file = debug_file
 
-        # From daemon to manage signal. Call self.manage_signal if
-        # exists, a dummy function otherwise
-        self.set_exit_handler()
         self.broks = {}
         self.is_master = False
         self.me = None
@@ -193,6 +193,9 @@ class Arbiter(Daemon):
 
         # to track system time change
         self.t_each_loop = time.time()
+        
+        self.log = logger
+        self.log.load_obj(self)
 
 
     # Use for adding things like broks
@@ -288,8 +291,6 @@ class Arbiter(Daemon):
     # Main loop function
     def main(self):
         # Log will be broks
-        self.log = logger
-        self.log.load_obj(self)
 
         self.print_header()
         for line in self.get_header():
@@ -499,9 +500,10 @@ class Arbiter(Daemon):
         self.group = self.conf.shinken_group
         self.workdir = os.path.expanduser('~'+self.user)
 
-        # If we go, we must go in daemon or not
-        # Check if another Scheduler is not running (with the same conf)
+
         self.check_parallel_run(do_replace)
+        self.change_to_workdir()
+        self.change_to_user_group()
 
 
         # And set SSL things too
@@ -517,19 +519,6 @@ class Arbiter(Daemon):
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK=0
 
-        # If the admin don't care about security, I allow root running
-        insane = not self.idontcareaboutsecurity
-
-        # Try to change the user (not nt for the moment)
-        # TODO: change user on nt
-        if os.name != 'nt':
-            self.change_user(insane)
-        else:
-            logger.log("Warning : you can't change user on this system")
-
-        # Now the daemon part if need
-        if is_daemon:
-            self.create_daemon(do_debug=debug, debug_file=debug_file)
 
         logger.log("Opening of the network port")
         # Now open the daemon port for Broks and other Arbiter sends
@@ -538,35 +527,46 @@ class Arbiter(Daemon):
         Pyro.config.PYRO_MULTITHREADED = 0
         logger.log("Using working directory : %s" % os.path.abspath(self.workdir))
 
-        self.poller_daemon = shinken.pyro_wrapper.init_daemon(self.me.address, self.me.port, self.conf.use_ssl)
+        self.poller_daemon = pyro.init_daemon(self.me.address, self.me.port, self.conf.use_ssl)
 
         logger.log("Listening on %s:%d" % (self.me.address, self.me.port))
 
         self.iarbiters = IArbiters(self)
 
-        self.uri_arb = shinken.pyro_wrapper.register(self.poller_daemon, self.iarbiters, "ForArbiter")
+        self.uri_arb = pyro.register(self.poller_daemon, self.iarbiters, "ForArbiter")
 
         logger.log("Configuration Loaded")
 
-        # Main loop
-        while True:
-            # If I am a spare, I wait for the master arbiter to send me
-            # true conf. When
-            if self.me.spare:
-                self.wait_initial_conf()
-            else:# I'm the master, I've got a conf
-                self.is_master = True
-                self.have_conf = True
-                
-            # Ok, now It've got a True conf, Now I wait to get too much
-            # time without
-            if self.me.spare:
-                print "I must wait now"
-                self.wait_for_master_death()
 
-            if self.must_run:
-                # Main loop
-                self.run()
+        # Finally the daemon part if need
+        if is_daemon:
+            daemon_socket_fds = tuple( sock.fileno() for sock in pyro.get_sockets(self.poller_daemon) )
+            self.daemonize(do_debug=debug, debug_file=debug_file, skip_close_fds=daemon_socket_fds)
+        else:
+            self.write_pid()
+
+        ## And go for the main loop
+        self.do_mainloop()
+
+        
+    def do_loop_turn(self):
+        # If I am a spare, I wait for the master arbiter to send me
+        # true conf. When
+        if self.me.spare:
+            self.wait_initial_conf()
+        else: # I'm the master, I've got a conf
+            self.is_master = True
+            self.have_conf = True
+
+        #Ok, now It've got a True conf, Now I wait to get too much
+        #time without
+        if self.me.spare:
+            print "I must wait now"
+            self.wait_for_master_death()
+
+        if self.must_run:
+            # Main loop
+            self.run()
 
 
     # Get 'objects' from external modules
@@ -590,12 +590,12 @@ class Arbiter(Daemon):
         self.have_conf = False
         print "Waiting for configuration from master"
         timeout = 1.0
-        while not self.have_conf :
-            socks = shinken.pyro_wrapper.get_sockets(self.poller_daemon)
-
+        while not self.have_conf and not self.interrupted:
             avant = time.time()
+            socks = pyro.get_sockets(self.poller_daemon)
+
             # 'foreign' event loop
-            ins, outs, exs = select.select(socks, [], [], timeout)
+            ins = self.get_socks_activity(socks, timeout)
 
             # Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
@@ -604,7 +604,7 @@ class Arbiter(Daemon):
             if ins != []:
                 for s in socks:
                     if s in ins:
-                        shinken.pyro_wrapper.handleRequests(self.poller_daemon, s)
+                        pyro.handleRequests(self.poller_daemon, s)
                         apres = time.time()
                         diff = apres-avant
                         timeout = timeout - diff
@@ -617,6 +617,9 @@ class Arbiter(Daemon):
             if timeout < 0:
                 timeout = 1.0
 
+        if self.interrupted:
+            self.request_stop()
+
 
     # We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
@@ -624,11 +627,12 @@ class Arbiter(Daemon):
         timeout = 1.0
         is_master_dead = False
         self.last_master_speack = time.time()
-        while not is_master_dead:
-            socks = shinken.pyro_wrapper.get_sockets(self.poller_daemon)
+        while not is_master_dead and not self.interrupted:
+
             avant = time.time()
-            # 'foreign' event loop
-            ins, outs, exs = select.select(socks, [], [], timeout)
+            
+            socks = pyro.get_sockets(self.poller_daemon)
+            ins = self.get_socks_activity(socks, timeout)
 
             # Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
@@ -637,7 +641,7 @@ class Arbiter(Daemon):
             if ins != []:
                 for s in socks:
                     if s in ins:
-                        shinken.pyro_wrapper.handleRequests(self.poller_daemon, s)
+                        pyro.handleRequests(self.poller_daemon, s)
                         self.last_master_speack = time.time()
                         apres = time.time()
                         diff = apres-avant
@@ -658,18 +662,10 @@ class Arbiter(Daemon):
                 is_master_dead = True
 
 
-    # Manage signal function
-    # Frame is just garbage
-    def manage_signal(self, sig, frame):
-        print "\nExiting with signal", sig
+
+    def do_stop(self):
         print "Stopping all network connexions"
         self.poller_daemon.shutdown(True)
-        print "Unlinking pid file"
-        try:
-            os.unlink(self.pidfile)
-        except OSError, exp:
-            print "Error un deleting pid file:", exp
-        sys.exit(0)
 
 
     # Main function
@@ -702,15 +698,15 @@ class Arbiter(Daemon):
 
         print "Run baby, run..."
         timeout = 1.0
-        while self.must_run :
+        while self.must_run and not self.interrupted:
             socks = []
-            daemon_sockets = shinken.pyro_wrapper.get_sockets(self.poller_daemon)
+            daemon_sockets = pyro.get_sockets(self.poller_daemon)
             socks.extend(daemon_sockets)
             avant = time.time()
             if self.fifo != None:
                 socks.append(self.fifo)
             # 'foreign' event loop
-            ins, outs, exs = select.select(socks, [], [], timeout)
+            ins = self.get_socks_activity(socks, timeout)
 
             # Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
@@ -720,7 +716,7 @@ class Arbiter(Daemon):
                 for s in socks:
                     if s in ins:
                         if s in daemon_sockets:
-                            shinken.pyro_wrapper.handleRequests(self.poller_daemon, s)
+                            pyro.handleRequests(self.poller_daemon, s)
                             apres = time.time()
                             diff = apres-avant
                             timeout = timeout - diff
