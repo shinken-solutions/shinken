@@ -212,27 +212,9 @@ class IBroks(Pyro.core.ObjBase):
 class Satellite(Daemon):
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
         
-        Daemon.__init__(self, config_file, is_daemon, do_replace, debug, debug_file)
+        self.check_shm()        
         
-        self.check_shm()
-
-        self.print_header()
-
-        #Log init
-        self.log = logger
-        self.log.load_obj(self)
-
-        #The config reading part
-
-        #Read teh config file if exist
-        #if not, default properties are used
-        self.parse_config_file()
-
-        if self.config_file != None:
-            #Some paths can be relatives. We must have a full path by taking
-            #the config file by reference
-            self.relative_paths_to_full(os.path.dirname(config_file))
-
+        Daemon.__init__(self, config_file, is_daemon, do_replace, debug, debug_file)
         
         #Keep broks so they can be eaten by a broker
         self.broks = {}
@@ -253,6 +235,8 @@ class Satellite(Daemon):
         self.have_conf = False
         self.have_new_conf = False
  
+        self.do_load_config()
+        
         self.do_daemon_init_and_start()
 
         # Now we create the interfaces

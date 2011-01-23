@@ -26,6 +26,8 @@ import select
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
 
+from shinken.log import logger
+
 
 if os.name != 'nt':
     from pwd import getpwnam
@@ -49,9 +51,27 @@ class Daemon:
         self.debug_file = debug_file
         self.interrupted = False
         
+        # Log init
+        self.log = logger
+        self.log.load_obj(self)
+        
         os.umask(UMASK)
         self.set_exit_handler()
+        
+        self.print_header()
  
+ 
+    def add(self, elt):
+        """ Dummy method for adding broker to this daemon """
+        pass
+
+ 
+    def do_load_config(self):
+        self.parse_config_file()
+        if self.config_file != None:
+            #Some paths can be relatives. We must have a full path by taking
+            #the config file by reference
+            self.relative_paths_to_full(os.path.dirname(self.config_file))
 
     def change_to_workdir(self):
         os.chdir(self.workdir)
@@ -72,8 +92,7 @@ class Daemon:
                 print("The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
                 sys.exit(2)   
 
-
-    def check_parallel_run(self, do_replace):
+    def check_parallel_run(self):
         """ Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
 Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 """
@@ -97,7 +116,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
                 return
             raise
             
-        if not do_replace:
+        if not self.do_replace:
             raise SystemExit, "valid pidfile exists and not forced to replace.  Exiting."
         
         print "Replacing previous instance ", pid
@@ -142,22 +161,24 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             except OSError:# ERROR, fd wasn't open to begin with (ignored)
                 pass
 
-
-    def daemonize(self, do_debug=False, debug_file='', skip_close_fds=None):
+    def daemonize(self, skip_close_fds=None):
         """ Go in "daemon" mode: close unused fds, redirect stdout/err, chdir, umask, fork-setsid-fork-writepid """
         
         if skip_close_fds is None:
             skip_close_fds = tuple()
 
-        self.close_fds(skip_close_fds + ( self.fpid.fileno() ,))
-        
-        if do_debug:
-            fdtemp = os.open(debug_file, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
+        print("Redirecting stdout and stderr as necessary..")
+        if self.debug:
+            fdtemp = os.open(self.debug_file, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
         else:
             fdtemp = os.open(REDIRECT_TO, os.O_RDWR)
+        
+        ## We close all fd but what we need:
+        self.close_fds(skip_close_fds + ( self.fpid.fileno() , fdtemp ))
+
         os.dup2(fdtemp, 1) # standard output (1)
         os.dup2(fdtemp, 2) # standard error (2)
-
+        
         # Now the Fork/Fork
         try:
             pid = os.fork()
@@ -176,8 +197,8 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             if status != 0:
                 print("something weird happened with/during second fork : status=", status)
             self.close_fds()
-            os._exit(status)
-        
+            os._exit(status)     
+
         os.setsid()
         try:
             pid = os.fork()
@@ -194,7 +215,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 
 
     def do_daemon_init_and_start(self, ssl_conf=None):
-        self.check_parallel_run(self.do_replace)
+        self.check_parallel_run()
         self.setup_pyro_daemon(ssl_conf)
         self.change_to_user_group()
         self.change_to_workdir()  ## must be done AFTER pyro daemon init
@@ -239,6 +260,27 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
                 return []
             raise
         return ins
+
+
+    def do_load_modules(self):
+        """ Load the modules present in ./modules """
+        import shinken
+        
+        # BEWARE: this way of finding path is good if we still
+        # DO NOT HAVE CHANGE PWD!!!
+        # Now get the module path. It's in fact the directory modules
+        # inside the shinken directory. So let's find it.
+
+        print "modulemanager file", shinken.modulesmanager.__file__
+        modulespath = os.path.abspath(shinken.modulesmanager.__file__)
+        print "modulemanager absolute file", modulespath
+        # We got one of the files of
+        elts = os.path.dirname(modulespath).split(os.sep)[:-1]
+        elts.append('shinken')
+        elts.append('modules')
+        self.modulespath = os.sep.join(elts)
+        logger.log("Using modules path : %s" % os.sep.join(elts))
+
 
     #Just give the uid of a user by looking at it's name
     def find_uid_from_name(self):
@@ -357,7 +399,8 @@ Also put default value in the properties if some are missing in the config_file 
                 version = ".".join(map(str, sys.version_info[:2]))
                 raise Exception("pywin32 not installed for Python " + version)
         else:
-            signal.signal(signal.SIGTERM, func)
+            for sig in (signal.SIGTERM, signal.SIGINT):
+                signal.signal(sig, func)
 
 
     def get_header(self):

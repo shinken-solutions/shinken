@@ -314,35 +314,15 @@ class Shinken(Daemon):
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
         
         Daemon.__init__(self, config_file, is_daemon, do_replace, debug, debug_file)
-        
-        self.print_header()
-
-        #Read teh config file if exist
-        #if not, default properties are used
-        self.parse_config_file()
-
-        if config_file != None:
-            #Some paths can be relatives. We must have a full path by taking
-            #the config file by reference
-            self.relative_paths_to_full(os.path.dirname(config_file))
 
         self.sched = None
         self.ichecks = None
         self.ibroks = None
         self.must_run = True
 
+        self.do_load_config()
 
-        #The module grabber part should be run BEFORE change the pwd with
-        #the daemon mode
-        print "modulemanager file", shinken.modulesmanager.__file__
-        modulespath = os.path.abspath(shinken.modulesmanager.__file__)
-        print "modulemanager absolute file", modulespath
-        #We got one of the files of
-        elts = os.path.dirname(modulespath).split(os.sep)[:-1]
-        elts.append('shinken')
-        elts.append('modules')
-        self.modulespath = os.sep.join(elts)
-        print "Using modules path : %s" % os.sep.join(elts)
+        self.do_load_modules()
 
         #Config Class must be filled with USERN Macro
         Config.fill_usern_macros()

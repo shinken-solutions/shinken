@@ -189,9 +189,6 @@ class Arbiter(Daemon):
 
         # to track system time change
         self.t_each_loop = time.time()
-        
-        self.log = logger
-        self.log.load_obj(self)
 
 
     # Use for adding things like broks
@@ -333,20 +330,7 @@ class Arbiter(Daemon):
             for m in self.me.modules:
                 print m
 
-            # BEWARE: this way of finding path is good if we still
-            # DO NOT HAVE CHANGE PWD!!!
-            # Now get the module path. It's in fact the directory modules
-            # inside the shinken directory. So let's find it.
-            print "modulemanager file", shinken.modulesmanager.__file__
-            modulespath = os.path.abspath(shinken.modulesmanager.__file__)
-            print "modulemanager absolute file", modulespath
-            # We got one of the files of
-            elts = os.path.dirname(modulespath).split(os.sep)[:-1]
-            elts.append('shinken')
-            elts.append('modules')
-            self.modulespath = os.sep.join(elts)
-            logger.log("Using modules path : %s" % os.sep.join(elts))
-
+            self.do_load_modules()
 
             self.modules_manager = ModulesManager('arbiter', self.modulespath, self.me.modules)
             self.modules_manager.load()
