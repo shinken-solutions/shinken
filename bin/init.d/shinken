@@ -231,7 +231,7 @@ do_stop() {
 #
 do_check() {
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
-    "$BIN/shinken-arbiter" -v -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1
+    "$BIN/shinken-arbiter" -v -c "$ETC/nagios.cfg" -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1
     return $?
 }
 
@@ -306,6 +306,11 @@ do_check_() {
     if [ $rc -eq 0 ]; then
         log_end_msg 0
     else
+        check_res_file="/tmp/shinken_checkconfig_result"
+        echo "$output" > "$check_res_file"
+        output=$(echo "$output" | tail -1)
+        log_warning_msg "full result is in ${check_res_file}"
+        log_failure_msg "ConfigCheck failed: $output"
         log_end_msg 1
     fi
     return $rc
