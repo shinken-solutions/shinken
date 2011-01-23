@@ -410,7 +410,7 @@ class Shinken(Daemon):
         print "I've got modules", self.modules
         self.load_modules()
 
-        #create scheduler with ref of our daemon
+        # create scheduler with ref of our daemon
         self.sched = Scheduler(self.daemon, self)
 
         #give it an interface
@@ -464,6 +464,15 @@ class Shinken(Daemon):
 
         #External command need the sched because he can raise checks
         e.load_scheduler(self.sched)
+
+
+    def manage_signal(self, sig, frame):
+        self.log.log("blop")
+        if self.sched:
+            self.sched.must_run = False
+        self.must_run = False
+        Daemon.manage_signal(self, sig, frame)
+
 
     def do_loop_turn(self):
         self.sched.run()

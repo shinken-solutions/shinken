@@ -158,7 +158,6 @@ class Scheduler:
         #first update our retention data
         self.update_retention_file(forced=True)
         self.must_run = False
-        self.sched_daemon.interrupted = True ## to make the do_main_loop exit
 
 
     #Load the external commander
@@ -875,7 +874,7 @@ class Scheduler:
         gogogo = time.time()
         self.t_each_loop = time.time() #use to track system time change
 
-        while self.must_run and not self.sched_daemon.interrupted:
+        while self.must_run:
             t_begin = time.time()
             socks = pyro.get_sockets(self.daemon)
             ins = self.sched_daemon.get_socks_activity(socks, timeout)
