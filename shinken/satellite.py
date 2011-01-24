@@ -584,69 +584,66 @@ class Satellite(Daemon):
         #Manage a possible time change (our before will be change with the diff)
         diff = self.check_for_system_time_change()
         begin_loop += diff
+        
+        after = time.time()
+        self.timeout -= after-begin_loop
 
-        try:
-            after = time.time()
-            self.timeout -= after-begin_loop
+        if self.timeout >= 0:
+            return
 
-            if self.timeout < 0: #for go in timeout
-                #print "Time out", timeout
-                raise Empty
+        print " ======================== "
+        after = time.time()
+        self.timeout = self.polling_interval
 
-        except Empty , exp: #Time out Part
-            print " ======================== "
-            after = time.time()
-            self.timeout = self.polling_interval
+        #Check if zombies workers are among us :)
+        #If so : KILL THEM ALL!!!
+        self.check_and_del_zombie_workers()
 
-            #Check if zombies workers are among us :)
-            #If so : KILL THEM ALL!!!
-            self.check_and_del_zombie_workers()
-
-            #Print stats for debug
-            for sched_id in self.schedulers:
-                sched = self.schedulers[sched_id]
-                #In workers we've got actions send to queue - queue size
-                print '[%d][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
-                    (sched_id, sched['name'],len(self.workers), self.s.qsize(), \
-                             self.nb_actions_in_workers - self.s.qsize(), len(self.returns_queue))
+        #Print stats for debug
+        for sched_id in self.schedulers:
+            sched = self.schedulers[sched_id]
+            #In workers we've got actions send to queue - queue size
+            print '[%d][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
+                (sched_id, sched['name'],len(self.workers), self.s.qsize(), \
+                         self.nb_actions_in_workers - self.s.qsize(), len(self.returns_queue))
 
 
-            #Before return or get new actions, see how we manage
-            #old ones : are they still in queue (s)? If True, we
-            #must wait more or at least have more workers
-            wait_ratio = self.wait_ratio.get_load()
-            if self.s.qsize() != 0 and wait_ratio < 5*self.polling_interval:
-                print "I decide to up wait ratio"
-                self.wait_ratio.update_load(wait_ratio * 2)
-            else:
-                #Go to self.polling_interval on normal run, if wait_ratio
-                #was >5*self.polling_interval,
-                #it make it come near 5 because if < 5, go up :)
-                self.wait_ratio.update_load(self.polling_interval)
-            wait_ratio = self.wait_ratio.get_load()
-            print "Wait ratio:", wait_ratio
+        #Before return or get new actions, see how we manage
+        #old ones : are they still in queue (s)? If True, we
+        #must wait more or at least have more workers
+        wait_ratio = self.wait_ratio.get_load()
+        if self.s.qsize() != 0 and wait_ratio < 5*self.polling_interval:
+            print "I decide to up wait ratio"
+            self.wait_ratio.update_load(wait_ratio * 2)
+        else:
+            #Go to self.polling_interval on normal run, if wait_ratio
+            #was >5*self.polling_interval,
+            #it make it come near 5 because if < 5, go up :)
+            self.wait_ratio.update_load(self.polling_interval)
+        wait_ratio = self.wait_ratio.get_load()
+        print "Wait ratio:", wait_ratio
 
-            # We can wait more than 1s if need,
-            # no more than 5s, but no less than 1
-            timeout = self.timeout * wait_ratio
-            timeout = max(self.polling_interval, timeout)
-            self.timeout = min(5*self.polling_interval, timeout)
+        # We can wait more than 1s if need,
+        # no more than 5s, but no less than 1
+        timeout = self.timeout * wait_ratio
+        timeout = max(self.polling_interval, timeout)
+        self.timeout = min(5*self.polling_interval, timeout)
 
-            # Maybe we do not have enouth workers, we check for it
-            # and launch new ones if need
-            self.adjust_worker_number_by_load()
+        # Maybe we do not have enouth workers, we check for it
+        # and launch new ones if need
+        self.adjust_worker_number_by_load()
 
-            # Manage all messages we've got in the last timeout
-            # for queue in self.return_messages:
-            while len(self.returns_queue) != 0:
-                self.manage_action_return(self.returns_queue.pop())
+        # Manage all messages we've got in the last timeout
+        # for queue in self.return_messages:
+        while len(self.returns_queue) != 0:
+            self.manage_action_return(self.returns_queue.pop())
 
-            # Now we can get new actions from schedulers
-            self.get_new_actions()
+        # Now we can get new actions from schedulers
+        self.get_new_actions()
 
-            # We send all finished checks
-            # REF: doc/shinken-action-queues.png (6)
-            self.manage_returns()
+        # We send all finished checks
+        # REF: doc/shinken-action-queues.png (6)
+        self.manage_returns()
 
 
     def main(self):
