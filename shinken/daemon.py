@@ -211,7 +211,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 
         self.fpid.close()
         del self.fpid
-        print("We are now fully daemonized :) pid=", os.getpid())
+        print("We are now fully daemonized :) pid=%d" % (os.getpid()))
 
 
     def do_daemon_init_and_start(self, ssl_conf=None):

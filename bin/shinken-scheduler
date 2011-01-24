@@ -467,8 +467,8 @@ class Shinken(Daemon):
 
 
     def manage_signal(self, sig, frame):
-        self.log.log("blop")
-        if self.sched:
+        # self.sched could be still unset if we have not yet received our conf
+        if self.sched: 
             self.sched.must_run = False
         self.must_run = False
         Daemon.manage_signal(self, sig, frame)
