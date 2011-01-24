@@ -146,7 +146,7 @@ if os.name != 'nt':
             if force_shell:
                 cmd = self.command
             else :
-                shlex.split(self.command)
+                cmd = shlex.split(self.command)
               
             try:
                 self.process = subprocess.Popen(cmd,
