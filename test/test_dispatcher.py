@@ -274,6 +274,18 @@ class TestDispatcher(ShinkenTest):
 
         # Now we really dispatch them!
         self.dispatcher.dispatch()
+        self.assert_(self.any_log_match('Dispatch OK of for conf in scheduler scheduler-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to reactionner reactionner-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to poller poller-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to broker broker-all-1'))
+        self.clear_logs()
+
+        # And look if we really dispatch conf as we should
+        for r in self.conf.realms:
+            for cfg in r.confs.values():
+                self.assert_(cfg.is_assigned == True)
+                self.assert_(cfg.assigned_to == scheduler1)
+                
 
 if __name__ == '__main__':
     unittest.main()
