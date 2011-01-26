@@ -86,7 +86,7 @@ class PollerLink(SatelliteLink):
     running_properties = {'con': StringProp(
             default=None),
                           'alive': StringProp(
-            default=False,
+            default=True,
             fill_brok=['full_status'],
             to_send=True),
                           'broks': StringProp(
@@ -111,5 +111,5 @@ class PollerLink(SatelliteLink):
             print "I %s manage tags : %s " % (self.get_name(), self.poller_tags)
 
 class PollerLinks(SatelliteLinks):
-    name_property = "name"
+    name_property = "poller_name"
     inner_class = PollerLink

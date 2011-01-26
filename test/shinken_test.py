@@ -26,6 +26,7 @@ from shinken.schedulerlink import SchedulerLink
 from shinken.pollerlink import PollerLink
 from shinken.reactionnerlink import ReactionnerLink
 from shinken.brokerlink import BrokerLink
+from shinken.satellitelink import SatelliteLink
 from shinken.notification import Notification
 from shinken.command import Command
 
