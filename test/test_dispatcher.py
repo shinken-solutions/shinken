@@ -48,6 +48,10 @@ class GoodScheduler(SchedulerLink):
     def have_conf(self, i):
         return True
 
+    def put_conf(self, conf):
+        return True
+
+
 class BadScheduler(SchedulerLink):
     def ping(self):
         print "Dummy bad ping", self.get_name()
@@ -62,6 +66,10 @@ class GoodPoller(PollerLink):
         print "Dummy OK for", self.get_name()
         self.set_alive()
 
+    def put_conf(self, conf):
+        return True
+
+
 class BadPoller(PollerLink):
     def ping(self):
         print "Dummy bad ping", self.get_name()
@@ -73,6 +81,9 @@ class GoodReactionner(ReactionnerLink):
         print "Dummy OK for", self.get_name()
         self.set_alive()
 
+    def put_conf(self, conf):
+        return True
+
 class BadReactionner(ReactionnerLink):
     def ping(self):
         print "Dummy bad ping", self.get_name()
@@ -83,6 +94,9 @@ class GoodBroker(BrokerLink):
     def ping(self):
         print "Dummy OK for", self.get_name()
         self.set_alive()
+
+    def put_conf(self, conf):
+        return True
 
 class BadBroker(BrokerLink):
     def ping(self):
@@ -257,7 +271,9 @@ class TestDispatcher(ShinkenTest):
         self.dispatcher.check_dispatch()
         # the conf should not be in a good shape
         self.assert_(self.dispatcher.dispatch_ok == False)
-                 
+
+        # Now we really dispatch them!
+        self.dispatcher.dispatch()
 
 if __name__ == '__main__':
     unittest.main()
