@@ -26,17 +26,35 @@
 from shinken_test import *
 
 
+class GoodArbiter(ArbiterLink):
+    # To lie about satellites
+    def ping(self):
+        print "Dummy OK for", self.get_name()
+        self.set_alive()
+
+    def have_conf(self, i):
+        return True
+
+    def do_not_run(self):
+        pass
+
+
 class GoodScheduler(SchedulerLink):
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
         self.set_alive()
 
+    def have_conf(self, i):
+        return True
+
 class BadScheduler(SchedulerLink):
     def ping(self):
         print "Dummy bad ping", self.get_name()
         self.add_failed_check_attempt()
 
+    def have_conf(self, i):
+        return False
 
 class GoodPoller(PollerLink):
     # To lie about satellites
@@ -82,6 +100,9 @@ class TestDispatcher(ShinkenTest):
     #Change ME :)
     def test_simple_dispatch(self):
         print "The dispatcher", self.dispatcher
+        # dummy for the arbiter
+        for a in self.conf.arbiterlinks:
+            a.__class__ = GoodArbiter
         print "Preparing schedulers"
         scheduler1 = self.conf.schedulerlinks.find_by_name('scheduler-all-1')
         self.assert_(scheduler1 != None)
@@ -231,7 +252,12 @@ class TestDispatcher(ShinkenTest):
         self.assert_(broker2.alive == False)
         self.assert_(broker2.attempt == 3)
         self.assert_(broker2.reachable == False)
-        
+
+        # Now we check how we should dispatch confs
+        self.dispatcher.check_dispatch()
+        # the conf should not be in a good shape
+        self.assert_(self.dispatcher.dispatch_ok == False)
+                 
 
 if __name__ == '__main__':
     unittest.main()

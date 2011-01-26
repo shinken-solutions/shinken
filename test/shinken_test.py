@@ -22,6 +22,7 @@ from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager, ExternalCommand
 from shinken.check import Check
 from shinken.module import Module
+from shinken.arbiterlink import ArbiterLink
 from shinken.schedulerlink import SchedulerLink
 from shinken.pollerlink import PollerLink
 from shinken.reactionnerlink import ReactionnerLink
