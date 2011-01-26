@@ -74,21 +74,17 @@ class ModulesManager(object):
                 print "Warning : the module type %s for %s was not found in modules!" % (module_type, module.get_name())
 
 
-    #Set an exit function that is call when we quit
-    def set_exit_handler(self, inst):
-        func = self.manage_signal
-        if os.name == "nt":
-            try:
-                import win32api
-                win32api.SetConsoleCtrlHandler(func, True)
-            except ImportError:
-                version = ".".join(map(str, sys.version_info[:2]))
-                raise Exception("pywin32 not installed for Python " + version)
-        else:
-            import signal
-            signal.signal(signal.SIGTERM, func)
-
-
+    def try_instance_init(self, inst):
+        """ Try to "init" the given module instance. 
+Returns: True on successfull init. False if instance init method raised any Exception. """ 
+        try:
+            inst.init()
+        except Exception as e:
+            print "Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e))
+            print "Back trace of this remove :"
+            traceback.print_exc(file=sys.stdout)    
+            return False
+        return True
 
     #Get modules instance to give them after broks
     def get_instances(self):
@@ -109,23 +105,19 @@ class ModulesManager(object):
 
         to_del = []
         for inst in self.instances:
-            try:
-                if 'external' in inst.properties and inst.properties['external']:
-                    inst.properties['to_queue'] = Queue()
-                    inst.properties['from_queue'] = Queue()
-                    inst.init()
-                    inst.properties['process'] = Process(target=inst.main, args=())
-                    inst.properties['process'].start()
-                    print "Starting external process (pid:%d) for instance %s" % (inst.properties['process'].pid, inst.get_name())
-                else:
-                    inst.properties['external'] = False
-                    inst.init()
-            except Exception , exp:
-                print "Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(exp))
-                print "Back trace of this remove :"
-                traceback.print_exc(file=sys.stdout)
+            isext = inst.properties.get('external', False)
+            if isext:
+                inst.properties['to_queue'] = Queue()
+                inst.properties['from_queue'] = Queue()
+            if not self.try_instance_init(inst):
                 to_del.append(inst)
-
+                continue
+            if isext:
+                print("Starting external process for instance %s" % (inst.name))
+                p = inst.properties['process'] = Process(target=inst.main, args=())
+                p.start()
+                print("%s is now started ; pid=%d" % (inst.name, p.pid))
+            inst.properties['external'] = isext
 
         for inst in to_del:
             self.instances.remove(inst)
