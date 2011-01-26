@@ -171,7 +171,35 @@ class Scheduler:
         ext_cmd = ExternalCommand(command)
         self.external_command.resolve_command(ext_cmd)
 
-
+    def add_Brok(self, brok):
+        #For brok, we TAG brok with our instance_id
+        brok.data['instance_id'] = self.instance_id
+        self.broks[brok.id] = brok
+    def add_Notification(self, notif):
+        self.actions[notif.id] = notif
+        #A notification ask for a brok
+        if notif.contact != None:
+            b = notif.get_initial_status_brok()
+            self.add(b)
+    def add_Check(self, c):
+        self.checks[c.id] = c
+        #A new check mean the host/service change it's next_check
+        #need to be refresh
+        b = c.ref.get_next_schedule_brok()
+        self.add(b)
+    def add_EventHandler(self, eh):
+        #print "Add an event Handler", elt.id
+        self.actions[eh.id] = eh
+    def add_Downtime(self, dt):
+        self.downtimes[dt.id] = dt
+        self.add(dt.extra_comment)
+    def add_ContactDowntime(self, contact_dt):
+        self.contact_downtimes[contact_dt.id] = contact_dt
+    def add_Comment(self, comment):
+        self.comments[comment.id] = comment
+        b = comment.ref.get_update_status_brok()
+        self.add(b)
+    
     #Schedulers have some queues. We can simplify call by adding
     #elements into the proper queue just by looking at their type
     #Brok -> self.broks
@@ -180,43 +208,19 @@ class Scheduler:
     #Downtime -> self.downtimes
     #ContactDowntime -> self.contact_downtimes
     def add(self, elt):
-        #For checks and notif, add is also an update function
-        if isinstance(elt, Check):
-            self.checks[elt.id] = elt
-            #A new check mean the host/service change it's next_check
-            #need to be refresh
-            b = elt.ref.get_next_schedule_brok()
-            self.add(b)
-            return
-        if isinstance(elt, Brok):
-            #For brok, we TAG brok with our instance_id
-            elt.data['instance_id'] = self.instance_id
-            self.broks[elt.id] = elt
-            return
-        if isinstance(elt, Notification):
-            self.actions[elt.id] = elt
-            #A notification ask for a brok
-            if elt.contact != None:
-                b = elt.get_initial_status_brok()
-                self.add(b)
-            return
-        if isinstance(elt, EventHandler):
-            #print "Add an event Handler", elt.id
-            self.actions[elt.id] = elt
-            return
-        if isinstance(elt, Downtime):
-            self.downtimes[elt.id] = elt
-            self.add(elt.extra_comment)
-            return
-        if isinstance(elt, ContactDowntime):
-            self.contact_downtimes[elt.id] = elt
-            return
-        if isinstance(elt, Comment):
-            self.comments[elt.id] = elt
-            b = elt.ref.get_update_status_brok()
-            self.add(b)
-            return
-
+        f = self.__add_actions.get(elt.__class__, None)
+        if f:
+            f(elt)
+        
+    __add_actions = {
+        Check: add_Check,
+        Brok: add_Brok,
+        Notification: add_Notification,
+        EventHandler: add_EventHandler,
+        Downtime: add_Downtime,
+        ContactDowntime: add_ContactDowntime,
+        Comment: add_Comment
+    }
 
     #Ours queues may explode if noone ask us for elements
     #It's very dangerous : you can crash your server... and it's a bad thing :)
