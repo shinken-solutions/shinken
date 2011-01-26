@@ -171,30 +171,37 @@ class Scheduler:
         ext_cmd = ExternalCommand(command)
         self.external_command.resolve_command(ext_cmd)
 
+
     def add_Brok(self, brok):
         #For brok, we TAG brok with our instance_id
         brok.data['instance_id'] = self.instance_id
         self.broks[brok.id] = brok
+        
     def add_Notification(self, notif):
         self.actions[notif.id] = notif
         #A notification ask for a brok
         if notif.contact != None:
             b = notif.get_initial_status_brok()
             self.add(b)
+            
     def add_Check(self, c):
         self.checks[c.id] = c
         #A new check mean the host/service change it's next_check
         #need to be refresh
         b = c.ref.get_next_schedule_brok()
         self.add(b)
-    def add_EventHandler(self, eh):
+        
+    def add_EventHandler(self, action):
         #print "Add an event Handler", elt.id
-        self.actions[eh.id] = eh
+        self.actions[action.id] = action
+        
     def add_Downtime(self, dt):
         self.downtimes[dt.id] = dt
-        self.add(dt.extra_comment)
+        self.add_Comment(dt.extra_comment)
+        
     def add_ContactDowntime(self, contact_dt):
         self.contact_downtimes[contact_dt.id] = contact_dt
+        
     def add_Comment(self, comment):
         self.comments[comment.id] = comment
         b = comment.ref.get_update_status_brok()
@@ -210,17 +217,19 @@ class Scheduler:
     def add(self, elt):
         f = self.__add_actions.get(elt.__class__, None)
         if f:
-            f(elt)
-        
+            #print("found action for %s : %s" % (elt.__class__.__name__, f.__name__))
+            f(self, elt)
+ 
     __add_actions = {
-        Check: add_Check,
-        Brok: add_Brok,
-        Notification: add_Notification,
-        EventHandler: add_EventHandler,
-        Downtime: add_Downtime,
-        ContactDowntime: add_ContactDowntime,
-        Comment: add_Comment
+        Check:              add_Check,
+        Brok:               add_Brok,
+        Notification:       add_Notification,
+        EventHandler:       add_EventHandler,
+        Downtime:           add_Downtime,
+        ContactDowntime:    add_ContactDowntime,
+        Comment:            add_Comment
     }
+    
 
     #Ours queues may explode if noone ask us for elements
     #It's very dangerous : you can crash your server... and it's a bad thing :)
