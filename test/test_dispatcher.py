@@ -154,6 +154,45 @@ class TestDispatcher(ShinkenTest):
         self.assert_(broker2.attempt == 1)
         self.assert_(broker2.reachable == False)
 
+        ### Now add another attempt, still alive, but attemp=2/3
+        self.dispatcher.check_alive()
+
+        # Check good values
+        self.assert_(scheduler1.alive == True)
+        self.assert_(scheduler1.attempt == 0)
+        self.assert_(scheduler1.reachable == True)
+        # still alive, just unreach
+        self.assert_(scheduler2.alive == True)
+        self.assert_(scheduler2.attempt == 2)
+        self.assert_(scheduler2.reachable == False)
+        
+        #and others satellites too
+        self.assert_(poller1.alive == True)
+        self.assert_(poller1.attempt == 0)
+        self.assert_(poller1.reachable == True)
+        # still alive, just unreach
+        self.assert_(poller2.alive == True)
+        self.assert_(poller2.attempt == 2)
+        self.assert_(poller2.reachable == False)
+
+        #and others satellites too
+        self.assert_(reactionner1.alive == True)
+        self.assert_(reactionner1.attempt == 0)
+        self.assert_(reactionner1.reachable == True)
+        # still alive, just unreach
+        self.assert_(reactionner2.alive == True)
+        self.assert_(reactionner2.attempt == 2)
+        self.assert_(reactionner2.reachable == False)
+        
+        #and others satellites too
+        self.assert_(broker1.alive == True)
+        self.assert_(broker1.attempt == 0)
+        self.assert_(broker1.reachable == True)
+        # still alive, just unreach
+        self.assert_(broker2.alive == True)
+        self.assert_(broker2.attempt == 2)
+        self.assert_(broker2.reachable == False)
+        
 
 if __name__ == '__main__':
     unittest.main()
