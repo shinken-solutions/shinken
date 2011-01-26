@@ -165,18 +165,6 @@ class Notification(Action):
         return t > self.t_to_go
 
 
-    def set_status(self, status):
-        self.status = status
-
-
-    def get_status(self):
-        return self.status
-
-
-    def get_output(self):
-        return self.output
-
-
     def is_administrative(self):
         if self.type in ('PROBLEM', 'RECOVERY'):
             return False

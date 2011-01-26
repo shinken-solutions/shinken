@@ -291,7 +291,7 @@ class Satellite(Daemon):
         sched_id = action.sched_id
         #Now we now where to put action, we do not need sched_id anymore
         del action.sched_id
-        action.set_status('waitforhomerun')
+        action.status = 'waitforhomerun'
         self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
         #We update stats
         self.nb_actions_in_workers =- 1
@@ -536,7 +536,7 @@ class Satellite(Daemon):
                     #REF: doc/shinken-action-queues.png (2)
                     for a in tmp:
                         a.sched_id = sched_id
-                        a.set_status('queue')
+                        a.status = 'queue'
                         msg = Message(id=0, type='Do', data=a)
                         self.s.put(msg)
                         #Update stats
