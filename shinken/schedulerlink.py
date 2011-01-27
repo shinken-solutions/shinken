@@ -68,7 +68,7 @@ class SchedulerLink(SatelliteLink):
     running_properties = {'con': StringProp(
             default=None),
                           'alive': StringProp(
-            default=False,
+            default=True,
             fill_brok=['full_status']), # DEAD or not
                           'attempt': StringProp(
             default=0,
@@ -133,5 +133,5 @@ class SchedulerLink(SatelliteLink):
         return r
 
 class SchedulerLinks(SatelliteLinks):
-    name_property = "name"
+    name_property = "scheduler_name"
     inner_class = SchedulerLink

@@ -262,8 +262,8 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         return ins
 
 
-    def do_load_modules(self):
-        """ Load the modules present in ./modules """
+    def find_modules_path(self):
+        """ Find the absolute path of the shinken module directory and set it in self.modulespath  """
         import shinken
         
         # BEWARE: this way of finding path is good if we still

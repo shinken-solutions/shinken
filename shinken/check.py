@@ -104,18 +104,6 @@ class Check(Action):
         return t > self.t_to_go
 
 
-    def set_status(self, status):
-        self.status = status
-
-
-    def get_status(self):
-        return self.status
-
-
-    def get_output(self):
-        return self.output
-
-
     def __str__(self):
         return "Check %d status:%s command:%s ref:%s" % (self.id, self.status, self.command, self.ref)
 
