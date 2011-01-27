@@ -62,6 +62,7 @@ class Hot_dependencies_arbiter:
     def init(self):
         print "I open the HOT dependency module"
         # Remember what we add
+        
 
 
     def get_name(self):

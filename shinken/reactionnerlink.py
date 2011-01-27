@@ -79,7 +79,7 @@ class ReactionnerLink(SatelliteLink):
     running_properties = {'con': StringProp(
             default=None),
                           'alive': StringProp(
-            default=False,
+            default=True,
             fill_brok=['full_status']),
                           'broks': StringProp(
             default=[]),
@@ -103,5 +103,5 @@ class ReactionnerLink(SatelliteLink):
 
 
 class ReactionnerLinks(SatelliteLinks):#(Items):
-    name_property = "name"
+    name_property = "reactionner_name"
     inner_class = ReactionnerLink

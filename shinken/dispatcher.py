@@ -119,7 +119,6 @@ class Dispatcher:
                     #he do not have to run, I'm stil alive!
                     arb.do_not_run()
 
-
         #We check for confs to be dispatched on alive scheds. If not dispatch, need dispatch :)
         #and if dipatch on a failed node, remove the association, and need a new disaptch
         for r in self.realms:

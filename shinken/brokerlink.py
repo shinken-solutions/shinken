@@ -70,7 +70,7 @@ class BrokerLink(SatelliteLink):
     running_properties = {'con': StringProp(
             default=None),
                           'alive': StringProp(
-            default=False,
+            default=True,
             fill_brok=['full_status']),
                           'broks': StringProp(
             default=[]),
@@ -95,5 +95,5 @@ class BrokerLink(SatelliteLink):
 
 
 class BrokerLinks(SatelliteLinks):
-    name_property = "name"
+    name_property = "broker_name"
     inner_class = BrokerLink
