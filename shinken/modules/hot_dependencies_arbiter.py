@@ -61,6 +61,7 @@ class Hot_dependencies_arbiter:
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "I open the HOT dependency module"
+        # Remember what we add
 
 
     def get_name(self):
@@ -86,5 +87,9 @@ class Hot_dependencies_arbiter:
                 father = arb.hosts.find_by_name(father_name)
                 if son != None and father != None:
                     print "finded!", son_name, father_name
+                    if not son.is_linked_with_host(father):
+                        print "Doing simple link between", son.get_name(), 'and', father.get_name()
+                        # Add a dep link between the son and the father
+                        son.add_host_act_dependancy(father, ['w', 'u', 'd'], None, True)
                 else:
                     print "Missing one of", son_name, father_name
