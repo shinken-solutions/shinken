@@ -423,6 +423,18 @@ class Arbiter(Daemon):
 
         # Warn about useless parameters in Shinken
         self.conf.notice_about_useless_parameters()
+
+        # Manage all post-conf modules
+        if self.me != None:
+            # Now we ask for configuration modules if they
+            # got items for us
+            for inst in self.mod_instances:
+                if 'late_configuration' in inst.properties['phases']:
+                    print "Ask a late config module"
+                    try :
+                        inst.hook_late_configuration(self.conf)
+                    except Exception, exp:
+                        print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))        
         
         # Correct conf?
         self.conf.is_correct()
