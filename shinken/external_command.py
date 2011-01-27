@@ -197,6 +197,8 @@ class ExternalCommandManager:
         'STOP_OBSESSING_OVER_SVC_CHECKS' : {'global' : True, 'args' : []},
         'LAUNCH_SVC_EVENT_HANDLER' : {'global' : False, 'args' : ['service']},
         'LAUNCH_HOST_EVENT_HANDLER' : {'global' : False, 'args' : ['host']},
+        # Now internal calls
+        'ADD_SIMPLE_HOST_DEPENDENCY' : {'global' : False, 'args' : ['host', 'host']},
     }
 
 
@@ -315,7 +317,7 @@ class ExternalCommandManager:
             print "This command is a global one, we resent it to all schedulers"
             self.dispatch_global_command(command)
             return None
-        print "Is bloabl?", c_name, ExternalCommandManager.commands[c_name]['global']
+        print "Is global?", c_name, ExternalCommandManager.commands[c_name]['global']
         print "Mode:", self.mode
         print "This command have arguments:", ExternalCommandManager.commands[c_name]['args'], len(ExternalCommandManager.commands[c_name]['args'])
 
@@ -1277,6 +1279,15 @@ class ExternalCommandManager:
     #LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_HOST_EVENT_HANDLER(self, host):
         host.get_event_handlers(externalcmd=True)
+
+    #ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
+    def ADD_SIMPLE_HOST_DEPENDENCY(self, son, father):
+        if not son.is_linked_with_host(father):
+            print "Doing simple link between", son.get_name(), 'and', father.get_name()
+            # Add a dep link between the son and the father
+            son.add_host_act_dependancy(father, ['w', 'u', 'd'], None, True)
+
+        
 
 
 

@@ -752,6 +752,14 @@ class Host(SchedulingItem):
         return self.host_name
 
 
+    # Say if we got the other in one of your dep list
+    def is_linked_with_host(self, other):
+        for (h, status, type, timeperiod, inherits_parent) in self.act_depend_of:
+            if h == other:
+                return True
+        return False
+        
+
     # Add a dependancy for action event handler, notification, etc)
     # and add ourself in it's dep list
     def add_host_act_dependancy(self, h, status, timeperiod, inherits_parent):
