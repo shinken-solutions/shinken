@@ -330,7 +330,7 @@ class Arbiter(Daemon):
             for m in self.me.modules:
                 print m
 
-            self.do_load_modules()
+            self.find_modules_path()
 
             self.modules_manager = ModulesManager('arbiter', self.modulespath, self.me.modules)
             self.modules_manager.load()

@@ -322,7 +322,7 @@ class Shinken(Daemon):
 
         self.do_load_config()
 
-        self.do_load_modules()
+        self.find_modules_path()
 
         #Config Class must be filled with USERN Macro
         Config.fill_usern_macros()
