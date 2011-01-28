@@ -170,6 +170,27 @@ class Hot_dependencies_arbiter:
 
                     print 'Raising external command', extcmd
                     arb.add(e)
+            # And now the deletion part
+            for son_k, father_k in removed:
+                son_type, son_name = son_k
+                father_type, father_name = father_k
+                print "Got new del", son_type, son_name, father_type, father_name
+                son = arb.conf.hosts.find_by_name(son_name.strip())
+                father = arb.conf.hosts.find_by_name(father_name.strip())
+                # if we cannot find them in the conf, bypass them
+                if son == None or father == None:
+                    print "not find dumbass!"
+                    continue
+                print son_name, father_name
+                if son_type == 'host' and father_type == 'host':
+                    # We just raise the external command, arbiter will do the job
+                    # to dispatch them
+                    extcmd = "[%lu] DEL_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    e = ExternalCommand(extcmd)
+
+                    print 'Raising external command', extcmd
+                    arb.add(e)
+
 
         print '\n'*10
                 
