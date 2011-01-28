@@ -702,6 +702,9 @@ class Arbiter(Daemon):
                             self.fifo = self.external_command.open()
 
             else: # Timeout
+                # Call modules that manage a starting tick pass
+                self.hook_point('tick')
+                
                 self.dispatcher.check_alive()
                 self.dispatcher.check_dispatch()
                 # REF: doc/shinken-conf-dispatching.png (3)
