@@ -42,7 +42,7 @@ class TestConfig(ShinkenTest):
             if m.module_type == 'simple_log':
                 mod = m
         self.assert_(mod != None)
-        self.assert_(mod.path == '/dev/shm/nagios.log')
+        self.assert_(mod.path == 'tmp/nagios.log')
         self.assert_(mod.module_name == 'Simple-log')
 
         try :
@@ -61,6 +61,7 @@ class TestConfig(ShinkenTest):
         sl.manage_brok(b)
         b = Brok('log', {'log' : "look at my ass again.\n"})
         sl.manage_brok(b)
+        sl.file.close()
         fd = open(mod.path)
         buf = fd.readline()
         self.assert_(buf == "look at my ass.\n")
