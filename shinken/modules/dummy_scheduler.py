@@ -25,6 +25,8 @@
 print "Detected module : Dummy module for Scheduler"
 
 
+from basemodule import Module
+
 
 properties = {
     'type' : 'dummy_scheduler',
@@ -36,24 +38,22 @@ properties = {
 #called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Dummy scheduler module for plugin %s" % plugin.get_name()
-    instance = Dummy_scheduler(plugin.get_name())
+    instance = Dummy_scheduler(plugin.get_name(), properties, foo="bar")
     return instance
 
 
 
 #Just print some stuff
-class Dummy_scheduler:
-    def __init__(self, name):
-        self.name = name
+class Dummy_scheduler(Module):
+    
+    def __init__(self, name, props, foo):
+        Module.__init__(self, name, props)
+        self.myfoo = foo
 
     #Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the dummy scheduler module"
         #self.return_queue = self.properties['from_queue']
-
-
-    def get_name(self):
-        return self.name
 
 
     #Ok, main function that is called in the retention creation pass

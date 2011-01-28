@@ -26,39 +26,39 @@ print "Detected module : Dummy module for Arbiter"
 
 
 import time
-from shinken.external_command import ExternalCommand
 
+
+from basemodule import Module
+
+from shinken.external_command import ExternalCommand
 
 
 properties = {
     'type' : 'dummy_arbiter',
     'external' : True,
-    'phases' : ['configuration', 'running'],
+    'phases' : ['configuration', 'late_configuration', 'running'],
     }
 
 
 #called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Dummy arbiter module for plugin %s" % plugin.get_name()
-    instance = Dummy_arbiter(plugin.get_name())
+    instance = Dummy_arbiter(plugin.get_name(), properties)
     return instance
 
 
 
 #Just print some stuff
-class Dummy_arbiter:
-    def __init__(self, name):
-        self.name = name
+class Dummy_arbiter(Module):
+    if False:  ## useless to define this:
+        def __init__(self, name, props):
+            Module.__init__(name, props)
 
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the dummy arbiter module"
         self.return_queue = self.properties['from_queue']
-
-
-    def get_name(self):
-        return self.name
-
+        
 
     #Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
@@ -67,16 +67,22 @@ class Dummy_arbiter:
         h = {'name' : 'dummy host from dummy arbiter module',
              'register' : '0',
              }
-
+        
         r['hosts'].append(h)
+        r['hosts'].append( {
+                            'host_name': "dummyhost1",
+                            'use': 'linux-server',
+                            'address': 'localhost'
+                            })
         print "[Dummy] Returning to Arbiter the hosts:", r
         return r
+    
+    def hook_late_configuration(self, conf):
+        print("Dummy in hook late config")
 
+    def do_loop_turn(self):
+        print "Raise a external command as example"
+        e = ExternalCommand('Viva la revolution')
+        self.return_queue.put(e)
+        time.sleep(1)
 
-    #When you are in "external" mode, that is the main loop of your process
-    def main(self):
-        while True:
-            print "Raise a external command as example"
-            e = ExternalCommand('Viva la revolution')
-            self.return_queue.put(e)
-            time.sleep(1)
