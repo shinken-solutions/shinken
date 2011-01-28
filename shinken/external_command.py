@@ -1276,9 +1276,11 @@ class ExternalCommandManager:
     def LAUNCH_SVC_EVENT_HANDLER(self, service):
         service.get_event_handlers(externalcmd=True)
 
+
     #LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_HOST_EVENT_HANDLER(self, host):
         host.get_event_handlers(externalcmd=True)
+
 
     #ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def ADD_SIMPLE_HOST_DEPENDENCY(self, son, father):
@@ -1286,7 +1288,8 @@ class ExternalCommandManager:
             print "Doing simple link between", son.get_name(), 'and', father.get_name()
             # Add a dep link between the son and the father
             son.add_host_act_dependancy(father, ['w', 'u', 'd'], None, True)
-
+            self.sched.get_and_register_status_brok(son)
+            self.sched.get_and_register_status_brok(father)
         
 
 
