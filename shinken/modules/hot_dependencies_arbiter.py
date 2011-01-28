@@ -84,8 +84,8 @@ class Hot_dependencies_arbiter:
             father_type, father_name = father_k
             print son_name, father_name
             if son_type == 'host' and father_type == 'host':
-                son = arb.hosts.find_by_name(son_name)
-                father = arb.hosts.find_by_name(father_name)
+                son = arb.conf.hosts.find_by_name(son_name)
+                father = arb.conf.hosts.find_by_name(father_name)
                 if son != None and father != None:
                     print "finded!", son_name, father_name
                     if not son.is_linked_with_host(father):
