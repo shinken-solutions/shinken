@@ -21,8 +21,11 @@
 #a GLPI with webservice (xmlrpc, SOAP is garbage) and take all
 #hosts. Simple way from now
 
+import time
 import json
 import os
+
+from shinken.external_command import ExternalCommand
 
 #This text is print at the import
 print "Detected module : Hot dependencies modules for Arbiter"
@@ -138,6 +141,7 @@ class Hot_dependencies_arbiter:
 
 
     def hook_tick(self, arb):
+        now = int(time.time())
         print "*"*10, "Tick tick for hot dependency"
         # If the mapping file changed, we reload it and update our links
         # if we need it
@@ -147,4 +151,25 @@ class Hot_dependencies_arbiter:
             additions, removed = self._got_mapping_changes()
             print "Additions : ", additions
             print "Remove : ", removed
-            
+            for son_k, father_k in additions:
+                son_type, son_name = son_k
+                father_type, father_name = father_k
+                print "Got new add", son_type, son_name, father_type, father_name
+                son = arb.conf.hosts.find_by_name(son_name.strip())
+                father = arb.conf.hosts.find_by_name(father_name.strip())
+                # if we cannot find them in the conf, bypass them
+                if son == None or father == None:
+                    print "not find dumbass!"
+                    continue
+                print son_name, father_name
+                if son_type == 'host' and father_type == 'host':
+                    # We just raise the external command, arbiter will do the job
+                    # to dispatch them
+                    extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    e = ExternalCommand(extcmd)
+
+                    print 'Raising external command', extcmd
+                    arb.add(e)
+
+        print '\n'*10
+                

@@ -85,10 +85,12 @@ for h in hosts:
 r = []
 print "Total res", res
 for host in res:
-    for vm in res[h]:
+    print "Doing key", host
+    for vm in res[host]:
         # First we apply rules on the names
         host_name = apply_rules(host, rules)
         vm_name = apply_rules(vm, rules)
+        print "Add", host_name, vm_name
         v = (('host', host_name),('host', vm_name))
         r.append(v)
 
