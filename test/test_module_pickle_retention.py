@@ -37,7 +37,7 @@ class TestConfig(ShinkenTest):
         print self.conf.modules
         #get our modules
         mod = None
-        mod = Module({'type' : 'pickle_retention_file', 'module_name' : 'PickleRetention', 'path' : '/tmp/retention-test.dat'})
+        mod = Module({'type' : 'pickle_retention_file', 'module_name' : 'PickleRetention', 'path' : 'tmp/retention-test.dat'})
 
         try :
             os.unlink(mod.path)
