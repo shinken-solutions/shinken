@@ -199,6 +199,7 @@ class ExternalCommandManager:
         'LAUNCH_HOST_EVENT_HANDLER' : {'global' : False, 'args' : ['host']},
         # Now internal calls
         'ADD_SIMPLE_HOST_DEPENDENCY' : {'global' : False, 'args' : ['host', 'host']},
+        'DEL_HOST_DEPENDENCY' : {'global' : False, 'args' : ['host', 'host']},
     }
 
 
@@ -1291,6 +1292,12 @@ class ExternalCommandManager:
             self.sched.get_and_register_status_brok(son)
             self.sched.get_and_register_status_brok(father)
         
+
+    #ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
+    def DEL_HOST_DEPENDENCY(self, son, father):
+        if son.is_linked_with_host(father):
+            print "removing simple link between", son.get_name(), 'and', father.get_name()
+            son.del_host_act_dependancy(father)
 
 
 

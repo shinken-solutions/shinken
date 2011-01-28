@@ -47,6 +47,11 @@ class TestCreateLinkFromExtCmd(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.assert_(h.is_linked_with_host(r))
 
+        # Now we remove this link
+        cmd = "[%lu] DEL_HOST_DEPENDENCY;test_host_0;test_router_0" % now
+        self.sched.run_external_command(cmd)
+        self.assert_(not h.is_linked_with_host(r))
+
 
 
 if __name__ == '__main__':
