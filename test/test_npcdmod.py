@@ -146,6 +146,7 @@ class TestConfig(ShinkenTest):
         self.update_broker()
         self.assert_(os.path.exists("./perfdata"))
         if os.path.exists("./perfdata"):
+            self.npcdmod_broker.logfile.close()
             os.unlink("./perfdata")
 
 
