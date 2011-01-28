@@ -42,7 +42,7 @@ class TestConfig(ShinkenTest):
             if m.module_type == 'host_perfdata':
                 mod = m
         self.assert_(mod != None)
-        self.assert_(mod.path == '/dev/shm/host-perfdata')
+        self.assert_(mod.path == 'tmp/host-perfdata')
         self.assert_(mod.module_name == 'Host-Perfdata')
         self.assert_(mod.mode == 'a')
         #Warning, the r (raw) is important here
@@ -69,6 +69,7 @@ class TestConfig(ShinkenTest):
             if b.type == 'host_check_result':
                 sl.manage_brok(b)
         self.sched.broks = {}
+        sl.file.close() # the sl also has an open file handle
 
         fd = open(mod.path)
         buf = fd.readline()
@@ -92,6 +93,7 @@ class TestConfig(ShinkenTest):
         for b in self.sched.broks.values():
             if b.type == 'host_check_result':
                 sl2.manage_brok(b)
+        sl2.file.close()
 
         fd = open(mod.path)
         buf = fd.readline()

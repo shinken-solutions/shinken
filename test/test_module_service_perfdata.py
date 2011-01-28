@@ -42,7 +42,7 @@ class TestConfig(ShinkenTest):
             if m.module_type == 'service_perfdata':
                 mod = m
         self.assert_(mod != None)
-        self.assert_(mod.path == '/dev/shm/service-perfdata')
+        self.assert_(mod.path == 'tmp/service-perfdata')
         self.assert_(mod.module_name == 'Service-Perfdata')
         self.assert_(mod.mode == 'a')
         #Warning, the r (raw) is important here
@@ -68,6 +68,7 @@ class TestConfig(ShinkenTest):
             if b.type == 'service_check_result':
                 sl.manage_brok(b)
         self.sched.broks = {}
+        sl.file.close() # the sl has also an open (writing) file handle
 
         fd = open(mod.path)
         buf = fd.readline()
@@ -91,6 +92,7 @@ class TestConfig(ShinkenTest):
         for b in self.sched.broks.values():
             if b.type == 'service_check_result':
                 sl2.manage_brok(b)
+        sl2.file.close()
 
         fd = open(mod.path)
         buf = fd.readline()

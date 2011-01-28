@@ -206,13 +206,15 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # recover
         # the acknowledgement must have been removed automatically
+        # recover notifications are only sent to contacts which
+        # received a critical/warning notification
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[svc, 0, 'GOOD']])
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 2) # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 2) # evt, master notif, contact notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
@@ -489,13 +491,15 @@ class TestConfig(ShinkenTest):
         #--------------------------------------------------------------
         # recover
         # the acknowledgement must have been removed automatically
+        # recover notifications are only sent to contacts which
+        # received a critical/warning notification
         #--------------------------------------------------------------
         self.scheduler_loop(1, [[host, 0, 'UP']])
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 2) # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 2) # evt, master notif, contact notif
         self.assert_(not host.problem_has_been_acknowledged)
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
