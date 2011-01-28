@@ -162,7 +162,7 @@ class Notification(Action):
 
 
     def is_launchable(self, t):
-        return t > self.t_to_go
+        return t >= self.t_to_go
 
 
     def is_administrative(self):

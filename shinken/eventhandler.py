@@ -117,7 +117,7 @@ class EventHandler(Action):
 
 
     def is_launchable(self, t):
-        return t > self.t_to_go
+        return t >= self.t_to_go
 
 
     def __str__(self):
