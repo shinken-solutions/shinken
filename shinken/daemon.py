@@ -389,6 +389,7 @@ Also put default value in the properties if some are missing in the config_file 
         print("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
         self.interrupted = True
 
+
     def set_exit_handler(self):
         func = self.manage_signal
         if os.name == "nt":

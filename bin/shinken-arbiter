@@ -281,6 +281,26 @@ class Arbiter(Daemon):
         #We only need to change some value
 
 
+    # We call the function of modules that got the this
+    # hook function
+    def hook_point(self, hook_name):
+        to_del = []
+        for inst in self.mod_instances:
+            full_hook_name = 'hook_' + hook_name
+            if hasattr(inst, full_hook_name):
+                f = getattr(inst, full_hook_name)
+                try :
+                    print "Calling", full_hook_name, "of", inst.get_name()
+                    f(self)
+                except Exception, exp:
+                    logger.log('The instance %s raise an exception %s. I kill it' % (inst.get_name(), str(exp)))
+                    to_del.append(inst)
+
+        #Now remove mod that raise an exception
+        for inst in to_del:
+            self.modules_manager.remove_instance(inst)
+
+
     # Main loop function
     def main(self):
         # Log will be broks
@@ -335,6 +355,9 @@ class Arbiter(Daemon):
             self.modules_manager = ModulesManager('arbiter', self.modulespath, self.me.modules)
             self.modules_manager.load()
             self.mod_instances = self.modules_manager.get_instances()
+
+            # Call modules that manage this read configuration pass
+            self.hook_point('read_configuration')
 
             # Now we ask for configuration modules if they
             # got items for us
@@ -426,15 +449,7 @@ class Arbiter(Daemon):
 
         # Manage all post-conf modules
         if self.me != None:
-            # Now we ask for configuration modules if they
-            # got items for us
-            for inst in self.mod_instances:
-                if 'late_configuration' in inst.properties['phases']:
-                    print "Ask a late config module"
-                    try :
-                        inst.hook_late_configuration(self.conf)
-                    except Exception, exp:
-                        print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))        
+            self.hook_point('late_configuration')
         
         # Correct conf?
         self.conf.is_correct()
@@ -687,6 +702,9 @@ class Arbiter(Daemon):
                             self.fifo = self.external_command.open()
 
             else: # Timeout
+                # Call modules that manage a starting tick pass
+                self.hook_point('tick')
+                
                 self.dispatcher.check_alive()
                 self.dispatcher.check_dispatch()
                 # REF: doc/shinken-conf-dispatching.png (3)

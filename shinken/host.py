@@ -758,6 +758,25 @@ class Host(SchedulingItem):
             if h == other:
                 return True
         return False
+
+
+    # Delete all links in the act_depend_of list of self and other
+    def del_host_act_dependancy(self, other):
+        to_del = []
+        # First we remove in my list
+        for (h, status, type, timeperiod, inherits_parent) in self.act_depend_of:
+            if h == other:
+                to_del.append( (h, status, type, timeperiod, inherits_parent))
+        for t in to_del:
+            self.act_depend_of.remove(t)
+
+        #And now in the father part
+        to_del = []
+        for (h, status, type, timeperiod, inherits_parent) in other.act_depend_of_me:
+            if h == self:
+                to_del.append( (h, status, type, timeperiod, inherits_parent) )
+        for t in to_del:
+            other.act_depend_of_me.remove(t)
         
 
     # Add a dependancy for action event handler, notification, etc)

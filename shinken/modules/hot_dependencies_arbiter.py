@@ -21,7 +21,11 @@
 #a GLPI with webservice (xmlrpc, SOAP is garbage) and take all
 #hosts. Simple way from now
 
+import time
 import json
+import os
+
+from shinken.external_command import ExternalCommand
 
 #This text is print at the import
 print "Detected module : Hot dependencies modules for Arbiter"
@@ -56,8 +60,11 @@ class Hot_dependencies_arbiter:
         self.mapping_command = mapping_command
         self.mapping_file_history = mapping_file_history
         self.mapping_command_interval = mapping_command_interval
+        self.last_update = 0
+        self.last_mapping = set()
+        self.mapping = set()
 
-
+        
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "I open the HOT dependency module"
@@ -68,12 +75,48 @@ class Hot_dependencies_arbiter:
     def get_name(self):
         return self.name
 
+    # Look is the mapping filechanged since the last lookup
+    def _is_mapping_file_changed(self):
+        try:
+            last_update = os.path.getmtime(self.mapping_file)
+            if last_update > self.last_update:
+                self.last_update = last_update
+                return True
+        except OSError : # Maybe the file got problem, we bypaass here
+            pass
+        return False
+
+
+    # Read the mapping file and update our internal mappings
+    def _update_mapping(self):
+        f = open(self.mapping_file, 'rb')
+        mapping = json.loads(f.read())
+        f.close()
+        self.last_mapping = self.mapping
+        # mapping is a list of list, we want a set of tuples
+        # because list cannot be hased for a set pass
+        self.mapping = set()
+        for e in mapping:
+            son, father = e
+            self.mapping.add( (tuple(son), tuple(father)) )
+
+
+    # Maybe the file is updated, but the mapping is the same
+    # if not, look at addition and remove objects
+    def _got_mapping_changes(self):
+        additions = self.mapping - self.last_mapping
+        removed = self.last_mapping - self.mapping
+
+        return additions, removed
+        
+        
 
     #Ok, main function that will load dep from a json file
     def hook_late_configuration(self, arb):
         # We will return external commands to the arbiter, so
         # it can jsut manage it easily and in a generic way
         ext_cmds = []
+        self._is_mapping_file_changed()
         f = open(self.mapping_file, 'rb')
         r = json.loads(f.read())
         f.close()
@@ -84,8 +127,8 @@ class Hot_dependencies_arbiter:
             father_type, father_name = father_k
             print son_name, father_name
             if son_type == 'host' and father_type == 'host':
-                son = arb.hosts.find_by_name(son_name)
-                father = arb.hosts.find_by_name(father_name)
+                son = arb.conf.hosts.find_by_name(son_name)
+                father = arb.conf.hosts.find_by_name(father_name)
                 if son != None and father != None:
                     print "finded!", son_name, father_name
                     if not son.is_linked_with_host(father):
@@ -94,3 +137,60 @@ class Hot_dependencies_arbiter:
                         son.add_host_act_dependancy(father, ['w', 'u', 'd'], None, True)
                 else:
                     print "Missing one of", son_name, father_name
+
+
+
+    def hook_tick(self, arb):
+        now = int(time.time())
+        print "*"*10, "Tick tick for hot dependency"
+        # If the mapping file changed, we reload it and update our links
+        # if we need it
+        if self._is_mapping_file_changed():
+            print "The mapping file changed, I update it"
+            self._update_mapping()
+            additions, removed = self._got_mapping_changes()
+            print "Additions : ", additions
+            print "Remove : ", removed
+            for son_k, father_k in additions:
+                son_type, son_name = son_k
+                father_type, father_name = father_k
+                print "Got new add", son_type, son_name, father_type, father_name
+                son = arb.conf.hosts.find_by_name(son_name.strip())
+                father = arb.conf.hosts.find_by_name(father_name.strip())
+                # if we cannot find them in the conf, bypass them
+                if son == None or father == None:
+                    print "not find dumbass!"
+                    continue
+                print son_name, father_name
+                if son_type == 'host' and father_type == 'host':
+                    # We just raise the external command, arbiter will do the job
+                    # to dispatch them
+                    extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    e = ExternalCommand(extcmd)
+
+                    print 'Raising external command', extcmd
+                    arb.add(e)
+            # And now the deletion part
+            for son_k, father_k in removed:
+                son_type, son_name = son_k
+                father_type, father_name = father_k
+                print "Got new del", son_type, son_name, father_type, father_name
+                son = arb.conf.hosts.find_by_name(son_name.strip())
+                father = arb.conf.hosts.find_by_name(father_name.strip())
+                # if we cannot find them in the conf, bypass them
+                if son == None or father == None:
+                    print "not find dumbass!"
+                    continue
+                print son_name, father_name
+                if son_type == 'host' and father_type == 'host':
+                    # We just raise the external command, arbiter will do the job
+                    # to dispatch them
+                    extcmd = "[%lu] DEL_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    e = ExternalCommand(extcmd)
+
+                    print 'Raising external command', extcmd
+                    arb.add(e)
+
+
+        print '\n'*10
+                
