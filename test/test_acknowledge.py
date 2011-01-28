@@ -112,8 +112,8 @@ class TestConfig(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 2) # alert, eventhndlr
+        self.assert_(self.count_actions() == 2) # evt, master notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
@@ -213,8 +213,8 @@ class TestConfig(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 2) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 2) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notif
+        self.assert_(self.count_actions() == 3) # evt, master notif, notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
