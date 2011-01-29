@@ -33,10 +33,18 @@ import shutil
 import time
 from timeperiod import Timeperiod
 from brok import Brok
+from module import Module
 
 sys.path.append("../shinken/modules/livestatus_broker")
+import livestatus_broker
 from livestatus_broker import Livestatus_broker
 sys.setcheckinterval(10000)
+
+
+modconf = Module()
+modconf.module_name = "livestatus"
+modconf.module_type = livestatus_broker.properties['type']
+modconf.properties = livestatus_broker.properties.copy()
 
 class TestConfig(ShinkenTest):
     def contains_line(self, text, pattern):
@@ -277,12 +285,13 @@ class TestConfig(ShinkenTest):
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', [], 'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()))
-        self.livestatus_broker.properties = {
-            'to_queue' : 0,
-            'from_queue' : 0
-
-            }
+        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], 'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()))
+        self.livestatus_broker.create_queues()
+        #self.livestatus_broker.properties = {
+        #    'to_queue' : 0,
+        #    'from_queue' : 0
+        #
+        #    }
         self.livestatus_broker.init()
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
@@ -2002,12 +2011,12 @@ Limit: 1001"""
 class TestConfigBig(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', [], 'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()))
-        self.livestatus_broker.properties = {
-            'to_queue' : 0,
-            'from_queue' : 0
-
-            }
+        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], 'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()))
+        self.livestatus_broker.create_queues()
+        #self.livestatus_broker.properties = {
+        #    'to_queue' : 0,
+        #    'from_queue' : 0
+        #}
         self.livestatus_broker.init()
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
@@ -2381,8 +2390,10 @@ OutputFormat: csv
 class TestConfigComplex(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_problem_impact.cfg')
-        self.livestatus_broker = Livestatus_broker('livestatus', '127.0.0.1', str(50000 + os.getpid()), 'live', [],  'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()), )
-        self.livestatus_broker.properties = {
+        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [],  'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()), )
+        self.livestatus_broker.create_queues()
+        if False:
+            self.livestatus_broker.properties = {
             'to_queue' : 0,
             'from_queue' : 0
 
