@@ -764,7 +764,7 @@ class SchedulingItem(Item):
                         self.create_notifications('PROBLEM')
 
         # Reset this flag. If it was true, actions were already taken
-        self.in_scheduled_downtime_during_last_check == False
+        self.in_scheduled_downtime_during_last_check = False
 
         # now is the time to update state_type_id
         # and our last_hard_state

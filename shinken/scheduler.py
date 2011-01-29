@@ -572,7 +572,7 @@ class Scheduler:
                     c.exit_status = 2
                     c.output = '(Error: there is no available check time after time change!)'
                     c.check_time = time.time()
-                    c.execution_time == 0
+                    c.execution_time = 0
                 else:
                     c.t_to_go = new_t
                     ref.next_chk = new_t
@@ -601,7 +601,7 @@ class Scheduler:
                     c.exit_status = 2
                     c.output = '(Error: there is no available check time after time change!)'
                     c.check_time = time.time()
-                    c.execution_time == 0
+                    c.execution_time = 0
                 else:
                     c.t_to_go = new_t
 
