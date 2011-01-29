@@ -354,7 +354,10 @@ class Arbiter(Daemon):
 
             self.modules_manager = ModulesManager('arbiter', self.modulespath, self.me.modules)
             self.modules_manager.load()
-            self.mod_instances = self.modules_manager.get_instances()
+            # we request the instances without them being *started* 
+            # (for these that are concerned ("external" modules):
+            # we will *start* these instances after we have been daemonized (if requested)
+            self.mod_instances = self.modules_manager.get_instances(False)
 
             # Call modules that manage this read configuration pass
             self.hook_point('read_configuration')
@@ -513,7 +516,11 @@ class Arbiter(Daemon):
         self.host = self.me.address
         self.port = self.me.port
         self.do_daemon_init_and_start(self.conf)
-                
+
+        # ok we are now fully daemon (if requested)
+        # now we can start our "external" modules (if any) :
+        self.modules_manager.init_and_start_instances()
+        self.mod_instances = self.modules_manager.instances
 
         self.iarbiters = IArbiters(self)
 
