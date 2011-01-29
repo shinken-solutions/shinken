@@ -202,11 +202,11 @@ ps -fu shinken
 
 
 echo "Now we can test a real run guy"
-/etc/init.d/shinken-scheduler start
-/etc/init.d/shinken-poller start
-/etc/init.d/shinken-reactionner start
-/etc/init.d/shinken-broker start
-/etc/init.d/shinken-arbiter start
+/etc/init.d/shinken-scheduler -d start
+/etc/init.d/shinken-poller -d start
+/etc/init.d/shinken-reactionner -d start
+/etc/init.d/shinken-broker -d start
+/etc/init.d/shinken-arbiter -d start
 
 echo "We will sleep again 5sec so every one is quite stable...."
 sleep 5
