@@ -109,14 +109,14 @@ class TestConfig(ShinkenTest):
         file.write("perfdata_file = /tmp/pfnerf")
         file.write("perfdata_spool_dir = /tmp/pnp4shinken/var/perfdata")
         file.write("perfdata_spool_filename=pferf")
-        flie.close()
+        file.close()
 
 
     def write_incomplete_config(self):
         file = open("npcd.cfg", "w")
         file.write("perfdata_file = /tmp/pfnerf")
         file.write("perfdata_spool_filename=pferf")
-        flie.close()
+        file.close()
 
 
     def test_write_perfdata_file(self):
