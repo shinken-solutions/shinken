@@ -43,9 +43,9 @@ class TestConfig(ShinkenTest):
         a.env = {}
 
         if os.name == 'nt':
-            a.command = "./dummy_command.cmd"
+            a.command = r'libexec\\dummy_command.cmd'
         else:
-            a.command = "./dummy_command.sh"
+            a.command = "libexec/dummy_command.sh"
         self.assert_(a.got_shell_characters() == False)
         a.execute()
         self.assert_(a.status == 'launched')
@@ -87,7 +87,7 @@ class TestConfig(ShinkenTest):
     def test_noshell_bang_command(self):
         a = Action()
         a.timeout = 10
-        a.command = "./dummy_command_nobang.sh"
+        a.command = "libexec/dummy_command_nobang.sh"
         a.env = {}
         if os.name == 'nt':
             return
@@ -104,7 +104,7 @@ class TestConfig(ShinkenTest):
     def test_got_shell_characters(self):
         a = Action()
         a.timeout = 10
-        a.command = "./dummy_command_nobang.sh && echo finished ok"
+        a.command = "libexec/dummy_command_nobang.sh && echo finished ok"
         a.env = {}
         if os.name == 'nt':
             return
