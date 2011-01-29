@@ -36,9 +36,9 @@ properties = {
 
 
 #called by the plugin manager to get a broker
-def get_instance(plugin):
-    print "Get a Dummy scheduler module for plugin %s" % plugin.get_name()
-    instance = Dummy_scheduler(plugin.get_name(), properties, foo="bar")
+def get_instance(mod_conf):
+    print "Get a Dummy scheduler module for plugin %s" % mod_conf.get_name()
+    instance = Dummy_scheduler(mod_conf, foo="bar")
     return instance
 
 
@@ -46,8 +46,8 @@ def get_instance(plugin):
 #Just print some stuff
 class Dummy_scheduler(Module):
     
-    def __init__(self, name, props, foo):
-        Module.__init__(self, name, props)
+    def __init__(self, mod_conf, foo):
+        Module.__init__(self, mod_conf)
         self.myfoo = foo
 
     #Called by Scheduler to say 'let's prepare yourself guy'

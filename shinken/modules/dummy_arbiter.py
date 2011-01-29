@@ -28,7 +28,7 @@ print "Detected module : Dummy module for Arbiter"
 import time
 
 
-from basemodule import Module
+from shinken.basemodule import Module
 
 from shinken.external_command import ExternalCommand
 
@@ -43,7 +43,7 @@ properties = {
 #called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Dummy arbiter module for plugin %s" % plugin.get_name()
-    instance = Dummy_arbiter(plugin.get_name(), properties)
+    instance = Dummy_arbiter(plugin)
     return instance
 
 
@@ -51,13 +51,13 @@ def get_instance(plugin):
 #Just print some stuff
 class Dummy_arbiter(Module):
     if False:  ## useless to define this:
-        def __init__(self, name, props):
-            Module.__init__(name, props)
+        def __init__(self, mod_conf):
+            Module.__init__(mod_conf)
 
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the dummy arbiter module"
-        self.return_queue = self.properties['from_queue']
+        #self.return_queue = self.properties['from_queue']
         
 
     #Ok, main function that is called in the CONFIGURATION phase
@@ -83,6 +83,6 @@ class Dummy_arbiter(Module):
     def do_loop_turn(self):
         print "Raise a external command as example"
         e = ExternalCommand('Viva la revolution')
-        self.return_queue.put(e)
+        self.to_q.put(e)
         time.sleep(1)
 

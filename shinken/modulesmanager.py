@@ -33,45 +33,54 @@ from multiprocessing import Process, Queue
 #modulepath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "modules/")
 #Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html
 
+from basemodule import Module
+
 class ModulesManager(object):
 
     def __init__(self, modules_type, modules_path, modules):
         self.modules_path = modules_path
         self.modules_type = modules_type
         self.modules = modules
-        self.allowed_types = [plug.module_type for plug in self.modules]
+        self.allowed_types = [ plug.module_type for plug in modules ]
+        self.imported_modules = []
+        self.modules_assoc = []
+        self.instances = []
 
 
     #Lod all modules
     def load(self):
         #We get all modules file of our type (end with broker.py for example)
-        modules_files = [fname[:-3] for fname in os.listdir(self.modules_path) if fname.endswith(self.modules_type+".py")]
+        modules_files = [ fname[:-3] for fname in os.listdir(self.modules_path) 
+                         if fname.endswith(self.modules_type+".py") ]
 
         #And directories (no remove of .py but still with broker for example at the end)
-        modules_files.extend([fname for fname in os.listdir(self.modules_path) if fname.endswith(self.modules_type)])
+        modules_files.extend([ fname for fname in os.listdir(self.modules_path)
+                               if fname.endswith(self.modules_type) ])
 
-        #Now we try to load thems
+        # Now we try to load thems
         if not self.modules_path in sys.path:
             sys.path.append(self.modules_path)
 
-        self.imported_modules = []
+        del self.imported_modules[:]
         for fname in modules_files:
             try:
+                print("importing %s" % (fname))
                 self.imported_modules.append(__import__(fname))
             except ImportError , exp:
                 print "Warning :", exp
 
-        self.modules_assoc = []
-        for module in self.modules:
-            module_type = module.module_type
+        del self.modules_assoc[:]
+        for mod_conf in self.modules:
+            module_type = mod_conf.module_type
             is_find = False
-            for mod in self.imported_modules:
-                if mod.properties['type'] == module_type:
-                    self.modules_assoc.append((module, mod))
+            for module in self.imported_modules:
+                if module.properties['type'] == module_type:
+                    self.modules_assoc.append((mod_conf, module))
                     is_find = True
+                    break
             if not is_find:
                 #No module is suitable, we Raise a Warning
-                print "Warning : the module type %s for %s was not found in modules!" % (module_type, module.get_name())
+                print "Warning : the module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name())
 
 
     def try_instance_init(self, inst):
@@ -86,18 +95,32 @@ Returns: True on successfull init. False if instance init method raised any Exce
             return False
         return True
 
+    def clear_instances(self, insts=None):
+        if insts is None:
+            insts = self.instances[:]
+        for i in insts:
+            self.remove_instance(i)
+    
     #Get modules instance to give them after broks
-    def get_instances(self):
-        self.instances = []
-        for (module, mod) in self.modules_assoc:
+    def get_instances(self, start_external=True):
+        self.clear_instances()
+        for (mod_conf, module) in self.modules_assoc:
             try:
-                inst = mod.get_instance(module)
-                if inst != None: #None = Bad thing happened :)
-                    #the instance need the properties of the module
-                    inst.properties = mod.properties
-                    self.instances.append(inst)
+                mod_conf.properties = module.properties.copy()
+                inst = module.get_instance(mod_conf)
+                if inst is None: #None = Bad thing happened :)
+                    continue
+                ## TODO: temporary for back comptability with previous modules :
+                if not isinstance(inst, Module):
+                    print("Notice: module %s is old module style (not instance of basemodule.Module)" % (mod_conf.get_name()))
+                    inst.props = inst.properties = mod_conf.properties.copy()
+                    inst.is_external = inst.props['external'] = inst.props.get('external', False)
+                    inst.phases = inst.props.get('phases', [])  ## though a module defined with no phase is quite useless ..
+                    inst.phases.append(None) ## to permit simpler get_*_ methods
+                    ## end temporary
+                self.instances.append(inst)
             except Exception , exp:
-                print "Error : the module %s raised an exception %s, I remove it!" % (module.get_name(), str(exp))
+                print "Error : the module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), str(exp))
                 print "Back trace of this remove :"
                 traceback.print_exc(file=sys.stdout)
 
@@ -105,36 +128,58 @@ Returns: True on successfull init. False if instance init method raised any Exce
 
         to_del = []
         for inst in self.instances:
-            isext = inst.properties.get('external', False)
-            if isext:
-                inst.properties['to_queue'] = Queue()
-                inst.properties['from_queue'] = Queue()
+            if inst.is_external:
+## TODO: do not know if really necessary for a module to have the queues already created for the module's init() method..
+                self.__set_ext_inst_queues(inst)  
             if not self.try_instance_init(inst):
                 to_del.append(inst)
                 continue
-            if isext:
-                print("Starting external process for instance %s" % (inst.name))
-                p = inst.properties['process'] = Process(target=inst.main, args=())
-                p.start()
-                print("%s is now started ; pid=%d" % (inst.name, p.pid))
-            inst.properties['external'] = isext
 
         for inst in to_del:
             self.instances.remove(inst)
 
+        if start_external:
+            self.__start_ext_instances()
+
         return self.instances
 
-    def remove_instance(self, inst):
-        #External instances need to be close before (process + queues)
-        if inst.properties['external']:
-            inst.properties['process'].terminate()
-            inst.properties['process'].join(timeout=1)
-            inst.properties['to_queue'].close()
-            inst.properties['to_queue'].join_thread()
-            inst.properties['from_queue'].close()
-            inst.properties['from_queue'].join_thread()
+    def __start_ext_instances(self):
+        for inst in self.instances:
+            if inst.is_external:
+                print("Starting external process for instance %s" % (inst.name))
+                p = inst.process = Process(target=inst.main, args=())
+                inst.properties['process'] = p  ## TODO: temporary
+                p.start()
+                print("%s is now started ; pid=%d" % (inst.name, p.pid))
 
-        #Then do not listen anymore about it
+    def __set_ext_inst_queues(self, inst):
+        if isinstance(inst, Module):
+            inst.create_queues()
+        else:
+            Module.create_queues__(inst)
+            ## TODO: temporary until new style module is used by every shinken module:
+            inst.properties['to_queue'] = inst.to_q
+            inst.properties['from_queue'] = inst.from_q
+
+    def init_and_start_instances(self):
+        for inst in self.instances:
+            if inst.is_external:
+                self.__set_ext_inst_queues(inst)
+            inst.init()
+        self.__start_ext_instances()
+
+
+    def remove_instance(self, inst):
+        # External instances need to be close before (process + queues)
+        if inst.is_external:
+            inst.process.terminate()
+            inst.process.join(timeout=1)
+            inst.to_q.close()
+            inst.to_q.join_thread()
+            inst.from_q.close()
+            inst.from_q.join_thread()
+
+        # Then do not listen anymore about it
         self.instances.remove(inst)
 
 
@@ -142,7 +187,7 @@ Returns: True on successfull init. False if instance init method raised any Exce
         to_del = []
         #Only for external
         for inst in self.instances:
-            if inst.properties['external'] and not inst.properties['process'].is_alive():
+            if inst.is_external and not inst.process.is_alive():
                 print "Error : the external module %s goes down unexpectly!" % inst.get_name()
                 to_del.append(inst)
 
@@ -151,19 +196,19 @@ Returns: True on successfull init. False if instance init method raised any Exce
 
 
     def get_internal_instances(self, phase=None):
-        return [inst for inst in self.instances if not inst.properties['external'] and (phase==None or phase in inst.properties['phases'])]
+        return [ inst for inst in self.instances if not inst.is_external and phase in inst.phases ]
 
 
     def get_external_instances(self, phase=None):
-        return [inst for inst in self.instances if inst.properties['external'] and (phase==None or phase in inst.properties['phases'])]
+        return [ inst for inst in self.instances if inst.is_external and phase in inst.phases ]
 
 
     def get_external_to_queues(self, phase=None):
-        return [inst.properties['to_queue'] for inst in self.instances if inst.properties['external'] and (phase==None or phase in inst.properties['phases'])]
+        return [ inst.to_q for inst in self.instances if inst.is_external and phase in inst.phases ]
 
 
     def get_external_from_queues(self, phase=None):
-        return [inst.properties['from_queue'] for inst in self.instances if inst.properties['external'] and (phase==None or phase in inst.properties['phases'])]
+        return [ inst.from_q for inst in self.instances if inst.is_external and phase in inst.phases ]
 
 
     def stop_all(self):
