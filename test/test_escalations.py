@@ -371,8 +371,8 @@ class TestEscalations(ShinkenTest):
 
         # And we hack the notification so we can raise really the level2 escalation
         for n in svc.notifications_in_progress.values():
-             n.t_to_go = time.time()
-             n.creation_time -= 3600
+            n.t_to_go = time.time()
+            n.creation_time -= 3600
 
         # We go in trouble too
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)

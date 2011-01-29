@@ -5971,7 +5971,7 @@ class LiveStatusRequest(LiveStatus):
         else:
             # A minimal integrity check
             if not self.table:
-               return []
+                return []
 
             # Make columns unique
             self.filtercolumns = list(set(self.filtercolumns))

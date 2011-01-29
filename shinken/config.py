@@ -1621,12 +1621,12 @@ class Config(Item):
             for sg in self.servicegroups:
                 new_servicegroups.append(sg.copy_shell())
             self.confs[i].servicegroups = Servicegroups(new_servicegroups)
-            self.confs[i].hosts = [] #will be fill after
-            self.confs[i].services = [] #will be fill after
-            self.confs[i].other_elements = {} # The elements of the others
-                                              #conf will be tag here
-            self.confs[i].is_assigned = False #if a scheduler have
-                                              #accepted the conf
+            self.confs[i].hosts = [] # will be fill after
+            self.confs[i].services = [] # will be fill after
+            # The elements of the others conf will be tag here
+            self.confs[i].other_elements = {}  
+            # if a scheduler have accepted the conf
+            self.confs[i].is_assigned = False 
 
         logger.log("Creating packs for realms")
 

@@ -369,7 +369,7 @@ class Service(SchedulingItem):
             for err in self.configuration_errors:
                 logger.log(err)
 
-         # Ok now we manage special cases...
+        # Ok now we manage special cases...
         if not hasattr(self, 'contacts') \
         and not hasattr(self, 'contact_groups') \
         and  self.notifications_enabled == True:
@@ -1159,8 +1159,7 @@ class Services(Items):
                     if not s.is_tpl() and s.configuration_errors == []:
                         srv_to_remove.append(id)
 
-                else: # Maybe the hnames was full of same host,
-                      # so we must reset the name
+                else: # Maybe the hnames was full of same host, so we must reset the name
                     for hname in hnames: # So even if len == 0, we are protected
                         s.host_name = hname
 

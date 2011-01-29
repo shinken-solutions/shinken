@@ -157,7 +157,7 @@ class Escalation(Item):
             for err in self.configuration_errors:
                 logger.log(err)
 
-         # Ok now we manage special cases...
+        # Ok now we manage special cases...
         if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups'):
             logger.log('%s : I do not have contacts nor contact_groups' % self.get_name())
             state = False

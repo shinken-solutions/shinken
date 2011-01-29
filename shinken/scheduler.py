@@ -40,8 +40,8 @@ class Scheduler:
     def __init__(self, daemon, scheduler_daemon):
         self.daemon = daemon # Pyro daemon for incomming orders/askings
         self.sched_daemon = scheduler_daemon
-        self.must_run = True # When set to false by us, we die and
-                             # arbiter launch a new Scheduler
+        # When set to false by us, we die and arbiter launch a new Scheduler
+        self.must_run = True 
 
         self.waiting_results = [] # satellites returns us results
         # and for not waiting them, we are putting them here and
