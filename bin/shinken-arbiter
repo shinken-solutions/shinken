@@ -646,6 +646,7 @@ class Arbiter(Daemon):
     def do_stop(self):
         print "Stopping all network connexions"
         self.daemon.shutdown(True)
+        self.modules_manager.clear_instances()
 
 
     # Main function
