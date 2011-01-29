@@ -53,14 +53,23 @@ from shinken.reactionnerlink import ReactionnerLink
 from shinken.pollerlink import PollerLink
 from shinken.brokerlink import BrokerLink
 from shinken.macroresolver import MacroResolver
+from shinken.basemodule import Module
+
 from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
+
+properties = {
+    'type' : 'livestatus',
+    'external' : True,
+    'phases' : ['running'],
+    }
 
 
 #Class for the Livestatus Broker
 #Get broks and listen to livestatus query language requests
-class Livestatus_broker:
-    def __init__(self, name, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path):
+class Livestatus_broker(Module):
+    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path):
+        Module.__init__(self, mod_conf)
         self.host = host
         self.port = port
         self.socket = socket
@@ -68,22 +77,6 @@ class Livestatus_broker:
         self.database_file = database_file
         self.max_logs_age = max_logs_age
         self.pnp_path = pnp_path
-        self.name = name
-
-        #Warning :
-        #self.properties will be add by the modulesmanager !!
-
-
-    #Called by Broker so we can do init stuff
-    def init(self):
-        print "Initialisation of the livestatus broker"
-
-        #to_queue is where we get broks from Broker
-        self.q = self.properties['to_queue']
-
-        #from_quue is where we push back objects like
-        #external commands to the broker
-        self.r = self.properties['from_queue']
 
         #Our datas
         self.configs = {}
@@ -104,37 +97,28 @@ class Livestatus_broker:
         self.hostname_lookup_table = {}
         self.servicename_lookup_table = {}
 
+        self.number_of_objects = 0
+
+
+    #Called by Broker so we can do init stuff
+    def init(self):
+        print "Initialisation of the livestatus broker"
+
+        #to_queue is where we get broks from Broker
+        #self.to_q = self.properties['to_queue']
+
+        #from_quue is where we push back objects like
+        #external commands to the broker
+        #self.from_q = self.properties['from_queue']
+
         self.prepare_log_db()
         self.prepare_pnp_path()
-        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.r)
 
-        self.number_of_objects = 0
+
+        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.from_q)
 
         m = MacroResolver()
         m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
-
-
-    def is_external(self):
-        return True
-
-
-    def get_name(self):
-        return self.name
-
-
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
-    def manage_brok(self, b):
-        type = b.type
-        manager = 'manage_'+type+'_brok'
-        #print "------------------------------------------- i receive", manager
-        if hasattr(self, manager):
-            #print "------------------------------------------- i manage", manager
-            #print b
-            f = getattr(self, manager)
-            f(b)
-        else:
-            print "I do not have manager", manager
 
 
     def manage_program_status_brok(self, b):
@@ -722,8 +706,7 @@ class Livestatus_broker:
             self.pnp_path += '/'
 
 
-    def manage_signal(self, sig, frame):
-        print "[LiveStatus] I receive a signal %s" % sig
+    def do_stop(self):
         print "[liveStatus] So I quit"
         for s in self.input:
             try:
@@ -732,23 +715,6 @@ class Livestatus_broker:
             except:
                 # no matter what comes, i'm finished
                 pass
-        sys.exit(0)
-
-
-    #Set an exit function that is call when we quit
-    def set_exit_handler(self):
-        func = self.manage_signal
-        if os.name == "nt":
-            try:
-                import win32api
-                win32api.SetConsoleCtrlHandler(func, True)
-            except ImportError:
-                version = ".".join(map(str, sys.version_info[:2]))
-                raise Exception("pywin32 not installed for Python " + version)
-        else:
-            import signal
-            print "Register the func", func, "as exit function"
-            signal.signal(signal.SIGTERM, func)
 
 
     def main(self):
@@ -778,9 +744,9 @@ class Livestatus_broker:
         databuffer = {}
         open_connections = {}
  
-        while True:
+        while not self.interrupted:
             try:
-                b = self.q.get(True, .01)  # do not block indefinitely
+                b = self.to_q.get(True, .01)  # do not block indefinitely
                 self.manage_brok(b)
             #We do not ware about Empty queue
             except Queue.Empty:

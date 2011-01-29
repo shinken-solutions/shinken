@@ -22,13 +22,7 @@ import re
 #This text is print at the import
 print "I am Livestatus Broker"
 
-
-properties = {
-    'type' : 'livestatus',
-    'external' : True,
-    'phases' : ['running'],
-    }
-
+from livestatus_broker import Livestatus_broker, properties
 
 #called by the plugin manager to get a broker
 def get_instance(plugin):
@@ -97,7 +91,7 @@ def get_instance(plugin):
         pnp_path = plugin.pnp_path
     else:
         pnp_path = ''
-    instance = Livestatus_broker(plugin.get_name(), host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path)
+    instance = Livestatus_broker(plugin, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path)
     return instance
 
 
