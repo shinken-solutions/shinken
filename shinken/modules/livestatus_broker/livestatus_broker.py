@@ -715,6 +715,11 @@ class Livestatus_broker(Module):
             except:
                 # no matter what comes, i'm finished
                 pass
+        try:
+            self.dbconn.commit()
+            self.dbconn.close()
+        except:
+            pass
 
 
     def main(self):

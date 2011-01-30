@@ -31,6 +31,7 @@ import re
 import subprocess
 import shutil
 import time
+import random
 from timeperiod import Timeperiod
 from brok import Brok
 from module import Module
@@ -285,7 +286,10 @@ class TestConfig(ShinkenTest):
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], 'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()))
+        self.testid = str(os.getpid() + random.randint(1, 1000))
+        self.livelogs = 'tmp/livelogs.db' + self.testid
+        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
+        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
         self.livestatus_broker.create_queues()
         #self.livestatus_broker.properties = {
         #    'to_queue' : 0,
@@ -303,11 +307,12 @@ class TestConfigSmall(TestConfig):
 
     def tearDown(self):
         self.stop_nagios()
+        self.livestatus_broker.dbconn.commit()
         self.livestatus_broker.dbconn.close()
-        if os.path.exists('tmp/livelogs.db' + str(os.getpid())):
-            os.remove('tmp/livelogs.db' + str(os.getpid()))
-        if os.path.exists('tmp/pnp4nagios_test' + str(os.getpid())):
-            shutil.rmtree('tmp/pnp4nagios_test' + str(os.getpid()))
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.pnp4nagios):
+            shutil.rmtree(self.pnp4nagios)
 
 
     def test_childs(self):
@@ -2011,7 +2016,10 @@ Limit: 1001"""
 class TestConfigBig(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
-        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], 'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()))
+        self.testid = str(os.getpid() + random.randint(1, 1000))
+        self.livelogs = 'tmp/livelogs.db' + self.testid
+        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
+        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
         self.livestatus_broker.create_queues()
         #self.livestatus_broker.properties = {
         #    'to_queue' : 0,
@@ -2025,9 +2033,12 @@ class TestConfigBig(TestConfig):
 
     def tearDown(self):
         self.stop_nagios()
+        self.livestatus_broker.dbconn.commit()
         self.livestatus_broker.dbconn.close()
-        if os.path.exists('tmp/livelogs.db' + str(os.getpid())):
-            os.remove('tmp/livelogs.db' + str(os.getpid()))
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.pnp4nagios):
+            shutil.rmtree(self.pnp4nagios)
 
 
     def test_stats(self):
@@ -2390,7 +2401,10 @@ OutputFormat: csv
 class TestConfigComplex(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_problem_impact.cfg')
-        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [],  'tmp/livelogs.db' + str(os.getpid()), 365, 'tmp/pnp4nagios_test' + str(os.getpid()), )
+        self.testid = str(os.getpid() + random.randint(1, 1000))
+        self.livelogs = 'tmp/livelogs.db' + self.testid
+        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
+        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
         self.livestatus_broker.create_queues()
         if False:
             self.livestatus_broker.properties = {
@@ -2409,11 +2423,12 @@ class TestConfigComplex(TestConfig):
 
     def tearDown(self):
         self.stop_nagios()
+        self.livestatus_broker.dbconn.commit()
         self.livestatus_broker.dbconn.close()
-        if os.path.exists('tmp/livelogs.db' + str(os.getpid())):
-            os.remove('tmp/livelogs.db' + str(os.getpid()))
-        if os.path.exists('tmp/pnp4nagios_test' + str(os.getpid())):
-            shutil.rmtree('tmp/pnp4nagios_test' + str(os.getpid()))
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.pnp4nagios):
+            shutil.rmtree(self.pnp4nagios)
 
 
     #  test_host_0  has parents test_router_0,test_router_1
