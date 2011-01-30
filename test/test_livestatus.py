@@ -1659,7 +1659,7 @@ test_host_0;test_ok_0
         #  <pnp_path>/host/_HOST_.xml
         # exists
         #---------------------------------------------------------------
-        pnp_path = 'tmp/pnp4nagios_test' + str(os.getpid())
+        pnp_path = self.pnp4nagios
         try:
             os.removedirs(pnp_path)
         except:
