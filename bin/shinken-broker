@@ -513,8 +513,6 @@ class Broker(Satellite):
         #internal modules
         self.broks.extend(broks)
 
-        #Sort the brok list by id
-        self.broks.sort(sort_by_ids)
 
 
 
@@ -644,6 +642,9 @@ class Broker(Satellite):
         self.get_new_broks(type='poller')
         self.get_new_broks(type='reactionner')
 
+        #Sort the brok list by id
+        self.broks.sort(sort_by_ids)
+
         #and for external queues
         #REF: doc/broker-modules.png (3)
         for b in self.broks:
@@ -651,7 +652,6 @@ class Broker(Satellite):
             #    print "Broker : put brok id : %d" % b.id
             for q in self.modules_manager.get_external_to_queues():
                 q.put(b)
-
 
         #We must had new broks at the end of the list, so we reverse the list
         self.broks.reverse()
@@ -679,9 +679,6 @@ class Broker(Satellite):
             #external modules before this loop (we pop them!)
             if len(self.broks) != nb_broks:
                 break
-
-        #Restore the good sense
-        self.broks.reverse()
 
         #Maybe external modules raised 'objets'
         #we should get them
