@@ -47,8 +47,6 @@ class TestConfig(ShinkenTest):
     def test_pickle_retention(self):
         print self.conf.modules
         #get our modules
-        mod = None
-        #mod = Module({'type' : 'pickle_retention_file', 'module_name' : 'PickleRetention', 'path' : 'tmp/retention-test.dat'})
         mod = pickle_retention_file_scheduler.Pickle_retention_scheduler(modconf, 'tmp/retention-test.dat')
         try :
             os.unlink(mod.path)
