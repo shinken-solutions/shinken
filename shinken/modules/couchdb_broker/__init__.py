@@ -42,5 +42,5 @@ def get_instance(plugin):
     host = plugin.host
     user = plugin.user
     password = plugin.password
-    instance = Couchdb_broker(plugin.get_name(), host, user, password)
+    instance = Couchdb_broker(plugin, host, user, password)
     return instance
