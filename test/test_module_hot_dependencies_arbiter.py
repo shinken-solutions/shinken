@@ -98,39 +98,28 @@ class TestModuleHotDep(ShinkenTest):
         # We can look is now the hosts are linked or not :)
         self.assert_(host1.is_linked_with_host(host0) == True)
 
-        if True:
-            return
+        print "Mapping after first pass?", sl.mapping
 
+        # We sleep because the dile we generated should have
+        # a different modification time, so more than 1s
+        time.sleep(1.5)
 
-        # updte the hosts and service in the scheduler in the retentino-file
-        sl.update_retention_objects(self.sched, l)
+        ### Ok now we update the mappign file with this time
+        # link between 1 and 2, bye bye 0 :)
+        # host2 is the host, host1 the VM
+        links = [[["host", "test_host_2"], ["host", "test_host_1"]]]
+        f = open(mod.mapping_file, 'wb')
+        f.write(json.dumps(links))
+        f.close()
         
-        #Now we change thing
-        svc = self.sched.hosts.find_by_name("test_host_0")
-        self.assert_(svc.state == 'PENDING')
-        print "State", svc.state
-        svc.state = 'UP' #was PENDING in the save time
+        sl.hook_tick(self)
         
-        r = sl.load_retention_objects(self.sched, l)
-        self.assert_(r == True)
-        
-        #search if the host is not changed by the loading thing
-        svc2 = self.sched.hosts.find_by_name("test_host_0")
-        self.assert_(svc == svc2)
-        
-        self.assert_(svc.state == 'PENDING')
+        # Now we should see link between 1 and 2, but not between 0 and 1
+        self.assert_(host1.is_linked_with_host(host0) == False)
+        self.assert_(host1.is_linked_with_host(host2) == True)
 
         #Ok, we can delete the retention file
-        os.unlink(mod.path)
-
-
-        # Now make real loops with notifications
-        self.scheduler_loop(10, [[svc, 2, 'CRITICAL | bibi=99%']])
-        #updte the hosts and service in the scheduler in the retentino-file
-        sl.update_retention_objects(self.sched, l)
-
-        r = sl.load_retention_objects(self.sched, l)
-        self.assert_(r == True)
+        os.unlink(mod.mapping_file)
 
 
 

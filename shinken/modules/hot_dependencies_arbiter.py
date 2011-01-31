@@ -115,12 +115,10 @@ class Hot_dependencies_arbiter:
         # it can jsut manage it easily and in a generic way
         ext_cmds = []
         self._is_mapping_file_changed()
-        f = open(self.mapping_file, 'rb')
-        r = json.loads(f.read())
-        f.close()
-        print "Rules :", r
+        self._update_mapping()
+        additions, removed = self._got_mapping_changes()
 
-        for (father_k, son_k) in r:
+        for (father_k, son_k) in additions:
             son_type, son_name = son_k
             father_type, father_name = father_k
             print son_name, father_name
@@ -149,7 +147,7 @@ class Hot_dependencies_arbiter:
             additions, removed = self._got_mapping_changes()
             print "Additions : ", additions
             print "Remove : ", removed
-            for son_k, father_k in additions:
+            for father_k, son_k in additions:
                 son_type, son_name = son_k
                 father_type, father_name = father_k
                 print "Got new add", son_type, son_name, father_type, father_name
@@ -169,7 +167,7 @@ class Hot_dependencies_arbiter:
                     print 'Raising external command', extcmd
                     arb.add(e)
             # And now the deletion part
-            for son_k, father_k in removed:
+            for father_k, son_k in removed:
                 son_type, son_name = son_k
                 father_type, father_name = father_k
                 print "Got new del", son_type, son_name, father_type, father_name

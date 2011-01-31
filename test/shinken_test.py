@@ -30,6 +30,7 @@ from shinken.brokerlink import BrokerLink
 from shinken.satellitelink import SatelliteLink
 from shinken.notification import Notification
 from shinken.command import Command
+from shinken.brok import Brok
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
@@ -82,7 +83,11 @@ class ShinkenTest(unittest.TestCase):
 
 
     def add(self, b):
-        self.broks[b.id] = b
+        if isinstance(b, Brok):
+            self.broks[b.id] = b
+            return
+        if isinstance(b, ExternalCommand):
+            self.sched.run_external_command(b.cmd_line)
 
 
     def fake_check(self, ref, exit_status, output="OK"):

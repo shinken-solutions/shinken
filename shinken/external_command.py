@@ -1298,6 +1298,8 @@ class ExternalCommandManager:
         if son.is_linked_with_host(father):
             print "removing simple link between", son.get_name(), 'and', father.get_name()
             son.del_host_act_dependancy(father)
+            self.sched.get_and_register_status_brok(son)
+            self.sched.get_and_register_status_brok(father)
 
 
 
