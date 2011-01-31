@@ -49,6 +49,22 @@ class TestModuleHotDep(ShinkenTest):
     def test_simple_json_read(self):
         print self.conf.modules
 
+        host0 = self.sched.conf.hosts.find_by_name('test_host_0')
+        self.assert_(host0 != None)
+        host1 = self.sched.conf.hosts.find_by_name('test_host_1')
+        self.assert_(host1 != None)
+        host2 = self.sched.conf.hosts.find_by_name('test_host_2')
+        self.assert_(host2 != None)
+
+        # From now there is no link between hosts (just parent with the router)
+        # but it's not imporant here
+        self.assert_(host0.is_linked_with_host(host1) == False)
+        self.assert_(host1.is_linked_with_host(host0) == False)
+        self.assert_(host0.is_linked_with_host(host2) == False)
+        self.assert_(host2.is_linked_with_host(host0) == False)
+        self.assert_(host2.is_linked_with_host(host1) == False)
+        self.assert_(host1.is_linked_with_host(host2) == False)
+
     
         #get our modules
         mod = None
@@ -75,8 +91,12 @@ class TestModuleHotDep(ShinkenTest):
         f.write(json.dumps(links))
         f.close()
 
-        # We just update the file, so the link shouldbe ok
-        self.assert_(sl._is_mapping_file_changed() == True)
+        # Try the hook for the late config, so it will create
+        # the link between host1 and host0
+        sl.hook_late_configuration(self)
+
+        # We can look is now the hosts are linked or not :)
+        self.assert_(host1.is_linked_with_host(host0) == True)
 
         if True:
             return
