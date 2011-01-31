@@ -28,6 +28,9 @@ print "Detected module : Memcache retention file for Scheduler"
 import memcache
 
 
+from shinken.basemodule import Module
+
+
 properties = {
     'type' : 'memcache_retention',
     'external' : False,
@@ -36,34 +39,25 @@ properties = {
 
 
 #called by the plugin manager to get a broker
-def get_instance(plugin):
-    print "Get a memcache retention scheduler module for plugin %s" % plugin.get_name()
-    server = plugin.server
-    port = plugin.port
-    instance = Memcache_retention_scheduler(plugin.get_name(), server, port)
+def get_instance(modconf):
+    print "Get a memcache retention scheduler module for plugin %s" % modconf.get_name()
+    instance = Memcache_retention_scheduler(modconf)
     return instance
 
 
 
 #Just print some stuff
-class Memcache_retention_scheduler:
-    def __init__(self, name, server, port):
-        self.name = name
-        self.server = server
-        self.port = port
+class Memcache_retention_scheduler(Module):
+    def __init__(self, mod_conf):
+        Module.__init__(self, mod_conf)
+        self.server = mod_conf.server
+        self.port = mod_conf.port
 
     #Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the memcache module"
         #self.return_queue = self.properties['from_queue']
         self.mc = memcache.Client(['%s:%s' % (self.server, self.port)], debug=0)
-
-
-#    mc.set("some_key", "Some value")
-#    value = mc.get("some_key")
-
-    def get_name(self):
-        return self.name
 
 
     #Ok, main function that is called in the retention creation pass
