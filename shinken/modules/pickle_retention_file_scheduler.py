@@ -29,6 +29,9 @@ import cPickle
 import shutil
 
 
+from shinken.basemodule import Module
+
+
 properties = {
     'type' : 'pickle_retention_file',
     'external' : False,
@@ -40,28 +43,18 @@ properties = {
 def get_instance(plugin):
     print "Get a pickle retention scheduler module for plugin %s" % plugin.get_name()
     path = plugin.path
-    instance = Pickle_retention_scheduler(plugin.get_name(), path)
+    instance = Pickle_retention_scheduler(plugin, path)
     return instance
 
 
 
-#Just print some stuff
-class Pickle_retention_scheduler:
-    def __init__(self, name, path):
-        self.name = name
+# Just print some stuff
+class Pickle_retention_scheduler(Module):
+    def __init__(self, modconf, path):
+        Module.__init__(self, modconf)
         self.path = path
 
-    #Called by Scheduler to say 'let's prepare yourself guy'
-    def init(self):
-        print "Initilisation of the Pickle file retention scheduler module"
-        #self.return_queue = self.properties['from_queue']
-
-
-    def get_name(self):
-        return self.name
-
-
-    #Ok, main function that is called in the retention creation pass
+    # Ok, main function that is called in the retention creation pass
     def update_retention_objects(self, sched, log_mgr):
         print "[PickleRetention] asking me to update the retention objects"
         #Now the flat file method
