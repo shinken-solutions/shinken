@@ -28,6 +28,10 @@ import os
 import time
 import re
 
+
+from shinken.basemodule import Module
+
+
 #This text is print at the import
 print "I am the nocdmod broker for pnp"
 
@@ -48,15 +52,15 @@ def get_instance(plugin):
     perfdata_spool_filename = getattr(plugin, 'perfdata_spool_filename', 'perfdata')
     sleep_time = getattr(plugin, 'sleep_time', 15)
 
-    instance = Npcd_broker(plugin.get_name(), config_file, perfdata_file, perfdata_spool_dir, perfdata_spool_filename, sleep_time)
+    instance = Npcd_broker(plugin, config_file, perfdata_file, perfdata_spool_dir, perfdata_spool_filename, sleep_time)
     return instance
 
 
 #Class for the Npcd Broker
 #Get broks and put them well-formatted in a spool file
-class Npcd_broker:
-    def __init__(self, name, config_file, perfdata_file, perfdata_spool_dir, perfdata_spool_filename, sleep_time):
-        self.name = name
+class Npcd_broker(Module):
+    def __init__(self, modconf, config_file, perfdata_file, perfdata_spool_dir, perfdata_spool_filename, sleep_time):
+        Module.__init__(self, modconf)
         self.config_file = config_file
         self.perfdata_file = perfdata_file
         self.perfdata_spool_dir = perfdata_spool_dir
@@ -81,28 +85,11 @@ class Npcd_broker:
             raise
 
 
-    #Called by Broker so we can do init stuff
-    def init(self):
-        self.q = self.properties['to_queue']
-        # if there is a leftover perfdata_file, we immediately move it to the spool_dir
-        self.rotate()
-
-
-    def get_name(self):
-        return self.name
-
-
     #Get a brok, parse it, and put in in database
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
-        type = b.type
-        manager = 'manage_'+type+'_brok'
-        if hasattr(self, manager):
-            # if perfdata processing is off, only accept program status broks
-            if self.process_performance_data or type in ('program_status', 'update_program_status'):
-                f = getattr(self, manager)
-                f(b)
-
+        if self.process_performance_data or b.type in ('program_status', 'update_program_status'):
+            Module.manage_brok(self, b)
 
     # Handle the global process_performance_data setting. If it is not active, this module will not write
     # any lines to the perfdata_file
@@ -193,9 +180,11 @@ class Npcd_broker:
     # This version does not use a signal-based timer yet. Rotation is triggered
     # by a constant flow of status update broks
     def main(self):
+        self.set_exit_handler()
+        self.rotate()
         last_rotated = time.time()
-        while True:
-            b = self.q.get() # can block here :)
+        while not self.interrupted:
+            b = self.to_q.get() # can block here :)
             self.manage_brok(b)
             if time.time() - last_rotated > self.sleep_time:
                 self.rotate()
