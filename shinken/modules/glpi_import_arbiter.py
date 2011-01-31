@@ -24,6 +24,7 @@
 
 import xmlrpclib
 
+from shinken.basemodule import Module
 
 #This text is print at the import
 print "Detected module : GLPI importer for Arbiter"
@@ -46,15 +47,15 @@ def get_instance(plugin):
         use_property = plugin.use_property
     else:
         use_property = 'otherserial'
-    instance = Glpi_importer_arbiter(plugin.get_name(), uri, login_name, login_password, use_property)
+    instance = Glpi_importer_arbiter(plugin, uri, login_name, login_password, use_property)
     return instance
 
 
 
 #Just get hostname from a GLPI webservices
-class Glpi_importer_arbiter:
-    def __init__(self, name, uri, login_name, login_password, use_property):
-        self.name = name
+class Glpi_importer_arbiter(Module):
+    def __init__(self, mod_conf, uri, login_name, login_password, use_property):
+        Module.__init__(self, mod_conf)
         self.uri = uri
         self.login_name = login_name
         self.login_password = login_password
@@ -71,11 +72,6 @@ class Glpi_importer_arbiter:
         res = self.con.glpi.doLogin(arg)
         self.session = res['session']
         print "My session number", self.session
-
-
-
-    def get_name(self):
-        return self.name
 
 
     #Ok, main function that will load hosts from GLPI
