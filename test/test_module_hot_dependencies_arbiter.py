@@ -27,7 +27,16 @@
 import os
 from shinken_test import *
 sys.path.append("../shinken/modules")
+
+import hot_dependencies_arbiter
 from hot_dependencies_arbiter import *
+from module import Module
+
+modconf = Module()
+modconf.module_name = "PickleRetention"
+modconf.module_type = hot_dependencies_arbiter.properties['type']
+modconf.properties = hot_dependencies_arbiter.properties.copy()
+
 
 try:
     import json
@@ -67,16 +76,13 @@ class TestModuleHotDep(ShinkenTest):
 
     
         #get our modules
-        mod = None
-        mod = Module({'type' : 'hot_dependencies', 'module_name' : 'VMWare_auto_linking', 'mapping_file' : 'tmp/vmware_mapping_file.json',
-                      'mapping_command' : "", 'mapping_command_interval' : '30'})
+        mod = sl = Hot_dependencies_arbiter(modconf, 'tmp/vmware_mapping_file.json', "", 30, 300)
         
         try :
             os.unlink(mod.mapping_file)
         except :
             pass
         
-        sl = get_instance(mod)
         print "Instance", sl
 
         # Hack here :(

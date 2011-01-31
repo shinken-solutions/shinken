@@ -38,6 +38,7 @@ except ImportError:
         print "Error : you need the json or simplejson module for this script"
         raise
 
+from shinken.basemodule import Module
 from shinken.external_command import ExternalCommand
 
 #This text is print at the import
@@ -58,16 +59,16 @@ def get_instance(plugin):
     mapping_command = getattr(plugin, 'mapping_command', '')
     mapping_command_interval = int(getattr(plugin, 'mapping_command_interval', '60'))
     mapping_command_timeout = int(getattr(plugin, 'mapping_command_timeout', '300'))
-    instance = Hot_dependencies_arbiter(plugin.get_name(), mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout)
+    instance = Hot_dependencies_arbiter(plugin, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout)
     return instance
 
 
 
 # Get hosts and/or services dep by launching a command
 # or read a flat file as json format taht got theses links
-class Hot_dependencies_arbiter:
-    def __init__(self, name, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout):
-        self.name = name
+class Hot_dependencies_arbiter(Module):
+    def __init__(self, modconf, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout):
+        Module.__init__(self, modconf)
         self.mapping_file = mapping_file
         self.last_update = 0
         self.last_mapping = set()
@@ -85,10 +86,6 @@ class Hot_dependencies_arbiter:
         print "I open the HOT dependency module"
         # Remember what we add
         
-
-    def get_name(self):
-        return self.name
-
 
     def _is_file_existing(self):
         return os.path.exists(self.mapping_file)
