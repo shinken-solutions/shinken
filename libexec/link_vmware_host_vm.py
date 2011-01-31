@@ -4,7 +4,13 @@ import os
 import sys
 import shlex
 import shutil
-import json
+try:
+    import json
+except ImportError: 
+    # For old Python version, load 
+    # simple json (it can be hard json?! It's 2 functions guy!)
+    import simplejson
+
 from subprocess import Popen, PIPE
 
 check_esx_path = sys.argv[1]#'/home/shinken/check_esx3.pl'
@@ -12,12 +18,7 @@ vcenter = sys.argv[2]# Addres o the vcenter
 user = sys.argv[3]# user name for vcenter connexion
 password = sys.argv[4]# password dumbass
 rules = sys.argv[5]# '', or 'lower' or 'nofqdn' or 'lower|nofqdn'
-list_host_cmd_s = '%s -D %s -u %s -p %s -l runtime -s listhost' % (check_esx_path, vcenter, user, password)
-print "Launching host listing", list_host_cmd_s
-list_host_cmd = shlex.split(list_host_cmd_s)
 
-hosts = []
-res = {}
 
 t = rules.split('|')
 new_rules = []
@@ -25,7 +26,8 @@ for e in t:
     new_rules.append(e.strip())
 rules = new_rules
 
-def apply_rules(name, rules):
+
+def _apply_rules(name, rules):
     print 'APPlying rules', rules, 'on name', name
     r = name
     if 'lower' in rules:
@@ -36,22 +38,36 @@ def apply_rules(name, rules):
     return r
 
 
-output = Popen(list_host_cmd, stdout=PIPE).communicate()
-print "Output", output[0]
+def get_vmware_hosts(check_esx_path, vcenter, user, password):
+    list_host_cmd_s = '%s -D %s -u %s -p %s -l runtime -s listhost' % (check_esx_path, vcenter, user, password)
+    print "Launching host listing", list_host_cmd_s
+    list_host_cmd = shlex.split(list_host_cmd_s)
+    
+    hosts = []
 
-parts = output[0].split(':')
-print parts
-hsts_raw = parts[1].split('|')[0]
-print hsts_raw
-hsts_raw_lst = hsts_raw.split(',')
-print hsts_raw_lst 
+    
+    output = Popen(list_host_cmd, stdout=PIPE).communicate()
+    print "Output", output[0]
 
-for hst_raw in hsts_raw_lst:
-    hst_raw = hst_raw.strip()
-    # look as server4.mydomain(UP)
-    elts = hst_raw.split('(')
-    hst = elts[0]
-    hosts.append(hst)
+    parts = output[0].split(':')
+    print parts
+    hsts_raw = parts[1].split('|')[0]
+    print hsts_raw
+    hsts_raw_lst = hsts_raw.split(',')
+    print hsts_raw_lst 
+
+    for hst_raw in hsts_raw_lst:
+        hst_raw = hst_raw.strip()
+        # look as server4.mydomain(UP)
+        elts = hst_raw.split('(')
+        hst = elts[0]
+        hosts.append(hst)
+    
+    return hosts
+
+res = {}
+hosts = get_vmware_hosts(check_esx_path, vcenter, user, password)
+
 
 print "Hosts", hosts
 for h in hosts:
@@ -88,8 +104,8 @@ for host in res:
     print "Doing key", host
     for vm in res[host]:
         # First we apply rules on the names
-        host_name = apply_rules(host, rules)
-        vm_name = apply_rules(vm, rules)
+        host_name = _apply_rules(host, rules)
+        vm_name = _apply_rules(vm, rules)
         print "Add", host_name, vm_name
         v = (('host', host_name),('host', vm_name))
         r.append(v)
@@ -102,3 +118,63 @@ f.write(buf)
 f.close()
 shutil.move('/tmp/vmware_mapping_file.json'+'.tmp', '/tmp/vmware_mapping_file.json')
 print "Finished!"
+
+
+sys.exit(0)
+
+
+VERSION = '0.1'
+def usage(name):
+    print "Shinken VMware link dumping script version %s from :" % VERSION
+    print "        Gabes Jean, naparuba@gmail.com"
+    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
+    print "Usage: %s [options] -c configfile [-c additionnal_config_file]" % name
+    print "Options:"
+    print " -c, --config"
+    print "\tConfig file (your nagios.cfg). Multiple -c can be used, it will be like if all files was just one"
+    print " -d, --daemon"
+    print "\tRun in daemon mode"
+    print " -r, --replace"
+    print "\tReplace previous running scheduler"
+    print " -h, --help"
+    print "\tPrint detailed help screen"
+    print " --debug"
+    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
+
+
+# Here we go!
+if __name__ == "__main__":
+    # Manage the options
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hxVupr", ["help", "esx3-path", "Vcenter", "user", "password", "rules"])
+    except getopt.GetoptError, err:
+        # print help information and exit:
+        print str(err) # will print something like "option -a not recognized"
+        usage(sys.argv[0])
+        sys.exit(2)
+    # Default params
+    config_files = []
+    verify_only = False
+    is_daemon = False
+    do_replace = False
+    debug = False
+    debug_file = None
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            usage(sys.argv[0])
+            sys.exit()
+        elif o in ("-v", "--verify-config"):
+            verify_only = True
+        elif o in ("-r", "--replace"):
+            do_replace = True
+        elif o in ("-c", "--config"):
+            config_files.append(a)
+        elif o in ("-d", "--daemon"):
+            is_daemon = True
+        elif o in ("--debug"):
+            debug = True
+            debug_file = a
+        else:
+            print "Sorry, the option", o, a, "is unknown"
+            usage(sys.argv[0])
+            sys.exit()
