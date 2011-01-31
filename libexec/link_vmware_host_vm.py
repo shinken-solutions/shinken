@@ -106,17 +106,24 @@ for h in hosts:
         res[h] = lst
 
 
-r = []
-print "Total res", res
-for host in res:
-    print "Doing key", host
-    for vm in res[host]:
-        # First we apply rules on the names
-        host_name = _apply_rules(host, rules)
-        vm_name = _apply_rules(vm, rules)
-        print "Add", host_name, vm_name
-        v = (('host', host_name),('host', vm_name))
-        r.append(v)
+
+def create_all_links(res, rules):
+    r = []
+    print "Total res", res
+    for host in res:
+        print "Doing key", host
+        for vm in res[host]:
+            # First we apply rules on the names
+            host_name = _apply_rules(host, rules)
+            vm_name = _apply_rules(vm, rules)
+            print "Add", host_name, vm_name
+            v = (('host', host_name),('host', vm_name))
+            r.append(v)
+    return r
+
+r = create_all_links(res, rules)
+
+print "Created %d links" % len(r)
 
 
 f = open('/tmp/vmware_mapping_file.json'+'.tmp', 'wb')
