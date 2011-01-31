@@ -99,7 +99,7 @@ EXIT /B 1
 
 REM here is where the tests actually run
 :FUNC1 
-C:\Python27\python C:\Python27\Scripts\nosetests -v -s --with-xunit --with-coverage %1
+C:\Python27\Scripts\nosetests -v -s --with-xunit --with-coverage %1
 IF ERRORLEVEL 1 goto :EOF
 ECHO successfully ran %1
 GOTO :EOF [Return to Main]
