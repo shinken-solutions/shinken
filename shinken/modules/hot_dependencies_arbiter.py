@@ -43,10 +43,9 @@ def get_instance(plugin):
     print "Get a Hot dependencies module for arbiter with plugin %s" % plugin.get_name()
     mapping_file = getattr(plugin, 'mapping_file', '')
     mapping_command = getattr(plugin, 'mapping_command', '')
-    mapping_file_history = getattr(plugin, 'mapping_file_history', '')
     mapping_command_interval = int(getattr(plugin, 'mapping_command_interval', '60'))
 
-    instance = Hot_dependencies_arbiter(plugin.get_name(), mapping_file, mapping_command, mapping_file_history, mapping_command_interval)
+    instance = Hot_dependencies_arbiter(plugin.get_name(), mapping_file, mapping_command, mapping_command_interval)
     return instance
 
 
@@ -54,11 +53,10 @@ def get_instance(plugin):
 # Get hosts and/or services dep by launching a command
 # or read a flat file as json format taht got theses links
 class Hot_dependencies_arbiter:
-    def __init__(self, name, mapping_file, mapping_command, mapping_file_history, mapping_command_interval):
+    def __init__(self, name, mapping_file, mapping_command, mapping_command_interval):
         self.name = name
         self.mapping_file = mapping_file
         self.mapping_command = mapping_command
-        self.mapping_file_history = mapping_file_history
         self.mapping_command_interval = mapping_command_interval
         self.last_update = 0
         self.last_mapping = set()
@@ -71,9 +69,9 @@ class Hot_dependencies_arbiter:
         # Remember what we add
         
 
-
     def get_name(self):
         return self.name
+
 
     # Look is the mapping filechanged since the last lookup
     def _is_mapping_file_changed(self):
