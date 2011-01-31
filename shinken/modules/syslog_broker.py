@@ -23,6 +23,7 @@
 
 import syslog
 
+from shinken.basemodule import Module
 
 #This text is print at the import
 print "I am simple syslog Broker"
@@ -41,47 +42,19 @@ def get_instance(plugin):
 
     #Catch errors
     #path = plugin.path
-    instance = Syslog_broker(plugin.get_name())
+    instance = Syslog_broker(plugin)
     return instance
 
 
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Syslog_broker:
-    def __init__(self, name):
-        self.name = name
-
-
-    #Called by Broker so we can do init stuff
-    #TODO : add conf param to get pass with init
-    #Conf from arbiter!
-    def init(self):
-        pass
-        #self.q = self.properties['to_queue']
-
-
-    def get_name(self):
-        return self.name
-
-
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
-    def manage_brok(self, b):
-        type = b.type
-        manager = 'manage_'+type+'_brok'
-        if hasattr(self, manager):
-            f = getattr(self, manager)
-            f(b)
-
+class Syslog_broker(Module):
+    def __init__(self, modconf):
+        Module.__init__(self, modconf)
 
     #A service check have just arrived, we UPDATE data info with this
     def manage_log_brok(self, b):
         data = b.data
         syslog.syslog(data['log'].encode('UTF-8'))
 
-
-#    def main(self):
-#        while True:
-#            b = self.q.get() # can block here :)
-#            self.manage_brok(b)
