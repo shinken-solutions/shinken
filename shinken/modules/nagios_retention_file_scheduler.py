@@ -51,6 +51,7 @@ from shinken.graph import Graph
 from shinken.log import logger
 from shinken.comment import Comment
 from shinken.downtime import Downtime
+from shinken.basemodule import Module
 
 from shinken.util import to_int, to_char, to_bool
 
@@ -71,31 +72,20 @@ properties = {
 def get_instance(plugin):
     print "Get a Nagios3 retention scheduler module for plugin %s" % plugin.get_name()
     path = plugin.path
-    instance = Nagios_retention_scheduler(plugin.get_name(), path)
+    instance = Nagios_retention_scheduler(plugin, path)
     return instance
 
 
 
 #Just print some stuff
-class Nagios_retention_scheduler:
-    def __init__(self, name, path):
-        self.name = name
+class Nagios_retention_scheduler(Module):
+    def __init__(self, mod_conf, path):
+        Module.__init__(self, mod_conf)
         self.path = path
-
-    #Called by Scheduler to say 'let's prepare yourself guy'
-    def init(self):
-        print "Initilisation of the Nagios file retention scheduler module"
-        #self.return_queue = self.properties['from_queue']
-
-
-    def get_name(self):
-        return self.name
-
 
     #Ok, main function that is called in the retention creation pass
     def update_retention_objects(self, sched, log_mgr):
         print "[NagiosRetention] asking me to update the retention objects, but I won't do it."
-
 
 
     def _cut_line(self, line):
