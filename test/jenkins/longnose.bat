@@ -90,7 +90,7 @@ IF ERRORLEVEL 1 GOTO FAIL
 )
 
 REM combine the single coverage files
-C:\Python27\python C:\Python27\Scripts\coverage xml --omit=/usr/lib
+C:\Python27\Scripts\coverage xml --omit=/usr/lib
 EXIT /B 0
 
 :FAIL
