@@ -52,7 +52,7 @@ def get_instance(plugin):
             else:
                 character_set = 'utf8'
 
-            instance = Merlindb_broker(plugin.get_name(), backend, host=host, user=user, password=password, database=database, character_set=character_set)
+            instance = Merlindb_broker(plugin, backend, host=host, user=user, password=password, database=database, character_set=character_set)
             return instance
 
         except ImportError , exp:
@@ -62,7 +62,7 @@ def get_instance(plugin):
     if backend == 'sqlite':
         try:
             database_path = plugin.database_path
-            instance = Merlindb_broker(plugin.get_name(), backend, database_path=database_path)
+            instance = Merlindb_broker(plugin, backend, database_path=database_path)
             return instance
 
         except ImportError , exp:

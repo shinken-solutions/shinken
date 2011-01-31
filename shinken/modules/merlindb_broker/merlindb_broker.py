@@ -27,6 +27,9 @@
 import copy
 import time
 
+from shinken.basemodule import Module
+
+
 def get_objs_names(objs):
     s = ''
     for o in objs:
@@ -46,7 +49,7 @@ def list_to_comma(lst):
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
 class Merlindb_broker:
-    def __init__(self, name, backend, host=None, user=None, password=None, database=None, character_set=None, database_path=None):
+    def __init__(self, modconf, backend, host=None, user=None, password=None, database=None, character_set=None, database_path=None):
         #Mapping for name of data, rename attributes and transform function
         self.mapping = {
             #Program status
@@ -392,8 +395,7 @@ class Merlindb_broker:
                 'id' : {'transform' : None},
                 }
             }
-
-        self.name = name
+        Module.__init__(self, modconf)
         self.backend = backend
         self.host = host
         self.user = user
@@ -415,10 +417,6 @@ class Merlindb_broker:
             from shinken.db_sqlite import DBSqlite
             print "Creating a sqlite backend"
             self.db_backend = DBSqlite(self.database_path)
-
-
-    def get_name(self):
-        return self.name
 
 
     def preprocess(self, type, brok):
