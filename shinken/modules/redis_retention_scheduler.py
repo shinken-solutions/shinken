@@ -27,6 +27,7 @@ print "Detected module : Redis retention file for Scheduler"
 
 import redis
 
+from shinken.basemodule import Module
 
 properties = {
     'type' : 'redis_retention',
@@ -39,15 +40,15 @@ properties = {
 def get_instance(plugin):
     print "Get a redis retention scheduler module for plugin %s" % plugin.get_name()
     server = plugin.server
-    instance = Redis_retention_scheduler(plugin.get_name(), server)
+    instance = Redis_retention_scheduler(plugin, server)
     return instance
 
 
 
 #Just print some stuff
-class Redis_retention_scheduler:
-    def __init__(self, name, server):
-        self.name = name
+class Redis_retention_scheduler(Module):
+    def __init__(self, modconf, server):
+        Module.__init__(self, modconf)
         self.server = server
 
     #Called by Scheduler to say 'let's prepare yourself guy'
@@ -55,13 +56,6 @@ class Redis_retention_scheduler:
         print "Initilisation of the redis module"
         #self.return_queue = self.properties['from_queue']
         self.mc = redis.Redis(self.server)
-
-
-#    mc.set("some_key", "Some value")
-#    value = mc.get("some_key")
-
-    def get_name(self):
-        return self.name
 
 
     #Ok, main function that is called in the retention creation pass
