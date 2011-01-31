@@ -69,8 +69,6 @@ class IForArbiter(Pyro.core.ObjBase):
         Pyro.core.ObjBase.__init__(self)
         self.app = app
         self.schedulers = app.schedulers
-        self.use_ssl = app.use_ssl
-
 
     #function called by arbiter for giving us our conf
     #conf must be a dict with:
@@ -100,7 +98,7 @@ class IForArbiter(Pyro.core.ObjBase):
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
 
-            uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
+            uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.app.use_ssl)
             print "DBG: scheduler UIR:", uri
 
             self.schedulers[sched_id]['uri'] = uri
@@ -216,41 +214,36 @@ class Satellite(Daemon):
         
         Daemon.__init__(self, config_file, is_daemon, do_replace, debug, debug_file)
         
-        #Keep broks so they can be eaten by a broker
+        # Keep broks so they can be eaten by a broker
         self.broks = {}
 
-        #Ours schedulers
+        # Ours schedulers
         self.schedulers = {}
-        self.workers = {} #dict of active workers
+        self.workers = {}   # dict of active workers
 
         self.nb_actions_in_workers = 0
 
-        #Init stats like Load for workers
+        # Init stats like Load for workers
         self.wait_ratio = Load(initial_value=1)
 
-        self.t_each_loop = time.time() #use to track system time change
+        self.t_each_loop = time.time() # used to track system time change
 
         #Now the specific stuff
         #Bool to know if we have received conf from arbiter
         self.have_conf = False
         self.have_new_conf = False
- 
-        self.do_load_config()
         
-        self.do_daemon_init_and_start()
-
         # Now we create the interfaces
         self.interface = IForArbiter(self)
         self.brok_interface = IBroks(self)
 
-        # And we register them
-        self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
-        self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
+        # Just for having these attributes defined here. explicit > implicit ;)
+        self.uri2 = None
+        self.uri3 = None
+        self.s = None
+        self.manager = None
+        self.returns_queue = None
         
-        self.s = Queue() #Global Master -> Slave
-        self.manager = Manager()
-        self.returns_queue = self.manager.list()
-
 
     def pynag_con_init(self, id):
         """ Initialize or re-initialize connexion with scheduler """
@@ -262,13 +255,13 @@ class Satellite(Daemon):
 
         logger.log("[%s] Init de connexion with %s at %s" % (self.name, sched['name'], sched['uri']))
         running_id = sched['running_id']
-        sched['con'] = Pyro.core.getProxyForURI(sched['uri'])
+        sch_con = sched['con'] = Pyro.core.getProxyForURI(sched['uri'])
 
         #timeout of 120 s
         #and get the running id
         try:
-            pyro.set_timeout(sched['con'], 5)
-            new_run_id = sched['con'].get_running_id()
+            pyro.set_timeout(sch_con, 5)
+            new_run_id = sch_con.get_running_id()
         except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
             logger.log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sched['name'], str(exp)))
             sched['con'] = None
@@ -646,7 +639,24 @@ class Satellite(Daemon):
         self.manage_returns()
 
 
+    def do_post_daemon_init(self):
+
+        # And we register them
+        self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
+        self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
+        
+        self.s = Queue() #Global Master -> Slave
+        self.manager = Manager()
+        self.returns_queue = self.manager.list()
+
+
     def main(self):
+
+        self.do_load_config()
+        
+        self.do_daemon_init_and_start()
+        
+        self.do_post_daemon_init()
 
         # We wait for initial conf
         self.wait_for_initial_conf()
@@ -663,5 +673,7 @@ class Satellite(Daemon):
 
         # Now main loop
         self.timeout = self.polling_interval
-        
+
+
         self.do_mainloop()
+
