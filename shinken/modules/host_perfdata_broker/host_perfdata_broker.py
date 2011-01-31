@@ -25,13 +25,14 @@
 #It will need just a new file, and a new manager :)
 
 
+from shinken.basemodule import Module
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Host_perfdata_broker:
-    def __init__(self, name, path, mode, template):
+class Host_perfdata_broker(Module):
+    def __init__(self, modconf, path, mode, template):
+        Module.__init__(self, modconf)
         self.path = path
-        self.name = name
         self.mode = mode
         self.template = template
 
@@ -46,20 +47,6 @@ class Host_perfdata_broker:
     def init(self):
         print "I open the host-perfdata file '%s'" % self.path
         self.file = open(self.path, self.mode)
-
-
-    def get_name(self):
-        return self.name
-
-
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
-    def manage_brok(self, b):
-        type = b.type
-        manager = 'manage_'+type+'_brok'
-        if hasattr(self, manager):
-            f = getattr(self, manager)
-            f(b)
 
 
     #We've got a 0, 1, 2 or 3 (or something else? ->3

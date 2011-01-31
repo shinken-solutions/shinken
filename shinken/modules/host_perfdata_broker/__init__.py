@@ -52,5 +52,5 @@ def get_instance(plugin):
         template = "$LASTHOSTCHECK$\t$HOSTNAME$\t$HOSTOUTPUT$\t$HOSTSTATE$\t$HOSTPERFDATA$\n"
         # int(data['last_chk']),data['host_name'], data['service_description'], data['output'], current_state, data['perf_data']
 
-    instance = Host_perfdata_broker(plugin.get_name(), path, mode, template)
+    instance = Host_perfdata_broker(plugin, path, mode, template)
     return instance
