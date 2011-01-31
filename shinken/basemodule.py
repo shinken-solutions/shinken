@@ -73,8 +73,9 @@ Example of task that a shinken module can do:
     def __init__(self, mod_conf):
         """ `name´ is the name given to this module instance. There can be many instance of the same type.
 `props´ is the properties dict of this module. dict that defines at what phases the module is involved. """
+        self.myconf = mod_conf
         self.name = mod_conf.get_name()
-        self.props = mod_conf.properties.copy()
+        self.props = mod_conf.properties
         self.properties = self.props
         self.interrupted = False
         self.is_external = self.props.get('external', False)
@@ -96,6 +97,10 @@ Like just open necessaries file(s), database(s), or whatever the module will nee
 
     def get_name(self):
         return self.name
+
+    def has(self, prop):
+        """ The classic has : do we have a prop or not? """
+        return hasattr(self, prop)
 
     def get_objects(self):
         """ Called during arbiter configuration phase. Return a dict to the objects that the module provides.
@@ -122,7 +127,7 @@ Called recurrently by scheduler. Also during stop of scheduler. """
 There a lot of different possible broks to manage. """
         manage = getattr(self, 'manage_' + brok.type + '_brok', None)
         if manage:
-            manage(brok)
+            return manage(brok)
 
 
     def manage_signal(self, sig, frame):
