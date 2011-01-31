@@ -32,6 +32,7 @@ import struct
 from ctypes import create_string_buffer
 import random
 
+from shinken.basemodule import Module
 from shinken.external_command import ExternalCommand
 
 properties = {
@@ -69,28 +70,19 @@ def get_instance(plugin):
     else:
         password = ""
 
-    instance = NSCA_arbiter(plugin.get_name(), host, port, encryption_method, password)
+    instance = NSCA_arbiter(plugin, host, port, encryption_method, password)
     return instance
 
 
 #Just print some stuff
-class NSCA_arbiter:
-    def __init__(self, name, host, port, encryption_method, password):
-        self.name = name
+class NSCA_arbiter(Module):
+    def __init__(self, modconf, host, port, encryption_method, password):
+        Module.__init__(self, modconf)
         self.host = host
         self.port = port
         self.encryption_method = encryption_method
         self.password = password
         self.rng = random.Random(password)
-
-    #Called by Arbiter to say 'let's prepare yourself guy'
-    def init(self):
-        print "Initialisation of the nsca arbiter module"
-        self.return_queue = self.properties['from_queue']
-
-
-    def get_name(self):
-        return self.name
 
 
     #Ok, main function that is called in the CONFIGURATION phase
@@ -152,11 +144,12 @@ class NSCA_arbiter:
             extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp,hostname,service,rc,output)
 
         e = ExternalCommand(extcmd)
-        self.return_queue.put(e)
+        self.from_q.put(e)
 
 
-    #When you are in "external" mode, that is the main loop of your process
+    # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        self.set_exit_handler()
         backlog = 5
         size = 8192
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -167,7 +160,7 @@ class NSCA_arbiter:
         databuffer = {}
         IVs = {}
 
-        while True:
+        while not self.interrupted:
             inputready,outputready,exceptready = select.select(input,[],[], 1)
 
             for s in inputready:
