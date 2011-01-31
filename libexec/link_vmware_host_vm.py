@@ -68,10 +68,11 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
 res = {}
 hosts = get_vmware_hosts(check_esx_path, vcenter, user, password)
 
-
 print "Hosts", hosts
-for h in hosts:
-    res[h] = []
+
+
+def get_vm_of_host(check_esx_path, vcenter, h, user, password):
+    lst = []
     print "Listing host", h
     list_vm_cmd_s = '%s -D %s -H %s -u %s -p %s -l runtime -s list' % (check_esx_path, vcenter, h, user, password)
     print "Launch vm listing", list_vm_cmd_s
@@ -82,7 +83,7 @@ for h in hosts:
     # Maybe we got a 'CRITICAL - There are no VMs.' message,
     # if so, we bypass this host
     if len(parts) < 2:
-        continue
+        return []
     print parts
     vms_raw = parts[1].split('|')[0]
     print vms_raw
@@ -95,7 +96,14 @@ for h in hosts:
         elts = vm_raw.split('(')
         vm = elts[0]
         print "GOT A VM", vm
-        res[h].append(vm)
+        lst.append(vm)
+    return lst
+
+
+for h in hosts:
+    lst = get_vm_of_host(check_esx_path, vcenter, h, user, password)
+    if lst != []:
+        res[h] = lst
 
 
 r = []
@@ -146,7 +154,7 @@ def usage(name):
 if __name__ == "__main__":
     # Manage the options
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hxVupr", ["help", "esx3-path", "Vcenter", "user", "password", "rules"])
+        opts, args = getopt.getopt(sys.argv[1:], "hoxVupr", ["help", "output", "esx3-path", "Vcenter", "user", "password", "rules"])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
