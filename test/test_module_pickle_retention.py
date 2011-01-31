@@ -25,9 +25,20 @@
 
 #It's ugly I know....
 import os
+
 from shinken_test import *
+
+
 sys.path.append("../shinken/modules")
+import pickle_retention_file_scheduler
 from pickle_retention_file_scheduler import *
+from module import Module
+
+modconf = Module()
+modconf.module_name = "PickleRetention"
+modconf.module_type = pickle_retention_file_scheduler.properties['type']
+modconf.properties = pickle_retention_file_scheduler.properties.copy()
+
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
@@ -37,8 +48,8 @@ class TestConfig(ShinkenTest):
         print self.conf.modules
         #get our modules
         mod = None
-        mod = Module({'type' : 'pickle_retention_file', 'module_name' : 'PickleRetention', 'path' : 'tmp/retention-test.dat'})
-
+        #mod = Module({'type' : 'pickle_retention_file', 'module_name' : 'PickleRetention', 'path' : 'tmp/retention-test.dat'})
+        mod = pickle_retention_file_scheduler.Pickle_retention_scheduler(modconf, 'tmp/retention-test.dat')
         try :
             os.unlink(mod.path)
         except :
