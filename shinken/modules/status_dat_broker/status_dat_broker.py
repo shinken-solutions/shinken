@@ -41,15 +41,15 @@ from shinken.config import Config
 from status import StatusFile
 from objectscache import ObjectsCacheFile
 
-
+from shinken.basemodule import Module
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Status_dat_broker:
-    def __init__(self, name, path, opath, update_interval):
+class Status_dat_broker(Module):
+    def __init__(self, modconf, path, opath, update_interval):
+        Module.__init__(self, modconf)
         self.path = path
         self.opath = opath
-        self.name = name
         self.update_interval = update_interval
 
         #Warning :
@@ -61,7 +61,6 @@ class Status_dat_broker:
     #Conf from arbiter!
     def init(self):
         print "I am init"
-        self.q = self.properties['to_queue']
 
         #Our datas
         self.configs = {}
@@ -78,29 +77,6 @@ class Status_dat_broker:
         self.objects_cache = ObjectsCacheFile(self.opath, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands)
 
         self.number_of_objects = 0
-
-
-    def is_external(self):
-        return True
-
-
-    def get_name(self):
-        return self.name
-
-
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
-    def manage_brok(self, b):
-        type = b.type
-        manager = 'manage_'+type+'_brok'
-        #if manager != 'manage_log_brok':
-        #    print "I manage brok Number", b.id, ":", manager
-        #print "------------------------------------------- i receive", manager
-        if hasattr(self, manager):
-            #print "------------------------------------------- i manage", manager
-            #print b
-            f = getattr(self, manager)
-            f(b)
 
 
     def manage_program_status_brok(self, b):
@@ -402,38 +378,15 @@ class Status_dat_broker:
             setattr(e, prop, data[prop])
 
 
-    def manage_signal(self, sig, frame):
-        print "[StatusDat] I receive a signal %s" % sig
-        print "[StatusDat] So I quit"
-        sys.exit(0)
-
-
-
-    #Set an exit function that is call when we quit
-    def set_exit_handler(self):
-        func = self.manage_signal
-        if os.name == "nt":
-            try:
-                import win32api
-                win32api.SetConsoleCtrlHandler(func, True)
-            except ImportError:
-                version = ".".join(map(str, sys.version_info[:2]))
-                raise Exception("pywin32 not installed for Python " + version)
-        else:
-            import signal
-            signal.signal(signal.SIGTERM, func)
-
-
-
     def main(self):
         self.set_exit_handler()
         last_generation = time.time()
         objects_cache_written = False
         number_of_objects_written = 0
 
-        while True:
+        while not self.interrupted:
             try:
-                b = self.q.get(True, 5)
+                b = self.to_q.get(True, 5)
                 self.manage_brok(b)
             except Queue.Empty:
                 # No items arrived in the queue, but we must write a status.dat at regular intervals
