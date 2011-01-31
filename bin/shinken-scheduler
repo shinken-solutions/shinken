@@ -320,8 +320,6 @@ class Shinken(Daemon):
         self.ibroks = None
         self.must_run = True
 
-        self.do_load_config()
-
         self.find_modules_path()
 
         #Config Class must be filled with USERN Macro
@@ -480,6 +478,8 @@ class Shinken(Daemon):
 
     #our main function, launch after the init
     def main(self):
+
+        self.do_load_config()
         
         self.do_daemon_init_and_start()
         
