@@ -5,21 +5,22 @@ import sys
 import shlex
 import shutil
 import getopt
+# Try to load the json (2.5 and higer) or
+# the simplejson if failed (python2.4)
 try:
     import json
 except ImportError: 
     # For old Python version, load 
     # simple json (it can be hard json?! It's 2 functions guy!)
-    import simplejson
-
+    try:
+        import simplejson as json
+    except ImportError:
+        print "Error : you need the json or simplejson module for this script"
+        sys.exit(2)
 from subprocess import Popen, PIPE
 
-#check_esx_path = sys.argv[1]#'/home/shinken/check_esx3.pl'
-#vcenter = sys.argv[2]# Addres o the vcenter
-#user = sys.argv[3]# user name for vcenter connexion
-#password = sys.argv[4]# password dumbass
-#rules = sys.argv[5]# '', or 'lower' or 'nofqdn' or 'lower|nofqdn'
 
+# Split and clean the rules from a string to a list
 def split_rules(rules):
     t = rules.split('|')
     new_rules = []
@@ -28,37 +29,27 @@ def split_rules(rules):
     rules = new_rules
     return rules
 
-
-
-
+# Apply all rules on the objects names
 def _apply_rules(name, rules):
-    print 'APPlying rules', rules, 'on name', name
     r = name
     if 'lower' in rules:
         r = r.lower()
     if 'nofqdn' in rules:
-        print "APPly nofqdn rule on", r
         r = r.split('.')[0]
     return r
 
-
+# Get all vmware hosts from a VCenter and return the list
 def get_vmware_hosts(check_esx_path, vcenter, user, password):
     list_host_cmd_s = '%s -D %s -u %s -p %s -l runtime -s listhost' % (check_esx_path, vcenter, user, password)
-    print "Launching host listing", list_host_cmd_s
     list_host_cmd = shlex.split(list_host_cmd_s)
     
     hosts = []
 
-    
     output = Popen(list_host_cmd, stdout=PIPE).communicate()
-    print "Output", output[0]
 
     parts = output[0].split(':')
-    print parts
     hsts_raw = parts[1].split('|')[0]
-    print hsts_raw
     hsts_raw_lst = hsts_raw.split(',')
-    print hsts_raw_lst 
 
     for hst_raw in hsts_raw_lst:
         hst_raw = hst_raw.strip()
@@ -70,64 +61,55 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     return hosts
 
 
-
-
-
+# For a specific host, ask all VM on it to the VCenter
 def get_vm_of_host(check_esx_path, vcenter, h, user, password):
     lst = []
     print "Listing host", h
     list_vm_cmd_s = '%s -D %s -H %s -u %s -p %s -l runtime -s list' % (check_esx_path, vcenter, h, user, password)
-    print "Launch vm listing", list_vm_cmd_s
     list_vm_cmd = shlex.split(list_vm_cmd_s)
     output = Popen(list_vm_cmd, stdout=PIPE).communicate()
-    print "Output", output[0]
     parts = output[0].split(':')
     # Maybe we got a 'CRITICAL - There are no VMs.' message,
     # if so, we bypass this host
     if len(parts) < 2:
         return []
-    print parts
+
     vms_raw = parts[1].split('|')[0]
-    print vms_raw
     vms_raw_lst = vms_raw.split(',')
-    print vms_raw_lst
     
     for vm_raw in vms_raw_lst:
         vm_raw = vm_raw.strip()
         # look as MYVM(UP)
         elts = vm_raw.split('(')
         vm = elts[0]
-        print "GOT A VM", vm
         lst.append(vm)
     return lst
 
 
-
-
-
+# Create all tuples of the links for the hosts
 def create_all_links(res, rules):
     r = []
-    print "Total res", res
     for host in res:
-        print "Doing key", host
         for vm in res[host]:
             # First we apply rules on the names
             host_name = _apply_rules(host, rules)
             vm_name = _apply_rules(vm, rules)
-            print "Add", host_name, vm_name
             v = (('host', host_name),('host', vm_name))
             r.append(v)
     return r
 
 
 def write_output(r, path):
-    f = open(path+'.tmp', 'wb')
-    buf = json.dumps(r)
-    print "BUF json", buf
-    f.write(buf)
-    f.close()
-    shutil.move(path+'.tmp', path)
-    print "File %s wrote" % path
+    try:
+        f = open(path+'.tmp', 'wb')
+        buf = json.dumps(r)
+        f.write(buf)
+        f.close()
+        shutil.move(path+'.tmp', path)
+        print "File %s wrote" % path
+    except IOError, exp:
+        print "Error writing the file %s : %s" % (path, exp)
+        sys.exit(2)
 
 
 def main(check_esx_path, vcenter, user, password, output, rules):
@@ -135,15 +117,12 @@ def main(check_esx_path, vcenter, user, password, output, rules):
     res = {}
     hosts = get_vmware_hosts(check_esx_path, vcenter, user, password)
     
-    print "Hosts", hosts
-    
     for h in hosts:
         lst = get_vm_of_host(check_esx_path, vcenter, h, user, password)
         if lst != []:
             res[h] = lst
 
     r = create_all_links(res, rules)
-    
     print "Created %d links" % len(r)
 
     write_output(r, output)
