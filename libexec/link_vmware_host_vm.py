@@ -4,6 +4,7 @@ import os
 import sys
 import shlex
 import shutil
+import getopt
 try:
     import json
 except ImportError: 
@@ -19,12 +20,14 @@ user = sys.argv[3]# user name for vcenter connexion
 password = sys.argv[4]# password dumbass
 rules = sys.argv[5]# '', or 'lower' or 'nofqdn' or 'lower|nofqdn'
 
-
-t = rules.split('|')
-new_rules = []
-for e in t:
-    new_rules.append(e.strip())
-rules = new_rules
+def split_rules(rules):
+    t = rules.split('|')
+    new_rules = []
+    for e in t:
+        new_rules.append(e.strip())
+    rules = new_rules
+    return rules
+rules = split_rules(rules)
 
 
 def _apply_rules(name, rules):
@@ -125,13 +128,16 @@ r = create_all_links(res, rules)
 
 print "Created %d links" % len(r)
 
+def write_output(r, path):
+    f = open(path+'.tmp', 'wb')
+    buf = json.dumps(r)
+    print "BUF json", buf
+    f.write(buf)
+    f.close()
+    shutil.move(path+'.tmp', path)
+    print "File %s wrote" % path
 
-f = open('/tmp/vmware_mapping_file.json'+'.tmp', 'wb')
-buf = json.dumps(r)
-print "BUF json", buf
-f.write(buf)
-f.close()
-shutil.move('/tmp/vmware_mapping_file.json'+'.tmp', '/tmp/vmware_mapping_file.json')
+write_output(r, '/tmp/vmware_mapping_file.json')
 print "Finished!"
 
 
@@ -140,21 +146,32 @@ sys.exit(0)
 
 VERSION = '0.1'
 def usage(name):
-    print "Shinken VMware link dumping script version %s from :" % VERSION
+    print "Shinken VMware links dumping script version %s from :" % VERSION
     print "        Gabes Jean, naparuba@gmail.com"
     print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
-    print "Usage: %s [options] -c configfile [-c additionnal_config_file]" % name
+    print "Usage: %s -V vcenter-ip -u USER -p PASSWORD -o /tmp/vmware_link.json [--esx3-path  /full/path/check_esx3.pl --rules RULES" % name
     print "Options:"
-    print " -c, --config"
-    print "\tConfig file (your nagios.cfg). Multiple -c can be used, it will be like if all files was just one"
-    print " -d, --daemon"
-    print "\tRun in daemon mode"
-    print " -r, --replace"
-    print "\tReplace previous running scheduler"
+    print " -V, --Vcenter"
+    print "\tThe IP/DNS address of your Vcenter host."
+    print " -u, --user"
+    print "\tUser name to connect to this Vcenter"
+    print " -p, --password"
+    print "\tThe password of this user"
+    print " -o, --output"
+    print "\tPath of the generated mapping file."
+    print " -x, --esx3-path"
+    print "\tFull path of the check_esx3.pl script. By default /usr/local/nagios/libexec/check_esx3.pl"
+    print " -r, --rules"
+    print "\t Rules of name transformation:"
+    print "\t\t lower : to lower names"
+    print "\t\t nofqdn : keep only the first name (server.mydomain.com -> server)"
+    print "\t\t you can use several rules like 'lower|nofqdn'"
     print " -h, --help"
     print "\tPrint detailed help screen"
-    print " --debug"
-    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
+    print "\n"
+    print "Example :"
+    print "\t %s -V vcenter.google.com -user MySuperUser -password secret --esx3-path  /usr/local/nagios/libexec/check_esx3.pl --rules 'lower|nofqdn'" % name
+
 
 
 # Here we go!
@@ -168,27 +185,28 @@ if __name__ == "__main__":
         usage(sys.argv[0])
         sys.exit(2)
     # Default params
-    config_files = []
-    verify_only = False
-    is_daemon = False
-    do_replace = False
-    debug = False
-    debug_file = None
+    check_esx_path = '/usr/local/nagios/libexec/check_esx3.pl'
+    vcenter = None
+    user = None
+    password = None
+    rules = ''
+    output = None
     for o, a in opts:
         if o in ("-h", "--help"):
             usage(sys.argv[0])
             sys.exit()
-        elif o in ("-v", "--verify-config"):
-            verify_only = True
-        elif o in ("-r", "--replace"):
-            do_replace = True
-        elif o in ("-c", "--config"):
-            config_files.append(a)
-        elif o in ("-d", "--daemon"):
-            is_daemon = True
-        elif o in ("--debug"):
-            debug = True
-            debug_file = a
+        elif o in ("o", "--output"):
+            output = a
+        elif o in ("-x", "--esx3-path"):
+            check_esx_path = a
+        elif o in ("-V", "--Vcenter"):
+            vcenter = a
+        elif o in ("-u", "--user"):
+            user = a
+        elif o in ("-p", "--password"):
+            password = a
+        elif o in ('-r', '--rules'):
+            rules = a
         else:
             print "Sorry, the option", o, a, "is unknown"
             usage(sys.argv[0])
