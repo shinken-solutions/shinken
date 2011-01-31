@@ -123,6 +123,93 @@ class TestModuleHotDep(ShinkenTest):
 
 
 
+
+    # We are trying to see if we can have good data with 2 commands call
+    # CASE1 : link between host0 and 1
+    # then after some second, :
+    # CASE2 : link between host1 and host2, so like the previous test, but with
+    # command calls
+    def test_json_read_with_command(self):
+        print self.conf.modules
+
+        host0 = self.sched.conf.hosts.find_by_name('test_host_0')
+        self.assert_(host0 != None)
+        host1 = self.sched.conf.hosts.find_by_name('test_host_1')
+        self.assert_(host1 != None)
+        host2 = self.sched.conf.hosts.find_by_name('test_host_2')
+        self.assert_(host2 != None)
+
+        # From now there is no link between hosts (just parent with the router)
+        # but it's not imporant here
+        self.assert_(host0.is_linked_with_host(host1) == False)
+        self.assert_(host1.is_linked_with_host(host0) == False)
+        self.assert_(host0.is_linked_with_host(host2) == False)
+        self.assert_(host2.is_linked_with_host(host0) == False)
+        self.assert_(host2.is_linked_with_host(host1) == False)
+        self.assert_(host1.is_linked_with_host(host2) == False)
+
+    
+        #get our modules
+        mod = None
+        mod = Module({'type' : 'hot_dependencies', 'module_name' : 'VMWare_auto_linking', 'mapping_file' : 'tmp/vmware_mapping_file.json',
+                      'mapping_command' : "libexec/hot_dep_export.py case1 tmp/vmware_mapping_file.json", 'mapping_command_interval' : '30'})
+        
+        try :
+            os.unlink(mod.mapping_file)
+        except :
+            pass
+        
+        sl = get_instance(mod)
+        print "Instance", sl
+        
+        # Hack here :(
+        sl.properties = {}
+        sl.properties['to_queue'] = None
+        sl.init()
+        l = logger
+
+        # Try the hook for the late config, so it will create
+        # the link between host1 and host0
+        sl.hook_late_configuration(self)
+
+        # We can look is now the hosts are linked or not :)
+        self.assert_(host1.is_linked_with_host(host0) == False)
+        
+        print "Mapping after first pass?", sl.mapping
+
+        # The hook_late should have seen a problem of no file
+        # and so launch the command. We can wait it finished
+        time.sleep(1.5)
+
+        # Now we look if it's finished, and we get data and manage them
+        # with case 1 (0 and 1 linked, not with 1 and 2)
+        sl.hook_tick(self)
+        
+        # Now we should see link between 1 and 0, but not between 2 and 1
+        self.assert_(host1.is_linked_with_host(host0) == True)
+        self.assert_(host1.is_linked_with_host(host2) == False)
+
+        # Now we go in case2
+        print "Go in case2 " * 10
+        sl.mapping_command = 'libexec/hot_dep_export.py case2 tmp/vmware_mapping_file.json'
+        # We lie in the interval :p
+        sl.mapping_command_interval = 0
+        sl.hook_tick(self)
+        time.sleep(1.5)
+        #But we need another tick to get all of it
+        sl.hook_tick(self)
+
+        # Now we should see link between 1 and 0, but not between 2 and 1
+        self.assert_(host1.is_linked_with_host(host0) == False)
+        self.assert_(host1.is_linked_with_host(host2) == True)
+
+
+        #Ok, we can delete the retention file
+        os.unlink(mod.mapping_file)
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
 
