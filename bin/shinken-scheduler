@@ -327,16 +327,10 @@ class Shinken(Daemon):
         #Config Class must be filled with USERN Macro
         Config.fill_usern_macros()
 
-        self.do_daemon_init_and_start()
-        
         #Now the interface
-        i_for_arbiter = IForArbiter(self)
-
-        self.uri2 = pyro.register(self.daemon, i_for_arbiter, "ForArbiter")
-
-        print "The Arbiter Interface is at:", self.uri2
-
-
+        self.i_for_arbiter = IForArbiter(self)
+        self.uri = None
+        self.uri2 = None
 
 
     def do_stop(self):
@@ -400,7 +394,6 @@ class Shinken(Daemon):
             print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
             val = self.override_conf[prop]
             setattr(self.conf, prop, val)
-
 
         if self.conf.use_timezone != 'NOTSET':
             print "Setting our timezone to", self.conf.use_timezone
@@ -488,11 +481,16 @@ class Shinken(Daemon):
     #our main function, launch after the init
     def main(self):
         
-        #Ok, now the conf
+        self.do_daemon_init_and_start()
+        
+        self.uri2 = pyro.register(self.daemon, self.i_for_arbiter, "ForArbiter")
+        print "The Arbiter Interface is at:", self.uri2
+
+        # Ok, now the conf
         self.wait_initial_conf()
         print "Ok we've got conf"
 
-        #ok, if we are here, we've got the conf
+        # ok, if we are here, we've got the conf
         self.load_conf()
 
         print "Configuration Loaded"
