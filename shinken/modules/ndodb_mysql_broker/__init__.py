@@ -28,9 +28,9 @@ properties = {
 
 
 #called by the plugin manager to get a instance
-def get_instance(plugin):
+def get_instance(mod_conf):
 
-    print "Get a ndoDB instance for plugin %s" % plugin.get_name()
+    print "Get a ndoDB instance for plugin %s" % mod_conf.get_name()
 
     #First try to import
     try:
@@ -39,15 +39,7 @@ def get_instance(plugin):
         print "Warning : the plugin type %s is unavalable : %s" % ('ndo_mysql', exp)
         return None
 
-
-    #TODO : catch errors
-    host = plugin.host
-    user = plugin.user
-    password = plugin.password
-    database = plugin.database
-    if hasattr( plugin, 'character_set'):
-        character_set = plugin.character_set
-    else:
-        character_set = 'utf8'
-    instance = Ndodb_broker(plugin.get_name(), host, user, password, database, character_set)
+    if not hasattr( mod_conf, 'character_set'):
+        mod_conf.character_set = 'utf8'
+    instance = Ndodb_broker(mod_conf)
     return instance

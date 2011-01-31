@@ -32,6 +32,7 @@ try:
 except : # TODO : fix this, python2.4 is not happy here?
     from db_mysql import DBMysql
 
+from shinken.basemodule import Module
 
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
@@ -40,8 +41,9 @@ def de_unixify(t):
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Ndodb_broker:
-    def __init__(self, name, host, user, password, database, character_set):
+class Ndodb_broker(Module):
+    def __init__(self, conf):
+        Module.__init__(self, conf)
         #Mapping for name of dataand transform function
         self.mapping = {
             'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : de_unixify},
@@ -50,22 +52,12 @@ class Ndodb_broker:
                                 'is_running' : {'name' : 'is_currently_running', 'transform' : None}
                                 },
             }
-        self.name = name
-        self.host = host
-        self.user = user
-        self.password = password
-        self.database = database
-        self.character_set = character_set
-
-
-
-    #The classic has : do we have a prop or not?
-    def has(self, prop):
-        return hasattr(self, prop)
-
-
-    def get_name(self):
-        return self.name
+        
+        self.host = conf.host
+        self.user = conf.user
+        self.password = conf.password
+        self.database = conf.database
+        self.character_set = conf.character_set
 
 
     #Called by Broker so we can do init stuff
@@ -86,16 +78,12 @@ class Ndodb_broker:
     #Get a brok, parse it, and put in in database
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
-        type = b.type
-        manager = 'manage_'+type+'_brok'
         #We've got problem with instance_id == 0 so we add 1 every where
         if 'instance_id' in b.data:
             b.data['instance_id'] = b.data['instance_id'] + 1
         #print "(Ndo) I search manager:", manager
-        if self.has(manager):
-            f = getattr(self, manager)
-            queries = f(b)
-            #Ok, we've got queries, now : run them!
+        queries = Module.manage_brok(self, b)
+        if queries is not None:
             for q in queries :
                 self.db.execute_query(q)
             return
