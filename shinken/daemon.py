@@ -24,6 +24,7 @@ import signal
 import select
 
 import shinken.pyro_wrapper as pyro
+from shinken.pyro_wrapper import InvalidWorkDir
 Pyro = pyro.Pyro
 
 from shinken.log import logger
@@ -41,6 +42,10 @@ REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 UMASK = 0
 VERSION = "0.5"
 
+
+class InvalidPidDir(Exception): pass
+
+
 class Daemon:
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
@@ -50,6 +55,11 @@ class Daemon:
         self.debug = debug
         self.debug_file = debug_file
         self.interrupted = False
+        
+        self.host = None
+        self.port = None
+        self.pidfile = None
+        self.workdir = None
         
         # Log init
         self.log = logger
@@ -74,12 +84,18 @@ class Daemon:
             self.relative_paths_to_full(os.path.dirname(self.config_file))
 
     def change_to_workdir(self):
-        os.chdir(self.workdir)
+        try:
+            os.chdir(self.workdir)
+        except Exception as e:
+            raise InvalidWorkDir(e)
         print("Successfully changed to workdir: %s" % (self.workdir))
 
     def unlink(self):
         print "Unlinking", self.pidfile
-        os.unlink(self.pidfile)
+        try:
+            os.unlink(self.pidfile)
+        except Exception as e:
+            print("Got an error unlinking our pidfile: %s" % (e))
 
     def check_shm(self):
         """ Only on linux: Check for /dev/shm write access """
@@ -92,12 +108,18 @@ class Daemon:
                 print("The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
                 sys.exit(2)   
 
+    def __open_pidfile(self):
+        ## if problem on open or creating file it'll be raised to the caller:
+        try:
+            self.fpid = open(self.pidfile, 'arw+')
+        except Exception as e:
+            raise InvalidPidDir(e)     
+
     def check_parallel_run(self):
         """ Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
 Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 """
-        ## if problem on open or creating file it'll be raised to the caller:
-        self.fpid = open(self.pidfile, 'arw+')
+        self.__open_pidfile()
         try:
             pid = int(self.fpid.read())
         except:
@@ -130,7 +152,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         ## TODO: give some time to wait that previous instance finishes ?
         time.sleep(1)
         ## we must also reopen the pid file cause the previous instance will normally have deleted it !!
-        self.fpid = open(self.pidfile, 'arw+')
+        self.__open_pidfile()
 
 
     def write_pid(self, pid=None):

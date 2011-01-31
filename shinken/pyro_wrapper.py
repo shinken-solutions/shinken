@@ -26,6 +26,11 @@ import sys
 import Pyro.core
 
 
+class InvalidWorkDir(Exception): pass
+class PortNotFree(Exception): pass
+
+
+
 #Try to see if we are Python 3 or 4
 try:
     Pyro.core.ObjBase
@@ -55,14 +60,22 @@ try:
 
 
     def init_daemon(host, port, use_ssl=False):
-        Pyro.core.initServer()
+        try:
+            Pyro.core.initServer()
+        except OSError as e: # must be problem with workdir :
+            raise InvalidWorkDir(e)
         if use_ssl:
-            daemon = Pyro.core.Daemon(host=host, port=port, prtcol='PYROSSL')
+            prtcol = 'PYROSSL'
         else:
-            daemon = Pyro.core.Daemon(host=host, port=port)
+            prtcol = 'PYRO'
+        try:
+            daemon = Pyro.core.Daemon(host=host, port=port, prtcol=prtcol)
+        except OSError as e:
+            # must be problem with workdir :
+            raise InvalidWorkDir(e)
         if daemon.port != port:
-            print "Sorry, the port %d is not free" % port
-            sys.exit(1)
+            msg = "Sorry, the port %d is not free" % (port)
+            raise PortNotFree(msg)
         return daemon
 
 
@@ -122,8 +135,11 @@ except AttributeError:
         try:
             daemon = Pyro.core.Daemon(host=host, port=port)
         except socket.error, exp:
-            print "Sorry, the port %d is not free : %s" % (port, str(exp))
-            sys.exit(1)
+            msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
+            raise PortNotFree(msg)
+        except Exception as e:
+            # must be problem with pyro workdir :
+            raise InvalidWorkDir(e)
         return daemon
 
 

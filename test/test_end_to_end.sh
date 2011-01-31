@@ -137,19 +137,6 @@ check_good_run var
 
 echo "First launch check OK"
 
-echo "####################################################################################"
-echo "Now check bad start"
-
-for mod in arbiter scheduler broker poller reactionner
-do
-	SHINKEN_DEFAULT_FILE=test/etc/bad_start/shinken_default ./bin/init.d/shinken -d start "$mod" 
-	rc=$?
-	if [ $rc -eq 0 ];
-	then
-		echo "ERROR: $mod should not have started twice but we got successfull returncode from it !"
-		exit 2
-	fi
-done
 
 echo "####################################################################################"
 
