@@ -32,6 +32,7 @@ import sys
 import datetime
 
 
+from shinken.basemodule import Module
 from shinken.util import get_day
 
 
@@ -58,17 +59,17 @@ def get_instance(plugin):
     if archive_path[-1] == os.sep:
         archive_path = archive_path[:-1]
 
-    instance = Simple_log_broker(plugin.get_name(), path, archive_path)
+    instance = Simple_log_broker(plugin, path, archive_path)
     return instance
 
 
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Simple_log_broker:
-    def __init__(self, name, path, archive_path):
+class Simple_log_broker(Module):
+    def __init__(self, modconf, path, archive_path):
+        Module.__init__(self, modconf)
         self.path = path
-        self.name = name
         self.archive_path = archive_path
 
 
@@ -119,28 +120,6 @@ class Simple_log_broker:
         return False
 
 
-    #Called by Broker so we can do init stuff
-    #TODO : add conf param to get pass with init
-    #Conf from arbiter!
-    def init(self):
-        self.q = self.properties['to_queue']
-        #print "Checking for archive need"
-
-
-    def get_name(self):
-        return self.name
-
-
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
-    def manage_brok(self, b):
-        type = b.type
-        manager = 'manage_'+type+'_brok'
-        if hasattr(self, manager):
-            f = getattr(self, manager)
-            f(b)
-
-
     #A service check have just arrived, we UPDATE data info with this
     def manage_log_brok(self, b):
         data = b.data
@@ -148,38 +127,13 @@ class Simple_log_broker:
         self.file.flush()
 
 
-    def manage_signal(self, sig, frame):
-        print "[SimpleLog] I receive a signal %s" % sig
-        print "[SimpleLog] So I quit"
-        sys.exit(0)
-
-
-
-    #Set an exit function that is call when we quit
-    def set_exit_handler(self):
-        func = self.manage_signal
-        if os.name == "nt":
-            try:
-                import win32api
-                win32api.SetConsoleCtrlHandler(func, True)
-            except ImportError:
-                version = ".".join(map(str, sys.version_info[:2]))
-                raise Exception("pywin32 not installed for Python " + version)
-        else:
-            import signal
-            signal.signal(signal.SIGTERM, func)
-
-    def opening(self):
+    def init(self):
         moved = self.check_and_do_archive(first_pass=True)
         if not moved:
             print "I open the log file %s" % self.path
             self.file = open(self.path,'a')
 
-
-    def main(self):
-        self.opening()
-        self.set_exit_handler()
-        while True:
-            self.check_and_do_archive()
-            b = self.q.get() # can block here :)
-            self.manage_brok(b)
+    def do_loopturn(self):
+        self.check_and_do_archive()
+        b = self.to_q.get() # can block here :)
+        self.manage_brok(b)
