@@ -14,11 +14,11 @@ except ImportError:
 
 from subprocess import Popen, PIPE
 
-check_esx_path = sys.argv[1]#'/home/shinken/check_esx3.pl'
-vcenter = sys.argv[2]# Addres o the vcenter
-user = sys.argv[3]# user name for vcenter connexion
-password = sys.argv[4]# password dumbass
-rules = sys.argv[5]# '', or 'lower' or 'nofqdn' or 'lower|nofqdn'
+#check_esx_path = sys.argv[1]#'/home/shinken/check_esx3.pl'
+#vcenter = sys.argv[2]# Addres o the vcenter
+#user = sys.argv[3]# user name for vcenter connexion
+#password = sys.argv[4]# password dumbass
+#rules = sys.argv[5]# '', or 'lower' or 'nofqdn' or 'lower|nofqdn'
 
 def split_rules(rules):
     t = rules.split('|')
@@ -27,7 +27,8 @@ def split_rules(rules):
         new_rules.append(e.strip())
     rules = new_rules
     return rules
-rules = split_rules(rules)
+
+
 
 
 def _apply_rules(name, rules):
@@ -68,10 +69,8 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     
     return hosts
 
-res = {}
-hosts = get_vmware_hosts(check_esx_path, vcenter, user, password)
 
-print "Hosts", hosts
+
 
 
 def get_vm_of_host(check_esx_path, vcenter, h, user, password):
@@ -103,10 +102,6 @@ def get_vm_of_host(check_esx_path, vcenter, h, user, password):
     return lst
 
 
-for h in hosts:
-    lst = get_vm_of_host(check_esx_path, vcenter, h, user, password)
-    if lst != []:
-        res[h] = lst
 
 
 
@@ -124,9 +119,6 @@ def create_all_links(res, rules):
             r.append(v)
     return r
 
-r = create_all_links(res, rules)
-
-print "Created %d links" % len(r)
 
 def write_output(r, path):
     f = open(path+'.tmp', 'wb')
@@ -137,11 +129,26 @@ def write_output(r, path):
     shutil.move(path+'.tmp', path)
     print "File %s wrote" % path
 
-write_output(r, '/tmp/vmware_mapping_file.json')
-print "Finished!"
 
+def main(check_esx_path, vcenter, user, password, output, rules):
+    rules = split_rules(rules)
+    res = {}
+    hosts = get_vmware_hosts(check_esx_path, vcenter, user, password)
+    
+    print "Hosts", hosts
+    
+    for h in hosts:
+        lst = get_vm_of_host(check_esx_path, vcenter, h, user, password)
+        if lst != []:
+            res[h] = lst
 
-sys.exit(0)
+    r = create_all_links(res, rules)
+    
+    print "Created %d links" % len(r)
+
+    write_output(r, output)
+    print "Finished!"
+    sys.exit(0)
 
 
 VERSION = '0.1'
@@ -173,17 +180,44 @@ def usage(name):
     print "\t %s -V vcenter.google.com -user MySuperUser -password secret --esx3-path  /usr/local/nagios/libexec/check_esx3.pl --rules 'lower|nofqdn'" % name
 
 
+def check_args(check_esx_path, vcenter, user, password, output, rules):
+    error = False
+    if vcenter == None:
+        error = True
+        print "Error : missing -V or -Vcenter option for the vcenter IP/DNS address"
+    if user == None:
+        error = True
+        print "Error : missing -u or -user option for the vcenter username"
+    if password == None:
+        error = True
+        print "Error : missing -p or -password option for the vcenter password"
+    if not os.path.exists(check_esx_path):
+        error = True
+        print "Error : the path %s for the check_esx3.pl script is wrong, missing file"
+    if output == None:
+        error = True
+        print "Error : missing -o or -output option for the output mapping file"
+
+    if error:
+        print "   ^"
+        print "   |"
+        print "   |"
+        print "   |"
+        usage(sys.argv[0])
+        sys.exit(2)
 
 # Here we go!
 if __name__ == "__main__":
+    print sys.argv[1:]
     # Manage the options
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hoxVupr", ["help", "output", "esx3-path", "Vcenter", "user", "password", "rules"])
+        opts, args = getopt.getopt(sys.argv[1:], "ho:x:V:u:p:r:", ["help", "output", "esx3-path", "Vcenter", "user", "password", "rules"])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
         usage(sys.argv[0])
         sys.exit(2)
+    print opts
     # Default params
     check_esx_path = '/usr/local/nagios/libexec/check_esx3.pl'
     vcenter = None
@@ -195,7 +229,8 @@ if __name__ == "__main__":
         if o in ("-h", "--help"):
             usage(sys.argv[0])
             sys.exit()
-        elif o in ("o", "--output"):
+        elif o in ("-o", "--output"):
+            print "Got output", a
             output = a
         elif o in ("-x", "--esx3-path"):
             check_esx_path = a
@@ -211,3 +246,7 @@ if __name__ == "__main__":
             print "Sorry, the option", o, a, "is unknown"
             usage(sys.argv[0])
             sys.exit()
+
+    print "Got", check_esx_path, vcenter, user, password, output, rules
+    check_args(check_esx_path, vcenter, user, password, output, rules)
+    main(check_esx_path, vcenter, user, password, output, rules)
