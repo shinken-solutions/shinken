@@ -27,6 +27,7 @@
 import copy
 import time
 
+from shinken.basemodule import Module
 from shinken.db_oracle import DBOracle
 
 def de_unixify(t):
@@ -35,8 +36,8 @@ def de_unixify(t):
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Ndodb_Oracle_broker:
-    def __init__(self, name, user, password, database):
+class Ndodb_Oracle_broker(Module):
+    def __init__(self, modconf, user, password, database):
         #Mapping for name of dataand transform function
         self.mapping = {
             'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : de_unixify},
@@ -45,20 +46,11 @@ class Ndodb_Oracle_broker:
                                 'is_running' : {'name' : 'is_currently_running', 'transform' : None}
                                 },
             }
-        self.name = name
+        Module.__init__(self, modconf)
         self.user = user
         self.password = password
         self.database = database
 
-
-
-    #The classic has : do we have a prop or not?
-    def has(self, prop):
-        return hasattr(self, prop)
-
-
-    def get_name(self):
-        return self.name
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
