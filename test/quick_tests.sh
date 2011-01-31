@@ -85,6 +85,7 @@ launch_and_assert test_contactdowntimes.py
 launch_and_assert test_nullinheritance.py
 launch_and_assert test_create_link_from_ext_cmd.py
 launch_and_assert test_dispatcher.py
+launch_and_assert test_module_hot_dependencies_arbiter.py
 
 #Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py
