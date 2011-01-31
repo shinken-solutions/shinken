@@ -133,7 +133,7 @@ class Simple_log_broker(Module):
             print "I open the log file %s" % self.path
             self.file = open(self.path,'a')
 
-    def do_loopturn(self):
+    def do_loop_turn(self):
         self.check_and_do_archive()
         b = self.to_q.get() # can block here :)
         self.manage_brok(b)
