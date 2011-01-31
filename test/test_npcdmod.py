@@ -24,14 +24,23 @@
 #
 
 from shinken_test import *
+from shinken.module import Module
+
 
 sys.path.append("../shinken/modules")
+import npcdmod_broker
 from npcdmod_broker import Npcd_broker
 sys.setcheckinterval(10000)
 
 
-class TestConfig(ShinkenTest):
+modconf = Module()
+modconf.module_name = "ncpd"
+modconf.module_type = npcdmod_broker.properties['type']
+modconf.properties = npcdmod_broker.properties.copy()
 
+
+
+class TestConfig(ShinkenTest):
 
 
     def add(self, b):
@@ -124,10 +133,9 @@ class TestConfig(ShinkenTest):
         if os.path.exists("./perfdata"):
             os.unlink("./perfdata")
 
-        self.npcdmod_broker = Npcd_broker('npcd', None, './perfdata', '.', 'perfdata-target', 15)
-        self.npcdmod_broker.properties = {
-            'to_queue' : 0
-            }
+        self.npcdmod_broker = Npcd_broker(modconf, None, './perfdata', '.', 'perfdata-target', 15)
+        self.npcdmod_broker.properties['to_queue'] = 0
+
         self.npcdmod_broker.init()
         self.sched.fill_initial_broks()
 
