@@ -2,6 +2,7 @@
 #Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
 #
 #This file is part of Shinken.
 #
@@ -431,6 +432,7 @@ Also put default value in the properties if some are missing in the config_file 
                 "Copyright (c) 2009-2010 :",
                 "Gabes Jean (naparuba@gmail.com)",
                 "Gerhard Lausser, Gerhard.Lausser@consol.de",
+	        "Gregory Starck, g.starck@gmail.com",
                 "License: AGPL"]
 
     def print_header(self):

@@ -2,6 +2,7 @@
 #Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
 #
 #This file is part of Shinken.
 #
@@ -735,6 +736,7 @@ def usage(name):
     print "Shinken Broker Daemon, version %s, from :" % VERSION
     print "        Gabes Jean, naparuba@gmail.com"
     print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
+    print "        Gregory Starck, g.starck@gmail.com"
     print "Usage: %s [options] [-c configfile]" % name
     print "Options:"
     print " -c, --config"
