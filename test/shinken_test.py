@@ -16,6 +16,7 @@ import unittest
 sys.path.append("..")
 sys.path.append("../shinken")
 sys.path.append("../bin")
+sys.path.append(os.path.abspath("bin"))
 
 from shinken.config import Config
 from shinken.dispatcher import Dispatcher
@@ -37,9 +38,7 @@ from shinken.brok import Brok
 
 
 shinkenarbiter = __import__("shinken-arbiter")
-
 shinkenpoller = __import__("shinken-poller")
-
 shinkenscheduler = __import__("shinken-scheduler")
 
 
