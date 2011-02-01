@@ -188,7 +188,7 @@ class SatelliteLink(Item):
             self.con = None
             return False
         except Exception, exp:
-            self.con = False
+            self.con = None
             return False
             
 
@@ -211,7 +211,7 @@ class SatelliteLink(Item):
             self.con = None
             return False
         except Exception, exp:
-            self.con = False
+            self.con = None
             return False
 
 
@@ -229,7 +229,7 @@ class SatelliteLink(Item):
             self.con = None
             return False
         except Exception, exp:
-            self.con = False
+            self.con = None
             return False
 
 
@@ -250,7 +250,7 @@ class SatelliteLink(Item):
             self.con = None
             return []
         except Exception, exp:
-            self.con = False
+            self.con = None
             return []
 
 
@@ -269,7 +269,7 @@ class SatelliteLink(Item):
             print exp
             return False
         except Exception, exp:
-            self.con = False
+            self.con = None
             return False
 
 
@@ -292,7 +292,7 @@ class SatelliteLink(Item):
             print exp
             return []
         except Exception, exp:
-            self.con = False
+            self.con = None
             return []
 
 
