@@ -1,0 +1,54 @@
+###############################################
+# This is a list of testscripts including those
+# which take more than 5 minutes to complete.
+###############################################
+test_services.py
+test_hosts.py
+test_host_missing_adress.py
+test_not_hostname.py
+test_bad_contact_call.py
+test_action.py
+test_config.py
+test_dependencies.py
+test_npcdmod.py
+test_problem_impact.py
+test_timeperiods.py
+test_command.py
+test_module_simplelog.py
+test_module_service_perfdata.py
+test_module_host_perfdata.py
+test_module_pickle_retention.py
+test_service_tpl_on_host_tpl.py
+test_db.py
+test_macroresolver.py
+test_complex_hostgroups.py
+test_resultmodulation.py
+test_satellites.py
+test_illegal_names.py
+test_service_generators.py
+test_notifway.py
+test_eventids.py
+test_obsess.py
+test_commands_perfdata.py
+test_notification_warning.py
+test_timeperiod_inheritance.py
+test_bad_timeperiods.py
+test_maintenance_period.py
+test_external_commands.py
+test_on_demand_event_handlers.py
+test_business_correlator.py
+test_properties.py
+test_realms.py
+test_host_without_cmd.py
+test_escalations.py
+test_notifications.py
+test_contactdowntimes.py
+test_nullinheritance.py
+test_create_link_from_ext_cmd.py
+test_dispatcher.py
+# takes long
+test_livestatus.py
+# takes very, very long
+test_maintenance_period.py
+test_downtimes.py
+test_acknowledge.py
