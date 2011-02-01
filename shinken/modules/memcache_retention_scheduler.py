@@ -28,7 +28,7 @@ print "Detected module : Memcache retention file for Scheduler"
 import memcache
 
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 
 properties = {
@@ -47,9 +47,9 @@ def get_instance(modconf):
 
 
 #Just print some stuff
-class Memcache_retention_scheduler(Module):
+class Memcache_retention_scheduler(BaseModule):
     def __init__(self, mod_conf):
-        Module.__init__(self, mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.server = mod_conf.server
         self.port = mod_conf.port
 

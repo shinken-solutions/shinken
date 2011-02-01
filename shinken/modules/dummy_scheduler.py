@@ -25,7 +25,7 @@
 print "Detected module : Dummy module for Scheduler"
 
 
-from basemodule import Module
+from shinken.basemodule import BaseModule
 
 
 properties = {
@@ -44,10 +44,10 @@ def get_instance(mod_conf):
 
 
 #Just print some stuff
-class Dummy_scheduler(Module):
+class Dummy_scheduler(BaseModule):
     
     def __init__(self, mod_conf, foo):
-        Module.__init__(self, mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.myfoo = foo
 
     #Called by Scheduler to say 'let's prepare yourself guy'

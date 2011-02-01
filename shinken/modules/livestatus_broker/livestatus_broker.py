@@ -53,7 +53,7 @@ from shinken.reactionnerlink import ReactionnerLink
 from shinken.pollerlink import PollerLink
 from shinken.brokerlink import BrokerLink
 from shinken.macroresolver import MacroResolver
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
@@ -67,9 +67,9 @@ properties = {
 
 #Class for the Livestatus Broker
 #Get broks and listen to livestatus query language requests
-class Livestatus_broker(Module):
+class Livestatus_broker(BaseModule):
     def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path):
-        Module.__init__(self, mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.host = host
         self.port = port
         self.socket = socket

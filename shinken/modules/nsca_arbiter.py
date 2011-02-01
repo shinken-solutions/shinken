@@ -32,7 +32,7 @@ import struct
 from ctypes import create_string_buffer
 import random
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
@@ -75,9 +75,9 @@ def get_instance(plugin):
 
 
 #Just print some stuff
-class NSCA_arbiter(Module):
+class NSCA_arbiter(BaseModule):
     def __init__(self, modconf, host, port, encryption_method, password):
-        Module.__init__(self, modconf)
+        BaseModule.__init__(self, modconf)
         self.host = host
         self.port = port
         self.encryption_method = encryption_method

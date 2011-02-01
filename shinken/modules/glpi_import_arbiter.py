@@ -24,7 +24,7 @@
 
 import xmlrpclib
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 #This text is print at the import
 print "Detected module : GLPI importer for Arbiter"
@@ -53,9 +53,9 @@ def get_instance(plugin):
 
 
 #Just get hostname from a GLPI webservices
-class Glpi_importer_arbiter(Module):
+class Glpi_importer_arbiter(BaseModule):
     def __init__(self, mod_conf, uri, login_name, login_password, use_property):
-        Module.__init__(self, mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.uri = uri
         self.login_name = login_name
         self.login_password = login_password

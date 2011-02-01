@@ -30,7 +30,7 @@ import time
 import re
 
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 
 #This text is print at the import
@@ -59,9 +59,9 @@ def get_instance(plugin):
 
 #Class for the Npcd Broker
 #Get broks and put them well-formatted in a spool file
-class Npcd_broker(Module):
+class Npcd_broker(BaseModule):
     def __init__(self, modconf, config_file, perfdata_file, perfdata_spool_dir, perfdata_spool_filename, sleep_time):
-        Module.__init__(self, modconf)
+        BaseModule.__init__(self, modconf)
         self.config_file = config_file
         self.perfdata_file = perfdata_file
         self.perfdata_spool_dir = perfdata_spool_dir
@@ -90,7 +90,7 @@ class Npcd_broker(Module):
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         if self.process_performance_data or b.type in ('program_status', 'update_program_status'):
-            Module.manage_brok(self, b)
+            BaseModule.manage_brok(self, b)
 
     # Handle the global process_performance_data setting. If it is not active, this module will not write
     # any lines to the perfdata_file

@@ -51,7 +51,7 @@ from shinken.graph import Graph
 from shinken.log import logger
 from shinken.comment import Comment
 from shinken.downtime import Downtime
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 from shinken.util import to_int, to_char, to_bool
 
@@ -78,9 +78,9 @@ def get_instance(plugin):
 
 
 #Just print some stuff
-class Nagios_retention_scheduler(Module):
+class Nagios_retention_scheduler(BaseModule):
     def __init__(self, mod_conf, path):
-        Module.__init__(self, mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.path = path
 
     #Ok, main function that is called in the retention creation pass

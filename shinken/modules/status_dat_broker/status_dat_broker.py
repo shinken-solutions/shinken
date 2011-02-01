@@ -41,13 +41,13 @@ from shinken.config import Config
 from status import StatusFile
 from objectscache import ObjectsCacheFile
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Status_dat_broker(Module):
+class Status_dat_broker(BaseModule):
     def __init__(self, modconf, path, opath, update_interval):
-        Module.__init__(self, modconf)
+        BaseModule.__init__(self, modconf)
         self.path = path
         self.opath = opath
         self.update_interval = update_interval

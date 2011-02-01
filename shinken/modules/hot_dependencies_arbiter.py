@@ -38,7 +38,7 @@ except ImportError:
         print "Error : you need the json or simplejson module for this script"
         raise
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 #This text is print at the import
@@ -66,9 +66,9 @@ def get_instance(plugin):
 
 # Get hosts and/or services dep by launching a command
 # or read a flat file as json format taht got theses links
-class Hot_dependencies_arbiter(Module):
+class Hot_dependencies_arbiter(BaseModule):
     def __init__(self, modconf, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout):
-        Module.__init__(self, modconf)
+        BaseModule.__init__(self, modconf)
         self.mapping_file = mapping_file
         self.last_update = 0
         self.last_mapping = set()

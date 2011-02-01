@@ -29,7 +29,7 @@ import cPickle
 import shutil
 
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 
 properties = {
@@ -49,9 +49,9 @@ def get_instance(plugin):
 
 
 # Just print some stuff
-class Pickle_retention_scheduler(Module):
+class Pickle_retention_scheduler(BaseModule):
     def __init__(self, modconf, path):
-        Module.__init__(self, modconf)
+        BaseModule.__init__(self, modconf)
         self.path = path
 
     # Ok, main function that is called in the retention creation pass

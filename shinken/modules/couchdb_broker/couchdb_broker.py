@@ -36,14 +36,14 @@ import socket as socket_imp # For Nagle HACK
 socket = socket_imp
 
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 
 #Class for the couchdb Broker
 #Get broks and puts them in a couchdb database
-class Couchdb_broker(Module):
+class Couchdb_broker(BaseModule):
     def __init__(self, modconf, host, user, password):
-        Module.__init__(self, modconf)
+        BaseModule.__init__(self, modconf)
         self.host = host
         self.user = user
         self.password = password
@@ -59,7 +59,7 @@ class Couchdb_broker(Module):
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         #We will transform data of b, so copy it
-        return Module.manage_brok(self, copy.deepcopy(b))
+        return BaseModule.manage_brok(self, copy.deepcopy(b))
 
 
     #Create the database connexion

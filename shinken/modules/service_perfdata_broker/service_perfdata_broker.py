@@ -24,14 +24,14 @@
 #Maybe one day host data will be usefull too
 #It will need just a new file, and a new manager :)
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Service_perfdata_broker(Module):
+class Service_perfdata_broker(BaseModule):
     def __init__(self, modconf, path, mode, template):
-        Module.__init__(self, modconf)
+        BaseModule.__init__(self, modconf)
         self.path = path
         self.mode = mode
         self.template = template

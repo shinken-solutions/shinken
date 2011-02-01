@@ -32,7 +32,7 @@ import sys
 import datetime
 
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 from shinken.util import get_day
 
 
@@ -66,9 +66,9 @@ def get_instance(plugin):
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Simple_log_broker(Module):
+class Simple_log_broker(BaseModule):
     def __init__(self, modconf, path, archive_path):
-        Module.__init__(self, modconf)
+        BaseModule.__init__(self, modconf)
         self.path = path
         self.archive_path = archive_path
 

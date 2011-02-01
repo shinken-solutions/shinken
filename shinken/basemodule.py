@@ -17,7 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-""" This python module contains the class Module that shinken modules will subclass """
+""" This python module contains the class BaseModule that shinken modules will subclass """
 
 
 import os
@@ -61,7 +61,7 @@ class ModulePhases:
     
     
 
-class Module(object):
+class BaseModule(object):
     """ This is the base class for the shinken modules.
 Modules can be used by the different shinken daemons/services for different tasks.
 Example of task that a shinken module can do:

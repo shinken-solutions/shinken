@@ -27,7 +27,7 @@ print "Detected module : Redis retention file for Scheduler"
 
 import redis
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 properties = {
     'type' : 'redis_retention',
@@ -46,9 +46,9 @@ def get_instance(plugin):
 
 
 #Just print some stuff
-class Redis_retention_scheduler(Module):
+class Redis_retention_scheduler(BaseModule):
     def __init__(self, modconf, server):
-        Module.__init__(self, modconf)
+        BaseModule.__init__(self, modconf)
         self.server = server
 
     #Called by Scheduler to say 'let's prepare yourself guy'

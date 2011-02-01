@@ -32,7 +32,7 @@ try:
 except : # TODO : fix this, python2.4 is not happy here?
     from db_mysql import DBMysql
 
-from shinken.basemodule import Module
+from shinken.basemodule import BaseModule
 
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
@@ -41,9 +41,9 @@ def de_unixify(t):
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Ndodb_broker(Module):
+class Ndodb_broker(BaseModule):
     def __init__(self, conf):
-        Module.__init__(self, conf)
+        BaseModule.__init__(self, conf)
         #Mapping for name of dataand transform function
         self.mapping = {
             'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : de_unixify},
@@ -82,7 +82,7 @@ class Ndodb_broker(Module):
         if 'instance_id' in b.data:
             b.data['instance_id'] = b.data['instance_id'] + 1
         #print "(Ndo) I search manager:", manager
-        queries = Module.manage_brok(self, b)
+        queries = BaseModule.manage_brok(self, b)
         if queries is not None:
             for q in queries :
                 self.db.execute_query(q)

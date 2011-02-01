@@ -34,7 +34,7 @@ from multiprocessing import Process, Queue
 #modulepath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "modules/")
 #Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html
 
-from basemodule import Module
+from basemodule import BaseModule
 
 class ModulesManager(object):
 
@@ -115,8 +115,8 @@ If an instance can't be created or init'ed then only log is done. That instance 
                 if inst is None: #None = Bad thing happened :)
                     continue
                 ## TODO: temporary for back comptability with previous modules :
-                if not isinstance(inst, Module):
-                    print("Notice: module %s is old module style (not instance of basemodule.Module)" % (mod_conf.get_name()))
+                if not isinstance(inst, BaseModule):
+                    print("Notice: module %s is old module style (not instance of basemodule.BaseModule)" % (mod_conf.get_name()))
                     inst.props = inst.properties = mod_conf.properties.copy()
                     inst.is_external = inst.props['external'] = inst.props.get('external', False)
                     inst.phases = inst.props.get('phases', [])  ## though a module defined with no phase is quite useless ..
@@ -155,10 +155,10 @@ If an instance can't be created or init'ed then only log is done. That instance 
                 print("%s is now started ; pid=%d" % (inst.name, p.pid))
 
     def __set_ext_inst_queues(self, inst):
-        if isinstance(inst, Module):
+        if isinstance(inst, BaseModule):
             inst.create_queues()
         else:
-            Module.create_queues__(inst)
+            BaseModule.create_queues__(inst)
             ## TODO: temporary until new style module is used by every shinken module:
             inst.properties['to_queue'] = inst.to_q
             inst.properties['from_queue'] = inst.from_q
