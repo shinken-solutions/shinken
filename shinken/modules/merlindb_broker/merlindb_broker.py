@@ -48,7 +48,7 @@ def list_to_comma(lst):
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Merlindb_broker:
+class Merlindb_broker(Module):
     def __init__(self, modconf, backend, host=None, user=None, password=None, database=None, character_set=None, database_path=None):
         #Mapping for name of data, rename attributes and transform function
         self.mapping = {
