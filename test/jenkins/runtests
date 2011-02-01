@@ -45,6 +45,8 @@ function launch_and_assert {
 	then
 	echo "Error : the test $SCRIPT failed"
 	exit 2
+    else
+	echo "test $SCRIPT succeeded, next one"
     fi
 }
 
@@ -59,4 +61,7 @@ do
 done < $TESTLIST
 
 # Create the coverage file
-test $COVERAGE == "COVERAGE" && coverage xml --omit=/usr/lib
+if test $COVERAGE == "COVERAGE"; then
+  coverage xml --omit=/usr/lib
+fi
+
