@@ -161,10 +161,11 @@ class Hot_dependencies_arbiter(Module):
         # If we got no in progress command, look if we should launch a new one
         if self.process == None:
             if now - self.last_cmd_launch > self.mapping_command_interval:
-                print "The command lunach is too old, launch a new one"
-                self._launch_command()
-            else:
-                print "The last cmd launch is too early", now - self.last_cmd_launch, self.mapping_command_interval
+                if self.mapping_command_interval != 0 and self.mapping_command != '':
+                    print "The command lunach is too old, launch a new one"
+                    self._launch_command()
+#            else:
+#                print "The last cmd launch is too early", now - self.last_cmd_launch, self.mapping_command_interval
         else:
             # We got one in progress, we should look if it's finished or not
             self._watch_command_finished()
