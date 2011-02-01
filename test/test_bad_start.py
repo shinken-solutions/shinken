@@ -52,13 +52,22 @@ class TestConfig(ShinkenTest):
         while os.path.exists(basedir):
             basedir += os.path.sep + str(random.randint(0,100))
         return basedir + os.path.sep + f 
+
+
+    def get_login_and_group(self, p):
+        try:
+            p.user = p.group = os.getlogin()
+        except OSError: #on some rare case, we can have a problem here
+            # so bypas it with default value
+            p.user = p.group = 'shinken'
+
     
     def test_bad_piddir(self):
         print("Testing bad piddir ..")
         os.chdir(curdir)
         p1 = shinkenpoller.Poller(pollerconfig, False, True, False, None)
         p1.do_load_config()
-        p1.user = p1.group = os.getlogin()
+        self.get_login_and_group(p1)
         p1.pidfile = self.gen_invalid_directory(p1.pidfile)
         self.assertRaises(InvalidPidDir, p1.do_daemon_init_and_start)
     
@@ -68,7 +77,7 @@ class TestConfig(ShinkenTest):
         p1 = shinkenpoller.Poller(pollerconfig, False, True, False, None)
         p1.do_load_config()
         p1.workdir = self.gen_invalid_directory(p1.workdir)
-        p1.user = p1.group = os.getlogin()
+        self.get_login_and_group(p1)
         self.assertRaises(InvalidWorkDir, p1.do_daemon_init_and_start)
 
     def test_port_not_free(self):
@@ -76,7 +85,7 @@ class TestConfig(ShinkenTest):
         os.chdir(curdir)
         p1 = shinkenpoller.Poller(pollerconfig, False, True, False, None)
         p1.do_load_config()
-        p1.user = p1.group = os.getlogin()
+        self.get_login_and_group(p1)
         p1.do_daemon_init_and_start()
         p1.do_post_daemon_init()
         
@@ -84,7 +93,7 @@ class TestConfig(ShinkenTest):
         
         p2 = shinkenpoller.Poller(pollerconfig, False, True, False, None)
         p2.do_load_config()
-        p2.user = p2.group = os.getlogin()
+        self.get_login_and_group(p2)
         
         os.unlink(p1.pidfile)  ## so that second poller will not see first started poller
         
