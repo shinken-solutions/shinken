@@ -83,6 +83,6 @@ class Dummy_arbiter(Module):
     def do_loop_turn(self):
         print "Raise a external command as example"
         e = ExternalCommand('Viva la revolution')
-        self.to_q.put(e)
+        self.from_q.put(e)
         time.sleep(1)
 
