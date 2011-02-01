@@ -75,12 +75,14 @@ Example of task that a shinken module can do:
 `props´ is the properties dict of this module. dict that defines at what phases the module is involved. """
         self.myconf = mod_conf
         self.name = mod_conf.get_name()
-        self.props = mod_conf.properties
+        self.props = mod_conf.properties.copy()
         self.properties = self.props
         self.interrupted = False
         self.is_external = self.props.get('external', False)
-        self.phases = self.props.get('phases', [])  ## though a module defined with no phase is quite useless ..
+        self.phases = self.props.get('phases', [])  # though a module defined with no phase is quite useless ..
         self.phases.append(None)
+        self.to_q = None
+        self.from_q = None
         
     def create_queues(self):
         self.create_queues__(self)

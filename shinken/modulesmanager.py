@@ -101,8 +101,11 @@ Returns: True on successfull init. False if instance init method raised any Exce
         for i in insts:
             self.remove_instance(i)
     
-    #Get modules instance to give them after broks
+    # actually only arbiter call this method with start_external=False..
     def get_instances(self, start_external=True):
+        """ Create, init and then returns the list of module instances that the caller needs.
+By default (start_external=True) also start the execution of the instances that are "external".
+If an instance can't be created or init'ed then only log is done. That instance is skipped. """ 
         self.clear_instances()
         for (mod_conf, module) in self.modules_assoc:
             try:
@@ -128,9 +131,6 @@ Returns: True on successfull init. False if instance init method raised any Exce
 
         to_del = []
         for inst in self.instances:
-            if inst.is_external:
-## TODO: do not know if really necessary for a module to have the queues already created for the module's init() method..
-                self.__set_ext_inst_queues(inst)  
             if not self.try_instance_init(inst):
                 to_del.append(inst)
                 continue
@@ -146,6 +146,7 @@ Returns: True on successfull init. False if instance init method raised any Exce
     def __start_ext_instances(self):
         for inst in self.instances:
             if inst.is_external:
+                self.__set_ext_inst_queues(inst)
                 print("Starting external process for instance %s" % (inst.name))
                 p = inst.process = Process(target=inst.main, args=())
                 inst.properties['process'] = p  ## TODO: temporary
@@ -161,24 +162,27 @@ Returns: True on successfull init. False if instance init method raised any Exce
             inst.properties['to_queue'] = inst.to_q
             inst.properties['from_queue'] = inst.from_q
 
+    # actually only called by arbiter...
+    # TODO: but this actually leads to a double "init" call.. maybe a "uninit" would be needed ? 
     def init_and_start_instances(self):
         for inst in self.instances:
-            if inst.is_external:
-                self.__set_ext_inst_queues(inst)
             inst.init()
         self.__start_ext_instances()
 
-
+    def close_inst_queues(self, inst):
+        """ Release the resources associated with the queues from the given module instance """
+        for q in (inst.to_q, inst.from_q):
+            if q is None: continue
+            q.close()
+            q.join_thread()
+        inst.to_q = inst.from_q = None
+        
     def remove_instance(self, inst):
         # External instances need to be close before (process + queues)
         if inst.is_external:
             inst.process.terminate()
             inst.process.join(timeout=1)
-            inst.to_q.close()
-            inst.to_q.join_thread()
-            inst.from_q.close()
-            inst.from_q.join_thread()
-
+            self.close_inst_queues(inst)
         # Then do not listen anymore about it
         self.instances.remove(inst)
 
