@@ -139,9 +139,9 @@ class IForArbiter(Pyro.core.ObjBase):
 
         # Now manage modules
         for module in conf['global']['modules']:
-            print "Got module", module.get_name()
-            # If we alrady got it, bypass
+            # If we already got it, bypass
             if not module.get_name() in self.app.worker_modules:
+                logger.log("[%s] Got module : %s " % (self.name, module.get_name()))
                 self.app.worker_modules[module.get_name()] = {'to_q' : Queue()}
         
 
@@ -519,9 +519,11 @@ class Satellite(Daemon):
     def _got_queue_from_action(self, a):
         if hasattr(a, 'module_type'):
             print "search for a module", a.module_type
+            if a.module_type in self.worker_modules:
+                return self.worker_modules[a.module_type]['to_q']
+            # Nothing found, it's not good at all!
             return None
         # If none, call the standard 'fork'
-        print "As ka Queue", self.worker_modules['fork']['to_q']
         return self.worker_modules['fork']['to_q']
 
 
