@@ -244,6 +244,7 @@ class Service(SchedulingItem):
         # Manage the unkown/unreach during hard state
         'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
+        'state_before_hard_unknown_reach_phase' : StringProp(default='OK', retention=True),
 
         }
 

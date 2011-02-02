@@ -536,7 +536,7 @@ class Host(SchedulingItem):
         # From now its not really used
         'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
-
+        'state_before_hard_unknown_reach_phase' : StringProp(default='UP', retention=True),
         }
 
     # Hosts macros and prop that give the information

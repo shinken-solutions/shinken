@@ -540,11 +540,20 @@ class SchedulingItem(Item):
             if self.state == 'UNKNOWN' and self.last_state != 'UNKNOWN' \
             or self.state == 'UNREACHABLE' and self.last_state != 'UNREACHABLE':
                 self.in_hard_unknown_reach_phase = True
+                # We also backup with which state we was before enter this phase
+                self.state_before_hard_unknown_reach_phase = self.last_state
                 return
         else:
             # if we were already in such a phase, look for its end
             if self.state != 'UNKNOWN' and self.state != 'UNREACHABLE':
                 self.in_hard_unknown_reach_phase = False
+            
+        # If we just exit the phase, look if we exit with a different state
+        # than we enter or not. If so, li and say we were not in such pahse
+        # because we need so to raise a new notif
+        if not self.in_hard_unknown_reach_phase and self.was_in_hard_unknown_reach_phase:
+            if self.state != self.state_before_hard_unknown_reach_phase:
+                self.was_in_hard_unknown_reach_phase = False
 
 
 

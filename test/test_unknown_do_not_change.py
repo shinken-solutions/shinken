@@ -101,6 +101,74 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.show_and_clear_logs()
 
 
+    # We got problem with unknown results on bad connexions 
+    # for critical services and host : if it was in a notification pass
+    # then the notification is restarted, but it's just a missing data,
+    # not a reason to warn about it
+    def test_unknown_do_not_change_state_with_different_exit_status_phase(self):
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+
+        print "GO OK"*10
+        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK | value1=0 value2=0']])
+        self.assert_(svc.state == 'OK')
+        self.assert_(svc.state_type == 'HARD')
+
+        print "GO CRITICAL SOFT"*10
+        # Ok we are UP, now we seach to go in trouble
+        self.scheduler_loop(1, [[svc, 2, 'PROBLEM | value1=1 value2=2']])
+        # CRITICAL/SOFT
+        self.assert_(svc.state == 'CRITICAL')
+        self.assert_(svc.state_type == 'SOFT')
+        # And again and again :)
+        print "GO CRITICAL HARD"*10
+        self.scheduler_loop(2, [[svc, 2, 'PROBLEM | value1=1 value2=2']])
+        # CRITICAL/HARD
+        self.assert_(svc.state == 'CRITICAL')
+        self.assert_(svc.state_type == 'HARD')
+
+        # Should have a notification about it
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.show_and_clear_logs()
+
+        print "GO UNKNOWN HARD"*10
+        # Then we make it as a unknown state
+        self.scheduler_loop(1, [[svc, 3, 'Unknown | value1=1 value2=2']])
+        # And we DO NOT WANT A NOTIF HERE
+        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;UNKNOWN'))
+        self.show_and_clear_logs()
+
+        print "Return CRITICAL HARD"*10
+        # Then we came back as WARNING here, so a different than we came in the phase!
+        self.scheduler_loop(1, [[svc, 1, 'WARNING | value1=1 value2=2']])
+        print svc.state, svc.state_type
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;WARNING'))
+        self.show_and_clear_logs()
+
+        # We check if we can still have new notifications of course
+        # And we speedup the notification
+        for n in svc.notifications_in_progress.values():
+            n.t_to_go = time.time()        
+        self.scheduler_loop(1, [[svc, 1, 'WARNING | value1=1 value2=2']])
+        print svc.state, svc.state_type
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;WARNING'))
+        self.show_and_clear_logs()
+
+        # And what if we came back as critical so? :)
+        self.scheduler_loop(1, [[svc, 2, 'CRITICAL | value1=1 value2=2']])
+        print svc.state, svc.state_type
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.show_and_clear_logs()
+
+
+
 
     # But we want to still raise notif as unknown if we first met this state
     def test_unknown_still_raise_notif(self):
