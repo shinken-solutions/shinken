@@ -70,6 +70,7 @@ class IForArbiter(Pyro.core.ObjBase):
         Pyro.core.ObjBase.__init__(self)
         self.app = app
         self.schedulers = app.schedulers
+        
 
     #function called by arbiter for giving us our conf
     #conf must be a dict with:
@@ -135,6 +136,14 @@ class IForArbiter(Pyro.core.ObjBase):
             time.tzset()
 
         logger.log("We have our schedulers : %s" % (str(self.schedulers)))
+
+        # Now manage modules
+        for module in conf['global']['modules']:
+            print "Got module", module.get_name()
+            # If we alrady got it, bypass
+            if not module.get_name() in self.app.worker_modules:
+                self.app.worker_modules[module.get_name()] = {'to_q' : Queue()}
+        
 
 
     #Arbiter ask us to do not manage a scheduler_id anymore
@@ -244,6 +253,8 @@ class Satellite(Daemon):
         self.s = None
         self.manager = None
         self.returns_queue = None
+
+        self.worker_modules = {}
         
 
     def pynag_con_init(self, id):
@@ -419,11 +430,12 @@ class Satellite(Daemon):
 
     #Create and launch a new worker, and put it into self.workers
     #It can be mortal or not
-    def create_and_launch_worker(self, mortal=True):
-        w = Worker(1, self.s, self.returns_queue, self.processes_by_worker, \
+    def create_and_launch_worker(self, module_name='fork', mortal=True):
+        q = self.worker_modules[module_name]['to_q']
+        w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
                    mortal=mortal,max_plugins_output_length = self.max_plugins_output_length )
         self.workers[w.id] = w
-        logger.log("[%s] Allocating new Worker : %s" % (self.name, w.id))
+        logger.log("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
         self.workers[w.id].start()
 
 
@@ -463,29 +475,29 @@ class Satellite(Daemon):
         return res
 
 
-    #workers are processes, they can die in a numerous of ways
-    #like :
-    #*99.99% : bug in code, sorry :p
-    #*0.005 % : a mix between a stupid admin (or an admin without coffee),
-    #and a kill command
-    #*0.005% : alien attack
-    #So they need to be detected, and restart if need
+    # workers are processes, they can die in a numerous of ways
+    # like :
+    # *99.99% : bug in code, sorry :p
+    # *0.005 % : a mix between a stupid admin (or an admin without coffee),
+    # and a kill command
+    # *0.005% : alien attack
+    # So they need to be detected, and restart if need
     def check_and_del_zombie_workers(self):
-        #Active children make a join with every one, useful :)
+        # Active children make a join with every one, useful :)
         act = active_children()
 
         w_to_del = []
         for w in self.workers.values():
-            #If a worker go down and we do not ask him, it's not
-            #good : we can think having a worker and it's not True
-            #So we del it
+            # If a worker go down and we do not ask him, it's not
+            # good : we can think having a worker and it's not True
+            # So we del it
             if not w.is_alive():
                 logger.log("[%s] Warning : the worker %s goes down unexpectly!" % (self.name, w.id))
-                #AIM ... Press FIRE ... <B>HEAD SHOT!</B>
+                # AIM ... Press FIRE ... <B>HEAD SHOT!</B>
                 w.terminate()
                 w.join(timeout=1)
                 w_to_del.append(w.id)
-        #OK, now really del workers
+        # OK, now really del workers
         for id in w_to_del:
             del self.workers[id]
 
@@ -497,8 +509,20 @@ class Satellite(Daemon):
         #I want at least min_workers or wish_workers (the biggest) but not more than max_workers
         while len(self.workers) < self.min_workers \
                     or (wish_worker > len(self.workers) and len(self.workers) < self.max_workers):
-            self.create_and_launch_worker()
+            for mod in self.worker_modules:
+                self.create_and_launch_worker(mod)
         #TODO : if len(workers) > 2*wish, maybe we can kill a worker?
+
+
+    # Get the Queue() from an action by looking at which module
+    # it wants
+    def _got_queue_from_action(self, a):
+        if hasattr(a, 'module_type'):
+            print "search for a module", a.module_type
+            return None
+        # If none, call the standard 'fork'
+        print "As ka Queue", self.worker_modules['fork']['to_q']
+        return self.worker_modules['fork']['to_q']
 
 
     #We get new actions from schedulers, we create a Message ant we
@@ -532,7 +556,9 @@ class Satellite(Daemon):
                         a.sched_id = sched_id
                         a.status = 'queue'
                         msg = Message(id=0, type='Do', data=a)
-                        self.s.put(msg)
+                        q = self._got_queue_from_action(a)
+                        if q != None:
+                            q.put(msg)
                         #Update stats
                         self.nb_actions_in_workers += 1
                 else: #no con? make the connexion
@@ -565,9 +591,6 @@ class Satellite(Daemon):
             print "Begin wait initial"
             self.wait_for_initial_conf()
             print "End wait initial"
-            #for sched_id in self.schedulers:
-            #    print "Init main2"
-            #    self.pynag_con_init(sched_id)
 
         #Now we check if arbiter speek to us in the daemon.
         #If so, we listen for it
@@ -596,17 +619,23 @@ class Satellite(Daemon):
         #Print stats for debug
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
-            #In workers we've got actions send to queue - queue size
-            print '[%d][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
-                (sched_id, sched['name'],len(self.workers), self.s.qsize(), \
-                         self.nb_actions_in_workers - self.s.qsize(), len(self.returns_queue))
+            for mod in self.worker_modules:
+                #In workers we've got actions send to queue - queue size
+                q = self.worker_modules[mod]['to_q']
+                print '[%d][%s][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
+                    (sched_id, sched['name'], mod, len(self.workers), q.qsize(), \
+                         self.nb_actions_in_workers - q.qsize(), len(self.returns_queue))
 
 
         #Before return or get new actions, see how we manage
         #old ones : are they still in queue (s)? If True, we
         #must wait more or at least have more workers
         wait_ratio = self.wait_ratio.get_load()
-        if self.s.qsize() != 0 and wait_ratio < 5*self.polling_interval:
+        total_q = 0
+        for mod in self.worker_modules:
+            q = self.worker_modules[mod]['to_q']
+            total_q += q.qsize()
+        if total_q != 0 and wait_ratio < 5*self.polling_interval:
             print "I decide to up wait ratio"
             self.wait_ratio.update_load(wait_ratio * 2)
         else:
@@ -641,14 +670,16 @@ class Satellite(Daemon):
 
 
     def do_post_daemon_init(self):
-
         # And we register them
         self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
         self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
         
-        self.s = Queue() #Global Master -> Slave
+        # self.s = Queue() #Global Master -> Slave
+        # We can open the Queeu for fork AFTER
+        self.worker_modules['fork'] = {'to_q' : Queue()}
         self.manager = Manager()
         self.returns_queue = self.manager.list()
+
 
 
     def main(self):
@@ -670,7 +701,8 @@ class Satellite(Daemon):
 
         # Allocate Mortal Threads
         for _ in xrange(1, self.min_workers):
-            self.create_and_launch_worker()
+            for mod in self.worker_modules:
+                self.create_and_launch_worker()
 
         # Now main loop
         self.timeout = self.polling_interval
