@@ -56,12 +56,7 @@ class Daemon:
         self.debug = debug
         self.debug_file = debug_file
         self.interrupted = False
-        
-        self.host = None
-        self.port = None
-        self.pidfile = None
-        self.workdir = None
-        
+                
         # Log init
         self.log = logger
         self.log.load_obj(self)
