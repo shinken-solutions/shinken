@@ -265,6 +265,10 @@ class Host(SchedulingItem):
             default=0,
             fill_brok=['full_status'],
             retention=True),
+        'last_state_type' : StringProp(
+            default='HARD', 
+            fill_brok=['full_status'], 
+            retention=True),
         'last_state_change': FloatProp(
             default=time.time(),
             fill_brok=['full_status'],
@@ -527,6 +531,11 @@ class Host(SchedulingItem):
         'got_business_rule' : BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule' : StringProp(default=None),
+        
+        # Manage the unkown/unreach during hard state
+        'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
+        'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
+
         }
 
     # Hosts macros and prop that give the information

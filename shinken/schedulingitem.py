@@ -523,6 +523,38 @@ class SchedulingItem(Item):
             self.broks.append(self.get_update_status_brok())
 
 
+    # UNKNOWN during a HARD state are not so important, and they should
+    # ot raise notif about it
+    def update_hard_unknown_phase_state(self):
+        print "MON CUL c'est du poulet\n"*2
+        print "update_hard_unknown_phase_state", self.last_state, self.last_state_type, self.state_type, self.state
+        # Manage only services
+        if not hasattr(self, 'in_hard_unknown_reach_phase'):
+            return
+        self.was_in_hard_unknown_reach_phase = self.in_hard_unknown_reach_phase
+        
+        # We do not care about SOFT state at all
+        # and we are sure we are no more in such a phase
+        if self.state_type != 'HARD' or self.last_state_type != 'HARD':
+            self.in_hard_unknown_reach_phase = False
+            print "No hard state, so not in in_hard_unknown_phase"
+
+        # So if we are not in already in such a phase, we check for
+        # a start or not. So here we are sure to be in a HARD/HARD folowing
+        # state
+        if not self.in_hard_unknown_reach_phase:
+            if self.state == 'UNKNOWN' and self.last_state != 'UNKNOWN':
+                print "Going to a in_hard_unknown_phase state"
+                self.in_hard_unknown_reach_phase = True
+                return
+        else:
+            # if we were already in such a phase, look for its end
+            if self.state != 'UNKNOWN':
+                self.in_hard_unknown_reach_phase = False
+                print "No more in in_hard_unknown_phase state"
+
+
+
     # consume a check return and send action in return
     # main function of reaction of checks like raise notifications
     # Special case:
@@ -577,7 +609,7 @@ class SchedulingItem(Item):
             # take by host/service, and not returned
 
         # remember how we was before this check
-        last_state_type = self.state_type
+        self.last_state_type = self.state_type
 
         self.set_state_from_exit_status(c.exit_status)
 
@@ -652,6 +684,7 @@ class SchedulingItem(Item):
                 self.state_type = 'HARD'
                 self.attempt = 1
 
+                #self.update_hard_unknown_phase_state()
                 # I'm no more a problem if I was one
                 self.no_more_a_problem()
 
@@ -741,20 +774,26 @@ class SchedulingItem(Item):
                     self.get_event_handlers()
             else:
                 # Send notifications whenever the state has changed. (W -> C)
+                # but not if the current state is UNKNOWN (hard C-> hard U -> hard C should
+                # not retart notifications)
                 if self.state != self.last_state:
-                    self.unacknowledge_problem_if_not_sticky()
-                    self.raise_alert_log_entry()
-                    self.remove_in_progress_notifications()
-                    if not no_action:
-                        self.create_notifications('PROBLEM')
+                    self.update_hard_unknown_phase_state()
+                    print self.last_state, self.last_state_type, self.state_type, self.state
+                    print "*"*20, 'in unknown state?', self.was_in_hard_unknown_reach_phase, self.in_hard_unknown_reach_phase
+                    if not self.in_hard_unknown_reach_phase and not self.was_in_hard_unknown_reach_phase:
+                        self.unacknowledge_problem_if_not_sticky()
+                        self.raise_alert_log_entry()
+                        self.remove_in_progress_notifications()
+                        if not no_action:
+                            self.create_notifications('PROBLEM')
 
-                    # PROBLEM/IMPACT
-                    # Maybe our new state can raise the problem
-                    # when the last one was not
-                    # I'm a problem only if I'm the root problem,
-                    # so not no_action:
-                    if not no_action:
-                        self.set_myself_as_problem()
+                        # PROBLEM/IMPACT
+                        # Maybe our new state can raise the problem
+                        # when the last one was not
+                        # I'm a problem only if I'm the root problem,
+                        # so not no_action:
+                        if not no_action:
+                            self.set_myself_as_problem()
 
                 elif self.in_scheduled_downtime_during_last_check == True:
                     # during the last check i was in a downtime. but now
@@ -764,6 +803,7 @@ class SchedulingItem(Item):
                     if not no_action:
                         self.create_notifications('PROBLEM')
 
+        self.update_hard_unknown_phase_state()
         # Reset this flag. If it was true, actions were already taken
         self.in_scheduled_downtime_during_last_check = False
 
@@ -785,7 +825,7 @@ class SchedulingItem(Item):
         # fill last_hard_state_change to now
         # if we just change from SOFT->HARD or
         # in HARD we change of state (Warning->critical, or critical->ok, etc etc)
-        if self.state_type == 'HARD' and (last_state_type == 'SOFT' or self.last_state != self.state):
+        if self.state_type == 'HARD' and (self.last_state_type == 'SOFT' or self.last_state != self.state):
             self.last_hard_state_change = int(time.time())
 
 

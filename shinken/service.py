@@ -132,6 +132,7 @@ class Service(SchedulingItem):
         'current_event_id' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_event_id' : IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_state' : StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
+        'last_state_type' : StringProp(default='HARD', fill_brok=['full_status'], retention=True),
         'last_state_id' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_state_change' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
         'last_hard_state_change' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
@@ -240,6 +241,9 @@ class Service(SchedulingItem):
             default=[],
             fill_brok=['full_status']),
 
+        # Manage the unkown/unreach during hard state
+        'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
+        'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
 
         }
 
