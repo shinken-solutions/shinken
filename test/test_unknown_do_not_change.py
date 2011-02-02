@@ -72,6 +72,54 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;UNKNOWN'))
         self.show_and_clear_logs()
 
+        # Then we came back as CRITICAL
+        self.scheduler_loop(1, [[svc, 2, 'CRITICAL | value1=1 value2=2']])
+        print svc.state, svc.state_type
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.show_and_clear_logs()
+
+
+
+    # But we want to still raise notif as unknown if we first met this state
+    def test_unknown_still_raise_notif(self):
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+
+        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK | value1=0 value2=0']])
+        self.assert_(svc.state == 'OK')
+        self.assert_(svc.state_type == 'HARD')
+
+        # Ok we are UP, now we seach to go in trouble
+        self.scheduler_loop(1, [[svc, 3, 'PROBLEM | value1=1 value2=2']])
+        # UNKOWN/SOFT
+        self.assert_(svc.state == 'UNKNOWN')
+        self.assert_(svc.state_type == 'SOFT')
+        # And again and again :)
+        self.scheduler_loop(2, [[svc, 3, 'PROBLEM | value1=1 value2=2']])
+        # UNKNOWN/HARD
+        self.assert_(svc.state == 'UNKNOWN')
+        self.assert_(svc.state_type == 'HARD')
+
+        # Should have a notification about it !
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;UNKNOWN'))
+        self.show_and_clear_logs()
+
+        # Then we make it as a critical state
+        # and we want a notif too
+        self.scheduler_loop(1, [[svc, 2, 'critical | value1=1 value2=2']])
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.show_and_clear_logs()
+
+
+        
+
 
 if __name__ == '__main__':
     unittest.main()
