@@ -32,100 +32,31 @@ import sys, os
 import getopt
 import ConfigParser
 
-## Make sure people are using Python 2.5 or higher
-if sys.version_info < (2,4):
-    print "Shinken requires as a minimum Python 2.4.x, sorry"
-    sys.exit(1)
-elif sys.version_info >= (3,):
-    print "Shinken is not yet compatible with Python3k, sorry"
-    sys.exit(1)
 
 
 #Pyro 4 dbg
-sys.path.insert(0,'.')
+sys.path.insert(0, '.')
 
 
 #Try to load shinken lib.
 #Maybe it's not in our python path, so we detect it
 #it so (it's a untar install) we add .. in the path
-try :
-    from shinken.util import to_bool
-    if hasattr(sys.modules['__main__'], '__file__'):
-        my_path = os.path.abspath(sys.modules['__main__'].__file__)
-        elts = os.path.dirname(my_path).split(os.sep)[:-1]
-        elts.append('shinken')
-        sys.path.append(os.sep.join(elts))
-except ImportError:
-    #Now add in the python path the shinken lib
-    #if we launch it in a direct way and
-    #the shinken is not a python lib
-    if hasattr(sys.modules['__main__'], '__file__'):
-        my_path = os.path.abspath(sys.modules['__main__'].__file__)
-        elts = os.path.dirname(my_path).split(os.sep)[:-1]
-        sys.path.append(os.sep.join(elts))
-        elts.append('shinken')
-        sys.path.append(os.sep.join(elts))
-
 try:
-    import shinken.pyro_wrapper as pyro
-except ImportError:
-    print "Shinken require the Python Pyro module. Please install it."
-    sys.exit(1)
-
-Pyro = pyro.Pyro
-
-from shinken.satellite import Satellite
-from shinken.util import to_int, to_bool
-from shinken.module import Module, Modules
-
-VERSION = "0.5"
+    import shinken
+except ImportError as e:
+    if hasattr(sys.modules['__main__'], '__file__'):
+        my_path = os.path.abspath(sys.modules['__main__'].__file__)
+        elts = os.path.dirname(my_path).split(os.sep)[:-1]
+        sys.path.append(os.sep.join(elts))
+        elts.append('shinken')
+        sys.path.append(os.sep.join(elts))
 
 
-#Our main APP class
-class Poller(Satellite):
-    do_checks = True #I do checks
-    do_actions = False #but no actions
-    #default_port = 7771
-
-    properties = {
-            'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
-            'pidfile' : {'default' : '/usr/local/shinken/var/pollerd.pid', 'pythonize' : None, 'path' : True},
-            'port' : {'default' : '7771', 'pythonize' : to_int},
-            'host' : {'default' : '0.0.0.0', 'pythonize' : None},
-            'user' : {'default' : 'shinken', 'pythonize' : None},
-            'group' : {'default' : 'shinken', 'pythonize' : None},
-            'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
-            'use_ssl' : {'default' : '0', 'pythonize' : to_bool},
-            'certs_dir' : {'default' : 'etc/certs', 'pythonize' : None},
-            'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
-            'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
-            'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
-            }
+from shinken.pollerdaemon import Poller, usage
 
 
-################### Process launch part
-def usage(name):
-    print "Shinken Poller Daemon, version %s, from : " % VERSION
-    print "        Gabes Jean, naparuba@gmail.com"
-    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
-    print "        Gregory Starck, g.starck@gmail.com"
-    print "Usage: %s [options] [-c configfile]" % name
-    print "Options:"
-    print " -c, --config"
-    print "\tConfig file."
-    print " -d, --daemon"
-    print "\tRun in daemon mode"
-    print " -r, --replace"
-    print "\tReplace previous running scheduler"
-    print " -h, --help"
-    print "\tPrint detailed help screen"
-    print " --debug"
-    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-
-
-#lets go to the party
 if __name__ == "__main__":
-    #Manage the options
+    # Manage the options
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hrdc::w", ["help", "replace", "daemon", "config=", "debug=", "easter"])
     except getopt.GetoptError, err:
@@ -155,9 +86,8 @@ if __name__ == "__main__":
         else:
             print "Sorry, the option",o, a, "is unknown"
             usage(sys.argv[0])
-            sys.exit()
+            sys.exit(1)
 
-    p = Poller(config_file, is_daemon, do_replace, debug, debug_file)
+    daemon = Poller(config_file, is_daemon, do_replace, debug, debug_file)
 
-    p.main()
-
+    daemon.main()
