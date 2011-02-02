@@ -140,9 +140,9 @@ class IForArbiter(Pyro.core.ObjBase):
         # Now manage modules
         for module in conf['global']['modules']:
             # If we already got it, bypass
-            if not module.get_name() in self.app.worker_modules:
-                logger.log("[%s] Got module : %s " % (self.name, module.get_name()))
-                self.app.worker_modules[module.get_name()] = {'to_q' : Queue()}
+            if not module.module_type in self.app.worker_modules:
+                logger.log("[%s] Got module : %s " % (self.name, module.module_type))
+                self.app.worker_modules[module.module_type] = {'to_q' : Queue()}
         
 
 
@@ -520,6 +520,8 @@ class Satellite(Daemon):
         if hasattr(a, 'module_type'):
             print "search for a module", a.module_type
             if a.module_type in self.worker_modules:
+                if a.module_type != 'fork':
+                    print "GOT A SPECIAL QUEUE (%s) for" % a.module_type, a.__dict__, 
                 return self.worker_modules[a.module_type]['to_q']
             # Nothing found, it's not good at all!
             return None

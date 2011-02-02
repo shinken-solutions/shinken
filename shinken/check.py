@@ -48,10 +48,11 @@ class Check(Action):
                 'poller_tag' : {'required': False, 'default': None},
                 'env' : {'required' : False, 'default' : {}},
                 'internal' : {'required': False, 'default':False},
+                'module_type' : {'required': False, 'default': 'fork'},
                 }
 
     #id = 0 #Is common to Actions
-    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag=None, env={}):
+    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag=None, env={}, module_type='fork'):
 
         self.is_a = 'check'
         self.type = ''
@@ -77,6 +78,7 @@ class Check(Action):
         self.execution_time = 0
         self.perf_data = ''
         self.poller_tag = poller_tag
+        self.module_type = module_type
         self.env = env
         # If it's a business rule, manage it as a special check
         if ref and ref.got_business_rule or command.startswith('_internal'):

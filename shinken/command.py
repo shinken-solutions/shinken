@@ -33,6 +33,8 @@ class Command(object):
             fill_brok=['full_status']),
         'poller_tag': StringProp(
             default=None),
+        'module_type': StringProp(
+            default=None),
         }
 
     def __init__(self, params={}):
@@ -42,6 +44,8 @@ class Command(object):
             setattr(self, key, params[key])
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = None
+        if not hasattr(self, 'module_type'):
+            self.module_type = 'fork'
 
 
     def pythonize(self):
@@ -103,6 +107,7 @@ class CommandCall:
         #If the host/service do not give an override poller_tag, take
         #the one of the command
         self.poller_tag = poller_tag #from host/service
+        self.module_type = self.command.module_type
         if self.valid and poller_tag == None:
             self.poller_tag = self.command.poller_tag #from command if not set
 

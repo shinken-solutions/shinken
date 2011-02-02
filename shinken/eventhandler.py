@@ -63,10 +63,11 @@ class EventHandler(Action):
                 'timeout' : IntegerProp(default=10),
                 'check_time' : IntegerProp(default=0),
                 'command' : StringProp(default=''),
+                'module_type' : StringProp(default=''),
                 }
 
     #id = 0 #Is common to Actions
-    def __init__(self, command, id=None, timeout=10, env={}):
+    def __init__(self, command, id=None, timeout=10, env={}, module_type='fork'):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
@@ -84,7 +85,7 @@ class EventHandler(Action):
         self.execution_time = 0
         self.perf_data = ''
         self.env = {}
-
+        self.module_type = module_type
 
 
     #return a copy of the check but just what is important for execution

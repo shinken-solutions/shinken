@@ -94,6 +94,9 @@ class Notification(Action):
         'sched_id' : IntegerProp(default=0),
         'timeout' : IntegerProp(default=10),
         'check_time' : IntegerProp(default=0),
+        'module_type' : StringProp(
+            default='',
+            fill_brok=['full_status']),
         }
 
     macros = {
@@ -116,7 +119,7 @@ class Notification(Action):
                      reason_type=1, state=0, ack_author='', ack_data='', \
                      escalated=False, contacts_notified=0, \
                      start_time=0, end_time=0, notification_type=0, id=None, \
-                     notif_nb=1, timeout=10, env={}):
+                     notif_nb=1, timeout=10, env={}, module_type='fork'):
         self.is_a = 'notification'
         self.type = type
         if id == None: #id != None is for copy call only
@@ -133,6 +136,7 @@ class Notification(Action):
         self.output = None
         self.ref = ref
         self.env = env
+        self.module_type = module_type
         #self.ref_type = ref_type
         self.t_to_go = t_to_go
         self.notif_nb = notif_nb
