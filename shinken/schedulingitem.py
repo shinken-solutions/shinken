@@ -526,32 +526,25 @@ class SchedulingItem(Item):
     # UNKNOWN during a HARD state are not so important, and they should
     # ot raise notif about it
     def update_hard_unknown_phase_state(self):
-        print "MON CUL c'est du poulet\n"*2
-        print "update_hard_unknown_phase_state", self.last_state, self.last_state_type, self.state_type, self.state
-        # Manage only services
-        if not hasattr(self, 'in_hard_unknown_reach_phase'):
-            return
         self.was_in_hard_unknown_reach_phase = self.in_hard_unknown_reach_phase
         
         # We do not care about SOFT state at all
         # and we are sure we are no more in such a phase
         if self.state_type != 'HARD' or self.last_state_type != 'HARD':
             self.in_hard_unknown_reach_phase = False
-            print "No hard state, so not in in_hard_unknown_phase"
 
         # So if we are not in already in such a phase, we check for
         # a start or not. So here we are sure to be in a HARD/HARD folowing
         # state
         if not self.in_hard_unknown_reach_phase:
-            if self.state == 'UNKNOWN' and self.last_state != 'UNKNOWN':
-                print "Going to a in_hard_unknown_phase state"
+            if self.state == 'UNKNOWN' and self.last_state != 'UNKNOWN' \
+            or self.state == 'UNREACHABLE' and self.last_state != 'UNREACHABLE':
                 self.in_hard_unknown_reach_phase = True
                 return
         else:
             # if we were already in such a phase, look for its end
-            if self.state != 'UNKNOWN':
+            if self.state != 'UNKNOWN' and self.state != 'UNREACHABLE':
                 self.in_hard_unknown_reach_phase = False
-                print "No more in in_hard_unknown_phase state"
 
 
 
@@ -885,7 +878,7 @@ class SchedulingItem(Item):
 
 
     # See if an escalation is eligible at t and notif nb=n
-    def is_escalable(self, n):#t, n):
+    def is_escalable(self, n):
         cls = self.__class__
 
         # We search since when we are in notification for escalations

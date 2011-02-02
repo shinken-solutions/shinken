@@ -533,6 +533,7 @@ class Host(SchedulingItem):
         'business_rule' : StringProp(default=None),
         
         # Manage the unkown/unreach during hard state
+        # From now its not really used
         'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
 

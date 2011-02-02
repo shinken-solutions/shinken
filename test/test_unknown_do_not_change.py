@@ -91,6 +91,15 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
+        # We check if we can still have new notifications of course
+        # And we speedup the notification
+        for n in svc.notifications_in_progress.values():
+            n.t_to_go = time.time()        
+        self.scheduler_loop(1, [[svc, 2, 'CRITICAL | value1=1 value2=2']])
+        print svc.state, svc.state_type
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
+        self.show_and_clear_logs()
+
 
 
     # But we want to still raise notif as unknown if we first met this state
@@ -131,7 +140,90 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.show_and_clear_logs()
 
 
+
+
+    # We got problem with unknown results on bad connexions 
+    # for critical services and host : if it was in a notification pass
+    # then the notification is restarted, but it's just a missing data,
+    # not a reason to warn about it
+    def test_unreach_do_not_change_state(self):
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+
+
+        print "GO OK"*10
+        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK | value1=0 value2=0']])
+        self.assert_(svc.state == 'OK')
+        self.assert_(svc.state_type == 'HARD')
+
+        print "GO DOWN SOFT"*10
+        # Ok we are UP, now we seach to go in trouble
+        self.scheduler_loop(1, [[host, 2, 'PROBLEM | value1=1 value2=2']])
+        # CRITICAL/SOFT
+        self.assert_(host.state == 'DOWN')
+        self.assert_(host.state_type == 'SOFT')
+        # And again and again :)
+        print "GO CRITICAL HARD"*10
+        self.scheduler_loop(2, [[host, 2, 'PROBLEM | value1=1 value2=2']])
+        # CRITICAL/HARD
+        self.assert_(host.state == 'DOWN')
+        self.assert_(host.state_type == 'HARD')
+
+        # Should have a notification about it
+        self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
+        self.show_and_clear_logs()
+
+        print "GO UNREACH HARD"*10
+        # Then we make it as a unknown state
+        self.scheduler_loop(3, [[router, 2, 'Bad router | value1=1 value2=2']])
+        # so we warn about the router, not the host
+        self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
+        self.show_and_clear_logs()
+
+        print "BIBI"*100
+        for n in host.notifications_in_progress.values():
+            print n.__dict__
+
+        # the we go in UNREACH
+        self.scheduler_loop(1, [[host, 2, 'CRITICAL | value1=1 value2=2']])
+        print host.state, host.state_type
+        self.show_and_clear_logs()
+        self.assert_(host.state == 'UNREACHABLE')
+        self.assert_(host.state_type == 'HARD')
+
+        # The the router came back :)
+        print "Router is back from Hell"*10
+        self.scheduler_loop(1, [[router, 0, 'Ok, I am back guys | value1=1 value2=2']])
+        self.assert_(self.any_log_match('HOST NOTIFICATION.*;UP'))
+        self.show_and_clear_logs()
+
+        # But how the host will say now?
+        self.scheduler_loop(1, [[host, 2, 'CRITICAL | value1=1 value2=2']])
+        print host.state, host.state_type
+        # And here we DO NOT WANT new notification
+        # If you folow, it THE important point of this test!
+        self.assert_(not self.any_log_match('HOST NOTIFICATION.*;DOWN'))
+        self.show_and_clear_logs()
         
+        print "Now go in the future, I want a notification"
+        # Check if we still got the next notification for this of course
+        
+        # Hack so the notification will raise now if it can
+        for n in host.notifications_in_progress.values():
+            n.t_to_go = time.time()
+        self.scheduler_loop(1, [[host, 2, 'CRITICAL | value1=1 value2=2']])
+        print host.state, host.state_type
+        # And here we DO NOT WANT new notification
+        self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
+        self.show_and_clear_logs()
+        
+
+
 
 
 if __name__ == '__main__':
