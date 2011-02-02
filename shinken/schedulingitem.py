@@ -818,17 +818,18 @@ class SchedulingItem(Item):
         else:
             self.state_type_id = 0
 
+        # fill last_hard_state_change to now
+        # if we just change from SOFT->HARD or
+        # in HARD we change of state (Warning->critical, or critical->ok, etc etc)
+        if self.state_type == 'HARD' and (self.last_state_type == 'SOFT' or self.last_state != self.state):
+            self.last_hard_state_change = int(time.time())
+
         # update event/problem-counters
         self.update_event_and_problem_id()
         self.broks.append(self.get_check_result_brok())
         self.get_obsessive_compulsive_processor_command()
         self.get_perfdata_command()
 
-        # fill last_hard_state_change to now
-        # if we just change from SOFT->HARD or
-        # in HARD we change of state (Warning->critical, or critical->ok, etc etc)
-        if self.state_type == 'HARD' and (self.last_state_type == 'SOFT' or self.last_state != self.state):
-            self.last_hard_state_change = int(time.time())
 
 
 
