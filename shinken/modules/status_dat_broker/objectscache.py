@@ -22,14 +22,14 @@ import time
 import os
 import tempfile
 
-from shinken.service import Service
-from shinken.host import Host
-from shinken.contact import Contact
-from shinken.hostgroup import Hostgroup
-from shinken.servicegroup import Servicegroup
-from shinken.contactgroup import Contactgroup
-from shinken.timeperiod import Timeperiod
-from shinken.command import Command
+from shinken.objects.service import Service
+from shinken.objects.host import Host
+from shinken.objects.contact import Contact
+from shinken.objects.hostgroup import Hostgroup
+from shinken.objects.servicegroup import Servicegroup
+from shinken.objects.contactgroup import Contactgroup
+from shinken.objects.timeperiod import Timeperiod
+from shinken.objects.command import Command
 
 from shinken.util import from_bool_to_string,from_list_to_split
 

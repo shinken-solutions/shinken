@@ -15,17 +15,21 @@ import unittest
 
 sys.path.append("..")
 sys.path.append("../shinken")
-sys.path.append("../bin")
-sys.path.append(os.path.abspath("bin"))
+#sys.path.append("../bin")
+#sys.path.append(os.path.abspath("bin"))
 
-from shinken.config import Config
+
+import shinken
+from shinken.objects.config import Config
+from shinken.objects.command import Command
+from shinken.objects.module import Module
+
 from shinken.dispatcher import Dispatcher
 from shinken.log import logger
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager, ExternalCommand
 from shinken.check import Check
-from shinken.module import Module
 from shinken.arbiterlink import ArbiterLink
 from shinken.schedulerlink import SchedulerLink
 from shinken.pollerlink import PollerLink
@@ -33,16 +37,9 @@ from shinken.reactionnerlink import ReactionnerLink
 from shinken.brokerlink import BrokerLink
 from shinken.satellitelink import SatelliteLink
 from shinken.notification import Notification
-from shinken.command import Command
+
 from shinken.brok import Brok
 
-
-shinkenarbiter = __import__("shinken-arbiter")
-shinkenpoller = __import__("shinken-poller")
-shinkenscheduler = __import__("shinken-scheduler")
-
-
-import shinken
 
 
 class ShinkenTest(unittest.TestCase):

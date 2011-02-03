@@ -28,9 +28,9 @@
 #from util import to_int, to_char, to_split, to_bool
 from copy import copy
 
+from .command import CommandCall
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
-from shinken.command import CommandCall
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 

@@ -89,7 +89,7 @@ class ModulesManager(object):
 Returns: True on successfull init. False if instance init method raised any Exception. """ 
         try:
             inst.init()
-        except Exception as e:
+        except Exception, e:
             print "Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e))
             print "Back trace of this remove :"
             traceback.print_exc(file=sys.stdout)    

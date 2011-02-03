@@ -23,30 +23,33 @@
 
 import re, string
 
-from shinken.config import Config
-from shinken.timeperiod import Timeperiod, Timeperiods
-from shinken.service import Service, Services
-from shinken.command import Command, Commands
-from shinken.resultmodulation import Resultmodulation, Resultmodulations
-from shinken.escalation import Escalation, Escalations
-from shinken.serviceescalation import Serviceescalation, Serviceescalations
-from shinken.hostescalation import Hostescalation, Hostescalations
-from shinken.host import Host, Hosts
-from shinken.hostgroup import Hostgroup, Hostgroups
-from shinken.realm import Realm, Realms
-from shinken.contact import Contact, Contacts
-from shinken.contactgroup import Contactgroup, Contactgroups
-from shinken.notificationway import NotificationWay, NotificationWays
-from shinken.servicegroup import Servicegroup, Servicegroups
-from shinken.item import Item
-from shinken.servicedependency import Servicedependency, Servicedependencies
-from shinken.hostdependency import Hostdependency, Hostdependencies
+from shinken.objects.config import Config
+from shinken.objects.timeperiod import Timeperiod, Timeperiods
+from shinken.objects.service import Service, Services
+from shinken.objects.command import Command, Commands
+import shinken.objects
+
+from shinken.objects.resultmodulation import Resultmodulation, Resultmodulations
+from shinken.objects.escalation import Escalation, Escalations
+from shinken.objects.serviceescalation import Serviceescalation, Serviceescalations
+from shinken.objects.hostescalation import Hostescalation, Hostescalations
+from shinken.objects.host import Host, Hosts
+from shinken.objects.hostgroup import Hostgroup, Hostgroups
+from shinken.objects.realm import Realm, Realms
+from shinken.objects.contact import Contact, Contacts
+from shinken.objects.contactgroup import Contactgroup, Contactgroups
+from shinken.objects.notificationway import NotificationWay, NotificationWays
+from shinken.objects.servicegroup import Servicegroup, Servicegroups
+from shinken.objects.item import Item
+from shinken.objects.servicedependency import Servicedependency, Servicedependencies
+from shinken.objects.hostdependency import Hostdependency, Hostdependencies
+
 from shinken.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.schedulerlink import SchedulerLink, SchedulerLinks
 from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
 from shinken.brokerlink import BrokerLink, BrokerLinks
 from shinken.pollerlink import PollerLink, PollerLinks
-from shinken.module import Module, Modules
+from shinken.objects.module import Module, Modules
 from shinken.graph import Graph
 from shinken.log import logger
 from shinken.comment import Comment

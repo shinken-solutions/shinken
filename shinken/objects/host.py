@@ -28,9 +28,9 @@ scheduling/consome check smart things :)
 import time
 import re #for keys generator
 
+from .item import Items
+from .schedulingitem import SchedulingItem
 from shinken.autoslots import AutoSlots
-from shinken.item import Items
-from shinken.schedulingitem import SchedulingItem
 from shinken.util import to_int, to_float, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, expand_with_macros
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.graph import Graph
@@ -275,7 +275,7 @@ class Host(SchedulingItem):
             retention=True),
         'last_hard_state_change': FloatProp(
             default=time.time(),
-            fill_brok=['full_status'],
+            fill_brok=['full_status', 'check_result'],
             retention=True),
         'last_hard_state': StringProp(
             default='PENDING',

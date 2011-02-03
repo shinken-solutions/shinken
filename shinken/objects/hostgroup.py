@@ -20,7 +20,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from itemgroup import Itemgroup, Itemgroups
+from .itemgroup import Itemgroup, Itemgroups
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class Hostgroup(Itemgroup):

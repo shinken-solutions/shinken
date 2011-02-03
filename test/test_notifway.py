@@ -22,8 +22,9 @@
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
-from shinken_test import *
+import time
+
+from shinken_test import unittest, ShinkenTest
 
 
 class TestConfig(ShinkenTest):

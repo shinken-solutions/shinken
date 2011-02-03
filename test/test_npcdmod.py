@@ -23,15 +23,17 @@
 # This file is used to test the npcd broker module
 #
 
-from shinken_test import *
-from shinken.module import Module
+import os, sys, string, time
+
+from shinken_test import unittest, ShinkenTest
+
+from shinken.objects.module import Module
+
+from shinken.modules import npcdmod_broker
+from shinken.modules.npcdmod_broker import Npcd_broker
 
 
-sys.path.append("../shinken/modules")
-import npcdmod_broker
-from npcdmod_broker import Npcd_broker
 sys.setcheckinterval(10000)
-
 
 modconf = Module()
 modconf.module_name = "ncpd"

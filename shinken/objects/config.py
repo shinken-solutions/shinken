@@ -31,29 +31,13 @@ import itertools
 import time
 import random
 
-from shinken.timeperiod import Timeperiod, Timeperiods
-from shinken.service import Service, Services
-from shinken.command import Command, Commands
-from shinken.resultmodulation import Resultmodulation, Resultmodulations
-from shinken.escalation import Escalation, Escalations
-from shinken.serviceescalation import Serviceescalation, Serviceescalations
-from shinken.hostescalation import Hostescalation, Hostescalations
-from shinken.host import Host, Hosts
-from shinken.hostgroup import Hostgroup, Hostgroups
-from shinken.realm import Realm, Realms
-from shinken.contact import Contact, Contacts
-from shinken.contactgroup import Contactgroup, Contactgroups
-from shinken.notificationway import NotificationWay, NotificationWays
-from shinken.servicegroup import Servicegroup, Servicegroups
-from shinken.item import Item
-from shinken.servicedependency import Servicedependency, Servicedependencies
-from shinken.hostdependency import Hostdependency, Hostdependencies
+from shinken.objects import *
+
 from shinken.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.schedulerlink import SchedulerLink, SchedulerLinks
 from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
 from shinken.brokerlink import BrokerLink, BrokerLinks
 from shinken.pollerlink import PollerLink, PollerLinks
-from shinken.module import Module, Modules
 from shinken.graph import Graph
 from shinken.log import logger
 

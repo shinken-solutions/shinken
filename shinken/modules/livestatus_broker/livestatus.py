@@ -36,7 +36,7 @@ except ImportError:
         import sqlite as sqlite3
 
 
-from shinken.service import Service
+from shinken.objects.service import Service
 from shinken.external_command import ExternalCommand
 from shinken.macroresolver import MacroResolver
 from shinken.util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split,get_customs_keys,get_customs_values

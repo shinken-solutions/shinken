@@ -56,20 +56,15 @@ class Daemon:
         self.debug = debug
         self.debug_file = debug_file
         self.interrupted = False
-        
-        self.host = None
-        self.port = None
-        self.pidfile = None
-        self.workdir = None
-        
+                
+        self.daemon = None
         # Log init
         self.log = logger
         self.log.load_obj(self)
         
         os.umask(UMASK)
         self.set_exit_handler()
-        
-        self.print_header()
+
  
  
     def add(self, elt):
@@ -87,7 +82,7 @@ class Daemon:
     def change_to_workdir(self):
         try:
             os.chdir(self.workdir)
-        except Exception as e:
+        except Exception, e:
             raise InvalidWorkDir(e)
         print("Successfully changed to workdir: %s" % (self.workdir))
 
@@ -95,7 +90,7 @@ class Daemon:
         print "Unlinking", self.pidfile
         try:
             os.unlink(self.pidfile)
-        except Exception as e:
+        except Exception, e:
             print("Got an error unlinking our pidfile: %s" % (e))
 
     def check_shm(self):
@@ -113,7 +108,7 @@ class Daemon:
         ## if problem on open or creating file it'll be raised to the caller:
         try:
             self.fpid = open(self.pidfile, 'arw+')
-        except Exception as e:
+        except Exception, e:
             raise InvalidPidDir(e)     
 
     def check_parallel_run(self):
@@ -129,11 +124,11 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         
         try:
             os.kill(pid, 0)
-        except OverflowError as e:
+        except OverflowError, e:
             ## pid is too long for "kill" : so bad content:
             print("stale pidfile exists: pid=%d is too long" % (pid))
             return
-        except os.error as e:
+        except os.error, e:
             if e.errno == errno.ESRCH:
                 print("stale pidfile exists (pid=%d not exists).  reusing it." % (pid))
                 return
@@ -145,7 +140,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         print "Replacing previous instance ", pid
         try:
             os.kill(pid, 3)
-        except os.error as e:
+        except os.error, e:
             if e.errno != errno.ESRCH:
                 raise
         
@@ -220,7 +215,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             if status != 0:
                 print("something weird happened with/during second fork : status=", status)
             self.close_fds()
-            os._exit(status)     
+            os._exit(status)
 
         os.setsid()
         try:
@@ -234,7 +229,8 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 
         self.fpid.close()
         del self.fpid
-        print("We are now fully daemonized :) pid=%d" % (os.getpid()))
+        self.pid = os.getpid()
+        print("We are now fully daemonized :) pid=%d" % (self.pid))
 
 
     def do_daemon_init_and_start(self, ssl_conf=None):
@@ -277,7 +273,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
     def get_socks_activity(self, socks, timeout):
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
-        except select.error as e:
+        except select.error, e:
             errnum, _ = e
             if errnum == errno.EINTR:
                 return []

@@ -22,21 +22,15 @@
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
-from shinken_test import *
-
 import os
-import sys
+import random, time
 
-import threading
-import random
-
-curdir = os.getcwd()
+from shinken_test import unittest
 
 from shinken.daemon import InvalidPidDir, InvalidWorkDir
 from shinken.pyro_wrapper import PortNotFree
 
-
+from shinken.daemons.pollerdaemon import Poller
 # all shinken-* services are subclassing Daemon so we only need to test one normally...
 
 # I choose poller.
@@ -44,64 +38,54 @@ from shinken.pyro_wrapper import PortNotFree
 # and we can use its default/dev config : 
 pollerconfig = "../etc/pollerd.ini"
 
+curdir = os.getcwd()
 
-class TestConfig(ShinkenTest):
-    
+class Test_Daemon_Bad_Start(unittest.TestCase):
+           
     def gen_invalid_directory(self, f):
         basedir = "/invalid_directory42/" + str(random.randint(0,100))
         while os.path.exists(basedir):
             basedir += os.path.sep + str(random.randint(0,100))
         return basedir + os.path.sep + f 
 
-
     def get_login_and_group(self, p):
         try:
-            p.user = p.group = os.getlogin()
-        except OSError: #on some rare case, we can have a problem here
-            # so bypas it with default value
-            p.user = p.group = 'shinken'
+            user = os.getlogin()
+        except OSError: # on some rare case, we can have a problem here
+            # so bypass it and keep default value
+            return
+        p.user = p.group = user
 
+    def get_poller_daemon(self):
+        os.chdir(curdir)
+        p = Poller(pollerconfig, False, True, False, None)
+        p.do_load_config()
+        self.get_login_and_group(p)
+        return p
     
     def test_bad_piddir(self):
-        print("Testing bad piddir ..")
-        os.chdir(curdir)
-        p1 = shinkenpoller.Poller(pollerconfig, False, True, False, None)
-        p1.do_load_config()
-        self.get_login_and_group(p1)
-        p1.pidfile = self.gen_invalid_directory(p1.pidfile)
-        self.assertRaises(InvalidPidDir, p1.do_daemon_init_and_start)
+        print("Testing bad piddir ... mypid=%d" % (os.getpid()))
+        p = self.get_poller_daemon()
+        p.pidfile = self.gen_invalid_directory(p.pidfile)
+        self.assertRaises(InvalidPidDir, p.do_daemon_init_and_start)
+        p.do_stop()
     
     def test_bad_workdir(self):
-        print("Testing port not free ...")
-        os.chdir(curdir)
-        p1 = shinkenpoller.Poller(pollerconfig, False, True, False, None)
-        p1.do_load_config()
-        p1.workdir = self.gen_invalid_directory(p1.workdir)
-        self.get_login_and_group(p1)
-        self.assertRaises(InvalidWorkDir, p1.do_daemon_init_and_start)
+        print("Testing bad workdir ... mypid=%d" % (os.getpid()))
+        p = self.get_poller_daemon()
+        p.workdir = self.gen_invalid_directory(p.workdir)
+        self.assertRaises(InvalidWorkDir, p.do_daemon_init_and_start)
+        p.do_stop()
 
     def test_port_not_free(self):
-        print("Testing port not free ...")
-        os.chdir(curdir)
-        p1 = shinkenpoller.Poller(pollerconfig, False, True, False, None)
-        p1.do_load_config()
-        self.get_login_and_group(p1)
-        p1.do_daemon_init_and_start()
-        p1.do_post_daemon_init()
-        
-        os.chdir(curdir)  ## first one has changed our cwd to its workdir, so reset to good one
-        
-        p2 = shinkenpoller.Poller(pollerconfig, False, True, False, None)
-        p2.do_load_config()
-        self.get_login_and_group(p2)
-        
+        time.sleep(1)
+        print("Testing port not free ... mypid=%d" % (os.getpid()))
+        p1 = self.get_poller_daemon()
+        p1.do_daemon_init_and_start()           
         os.unlink(p1.pidfile)  ## so that second poller will not see first started poller
-        
+        p2 = self.get_poller_daemon()        
         self.assertRaises(PortNotFree, p2.do_daemon_init_and_start)
         
         
 if __name__ == '__main__':
     unittest.main()
-
-
-        

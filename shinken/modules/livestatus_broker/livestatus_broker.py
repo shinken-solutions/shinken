@@ -39,15 +39,15 @@ except ImportError: # python 2.4 do not have it
         import sqlite as sqlite3 # one last try
 import Queue
 
-from shinken.host import Host
-from shinken.hostgroup import Hostgroup
-from shinken.service import Service
-from shinken.servicegroup import Servicegroup
-from shinken.contact import Contact
-from shinken.contactgroup import Contactgroup
-from shinken.timeperiod import Timeperiod
-from shinken.command import Command
-from shinken.config import Config
+from shinken.objects.host import Host
+from shinken.objects.hostgroup import Hostgroup
+from shinken.objects.service import Service
+from shinken.objects.servicegroup import Servicegroup
+from shinken.objects.contact import Contact
+from shinken.objects.contactgroup import Contactgroup
+from shinken.objects.timeperiod import Timeperiod
+from shinken.objects.command import Command
+from shinken.objects.config import Config
 from shinken.schedulerlink import SchedulerLink
 from shinken.reactionnerlink import ReactionnerLink
 from shinken.pollerlink import PollerLink

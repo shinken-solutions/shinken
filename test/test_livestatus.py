@@ -32,15 +32,15 @@ import subprocess
 import shutil
 import time
 import random
-from timeperiod import Timeperiod
-from brok import Brok
-from module import Module
 
-sys.path.append("../shinken/modules/livestatus_broker")
-import livestatus_broker
-from livestatus_broker import Livestatus_broker
+from shinken.brok import Brok
+from shinken.objects.timeperiod import Timeperiod
+from shinken.objects.module import Module
+
+from shinken.modules import livestatus_broker
+from shinken.modules.livestatus_broker import Livestatus_broker
+
 sys.setcheckinterval(10000)
-
 
 modconf = Module()
 modconf.module_name = "livestatus"

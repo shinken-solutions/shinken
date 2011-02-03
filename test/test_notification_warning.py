@@ -22,8 +22,10 @@
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
-from shinken_test import *
+
+from shinken_test import unittest, ShinkenTest
+
+from shinken.notification import Notification
 
 
 class TestConfig(ShinkenTest):

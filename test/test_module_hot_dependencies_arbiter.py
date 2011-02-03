@@ -23,14 +23,17 @@
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
-import os
-from shinken_test import *
-sys.path.append("../shinken/modules")
+import os, sys, time
 
-import hot_dependencies_arbiter
-from hot_dependencies_arbiter import *
-from module import Module
+from shinken_test import unittest, ShinkenTest
+
+from shinken.log import logger
+
+from shinken.objects.module import Module
+
+from shinken.modules import hot_dependencies_arbiter
+from shinken.modules.hot_dependencies_arbiter import Hot_dependencies_arbiter, get_instance
+
 
 modconf = Module()
 modconf.module_name = "PickleRetention"

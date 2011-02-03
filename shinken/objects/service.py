@@ -31,9 +31,10 @@ except ImportError:
     NodeSet = None
 
 
+from .item import Items
+from .schedulingitem import SchedulingItem
+
 from shinken.autoslots import AutoSlots
-from shinken.item import Items
-from shinken.schedulingitem import SchedulingItem
 from shinken.util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, expand_with_macros
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.macroresolver import MacroResolver
@@ -135,7 +136,7 @@ class Service(SchedulingItem):
         'last_state_type' : StringProp(default='HARD', fill_brok=['full_status'], retention=True),
         'last_state_id' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_state_change' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
-        'last_hard_state_change' : FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_hard_state_change' : FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state' : StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id' : IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_time_ok' : IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
