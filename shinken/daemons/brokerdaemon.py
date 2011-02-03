@@ -655,6 +655,9 @@ class Broker(Satellite):
     # Main function, will loop forever
     def main(self):
         
+        for line in self.get_header():
+            self.log.log(line)
+
         logger.log("[Broker] Using working directory : %s" % os.path.abspath(self.workdir))
         
         self.do_daemon_init_and_start()

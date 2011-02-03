@@ -92,7 +92,7 @@ except ImportError, e:
         sys.path.append(os.sep.join(elts))
 
 
-from shinken.schedulerdaemon import Shinken, usage
+from shinken.daemons.schedulerdaemon import Shinken, usage
 
 
 #Here we go!

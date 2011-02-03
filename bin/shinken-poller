@@ -48,7 +48,7 @@ except ImportError, e:
         sys.path.append(os.sep.join(elts))
 
 
-from shinken.pollerdaemon import Poller, usage
+from shinken.daemons.pollerdaemon import Poller, usage
 
 
 if __name__ == "__main__":

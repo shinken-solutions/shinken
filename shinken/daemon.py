@@ -63,8 +63,7 @@ class Daemon:
         
         os.umask(UMASK)
         self.set_exit_handler()
-        
-        self.print_header()
+
  
  
     def add(self, elt):

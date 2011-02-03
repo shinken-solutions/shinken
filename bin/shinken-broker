@@ -40,6 +40,13 @@ import getopt
 #it so (it's a untar install) we add .. in the path
 try:
     import shinken
+    # HACK : under python2.4, without this, it seems that
+    # modules are not so happy to import
+    if hasattr(sys.modules['__main__'], '__file__'):
+        my_path = os.path.abspath(sys.modules['__main__'].__file__)
+        elts = os.path.dirname(my_path).split(os.sep)[:-1]
+        elts.append('shinken')
+        sys.path.append(os.sep.join(elts))
 except ImportError, e:
     # We can have problem in importing with direct launch.
     # if so we must add the shinken lib in .. of this file to
@@ -51,7 +58,7 @@ except ImportError, e:
         elts.append('shinken')
         sys.path.append(os.sep.join(elts))
 
-from shinken.brokerdaemon import Broker, usage
+from shinken.daemons.brokerdaemon import Broker, usage
 
 #lets go to the party
 if __name__ == "__main__":

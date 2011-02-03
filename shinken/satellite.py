@@ -688,6 +688,9 @@ class Satellite(Daemon):
 
     def main(self):
 
+        for line in self.get_header():
+            self.log.log(line)
+
         self.do_load_config()
         
         self.do_daemon_init_and_start()
