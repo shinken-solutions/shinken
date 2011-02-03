@@ -26,7 +26,7 @@
 
 #It's ugly I know....
 from shinken_test import *
-from timeperiod import Timeperiod
+from shinken.objects.timeperiod import Timeperiod
 
 class TestTimeperiods(ShinkenTest):
 

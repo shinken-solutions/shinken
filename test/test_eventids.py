@@ -28,7 +28,7 @@
 
 #It's ugly I know....
 from shinken_test import *
-from shinken.schedulingitem import SchedulingItem
+from shinken.objects.schedulingitem import SchedulingItem
 
 
 class TestConfig(ShinkenTest):

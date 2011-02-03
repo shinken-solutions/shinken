@@ -23,12 +23,11 @@
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
-import os
-from shinken_test import *
-sys.path.append("../shinken/modules")
-from merlindb_broker import *
+from shinken_test import unittest, ShinkenTest
+
 from shinken.brok import Brok
+from shinken.modules.merlindb_broker import get_instance
+
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test

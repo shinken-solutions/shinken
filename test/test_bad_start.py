@@ -22,18 +22,15 @@
 # This file is used to test reading and processing of config files
 #
 
-from shinken_test import ShinkenTest, unittest
 import os
+import random, time
 
-
-import random
-
-curdir = os.getcwd()
+from shinken_test import unittest
 
 from shinken.daemon import InvalidPidDir, InvalidWorkDir
 from shinken.pyro_wrapper import PortNotFree
 
-from shinken.pollerdaemon import Poller
+from shinken.daemons.pollerdaemon import Poller
 # all shinken-* services are subclassing Daemon so we only need to test one normally...
 
 # I choose poller.
@@ -41,6 +38,7 @@ from shinken.pollerdaemon import Poller
 # and we can use its default/dev config : 
 pollerconfig = "../etc/pollerd.ini"
 
+curdir = os.getcwd()
 
 class Test_Daemon_Bad_Start(unittest.TestCase):
            
@@ -66,23 +64,24 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
         return p
     
     def test_bad_piddir(self):
-        print("Testing bad piddir ...")
+        print("Testing bad piddir ... mypid=%d" % (os.getpid()))
         p = self.get_poller_daemon()
         p.pidfile = self.gen_invalid_directory(p.pidfile)
         self.assertRaises(InvalidPidDir, p.do_daemon_init_and_start)
+        p.do_stop()
     
     def test_bad_workdir(self):
-        print("Testing bad workdir ...")
+        print("Testing bad workdir ... mypid=%d" % (os.getpid()))
         p = self.get_poller_daemon()
         p.workdir = self.gen_invalid_directory(p.workdir)
         self.assertRaises(InvalidWorkDir, p.do_daemon_init_and_start)
+        p.do_stop()
 
     def test_port_not_free(self):
-        print("Testing port not free ...")
+        time.sleep(1)
+        print("Testing port not free ... mypid=%d" % (os.getpid()))
         p1 = self.get_poller_daemon()
-        p1.do_daemon_init_and_start()
-        p1.do_post_daemon_init()
-            
+        p1.do_daemon_init_and_start()           
         os.unlink(p1.pidfile)  ## so that second poller will not see first started poller
         p2 = self.get_poller_daemon()        
         self.assertRaises(PortNotFree, p2.do_daemon_init_and_start)

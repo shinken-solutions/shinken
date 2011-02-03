@@ -19,17 +19,18 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.item import Item, Items
+from .item import Item, Items
+from .escalation import Escalation
 from shinken.util import to_int, to_split
-from shinken.escalation import Escalation
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
-class Hostescalation(Item):
+class Serviceescalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
-    my_type = 'hostescalation'
+    my_type = 'serviceescalation'
 
     properties={'host_name' : StringProp(),
                 'hostgroup_name' : StringProp(),
+                'service_description' : StringProp(),
                 'first_notification' : IntegerProp(),
                 'last_notification' : IntegerProp(),
                 'notification_interval' : IntegerProp(),
@@ -50,9 +51,9 @@ class Hostescalation(Item):
         return ''
 
 
-class Hostescalations(Items):
+class Serviceescalations(Items):
     name_property = ""
-    inner_class = Hostescalation
+    inner_class = Serviceescalation
 
 
     #We look for contacts property in contacts and
@@ -60,14 +61,11 @@ class Hostescalations(Items):
         #Now we explode all escalations (host_name, service_description) to escalations
         for es in self:
             properties = es.__class__.properties
-            name = getattr(es, 'host_name', getattr(es, 'hostgroup_name', ''))
-            creation_dict = {'escalation_name' : 'Generated-Hostescalation-%d-%s' % (es.id, name)}
+
+            creation_dict = {'escalation_name' : 'Generated-Serviceescalation-%d' % es.id}
             for prop in properties:
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)
+            #print "Creation an escalation with :", creation_dict
             s = Escalation(creation_dict)
             escalations.add_escalation(s)
-
-        #print "All escalations"
-        #for es in escalations:
-        #    print es

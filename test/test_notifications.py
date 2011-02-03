@@ -23,9 +23,9 @@
 # This file is used to test host- and service-downtimes.
 #
 
+import time
 
-#It's ugly I know....
-from shinken_test import *
+from shinken_test import unittest, ShinkenTest
 
 
 class TestConfig(ShinkenTest):

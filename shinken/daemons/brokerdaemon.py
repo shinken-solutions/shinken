@@ -30,25 +30,26 @@ from shinken.bin import VERSION
 from shinken.satellite import Satellite
 from shinken.daemon import Daemon
 from shinken.util import to_int, to_bool, sort_by_ids
-from shinken.module import Module, Modules
 from shinken.modulesmanager import ModulesManager
 from shinken.log import logger
 from shinken.brok import Brok
 
 #Load to be used by modules
-from shinken.resultmodulation import Resultmodulation
-from shinken.escalation import Escalation
-from shinken.timeperiod import Timeperiod
-from shinken.notificationway import NotificationWay, NotificationWays
-from shinken.contact import Contact
-from shinken.command import Command, CommandCall
+from shinken.objects.config import Config
+from shinken.objects.resultmodulation import Resultmodulation
+from shinken.objects.escalation import Escalation
+from shinken.objects.timeperiod import Timeperiod
+from shinken.objects.notificationway import NotificationWay, NotificationWays
+from shinken.objects.contact import Contact
+from shinken.objects.command import Command, CommandCall
 from shinken.external_command import ExternalCommand
-from shinken.service import Service, Services
-from shinken.host import Host, Hosts
-from shinken.hostgroup import Hostgroup, Hostgroups
-from shinken.servicegroup import Servicegroup, Servicegroups
-from shinken.contactgroup import Contactgroup, Contactgroups
-from shinken.config import Config
+from shinken.objects.service import Service, Services
+from shinken.objects.host import Host, Hosts
+from shinken.objects.hostgroup import Hostgroup, Hostgroups
+from shinken.objects.servicegroup import Servicegroup, Servicegroups
+from shinken.objects.contactgroup import Contactgroup, Contactgroups
+from shinken.objects.module import Module, Modules
+
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 

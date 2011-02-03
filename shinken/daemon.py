@@ -57,6 +57,7 @@ class Daemon:
         self.debug_file = debug_file
         self.interrupted = False
                 
+        self.daemon = None
         # Log init
         self.log = logger
         self.log.load_obj(self)
@@ -214,7 +215,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             if status != 0:
                 print("something weird happened with/during second fork : status=", status)
             self.close_fds()
-            os._exit(status)     
+            os._exit(status)
 
         os.setsid()
         try:
@@ -228,7 +229,8 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 
         self.fpid.close()
         del self.fpid
-        print("We are now fully daemonized :) pid=%d" % (os.getpid()))
+        self.pid = os.getpid()
+        print("We are now fully daemonized :) pid=%d" % (self.pid))
 
 
     def do_daemon_init_and_start(self, ssl_conf=None):

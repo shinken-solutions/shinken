@@ -70,7 +70,7 @@
 #
 import re, time
 
-from shinken.item import Item, Items
+from .item import Item, Items
 from shinken.util import *
 
 

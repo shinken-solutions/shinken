@@ -23,16 +23,15 @@
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
 import os
 
-from shinken_test import *
+from shinken_test import unittest, ShinkenTest
 
+from shinken.log import logger
+from shinken.objects.module import Module
+from shinken.modules import pickle_retention_file_scheduler
+from shinken.modules.pickle_retention_file_scheduler import get_instance 
 
-sys.path.append("../shinken/modules")
-import pickle_retention_file_scheduler
-from pickle_retention_file_scheduler import *
-from module import Module
 
 modconf = Module()
 modconf.module_name = "PickleRetention"

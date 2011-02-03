@@ -28,18 +28,18 @@ import os
 import Queue
 
 #And now include from this global directory
-from shinken.host import Host
-from shinken.hostgroup import Hostgroup
-from shinken.service import Service
-from shinken.servicegroup import Servicegroup
-from shinken.contact import Contact
-from shinken.contactgroup import Contactgroup
-from shinken.timeperiod import Timeperiod
-from shinken.command import Command
-from shinken.config import Config
+from shinken.objects.host import Host
+from shinken.objects.hostgroup import Hostgroup
+from shinken.objects.service import Service
+from shinken.objects.servicegroup import Servicegroup
+from shinken.objects.contact import Contact
+from shinken.objects.contactgroup import Contactgroup
+from shinken.objects.timeperiod import Timeperiod
+from shinken.objects.command import Command
+from shinken.objects.config import Config
 #And now include from this directory
-from status import StatusFile
-from objectscache import ObjectsCacheFile
+from shinken.modules.status_dat_broker.status import StatusFile
+from shinken.modules.status_dat_broker.objectscache import ObjectsCacheFile
 
 from shinken.basemodule import BaseModule
 

@@ -451,11 +451,11 @@ class Satellite(Daemon):
                 pass
             except AssertionError: #In a worker
                 pass
-        logger.log('Stopping all network connexions')
-        self.daemon.disconnect(self.interface)
-        self.daemon.disconnect(self.brok_interface)
-        self.daemon.shutdown(True)
-
+        if self.daemon:
+            logger.log('Stopping all network connexions')
+            self.daemon.disconnect(self.interface)
+            self.daemon.disconnect(self.brok_interface)
+            self.daemon.shutdown(True)
 
     #A simple fucntion to add objects in self
     #like broks in self.broks, etc

@@ -27,7 +27,7 @@ from Queue import Empty
 
 from shinken.bin import VERSION
 from shinken.util import to_bool
-from shinken.config import Config
+from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon

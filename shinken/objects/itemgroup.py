@@ -22,7 +22,7 @@
 
 #And itemgroup is like a item, but it's a group if items :)
 
-from brok import Brok
+from shinken.brok import Brok
 
 class Itemgroup:
     id = 0

@@ -25,7 +25,7 @@
 #It's ugly I know....
 from shinken_test import *
 from shinken.macroresolver import MacroResolver
-from shinken.command import Command,CommandCall
+from shinken.objects.command import Command,CommandCall
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test

@@ -26,7 +26,7 @@ from shinken.util import to_int, to_bool
 from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
-from shinken.command import CommandCall
+from shinken.objects.command import CommandCall
 from shinken.log import logger
 
 class ExternalCommand:
