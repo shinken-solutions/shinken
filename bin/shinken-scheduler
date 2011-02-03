@@ -78,9 +78,6 @@ if os.name != 'nt':
         sys.setrecursionlimit(int(stacksize_soft * 2.4 + 3200))
 
 
-#DBG for Pyro 4
-sys.path.insert(0, '.')
-
 #Try to load shinken lib.
 #Maybe it's not in our python path, so we detect it
 #it so (it's a untar install) we add .. in the path

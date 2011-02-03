@@ -26,12 +26,9 @@
 
 import copy
 import time
+import sys
 
-try:
-    from shinken.db_mysql import DBMysql
-except : # TODO : fix this, python2.4 is not happy here?
-    from db_mysql import DBMysql
-
+from shinken.db_mysql import DBMysql
 from shinken.basemodule import BaseModule
 
 def de_unixify(t):

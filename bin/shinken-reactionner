@@ -33,9 +33,6 @@ import sys, os
 import getopt
 import ConfigParser
 
-#Pyro 4 dbg
-sys.path.insert(0, '.')
-
 
 #Try to load shinken lib.
 #Maybe it's not in our python path, so we detect it

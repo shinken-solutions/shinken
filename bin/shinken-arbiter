@@ -51,9 +51,6 @@ if os.name != 'nt':
     else:
         sys.setrecursionlimit(int(stacksize_soft * 2.4 + 3200))
 
-# In fact it's useful for installed daemon
-sys.path.insert(0, '.')
-
 
 # Try to load shinken lib.
 # Maybe it's not in our python path, so we detect it
