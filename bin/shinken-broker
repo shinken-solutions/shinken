@@ -45,6 +45,11 @@ sys.path.insert(0, '.')
 #it so (it's a untar install) we add .. in the path
 try:
     import shinken
+    if hasattr(sys.modules['__main__'], '__file__'):
+        my_path = os.path.abspath(sys.modules['__main__'].__file__)
+        elts = os.path.dirname(my_path).split(os.sep)[:-1]
+        elts.append('shinken')
+        sys.path.append(os.sep.join(elts))
 except ImportError, e:
     if hasattr(sys.modules['__main__'], '__file__'):
         my_path = os.path.abspath(sys.modules['__main__'].__file__)
