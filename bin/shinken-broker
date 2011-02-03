@@ -45,6 +45,8 @@ sys.path.insert(0, '.')
 #it so (it's a untar install) we add .. in the path
 try:
     import shinken
+    # HACK : under python2.4, without this, it seems that
+    # modules are not so happy to import
     if hasattr(sys.modules['__main__'], '__file__'):
         my_path = os.path.abspath(sys.modules['__main__'].__file__)
         elts = os.path.dirname(my_path).split(os.sep)[:-1]
