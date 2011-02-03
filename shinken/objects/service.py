@@ -31,8 +31,8 @@ except ImportError:
     NodeSet = None
 
 
-from .item import Items
-from .schedulingitem import SchedulingItem
+from item import Items
+from schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
 from shinken.util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, expand_with_macros

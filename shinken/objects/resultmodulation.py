@@ -24,7 +24,7 @@
 
 import time
 
-from .item import Item, Items
+from item import Item, Items
 from shinken.util import to_split
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 

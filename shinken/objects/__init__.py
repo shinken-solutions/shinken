@@ -20,23 +20,23 @@
 
 """ The objects package contains definition classes of the different objects that can be declared in configuration files. """
 
-from .item import Item, Items
-from .timeperiod import Timeperiod, Timeperiods
-from .service import Service, Services
-from .command import Command, Commands
-from .resultmodulation import Resultmodulation, Resultmodulations
-from .escalation import Escalation, Escalations
-from .serviceescalation import Serviceescalation, Serviceescalations
-from .hostescalation import Hostescalation, Hostescalations
-from .host import Host, Hosts
-from .hostgroup import Hostgroup, Hostgroups
-from .realm import Realm, Realms
-from .contact import Contact, Contacts
-from .contactgroup import Contactgroup, Contactgroups
-from .notificationway import NotificationWay, NotificationWays
-from .servicegroup import Servicegroup, Servicegroups
-from .servicedependency import Servicedependency, Servicedependencies
-from .hostdependency import Hostdependency, Hostdependencies
-from .module import Module, Modules
+from item import Item, Items
+from timeperiod import Timeperiod, Timeperiods
+from service import Service, Services
+from command import Command, Commands
+from resultmodulation import Resultmodulation, Resultmodulations
+from escalation import Escalation, Escalations
+from serviceescalation import Serviceescalation, Serviceescalations
+from hostescalation import Hostescalation, Hostescalations
+from host import Host, Hosts
+from hostgroup import Hostgroup, Hostgroups
+from realm import Realm, Realms
+from contact import Contact, Contacts
+from contactgroup import Contactgroup, Contactgroups
+from notificationway import NotificationWay, NotificationWays
+from servicegroup import Servicegroup, Servicegroups
+from servicedependency import Servicedependency, Servicedependencies
+from hostdependency import Hostdependency, Hostdependencies
+from module import Module, Modules
 
-from .config import Config
+from config import Config
