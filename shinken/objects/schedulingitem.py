@@ -28,7 +28,7 @@ or the consume_check ones. It's a quite important class!
 import random
 import time
 
-from .item import Item
+from item import Item
 from shinken.check import Check
 from shinken.notification import Notification
 from shinken.macroresolver import MacroResolver
