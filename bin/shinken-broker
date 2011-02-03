@@ -60,7 +60,7 @@ except ImportError, e:
         elts.append('shinken')
         sys.path.append(os.sep.join(elts))
 
-from shinken.brokerdaemon import Broker, usage
+from shinken.daemons.brokerdaemon import Broker, usage
 
 #lets go to the party
 if __name__ == "__main__":

@@ -51,7 +51,7 @@ except ImportError, e:
         sys.path.append(os.sep.join(elts))
 
 
-from shinken.reactionnerdaemon import Reactionner, usage
+from shinken.daemons.reactionnerdaemon import Reactionner, usage
 
 
 
