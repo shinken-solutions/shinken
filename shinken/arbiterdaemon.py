@@ -227,8 +227,6 @@ class Arbiter(Daemon):
     # Main loop function
     def main(self):
         # Log will be broks
-
-        self.print_header()
         for line in self.get_header():
             self.log.log(line)
 
