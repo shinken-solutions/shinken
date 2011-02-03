@@ -82,7 +82,7 @@ class Daemon:
     def change_to_workdir(self):
         try:
             os.chdir(self.workdir)
-        except Exception as e:
+        except Exception, e:
             raise InvalidWorkDir(e)
         print("Successfully changed to workdir: %s" % (self.workdir))
 
@@ -90,7 +90,7 @@ class Daemon:
         print "Unlinking", self.pidfile
         try:
             os.unlink(self.pidfile)
-        except Exception as e:
+        except Exception, e:
             print("Got an error unlinking our pidfile: %s" % (e))
 
     def check_shm(self):
@@ -108,7 +108,7 @@ class Daemon:
         ## if problem on open or creating file it'll be raised to the caller:
         try:
             self.fpid = open(self.pidfile, 'arw+')
-        except Exception as e:
+        except Exception, e:
             raise InvalidPidDir(e)     
 
     def check_parallel_run(self):
@@ -124,11 +124,11 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         
         try:
             os.kill(pid, 0)
-        except OverflowError as e:
+        except OverflowError, e:
             ## pid is too long for "kill" : so bad content:
             print("stale pidfile exists: pid=%d is too long" % (pid))
             return
-        except os.error as e:
+        except os.error, e:
             if e.errno == errno.ESRCH:
                 print("stale pidfile exists (pid=%d not exists).  reusing it." % (pid))
                 return
@@ -140,7 +140,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         print "Replacing previous instance ", pid
         try:
             os.kill(pid, 3)
-        except os.error as e:
+        except os.error, e:
             if e.errno != errno.ESRCH:
                 raise
         
@@ -272,7 +272,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
     def get_socks_activity(self, socks, timeout):
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
-        except select.error as e:
+        except select.error, e:
             errnum, _ = e
             if errnum == errno.EINTR:
                 return []

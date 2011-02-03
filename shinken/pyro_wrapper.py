@@ -63,7 +63,7 @@ try:
     def init_daemon(host, port, use_ssl=False):
         try:
             Pyro.core.initServer()
-        except OSError as e: # must be problem with workdir :
+        except OSError, e: # must be problem with workdir :
             raise InvalidWorkDir(e)
         if use_ssl:
             prtcol = 'PYROSSL'
@@ -71,7 +71,7 @@ try:
             prtcol = 'PYRO'
         try:
             daemon = Pyro.core.Daemon(host=host, port=port, prtcol=prtcol)
-        except OSError as e:
+        except OSError, e:
             # must be problem with workdir :
             raise InvalidWorkDir(e)
         if daemon.port != port:
@@ -138,7 +138,7 @@ except AttributeError:
         except socket.error, exp:
             msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
             raise PortNotFree(msg)
-        except Exception as e:
+        except Exception, e:
             # must be problem with pyro workdir :
             raise InvalidWorkDir(e)
         return daemon
