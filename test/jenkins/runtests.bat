@@ -56,7 +56,7 @@ REM Merge the single coverage files
 IF %COVERAGE% == COVERAGE %PYTHONTOOLS%\coverage xml --omit=/usr/lib
 REM Run Pylint
 CD ..
-IF %PYLINT% == PYLINT %PYTHONTOOLS%\pylint -f parseable --disable=C0111,C0103,W0201,E1101 shinken shinken\modules shinken\modules\* > $DIR\pylint.txt
+IF %PYLINT% == PYLINT %PYTHONTOOLS%\pylint -f parseable --disable=C0111,C0103,W0201,E1101 shinken shinken\modules shinken\modules\* > pylint.txt
 EXIT /B 0
 
 :FAIL
