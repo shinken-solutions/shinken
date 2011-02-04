@@ -41,7 +41,7 @@ class Worker:
     _idletime = None
     _timeout = None
     _c = None
-    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300, max_plugins_output_length=8192):
+    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300, max_plugins_output_length=8192, target=None):
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -50,7 +50,10 @@ class Worker:
         self._timeout = timeout
         self.processes_by_worker = processes_by_worker
         self._c = Queue() # Private Control queue for the Worker
-        self._process = Process(target=self.work, args=(s, returns_queue, self._c))
+        # By default, take our own code
+        if target == None:
+            target=self.work
+        self._process = Process(target=target, args=(s, returns_queue, self._c))
         self.returns_queue = returns_queue
         self.max_plugins_output_length = max_plugins_output_length
         self.i_am_dying = False

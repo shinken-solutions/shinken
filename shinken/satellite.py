@@ -443,14 +443,22 @@ class Satellite(Daemon):
         # We only need to change some value
 
 
-
-
     # Create and launch a new worker, and put it into self.workers
     # It can be mortal or not
     def create_and_launch_worker(self, module_name='fork', mortal=True):
         q = self.worker_modules[module_name]['to_q']
+
+        # If we are in the fork module, do not specify a target
+        target = None
+        if module_name == 'fork':
+            target = None
+        else:
+            for module in self.mod_instances:
+                if module.properties['type'] == module_name:
+                    target=module.work
+
         w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
-                   mortal=mortal,max_plugins_output_length = self.max_plugins_output_length )
+                   mortal=mortal,max_plugins_output_length = self.max_plugins_output_length, target=target )
         self.workers[w.id] = w
         logger.log("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
         self.workers[w.id].start()
@@ -473,6 +481,7 @@ class Satellite(Daemon):
             self.daemon.disconnect(self.interface)
             self.daemon.disconnect(self.brok_interface)
             self.daemon.shutdown(True)
+
 
     # A simple fucntion to add objects in self
     # like broks in self.broks, etc
@@ -527,7 +536,7 @@ class Satellite(Daemon):
         while len(self.workers) < self.min_workers \
                     or (wish_worker > len(self.workers) and len(self.workers) < self.max_workers):
             for mod in self.worker_modules:
-                self.create_and_launch_worker(mod)
+                self.create_and_launch_worker(module_name=mod)
         # TODO : if len(workers) > 2*wish, maybe we can kill a worker?
 
 
@@ -728,7 +737,7 @@ class Satellite(Daemon):
         # Allocate Mortal Threads
         for _ in xrange(1, self.min_workers):
             for mod in self.worker_modules:
-                self.create_and_launch_worker()
+                self.create_and_launch_worker(module_name=mod)
 
         # Now main loop
         self.timeout = self.polling_interval
