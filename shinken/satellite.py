@@ -64,6 +64,7 @@ from brok import Brok
 from check import Check
 from notification import Notification
 from eventhandler import EventHandler
+from shinken.modulesmanager import ModulesManager
 
 # Interface for Arbiter, our big MASTER
 # It put us our conf
@@ -73,6 +74,7 @@ class IForArbiter(Pyro.core.ObjBase):
         Pyro.core.ObjBase.__init__(self)
         self.app = app
         self.schedulers = app.schedulers
+        self.app.modules = []
         
 
     # function called by arbiter for giving us our conf
@@ -144,9 +146,11 @@ class IForArbiter(Pyro.core.ObjBase):
         for module in conf['global']['modules']:
             # If we already got it, bypass
             if not module.module_type in self.app.worker_modules:
+                print "Add module object", module
+                self.app.modules.append(module)
                 logger.log("[%s] Got module : %s " % (self.name, module.module_type))
                 self.app.worker_modules[module.module_type] = {'to_q' : Queue()}
-        
+                
 
 
     # Arbiter ask us to do not manage a scheduler_id anymore
@@ -258,7 +262,17 @@ class Satellite(Daemon):
         self.returns_queue = None
 
         self.worker_modules = {}
-        
+
+        # And find where our modules are :)
+        self.find_modules_path()        
+
+
+    # Load and init all modules we've got
+    def load_modules(self):
+        self.modules_manager = ModulesManager('poller', self.modulespath, self.modules)
+        self.modules_manager.load()
+        self.mod_instances = self.modules_manager.get_instances()
+
 
     def pynag_con_init(self, id):
         """ Initialize or re-initialize connexion with scheduler """
@@ -521,7 +535,6 @@ class Satellite(Daemon):
     # it wants
     def _got_queue_from_action(self, a):
         if hasattr(a, 'module_type'):
-            print "search for a module", a.module_type
             if a.module_type in self.worker_modules:
                 if a.module_type != 'fork':
                     print "GOT A SPECIAL QUEUE (%s) for" % a.module_type, a.__dict__, 
@@ -703,7 +716,10 @@ class Satellite(Daemon):
         # We wait for initial conf
         self.wait_for_initial_conf()
 
-        # Connexion init with PyNag server
+        # We can load our modules now
+        self.load_modules()
+
+        # Connexion init with scheduler servers
         for sched_id in self.schedulers:
             print "Init main"
             self.pynag_con_init(sched_id)

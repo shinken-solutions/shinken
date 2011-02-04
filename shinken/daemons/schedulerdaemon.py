@@ -34,7 +34,7 @@ from shinken.util import to_int, to_bool
 from shinken.modulesmanager import ModulesManager
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
-
+from log import logger
 
 
 ################### Process launch part
