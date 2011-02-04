@@ -20,15 +20,18 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is an interface for reactionner and poller
-#The satallite listen configuration from Arbiter in a port
-#the configuration gived by arbiter is schedulers where actionner will
-#take actions.
-#When already launch and have a conf, actionner still listen to arbiter
-#(one a timeout)
-#if arbiter whant it to have a new conf, satellite forgot old schedulers
-#(and actions into)
-#take new ones and do the (new) job.
+""" 
+This class is an interface for reactionner and poller
+The satallite listen configuration from Arbiter in a port
+the configuration gived by arbiter is schedulers where actionner will
+take actions.
+
+When already launch and have a conf, actionner still listen to arbiter
+(one a timeout)
+
+if arbiter want it to have a new conf, satellite forgot old schedulers
+(and actions into) take new ones and do the (new) job.
+"""
 
 from Queue import Empty
 from multiprocessing import Queue, Manager, active_children
@@ -62,25 +65,25 @@ from check import Check
 from notification import Notification
 from eventhandler import EventHandler
 
-#Interface for Arbiter, our big MASTER
-#It put us our conf
+# Interface for Arbiter, our big MASTER
+# It put us our conf
 class IForArbiter(Pyro.core.ObjBase):
-    #We keep app link because we are just here for it
+    # We keep app link because we are just here for it
     def __init__(self, app):
         Pyro.core.ObjBase.__init__(self)
         self.app = app
         self.schedulers = app.schedulers
         
 
-    #function called by arbiter for giving us our conf
-    #conf must be a dict with:
-    #'schedulers' : schedulers dict (by id) with address and port
-    #TODO: catch case where Arbiter send somethign we already have
-    #(same id+add+port) -> just do nothing :)
+    # function called by arbiter for giving us our conf
+    # conf must be a dict with:
+    # 'schedulers' : schedulers dict (by id) with address and port
+    # TODO: catch case where Arbiter send somethign we already have
+    # (same id+add+port) -> just do nothing :)
     def put_conf(self, conf):
         self.app.have_conf = True
         self.app.have_new_conf = True
-        #Gout our name from the globals
+        # Gout our name from the globals
         if 'poller_name' in conf['global']:
             self.name = conf['global']['poller_name']
         elif 'reactionner_name' in conf['global']:
@@ -90,7 +93,7 @@ class IForArbiter(Pyro.core.ObjBase):
         self.app.name = self.name
 
         print "[%s] Sending us a configuration %s " % (self.name, conf)
-        #If we've got something in the schedulers, we do not want it anymore
+        # If we've got something in the schedulers, we do not want it anymore
         for sched_id in conf['schedulers'] :
             already_got = False
             if sched_id in self.schedulers:
@@ -111,24 +114,24 @@ class IForArbiter(Pyro.core.ObjBase):
             self.schedulers[sched_id]['running_id'] = 0
             self.schedulers[sched_id]['active'] = s['active']
 
-            #And then we connect to it :)
+            # And then we connect to it :)
             self.app.pynag_con_init(sched_id)
 
-        #Now the limit part
+        # Now the limit part
         self.app.max_workers = conf['global']['max_workers']
         self.app.min_workers = conf['global']['min_workers']
         self.app.processes_by_worker = conf['global']['processes_by_worker']
         self.app.polling_interval = conf['global']['polling_interval']
         if 'poller_tags' in conf['global']:
             self.app.poller_tags = conf['global']['poller_tags']
-        else: #for reactionner, poler_tag is [None]
+        else: # for reactionner, poler_tag is [None]
             self.app.poller_tags = []
         if 'max_plugins_output_length' in conf['global']:
             self.app.max_plugins_output_length = conf['global']['max_plugins_output_length']
-        else: #for reactionner, we don't really care about it
+        else: # for reactionner, we don't really care about it
             self.app.max_plugins_output_length = 8192
         print "Max output lenght" , self.app.max_plugins_output_length
-        #Set our giving timezone from arbiter
+        # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
             logger.log("[%s] Setting our timezone to %s" %(self.name, use_timezone))
@@ -146,8 +149,8 @@ class IForArbiter(Pyro.core.ObjBase):
         
 
 
-    #Arbiter ask us to do not manage a scheduler_id anymore
-    #I do it and don't ask why
+    # Arbiter ask us to do not manage a scheduler_id anymore
+    # I do it and don't ask why
     def remove_from_conf(self, sched_id):
         try:
             del self.schedulers[sched_id]
@@ -155,68 +158,68 @@ class IForArbiter(Pyro.core.ObjBase):
             pass
 
 
-    #Arbiter ask me which sched_id I manage, If it is not ok with it
-    #It will ask me to remove one or more sched_id
+    # Arbiter ask me which sched_id I manage, If it is not ok with it
+    # It will ask me to remove one or more sched_id
     def what_i_managed(self):
         return self.schedulers.keys()
 
 
-    #Use for arbiter to know if we are alive
+    # Use for arbiter to know if we are alive
     def ping(self):
         print "We ask us for a ping"
         return True
 
 
-    #Use by arbiter to know if we have a conf or not
-    #can be usefull if we must do nothing but
-    #we are not because it can KILL US!
+    # Use by arbiter to know if we have a conf or not
+    # can be usefull if we must do nothing but
+    # we are not because it can KILL US!
     def have_conf(self):
         return self.app.have_conf
 
 
-    #Call by arbiter if it thinks we are running but we must do not (like
-    #if I was a spare that take a conf but the master returns, I must die
-    #and wait a new conf)
-    #Us : No please...
-    #Arbiter : I don't care, hasta la vista baby!
-    #Us : ... <- Nothing! We are die! you don't follow
-    #anything or what?? Reading code is not a job for eyes only...
+    # Call by arbiter if it thinks we are running but we must do not (like
+    # if I was a spare that take a conf but the master returns, I must die
+    # and wait a new conf)
+    # Us : No please...
+    # Arbiter : I don't care, hasta la vista baby!
+    # Us : ... <- Nothing! We are die! you don't follow
+    # anything or what?? Reading code is not a job for eyes only...
     def wait_new_conf(self):
         print "Arbiter want me to wait a new conf"
         self.schedulers.clear()
         self.app.have_conf = False
 
 
-#Interface for Brokers
-#They connect here and get all broks (data for brokers)
-#datas must be ORDERED! (initial status BEFORE uodate...)
+# Interface for Brokers
+# They connect here and get all broks (data for brokers)
+# datas must be ORDERED! (initial status BEFORE uodate...)
 class IBroks(Pyro.core.ObjBase):
-    #we keep sched link
+    # we keep sched link
     def __init__(self, app):
         Pyro.core.ObjBase.__init__(self)
         self.app = app
         self.running_id = random.random()
 
 
-    #Broker need to void it's broks?
+    # Broker need to void it's broks?
     def get_running_id(self):
         return self.running_id
 
 
-    #poller or reactionner ask us actions
+    # poller or reactionner ask us actions
     def get_broks(self):
-        #print "We ask us broks"
+        # print "We ask us broks"
         res = self.app.get_broks()
         return res
 
 
-    #Ping? Pong!
+    # Ping? Pong!
     def ping(self):
         return None
 
 
 
-#Our main APP class
+# Our main APP class
 class Satellite(Daemon):
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
         
@@ -238,8 +241,8 @@ class Satellite(Daemon):
 
         self.t_each_loop = time.time() # used to track system time change
 
-        #Now the specific stuff
-        #Bool to know if we have received conf from arbiter
+        # Now the specific stuff
+        # Bool to know if we have received conf from arbiter
         self.have_conf = False
         self.have_new_conf = False
         
@@ -260,8 +263,8 @@ class Satellite(Daemon):
     def pynag_con_init(self, id):
         """ Initialize or re-initialize connexion with scheduler """
         sched = self.schedulers[id]
-        #If sched is not active, I do not try to init
-        #it is just useless
+        # If sched is not active, I do not try to init
+        # it is just useless
         if not sched['active']:
             return
 
@@ -269,8 +272,8 @@ class Satellite(Daemon):
         running_id = sched['running_id']
         sch_con = sched['con'] = Pyro.core.getProxyForURI(sched['uri'])
 
-        #timeout of 120 s
-        #and get the running id
+        # timeout of 120 s
+        # and get the running id
         try:
             pyro.set_timeout(sch_con, 5)
             new_run_id = sch_con.get_running_id()
@@ -279,8 +282,8 @@ class Satellite(Daemon):
             sched['con'] = None
             return
 
-        #The schedulers have been restart : it has a new run_id.
-        #So we clear all verifs, they are obsolete now.
+        # The schedulers have been restart : it has a new run_id.
+        # So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
             logger.log("[%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sched['name']))
             sched['wait_homerun'].clear()
@@ -288,50 +291,50 @@ class Satellite(Daemon):
         logger.log("[%s] Connexion OK with scheduler %s" % (self.name, sched['name']))
 
 
-    #Manage action return from Workers
-    #We just put them into the sched they are for
-    #and we clean unused properties like sched_id
+    # Manage action return from Workers
+    # We just put them into the sched they are for
+    # and we clean unused properties like sched_id
     def manage_action_return(self, action):
-        #Ok, it's a result. We get it, and fill verifs of the good sched_id
+        # Ok, it's a result. We get it, and fill verifs of the good sched_id
         sched_id = action.sched_id
-        #Now we now where to put action, we do not need sched_id anymore
+        # Now we now where to put action, we do not need sched_id anymore
         del action.sched_id
         action.status = 'waitforhomerun'
         self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
-        #We update stats
+        # We update stats
         self.nb_actions_in_workers =- 1
 
 
-    #Return the chk to scheduler and clean them
-    #REF: doc/shinken-action-queues.png (6)
+    # Return the chk to scheduler and clean them
+    # REF: doc/shinken-action-queues.png (6)
     def manage_returns(self):
         total_sent = 0
-        #Fot all schedulers, we check for waitforhomerun and we send back results
+        # Fot all schedulers, we check for waitforhomerun and we send back results
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
-            #If sched is not active, I do not try return
+            # If sched is not active, I do not try return
             if not sched['active']:
                 continue
-            #Now ret have all verifs, we can return them
+            # Now ret have all verifs, we can return them
             send_ok = False
             ret = sched['wait_homerun'].values()
             if ret is not []:
                 try:
                     con = sched['con']
-                    if con is not None: #None = not initialized
+                    if con is not None: # None = not initialized
                         send_ok = con.put_results(ret)
-                #Not connected or sched is gone
+                # Not connected or sched is gone
                 except (Pyro.errors.ProtocolError, KeyError) , exp:
                     print exp
                     self.pynag_con_init(sched_id)
                     return
-                except AttributeError , exp: #the scheduler must  not be initialized
+                except AttributeError , exp: # the scheduler must  not be initialized
                     print exp
                 except Exception , exp:
                     print ''.join(Pyro.util.getPyroTraceback(exp))
                     sys.exit(0)
 
-            #We clean ONLY if the send is OK
+            # We clean ONLY if the send is OK
             if send_ok :
                 sched['wait_homerun'].clear()
             else:
@@ -340,21 +343,21 @@ class Satellite(Daemon):
 
 
 
-    #Use to wait conf from arbiter.
-    #It send us conf in our daemon. It put the have_conf prop
-    #if he send us something
-    #(it can just do a ping)
+    # Use to wait conf from arbiter.
+    # It send us conf in our daemon. It put the have_conf prop
+    # if he send us something
+    # (it can just do a ping)
     def wait_for_initial_conf(self):
         logger.log("Waiting for initial configuration")
         timeout = 1.0
-        #Arbiter do not already set our have_conf param
+        # Arbiter do not already set our have_conf param
         while not self.have_conf and not self.interrupted:
             before = time.time()
             
             socks = pyro.get_sockets(self.daemon)
             ins = self.get_socks_activity(socks, timeout)
             
-            #Manage a possible time change (our avant will be change with the diff)
+            # Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
             before += diff
 
@@ -366,7 +369,7 @@ class Satellite(Daemon):
                         diff = after-before
                         timeout = timeout - diff
                         break    # no need to continue with the for loop
-            else: #Timeout
+            else: # Timeout
                 sys.stdout.write(".")
                 sys.stdout.flush()
                 timeout = 1.0
@@ -378,10 +381,10 @@ class Satellite(Daemon):
             self.request_stop()
 
 
-    #The arbiter can resent us new conf in the daemon port.
-    #We do not want to loose time about it, so it's not a bloking
-    #wait, timeout = 0s
-    #If it send us a new conf, we reinit the connexions of all schedulers
+    # The arbiter can resent us new conf in the daemon port.
+    # We do not want to loose time about it, so it's not a bloking
+    # wait, timeout = 0s
+    # If it send us a new conf, we reinit the connexions of all schedulers
     def watch_for_new_conf(self, timeout_daemon):
         socks = pyro.get_sockets(self.daemon)
         ins = self.get_socks_activity(socks, timeout_daemon)
@@ -390,8 +393,8 @@ class Satellite(Daemon):
                 if sock in ins:
                     pyro.handleRequests(self.daemon, sock)
 
-                    #have_new_conf is set with put_conf
-                    #so another handle will not make a con_init
+                    # have_new_conf is set with put_conf
+                    # so another handle will not make a con_init
                     if self.have_new_conf:
                         for sched_id in self.schedulers:
                             print "Got a new conf"
@@ -399,37 +402,37 @@ class Satellite(Daemon):
                         self.have_new_conf = False
 
 
-    #Check if our system time change. If so, change our
+    # Check if our system time change. If so, change our
     def check_for_system_time_change(self):
         now = time.time()
         difference = now - self.t_each_loop
-        #If we have more than 15 min time change, we need to compensate
-        #it
+        # If we have more than 15 min time change, we need to compensate
+        # it
 
         if abs(difference) > 900:
             self.compensate_system_time_change(difference)
 
-        #Now set the new value for the tick loop
+        # Now set the new value for the tick loop
         self.t_each_loop = now
 
-        #return the diff if it need, of just 0
+        # return the diff if it need, of just 0
         if abs(difference) > 900:
             return difference
         else:
             return 0
 
 
-    #If we've got a system time change, we need to compensate it
-    #from now, we do not do anything in fact.
+    # If we've got a system time change, we need to compensate it
+    # from now, we do not do anything in fact.
     def compensate_system_time_change(self, difference):
         logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
-        #We only need to change some value
+        # We only need to change some value
 
 
 
 
-    #Create and launch a new worker, and put it into self.workers
-    #It can be mortal or not
+    # Create and launch a new worker, and put it into self.workers
+    # It can be mortal or not
     def create_and_launch_worker(self, module_name='fork', mortal=True):
         q = self.worker_modules[module_name]['to_q']
         w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
@@ -445,11 +448,11 @@ class Satellite(Daemon):
             try:
                 w.terminate()
                 w.join(timeout=1)
-                #queue = w.return_queue
-                #self.return_messages.remove(queue)
-            except AttributeError: #A already die worker
+                # queue = w.return_queue
+                # self.return_messages.remove(queue)
+            except AttributeError: # A already die worker
                 pass
-            except AssertionError: #In a worker
+            except AssertionError: # In a worker
                 pass
         if self.daemon:
             logger.log('Stopping all network connexions')
@@ -457,18 +460,18 @@ class Satellite(Daemon):
             self.daemon.disconnect(self.brok_interface)
             self.daemon.shutdown(True)
 
-    #A simple fucntion to add objects in self
-    #like broks in self.broks, etc
-    #TODO : better tag ID?
+    # A simple fucntion to add objects in self
+    # like broks in self.broks, etc
+    # TODO : better tag ID?
     def add(self, elt):
         if isinstance(elt, Brok):
-            #For brok, we TAG brok with our instance_id
+            # For brok, we TAG brok with our instance_id
             elt.data['instance_id'] = 0
             self.broks[elt.id] = elt
             return
 
 
-    #Someone ask us our broks. We send them, and clean the queue
+    # Someone ask us our broks. We send them, and clean the queue
     def get_broks(self):
         res = copy.copy(self.broks)
         self.broks.clear()
@@ -502,16 +505,16 @@ class Satellite(Daemon):
             del self.workers[id]
 
 
-    #Here we create new workers if the queue load (len of verifs) is too long
+    # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
-        #TODO : get a real value for a load
+        # TODO : get a real value for a load
         wish_worker = 1
-        #I want at least min_workers or wish_workers (the biggest) but not more than max_workers
+        # I want at least min_workers or wish_workers (the biggest) but not more than max_workers
         while len(self.workers) < self.min_workers \
                     or (wish_worker > len(self.workers) and len(self.workers) < self.max_workers):
             for mod in self.worker_modules:
                 self.create_and_launch_worker(mod)
-        #TODO : if len(workers) > 2*wish, maybe we can kill a worker?
+        # TODO : if len(workers) > 2*wish, maybe we can kill a worker?
 
 
     # Get the Queue() from an action by looking at which module
@@ -529,33 +532,33 @@ class Satellite(Daemon):
         return self.worker_modules['fork']['to_q']
 
 
-    #We get new actions from schedulers, we create a Message ant we
-    #put it in the s queue (from master to slave)
-    #REF: doc/shinken-action-queues.png (1)
+    # We get new actions from schedulers, we create a Message ant we
+    # put it in the s queue (from master to slave)
+    # REF: doc/shinken-action-queues.png (1)
     def get_new_actions(self):
-        #Here are the differences between a
-        #poller and a reactionner:
-        #Poller will only do checks,
-        #reactionner do actions
+        # Here are the differences between a
+        # poller and a reactionner:
+        # Poller will only do checks,
+        # reactionner do actions
         do_checks = self.__class__.do_checks
         do_actions = self.__class__.do_actions
 
-        #We check for new check in each schedulers and put the result in new_checks
+        # We check for new check in each schedulers and put the result in new_checks
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
-            #If sched is not active, I do not try return
+            # If sched is not active, I do not try return
             if not sched['active']:
                 continue
 
             try:
                 con = sched['con']
-                if con is not None: #None = not initilized
+                if con is not None: # None = not initilized
                     pyro.set_timeout(con, 120)
-                    #OK, go for it :)
+                    # OK, go for it :)
                     tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, poller_tags=self.poller_tags)
                     print "Ask actions to", sched_id, "got", len(tmp)
-                    #We 'tag' them with sched_id and put into queue for workers
-                    #REF: doc/shinken-action-queues.png (2)
+                    # We 'tag' them with sched_id and put into queue for workers
+                    # REF: doc/shinken-action-queues.png (2)
                     for a in tmp:
                         a.sched_id = sched_id
                         a.status = 'queue'
@@ -563,21 +566,21 @@ class Satellite(Daemon):
                         q = self._got_queue_from_action(a)
                         if q != None:
                             q.put(msg)
-                        #Update stats
+                        # Update stats
                         self.nb_actions_in_workers += 1
-                else: #no con? make the connexion
+                else: # no con? make the connexion
                     self.pynag_con_init(sched_id)
-            #Ok, con is not know, so we create it
-            #Or maybe is the connexion lsot, we recreate it
+            # Ok, con is not know, so we create it
+            # Or maybe is the connexion lsot, we recreate it
             except (KeyError, Pyro.errors.ProtocolError) , exp:
                 print exp
                 self.pynag_con_init(sched_id)
-            #scheduler must not be initialized
-            #or scheduler must not have checks
+            # scheduler must not be initialized
+            # or scheduler must not have checks
             except (AttributeError, Pyro.errors.NamingError) , exp:
                 print exp
-            #What the F**k? We do not know what happenned,
-            #so.. bye bye :)
+            # What the F**k? We do not know what happenned,
+            # so.. bye bye :)
             except Pyro.errors.ConnectionClosedError , exp:
                 print exp
                 self.pynag_con_init(sched_id)
@@ -589,20 +592,20 @@ class Satellite(Daemon):
     def do_loop_turn(self):
         begin_loop = time.time()
 
-        #Maybe the arbiter ask us to wait for a new conf
-        #If true, we must restart all...
+        # Maybe the arbiter ask us to wait for a new conf
+        # If true, we must restart all...
         if self.have_conf == False:
             print "Begin wait initial"
             self.wait_for_initial_conf()
             print "End wait initial"
 
-        #Now we check if arbiter speek to us in the daemon.
-        #If so, we listen for it
-        #When it push us conf, we reinit connexions
-        #Sleep in waiting a new conf :)
+        # Now we check if arbiter speek to us in the daemon.
+        # If so, we listen for it
+        # When it push us conf, we reinit connexions
+        # Sleep in waiting a new conf :)
         self.watch_for_new_conf(self.timeout)
 
-        #Manage a possible time change (our before will be change with the diff)
+        # Manage a possible time change (our before will be change with the diff)
         diff = self.check_for_system_time_change()
         begin_loop += diff
         
@@ -616,24 +619,24 @@ class Satellite(Daemon):
         after = time.time()
         self.timeout = self.polling_interval
 
-        #Check if zombies workers are among us :)
-        #If so : KILL THEM ALL!!!
+        # Check if zombies workers are among us :)
+        # If so : KILL THEM ALL!!!
         self.check_and_del_zombie_workers()
 
-        #Print stats for debug
+        # Print stats for debug
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
             for mod in self.worker_modules:
-                #In workers we've got actions send to queue - queue size
+                # In workers we've got actions send to queue - queue size
                 q = self.worker_modules[mod]['to_q']
                 print '[%d][%s][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
                     (sched_id, sched['name'], mod, len(self.workers), q.qsize(), \
                          self.nb_actions_in_workers - q.qsize(), len(self.returns_queue))
 
 
-        #Before return or get new actions, see how we manage
-        #old ones : are they still in queue (s)? If True, we
-        #must wait more or at least have more workers
+        # Before return or get new actions, see how we manage
+        # old ones : are they still in queue (s)? If True, we
+        # must wait more or at least have more workers
         wait_ratio = self.wait_ratio.get_load()
         total_q = 0
         for mod in self.worker_modules:
@@ -643,9 +646,9 @@ class Satellite(Daemon):
             print "I decide to up wait ratio"
             self.wait_ratio.update_load(wait_ratio * 2)
         else:
-            #Go to self.polling_interval on normal run, if wait_ratio
-            #was >5*self.polling_interval,
-            #it make it come near 5 because if < 5, go up :)
+            # Go to self.polling_interval on normal run, if wait_ratio
+            # was >5*self.polling_interval,
+            # it make it come near 5 because if < 5, go up :)
             self.wait_ratio.update_load(self.polling_interval)
         wait_ratio = self.wait_ratio.get_load()
         print "Wait ratio:", wait_ratio
@@ -678,7 +681,7 @@ class Satellite(Daemon):
         self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
         self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
         
-        # self.s = Queue() #Global Master -> Slave
+        # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER
         self.worker_modules['fork'] = {'to_q' : Queue()}
         self.manager = Manager()
