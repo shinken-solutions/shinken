@@ -22,6 +22,7 @@
 import os
 import sys
 import time
+import traceback
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -32,28 +33,11 @@ from shinken.daemon import Daemon
 from shinken.util import to_int, to_bool, sort_by_ids
 from shinken.modulesmanager import ModulesManager
 from shinken.log import logger
-from shinken.brok import Brok
-
-# Load to be used by modules
-from shinken.objects.config import Config
-from shinken.objects.resultmodulation import Resultmodulation
-from shinken.objects.escalation import Escalation
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.notificationway import NotificationWay, NotificationWays
-from shinken.objects.contact import Contact
-from shinken.objects.command import Command, CommandCall
-from shinken.external_command import ExternalCommand
-from shinken.objects.service import Service, Services
-from shinken.objects.host import Host, Hosts
-from shinken.objects.hostgroup import Hostgroup, Hostgroups
-from shinken.objects.servicegroup import Servicegroup, Servicegroups
-from shinken.objects.contactgroup import Contactgroup, Contactgroups
-from shinken.objects.module import Module, Modules
 
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 
-
+from shinken.external_command import ExternalCommand
 
 
 # # # ################ Process launch part
@@ -333,7 +317,8 @@ class Broker(Satellite):
 
         self.find_modules_path()
 
-
+        self.modules_manager = None
+        
 
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
@@ -461,8 +446,7 @@ class Broker(Satellite):
                 print exp.__dict__
                 logger.log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.name, mod.get_name(),str(exp)))
                 logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
-                print "Back trace of this kill:"
-                traceback.print_stack()
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 to_del.append(mod)
         # Now remove mod that raise an exception
         for mod in to_del:
@@ -576,8 +560,9 @@ class Broker(Satellite):
         #  Maybe we quit before even launch modules
         # # Maybe not now that we aren't anymore doing this in the signal handler ??
         #     if hasattr(self, 'modules_manager'):
-        logger.log('Stopping all modules')
-        self.modules_manager.stop_all()
+        if self.modules_manager:
+            logger.log('Stopping all modules')
+            self.modules_manager.stop_all()
         act = active_children()
         for a in act:
             a.terminate()
