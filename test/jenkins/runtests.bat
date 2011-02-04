@@ -34,6 +34,7 @@ IF (%PYTHONVERS%) == (266) SET PYTHONVERS=26
 IF (%PYTHONVERS%) == (246) SET PYTHONVERS=24
 SET PYTHONBIN=C:\Python%PYTHONVERS%
 SET PYTHONTOOLS=C:\Python%PYTHONVERS%\Scripts
+SET PATH=%PYTHONBIN%;%PYTHONTOOLS%;%PATH%
 
 REM This script is located in test/jenkins but needs to be run from test.
 REM Find out the script's directory and then go to the dir one level above. 
