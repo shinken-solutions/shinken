@@ -132,6 +132,8 @@ If an instance can't be created or init'ed then only log is done. That instance 
 
         to_del = []
         for inst in self.instances:
+            # some modules (like livestatus) need their queues to be setup before their "init" method be called.
+            self.__set_ext_inst_queues(inst)  
             if not self.try_instance_init(inst):
                 to_del.append(inst)
                 continue
@@ -147,7 +149,6 @@ If an instance can't be created or init'ed then only log is done. That instance 
     def __start_ext_instances(self):
         for inst in self.instances:
             if inst.is_external:
-                self.__set_ext_inst_queues(inst)
                 print("Starting external process for instance %s" % (inst.name))
                 p = inst.process = Process(target=inst.main, args=())
                 inst.properties['process'] = p  ## TODO: temporary
@@ -155,6 +156,9 @@ If an instance can't be created or init'ed then only log is done. That instance 
                 print("%s is now started ; pid=%d" % (inst.name, p.pid))
 
     def __set_ext_inst_queues(self, inst):
+        # if some queues were already setup just close them:
+        # WARN: if the instance module had kept some ref to the initial queues then it can be BAD !
+        self.close_inst_queues(inst) 
         if isinstance(inst, BaseModule):
             inst.create_queues()
         else:
@@ -167,6 +171,7 @@ If an instance can't be created or init'ed then only log is done. That instance 
     # TODO: but this actually leads to a double "init" call.. maybe a "uninit" would be needed ? 
     def init_and_start_instances(self):
         for inst in self.instances:
+            self.__set_ext_inst_queues(inst)
             inst.init()
         self.__start_ext_instances()
 

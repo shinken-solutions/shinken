@@ -756,6 +756,9 @@ class Livestatus_broker(BaseModule):
             #We do not ware about Empty queue
             except Queue.Empty:
                 pass
+            except IOError, e:
+                if e.errno != os.errno.EINTR:
+                    raise
             #But others are importants
             except Exception, exp:
                 print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)

@@ -388,6 +388,9 @@ class Status_dat_broker(BaseModule):
             try:
                 b = self.to_q.get(True, 5)
                 self.manage_brok(b)
+            except IOError, e:
+                if e.errno != os.errno.EINTR:
+                    raise
             except Queue.Empty:
                 # No items arrived in the queue, but we must write a status.dat at regular intervals
                 pass
