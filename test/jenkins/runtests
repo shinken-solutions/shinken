@@ -28,8 +28,8 @@ test "$PYTHONVERS" == "" && PYTHONVERS=27
 test "$PYTHONVERS" == "27" && PYTHONVERS=2.7.1
 test "$PYTHONVERS" == "26" && PYTHONVERS=2.6.6
 test "$PYTHONVERS" == "24" && PYTHONVERS=2.4.6
-PYTHONBIN=/opt/python-${PYTHONVERS}/bin/python
-PYTHONTOOLS=/opt/python-${PYTHONVERS}/bin
+PYTHONBIN=${PYTHONBIN:-/opt/python-${PYTHONVERS}/bin/python}
+PYTHONTOOLS=${PYTHONTOOLS:-/opt/python-${PYTHONVERS}/bin}
 
 
 DIR=$(cd $(dirname "$0"); pwd)
@@ -75,6 +75,6 @@ fi
 if test $PYLINT == "PYLINT"; then
   cd ..
   echo checking the code with pylint
-  ${PYTHONTOOLS}/pylint -f parseable --disable=C0111,C0103,W0201,E1101 shinken shinken\modules shinken\modules\* > pylint.txt
+  ${PYTHONTOOLS}/pylint --rcfile test/jenkins/pylint.rc shinken > pylint.txt
 fi
 

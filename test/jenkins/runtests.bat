@@ -52,23 +52,32 @@ CALL :FUNC1 %%f
 IF %COVERAGE% == NOCOVERAGE IF %PYLINT% == NOPYLINT IF ERRORLEVEL 1 GOTO FAIL
 )
 
-REM Merge the single coverage files
-IF %COVERAGE% == COVERAGE %PYTHONTOOLS%\coverage xml --omit=/usr/lib
-REM Run Pylint
+IF %COVERAGE% == COVERAGE CALL :DOCOVERAGE
 CD ..
-IF %PYLINT% == PYLINT %PYTHONTOOLS%\pylint -f parseable --disable=C0111,C0103,W0201,E1101 shinken shinken\modules shinken\modules\* > pylint.txt
+IF %PYLINT% == PYLINT CALL :DOPYLINT
+ECHO THATS IT
 EXIT /B 0
 
 :FAIL
 ECHO One of the tests failed, so i give up.
 EXIT /B 1
 
+:DOCOVERAGE
+%PYTHONTOOLS%\coverage xml --omit=/usr/lib
+IF NOT ERRORLEVEL 0 ECHO COVERAGE HAD A PROBLEM
+GOTO :EOF [Return to Main]
+
+:DOPYLINT
+CALL %PYTHONTOOLS%\pylint --rcfile test\jenkins\pylint.rc shinken > pylint.txt
+IF NOT ERRORLEVEL 0 ECHO PYLINT HAD A PROBLEM
+GOTO :EOF [Return to Main]
+
 REM Here is where the tests actually run
 :FUNC1 
 ECHO I RUN %1
 IF %COVERAGE% == NOCOVERAGE IF %PYLINT% == NOPYLINT %PYTHONTOOLS%\nosetests -v -s --with-xunit %1
 IF %COVERAGE% == COVERAGE %PYTHONTOOLS%\nosetests -v -s --with-xunit --with-coverage %1
-IF ERRORLEVEL 1 goto :EOF
+IF ERRORLEVEL 1 GOTO :EOF
 ECHO successfully ran %1
 GOTO :EOF [Return to Main]
 
