@@ -218,6 +218,8 @@ class Shinken(Daemon):
         'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
         'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
         'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
+        'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
+        'local_log' : {'default' : '/usr/local/shinken/var/schedulerd.log', 'pythonize' : None, 'path' : True},
         }
 
     #Create the shinken class:
@@ -253,6 +255,8 @@ class Shinken(Daemon):
         print "Stopping all network connexions"
         self.daemon.shutdown(True)
 
+        # and closing the local log file if need
+        logger.quit()
 
 
     #We wait (block) for arbiter to send us conf

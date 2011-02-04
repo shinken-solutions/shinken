@@ -58,6 +58,7 @@ class Daemon:
         self.interrupted = False
                 
         self.daemon = None
+
         # Log init
         self.log = logger
         self.log.load_obj(self)
@@ -75,9 +76,12 @@ class Daemon:
     def do_load_config(self):
         self.parse_config_file()
         if self.config_file != None:
-            #Some paths can be relatives. We must have a full path by taking
-            #the config file by reference
+            # Some paths can be relatives. We must have a full path by taking
+            # the config file by reference
             self.relative_paths_to_full(os.path.dirname(self.config_file))
+        # Then start to log all in the local file if asked so
+        self.register_local_log()
+
 
     def change_to_workdir(self):
         try:
@@ -86,12 +90,25 @@ class Daemon:
             raise InvalidWorkDir(e)
         print("Successfully changed to workdir: %s" % (self.workdir))
 
+
     def unlink(self):
         print "Unlinking", self.pidfile
         try:
             os.unlink(self.pidfile)
         except Exception, e:
             print("Got an error unlinking our pidfile: %s" % (e))
+
+    # Look if we need a local log or not
+    def register_local_log(self):
+        # The arbiter don't have such an attribute
+        if hasattr(self, 'use_local_log') and self.use_local_log:
+            try:
+                self.log.register_local_log(self.local_log)
+            except IOError, exp:
+                print "Error : opening the log file '%s' failed with '%s'" % (self.local_log, exp)
+                sys.exit(2)
+            logger.log("Using the local log file '%s'" % self.local_log)
+
 
     def check_shm(self):
         """ Only on linux: Check for /dev/shm write access """
@@ -110,6 +127,7 @@ class Daemon:
             self.fpid = open(self.pidfile, 'arw+')
         except Exception, e:
             raise InvalidPidDir(e)     
+
 
     def check_parallel_run(self):
         """ Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
@@ -160,6 +178,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.fpid.close()
         del self.fpid ## no longer needed
 
+
     def close_fds(self, skip_close_fds=None):
         if skip_close_fds is None:
             skip_close_fds = tuple()
@@ -178,6 +197,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
                 os.close(fd)
             except OSError:# ERROR, fd wasn't open to begin with (ignored)
                 pass
+
 
     def daemonize(self, skip_close_fds=None):
         """ Go in "daemon" mode: close unused fds, redirect stdout/err, chdir, umask, fork-setsid-fork-writepid """
@@ -438,8 +458,9 @@ Also put default value in the properties if some are missing in the config_file 
     def do_loop_turn(self):
         raise NotImplementedError()
 
+    # At least, lose the local log file if need
     def do_stop(self):
-        pass
+        logger.quit()
 
     def request_stop(self):
         self.unlink()  ## unlink first

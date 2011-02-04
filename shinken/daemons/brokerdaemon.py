@@ -286,6 +286,8 @@ class Broker(Satellite):
             'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
             'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
             'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
+            'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
+            'local_log' : {'default' : '/usr/local/shinken/var/brokerd.log', 'pythonize' : None, 'path' : True},
             }
 
 
@@ -583,6 +585,8 @@ class Broker(Satellite):
         logger.log('Stopping all network connexions')
         self.daemon.shutdown(True)
 
+        # And finally close the logger too
+        logger.quit()
 
     def do_loop_turn(self):
         print "Begin Loop : manage broks", len(self.broks)
