@@ -83,6 +83,7 @@ Example of task that a shinken module can do:
         self.phases.append(None)
         self.to_q = None
         self.from_q = None
+        self.process = None
         
     def create_queues(self):
         self.create_queues__(self)

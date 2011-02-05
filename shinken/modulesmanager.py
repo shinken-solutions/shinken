@@ -145,7 +145,7 @@ If an instance can't be created or init'ed then only log is done. That instance 
             self.__start_ext_instances()
 
         return self.instances
-
+ 
     def __start_ext_instances(self):
         for inst in self.instances:
             if inst.is_external:
@@ -186,8 +186,10 @@ If an instance can't be created or init'ed then only log is done. That instance 
     def remove_instance(self, inst):
         # External instances need to be close before (process + queues)
         if inst.is_external:
-            inst.process.terminate()
-            inst.process.join(timeout=1)
+            if inst.process:
+                inst.process.terminate()
+                inst.process.join(timeout=1)
+                inst.process = None
             self.close_inst_queues(inst)
         # Then do not listen anymore about it
         self.instances.remove(inst)
