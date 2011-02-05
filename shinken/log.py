@@ -25,32 +25,54 @@ from brok import Brok
 
 obj = None
 name = None
+local_log = None
 
 class Log:
-    #We load the object where we will put log broks
-    #with the 'add' method
+    # We load the object where we will put log broks
+    # with the 'add' method
     def load_obj(self, object, name_ = None):
         global obj
         global name
         obj = object
         name = name_
 
-    #We enter a log message, we format it, and we add the log brok
+    # We enter a log message, we format it, and we add the log brok
     def log(self, message, format = None):
         global obj
         global name
+        global local_log
+
         print message
         if format == None:
             if name == None:
-            #We format the log in UTF-8
+            # We format the log in UTF-8
                 s = u'[%d] %s\n' % (int(time.time()), message.decode('UTF-8', 'replace'))
             else:
                 s = u'[%d] [%s] %s\n' % (int(time.time()), name, message.decode('UTF-8', 'replace'))
         else:
             s = format % message
 
-        #Wecreate and add the brok
+        # We create and add the brok
         b = Brok('log', {'log' : s})
         obj.add(b)
+
+        # If we want a local log write, do it
+        if local_log != None:
+            local_log.write(s)
+            local_log.flush()
+            
+
+    # The log can also write to a local file if need
+    def register_local_log(self, path):
+        global local_log
+        local_log = open(path, 'a')
+        
+
+    # Clsoe the local log file at program exit
+    def quit(self):
+        global local_log
+        if local_log:
+            local_log.close()
+        
 
 logger = Log()

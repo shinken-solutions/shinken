@@ -28,6 +28,13 @@ SET PYLINT=%3
 
 IF NOT (%COVERAGE%) == (COVERAGE) SET COVERAGE=NOCOVERAGE
 IF NOT (%PYLINT%) == (PYLINT) SET PYLINT=NOPYLINT
+IF (%PYTHONVERS%) == (%PYTHONVERS%) SET PYTHONVERS=27
+IF (%PYTHONVERS%) == (271) SET PYTHONVERS=27
+IF (%PYTHONVERS%) == (266) SET PYTHONVERS=26
+IF (%PYTHONVERS%) == (246) SET PYTHONVERS=24
+SET PYTHONBIN=C:\Python%PYTHONVERS%
+SET PYTHONTOOLS=C:\Python%PYTHONVERS%\Scripts
+SET PATH=%PYTHONBIN%;%PYTHONTOOLS%;%PATH%
 
 REM This script is located in test/jenkins but needs to be run from test.
 REM Find out the script's directory and then go to the dir one level above. 
@@ -46,22 +53,32 @@ CALL :FUNC1 %%f
 IF %COVERAGE% == NOCOVERAGE IF %PYLINT% == NOPYLINT IF ERRORLEVEL 1 GOTO FAIL
 )
 
-REM Merge the single coverage files
-IF %COVERAGE% == COVERAGE C:\Python27\Scripts\coverage xml --omit=/usr/lib
-REM Run Pylint
-IF %PYLINT% == PYLINT ECHO NEED TO INSTALL Pylint first
+IF %COVERAGE% == COVERAGE CALL :DOCOVERAGE
+CD ..
+IF %PYLINT% == PYLINT CALL :DOPYLINT
+ECHO THATS IT
 EXIT /B 0
 
 :FAIL
 ECHO One of the tests failed, so i give up.
 EXIT /B 1
 
+:DOCOVERAGE
+%PYTHONTOOLS%\coverage xml --omit=/usr/lib
+IF NOT ERRORLEVEL 0 ECHO COVERAGE HAD A PROBLEM
+GOTO :EOF [Return to Main]
+
+:DOPYLINT
+CALL %PYTHONTOOLS%\pylint --rcfile test\jenkins\pylint.rc shinken > pylint.txt
+IF NOT ERRORLEVEL 0 ECHO PYLINT HAD A PROBLEM
+GOTO :EOF [Return to Main]
+
 REM Here is where the tests actually run
 :FUNC1 
 ECHO I RUN %1
-IF %COVERAGE% == NOCOVERAGE IF %PYLINT% == NOPYLINT C:\Python27\Scripts\nosetests -v -s --with-xunit %1
-IF %COVERAGE% == COVERAGE IF %PYLINT% == NOPYLINT C:\Python27\Scripts\nosetests -v -s --with-xunit --with-coverage %1
-IF ERRORLEVEL 1 goto :EOF
+IF %COVERAGE% == NOCOVERAGE IF %PYLINT% == NOPYLINT %PYTHONTOOLS%\nosetests -v -s --with-xunit %1
+IF %COVERAGE% == COVERAGE %PYTHONTOOLS%\nosetests -v -s --with-xunit --with-coverage %1
+IF ERRORLEVEL 1 GOTO :EOF
 ECHO successfully ran %1
 GOTO :EOF [Return to Main]
 

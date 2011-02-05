@@ -28,15 +28,15 @@ import os
 import Queue
 
 #And now include from this global directory
-from shinken.objects.host import Host
-from shinken.objects.hostgroup import Hostgroup
-from shinken.objects.service import Service
-from shinken.objects.servicegroup import Servicegroup
-from shinken.objects.contact import Contact
-from shinken.objects.contactgroup import Contactgroup
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.command import Command
-from shinken.objects.config import Config
+from shinken.objects import Host
+from shinken.objects import Hostgroup
+from shinken.objects import Service
+from shinken.objects import Servicegroup
+from shinken.objects import Contact
+from shinken.objects import Contactgroup
+from shinken.objects import Timeperiod
+from shinken.objects import Command
+from shinken.objects import Config
 #And now include from this directory
 from shinken.modules.status_dat_broker.status import StatusFile
 from shinken.modules.status_dat_broker.objectscache import ObjectsCacheFile
@@ -388,6 +388,9 @@ class Status_dat_broker(BaseModule):
             try:
                 b = self.to_q.get(True, 5)
                 self.manage_brok(b)
+            except IOError, e:
+                if e.errno != os.errno.EINTR:
+                    raise
             except Queue.Empty:
                 # No items arrived in the queue, but we must write a status.dat at regular intervals
                 pass

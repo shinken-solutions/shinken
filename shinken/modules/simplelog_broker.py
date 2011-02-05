@@ -135,5 +135,10 @@ class Simple_log_broker(BaseModule):
 
     def do_loop_turn(self):
         self.check_and_do_archive()
-        b = self.to_q.get() # can block here :)
-        self.manage_brok(b)
+        try:
+            b = self.to_q.get() # can block here :)
+        except IOError, e:
+            if e.errno != os.errno.EINTR:
+                raise
+        else:
+            self.manage_brok(b)

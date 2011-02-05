@@ -64,6 +64,8 @@ class Poller(Satellite):
             'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
             'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
             'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
+            'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
+            'local_log' : {'default' : '/usr/local/shinken/var/pollerd.log', 'pythonize' : None, 'path' : True},
             }
 
 

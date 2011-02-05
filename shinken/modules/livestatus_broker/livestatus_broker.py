@@ -39,15 +39,15 @@ except ImportError: # python 2.4 do not have it
         import sqlite as sqlite3 # one last try
 import Queue
 
-from shinken.objects.host import Host
-from shinken.objects.hostgroup import Hostgroup
-from shinken.objects.service import Service
-from shinken.objects.servicegroup import Servicegroup
-from shinken.objects.contact import Contact
-from shinken.objects.contactgroup import Contactgroup
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.command import Command
-from shinken.objects.config import Config
+from shinken.objects import Host
+from shinken.objects import Hostgroup
+from shinken.objects import Service
+from shinken.objects import Servicegroup
+from shinken.objects import Contact
+from shinken.objects import Contactgroup
+from shinken.objects import Timeperiod
+from shinken.objects import Command
+from shinken.objects import Config
 from shinken.schedulerlink import SchedulerLink
 from shinken.reactionnerlink import ReactionnerLink
 from shinken.pollerlink import PollerLink
@@ -756,6 +756,9 @@ class Livestatus_broker(BaseModule):
             #We do not ware about Empty queue
             except Queue.Empty:
                 pass
+            except IOError, e:
+                if e.errno != os.errno.EINTR:
+                    raise
             #But others are importants
             except Exception, exp:
                 print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)

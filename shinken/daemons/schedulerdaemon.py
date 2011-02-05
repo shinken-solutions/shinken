@@ -26,7 +26,7 @@ import time
 
 from shinken.bin import VERSION
 from shinken.scheduler import Scheduler
-from shinken.objects.config import Config
+from shinken.objects import Config
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager
 from shinken.daemon import Daemon
@@ -34,7 +34,7 @@ from shinken.util import to_int, to_bool
 from shinken.modulesmanager import ModulesManager
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
-
+from shinken.log import logger
 
 
 ################### Process launch part
@@ -218,6 +218,8 @@ class Shinken(Daemon):
         'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
         'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
         'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
+        'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
+        'local_log' : {'default' : '/usr/local/shinken/var/schedulerd.log', 'pythonize' : None, 'path' : True},
         }
 
     #Create the shinken class:
@@ -253,6 +255,8 @@ class Shinken(Daemon):
         print "Stopping all network connexions"
         self.daemon.shutdown(True)
 
+        # and closing the local log file if need
+        logger.quit()
 
 
     #We wait (block) for arbiter to send us conf
