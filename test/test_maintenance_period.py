@@ -73,6 +73,13 @@ class TestConfig(ShinkenTest):
         svc1.maintenance_period = None
         svc2.maintenance_period = None
 
+        # be sure we have some time before a new minute begins.
+        # otherwise we get a race condition and a failed test here.
+        x = time.gmtime()
+        while x.tm_sec < 50:
+            time.sleep(1)
+            x = time.gmtime()
+
         now = time.time()
         print "now it is", time.asctime(time.localtime(now))
         nowday = time.strftime("%A", time.localtime(now + 60)).lower()
