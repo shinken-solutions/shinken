@@ -525,11 +525,11 @@ class Livestatus_broker(BaseModule):
             elif type == 'PASSIVE SERVICE CHECK':
                 logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_PASSIVECHECK
-                host_name, service_description, state, check_plugin_output = options.split(';')
+                host_name, service_description, state, check_plugin_output = options.split(';', 3)
             elif type == 'PASSIVE HOST CHECK':
                 logobject = LOGOBJECT_HOST
                 logclass = LOGCLASS_PASSIVECHECK
-                host_name, state, check_plugin_output = options.split(';')
+                host_name, state, check_plugin_output = options.split(';', 2)
 
             elif type == 'SERVICE EVENT HANDLER':
                 # SERVICE EVENT HANDLER: test_host_0;test_ok_0;CRITICAL;SOFT;1;eventhandler

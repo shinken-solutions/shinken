@@ -48,13 +48,42 @@ class TestConfig(ShinkenTest):
         self.assert_(host.state_type == 'HARD')
 
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy' % int(time.time())
-
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
         self.scheduler_loop(1, []) #Need 2 run for get then consume)
         self.assert_(host.state == 'DOWN')
         self.assert_(host.output == 'Bob is not happy')
 
+        # Now with performance data
+        excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, []) #Need 2 run for get then consume)
+        self.assert_(host.state == 'DOWN')
+        self.assert_(host.output == 'Bob is not happy')
+        self.assert_(host.perf_data == 'rtt=9999')
+
+        # Now with full-blown performance data. Here we have to watch out:
+        # Is a ";" a separator for the external command or is it
+        # part of the performance data?
+        excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999;5;10;0;10000' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, []) #Need 2 run for get then consume)
+        self.assert_(host.state == 'DOWN')
+        self.assert_(host.output == 'Bob is not happy')
+        print "perf (%s)" % host.perf_data
+        self.assert_(host.perf_data == 'rtt=9999;5;10;0;10000')
+
+        # The same with a service
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;Bobby is not happy|rtt=9999;5;10;0;10000' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, []) #Need 2 run for get then consume)
+        self.assert_(svc.state == 'WARNING')
+        self.assert_(svc.output == 'Bobby is not happy')
+        print "perf (%s)" % svc.perf_data
+        self.assert_(svc.perf_data == 'rtt=9999;5;10;0;10000')
 
         #Clean the command_file
         #try:
