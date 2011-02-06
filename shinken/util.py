@@ -59,7 +59,11 @@ def get_sec_from_morning(t):
 #@memoized
 def get_start_of_day(year, month_id, day):
     start_time = (year, month_id, day, 00, 00, 00, 0, 0, -1)
-    start_time_epoch = time.mktime(start_time)
+    try:
+        start_time_epoch = time.mktime(start_time)
+    except OverflowError:
+        # Windows mktime sometimes crashes on (1970, 1, 1, ...)
+        start_time_epoch = 0.0
     return start_time_epoch
 
 
