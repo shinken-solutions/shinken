@@ -25,7 +25,6 @@ import time
 import random
 from Queue import Empty
 
-from shinken.bin import VERSION
 from shinken.util import to_bool
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
@@ -667,25 +666,3 @@ class Arbiter(Daemon):
 
             if timeout < 0:
                 timeout = 1.0
-
-
-
-################### Process launch part
-def usage(name):
-    print "Shinken Arbiter Daemon, version %s, from :" % VERSION
-    print "        Gabes Jean, naparuba@gmail.com"
-    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
-    print "        Gregory Starck, g.starck@gmail.com"
-    print "Usage: %s [options] -c configfile [-c additionnal_config_file]" % name
-    print "Options:"
-    print " -c, --config"
-    print "\tConfig file (your nagios.cfg). Multiple -c can be used, it will be like if all files was just one"
-    print " -d, --daemon"
-    print "\tRun in daemon mode"
-    print " -r, --replace"
-    print "\tReplace previous running scheduler"
-    print " -h, --help"
-    print "\tPrint detailed help screen"
-    print " --debug"
-    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-

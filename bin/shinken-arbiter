@@ -32,7 +32,7 @@ It also read order form users (nagios.cmd) and send orders to schedulers.
 
 import os
 import sys
-import getopt
+import optparse
 
 
 # We try to raise up recusion limit on
@@ -66,51 +66,36 @@ except ImportError, e:
         sys.path.append(os.sep.join(elts))
 
 
-from shinken.daemons.arbiterdaemon import Arbiter, usage
-
+from shinken.daemons.arbiterdaemon import Arbiter
+from shinken.bin import VERSION
 
 # Here we go!
 if __name__ == "__main__":
-    # Manage the options
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hvrdc::w", ["help", "verify-config", "replace", "daemon", "config=", "debug=", "easter"])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage(sys.argv[0])
-        sys.exit(2)
-    # Default params
-    config_files = []
-    verify_only = False
-    is_daemon = False
-    do_replace = False
-    debug = False
-    debug_file = None
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage(sys.argv[0])
-            sys.exit()
-        elif o in ("-v", "--verify-config"):
-            verify_only = True
-        elif o in ("-r", "--replace"):
-            do_replace = True
-        elif o in ("-c", "--config"):
-            config_files.append(a)
-        elif o in ("-d", "--daemon"):
-            is_daemon = True
-        elif o in ("--debug"):
-            debug = True
-            debug_file = a
-        else:
-            print "Sorry, the option", o, a, "is unknown"
-            usage(sys.argv[0])
-            sys.exit()
+    parser = optparse.OptionParser(
+        "%prog [options] -c configfile [-c additional_config_file]",
+        version="%prog " + VERSION)
+    parser.add_option('-c', '--config', action='append',
+                      dest="config_files", metavar="CONFIG-FILE",
+                      help=('Config file (your nagios.cfg). Multiple -c can be '
+                            'used, it will be like if all files was just one'))
+    parser.add_option('-d', '--daemon', action='store_true',
+                      dest="is_daemon",
+                      help="Run in daemon mode")
+    parser.add_option('-r', '--replace', action='store_true',
+                      dest="do_replace",
+                      help="Replace previous running scheduler")
+    parser.add_option('--debugfile', dest='debug_file',
+                      help=("Debug file. Default: not used "
+                            "(why debug a bug free program? :) )"))
+    parser.add_option("-v", "--verify-config",
+                      dest="verify_only", action="store_true",
+                      help="Verify config file and exit")
+    
+    opts, args = parser.parse_args()
+    if not opts.config_files:
+        parser.error("Requires at least one config file (option -c/--config")
+    if args:
+        parser.error("Does not accept any argument. Use option -c/--config")
 
-    if len(config_files) == 0:
-        print "Error : config file is need"
-        usage(sys.argv[0])
-        sys.exit(1)
-
-    daemon = Arbiter(config_files, is_daemon, do_replace, verify_only, debug, debug_file)
-
+    daemon = Arbiter(debug=opts.debug_file is not None, **opts.__dict__)
     daemon.main()
