@@ -87,6 +87,7 @@ launch_and_assert test_nullinheritance.py
 launch_and_assert test_create_link_from_ext_cmd.py
 launch_and_assert test_dispatcher.py
 launch_and_assert test_module_hot_dependencies_arbiter.py
+launch_and_assert test_module_hack_cmd_poller_tag.py
 launch_and_assert test_unknown_do_not_change.py
 
 #Live status is a bit longer than the previous, so we put it at the end.

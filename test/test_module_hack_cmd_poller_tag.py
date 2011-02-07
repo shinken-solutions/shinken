@@ -56,22 +56,25 @@ class TestHackCmdPollerTag(ShinkenTest):
         cmd2 = self.sched.commands.find_cmd_by_name('should_not_change')
         self.assert_(cmd2 != None)
         
+        # cmd1 should have been updated, but not cmd2
         print "CMD1", cmd1.__dict__
         print "P", cmd1.poller_tag
         self.assert_(cmd1.poller_tag == 'other')
         print "CMD2", cmd2.__dict__
         print "P", cmd1.poller_tag
-        self.assert_(cmd2.poller_tag == 'other')
+        self.assert_(cmd2.poller_tag == 'alreadydefined')
         
-        # look for a service that use it
+        # look for a objects that use it
         h1 = self.sched.hosts.find_by_name("test_host_0")
         self.assert_(h1 != None)
         h2 = self.sched.hosts.find_by_name("test_router_0")
         self.assert_(h2 != None)
         
+        # Ok, host1 call cmd2, and host2 cmd1...
+        # sorry for the crossing :p
         print "H1", h1.check_command
         print h1.check_command.command
-        self.assert_(h1.check_command.poller_tag == 'other')
+        self.assert_(h1.check_command.poller_tag == 'alreadydefined')
         print "H2", h2.check_command
         print h2.check_command.command
         self.assert_(h2.check_command.poller_tag == 'other')

@@ -75,7 +75,7 @@ class Hack_cmds_pt(BaseModule):
         p = re.compile(self.cmd_line_match)
         for c in arb.conf.commands:
             m = p.match(c.command_line)
-            if m != None:
+            if m != None and c.poller_tag == None:
                 print "[Hack command poller tag] Match! Chaging the poller tag of %s by %s " % (c.command_name, self.poller_tag)
                 c.poller_tag = self.poller_tag
                 self.update_service_and_hosts_commandCall(arb, c, self.poller_tag)
