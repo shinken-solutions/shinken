@@ -69,33 +69,31 @@ except ImportError, e:
 from shinken.daemons.arbiterdaemon import Arbiter
 from shinken.bin import VERSION
 
-# Here we go!
-if __name__ == "__main__":
-    parser = optparse.OptionParser(
-        "%prog [options] -c configfile [-c additional_config_file]",
-        version="%prog " + VERSION)
-    parser.add_option('-c', '--config', action='append',
-                      dest="config_files", metavar="CONFIG-FILE",
-                      help=('Config file (your nagios.cfg). Multiple -c can be '
-                            'used, it will be like if all files was just one'))
-    parser.add_option('-d', '--daemon', action='store_true',
-                      dest="is_daemon",
-                      help="Run in daemon mode")
-    parser.add_option('-r', '--replace', action='store_true',
-                      dest="do_replace",
-                      help="Replace previous running scheduler")
-    parser.add_option('--debugfile', dest='debug_file',
-                      help=("Debug file. Default: not used "
-                            "(why debug a bug free program? :) )"))
-    parser.add_option("-v", "--verify-config",
-                      dest="verify_only", action="store_true",
-                      help="Verify config file and exit")
-    
-    opts, args = parser.parse_args()
-    if not opts.config_files:
-        parser.error("Requires at least one config file (option -c/--config")
-    if args:
-        parser.error("Does not accept any argument. Use option -c/--config")
+parser = optparse.OptionParser(
+    "%prog [options] -c configfile [-c additional_config_file]",
+    version="%prog " + VERSION)
+parser.add_option('-c', '--config', action='append',
+                  dest="config_files", metavar="CONFIG-FILE",
+                  help=('Config file (your nagios.cfg). Multiple -c can be '
+                        'used, it will be like if all files was just one'))
+parser.add_option('-d', '--daemon', action='store_true',
+                  dest="is_daemon",
+                  help="Run in daemon mode")
+parser.add_option('-r', '--replace', action='store_true',
+                  dest="do_replace",
+                  help="Replace previous running scheduler")
+parser.add_option('--debugfile', dest='debug_file',
+                  help=("Debug file. Default: not used "
+                        "(why debug a bug free program? :) )"))
+parser.add_option("-v", "--verify-config",
+                  dest="verify_only", action="store_true",
+                  help="Verify config file and exit")
 
-    daemon = Arbiter(debug=opts.debug_file is not None, **opts.__dict__)
-    daemon.main()
+opts, args = parser.parse_args()
+if not opts.config_files:
+    parser.error("Requires at least one config file (option -c/--config")
+if args:
+    parser.error("Does not accept any argument. Use option -c/--config")
+
+daemon = Arbiter(debug=opts.debug_file is not None, **opts.__dict__)
+daemon.main()
