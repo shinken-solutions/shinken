@@ -32,9 +32,10 @@ class TestConfig(ShinkenTest):
     #setUp is in shinken_test
 
     def wait_finished(self, a):
-        for i in xrange(1, 10000):
+        for i in xrange(1, 100000):
             if a.status == 'launched':
                 a.check_finished(8012)
+                time.sleep(0.01)
 
     #Change ME :)
     def test_action(self):

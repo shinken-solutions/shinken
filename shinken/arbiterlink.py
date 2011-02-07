@@ -63,7 +63,7 @@ class ArbiterLink(SatelliteLink):
         cls = self.__class__
 
         for prop in cls.properties:
-            if not hasattr(self, prop) and cls.properties[prop]['required']:
+            if not hasattr(self, prop) and cls.properties[prop].required:
                 print self.get_name(), " : I do not have", prop
                 state = False #Bad boy...
         return state

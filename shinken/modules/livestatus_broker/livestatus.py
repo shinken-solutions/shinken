@@ -35,7 +35,7 @@ except ImportError:
     except ImportError:
         import sqlite as sqlite3
 
-
+from shinken.bin import VERSION
 from shinken.objects import Service
 from shinken.external_command import ExternalCommand
 from shinken.macroresolver import MacroResolver
@@ -4567,7 +4567,7 @@ class LiveStatus:
                 'type' : 'int',
             },
             'program_version' : {
-                'default' : '0.1',
+                'default' : VERSION,
                 'description' : 'The version of the monitoring daemon',
                 'prop' : None,
                 'type' : 'string',

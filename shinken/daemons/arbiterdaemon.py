@@ -626,9 +626,11 @@ class Arbiter(Daemon):
                         # If FIFO, read external command
                         if s == self.fifo:
                             ext_cmds = self.external_command.get()
-                            for ext_cmd in ext_cmds:
-                                self.external_commands.append(ext_cmd)
-                            self.fifo = self.external_command.open()
+                            if ext_cmds:
+                                for ext_cmd in ext_cmds:
+                                    self.external_commands.append(ext_cmd)
+                            else:
+                                self.fifo = self.external_command.open()
 
             else: # Timeout
                 # Call modules that manage a starting tick pass

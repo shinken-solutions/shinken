@@ -217,6 +217,7 @@ class ExternalCommandManager:
         self.timeperiods = conf.timeperiods
         self.pipe_path = conf.command_file
         self.fifo = None
+        self.cmd_fragments = ''
         if self.mode == 'dispatcher':
             self.confs = conf.confs
 
@@ -246,17 +247,24 @@ class ExternalCommandManager:
 
     def get(self):
         buf = os.read(self.fifo, 8096)
-        os.close(self.fifo)
         r = []
-        if buf != '':
-            t = buf.split('\n')
-            for s in t:
-                if s != '':
-                    excmd = ExternalCommand(s)
-                    r.append(excmd)
-            return r
-        return []
-
+        fullbuf = len(buf) == 8096 and True or False
+        # If the buffer ended with a fragment last time, prepend it here
+        buf = self.cmd_fragments + buf
+        buflen = len(buf)
+        self.cmd_fragments = ''
+        if fullbuf and buf[-1] != '\n':
+            # The buffer was full but ends with a command fragment
+            r.extend([ExternalCommand(s) for s in (buf.split('\n'))[:-1] if s])
+            self.cmd_fragments = (buf.split('\n'))[-1]
+        elif buflen:
+            # The buffer is either half-filled or full with a '\n' at the end.
+            r.extend([ExternalCommand(s) for s in buf.split('\n') if s])
+        else:
+            # The buffer is empty. We "reset" the fifo here. It will be
+            # re-opened in the main loop.
+            os.close(self.fifo)
+        return r
 
 
     def resolve_command(self, excmd):
@@ -298,9 +306,8 @@ class ExternalCommandManager:
     #We need to get the first part, the command name
     def get_command_and_args(self, command):
         print "Trying to resolve", command
-        if command[-1] == '\n':
-            command = command[:-1]
-        elts = command.split(';')
+        command = command.rstrip()
+        elts = command.split(';') # danger!!! passive checkresults with perfdata
         part1 = elts[0]
 
         elts2 = part1.split(' ')
@@ -314,6 +321,14 @@ class ExternalCommandManager:
         if c_name not in ExternalCommandManager.commands:
             print "This command is not recognized, sorry"
             return None
+
+        # Split again based on the number of args we expect. We cannot split
+        # on every ; because this character may appear in the perfdata of
+        # passive check results.
+        numargs = len(ExternalCommandManager.commands[c_name]['args'])
+        if numargs and 'service' in ExternalCommandManager.commands[c_name]['args']:
+            numargs += 1
+        elts = command.split(';', numargs) 
 
         if self.mode == 'dispatcher' and ExternalCommandManager.commands[c_name]['global']:
             print "This command is a global one, we resent it to all schedulers"
