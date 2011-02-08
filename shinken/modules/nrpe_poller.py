@@ -213,6 +213,15 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 self.rc = 2
                 self.message = str(exp)
                 return
+            except OpenSSL.SSL.WantReadError, exp:
+                while True:
+                    print "Do handshake violent!"
+                    try: 
+                        self.socket.do_handshake()
+                    except OpenSSL.SSL.WantReadError, exp:
+                        return
+                    break
+                return
 
             if len(b) != 0:
                 (self.rc, self.message) = self.nrpe.read(b)
@@ -253,6 +262,12 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 self.message = str(exp)
                 return
             except OpenSSL.SSL.WantReadError, exp:
+                while True:
+                    print "Do handshake violent!"
+                    try: 
+                        self.socket.do_handshake()
+                    except OpenSSL.SSL.WantReadError, exp:
+                        return
                 print "Fuck WantReadError", exp
                 self.handle_read()
                 return
