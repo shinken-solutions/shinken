@@ -69,6 +69,13 @@ class NRPE:
         '''
         self.query = create_string_buffer(1036)
         crc = 0
+
+        if not command:
+            self.state = 'received'
+            self.rc = 3
+            self.message = "Error : no command asked fro nrpe query"
+            return
+
         self.query.raw=struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
         crc = binascii.crc32(self.query)
         # we restart with the crc value this time...
@@ -118,6 +125,7 @@ class NRPE:
 
         self.state = 'received'
         # TODO : check crc
+            
         response = struct.unpack(">2hih1024s", data)
 
         rc = response[3]
@@ -210,7 +218,7 @@ def parse_args(cmd_args):
     except getopt.GetoptError, err:
         # If we got problem, bail out
         return (host, port, unknown_on_timeout, command, timeout, use_ssl)
-    
+    print  opts, args
     for o, a in opts:
         if o in ("-H"):
             host = a
@@ -269,7 +277,11 @@ class Nrpe_poller(BaseModule):
             if chk.status == 'queue':
                 chk.status = 'launched'
                 print "NRPE (bad) check for", chk.command
-                n = NRPEAsyncClient('localhost', 5666, 'check_load')
+                # Want the args of the commands
+                args = parse_args(chk.command.split(' ')[1:])
+                print "Args", args
+                (host, port, unknown_on_timeout, command, timeout, use_ssl) = args
+                n = NRPEAsyncClient(host, port, command)
                 chk.con = n
                 self.con_in_progress.append(n)
                 #chk.exit_status = 2
