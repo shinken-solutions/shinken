@@ -158,7 +158,13 @@ class NRPEAsyncClient(asyncore.dispatcher):
     def handle_read(self):
         if self.nrpe.state != 'received':
             #print "Handle read"
-            b = self.recv(1034)
+            try:
+                b = self.recv(1034)
+            except socket.error, exp:
+                self.nrpe.state = 'received'
+                self.rc = 2
+                self.message = str(exp)
+                return
             #print "received", len(b), "bytes"
             (self.rc, self.message) = self.nrpe.read(b)
             # We can close ourself
@@ -168,12 +174,18 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
     def writable(self):
         #print "writable?", len(self.nrpe.query) > 0
-        return (len(self.nrpe.query) > 0)
+        return not self.is_done and (len(self.nrpe.query) > 0)
 
 
     def handle_write(self):
+        try : 
         #print "handle write", len(self.nrpe.query)
-        sent = self.send(self.nrpe.query)
+            sent = self.send(self.nrpe.query)
+        except socket.error, exp:
+            self.nrpe.state = 'received'
+            self.rc = 2
+            self.message = str(exp)
+            return
         #print "Sent", sent
         self.nrpe.query = self.nrpe.query[sent:]
         #print "New len query", len(self.nrpe.query)
@@ -331,12 +343,15 @@ class Nrpe_poller(BaseModule):
             self.manage_finished_checks()
 
             # Now get order from master
+            print "Try c"
             try:
                 cmsg = c.get(block=False)
+                print "Got message", cmsg.get_type()
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self.id
                     break
             except :
+                print "Nothing"
                 pass
 
             timeout -= time.time() - begin
