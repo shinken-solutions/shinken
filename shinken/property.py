@@ -34,6 +34,9 @@ FULL_STATUS = 'full_status'
 CHECK_RESULT = 'check_result'
 
 
+none_object = object()
+
+
 class Property(object):
     """
     Baseclass of all properties.
@@ -43,7 +46,7 @@ class Property(object):
 
 
     """
-    def __init__(self, default='ididnotsetdefault', class_inherit=[],
+    def __init__(self, default=none_object, class_inherit=[],
                  unmanaged=False, help='', no_slots=False,
                  fill_brok=[], conf_send_preparation=None,
                  brok_transformation=None,retention=False,to_send=False,
@@ -83,8 +86,8 @@ class Property(object):
 
         """
         self.default = default
-        self.has_default = (default != 'ididnotsetdefault')
-        self.required = default is 'ididnotsetdefault'
+        self.has_default = (default is not none_object)
+        self.required = not self.has_default
         self.class_inherit = class_inherit
         self.help = help or ''
         self.unmanaged = unmanaged
