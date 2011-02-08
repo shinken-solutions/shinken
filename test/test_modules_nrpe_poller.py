@@ -65,7 +65,7 @@ class TestNrpePoller(ShinkenTest):
 
         # We prepare a check in the to_queue
         status = 'queue'
-        command = "$USER1$/check_nrpe -H idonotexist -u -t 9 -c check_load -a arg1 arg2 arg3"
+        command = "$USER1$/check_nrpe -H localhost33 -n -u -t 9 -c check_load"# -a arg1 arg2 arg3"
         ref = None
         t_to_to = time.time()
         c = Check(status, command, ref, t_to_to)
@@ -80,6 +80,10 @@ class TestNrpePoller(ShinkenTest):
         msg2 = Message(id=0, type='Die')
 
         control_queue.put(msg1)
+        #control_queue.put(msg1)
+        #control_queue.put(msg1)
+        #control_queue.put(msg1)
+        #control_queue.put(msg1)
         control_queue.put(msg2)
         sl.work(to_queue, from_queue, control_queue)
 
