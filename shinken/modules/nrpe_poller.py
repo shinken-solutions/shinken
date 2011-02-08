@@ -211,14 +211,15 @@ def parse_args(cmd_args):
     unknown_on_timeout = False
     timeout = 10
     use_ssl = True
+    add_args = []
 
     #Manage the options
     try:
         opts, args = getopt.getopt(cmd_args, "H::p::nut::c::a::", [])
     except getopt.GetoptError, err:
         # If we got problem, bail out
-        return (host, port, unknown_on_timeout, command, timeout, use_ssl)
-    print  opts, args
+        return (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
+    print  "Opts", opts, "Args", args
     for o, a in opts:
         if o in ("-H"):
             host = a
@@ -232,7 +233,12 @@ def parse_args(cmd_args):
             unknown_on_timeout = True
         elif o in ('-n'):
             use_ssl = False
-    return (host, port, unknown_on_timeout, command, timeout, use_ssl)
+        elif o in ('-a'):
+            # Here we got a, btu also all 'args'
+            add_args.append(a)
+            add_args.extend(args)
+            
+    return (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
 
 
 
@@ -269,6 +275,7 @@ class Nrpe_poller(BaseModule):
                 time.sleep(1)
 
 
+
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
@@ -280,8 +287,21 @@ class Nrpe_poller(BaseModule):
                 # Want the args of the commands
                 args = parse_args(chk.command.split(' ')[1:])
                 print "Args", args
-                (host, port, unknown_on_timeout, command, timeout, use_ssl) = args
-                n = NRPEAsyncClient(host, port, command)
+                
+                (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args) = args
+                
+                # If we do nto have the good args, we bail out for this check
+                if command == None or host == None:
+                    chk.status = 'done'
+                    chk.exit_status = 2
+                    chk.get_outputs('Error : the parameters host or command are not correct.', 8012)
+                    chk.execution_time = 0.0
+                    continue
+                # Ok we are good, we go on
+                total_args = [command]
+                total_args.extend(add_args)
+                cmd = r'!'.join(total_args)
+                n = NRPEAsyncClient(host, port, cmd)
                 chk.con = n
                 self.con_in_progress.append(n)
                 #chk.exit_status = 2
@@ -301,14 +321,25 @@ class Nrpe_poller(BaseModule):
         
         # Now we look for finised checks
         for c in self.checks:
-            n = c.con
-            if c.status == 'launched' and n.is_done():
+            # First manage check in error, bad formed
+            if c.status == 'done':
+                to_del.append(c)
+                try:
+                    self.returns_queue.append(c)
+                except IOError , exp:
+                    print "[%d]Exiting: %s" % (self.id, exp)
+                    sys.exit(2)
+                continue
+            # Then we check for good checks
+            if c.status == 'launched' and c.con.is_done():
+                n = c.con
                 print "Finished check", c
                 c.status = 'done'
                 c.exit_status = n.rc
                 c.get_outputs(n.message, 8012)
                 # unlink our object from the original check
-                del c.con
+                if hasattr(c, 'con'):
+                    delattr(c, 'con')
                 self.con_in_progress.remove(n)
                 to_del.append(c)
 
