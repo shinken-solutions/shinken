@@ -30,7 +30,6 @@
 
 import sys, os
 import getopt
-import ConfigParser
 
 
 
