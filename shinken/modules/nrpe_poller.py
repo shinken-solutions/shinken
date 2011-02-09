@@ -37,12 +37,16 @@ import struct
 import binascii
 import asyncore
 import getopt
+import shlex
 
 try :
     import OpenSSL
-    from OpenSSL import SSL
+    SSLWantReadError = OpenSSL.SSL.WantReadError
+    SSLZeroReturnError = OpenSSL.SSL.ZeroReturnError
 except ImportError:
     OpenSSL = None
+    SSLWantReadError = None
+    SSLZeroReturnError = None
 
 from ctypes import create_string_buffer
 from Queue import Empty
@@ -65,6 +69,7 @@ def get_instance(mod_conf):
 
 
 class NRPE:
+    # Really build the buffer query with our command
     def build_query(self, command):
         '''
         Build a query packet
@@ -84,11 +89,13 @@ class NRPE:
             self.message = "Error : no command asked fro nrpe query"
             return
 
+        # We pack it, then we compute CRC32 of this frist query
         self.query.raw=struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
         crc = binascii.crc32(self.query)
-        # we restart with the crc value this time...
+        
+        # we restart with the crc value this time
+        # because python2.4 do not have pack_into.
         self.query.raw=struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
-        #struct.pack_into(">i", self.query, 4, crc)
 
     
     def init_query(self,host, port, use_ssl, command):
@@ -113,20 +120,22 @@ class NRPE:
 #            self.state = 'received'
 #            return(self.rc, self.message)
         
-    def get(self):
-        # If we already got an error, get out now
-        if self.state == 'received':
-            return (self.rc, self.message)
-        try:
-            data = self.s.recv(1034)
-            self.s.close()
-        except socket.error,exp:
-            self.rc = 2
-            self.message = str(exp)
-            self.state = 'received'
-            return(self.rc, self.message)
-        return data
+#    def get(self):
+#        # If we already got an error, get out now
+#        if self.state == 'received':
+#            return (self.rc, self.message)
+#        try:
+#            data = self.s.recv(1034)
+#            self.s.close()
+#        except socket.error,exp:
+#            self.rc = 2
+#            self.message = str(exp)
+#            self.state = 'received'
+#            return(self.rc, self.message)
+#        return data
 
+    # Read a return and extract return code
+    # and output
     def read(self, data):
         if self.state == 'received':
             return (self.rc, self.message)
@@ -136,11 +145,13 @@ class NRPE:
             
         response = struct.unpack(">2hih1024s", data)
 
-        rc = response[3]
-        message = response[4]
+        self.rc = response[3]
+        # the output is fill with \x00 at the end. We 
+        # should clean them
+        self.message = response[4].strip('\x00')
         crc_orig = response[2]
         
-        return (rc,message)
+        return (self.rc, self.message)
 
 
 
@@ -148,9 +159,13 @@ class NRPE:
 
 class NRPEAsyncClient(asyncore.dispatcher):
 
-    def __init__(self, host, port, use_ssl, msg):
-        self.use_ssl = use_ssl
+    def __init__(self, host, port, use_ssl, timeout, unknown_on_timeout, msg):
         asyncore.dispatcher.__init__(self)
+
+        self.use_ssl = use_ssl
+        self.start_time = time.time()
+        self.timeout = timeout
+        self.unknown_on_timeout = unknown_on_timeout
 
         # Instanciate our nrpe helper
         self.nrpe = NRPE()
@@ -163,9 +178,8 @@ class NRPEAsyncClient(asyncore.dispatcher):
             # The admin want a ssl connexion, but there is not openssl
             # lib installed :(
             if OpenSSL == None:
-                self.rc = 2
-                self.message = "Error : the openssl lib for Python is not installed."
-                self.nrpe.state = 'received'
+                self.set_exit(2, "Error : the openssl lib for Python is not installed.")
+                return
             else:
                 # Ok we can wrap the socket
                 print "Wrapping ssl!"
@@ -175,11 +189,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
             print "Connect to", host, port
             self.connect( (host, port) )
         except socket.error,exp:
-            print exp
-            self.rc = 2
-            self.message = str(exp)
-            self.nrpe.state = 'received'
-        print "Connect done"
+            self.set_exit(2, str(exp))
         
 
     def wrap_ssl(self):
@@ -190,91 +200,104 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
 
     def handle_connect(self):
-        print "Go connect"
         pass
 
 
     def handle_close(self):
-        print "Manage close"
         self.close()
 
+        
+    def set_exit(self, rc, message):
+        self.rc = rc
+        self.message = message
+        self.execution_time = time.time() - self.start_time
+        self.nrpe.state = 'received'
 
+
+    # Check if we are in timeout. If so, just bailout
+    # and set the correct return code from timeout
+    # case
+    def look_for_timeout(self):
+        now = time.time()
+        if now - self.start_time > self.timeout:
+            if self.unknown_on_timeout:
+                rc = 3
+            else:
+                rc = 2
+            message = 'Error : connexion timeout after %d seconds' % self.timeout
+            self.set_exit(rc, message)
+
+
+    # We got a read for the socekt. We do it if we do not already
+    # finished. Maybe it's just a SSL handshake continuation, if so
+    # we continue it and wait for hadshake finish
     def handle_read(self):
-        #print "Do handshake"
-        #self.socket.do_handshake()
-        print "Go read"
-        if self.nrpe.state != 'received':
-            #print "Handle read"
+        if not self.is_done():
             try:
-                b = self.recv(1034)
+                buf = self.recv(1034)
             except socket.error, exp:
                 print exp
-                self.nrpe.state = 'received'
-                self.rc = 2
-                self.message = str(exp)
-                return
-            except OpenSSL.SSL.WantReadError, exp:
-                while True:
-                    print "Do handshake violent!"
-                    try: 
-                        self.socket.do_handshake()
-                    except OpenSSL.SSL.WantReadError, exp:
-                        return
-                    break
+                self.set_exit(2, str(exp))
                 return
 
-            if len(b) != 0:
-                (self.rc, self.message) = self.nrpe.read(b)
+            # if we are in ssl, there can be a handshake
+            # problem : we can't talk until we finished
+            # it, sorry
+            except SSLWantReadError, exp:
+                try: 
+                    self.socket.do_handshake()
+                except SSLWantReadError, exp:
+                    return
+                return
+
+            # We can have nothing, it's just that the server
+            # do not want to talk to us :(
+            except SSLZeroReturnError :
+                buf = ''
+
+            # Maybe we got nothing from the server (it refuse our ip,
+            # of refuse arguments...)
+            if len(buf) != 0:
+                (rc, message) = self.nrpe.read(buf)
+                self.set_exit(rc, message)
             else:
-                self.rc = 2
-                self.message = "nothing return"
-            # We can close ourself
+                self.set_exit(2, "Error : nothing return from the nrpe server")
+            
+            # We can close the socket, we are done
             self.close()
-            print self.rc, self.message
 
-
+    # Did we finished our job?
     def writable(self):
-        print "writable?", len(self.nrpe.query) > 0
         return not self.is_done() and (len(self.nrpe.query) > 0)
 
-
+    # We can write to the socket. If we are in the ssk handshake phase
+    # we just continue it and return. If we finished it, we can write our
+    # query
     def handle_write(self):
-        #print "State", self.socket.state_string()
-
-        #if self._ssl_accepting:
-        #    self._do_ssl_handshake()
-        #elif self._ssl_closing:
-        #    self._do_ssl_shutdown()
-        #print "Do handshake"
-        #try:
-        #    self.socket.do_handshake()
-        #except OpenSSL.SSL.WantReadError, exp:
-        #    pass
-        if self.writable():#not self.is_done():
-            print "Try write"
+        if self.writable():
             try : 
-            #print "handle write", len(self.nrpe.query)
                 sent = self.send(self.nrpe.query)
             except socket.error, exp:
-                print exp
-                self.nrpe.state = 'received'
-                self.rc = 2
-                self.message = str(exp)
+                # In case of problem, just bail out
+                # as error
+                self.set_exit(2, str(exp))
                 return
-            except OpenSSL.SSL.WantReadError, exp:
-                while True:
-                    print "Do handshake violent!"
-                    try: 
-                        self.socket.do_handshake()
-                    except OpenSSL.SSL.WantReadError, exp:
-                        return
-                print "Fuck WantReadError", exp
-                self.handle_read()
-                return
-            print "Sent", sent
-            self.nrpe.query = self.nrpe.query[sent:]
-            #print "New len query", len(self.nrpe.query)
 
+            # if we are in ssl, there can be a handshake
+            # problem : we can't talk until we finished
+            # it, sorry
+            except SSLWantReadError, exp:
+                try: 
+                    self.socket.do_handshake()
+                except SSLWantReadError, exp:
+                    # still not finished, we continue
+                    return
+                return
+            # Maybe we did not send all oru query
+            # so we buferize it
+            self.nrpe.query = self.nrpe.query[sent:]
+
+    
     def is_done(self):
         return self.nrpe.state == 'received'
 
@@ -334,7 +357,6 @@ class Nrpe_poller(BaseModule):
         self.i_am_dying = False
 
 
-
     # Get new checks if less than nb_checks_max
     # If no new checks got and no check in queue,
     # sleep for 1 sec
@@ -356,17 +378,22 @@ class Nrpe_poller(BaseModule):
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
-        #queue
         for chk in self.checks:
             if chk.status == 'queue':
+                # Ok we launch it
                 chk.status = 'launched'
-                print "NRPE (bad) check for", chk.command
-                # Want the args of the commands
-                args = parse_args(chk.command.split(' ')[1:])
-                print "Args", args
-                
-                (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args) = args
-                
+                # Want the args of the commands so we parse it like a shell
+                clean_command = shlex.split(chk.command)
+                # If the command seems good
+                if len(clean_command) > 1:
+                    # we do not want the first member, check_nrpe thing
+                    args = parse_args(clean_command[1:])
+                    (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args) = args
+                    print (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
+                else:
+                    # Set an error so we will quit tis check
+                    command = None
+                    
                 # If we do nto have the good args, we bail out for this check
                 if command == None or host == None:
                     chk.status = 'done'
@@ -374,17 +401,13 @@ class Nrpe_poller(BaseModule):
                     chk.get_outputs('Error : the parameters host or command are not correct.', 8012)
                     chk.execution_time = 0.0
                     continue
+                
                 # Ok we are good, we go on
                 total_args = [command]
                 total_args.extend(add_args)
                 cmd = r'!'.join(total_args)
-                n = NRPEAsyncClient(host, port, use_ssl, cmd)
+                n = NRPEAsyncClient(host, port, use_ssl, timeout, unknown_on_timeout, cmd)
                 chk.con = n
-                self.con_in_progress.append(n)
-                #chk.exit_status = 2
-                #chk.get_outputs('All is NOT SO well', 8012)
-                #chk.status = 'done'
-                chk.execution_time = 0.1
 
 
     # Check the status of checks
@@ -393,13 +416,16 @@ class Nrpe_poller(BaseModule):
     def manage_finished_checks(self):
         to_del = []
         
+        # First look for checks in timeout
+        for c in self.checks:
+            if c.status == 'launched':
+                c.con.look_for_timeout()
+
         # We check if all new things in connexions
-        print "Pool!"
-        asyncore.poll(timeout=0.1)
+        asyncore.poll(timeout=1)
         
         # Now we look for finised checks
         for c in self.checks:
-            print "And check", c
             # First manage check in error, bad formed
             if c.status == 'done':
                 to_del.append(c)
@@ -412,16 +438,17 @@ class Nrpe_poller(BaseModule):
             # Then we check for good checks
             if c.status == 'launched' and c.con.is_done():
                 n = c.con
-                print "Finished check", c
                 c.status = 'done'
                 c.exit_status = n.rc
                 c.get_outputs(n.message, 8012)
+                c.execution_time  = c.con.execution_time
                 # unlink our object from the original check
                 if hasattr(c, 'con'):
                     delattr(c, 'con')
-                self.con_in_progress.remove(n)
-                to_del.append(c)
 
+                # and set this check for deleting
+                # and try to send it
+                to_del.append(c)
                 try:
                     self.returns_queue.append(c)
                 except IOError , exp:
@@ -439,12 +466,11 @@ class Nrpe_poller(BaseModule):
     #return_queue = queue managed by manager
     #c = Control Queue for the worker
     def work(self, s, returns_queue, c):
-        print "Module NRPE started!"
+        print "[Nrpe] Module NRPE started!"
         ## restore default signal handler for the workers:
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
         timeout = 1.0
         self.checks = []
-        self.con_in_progress = []
 
         self.returns_queue = returns_queue
         self.s = s
@@ -465,15 +491,12 @@ class Nrpe_poller(BaseModule):
             self.manage_finished_checks()
 
             # Now get order from master
-            print "Try c"
             try:
                 cmsg = c.get(block=False)
-                print "Got message", cmsg.get_type()
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self.id
                     break
             except :
-                print "Nothing"
                 pass
 
             timeout -= time.time() - begin

@@ -202,7 +202,7 @@ class Worker:
             msg = None
             cmsg = None
 
-            # If we are diyin (big problem!) we do not
+            # If we are dying (big problem!) we do not
             # take new jobs, we just finished the current one
             if not self.i_am_dying:
                 #REF: doc/shinken-action-queues.png (3)
@@ -216,13 +216,13 @@ class Worker:
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    print "[%d]Dad say we are diing..." % self.id
+                    print "[%d]Dad say we are dying..." % self.id
                     break
             except :
                 pass
 
             if self._mortal == True and self._idletime > 2 * self._timeout:
-                print "[%d]Timeout, Arakiri" % self.id
+                print "[%d]Timeout, Harakiri" % self.id
                 #The master must be dead and we are loonely, we must die
                 break
 
