@@ -21,7 +21,8 @@ How to install Shinken
 You just need to add a shinken user (in the shinken group) on your
 system::
 
-   adduser shinken
+   useradd --user-group shinken
+   usermod --lock shinken
 
 First way: all in a directory (ugly but quick way ;)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
