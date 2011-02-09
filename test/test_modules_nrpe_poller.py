@@ -65,7 +65,7 @@ class TestNrpePoller(ShinkenTest):
 
         # We prepare a check in the to_queue
         status = 'queue'
-        command = "$USER1$/check_nrpe -H localhost -u -t 9 -c check_load"# -a arg1 arg2 arg3"
+        command = "$USER1$/check_nrpe -H localhost  -u -t 1 -c check_load2 -a 20"# -a arg1 arg2 arg3"
         ref = None
         t_to_to = time.time()
         c = Check(status, command, ref, t_to_to)
