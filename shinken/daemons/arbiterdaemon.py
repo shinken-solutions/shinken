@@ -587,7 +587,7 @@ class Arbiter(Daemon):
         # Now create the external commander
         if os.name != 'nt':
             e = ExternalCommandManager(self.conf, 'dispatcher')
-
+            e.load_arbiter(self)
             # Arbiter need to know about external command to activate it
             # if necessary
             self.load_external_command(e)

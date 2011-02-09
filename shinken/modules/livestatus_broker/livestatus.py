@@ -6025,6 +6025,28 @@ class LiveStatusRequest(LiveStatus):
                 traceback.print_exc(32) 
                 print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
+    
+    def get_hosts_livedata(self):
+        pass
+    def get_services_livedata(self):
+        pass
+    
+    def get_simple_livedata(self, table, result, outmap):
+        objects = getattr(self, table)
+        for obj in objects.values():
+            result.append(self.create_output(outmap, obj))
+    
+    objects_get_handlers = {
+        'hosts':            get_hosts_livedata,
+        'services':         get_services_livedata,
+        'commands':         get_simple_livedata,
+        'schedulers':       get_simple_livedata,
+        'brokers':          get_simple_livedata,
+        'pollers':          get_simple_livedata,
+        'reactionners':     get_simple_livedata,
+        # TODO: finish..
+    }
+
 
     def get_live_data(self):
         """Find the objects which match the request.
@@ -6156,9 +6178,12 @@ class LiveStatusRequest(LiveStatus):
 
             result = filtresult
         elif self.table == 'contacts':
-            filtresult = [self.create_output(output_map, y) for y in (x for x in self.contacts.values() if (without_filter or filter_func(self.create_output(filter_map, x))))]
+            result = [ self.create_output(output_map, y) for y in (
+                                x for x in self.contacts.values() 
+                                if (without_filter or filter_func(self.create_output(filter_map, x))))
+            ]
             if self.limit:
-                filtresult = filtresult[:self.limit]
+                result = result[:self.limit]
         elif self.table == 'commands':
             for c in self.commands.values():
                 result.append(self.create_output(output_map, c))
@@ -6210,6 +6235,8 @@ class LiveStatusRequest(LiveStatus):
                             result.append({ 'description' : LiveStatus.out_map[obj][attr]['description'], 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
                         else:
                             result.append({'description' : 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
+        else:
+            print("Got unhandled table: %s" % (self.table))
 
         if self.stats_request:
             result = self.statsify_result(result)

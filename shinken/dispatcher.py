@@ -210,8 +210,8 @@ class Dispatcher:
             kind = satellite.get_my_type()
             if satellite.reachable:
                 cfg_ids = satellite.what_i_managed()
-                #I do nto care about satellites that do nothing, it already
-                #do what I want :)
+                # I do nto care about satellites that do nothing, it already
+                # do what I want :)
                 if len(cfg_ids) != 0:
                     id_to_delete = []
                     for cfg_id in cfg_ids:
