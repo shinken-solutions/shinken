@@ -37,17 +37,16 @@ root_path = "/" #if the setup.py is call with root, get it
 
 #We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
-import platform
-python_version = tuple((int(s) for s in platform.python_version_tuple()))
+try:
+    python_version = sys.version_info
+except:
+    python_version = (1,5)
 
 ## Make sure people are using Python 2.3 or higher
 if python_version < (2, 4):
-    print "Shinken require as a minimum Python 2.4.x, sorry"
-    sys.exit(1)
-
-if python_version < (3):
-    print "Shinken is not yet compatible with Python3k, sorry"
-    sys.exit(1)
+    sys.exit("Shinken require as a minimum Python 2.4.x, sorry")
+elif python_version >= (3,):
+    sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
 def getscripts(path):
     script = os.path.basename(path)
@@ -208,18 +207,16 @@ def get_uid(user_name):
     try:
         return getpwnam(user_name)[2]
     except KeyError, exp:
-        print "Error: the user", user_name, "is unknown"
-        print "Maybe you should create this user"
-        sys.exit(2)
+        sys.exit("Error: the user" + user_name + "is unknown. "
+                 "Maybe you should create this user.")
 
 
 def get_gid(group_name):
     try:
         return getgrnam(group_name)[2]
     except KeyError, exp:
-        print "Error: the group",group_name , "is unknown"
-        print "Maybe you should create this group"
-        sys.exit(2)
+        sys.exit("Error: the group" +group_name + "is unknown. "
+                 "Maybe you should create this group.")
 
 
 #Open a /etc/*d.ini file and change the ../var occurence with a good value
@@ -258,7 +255,7 @@ def update_file_with_string(path, match, new_string):
 
 
 if '-h' in sys.argv or '--help' in sys.argv:
-    sys.exit(1)
+    sys.exit(0)
 
 #If there is another root, it's strange, it must be a special case...
 if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv) and re.search("--root", ' '.join(sys.argv)) == None:

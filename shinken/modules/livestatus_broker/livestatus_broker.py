@@ -440,7 +440,7 @@ class Livestatus_broker(BaseModule):
             # invalid
         else:
             service_states = { 'OK' : 0, 'WARNING' : 1, 'CRITICAL' : 2, 'UNKNOWN' : 3, 'RECOVERY' : 0 }
-            host_states = { 'UP' : 0, 'DOWN' : 1, 'UNREACHABLE' : 2, 'RECOVERY' : 0 }
+            host_states = { 'UP' : 0, 'DOWN' : 1, 'UNREACHABLE' : 2, 'UNKNOWN': 3, 'RECOVERY' : 0 }
 
             # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
             # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',

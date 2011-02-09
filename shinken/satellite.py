@@ -49,8 +49,7 @@ import random
 try:
     import shinken.pyro_wrapper as pyro
 except ImportError:
-    print "Shinken require the Python Pyro module. Please install it."
-    sys.exit(1)
+    sys.exit("Shinken require the Python Pyro module. Please install it.")
 
 Pyro = pyro.Pyro
 
