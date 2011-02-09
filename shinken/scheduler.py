@@ -687,14 +687,14 @@ class Scheduler:
     # Called every 1sec to consume every result in services or hosts
     # with theses results, they are OK, CRITCAL, UP/DOWN, etc...
     def consume_results(self):
-        # All results are in self.waiting_results
-        # We need to get thems first
+        #All results are in self.waiting_results
+        #We need to get them first
         for c in self.waiting_results:
             self.put_results(c)
         self.waiting_results = []
 
-        # Then we consume thems
-        # print "**********Consume*********"
+        #Then we consume them
+        #print "**********Consume*********"
         for c in self.checks.values():
             if c.status == 'waitconsume':
                 item = c.ref
