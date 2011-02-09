@@ -47,7 +47,7 @@ if python_version < (2, 4):
     print "Shinken require as a minimum Python 2.4.x, sorry"
     sys.exit(1)
 
-if python_version < (3):
+if python_version >= (3,):
     print "Shinken is not yet compatible with Python3k, sorry"
     sys.exit(1)
 
