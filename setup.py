@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+#Copyright (C) 2009-2011 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Hartmut Goebel <h.goebel@goebel-consult.de>
+#First version of this file from Maximilien Bersoult
 #
 #This file is part of Shinken.
 #
@@ -19,14 +21,11 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#first verion of this file from Maximilien Bersoult
-
 from setuptools import setup, find_packages
 from glob import glob
-import os, sys, re
+import os, sys
 import ConfigParser
 import getopt
-import re
 if os.name != 'nt':
     from pwd import getpwnam
     from grp import getgrnam
@@ -35,47 +34,50 @@ if os.name != 'nt':
 install_scripts_path = "/usr/bin" #where to install launch scripts. Beter in PATH ;)
 root_path = "/" #if the setup.py is call with root, get it
 
-#We know that a Python 2.3 or Python3K will fail.
-#We can say why and quit.
+# Shinken requires Python 2.4, but does not support Python 3.x yet.
 try:
     python_version = sys.version_info
 except:
     python_version = (1,5)
 
-## Make sure people are using Python 2.3 or higher
+## Make sure people are using Python 2.4 or higher
 if python_version < (2, 4):
     sys.exit("Shinken require as a minimum Python 2.4.x, sorry")
 elif python_version >= (3,):
     sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
 def getscripts(path):
-    script = os.path.basename(path)
-    return script
-
-
+    return os.path.basename(path)
 
 
 #Set the default values for the paths
 #owners and groups
 if os.name == 'nt':
-    paths_and_owners = {'var' : {'path' : "c:\\shinken\\var", 'owner' : None, 'group' : None },
-                        'etc' : {'path' : "c:\\shinken\\etc", 'owner'  : None, 'group' : None},
-                        'libexec' : {'path' : "c:\\shinken\\libexec", 'owner'  : None, 'group' : None},
+    paths_and_owners = {'var': {'path': "c:\\shinken\\var",
+                                'owner': None,
+                                'group': None },
+                        'etc': {'path': "c:\\shinken\\etc",
+                                 'owner': None,
+                                'group': None},
+                        'libexec': {'path': "c:\\shinken\\libexec",
+                                    'owner': None,
+                                    'group': None},
                         }
 else:
-    paths_and_owners = {'var' : {'path' : "/var/lib/shinken/", 'owner' : 'shinken', 'group' : 'shinken' },
-                        'etc' : {'path' : "/etc/shinken", 'owner'  : 'shinken', 'group' : 'shinken'},
-                        'libexec' : {'path' : "/usr/lib/shinken/plugins", 'owner'  : 'shinken', 'group' : 'shinken'},
+    paths_and_owners = {'var': {'path': "/var/lib/shinken/",
+                                'owner': 'shinken',
+                                'group' : 'shinken' },
+                        'etc': {'path': "/etc/shinken",
+                                'owner': 'shinken',
+                                'group' : 'shinken'},
+                        'libexec': {'path': "/usr/lib/shinken/plugins",
+                                    'owner': 'shinken',
+                                    'group': 'shinken'},
                         }
-
-
 
 #The default file must have good values for the directories:
 #etc, var and where to push scripts that launch the app.
 def generate_default_shinken_file():
-    global paths_and_owners
-    global install_scripts_path
-
     #Read the in file, it's our template
     f = open("bin/default/shinken.in")
     buf = f.read()
@@ -93,8 +95,6 @@ def generate_default_shinken_file():
 
 
 def parse_config_file(config_file):
-    global paths_and_owners
-
     config = ConfigParser.ConfigParser()
     config.read(config_file)
     if config._sections == {}:
@@ -172,30 +172,51 @@ setup(
                       required_pkgs
                       ],
 
-  scripts = [f for f in glob('bin/shinken-[!_]*')],
-  data_files=[(etc_path, ["etc/nagios.cfg",'etc/brokerd.ini', 'etc/brokerd-windows.ini',
-                          'etc/commands.cfg', 'etc/timeperiods.cfg', 'etc/templates.cfg',
-                          'etc/escalations.cfg', 'etc/dependencies.cfg',
-                          'etc/hostgroups.cfg', 'etc/servicegroups.cfg',
-                          'etc/contactgroups.cfg',
-                          'etc/nagios.cfg', 'etc/nagios-windows.cfg', 'etc/pollerd.ini',
-                          'etc/reactionnerd.ini', 'etc/resource.cfg', 'etc/schedulerd.ini',
-                          'etc/schedulerd-windows.ini', 'etc/pollerd-windows.ini',
-                          'etc/shinken-specific.cfg', 'etc/shinken-specific-high-availability.cfg',
-                          'etc/shinken-specific-load-balanced-only.cfg'
-                                ]),
-              (os.sep.join([etc_path, 'objects', 'hosts']), [f for f in glob('etc/objects/hosts/[!_]*.cfg')]),
-              (os.sep.join([etc_path, 'objects', 'services']), [f for f in glob('etc/objects/services/[!_]*.cfg')]),
-              (os.sep.join([etc_path, 'objects', 'contacts']), [f for f in glob('etc/objects/contacts/[!_]*.cfg')]),
-              (os.sep.join([etc_path, 'certs']) , [f for f in glob('etc/certs/[!_]*.pem')]),
-              
-              ('/etc/init.d', ['bin/init.d/shinken-arbiter', 'bin/init.d/shinken-broker', 'bin/init.d/shinken-poller',
-                               'bin/init.d/shinken-reactionner', 'bin/init.d/shinken-scheduler', 'bin/init.d/shinken']),
-              ('/etc/default/', ['bin/default/shinken']),
+  scripts = glob('bin/shinken-[!_]*'),
+  data_files=[(etc_path,
+               ["etc/nagios.cfg",
+                'etc/brokerd.ini',
+                'etc/brokerd-windows.ini',
+                'etc/commands.cfg',
+                'etc/timeperiods.cfg',
+                'etc/templates.cfg',
+                'etc/escalations.cfg',
+                'etc/dependencies.cfg',
+                'etc/hostgroups.cfg',
+                'etc/servicegroups.cfg',
+                'etc/contactgroups.cfg',
+                'etc/nagios.cfg',
+                'etc/nagios-windows.cfg',
+                'etc/pollerd.ini',
+                'etc/reactionnerd.ini',
+                'etc/resource.cfg',
+                'etc/schedulerd.ini',
+                'etc/schedulerd-windows.ini',
+                'etc/pollerd-windows.ini',
+                'etc/shinken-specific.cfg',
+                'etc/shinken-specific-high-availability.cfg',
+                'etc/shinken-specific-load-balanced-only.cfg'
+                ]),
+              (os.path.join(etc_path, 'objects', 'hosts'),
+               glob('etc/objects/hosts/[!_]*.cfg')),
+              (os.path.join(etc_path, 'objects', 'services'),
+               glob('etc/objects/services/[!_]*.cfg')),
+              (os.path.join(etc_path, 'objects', 'contacts'),
+               glob('etc/objects/contacts/[!_]*.cfg')),
+              (os.path.join(etc_path, 'certs') ,
+               glob('etc/certs/[!_]*.pem')),
+              ('/etc/init.d',
+               ['bin/init.d/shinken-arbiter',
+                'bin/init.d/shinken-broker',
+                'bin/init.d/shinken-poller',
+                'bin/init.d/shinken-reactionner',
+                'bin/init.d/shinken-scheduler',
+                'bin/init.d/shinken']),
+              ('/etc/default/',
+               ['bin/default/shinken']),
               (var_path, ['var/void_for_git']),
               (libexec_path, ['libexec/check.sh']),
               ]
-
 )
 
 
@@ -222,25 +243,20 @@ def get_gid(group_name):
 #Open a /etc/*d.ini file and change the ../var occurence with a good value
 #from the configuration file
 def update_ini_file_with_var(path):
-    global paths_and_owners
     var_path = paths_and_owners['var']['path']
     update_file_with_string(path, "../var", var_path)
 
 
 #Replace the libexec path in common.cfg by the one in the parameter file
 def update_resource_cfg_file_with_libexec(path):
-    global paths_and_owners
     libexec_path = paths_and_owners['libexec']['path']
     update_file_with_string(path, "/usr/local/shinken/libexec", libexec_path)
 
 
 #Replace paths in nagios.cfg file
 def update_cfg_file_with_var_path(path):
-    global paths_and_owners
     var_path = paths_and_owners['var']['path']
     update_file_with_string(path, "/usr/local/shinken/var", var_path)
-
-
 
 
 #Replace the libexec path in common.cfg by the one in the parameter file
@@ -269,28 +285,30 @@ if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv) and re.sea
             print "Changing the directory", root, "by", owner, ":", group
             os.chown(root, uid, gui)
             for dir in dirs:
-                print "Change owner of the directory", root+os.sep+dir, "by", owner, ":", group
-                os.chown(root+os.sep+dir,uid, gui)
+                dir = os.path.join(root, dir)
+                print "Change owner of the directory", dir, "to", owner, ":", group
+                os.chown(dir,uid, gui)
             for name in files:
-                print "Change owner of the file", root+os.sep+name, "by", owner, ":", group
-                os.chown(root+os.sep+name,uid, gui)
+                name = os.path.join(root, name)
+                print "Change owner of the file", name, "to", owner, ":", group
+                os.chown(name,uid, gui)
 
 
 
 #Here, even with --root we should change the file with good values
 if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv):
     #then update the /etc/*d.ini files ../var value with the real var one
-    print "Now updating the /etc/shinken/*d/ini files with the good value for var"
-    update_ini_file_with_var(os.sep.join([root_path, etc_path, 'brokerd.ini']))
-    update_ini_file_with_var(os.sep.join([root_path, etc_path, 'schedulerd.ini']))
-    update_ini_file_with_var(os.sep.join([root_path, etc_path, 'pollerd.ini']))
-    update_ini_file_with_var(os.sep.join([root_path, etc_path, 'reactionnerd.ini']))
+    print "Now updating the /etc/shinken/*d.ini files with the good value for var"
+    for name in ('brokerd.ini', 'schedulerd.ini', 'pollerd.ini',
+                 'reactionnerd.ini'):
+        update_ini_file_with_var(os.path.join(root_path, etc_path, name))
 
     #And now the resource.cfg path with the value of libexec path
     print "Now updating the /etc/shinken/resource.cfg file with good libexec path"
-    update_resource_cfg_file_with_libexec(os.sep.join([root_path, etc_path, 'resource.cfg']))
+    for name in ('resource.cfg'):
+        update_resource_cfg_file_with_libexec(os.path.join(root_path, etc_path, name))
 
     #And update the nagios.cfg file for all /usr/local/shinken/var value with good one
     print "Now updating the /etc/shinken/nagios.cfg file with good var path"
-    update_cfg_file_with_var_path(os.sep.join([root_path, etc_path, 'nagios.cfg']))
-    update_cfg_file_with_var_path(os.sep.join([root_path, etc_path, 'shinken-specific.cfg']))
+    for name in ('nagios.cfg', 'shinken-specific.cfg'):
+        update_cfg_file_with_var_path(os.path.join(root_path, etc_path, name))
