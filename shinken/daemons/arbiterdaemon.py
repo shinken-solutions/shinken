@@ -307,8 +307,7 @@ class Arbiter(Daemon):
 
         # Maybe conf is already invalid
         if not self.conf.conf_is_correct:
-            print "***> One or more problems was encountered while processing the config files..."
-            sys.exit(1)
+            sys.exit("***> One or more problems was encountered while processing the config files...")
 
 
         # Change Nagios2 names to Nagios3 ones
@@ -379,8 +378,7 @@ class Arbiter(Daemon):
 
         #If the conf is not correct, we must get out now
         if not self.conf.conf_is_correct:
-            print "Configuration is incorrect, sorry, I bail out"
-            sys.exit(1)
+            sys.exit("Configuration is incorrect, sorry, I bail out")
 
         #Debug to see memory and objects :)
         #self.conf.dump()
@@ -391,10 +389,10 @@ class Arbiter(Daemon):
 
         # Search myself as an arbiter object
         if self.me == None:
-            print "Error : I cannot find my own Arbiter object, I bail out"
-            print "To solve it : please change the host_name parameter in the object Arbiter"
-            print "in the file shinken-specific.cfg. Thanks."
-            sys.exit(1)
+            sys.exit("Error: I cannot find my own Arbiter object, I bail out. "
+                     "To solve it, please change the host_name parameter in "
+                     "the object Arbiter in the file shinken-specific.cfg. "
+                     "Thanks.")
 
 
         # If I am a spare, I must wait a (true) conf from Arbiter Master
@@ -407,8 +405,7 @@ class Arbiter(Daemon):
         # The conf can be incorrect here if the cut into parts see errors like
         # a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
-            print "Configuration is incorrect, sorry, I bail out"
-            sys.exit(1)
+            sys.exit("Configuration is incorrect, sorry, I bail out")
 
         logger.log('Things look okay - No serious problems were detected during the pre-flight check')
 
