@@ -343,6 +343,7 @@ class ExternalCommandManager:
             numargs += 1
         elts = command.split(';', numargs) 
 
+        print self.mode, entry['global']
         if self.mode == 'dispatcher' and entry['global']:
             if not internal:
                 print "This command is a global one, we resent it to all schedulers"

@@ -89,9 +89,10 @@ class ShinkenTest(unittest.TestCase):
         self.sched.load_conf(self.conf)
         e = ExternalCommandManager(self.conf, 'applyer')
         self.sched.external_command = e
-        e = ExternalCommandManager(self.conf, 'dispatcher')
-        e.load_arbiter(self)
-        self.external_command_dispatcher = e
+        e.load_scheduler(self.sched)
+        e2 = ExternalCommandManager(self.conf, 'dispatcher')
+        e2.load_arbiter(self)
+        self.external_command_dispatcher = e2
         self.sched.schedule()
 
 
