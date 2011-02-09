@@ -49,24 +49,23 @@ from shinken.daemons.pollerdaemon import Poller
 from shinken.bin import VERSION
 
 
-if __name__ == "__main__":
-    parser = optparse.OptionParser(
-        "%prog [options]", version="%prog " + VERSION)
-    parser.add_option('-c', '--config',
-                      dest="config_file", metavar="CONFIG-FILE",
-                      help='Config file')
-    parser.add_option('-d', '--daemon', action='store_true',
-                      dest="is_daemon",
-                      help="Run in daemon mode")
-    parser.add_option('-r', '--replace', action='store_true',
-                      dest="do_replace",
-                      help="Replace previous running poller")
-    parser.add_option('--debugfile', dest='debug_file',
-                      help=("Debug file. Default: not used "
-                            "(why debug a bug free program? :) )"))
-    opts, args = parser.parse_args()
-    if args:
-        parser.error("Does not accept any argument.")
+parser = optparse.OptionParser(
+    "%prog [options]", version="%prog " + VERSION)
+parser.add_option('-c', '--config',
+                  dest="config_file", metavar="CONFIG-FILE",
+                  help='Config file')
+parser.add_option('-d', '--daemon', action='store_true',
+                  dest="is_daemon",
+                  help="Run in daemon mode")
+parser.add_option('-r', '--replace', action='store_true',
+                  dest="do_replace",
+                  help="Replace previous running poller")
+parser.add_option('--debugfile', dest='debug_file',
+                  help=("Debug file. Default: not used "
+                        "(why debug a bug free program? :) )"))
+opts, args = parser.parse_args()
+if args:
+    parser.error("Does not accept any argument.")
 
-    daemon = Poller(debug=opts.debug_file is not None, **opts.__dict__)
-    daemon.main()
+daemon = Poller(debug=opts.debug_file is not None, **opts.__dict__)
+daemon.main()
