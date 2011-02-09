@@ -38,7 +38,7 @@ Second way: district directory (clean way)
 You can install really the application by using the `setup.py` script.
 It will install the shinken library in the python path, create the
 `/etc/shinken` and `/var/lib/shinken` directory (you can change them in
-the setup_parameters.cfg file before launching `setup.py`). You will
+the `setup.cfg` file before launching `setup.py`). You will
 need the `python-setuptools` package for it. Then just run::
 
   sudo python setup.py install --install-scripts=/usr/bin/
