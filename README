@@ -1,6 +1,5 @@
 
 == Presentation Of the Shinken project ==
-Hi,
 
 Welcome in the Shinken project.
 
@@ -11,40 +10,40 @@ scale to large environments. It’s as simple as in all the marketing
 “cloud computing” slides, but here, it’s real!
 
 Shinken is backwards-compatible with the Nagios configuration standard
-and plugins. It works on any operating system and architecture that
+and plug-ins. It works on any operating system and architecture that
 supports Python, which includes Windows and GNU/Linux.
 
 
 == How to install it ==
 
 You just need to add a shinken user (in the shinken group) on your
-system : $adduser shinken
+system: $adduser shinken
 
-=== First way : all in a directory (ugly but quick way ;) )===
+=== First way: all in a directory (ugly but quick way ;) )===
 
 Then move the shinken directory and give it to the shinken user:
 
   mv shinken /usr/local
   chown -R shinken:shinken /usr/local/shinken
 
-=== Second way : district directory (clean way) ===
+=== Second way: district directory (clean way) ===
 
 You can install really the application by using the setup.py script.
-It will install the shinken librairy in the python path, create the
+It will install the shinken library in the python path, create the
 /etc/shinken and /var/lib/shinken directory (you can change them in
 the setup_parameters.cfg file before launching setup.py). You will
-need the python-setuptools package for it. Then just run :
+need the python-setuptools package for it. Then just run:
 
   sudo python setup.py install --install-scripts=/usr/bin/
 
 For the compilation part in both way it's easy: there is no
 compilation part!
 
-== Dependancies ==
+== Dependencies ==
 
-The only dependancies are Python >= 2.4 and the Pyro module.
+The only dependencies are Python >= 2.4 and the Pyro module.
 
-For 2.4 and 2.5 python version, you will need an additionnal packages:
+For 2.4 and 2.5 python version, you will need an additional packages:
 * multiprocessing from http://pypi.python.org/pypi/multiprocessing/
 * for livestatus only: 
   - simplejson: http://pypi.python.org/pypi/simplejson/ and
@@ -55,7 +54,7 @@ installed the python-devel package too).
 
 For Python, it should be ok with nearly all distribution.
 
-Under ubuntu, you can grag the Pyro module with:
+Under ubuntu, you can grab the Pyro module with:
 
   $ sudo apt-get install pyro
 
@@ -82,7 +81,7 @@ shinken-specific.cfg file.
 
 == I need to change the configuration ? ==
 
-Nothing unless somenews hosts and services.
+Nothing unless some new hosts and services.
 
 == How to run it ==
 
@@ -107,5 +106,5 @@ The setup.py give you some init.d scripts, let use them :)
 
 None we know :)
 
-If you find one, please psot it in our trac site:
+If you find one, please post it in our trac site:
 https://sourceforge.net/apps/trac/shinken/report/2
