@@ -22,7 +22,6 @@
 import os, sys, random, time
 
 
-from shinken.bin import VERSION
 from shinken.scheduler import Scheduler
 from shinken.objects import Config
 from shinken.macroresolver import MacroResolver
@@ -33,28 +32,6 @@ from shinken.modulesmanager import ModulesManager
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 from shinken.log import logger
-
-
-################### Process launch part
-def usage(name):
-    print "Shinken Scheduler Daemon, version %s, from :" % VERSION
-    print "        Gabes Jean, naparuba@gmail.com"
-    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
-    print "        Gregory Starck, g.starck@gmail.com"
-    print "Usage: %s [options] [-c configfile]" % name
-    print "Options:"
-    print " -c, --config"
-    print "\tConfig file."
-    print " -d, --daemon"
-    print "\tRun in daemon mode"
-    print " -r, --replace"
-    print "\tReplace previous running scheduler"
-    print " -h, --help"
-    print "\tPrint detailed help screen"
-    print " --debug"
-    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-
-
 
 #Interface for Workers
 
