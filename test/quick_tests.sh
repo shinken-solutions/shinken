@@ -89,6 +89,7 @@ launch_and_assert test_dispatcher.py
 launch_and_assert test_module_hot_dependencies_arbiter.py
 launch_and_assert test_module_hack_cmd_poller_tag.py
 launch_and_assert test_unknown_do_not_change.py
+launch_and_assert test_customs_on_service_hosgroups.py
 #todo : reenable it, whne sll work
 #launch_and_assert test_modules_nrpe_poller.py
 
