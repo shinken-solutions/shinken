@@ -38,66 +38,37 @@ class Notification(Action):
     #id = 0 #Is in fact in the Action class to be common with Checks and
     #events handlers
 
-    properties={
-        'type' : StringProp(default=''),
-        'notification_type': IntegerProp(
-            default=0,
-            fill_brok=['full_status']),
-        'start_time': StringProp(
-            default=0,
-            fill_brok=['full_status']),
-        'end_time': StringProp(
-            default=0,
-            fill_brok=['full_status']),
-        'contact_name': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'host_name': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'service_description': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'reason_type': StringProp(
-            default=0,
-            fill_brok=['full_status']),
-        'state': StringProp(
-            default=0,
-            fill_brok=['full_status']),
-        'output': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'ack_author': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'ack_data': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'escalated': BoolProp(
-            default=False,
-            fill_brok=['full_status']),
-        'contacts_notified': StringProp(
-            default=0,
-            fill_brok=['full_status']),
-        'env': StringProp(
-            default={}),
-        'exit_status' : IntegerProp(default=3),
-        'command_call' : StringProp(default=None),
-        'contact' : StringProp(default=None),
-        '_in_timeout' : BoolProp(default=False),
-        'notif_nb' : IntegerProp(default=0),
-        'status' : StringProp(default='scheduled'),
-        't_to_go' : IntegerProp(default=0),
-        'is_a' : StringProp(default=''),
-        'command' : StringProp(default=''),
-        'host_name' : StringProp(default=''),
-        'sched_id' : IntegerProp(default=0),
-        'timeout' : IntegerProp(default=10),
-        'check_time' : IntegerProp(default=0),
-        'module_type' : StringProp(
-            default='',
-            fill_brok=['full_status']),
-        }
+    properties = {
+        'type' :               StringProp (default=''),
+        'notification_type':   IntegerProp(default=0,  fill_brok=['full_status']),
+        'start_time':          StringProp (default=0,  fill_brok=['full_status']),
+        'end_time':            StringProp (default=0,  fill_brok=['full_status']),
+        'contact_name':        StringProp (default='', fill_brok=['full_status']),
+        'host_name':           StringProp (default='', fill_brok=['full_status']),
+        'service_description': StringProp (default='', fill_brok=['full_status']),
+        'reason_type':         StringProp (default=0,  fill_brok=['full_status']),
+        'state':               StringProp (default=0,  fill_brok=['full_status']),
+        'output':              StringProp (default='', fill_brok=['full_status']),
+        'ack_author':          StringProp (default='', fill_brok=['full_status']),
+        'ack_data':            StringProp (default='', fill_brok=['full_status']),
+        'escalated':           BoolProp   (default=False, fill_brok=['full_status']),
+        'contacts_notified':   StringProp (default=0,  fill_brok=['full_status']),
+        'env':                 StringProp (default={}),
+        'exit_status':         IntegerProp(default=3),
+        'command_call':        StringProp (default=None),
+        'contact':             StringProp (default=None),
+        '_in_timeout':         BoolProp   (default=False),
+        'notif_nb':            IntegerProp(default=0),
+        'status':              StringProp (default='scheduled'),
+        't_to_go':             IntegerProp(default=0),
+        'is_a':                StringProp (default=''),
+        'command':             StringProp (default=''),
+        'host_name':           StringProp (default=''),
+        'sched_id':            IntegerProp(default=0),
+        'timeout':             IntegerProp(default=10),
+        'check_time':          IntegerProp(default=0),
+        'module_type':         StringProp (default='', fill_brok=['full_status']),
+    }
 
     macros = {
         'NOTIFICATIONTYPE' : 'type',
