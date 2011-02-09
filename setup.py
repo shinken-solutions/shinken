@@ -37,8 +37,10 @@ root_path = "/" #if the setup.py is call with root, get it
 
 #We know that a Python 2.3 or Python3K will fail.
 #We can say why and quit.
-import platform
-python_version = tuple((int(s) for s in platform.python_version_tuple()))
+try:
+    python_version = sys.version_info
+except:
+    python_version = (1,5)
 
 ## Make sure people are using Python 2.3 or higher
 if python_version < (2, 4):
