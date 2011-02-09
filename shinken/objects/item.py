@@ -86,6 +86,8 @@ class Item(object):
             if hasattr(self, prop):
                 val = getattr(self, prop)
                 setattr(i, prop, val)
+        # Also copy the customs tab
+        i.customs = copy(self.customs)
         return i
 
 
