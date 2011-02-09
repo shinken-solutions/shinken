@@ -45,20 +45,29 @@ need the `python-setuptools` package for it. Then just run::
 For the compilation part in both way it's easy: there is no
 compilation part!
 
-Dependencies
+Requirements
 =========================
 
-The only dependencies are Python >= 2.4 and the Pyro module.
+`shinken` requires
 
-For 2.4 and 2.5 python version, you will need an additional packages:
+* `Python`__ 2.4 or higher (Python 2.6 or higher is recommended)
+* `setuptools`__ or `distribute`__ for installation (see below).
+* `Pyro`__
+* `multiprocessing` Python package when using Python 2.4 or 2.5
+  (`multiprocessing` is already included in Python 2.6 and higher)
 
-* multiprocessing from http://pypi.python.org/pypi/multiprocessing/
+__ http://www.python.org/download/
+__ pyro
+__ http://pypi.python.org/pypi/multiprocessing/
 
-* for livestatus only: 
+If (and only if) you plan to use the `livestatus` module, I'll also
+need
 
-  - simplejson: http://pypi.python.org/pypi/simplejson/ and
+* `simplejson`__ 
+* `pysqlite`__
 
-  - pysqlite: <http://code.google.com/p/pysqlite/
+__ http://pypi.python.org/pypi/simplejson/ and
+__ http://code.google.com/p/pysqlite/
 
 Just untar and launch `python setup.py install` (and be sure to have
 installed the `python-devel` package too).
@@ -87,17 +96,19 @@ The configuration is where you put the etc directory (in
 `/usr/local/shinken/etc` for a quick and dirty install, `/etc/shinken`
 for a clean one).
 
-The `nagios.cfg`, common files are like Nagios. All Shinken specific
-objects (like link to daemons or realms) are in the
-`shinken-specific.cfg` file.
-
-I need to change the configuration?
-===================================
-
-Nothing unless some new hosts and services.
+The `nagios.cfg` file is meant ot be shared with Nagios. All Shinken
+specific objects (like link to daemons or realms) are in the file
+`shinken-specific.cfg`.
 
 
-How to run it
+I need to change my existing Nagios configuration?
+===================================================
+
+No, there is no need to change the existing configuration - unless
+you want to add some new hosts and services.
+
+
+How to run Shinken
 ================================
 
 Quick and dirty way
@@ -107,10 +118,10 @@ It's easy, there is a already launch script for you::
 
   /usr/local/shinken/bin/launch_all.sh
 
-Clean wa
+Clean way
 ~~~~~~~~~~~~~~~~~~~~
 
-The setup.py give you some init.d scripts, let use them::
+The `setup.py` installes some `init.d` scripts, let's use them::
 
   /etc/init.d/shinken-scheduler start
   /etc/init.d/shinken-poller start
