@@ -1354,8 +1354,12 @@ class ExternalCommandManager:
         p.add_global_conf_parameters(parameters)
         self.arbiter.conf.pollers[p.id] = p
         self.arbiter.dispatcher.elements.append(p)
+        self.arbiter.dispatcher.satellites.append(p)
+        r.pollers.append(p)
+        r.count_pollers()
+        r.fill_potential_pollers()
         print "Poller %s added" % poller_name
-        
+        print "Potential", r.get_potential_satellites_by_type('poller')
 
 
 if __name__ == '__main__':

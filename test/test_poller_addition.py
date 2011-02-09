@@ -305,9 +305,8 @@ class TestPollerAddition(ShinkenTest):
         self.assert_(newpoller.reachable == True)
         
         # Now we check how we should dispatch confs
-        self.dispatcher.dispatch()
         self.dispatcher.check_bad_dispatch()
-        
+        self.dispatcher.dispatch()        
         
 
 if __name__ == '__main__':
