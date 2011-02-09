@@ -1,5 +1,6 @@
-
-== Presentation Of the Shinken project ==
+===================================
+Presentation Of the Shinken project
+===================================
 
 Welcome in the Shinken project.
 
@@ -14,95 +15,112 @@ and plug-ins. It works on any operating system and architecture that
 supports Python, which includes Windows and GNU/Linux.
 
 
-== How to install it ==
+How to install Shinken
+=========================
 
 You just need to add a shinken user (in the shinken group) on your
-system: $adduser shinken
+system::
 
-=== First way: all in a directory (ugly but quick way ;) )===
+   adduser shinken
 
-Then move the shinken directory and give it to the shinken user:
+First way: all in a directory (ugly but quick way ;)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Then move the shinken directory and give it to the shinken user::
 
   mv shinken /usr/local
   chown -R shinken:shinken /usr/local/shinken
 
-=== Second way: district directory (clean way) ===
+Second way: district directory (clean way)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can install really the application by using the setup.py script.
+You can install really the application by using the `setup.py` script.
 It will install the shinken library in the python path, create the
-/etc/shinken and /var/lib/shinken directory (you can change them in
-the setup_parameters.cfg file before launching setup.py). You will
-need the python-setuptools package for it. Then just run:
+`/etc/shinken` and `/var/lib/shinken` directory (you can change them in
+the setup_parameters.cfg file before launching `setup.py`). You will
+need the `python-setuptools` package for it. Then just run::
 
   sudo python setup.py install --install-scripts=/usr/bin/
 
 For the compilation part in both way it's easy: there is no
 compilation part!
 
-== Dependencies ==
+Dependencies
+=========================
 
 The only dependencies are Python >= 2.4 and the Pyro module.
 
 For 2.4 and 2.5 python version, you will need an additional packages:
+
 * multiprocessing from http://pypi.python.org/pypi/multiprocessing/
+
 * for livestatus only: 
+
   - simplejson: http://pypi.python.org/pypi/simplejson/ and
-  - pysqlite http://code.google.com/p/pysqlite/
 
-Just untar and launch python setup.py install (and be sure to have
-installed the python-devel package too).
+  - pysqlite: <http://code.google.com/p/pysqlite/
 
-For Python, it should be ok with nearly all distribution.
+Just untar and launch `python setup.py install` (and be sure to have
+installed the `python-devel` package too).
 
-Under ubuntu, you can grab the Pyro module with:
+For Python, it should be okay with nearly all distribution.
 
-  $ sudo apt-get install pyro
+Under ubuntu, you can grab the Pyro module with::
 
-Under other distributions, you can search for it:
+  sudo apt-get install pyro
 
-  $yum search pyro
+Under other distributions, you can search for it::
 
-And if you do not find it, you can install it from Pypi:
+  yum search pyro
 
-  $ easy_install pyro
+And if you do not find it, you can install it from PyPI::
+
+  easy_install pyro
 
 And that all folks :)
 
 
-== Where is the configuration ? ==
+Where is the configuration?
+================================
 
 The configuration is where you put the etc directory (in
-/usr/local/shinken/etc for a quick and dirty install, /etc/shinken for
-a clean one).
+`/usr/local/shinken/etc` for a quick and dirty install, `/etc/shinken`
+for a clean one).
 
-The nagios.cfg, commons files are like Nagios. All Shinken specific
+The `nagios.cfg`, common files are like Nagios. All Shinken specific
 objects (like link to daemons or realms) are in the
-shinken-specific.cfg file.
+`shinken-specific.cfg` file.
 
-== I need to change the configuration ? ==
+I need to change the configuration?
+===================================
 
 Nothing unless some new hosts and services.
 
-== How to run it ==
 
-===Quick and dirty way ===
+How to run it
+================================
 
-It's easy, there is a already launch script for you:
+Quick and dirty way
+~~~~~~~~~~~~~~~~~~~~
 
-  $ /usr/local/shinken/bin/launch_all.sh
+It's easy, there is a already launch script for you::
 
-===Clean way==
+  /usr/local/shinken/bin/launch_all.sh
 
-The setup.py give you some init.d scripts, let use them :)
+Clean wa
+~~~~~~~~~~~~~~~~~~~~
 
-  $ /etc/init.d/shinken-scheduler start
-  $ /etc/init.d/shinken-poller start
-  $ /etc/init.d/shinken-reactionner start
-  $ /etc/init.d/shinken-broker start
-  $ /etc/init.d/shinken-arbiter start
+The setup.py give you some init.d scripts, let use them::
+
+  /etc/init.d/shinken-scheduler start
+  /etc/init.d/shinken-poller start
+  /etc/init.d/shinken-reactionner start
+  /etc/init.d/shinken-broker start
+  /etc/init.d/shinken-arbiter start
 
 
-== Known bugs ==
+Known bugs
+================================
 
 None we know :)
 
