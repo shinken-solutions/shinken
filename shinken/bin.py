@@ -26,22 +26,17 @@ Arbiter, Scheduler, etc. It just checks for the main requirement of
 Shinken.
 """
 
-
 import sys
 
 VERSION = "0.5+"
 
 # Make sure people are using Python 2.4 or higher
 if sys.version_info < (2,4):
-    print "Shinken requires as a minimum Python 2.4.x, sorry"
-    sys.exit(1)
+    sys.exit("Shinken requires as a minimum Python 2.4.x, sorry")
 elif sys.version_info >= (3,):
-    print "Shinken is not yet compatible with Python 3.x, sorry"
-    sys.exit(1)
-    
+    sys.exit("Shinken is not yet compatible with Python 3.x, sorry")
 
 try:
     import shinken.pyro_wrapper
 except ImportError:
-    print "Shinken requires the Python Pyro module. Please install it."
-    sys.exit(1)
+    sys.exit("Shinken requires the Python Pyro module. Please install it.")
