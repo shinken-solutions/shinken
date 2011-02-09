@@ -31,75 +31,34 @@ class PollerLink(SatelliteLink):
     id = 0
     my_type = 'poller'
     #To_send : send or not to satellite conf
-    properties={'poller_name': StringProp(
-            fill_brok=['full_status'],
-            to_send=True),
-                'address': StringProp(
-            fill_brok=['full_status']),
-                'port': IntegerProp(
-            default=7771,
-            fill_brok=['full_status']),
-                'spare': BoolProp(
-            default='0',
-            fill_brok=['full_status']),
-                'manage_sub_realms': BoolProp(
-            default='0',
-            fill_brok=['full_status']),
-                'modules': ListProp(
-            default='',
-            to_send=True),
-                'min_workers': IntegerProp(
-            default='1',
-            fill_brok=['full_status'],
-            to_send=True),
-                'max_workers': IntegerProp(
-            default='30',
-            fill_brok=['full_status'],
-            to_send=True),
-                'processes_by_worker': IntegerProp(
-            default='256',
-            fill_brok=['full_status'],
-            to_send=True),
-                'polling_interval': IntegerProp(
-            default='1',
-            fill_brok=['full_status'],
-            to_send=True),
-                'manage_arbiters': IntegerProp(
-            default='0'),
-                'poller_tags': ListProp(
-            default='',
-            to_send=True),
-                'use_timezone': StringProp(
-            default='NOTSET',
-            to_send=True),
-                'timeout': IntegerProp(
-            default='3',
-            fill_brok=['full_status']),
-                'data_timeout': IntegerProp(
-            default='120',
-            fill_brok=['full_status']),
-                'max_check_attempts': IntegerProp(
-            default='3',
-            fill_brok=['full_status']),
-                'realm' : StringProp(default=''),
-                }
+    properties = {
+        'poller_name':  StringProp(fill_brok=['full_status'], to_send=True),
+        'address':      StringProp(fill_brok=['full_status']),
+        'port':         IntegerProp(default=7771, fill_brok=['full_status']),
+        'spare':        BoolProp(default='0', fill_brok=['full_status']),
+        'manage_sub_realms': BoolProp(default='0', fill_brok=['full_status']),
+        'modules':      ListProp(default='', to_send=True),
+        'min_workers':  IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
+        'max_workers':  IntegerProp(default='30', fill_brok=['full_status'], to_send=True),
+        'processes_by_worker': IntegerProp(default='256', fill_brok=['full_status'], to_send=True),
+        'polling_interval': IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
+        'manage_arbiters': IntegerProp(default='0'),
+        'poller_tags':  ListProp(default='', to_send=True),
+        'use_timezone': StringProp(default='NOTSET', to_send=True),
+        'timeout':      IntegerProp(default='3', fill_brok=['full_status']),
+        'data_timeout': IntegerProp(default='120', fill_brok=['full_status']),
+        'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
+        'realm' :       StringProp(default=''),
+    }
 
-    running_properties = {'con': StringProp(
-            default=None),
-                          'alive': StringProp(
-            default=True,
-            fill_brok=['full_status'],
-            to_send=True),
-                          'broks': StringProp(
-            default=[]),
-                          'attempt': StringProp(
-            default=0,
-            fill_brok=['full_status']), # the number of failed attempt
-                          'reachable': StringProp(
-            default=False,
-            fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
-                          'configuration_errors' : StringProp(default=[]),
-                          }
+    running_properties = {
+        'con':       StringProp(default=None),
+        'alive':     StringProp(default=True, fill_brok=['full_status'], to_send=True),
+        'broks':     StringProp(default=[]),
+        'attempt':   StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
+        'reachable': StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+        'configuration_errors': StringProp(default=[]),
+    }
     macros = {}
 
     def get_name(self):

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #Copyright (C) 2009-2010 :
 #    Dupeux Nicolas, nicolas.dupeux@arkea.com
+#    Alan Brenner, Alan.Brenner@ithaka.org
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -36,6 +37,13 @@ import struct
 import binascii
 import asyncore
 import getopt
+
+try :
+    import OpenSSL
+    from OpenSSL import SSL
+except ImportError:
+    OpenSSL = None
+
 from ctypes import create_string_buffer
 from Queue import Empty
 from multiprocessing import Process, Queue
@@ -69,6 +77,13 @@ class NRPE:
         '''
         self.query = create_string_buffer(1036)
         crc = 0
+
+        if not command:
+            self.state = 'received'
+            self.rc = 3
+            self.message = "Error : no command asked fro nrpe query"
+            return
+
         self.query.raw=struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
         crc = binascii.crc32(self.query)
         # we restart with the crc value this time...
@@ -76,7 +91,7 @@ class NRPE:
         #struct.pack_into(">i", self.query, 4, crc)
 
     
-    def init_query(self,host, port, command):
+    def init_query(self,host, port, use_ssl, command):
         self.state = 'creation'
         print 'build with', command
         self.build_query(command)
@@ -84,19 +99,19 @@ class NRPE:
         self.port = port
         
 
-    def send(self):
-        self.state = 'sent'
-        try:
-            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.s.settimeout(9)
-            self.s.connect((self.host, self.port))
-            print "Sending", len(self.query)
-            self.s.send(self.query)
-        except socket.error,exp:
-            self.rc = 2
-            self.message = str(exp)
-            self.state = 'received'
-            return(self.rc, self.message)
+#    def send(self):
+#        self.state = 'sent'
+#        try:
+#            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#            self.s.settimeout(9)
+#            self.s.connect((self.host, self.port))
+#            print "Sending", len(self.query)
+#            self.s.send(self.query)
+#        except socket.error,exp:
+#            self.rc = 2
+#            self.message = str(exp)
+#            self.state = 'received'
+#            return(self.rc, self.message)
         
     def get(self):
         # If we already got an error, get out now
@@ -118,6 +133,7 @@ class NRPE:
 
         self.state = 'received'
         # TODO : check crc
+            
         response = struct.unpack(">2hih1024s", data)
 
         rc = response[3]
@@ -129,54 +145,135 @@ class NRPE:
 
 
 
+
 class NRPEAsyncClient(asyncore.dispatcher):
 
-    def __init__(self, host, port, msg):
+    def __init__(self, host, port, use_ssl, msg):
+        self.use_ssl = use_ssl
         asyncore.dispatcher.__init__(self)
+
+        # Instanciate our nrpe helper
+        self.nrpe = NRPE()
+        self.nrpe.init_query(host, 5666, use_ssl, msg)
+
+        # And now we create a socket for our connexion
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        if use_ssl:
+            # The admin want a ssl connexion, but there is not openssl
+            # lib installed :(
+            if OpenSSL == None:
+                self.rc = 2
+                self.message = "Error : the openssl lib for Python is not installed."
+                self.nrpe.state = 'received'
+            else:
+                # Ok we can wrap the socket
+                print "Wrapping ssl!"
+                self.wrap_ssl()
+
         try:
+            print "Connect to", host, port
             self.connect( (host, port) )
         except socket.error,exp:
+            print exp
             self.rc = 2
             self.message = str(exp)
-            self.state = 'received'
-                                                        
-        self.nrpe = NRPE()
-        self.nrpe.init_query(host, 5666, msg)
+            self.nrpe.state = 'received'
+        print "Connect done"
         
 
+    def wrap_ssl(self):
+        self.context = OpenSSL.SSL.Context(OpenSSL.SSL.TLSv1_METHOD)
+        self.context.set_cipher_list('ADH')
+        self.socket = OpenSSL.SSL.Connection(self.context, self.socket)
+        self.set_accept_state()
+
+
     def handle_connect(self):
-        #print "Go connect"
+        print "Go connect"
         pass
 
 
     def handle_close(self):
-        #print "Manage close"
+        print "Manage close"
         self.close()
 
 
     def handle_read(self):
+        #print "Do handshake"
+        #self.socket.do_handshake()
+        print "Go read"
         if self.nrpe.state != 'received':
             #print "Handle read"
-            b = self.recv(1034)
-            #print "received", len(b), "bytes"
-            (self.rc, self.message) = self.nrpe.read(b)
+            try:
+                b = self.recv(1034)
+            except socket.error, exp:
+                print exp
+                self.nrpe.state = 'received'
+                self.rc = 2
+                self.message = str(exp)
+                return
+            except OpenSSL.SSL.WantReadError, exp:
+                while True:
+                    print "Do handshake violent!"
+                    try: 
+                        self.socket.do_handshake()
+                    except OpenSSL.SSL.WantReadError, exp:
+                        return
+                    break
+                return
+
+            if len(b) != 0:
+                (self.rc, self.message) = self.nrpe.read(b)
+            else:
+                self.rc = 2
+                self.message = "nothing return"
             # We can close ourself
             self.close()
             print self.rc, self.message
 
 
     def writable(self):
-        #print "writable?", len(self.nrpe.query) > 0
-        return (len(self.nrpe.query) > 0)
+        print "writable?", len(self.nrpe.query) > 0
+        return not self.is_done() and (len(self.nrpe.query) > 0)
 
 
     def handle_write(self):
-        #print "handle write", len(self.nrpe.query)
-        sent = self.send(self.nrpe.query)
-        #print "Sent", sent
-        self.nrpe.query = self.nrpe.query[sent:]
-        #print "New len query", len(self.nrpe.query)
+        #print "State", self.socket.state_string()
+
+        #if self._ssl_accepting:
+        #    self._do_ssl_handshake()
+        #elif self._ssl_closing:
+        #    self._do_ssl_shutdown()
+        #print "Do handshake"
+        #try:
+        #    self.socket.do_handshake()
+        #except OpenSSL.SSL.WantReadError, exp:
+        #    pass
+        if self.writable():#not self.is_done():
+            print "Try write"
+            try : 
+            #print "handle write", len(self.nrpe.query)
+                sent = self.send(self.nrpe.query)
+            except socket.error, exp:
+                print exp
+                self.nrpe.state = 'received'
+                self.rc = 2
+                self.message = str(exp)
+                return
+            except OpenSSL.SSL.WantReadError, exp:
+                while True:
+                    print "Do handshake violent!"
+                    try: 
+                        self.socket.do_handshake()
+                    except OpenSSL.SSL.WantReadError, exp:
+                        return
+                print "Fuck WantReadError", exp
+                self.handle_read()
+                return
+            print "Sent", sent
+            self.nrpe.query = self.nrpe.query[sent:]
+            #print "New len query", len(self.nrpe.query)
 
     def is_done(self):
         return self.nrpe.state == 'received'
@@ -191,14 +288,15 @@ def parse_args(cmd_args):
     unknown_on_timeout = False
     timeout = 10
     use_ssl = True
+    add_args = []
 
     #Manage the options
     try:
         opts, args = getopt.getopt(cmd_args, "H::p::nut::c::a::", [])
     except getopt.GetoptError, err:
         # If we got problem, bail out
-        return (host, port, unknown_on_timeout, command, timeout, use_ssl)
-    
+        return (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
+    print  "Opts", opts, "Args", args
     for o, a in opts:
         if o in ("-H"):
             host = a
@@ -212,7 +310,12 @@ def parse_args(cmd_args):
             unknown_on_timeout = True
         elif o in ('-n'):
             use_ssl = False
-    return (host, port, unknown_on_timeout, command, timeout, use_ssl)
+        elif o in ('-a'):
+            # Here we got a, btu also all 'args'
+            add_args.append(a)
+            add_args.extend(args)
+            
+    return (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
 
 
 
@@ -249,6 +352,7 @@ class Nrpe_poller(BaseModule):
                 time.sleep(1)
 
 
+
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
@@ -257,7 +361,24 @@ class Nrpe_poller(BaseModule):
             if chk.status == 'queue':
                 chk.status = 'launched'
                 print "NRPE (bad) check for", chk.command
-                n = NRPEAsyncClient('localhost', 5666, 'check_load')
+                # Want the args of the commands
+                args = parse_args(chk.command.split(' ')[1:])
+                print "Args", args
+                
+                (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args) = args
+                
+                # If we do nto have the good args, we bail out for this check
+                if command == None or host == None:
+                    chk.status = 'done'
+                    chk.exit_status = 2
+                    chk.get_outputs('Error : the parameters host or command are not correct.', 8012)
+                    chk.execution_time = 0.0
+                    continue
+                # Ok we are good, we go on
+                total_args = [command]
+                total_args.extend(add_args)
+                cmd = r'!'.join(total_args)
+                n = NRPEAsyncClient(host, port, use_ssl, cmd)
                 chk.con = n
                 self.con_in_progress.append(n)
                 #chk.exit_status = 2
@@ -273,18 +394,31 @@ class Nrpe_poller(BaseModule):
         to_del = []
         
         # We check if all new things in connexions
+        print "Pool!"
         asyncore.poll(timeout=0.1)
         
         # Now we look for finised checks
         for c in self.checks:
-            n = c.con
-            if c.status == 'launched' and n.is_done():
+            print "And check", c
+            # First manage check in error, bad formed
+            if c.status == 'done':
+                to_del.append(c)
+                try:
+                    self.returns_queue.append(c)
+                except IOError , exp:
+                    print "[%d]Exiting: %s" % (self.id, exp)
+                    sys.exit(2)
+                continue
+            # Then we check for good checks
+            if c.status == 'launched' and c.con.is_done():
+                n = c.con
                 print "Finished check", c
                 c.status = 'done'
                 c.exit_status = n.rc
                 c.get_outputs(n.message, 8012)
                 # unlink our object from the original check
-                del c.con
+                if hasattr(c, 'con'):
+                    delattr(c, 'con')
                 self.con_in_progress.remove(n)
                 to_del.append(c)
 
@@ -331,12 +465,15 @@ class Nrpe_poller(BaseModule):
             self.manage_finished_checks()
 
             # Now get order from master
+            print "Try c"
             try:
                 cmsg = c.get(block=False)
+                print "Got message", cmsg.get_type()
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self.id
                     break
             except :
+                print "Nothing"
                 pass
 
             timeout -= time.time() - begin

@@ -23,3 +23,5 @@ To Gregory Ranchy for his help on the official doc
 To Kristoffer Moegle for this patch on arbiter configuration module
 To Eric Beaulieu for his help on the ssl certificates :)
 To Laurent Guyon, our best bug hunter :)
+To Alan Brenner for his SSL core for the NRPE module
+To Venelin Petkov for this bug report about missing customs on services

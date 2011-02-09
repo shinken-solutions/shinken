@@ -57,7 +57,7 @@ class Daemon:
         self.debug_file = debug_file
         self.interrupted = False
                 
-        self.daemon = None
+        self.daemon = None # should'nt it be renamed to "pyro_daemon" for clarity & safety ?
 
         # Log init
         self.log = logger
