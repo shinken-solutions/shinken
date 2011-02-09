@@ -31,8 +31,6 @@
 
 import sys, os
 import optparse
-import ConfigParser
-
 
 #Try to load shinken lib.
 #Maybe it's not in our python path, so we detect it
@@ -50,8 +48,6 @@ except ImportError, e:
 
 from shinken.daemons.reactionnerdaemon import Reactionner
 from shinken.bin import VERSION
-
-
 
 #lets go to the party
 if __name__ == "__main__":
