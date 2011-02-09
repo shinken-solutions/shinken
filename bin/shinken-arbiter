@@ -81,7 +81,7 @@ parser.add_option('-d', '--daemon', action='store_true',
                   help="Run in daemon mode")
 parser.add_option('-r', '--replace', action='store_true',
                   dest="do_replace",
-                  help="Replace previous running scheduler")
+                  help="Replace previous running arbiter")
 parser.add_option('--debugfile', dest='debug_file',
                   help=("Debug file. Default: not used "
                         "(why debug a bug free program? :) )"))
