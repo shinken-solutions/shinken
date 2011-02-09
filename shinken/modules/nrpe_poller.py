@@ -190,7 +190,6 @@ class NRPEAsyncClient(asyncore.dispatcher):
             self.connect( (host, port) )
         except socket.error,exp:
             self.set_exit(2, str(exp))
-        print "Connect done"
         
 
     def wrap_ssl(self):
