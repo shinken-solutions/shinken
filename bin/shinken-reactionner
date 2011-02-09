@@ -30,7 +30,7 @@
 #chedulers (and actions into) take new ones and do the (new) job.
 
 import sys, os
-import getopt
+import optparse
 import ConfigParser
 
 
@@ -48,45 +48,30 @@ except ImportError, e:
         sys.path.append(os.sep.join(elts))
 
 
-from shinken.daemons.reactionnerdaemon import Reactionner, usage
+from shinken.daemons.reactionnerdaemon import Reactionner
+from shinken.bin import VERSION
 
 
 
 #lets go to the party
 if __name__ == "__main__":
-    #Manage the options
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hrdc::w", ["help", "replace", "daemon", "config=", "debug=", "easter"])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage(sys.argv[0])
-        sys.exit(2)
-    #Default params
-    config_file = None
-    is_daemon=False
-    do_replace=False
-    debug=False
-    debug_file=None
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage(sys.argv[0])
-            sys.exit()
-        elif o in ("-r", "--replace"):
-            do_replace = True
-        elif o in ("-c", "--config"):
-            config_file = a
-        elif o in ("-d", "--daemon"):
-            is_daemon = True
-        elif o in ("--debug"):
-            debug = True
-            debug_file = a
-        else:
-            print "Sorry, the option",o, a, "is unknown"
-            usage(sys.argv[0])
-            sys.exit()
+    parser = optparse.OptionParser(
+        "%prog [options]", version="%prog " + VERSION)
+    parser.add_option('-c', '--config',
+                      dest="config_file", metavar="CONFIG-FILE",
+                      help='Config file')
+    parser.add_option('-d', '--daemon', action='store_true',
+                      dest="is_daemon",
+                      help="Run in daemon mode")
+    parser.add_option('-r', '--replace', action='store_true',
+                      dest="do_replace",
+                      help="Replace previous running reactionner")
+    parser.add_option('--debugfile', dest='debug_file',
+                      help=("Debug file. Default: not used "
+                            "(why debug a bug free program? :) )"))
+    opts, args = parser.parse_args()
+    if args:
+        parser.error("Does not accept any argument.")
 
-
-    daemon = Reactionner(config_file, is_daemon, do_replace, debug, debug_file)
-    
+    daemon = Reactionner(debug=opts.debug_file is not None, **opts.__dict__)
     daemon.main()
