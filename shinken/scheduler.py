@@ -24,6 +24,7 @@ import select, time, os, errno
 import traceback
 
 import shinken.pyro_wrapper as pyro
+from shinken.pyro_wrapper import Pyro
 from shinken.external_command import ExternalCommand
 from shinken.check import Check
 from shinken.notification import Notification
@@ -151,6 +152,12 @@ class Scheduler:
     def load_modules(self, modules_manager, mod_instances):
         self.modules_manager = modules_manager
         self.mod_instances = mod_instances
+
+        
+    # Load the pollers from our app master
+    def load_satellites(self, pollers, reactionners):
+        self.pollers = pollers
+        self.reactionners = reactionners
 
 
     # Oh... Arbiter want us to die... For launch a new Scheduler
@@ -445,6 +452,157 @@ class Scheduler:
                 pass
         else:
             logger.log("Error : the received result type in unknown ! %s" % str(c.is_a))
+
+
+
+    # Get teh good tabs for links by the kind. If unknown, return None
+    def get_links_from_type(self, type):
+        t = {'poller' : self.pollers, 'reactionner' : self.reactionners}
+        if type in t :
+            return t[type]
+        return None
+
+
+    # Check if we do not connect to ofthen to this
+    def is_connexion_try_too_close(self, elt):
+        now = time.time()
+        last_connexion = elt['last_connexion']
+        if now - last_connexion < 5:
+            return  True
+        return False
+
+
+    # initialise or re-initialise connexion with a poller
+    # or a reactionner
+    def pynag_con_init(self, id, type='poller'):
+        # Get teh good links tab for looping..
+        links = self.get_links_from_type(type)
+        if links == None:
+            logger.log('DBG: Type unknown for connexion! %s' % type)
+            return
+
+        # We want only to initiate connexions to the passive
+        # pollers and reactionners
+        passive = links[id]['passive']
+        if not passive:
+            return
+        
+        # If we try to connect too much, we slow down our tests
+        if self.is_connexion_try_too_close(links[id]):
+            return
+
+        # Ok, we can now update it
+        links[id]['last_connexion'] = time.time()
+
+        print "Init connexion with", links[id]['uri']
+
+        uri = links[id]['uri']
+        links[id]['con'] = Pyro.core.getProxyForURI(uri)
+        con = links[id]['con']
+
+        try:
+            # intial ping must be quick
+            pyro.set_timeout(con, 5)
+            con.ping()
+        except Pyro.errors.ProtocolError, exp:
+            logger.log("[] Connexion problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            links[id]['con'] = None
+            return
+        except Pyro.errors.NamingError, exp:
+            logger.log("[] the %s '%s' is not initilised : %s" % (type, links[id]['name'], str(exp)))
+            links[id]['con'] = None
+            return
+        except KeyError , exp:
+            logger.log("[] the %s '%s' is not initilised : %s" % (type, links[id]['name'], str(exp)))
+            links[id]['con'] = None
+            traceback.print_stack()
+            return
+        except Pyro.errors.CommunicationError, exp:
+            logger.log("[] the %s '%s' got CommunicationError : %s" % (type, links[id]['name'], str(exp)))
+            links[id]['con'] = None
+            return
+
+        logger.log("[] Connexion OK to the %s %s" % (type, links[id]['name']))
+
+
+    # We should push actions to our passives satellites
+    def push_actions_to_passives_satellites(self):
+        # We loop for our passive pollers
+        for p in [p for p in self.pollers.values() if p['passive']]:
+            print "I will send actions to the poller", p
+            con = p['con']
+            poller_tags = p['poller_tags']
+            if con != None:
+            # get actions
+                lst = self.get_to_run_checks(True, False, poller_tags)
+                try:
+                    # intial ping must be quick
+                    pyro.set_timeout(con, 120)
+                    print "Sending", len(lst), "actions"
+                    con.push_actions(lst, self.instance_id)
+                    self.nb_checks_send += len(lst)
+                except Pyro.errors.ProtocolError, exp:
+                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                except Pyro.errors.NamingError, exp:
+                    logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                except KeyError , exp:
+                    logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    traceback.print_stack()
+                    return
+                except Pyro.errors.CommunicationError, exp:
+                    logger.log("[] the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                #we came back to normal timeout
+                pyro.set_timeout(con, 5)
+            else : # no connexion? try to reconnect
+                self.pynag_con_init(p['instance_id'], type='poller')
+
+
+
+    # We should get returns from satellites
+    def get_actions_from_passives_satellites(self):
+        # We loop for our passive pollers
+        for p in [p for p in self.pollers.values() if p['passive']]:
+            print "I will get actions from the poller", p
+            con = p['con']
+            poller_tags = p['poller_tags']
+            if con != None:
+                try:
+                    # intial ping must be quick
+                    pyro.set_timeout(con, 120)
+                    results = con.get_returns(self.instance_id)
+                    nb_received = len(results)
+                    self.nb_check_received += nb_received
+                    print "Received %d passive results" % nb_received
+                    self.waiting_results.extend(results)
+                except Pyro.errors.ProtocolError, exp:
+                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                except Pyro.errors.NamingError, exp:
+                    logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                except KeyError , exp:
+                    logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    traceback.print_stack()
+                    return
+                except Pyro.errors.CommunicationError, exp:
+                    logger.log("[] the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                #we came back to normal timeout
+                pyro.set_timeout(con, 5)
+            else: # no connexion, try reinit
+                self.pynag_con_init(p['instance_id'], type='poller')
+
 
 
     # Some checks are purely internal, like business based one
@@ -880,6 +1038,11 @@ class Scheduler:
         logger.log("[%s] First scheduling launched" % self.instance_name)
         self.schedule()
         logger.log("[%s] First scheduling done" % self.instance_name)
+
+        # Now connect to the passive satellites if need
+        for p_id in self.pollers:
+            self.pynag_con_init(p_id, type='poller')
+
         # Ticks is for recurrent function call like consume
         # del zombies etc
         ticks = 0
@@ -913,6 +1076,11 @@ class Scheduler:
                         if ticks % nb_ticks == 0:
                             # print "I run function :", name
                             f()
+
+                #DBG : push actions to passives?
+                self.push_actions_to_passives_satellites()
+                self.get_actions_from_passives_satellites()
+                
 
                 #if  ticks % 10 == 0:
                 #    self.conf.quick_debug()

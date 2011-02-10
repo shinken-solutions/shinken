@@ -284,7 +284,6 @@ class LiveStatusStack:
             return self.get()
 
 
-
 try:
     Queue.LifoQueue
     LiveStatusStack.__bases__ = (Queue.LifoQueue,)
@@ -292,7 +291,6 @@ except AttributeError:
     # Ptyhon 2.4 and 2.5 do not have it.
     # Use our own implementation.
     LiveStatusStack.__bases__ = (MyLifoQueue,)
-
 
 
 class LiveStatus:
@@ -5419,7 +5417,9 @@ class LiveStatus:
         handles the execution of the request and formatting of the result.
         
         """
-        request = LiveStatusRequest(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue)
+        request = LiveStatusRequest(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, 
+                                    self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, 
+                                    self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue)
         request.parse_input(data)
         print "REQUEST\n%s\n" % data
         #print request
@@ -5675,9 +5675,18 @@ class LiveStatusResponse:
                 self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
 
 
+class LiveStatusConstraints():
+    """ Represent the constraints applied on a livestatus request """
+    def __init__(self, filter_func, out_map, filter_map, output_map, without_filter):
+        self.filter_func = filter_func
+        self.out_map = out_map
+        self.filter_map = filter_map
+        self.output_map = output_map
+        self.without_filter = without_filter
 
-class LiveStatusRequest(LiveStatus):
-    
+
+class LiveStatusRequest(LiveStatus):    
+   
     """A class describing a livestatus request."""
     
     def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue):
@@ -6007,6 +6016,7 @@ class LiveStatusRequest(LiveStatus):
                     # Apply the filters on the broker's host/service/etc elements
               
                     result = self.get_live_data()
+                    
                 if self.stats_request:
                     self.columns = range(num_stats_filters)
                     if self.stats_group_by:
@@ -6026,27 +6036,162 @@ class LiveStatusRequest(LiveStatus):
                 print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
     
-    def get_hosts_livedata(self):
-        pass
-    def get_services_livedata(self):
-        pass
+    def get_hosts_or_services_livedata(self, cs, key):
+        objects = getattr(self, self.table)
+        if not self.limit:
+            objects = objects.values()
+        else:
+            objects = sorted(objects.values(), key=key)
+        return [ 
+            self.create_output(cs.output_map, y) for y in (
+                x for x in objects 
+                if cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, x)))
+        ]
     
-    def get_simple_livedata(self, table, result, outmap):
-        objects = getattr(self, table)
-        for obj in objects.values():
-            result.append(self.create_output(outmap, obj))
+    def get_hosts_livedata(self, cs):
+        return self.get_hosts_or_services_livedata(cs, lambda k: (k.host_name))
     
-    objects_get_handlers = {
-        'hosts':            get_hosts_livedata,
-        'services':         get_services_livedata,
-        'commands':         get_simple_livedata,
-        'schedulers':       get_simple_livedata,
-        'brokers':          get_simple_livedata,
-        'pollers':          get_simple_livedata,
-        'reactionners':     get_simple_livedata,
-        # TODO: finish..
-    }
+    def get_services_livedata(self, cs):
+        return self.get_hosts_or_services_livedata(cs, lambda k: (k.host_name, k.service_description))
 
+    def get_simple_livedata(self, cs):
+        objects = getattr(self, self.table)
+        return [ self.create_output(cs.output_map, obj) for obj in objects.values() ]
+
+    def get_filtered_livedata(self, cs):
+        objects = getattr(self, self.table).values()
+        if cs.without_filter:
+            return [ y for y in [ self.create_output(cs.output_map, x) for x in objects ] if cs.filter_func(y) ]
+        res = [ x for x in objects if cs.filter_func(self.create_output(cs.filter_map, x)) ]
+        return [ self.create_output(cs.output_map, x) for x in res ]
+
+    def get_list_livedata(self, cs):
+        t = self.table
+        if cs.without_filter:
+            res = [ self.create_output(cs.output_map, y) for y in 
+                        reduce(list.__add__
+                            , [ getattr(x, t) for x in self.services.values() + self.hosts.values()
+                                    if len(getattr(x, t)) > 0 ]
+                            , [])
+            ]
+        else:
+            res = [ c for c in reduce(list.__add__
+                        , [ getattr(x, t) for x in self.services.values() + self.hosts.values() 
+                                if len(getattr(x, t)) > 0]
+                        , []
+                        )
+                    if cs.filter_func(self.create_output(cs.filter_map, c)) ]
+            res = [ self.create_output(cs.output_map, x) for x in res ]
+        return res
+    
+    
+    def get_group_livedata(self, cs, objs, an, group_key, member_key):
+        """ return a list of elements from a "group" of 'objs'. group can be a hostgroup or a servicegroup.
+objs: the objects to get elements from.
+an: the attribute name to set on result.
+group_key: the key to be used to sort the group members.
+member_key: the key to be used to sort each resulting element of a group member. """
+        return [ self.create_output(cs.output_map, x) for x in (
+                    svc for svc in (
+                        setattr(og[0], an, og[1]) or og[0] for og in (
+                            ( copy.copy(item0), inner_list0[1]) for inner_list0 in (
+                                (sorted(sg1.members, key = member_key), sg1) for sg1 in
+                                    sorted([sg0 for sg0 in objs if sg0.members], key = group_key)
+                                ) for item0 in inner_list0[0]
+                            )
+                        ) if (cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, svc))))
+        ]
+
+    def get_hostbygroups_livedata(self, cs):
+        member_key = lambda k: k.host_name
+        group_key = lambda k: k.hostgroup_name
+        return self.get_group_livedata(cs, self.hostgroups.values(), 'hostgroup', group_key, member_key)        
+
+    def get_servicebygroups_livedata(self, cs):
+        member_key = lambda k: k.get_name()
+        group_key = lambda k: k.servicegroup_name
+        return self.get_group_livedata(cs, self.servicegroups.values(), 'servicegroup', group_key, member_key)
+    
+    def get_problem_livedata(self, cs):
+        # We will crate a problems list first with all problems and source in it
+        # TODO : create with filter
+        problems = []
+        for h in self.hosts.values():
+            if h.is_problem:
+                pb = Problem(h, h.impacts)
+                problems.append(pb)
+        for s in self.services.values():
+            if s.is_problem:
+                pb = Problem(s, s.impacts)
+                problems.append(pb)
+        # Then return
+        return [ self.create_output(cs.output_map, pb) for pb in problems ]
+
+    def get_status_livedata(self, cs):
+        cs.out_map = self.out_map['Config']
+        return [ self.create_output(cs.output_map, c) for c in self.configs.values() ]
+
+    def get_columns_livedata(self, cs):
+        result = []
+        result.append({
+            'description' : 'A description of the column' , 'name' : 'description' , 'table' : 'columns' , 'type' : 'string' })
+        result.append({
+            'description' : 'The name of the column within the table' , 'name' : 'name' , 'table' : 'columns' , 'type' : 'string' })
+        result.append({
+            'description' : 'The name of the table' , 'name' : 'table' , 'table' : 'columns' , 'type' : 'string' })
+        result.append({
+            'description' : 'The data type of the column (int, float, string, list)' , 'name' : 'type' , 'table' : 'columns' , 'type' : 'string' })
+        tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Logline' : 'log', 'Statsbygroup' : 'statsgroupby', 'Hostsbygroup' : 'hostsbygroup', 'Servicesbygroup' : 'servicesbygroup', 'Servicesbyhostgroup' : 'servicesbyhostgroup' }
+        for obj in sorted(LiveStatus.out_map, key=lambda x: x):
+            if obj in tablenames:
+                for attr in LiveStatus.out_map[obj]:
+                    if 'description' in LiveStatus.out_map[obj][attr] and LiveStatus.out_map[obj][attr]['description']:
+                        result.append({ 'description' : LiveStatus.out_map[obj][attr]['description'], 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
+                    else:
+                        result.append({'description' : 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
+        return result
+
+    def get_servicebyhostgroups_livedata(self, cs):
+        # to test..
+        res = [ self.create_output(cs.output_map, x) for x in (
+                svc for svc in (
+                    setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
+                        # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
+                        (copy.copy(item1), inner_list1[1]) for inner_list1 in (
+                            # ([service, service, ...], hostgroup), ([service, ...], hostgroup), ...  flattened by host. only if a host has services. sorted by service_description
+                            (sorted(item0.services, key = lambda k: k.service_description), inner_list0[1]) for inner_list0 in (
+                                # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
+                                (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
+                                    # hostgroups, sorted by hostgroup_name
+                                    sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
+                            ) for item0 in inner_list0[0] if item0.services
+                        ) for item1 in inner_list1[0]
+                    )
+                ) if (cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, svc)))
+            )]
+        return res
+
+
+    objects_get_handlers = {
+        'hosts':                get_hosts_livedata,
+        'services':             get_services_livedata,
+        'commands':             get_simple_livedata,
+        'schedulers':           get_simple_livedata,
+        'brokers':              get_simple_livedata,
+        'pollers':              get_simple_livedata,
+        'reactionners':         get_simple_livedata,
+        'contacts':             get_filtered_livedata,
+        'hostgroups':           get_filtered_livedata,
+        'servicegroups':        get_filtered_livedata,
+        'downtimes':            get_list_livedata,
+        'comments':             get_list_livedata,
+        'hostsbygroup':         get_hostbygroups_livedata,
+        'servicesbygroup':      get_servicebygroups_livedata,
+        'problems':             get_problem_livedata,
+        'status':               get_status_livedata,
+        'columns':              get_columns_livedata,
+        'servicesbyhostgroup':  get_servicebyhostgroups_livedata
+    }
 
     def get_live_data(self):
         """Find the objects which match the request.
@@ -6054,194 +6199,40 @@ class LiveStatusRequest(LiveStatus):
         This function scans a list of objects (hosts, services, etc.) and
         applies the filter functions first. The remaining objects are
         converted to simple dicts which have only the keys that were
-        requested through Column: attributes.
+        requested through Column: attributes. """
+        # We will use prefiltercolumns here for some serious speedup.
+        # For example, if nagvis wants Filter: host_groups >= hgxy
+        # we don't have to use the while list of hostgroups in
+        # the innermost loop
+        # Filter: host_groups >= linux-servers
+        # host_groups is a service attribute
+        # We can get all services of all hosts of all hostgroups and filter at the end
+        # But it would save a lot of time to already filter the hostgroups. This means host_groups must be hard-coded
+        # Also host_name, but then we must filter the second step.
+        # And a mixture host_groups/host_name with FilterAnd/Or? Must have several filter functions
         
-        """
-        result = []
-        # Get the function which implements the Filter: statements
-        filter_func = self.filter_stack.get_stack()
-        out_map = self.out_map[self.out_map_name]
-        filter_map = dict([(k, out_map.get(k)) for k in self.filtercolumns])
-        output_map = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
-        without_filter = len(self.filtercolumns) == 0
-        
-        if self.table in ['hosts', 'services', 'downtimes', 'comments', 'hostgroups', 'servicegroups', 'hostsbygroup', 'servicesbygroup', 'servicesbyhostgroup']:
-            #Scan through the objects and apply the Filter: rules
-            if self.table == 'hosts':
-                if not self.limit:
-                    filtresult = [self.create_output(output_map, y) for y in (x for x in self.hosts.values() if (without_filter or filter_func(self.create_output(filter_map, x))))]
-                else:
-                    hosts = sorted(self.hosts.values(), key = lambda k: k.host_name)
-                    filtresult = [self.create_output(output_map, y) for y in (x for x in hosts if (without_filter or filter_func(self.create_output(filter_map, x))))]
-                    filtresult = filtresult[:self.limit]
-            elif self.table == 'hostsbygroup':
-                # instead of self.hosts.values()
-                # loop over hostgroups, then over members, then flatten the list, then add a hostgroup attribute to each host
-                if True:
-                    filtresult = [self.create_output(output_map, x) for x in [
-                        host for host in [
-                            setattr(hohg[0], 'hostgroup', hohg[1]) or hohg[0] for hohg in [
-                                # (host, hg), (host, hg), ... host objects are individuals
-                                (copy.copy(item0), inner_list0[1]) for inner_list0 in [
-                                    # ([host, host, ...], hg), ([host], hg), ...
-                                    (sorted(hg1.members, key = lambda k: k.host_name), hg1 ) for hg1 in
-                                        # hostgroups sorted by hostgroup_name
-                                        sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
-                                ] for item0 in inner_list0[0]
-                            ]
-                        ] if (without_filter or filter_func(self.create_output(filter_map, host)))
-                    ]]
-                if self.limit:
-                    filtresult = filtresult[:self.limit]
-            elif self.table == 'services':
-                if not self.limit:
-                    filtresult = [self.create_output(output_map, y) for y in (x for x in self.services.values() if (without_filter or filter_func(self.create_output(filter_map, x))))]
-                else:
-                    services = sorted(self.services.values(), key = lambda k: (k.host_name, k.service_description))
-                    filtresult = [self.create_output(output_map, y) for y in (x for x in services if (without_filter or filter_func(self.create_output(filter_map, x))))]
-                    filtresult = filtresult[:self.limit]
-            elif self.table == 'servicesbygroup':
-                # Here we have more generators instead of list comprehensions, but in fact it makes no difference
-                # (Tested with 2000 services)
-                # Multisite actually uses this with limit. This is a temporary workaround because limiting requires sorting
-                if True:
-                    filtresult = [self.create_output(output_map, x) for x in (
-                        svc for svc in (
-                            setattr(servicesg[0], 'servicegroup', servicesg[1]) or servicesg[0] for servicesg in (
-                                # (service, sg), (service, sg), ...  service objects are individuals
-                                (copy.copy(item0), inner_list0[1]) for inner_list0 in (
-                                    # ([service, service], sg), ([service, service, ...], sg), ... services are sorted
-                                    (sorted(sg1.members, key = lambda k: k.get_name()), sg1) for sg1 in
-                                        # servicegroups, sorted by their servicegroup_name
-                                        sorted([sg0 for sg0 in self.servicegroups.values() if sg0.members], key = lambda k: k.servicegroup_name)
-                                ) for item0 in inner_list0[0]
-                            )
-                        ) if (without_filter or filter_func(self.create_output(filter_map, svc)))
-                    )]
-                if self.limit:
-                    filtresult = filtresult[:self.limit]
-            elif self.table == 'servicesbyhostgroup':
-                # We will use prefiltercolumns here for some serious speedup.
-                # For example, if nagvis wants Filter: host_groups >= hgxy
-                # we don't have to use the while list of hostgroups in
-                # the innermost loop
-                # Filter: host_groups >= linux-servers
-                # host_groups is a service attribute
-                # We can get all services of all hosts of all hostgroups and filter at the end
-                # But it would save a lot of time to already filter the hostgroups. This means host_groups must be hard-coded
-                # Also host_name, but then we must filter the second step.
-                # And a mixture host_groups/host_name with FilterAnd/Or? Must have several filter functions
-                # This is still under construction. The code can be made simpler
-                if True:
-                    filtresult = [self.create_output(output_map, x) for x in (
-                        svc for svc in (
-                            setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
-                                # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
-                                (copy.copy(item1), inner_list1[1]) for inner_list1 in (
-                                    # ([service, service, ...], hostgroup), ([service, ...], hostgroup), ...  flattened by host. only if a host has services. sorted by service_description
-                                    (sorted(item0.services, key = lambda k: k.service_description), inner_list0[1]) for inner_list0 in (
-                                        # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
-                                        (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
-                                            # hostgroups, sorted by hostgroup_name
-                                            sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
-                                    ) for item0 in inner_list0[0] if item0.services
-                                ) for item1 in inner_list1[0]
-                            )
-                        ) if (without_filter or filter_func(self.create_output(filter_map, svc)))
-                    )]
-                if self.limit:
-                    filtresult = filtresult[:self.limit]
-            elif self.table == 'downtimes':
-                if without_filter:
-                    filtresult = [self.create_output(output_map, y) for y in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], [])]
-                else:
-                    prefiltresult = [d for d in reduce(list.__add__, [x.downtimes for x in self.services.values() + self.hosts.values() if len(x.downtimes) > 0], []) if filter_func(self.create_output(filter_map, d))]
-                    filtresult = [self.create_output(output_map, x) for x in prefiltresult]
-            elif self.table == 'comments':
-                if without_filter:
-                    filtresult = [self.create_output(output_map, y) for y in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], [])]
-                else:
-                    prefiltresult = [c for c in reduce(list.__add__, [x.comments for x in self.services.values() + self.hosts.values() if len(x.comments) > 0], []) if filter_func(self.create_output(filter_map, c))]
-                    filtresult = [self.create_output(output_map, x) for x in prefiltresult]
-            elif self.table == 'hostgroups':
-                if without_filter:
-                    filtresult = [y for y in [self.create_output(output_map, x) for x in self.hostgroups.values()] if filter_func(y)]
-                else:
-                    prefiltresult = [x for x in self.hostgroups.values() if filter_func(self.create_output(filter_map, x))]
-                    filtresult = [self.create_output(output_map, x) for x in prefiltresult]
-            elif self.table == 'servicegroups':
-                if without_filter:
-                    filtresult = [y for y in [self.create_output(output_map, x) for x in self.servicegroups.values()] if filter_func(y)]
-                else:
-                    prefiltresult = [x for x in self.servicegroups.values() if filter_func(self.create_output(filter_map, x))]
-                    filtresult = [self.create_output(output_map, x) for x in prefiltresult]
-
-            result = filtresult
-        elif self.table == 'contacts':
-            result = [ self.create_output(output_map, y) for y in (
-                                x for x in self.contacts.values() 
-                                if (without_filter or filter_func(self.create_output(filter_map, x))))
-            ]
-            if self.limit:
-                result = result[:self.limit]
-        elif self.table == 'commands':
-            for c in self.commands.values():
-                result.append(self.create_output(output_map, c))
-        elif self.table == 'schedulers':
-            for s in self.schedulers.values():
-                result.append(self.create_output(output_map, s))
-        elif self.table == 'pollers':
-            for s in self.pollers.values():
-                result.append(self.create_output(output_map, s))
-        elif self.table == 'reactionners':
-            for s in self.reactionners.values():
-                result.append(self.create_output(output_map, s))
-        elif self.table == 'brokers':
-            for s in self.brokers.values():
-                result.append(self.create_output(output_map, s))
-        elif self.table == 'problems':
-            # We will crate a problems list first with all problems and source in it
-            # TODO : create with filter
-            problems = []
-            for h in self.hosts.values():
-                if h.is_problem:
-                    pb = Problem(h, h.impacts)
-                    problems.append(pb)
-            for s in self.services.values():
-                if s.is_problem:
-                    pb = Problem(s, s.impacts)
-                    problems.append(pb)
-            # Then return
-            for pb in problems:
-                result.append(self.create_output(output_map, pb))
-        elif self.table == 'status':
-            out_map = self.out_map['Config']
-            for c in self.configs.values():
-                result.append(self.create_output(output_map, c))
-        elif self.table == 'columns':
-            result.append({
-                'description' : 'A description of the column' , 'name' : 'description' , 'table' : 'columns' , 'type' : 'string' })
-            result.append({
-                'description' : 'The name of the column within the table' , 'name' : 'name' , 'table' : 'columns' , 'type' : 'string' })
-            result.append({
-                'description' : 'The name of the table' , 'name' : 'table' , 'table' : 'columns' , 'type' : 'string' })
-            result.append({
-                'description' : 'The data type of the column (int, float, string, list)' , 'name' : 'type' , 'table' : 'columns' , 'type' : 'string' })
-            tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Logline' : 'log', 'Statsbygroup' : 'statsgroupby', 'Hostsbygroup' : 'hostsbygroup', 'Servicesbygroup' : 'servicesbygroup', 'Servicesbyhostgroup' : 'servicesbyhostgroup' }
-            for obj in sorted(LiveStatus.out_map, key=lambda x: x):
-                if obj in tablenames:
-                    for attr in LiveStatus.out_map[obj]:
-                        if 'description' in LiveStatus.out_map[obj][attr] and LiveStatus.out_map[obj][attr]['description']:
-                            result.append({ 'description' : LiveStatus.out_map[obj][attr]['description'], 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
-                        else:
-                            result.append({'description' : 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
-        else:
+        handler = self.objects_get_handlers.get(self.table, None)
+        if not handler:
             print("Got unhandled table: %s" % (self.table))
+            return []
+        
+        # Get the function which implements the Filter: statements
+        filter_func     = self.filter_stack.get_stack()
+        out_map         = self.out_map[self.out_map_name]
+        filter_map      = dict([(k, out_map.get(k)) for k in self.filtercolumns])
+        output_map      = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
+        without_filter  = len(self.filtercolumns) == 0
+    
+        cs = LiveStatusConstraints(filter_func, out_map, filter_map, output_map, without_filter)
+        res = handler(self, cs)
 
+        if self.limit:
+            res = res[:self.limit]
+            
         if self.stats_request:
-            result = self.statsify_result(result)
-        #print "result is", result
-        return result
+            res = self.statsify_result(res)
+        
+        return res
 
 
     def get_live_data_log(self):

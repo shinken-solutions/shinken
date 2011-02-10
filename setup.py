@@ -352,7 +352,7 @@ setup(
   license = "GNU Affero General Public License",
   url = "http://www.shinken-monitoring.org",
   zip_safe=False,
-  classifiers=['Development Status :: 4 - Beta',
+  classifiers=['Development Status :: 5 - Production/Stable',
                'Environment :: Console',
                'Intended Audience :: System Administrators',
                'License :: OSI Approved :: GNU Affero General Public License v3',

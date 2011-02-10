@@ -45,7 +45,15 @@ class Command(object):
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = None
         if not hasattr(self, 'module_type'):
-            self.module_type = 'fork'
+            # If the command satr with a _, set the module_type
+            # as the name of the command, without the _
+            if getattr(self, 'command_line', '').startswith('_'):
+                module_type = getattr(self, 'command_line', '').split(' ')[0]
+                # and we remove the first _
+                self.module_type = module_type[1:]
+            # If no command starting with _, be fork :)
+            else:
+                self.module_type = 'fork'
 
 
     def pythonize(self):
