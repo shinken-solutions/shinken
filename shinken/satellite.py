@@ -216,6 +216,13 @@ class ISchedulers(Pyro.core.ObjBase):
         self.app.add_actions(actions, sched_id)
 
 
+    # A scheduler ask us its returns
+    def get_returns(self, sched_id):
+        print "A scheduler ask me the returns", sched_id
+        ret = self.app.get_return_for_passive(sched_id)
+        print "Send mack", len(ret), "returns"
+        return ret
+
 
 # Interface for Brokers
 # They connect here and get all broks (data for brokers)
@@ -379,6 +386,21 @@ class Satellite(Daemon):
                 self.pynag_con_init(sched_id)
                 logger.log("Sent failed!")
 
+
+    # Get all returning actions for a call from a
+    # scheduler
+    def get_return_for_passive(self, sched_id):
+        # I do not know this scheduler?
+        if sched_id not in self.schedulers:
+            print "I do not know about the scheduler", sched_id
+            return []
+
+        sched = self.schedulers[sched_id]
+        print "Preparing to return", sched['wait_homerun'].values()
+        ret = copy.copy(sched['wait_homerun'].values())
+        sched['wait_homerun'].clear()
+        print "Fianlly return", ret
+        return ret
 
 
     # Use to wait conf from arbiter.
