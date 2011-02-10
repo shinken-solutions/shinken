@@ -525,6 +525,41 @@ class Scheduler:
         logger.log("[] Connexion OK to the %s %s" % (type, links[id]['name']))
 
 
+    # We should push actions to our passives satellites
+    def push_actions_to_passives_satellites(self):
+        # We loop for our passive pollers
+        for p in [p for p in self.pollers.values() if p['passive']]:
+            print "I will send actions to the poller", p
+            con = p['con']
+            poller_tags = p['poller_tags']
+            # get actions
+            lst = self.get_to_run_checks(True, False, poller_tags)
+            try:
+            # intial ping must be quick
+                pyro.set_timeout(con, 120)
+                print "Sending", len(lst), "actions"
+                con.push_actions(lst, self.instance_id)
+                self.nb_checks_send += len(lst)
+            except Pyro.errors.ProtocolError, exp:
+                logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                p['con'] = None
+                return
+            except Pyro.errors.NamingError, exp:
+                logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                p['con'] = None
+                return
+            except KeyError , exp:
+                logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                p['con'] = None
+                traceback.print_stack()
+                return
+            except Pyro.errors.CommunicationError, exp:
+                logger.log("[] the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                p['con'] = None
+                return
+            #we came back to normal timeout
+            pyro.set_timeout(con, 5)
+
 
 
     # Some checks are purely internal, like business based one
@@ -998,6 +1033,9 @@ class Scheduler:
                         if ticks % nb_ticks == 0:
                             # print "I run function :", name
                             f()
+
+                #DBG : push actions to passives?
+                self.push_actions_to_passives_satellites()
 
                 #if  ticks % 10 == 0:
                 #    self.conf.quick_debug()

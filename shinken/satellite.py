@@ -211,9 +211,9 @@ class ISchedulers(Pyro.core.ObjBase):
 
 
     # A Scheduler send me actions to do
-    def push_actions(self, actions):
+    def push_actions(self, actions, sched_id):
         print "A scheduler sned me actions", actions
-        self.app.add_actions(actions)
+        self.app.add_actions(actions, sched_id)
 
 
 
@@ -580,7 +580,7 @@ class Satellite(Daemon):
 
 
     # Add to our queues a list of actions
-    def add_actions(self, lst):
+    def add_actions(self, lst, sched_id):
         for a in lst:
             a.sched_id = sched_id
             a.status = 'queue'
@@ -619,7 +619,7 @@ class Satellite(Daemon):
                     print "Ask actions to", sched_id, "got", len(tmp)
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
-                    self.add_actions(tmp)
+                    self.add_actions(tmp, sched_id)
                     #for a in tmp:
                     #    a.sched_id = sched_id
                     #    a.status = 'queue'
