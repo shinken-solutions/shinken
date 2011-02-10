@@ -114,6 +114,7 @@ HE got user entry, so we must listen him carefully and give information he want,
         self.app = app
         self.running_id = random.random()
 
+
     #very useful?
     def get_running_id(self):
         return self.running_id
@@ -134,15 +135,31 @@ HE got user entry, so we must listen him carefully and give information he want,
     #If not, we take it, and if app has a scheduler, we ask it to die,
     #so the new conf  will be load, and a new scheduler created
     def put_conf(self, conf_package):
-        (conf, override_conf, modules) = conf_package
+        self.use_ssl = self.app.use_ssl
+        (conf, override_conf, modules, satellites) = conf_package
         if not self.app.have_conf or self.app.conf.magic_hash != conf.magic_hash:
             self.app.conf = conf
             self.app.override_conf = override_conf
             self.app.modules = modules
+            self.app.satellites = satellites
+            self.pollers = self.app.pollers
             print "Get conf:", self.app.conf
             self.app.have_conf = True
             print "Have conf?", self.app.have_conf
             print "Just apres reception"
+
+            
+            # Now We create our pollers
+            for pol_id in satellites['pollers']:
+                # Must look if we already have it
+                already_got = pol_id in self.pollers
+                p = satellites['pollers'][pol_id]
+                self.pollers[pol_id] = p
+                uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
+                self.pollers[pol_id]['uri'] = uri
+                self.pollers[pol_id]['last_connexion'] = 0
+                print "Got a poller", p
+
 
             #if app already have a scheduler, we must say him to
             #DIE Mouahahah
@@ -196,7 +213,8 @@ class Shinken(Daemon):
         'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
         'local_log' : {'default' : '/usr/local/shinken/var/schedulerd.log', 'pythonize' : None, 'path' : True},
         }
-
+    
+    
     #Create the shinken class:
     #Create a Pyro server (port = arvg 1)
     #then create the interface for arbiter
@@ -219,6 +237,10 @@ class Shinken(Daemon):
         self.i_for_arbiter = IForArbiter(self)
         self.uri = None
         self.uri2 = None
+
+        # And possible links for satellites
+        # from now only pollers
+        self.pollers = {}
 
 
     def do_stop(self):
@@ -321,6 +343,7 @@ class Shinken(Daemon):
         self.conf.explode_global_conf()
         #we give sched it's conf
         self.sched.load_conf(self.conf)
+
 
         self.sched.load_modules(self.modules_manager, self.mod_instances)
 

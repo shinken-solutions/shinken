@@ -314,7 +314,10 @@ class Dispatcher:
                                 #REF: doc/shinken-conf-dispatching.png (3)
                                 #REF: doc/shinken-scheduler-lost.png (2)
                                 override_conf = sched.get_override_configuration()
-                                conf_package = (conf, override_conf, sched.modules)
+                                satellites_for_sched = r.get_satellites_links_for_scheduler()
+                                print "Want to give a satellites pack for the scheduler", satellites_for_sched
+                                conf_package = (conf, override_conf, sched.modules, satellites_for_sched)
+                                print "Try to put the conf", conf_package
                                 is_sent = sched.put_conf(conf_package)
                                 if is_sent:
                                     logger.log('[%s] Dispatch OK of for conf in scheduler %s' % (r.get_name(), sched.get_name()))
@@ -401,18 +404,18 @@ class Dispatcher:
                                     satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part
                                     if satellite.manage_arbiters:
                                         satellite.cfg['arbiters'] = arbiters_cfg
+
                                     #Brokers should have poller/reactionners links too
                                     if kind == "broker":
                                         r.fill_broker_with_poller_reactionner_links(satellite)
-                                        #r.fill_broker_with_scheduler_links(satellite)
-                                    #cfg_for_satellite['modules'] = satellite.modules
+
                                     is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
                                     if is_sent:
                                         satellite.active = True
                                         logger.log('[%s] Dispatch OK of for configuration %s to %s %s' %(r.get_name(), cfg_id, kind, satellite.get_name()))
                                         nb_cfg_sent += 1
                                         r.to_satellites_managed_by[kind][cfg_id].append(satellite)
-                            #else:
+                            # else:
                             #    #I've got enouth satellite, the next one are spare for me
                             r.to_satellites_nb_assigned[kind][cfg_id] = nb_cfg_sent
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
