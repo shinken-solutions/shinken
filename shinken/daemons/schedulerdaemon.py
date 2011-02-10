@@ -293,76 +293,6 @@ class Shinken(Daemon):
             self.request_stop()
 
 
-    # Get teh good tabs for links by the kind. If unknown, return None
-    def get_links_from_type(self, type):
-        t = {'poller' : self.pollers, 'reactionner' : self.reactionners}
-        if type in t :
-            return t[type]
-        return None
-
-
-    # Check if we do not connect to ofthen to this
-    def is_connexion_try_too_close(self, elt):
-        now = time.time()
-        last_connexion = elt['last_connexion']
-        if now - last_connexion < 5:
-            return  True
-        return False
-
-
-    # initialise or re-initialise connexion with a poller
-    # or a reactionner
-    def pynag_con_init(self, id, type='poller'):
-        # Get teh good links tab for looping..
-        links = self.get_links_from_type(type)
-        if links == None:
-            logger.log('DBG: Type unknown for connexion! %s' % type)
-            return
-
-        # We want only to initiate connexions to the passive
-        # pollers and reactionners
-        passive = links[id]['passive']
-        if not passive:
-            return
-        
-        # If we try to connect too much, we slow down our tests
-        if self.is_connexion_try_too_close(links[id]):
-            return
-
-        # Ok, we can now update it
-        links[id]['last_connexion'] = time.time()
-
-        print "Init connexion with", links[id]['uri']
-
-        uri = links[id]['uri']
-        links[id]['con'] = Pyro.core.getProxyForURI(uri)
-        con = links[id]['con']
-
-        try:
-            # intial ping must be quick
-            pyro.set_timeout(con, 5)
-            con.ping()
-        except Pyro.errors.ProtocolError, exp:
-            logger.log("[] Connexion problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
-            return
-        except Pyro.errors.NamingError, exp:
-            logger.log("[] the %s '%s' is not initilised : %s" % (type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
-            return
-        except KeyError , exp:
-            logger.log("[] the %s '%s' is not initilised : %s" % (type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
-            traceback.print_stack()
-            return
-        except Pyro.errors.CommunicationError, exp:
-            logger.log("[] the %s '%s' got CommunicationError : %s" % (type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
-            return
-
-        logger.log("[] Connexion OK to the %s %s" % (type, links[id]['name']))
-
-
 
     #Load and init all modules we've got
     def load_modules(self):
@@ -418,8 +348,10 @@ class Shinken(Daemon):
         #we give sched it's conf
         self.sched.load_conf(self.conf)
 
-
+        
         self.sched.load_modules(self.modules_manager, self.mod_instances)
+
+        self.sched.load_satellites(self.pollers, self.reactionners)
 
         #We must update our Config dict macro with good value
         #from the config parameters
@@ -465,6 +397,7 @@ class Shinken(Daemon):
                 self.wait_initial_conf()
                 self.load_conf()
 
+
     #our main function, launch after the init
     def main(self):
 
@@ -484,10 +417,6 @@ class Shinken(Daemon):
 
         print "Configuration Loaded"
         
-        # Now connect to the passive satellites if need
-        for p_id in self.pollers:
-            self.pynag_con_init(p_id, type='poller')
-
         self.do_mainloop()
             
 
