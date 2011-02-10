@@ -86,11 +86,11 @@ class install(_install):
     def finalize_options(self):
         _install.finalize_options(self)
         if self.etc_path is None:
-            self.etc_path = os.path.join(self.prefix, 'etc', 'shinken')
+            self.etc_path = paths_and_owners['etc']['path']
         if self.var_path is None:
-            self.var_path = os.path.join(self.prefix, 'var', 'lib', 'shinken')
+            self.var_path = paths_and_owners['var']['path']
         if self.plugins_path is None:
-            self.plugins_path = os.path.join(self.prefix,'lib','nagios','plugins')
+            self.plugins_path = paths_and_owners['libexec']['path']
         if self.root:
             for attr in ('etc_path', 'var_path', 'plugins_path'):
                 setattr(self, attr, change_root(self.root, getattr(self, attr)))
@@ -188,7 +188,7 @@ class build_config(Command):
         # And update the nagios.cfg file for all /usr/local/shinken/var
         # value with good one
         for name in ('nagios.cfg',
-                     'shinken-specific.cfg'
+                     'shinken-specific.cfg',
                      'shinken-specific-high-availability.cfg',
                      'shinken-specific-load-balanced-only.cfg',
                      ):
@@ -405,7 +405,7 @@ setup(
                glob('etc/objects/contacts/[!_]*.cfg')),
               (os.path.join(etc_path, 'certs') ,
                glob('etc/certs/[!_]*.pem')),
-              (os.path.join(etc_path, 'init.d'),
+              (os.path.join('/etc', 'init.d'),
                ['bin/init.d/shinken',
                 'bin/init.d/shinken-arbiter',
                 'bin/init.d/shinken-broker',
