@@ -33,7 +33,7 @@ class ReactionnerLink(SatelliteLink):
         'address':          StringProp(fill_brok=['full_status']), 
         'port':             IntegerProp(default='7769', fill_brok=['full_status']),
         'spare':            BoolProp(default='0', fill_brok=['full_status']),
-        'passive' :         BoolProp(default='0', fill_brok=['full_status']),
+        'passive' :         BoolProp(default='0', fill_brok=['full_status'], to_send=True),
         'manage_sub_realms': BoolProp(default='1', fill_brok=['full_status']),
         'modules':          ListProp(default='', to_send=True),
         'min_workers':      IntegerProp(default='1', fill_brok=['full_status'], to_send=True),

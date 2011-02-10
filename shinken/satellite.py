@@ -121,6 +121,8 @@ class IForArbiter(Pyro.core.ObjBase):
         # Now the limit part
         self.app.max_workers = conf['global']['max_workers']
         self.app.min_workers = conf['global']['min_workers']
+        self.app.passive = conf['global']['passive']
+        print "Is passive?", self.app.passive
         self.app.processes_by_worker = conf['global']['processes_by_worker']
         self.app.polling_interval = conf['global']['polling_interval']
         if 'poller_tags' in conf['global']:
@@ -688,13 +690,18 @@ class Satellite(Daemon):
         # for queue in self.return_messages:
         while len(self.returns_queue) != 0:
             self.manage_action_return(self.returns_queue.pop())
+            
+        # If we are passive, we do not initiate the check getting
+        # and return
+        print "Am I passive?", self.passive
+        if not self.passive:
+            print "I try to get new actions!"
+            # Now we can get new actions from schedulers
+            self.get_new_actions()
 
-        # Now we can get new actions from schedulers
-        self.get_new_actions()
-
-        # We send all finished checks
-        # REF: doc/shinken-action-queues.png (6)
-        self.manage_returns()
+            # We send all finished checks
+            # REF: doc/shinken-action-queues.png (6)
+            self.manage_returns()
 
 
     def do_post_daemon_init(self):
