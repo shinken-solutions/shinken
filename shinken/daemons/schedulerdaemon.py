@@ -50,6 +50,7 @@ They connect here and see if they are still OK with our running_id, if not, they
     def get_running_id(self):
         return self.running_id
 
+
     # poller or reactionner ask us actions
     def get_checks(self , do_checks=False, do_actions=False, poller_tags=[]):
         #print "We ask us checks"
@@ -155,7 +156,7 @@ HE got user entry, so we must listen him carefully and give information he want,
                 already_got = pol_id in self.pollers
                 p = satellites['pollers'][pol_id]
                 self.pollers[pol_id] = p
-                uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
+                uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
                 self.pollers[pol_id]['uri'] = uri
                 self.pollers[pol_id]['last_connexion'] = 0
                 print "Got a poller", p
@@ -171,6 +172,7 @@ HE got user entry, so we must listen him carefully and give information he want,
     #Arbiter want to know if we are alive
     def ping(self):
         return True
+
 
     #Use by arbiter to know if we have a conf or not
     #can be usefull if we must do nothing but

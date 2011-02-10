@@ -195,6 +195,28 @@ class IForArbiter(Pyro.core.ObjBase):
         self.app.have_conf = False
 
 
+# Interface for Schedulers
+# If we are passive, they connect to this and
+# send/get actions
+class ISchedulers(Pyro.core.ObjBase):
+    # we keep sched link
+    def __init__(self, app):
+        Pyro.core.ObjBase.__init__(self)
+        self.app = app
+
+
+    # Ping? Pong!
+    def ping(self):
+        return None
+
+
+    # A Scheduler send me actions to do
+    def push_actions(self, actions):
+        print "A scheduler sned me actions", actions
+        self.app.add_actions(actions)
+
+
+
 # Interface for Brokers
 # They connect here and get all broks (data for brokers)
 # datas must be ORDERED! (initial status BEFORE uodate...)
@@ -254,6 +276,7 @@ class Satellite(Daemon):
         # Now we create the interfaces
         self.interface = IForArbiter(self)
         self.brok_interface = IBroks(self)
+        self.scheduler_interface = ISchedulers(self)
 
         # Just for having these attributes defined here. explicit > implicit ;)
         self.uri2 = None
@@ -481,6 +504,7 @@ class Satellite(Daemon):
             logger.log('Stopping all network connexions')
             self.daemon.disconnect(self.interface)
             self.daemon.disconnect(self.brok_interface)
+            self.daemon.disconnect(self.scheduler_interface)
             self.daemon.shutdown(True)
 
 
@@ -555,6 +579,19 @@ class Satellite(Daemon):
         return self.worker_modules['fork']['to_q']
 
 
+    # Add to our queues a list of actions
+    def add_actions(self, lst):
+        for a in lst:
+            a.sched_id = sched_id
+            a.status = 'queue'
+            msg = Message(id=0, type='Do', data=a)
+            q = self._got_queue_from_action(a)
+            if q != None:
+                q.put(msg)
+            # Update stats
+            self.nb_actions_in_workers += 1
+
+
     # We get new actions from schedulers, we create a Message ant we
     # put it in the s queue (from master to slave)
     # REF: doc/shinken-action-queues.png (1)
@@ -582,15 +619,16 @@ class Satellite(Daemon):
                     print "Ask actions to", sched_id, "got", len(tmp)
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
-                    for a in tmp:
-                        a.sched_id = sched_id
-                        a.status = 'queue'
-                        msg = Message(id=0, type='Do', data=a)
-                        q = self._got_queue_from_action(a)
-                        if q != None:
-                            q.put(msg)
-                        # Update stats
-                        self.nb_actions_in_workers += 1
+                    self.add_actions(tmp)
+                    #for a in tmp:
+                    #    a.sched_id = sched_id
+                    #    a.status = 'queue'
+                    #    msg = Message(id=0, type='Do', data=a)
+                    #    q = self._got_queue_from_action(a)
+                    #    if q != None:
+                    #        q.put(msg)
+                    #    # Update stats
+                    #    self.nb_actions_in_workers += 1
                 else: # no con? make the connexion
                     self.pynag_con_init(sched_id)
             # Ok, con is not know, so we create it
@@ -708,6 +746,7 @@ class Satellite(Daemon):
         # And we register them
         self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
         self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
+        self.uri4 = pyro.register(self.daemon, self.scheduler_interface, "Schedulers")
         
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER
