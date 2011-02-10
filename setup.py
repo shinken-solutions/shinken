@@ -188,7 +188,7 @@ class build_config(Command):
         # And update the nagios.cfg file for all /usr/local/shinken/var
         # value with good one
         for name in ('nagios.cfg',
-                     'shinken-specific.cfg'
+                     'shinken-specific.cfg',
                      'shinken-specific-high-availability.cfg',
                      'shinken-specific-load-balanced-only.cfg',
                      ):
