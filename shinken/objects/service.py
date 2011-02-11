@@ -1178,7 +1178,7 @@ class Services(Items):
         for s in self:
             if not s.is_tpl():
                 sname = s.service_description
-                shname = s.host_name
+                shname = getattr(s ,'host_name', '')
                 if hasattr(s, 'servicegroups'):
                     sgs = s.servicegroups.split(',')
                     for sg in sgs:

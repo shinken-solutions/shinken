@@ -20,29 +20,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from shinken.bin import VERSION
 from shinken.satellite import Satellite
 from shinken.util import to_int, to_bool
-
-
-def usage(name):
-    print "Shinken Poller Daemon, version %s, from : " % VERSION
-    print "        Gabes Jean, naparuba@gmail.com"
-    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
-    print "        Gregory Starck, g.starck@gmail.com"
-    print "Usage: %s [options] [-c configfile]" % name
-    print "Options:"
-    print " -c, --config"
-    print "\tConfig file."
-    print " -d, --daemon"
-    print "\tRun in daemon mode"
-    print " -r, --replace"
-    print "\tReplace previous running scheduler"
-    print " -h, --help"
-    print "\tPrint detailed help screen"
-    print " --debug"
-    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-
 
 
 #Our main APP class

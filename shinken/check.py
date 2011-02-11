@@ -29,27 +29,27 @@ class Check(Action):
                      't_to_go', 'depend_on', 'depend_on_me', 'check_time', \
                      'execution_time', 'env')
 
-    properties={'is_a' : {'required': False, 'default':'check'},
-                'type' : {'required': False, 'default': ''},
-                '_in_timeout' : {'required': False, 'default': False},
-                'status' : {'required': False, 'default':''},
-                'exit_status' : {'required': False, 'default':3},
-                'state' : {'required': False, 'default':0},
-                'output' : {'required': False, 'default':''},
-                'long_output' : {'required': False, 'default':''},
-                'ref' : {'required': False, 'default': -1},
-                #'ref_type' : {'required': False, 'default':''},
-                't_to_go' : {'required': False, 'default': 0},
-                'depend_on' : {'required': False, 'default': []},
-                'dep_check' : {'required': False, 'default': []},
-                'check_time' : {'required': False, 'default': 0},
-                'execution_time' : {'required': False, 'default': 0},
-                'perf_data' : {'required': False, 'default':''},
-                'poller_tag' : {'required': False, 'default': None},
-                'env' : {'required' : False, 'default' : {}},
-                'internal' : {'required': False, 'default':False},
-                'module_type' : {'required': False, 'default': 'fork'},
-                }
+    properties = {
+        'is_a':         {'required': False, 'default': 'check'},
+        'type':         {'required': False, 'default': ''},
+        '_in_timeout':  {'required': False, 'default': False},
+        'status' :      {'required': False, 'default': ''},
+        'exit_status' : {'required': False, 'default': 3},
+        'state':        {'required': False, 'default': 0},
+        'output':       {'required': False, 'default': ''},
+        'long_output':  {'required': False, 'default': ''},
+        'ref':          {'required': False, 'default': -1},
+        't_to_go':      {'required': False, 'default': 0},
+        'depend_on':    {'required': False, 'default': []},
+        'dep_check':    {'required': False, 'default': []},
+        'check_time':   {'required': False, 'default': 0},
+        'execution_time': {'required': False, 'default': 0},
+        'perf_data':    {'required': False, 'default': ''},
+        'poller_tag':   {'required': False, 'default': None},
+        'env':          {'required' : False, 'default': {}},
+        'internal':     {'required': False, 'default': False},
+        'module_type':  {'required': False, 'default': 'fork'},
+    }
 
     #id = 0 #Is common to Actions
     def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag=None, env={}, module_type='fork'):

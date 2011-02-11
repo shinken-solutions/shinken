@@ -306,14 +306,14 @@ class Realm(Itemgroup):
         self.fill_potential_brokers()
 
 
-    #TODO: find a better name...
-    #TODO : and if he goes active?
+    # TODO: find a better name...
+    # TODO : and if he goes active?
     def fill_broker_with_poller_reactionner_links(self, broker):
-        #First we create/void theses links
+        # First we create/void theses links
         broker.cfg['pollers'] = {}
         broker.cfg['reactionners'] = {}
 
-        #First our own level
+        # First our own level
         for p in self.get_pollers():
             cfg = p.give_satellite_cfg()
             broker.cfg['pollers'][p.id] = cfg
@@ -322,14 +322,14 @@ class Realm(Itemgroup):
             cfg = r.give_satellite_cfg()
             broker.cfg['reactionners'][r.id] = cfg
 
-        #Then sub if we must to it
+        # Then sub if we must to it
         if broker.manage_sub_realms:
-            #Now pollers
+            # Now pollers
             for p in self.get_all_subs_pollers():
                 cfg = p.give_satellite_cfg()
                 broker.cfg['pollers'][p.id] = cfg
 
-            #Now reactionners
+            # Now reactionners
             for r in self.get_all_subs_reactionners():
                 cfg = r.give_satellite_cfg()
                 broker.cfg['reactionners'][r.id] = cfg
@@ -362,6 +362,29 @@ class Realm(Itemgroup):
             print "FUCK, not managing it!"
 
         print "***** Broker Me %s got schedulers links : %s" % (broker.get_name(), broker.cfg['schedulers'])
+
+
+    # Get a conf package of satellites links that can be useful for 
+    # a scheduler
+    def get_satellites_links_for_scheduler(self):
+        cfg = {}
+
+        # First we create/void theses links
+        cfg['pollers'] = {}
+        cfg['reactionners'] = {}
+
+        # First our own level
+        for p in self.get_pollers():
+            c = p.give_satellite_cfg()
+            cfg['pollers'][p.id] = c
+
+        for r in self.get_reactionners():
+            c = r.give_satellite_cfg()
+            cfg['reactionners'][r.id] = c
+
+        print "***** Preparing a satellites conf for a scheduler", cfg
+        return cfg
+
 
 
 class Realms(Itemgroups):

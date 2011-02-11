@@ -28,26 +28,28 @@ from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharP
 class ArbiterLink(SatelliteLink):
     id = 0
     my_type = 'arbiter'
-    properties={'arbiter_name' : StringProp(),
-                'host_name' : StringProp(default=socket.gethostname()),
-                'address' : StringProp(),
-                'port' : IntegerProp(default='7770'),
-                'spare' : BoolProp(default='0'),
-                'modules' : ListProp(default='', to_send=True),
-#                'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
-                'manage_arbiters' : BoolProp(default='0'),
-                'timeout' : IntegerProp(default='3', fill_brok=['full_status']),
-                'data_timeout' : IntegerProp(default='120', fill_brok=['full_status']),
-                'max_check_attempts' : IntegerProp(default='3', fill_brok=['full_status']),
-                }
+    properties = {
+        'arbiter_name':    StringProp(),
+        'host_name':       StringProp(default=socket.gethostname()),
+        'address':         StringProp(),
+        'port':            IntegerProp(default='7770'),
+        'spare':           BoolProp(default='0'),
+        'modules':         ListProp(default='', to_send=True),
+#        'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
+        'manage_arbiters': BoolProp(default='0'),
+        'timeout':         IntegerProp(default='3', fill_brok=['full_status']),
+        'data_timeout':    IntegerProp(default='120', fill_brok=['full_status']),
+        'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
+    }
 
-    running_properties = {'con' : StringProp(default=None),
-                          'broks' : ListProp(default=[]),
-                          'alive' : BoolProp(default=False, fill_brok=['full_status']), # DEAD or not
-                          'attempt' : IntegerProp(default=0, fill_brok=['full_status']), # the number of failed attempt
-                          'reachable' : IntegerProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
-                          'configuration_errors' : StringProp(default=[]),
-                          }
+    running_properties = {
+        'con':     StringProp(default=None),
+        'broks':   ListProp(default=[]),
+        'alive':   BoolProp(default=False, fill_brok=['full_status']), # DEAD or not
+        'attempt': IntegerProp(default=0, fill_brok=['full_status']), # the number of failed attempt
+        'reachable': IntegerProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+        'configuration_errors': StringProp(default=[]),
+    }
 
     macros = {}
 
