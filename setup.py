@@ -113,8 +113,6 @@ class build_config(Command):
         self.build_base = None
         self.etc_path = None
         self.var_path = None
-        self.var_owner = None
-        self.var_group = None
         self.plugins_path = None
 
         self._install_scripts = None
@@ -131,15 +129,9 @@ class build_config(Command):
                                    ('etc_path', 'etc_path'),
                                    ('var_path', 'var_path'),
                                    ('plugins_path', 'plugins_path'),
-                                   ('var_owner', 'var_owner'),
-                                   ('var_group', 'var_group'),
                                    )
         if self.build_dir is None:
             self.build_dir = os.path.join(self.build_base, 'etc')
-        #self.etc_path = os.path.join(self.etc_path, 'shinken')
-        #self.var_path = os.path.join(self.var_path, 'lib', 'shinken')
-        print "TOTO"*100
-        print self.etc_path, self.var_path
         
 
     def run(self):
@@ -252,7 +244,7 @@ class install_config(Command):
         if self.group is None and grp:
             self.group = grp.getgrgid(os.getgid())[0]
 
-            
+
     def run(self):
         #log.warn('>>> %s', self.lib)
         log.warn('>>> %s', self.etc_path)
@@ -292,8 +284,6 @@ class install_config(Command):
         for root, dirs, files in os.walk(path):
             for path in itertools.chain(dirs, files):
                 path = os.path.join(root, path)
-
-
 
     @staticmethod
     def get_uid(user_name):
