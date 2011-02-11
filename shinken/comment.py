@@ -23,17 +23,17 @@ class Comment:
     id = 1
 
     properties = {
-        'entry_time' : None,
-        'persistent' : None,
-        'author' : None,
-        'comment' : None,
-        'comment_type' : None,
-        'entry_type' : None,
-        'source' : None,
-        'expires' : None,
-        'expire_time' : None,
-        'can_be_deleted' : None,
-        }
+        'entry_time':   None,
+        'persistent':   None,
+        'author':       None,
+        'comment':      None,
+        'comment_type': None,
+        'entry_type':   None,
+        'source':       None,
+        'expires':      None,
+        'expire_time':  None,
+        'can_be_deleted': None,
+    }
 
 
 
