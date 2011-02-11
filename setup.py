@@ -348,7 +348,7 @@ if sys.version_info < (2, 6):
     required_pkgs.append('multiprocessing')
 
 etc_path = paths_and_owners['etc']['path']
-etc_root = os.sep.join(etc_path.split(os.sep)[:-1])
+etc_root = os.path.dirname(etc_path)
 libexec_path = paths_and_owners['libexec']['path']
 var_path = paths_and_owners['var']['path']
 var_owner = paths_and_owners['var']['owner']
