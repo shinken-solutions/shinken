@@ -71,18 +71,18 @@ class Notification(Action):
     }
 
     macros = {
-        'NOTIFICATIONTYPE' : 'type',
-        'NOTIFICATIONRECIPIENTS' : 'recipients',
-        'NOTIFICATIONISESCALATED' : 'escaladed',
-        'NOTIFICATIONAUTHOR' : 'author',
-        'NOTIFICATIONAUTHORNAME' : 'author_name',
-        'NOTIFICATIONAUTHORALIAS' : 'author_alias',
-        'NOTIFICATIONCOMMENT' : 'comment',
-        'HOSTNOTIFICATIONNUMBER' : 'notif_nb',
-        'HOSTNOTIFICATIONID' : 'id',
-        'SERVICENOTIFICATIONNUMBER' : 'notif_nb',
-        'SERVICENOTIFICATIONID' : 'id'
-        }
+        'NOTIFICATIONTYPE':         'type',
+        'NOTIFICATIONRECIPIENTS':   'recipients',
+        'NOTIFICATIONISESCALATED':  'escaladed',
+        'NOTIFICATIONAUTHOR':       'author',
+        'NOTIFICATIONAUTHORNAME':   'author_name',
+        'NOTIFICATIONAUTHORALIAS':  'author_alias',
+        'NOTIFICATIONCOMMENT':      'comment',
+        'HOSTNOTIFICATIONNUMBER':   'notif_nb',
+        'HOSTNOTIFICATIONID':       'id',
+        'SERVICENOTIFICATIONNUMBER': 'notif_nb',
+        'SERVICENOTIFICATIONID':    'id'
+    }
 
 
     def __init__(self, type , status, command, command_call, ref, contact, t_to_go, \
@@ -177,7 +177,7 @@ class Notification(Action):
 
     #Get a brok with initial status
     def get_initial_status_brok(self):
-        data = {'id' : self.id}
+        data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('notification_raise', data)
