@@ -405,21 +405,10 @@ Also put default value in the properties if some are missing in the config_file 
         for prop in properties:
             if 'path' in properties[prop] and properties[prop]['path']:
                 path = getattr(self, prop)
-                new_path = path
-                #Windows full paths are like c:/blabla
-                #Unixes are like /blabla
-                #So we look for : on windows, / for Unixes
-                if os.name != 'nt':
-                    #os.sep = / on Unix
-                    #so here if not
-                    if path != '' and path[0] not in (os.sep, os.altsep):
-                        new_path = os.path.join(reference_path, path)
-                else:
-                    #os.sep = \ on windows, and we must look at c: like format
-                    if len(path) > 2 and path[1] != ':':
-                        new_path = os.path.join(reference_path, path)
-                setattr(self, prop, new_path)
-                #print "Setting %s for %s" % (new_path, prop)
+                if not os.path.isabs(path):
+                    path = os.path.join(reference_path, path)
+                setattr(self, prop, path)
+                #print "Setting %s for %s" % (path, prop)
 
 
     def manage_signal(self, sig, frame):
