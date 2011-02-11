@@ -50,6 +50,7 @@ from distutils.core import Command
 from distutils.command.build import build as _build
 from distutils.command.install import install as _install
 from distutils.util import change_root
+from distutils.errors import DistutilsOptionError
 
 class build(_build):
     sub_commands = _build.sub_commands + [
@@ -299,7 +300,7 @@ class install_config(Command):
         try:
             return pwd.getpwnam(user_name)[2]
         except KeyError, exp:
-            raise DistutilsOptionError("The user %s is unknown."
+            raise DistutilsOptionError("The user %s is unknown. "
                                        "Maybe you should create this user"
                                        % user_name)
 
@@ -308,7 +309,7 @@ class install_config(Command):
         try:
             return grp.getgrnam(group_name)[2]
         except KeyError, exp:
-            raise DistutilsOptionError("The group %s is unknown."
+            raise DistutilsOptionError("The group %s is unknown. "
                                        "Maybe you should create this group"
                                        % group_name)
 
