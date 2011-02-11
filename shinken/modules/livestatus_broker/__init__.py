@@ -66,7 +66,8 @@ def get_instance(plugin):
     if hasattr(plugin, 'database_file'):
         database_file = plugin.database_file
     else:
-        database_file = os.sep.join([os.path.abspath(''), 'var', 'livestatus.db'])
+        database_file = os.path.join(os.path.abspath('.'), 'var', 'livestatus.db')
+
 
     if hasattr(plugin, 'max_logs_age'):
         maxmatch = re.match(r'^(\d+)([dwm])$', plugin.max_logs_age)

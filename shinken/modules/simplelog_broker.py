@@ -55,8 +55,8 @@ def get_instance(plugin):
     path = plugin.path
 
     archive_path = plugin.archive_path
-    #Clean the archive_path trailing / if need
-    if archive_path[-1] == os.sep:
+    # Remove trailing slash from archive_path if need
+    if archive_path[-1] in (os.sep, os.altsep):
         archive_path = archive_path[:-1]
 
     instance = Simple_log_broker(plugin, path, archive_path)
@@ -107,7 +107,7 @@ class Simple_log_broker(BaseModule):
             d = datetime.datetime.fromtimestamp(today)
             s_day = d.strftime("-%m-%d-%Y-00")
             archive_name = f_base_name+s_day+ext
-            file_archive_path = os.sep.join([self.archive_path, archive_name])
+            file_archive_path = os.path.join(self.archive_path, archive_name)
             print "Moving the old log file from %s to %s" % (self.path, file_archive_path)
 
             shutil.move(self.path, file_archive_path)

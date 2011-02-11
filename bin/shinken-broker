@@ -44,19 +44,17 @@ try:
     # modules are not so happy to import
     if hasattr(sys.modules['__main__'], '__file__'):
         my_path = os.path.abspath(sys.modules['__main__'].__file__)
-        elts = os.path.dirname(my_path).split(os.sep)[:-1]
-        elts.append('shinken')
-        sys.path.append(os.sep.join(elts))
+        parent_path = os.path.dirname(os.path.dirname(my_path))
+        sys.path.append(os.path.join(parent_path, 'shinken'))
 except ImportError, e:
     # We can have problem in importing with direct launch.
     # if so we must add the shinken lib in .. of this file to
     # sys.path
     if hasattr(sys.modules['__main__'], '__file__'):
         my_path = os.path.abspath(sys.modules['__main__'].__file__)
-        elts = os.path.dirname(my_path).split(os.sep)[:-1]
-        sys.path.append(os.sep.join(elts))
-        elts.append('shinken')
-        sys.path.append(os.sep.join(elts))
+        parent_path = os.path.dirname(os.path.dirname(my_path))
+        sys.path.append(parent_path)
+        sys.path.append(os.path.join(parent_path, 'shinken'))
 
 from shinken.daemons.brokerdaemon import Broker
 from shinken.bin import VERSION
