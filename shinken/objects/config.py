@@ -47,6 +47,9 @@ from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharP
 #psyco.full()
 
 
+no_longer_used_txt   = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
+not_interresting_txt = 'We do not think such an option is interesting to manage.'
+
 class Config(Item):
     cache_path = "objects.cache"
     my_type = "config"
@@ -63,384 +66,174 @@ class Config(Item):
     #  in Shinken
     # *usage_text : if present, will print it to explain why it's no more useful
     properties = {
-        'prefix': StringProp(
-            default='/usr/local/shinken/'),
-        'log_file': UnusedProp(
-            text='This parameter is not longer take from the main file, but must be defined in the log broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'),
-        'object_cache_file': UnusedProp(
-            text='This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'),
-        'precached_object_file': UnusedProp(
-            text='Shinken is faster enough to do not need precached object file.'),
-        'resource_file': StringProp(
-            default='/tmp/ressources.txt'),
-        'temp_file': UnusedProp(
-            text=' temporary files are not used in the shinken architecture.'),
-        'status_file': UnusedProp(
-            text='This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'),
-        'status_update_interval': UnusedProp(
-            text='This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'),
-        'shinken_user': StringProp(
-            default='shinken'),
-        'shinken_group': StringProp(
-            default='shinken'),
-        'enable_notifications': BoolProp(
-            default='1',
-            class_inherit=[(Host, None), (Service, None), (Contact, None)]),
-        'execute_service_checks': BoolProp(
-            default='1',
-            class_inherit=[(Service, 'execute_checks')]),
-        'accept_passive_service_checks': BoolProp(
-            default='1',
-            class_inherit=[(Service, 'accept_passive_checks')]),
-        'execute_host_checks': BoolProp(
-            default='1',
-            class_inherit=[(Host, 'execute_checks')]),
-        'accept_passive_host_checks': BoolProp(
-            default='1',
-            class_inherit=[(Host, 'accept_passive_checks')]),
-        'enable_event_handlers': BoolProp(
-            default='1',
-            class_inherit=[(Host, None), (Service, None)]),
-        'log_rotation_method': CharProp(
-            default='d'),
-        'log_archive_path': StringProp(
-            default='/usr/local/shinken/var/archives'),
-        'check_external_commands': BoolProp(
-            default='1'),
-        'command_check_interval': UnusedProp(
-            text='anoter value than look always the file is useless, so we fix it.'),
-        'command_file': StringProp(
-            default='/tmp/command.cmd'),
-        'external_command_buffer_slots': UnusedProp(
-            text='We do not limit the ewxternal command slot.'),
-        'check_for_updates': UnusedProp(
-            text='network administrators will never allow such communication between server and the external world. Use your distribution packet manager to know if updates are available or go to the http://www.shinken-monitoring.org website instead.'),
-        'bare_update_checks': UnusedProp(
-            text=None),
-        'lock_file': StringProp(
-            default='/usr/local/shinken/var/arbiterd.pid'),
-        'retain_state_information': UnusedProp(
-            text='sorry, retain state information will not be implemented because it is useless.'),
-        'state_retention_file': StringProp(
-            default=''),
-        'retention_update_interval': IntegerProp(
-            default='0'),
-        'use_retained_program_state': UnusedProp(
-            text='We do not think such an option is interesting to manage.'),
-        'use_retained_scheduling_info': UnusedProp(
-            text='We do not think such an option is interesting to manage.'),
-        'retained_host_attribute_mask': UnusedProp(
-            text='We do not think such an option is interesting to manage.'),
-        'retained_service_attribute_mask': UnusedProp(
-            text='We do not think such an option is interesting to manage.'),
-        'retained_process_host_attribute_mask': UnusedProp(
-            text='We do not think such an option is interesting to manage.'),
-        'retained_process_service_attribute_mask': UnusedProp(
-            text='We do not think such an option is interesting to manage.'),
-        'retained_contact_host_attribute_mask': UnusedProp(
-            text='We do not think such an option is interesting to manage.'),
-        'retained_contact_service_attribute_mask': UnusedProp(
-            text='We do not think such an option is interesting to manage.'),
-        'use_syslog': BoolProp(
-            default='0'),
-        'log_notifications': BoolProp(
-            default='1',
-            class_inherit=[(Host, None), (Service, None)]),
-        'log_service_retries': BoolProp(
-            default='1',
-            class_inherit=[(Service, 'log_retries')]),
-        'log_host_retries': BoolProp(
-            default='1',
-            class_inherit=[(Host, 'log_retries')]),
-        'log_event_handlers': BoolProp(
-            default='1',
-            class_inherit=[(Host, None), (Service, None)]),
-        'log_initial_states': BoolProp(
-            default='1'),
-        'log_external_commands': BoolProp(
-            default='1'),
-        'log_passive_checks': BoolProp(
-            default='1'),
-        'global_host_event_handler': StringProp(
-            default='',
-            class_inherit=[(Host, 'global_event_handler')]),
-        'global_service_event_handler': StringProp(
-            default='',
-            class_inherit=[(Service, 'global_event_handler')]),
-        'sleep_time': UnusedProp(
-            text='this deprecated option is useless in the shinken way of doing.'),
-        'service_inter_check_delay_method': UnusedProp(
-            text='This option is useless in the Shinken scheduling. The only way is the smart way.'),
-        'max_service_check_spread': IntegerProp(
-            default='30',
-            class_inherit=[(Service, 'max_check_spread')]),
-        'service_interleave_factor': UnusedProp(
-            text='This option is useless in the Shinken scheduling because it use a random distribution for initial checks.'),
-        'max_concurrent_checks': UnusedProp(
-            text='Limiting the max concurrent checks is not helful to got a good running monitoring server.'),
-        'check_result_reaper_frequency': UnusedProp(
-            text='Shinken do not use reaper process.'),
-        'max_check_result_reaper_time': UnusedProp(
-            text='Shinken do not use reaper process.'),
-        'check_result_path': UnusedProp(
-            text='Shinken use in memory returns, not check results on flat file.'),
-        'max_check_result_file_age': UnusedProp(
-            text='Shinken do not use flat file check resultfiles.'),
-        'host_inter_check_delay_method': UnusedProp(
-            text='This option is unused in the Shinken scheduling because distribution of the initial check is a random one.'),
-        'max_host_check_spread': IntegerProp(
-            default='30',
-            class_inherit=[(Host, 'max_check_spread')]),
-        'interval_length': IntegerProp(
-            default='60',
-            class_inherit=[(Host, None), (Service, None)]),
-        'auto_reschedule_checks': BoolProp(
-            managed=False,
-            default='1'),
-        'auto_rescheduling_interval': IntegerProp(
-             managed=False,
-             default='1'),
-        'auto_rescheduling_window': IntegerProp(
-             managed=False,
-            default='180'),
-        'use_aggressive_host_checking': UnusedProp(
-            text='Host agressive checking is an heritage from Nagios 1 and is really useless now.'),
-        'translate_passive_host_checks': BoolProp(
-             managed=False,
-            default='1'),
-        'passive_host_checks_are_soft': BoolProp(
-             managed=False,
-            default='1'),
-        'enable_predictive_host_dependency_checks': BoolProp(
-             managed=False,
-            default='1',
-            class_inherit=[(Host, 'enable_predictive_dependency_checks')]),
-        'enable_predictive_service_dependency_checks': StringProp(
-             managed=False,
-            default='1'),
-        'cached_host_check_horizon': IntegerProp(
-            default='0',
-            class_inherit=[(Host, 'cached_check_horizon')]),
-        'cached_service_check_horizon': IntegerProp(
-            default='0',
-            class_inherit=[(Service, 'cached_check_horizon')]),
-        'use_large_installation_tweaks': BoolProp(
-            default='0',
-            class_inherit=[(Host, None), (Service, None)]),
-        'free_child_process_memory': UnusedProp(
-            text='this option is automatic in Python processes'),
-        'child_processes_fork_twice': UnusedProp(
-            text='fork twice is not use.'),
-        'enable_environment_macros': BoolProp(
-            default='1',
-            class_inherit=[(Host, None), (Service, None)]),
-        'enable_flap_detection': BoolProp(
-            default='1',
-            class_inherit=[(Host, None), (Service, None)]),
-        'low_service_flap_threshold': IntegerProp(
-            default='25',
-            class_inherit=[(Service, 'low_flap_threshold')]),
-        'high_service_flap_threshold': IntegerProp(
-            default='50',
-            class_inherit=[(Service, 'high_flap_threshold')]),
-        'low_host_flap_threshold': IntegerProp(
-            default='25',
-            class_inherit=[(Host, 'low_flap_threshold')]),
-        'high_host_flap_threshold': IntegerProp(
-            default='50',
-            class_inherit=[(Host, 'high_flap_threshold')]),
-        'soft_state_dependencies': BoolProp(
-             managed=False,
-            default='0'),
-        'service_check_timeout': IntegerProp(
-            default='10',
-            class_inherit=[(Service, 'check_timeout')]),
-        'host_check_timeout': IntegerProp(
-            default='10',
-            class_inherit=[(Host, 'check_timeout')]),
-        'event_handler_timeout': IntegerProp(
-            default='10',
-            class_inherit=[(Host, None), (Service, None)]),
-        'notification_timeout': IntegerProp(
-            default='5',
-            class_inherit=[(Host, None), (Service, None)]),
-        'ocsp_timeout': IntegerProp(
-            default='5',
-            class_inherit=[(Service, None)]),
-        'ochp_timeout': IntegerProp(
-            default='5',
-            class_inherit=[(Host, None)]),
-        'perfdata_timeout': IntegerProp(
-            default='2',
-            class_inherit=[(Host, None), (Service, None)]),
-        'obsess_over_services': BoolProp(
-            default='0',
-            class_inherit=[(Service, 'obsess_over')]),
-        'ocsp_command': StringProp(
-            default='',
-            class_inherit=[(Service, None)]),
-        'obsess_over_hosts': BoolProp(
-            default='0',
-            class_inherit=[(Host, 'obsess_over')]),
-        'ochp_command': StringProp(
-            default='',
-            class_inherit=[(Host, None)]),
-        'process_performance_data': BoolProp(
-            default='1',
-            class_inherit=[(Host, None), (Service, None)]),
-        'host_perfdata_command': StringProp(
-            default='',
-            class_inherit=[(Host, 'perfdata_command')]),
-        'service_perfdata_command': StringProp(
-            default='',
-            class_inherit=[(Service, 'perfdata_command')]),
-        'host_perfdata_file': StringProp(
-            default='',
-            class_inherit=[(Host, 'perfdata_file')]),
-        'service_perfdata_file': StringProp(
-            default='',
-            class_inherit=[(Service, 'perfdata_file')]),
-        'host_perfdata_file_template': StringProp(
-            default='/tmp/host.perf',
-            class_inherit=[(Host, 'perfdata_file_template')]),
-        'service_perfdata_file_template': StringProp(
-            default='/tmp/host.perf',
-            class_inherit=[(Service, 'perfdata_file_template')]),
-        'host_perfdata_file_mode': CharProp(
-            default='a',
-            class_inherit=[(Host, 'perfdata_file_mode')]),
-        'service_perfdata_file_mode': CharProp(
-            default='a',
-            class_inherit=[(Service, 'perfdata_file_mode')]),
-        'host_perfdata_file_processing_interval': IntegerProp(
-             managed=False,
-            default='15'),
-        'service_perfdata_file_processing_interval': IntegerProp(
-             managed=False,
-            default='15'),
-        'host_perfdata_file_processing_command': StringProp(
-             managed=False,
-            default='',
-            class_inherit=[(Host, 'perfdata_file_processing_command')]),
-        'service_perfdata_file_processing_command': StringProp(
-             managed=False,
-            default=None),
-        'check_for_orphaned_services': BoolProp(
-            default='1',
-            class_inherit=[(Service, 'check_for_orphaned')]),
-        'check_for_orphaned_hosts': BoolProp(
-            default='1',
-            class_inherit=[(Host, 'check_for_orphaned')]),
-        'check_service_freshness': BoolProp(
-            default='1',
-            class_inherit=[(Service, 'check_freshness')]),
-        'service_freshness_check_interval': IntegerProp(
-            default='60'),
-        'check_host_freshness': BoolProp(
-            default='1',
-            class_inherit=[(Host, 'check_freshness')]),
-        'host_freshness_check_interval': IntegerProp(
-            default='60'),
-        'additional_freshness_latency': IntegerProp(
-            default='15',
-            class_inherit=[(Host, None), (Service, None)]),
-        'enable_embedded_perl': BoolProp(
-            help='It will surely never be managed, but it should not be useful with poller performances.',
-             managed=False,
-            default='1'),
-        'use_embedded_perl_implicitly': BoolProp(
-             managed=False,
-            default='0'),
-        'date_format': StringProp(
-            managed=False,
-            default=None),
-        'use_timezone': StringProp(
-            default='',
-            class_inherit=[(Host, None), (Service, None), (Contact, None)]),
-        'illegal_object_name_chars': StringProp(
-            default="""`~!$%^&*"|'<>?,()=""",
-            class_inherit=[(Host, None), (Service, None), (Contact, None)]),
-        'illegal_macro_output_chars': StringProp(
-            default='',
-            class_inherit=[(Host, None), (Service, None), (Contact, None)]),
-        'use_regexp_matching': BoolProp(
-            help=' if you go some host or service definition like prod*, it will surely failed from now, sorry.',
-            managed=False,
-            default='0'),
-        'use_true_regexp_matching': BoolProp(
-            managed=False,
-            default=None),
-        'admin_email': UnusedProp(
-            text='sorry, not yet implemented.'),
-        'admin_pager': UnusedProp(
-            text='sorry, not yet implemented.'),
-        'event_broker_options': UnusedProp(
-            text='event broker are replaced by modules with a real configuration template.'),
-        'broker_module': StringProp(
-            default=''),
-        'debug_file': UnusedProp(
-            text=None),
-        'debug_level': UnusedProp(
-            text=None),
-        'debug_verbosity': UnusedProp(
-            text=None),
-        'max_debug_file_size': UnusedProp(
-            text=None),
+        'prefix':                   StringProp(default='/usr/local/shinken/'),
+        'log_file':                 UnusedProp(text=no_longer_used_txt),
+        'object_cache_file':        UnusedProp(text=no_longer_used_txt),
+        'precached_object_file':    UnusedProp(text='Shinken is faster enough to do not need precached object file.'),
+        'resource_file':            StringProp(default='/tmp/ressources.txt'),
+        'temp_file':                UnusedProp(text=' temporary files are not used in the shinken architecture.'),
+        'status_file':              UnusedProp(text=no_longer_used_txt),
+        'status_update_interval':   UnusedProp(text=no_longer_used_txt),
+        'shinken_user':             StringProp(default='shinken'),
+        'shinken_group':            StringProp(default='shinken'),
+        'enable_notifications':     BoolProp(default='1', class_inherit=[(Host, None), (Service, None), (Contact, None)]),
+        'execute_service_checks':   BoolProp(default='1', class_inherit=[(Service, 'execute_checks')]),
+        'accept_passive_service_checks': BoolProp(default='1', class_inherit=[(Service, 'accept_passive_checks')]),
+        'execute_host_checks':      BoolProp(default='1', class_inherit=[(Host, 'execute_checks')]),
+        'accept_passive_host_checks': BoolProp(default='1', class_inherit=[(Host, 'accept_passive_checks')]),
+        'enable_event_handlers':    BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
+        'log_rotation_method':      CharProp(default='d'),
+        'log_archive_path':         StringProp(default='/usr/local/shinken/var/archives'),
+        'check_external_commands':  BoolProp(default='1'),
+        'command_check_interval':   UnusedProp(text='anoter value than look always the file is useless, so we fix it.'),
+        'command_file':             StringProp(default='/tmp/command.cmd'),
+        'external_command_buffer_slots': UnusedProp(text='We do not limit the external command slot.'),
+        'check_for_updates':        UnusedProp(text='network administrators will never allow such communication between server and the external world. Use your distribution packet manager to know if updates are available or go to the http://www.shinken-monitoring.org website instead.'),
+        'bare_update_checks':       UnusedProp(text=None),
+        'lock_file':                StringProp(default='/usr/local/shinken/var/arbiterd.pid'),
+        'retain_state_information': UnusedProp(text='sorry, retain state information will not be implemented because it is useless.'),
+        'state_retention_file':     StringProp(default=''),
+        'retention_update_interval': IntegerProp(default='0'),
+        'use_retained_program_state': UnusedProp(text=not_interresting_txt),
+        'use_retained_scheduling_info': UnusedProp(text=not_interresting_txt),
+        'retained_host_attribute_mask': UnusedProp(text=not_interresting_txt),
+        'retained_service_attribute_mask': UnusedProp(text=not_interresting_txt),
+        'retained_process_host_attribute_mask': UnusedProp(text=not_interresting_txt),
+        'retained_process_service_attribute_mask': UnusedProp(text=not_interresting_txt),
+        'retained_contact_host_attribute_mask': UnusedProp(text=not_interresting_txt),
+        'retained_contact_service_attribute_mask': UnusedProp(text=not_interresting_txt),
+        'use_syslog':               BoolProp(default='0'),
+        'log_notifications':        BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
+        'log_service_retries':      BoolProp(default='1', class_inherit=[(Service, 'log_retries')]),
+        'log_host_retries':         BoolProp(default='1', class_inherit=[(Host, 'log_retries')]),
+        'log_event_handlers':       BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
+        'log_initial_states':       BoolProp(default='1'),
+        'log_external_commands':    BoolProp(default='1'),
+        'log_passive_checks':       BoolProp(default='1'),
+        'global_host_event_handler': StringProp(default='', class_inherit=[(Host, 'global_event_handler')]),
+        'global_service_event_handler': StringProp(default='', class_inherit=[(Service, 'global_event_handler')]),
+        'sleep_time':               UnusedProp(text='this deprecated option is useless in the shinken way of doing.'),
+        'service_inter_check_delay_method': UnusedProp(text='This option is useless in the Shinken scheduling. The only way is the smart way.'),
+        'max_service_check_spread': IntegerProp(default='30', class_inherit=[(Service, 'max_check_spread')]),
+        'service_interleave_factor': UnusedProp(text='This option is useless in the Shinken scheduling because it use a random distribution for initial checks.'),
+        'max_concurrent_checks':    UnusedProp(text='Limiting the max concurrent checks is not helful to got a good running monitoring server.'),
+        'check_result_reaper_frequency': UnusedProp(text='Shinken do not use reaper process.'),
+        'max_check_result_reaper_time': UnusedProp(text='Shinken do not use reaper process.'),
+        'check_result_path':        UnusedProp(text='Shinken use in memory returns, not check results on flat file.'),
+        'max_check_result_file_age': UnusedProp(text='Shinken do not use flat file check resultfiles.'),
+        'host_inter_check_delay_method': UnusedProp(text='This option is unused in the Shinken scheduling because distribution of the initial check is a random one.'),
+        'max_host_check_spread':    IntegerProp(default='30', class_inherit=[(Host, 'max_check_spread')]),
+        'interval_length':          IntegerProp(default='60', class_inherit=[(Host, None), (Service, None)]),
+        'auto_reschedule_checks':   BoolProp(managed=False, default='1'),
+        'auto_rescheduling_interval': IntegerProp(managed=False, default='1'),
+        'auto_rescheduling_window': IntegerProp(managed=False, default='180'),
+        'use_aggressive_host_checking': UnusedProp(text='Host agressive checking is an heritage from Nagios 1 and is really useless now.'),
+        'translate_passive_host_checks': BoolProp(managed=False, default='1'),
+        'passive_host_checks_are_soft': BoolProp(managed=False, default='1'),
+        'enable_predictive_host_dependency_checks': BoolProp(managed=False, default='1', class_inherit=[(Host, 'enable_predictive_dependency_checks')]),
+        'enable_predictive_service_dependency_checks': StringProp(managed=False, default='1'),
+        'cached_host_check_horizon': IntegerProp(default='0', class_inherit=[(Host, 'cached_check_horizon')]),
+        'cached_service_check_horizon': IntegerProp(default='0', class_inherit=[(Service, 'cached_check_horizon')]),
+        'use_large_installation_tweaks': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
+        'free_child_process_memory': UnusedProp(text='this option is automatic in Python processes'),
+        'child_processes_fork_twice': UnusedProp(text='fork twice is not use.'),
+        'enable_environment_macros': BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
+        'enable_flap_detection':    BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
+        'low_service_flap_threshold': IntegerProp(default='25', class_inherit=[(Service, 'low_flap_threshold')]),
+        'high_service_flap_threshold': IntegerProp(default='50', class_inherit=[(Service, 'high_flap_threshold')]),
+        'low_host_flap_threshold':  IntegerProp(default='25', class_inherit=[(Host, 'low_flap_threshold')]),
+        'high_host_flap_threshold': IntegerProp(default='50', class_inherit=[(Host, 'high_flap_threshold')]),
+        'soft_state_dependencies':  BoolProp(managed=False, default='0'),
+        'service_check_timeout':    IntegerProp(default='10', class_inherit=[(Service, 'check_timeout')]),
+        'host_check_timeout':       IntegerProp(default='10', class_inherit=[(Host, 'check_timeout')]),
+        'event_handler_timeout':    IntegerProp(default='10', class_inherit=[(Host, None), (Service, None)]),
+        'notification_timeout':     IntegerProp(default='5', class_inherit=[(Host, None), (Service, None)]),
+        'ocsp_timeout':             IntegerProp(default='5', class_inherit=[(Service, None)]),
+        'ochp_timeout':             IntegerProp(default='5', class_inherit=[(Host, None)]),
+        'perfdata_timeout':         IntegerProp(default='2', class_inherit=[(Host, None), (Service, None)]),
+        'obsess_over_services':     BoolProp(default='0', class_inherit=[(Service, 'obsess_over')]),
+        'ocsp_command':             StringProp(default='', class_inherit=[(Service, None)]),
+        'obsess_over_hosts':        BoolProp(default='0', class_inherit=[(Host, 'obsess_over')]),
+        'ochp_command':             StringProp(default='', class_inherit=[(Host, None)]),
+        'process_performance_data': BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
+        'host_perfdata_command':    StringProp(default='', class_inherit=[(Host, 'perfdata_command')]),
+        'service_perfdata_command': StringProp(default='', class_inherit=[(Service, 'perfdata_command')]),
+        'host_perfdata_file':       StringProp(default='', class_inherit=[(Host, 'perfdata_file')]),
+        'service_perfdata_file':    StringProp(default='', class_inherit=[(Service, 'perfdata_file')]),
+        'host_perfdata_file_template': StringProp(default='/tmp/host.perf', class_inherit=[(Host, 'perfdata_file_template')]),
+        'service_perfdata_file_template': StringProp(default='/tmp/host.perf', class_inherit=[(Service, 'perfdata_file_template')]),
+        'host_perfdata_file_mode':  CharProp(default='a', class_inherit=[(Host, 'perfdata_file_mode')]),
+        'service_perfdata_file_mode': CharProp(default='a', class_inherit=[(Service, 'perfdata_file_mode')]),
+        'host_perfdata_file_processing_interval': IntegerProp(managed=False, default='15'),
+        'service_perfdata_file_processing_interval': IntegerProp(managed=False, default='15'),
+        'host_perfdata_file_processing_command': StringProp(managed=False, default='', class_inherit=[(Host, 'perfdata_file_processing_command')]),
+        'service_perfdata_file_processing_command': StringProp(managed=False, default=None),
+        'check_for_orphaned_services': BoolProp(default='1', class_inherit=[(Service, 'check_for_orphaned')]),
+        'check_for_orphaned_hosts': BoolProp(default='1', class_inherit=[(Host, 'check_for_orphaned')]),
+        'check_service_freshness': BoolProp(default='1', class_inherit=[(Service, 'check_freshness')]),
+        'service_freshness_check_interval': IntegerProp(default='60'),
+        'check_host_freshness': BoolProp(default='1', class_inherit=[(Host, 'check_freshness')]),
+        'host_freshness_check_interval': IntegerProp(default='60'),
+        'additional_freshness_latency': IntegerProp(default='15', class_inherit=[(Host, None), (Service, None)]),
+        'enable_embedded_perl': BoolProp(managed=False, default='1', help='It will surely never be managed, but it should not be useful with poller performances.'),
+        'use_embedded_perl_implicitly': BoolProp(managed=False, default='0'),
+        'date_format':          StringProp(managed=False, default=None),
+        'use_timezone':         StringProp(default='', class_inherit=[(Host, None), (Service, None), (Contact, None)]),
+        'illegal_object_name_chars': StringProp(default="""`~!$%^&*"|'<>?,()=""", class_inherit=[(Host, None), (Service, None), (Contact, None)]),
+        'illegal_macro_output_chars': StringProp(default='', class_inherit=[(Host, None), (Service, None), (Contact, None)]),
+        'use_regexp_matching':  BoolProp(managed=False, default='0', help=' if you go some host or service definition like prod*, it will surely failed from now, sorry.'),
+        'use_true_regexp_matching': BoolProp(managed=False, default=None),
+        'admin_email':          UnusedProp(text='sorry, not yet implemented.'),
+        'admin_pager':          UnusedProp(text='sorry, not yet implemented.'),
+        'event_broker_options': UnusedProp(text='event broker are replaced by modules with a real configuration template.'),
+        'broker_module':        StringProp(default=''),
+        'debug_file':           UnusedProp(text=None),
+        'debug_level':          UnusedProp(text=None),
+        'debug_verbosity':      UnusedProp(text=None),
+        'max_debug_file_size':  UnusedProp(text=None),
         #'$USERn$ : {'required':False, 'default':''} # Add at run in __init__
 
         # SHINKEN SPECIFIC
-        'idontcareaboutsecurity': BoolProp(
-            default='0'),
-        'flap_history': IntegerProp(
-            default='20',
-            class_inherit=[(Host, None), (Service, None)]),
-        'max_plugins_output_length': IntegerProp(
-            default='8192',
-            class_inherit=[(Host, None), (Service, None)]),
+        'idontcareaboutsecurity': BoolProp(default='0'),
+        'flap_history': IntegerProp(default='20', class_inherit=[(Host, None), (Service, None)]),
+        'max_plugins_output_length': IntegerProp(default='8192', class_inherit=[(Host, None), (Service, None)]),
 
         # Enable or not the notice about old Nagios parameters
-        'disable_old_nagios_parameters_whining': BoolProp(
-            default='0'),
+        'disable_old_nagios_parameters_whining': BoolProp(default='0'),
 
         # Now for problem/impact states changes
-        'enable_problem_impacts_states_change': BoolProp(
-            default='0',
-            class_inherit=[(Host, None), (Service, None)]),
+        'enable_problem_impacts_states_change': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
 
         # More a running value in fact
-        'resource_macros_names': StringProp(
-            default=[]),
+        'resource_macros_names': StringProp(default=[]),
 
         # SSL PART
         # global boolean for know if we use ssl or not
-        'use_ssl' : BoolProp(default='0',
-                             class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
-                                            (BrokerLink, None), (PollerLink, None), (ArbiterLink, None)],
-                             ),
-        'certs_dir' : StringProp(default='etc/certs'),
-        'ca_cert' : StringProp(default='etc/certs/ca.pem'),
-        'server_cert' : StringProp(default='etc/certs/server.pem'),
-        'hard_ssl_name_check' : BoolProp(default='0'),
-
+        'use_ssl':          BoolProp(default='0', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
+                                                                (BrokerLink, None), (PollerLink, None), (ArbiterLink, None)]),
+        'certs_dir':        StringProp(default='etc/certs'),
+        'ca_cert':          StringProp(default='etc/certs/ca.pem'),
+        'server_cert' :     StringProp(default='etc/certs/server.pem'),
+        'hard_ssl_name_check': BoolProp(default='0'),
     }
 
     macros = {
-        'PREFIX' : 'prefix',
-        'MAINCONFIGFILE' : '',
-        'STATUSDATAFILE' : '',
-        'COMMENTDATAFILE' : '',
-        'DOWNTIMEDATAFILE' : '',
-        'RETENTIONDATAFILE' : '',
-        'OBJECTCACHEFILE' : '',
-        'TEMPFILE' : '',
-        'TEMPPATH' : '',
-        'LOGFILE' : '',
-        'RESOURCEFILE' : '',
-        'COMMANDFILE' : '',
-        'HOSTPERFDATAFILE' : '',
-        'SERVICEPERFDATAFILE' : '',
-        'ADMINEMAIL' : '',
-        'ADMINPAGER' : ''
+        'PREFIX':               'prefix',
+        'MAINCONFIGFILE':       '',
+        'STATUSDATAFILE':       '',
+        'COMMENTDATAFILE':      '',
+        'DOWNTIMEDATAFILE':     '',
+        'RETENTIONDATAFILE':    '',
+        'OBJECTCACHEFILE':      '',
+        'TEMPFILE':             '',
+        'TEMPPATH':             '',
+        'LOGFILE':              '',
+        'RESOURCEFILE':         '',
+        'COMMANDFILE':          '',
+        'HOSTPERFDATAFILE':     '',
+        'SERVICEPERFDATAFILE':  '',
+        'ADMINEMAIL':           '',
+        'ADMINPAGER':           ''
         #'USERn' : '$USERn$' # Add at run in __init__
         }
 
@@ -449,36 +242,36 @@ class Config(Item):
     #Type: 'name in objects' : {Class of object, Class of objects,
     #'property for self for the objects(config)'
     types_creations = {
-        'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
-        'service' : (Service, Services, 'services'),
-        'servicegroup' : (Servicegroup, Servicegroups, 'servicegroups'),
-        'command' : (Command, Commands, 'commands'),
-        'host' : (Host, Hosts, 'hosts'),
-        'hostgroup' : (Hostgroup, Hostgroups, 'hostgroups'),
-        'contact' : (Contact, Contacts, 'contacts'),
-        'contactgroup' : (Contactgroup, Contactgroups, 'contactgroups'),
-        'notificationway' : (NotificationWay, NotificationWays, 'notificationways'),
-        'servicedependency' : (Servicedependency, Servicedependencies, 'servicedependencies'),
-        'hostdependency' : (Hostdependency, Hostdependencies, 'hostdependencies'),
-        'arbiter' : (ArbiterLink, ArbiterLinks, 'arbiterlinks'),
-        'scheduler' : (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
-        'reactionner' : (ReactionnerLink, ReactionnerLinks, 'reactionners'),
-        'broker' : (BrokerLink, BrokerLinks, 'brokers'),
-        'poller' : (PollerLink, PollerLinks, 'pollers'),
-        'realm' : (Realm, Realms, 'realms'),
-        'module' : (Module, Modules, 'modules'),
-        'resultmodulation' : (Resultmodulation, Resultmodulations, 'resultmodulations'),
-        'escalation' : (Escalation, Escalations, 'escalations'),
-        'serviceescalation' : (Serviceescalation, Serviceescalations, 'serviceescalations'),
-        'hostescalation' : (Hostescalation, Hostescalations, 'hostescalations'),
-        }
+        'timeperiod':       (Timeperiod, Timeperiods, 'timeperiods'),
+        'service':          (Service, Services, 'services'),
+        'servicegroup':     (Servicegroup, Servicegroups, 'servicegroups'),
+        'command':          (Command, Commands, 'commands'),
+        'host':             (Host, Hosts, 'hosts'),
+        'hostgroup':        (Hostgroup, Hostgroups, 'hostgroups'),
+        'contact':          (Contact, Contacts, 'contacts'),
+        'contactgroup':     (Contactgroup, Contactgroups, 'contactgroups'),
+        'notificationway':  (NotificationWay, NotificationWays, 'notificationways'),
+        'servicedependency': (Servicedependency, Servicedependencies, 'servicedependencies'),
+        'hostdependency':   (Hostdependency, Hostdependencies, 'hostdependencies'),
+        'arbiter':          (ArbiterLink, ArbiterLinks, 'arbiterlinks'),
+        'scheduler':        (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
+        'reactionner':      (ReactionnerLink, ReactionnerLinks, 'reactionners'),
+        'broker':           (BrokerLink, BrokerLinks, 'brokers'),
+        'poller':           (PollerLink, PollerLinks, 'pollers'),
+        'realm':            (Realm, Realms, 'realms'),
+        'module':           (Module, Modules, 'modules'),
+        'resultmodulation': (Resultmodulation, Resultmodulations, 'resultmodulations'),
+        'escalation':       (Escalation, Escalations, 'escalations'),
+        'serviceescalation': (Serviceescalation, Serviceescalations, 'serviceescalations'),
+        'hostescalation':   (Hostescalation, Hostescalations, 'hostescalations'),
+    }
 
     #This tab is used to transform old parameters name into new ones
     #so from Nagios2 format, to Nagios3 ones
     old_properties = {
-        'nagios_user' : 'shinken_user',
-        'nagios_group' : 'shinken_group'
-        }
+        'nagios_user':  'shinken_user',
+        'nagios_group': 'shinken_group'
+    }
 
 
 
@@ -617,30 +410,31 @@ class Config(Item):
 
     def read_config_buf(self, buf):
         params = []
-        objectscfg = {'void': [],
-                      'timeperiod' : [],
-                      'command' : [],
-                      'contactgroup' : [],
-                      'hostgroup' : [],
-                      'contact' : [],
-                      'notificationway' : [],
-                      'host' : [],
-                      'service' : [],
-                      'servicegroup' : [],
-                      'servicedependency' : [],
-                      'hostdependency' : [],
-                      'arbiter' : [],
-                      'scheduler' : [],
-                      'reactionner' : [],
-                      'broker' : [],
-                      'poller' : [],
-                      'realm' : [],
-                      'module' : [],
-                      'resultmodulation' : [],
-                      'escalation' : [],
-                      'serviceescalation' : [],
-                      'hostescalation' : [],
-                      }
+        objectscfg = {
+            'void': [],
+            'timeperiod' : [],
+            'command' : [],
+            'contactgroup' : [],
+            'hostgroup' : [],
+            'contact' : [],
+            'notificationway' : [],
+            'host' : [],
+            'service' : [],
+            'servicegroup' : [],
+            'servicedependency' : [],
+            'hostdependency' : [],
+            'arbiter' : [],
+            'scheduler' : [],
+            'reactionner' : [],
+            'broker' : [],
+            'poller' : [],
+            'realm' : [],
+            'module' : [],
+            'resultmodulation' : [],
+            'escalation' : [],
+            'serviceescalation' : [],
+            'hostescalation' : [],
+        }
         tmp = []
         tmp_type = 'void'
         in_define = False

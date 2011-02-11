@@ -33,24 +33,26 @@ class Escalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'escalation'
 
-    properties={'escalation_name': StringProp(),
-                'first_notification': IntegerProp(),
-                'last_notification': IntegerProp(),
-                'first_notification_time': IntegerProp(),
-                'last_notification_time': IntegerProp(),
-                'notification_interval': IntegerProp(),
-                'escalation_period': StringProp(default=None),
-                'escalation_options': ListProp(default='d,u,r,w,c'),
-                'contacts': StringProp(),
-                'contact_groups': StringProp(),
-                }
+    properties = {
+        'escalation_name':      StringProp(),
+        'first_notification':   IntegerProp(),
+        'last_notification':    IntegerProp(),
+        'first_notification_time': IntegerProp(),
+        'last_notification_time': IntegerProp(),
+        'notification_interval': IntegerProp(),
+        'escalation_period':    StringProp(default=None),
+        'escalation_options':   ListProp(default='d,u,r,w,c'),
+        'contacts':             StringProp(),
+        'contact_groups':       StringProp(),
+    }
+    
     running_properties = {
         # All errors and warning raised during the configuration parsing
         # and that will raised real warning/errors during the is_correct
         'configuration_warnings': StringProp(default=[]),
         'configuration_errors': StringProp(default=[]),
-        'time_based' : BoolProp(default=False),
-        }
+        'time_based':           BoolProp(default=False),
+    }
 
     macros = {}
 
@@ -68,9 +70,11 @@ class Escalation(Item):
     # *If we are time based, we check if the time that we were in notification
     # is in our time interval
     def is_eligible(self, t, status, notif_number, in_notif_time, interval):
-        small_states = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
-             'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's',
-             'DOWN' : 'd', 'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'}
+        small_states = {
+            'WARNING' : 'w',    'UNKNOWN' : 'u',     'CRITICAL' : 'c',
+            'RECOVERY' : 'r',   'FLAPPING' : 'f',    'DOWNTIME' : 's',
+            'DOWN' : 'd',       'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'
+        }
 
         # If we are not time based, we check notification numbers:
         if not self.time_based:
