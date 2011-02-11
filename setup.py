@@ -81,6 +81,8 @@ class install(_install):
         _install.initialize_options(self)
         self.etc_path = None
         self.var_path = None
+        self.var_owner = None
+        self.var_group = None
         self.plugins_path = None
 
     def finalize_options(self):
@@ -89,6 +91,8 @@ class install(_install):
             self.etc_path = paths_and_owners['etc']['path']
         if self.var_path is None:
             self.var_path = paths_and_owners['var']['path']
+            self.var_owner = paths_and_owners['var']['owner']
+            self.var_group = paths_and_owners['var']['group']
         if self.plugins_path is None:
             self.plugins_path = paths_and_owners['libexec']['path']
         if self.root:
@@ -108,6 +112,8 @@ class build_config(Command):
         self.build_base = None
         self.etc_path = None
         self.var_path = None
+        self.var_owner = None
+        self.var_group = None
         self.plugins_path = None
 
         self._install_scripts = None
@@ -124,11 +130,15 @@ class build_config(Command):
                                    ('etc_path', 'etc_path'),
                                    ('var_path', 'var_path'),
                                    ('plugins_path', 'plugins_path'),
+                                   ('var_owner', 'var_owner'),
+                                   ('var_group', 'var_group'),
                                    )
         if self.build_dir is None:
             self.build_dir = os.path.join(self.build_base, 'etc')
-        self.etc_path = os.path.join(self.etc_path, 'shinken')
-        self.var_path = os.path.join(self.var_path, 'lib', 'shinken')
+        #self.etc_path = os.path.join(self.etc_path, 'shinken')
+        #self.var_path = os.path.join(self.var_path, 'lib', 'shinken')
+        print "TOTO"*100
+        print self.etc_path, self.var_path
         
 
     def run(self):
@@ -222,6 +232,8 @@ class install_config(Command):
         self.root = None
         self.etc_path = None  # typically /etc on Posix systems 
         self.var_path = None # typically /var on Posix systems 
+        self.var_owner = None  # typically shinken
+        self.var_group = None  # typically shinken too
         self.plugins_path = None    # typically /libexec on Posix systems
 
     def finalize_options(self):
@@ -231,6 +243,8 @@ class install_config(Command):
                                    ('root', 'root'),
                                    ('etc_path', 'etc_path'),
                                    ('var_path', 'var_path'),
+                                   ('var_owner', 'var_owner'),
+                                   ('var_group', 'var_group'),
                                    ('plugins_path', 'plugins_path'))
         if self.owner is None and pwd:
             self.owner = pwd.getpwuid(os.getuid())[0]
@@ -244,6 +258,8 @@ class install_config(Command):
         if not self.skip_build:
             self.run_command('build_config')
         self.outfiles = self.copy_tree(self.build_dir, self.etc_path)
+
+
         if pwd:
             # assume a posix system
             uid = self.get_uid(self.owner)
@@ -252,6 +268,14 @@ class install_config(Command):
                 log.info("Changing owner of %s to %s:%s", file, self.owner, self.group)
                 if not self.dry_run:
                     os.chown(file, uid, gid)
+            # And set the /var/lib/shinken in correct owner too
+            # TODO : (j gabes) I can't access to self.var_owner (None) and
+            # I don't know how to change it o I use the global variables
+            var_uid = self.get_uid(var_owner)
+            var_gid = self.get_uid(var_group)
+            if not self.dry_run:
+                os.chown(self.var_path, var_uid, var_gid)
+
 
     def get_inputs (self):
         return self.distribution.configs or []
@@ -332,9 +356,12 @@ else:
 if sys.version_info < (2, 6):
     required_pkgs.append('multiprocessing')
 
-etc_path= paths_and_owners['etc']['path']
+etc_path = paths_and_owners['etc']['path']
+etc_root = os.sep.join(etc_path.split(os.sep)[:-1])
 libexec_path = paths_and_owners['libexec']['path']
 var_path = paths_and_owners['var']['path']
+var_owner = paths_and_owners['var']['owner']
+var_group = paths_and_owners['var']['group']
 
 setup(
   cmdclass = {'build': build,
@@ -412,8 +439,8 @@ setup(
                 'bin/init.d/shinken-poller',
                 'bin/init.d/shinken-reactionner',
                 'bin/init.d/shinken-scheduler']),
-              #(os.path.join(etc_path, 'default',),
-              # ['bin/default/shinken']),
+              (os.path.join(etc_root, 'default',),
+               ['bin/default/shinken']),
               (var_path, ['var/void_for_git']),
               (libexec_path, ['libexec/check.sh']),
               ]
