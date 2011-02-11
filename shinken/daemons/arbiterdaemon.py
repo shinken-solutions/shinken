@@ -25,7 +25,6 @@ import time
 import random
 from Queue import Empty
 
-from shinken.bin import VERSION
 from shinken.util import to_bool
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
@@ -308,8 +307,7 @@ class Arbiter(Daemon):
 
         # Maybe conf is already invalid
         if not self.conf.conf_is_correct:
-            print "***> One or more problems was encountered while processing the config files..."
-            sys.exit(1)
+            sys.exit("***> One or more problems was encountered while processing the config files...")
 
 
         # Change Nagios2 names to Nagios3 ones
@@ -380,8 +378,7 @@ class Arbiter(Daemon):
 
         #If the conf is not correct, we must get out now
         if not self.conf.conf_is_correct:
-            print "Configuration is incorrect, sorry, I bail out"
-            sys.exit(1)
+            sys.exit("Configuration is incorrect, sorry, I bail out")
 
         #Debug to see memory and objects :)
         #self.conf.dump()
@@ -392,10 +389,10 @@ class Arbiter(Daemon):
 
         # Search myself as an arbiter object
         if self.me == None:
-            print "Error : I cannot find my own Arbiter object, I bail out"
-            print "To solve it : please change the host_name parameter in the object Arbiter"
-            print "in the file shinken-specific.cfg. Thanks."
-            sys.exit(1)
+            sys.exit("Error: I cannot find my own Arbiter object, I bail out. "
+                     "To solve it, please change the host_name parameter in "
+                     "the object Arbiter in the file shinken-specific.cfg. "
+                     "Thanks.")
 
 
         # If I am a spare, I must wait a (true) conf from Arbiter Master
@@ -408,8 +405,7 @@ class Arbiter(Daemon):
         # The conf can be incorrect here if the cut into parts see errors like
         # a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
-            print "Configuration is incorrect, sorry, I bail out"
-            sys.exit(1)
+            sys.exit("Configuration is incorrect, sorry, I bail out")
 
         logger.log('Things look okay - No serious problems were detected during the pre-flight check')
 
@@ -591,7 +587,7 @@ class Arbiter(Daemon):
         # Now create the external commander
         if os.name != 'nt':
             e = ExternalCommandManager(self.conf, 'dispatcher')
-
+            e.load_arbiter(self)
             # Arbiter need to know about external command to activate it
             # if necessary
             self.load_external_command(e)
@@ -667,25 +663,3 @@ class Arbiter(Daemon):
 
             if timeout < 0:
                 timeout = 1.0
-
-
-
-################### Process launch part
-def usage(name):
-    print "Shinken Arbiter Daemon, version %s, from :" % VERSION
-    print "        Gabes Jean, naparuba@gmail.com"
-    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
-    print "        Gregory Starck, g.starck@gmail.com"
-    print "Usage: %s [options] -c configfile [-c additionnal_config_file]" % name
-    print "Options:"
-    print " -c, --config"
-    print "\tConfig file (your nagios.cfg). Multiple -c can be used, it will be like if all files was just one"
-    print " -d, --daemon"
-    print "\tRun in daemon mode"
-    print " -r, --replace"
-    print "\tReplace previous running scheduler"
-    print " -h, --help"
-    print "\tPrint detailed help screen"
-    print " --debug"
-    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-

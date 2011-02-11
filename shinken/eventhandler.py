@@ -33,38 +33,25 @@ from action import Action
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 
 class EventHandler(Action):
-    properties={'is_a': StringProp(
-            default='eventhandler'),
-                'type': StringProp(
-            default=''),
-                '_in_timeout': StringProp(
-            default=False),
-                'status': StringProp(
-            default=''),
-                'exit_status': StringProp(
-            default=3),
-                'output': StringProp(
-            default=''),
-                'long_output': StringProp(
-            default=''),
-#                'ref': StringProp(
-#            default=-1),
-                #'ref_type' : {'required': False, 'default':''},
-                't_to_go': StringProp(
-            default=0),
-                'check_time': StringProp(
-            default=0),
-                'execution_time': StringProp(
-            default=0),
-                'env': StringProp(
-            default={}),
-                'perf_data' : StringProp(default=''),
-                'sched_id' : IntegerProp(default=0),
-                'timeout' : IntegerProp(default=10),
-                'check_time' : IntegerProp(default=0),
-                'command' : StringProp(default=''),
-                'module_type' : StringProp(default=''),
-                }
+    properties = {
+        'is_a':           StringProp (default='eventhandler'),
+        'type':           StringProp (default=''),
+        '_in_timeout':    StringProp (default=False),
+        'status':         StringProp (default=''),
+        'exit_status':    StringProp (default=3),
+        'output':         StringProp (default=''),
+        'long_output':    StringProp (default=''),
+        't_to_go':        StringProp (default=0),
+        'check_time':     StringProp (default=0),
+        'execution_time': StringProp (default=0),
+        'env':            StringProp (default={}),
+        'perf_data':      StringProp (default=''),
+        'sched_id':       IntegerProp(default=0),
+        'timeout':        IntegerProp(default=10),
+        'check_time':     IntegerProp(default=0),
+        'command':        StringProp (default=''),
+        'module_type':    StringProp (default=''),
+    }
 
     #id = 0 #Is common to Actions
     def __init__(self, command, id=None, timeout=10, env={}, module_type='fork'):

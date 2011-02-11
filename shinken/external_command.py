@@ -29,6 +29,8 @@ from shinken.comment import Comment
 from shinken.objects import CommandCall
 from shinken.log import logger
 
+from shinken.pollerlink import PollerLink, PollerLinks
+
 class ExternalCommand:
     my_type = 'externalcommand'
     def __init__(self, cmd_line):
@@ -201,6 +203,7 @@ class ExternalCommandManager:
         # Now internal calls
         'ADD_SIMPLE_HOST_DEPENDENCY' : {'global' : False, 'args' : ['host', 'host']},
         'DEL_HOST_DEPENDENCY' : {'global' : False, 'args' : ['host', 'host']},
+        'ADD_SIMPLE_POLLER' : {'global' : True, 'internal' : True, 'args' : [None, None, None, None]},
     }
 
 
@@ -224,6 +227,9 @@ class ExternalCommandManager:
 
     def load_scheduler(self, scheduler):
         self.sched = scheduler
+
+    def load_arbiter(self, arbiter):
+        self.arbiter = arbiter
 
 
     def open(self):
@@ -325,18 +331,28 @@ class ExternalCommandManager:
         # Split again based on the number of args we expect. We cannot split
         # on every ; because this character may appear in the perfdata of
         # passive check results.
-        numargs = len(ExternalCommandManager.commands[c_name]['args'])
-        if numargs and 'service' in ExternalCommandManager.commands[c_name]['args']:
+        entry = ExternalCommandManager.commands[c_name]
+        
+        #Look if the command is purely internal or not
+        internal = False
+        if 'internal' in entry and entry['internal']:
+            internal = True
+
+        numargs = len(entry['args'])
+        if numargs and 'service' in entry['args']:
             numargs += 1
         elts = command.split(';', numargs) 
 
-        if self.mode == 'dispatcher' and ExternalCommandManager.commands[c_name]['global']:
-            print "This command is a global one, we resent it to all schedulers"
-            self.dispatch_global_command(command)
-            return None
-        print "Is global?", c_name, ExternalCommandManager.commands[c_name]['global']
+        print self.mode, entry['global']
+        if self.mode == 'dispatcher' and entry['global']:
+            if not internal:
+                print "This command is a global one, we resent it to all schedulers"
+                self.dispatch_global_command(command)
+                return None
+
+        print "Is global?", c_name, entry['global']
         print "Mode:", self.mode
-        print "This command have arguments:", ExternalCommandManager.commands[c_name]['args'], len(ExternalCommandManager.commands[c_name]['args'])
+        print "This command have arguments:", entry['args'], len(entry['args'])
 
         args = []
         i = 1
@@ -352,7 +368,7 @@ class ExternalCommandManager:
                 print "For command arg", val
 
                 if not in_service:
-                    type_searched = ExternalCommandManager.commands[c_name]['args'][i-1]
+                    type_searched = entry['args'][i-1]
                     print "Search for a arg", type_searched
 
                     if type_searched == 'host':
@@ -434,7 +450,7 @@ class ExternalCommandManager:
             print "Sorry, the arguments are not corrects"
             return None
         print 'Finally got ARGS:', args
-        if len(args) == len(ExternalCommandManager.commands[c_name]['args']):
+        if len(args) == len(entry['args']):
             print "OK, we can call the command", c_name, "with", args
             f = getattr(self, c_name)
             apply(f, args)
@@ -1317,6 +1333,34 @@ class ExternalCommandManager:
             self.sched.get_and_register_status_brok(son)
             self.sched.get_and_register_status_brok(father)
 
+
+    #ADD_SIMPLE_POLLER;realm_name;poller_name;address;port
+    def ADD_SIMPLE_POLLER(self, realm_name, poller_name, address, port):
+        print "I need to add the poller", realm_name, poller_name, address, port
+
+        # First we look for the realm
+        r = self.conf.realms.find_by_name(realm_name)
+        if r == None:
+            print "Sorry, the realm %s is unknown" % realm_name
+            return
+        print "We found the realm", r
+        # TODO : backport this in the config class?
+        # We create the PollerLink object
+        t = {'poller_name' : poller_name, 'address' : address, 'port' : port}
+        p = PollerLink(t)
+        p.fill_default()
+        p.pythonize()
+        p.prepare_for_conf()
+        parameters = {'max_plugins_output_length' : self.conf.max_plugins_output_length}
+        p.add_global_conf_parameters(parameters)
+        self.arbiter.conf.pollers[p.id] = p
+        self.arbiter.dispatcher.elements.append(p)
+        self.arbiter.dispatcher.satellites.append(p)
+        r.pollers.append(p)
+        r.count_pollers()
+        r.fill_potential_pollers()
+        print "Poller %s added" % poller_name
+        print "Potential", r.get_potential_satellites_by_type('poller')
 
 
 if __name__ == '__main__':

@@ -27,7 +27,6 @@ import traceback
 from multiprocessing import active_children
 from Queue import Empty
 
-from shinken.bin import VERSION
 from shinken.satellite import Satellite
 from shinken.daemon import Daemon
 from shinken.util import to_int, to_bool, sort_by_ids
@@ -38,28 +37,6 @@ import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 
 from shinken.external_command import ExternalCommand
-
-
-# # # ################ Process launch part
-def usage(name):
-    print "Shinken Broker Daemon, version %s, from :" % VERSION
-    print "        Gabes Jean, naparuba@gmail.com"
-    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
-    print "        Gregory Starck, g.starck@gmail.com"
-    print "Usage: %s [options] [-c configfile]" % name
-    print "Options:"
-    print " -c, --config"
-    print "\tConfig file."
-    print " -d, --daemon"
-    print "\tRun in daemon mode"
-    print " -r, --replace"
-    print "\tReplace previous running scheduler"
-    print " -h, --help"
-    print "\tPrint detailed help screen"
-    print " --debug"
-    print "\tDebug File. Default : no use (why debug a bug free program? :) )"
-
-
 
 
 # Interface for Arbiter, our big MASTER

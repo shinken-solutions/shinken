@@ -81,6 +81,16 @@ class TestHackCmdPollerTag(ShinkenTest):
         
 
 
+    def test_underscore_commands_module_type_recognition(self):
+        cmd_tag = self.sched.commands.find_cmd_by_name('will_tag')
+        self.assert_(cmd_tag != None)
+        self.assert_(cmd_tag.module_type == 'nrpe_poller')
+        cmd_not_tag = self.sched.commands.find_cmd_by_name('will_not_tag')
+        self.assert_(cmd_not_tag != None)
+        self.assert_(cmd_not_tag.module_type == 'isetwhatiwant')
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
