@@ -26,9 +26,11 @@ class Module(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'module'
 
-    properties={'module_name': StringProp(),
-                'module_type': StringProp(),
-                }
+    properties = {
+        'module_name': StringProp(),
+        'module_type': StringProp(),
+    }
+    
     running_properties = {}
 
     macros = {}

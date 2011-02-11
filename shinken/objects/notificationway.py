@@ -33,36 +33,22 @@ class NotificationWay(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'notificationway'
 
-    properties={
-        'notificationway_name': StringProp(
-            fill_brok=['full_status']),
-        'host_notifications_enabled': BoolProp(
-            default='1',
-            fill_brok=['full_status']),
-        'service_notifications_enabled': BoolProp(
-            default='1',
-            fill_brok=['full_status']),
-        'host_notification_period': StringProp(
-            fill_brok=['full_status']),
-        'service_notification_period': StringProp(
-            fill_brok=['full_status']),
-        'host_notification_options': ListProp(
-            fill_brok=['full_status']),
-        'service_notification_options': ListProp(
-            fill_brok=['full_status']),
-        'host_notification_commands': StringProp(
-            fill_brok=['full_status']),
-        'service_notification_commands': StringProp(
-            fill_brok=['full_status']),
-        'min_criticity' : IntegerProp(
-            default = '0',
-            fill_brok=['full_status']),
-        }
+    properties = {
+        'notificationway_name':         StringProp (fill_brok=['full_status']),
+        'host_notifications_enabled':   BoolProp   (default='1', fill_brok=['full_status']),
+        'service_notifications_enabled':BoolProp   (default='1', fill_brok=['full_status']),
+        'host_notification_period':     StringProp (fill_brok=['full_status']),
+        'service_notification_period':  StringProp (fill_brok=['full_status']),
+        'host_notification_options':    ListProp   (fill_brok=['full_status']),
+        'service_notification_options': ListProp   (fill_brok=['full_status']),
+        'host_notification_commands':   StringProp (fill_brok=['full_status']),
+        'service_notification_commands':StringProp (fill_brok=['full_status']),
+        'min_criticity':                IntegerProp(default = '0', fill_brok=['full_status']),
+    }
+    
     running_properties = {}
 
-    macros = {
-        }
-
+    macros = {}
 
     #For debugging purpose only (nice name)
     def get_name(self):
