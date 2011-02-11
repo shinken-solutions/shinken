@@ -5675,7 +5675,7 @@ class LiveStatusResponse:
                 self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
 
 
-class LiveStatusConstraints():
+class LiveStatusConstraints:
     """ Represent the constraints applied on a livestatus request """
     def __init__(self, filter_func, out_map, filter_map, output_map, without_filter):
         self.filter_func = filter_func
