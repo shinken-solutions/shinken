@@ -71,7 +71,8 @@ $texthtml = $texthtml  . "<strong>Host</strong> : $HOSTNAME\n"
 	 from => 'Monitoring Agent <monitor-agent@invaliddomain.org>',
          to => $TO,
          subject => "$SERVICEDESC $SERVICESTATE on $HOSTNAME",
-         'content-type' => "multipart/alternative; boundary=\"$boundary\""
+         'content-type' => "multipart/alternative; boundary=\"$boundary\"",
+         'Auto-Submitted' => "auto-generated"
         );
 
 $plain = encode_qp $text;
