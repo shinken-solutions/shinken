@@ -40,10 +40,9 @@ try:
 except ImportError, e:
     if hasattr(sys.modules['__main__'], '__file__'):
         my_path = os.path.abspath(sys.modules['__main__'].__file__)
-        elts = os.path.dirname(my_path).split(os.sep)[:-1]
-        sys.path.append(os.sep.join(elts))
-        elts.append('shinken')
-        sys.path.append(os.sep.join(elts))
+        parent_path = os.path.dirname(os.path.dirname(my_path))
+        sys.path.append(parent_path)
+        sys.path.append(os.path.join(parent_path, 'shinken'))
 
 
 from shinken.daemons.reactionnerdaemon import Reactionner

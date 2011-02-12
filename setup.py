@@ -50,6 +50,7 @@ from distutils.core import Command
 from distutils.command.build import build as _build
 from distutils.command.install import install as _install
 from distutils.util import change_root
+from distutils.errors import DistutilsOptionError
 
 class build(_build):
     sub_commands = _build.sub_commands + [
@@ -112,8 +113,6 @@ class build_config(Command):
         self.build_base = None
         self.etc_path = None
         self.var_path = None
-        self.var_owner = None
-        self.var_group = None
         self.plugins_path = None
 
         self._install_scripts = None
@@ -130,15 +129,9 @@ class build_config(Command):
                                    ('etc_path', 'etc_path'),
                                    ('var_path', 'var_path'),
                                    ('plugins_path', 'plugins_path'),
-                                   ('var_owner', 'var_owner'),
-                                   ('var_group', 'var_group'),
                                    )
         if self.build_dir is None:
             self.build_dir = os.path.join(self.build_base, 'etc')
-        #self.etc_path = os.path.join(self.etc_path, 'shinken')
-        #self.var_path = os.path.join(self.var_path, 'lib', 'shinken')
-        print "TOTO"*100
-        print self.etc_path, self.var_path
         
 
     def run(self):
@@ -251,7 +244,7 @@ class install_config(Command):
         if self.group is None and grp:
             self.group = grp.getgrgid(os.getgid())[0]
 
-            
+
     def run(self):
         #log.warn('>>> %s', self.lib)
         log.warn('>>> %s', self.etc_path)
@@ -292,14 +285,12 @@ class install_config(Command):
             for path in itertools.chain(dirs, files):
                 path = os.path.join(root, path)
 
-
-
     @staticmethod
     def get_uid(user_name):
         try:
             return pwd.getpwnam(user_name)[2]
         except KeyError, exp:
-            raise DistutilsOptionError("The user %s is unknown."
+            raise DistutilsOptionError("The user %s is unknown. "
                                        "Maybe you should create this user"
                                        % user_name)
 
@@ -308,7 +299,7 @@ class install_config(Command):
         try:
             return grp.getgrnam(group_name)[2]
         except KeyError, exp:
-            raise DistutilsOptionError("The group %s is unknown."
+            raise DistutilsOptionError("The group %s is unknown. "
                                        "Maybe you should create this group"
                                        % group_name)
 
@@ -357,7 +348,7 @@ if sys.version_info < (2, 6):
     required_pkgs.append('multiprocessing')
 
 etc_path = paths_and_owners['etc']['path']
-etc_root = os.sep.join(etc_path.split(os.sep)[:-1])
+etc_root = os.path.dirname(etc_path)
 libexec_path = paths_and_owners['libexec']['path']
 var_path = paths_and_owners['var']['path']
 var_owner = paths_and_owners['var']['owner']
