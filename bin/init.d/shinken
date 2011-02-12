@@ -279,9 +279,17 @@ do_stop_() {
 }
 
 do_restart_() {
-    log_daemon_msg "Restarting $1"
-    stopoutput=$(do_stop "$1")
-    startoutput=$(do_start "$1")
+    mod="$1"
+    log_daemon_msg "Restarting $mod"
+    if [ "$mod" = "arbiter" ]; then
+        do_check_ "$mod"
+        checkrc=$?
+        if [ $checkrc -ne 0 ]; then
+           return 1
+        fi
+    fi 
+    stopoutput=$(do_stop "$mod")
+    startoutput=$(do_start "$mod")
     rc=$?
     if [ $rc -eq 0 ]; then
         log_end_msg 0
