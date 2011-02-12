@@ -943,6 +943,7 @@ class Livestatus_broker(BaseModule):
                 # before we open the socket
                 pass
 
+        self.do_stop()
 
 def livestatus_factory(cursor, row):
     return Logline(row)
