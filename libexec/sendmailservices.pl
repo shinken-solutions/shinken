@@ -68,7 +68,7 @@ $texthtml = $texthtml  . "<strong>Host</strong> : $HOSTNAME\n"
 	. "<strong>Service output</strong> : $SERVICEOUTPUT\n\n\n\n";
 
 %mail = (
-	 from => 'Monitoring Agent <>',
+	 from => 'Monitoring Agent <monitor-agent@invaliddomain.org>',
          to => $TO,
          subject => "$SERVICEDESC $SERVICESTATE on $HOSTNAME",
          'content-type' => "multipart/alternative; boundary=\"$boundary\""

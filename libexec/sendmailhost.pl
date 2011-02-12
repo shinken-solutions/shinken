@@ -60,7 +60,7 @@ $texthtml = $texthtml  . "<strong>Impacted host</strong> : $HOSTNAME\n"
 
 
 %mail = (
-         from => 'Monitoring Agent <>',
+         from => 'Monitoring Agent <monitor-agent@invaliddomain.org>',
          to => $TO,
          subject => "$HOSTNAME is $HOSTSTATE !",
          'content-type' => "multipart/alternative; boundary=\"$boundary\""
