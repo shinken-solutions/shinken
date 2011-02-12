@@ -912,7 +912,7 @@ ResponseHeader: fixed16\n"""
         good_response = """200         115
 [["(Nagios Process)",2,0,0,"test_host_0",1,0,"test_ok_0",0,2],["lausser",1,0,0,"test_host_0",2,1,"test_ok_0",1,2]]
 """
-        self._assert(response == good_response)
+        self.assert_(response == good_response)
 
 
     def test_thruk_logs(self):
