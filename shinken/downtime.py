@@ -42,6 +42,7 @@ class Downtime:
         'is_in_effect': None,
         'has_been_triggered': None,
         'can_be_deleted': None,
+        'ref':          None
     }
 
 

@@ -33,6 +33,7 @@ class Comment:
         'expires':      None,
         'expire_time':  None,
         'can_be_deleted': None,
+        'ref':  None
     }
 
 
