@@ -315,7 +315,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         print "modulemanager absolute file", modulespath
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
-        self.modulespath = os.path.join(parent_path, 'shinken', 'modules'))
+        self.modulespath = os.path.join(parent_path, 'shinken', 'modules')
         logger.log("Using modules path : %s" % self.modulespath)
 
 
