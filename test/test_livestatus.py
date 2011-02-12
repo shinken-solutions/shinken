@@ -886,20 +886,33 @@ ResponseHeader: fixed16"""
 
         #request = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
         request = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
+        response, _ = self.livestatus_broker.livestatus.handle_request(request)
+#        print response
         good_response = """200          17
 [[[""" + svc_comment_list +"""],[],0,0]]
 """
         self.assert_(response == good_response) # json
 
         request = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\n"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
+        response, _ = self.livestatus_broker.livestatus.handle_request(request)
+#        print response
         good_response = """200           9
 """ + svc_comment_list + """;;0;0
 """
         self.assert_(response == good_response) # csv
+
+        request = """GET comments\n\
+Columns: author entry_type expires expire_time host_name id persistent service_description source type\n\
+Filter: service_description !=\n\
+Filter: service_description =\n\
+Or: 2\n\
+OutputFormat: json\n\
+ResponseHeader: fixed16\n"""
+        response, _ = self.livestatus_broker.livestatus.handle_request(request)
+        good_response = """200         115
+[["(Nagios Process)",2,0,0,"test_host_0",1,0,"test_ok_0",0,2],["lausser",1,0,0,"test_host_0",2,1,"test_ok_0",1,2]]
+"""
+        self._assert(response == good_response)
 
 
     def test_thruk_logs(self):
@@ -2406,12 +2419,6 @@ class TestConfigComplex(TestConfig):
         self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
         self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
         self.livestatus_broker.create_queues()
-        if False:
-            self.livestatus_broker.properties = {
-            'to_queue' : 0,
-            'from_queue' : 0
-
-            }
         self.livestatus_broker.init()
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()

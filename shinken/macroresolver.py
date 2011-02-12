@@ -39,33 +39,30 @@ class MacroResolver(Borg):
     my_type = 'macroresolver'
     #Global macros
     macros = {
-        'TOTALHOSTSUP' : 'get_total_hosts_up',
-        'TOTALHOSTSDOWN' : 'get_total_hosts_down',
-        'TOTALHOSTSUNREACHABLE' : 'get_total_hosts_unreacheable',
-        'TOTALHOSTSDOWNUNHANDLED' : 'get_total_hosts_unhandled',
-        'TOTALHOSTSUNREACHABLEUNHANDLED' : 'get_total_hosts_unreacheable_unhandled',
-        'TOTALHOSTPROBLEMS' : 'get_total_host_problems',
-        'TOTALHOSTPROBLEMSUNHANDLED' : 'get_total_host_problems_unhandled',
-        'TOTALSERVICESOK' : 'get_total_service_ok',
-        'TOTALSERVICESWARNING' : 'get_total_services_warning',
-        'TOTALSERVICESCRITICAL' : 'get_total_services_critical',
-        'TOTALSERVICESUNKNOWN' : 'get_total_services_unknown',
-        'TOTALSERVICESWARNINGUNHANDLED' : 'get_total_services_warning_unhandled',
-        'TOTALSERVICESCRITICALUNHANDLED' : 'get_total_services_critical_unhandled',
-        'TOTALSERVICESUNKNOWNUNHANDLED' : 'get_total_services_unknown_unhandled',
-        'TOTALSERVICEPROBLEMS' : 'get_total_service_problems',
-        'TOTALSERVICEPROBLEMSUNHANDLED' : 'get_total_service_problems_unhandled',
-
-        'LONGDATETIME' : 'get_long_date_time',
-        'SHORTDATETIME' : 'get_short_date_time',
-        'DATE' : 'get_date',
-        'TIME' : 'get_time',
-        'TIMET' : 'get_timet',
-
-        'PROCESSSTARTTIME' : 'get_process_start_time',
-        'EVENTSTARTTIME' : 'get_events_start_time',
-
-        }
+        'TOTALHOSTSUP':         'get_total_hosts_up',
+        'TOTALHOSTSDOWN':       'get_total_hosts_down',
+        'TOTALHOSTSUNREACHABLE': 'get_total_hosts_unreacheable',
+        'TOTALHOSTSDOWNUNHANDLED': 'get_total_hosts_unhandled',
+        'TOTALHOSTSUNREACHABLEUNHANDLED': 'get_total_hosts_unreacheable_unhandled',
+        'TOTALHOSTPROBLEMS':    'get_total_host_problems',
+        'TOTALHOSTPROBLEMSUNHANDLED': 'get_total_host_problems_unhandled',
+        'TOTALSERVICESOK':      'get_total_service_ok',
+        'TOTALSERVICESWARNING': 'get_total_services_warning',
+        'TOTALSERVICESCRITICAL': 'get_total_services_critical',
+        'TOTALSERVICESUNKNOWN': 'get_total_services_unknown',
+        'TOTALSERVICESWARNINGUNHANDLED': 'get_total_services_warning_unhandled',
+        'TOTALSERVICESCRITICALUNHANDLED': 'get_total_services_critical_unhandled',
+        'TOTALSERVICESUNKNOWNUNHANDLED': 'get_total_services_unknown_unhandled',
+        'TOTALSERVICEPROBLEMS': 'get_total_service_problems',
+        'TOTALSERVICEPROBLEMSUNHANDLED': 'get_total_service_problems_unhandled',
+        'LONGDATETIME':         'get_long_date_time',
+        'SHORTDATETIME':        'get_short_date_time',
+        'DATE':                 'get_date',
+        'TIME':                 'get_time',
+        'TIMET':                'get_timet',
+        'PROCESSSTARTTIME':     'get_process_start_time',
+        'EVENTSTARTTIME':       'get_events_start_time',
+    }
 
 
     #This shall be call ONE TIME. It just put links for elements

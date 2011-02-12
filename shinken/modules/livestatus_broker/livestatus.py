@@ -5675,7 +5675,7 @@ class LiveStatusResponse:
                 self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
 
 
-class LiveStatusConstraints():
+class LiveStatusConstraints:
     """ Represent the constraints applied on a livestatus request """
     def __init__(self, filter_func, out_map, filter_map, output_map, without_filter):
         self.filter_func = filter_func
@@ -5853,7 +5853,8 @@ class LiveStatusRequest(LiveStatus):
         sets the attributes of the request object
         
         """
-        for line in [line.strip() for line in data.splitlines()]:
+        for line in data.splitlines():
+            line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
             # a space folowing the :
             if ':' in line and not ' ' in line:
@@ -5971,69 +5972,71 @@ class LiveStatusRequest(LiveStatus):
 
 
     def launch_query(self):
-        """Prepare the request object's filter stacks"""
+        """ Prepare the request object's filter stacks """
         if self.extcmd:
             # External command are send back to broker
             e = ExternalCommand(self.extcmd)
             self.return_queue.put(e)
             return []
-        else:
-            # A minimal integrity check
-            if not self.table:
-                return []
+        
+        # A minimal integrity check
+        if not self.table:
+            return []
 
-            # Make columns unique
-            self.filtercolumns = list(set(self.filtercolumns))
-            self.prefiltercolumns = list(set(self.prefiltercolumns))
-            self.stats_columns = list(set(self.stats_columns))
+        # Make columns unique
+        self.filtercolumns = list(set(self.filtercolumns))
+        self.prefiltercolumns = list(set(self.prefiltercolumns))
+        self.stats_columns = list(set(self.stats_columns))
 
-            if self.stats_request:
-                if len(self.columns) > 0:
-                    # StatsGroupBy is deprecated. Columns: can be used instead
-                    self.stats_group_by = self.columns
-                elif len(self.stats_group_by) > 0:
-                    self.columns = self.stats_group_by + self.stats_columns
-                #if len(self.stats_columns) > 0 and len(self.columns) == 0:
-                if len(self.stats_columns) > 0:
-                    self.columns = self.stats_columns + self.columns
+        if self.stats_request:
+            if len(self.columns) > 0:
+                # StatsGroupBy is deprecated. Columns: can be used instead
+                self.stats_group_by = self.columns
+            elif len(self.stats_group_by) > 0:
+                self.columns = self.stats_group_by + self.stats_columns
+            #if len(self.stats_columns) > 0 and len(self.columns) == 0:
+            if len(self.stats_columns) > 0:
+                self.columns = self.stats_columns + self.columns
 
-            # Make one big filter where the single filters are anded
-            self.filter_stack.and_elements(self.filter_stack.qsize())
-            try:
-                # Remember the number of stats filters. We need these numbers as columns later.
-                # But we need to ask now, because get_live_data() will empty the stack
-                num_stats_filters = self.stats_filter_stack.qsize()
-                if self.table == 'log':
-                    self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
-                    result = self.get_live_data_log()
+        # Make one big filter where the single filters are anded
+        self.filter_stack.and_elements(self.filter_stack.qsize())
+        try:
+            # Remember the number of stats filters. We need these numbers as columns later.
+            # But we need to ask now, because get_live_data() will empty the stack
+            num_stats_filters = self.stats_filter_stack.qsize()
+            if self.table == 'log':
+                self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
+                result = self.get_live_data_log()
+            else:
+                # If the pnpgraph_present column is involved, then check
+                # with each request if the pnp perfdata path exists
+                if 'pnpgraph_present' in self.columns + self.filtercolumns + self.prefiltercolumns and self.pnp_path and os.access(self.pnp_path, os.R_OK):
+                    self.pnp_path_readable = True
                 else:
-                    # If the pnpgraph_present column is involved, then check
-                    # with each request if the pnp perfdata path exists
-                    if 'pnpgraph_present' in self.columns + self.filtercolumns + self.prefiltercolumns and self.pnp_path and os.access(self.pnp_path, os.R_OK):
-                        self.pnp_path_readable = True
-                    else:
-                        self.pnp_path_readable = False
-                    # Apply the filters on the broker's host/service/etc elements
-              
-                    result = self.get_live_data()
-                    
-                if self.stats_request:
-                    self.columns = range(num_stats_filters)
-                    if self.stats_group_by:
-                        self.columns = tuple(list(self.stats_group_by) + list(self.columns))
-                    if len(self.aliases) == 0:
-                        #If there were Stats: staments without "as", show no column headers at all
-                        self.response.columnheaders = 'off'
-                    else:
-                        self.response.columnheaders = 'on'
+                    self.pnp_path_readable = False
+                # Apply the filters on the broker's host/service/etc elements
+          
+                result = self.get_live_data()
+                
+            if self.stats_request:
+                self.columns = range(num_stats_filters)
+                if self.stats_group_by:
+                    self.columns = tuple(list(self.stats_group_by) + list(self.columns))
+                if len(self.aliases) == 0:
+                    #If there were Stats: staments without "as", show no column headers at all
+                    self.response.columnheaders = 'off'
+                else:
+                    self.response.columnheaders = 'on'
 
-                return result
-            except Exception, e:
-                import traceback
-                print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-                print e
-                traceback.print_exc(32) 
-                print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        except Exception, e:
+            import traceback
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            print e
+            traceback.print_exc(32) 
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            result = []
+        
+        return result
 
     
     def get_hosts_or_services_livedata(self, cs, key):
@@ -6171,18 +6174,19 @@ member_key: the key to be used to sort each resulting element of a group member.
             )]
         return res
 
-
     objects_get_handlers = {
         'hosts':                get_hosts_livedata,
         'services':             get_services_livedata,
-        'commands':             get_simple_livedata,
+        'commands':             get_filtered_livedata,
         'schedulers':           get_simple_livedata,
         'brokers':              get_simple_livedata,
         'pollers':              get_simple_livedata,
         'reactionners':         get_simple_livedata,
         'contacts':             get_filtered_livedata,
+        'contactgroups':        get_filtered_livedata,
         'hostgroups':           get_filtered_livedata,
         'servicegroups':        get_filtered_livedata,
+        'timeperiods':          get_filtered_livedata,
         'downtimes':            get_list_livedata,
         'comments':             get_list_livedata,
         'hostsbygroup':         get_hostbygroups_livedata,

@@ -41,58 +41,55 @@ class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'contact'
 
-    properties={
-        'contact_name' : StringProp(fill_brok=['full_status']),
-        'alias' : StringProp(default='none', fill_brok=['full_status']),
-        'contactgroups' : StringProp(default='', fill_brok=['full_status']),
-        'host_notifications_enabled' : BoolProp(default='1', fill_brok=['full_status']),
-        'service_notifications_enabled' : BoolProp(default='1', fill_brok=['full_status']),
-        'host_notification_period' : StringProp(fill_brok=['full_status']),
-        'service_notification_period' : StringProp(fill_brok=['full_status']),
-        'host_notification_options' : ListProp(fill_brok=['full_status']),
-        'service_notification_options' : ListProp(fill_brok=['full_status']),
-        'host_notification_commands' : StringProp(fill_brok=['full_status']),
-        'service_notification_commands' : StringProp(fill_brok=['full_status']),
-        'min_criticity' : IntegerProp(default = '0', fill_brok=['full_status']),
-        'email' : StringProp(default='none', fill_brok=['full_status']),
-        'pager' : StringProp(default='none', fill_brok=['full_status']),
-        'address1' : StringProp(default='none', fill_brok=['full_status']),
-        'address2' : StringProp(default='none', fill_brok=['full_status']),
-        'address3' : StringProp(default='none', fill_brok=['full_status']),
-        'address4' : StringProp(default='none', fill_brok=['full_status']),
-        'address5' : StringProp(default='none', fill_brok=['full_status']),
-        'address6' : StringProp(default='none', fill_brok=['full_status']),
-        'can_submit_commands' : BoolProp(default='0', fill_brok=['full_status']),
-        'retain_status_information' : BoolProp(default='1', fill_brok=['full_status']),
-        'notificationways' : StringProp(default=''),
-        }
+    properties = {
+        'contact_name':     StringProp(fill_brok=['full_status']),
+        'alias':            StringProp(default='none', fill_brok=['full_status']),
+        'contactgroups':    StringProp(default='', fill_brok=['full_status']),
+        'host_notifications_enabled': BoolProp(default='1', fill_brok=['full_status']),
+        'service_notifications_enabled': BoolProp(default='1', fill_brok=['full_status']),
+        'host_notification_period': StringProp(fill_brok=['full_status']),
+        'service_notification_period': StringProp(fill_brok=['full_status']),
+        'host_notification_options': ListProp(fill_brok=['full_status']),
+        'service_notification_options': ListProp(fill_brok=['full_status']),
+        'host_notification_commands': StringProp(fill_brok=['full_status']),
+        'service_notification_commands': StringProp(fill_brok=['full_status']),
+        'min_criticity':    IntegerProp(default = '0', fill_brok=['full_status']),
+        'email':            StringProp(default='none', fill_brok=['full_status']),
+        'pager':            StringProp(default='none', fill_brok=['full_status']),
+        'address1':         StringProp(default='none', fill_brok=['full_status']),
+        'address2':         StringProp(default='none', fill_brok=['full_status']),
+        'address3' :        StringProp(default='none', fill_brok=['full_status']),
+        'address4':         StringProp(default='none', fill_brok=['full_status']),
+        'address5':         StringProp(default='none', fill_brok=['full_status']),
+        'address6':         StringProp(default='none', fill_brok=['full_status']),
+        'can_submit_commands': BoolProp(default='0', fill_brok=['full_status']),
+        'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
+        'notificationways': StringProp(default=''),
+    }
 
     running_properties = {
         #All errors and warning raised during the configuration parsing
         #and taht will raised real warning/errors during the is_correct
-        'configuration_warnings' : ListProp(default=[]),
-        'configuration_errors' : ListProp(default=[]),
-        'downtimes': StringProp(
-            default=[],
-            fill_brok=['full_status'],
-            retention=True),
-        }
+        'configuration_warnings': ListProp(default=[]),
+        'configuration_errors': ListProp(default=[]),
+        'downtimes':        StringProp(default=[], fill_brok=['full_status'], retention=True),
+    }
 
 
     macros = {
-        'CONTACTNAME' : 'contact_name',
-        'CONTACTALIAS' : 'alias',
-        'CONTACTEMAIL' : 'email',
-        'CONTACTPAGER' : 'pager',
-        'CONTACTADDRESS1' : 'address1',
-        'CONTACTADDRESS2' : 'address2',
-        'CONTACTADDRESS3' : 'address3',
-        'CONTACTADDRESS4' : 'address4',
-        'CONTACTADDRESS5' : 'address5',
-        'CONTACTADDRESS6' : 'address6',
-        'CONTACTGROUPNAME' : 'get_groupname',
-        'CONTACTGROUPNAMES' : 'get_groupnames'
-        }
+        'CONTACTNAME':      'contact_name',
+        'CONTACTALIAS':     'alias',
+        'CONTACTEMAIL':     'email',
+        'CONTACTPAGER':     'pager',
+        'CONTACTADDRESS1':  'address1',
+        'CONTACTADDRESS2':  'address2',
+        'CONTACTADDRESS3':  'address3',
+        'CONTACTADDRESS4':  'address4',
+        'CONTACTADDRESS5':  'address5',
+        'CONTACTADDRESS6':  'address6',
+        'CONTACTGROUPNAME': 'get_groupname',
+        'CONTACTGROUPNAMES': 'get_groupnames'
+    }
 
 
     #For debugging purpose only (nice name)

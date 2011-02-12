@@ -38,17 +38,18 @@ class Servicedependency(Item):
 #       inherits_parent         1
 #       dependency_period       24x7
 
-    properties={'dependent_host_name': StringProp(),
-                'dependent_hostgroup_name': StringProp(default=''),
-                'dependent_service_description': StringProp(),
-                'host_name': StringProp(),
-                'hostgroup_name': StringProp(default=''),
-                'service_description': StringProp(),
-                'inherits_parent': BoolProp(default='0'),
-                'execution_failure_criteria': ListProp(default='n'),
-                'notification_failure_criteria': ListProp(default='n'),
-                'dependency_period': StringProp(default='')
-                }
+    properties = {
+        'dependent_host_name':           StringProp(),
+        'dependent_hostgroup_name':      StringProp(default=''),
+        'dependent_service_description': StringProp(),
+        'host_name':                     StringProp(),
+        'hostgroup_name':                StringProp(default=''),
+        'service_description':           StringProp(),
+        'inherits_parent':               BoolProp  (default='0'),
+        'execution_failure_criteria':    ListProp  (default='n'),
+        'notification_failure_criteria': ListProp  (default='n'),
+        'dependency_period':             StringProp(default='')
+    }
     running_properties = {}
 
     #Give a nice name output, for debbuging purpose
@@ -68,13 +69,13 @@ class Servicedependencies(Items):
     def add_service_dependency(self, dep_host_name, dep_service_description, par_host_name, par_service_description):
         #We create a "standard" service_dep
         prop = {
-            'dependent_host_name' : dep_host_name,
-            'dependent_service_description' : dep_service_description,
-            'host_name' : par_host_name,
-            'service_description' : par_service_description,
-            'notification_failure_criteria' : 'u,c,w',
-            'inherits_parent' : '1',
-            }
+            'dependent_host_name':           dep_host_name,
+            'dependent_service_description': dep_service_description,
+            'host_name':                     par_host_name,
+            'service_description':           par_service_description,
+            'notification_failure_criteria': 'u,c,w',
+            'inherits_parent':               '1',
+        }
         sd = Servicedependency(prop)
         self.items[sd.id] = sd
 

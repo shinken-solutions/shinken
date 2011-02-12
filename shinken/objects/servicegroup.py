@@ -27,39 +27,27 @@ class Servicegroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'servicegroup'
 
-    properties={
-        'id': StringProp(
-            default=0,
-            fill_brok=['full_status']),
-        'servicegroup_name': StringProp(
-            fill_brok=['full_status']),
-        'alias': StringProp(
-            fill_brok=['full_status']),
-        'notes': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'notes_url': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'action_url': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'members': StringProp(
-            default='',
-            fill_brok=['full_status']),
+    properties = {
+        'id':                StringProp(default=0, fill_brok=['full_status']),
+        'servicegroup_name': StringProp(fill_brok=['full_status']),
+        'alias':             StringProp(fill_brok=['full_status']),
+        'notes':             StringProp(default='', fill_brok=['full_status']),
+        'notes_url':         StringProp(default='', fill_brok=['full_status']),
+        'action_url':        StringProp(default='', fill_brok=['full_status']),
+        'members':           StringProp(default='',fill_brok=['full_status']),
         #Shinken specific
-        'unknown_members': StringProp(
-            default=[]),
-        'configuration_errors' : StringProp(default = []),
+        'unknown_members':   StringProp(default=[]),
+        'configuration_errors': StringProp(default = []),
 
-        }
+    }
+    
     macros = {
-        'SERVICEGROUPALIAS' : 'alias',
-        'SERVICEGROUPMEMBERS' : 'members',
-        'SERVICEGROUPNOTES' : 'notes',
-        'SERVICEGROUPNOTESURL' : 'notes_url',
-        'SERVICEGROUPACTIONURL' : 'action_url'
-        }
+        'SERVICEGROUPALIAS':     'alias',
+        'SERVICEGROUPMEMBERS':   'members',
+        'SERVICEGROUPNOTES':     'notes',
+        'SERVICEGROUPNOTESURL':  'notes_url',
+        'SERVICEGROUPACTIONURL': 'action_url'
+    }
 
 
     def get_services(self):

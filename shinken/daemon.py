@@ -314,11 +314,9 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         modulespath = os.path.abspath(shinken.modulesmanager.__file__)
         print "modulemanager absolute file", modulespath
         # We got one of the files of
-        elts = os.path.dirname(modulespath).split(os.sep)[:-1]
-        elts.append('shinken')
-        elts.append('modules')
-        self.modulespath = os.sep.join(elts)
-        logger.log("Using modules path : %s" % os.sep.join(elts))
+        parent_path = os.path.dirname(os.path.dirname(modulespath))
+        self.modulespath = os.path.join(parent_path, 'shinken', 'modules')
+        logger.log("Using modules path : %s" % self.modulespath)
 
 
     #Just give the uid of a user by looking at it's name
@@ -407,21 +405,10 @@ Also put default value in the properties if some are missing in the config_file 
         for prop in properties:
             if 'path' in properties[prop] and properties[prop]['path']:
                 path = getattr(self, prop)
-                new_path = path
-                #Windows full paths are like c:/blabla
-                #Unixes are like /blabla
-                #So we look for : on windows, / for Unixes
-                if os.name != 'nt':
-                    #os.sep = / on Unix
-                    #so here if not
-                    if path != '' and path[0] != os.sep :
-                        new_path = reference_path + os.sep + path
-                else:
-                    #os.sep = \ on windows, and we must look at c: like format
-                    if len(path) > 2 and path[1] != ':':
-                        new_path = reference_path + os.sep + path
-                setattr(self, prop, new_path)
-                #print "Setting %s for %s" % (new_path, prop)
+                if not os.path.isabs(path):
+                    path = os.path.join(reference_path, path)
+                setattr(self, prop, path)
+                #print "Setting %s for %s" % (path, prop)
 
 
     def manage_signal(self, sig, frame):

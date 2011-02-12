@@ -36,15 +36,17 @@ class Hostdependency(Item):
 #       inherits_parent         1
 #       dependency_period       24x7
 
-    properties={'dependent_host_name': StringProp(),
-                'dependent_hostgroup_name': StringProp(default=''),
-                'host_name': StringProp(),
-                'hostgroup_name': StringProp(default=''),
-                'inherits_parent': BoolProp(default='0'),
-                'execution_failure_criteria': ListProp(default='n'),
-                'notification_failure_criteria': ListProp(default='n'),
-                'dependency_period': StringProp(default='')
-                }
+    properties = {
+        'dependent_host_name':           StringProp(),
+        'dependent_hostgroup_name':      StringProp(default=''),
+        'host_name':                     StringProp(),
+        'hostgroup_name':                StringProp(default=''),
+        'inherits_parent':               BoolProp(default='0'),
+        'execution_failure_criteria':    ListProp(default='n'),
+        'notification_failure_criteria': ListProp(default='n'),
+        'dependency_period':             StringProp(default='')
+    }
+    
     running_properties = {}
 
     #Give a nice name output, for debbuging purpose

@@ -29,20 +29,21 @@ class Downtime:
     #Just to list the properties we will send as pickle
     #so to others daemons, so all but NOT REF
     properties = {
-        'activate_me' : None,
-        'entry_time' : None,
-        'fixed' : None,
-        'start_time' : None,
-        'duration' : None,
-        'trigger_id' : None,
-        'end_time' : None,
-        'real_end_time' : None,
-        'author' : None,
-        'comment' : None,
-        'is_in_effect' : None,
-        'has_been_triggered' : None,
-        'can_be_deleted' : None,
-        }
+        'activate_me':  None,
+        'entry_time':   None,
+        'fixed':        None,
+        'start_time':   None,
+        'duration':     None,
+        'trigger_id':   None,
+        'end_time':     None,
+        'real_end_time': None,
+        'author':       None,
+        'comment':      None,
+        'is_in_effect': None,
+        'has_been_triggered': None,
+        'can_be_deleted': None,
+        'ref':          None
+    }
 
 
     #Schedules downtime for a specified service. If the "fixed" argument is set

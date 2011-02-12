@@ -27,39 +27,26 @@ class Hostgroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'hostgroup'
 
-    properties={
-        'id': StringProp(
-            default=0,
-            fill_brok=['full_status']),
-        'hostgroup_name': StringProp(
-            fill_brok=['full_status']),
-        'alias': StringProp(
-            fill_brok=['full_status']),
-        'notes': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'notes_url': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'action_url': StringProp(
-            default='',
-            fill_brok=['full_status']),
-        'members': StringProp(
-            default='',
-            fill_brok=['full_status']),
+    properties = {
+        'id':             StringProp(default=0, fill_brok=['full_status']),
+        'hostgroup_name': StringProp(fill_brok=['full_status']),
+        'alias':          StringProp(fill_brok=['full_status']),
+        'notes':          StringProp(default='', fill_brok=['full_status']),
+        'notes_url':      StringProp(default='', fill_brok=['full_status']),
+        'action_url':     StringProp(default='', fill_brok=['full_status']),
+        'members':        StringProp(default='', fill_brok=['full_status']),
         #Shinken specific
-        'unknown_members': StringProp(
-            default=[]),
-        'configuration_errors' : StringProp(default = []),
-        }
+        'unknown_members':StringProp(default=[]),
+        'configuration_errors': StringProp(default = []),
+    }
 
     macros = {
-        'HOSTGROUPALIAS' : 'alias',
-        'HOSTGROUPMEMBERS' : 'members',
-        'HOSTGROUPNOTES' : 'notes',
-        'HOSTGROUPNOTESURL' : 'notes_url',
-        'HOSTGROUPACTIONURL' : 'action_url'
-        }
+        'HOSTGROUPALIAS':     'alias',
+        'HOSTGROUPMEMBERS':   'members',
+        'HOSTGROUPNOTES':     'notes',
+        'HOSTGROUPNOTESURL':  'notes_url',
+        'HOSTGROUPACTIONURL': 'action_url'
+    }
 
 
     def get_name(self):

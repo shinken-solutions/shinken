@@ -1,3 +1,7 @@
 *.egg-info
 build
 dist
+.project
+.pydevproject
+.settings
+.gitignore

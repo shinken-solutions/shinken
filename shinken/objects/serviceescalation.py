@@ -28,20 +28,20 @@ class Serviceescalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'serviceescalation'
 
-    properties={'host_name' : StringProp(),
-                'hostgroup_name' : StringProp(),
-                'service_description' : StringProp(),
-                'first_notification' : IntegerProp(),
-                'last_notification' : IntegerProp(),
-                'notification_interval' : IntegerProp(),
-                'escalation_period' : StringProp(default=''),
-                'escalation_options' : ListProp(default='d,u,r,w,c'),
-                'contacts' : StringProp(),
-                'contact_groups' : StringProp(),
-                }
+    properties = {
+        'host_name':             StringProp (),
+        'hostgroup_name':        StringProp (),
+        'service_description':   StringProp (),
+        'first_notification':    IntegerProp(),
+        'last_notification':     IntegerProp(),
+        'notification_interval': IntegerProp(),
+        'escalation_period':     StringProp (default=''),
+        'escalation_options':    ListProp   (default='d,u,r,w,c'),
+        'contacts':              StringProp (),
+        'contact_groups':        StringProp (),
+    }
 
     running_properties = {}
-
 
     macros = {}
 

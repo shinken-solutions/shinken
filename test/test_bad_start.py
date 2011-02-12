@@ -45,8 +45,8 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
     def gen_invalid_directory(self, f):
         basedir = "/invalid_directory42/" + str(random.randint(0,100))
         while os.path.exists(basedir):
-            basedir += os.path.sep + str(random.randint(0,100))
-        return basedir + os.path.sep + f 
+            basedir = os.path.join(basedir, str(random.randint(0,100)))
+        return os.path.join(basedir, f)
 
     def get_login_and_group(self, p):
         try:
