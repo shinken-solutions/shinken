@@ -6175,7 +6175,7 @@ member_key: the key to be used to sort each resulting element of a group member.
     objects_get_handlers = {
         'hosts':                get_hosts_livedata,
         'services':             get_services_livedata,
-        'commands':             get_simple_livedata,
+        'commands':             get_filtered_livedata,
         'schedulers':           get_simple_livedata,
         'brokers':              get_simple_livedata,
         'pollers':              get_simple_livedata,
