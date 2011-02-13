@@ -281,9 +281,10 @@ class install_config(Command):
         log.info("Changing owner of %s to %s:%s", path, owner, group)
         if not self.dry_run:
             os.chown(path, uid, gid)
-        for root, dirs, files in os.walk(path):
+        for dirname, dirs, files in os.walk(path):
             for path in itertools.chain(dirs, files):
-                path = os.path.join(root, path)
+                path = os.path.join(dirname, path)
+                os.chown(path, uid, gid)
 
     @staticmethod
     def get_uid(user_name):
