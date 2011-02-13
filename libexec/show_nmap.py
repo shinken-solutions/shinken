@@ -1,9 +1,53 @@
-from xml.etree.ElementTree import ElementTree
+#!/usr/bin/env python
+#Copyright (C) 2009-2010 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#
+#This file is part of Shinken.
+#
+#Shinken is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#Shinken is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-tree = ElementTree()
-tree.parse("local.xml")
-p = tree.findall('host')
-print "Number of host", len(p)
+
+import optparse
+import sys
+import cPickle
+import os
+
+try:
+    from xml.etree.ElementTree import ElementTree
+except ImportError:
+    print "This script need the python ElementTree module. Please install it"
+    sys.exit(2)
+
+VERSION = '0.1'
+
+parser = optparse.OptionParser(
+    "%prog [options] -x nmap.xml -o directory_output",
+    version="%prog " + VERSION)
+parser.add_option('-x', '--xml-input',
+                  dest="xml_input", help=('Output of nmap'))
+parser.add_option('-o', '--dir-output', dest="output_dir",
+                  help="Directory output for results")
+opts, args = parser.parse_args()
+
+if not opts.xml_input:
+    parser.error("Requires one nmap xml output file (option -x/--xml-input")
+if not opts.output_dir:
+    parser.error("Requires one output directory (option -o/--dir-output")
+if args:
+    parser.error("Does not accept any argument.")
 
 
 # Say if a host is up or not
@@ -29,6 +73,16 @@ class DetectedHost:
         if self.host_name == '':
             self.host_name = name
 
+
+    # Get a identifier for this host
+    def get_name(self):
+        if self.host_name != '':
+            return self.host_name
+        if self.ip != '':
+            return self.ip
+        return None
+
+
     # Fill the different os possibilities
     def add_os_possibility(self, os, osgen, accuracy):
         self.os_possibilities.append( (os, osgen, accuracy) )
@@ -50,7 +104,23 @@ class DetectedHost:
                 self.os = (os, osgen)
 
 
-for h in p:
+xml_input = opts.xml_input
+output_dir = opts.output_dir
+
+tree = ElementTree()
+try:
+    tree.parse(xml_input)
+except IOError, exp:
+    print "Error opening file '%s' : %s" % (xml_input, exp)
+    sys.exit(2)
+
+hosts = tree.findall('host')
+print "Number of host", len(hosts)
+
+
+all_hosts = []
+
+for h in hosts:
     # Bypass non up hosts
     if not is_up(h):
         continue
@@ -89,9 +159,9 @@ for h in p:
 
 
     # Now the OS detection
-    os = h.find('os')
+    ios = h.find('os')
     #print os.__dict__
-    cls = os.findall('osclass')
+    cls = ios.findall('osclass')
     for c in cls:
         #print "Class", c.__dict__
         family = c.attrib['osfamily']
@@ -120,6 +190,19 @@ for h in p:
                 dh.open_ports.append(int(p_id))
 
     print dh.__dict__
-
+    all_hosts.append(dh)
     print "\n\n"
     
+
+
+for h in all_hosts:
+    name = h.get_name()
+    if not name:
+        continue
+    
+    print "Doing name", name
+    path = os.path.join(output_dir, name+'.discover')
+    print "Want path", path
+    f = open(path, 'wb')
+    cPickle.dump(h, f)
+    f.close()
