@@ -419,14 +419,3 @@ setup(
               (libexec_path, ['libexec/check.sh']),
               ]
 )
-
-
-# We will chown shinken:shinken for all /etc/shinken
-# and /var/lib/shinken.
-
-
-#if os.name != 'nt' and ('install' in sys.argv or 'sdist' in sys.argv):
-#    for dir in ['etc', 'var']:
-#        _chown(paths_and_owners[dir]['path'],
-#               paths_and_owners[dir]['owner'],
-#               paths_and_owners[dir]['owner'])
