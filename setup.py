@@ -44,6 +44,9 @@ except ImportError:
     # assume non-unix platform
     pass
 
+DEFAULT_OWNER = 'shinken'
+DEFAULT_GROUP = 'shinken'
+
 from distutils import log
 from distutils.core import Command
 from distutils.command.build import build as _build
@@ -75,15 +78,19 @@ class install(_install):
         ('etc-path=', None, 'read-only single-machine data'),
         ('var-path=', None, 'modifiable single-machine data'),
         ('plugins-path=', None, 'program executables'),
+        ('owner=', None, ('change owner for etc/* and var '
+                          '(default: %s)' % DEFAULT_OWNER)),
+        ('group=', None, ('change group for etc/* and var '
+                          '(default: %s)' % DEFAULT_GROUP)),
         ]
     
     def initialize_options(self):
         _install.initialize_options(self)
         self.etc_path = None
         self.var_path = None
-        self.var_owner = None
-        self.var_group = None
         self.plugins_path = None
+        self.owner = None
+        self.group = None
 
     def finalize_options(self):
         _install.finalize_options(self)
@@ -91,10 +98,13 @@ class install(_install):
             self.etc_path = paths_and_owners['etc']['path']
         if self.var_path is None:
             self.var_path = paths_and_owners['var']['path']
-            self.var_owner = paths_and_owners['var']['owner']
-            self.var_group = paths_and_owners['var']['group']
         if self.plugins_path is None:
             self.plugins_path = paths_and_owners['libexec']['path']
+        if self.owner is None:
+            self.owner = DEFAULT_OWNER
+        if self.group is None:
+            self.group = DEFAULT_GROUP
+
         if self.root:
             for attr in ('etc_path', 'var_path', 'plugins_path'):
                 setattr(self, attr, change_root(self.root, getattr(self, attr)))
@@ -224,8 +234,6 @@ class install_config(Command):
         self.root = None
         self.etc_path = None  # typically /etc on Posix systems 
         self.var_path = None # typically /var on Posix systems 
-        self.var_owner = None  # typically shinken
-        self.var_group = None  # typically shinken too
         self.plugins_path = None    # typically /libexec on Posix systems
 
     def finalize_options(self):
@@ -235,14 +243,9 @@ class install_config(Command):
                                    ('root', 'root'),
                                    ('etc_path', 'etc_path'),
                                    ('var_path', 'var_path'),
-                                   ('var_owner', 'var_owner'),
-                                   ('var_group', 'var_group'),
-                                   ('plugins_path', 'plugins_path'))
-        if self.owner is None and pwd:
-            self.owner = pwd.getpwuid(os.getuid())[0]
-        if self.group is None and grp:
-            self.group = grp.getgrgid(os.getgid())[0]
-
+                                   ('plugins_path', 'plugins_path'),
+                                   ('owner', 'owner'),
+                                   ('group', 'group'))
 
     def run(self):
         #log.warn('>>> %s', self.lib)
@@ -260,13 +263,9 @@ class install_config(Command):
                 log.info("Changing owner of %s to %s:%s", file, self.owner, self.group)
                 if not self.dry_run:
                     os.chown(file, uid, gid)
-            # And set the /var/lib/shinken in correct owner too
-            # TODO : (j gabes) I can't access to self.var_owner (None) and
-            # I don't know how to change it o I use the global variables
-            var_uid = self.get_uid(var_owner)
-            var_gid = self.get_uid(var_group)
-            if not self.dry_run:
-                os.chown(self.var_path, var_uid, var_gid)
+            # recursivly change permissions for etc/shinken and var/lib/shinken
+            self.recursive_chown(self.etc_path, uid, gid, self.owner, self.group)
+            self.recursive_chown(self.var_path, uid, gid, self.owner, self.group)
 
 
     def get_inputs (self):
@@ -275,8 +274,7 @@ class install_config(Command):
     def get_outputs(self):
         return self.outfiles or []
 
-    @staticmethod
-    def recursive_chown(path, uid, gid, owner, group):
+    def recursive_chown(self, path, uid, gid, owner, group):
         log.info("Changing owner of %s to %s:%s", path, owner, group)
         if not self.dry_run:
             os.chown(path, uid, gid)
@@ -314,29 +312,16 @@ def update_file_with_string(infilename, outfilename, match, new_string):
     f.close()
 
 
-#Set the default values for the paths
-#owners and groups
+# Set the default values for the paths
 if os.name == 'nt':
-    paths_and_owners = {'var':{'path': "c:\\shinken\\var",
-                               'owner': None,
-                               'group': None },
-                        'etc': {'path': "c:\\shinken\\etc",
-                                'owner': None,
-                                'group': None},
-                        'libexec': {'path': "c:\\shinken\\libexec",
-                                    'owner': None,
-                                    'group': None},
+    paths_and_owners = {'var':{'path': "c:\\shinken\\var"},
+                        'etc': {'path': "c:\\shinken\\etc"},
+                        'libexec': {'path': "c:\\shinken\\libexec"},
                         }
 else:
-    paths_and_owners = {'var': {'path': "/var/lib/shinken/",
-                                'owner' : 'shinken',
-                                'group' : 'shinken' },
-                        'etc': {'path': "/etc/shinken",
-                                'owner': 'shinken',
-                                'group': 'shinken'},
-                        'libexec': {'path': "/usr/lib/shinken/plugins",
-                                    'owner': 'shinken',
-                                    'group': 'shinken'},
+    paths_and_owners = {'var': {'path': "/var/lib/shinken/"},
+                        'etc': {'path': "/etc/shinken"},
+                        'libexec': {'path': "/usr/lib/shinken/plugins"},
                         }
 
 required_pkgs = []
@@ -351,8 +336,6 @@ etc_path = paths_and_owners['etc']['path']
 etc_root = os.path.dirname(etc_path)
 libexec_path = paths_and_owners['libexec']['path']
 var_path = paths_and_owners['var']['path']
-var_owner = paths_and_owners['var']['owner']
-var_group = paths_and_owners['var']['group']
 
 setup(
   cmdclass = {'build': build,
