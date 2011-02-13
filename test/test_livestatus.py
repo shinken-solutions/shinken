@@ -36,6 +36,7 @@ import random
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
+from shinken.comment import Comment
 
 from shinken.modules import livestatus_broker
 from shinken.modules.livestatus_broker import Livestatus_broker
@@ -286,6 +287,7 @@ class TestConfig(ShinkenTest):
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+        Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.livelogs = 'tmp/livelogs.db' + self.testid
         self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
@@ -313,6 +315,12 @@ class TestConfigSmall(TestConfig):
             os.remove(self.livelogs)
         if os.path.exists(self.pnp4nagios):
             shutil.rmtree(self.pnp4nagios)
+        if os.path.exists('var/nagios.log'):
+            os.remove('var/nagios.log')
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
 
 
     def test_childs(self):
@@ -2029,6 +2037,7 @@ Limit: 1001"""
 class TestConfigBig(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
+        Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.livelogs = 'tmp/livelogs.db' + self.testid
         self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
@@ -2052,6 +2061,12 @@ class TestConfigBig(TestConfig):
             os.remove(self.livelogs)
         if os.path.exists(self.pnp4nagios):
             shutil.rmtree(self.pnp4nagios)
+        if os.path.exists('var/nagios.log'):
+            os.remove('var/nagios.log')
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
 
 
     def test_stats(self):
