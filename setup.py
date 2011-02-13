@@ -177,10 +177,7 @@ class build_config(Command):
 
         # Open a /etc/*d.ini file and change the ../var occurence with a
         # good value from the configuration file
-        for name in ('brokerd.ini',
-                     'schedulerd.ini',
-                     'pollerd.ini',
-                     'reactionnerd.ini'):
+        for name in daemon_ini_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
@@ -189,7 +186,7 @@ class build_config(Command):
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
-        for name in ('resource.cfg', ):
+        for name in resource_cfg_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
@@ -199,11 +196,7 @@ class build_config(Command):
 
         # And update the nagios.cfg file for all /usr/local/shinken/var
         # value with good one
-        for name in ('nagios.cfg',
-                     'shinken-specific.cfg',
-                     'shinken-specific-high-availability.cfg',
-                     'shinken-specific-load-balanced-only.cfg',
-                     ):
+        for name in main_config_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
@@ -337,6 +330,28 @@ etc_root = os.path.dirname(etc_path)
 libexec_path = paths_and_owners['libexec']['path']
 var_path = paths_and_owners['var']['path']
 
+# nagios/shinken global config
+main_config_files = ('nagios.cfg',
+                     'nagios-windows.cfg',
+                     'shinken-specific.cfg',
+                     'shinken-specific-high-availability.cfg',
+                     'shinken-specific-load-balanced-only.cfg',
+                     )
+
+# daemon configs
+daemon_ini_files = ('brokerd.ini',
+                    'brokerd-windows.ini',
+                    'pollerd.ini',
+                    'pollerd-windows.ini',
+                    'reactionnerd.ini',
+                    'schedulerd.ini',
+                    'schedulerd-windows.ini',
+                    )
+
+resource_cfg_files = ('resource.cfg', )
+
+
+
 setup(
   cmdclass = {'build': build,
               'install': install,
@@ -371,29 +386,13 @@ setup(
 
   scripts = glob('bin/shinken-[!_]*'),
   data_files=[(etc_path,
-               [# nagios/shinken global config
-                #"etc/nagios.cfg",
-                'etc/nagios-windows.cfg',
-                #'etc/shinken-specific.cfg',
-                #'etc/shinken-specific-high-availability.cfg',
-                #'etc/shinken-specific-load-balanced-only.cfg',
-
-                # daemon configs
-                #'etc/brokerd.ini',
-                'etc/brokerd-windows.ini',
-                #'etc/pollerd.ini',
-                'etc/pollerd-windows.ini',
-                #'etc/reactionnerd.ini',
-                #'etc/schedulerd.ini',
-                'etc/schedulerd-windows.ini',
-
-                # other configs
+               [# other configs
                 'etc/commands.cfg',
                 'etc/contactgroups.cfg',
                 'etc/dependencies.cfg',
                 'etc/escalations.cfg',
                 'etc/hostgroups.cfg',
-                'etc/resource.cfg',
+                #'etc/resource.cfg', # see above
                 'etc/servicegroups.cfg',
                 'etc/templates.cfg',
                 'etc/timeperiods.cfg',
