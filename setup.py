@@ -95,11 +95,11 @@ class install(_install):
     def finalize_options(self):
         _install.finalize_options(self)
         if self.etc_path is None:
-            self.etc_path = paths_and_owners['etc']['path']
+            self.etc_path = default_paths['etc']
         if self.var_path is None:
-            self.var_path = paths_and_owners['var']['path']
+            self.var_path = default_paths['var']
         if self.plugins_path is None:
-            self.plugins_path = paths_and_owners['libexec']['path']
+            self.plugins_path = default_paths['libexec']
         if self.owner is None:
             self.owner = DEFAULT_OWNER
         if self.group is None:
@@ -307,15 +307,15 @@ def update_file_with_string(infilename, outfilename, match, new_string):
 
 # Set the default values for the paths
 if os.name == 'nt':
-    paths_and_owners = {'var':{'path': "c:\\shinken\\var"},
-                        'etc': {'path': "c:\\shinken\\etc"},
-                        'libexec': {'path': "c:\\shinken\\libexec"},
-                        }
+    default_paths = {'var':      "c:\\shinken\\var",
+                     'etc':      "c:\\shinken\\etc",
+                     'libexec':  "c:\\shinken\\libexec",
+                     }
 else:
-    paths_and_owners = {'var': {'path': "/var/lib/shinken/"},
-                        'etc': {'path': "/etc/shinken"},
-                        'libexec': {'path': "/usr/lib/shinken/plugins"},
-                        }
+    default_paths = {'var': "/var/lib/shinken/",
+                     'etc': "/etc/shinken",
+                     'libexec': "/usr/lib/shinken/plugins",
+                     }
 
 required_pkgs = []
 if sys.version_info < (2, 5):
@@ -325,10 +325,7 @@ else:
 if sys.version_info < (2, 6):
     required_pkgs.append('multiprocessing')
 
-etc_path = paths_and_owners['etc']['path']
-etc_root = os.path.dirname(etc_path)
-libexec_path = paths_and_owners['libexec']['path']
-var_path = paths_and_owners['var']['path']
+etc_root = os.path.dirname(default_paths['etc'])
 
 # nagios/shinken global config
 main_config_files = ('nagios.cfg',
@@ -385,7 +382,7 @@ setup(
                       ],
 
   scripts = glob('bin/shinken-[!_]*'),
-  data_files=[(etc_path,
+  data_files=[(default_paths['etc'],
                [# other configs
                 'etc/commands.cfg',
                 'etc/contactgroups.cfg',
@@ -397,13 +394,13 @@ setup(
                 'etc/templates.cfg',
                 'etc/timeperiods.cfg',
                 ]),
-              (os.path.join(etc_path, 'objects', 'hosts'),
+              (os.path.join(default_paths['etc'], 'objects', 'hosts'),
                glob('etc/objects/hosts/[!_]*.cfg')),
-              (os.path.join(etc_path, 'objects', 'services'),
+              (os.path.join(default_paths['etc'], 'objects', 'services'),
                glob('etc/objects/services/[!_]*.cfg')),
-              (os.path.join(etc_path, 'objects', 'contacts'),
+              (os.path.join(default_paths['etc'], 'objects', 'contacts'),
                glob('etc/objects/contacts/[!_]*.cfg')),
-              (os.path.join(etc_path, 'certs') ,
+              (os.path.join(default_paths['etc'], 'certs') ,
                glob('etc/certs/[!_]*.pem')),
               (os.path.join('/etc', 'init.d'),
                ['bin/init.d/shinken',
@@ -414,7 +411,7 @@ setup(
                 'bin/init.d/shinken-scheduler']),
               (os.path.join(etc_root, 'default',),
                ['bin/default/shinken']),
-              (var_path, ['var/void_for_git']),
-              (libexec_path, ['libexec/check.sh']),
+              (default_paths['var'], ['var/void_for_git']),
+              (default_paths['libexec'], ['libexec/check.sh']),
               ]
 )
