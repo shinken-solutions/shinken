@@ -1,7 +1,7 @@
 from xml.etree.ElementTree import ElementTree
+
 tree = ElementTree()
 tree.parse("local.xml")
-#tree.parse("www.google.com.xml")
 p = tree.findall('host')
 print "Number of host", len(p)
 
