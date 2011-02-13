@@ -20,9 +20,21 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
+# Shinken requires Python 2.4, but does not support Python 3.x yet.
+import sys
+try:
+    python_version = sys.version_info
+except:
+    python_version = (1,5)
+if python_version < (2, 4):
+    sys.exit("Shinken require as a minimum Python 2.4.x, sorry")
+elif python_version >= (3,):
+    sys.exit("Shinken is not yet compatible with Python3k, sorry")
+
 from setuptools import setup, find_packages
 from glob import glob
-import os, sys
+import os
 import ConfigParser
 try:
     import pwd
@@ -30,20 +42,6 @@ try:
 except ImportError:
     # assume non-unix platform
     pass
-
-# Shinken requires Python 2.4, but does not support Python 3.x yet.
-try:
-    python_version = sys.version_info
-except:
-    python_version = (1,5)
-
-
-## Make sure people are using Python 2.4 or higher
-if python_version < (2, 4):
-    sys.exit("Shinken require as a minimum Python 2.4.x, sorry")
-elif python_version >= (3,):
-    sys.exit("Shinken is not yet compatible with Python3k, sorry")
-
 
 from distutils import log
 from distutils.core import Command
