@@ -35,6 +35,7 @@ elif python_version >= (3,):
 from setuptools import setup, find_packages
 from glob import glob
 import os
+import itertools
 import ConfigParser
 try:
     import pwd
