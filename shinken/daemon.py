@@ -3,6 +3,7 @@
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 #This file is part of Shinken.
 #
@@ -432,10 +433,11 @@ Also put default value in the properties if some are missing in the config_file 
 
     def get_header(self):
         return ["Shinken %s" % VERSION,
-                "Copyright (c) 2009-2010 :",
+                "Copyright (c) 2009-2011 :",
                 "Gabes Jean (naparuba@gmail.com)",
                 "Gerhard Lausser, Gerhard.Lausser@consol.de",
 	        "Gregory Starck, g.starck@gmail.com",
+                "Hartmut Goebel, h.goebel@goebel-consult.de",
                 "License: AGPL"]
 
     def print_header(self):
