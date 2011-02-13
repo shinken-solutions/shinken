@@ -277,7 +277,7 @@ class install_config(Command):
         return self.outfiles or []
 
     @staticmethod
-    def _chown(path, owner, group):
+    def recursive_chown(path, uid, gid, owner, group):
         log.info("Changing owner of %s to %s:%s", path, owner, group)
         if not self.dry_run:
             os.chown(path, uid, gid)
