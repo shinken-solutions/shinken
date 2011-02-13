@@ -3,6 +3,7 @@
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 #This file is part of Shinken.
 #
@@ -315,7 +316,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         print "modulemanager absolute file", modulespath
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
-        self.modulespath = os.path.join(parent_path, 'shinken', 'modules'))
+        self.modulespath = os.path.join(parent_path, 'shinken', 'modules')
         logger.log("Using modules path : %s" % self.modulespath)
 
 
@@ -432,10 +433,11 @@ Also put default value in the properties if some are missing in the config_file 
 
     def get_header(self):
         return ["Shinken %s" % VERSION,
-                "Copyright (c) 2009-2010 :",
+                "Copyright (c) 2009-2011 :",
                 "Gabes Jean (naparuba@gmail.com)",
                 "Gerhard Lausser, Gerhard.Lausser@consol.de",
 	        "Gregory Starck, g.starck@gmail.com",
+                "Hartmut Goebel, h.goebel@goebel-consult.de",
                 "License: AGPL"]
 
     def print_header(self):

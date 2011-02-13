@@ -3,6 +3,7 @@
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 #This file is part of Shinken.
 #
@@ -42,6 +43,9 @@ class Downtime:
         'is_in_effect': None,
         'has_been_triggered': None,
         'can_be_deleted': None,
+# TODO: find a very good way to handle the downtime "ref"
+# ref must effectively not be in properties because it points onto a real object.
+#        'ref':          None
     }
 
 

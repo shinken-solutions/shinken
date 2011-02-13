@@ -137,31 +137,48 @@ class Livestatus_broker(BaseModule):
         c_id = data['instance_id']
         # We have only one config here, with id 0
         c = self.configs[0]
-        print c
-        for prop in data:
-            setattr(c, prop, data[prop])
-        #print "CFG:", c
+        self.update_element(c, data)
+    
 
-
+    def set_schedulingitem_values(self, i):
+        i.check_period = self.get_timeperiod(i.check_period)
+        i.notification_period = self.get_timeperiod(i.notification_period)
+        i.contacts = self.get_contacts(i.contacts)
+        #Escalations is not use for status_dat
+        del i.escalations
+        
+    def set_ref_attributes_on_item(self, i):
+        for g in i.comments, i.downtimes: 
+            for e in g:
+                e.ref = i
+        
     def manage_initial_host_status_brok(self, b):
         data = b.data
         h_id = data['id']
         #print "Creating host:", h_id, data
         h = Host({})
-        for prop in data:
-            setattr(h, prop, data[prop])
-        h.check_period = self.get_timeperiod(h.check_period)
-        h.notification_period = self.get_timeperiod(h.notification_period)
-        h.contacts = self.get_contacts(h.contacts)
-        #Escalations is not use for status_dat
-        del h.escalations
-
+        self.update_element(h, data)        
+        self.set_schedulingitem_values(h)
+        self.set_ref_attributes_on_item(h)
+        
         h.service_ids = []
         h.services = []
         self.hosts[h_id] = h
         self.hostname_lookup_table[h.host_name] = h_id
         self.number_of_objects += 1
 
+    #In fact, an update of a host is like a check return
+    def manage_update_host_status_brok(self, b):
+        self.manage_host_check_result_brok(b)
+        data = b.data
+        #In the status, we've got duplicated item, we must relink thems
+        h = self.find_host(data['host_name'])
+        if h == None:
+            print "Warning : the host %s is unknown!" % data['host_name']
+            return
+        
+        self.set_schedulingitem_values(h)
+        self.set_ref_attributes_on_item(h)
 
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
@@ -170,8 +187,7 @@ class Livestatus_broker(BaseModule):
         del data['members']
         #print "Creating hostgroup:", hg_id, data
         hg = Hostgroup()
-        for prop in data:
-            setattr(hg, prop, data[prop])
+        self.update_element(hg, data)
         setattr(hg, 'members', [])
         for (h_id, h_name) in members:
             if h_id in self.hosts:
@@ -187,14 +203,9 @@ class Livestatus_broker(BaseModule):
         #print "Creating Service:", s_id, data
         s = Service({})
         self.update_element(s, data)
-
-        s.check_period = self.get_timeperiod(s.check_period)
-        s.notification_period = self.get_timeperiod(s.notification_period)
-
-        s.contacts = self.get_contacts(s.contacts)
-
-        del s.escalations
-
+        self.set_schedulingitem_values(s)
+        self.set_ref_attributes_on_item(s)
+        
         h = self.find_host(data['host_name'])
         if h != None:
             # Reconstruct the connection between hosts and services
@@ -202,6 +213,7 @@ class Livestatus_broker(BaseModule):
             h.services.append(s)
             # There is already a s.host_name, but a reference to the h object can be useful too
             s.host = h
+        
         self.services[s_id] = s
         self.servicename_lookup_table[s.host_name + s.service_description] = s_id
         self.number_of_objects += 1
@@ -214,8 +226,7 @@ class Livestatus_broker(BaseModule):
         del data['members']
         #print "Creating servicegroup:", sg_id, data
         sg = Servicegroup()
-        for prop in data:
-            setattr(sg, prop, data[prop])
+        self.update_element(sg, data)
         setattr(sg, 'members', [])
         for (s_id, s_name) in members:
             if s_id in self.services:
@@ -243,8 +254,7 @@ class Livestatus_broker(BaseModule):
         del data['members']
         #print "Creating contactgroup:", cg_id, data
         cg = Contactgroup()
-        for prop in data:
-            setattr(cg, prop, data[prop])
+        self.update_element(cg, data)
         setattr(cg, 'members', [])
         for (c_id, c_name) in members:
             if c_id in self.contacts:
@@ -391,10 +401,20 @@ class Livestatus_broker(BaseModule):
         if s == None:
             print "Warning : the service %s/%s is unknown!" % (data['host_name'], data['service_description'])
             return
-        s.check_period = self.get_timeperiod(s.check_period)
-        s.notification_period = self.get_timeperiod(s.notification_period)
-        s.contacts = self.get_contacts(s.contacts)
-        del s.escalations
+        self.set_schedulingitem_values(s)
+        
+        ## damn:
+        if False:
+            self.set_ref_attributes_on_item(s)
+            ## don't know why but this makes query3 of "test_status" of livestatus test fails :
+# ======================================================================
+#FAIL: test_status (__main__.TestConfigSmall)
+#----------------------------------------------------------------------
+#Traceback (most recent call last):
+#  File "./test_livestatus_2.py", line xxx, in test_status
+#    self.assert_(response == 'test_host_0;test_ok_0;1\n')
+#AssertionError
+
 
 
     def manage_host_check_result_brok(self, b):
@@ -408,22 +428,6 @@ class Livestatus_broker(BaseModule):
     # this brok should arrive within a second after the host_check_result_brok
     def manage_host_next_schedule_brok(self, b):
         self.manage_host_check_result_brok(b)
-
-
-    #In fact, an update of a host is like a check return
-    def manage_update_host_status_brok(self, b):
-        self.manage_host_check_result_brok(b)
-        data = b.data
-        #In the status, we've got duplicated item, we must relink thems
-        h = self.find_host(data['host_name'])
-        if h == None:
-            print "Warning : the host %s is unknown!" % data['host_name']
-            return
-        h.check_period = self.get_timeperiod(h.check_period)
-        h.notification_period = self.get_timeperiod(h.notification_period)
-        h.contacts = self.get_contacts(h.contacts)
-        #Escalations is not use for status_dat
-        del h.escalations
 
 
     #A log brok will be written into a database
@@ -943,6 +947,7 @@ class Livestatus_broker(BaseModule):
                 # before we open the socket
                 pass
 
+        self.do_stop()
 
 def livestatus_factory(cursor, row):
     return Logline(row)

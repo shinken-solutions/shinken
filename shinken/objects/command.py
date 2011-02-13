@@ -3,6 +3,7 @@
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 #This file is part of Shinken.
 #
@@ -148,7 +149,7 @@ class Commands(object):
 
     def find_cmd_id_by_name(self, name):
         for id in self.commands:
-            if self.commands[id].command_name == name:
+            if getattr(self.commands[id], 'command_name', '') == name:
                 return id
         return None
 
