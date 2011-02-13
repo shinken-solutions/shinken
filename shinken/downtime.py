@@ -42,7 +42,9 @@ class Downtime:
         'is_in_effect': None,
         'has_been_triggered': None,
         'can_be_deleted': None,
-        'ref':          None
+# TODO: find a very good way to handle the downtime "ref"
+# ref must effectively not be in properties because it points onto a real object.
+#        'ref':          None
     }
 
 
