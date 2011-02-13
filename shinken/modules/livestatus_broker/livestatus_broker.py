@@ -140,12 +140,15 @@ class Livestatus_broker(BaseModule):
         self.update_element(c, data)
     
 
-    def set_host_values(self, h):
-        h.check_period = self.get_timeperiod(h.check_period)
-        h.notification_period = self.get_timeperiod(h.notification_period)
-        h.contacts = self.get_contacts(h.contacts)
+    def set_schedulingitem_values(self, i):
+        i.check_period = self.get_timeperiod(i.check_period)
+        i.notification_period = self.get_timeperiod(i.notification_period)
+        i.contacts = self.get_contacts(i.contacts)
+        for g in i.comments, i.downtimes:
+            for e in g:
+                e.ref = i
         #Escalations is not use for status_dat
-        del h.escalations
+        del i.escalations
         
     def manage_initial_host_status_brok(self, b):
         data = b.data
@@ -153,7 +156,7 @@ class Livestatus_broker(BaseModule):
         #print "Creating host:", h_id, data
         h = Host({})
         self.update_element(h, data)        
-        self.set_host_values(h)
+        self.set_schedulingitem_values(h)
         
         h.service_ids = []
         h.services = []
@@ -171,7 +174,7 @@ class Livestatus_broker(BaseModule):
             print "Warning : the host %s is unknown!" % data['host_name']
             return
         
-        self.set_host_values(h)
+        self.set_schedulingitem_values(h)
 
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
@@ -196,12 +199,7 @@ class Livestatus_broker(BaseModule):
         #print "Creating Service:", s_id, data
         s = Service({})
         self.update_element(s, data)
-        if len(s.comments):
-            print("DBG: in manage:", s.comments)
-        s.check_period = self.get_timeperiod(s.check_period)
-        s.notification_period = self.get_timeperiod(s.notification_period)
-
-        s.contacts = self.get_contacts(s.contacts)
+        self.set_schedulingitem_values(s)
 
         h = self.find_host(data['host_name'])
         if h != None:
@@ -398,9 +396,7 @@ class Livestatus_broker(BaseModule):
         if s == None:
             print "Warning : the service %s/%s is unknown!" % (data['host_name'], data['service_description'])
             return
-        s.check_period = self.get_timeperiod(s.check_period)
-        s.notification_period = self.get_timeperiod(s.notification_period)
-        s.contacts = self.get_contacts(s.contacts)
+        self.set_schedulingitem_values(s)
 
 
     def manage_host_check_result_brok(self, b):
