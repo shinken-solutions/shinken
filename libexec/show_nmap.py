@@ -67,6 +67,7 @@ class ConfigurationManager:
         self.h = h
         self.path = path
         self.templates = ['generic-host']
+        self.services = []
 
         
     def fill_system_conf(self):
@@ -97,8 +98,47 @@ class ConfigurationManager:
 
         t = map[ios]
         self.templates.append(t)
-        
 
+
+    def fill_ports_services(self):
+        for p in self.h.open_ports:
+            print "The port", p, " is open"
+            f = getattr(self, 'gen_srv_'+str(p), None)
+            if f:
+                f()
+
+
+    def generate_service(self, desc, check):
+        srv = {'desc' : desc, 'check' : check}
+        self.services.append(srv)
+
+
+    # HTTP
+    def gen_srv_80(self):
+        self.generate_service('HTTP', 'check_http')
+
+    # SSH
+    def gen_srv_22(self):
+        self.generate_service('SSH', 'check_ssh')
+
+    # HTTPS + certificate
+    def gen_srv_443(self):
+        self.generate_service('HTTPS', 'check_https')
+        self.generate_service('HTTPS-CERT', 'check_https_certificate')
+        
+    # FTP
+    def gen_srv_21(self):
+        self.generate_service('FTP', 'check_ftp')
+        
+    # DNS
+    def gen_srv_53(self):
+        self.generate_service('DNS', 'check_dig')
+        
+    # Oracle Listener
+    def gen_srv_1521(self):
+        self.generate_service('Oracle-Listener', 'check_oracle_listener')
+      
+        
 
 class DetectedHost:
     def __init__(self):
@@ -266,6 +306,6 @@ for h in all_hosts:
     # And generate the configuration too
     c = ConfigurationManager(h, cfg_output_dir)
     c.fill_system_conf()
-    
+    c.fill_ports_services()
     print c.__dict__
     
