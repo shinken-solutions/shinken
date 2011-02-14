@@ -42,7 +42,7 @@ parser.add_option('-x', '--xml-input',
                   dest="xml_input", help=('Output of nmap'))
 parser.add_option('-o', '--dir-output', dest="output_dir",
                   help="Directory output for results")
-parser.add_option('--d', '--cfg-dir-output', dest="cfg_output_dir",
+parser.add_option('-d', '--cfg-dir-output', dest="cfg_output_dir",
                   help="Directory output for host/services generated configurations")
 opts, args = parser.parse_args()
 
@@ -168,12 +168,21 @@ class ConfigurationManager:
         
     # DNS
     def gen_srv_53(self):
-        self.generate_service('DNS', 'check_dig')
+        self.generate_service('DNS', 'check_dig!$HOSTADDRESS$')
         
     # Oracle Listener
     def gen_srv_1521(self):
         self.generate_service('Oracle-Listener', 'check_oracle_listener')
-    
+
+    # Now for MSSQL
+    def gen_srv_1433(self):
+        self.generate_service('MSSQL-Connexion', 'check_mssql_connexion')
+        print "Will need check_mssql_health from http://labs.consol.de/nagios/check_mssql_health/"
+
+    # SMTP
+    def gen_srv_25(self):
+        self.generate_service('SMTP', 'check_smtp')
+        
     
     # Write the host cfg file
     def write_host_configuration(self):
