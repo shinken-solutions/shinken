@@ -109,12 +109,13 @@ class CommandCall:
         else:
             self.valid = False
             self.command = tab[0]
-        #If the host/service do not give an override poller_tag, take
-        #the one of the command
-        self.poller_tag = poller_tag #from host/service
-        self.module_type = self.command.module_type
-        if self.valid and poller_tag == None:
-            self.poller_tag = self.command.poller_tag #from command if not set
+        if self.valid:
+            #If the host/service do not give an override poller_tag, take
+            #the one of the command
+            self.poller_tag = poller_tag #from host/service
+            self.module_type = self.command.module_type
+            if self.valid and poller_tag == None:
+                self.poller_tag = self.command.poller_tag #from command if not set
 
 
     def is_valid(self):

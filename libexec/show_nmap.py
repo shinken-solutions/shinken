@@ -120,6 +120,21 @@ class ConfigurationManager:
         return s
 
 
+    def get_cfg_for_services(self):
+        r = {}
+        print "And now services:"
+        for srv in self.services:
+            desc = srv['service_description']
+            s = 'define service {\n'
+            for k in srv:
+                v = srv[k]
+                s += '  %s    %s\n' % (k, v)
+            s += '}\n'
+            print s
+            r[desc] = s
+        return r
+
+            
 
     def fill_ports_services(self):
         for p in self.h.open_ports:
@@ -130,7 +145,7 @@ class ConfigurationManager:
 
 
     def generate_service(self, desc, check):
-        srv = {'desc' : desc, 'check' : check}
+        srv = {'use' : 'generic-service', 'service_description' : desc, 'check_command' : check, 'host_name' : self.h.get_name()}
         self.services.append(srv)
 
 
@@ -187,6 +202,38 @@ class ConfigurationManager:
             return
         fd.write(s)
         fd.close()
+        
+
+    def write_services_configuration(self):
+        name = self.h.get_name()
+        # If the host is bad, get out
+        if not name:
+            return
+        
+        # Write the directory with the host config
+        p = os.path.join(self.srvs_path, name)
+        print "Want to create", p
+        try:
+            os.mkdir(p)
+        except OSError, exp:
+            # If directory already exist, it's not a problem
+            if not exp.errno != '17':
+                print "Cannot create the directory '%s' : '%s'" % (p, exp)
+                return
+        # Ok now we get the services to create    
+        r = c.get_cfg_for_services()
+        for s in r:
+            cfg_p = os.path.join(p, name+'-'+s+'.cfg')
+            print "Want to wrote", cfg_p
+            buf = r[s]
+            try:
+                fd = open(cfg_p, 'w')
+            except OSError, exp:
+                print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+                return
+            fd.write(buf)
+            fd.close()
+        
         
 
 
@@ -363,5 +410,6 @@ for h in all_hosts:
     c.fill_system_conf()
     c.fill_ports_services()
     c.write_host_configuration()
+    c.write_services_configuration()
     print c.__dict__
     
