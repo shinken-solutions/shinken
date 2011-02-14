@@ -110,20 +110,20 @@ class ConfigurationManager:
         t = map[ios]
         self.templates.append(t)
 
-
-    def get_cfg_for_host(self):
-        props = {}
-        props['host_name'] = self.h.get_name()
-        props['criticity'] = self.criticity
-
-        
         # Look for VMWare VM or hosts
         if self.h.is_vmware_vm():
             self.templates.append('vmware-vm')
         # Now is an host?
         if self.h.is_vmware_esx():
             self.templates.append('vmware-host')
-        
+
+
+    def get_cfg_for_host(self):
+        props = {}
+        props['host_name'] = self.h.get_name()
+        props['criticity'] = self.criticity
+
+             
         props['use'] = ','.join(self.templates)            
         
         print "Want to write", props
@@ -159,11 +159,23 @@ class ConfigurationManager:
             if f:
                 f()
 
+    def fill_system_services(self):
+        for t in self.templates:
+            print "Registering services for the template", t
+            # Python functions cannot be -, so we change it by _
+            t = t.replace('-','_')
+            print "Search for", 'gen_srv_'+str(t)
+            f = getattr(self, 'gen_srv_'+str(t), None)
+            if f:
+                f()
+
 
     def generate_service(self, desc, check):
         srv = {'use' : 'generic-service', 'service_description' : desc, 'check_command' : check, 'host_name' : self.h.get_name()}
         self.services.append(srv)
 
+
+    ######### For network ones
 
     # HTTP
     def gen_srv_80(self):
@@ -214,6 +226,33 @@ class ConfigurationManager:
     #Mysql
     def gen_srv_3306(self):
         self.generate_service('Mysql', 'check_mysql_connexion')
+
+
+    #### 
+    #      For system ones
+    ####
+    def gen_srv_linux(self):
+        print "Want a Linux checks, but I don't know what to propose sorry..."
+
+    def gen_srv_windows(self):
+        print "Want a Windows checks, but I don't know what to propose sorry..."
+
+    #For a VM we can add cpu, io, mem and net
+    def gen_srv_vmware_vm(self):
+        self.generate_service('VM-Cpu', "check_esx_vm!cpu")
+        self.generate_service('VM-IO', "check_esx_vm!io")
+        self.generate_service('VM-Memory', "check_esx_vm!mem")
+        self.generate_service('VM-Network', "check_esx_vm!net")
+        print "Will need the check_esx3.pl from http://www.op5.org/community/plugin-inventory/op5-projects/op5-plugins"
+
+    # Quite the same for the host
+    def gen_srv_vmware_host(self):
+        self.generate_service('ESX-host-Cpu', "check_esx_host!cpu")
+        self.generate_service('ESX-host-IO', "check_esx_host!io")
+        self.generate_service('ESX-host-Memory', "check_esx_host!mem")
+        self.generate_service('ESX-host-Network', "check_esx_host!net")
+        print "Will need the check_esx3.pl from http://www.op5.org/community/plugin-inventory/op5-projects/op5-plugins"
+        
 
 
     # Write the host cfg file
@@ -468,6 +507,7 @@ for h in all_hosts:
     c = ConfigurationManager(h, cfg_output_dir, criticity)
     c.fill_system_conf()
     c.fill_ports_services()
+    c.fill_system_services()
     c.write_host_configuration()
     c.write_services_configuration()
     print c.__dict__
