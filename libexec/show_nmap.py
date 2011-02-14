@@ -192,6 +192,10 @@ class ConfigurationManager:
     def gen_srv_636(self):
         self.generate_service('Ldaps', 'check_ldaps')
     
+    #Mysql
+    def gen_srv_3306(self):
+        self.generate_service('Mysql', 'check_mysql_connexion')
+
 
     # Write the host cfg file
     def write_host_configuration(self):
