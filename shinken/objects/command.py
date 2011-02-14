@@ -85,8 +85,8 @@ class Command(object):
             if brok_type in cls.properties[prop].fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)
-                elif 'default' in cls.properties[prop]:
-                    data[prop] = cls.properties[prop].default
+                #elif 'default' in cls.properties[prop]:
+                #    data[prop] = cls.properties[prop].default
 
 
 

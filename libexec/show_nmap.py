@@ -116,6 +116,7 @@ class ConfigurationManager:
             s += '  %s    %s\n' % (k, v)
         s += '}\n'
         print s
+        return s
 
 
 
@@ -177,7 +178,14 @@ class ConfigurationManager:
                 return
         cfg_p = os.path.join(p, name+'.cfg')
         print "Want to wrote", cfg_p
-        self.get_cfg_for_host()
+        s = self.get_cfg_for_host()
+        try:
+            fd = open(cfg_p, 'w')
+        except OSError, exp:
+            print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+            return
+        fd.write(s)
+        fd.close()
         
 
 
