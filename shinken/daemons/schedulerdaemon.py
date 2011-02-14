@@ -357,7 +357,8 @@ class Shinken(Daemon):
         #We must update our Config dict macro with good value
         #from the config parameters
         self.sched.conf.fill_resource_macros_names_macros()
-
+        print "DBG: got macors", self.sched.conf.macros
+        print getattr(self.sched.conf, '$PLUGINSDIR$', 'MONCUL'*100)
 
         #Creating the Macroresolver Class & unique instance
         m = MacroResolver()

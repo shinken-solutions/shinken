@@ -584,8 +584,9 @@ class SchedulingItem(Item):
         # Now get data from check
         self.execution_time = c.execution_time
         self.last_chk = int(c.check_time)
-        self.output = c.output
-        self.long_output = c.long_output
+        # Get output and forgot bad UTF8 values
+        self.output = c.output.decode('utf8', 'ignore')
+        self.long_output = c.long_output.decode('utf8', 'ignore')
 
         # Get the perf_data only if we want it in the configuration
         if self.__class__.process_performance_data and self.process_perf_data:

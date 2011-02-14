@@ -306,8 +306,10 @@ class Config(Item):
     def fill_resource_macros_names_macros(self):
         """ fill the macro dict will all value
         from self.resource_macros_names"""
+        properties = self.__class__.properties
         macros = self.__class__.macros
         for macro_name in self.resource_macros_names:
+            properties['$'+macro_name+'$'] = StringProp(default='')
             macros[macro_name] = '$'+macro_name+'$'
 
 
@@ -1351,10 +1353,10 @@ class Config(Item):
 
 
 
-    #Use the self.conf and make nb_parts new confs.
-    #nbparts is equal to the number of schedulerlink
-    #New confs are independant whith checks. The only communication
-    #That can be need is macro in commands
+    # Use the self.conf and make nb_parts new confs.
+    # nbparts is equal to the number of schedulerlink
+    # New confs are independant whith checks. The only communication
+    # That can be need is macro in commands
     def cut_into_parts(self):
         #print "Scheduler configurated :", self.schedulerlinks
         #I do not care about alive or not. User must have set a spare if need it
@@ -1381,9 +1383,10 @@ class Config(Item):
                         and not isinstance(Config.properties[prop], UnusedProp):
                     val = getattr(self, prop)
                     setattr(self.confs[i], prop, val)
-
-            #we need a deepcopy because each conf
-            #will have new hostgroups
+                    #print "Copy", prop, val
+            
+            # we need a deepcopy because each conf
+            # will have new hostgroups
             self.confs[i].id = i
             self.confs[i].commands = self.commands
             self.confs[i].timeperiods = self.timeperiods

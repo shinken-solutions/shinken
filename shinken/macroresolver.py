@@ -126,7 +126,8 @@ class MacroResolver(Borg):
             else:
                 return str(value)
         except AttributeError , exp:
-            return str(exp)
+            # Return no value
+            return ''
 
 
     #For some macros, we need to delete unwanted caracters

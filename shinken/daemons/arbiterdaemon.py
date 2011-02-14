@@ -421,7 +421,6 @@ class Arbiter(Daemon):
 
         logger.log("Configuration Loaded")
 
-
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
         self.pidfile = self.conf.lock_file
