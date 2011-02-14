@@ -115,10 +115,16 @@ class ConfigurationManager:
         props = {}
         props['host_name'] = self.h.get_name()
         props['criticity'] = self.criticity
-        props['use'] = ','.join(self.templates)
+
         
+        # Look for VMWare VM or hosts
         if self.h.is_vmware_vm():
-            props['_VMWARE_VM'] = '1'
+            self.templates.append('vmware-vm')
+        # Now is an host?
+        if self.h.is_vmware_esx():
+            self.templates.append('vmware-host')
+        
+        props['use'] = ','.join(self.templates)            
         
         print "Want to write", props
         s = 'define host {\n'
@@ -299,9 +305,27 @@ class DetectedHost:
             return self.ip
         return None
 
+    # We look for the host VMWare
+    def is_vmware_esx(self):
+        # If it's not a virtual machine baid out
+        if self.mac_vendor != 'VMware':
+            return False
+        # If we got all theses ports, we ae quite ok for
+        # a VMWare host
+        needed_ports = [22, 80, 443, 902, 903, 5989]
+        for p in needed_ports:
+            if p not in self.open_ports:
+                # find one missing port, not a VMWare host
+                return False
+        # Ok all ports are found, we are a ESX :)
+        return True
 
     # Say if we are a virtual machine or not
     def is_vmware_vm(self):
+        # special case : the esx host itself
+        if self.is_vmware_esx():
+            return False
+        # Else, look at the mac vendor
         return self.mac_vendor == 'VMware'
 
 
