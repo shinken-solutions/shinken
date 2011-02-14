@@ -42,20 +42,16 @@ parser.add_option('-x', '--xml-input',
                   dest="xml_input", help=('Output of nmap'))
 parser.add_option('-o', '--dir-output', dest="output_dir",
                   help="Directory output for results")
-parser.add_option('--dh', '--hosts-cfg-dir-output', dest="host_cfg_output_dir",
-                  help="Directory output for host generated configurations")
-parser.add_option('--ds', '--services-cfg-dir-output', dest="srv_cfg_output_dir",
-                  help="Directory output for host generated configurations")
+parser.add_option('--d', '--cfg-dir-output', dest="cfg_output_dir",
+                  help="Directory output for host/services generated configurations")
 opts, args = parser.parse_args()
 
 if not opts.xml_input:
     parser.error("Requires one nmap xml output file (option -x/--xml-input")
 if not opts.output_dir:
     parser.error("Requires one output directory (option -o/--dir-output")
-if not opts.host_cfg_output_dir:
-    parser.error("Requires one configuration output directory (option --dh/--hosts-cfg-dir-output")
-if not opts.srv_cfg_output_dir:
-    parser.error("Requires one configuration output directory (option --ds/--services-cfg-dir-output")
+if not opts.cfg_output_dir:
+    parser.error("Requires one configuration output directory (option -d/--cfg-dir-output")
 if args:
     parser.error("Does not accept any argument.")
 
@@ -68,10 +64,10 @@ def is_up(h):
 
 
 class ConfigurationManager:
-    def __init__(self, h, hosts_path, srvs_path):
+    def __init__(self, h, path):
         self.h = h
-        self.hosts_path = hosts_path
-        self.srvs_path = srvs_path
+        self.hosts_path = os.path.join(path, 'hosts')
+        self.srvs_path = os.path.join(path, 'services')
         self.templates = ['generic-host']
         self.services = []
         
@@ -250,8 +246,7 @@ class DetectedHost:
 
 xml_input = opts.xml_input
 output_dir = opts.output_dir
-hosts_cfg_output_dir = opts.host_cfg_output_dir
-srvs_cfg_output_dir = opts.srv_cfg_output_dir
+cfg_output_dir = opts.cfg_output_dir
 
 tree = ElementTree()
 try:
@@ -364,7 +359,7 @@ for h in all_hosts:
     f.close()
 
     # And generate the configuration too
-    c = ConfigurationManager(h, hosts_cfg_output_dir, srvs_cfg_output_dir)
+    c = ConfigurationManager(h, cfg_output_dir)
     c.fill_system_conf()
     c.fill_ports_services()
     c.write_host_configuration()
