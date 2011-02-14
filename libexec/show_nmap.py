@@ -26,6 +26,7 @@ import sys
 import cPickle
 import os
 
+
 try:
     from xml.etree.ElementTree import ElementTree
 except ImportError:
@@ -68,7 +69,7 @@ class ConfigurationManager:
         self.path = path
         self.templates = ['generic-host']
         self.services = []
-
+        
         
     def fill_system_conf(self):
         ios = self.h.os
@@ -98,6 +99,24 @@ class ConfigurationManager:
 
         t = map[ios]
         self.templates.append(t)
+
+
+    def get_cfg_for_host(self):
+        props = {}
+        props['host_name'] = self.h.get_name()
+        props['use'] = ','.join(self.templates)
+        
+        if self.h.is_vmware_vm():
+            props['_VMWARE_VM'] = '1'
+        
+        print "Want to write", props
+        s = 'define host {\n'
+        for k in props:
+            v = props[k]
+            s += '  %s    %s\n' % (k, v)
+        s += '}\n'
+        print s
+
 
 
     def fill_ports_services(self):
@@ -137,8 +156,30 @@ class ConfigurationManager:
     # Oracle Listener
     def gen_srv_1521(self):
         self.generate_service('Oracle-Listener', 'check_oracle_listener')
-      
+    
+    
+    # Write the host cfg file
+    def write_host_configuration(self):
+        name = self.h.get_name()
+        # If the host is bad, get out
+        if not name:
+            return
         
+        # Write the directory with the host config
+        p = os.path.join(self.path, name)
+        print "Want to create", p
+        try:
+            os.mkdir(p)
+        except OSError, exp:
+            # If directory already exist, it's not a problem
+            if not exp.errno != '17':
+                print "Cannot create the directory '%s' : '%s'" % (p, exp)
+                return
+        cfg_p = os.path.join(p, name+'.cfg')
+        print "Want to wrote", cfg_p
+        self.get_cfg_for_host()
+        
+
 
 class DetectedHost:
     def __init__(self):
@@ -166,6 +207,11 @@ class DetectedHost:
         if self.ip != '':
             return self.ip
         return None
+
+
+    # Say if we are a virtual machine or not
+    def is_vmware_vm(self):
+        return self.mac_vendor == 'VMware'
 
 
     # Fill the different os possibilities
@@ -307,5 +353,6 @@ for h in all_hosts:
     c = ConfigurationManager(h, cfg_output_dir)
     c.fill_system_conf()
     c.fill_ports_services()
+    c.write_host_configuration()
     print c.__dict__
     
