@@ -183,6 +183,9 @@ class ConfigurationManager:
     def gen_srv_25(self):
         self.generate_service('SMTP', 'check_smtp')
         
+    # And the SMTPS too
+    def gen_srv_465(self):
+        self.generate_service('SMTPS', 'check_smtps')
 
     # LDAP
     def gen_srv_389(self):
