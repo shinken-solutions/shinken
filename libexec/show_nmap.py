@@ -19,6 +19,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+#sudo nmap 192.168.0.1 -T4 -O --traceroute -oX toto.xml
 
 import optparse
 import sys
@@ -40,12 +41,16 @@ parser.add_option('-x', '--xml-input',
                   dest="xml_input", help=('Output of nmap'))
 parser.add_option('-o', '--dir-output', dest="output_dir",
                   help="Directory output for results")
+parser.add_option('-d', '--cfg-dir-output', dest="cfg_output_dir",
+                  help="Directory output for generated configurations")
 opts, args = parser.parse_args()
 
 if not opts.xml_input:
     parser.error("Requires one nmap xml output file (option -x/--xml-input")
 if not opts.output_dir:
     parser.error("Requires one output directory (option -o/--dir-output")
+if not opts.cfg_output_dir:
+    parser.error("Requires one configuration output directory (option -d/--cfg-dir-output")
 if args:
     parser.error("Does not accept any argument.")
 
@@ -66,6 +71,8 @@ class DetectedHost:
         self.os_possibilities = []
         self.os = ('', '')
         self.open_ports = []
+
+        self.parent = ''
 
 
     # Keep the first name we got
@@ -106,6 +113,7 @@ class DetectedHost:
 
 xml_input = opts.xml_input
 output_dir = opts.output_dir
+cfg_output_dir = opts.cfg_output_dir
 
 tree = ElementTree()
 try:
@@ -137,7 +145,8 @@ for h in hosts:
         if addrtype == 'ipv4':
             dh.ip = addr.attrib['addr']
         if addrtype == "mac":
-            dh.mac_vendor = addr.attrib['vendor']
+            if 'vendor' in addr.attrib:
+                dh.mac_vendor = addr.attrib['vendor']
 
 
     # Now we got the hostnames
@@ -153,9 +162,18 @@ for h in hosts:
     # Now print the traceroute
     traces = h.findall('trace')
     for trace in traces:
+        #print trace.__dict__
         hops = trace.findall('hop')
-        #for hop in hops:
-        #    print hop.__dict__
+        #print "Number of hops", len(hops)
+        distance = len(hops)
+        if distance >= 2:
+            for hop in hops:
+                ttl = int(hop.attrib['ttl'])
+                #We search the direct father
+                if ttl == distance-1:
+                    #print ttl
+                    #print hop.__dict__
+                    dh.parent = hop.attrib['ipaddr']
 
 
     # Now the OS detection
@@ -206,3 +224,7 @@ for h in all_hosts:
     f = open(path, 'wb')
     cPickle.dump(h, f)
     f.close()
+
+
+
+# Ok now we generate the definitive conf
