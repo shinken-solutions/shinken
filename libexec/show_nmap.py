@@ -183,7 +183,16 @@ class ConfigurationManager:
     def gen_srv_25(self):
         self.generate_service('SMTP', 'check_smtp')
         
+
+    # LDAP
+    def gen_srv_389(self):
+        self.generate_service('Ldap', 'check_ldap')
+
+    # LDAPS
+    def gen_srv_636(self):
+        self.generate_service('Ldaps', 'check_ldaps')
     
+
     # Write the host cfg file
     def write_host_configuration(self):
         name = self.h.get_name()
