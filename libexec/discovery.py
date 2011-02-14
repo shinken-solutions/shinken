@@ -79,7 +79,25 @@ class ConfigurationManager:
         self.templates = ['generic-host']
         self.services = []
         self.criticity = criticity
+        self.parents = []
+
         
+    # We search if our potential parent is present in the
+    # other detected hosts. If so, set it as my parent
+    def look_for_parent(self, all_hosts):
+        parent = self.h.parent
+        print "Look for my parent", self.h.get_name(), "->", parent
+        # Ok, we didn't find any parent
+        # we bail out
+        if parent == '':
+            return
+        for h in all_hosts:
+            print "Is it you?", h.get_name()
+            if h.get_name() == parent:
+                print "Houray, we find our parent", self.h.get_name(), "->", h.get_name()
+                self.parents.append(h.get_name())
+        
+
         
     def fill_system_conf(self):
         ios = self.h.os
@@ -123,7 +141,11 @@ class ConfigurationManager:
         props['host_name'] = self.h.get_name()
         props['criticity'] = self.criticity
 
-             
+        # Parents if we got some
+        if self.parents != []:
+            props['parents'] = ','.join(self.parents)
+
+        # Now template
         props['use'] = ','.join(self.templates)            
         
         print "Want to write", props
@@ -449,9 +471,14 @@ for h in hosts:
                 ttl = int(hop.attrib['ttl'])
                 #We search the direct father
                 if ttl == distance-1:
-                    #print ttl
-                    #print hop.__dict__
-                    dh.parent = hop.attrib['ipaddr']
+                    print ttl
+                    print "Super hop", hop.__dict__
+                    # Get the host name if possible, if not
+                    # take the IP
+                    if 'host' in hop.attrib:
+                        dh.parent = hop.attrib['host']
+                    else:
+                        dh.parent = hop.attrib['ipaddr']
 
 
     # Now the OS detection
@@ -505,6 +532,7 @@ for h in all_hosts:
 
     # And generate the configuration too
     c = ConfigurationManager(h, cfg_output_dir, criticity)
+    c.look_for_parent(all_hosts)
     c.fill_system_conf()
     c.fill_ports_services()
     c.fill_system_services()
