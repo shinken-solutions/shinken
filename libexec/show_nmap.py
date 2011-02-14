@@ -62,6 +62,44 @@ def is_up(h):
     return state == 'up'
 
 
+class ConfigurationManager:
+    def __init__(self, h, path):
+        self.h = h
+        self.path = path
+        self.templates = ['generic-host']
+
+        
+    def fill_system_conf(self):
+        ios = self.h.os
+        
+        #Ok, unknown os... not good
+        if ios == ('', ''):
+            return
+
+        map = {('Windows', '2000') : 'windows',
+               ('Windows', '2003') : 'windows',
+               ('Windows', '7') : 'windows',
+               ('Windows', 'XP') : 'windows',
+               # ME? you are a stupid moron!
+               ('Windows', 'Me') : 'windows',
+               ('Windows', '2008') : 'windows',
+               # that's a good boy :)
+               ('Linux', '2.6.X') : 'linux',
+               ('Linux', '2.4.X') : 'linux',
+               # HPUX? I think you didn't choose...
+               ('HP-UX', '11.X') : 'hpux',
+               ('HP-UX', '10.X') : 'hpux',
+
+               }
+        if ios not in map:
+            print "Unknown OS:", ios
+            return
+
+        t = map[ios]
+        self.templates.append(t)
+        
+
+
 class DetectedHost:
     def __init__(self):
         self.ip = ''
@@ -225,6 +263,9 @@ for h in all_hosts:
     cPickle.dump(h, f)
     f.close()
 
-
-
-# Ok now we generate the definitive conf
+    # And generate the configuration too
+    c = ConfigurationManager(h, cfg_output_dir)
+    c.fill_system_conf()
+    
+    print c.__dict__
+    
