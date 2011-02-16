@@ -206,7 +206,8 @@ class Scheduler:
         
     def add_Downtime(self, dt):
         self.downtimes[dt.id] = dt
-        self.add_Comment(dt.extra_comment)
+        if dt.extra_comment:
+            self.add_Comment(dt.extra_comment)
         
     def add_ContactDowntime(self, contact_dt):
         self.contact_downtimes[contact_dt.id] = contact_dt
