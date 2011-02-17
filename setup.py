@@ -400,6 +400,7 @@ setup(
                glob('etc/objects/services/[!_]*.cfg')),
               (os.path.join(default_paths['etc'], 'objects', 'contacts'),
                glob('etc/objects/contacts/[!_]*.cfg')),
+              (os.path.join(default_paths['etc'], 'objects', 'discovery'), tuple() ), 
               (os.path.join(default_paths['etc'], 'certs') ,
                glob('etc/certs/[!_]*.pem')),
               (os.path.join('/etc', 'init.d'),
