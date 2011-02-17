@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 #Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -28,11 +28,6 @@ Shinken.
 """
 
 import sys
-reload(sys)
-
-sys.setdefaultencoding('UTF-8')
-
-
 
 VERSION = "0.5+"
 
