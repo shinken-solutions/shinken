@@ -27,9 +27,8 @@ from shinken.util import to_int, to_bool
 
 #Our main APP class
 class Poller(Satellite):
-    do_checks = True #I do checks
-    do_actions = False #but no actions
-    #default_port = 7771
+    do_checks = True    # I do checks
+    do_actions = False  # but no actions
 
     properties = {
             'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
@@ -46,8 +45,7 @@ class Poller(Satellite):
             'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
             'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
             'local_log' : {'default' : '/usr/local/shinken/var/pollerd.log', 'pythonize' : None, 'path' : True},
-            }
+    }
 
-
-    ################### Process launch part
-
+    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+        Satellite.__init__(self, 'poller', config_file, is_daemon, do_replace, debug, debug_file)

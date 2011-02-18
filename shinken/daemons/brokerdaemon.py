@@ -42,6 +42,7 @@ from shinken.external_command import ExternalCommand
 
 # Interface for Arbiter, our big MASTER
 # It put us our conf
+# TODO: subclass satellite.IForArbiter for factorization..
 class IForArbiter(Pyro.core.ObjBase):
         # We keep app link because we are just here for it
     def __init__(self, app):
@@ -60,15 +61,19 @@ class IForArbiter(Pyro.core.ObjBase):
     # (same id+add+port) -> just do nothing :)
     # REF : doc/shinken-conf-dispatching.png (4)
     def put_conf(self, conf):
+        # TODO: just save the conf, put a flag to say a new conf is there and return
+        # and handle the setup of this new conf in the main satellite loop ?
+        
         self.app.have_conf = True
         self.app.have_new_conf = True
 
         # Got our name from the globals
         if 'broker_name' in conf['global']:
-            self.name = conf['global']['broker_name']
+            name = conf['global']['broker_name']
         else:
-            self.name = 'Unnamed broker'
-        self.app.name = self.name
+            name = 'Unnamed broker'
+        self.app.name = self.name = name
+        self.app.log.load_obj(self.app, name)
 
         print "[%s] Sending us configuration %s" %(self.name, conf)
         # If we've got something in the schedulers, we do not
@@ -167,9 +172,9 @@ class IForArbiter(Pyro.core.ObjBase):
         logger.log("[%s] We have our reactionners : %s" % (self.name, self.reactionners))
 
         if not self.app.have_modules:
-            self.app.modules = conf['global']['modules']
+            self.app.modules = mods = self.app.modules = conf['global']['modules']
             self.app.have_modules = True
-            logger.log("[%s] We received modules %s " %(self.name,  self.app.modules))
+            logger.log("[%s] We received modules %s " %( self.name,  mods))
 
         # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
@@ -257,16 +262,15 @@ class Broker(Satellite):
 
         self.check_shm()
         
-        Daemon.__init__(self, config_file, is_daemon, do_replace, debug, debug_file)
-        
-        self.name = "broker (conf not received)"
+        # NB: we don't call Satellite.__init__ because we actually totally overide it !
+        Daemon.__init__(self, 'broker', config_file, is_daemon, do_replace, debug, debug_file)
 
         # Bool to know if we have received conf from arbiter
         self.have_conf = False
         self.have_new_conf = False
+        
         # Ours schedulers
         self.schedulers = {}
-        self.mod_instances = [] #  for brokers from modules
 
         # Our arbiters
         self.arbiters = {}
@@ -277,7 +281,7 @@ class Broker(Satellite):
 
         # Modules are load one time
         self.have_modules = False
-        self.modules = []
+
 
         # Can have a queue of external_commands give by modules
         # will be taken by arbiter to process
@@ -293,9 +297,6 @@ class Broker(Satellite):
 
         self.do_load_config()
 
-        self.find_modules_path()
-
-        self.modules_manager = None
         
 
     # Schedulers have some queues. We can simplify call by adding
@@ -427,8 +428,7 @@ class Broker(Satellite):
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 to_del.append(mod)
         # Now remove mod that raise an exception
-        for mod in to_del:
-            self.modules_manager.remove_instance(mod)
+        self.modules_manager.clear_instances(to_del)
 
 
     # Add broks (a tab) to different queues for
@@ -636,12 +636,8 @@ class Broker(Satellite):
         #  We wait for initial conf
         self.wait_for_initial_conf()
 
-        self.modules_manager = ModulesManager('broker', self.modulespath, self.modules)
-        self.modules_manager.load()
-        self.mod_instances = self.modules_manager.get_instances()
-
-        logger.log("[%s] I correctly load the modules : %s " % (self.name, [inst.get_name() for inst in self.mod_instances]))
-
+        self.modules_manager.set_modules(self.modules)
+        self.do_load_modules()
 
         # Do the modules part, we have our modules in self.modules
         # REF: doc/broker-modules.png (1)

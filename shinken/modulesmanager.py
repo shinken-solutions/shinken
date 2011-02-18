@@ -48,9 +48,20 @@ class ModulesManager(object):
         self.modules_assoc = []
         self.instances = []
 
+    def set_modules(self, modules):
+        
+        """ Set the modules requested for this manager """
+        self.modules = modules
+        self.allowed_types = [ mod.module_type for mod in modules ]
 
-    #Lod all modules
+    def load_and_init(self, start_external=True):
+        """ Import, instanciate & "init" the modules we have been requested """
+        self.load()
+        self.get_instances(start_external)
+
     def load(self):
+        """ Try to import the requested modules ; put the imported modules in self.imported_modules.
+The previous imported modules, if any, are cleaned before. """ 
         #We get all modules file of our type (end with broker.py for example)
         modules_files = [ fname[:-3] for fname in os.listdir(self.modules_path) 
                          if fname.endswith(self.modules_type+".py") ]
@@ -89,17 +100,19 @@ class ModulesManager(object):
         """ Try to "init" the given module instance. 
 Returns: True on successfull init. False if instance init method raised any Exception. """ 
         try:
+            # We setup the inst queues before its 'init' method is called. So that it can eventually get ref to the queues.
+            inst.create_queues()
             inst.init()
         except Exception, e:
-            print "Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e))
-            print "Back trace of this remove :"
-            traceback.print_exc(file=sys.stdout)    
+            print("Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
+            print("Back trace of this remove : %s" % (traceback.format_exc()))
             return False
         return True
 
     def clear_instances(self, insts=None):
+        """ Request to "remove" the given instances list or all if not provided """
         if insts is None:
-            insts = self.instances[:]
+            insts = self.instances[:] # have to make a copy of the list
         for i in insts:
             self.remove_instance(i)
     
@@ -107,22 +120,17 @@ Returns: True on successfull init. False if instance init method raised any Exce
     def get_instances(self, start_external=True):
         """ Create, init and then returns the list of module instances that the caller needs.
 By default (start_external=True) also start the execution of the instances that are "external".
-If an instance can't be created or init'ed then only log is done. That instance is skipped. """ 
+If an instance can't be created or init'ed then only log is done. That instance is skipped.
+The previous modules instance(s), if any, are all cleaned. """ 
         self.clear_instances()
         for (mod_conf, module) in self.modules_assoc:
             try:
                 mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
                 if inst is None: #None = Bad thing happened :)
+                    print("get_instance for module %s returned None !" % (mod_conf.get_name()))
                     continue
-                ## TODO: temporary for back comptability with previous modules :
-                if not isinstance(inst, BaseModule):
-                    print("Notice: module %s is old module style (not instance of basemodule.BaseModule)" % (mod_conf.get_name()))
-                    inst.props = inst.properties = mod_conf.properties.copy()
-                    inst.is_external = inst.props['external'] = inst.props.get('external', False)
-                    inst.phases = inst.props.get('phases', [])  ## though a module defined with no phase is quite useless ..
-                    inst.phases.append(None) ## to permit simpler get_*_ methods
-                    ## end temporary
+                assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
             except Exception , exp:
                 print "Error : the module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), str(exp))
@@ -133,65 +141,43 @@ If an instance can't be created or init'ed then only log is done. That instance 
 
         to_del = []
         for inst in self.instances:
-            # some modules (like livestatus) need their queues to be setup before their "init" method be called.
-            self.__set_ext_inst_queues(inst)  
             if not self.try_instance_init(inst):
+                # TODO: isn't it very bad if a requested module instance can't be "initialized" ?
                 to_del.append(inst)
-                continue
 
-        for inst in to_del:
-            self.instances.remove(inst)
+        self.clear_instances(to_del)
 
+        # We only start the external instances once they all have been "init" called 
         if start_external:
             self.__start_ext_instances()
 
         return self.instances
- 
+
     def __start_ext_instances(self):
         for inst in self.instances:
-            if inst.is_external:
-                print("Starting external process for instance %s" % (inst.name))
-                p = inst.process = Process(target=inst.main, args=())
-                inst.properties['process'] = p  ## TODO: temporary
-                p.start()
-                print("%s is now started ; pid=%d" % (inst.name, p.pid))
+            inst.start()
 
-    def __set_ext_inst_queues(self, inst):
-        # if some queues were already setup just close them:
-        # WARN: if the instance module had kept some ref to the initial queues then it can be BAD !
-        self.close_inst_queues(inst) 
-        if isinstance(inst, BaseModule):
-            inst.create_queues()
-        else:
-            BaseModule.create_queues__(inst)
-            ## TODO: temporary until new style module is used by every shinken module:
-            inst.properties['to_queue'] = inst.to_q
-            inst.properties['from_queue'] = inst.from_q
-
-    # actually only called by arbiter...
+    # actually only called by arbiter... because it instanciate its modules before going daemon
     # TODO: but this actually leads to a double "init" call.. maybe a "uninit" would be needed ? 
     def init_and_start_instances(self):
+        to_del = []
         for inst in self.instances:
-            self.__set_ext_inst_queues(inst)
-            inst.init()
+            if not self.try_instance_init(inst):
+                # damn..
+                print("module instance %s could not be init")
+                to_del.append(inst)
+        self.clear_instances(to_del) 
         self.__start_ext_instances()
-
-    def close_inst_queues(self, inst):
-        """ Release the resources associated with the queues from the given module instance """
-        for q in (inst.to_q, inst.from_q):
-            if q is None: continue
-            q.close()
-            q.join_thread()
-        inst.to_q = inst.from_q = None
-        
+     
     def remove_instance(self, inst):
+        """ Request to cleanly remove the given instance. 
+If instance is external also shutdown it cleanly """
         # External instances need to be close before (process + queues)
         if inst.is_external:
-            if inst.process:
-                inst.process.terminate()
-                inst.process.join(timeout=1)
-                inst.process = None
-            self.close_inst_queues(inst)
+            inst.stop_process()
+        
+        inst.clear_queues()
+
         # Then do not listen anymore about it
         self.instances.remove(inst)
 
@@ -204,8 +190,7 @@ If an instance can't be created or init'ed then only log is done. That instance 
                 print "Error : the external module %s goes down unexpectly!" % inst.get_name()
                 to_del.append(inst)
 
-        for inst in to_del:
-            self.remove_instance(inst)
+        self.clear_instances(to_del)
 
 
     def get_internal_instances(self, phase=None):
@@ -229,5 +214,5 @@ If an instance can't be created or init'ed then only log is done. That instance 
         for inst in self.get_internal_instances():
             if hasattr(inst, 'quit') and callable(inst.quit):
                 inst.quit()
-        for inst in self.get_external_instances():
-            self.remove_instance(inst)
+        
+        self.clear_instances(self.get_external_instances())

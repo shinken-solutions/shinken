@@ -30,6 +30,7 @@ from shinken.pyro_wrapper import InvalidWorkDir
 Pyro = pyro.Pyro
 
 from shinken.log import logger
+from shinken.modulesmanager import ModulesManager
 
 
 if os.name != 'nt':
@@ -50,23 +51,31 @@ class InvalidPidDir(Exception): pass
 
 class Daemon:
 
-    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+    def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
+        self.name = name
         self.config_file = config_file
         self.is_daemon = is_daemon
         self.do_replace = do_replace
         self.debug = debug
         self.debug_file = debug_file
         self.interrupted = False
-                
+
         self.daemon = None # should'nt it be renamed to "pyro_daemon" for clarity & safety ?
 
         # Log init
         self.log = logger
         self.log.load_obj(self)
         
+
+        self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
+
         os.umask(UMASK)
         self.set_exit_handler()
 
+    
+    def do_load_modules(self, start_external=True):
+        self.modules_manager.load_and_init(start_external)
+        self.log.log("I correctly loaded the modules : %s " % ([ inst.get_name() for inst in self.modules_manager.instances ]))
  
  
     def add(self, elt):
@@ -180,10 +189,8 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         del self.fpid ## no longer needed
 
 
-    def close_fds(self, skip_close_fds=None):
-        if skip_close_fds is None:
-            skip_close_fds = tuple()
-        
+    def close_fds(self, skip_close_fds):
+        """ Close all the process file descriptors. Skip the descriptors present in the skip_close_fds list """
         #First we manage the file descriptor, because debug file can be
         #relative to pwd
         import resource
@@ -235,8 +242,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             pid, status = os.waitpid(pid, 0)
             if status != 0:
                 print("something weird happened with/during second fork : status=", status)
-            self.close_fds()
-            os._exit(status)
+            os._exit(status != 0)
 
         os.setsid()
         try:
@@ -245,7 +251,6 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             raise Exception, "%s [%d]" % (e.strerror, e.errno)
         if pid != 0:
             self.write_pid(pid)
-            self.close_fds()
             os._exit(0)
 
         self.fpid.close()
@@ -303,7 +308,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 
 
     def find_modules_path(self):
-        """ Find the absolute path of the shinken module directory and set it in self.modulespath  """
+        """ Find the absolute path of the shinken module directory and returns it.  """
         import shinken
         
         # BEWARE: this way of finding path is good if we still
@@ -316,9 +321,10 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         print "modulemanager absolute file", modulespath
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
-        self.modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        logger.log("Using modules path : %s" % self.modulespath)
-
+        modulespath = os.path.join(parent_path, 'shinken', 'modules')
+        print("Using modules path : %s" % (modulespath))
+        
+        return modulespath
 
     #Just give the uid of a user by looking at it's name
     def find_uid_from_name(self):

@@ -31,18 +31,14 @@
 #chedulers (and actions into) take new ones and do the (new) job.
 
 
-import sys
-import os
-
 from shinken.satellite import Satellite
 from shinken.util import to_int, to_bool
 
 
 #Our main APP class
 class Reactionner(Satellite):
-    do_checks = False #I do not do checks
-    do_actions = True #just actions like notifications
-    #default_port = 7769
+    do_checks = False # I do not do checks
+    do_actions = True # just actions like notifications
 
     properties = {
             'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
@@ -59,5 +55,7 @@ class Reactionner(Satellite):
             'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
             'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
             'local_log' : {'default' : '/usr/local/shinken/var/reactionnerd.log', 'pythonize' : None, 'path' : True},
-            }
+    }
 
+    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+        Satellite.__init__(self, 'reactionner', config_file, is_daemon, do_replace, debug, debug_file)

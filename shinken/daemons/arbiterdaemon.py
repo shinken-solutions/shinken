@@ -95,7 +95,7 @@ class Arbiter(Daemon):
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
         
-        Daemon.__init__(self, config_files[0], is_daemon, do_replace, debug, debug_file)
+        Daemon.__init__(self, 'arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
         
         self.config_files = config_files
 
@@ -208,7 +208,7 @@ class Arbiter(Daemon):
     # hook function
     def hook_point(self, hook_name):
         to_del = []
-        for inst in self.mod_instances:
+        for inst in self.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
             if hasattr(inst, full_hook_name):
                 f = getattr(inst, full_hook_name)
@@ -220,8 +220,7 @@ class Arbiter(Daemon):
                     to_del.append(inst)
 
         #Now remove mod that raise an exception
-        for inst in to_del:
-            self.modules_manager.remove_instance(inst)
+        self.modules_manager.clear_instances(to_del)
 
 
     # Main loop function
@@ -271,22 +270,19 @@ class Arbiter(Daemon):
             for m in self.me.modules:
                 print m
 
-            self.find_modules_path()
-
-            self.modules_manager = ModulesManager('arbiter', self.modulespath, self.me.modules)
-            self.modules_manager.load()
             # we request the instances without them being *started* 
             # (for these that are concerned ("external" modules):
             # we will *start* these instances after we have been daemonized (if requested)
-            self.mod_instances = self.modules_manager.get_instances(False)
+            self.modules_manager.set_modules(self.me.modules)
+            self.do_load_modules(False)
 
             # Call modules that manage this read configuration pass
             self.hook_point('read_configuration')
 
             # Now we ask for configuration modules if they
             # got items for us
-            for inst in self.mod_instances:
-                if 'configuration' in inst.properties['phases']:
+            for inst in self.modules_manager.instances:
+                if 'configuration' in inst.phases:
                     try :
                         r = inst.get_objects()
                         types_creations = self.conf.types_creations
@@ -437,7 +433,6 @@ class Arbiter(Daemon):
         # ok we are now fully daemon (if requested)
         # now we can start our "external" modules (if any) :
         self.modules_manager.init_and_start_instances()
-        self.mod_instances = self.modules_manager.instances
 
         self.iarbiters = IArbiters(self)
 

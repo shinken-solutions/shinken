@@ -82,17 +82,21 @@ class IForArbiter(Pyro.core.ObjBase):
     # 'schedulers' : schedulers dict (by id) with address and port
     # TODO: catch case where Arbiter send somethign we already have
     # (same id+add+port) -> just do nothing :)
+    
     def put_conf(self, conf):
+        # TODO: just save the conf, put a flag to say a new conf is there and return
+        # and handle the setup of this new conf in the main satellite loop ?
+        
         self.app.have_conf = True
         self.app.have_new_conf = True
         # Gout our name from the globals
         if 'poller_name' in conf['global']:
-            self.name = conf['global']['poller_name']
+            name = conf['global']['poller_name']
         elif 'reactionner_name' in conf['global']:
-            self.name = conf['global']['reactionner_name']
+            name = conf['global']['reactionner_name']
         else:
-            self.name = 'Unnamed satellite'
-        self.app.name = self.name
+            name = 'Unnamed satellite'
+        self.app.name = self.name = name
 
         print "[%s] Sending us a configuration %s " % (self.name, conf)
         # If we've got something in the schedulers, we do not want it anymore
@@ -145,14 +149,16 @@ class IForArbiter(Pyro.core.ObjBase):
         logger.log("We have our schedulers : %s" % (str(self.schedulers)))
 
         # Now manage modules
-        for module in conf['global']['modules']:
+        # TODO: check how to better handle this with modules_manager..
+        mods = conf['global']['modules']
+        for module in mods:
             # If we already got it, bypass
             if not module.module_type in self.app.worker_modules:
                 print "Add module object", module
-                self.app.modules.append(module)
+                self.app.modules_manager.modules.append(module)
                 logger.log("[%s] Got module : %s " % (self.name, module.module_type))
                 self.app.worker_modules[module.module_type] = {'to_q' : Queue()}
-                
+
 
 
     # Arbiter ask us to do not manage a scheduler_id anymore
@@ -256,11 +262,11 @@ class IBroks(Pyro.core.ObjBase):
 
 # Our main APP class
 class Satellite(Daemon):
-    def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
+    def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
         
         self.check_shm()        
         
-        Daemon.__init__(self, config_file, is_daemon, do_replace, debug, debug_file)
+        Daemon.__init__(self, name, config_file, is_daemon, do_replace, debug, debug_file)
         
         # Keep broks so they can be eaten by a broker
         self.broks = {}
@@ -294,16 +300,6 @@ class Satellite(Daemon):
         self.returns_queue = None
 
         self.worker_modules = {}
-
-        # And find where our modules are :)
-        self.find_modules_path()        
-
-
-    # Load and init all modules we've got
-    def load_modules(self):
-        self.modules_manager = ModulesManager('poller', self.modulespath, self.modules)
-        self.modules_manager.load()
-        self.mod_instances = self.modules_manager.get_instances()
 
 
     def pynag_con_init(self, id):
@@ -500,15 +496,16 @@ class Satellite(Daemon):
         if module_name == 'fork':
             target = None
         else:
-            for module in self.mod_instances:
+            for module in self.modules_manager.instances:
                 if module.properties['type'] == module_name:
-                    target=module.work
-
+                    target = module.work
+            if target is None:
+                return
         w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
                    mortal=mortal,max_plugins_output_length = self.max_plugins_output_length, target=target )
         self.workers[w.id] = w
         logger.log("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
-        self.workers[w.id].start()
+        w.start()
 
 
     def do_stop(self):
@@ -682,7 +679,10 @@ class Satellite(Daemon):
             print "Begin wait initial"
             self.wait_for_initial_conf()
             print "End wait initial"
+            if not self.have_conf:  # we may have been interrupted or so; then just return from this loop turn
+                return
 
+            
         # Now we check if arbiter speek to us in the daemon.
         # If so, we listen for it
         # When it push us conf, we reinit connexions
@@ -778,6 +778,10 @@ class Satellite(Daemon):
         self.returns_queue = self.manager.list()
 
 
+    def setup_new_conf(self):
+        """ Setup the new received conf """
+        pass
+
 
     def main(self):
 
@@ -793,8 +797,11 @@ class Satellite(Daemon):
         # We wait for initial conf
         self.wait_for_initial_conf()
 
+        if not self.have_conf: # we must have either big problem or was requested to shutdown
+            return
         # We can load our modules now
-        self.load_modules()
+        self.modules_manager.set_modules(self.modules)
+        self.modules_manager.load_and_init()
 
         # Connexion init with scheduler servers
         for sched_id in self.schedulers:

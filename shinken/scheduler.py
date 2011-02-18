@@ -148,12 +148,6 @@ class Scheduler:
                 print "Changing the tick for the function", name, new_tick
                 self.recurrent_works[i] = (name, f, new_tick)
 
-
-    # Load the modules from our app master
-    def load_modules(self, modules_manager, mod_instances):
-        self.modules_manager = modules_manager
-        self.mod_instances = mod_instances
-
         
     # Load the pollers from our app master
     def load_satellites(self, pollers, reactionners):
@@ -646,8 +640,8 @@ class Scheduler:
         to_del = []
 
         # Do the job for all modules that do the retention
-        for inst in self.mod_instances:
-            if 'retention' in inst.properties['phases']:
+        for inst in self.sched_daemon.modules_manager.instances:
+            if 'retention' in inst.phases:
                 try:
                     # Ask it with self to they have full access, and a log object
                     # so they can easily raise log
@@ -656,14 +650,11 @@ class Scheduler:
                     print exp.__dict__
                     logger.log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.instance_name, inst.get_name(),str(exp)))
                     logger.log("[%s] Exception type : %s" % (self.instance_name, type(exp)))
-                    print "Back trace of this kill:"
-                    traceback.print_stack()
+                    logger.log("[%s] Traceback: %s" % (self.instance_name, traceback.format_exc()))
                     to_del.append(inst)
 
         # Now remove mod that raise an exception
-        for mod in to_del:
-            self.modules_manager.remove_instance(mod)
-
+        self.sched_daemon.modules_manager.clear_instances(to_del)
 
 
     # Load the retention file and get status from it. It do not get all checks in progress
@@ -671,8 +662,8 @@ class Scheduler:
     def retention_load(self):
         to_del = []
         # Do this job with modules too
-        for inst in self.mod_instances:
-            if 'retention' in inst.properties['phases']:
+        for inst in self.sched_daemon.modules_manager.instances:
+            if 'retention' in inst.phases:
                 try:
                     # give us ourself (full control!) and a log manager object
                     b = inst.load_retention_objects(self, logger)
@@ -683,14 +674,12 @@ class Scheduler:
                     print exp.__dict__
                     logger.log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.instance_name, inst.get_name(),str(exp)))
                     logger.log("[%s] Exception type : %s" % (self.instance_name, type(exp)))
-                    print "Back trace of this kill:"
-                    traceback.print_stack()
+                    logger.log("[%s] Traceback: %s" % (self.instance_name, traceback.format_exc()))
                     to_del.append(inst)
 
         # Now remove mod that raise an exception
-        for mod in to_del:
-            self.modules_manager.remove_instance(mod)
-
+        self.sched_daemon.modules_manager.clear_instances(to_del)
+        
 
     def check_for_system_time_change(self):
         now = time.time()

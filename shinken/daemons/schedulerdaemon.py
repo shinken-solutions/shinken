@@ -224,14 +224,12 @@ class Shinken(Daemon):
     #Then, it wait for a first configuration
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
         
-        Daemon.__init__(self, config_file, is_daemon, do_replace, debug, debug_file)
+        Daemon.__init__(self, 'scheduler', config_file, is_daemon, do_replace, debug, debug_file)
 
         self.sched = None
         self.ichecks = None
         self.ibroks = None
         self.must_run = True
-
-        self.find_modules_path()
 
         #Config Class must be filled with USERN Macro
         Config.fill_usern_macros()
@@ -295,13 +293,6 @@ class Shinken(Daemon):
 
 
 
-    #Load and init all modules we've got
-    def load_modules(self):
-        self.modules_manager = ModulesManager('scheduler', self.modulespath, self.modules)
-        self.modules_manager.load()
-        self.mod_instances = self.modules_manager.get_instances()
-
-
     #OK, we've got the conf, now we load it
     #and launch scheduler with it
     #we also create interface for poller and reactionner
@@ -318,7 +309,9 @@ class Shinken(Daemon):
             time.tzset()
 
         print "I've got modules", self.modules
-        self.load_modules()
+        # TODO: if scheduler had previous modules instanciated it must clean them !
+        self.modules_manager.set_modules(self.modules)
+        self.do_load_modules()
 
         # create scheduler with ref of our daemon
         self.sched = Scheduler(self.daemon, self)
@@ -348,9 +341,6 @@ class Shinken(Daemon):
         self.conf.explode_global_conf()
         #we give sched it's conf
         self.sched.load_conf(self.conf)
-
-        
-        self.sched.load_modules(self.modules_manager, self.mod_instances)
 
         self.sched.load_satellites(self.pollers, self.reactionners)
 

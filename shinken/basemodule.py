@@ -22,7 +22,7 @@
 
 import os
 import signal
-from multiprocessing import Queue
+from multiprocessing import Queue, Process
 
  
 
@@ -71,36 +71,63 @@ Example of task that a shinken module can do:
  """
 
     def __init__(self, mod_conf):
-        """ `name´ is the name given to this module instance. There can be many instance of the same type.
-`props´ is the properties dict of this module. dict that defines at what phases the module is involved. """
+        """ Instanciate a new module. There can be many instance of the same type.
+`mod_conf´ is module configuration object for this new module instance. """
         self.myconf = mod_conf
         self.name = mod_conf.get_name()
         self.props = mod_conf.properties.copy()
-        self.properties = self.props
+        self.properties = self.props # TODO: choose between 'props' or 'properties'..
         self.interrupted = False
         self.is_external = self.props.get('external', False)
         self.phases = self.props.get('phases', [])  # though a module defined with no phase is quite useless ..
         self.phases.append(None)
-        self.to_q = None
-        self.from_q = None
+        self.to_q = None # the queue the module will receive data to manage
+        self.from_q = None # the queue the module will put its result data
         self.process = None
-        
-    def create_queues(self):
-        self.create_queues__(self)
-        
-    @staticmethod
-    def create_queues__(obj):
-        obj.from_q = Queue()
-        obj.to_q = Queue()
+
 
     def init(self):
         """ Handle this module "post" init ; just before it'll be started. 
 Like just open necessaries file(s), database(s), or whatever the module will need. """
         pass
 
+    def create_queues(self):
+        """ Create the shared queues that will be used by shinken daemon process and this module process.
+But clear queues if they were already set before recreating new one.  """
+        self.clear_queues()
+        self.from_q = Queue()
+        self.to_q = Queue()
+
+    def clear_queues(self):
+        """ Release the resources associated with the queues of this instance """
+        for q in (self.to_q, self.from_q):
+            if q is None: continue
+            q.close()
+            q.join_thread()
+        self.to_q = self.from_q = None
+
+    def start(self):
+        """ Start this module process if it's external. if not -> donothing """
+        if not self.is_external:
+            return
+        self.stop_process()
+        print("Starting external process for instance %s" % (self.name))
+        p = self.process = Process(target=self.main, args=())
+        self.properties['process'] = p  ## TODO: temporary
+        p.start()
+        print("%s is now started ; pid=%d" % (self.name, p.pid))
+
+    def stop_process(self):
+        """ Request the module process to stop and release it """
+        if self.process:
+            self.process.terminate()
+            self.process.join(timeout=1)
+            self.process = None
+
+
+    ## TODO: are these 2 methods really needed ?
     def get_name(self):
         return self.name
-
     def has(self, prop):
         """ The classic has : do we have a prop or not? """
         return hasattr(self, prop)
@@ -146,15 +173,22 @@ There a lot of different possible broks to manage. """
     set_exit_handler = set_signal_handler
     
     def do_stop(self):
+        """ Called just before the module will exit
+Put in this method all you need to cleanly release all open resource used by your module """ 
         pass
     
     def do_loop_turn(self):
+        """ For external modules only: implement in this method the body of you main loop """
         raise NotImplementedError()
     
     def main(self):
+        """ module "main" method. Only used by external modules. """
         self.set_signal_handler()
         print("[%s[%d]]: Now running.." % (self.name, os.getpid()))
         while not self.interrupted:
             self.do_loop_turn()
         self.do_stop()
         print("[%s]: exiting now.." % (self.name))
+        
+    work = main # TODO: apparently some modules would uses "work" as the main method ??
+
