@@ -64,7 +64,7 @@ class TestConfig(ShinkenTest):
             self.nagios_loop(1, reflist)
   
 
-    def update_broker(self):
+    def update_broker(self, dodeepcopy=False):
         #The brok should be manage in the good order
         ids = self.sched.broks.keys()
         ids.sort()
@@ -73,9 +73,9 @@ class TestConfig(ShinkenTest):
             #print "Managing a brok type", brok.type, "of id", brok_id
             #if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
-                        
+            if dodeepcopy:
+                brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
-            del brok.data
         self.sched.broks = {}
 
 
@@ -309,31 +309,6 @@ class TestConfigSmall(TestConfig):
         self.livestatus_path = None
         self.nagios_config = None
 
-    
-    def update_broker(self):
-        # Have to put redeclare it here because if copy.deepcopy is done in TestConfig 
-        # then the others tests consume too much memory ! :/
-        # TODO: check this: even with this TestConfigBig still consume up to 30% mem of my 2GB.. :s 
-        
-        #The brok should be manage in the good order
-        ids = self.sched.broks.keys()
-        ids.sort()
-        for brok_id in ids:
-            brok = self.sched.broks[brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
-            
-            # TODO: NB: due to the fact we call livestatus in a direct way 
-            # then we have to make a copy of the brok before giving it 
-            # cause the brok can contains ref to the scheduler objects
-            # and if livestatus modify them it will be very bad ;)
-            print("DBG: going to copy..", brok.type)
-            brok.data = copy.deepcopy(brok.data)
-            print("DBG: copy done")
-            self.livestatus_broker.manage_brok(brok)
-            
-        self.sched.broks = {}
 
 
     def tearDown(self):
@@ -483,7 +458,7 @@ ResponseHeader: fixed16
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
-        self.update_broker()
+        self.update_broker(True)
         #---------------------------------------------------------------
         # get the full hosts table
         #---------------------------------------------------------------
@@ -556,11 +531,11 @@ ResponseHeader: fixed16
         now = time.time()
         cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;0;0;%d;lausser;blablub" % (now, now, now + duration, duration)
         self.sched.run_external_command(cmd)
-        self.update_broker()
+        self.update_broker(True)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
-        self.update_broker()
+        self.update_broker(True)
         self.scheduler_loop(3, [[svc, 2, 'BAD']])
-        self.update_broker()
+        self.update_broker(True)
         request = 'GET services\nColumns: host_name description scheduled_downtime_depth\nFilter: state = 2\nFilter: scheduled_downtime_depth = 1'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print 'query_3_______________\n%s\n%s\n' % (request, response)
