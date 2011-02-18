@@ -73,14 +73,9 @@ class TestConfig(ShinkenTest):
             #print "Managing a brok type", brok.type, "of id", brok_id
             #if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
-            
-            # TODO: NB: due to the fact we call livestatus in a direct way 
-            # then we have to make a copy of the brok before giving it 
-            # cause the brok can contains ref to the scheduler objects
-            # and if livestatus modify them it will be very bad ;)
-            brok = copy.deepcopy(brok)
-            
+                        
             self.livestatus_broker.manage_brok(brok)
+            del brok.data
         self.sched.broks = {}
 
 
@@ -313,6 +308,32 @@ class TestConfigSmall(TestConfig):
         self.nagios_path = None
         self.livestatus_path = None
         self.nagios_config = None
+
+    
+    def update_broker(self):
+        # Have to put redeclare it here because if copy.deepcopy is done in TestConfig 
+        # then the others tests consume too much memory ! :/
+        # TODO: check this: even with this TestConfigBig still consume up to 30% mem of my 2GB.. :s 
+        
+        #The brok should be manage in the good order
+        ids = self.sched.broks.keys()
+        ids.sort()
+        for brok_id in ids:
+            brok = self.sched.broks[brok_id]
+            #print "Managing a brok type", brok.type, "of id", brok_id
+            #if brok.type == 'update_service_status':
+            #    print "Problem?", brok.data['is_problem']
+            
+            # TODO: NB: due to the fact we call livestatus in a direct way 
+            # then we have to make a copy of the brok before giving it 
+            # cause the brok can contains ref to the scheduler objects
+            # and if livestatus modify them it will be very bad ;)
+            print("DBG: going to copy..", brok.type)
+            brok.data = copy.deepcopy(brok.data)
+            print("DBG: copy done")
+            self.livestatus_broker.manage_brok(brok)
+            
+        self.sched.broks = {}
 
 
     def tearDown(self):
