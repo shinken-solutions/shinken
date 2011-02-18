@@ -1179,3 +1179,10 @@ class SchedulingItem(Item):
                 #print "I register to the element", e.get_name()
                 # all states, every timeperiod, and inherit parents
                 e.add_business_rule_act_dependancy(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
+
+
+    def rebuild_ref(self):
+        """ Rebuild the possible reference a schedulingitem can have """
+        for g in self.comments, self.downtimes:
+            for o in g:
+                o.ref = self

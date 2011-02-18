@@ -144,13 +144,9 @@ class Livestatus_broker(BaseModule):
         i.check_period = self.get_timeperiod(i.check_period)
         i.notification_period = self.get_timeperiod(i.notification_period)
         i.contacts = self.get_contacts(i.contacts)
+        i.rebuild_ref()
         #Escalations is not use for status_dat
         del i.escalations
-        
-    def set_ref_attributes_on_item(self, i):
-        for g in i.comments, i.downtimes: 
-            for e in g:
-                e.ref = i
         
     def manage_initial_host_status_brok(self, b):
         data = b.data
@@ -159,7 +155,6 @@ class Livestatus_broker(BaseModule):
         h = Host({})
         self.update_element(h, data)        
         self.set_schedulingitem_values(h)
-        self.set_ref_attributes_on_item(h)
         
         h.service_ids = []
         h.services = []
@@ -176,9 +171,8 @@ class Livestatus_broker(BaseModule):
         if h == None:
             print "Warning : the host %s is unknown!" % data['host_name']
             return
-        
+        self.update_element(h, data)
         self.set_schedulingitem_values(h)
-        self.set_ref_attributes_on_item(h)
 
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
@@ -204,7 +198,6 @@ class Livestatus_broker(BaseModule):
         s = Service({})
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
-        self.set_ref_attributes_on_item(s)
         
         h = self.find_host(data['host_name'])
         if h != None:
@@ -217,6 +210,19 @@ class Livestatus_broker(BaseModule):
         self.services[s_id] = s
         self.servicename_lookup_table[s.host_name + s.service_description] = s_id
         self.number_of_objects += 1
+
+    #In fact, an update of a service is like a check return
+    def manage_update_service_status_brok(self, b):
+        self.manage_service_check_result_brok(b)
+        data = b.data
+        #In the status, we've got duplicated item, we must relink thems
+        s = self.find_service(data['host_name'], data['service_description'])
+        if s == None:
+            print "Warning : the service %s/%s is unknown!" % (data['host_name'], data['service_description'])
+            return
+        self.update_element(s, data)
+        self.set_schedulingitem_values(s)
+   
 
 
     def manage_initial_servicegroup_status_brok(self, b):
@@ -392,29 +398,7 @@ class Livestatus_broker(BaseModule):
         self.manage_service_check_result_brok(b)
 
 
-    #In fact, an update of a service is like a check return
-    def manage_update_service_status_brok(self, b):
-        self.manage_service_check_result_brok(b)
-        data = b.data
-        #In the status, we've got duplicated item, we must relink thems
-        s = self.find_service(data['host_name'], data['service_description'])
-        if s == None:
-            print "Warning : the service %s/%s is unknown!" % (data['host_name'], data['service_description'])
-            return
-        self.set_schedulingitem_values(s)
-        
-        ## damn:
-        if False:
-            self.set_ref_attributes_on_item(s)
-            ## don't know why but this makes query3 of "test_status" of livestatus test fails :
-# ======================================================================
-#FAIL: test_status (__main__.TestConfigSmall)
-#----------------------------------------------------------------------
-#Traceback (most recent call last):
-#  File "./test_livestatus_2.py", line xxx, in test_status
-#    self.assert_(response == 'test_host_0;test_ok_0;1\n')
-#AssertionError
-
+    
 
 
     def manage_host_check_result_brok(self, b):

@@ -32,6 +32,7 @@ import subprocess
 import shutil
 import time
 import random
+import copy
 
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
@@ -72,6 +73,13 @@ class TestConfig(ShinkenTest):
             #print "Managing a brok type", brok.type, "of id", brok_id
             #if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
+            
+            # TODO: NB: due to the fact we call livestatus in a direct way 
+            # then we have to make a copy of the brok before giving it 
+            # cause the brok can contains ref to the scheduler objects
+            # and if livestatus modify them it will be very bad ;)
+            brok = copy.deepcopy(brok)
+            
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
 
