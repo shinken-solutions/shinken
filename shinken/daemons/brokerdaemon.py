@@ -75,11 +75,11 @@ class IForArbiter(Pyro.core.ObjBase):
         self.app.name = self.name = name
         self.app.log.load_obj(self.app, name)
 
-        print "[%s] Sending us configuration %s" %(self.name, conf)
+        print "[%s] Sending us configuration %s" % (self.name, conf)
         # If we've got something in the schedulers, we do not
         # want it anymore
         # self.schedulers.clear()
-        for sched_id in conf['schedulers'] :
+        for sched_id in conf['schedulers']:
             # Must look if we already have it to do nto overdie our broks
             already_got = sched_id in self.schedulers
             if already_got:
@@ -102,7 +102,7 @@ class IForArbiter(Pyro.core.ObjBase):
         logger.log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
 
         # Now get arbiter
-        for arb_id in conf['arbiters'] :
+        for arb_id in conf['arbiters']:
             # Must look if we already have it
             already_got = arb_id in self.arbiters
             if already_got:
@@ -123,7 +123,7 @@ class IForArbiter(Pyro.core.ObjBase):
         logger.log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
 
         # Now for pollers
-        for pol_id in conf['pollers'] :
+        for pol_id in conf['pollers']:
             # Must look if we already have it
             already_got = pol_id in self.pollers
             if already_got:

@@ -225,31 +225,36 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         os.dup2(fdtemp, 1) # standard output (1)
         os.dup2(fdtemp, 2) # standard error (2)
         
-        # Now the Fork/Fork
+        # Now the fork/setsid/fork..
         try:
             pid = os.fork()
         except OSError, e:
             raise Exception, "%s [%d]" % (e.strerror, e.errno)
         if pid != 0:
-            ## in the father
+            # In the father ; we check if our child exit correctly 
+            # it has effectively to write the pid of our futur little child..
             def do_exit(sig, frame):
                 print("timeout waiting child while it should have quickly returned ; something weird happened")
                 os.kill(pid, 9)
                 sys.exit(1)
-            ## wait the child process to check its return status:
+            # wait the child process to check its return status:
             signal.signal(signal.SIGALRM, do_exit)
-            signal.alarm(3)  ## TODO: define alarm value somewhere else and/or use config variable
+            signal.alarm(3)  # forking & writing a pid in a file should be rather quick..
+            # if it's not then somewthing wrong can already be on the way so let's wait max 3 secs here. 
             pid, status = os.waitpid(pid, 0)
             if status != 0:
                 print("something weird happened with/during second fork : status=", status)
             os._exit(status != 0)
 
+        # halfway to daemonize..
         os.setsid()
         try:
             pid = os.fork()
         except OSError, e:
             raise Exception, "%s [%d]" % (e.strerror, e.errno)
         if pid != 0:
+            # we are the last step and the real daemon is actually correctly created at least.
+            # we have still the last responsibility to write the pid of the daemon itself.
             self.write_pid(pid)
             os._exit(0)
 
