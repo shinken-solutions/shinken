@@ -234,7 +234,7 @@ class Worker:
                 print "[%d] I DIE because I cannot do my job as I should (too many open files?)... forgot me please." % self.id
                 break
 
-            #Manage a possible time change (our avant will be change with the diff)
+            # Manage a possible time change (our avant will be change with the diff)
             diff = self.check_for_system_time_change()
             begin += diff
 

@@ -280,7 +280,6 @@ class Satellite(Daemon):
         # Init stats like Load for workers
         self.wait_ratio = Load(initial_value=1)
 
-        self.t_each_loop = time.time() # used to track system time change
 
         # Now the specific stuff
         # Bool to know if we have received conf from arbiter
@@ -396,7 +395,7 @@ class Satellite(Daemon):
         print "Preparing to return", sched['wait_homerun'].values()
         ret = copy.copy(sched['wait_homerun'].values())
         sched['wait_homerun'].clear()
-        print "Fianlly return", ret
+        print "Finally return", ret
         return ret
 
 
@@ -409,31 +408,15 @@ class Satellite(Daemon):
         timeout = 1.0
         # Arbiter do not already set our have_conf param
         while not self.have_conf and not self.interrupted:
-            before = time.time()
-            
-            socks = pyro.get_sockets(self.daemon)
-            ins = self.get_socks_activity(socks, timeout)
-            
-            # Manage a possible time change (our avant will be change with the diff)
-            diff = self.check_for_system_time_change()
-            before += diff
-
-            if ins != []:
-                for sock in socks:
-                    if sock in ins:
-                        pyro.handleRequests(self.daemon, sock)
-                        after = time.time()
-                        diff = after-before
-                        timeout = timeout - diff
-                        break    # no need to continue with the for loop
-            else: # Timeout
-                sys.stdout.write(".")
-                sys.stdout.flush()
-                timeout = 1.0
-
-            if timeout < 0:
-                timeout = 1.0
-
+            elapsed, _ = self.handleRequests(timeout)
+            if elapsed:
+                timeout -= elapsed
+                if timeout > 0:
+                    continue
+            timeout = 1.0
+            sys.stdout.write(".")
+            sys.stdout.flush()
+        
         if self.interrupted:
             self.request_stop()
 
@@ -442,49 +425,17 @@ class Satellite(Daemon):
     # We do not want to loose time about it, so it's not a bloking
     # wait, timeout = 0s
     # If it send us a new conf, we reinit the connexions of all schedulers
-    def watch_for_new_conf(self, timeout_daemon):
-        socks = pyro.get_sockets(self.daemon)
-        ins = self.get_socks_activity(socks, timeout_daemon)
-        if ins != []:
-            for sock in socks:
-                if sock in ins:
-                    pyro.handleRequests(self.daemon, sock)
+    def watch_for_new_conf(self, timeout):
+        self.handleRequests(timeout)
 
-                    # have_new_conf is set with put_conf
-                    # so another handle will not make a con_init
-                    if self.have_new_conf:
-                        for sched_id in self.schedulers:
-                            print "Got a new conf"
-                            self.pynag_con_init(sched_id)
-                        self.have_new_conf = False
-
-
-    # Check if our system time change. If so, change our
-    def check_for_system_time_change(self):
-        now = time.time()
-        difference = now - self.t_each_loop
-        # If we have more than 15 min time change, we need to compensate
-        # it
-
-        if abs(difference) > 900:
-            self.compensate_system_time_change(difference)
-
-        # Now set the new value for the tick loop
-        self.t_each_loop = now
-
-        # return the diff if it need, of just 0
-        if abs(difference) > 900:
-            return difference
-        else:
-            return 0
-
-
-    # If we've got a system time change, we need to compensate it
-    # from now, we do not do anything in fact.
-    def compensate_system_time_change(self, difference):
-        logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
-        # We only need to change some value
-
+        # have_new_conf is set with put_conf
+        # so another handle will not make a con_init
+        if self.have_new_conf:
+            for sched_id in self.schedulers:
+                print "Got a new conf"
+                self.pynag_con_init(sched_id)
+            self.have_new_conf = False
+            
 
     # Create and launch a new worker, and put it into self.workers
     # It can be mortal or not
@@ -522,9 +473,9 @@ class Satellite(Daemon):
                 pass
         if self.daemon:
             logger.log('Stopping all network connexions')
-            self.daemon.disconnect(self.interface)
-            self.daemon.disconnect(self.brok_interface)
-            self.daemon.disconnect(self.scheduler_interface)
+            self.daemon.unregister(self.interface)
+            self.daemon.unregister(self.brok_interface)
+            self.daemon.unregister(self.scheduler_interface)
             self.daemon.shutdown(True)
 
 
@@ -694,7 +645,7 @@ class Satellite(Daemon):
         begin_loop += diff
         
         after = time.time()
-        self.timeout -= after-begin_loop
+        self.timeout -= after - begin_loop
 
         if self.timeout >= 0:
             return
@@ -766,10 +717,12 @@ class Satellite(Daemon):
 
 
     def do_post_daemon_init(self):
+        """ Do this satellite (poller or reactionner) post "daemonize" init:
+we must register our interfaces for 3 possible callers: arbiter, schedulers or brokers. """
         # And we register them
-        self.uri2 = pyro.register(self.daemon, self.interface, "ForArbiter")
-        self.uri3 = pyro.register(self.daemon, self.brok_interface, "Broks")
-        self.uri4 = pyro.register(self.daemon, self.scheduler_interface, "Schedulers")
+        self.uri2 = self.daemon.register(self.interface, "ForArbiter")
+        self.uri3 = self.daemon.register(self.brok_interface, "Broks")
+        self.uri4 = self.daemon.register(self.scheduler_interface, "Schedulers")
         
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER

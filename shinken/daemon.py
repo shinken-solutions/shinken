@@ -60,6 +60,8 @@ class Daemon:
         self.debug_file = debug_file
         self.interrupted = False
 
+        self.t_each_loop = time.time() # used to track system time change
+
         self.daemon = None # should'nt it be renamed to "pyro_daemon" for clarity & safety ?
 
         # Log init
@@ -72,6 +74,25 @@ class Daemon:
         os.umask(UMASK)
         self.set_exit_handler()
 
+    # At least, lose the local log file if need
+    def do_stop(self):
+        logger.quit()
+
+    def request_stop(self):
+        self.unlink()  ## unlink first
+        self.do_stop()
+        print("Exiting")
+        sys.exit(0)
+
+    def do_loop_turn(self):
+        raise NotImplementedError()
+
+    def do_mainloop(self):
+        while True:
+            self.do_loop_turn()
+            if self.interrupted:
+                break
+        self.request_stop()
     
     def do_load_modules(self, start_external=True):
         self.modules_manager.load_and_init(start_external)
@@ -270,7 +291,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.change_to_user_group()
         self.change_to_workdir()  ## must be done AFTER pyro daemon init
         if self.is_daemon:
-            daemon_socket_fds = tuple( sock.fileno() for sock in pyro.get_sockets(self.daemon) )
+            daemon_socket_fds = tuple( sock.fileno() for sock in self.daemon.get_sockets() )
             self.daemonize(skip_close_fds=daemon_socket_fds)
         else:
             self.write_pid()
@@ -293,12 +314,12 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK=0
 
-        #create the server
+        # create the server
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0        
 
-        self.daemon = pyro.init_daemon(self.host, self.port, ssl_conf.use_ssl)
+        self.daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl) 
 
 
     def get_socks_activity(self, socks, timeout):
@@ -455,22 +476,48 @@ Also put default value in the properties if some are missing in the config_file 
         for line in self.get_header():
             print line
 
-    def do_loop_turn(self):
-        raise NotImplementedError()
+    def handleRequests(self, timeout, suppl_socks=None):
+        """ Wait up to timeout to handle the pyro daemon requests.
+If suppl_socks is given it also looks for activity on that list of fd.
+If none request come within timeout seconds then returns tuple(0, [])
+Else: returns a tuple with the elapsed time since we have been called and as second argument the fd from suppl_socks that eventually got activity.
+"""
+        before = time.time()
+        socks = self.daemon.get_sockets()
+        if suppl_socks:
+            socks.extend(suppl_socks)
+        ins = self.get_socks_activity(socks, timeout)
+        diff = self.check_for_system_time_change()
+        before += diff
+        if ins is []:
+            return 0, []
+        for sock in socks:
+            if sock in ins:
+                self.daemon.handleRequests(sock)
+                ins.remove(sock)
+        after = time.time() - before
+        return after, ins
+        
 
-    # At least, lose the local log file if need
-    def do_stop(self):
-        logger.quit()
+    def check_for_system_time_change(self):
+        """ Check for a possible system time change and act correspondingly.
+If such a change is detected then we returns the number of seconds that changed. 0 if no time change was detected.
+Time change can be positive or negative: 
+positive when we have been sent in the futur and negative if we have been sent in the past. """
+        now = time.time()
+        difference = now - self.t_each_loop
+        
+        # If we have more than 15 min time change, we need to compensate it
+        if abs(difference) > 900:
+            self.compensate_system_time_change(difference)
+        else:
+            difference = 0
 
-    def request_stop(self):
-        self.unlink()  ## unlink first
-        self.do_stop()
-        print("Exiting")
-        sys.exit(0)
+        self.t_each_loop = now
+        
+        return difference
+        
+    def compensate_system_time_change(self, difference):
+        """ Default action for system time change. Actually a log is done """
+        logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
 
-    def do_mainloop(self):
-        while True:
-            self.do_loop_turn()
-            if self.interrupted:
-                break
-        self.request_stop()

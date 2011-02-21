@@ -37,49 +37,46 @@ class PortNotFree(Exception): pass
 try:
     Pyro.core.ObjBase
     #Some one already go here, so we are in 4 if None
-    if Pyro.core.ObjBase == None:
+    if Pyro.core.ObjBase is None:
         raise AttributeError
     print "Using Pyro", Pyro.constants.VERSION
-    pyro_version = 3
-    protocol = 'PYROLOC'
+    
     Pyro.errors.CommunicationError = Pyro.errors.ProtocolError
+    
+    class Pyro3Daemon(Pyro.core.Daemon):
+        pyro_version = 3
+        protocol = 'PYROLOC'
+        
+        def __init__(self, host, port, use_ssl=False):
+            try:
+                Pyro.core.initServer()
+            except OSError, e: # must be problem with workdir :
+                raise InvalidWorkDir(e)
+            if use_ssl:
+                prtcol = 'PYROSSL'
+            else:
+                prtcol = 'PYRO'
+            try:
+                Pyro.core.Daemon.__init__(self, host=host, port=port, prtcol=prtcol)
+            except OSError, e:
+                # must be problem with workdir :
+                raise InvalidWorkDir(e)
+            if self.port != port:
+                msg = "Sorry, the port %d is not free" % (port)
+                raise PortNotFree(msg)
+        
 
+        def register(self, obj, name):
+            return self.connect(obj, name)
 
-    def register(daemon, obj, name):
-        return daemon.connect(obj, name)
+        def unregister(self, obj):
+            self.disconnect(obj)
 
+        def get_sockets(self):
+            return self.getServerSockets()
 
-    def unregister(daemon, obj):
-        daemon.disconnect(obj)
-
-
-    def get_sockets(daemon):
-        return daemon.getServerSockets()
-
-
-    def handleRequests(daemon, s):
-        daemon.handleRequests()
-
-
-    def init_daemon(host, port, use_ssl=False):
-        try:
-            Pyro.core.initServer()
-        except OSError, e: # must be problem with workdir :
-            raise InvalidWorkDir(e)
-        if use_ssl:
-            prtcol = 'PYROSSL'
-        else:
-            prtcol = 'PYRO'
-        try:
-            daemon = Pyro.core.Daemon(host=host, port=port, prtcol=prtcol)
-        except OSError, e:
-            # must be problem with workdir :
-            raise InvalidWorkDir(e)
-        if daemon.port != port:
-            msg = "Sorry, the port %d is not free" % (port)
-            raise PortNotFree(msg)
-        return daemon
-
+        def handleRequests(self, s):
+            Pyro.core.Daemon.handleRequests(self)    
 
     def create_uri(address, port, obj_name, use_ssl):
         if not use_ssl:
@@ -87,64 +84,64 @@ try:
         else:
             return "PYROLOCSSL://%s:%d/%s" % (address, port, obj_name)
 
-    #Timeout way is also changed between 3 and 4
-    #it's a method in 3, a property in 4
+    # Timeout way is also changed between 3 and 4
+    # it's a method in 3, a property in 4
     def set_timeout(con, timeout):
         con._setTimeout(timeout)
-
 
     def getProxy(uri):
         return Pyro.core.getProxyForURI(uri)
 
 
+    PyroClass = Pyro3Daemon
+
+
 except AttributeError:
+    
     print "Using Pyro", Pyro.constants.VERSION
-    pyro_version = 4
-    #Ok, in Pyro 4, interface do not need to
-    #inherit from ObjBase, just object is good
+    
+    # Ok, in Pyro 4, interface do not need to
+    # inherit from ObjBase, just object is good
     Pyro.core.ObjBase = object
     Pyro.errors.URIError = Pyro.errors.ProtocolError
-    protocol = 'PYRO'
     Pyro.core.getProxyForURI = Pyro.core.Proxy
-    #Hack for Pyro 4 : with it, there is
-    #no more way to send huge packet!
+    
+    # Hack for Pyro 4 : with it, there is
+    # no more way to send huge packet!
     import socket
     if hasattr(socket, 'MSG_WAITALL'):
         del socket.MSG_WAITALL
 
+    class Pyro4Daemon(Pyro.core.Daemon):
+        pyro_version = 4
+        protocol = 'PYRO'
+        
+        def __init__(self, host, port, use_ssl=False):
+            #Pyro 4 i by default thread, should do select
+            #(I hate threads!)
+            Pyro.config.SERVERTYPE = "select"
+            #And port already use now raise an exception
+            try:
+                Pyro.core.Daemon.__init__(self, host=host, port=port)
+            except socket.error, exp:
+                msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
+                raise PortNotFree(msg)
+            except Exception, e:
+                # must be problem with pyro workdir :
+                raise InvalidWorkDir(e)
 
-    def register(daemon, obj, name):
-        return daemon.register(obj, name)
+        ## same than this super class so no need:
+        # def register(self, obj, name):
+        # def unregister(self, obj, name):
+    
 
-
-    def unregister(daemon, obj, name):
-        daemon.unregister(obj)
-
-
-    def get_sockets(daemon):
-        return daemon.sockets()
-
-
-    def handleRequests(daemon, s):
-        daemon.handleRequests([s])
-
-
-    def init_daemon(host, port, use_ssl=False):
-        #Pyro 4 i by default thread, should do select
-        #(I hate threads!)
-        Pyro.config.SERVERTYPE="select"
-        #And port already use now raise an exception
-        try:
-            daemon = Pyro.core.Daemon(host=host, port=port)
-        except socket.error, exp:
-            msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
-            raise PortNotFree(msg)
-        except Exception, e:
-            # must be problem with pyro workdir :
-            raise InvalidWorkDir(e)
-        return daemon
-
-
+        def get_sockets(self):
+            return self.sockets()
+    
+        def handleRequests(self, s):
+            Pyro.core.Daemon.handleRequests(self, [s])
+    
+    
     def create_uri(address, port, obj_name, use_ssl=False):
         return "PYRO:%s@%s:%d" % (obj_name, address, port)
 
@@ -155,3 +152,22 @@ except AttributeError:
 
     def getProxy(uri):
         return Pyro.core.Proxy(uri)
+
+
+    PyroClass = Pyro4Daemon
+    
+
+
+import select, errno, time
+
+class ShinkenPyroDaemon(PyroClass):
+    
+    def get_socks_activity(self, timeout):
+        try:
+            ins, _, _ = select.select(self.get_sockets(), [], [], timeout)
+        except select.error, e:
+            errnum, _ = e
+            if errnum == errno.EINTR:
+                return []
+            raise
+        return ins

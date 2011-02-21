@@ -41,7 +41,7 @@ from shinken.notification import Notification
 
 from shinken.brok import Brok
 
-
+from shinken.daemons.schedulerdaemon import Shinken
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
@@ -83,7 +83,10 @@ class ShinkenTest(unittest.TestCase):
         self.conf.is_correct()
         self.confs = self.conf.cut_into_parts()
         self.dispatcher = Dispatcher(self.conf, self.me)
-        self.sched = Scheduler(None, None)
+        
+        scheddaemon = Shinken(None, False, False, False, None) 
+        self.sched = Scheduler(scheddaemon.daemon, scheddaemon)
+        
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf)

@@ -287,8 +287,6 @@ class Broker(Satellite):
         # will be taken by arbiter to process
         self.external_commands = []
 
-        self.t_each_loop = time.time() # use to track system time change
-
         # All broks to manage
         self.broks = [] # broks to manage
         # broks raised this turn and that need to be put in self.broks
@@ -630,7 +628,7 @@ class Broker(Satellite):
         
         self.do_daemon_init_and_start()
 
-        self.uri2 = pyro.register(self.daemon, IForArbiter(self), "ForArbiter")
+        self.uri2 = self.daemon.register(IForArbiter(self), "ForArbiter")
         print "The Arbtier uri it at", self.uri2
 
         #  We wait for initial conf

@@ -36,6 +36,11 @@ from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.dependencynode import DependencyNodeFactory, DependencyNode
 
+
+# on system time change just reevaluate the following attributes :
+__on_time_change_update = ( 'last_notification', 'last_state_change', 'last_hard_state_change' )
+
+
 class SchedulingItem(Item):
 
     # global counters used for [current|last]_[host|service]_[event|problem]_id
@@ -450,8 +455,7 @@ class SchedulingItem(Item):
     # checks that will give us the new value
     def compensate_system_time_change(self, difference):
         # We only need to change some value
-        need_change = ['last_notification', 'last_state_change', 'last_hard_state_change']
-        for p in need_change:
+        for p in __on_time_change_update:
             val = getattr(self, p) # current value
             #Do not go below 1970 :)
             val = max(0, val + difference) #diff can be -
