@@ -521,6 +521,7 @@ class Arbiter(Daemon):
         # Now we can get all initial broks for our satellites
         self.get_initial_broks_from_satellitelinks()
 
+        suppl_socks = None
         # Now create the external commander
         if os.name != 'nt':
             e = ExternalCommandManager(self.conf, 'dispatcher')
@@ -528,9 +529,8 @@ class Arbiter(Daemon):
             # Arbiter need to know about external command to activate it
             # if necessary
             self.load_external_command(e)
-            suppl_socks = [ self.fifo ]
-        else:
-            suppl_socks = None
+            if self.fifo is not None:
+                suppl_socks = [ self.fifo ]
 
         print "Run baby, run..."
         timeout = 1.0             
@@ -548,7 +548,10 @@ class Arbiter(Daemon):
                         self.external_commands.append(ext_cmd)
                 else:
                     self.fifo = self.external_command.open()
-                    suppl_socks = [ self.fifo ]
+                    if self.fifo is not None:
+                        suppl_socks = [ self.fifo ]
+                    else:
+                        suppl_socks = None
                 elapsed += now - time.time()
 
             if elapsed or ins:
