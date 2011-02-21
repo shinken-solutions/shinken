@@ -196,26 +196,15 @@ HE got user entry, so we must listen him carefully and give information he want,
             self.app.sched.die()
 
 
-#Tha main app class
+# The main app class
 class Shinken(Daemon):
-    #default_port = 7768
 
-    properties = {
-        'workdir':      { 'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
+    properties = Daemon.properties.copy()
+    properties.update({
         'pidfile':      { 'default' : '/usr/local/shinken/var/schedulerd.pid', 'pythonize' : None, 'path' : True},
         'port':         { 'default' : '7768', 'pythonize' : to_int},
-        'host':         { 'default' : '0.0.0.0', 'pythonize' : None},
-        'user':         { 'default' : 'shinken', 'pythonize' : None},
-        'group':        { 'default' : 'shinken', 'pythonize' : None},
-        'use_ssl':      { 'default' : '0', 'pythonize' : to_bool},
-        'certs_dir':    { 'default' : 'etc/certs', 'pythonize' : None},
-        'ca_cert':      { 'default' : 'etc/certs/ca.pem', 'pythonize' : None},
-        'server_cert':  { 'default': 'etc/certs/server.pem', 'pythonize' : None},
-        'use_local_log':{ 'default' : '0', 'pythonize' : to_bool},
         'local_log':    { 'default' : '/usr/local/shinken/var/schedulerd.log', 'pythonize' : None, 'path' : True},
-        'hard_ssl_name_check':    { 'default' : '0', 'pythonize' : to_bool},
-        'idontcareaboutsecurity': { 'default' : '0', 'pythonize' : to_bool},
-    }
+    })
     
     
     #Create the shinken class:

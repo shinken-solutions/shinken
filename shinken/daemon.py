@@ -31,6 +31,7 @@ Pyro = pyro.Pyro
 
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
+from shinken.util import to_int, to_bool
 
 
 if os.name != 'nt':
@@ -50,6 +51,20 @@ class InvalidPidDir(Exception): pass
 
 
 class Daemon:
+
+    properties = {
+        'workdir':      { 'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
+        'host':         { 'default' : '0.0.0.0', 'pythonize' : None},
+        'user':         { 'default' : 'shinken', 'pythonize' : None},
+        'group':        { 'default' : 'shinken', 'pythonize' : None},
+        'use_ssl':      { 'default' : '0', 'pythonize' : to_bool},
+        'certs_dir':    { 'default' : 'etc/certs', 'pythonize' : None},
+        'ca_cert':      { 'default' : 'etc/certs/ca.pem', 'pythonize' : None},
+        'server_cert':  { 'default': 'etc/certs/server.pem', 'pythonize' : None},
+        'use_local_log':{ 'default' : '0', 'pythonize' : to_bool},
+        'hard_ssl_name_check':    { 'default' : '0', 'pythonize' : to_bool},
+        'idontcareaboutsecurity': { 'default' : '0', 'pythonize' : to_bool},
+    }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
         self.name = name

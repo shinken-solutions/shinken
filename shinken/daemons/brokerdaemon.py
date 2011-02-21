@@ -238,24 +238,13 @@ class IForArbiter(Pyro.core.ObjBase):
 
 # Our main APP class
 class Broker(Satellite):
-    # default_port = 7772
-    properties = {
-            'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
-            'pidfile' : {'default' : '/usr/local/shinken/var/brokerd.pid', 'pythonize' : None, 'path' : True},
-            'port' : {'default' : '7772', 'pythonize' : to_int},
-            'host' : {'default' : '0.0.0.0', 'pythonize' : None},
-            'user' : {'default' : 'shinken', 'pythonize' : None},
-            'group' : {'default' : 'shinken', 'pythonize' : None},
-            'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
-#               'modulespath' : {'default' :'/usr/local/shinken/shinken/modules' , 'pythonize' : None, 'path' : True}
-            'use_ssl' : {'default' : '0', 'pythonize' : to_bool},
-            'certs_dir' : {'default' : 'etc/certs', 'pythonize' : None},
-            'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
-            'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
-            'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
-            'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
-            'local_log' : {'default' : '/usr/local/shinken/var/brokerd.log', 'pythonize' : None, 'path' : True},
-            }
+
+    properties = Satellite.properties.copy()
+    properties.update({
+        'pidfile':   { 'default' : '/usr/local/shinken/var/brokerd.pid', 'pythonize' : None, 'path' : True},
+        'port':      { 'default' : '7772', 'pythonize' : to_int},
+        'local_log': { 'default' : '/usr/local/shinken/var/brokerd.log', 'pythonize' : None, 'path' : True},
+    })
 
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):

@@ -91,7 +91,8 @@ class IArbiters(Pyro.core.ObjBase):
 
 # Main Arbiter Class
 class Arbiter(Daemon):
-    properties = {}
+    
+    #properties = {}
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
         
