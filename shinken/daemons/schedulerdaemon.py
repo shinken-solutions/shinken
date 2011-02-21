@@ -196,26 +196,15 @@ HE got user entry, so we must listen him carefully and give information he want,
             self.app.sched.die()
 
 
-#Tha main app class
+# The main app class
 class Shinken(Daemon):
-    #default_port = 7768
 
-    properties = {
-        'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
-        'pidfile' : {'default' : '/usr/local/shinken/var/schedulerd.pid', 'pythonize' : None, 'path' : True},
-        'port' : {'default' : '7768', 'pythonize' : to_int},
-        'host' : {'default' : '0.0.0.0', 'pythonize' : None},
-        'user' : {'default' : 'shinken', 'pythonize' : None},
-        'group' : {'default' : 'shinken', 'pythonize' : None},
-        'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
-        'use_ssl' : {'default' : '0', 'pythonize' : to_bool},
-        'certs_dir' : {'default' : 'etc/certs', 'pythonize' : None},
-        'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
-        'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
-        'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
-        'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
-        'local_log' : {'default' : '/usr/local/shinken/var/schedulerd.log', 'pythonize' : None, 'path' : True},
-        }
+    properties = Daemon.properties.copy()
+    properties.update({
+        'pidfile':      { 'default' : '/usr/local/shinken/var/schedulerd.pid', 'pythonize' : None, 'path' : True},
+        'port':         { 'default' : '7768', 'pythonize' : to_int},
+        'local_log':    { 'default' : '/usr/local/shinken/var/schedulerd.log', 'pythonize' : None, 'path' : True},
+    })
     
     
     #Create the shinken class:
@@ -258,7 +247,7 @@ class Shinken(Daemon):
         logger.quit()
 
 
-    #We wait (block) for arbiter to send us conf
+    # We wait (block) for arbiter to send us conf
     def wait_initial_conf(self):
 
         self.have_conf = False
@@ -266,27 +255,16 @@ class Shinken(Daemon):
         timeout = 1.0
         while not self.have_conf and not self.interrupted:
 
-            avant = time.time()
+            elapsed, _, _ = self.handleRequests(timeout)
+            if elapsed:
+                timeout -= elapsed
+                if timeout > 0:
+                    continue
             
-            socks = pyro.get_sockets(self.daemon)            
-            ins = self.get_socks_activity(socks, timeout)
-            if ins != []:
-                for s in socks:
-                    if s in ins:
-                        #Cal the wrapper to manage the good
-                        #handleRequests call of daemon
-                        pyro.handleRequests(self.daemon, s)
-                        apres = time.time()
-                        diff = apres-avant
-                        timeout = timeout - diff
-                        break    # no need to continue with the for loop
-            else: #Timeout
-                sys.stdout.write(".")
-                sys.stdout.flush()
-                timeout = 1.0
-
-            if timeout < 0:
-                timeout = 1.0
+            # Timeout
+            sys.stdout.write(".")
+            sys.stdout.flush()
+            timeout = 1.0
         
         if self.interrupted:
             self.request_stop()
@@ -316,25 +294,25 @@ class Shinken(Daemon):
         # create scheduler with ref of our daemon
         self.sched = Scheduler(self.daemon, self)
 
-        #give it an interface
-        #But first remove previous interface if exists
+        # give it an interface
+        # But first remove previous interface if exists
         if self.ichecks != None:
             print "Deconnecting previous Check Interface from daemon"
-            pyro.unregister(self.daemon, self.ichecks)
+            self.daemon.unregister(self.ichecks)
 
         #Now create and connect it
         self.ichecks = IChecks(self.sched)
-        self.uri = pyro.register(self.daemon, self.ichecks, "Checks")
+        self.uri = self.daemon.register(self.ichecks, "Checks")
         print "The Checks Interface uri is:", self.uri
 
         #Same for Broks
         if self.ibroks != None:
             print "Deconnecting previous Broks Interface from daemon"
-            pyro.unregister(self.daemon, self.ibroks)
+            self.daemon.unregister(self.ibroks)
 
         #Create and connect it
         self.ibroks = IBroks(self.sched)
-        self.uri2 = pyro.register(self.daemon, self.ibroks, "Broks")
+        self.uri2 = self.daemon.register(self.ibroks, "Broks")
         print "The Broks Interface uri is:", self.uri2
 
         print "Loading configuration"
@@ -370,6 +348,69 @@ class Shinken(Daemon):
         e.load_scheduler(self.sched)
 
 
+    def compensate_system_time_change(self, difference):
+        """ Compensate a system time change of difference for all hosts/services/checks/notifs """
+        logger.log('Warning: A system time change of %d has been detected.  Compensating...' % difference)
+        # We only need to change some value
+        self.program_start = max(0, self.program_start + difference)
+
+        # Then we compasate all host/services
+        for h in self.sched.hosts:
+            h.compensate_system_time_change(difference)
+        for s in self.sched.services:
+            s.compensate_system_time_change(difference)
+
+        # Now all checks and actions
+        for c in self.sched.checks.values():
+            # Already launch checks should not be touch
+            if c.status == 'scheduled':
+                t_to_go = c.t_to_go
+                ref = c.ref
+                new_t = max(0, t_to_go + difference)
+                # But it's no so simple, we must match the timeperiod
+                new_t = ref.check_period.get_next_valid_time_from_t(new_t)
+                # But maybe no there is no more new value! Not good :(
+                # Say as error, with error output
+                if new_t == None:
+                    c.state = 'waitconsume'
+                    c.exit_status = 2
+                    c.output = '(Error: there is no available check time after time change!)'
+                    c.check_time = time.time()
+                    c.execution_time = 0
+                else:
+                    c.t_to_go = new_t
+                    ref.next_chk = new_t
+
+        # Now all checks and actions
+        for c in self.sched.actions.values():
+            # Already launch checks should not be touch
+            if c.status == 'scheduled':
+                t_to_go = c.t_to_go
+
+                #  Event handler do not have ref
+                ref = getattr(c, 'ref', None)
+                new_t = max(0, t_to_go + difference)
+
+                # Notification should be check with notification_period
+                if c.is_a == 'notification':
+                    # But it's no so simple, we must match the timeperiod
+                    new_t = ref.notification_period.get_next_valid_time_from_t(new_t)
+                    # And got a creation_time variable too
+                    c.creation_time = c.creation_time + difference
+
+                # But maybe no there is no more new value! Not good :(
+                # Say as error, with error output
+                if new_t == None:
+                    c.state = 'waitconsume'
+                    c.exit_status = 2
+                    c.output = '(Error: there is no available check time after time change!)'
+                    c.check_time = time.time()
+                    c.execution_time = 0
+                else:
+                    c.t_to_go = new_t
+
+
+
     def manage_signal(self, sig, frame):
         # self.sched could be still unset if we have not yet received our conf
         if self.sched: 
@@ -397,7 +438,7 @@ class Shinken(Daemon):
         
         self.do_daemon_init_and_start()
         
-        self.uri2 = pyro.register(self.daemon, self.i_for_arbiter, "ForArbiter")
+        self.uri2 = self.daemon.register(self.i_for_arbiter, "ForArbiter")
         print "The Arbiter Interface is at:", self.uri2
 
         # Ok, now the conf

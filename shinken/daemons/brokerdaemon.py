@@ -75,11 +75,11 @@ class IForArbiter(Pyro.core.ObjBase):
         self.app.name = self.name = name
         self.app.log.load_obj(self.app, name)
 
-        print "[%s] Sending us configuration %s" %(self.name, conf)
+        print "[%s] Sending us configuration %s" % (self.name, conf)
         # If we've got something in the schedulers, we do not
         # want it anymore
         # self.schedulers.clear()
-        for sched_id in conf['schedulers'] :
+        for sched_id in conf['schedulers']:
             # Must look if we already have it to do nto overdie our broks
             already_got = sched_id in self.schedulers
             if already_got:
@@ -102,7 +102,7 @@ class IForArbiter(Pyro.core.ObjBase):
         logger.log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
 
         # Now get arbiter
-        for arb_id in conf['arbiters'] :
+        for arb_id in conf['arbiters']:
             # Must look if we already have it
             already_got = arb_id in self.arbiters
             if already_got:
@@ -123,7 +123,7 @@ class IForArbiter(Pyro.core.ObjBase):
         logger.log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
 
         # Now for pollers
-        for pol_id in conf['pollers'] :
+        for pol_id in conf['pollers']:
             # Must look if we already have it
             already_got = pol_id in self.pollers
             if already_got:
@@ -238,24 +238,13 @@ class IForArbiter(Pyro.core.ObjBase):
 
 # Our main APP class
 class Broker(Satellite):
-    # default_port = 7772
-    properties = {
-            'workdir' : {'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
-            'pidfile' : {'default' : '/usr/local/shinken/var/brokerd.pid', 'pythonize' : None, 'path' : True},
-            'port' : {'default' : '7772', 'pythonize' : to_int},
-            'host' : {'default' : '0.0.0.0', 'pythonize' : None},
-            'user' : {'default' : 'shinken', 'pythonize' : None},
-            'group' : {'default' : 'shinken', 'pythonize' : None},
-            'idontcareaboutsecurity' : {'default' : '0', 'pythonize' : to_bool},
-#               'modulespath' : {'default' :'/usr/local/shinken/shinken/modules' , 'pythonize' : None, 'path' : True}
-            'use_ssl' : {'default' : '0', 'pythonize' : to_bool},
-            'certs_dir' : {'default' : 'etc/certs', 'pythonize' : None},
-            'ca_cert' : {'default' : 'etc/certs/ca.pem', 'pythonize' : None},
-            'server_cert' : {'default': 'etc/certs/server.pem', 'pythonize' : None},
-            'hard_ssl_name_check' : {'default' : '0', 'pythonize' : to_bool},
-            'use_local_log' : {'default' : '0', 'pythonize' : to_bool},
-            'local_log' : {'default' : '/usr/local/shinken/var/brokerd.log', 'pythonize' : None, 'path' : True},
-            }
+
+    properties = Satellite.properties.copy()
+    properties.update({
+        'pidfile':   { 'default' : '/usr/local/shinken/var/brokerd.pid', 'pythonize' : None, 'path' : True},
+        'port':      { 'default' : '7772', 'pythonize' : to_int},
+        'local_log': { 'default' : '/usr/local/shinken/var/brokerd.log', 'pythonize' : None, 'path' : True},
+    })
 
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
@@ -286,8 +275,6 @@ class Broker(Satellite):
         # Can have a queue of external_commands give by modules
         # will be taken by arbiter to process
         self.external_commands = []
-
-        self.t_each_loop = time.time() # use to track system time change
 
         # All broks to manage
         self.broks = [] # broks to manage
@@ -630,7 +617,7 @@ class Broker(Satellite):
         
         self.do_daemon_init_and_start()
 
-        self.uri2 = pyro.register(self.daemon, IForArbiter(self), "ForArbiter")
+        self.uri2 = self.daemon.register(IForArbiter(self), "ForArbiter")
         print "The Arbtier uri it at", self.uri2
 
         #  We wait for initial conf

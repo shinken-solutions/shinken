@@ -91,7 +91,8 @@ class IArbiters(Pyro.core.ObjBase):
 
 # Main Arbiter Class
 class Arbiter(Daemon):
-    properties = {}
+    
+    #properties = {}
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
         
@@ -110,8 +111,7 @@ class Arbiter(Daemon):
         # Now tab for external_commands
         self.external_commands = []
 
-        # to track system time change
-        self.t_each_loop = time.time()
+        self.fifo = None
 
 
     # Use for adding things like broks
@@ -175,33 +175,6 @@ class Arbiter(Daemon):
     def load_external_command(self, e):
         self.external_command = e
         self.fifo = e.open()
-
-
-    # Check if our system time change. If so, change our
-    def check_for_system_time_change(self):
-        now = time.time()
-        difference = now - self.t_each_loop
-        # If we have more than 15 min time change, we need to
-        # compensate it
-
-        if abs(difference) > 900:
-            self.compensate_system_time_change(difference)
-
-        # Now set the new value for the tick loop
-        self.t_each_loop = now
-
-        # return the diff if it need, of just 0
-        if abs(difference) > 900:
-            return difference
-        else:
-            return 0
-
-
-    # If we've got a system time change, we need to compensate it
-    # from now, we do not do anything in fact.
-    def compensate_system_time_change(self, difference):
-        logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
-        #We only need to change some value
 
 
     # We call the function of modules that got the this
@@ -436,7 +409,7 @@ class Arbiter(Daemon):
 
         self.iarbiters = IArbiters(self)
 
-        self.uri_arb = pyro.register(self.daemon, self.iarbiters, "ForArbiter")
+        self.uri_arb = self.daemon.register(self.iarbiters, "ForArbiter") 
 
         ## And go for the main loop
         self.do_mainloop()
@@ -483,30 +456,15 @@ class Arbiter(Daemon):
         print "Waiting for configuration from master"
         timeout = 1.0
         while not self.have_conf and not self.interrupted:
-            avant = time.time()
-            socks = pyro.get_sockets(self.daemon)
-
-            # 'foreign' event loop
-            ins = self.get_socks_activity(socks, timeout)
-
-            # Manage a possible time change (our avant will be change with the diff)
-            diff = self.check_for_system_time_change()
-            avant += diff
-
-            if ins != []:
-                for s in socks:
-                    if s in ins:
-                        pyro.handleRequests(self.daemon, s)
-                        apres = time.time()
-                        diff = apres-avant
-                        timeout = timeout - diff
-                        break    # no need to continue with the for loop
-            else: #Timeout
+            
+            elapsed, _, _ = self.handleRequests(timeout)
+            if elapsed:
+                timeout = timeout - elapsed
+                if timeout < 0:
+                    timeout = 1.0
+            else: # Timeout
                 sys.stdout.write(".")
                 sys.stdout.flush()
-                timeout = 1.0
-
-            if timeout < 0:
                 timeout = 1.0
 
         if self.interrupted:
@@ -517,42 +475,29 @@ class Arbiter(Daemon):
     def wait_for_master_death(self):
         print "Waiting for master death"
         timeout = 1.0
-        is_master_dead = False
         self.last_master_speack = time.time()
-        while not is_master_dead and not self.interrupted:
-
-            avant = time.time()
+        
+        while not self.interrupted:
+            elapsed, _, tcdiff = self.handleRequests(timeout)
+            # if there was a system Time Change (tcdiff) then we have to adapt last_master_speak:
+            if tcdiff:
+                self.last_master_speack += tcdiff
+            if elapsed:
+                self.last_master_speack = time.time()
+                timeout -= elapsed
+                if timeout > 0:
+                    continue
             
-            socks = pyro.get_sockets(self.daemon)
-            ins = self.get_socks_activity(socks, timeout)
+            timeout = 1.0            
+            sys.stdout.write(".")
+            sys.stdout.flush()
 
-            # Manage a possible time change (our avant will be change with the diff)
-            diff = self.check_for_system_time_change()
-            avant += diff
-
-            if ins != []:
-                for s in socks:
-                    if s in ins:
-                        pyro.handleRequests(self.daemon, s)
-                        self.last_master_speack = time.time()
-                        apres = time.time()
-                        diff = apres-avant
-                        timeout = timeout - diff
-            else: # Timeout
-                sys.stdout.write(".")
-                sys.stdout.flush()
-                timeout = 1.0
-
-            if timeout < 0:
-                timeout = 1.0
-
-            #Now check if master is dead or not
+            # Now check if master is dead or not
             now = time.time()
             if now - self.last_master_speack > 5:
                 print "Master is dead!!!"
                 self.must_run = True
-                is_master_dead = True
-
+                break
 
 
     def do_stop(self):
@@ -579,6 +524,7 @@ class Arbiter(Daemon):
         # Now we can get all initial broks for our satellites
         self.get_initial_broks_from_satellitelinks()
 
+        suppl_socks = None
         # Now create the external commander
         if os.name != 'nt':
             e = ExternalCommandManager(self.conf, 'dispatcher')
@@ -586,75 +532,66 @@ class Arbiter(Daemon):
             # Arbiter need to know about external command to activate it
             # if necessary
             self.load_external_command(e)
-        else:
-            self.fifo = None
+            if self.fifo is not None:
+                suppl_socks = [ self.fifo ]
 
         print "Run baby, run..."
-        timeout = 1.0
+        timeout = 1.0             
+        
         while self.must_run and not self.interrupted:
-            socks = []
-            daemon_sockets = pyro.get_sockets(self.daemon)
-            socks.extend(daemon_sockets)
-            avant = time.time()
-            if self.fifo != None:
-                socks.append(self.fifo)
-            # 'foreign' event loop
-            ins = self.get_socks_activity(socks, timeout)
+            
+            elapsed, ins, _ = self.handleRequests(timeout, suppl_socks)
+            
+            # If FIFO, read external command
+            if ins:
+                now = time.time()
+                ext_cmds = self.external_command.get()
+                if ext_cmds:
+                    for ext_cmd in ext_cmds:
+                        self.external_commands.append(ext_cmd)
+                else:
+                    self.fifo = self.external_command.open()
+                    if self.fifo is not None:
+                        suppl_socks = [ self.fifo ]
+                    else:
+                        suppl_socks = None
+                elapsed += now - time.time()
 
-            # Manage a possible time change (our avant will be change with the diff)
-            diff = self.check_for_system_time_change()
-            avant += diff
+            if elapsed or ins:
+                timeout -= elapsed
+                if timeout > 0: # only continue if we are not over timeout
+                    continue  
+            
+            # Timeout
+            timeout = 1.0 # reset the timeout value
+            
+            # Call modules that manage a starting tick pass
+            self.hook_point('tick')
+            
+            self.dispatcher.check_alive()
+            self.dispatcher.check_dispatch()
+            # REF: doc/shinken-conf-dispatching.png (3)
+            self.dispatcher.dispatch()
+            self.dispatcher.check_bad_dispatch()
 
-            if ins != []:
-                for s in socks:
-                    if s in ins:
-                        if s in daemon_sockets:
-                            pyro.handleRequests(self.daemon, s)
-                            apres = time.time()
-                            diff = apres-avant
-                            timeout = timeout - diff
-                            break    # no need to continue with the for loop
-                        # If FIFO, read external command
-                        if s == self.fifo:
-                            ext_cmds = self.external_command.get()
-                            if ext_cmds:
-                                for ext_cmd in ext_cmds:
-                                    self.external_commands.append(ext_cmd)
-                            else:
-                                self.fifo = self.external_command.open()
+            # Now get things from our module instances
+            self.get_objects_from_from_queues()
 
-            else: # Timeout
-                # Call modules that manage a starting tick pass
-                self.hook_point('tick')
-                
-                self.dispatcher.check_alive()
-                self.dispatcher.check_dispatch()
-                # REF: doc/shinken-conf-dispatching.png (3)
-                self.dispatcher.dispatch()
-                self.dispatcher.check_bad_dispatch()
+            # Maybe our satellites links raise new broks. Must reap them
+            self.get_broks_from_satellitelinks()
 
-                # Now get things from our module instances
-                self.get_objects_from_from_queues()
+            # One broker is responsible for our broks,
+            # we must give him our broks
+            self.push_broks_to_broker()
+            self.get_external_commands_from_brokers()
+            # send_conf_to_schedulers()
 
-                # Maybe our satellites links raise new broks. Must reap them
-                self.get_broks_from_satellitelinks()
+            print "Nb Broks send:", self.nb_broks_send
+            self.nb_broks_send = 0
 
-                # One broker is responsible for our broks,
-                # we must give him our broks
-                self.push_broks_to_broker()
-                self.get_external_commands_from_brokers()
-                # send_conf_to_schedulers()
-                timeout = 1.0
-
-                print "Nb Broks send:", self.nb_broks_send
-                self.nb_broks_send = 0
-
-                # Now send all external commands to schedulers
-                for ext_cmd in self.external_commands:
-                    self.external_command.resolve_command(ext_cmd)
-                # It's send, do not keep them
-                # TODO: check if really send. Queue by scheduler?
-                self.external_commands = []
-
-            if timeout < 0:
-                timeout = 1.0
+            # Now send all external commands to schedulers
+            for ext_cmd in self.external_commands:
+                self.external_command.resolve_command(ext_cmd)
+            # It's send, do not keep them
+            # TODO: check if really send. Queue by scheduler?
+            self.external_commands = []

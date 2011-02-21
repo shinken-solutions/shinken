@@ -31,6 +31,7 @@ Pyro = pyro.Pyro
 
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
+from shinken.util import to_int, to_bool
 
 
 if os.name != 'nt':
@@ -51,6 +52,20 @@ class InvalidPidDir(Exception): pass
 
 class Daemon:
 
+    properties = {
+        'workdir':      { 'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
+        'host':         { 'default' : '0.0.0.0', 'pythonize' : None},
+        'user':         { 'default' : 'shinken', 'pythonize' : None},
+        'group':        { 'default' : 'shinken', 'pythonize' : None},
+        'use_ssl':      { 'default' : '0', 'pythonize' : to_bool},
+        'certs_dir':    { 'default' : 'etc/certs', 'pythonize' : None},
+        'ca_cert':      { 'default' : 'etc/certs/ca.pem', 'pythonize' : None},
+        'server_cert':  { 'default': 'etc/certs/server.pem', 'pythonize' : None},
+        'use_local_log':{ 'default' : '0', 'pythonize' : to_bool},
+        'hard_ssl_name_check':    { 'default' : '0', 'pythonize' : to_bool},
+        'idontcareaboutsecurity': { 'default' : '0', 'pythonize' : to_bool},
+    }
+
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
         self.name = name
         self.config_file = config_file
@@ -59,6 +74,10 @@ class Daemon:
         self.debug = debug
         self.debug_file = debug_file
         self.interrupted = False
+
+        now = time.time()
+        self.program_start = now
+        self.t_each_loop = now # used to track system time change
 
         self.daemon = None # should'nt it be renamed to "pyro_daemon" for clarity & safety ?
 
@@ -72,6 +91,25 @@ class Daemon:
         os.umask(UMASK)
         self.set_exit_handler()
 
+    # At least, lose the local log file if need
+    def do_stop(self):
+        logger.quit()
+
+    def request_stop(self):
+        self.unlink()  ## unlink first
+        self.do_stop()
+        print("Exiting")
+        sys.exit(0)
+
+    def do_loop_turn(self):
+        raise NotImplementedError()
+
+    def do_mainloop(self):
+        while True:
+            self.do_loop_turn()
+            if self.interrupted:
+                break
+        self.request_stop()
     
     def do_load_modules(self, start_external=True):
         self.modules_manager.load_and_init(start_external)
@@ -225,31 +263,36 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         os.dup2(fdtemp, 1) # standard output (1)
         os.dup2(fdtemp, 2) # standard error (2)
         
-        # Now the Fork/Fork
+        # Now the fork/setsid/fork..
         try:
             pid = os.fork()
         except OSError, e:
             raise Exception, "%s [%d]" % (e.strerror, e.errno)
         if pid != 0:
-            ## in the father
+            # In the father ; we check if our child exit correctly 
+            # it has effectively to write the pid of our futur little child..
             def do_exit(sig, frame):
                 print("timeout waiting child while it should have quickly returned ; something weird happened")
                 os.kill(pid, 9)
                 sys.exit(1)
-            ## wait the child process to check its return status:
+            # wait the child process to check its return status:
             signal.signal(signal.SIGALRM, do_exit)
-            signal.alarm(3)  ## TODO: define alarm value somewhere else and/or use config variable
+            signal.alarm(3)  # forking & writing a pid in a file should be rather quick..
+            # if it's not then somewthing wrong can already be on the way so let's wait max 3 secs here. 
             pid, status = os.waitpid(pid, 0)
             if status != 0:
                 print("something weird happened with/during second fork : status=", status)
             os._exit(status != 0)
 
+        # halfway to daemonize..
         os.setsid()
         try:
             pid = os.fork()
         except OSError, e:
             raise Exception, "%s [%d]" % (e.strerror, e.errno)
         if pid != 0:
+            # we are the last step and the real daemon is actually correctly created at least.
+            # we have still the last responsibility to write the pid of the daemon itself.
             self.write_pid(pid)
             os._exit(0)
 
@@ -265,7 +308,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.change_to_user_group()
         self.change_to_workdir()  ## must be done AFTER pyro daemon init
         if self.is_daemon:
-            daemon_socket_fds = tuple( sock.fileno() for sock in pyro.get_sockets(self.daemon) )
+            daemon_socket_fds = tuple( sock.fileno() for sock in self.daemon.get_sockets() )
             self.daemonize(skip_close_fds=daemon_socket_fds)
         else:
             self.write_pid()
@@ -288,12 +331,12 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK=0
 
-        #create the server
+        # create the server
         Pyro.config.PYRO_STORAGE = self.workdir
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0        
 
-        self.daemon = pyro.init_daemon(self.host, self.port, ssl_conf.use_ssl)
+        self.daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl) 
 
 
     def get_socks_activity(self, socks, timeout):
@@ -450,22 +493,53 @@ Also put default value in the properties if some are missing in the config_file 
         for line in self.get_header():
             print line
 
-    def do_loop_turn(self):
-        raise NotImplementedError()
+    def handleRequests(self, timeout, suppl_socks=None):
+        """ Wait up to timeout to handle the pyro daemon requests.
+If suppl_socks is given it also looks for activity on that list of fd.
+Returns a 3-tuple:
+If timeout: first arg is 0, second is [], third is possible system time change value
+If not timeout (== some fd got activity): 
+ - first arg is elapsed time since wait, 
+ - second arg is sublist of suppl_socks that got activity.
+ - third arg is possible system time change value, or 0 if no change. """
+        before = time.time()
+        socks = self.daemon.get_sockets()
+        if suppl_socks:
+            socks.extend(suppl_socks)
+        ins = self.get_socks_activity(socks, timeout)
+        tcdiff = self.check_for_system_time_change()
+        before += tcdiff
+        if ins is []: # trivial case: no fd activity:
+            return 0, [], tcdiff
+        for sock in socks:
+            if sock in ins:
+                self.daemon.handleRequests(sock)
+                ins.remove(sock)
+        elapsed = time.time() - before
+        if elapsed == 0: # we have done a few instructions in 0 second exactly !? quantum computer ?
+            elapsed = 0.01  # but we absolutely need to return != 0 to indicate that we got activity
+        return elapsed, ins, tcdiff
+        
 
-    # At least, lose the local log file if need
-    def do_stop(self):
-        logger.quit()
+    def check_for_system_time_change(self):
+        """ Check for a possible system time change and act correspondingly.
+If such a change is detected then we returns the number of seconds that changed. 0 if no time change was detected.
+Time change can be positive or negative: 
+positive when we have been sent in the futur and negative if we have been sent in the past. """
+        now = time.time()
+        difference = now - self.t_each_loop
+        
+        # If we have more than 15 min time change, we need to compensate it
+        if abs(difference) > 900:
+            self.compensate_system_time_change(difference)
+        else:
+            difference = 0
 
-    def request_stop(self):
-        self.unlink()  ## unlink first
-        self.do_stop()
-        print("Exiting")
-        sys.exit(0)
+        self.t_each_loop = now
+        
+        return difference
+        
+    def compensate_system_time_change(self, difference):
+        """ Default action for system time change. Actually a log is done """
+        logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
 
-    def do_mainloop(self):
-        while True:
-            self.do_loop_turn()
-            if self.interrupted:
-                break
-        self.request_stop()

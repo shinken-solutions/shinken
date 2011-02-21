@@ -40,8 +40,8 @@ from shinken.log import logger
 
 
 class Scheduler:
-    def __init__(self, daemon, scheduler_daemon):
-        self.daemon = daemon # Pyro daemon for incomming orders/askings
+    def __init__(self, pyro_daemon, scheduler_daemon):
+        self.daemon = pyro_daemon # Pyro daemon for incomming orders/askings
         self.sched_daemon = scheduler_daemon
         # When set to false by us, we die and arbiter launch a new Scheduler
         self.must_run = True 
@@ -72,10 +72,10 @@ class Scheduler:
             11 : ('get_and_register_update_program_status_brok', self.get_and_register_update_program_status_brok, 10),
             # Check for system time change. And AFTER get new checks
             # so they are changed too.
-            12 : ('check_for_system_time_change', self.check_for_system_time_change, 1),
+            12 : ('check_for_system_time_change', self.sched_daemon.check_for_system_time_change, 1),
             # launch if need all internal checks
             13 : ('manage_internal_checks', self.manage_internal_checks, 1),
-            }
+        }
 
         # stats part
         self.nb_checks_send = 0
@@ -679,81 +679,6 @@ class Scheduler:
 
         # Now remove mod that raise an exception
         self.sched_daemon.modules_manager.clear_instances(to_del)
-        
-
-    def check_for_system_time_change(self):
-        now = time.time()
-        difference = now - self.t_each_loop
-        # If we have more than 15 min time change, we need to compensate
-        # it
-        if abs(difference) > 900:
-            self.compensate_system_time_change(difference)
-
-        # Now set the new value for the tick loop
-        self.t_each_loop = now
-
-
-    # If we've got a system time change, we need to compensate it
-    # So change our value, and all checks/notif ones
-    def compensate_system_time_change(self, difference):
-        logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
-        # We only need to change some value
-        self.program_start = max(0, self.program_start + difference)
-
-        # Then we compasate all host/services
-        for h in self.hosts:
-            h.compensate_system_time_change(difference)
-        for s in self.services:
-            s.compensate_system_time_change(difference)
-
-        # Now all checks and actions
-        for c in self.checks.values():
-            # Already launch checks should not be touch
-            if c.status == 'scheduled':
-                t_to_go = c.t_to_go
-                ref = c.ref
-                new_t = max(0, t_to_go + difference)
-                # But it's no so simple, we must match the timeperiod
-                new_t = ref.check_period.get_next_valid_time_from_t(new_t)
-                # But maybe no there is no more new value! Not good :(
-                # Say as error, with error output
-                if new_t == None:
-                    c.state = 'waitconsume'
-                    c.exit_status = 2
-                    c.output = '(Error: there is no available check time after time change!)'
-                    c.check_time = time.time()
-                    c.execution_time = 0
-                else:
-                    c.t_to_go = new_t
-                    ref.next_chk = new_t
-
-        # Now all checks and actions
-        for c in self.actions.values():
-            # Already launch checks should not be touch
-            if c.status == 'scheduled':
-                t_to_go = c.t_to_go
-
-                #  Event handler do not have ref
-                ref = getattr(c, 'ref', None)
-                new_t = max(0, t_to_go + difference)
-
-                # Notification should be check with notification_period
-                if c.is_a == 'notification':
-                    # But it's no so simple, we must match the timeperiod
-                    new_t = ref.notification_period.get_next_valid_time_from_t(new_t)
-                    # And got a creation_time variable too
-                    c.creation_time = c.creation_time + difference
-
-                # But maybe no there is no more new value! Not good :(
-                # Say as error, with error output
-                if new_t == None:
-                    c.state = 'waitconsume'
-                    c.exit_status = 2
-                    c.output = '(Error: there is no available check time after time change!)'
-                    c.check_time = time.time()
-                    c.execution_time = 0
-                else:
-                    c.t_to_go = new_t
 
 
     # Fill the self.broks with broks of self (process id, and co)
@@ -1040,96 +965,88 @@ class Scheduler:
         timeout = 1.0 # For the select
 
         gogogo = time.time()
-        self.t_each_loop = time.time() # use to track system time change
 
         while self.must_run:
-            t_begin = time.time()
-            socks = pyro.get_sockets(self.daemon)
-            ins = self.sched_daemon.get_socks_activity(socks, timeout)
-            if ins != []:
-                for s in socks:
-                    if s in ins:
-                        pyro.handleRequests(self.daemon, s)
-                        t_after = time.time()
-                        diff = t_after-t_begin
-                        timeout = timeout - diff
-                        break    # no need to continue with the for loop
-            else: #Timeout
-                timeout = 1.0
-                ticks += 1
 
-                # Do reccurent works like schedule, consume
-                # delete_zombie_checks
-                for i in self.recurrent_works:
-                    (name, f, nb_ticks) = self.recurrent_works[i]
-                    # A 0 in the tick will just disable it
-                    if nb_ticks != 0:
-                        if ticks % nb_ticks == 0:
-                            # print "I run function :", name
-                            f()
+            elapsed, _, _ = self.sched_daemon.handleRequests(timeout)
+            if elapsed: 
+                timeout -= elapsed
+                if timeout > 0:
+                    continue
 
-                #DBG : push actions to passives?
-                self.push_actions_to_passives_satellites()
-                self.get_actions_from_passives_satellites()
-                
+            # Timeout or time over
+            timeout = 1.0
+            ticks += 1
 
-                #if  ticks % 10 == 0:
-                #    self.conf.quick_debug()
+            # Do reccurent works like schedule, consume
+            # delete_zombie_checks
+            for i in self.recurrent_works:
+                (name, f, nb_ticks) = self.recurrent_works[i]
+                # A 0 in the tick will just disable it
+                if nb_ticks != 0:
+                    if ticks % nb_ticks == 0:
+                        # print "I run function :", name
+                        f()
 
-                # stats
-                nb_scheduled = len([c for c in self.checks.values() if c.status=='scheduled'])
-                nb_inpoller = len([c for c in self.checks.values() if c.status=='inpoller'])
-                nb_zombies = len([c for c in self.checks.values() if c.status=='zombie'])
-                nb_notifications = len(self.actions)
+            #DBG : push actions to passives?
+            self.push_actions_to_passives_satellites()
+            self.get_actions_from_passives_satellites()
+            
 
-                print "Checks:", "total", len(self.checks), "scheduled", nb_scheduled, "inpoller", nb_inpoller, "zombies", nb_zombies, "notifications", nb_notifications
+            #if  ticks % 10 == 0:
+            #    self.conf.quick_debug()
 
-                m = 0.0
-                m_nb = 0
-                for s in self.services:
-                    m += s.latency
-                    m_nb += 1
-                if m_nb != 0:
-                    print "Average latency:", m, m_nb,  m / m_nb
+            # stats
+            nb_scheduled = len([c for c in self.checks.values() if c.status=='scheduled'])
+            nb_inpoller = len([c for c in self.checks.values() if c.status=='inpoller'])
+            nb_zombies = len([c for c in self.checks.values() if c.status=='zombie'])
+            nb_notifications = len(self.actions)
 
-                # print "Notifications:", nb_notifications
-                now = time.time()
-                #for a in self.actions.values():
-                #    if a.is_a == 'notification':
-                #        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, a.contact.get_name(), 'level:%d' % a.notif_nb, 'launch in', int(a.t_to_go - now)
-                #    else:
-                #        print "Event:", a.id, a.status
-                print "Nb checks send:", self.nb_checks_send
-                self.nb_checks_send = 0
-                print "Nb Broks send:", self.nb_broks_send
-                self.nb_broks_send = 0
+            print "Checks:", "total", len(self.checks), "scheduled", nb_scheduled, "inpoller", nb_inpoller, "zombies", nb_zombies, "notifications", nb_notifications
 
-                time_elapsed = now - gogogo
-                print "Check average =", int(self.nb_check_received / time_elapsed), "checks/s"
+            m = 0.0
+            m_nb = 0
+            for s in self.services:
+                m += s.latency
+                m_nb += 1
+            if m_nb != 0:
+                print "Average latency:", m, m_nb,  m / m_nb
 
-                #for n in  self.actions.values():
-                #    if n.ref_type == 'service':
-                #        print 'Service notification', n
-                #    if n.ref_type == 'host':
-                #        print 'Host notification', n
-                #print "."
-                #print "Service still in checking?"
-                #for s in self.services:
-                #    print s.get_name()+':'+str(s.in_checking)
-                #    for i in s.checks_in_progress:
-                #        print i, i.t_to_go
-                #for s in self.hosts:
-                #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
-                #    for i in s.checks_in_progress:
-                #        print i#self.checks[i]
+            # print "Notifications:", nb_notifications
+            now = time.time()
+            #for a in self.actions.values():
+            #    if a.is_a == 'notification':
+            #        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, a.contact.get_name(), 'level:%d' % a.notif_nb, 'launch in', int(a.t_to_go - now)
+            #    else:
+            #        print "Event:", a.id, a.status
+            print "Nb checks send:", self.nb_checks_send
+            self.nb_checks_send = 0
+            print "Nb Broks send:", self.nb_broks_send
+            self.nb_broks_send = 0
 
-                #for c in self.checks.values():
-                #    if c.ref_type == 'host':
-                #        print c.id, ":", c.status, 'Depend_on_me:', len(c.depend_on_me), 'depend_on', c.depend_on
-                #hp=hpy()
-                #print hp.heap()
-                #print hp.heapu()
+            time_elapsed = now - gogogo
+            print "Check average =", int(self.nb_check_received / time_elapsed), "checks/s"
 
+            #for n in  self.actions.values():
+            #    if n.ref_type == 'service':
+            #        print 'Service notification', n
+            #    if n.ref_type == 'host':
+            #        print 'Host notification', n
+            #print "."
+            #print "Service still in checking?"
+            #for s in self.services:
+            #    print s.get_name()+':'+str(s.in_checking)
+            #    for i in s.checks_in_progress:
+            #        print i, i.t_to_go
+            #for s in self.hosts:
+            #    print s.get_name()+':'+str(s.in_checking)+str(s.checks_in_progress)
+            #    for i in s.checks_in_progress:
+            #        print i#self.checks[i]
 
-            if timeout < 0:
-                timeout = 1.0
+            #for c in self.checks.values():
+            #    if c.ref_type == 'host':
+            #        print c.id, ":", c.status, 'Depend_on_me:', len(c.depend_on_me), 'depend_on', c.depend_on
+            #hp=hpy()
+            #print hp.heap()
+            #print hp.heapu()
+
