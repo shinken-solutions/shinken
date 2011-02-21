@@ -480,19 +480,20 @@ class Arbiter(Daemon):
             elapsed, _ = self.handleRequests(timeout)
             if elapsed:
                 self.last_master_speack = time.time()
-                timeout = timeout - elapsed
-                if timeout < 0:
-                    timeout = 1.0
-            else: # Timeout
-                sys.stdout.write(".")
-                sys.stdout.flush()
+                timeout -= elapsed
+                if timeout > 0:
+                    continue
 
-                # Now check if master is dead or not
-                now = time.time()
-                if now - self.last_master_speack > 5:
-                    print "Master is dead!!!"
-                    self.must_run = True
-                    break
+            timeout = 1.0            
+            sys.stdout.write(".")
+            sys.stdout.flush()
+
+            # Now check if master is dead or not
+            now = time.time()
+            if now - self.last_master_speack > 5:
+                print "Master is dead!!!"
+                self.must_run = True
+                break
 
 
     def do_stop(self):
