@@ -20,10 +20,9 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, errno, sys, ConfigParser
-import time
-import signal
-import select
+import os, errno, sys, time, signal, select, random 
+import ConfigParser
+
 
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import InvalidWorkDir
@@ -48,6 +47,32 @@ VERSION = "0.5"
 
 
 class InvalidPidDir(Exception): pass
+
+
+
+class Interface():
+    def __init__(self, app):
+        self.pyro_obj = Pyro.core.ObjBase() 
+        self.pyro_obj.delegateTo(self)
+        
+        self.app = app
+        self.running_id = "%d.%d" % (time.time(), random.random())
+
+    def ping(self):
+        return "pong"
+
+    def get_running_id(self):
+        return self.running_id
+    
+    def put_conf(self, conf):
+        self.app.new_conf = conf
+
+    def wait_new_conf(self):
+        self.app.cur_conf = None
+        
+    def have_conf(self):
+        return self.app.cur_conf is not None
+
 
 
 class Daemon:
@@ -86,6 +111,8 @@ class Daemon:
         self.log = logger
         self.log.load_obj(self)
         
+        self.new_conf = None # used by controller to push conf 
+        self.cur_conf = None
 
         self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
 

@@ -59,13 +59,14 @@ from daemon import Daemon
 from log import logger
 from brok import Brok
 
+from shinken.daemon import Interface
 
 # Interface for Arbiter, our big MASTER
 # It put us our conf
-class IForArbiter(Pyro.core.ObjBase):
+class IForArbiter(Interface):
     # We keep app link because we are just here for it
     def __init__(self, app):
-        Pyro.core.ObjBase.__init__(self)
+        Interface.__init__(self, app)
         self.app = app
         self.schedulers = app.schedulers
         self.app.modules = []
