@@ -21,7 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import select, time, os, errno
+import time, os
 import traceback
 
 import shinken.pyro_wrapper as pyro

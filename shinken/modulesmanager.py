@@ -21,21 +21,14 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is use to mnager modules and call callback
+#This class is use to manage modules and call callback
 
-
-import os
-import os.path
-import sys
+import os, sys
 import traceback
 
 
-from multiprocessing import Process, Queue
+from shinken.basemodule import BaseModule
 
-#modulepath = os.path.join(os.path.dirname(imp.find_module("pluginloader")[1]), "modules/")
-#Thanks http://pytute.blogspot.com/2007/04/python-plugin-system.html
-
-from basemodule import BaseModule
 
 class ModulesManager(object):
 

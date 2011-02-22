@@ -30,8 +30,7 @@ from Queue import Empty
 
 from shinken.satellite import Satellite
 from shinken.daemon import Daemon
-from shinken.util import to_int, to_bool, sort_by_ids
-from shinken.modulesmanager import ModulesManager
+from shinken.util import to_int, sort_by_ids
 from shinken.log import logger
 
 import shinken.pyro_wrapper as pyro

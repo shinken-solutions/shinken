@@ -78,7 +78,7 @@ from shinken.util import *
 from shinken.daterange import Daterange,CalendarDaterange,StandardDaterange,MonthWeekDayDaterange
 from shinken.daterange import MonthDateDaterange,WeekDayDaterange,MonthDayDaterange
 from shinken.brok import Brok
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import IntegerProp, StringProp, ListProp
 
 
 class Timeperiod(Item):

@@ -22,7 +22,7 @@
 
 
 from shinken.satellite import Satellite
-from shinken.util import to_int, to_bool
+from shinken.util import to_int
 
 
 #Our main APP class

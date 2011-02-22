@@ -25,8 +25,7 @@
 #can see if a poller is alive, and can send it new configuration
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
-from shinken.util import to_int, to_bool, to_split
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
 class PollerLink(SatelliteLink):
     id = 0

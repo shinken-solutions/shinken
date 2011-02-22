@@ -22,8 +22,8 @@
 
 
 from item import Item, Items
-from shinken.util import to_split, to_bool, strip_and_uniq
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.util import strip_and_uniq
+from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
 
 

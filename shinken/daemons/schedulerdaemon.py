@@ -28,8 +28,7 @@ from shinken.objects import Config
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager
 from shinken.daemon import Daemon
-from shinken.util import to_int, to_bool
-from shinken.modulesmanager import ModulesManager
+from shinken.util import to_int
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 from shinken.log import logger

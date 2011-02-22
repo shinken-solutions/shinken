@@ -34,15 +34,12 @@ if arbiter want it to have a new conf, satellite forgot old schedulers
 (and actions into) take new ones and do the (new) job.
 """
 
-from Queue import Empty
+
 from multiprocessing import Queue, Manager, active_children
 import os
-import errno
-import stat
 import copy
 import time
 import sys
-import select
 import cPickle
 import random
 
@@ -61,10 +58,7 @@ from load import Load
 from daemon import Daemon
 from log import logger
 from brok import Brok
-from check import Check
-from notification import Notification
-from eventhandler import EventHandler
-from shinken.modulesmanager import ModulesManager
+
 
 # Interface for Arbiter, our big MASTER
 # It put us our conf

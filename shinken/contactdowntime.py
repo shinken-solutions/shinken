@@ -22,7 +22,7 @@
 
 
 import time
-from comment import Comment
+
 
 class ContactDowntime:
     id = 1

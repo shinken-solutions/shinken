@@ -33,7 +33,7 @@ import time
 
 from action import Action
 from brok import Brok
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp
 
 class Notification(Action):
     #id = 0 #Is in fact in the Action class to be common with Checks and

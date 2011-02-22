@@ -24,7 +24,7 @@
 """
 """
 
-from shinken.util import to_bool, to_float, to_split, to_char, to_int
+from shinken.util import to_float, to_split, to_char, to_int
 
 __author__ = "Hartmut Goebel <h.goebel@goebel-consult.de>"
 __copyright__ = "Copyright 2010 by Hartmut Goebel <h.goebel@goebel-consult.de>"

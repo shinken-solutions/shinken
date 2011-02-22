@@ -22,7 +22,7 @@
 
 
 from itemgroup import Itemgroup, Itemgroups
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import StringProp
 
 class Hostgroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database

@@ -20,7 +20,8 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.util import *
+import time, calendar
+from shinken.util import get_sec_from_morning, get_day, get_start_of_day, get_end_of_day
 
 
 #Get the day number (like 27 in July tuesday 27 2010 for call:

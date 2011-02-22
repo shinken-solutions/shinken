@@ -42,14 +42,12 @@ from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
 from shinken.log import logger
 
-from shinken.util import to_int, to_char, to_bool
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
-#import psyco
-#psyco.full()
+from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp
 
 
 no_longer_used_txt   = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
 not_interresting_txt = 'We do not think such an option is interesting to manage.'
+
 
 class Config(Item):
     cache_path = "objects.cache"

@@ -31,7 +31,7 @@ import time
 #    from pexpect import *
 
 from action import Action
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import IntegerProp, StringProp
 
 class EventHandler(Action):
     properties = {

@@ -21,8 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from item import Item, Items
-from shinken.util import to_split, to_bool
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import BoolProp, StringProp, ListProp
 
 class Hostdependency(Item):
     id = 0

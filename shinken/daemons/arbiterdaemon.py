@@ -26,16 +26,14 @@ import time
 import random
 from Queue import Empty
 
-from shinken.util import to_bool
+
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon
 from shinken.log import logger
-from shinken.modulesmanager import ModulesManager
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 
 
