@@ -240,9 +240,9 @@ class Broker(Satellite):
 
     properties = Satellite.properties.copy()
     properties.update({
-        'pidfile':   { 'default' : '/usr/local/shinken/var/brokerd.pid', 'pythonize' : None, 'path' : True},
-        'port':      { 'default' : '7772', 'pythonize' : to_int},
-        'local_log': { 'default' : '/usr/local/shinken/var/brokerd.log', 'pythonize' : None, 'path' : True},
+        'pidfile':   { 'default': '/usr/local/shinken/var/brokerd.pid', 'pythonize': None, 'path': True },
+        'port':      { 'default': '7772', 'pythonize': to_int },
+        'local_log': { 'default': '/usr/local/shinken/var/brokerd.log', 'pythonize': None, 'path': True },
     })
 
 

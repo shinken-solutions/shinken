@@ -200,9 +200,9 @@ class Shinken(Daemon):
 
     properties = Daemon.properties.copy()
     properties.update({
-        'pidfile':      { 'default' : '/usr/local/shinken/var/schedulerd.pid', 'pythonize' : None, 'path' : True},
-        'port':         { 'default' : '7768', 'pythonize' : to_int},
-        'local_log':    { 'default' : '/usr/local/shinken/var/schedulerd.log', 'pythonize' : None, 'path' : True},
+        'pidfile':      { 'default': '/usr/local/shinken/var/schedulerd.pid', 'pythonize': None, 'path': True },
+        'port':         { 'default': '7768', 'pythonize': to_int },
+        'local_log':    { 'default': '/usr/local/shinken/var/schedulerd.log', 'pythonize': None, 'path': True },
     })
     
     
