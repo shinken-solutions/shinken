@@ -50,7 +50,6 @@ except ImportError:
 
 from ctypes import create_string_buffer
 from Queue import Empty
-from multiprocessing import Process, Queue
 from shinken.basemodule import BaseModule
 
 

@@ -21,42 +21,18 @@
 #Here for the configuration phase AND running one
 
 
-import re, string
+import re
 
-from shinken.objects import Config
+
 from shinken.objects import Timeperiod, Timeperiods
 from shinken.objects import Service, Services
-from shinken.objects import Command, Commands
-import shinken.objects
-
-from shinken.objects import Resultmodulation, Resultmodulations
-from shinken.objects import Escalation, Escalations
-from shinken.objects import Serviceescalation, Serviceescalations
-from shinken.objects import Hostescalation, Hostescalations
 from shinken.objects import Host, Hosts
-from shinken.objects import Hostgroup, Hostgroups
-from shinken.objects import Realm, Realms
 from shinken.objects import Contact, Contacts
-from shinken.objects import Contactgroup, Contactgroups
-from shinken.objects import NotificationWay, NotificationWays
-from shinken.objects import Servicegroup, Servicegroups
-from shinken.objects import Item
-from shinken.objects import Servicedependency, Servicedependencies
-from shinken.objects import Hostdependency, Hostdependencies
-
-from shinken.arbiterlink import ArbiterLink, ArbiterLinks
-from shinken.schedulerlink import SchedulerLink, SchedulerLinks
-from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
-from shinken.brokerlink import BrokerLink, BrokerLinks
-from shinken.pollerlink import PollerLink, PollerLinks
-from shinken.objects import Module, Modules
-from shinken.graph import Graph
-from shinken.log import logger
 from shinken.comment import Comment
 from shinken.downtime import Downtime
 from shinken.basemodule import BaseModule
 
-from shinken.util import to_int, to_char, to_bool
+from shinken.util import to_bool
 
 
 
@@ -68,7 +44,7 @@ properties = {
     'type' : 'nagios_retention_file',
     'external' : False,
     'phases' : ['retention'],
-    }
+}
 
 
 #called by the plugin manager to get a broker
