@@ -279,10 +279,6 @@ class Broker(Satellite):
         self.broks = [] # broks to manage
         # broks raised this turn and that need to be put in self.broks
         self.broks_internal_raised = []
-
-
-        self.do_load_config()
-
         
 
     # Schedulers have some queues. We can simplify call by adding
@@ -608,6 +604,8 @@ class Broker(Satellite):
 
     #  Main function, will loop forever
     def main(self):
+        
+        self.do_load_config()
         
         for line in self.get_header():
             self.log.log(line)
