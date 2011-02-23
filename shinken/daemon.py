@@ -55,7 +55,7 @@ class Interface(object):
     
     def __init__(self, app):
         """ 'app´ is to be set to the owner of this interface. """
-        assert(isinstance(app, Daemon))
+
         self.pyro_obj = Pyro.core.ObjBase() 
         self.pyro_obj.delegateTo(self)
         
