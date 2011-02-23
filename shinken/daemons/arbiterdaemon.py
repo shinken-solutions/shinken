@@ -94,7 +94,7 @@ class Arbiter(Daemon):
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
         
-        Daemon.__init__(self, 'arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
+        super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
         
         self.config_files = config_files
 

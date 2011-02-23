@@ -41,7 +41,6 @@ import copy
 import time
 import sys
 import cPickle
-import random
 
 
 try:
@@ -137,7 +136,7 @@ class IBroks(Interface):
 class BaseSatellite(Daemon):
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):     
         
-        Daemon.__init__(self, name, config_file, is_daemon, do_replace, debug, debug_file)
+        super(BaseSatellite, self).__init__(name, config_file, is_daemon, do_replace, debug, debug_file)
 
         # Ours schedulers
         self.schedulers = {}
@@ -156,14 +155,14 @@ class BaseSatellite(Daemon):
         if self.pyro_daemon:
             print "Stopping all network connexions"
             self.pyro_daemon.unregister(self.interface.pyro_obj)
-        Daemon.do_stop()
+        super(BaseSatellite, self).do_stop()
 
 
 # Our main APP class
 class Satellite(BaseSatellite):
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
         
-        BaseSatellite.__init__(self, name, config_file, is_daemon, do_replace, debug, debug_file)
+        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace, debug, debug_file)
         
         # Keep broks so they can be eaten by a broker
         self.broks = {}
@@ -324,7 +323,7 @@ class Satellite(BaseSatellite):
             logger.log('Stopping all network connexions')
             self.pyro_daemon.unregister(self.brok_interface.pyro_obj)
             self.pyro_daemon.unregister(self.scheduler_interface.pyro_obj)
-        BaseSatellite.do_stop(self)
+        super(Satellite, self).do_stop()
 
 
     # A simple fucntion to add objects in self

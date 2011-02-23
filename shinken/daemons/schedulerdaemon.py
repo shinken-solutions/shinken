@@ -161,7 +161,7 @@ class Shinken(BaseSatellite):
             self.sched.update_retention_file(forced=True)
         self.pyro_daemon.unregister(self.ibroks.pyro_obj)
         self.pyro_daemon.unregister(self.ichecks.pyro_obj)
-        BaseSatellite.do_stop(self)
+        super(Shinken, self).do_stop()
 
 
     #OK, we've got the conf, now we load it

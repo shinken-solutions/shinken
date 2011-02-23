@@ -51,8 +51,8 @@ class Broker(BaseSatellite):
 
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-       
-        BaseSatellite.__init__(self, 'broker', config_file, is_daemon, do_replace, debug, debug_file)
+        
+        super(Broker, self).__init__('broker', config_file, is_daemon, do_replace, debug, debug_file)
 
         # Our arbiters
         self.arbiters = {}
@@ -209,7 +209,6 @@ class Broker(BaseSatellite):
     # Add broks (a tab) to different queues for
     # internal and external modules
     def add_broks_to_queue(self, broks):
-
         # Ok now put in queue brocks for manage by
         # internal modules
         self.broks.extend(broks)
@@ -284,22 +283,18 @@ class Broker(BaseSatellite):
                 logger.log(''.join(Pyro.util.getPyroTraceback(x)))
                 sys.exit(1)
 
-
-
-
     # modules can have process, and they can die
     def check_and_del_zombie_modules(self):
         # Active children make a join with every one, useful :)
         act = active_children()
         self.modules_manager.check_alive_instances()
 
-
     def do_stop(self):
         act = active_children()
         for a in act:
             a.terminate()
             a.join(1)
-        BaseSatellite.do_stop(self)
+        super(Broker, self).do_stop()
         
         
     def setup_new_conf(self):

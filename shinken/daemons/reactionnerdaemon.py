@@ -48,4 +48,4 @@ class Reactionner(Satellite):
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-        Satellite.__init__(self, 'reactionner', config_file, is_daemon, do_replace, debug, debug_file)
+        super(Reactionner, self).__init__('reactionner', config_file, is_daemon, do_replace, debug, debug_file)
