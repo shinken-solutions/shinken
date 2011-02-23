@@ -407,7 +407,7 @@ class Arbiter(Daemon):
 
         self.iarbiters = IArbiters(self)
 
-        self.uri_arb = self.daemon.register(self.iarbiters, "ForArbiter") 
+        self.uri_arb = self.pyro_daemon.register(self.iarbiters, "ForArbiter") 
 
         ## And go for the main loop
         self.do_mainloop()
@@ -500,7 +500,7 @@ class Arbiter(Daemon):
 
     def do_stop(self):
         print "Stopping all network connexions"
-        self.daemon.shutdown(True)
+        self.pyro_daemon.shutdown(True)
         self.modules_manager.clear_instances()
 
 

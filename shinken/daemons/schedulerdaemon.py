@@ -240,7 +240,7 @@ class Shinken(Daemon):
             self.sched.update_retention_file(forced=True)
         
         print "Stopping all network connexions"
-        self.daemon.shutdown(True)
+        self.pyro_daemon.shutdown(True)
 
         # and closing the local log file if need
         logger.quit()
@@ -290,28 +290,28 @@ class Shinken(Daemon):
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
 
-        # create scheduler with ref of our daemon
-        self.sched = Scheduler(self.daemon, self)
+        # create scheduler with ref of our pyro_daemon
+        self.sched = Scheduler(self.pyro_daemon, self)
 
         # give it an interface
         # But first remove previous interface if exists
         if self.ichecks != None:
-            print "Deconnecting previous Check Interface from daemon"
-            self.daemon.unregister(self.ichecks)
+            print "Deconnecting previous Check Interface from pyro_daemon"
+            self.pyro_daemon.unregister(self.ichecks)
 
         #Now create and connect it
         self.ichecks = IChecks(self.sched)
-        self.uri = self.daemon.register(self.ichecks, "Checks")
+        self.uri = self.pyro_daemon.register(self.ichecks, "Checks")
         print "The Checks Interface uri is:", self.uri
 
         #Same for Broks
         if self.ibroks != None:
-            print "Deconnecting previous Broks Interface from daemon"
-            self.daemon.unregister(self.ibroks)
+            print "Deconnecting previous Broks Interface from pyro_daemon"
+            self.pyro_daemon.unregister(self.ibroks)
 
         #Create and connect it
         self.ibroks = IBroks(self.sched)
-        self.uri2 = self.daemon.register(self.ibroks, "Broks")
+        self.uri2 = self.pyro_daemon.register(self.ibroks, "Broks")
         print "The Broks Interface uri is:", self.uri2
 
         print "Loading configuration"
@@ -437,7 +437,7 @@ class Shinken(Daemon):
         
         self.do_daemon_init_and_start()
         
-        self.uri2 = self.daemon.register(self.i_for_arbiter, "ForArbiter")
+        self.uri2 = self.pyro_daemon.register(self.i_for_arbiter, "ForArbiter")
         print "The Arbiter Interface is at:", self.uri2
 
         # Ok, now the conf

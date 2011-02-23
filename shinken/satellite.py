@@ -395,7 +395,7 @@ class Satellite(Daemon):
 
 
     # Use to wait conf from arbiter.
-    # It send us conf in our daemon. It put the have_conf prop
+    # It send us conf in our pyro_daemon. It put the have_conf prop
     # if he send us something
     # (it can just do a ping)
     def wait_for_initial_conf(self):
@@ -416,7 +416,7 @@ class Satellite(Daemon):
             self.request_stop()
 
 
-    # The arbiter can resent us new conf in the daemon port.
+    # The arbiter can resent us new conf in the pyro_daemon port.
     # We do not want to loose time about it, so it's not a bloking
     # wait, timeout = 0s
     # If it send us a new conf, we reinit the connexions of all schedulers
@@ -466,12 +466,12 @@ class Satellite(Daemon):
                 pass
             except AssertionError: # In a worker
                 pass
-        if self.daemon:
+        if self.pyro_daemon:
             logger.log('Stopping all network connexions')
-            self.daemon.unregister(self.interface)
-            self.daemon.unregister(self.brok_interface)
-            self.daemon.unregister(self.scheduler_interface)
-            self.daemon.shutdown(True)
+            self.pyro_daemon.unregister(self.interface)
+            self.pyro_daemon.unregister(self.brok_interface)
+            self.pyro_daemon.unregister(self.scheduler_interface)
+            self.pyro_daemon.shutdown(True)
 
 
     # A simple fucntion to add objects in self
@@ -629,7 +629,7 @@ class Satellite(Daemon):
                 return
 
             
-        # Now we check if arbiter speek to us in the daemon.
+        # Now we check if arbiter speek to us in the pyro_daemon.
         # If so, we listen for it
         # When it push us conf, we reinit connexions
         # Sleep in waiting a new conf :)
@@ -715,9 +715,9 @@ class Satellite(Daemon):
         """ Do this satellite (poller or reactionner) post "daemonize" init:
 we must register our interfaces for 3 possible callers: arbiter, schedulers or brokers. """
         # And we register them
-        self.uri2 = self.daemon.register(self.interface, "ForArbiter")
-        self.uri3 = self.daemon.register(self.brok_interface, "Broks")
-        self.uri4 = self.daemon.register(self.scheduler_interface, "Schedulers")
+        self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
+        self.uri3 = self.pyro_daemon.register(self.brok_interface, "Broks")
+        self.uri4 = self.pyro_daemon.register(self.scheduler_interface, "Schedulers")
         
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER

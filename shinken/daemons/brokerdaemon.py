@@ -528,7 +528,7 @@ class Broker(Satellite):
             a.terminate()
             a.join(1)
         logger.log('Stopping all network connexions')
-        self.daemon.shutdown(True)
+        self.pyro_daemon.shutdown(True)
 
         # And finally close the logger too
         logger.quit()
@@ -538,7 +538,7 @@ class Broker(Satellite):
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
-        # Now we check if arbiter speek to us in the daemon.
+        # Now we check if arbiter speek to us in the pyro_daemon.
         # If so, we listen for it
         # When it push us conf, we reinit connexions
         self.watch_for_new_conf(0.0)
@@ -614,7 +614,7 @@ class Broker(Satellite):
         
         self.do_daemon_init_and_start()
 
-        self.uri2 = self.daemon.register(IForArbiter(self), "ForArbiter")
+        self.uri2 = self.pyro_daemon.register(IForArbiter(self), "ForArbiter")
         print "The Arbtier uri it at", self.uri2
 
         #  We wait for initial conf

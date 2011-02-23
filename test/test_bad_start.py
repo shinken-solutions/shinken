@@ -85,7 +85,7 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
         p1.do_daemon_init_and_start()           
         os.unlink(p1.pidfile)  ## so that second poller will not see first started poller
         p2 = self.get_poller_daemon()
-        p2.port = p1.daemon.port
+        p2.port = p1.pyro_daemon.port
         self.assertRaises(PortNotFree, p2.do_daemon_init_and_start)
         
         

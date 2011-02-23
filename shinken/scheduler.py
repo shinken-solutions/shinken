@@ -41,7 +41,7 @@ from shinken.log import logger
 
 class Scheduler:
     def __init__(self, pyro_daemon, scheduler_daemon):
-        self.daemon = pyro_daemon # Pyro daemon for incomming orders/askings
+        self.pyro_daemon = pyro_daemon # Pyro pyro_daemon for incomming orders/askings
         self.sched_daemon = scheduler_daemon
         # When set to false by us, we die and arbiter launch a new Scheduler
         self.must_run = True 
