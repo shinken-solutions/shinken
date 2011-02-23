@@ -80,7 +80,7 @@ class Interface(object):
 
 
 
-class Daemon:
+class Daemon(object):
 
     properties = {
         'workdir':      { 'default': '/usr/local/shinken/var', 'pythonize': None, 'path': True },
