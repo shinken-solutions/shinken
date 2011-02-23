@@ -156,10 +156,11 @@ class Shinken(BaseSatellite):
 
 
     def do_stop(self):
-        #if hasattr(self, 'sched'):
         if self.sched:
             print "Asking for a retention save"
             self.sched.update_retention_file(forced=True)
+        self.pyro_daemon.unregister(self.ibroks.pyro_obj)
+        self.pyro_daemon.unregister(self.ichecks.pyro_obj)
         BaseSatellite.do_stop(self)
 
 
