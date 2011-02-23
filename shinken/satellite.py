@@ -135,9 +135,7 @@ class IBroks(Interface):
 
 
 class BaseSatellite(Daemon):
-    def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
-        
-        self.check_shm()        
+    def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):     
         
         Daemon.__init__(self, name, config_file, is_daemon, do_replace, debug, debug_file)
 
@@ -154,6 +152,11 @@ class BaseSatellite(Daemon):
     def watch_for_new_conf(self, timeout):
         self.handleRequests(timeout)
 
+    def do_stop(self):
+        if self.pyro_daemon:
+            print "Stopping all network connexions"
+            self.pyro_daemon.unregister(self.interface.pyro_obj)
+        Daemon.do_stop()
 
 
 # Our main APP class
@@ -319,10 +322,9 @@ class Satellite(BaseSatellite):
                 pass
         if self.pyro_daemon:
             logger.log('Stopping all network connexions')
-            self.pyro_daemon.unregister(self.interface.pyro_obj)
             self.pyro_daemon.unregister(self.brok_interface.pyro_obj)
             self.pyro_daemon.unregister(self.scheduler_interface.pyro_obj)
-            self.pyro_daemon.shutdown(True)
+        BaseSatellite.do_stop(self)
 
 
     # A simple fucntion to add objects in self

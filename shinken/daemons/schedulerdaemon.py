@@ -32,6 +32,7 @@ from shinken.util import to_int
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 from shinken.log import logger
+from shinken.satellite import BaseSatellite, IForArbiter
 
 #Interface for Workers
 
@@ -107,79 +108,19 @@ They connect here and get all broks (data for brokers). datas must be ORDERED! (
         return None
 
 
-class IForArbiter(Pyro.core.ObjBase):
+class IForArbiter(IForArbiter):
     """ Interface for Arbiter, our big MASTER. We ask him a conf and after we listen for him.
 HE got user entry, so we must listen him carefully and give information he want, maybe for another scheduler """
-    def __init__(self, app):
-        Pyro.core.ObjBase.__init__(self)
-        self.app = app
-        self.running_id = random.random()
-
-
-    #very useful?
-    def get_running_id(self):
-        return self.running_id
-
-
-    #use full too?
-    def get_info(self, type, ref, prop, other):
-        return self.app.sched.get_info(type, ref, prop, other)
-
 
     #arbiter is send us a external coomand.
     #it can send us global command, or specific ones
     def run_external_command(self, command):
         self.app.sched.run_external_command(command)
 
-
-    #Arbiter is sending us a new conf. We check if we do not already have it.
-    #If not, we take it, and if app has a scheduler, we ask it to die,
-    #so the new conf  will be load, and a new scheduler created
-    def put_conf(self, conf_package):
-        self.use_ssl = self.app.use_ssl
-        (conf, override_conf, modules, satellites) = conf_package
-        if not self.app.have_conf or self.app.conf.magic_hash != conf.magic_hash:
-            self.app.conf = conf
-            self.app.override_conf = override_conf
-            self.app.modules = modules
-            self.app.satellites = satellites
-            self.pollers = self.app.pollers
-            print "Get conf:", self.app.conf
-            self.app.have_conf = True
-            print "Have conf?", self.app.have_conf
-            print "Just apres reception"
-
-            
-            # Now We create our pollers
-            for pol_id in satellites['pollers']:
-                # Must look if we already have it
-                already_got = pol_id in self.pollers
-                p = satellites['pollers'][pol_id]
-                self.pollers[pol_id] = p
-                uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
-                self.pollers[pol_id]['uri'] = uri
-                self.pollers[pol_id]['last_connexion'] = 0
-                print "Got a poller", p
-
-
-            #if app already have a scheduler, we must say him to
-            #DIE Mouahahah
-            #So It will quit, and will load a new conf (and create a brand new scheduler)
-            if self.app.sched:
-                self.app.sched.die()
-
-
-    #Arbiter want to know if we are alive
-    def ping(self):
-        return True
-
-
-    #Use by arbiter to know if we have a conf or not
-    #can be usefull if we must do nothing but
-    #we are not because it can KILL US!
-    def have_conf(self):
-        return self.app.have_conf
-
+    def put_conf(self, conf):
+        if self.app.sched:
+            self.app.sched.die()
+        super(IForArbiter, self).put_conf(conf)
 
     #Call by arbiter if it thinks we are running but we must do not (like
     #if I was a spare that take a conf but the master returns, I must die
@@ -190,15 +131,15 @@ HE got user entry, so we must listen him carefully and give information he want,
     #anything or what??
     def wait_new_conf(self):
         print "Arbiter want me to wait a new conf"
-        self.app.have_conf = False
-        if hasattr(self.app, "sched"):
+        if self.app.sched:
             self.app.sched.die()
+        super(IForArbiter, self).wait_new_conf()        
 
 
 # The main app class
-class Shinken(Daemon):
+class Shinken(BaseSatellite):
 
-    properties = Daemon.properties.copy()
+    properties = BaseSatellite.properties.copy()
     properties.update({
         'pidfile':      { 'default': '/usr/local/shinken/var/schedulerd.pid', 'pythonize': None, 'path': True },
         'port':         { 'default': '7768', 'pythonize': to_int },
@@ -212,7 +153,9 @@ class Shinken(Daemon):
     #Then, it wait for a first configuration
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
         
-        Daemon.__init__(self, 'scheduler', config_file, is_daemon, do_replace, debug, debug_file)
+        BaseSatellite.__init__(self, 'scheduler', config_file, is_daemon, do_replace, debug, debug_file)
+
+        self.interface = IForArbiter(self)
 
         self.sched = None
         self.ichecks = None
@@ -222,8 +165,7 @@ class Shinken(Daemon):
         #Config Class must be filled with USERN Macro
         Config.fill_usern_macros()
 
-        #Now the interface
-        self.i_for_arbiter = IForArbiter(self)
+        # Now the interface
         self.uri = None
         self.uri2 = None
 
@@ -238,36 +180,7 @@ class Shinken(Daemon):
         if self.sched:
             print "Asking for a retention save"
             self.sched.update_retention_file(forced=True)
-        
-        print "Stopping all network connexions"
-        self.pyro_daemon.shutdown(True)
-
-        # and closing the local log file if need
-        logger.quit()
-
-
-    # We wait (block) for arbiter to send us conf
-    def wait_initial_conf(self):
-
-        self.have_conf = False
-        print "Waiting for initial configuration"
-        timeout = 1.0
-        while not self.have_conf and not self.interrupted:
-
-            elapsed, _, _ = self.handleRequests(timeout)
-            if elapsed:
-                timeout -= elapsed
-                if timeout > 0:
-                    continue
-            
-            # Timeout
-            sys.stdout.write(".")
-            sys.stdout.flush()
-            timeout = 1.0
-        
-        if self.interrupted:
-            self.request_stop()
-
+        BaseSatellite.do_stop(self)
 
 
     #OK, we've got the conf, now we load it
@@ -429,6 +342,37 @@ class Shinken(Daemon):
                 self.wait_initial_conf()
                 self.load_conf()
 
+    def setup_new_conf(self):
+        #self.use_ssl = self.app.use_ssl
+        (conf, override_conf, modules, satellites) = self.new_conf
+        self.new_conf = None
+        if not self.cur_conf or self.cur_conf.magic_hash != conf.magic_hash:
+            self.conf = conf
+            self.override_conf = override_conf
+            self.modules = modules
+            self.satellites = satellites
+            #self.pollers = self.app.pollers
+
+            # Now We create our pollers
+            for pol_id in satellites['pollers']:
+                # Must look if we already have it
+                already_got = pol_id in self.pollers
+                p = satellites['pollers'][pol_id]
+                self.pollers[pol_id] = p
+                uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
+                self.pollers[pol_id]['uri'] = uri
+                self.pollers[pol_id]['last_connexion'] = 0
+                print "Got a poller", p
+
+
+            #if app already have a scheduler, we must say him to
+            #DIE Mouahahah
+            #So It will quit, and will load a new conf (and create a brand new scheduler)
+            if self.sched:
+                self.sched.die()
+
+        self.load_conf()
+        self.cur_conf = conf
 
     #our main function, launch after the init
     def main(self):
@@ -437,15 +381,16 @@ class Shinken(Daemon):
         
         self.do_daemon_init_and_start()
         
-        self.uri2 = self.pyro_daemon.register(self.i_for_arbiter, "ForArbiter")
+        self.uri2 = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
         print "The Arbiter Interface is at:", self.uri2
 
         # Ok, now the conf
-        self.wait_initial_conf()
+        self.wait_for_initial_conf()
         print "Ok we've got conf"
+        if not self.new_conf:
+            return
+        self.setup_new_conf()
 
-        # ok, if we are here, we've got the conf
-        self.load_conf()
 
         print "Configuration Loaded"
         

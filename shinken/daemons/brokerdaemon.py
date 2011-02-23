@@ -295,22 +295,13 @@ class Broker(BaseSatellite):
 
 
     def do_stop(self):
-        #  Maybe we quit before even launch modules
-        # # Maybe not now that we aren't anymore doing this in the signal handler ??
-        #     if hasattr(self, 'modules_manager'):
-        if self.modules_manager:
-            logger.log('Stopping all modules')
-            self.modules_manager.stop_all()
         act = active_children()
         for a in act:
             a.terminate()
             a.join(1)
-        logger.log('Stopping all network connexions')
-        self.pyro_daemon.shutdown(True)
-
-        # And finally close the logger too
-        logger.quit()
-
+        BaseSatellite.do_stop(self)
+        
+        
     def setup_new_conf(self):
         conf = self.new_conf
         self.new_conf = None

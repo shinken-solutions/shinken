@@ -50,7 +50,7 @@ class InvalidPidDir(Exception): pass
 
 
 
-class Interface():
+class Interface(object):
     """ Interface for pyro communications """
     
     def __init__(self, app):
@@ -98,6 +98,9 @@ class Daemon:
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
+        
+        self.check_shm()   
+        
         self.name = name
         self.config_file = config_file
         self.is_daemon = is_daemon
@@ -126,7 +129,13 @@ class Daemon:
 
     # At least, lose the local log file if need
     def do_stop(self):
+        if self.modules_manager:
+            logger.log('Stopping all modules')
+            self.modules_manager.stop_all()
+        if self.pyro_daemon:
+            self.pyro_daemon.shutdown(True)
         logger.quit()
+        
 
     def request_stop(self):
         self.unlink()  ## unlink first
