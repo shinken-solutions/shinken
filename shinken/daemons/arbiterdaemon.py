@@ -343,9 +343,6 @@ class Arbiter(Daemon):
                      "Thanks.")
 
 
-        # If I am a spare, I must wait a (true) conf from Arbiter Master
-        self.wait_conf = self.me.spare
-
         # REF: doc/shinken-conf-dispatching.png (2)
         logger.log("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
@@ -419,29 +416,6 @@ class Arbiter(Daemon):
                     self.add(o)
                 except Empty:
                     break
-
-
-
-    # We wait (block) for arbiter to send us conf
-    def wait_initial_conf(self):
-        self.have_conf = False
-        print "Waiting for configuration from master"
-        timeout = 1.0
-        while not self.have_conf and not self.interrupted:
-            
-            elapsed, _, _ = self.handleRequests(timeout)
-            if elapsed:
-                timeout = timeout - elapsed
-                if timeout < 0:
-                    timeout = 1.0
-            else: # Timeout
-                sys.stdout.write(".")
-                sys.stdout.flush()
-                timeout = 1.0
-
-        if self.interrupted:
-            self.request_stop()
-
 
     # We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
