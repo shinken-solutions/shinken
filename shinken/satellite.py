@@ -64,125 +64,19 @@ from shinken.daemon import Interface
 # Interface for Arbiter, our big MASTER
 # It put us our conf
 class IForArbiter(Interface):
-    # We keep app link because we are just here for it
-    def __init__(self, app):
-        Interface.__init__(self, app)
-        self.app = app
-        self.schedulers = app.schedulers
-        self.app.modules = []
-        
-
-    # function called by arbiter for giving us our conf
-    # conf must be a dict with:
-    # 'schedulers' : schedulers dict (by id) with address and port
-    # TODO: catch case where Arbiter send somethign we already have
-    # (same id+add+port) -> just do nothing :)
-    
-    def put_conf(self, conf):
-        # TODO: just save the conf, put a flag to say a new conf is there and return
-        # and handle the setup of this new conf in the main satellite loop ?
-        
-        self.app.have_conf = True
-        self.app.have_new_conf = True
-        # Gout our name from the globals
-        if 'poller_name' in conf['global']:
-            name = conf['global']['poller_name']
-        elif 'reactionner_name' in conf['global']:
-            name = conf['global']['reactionner_name']
-        else:
-            name = 'Unnamed satellite'
-        self.app.name = self.name = name
-
-        print "[%s] Sending us a configuration %s " % (self.name, conf)
-        # If we've got something in the schedulers, we do not want it anymore
-        for sched_id in conf['schedulers'] :
-            already_got = False
-            if sched_id in self.schedulers:
-                logger.log("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
-                already_got = True
-                wait_homerun = self.schedulers[sched_id]['wait_homerun']
-            s = conf['schedulers'][sched_id]
-            self.schedulers[sched_id] = s
-
-            uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.app.use_ssl)
-            print "DBG: scheduler UIR:", uri
-
-            self.schedulers[sched_id]['uri'] = uri
-            if already_got:
-                self.schedulers[sched_id]['wait_homerun'] = wait_homerun
-            else:
-                self.schedulers[sched_id]['wait_homerun'] = {}
-            self.schedulers[sched_id]['running_id'] = 0
-            self.schedulers[sched_id]['active'] = s['active']
-
-            # And then we connect to it :)
-            self.app.pynag_con_init(sched_id)
-
-        # Now the limit part
-        self.app.max_workers = conf['global']['max_workers']
-        self.app.min_workers = conf['global']['min_workers']
-        self.app.passive = conf['global']['passive']
-        print "Is passive?", self.app.passive
-        self.app.processes_by_worker = conf['global']['processes_by_worker']
-        self.app.polling_interval = conf['global']['polling_interval']
-        if 'poller_tags' in conf['global']:
-            self.app.poller_tags = conf['global']['poller_tags']
-        else: # for reactionner, poler_tag is [None]
-            self.app.poller_tags = []
-        if 'max_plugins_output_length' in conf['global']:
-            self.app.max_plugins_output_length = conf['global']['max_plugins_output_length']
-        else: # for reactionner, we don't really care about it
-            self.app.max_plugins_output_length = 8192
-        print "Max output lenght" , self.app.max_plugins_output_length
-        # Set our giving timezone from arbiter
-        use_timezone = conf['global']['use_timezone']
-        if use_timezone != 'NOTSET':
-            logger.log("[%s] Setting our timezone to %s" %(self.name, use_timezone))
-            os.environ['TZ'] = use_timezone
-            time.tzset()
-
-        logger.log("We have our schedulers : %s" % (str(self.schedulers)))
-
-        # Now manage modules
-        # TODO: check how to better handle this with modules_manager..
-        mods = conf['global']['modules']
-        for module in mods:
-            # If we already got it, bypass
-            if not module.module_type in self.app.worker_modules:
-                print "Add module object", module
-                self.app.modules_manager.modules.append(module)
-                logger.log("[%s] Got module : %s " % (self.name, module.module_type))
-                self.app.worker_modules[module.module_type] = {'to_q' : Queue()}
-
-
 
     # Arbiter ask us to do not manage a scheduler_id anymore
     # I do it and don't ask why
     def remove_from_conf(self, sched_id):
         try:
-            del self.schedulers[sched_id]
+            del self.app.schedulers[sched_id]
         except KeyError:
             pass
-
 
     # Arbiter ask me which sched_id I manage, If it is not ok with it
     # It will ask me to remove one or more sched_id
     def what_i_managed(self):
-        return self.schedulers.keys()
-
-
-    # Use for arbiter to know if we are alive
-    def ping(self):
-        print "We ask us for a ping"
-        return True
-
-
-    # Use by arbiter to know if we have a conf or not
-    # can be usefull if we must do nothing but
-    # we are not because it can KILL US!
-    def have_conf(self):
-        return self.app.have_conf
-
+        return self.app.schedulers.keys()
 
     # Call by arbiter if it thinks we are running but we must do not (like
     # if I was a spare that take a conf but the master returns, I must die
@@ -193,24 +87,25 @@ class IForArbiter(Interface):
     # anything or what?? Reading code is not a job for eyes only...
     def wait_new_conf(self):
         print "Arbiter want me to wait a new conf"
-        self.schedulers.clear()
-        self.app.have_conf = False
+        self.app.schedulers.clear()
+        self.app.cur_conf = None
+
+    ### NB: following methods are only used by broker:
+    
+    def push_broks(self, broks):
+        """ Used by the Arbiter to push broks to broker """ 
+        self.app.add_broks_to_queue(broks.values())
+        return True
+
+    # The arbiter ask us our external commands in queue
+    def get_external_commands(self):
+        return self.app.get_external_commands()
 
 
 # Interface for Schedulers
 # If we are passive, they connect to this and
 # send/get actions
-class ISchedulers(Pyro.core.ObjBase):
-    # we keep sched link
-    def __init__(self, app):
-        Pyro.core.ObjBase.__init__(self)
-        self.app = app
-
-
-    # Ping? Pong!
-    def ping(self):
-        return None
-
+class ISchedulers(Interface):
 
     # A Scheduler send me actions to do
     def push_actions(self, actions, sched_id):
@@ -229,18 +124,7 @@ class ISchedulers(Pyro.core.ObjBase):
 # Interface for Brokers
 # They connect here and get all broks (data for brokers)
 # datas must be ORDERED! (initial status BEFORE uodate...)
-class IBroks(Pyro.core.ObjBase):
-    # we keep sched link
-    def __init__(self, app):
-        Pyro.core.ObjBase.__init__(self)
-        self.app = app
-        self.running_id = random.random()
-
-
-    # Broker need to void it's broks?
-    def get_running_id(self):
-        return self.running_id
-
+class IBroks(Interface):
 
     # poller or reactionner ask us actions
     def get_broks(self):
@@ -249,25 +133,38 @@ class IBroks(Pyro.core.ObjBase):
         return res
 
 
-    # Ping? Pong!
-    def ping(self):
-        return None
 
-
-
-# Our main APP class
-class Satellite(Daemon):
+class BaseSatellite(Daemon):
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
         
         self.check_shm()        
         
         Daemon.__init__(self, name, config_file, is_daemon, do_replace, debug, debug_file)
+
+        # Ours schedulers
+        self.schedulers = {}
+        
+        # Now we create the interfaces
+        self.interface = IForArbiter(self)
+
+    # The arbiter can resent us new conf in the pyro_daemon port.
+    # We do not want to loose time about it, so it's not a bloking
+    # wait, timeout = 0s
+    # If it send us a new conf, we reinit the connexions of all schedulers
+    def watch_for_new_conf(self, timeout):
+        self.handleRequests(timeout)
+
+
+
+# Our main APP class
+class Satellite(BaseSatellite):
+    def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
+        
+        BaseSatellite.__init__(self, name, config_file, is_daemon, do_replace, debug, debug_file)
         
         # Keep broks so they can be eaten by a broker
         self.broks = {}
 
-        # Ours schedulers
-        self.schedulers = {}
         self.workers = {}   # dict of active workers
 
         self.nb_actions_in_workers = 0
@@ -275,14 +172,6 @@ class Satellite(Daemon):
         # Init stats like Load for workers
         self.wait_ratio = Load(initial_value=1)
 
-
-        # Now the specific stuff
-        # Bool to know if we have received conf from arbiter
-        self.have_conf = False
-        self.have_new_conf = False
-        
-        # Now we create the interfaces
-        self.interface = IForArbiter(self)
         self.brok_interface = IBroks(self)
         self.scheduler_interface = ISchedulers(self)
 
@@ -394,44 +283,6 @@ class Satellite(Daemon):
         return ret
 
 
-    # Use to wait conf from arbiter.
-    # It send us conf in our pyro_daemon. It put the have_conf prop
-    # if he send us something
-    # (it can just do a ping)
-    def wait_for_initial_conf(self):
-        logger.log("Waiting for initial configuration")
-        timeout = 1.0
-        # Arbiter do not already set our have_conf param
-        while not self.have_conf and not self.interrupted:
-            elapsed, _, _ = self.handleRequests(timeout)
-            if elapsed:
-                timeout -= elapsed
-                if timeout > 0:
-                    continue
-            timeout = 1.0
-            sys.stdout.write(".")
-            sys.stdout.flush()
-        
-        if self.interrupted:
-            self.request_stop()
-
-
-    # The arbiter can resent us new conf in the pyro_daemon port.
-    # We do not want to loose time about it, so it's not a bloking
-    # wait, timeout = 0s
-    # If it send us a new conf, we reinit the connexions of all schedulers
-    def watch_for_new_conf(self, timeout):
-        self.handleRequests(timeout)
-
-        # have_new_conf is set with put_conf
-        # so another handle will not make a con_init
-        if self.have_new_conf:
-            for sched_id in self.schedulers:
-                print "Got a new conf"
-                self.pynag_con_init(sched_id)
-            self.have_new_conf = False
-            
-
     # Create and launch a new worker, and put it into self.workers
     # It can be mortal or not
     def create_and_launch_worker(self, module_name='fork', mortal=True):
@@ -468,9 +319,9 @@ class Satellite(Daemon):
                 pass
         if self.pyro_daemon:
             logger.log('Stopping all network connexions')
-            self.pyro_daemon.unregister(self.interface)
-            self.pyro_daemon.unregister(self.brok_interface)
-            self.pyro_daemon.unregister(self.scheduler_interface)
+            self.pyro_daemon.unregister(self.interface.pyro_obj)
+            self.pyro_daemon.unregister(self.brok_interface.pyro_obj)
+            self.pyro_daemon.unregister(self.scheduler_interface.pyro_obj)
             self.pyro_daemon.shutdown(True)
 
 
@@ -617,36 +468,26 @@ class Satellite(Daemon):
 
 
     def do_loop_turn(self):
-        begin_loop = time.time()
-
         # Maybe the arbiter ask us to wait for a new conf
         # If true, we must restart all...
-        if self.have_conf == False:
+        if self.cur_conf is None:
             print "Begin wait initial"
             self.wait_for_initial_conf()
             print "End wait initial"
-            if not self.have_conf:  # we may have been interrupted or so; then just return from this loop turn
+            if not self.new_conf:  # we may have been interrupted or so; then just return from this loop turn
                 return
+            self.setup_new_conf()
 
-            
         # Now we check if arbiter speek to us in the pyro_daemon.
         # If so, we listen for it
         # When it push us conf, we reinit connexions
         # Sleep in waiting a new conf :)
         self.watch_for_new_conf(self.timeout)
-
-        # Manage a possible time change (our before will be change with the diff)
-        diff = self.check_for_system_time_change()
-        begin_loop += diff
-        
-        after = time.time()
-        self.timeout -= after - begin_loop
-
-        if self.timeout >= 0:
-            return
+        if self.new_conf:
+            self.setup_new_conf()
 
         print " ======================== "
-        after = time.time()
+
         self.timeout = self.polling_interval
 
         # Check if zombies workers are among us :)
@@ -715,9 +556,9 @@ class Satellite(Daemon):
         """ Do this satellite (poller or reactionner) post "daemonize" init:
 we must register our interfaces for 3 possible callers: arbiter, schedulers or brokers. """
         # And we register them
-        self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
-        self.uri3 = self.pyro_daemon.register(self.brok_interface, "Broks")
-        self.uri4 = self.pyro_daemon.register(self.scheduler_interface, "Schedulers")
+        self.uri2 = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
+        self.uri3 = self.pyro_daemon.register(self.brok_interface.pyro_obj, "Broks")
+        self.uri4 = self.pyro_daemon.register(self.scheduler_interface.pyro_obj, "Schedulers")
         
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER
@@ -728,7 +569,78 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
 
     def setup_new_conf(self):
         """ Setup the new received conf """
-        pass
+        conf = self.new_conf
+        self.new_conf = None
+        self.cur_conf = conf
+        # Gout our name from the globals
+        if 'poller_name' in conf['global']:
+            name = conf['global']['poller_name']
+        elif 'reactionner_name' in conf['global']:
+            name = conf['global']['reactionner_name']
+        else:
+            name = 'Unnamed satellite'
+        self.name = name
+
+        print "[%s] Sending us a configuration %s " % (self.name, conf)
+        # If we've got something in the schedulers, we do not want it anymore
+        for sched_id in conf['schedulers'] :
+            already_got = False
+            if sched_id in self.schedulers:
+                logger.log("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
+                already_got = True
+                wait_homerun = self.schedulers[sched_id]['wait_homerun']
+            s = conf['schedulers'][sched_id]
+            self.schedulers[sched_id] = s
+
+            uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
+            print "DBG: scheduler UIR:", uri
+
+            self.schedulers[sched_id]['uri'] = uri
+            if already_got:
+                self.schedulers[sched_id]['wait_homerun'] = wait_homerun
+            else:
+                self.schedulers[sched_id]['wait_homerun'] = {}
+            self.schedulers[sched_id]['running_id'] = 0
+            self.schedulers[sched_id]['active'] = s['active']
+
+            # And then we connect to it :)
+            self.pynag_con_init(sched_id)
+
+        # Now the limit part
+        self.max_workers = conf['global']['max_workers']
+        self.min_workers = conf['global']['min_workers']
+        self.passive = conf['global']['passive']
+        print "Is passive?", self.passive
+        self.processes_by_worker = conf['global']['processes_by_worker']
+        self.polling_interval = conf['global']['polling_interval']
+        if 'poller_tags' in conf['global']:
+            self.poller_tags = conf['global']['poller_tags']
+        else: # for reactionner, poler_tag is [None]
+            self.poller_tags = []
+        if 'max_plugins_output_length' in conf['global']:
+            self.max_plugins_output_length = conf['global']['max_plugins_output_length']
+        else: # for reactionner, we don't really care about it
+            self.max_plugins_output_length = 8192
+        print "Max output lenght" , self.max_plugins_output_length
+        # Set our giving timezone from arbiter
+        use_timezone = conf['global']['use_timezone']
+        if use_timezone != 'NOTSET':
+            logger.log("[%s] Setting our timezone to %s" %(self.name, use_timezone))
+            os.environ['TZ'] = use_timezone
+            time.tzset()
+
+        logger.log("We have our schedulers : %s" % (str(self.schedulers)))
+
+        # Now manage modules
+        # TODO: check how to better handle this with modules_manager..
+        mods = conf['global']['modules']
+        for module in mods:
+            # If we already got it, bypass
+            if not module.module_type in self.worker_modules:
+                print "Add module object", module
+                self.modules_manager.modules.append(module)
+                logger.log("[%s] Got module : %s " % (self.name, module.module_type))
+                self.worker_modules[module.module_type] = {'to_q' : Queue()}
 
 
     def main(self):
@@ -744,18 +656,13 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
 
         # We wait for initial conf
         self.wait_for_initial_conf()
-
-        if not self.have_conf: # we must have either big problem or was requested to shutdown
+        if not self.new_conf: # we must have either big problem or was requested to shutdown
             return
+        self.setup_new_conf()
+        
         # We can load our modules now
-        self.modules_manager.set_modules(self.modules)
+        self.modules_manager.set_modules(self.modules_manager.modules)
         self.modules_manager.load_and_init()
-
-        # Connexion init with scheduler servers
-        for sched_id in self.schedulers:
-            print "Init main"
-            self.pynag_con_init(sched_id)
-        self.have_new_conf = False
 
         # Allocate Mortal Threads
         for _ in xrange(1, self.min_workers):
@@ -764,7 +671,6 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
 
         # Now main loop
         self.timeout = self.polling_interval
-
 
         self.do_mainloop()
 

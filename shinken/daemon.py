@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -51,7 +51,11 @@ class InvalidPidDir(Exception): pass
 
 
 class Interface():
+    """ Interface for pyro communications """
+    
     def __init__(self, app):
+        """ 'app´ is to be set to the owner of this interface. """
+        assert(isinstance(app, Daemon))
         self.pyro_obj = Pyro.core.ObjBase() 
         self.pyro_obj.delegateTo(self)
         
@@ -72,6 +76,7 @@ class Interface():
         
     def have_conf(self):
         return self.app.cur_conf is not None
+
 
 
 
@@ -571,3 +576,22 @@ positive when we have been sent in the futur and negative if we have been sent i
         """ Default action for system time change. Actually a log is done """
         logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
 
+
+
+    # Use to wait conf from arbiter.
+    # It send us conf in our pyro_daemon. It put the have_conf prop
+    # if he send us something
+    # (it can just do a ping)
+    def wait_for_initial_conf(self, timeout=1.0):
+        logger.log("Waiting for initial configuration")
+        cur_timeout = timeout
+        # Arbiter do not already set our have_conf param
+        while not self.new_conf and not self.interrupted:
+            elapsed, _, _ = self.handleRequests(cur_timeout)
+            if elapsed:
+                cur_timeout -= elapsed
+                if cur_timeout > 0:
+                    continue
+                cur_timeout = timeout
+            sys.stdout.write(".")
+            sys.stdout.flush()
