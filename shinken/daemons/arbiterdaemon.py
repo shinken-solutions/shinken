@@ -90,6 +90,12 @@ class Arbiter(Daemon):
 
         self.fifo = None
 
+        # Use to know if we must still be alive or not
+        self.must_run = True
+
+        print "Loading configuration"
+        self.conf = Config()
+
 
     # Use for adding things like broks
     def add(self, b):
@@ -114,7 +120,7 @@ class Arbiter(Daemon):
                 is_send = brk.push_broks(self.broks)
                 if is_send:
                     # They are gone, we keep none!
-                    self.broks = {}
+                    self.broks.clear()
 
 
     # We must take external_commands from all brokers
@@ -179,11 +185,6 @@ class Arbiter(Daemon):
         for line in self.get_header():
             self.log.log(line)
 
-        # Use to know if we must still be alive or not
-        self.must_run = True
-
-        print "Loading configuration"
-        self.conf = Config()
         # The config Class must have the USERN macro
         # There are 256 of them, so we create online
         Config.fill_usern_macros()
