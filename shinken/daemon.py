@@ -80,7 +80,7 @@ class Daemon:
         self.program_start = now
         self.t_each_loop = now # used to track system time change
 
-        self.daemon = None # should'nt it be renamed to "pyro_daemon" for clarity & safety ?
+        self.pyro_daemon = None
 
         # Log init
         self.log = logger
@@ -309,7 +309,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.change_to_user_group()
         self.change_to_workdir()  ## must be done AFTER pyro daemon init
         if self.is_daemon:
-            daemon_socket_fds = tuple( sock.fileno() for sock in self.daemon.get_sockets() )
+            daemon_socket_fds = tuple( sock.fileno() for sock in self.pyro_daemon.get_sockets() )
             self.daemonize(skip_close_fds=daemon_socket_fds)
         else:
             self.write_pid()
@@ -337,7 +337,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0        
 
-        self.daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl) 
+        self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl) 
 
 
     def get_socks_activity(self, socks, timeout):
@@ -504,7 +504,7 @@ If not timeout (== some fd got activity):
  - second arg is sublist of suppl_socks that got activity.
  - third arg is possible system time change value, or 0 if no change. """
         before = time.time()
-        socks = self.daemon.get_sockets()
+        socks = self.pyro_daemon.get_sockets()
         if suppl_socks:
             socks.extend(suppl_socks)
         ins = self.get_socks_activity(socks, timeout)
@@ -514,7 +514,7 @@ If not timeout (== some fd got activity):
             return 0, [], tcdiff
         for sock in socks:
             if sock in ins:
-                self.daemon.handleRequests(sock)
+                self.pyro_daemon.handleRequests(sock)
                 ins.remove(sock)
         elapsed = time.time() - before
         if elapsed == 0: # we have done a few instructions in 0 second exactly !? quantum computer ?

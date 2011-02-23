@@ -85,7 +85,7 @@ class ShinkenTest(unittest.TestCase):
         self.dispatcher = Dispatcher(self.conf, self.me)
         
         scheddaemon = Shinken(None, False, False, False, None)
-        self.sched = Scheduler(scheddaemon.daemon, scheddaemon)
+        self.sched = Scheduler(scheddaemon.pyro_daemon, scheddaemon)
         
         scheddaemon.sched = self.sched
                 
