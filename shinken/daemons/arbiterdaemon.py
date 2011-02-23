@@ -30,7 +30,7 @@ from Queue import Empty
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
-from shinken.daemon import Daemon
+from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
@@ -40,51 +40,30 @@ from shinken.pyro_wrapper import Pyro
 # Interface for the other Arbiter
 # It connect, and we manage who is the Master, slave etc.
 # Here is a also a fnction to have a new conf from the master
-class IArbiters(Pyro.core.ObjBase):
-    # we keep arbiter link
-    def __init__(self, arbiter):
-        Pyro.core.ObjBase.__init__(self)
-        self.arbiter = arbiter
-        self.running_id = random.random()
-
-
-    # Broker need to void it's broks?
-    def get_running_id(self):
-        return self.running_id
-
-
+class IForArbiter(Interface):
+    
     def have_conf(self, magic_hash):
         # I've got a conf and the good one
-        if self.arbiter.have_conf and self.arbiter.conf.magic_hash == magic_hash:
+        if self.app.have_conf and self.app.conf.magic_hash == magic_hash:
             return True
         else: #No conf or a bad one
             return False
 
-
     # The master Arbiter is sending us a new conf. Ok, we take it
     def put_conf(self, conf):
-        self.arbiter.conf = conf
-        print "Get conf:", self.arbiter.conf
-        self.arbiter.have_conf = True
-        print "Just after reception"
-        self.arbiter.must_run = False
-
-
-    # Ping? Pong!
-    def ping(self):
-        return None
-
+        super(IForArbiter, self).put_conf(conf)
+        self.app.must_run = False
 
     # the master arbiter ask me to do not run!
     def do_not_run(self):
         # If i'm the master, just FUCK YOU!
-        if self.arbiter.is_master:
+        if self.app.is_master:
             print "Some fucking idiot ask me to do not run. I'm a proud master, so I'm still running"
         # Else I'm just a spare, so I listen to my master
         else:
             print "Someone ask me to do not run"
-            self.arbiter.last_master_speack = time.time()
-            self.arbiter.must_run = False
+            self.app.last_master_speack = time.time()
+            self.app.must_run = False
 
 
 # Main Arbiter Class
@@ -230,7 +209,8 @@ class Arbiter(Daemon):
                 arb.need_conf = False
                 self.me = arb
                 print "I am the arbiter :", arb.get_name()
-                print "Am I the master?", not self.me.spare
+                self.is_master = not self.me.spare
+                print "Am I the master?", self.is_master
             else: #not me
                 arb.need_conf = True
 
@@ -405,9 +385,8 @@ class Arbiter(Daemon):
         # now we can start our "external" modules (if any) :
         self.modules_manager.init_and_start_instances()
 
-        self.iarbiters = IArbiters(self)
-
-        self.uri_arb = self.pyro_daemon.register(self.iarbiters, "ForArbiter") 
+        self.interface = IForArbiter(self)
+        self.uri_arb = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter") 
 
         ## And go for the main loop
         self.do_mainloop()
@@ -417,14 +396,9 @@ class Arbiter(Daemon):
         # If I am a spare, I wait for the master arbiter to send me
         # true conf. When
         if self.me.spare:
-            self.wait_initial_conf()
-        else: # I'm the master, I've got a conf
-            self.is_master = True
-            self.have_conf = True
-
-        #Ok, now It've got a True conf, Now I wait to get too much
-        #time without
-        if self.me.spare:
+            self.wait_for_initial_conf()
+            if not self.new_conf:
+                return
             print "I must wait now"
             self.wait_for_master_death()
 
@@ -496,13 +470,6 @@ class Arbiter(Daemon):
                 print "Master is dead!!!"
                 self.must_run = True
                 break
-
-
-    def do_stop(self):
-        print "Stopping all network connexions"
-        self.pyro_daemon.shutdown(True)
-        self.modules_manager.clear_instances()
-
 
     # Main function
     def run(self):
