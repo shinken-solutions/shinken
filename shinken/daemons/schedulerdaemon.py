@@ -316,12 +316,11 @@ class Shinken(BaseSatellite):
     def do_loop_turn(self):        
         # Ok, now the conf
         self.wait_for_initial_conf()
-        print "Ok we've got conf"
         if not self.new_conf:
             return
+        print "Ok we've got conf"
         self.setup_new_conf()
         print "Configuration Loaded"
-
         self.sched.run()
 
 
