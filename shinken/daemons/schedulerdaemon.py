@@ -32,20 +32,13 @@ from shinken.util import to_int
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 from shinken.log import logger
-from shinken.satellite import BaseSatellite, IForArbiter
+from shinken.satellite import BaseSatellite, IForArbiter, Interface
 
 #Interface for Workers
 
-class IChecks(Pyro.core.ObjBase):
+class IChecks(Interface):
     """ Interface for Workers:
 They connect here and see if they are still OK with our running_id, if not, they must drop their checks """
-    # in progress we keep sched link
-    # and we create a running_id so poller and
-    # reactionner know if we restart or not
-    def __init__(self, sched):
-        Pyro.core.ObjBase.__init__(self)
-        self.sched = sched
-        self.running_id = random.random()
 
     # poller or reactionner is asking us our running_id
     def get_running_id(self):
@@ -55,57 +48,44 @@ They connect here and see if they are still OK with our running_id, if not, they
     # poller or reactionner ask us actions
     def get_checks(self , do_checks=False, do_actions=False, poller_tags=[]):
         #print "We ask us checks"
-        res = self.sched.get_to_run_checks(do_checks, do_actions, poller_tags)
+        res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags)
         #print "Sending %d checks" % len(res)
-        self.sched.nb_checks_send += len(res)
+        self.app.nb_checks_send += len(res)
         return res
 
     # poller or reactionner are putting us results
     def put_results(self, results):
         nb_received = len(results)
-        self.sched.nb_check_received += nb_received
+        self.app.nb_check_received += nb_received
         print "Received %d results" % nb_received
-        self.sched.waiting_results.extend(results)
+        self.app.waiting_results.extend(results)
 
         #for c in results:
         #self.sched.put_results(c)
         return True
 
 
-class IBroks(Pyro.core.ObjBase):
+class IBroks(Interface):
     """ Interface for Brokers:
 They connect here and get all broks (data for brokers). datas must be ORDERED! (initial status BEFORE uodate...) """ 
-    # we keep sched link
-    def __init__(self, sched):
-        Pyro.core.ObjBase.__init__(self)
-        self.sched = sched
-        self.running_id = random.random()
-
-    # Broker need to void it's broks?
-    def get_running_id(self):
-        return self.running_id
 
     # poller or reactionner ask us actions
     def get_broks(self):
         #print "We ask us broks"
-        res = self.sched.get_broks()
+        res = self.app.get_broks()
         #print "Sending %d broks" % len(res)#, res
-        self.sched.nb_broks_send += len(res)
+        self.app.nb_broks_send += len(res)
         #we do not more have a full broks in queue
-        self.sched.has_full_broks = False
+        self.app.has_full_broks = False
         return res
 
     #A broker is a new one, if we do not have
     #a full broks, we clean our broks, and
     #fill it with all new values
     def fill_initial_broks(self):
-        if not self.sched.has_full_broks:
-            self.sched.broks.clear()
-            self.sched.fill_initial_broks()
-
-    #Ping? Pong!
-    def ping(self):
-        return None
+        if not self.app.has_full_broks:
+            self.app.broks.clear()
+            self.app.fill_initial_broks()
 
 
 class IForArbiter(IForArbiter):
@@ -210,25 +190,26 @@ class Shinken(BaseSatellite):
         # But first remove previous interface if exists
         if self.ichecks != None:
             print "Deconnecting previous Check Interface from pyro_daemon"
-            self.pyro_daemon.unregister(self.ichecks)
+            self.pyro_daemon.unregister(self.ichecks.pyro_obj)
 
         #Now create and connect it
         self.ichecks = IChecks(self.sched)
-        self.uri = self.pyro_daemon.register(self.ichecks, "Checks")
+        self.uri = self.pyro_daemon.register(self.ichecks.pyro_obj, "Checks")
         print "The Checks Interface uri is:", self.uri
 
         #Same for Broks
         if self.ibroks != None:
             print "Deconnecting previous Broks Interface from pyro_daemon"
-            self.pyro_daemon.unregister(self.ibroks)
+            self.pyro_daemon.unregister(self.ibroks.pyro_obj)
 
         #Create and connect it
         self.ibroks = IBroks(self.sched)
-        self.uri2 = self.pyro_daemon.register(self.ibroks, "Broks")
+        self.uri2 = self.pyro_daemon.register(self.ibroks.pyro_obj, "Broks")
         print "The Broks Interface uri is:", self.uri2
 
         print "Loading configuration"
         self.conf.explode_global_conf()
+        
         #we give sched it's conf
         self.sched.load_conf(self.conf)
 
