@@ -313,16 +313,17 @@ class Shinken(BaseSatellite):
         Daemon.manage_signal(self, sig, frame)
 
 
-    def do_loop_turn(self):
+    def do_loop_turn(self):        
+        # Ok, now the conf
+        self.wait_for_initial_conf()
+        print "Ok we've got conf"
+        if not self.new_conf:
+            return
+        self.setup_new_conf()
+        print "Configuration Loaded"
+
         self.sched.run()
-        # Ok, we quit scheduler, but maybe it's just for
-        # reloading our configuration
-        if self.must_run:
-            if self.have_conf:
-                self.load_conf()
-            else:
-                self.wait_initial_conf()
-                self.load_conf()
+
 
     def setup_new_conf(self):
         #self.use_ssl = self.app.use_ssl
@@ -365,16 +366,6 @@ class Shinken(BaseSatellite):
         
         self.uri2 = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
         print "The Arbiter Interface is at:", self.uri2
-
-        # Ok, now the conf
-        self.wait_for_initial_conf()
-        print "Ok we've got conf"
-        if not self.new_conf:
-            return
-        self.setup_new_conf()
-
-
-        print "Configuration Loaded"
         
         self.do_mainloop()
             
