@@ -390,11 +390,18 @@ class Arbiter(Daemon):
         self.do_mainloop()
 
     def setup_new_conf(self):
+        """ Setup a new conf received from a Master arbiter. """
         conf = self.new_conf
         self.new_conf = None
         self.cur_conf = conf
-        self.conf = conf
-        
+        self.conf = conf        
+        for arb in self.conf.arbiterlinks:
+            if (arb.address, arb.port) == (self.host, self.port):
+                self.me = arb
+                arb.is_me = lambda s: True  # we now definitively know who we are, just keep it.
+            else:
+                arb.is_me = lambda s: False # and we know who we are not, just keep it.
+
     def do_loop_turn(self):
         # If I am a spare, I wait for the master arbiter to send me
         # true conf. When
