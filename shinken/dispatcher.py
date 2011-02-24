@@ -86,6 +86,9 @@ class Dispatcher:
         for r in self.realms:
             r.prepare_for_satellites_conf()
 
+        # Reset need_conf for all schedulers.
+        for s in self.schedulers:
+            s.need_conf = True
 
     #checks alive elements
     def check_alive(self):

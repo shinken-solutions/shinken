@@ -398,9 +398,9 @@ class Arbiter(Daemon):
         for arb in self.conf.arbiterlinks:
             if (arb.address, arb.port) == (self.host, self.port):
                 self.me = arb
-                arb.is_me = lambda s: True  # we now definitively know who we are, just keep it.
+                arb.is_me = lambda: True  # we now definitively know who we are, just keep it.
             else:
-                arb.is_me = lambda s: False # and we know who we are not, just keep it.
+                arb.is_me = lambda: False # and we know who we are not, just keep it.
 
     def do_loop_turn(self):
         # If I am a spare, I wait for the master arbiter to send me
