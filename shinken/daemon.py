@@ -551,7 +551,7 @@ If not timeout (== some fd got activity):
         ins = self.get_socks_activity(socks, timeout)
         tcdiff = self.check_for_system_time_change()
         before += tcdiff
-        if ins is []: # trivial case: no fd activity:
+        if len(ins) == 0: # trivial case: no fd activity:
             return 0, [], tcdiff
         for sock in socks:
             if sock in ins:
