@@ -93,6 +93,8 @@ class Arbiter(Daemon):
         # Use to know if we must still be alive or not
         self.must_run = True
 
+        self.interface = IForArbiter(self)
+
         print "Loading configuration"
         self.conf = Config()
 
@@ -383,7 +385,6 @@ class Arbiter(Daemon):
         # now we can start our "external" modules (if any) :
         self.modules_manager.init_and_start_instances()
 
-        self.interface = IForArbiter(self)
         self.uri_arb = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter") 
 
         ## And go for the main loop
