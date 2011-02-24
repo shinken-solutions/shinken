@@ -44,7 +44,7 @@ class IForArbiter(Interface):
     
     def have_conf(self, magic_hash):
         # I've got a conf and the good one
-        if self.app.have_conf and self.app.conf.magic_hash == magic_hash:
+        if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
             return True
         else: #No conf or a bad one
             return False
@@ -389,6 +389,11 @@ class Arbiter(Daemon):
         ## And go for the main loop
         self.do_mainloop()
 
+    def setup_new_conf(self):
+        conf = self.new_conf
+        self.new_conf = None
+        self.cur_conf = conf
+        self.conf = conf
         
     def do_loop_turn(self):
         # If I am a spare, I wait for the master arbiter to send me
@@ -397,6 +402,7 @@ class Arbiter(Daemon):
             self.wait_for_initial_conf()
             if not self.new_conf:
                 return
+            self.setup_new_conf()
             print "I must wait now"
             self.wait_for_master_death()
 
@@ -427,6 +433,8 @@ class Arbiter(Daemon):
         while not self.interrupted:
             elapsed, _, tcdiff = self.handleRequests(timeout)
             # if there was a system Time Change (tcdiff) then we have to adapt last_master_speak:
+            if self.new_conf:
+                self.setup_new_conf()
             if tcdiff:
                 self.last_master_speack += tcdiff
             if elapsed:
