@@ -142,9 +142,6 @@ class Shinken(BaseSatellite):
         self.ibroks = None
         self.must_run = True
 
-        #Config Class must be filled with USERN Macro
-        Config.fill_usern_macros()
-
         # Now the interface
         self.uri = None
         self.uri2 = None

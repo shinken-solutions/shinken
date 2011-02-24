@@ -94,8 +94,6 @@ class Arbiter(Daemon):
         self.must_run = True
 
         self.interface = IForArbiter(self)
-
-        print "Loading configuration"
         self.conf = Config()
 
 
@@ -187,10 +185,7 @@ class Arbiter(Daemon):
         for line in self.get_header():
             self.log.log(line)
 
-        # The config Class must have the USERN macro
-        # There are 256 of them, so we create online
-        Config.fill_usern_macros()
-
+        print "Loading configuration"
         # REF: doc/shinken-conf-dispatching.png (1)
         buf = self.conf.read_config(self.config_files)
 

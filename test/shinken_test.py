@@ -49,7 +49,6 @@ class ShinkenTest(unittest.TestCase):
 
     def setup_with_file(self, path):
         # i am arbiter-like
-        Config.fill_usern_macros()
         self.broks = {}
         self.me = None
         self.log = logger
