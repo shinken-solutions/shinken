@@ -26,67 +26,44 @@ import time
 import random
 from Queue import Empty
 
-from shinken.util import to_bool
+
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
-from shinken.daemon import Daemon
+from shinken.daemon import Daemon, Interface
 from shinken.log import logger
-from shinken.modulesmanager import ModulesManager
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 
 
 # Interface for the other Arbiter
 # It connect, and we manage who is the Master, slave etc.
 # Here is a also a fnction to have a new conf from the master
-class IArbiters(Pyro.core.ObjBase):
-    # we keep arbiter link
-    def __init__(self, arbiter):
-        Pyro.core.ObjBase.__init__(self)
-        self.arbiter = arbiter
-        self.running_id = random.random()
-
-
-    # Broker need to void it's broks?
-    def get_running_id(self):
-        return self.running_id
-
-
+class IForArbiter(Interface):
+    
     def have_conf(self, magic_hash):
         # I've got a conf and the good one
-        if self.arbiter.have_conf and self.arbiter.conf.magic_hash == magic_hash:
+        if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
             return True
         else: #No conf or a bad one
             return False
 
-
     # The master Arbiter is sending us a new conf. Ok, we take it
     def put_conf(self, conf):
-        self.arbiter.conf = conf
-        print "Get conf:", self.arbiter.conf
-        self.arbiter.have_conf = True
-        print "Just after reception"
-        self.arbiter.must_run = False
-
-
-    # Ping? Pong!
-    def ping(self):
-        return None
-
+        super(IForArbiter, self).put_conf(conf)
+        self.app.must_run = False
 
     # the master arbiter ask me to do not run!
     def do_not_run(self):
         # If i'm the master, just FUCK YOU!
-        if self.arbiter.is_master:
+        if self.app.is_master:
             print "Some fucking idiot ask me to do not run. I'm a proud master, so I'm still running"
         # Else I'm just a spare, so I listen to my master
         else:
             print "Someone ask me to do not run"
-            self.arbiter.last_master_speack = time.time()
-            self.arbiter.must_run = False
+            self.app.last_master_speack = time.time()
+            self.app.must_run = False
 
 
 # Main Arbiter Class
@@ -96,7 +73,7 @@ class Arbiter(Daemon):
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
         
-        Daemon.__init__(self, 'arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
+        super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
         
         self.config_files = config_files
 
@@ -112,6 +89,12 @@ class Arbiter(Daemon):
         self.external_commands = []
 
         self.fifo = None
+
+        # Use to know if we must still be alive or not
+        self.must_run = True
+
+        self.interface = IForArbiter(self)
+        self.conf = Config()
 
 
     # Use for adding things like broks
@@ -137,7 +120,7 @@ class Arbiter(Daemon):
                 is_send = brk.push_broks(self.broks)
                 if is_send:
                     # They are gone, we keep none!
-                    self.broks = {}
+                    self.broks.clear()
 
 
     # We must take external_commands from all brokers
@@ -195,34 +178,16 @@ class Arbiter(Daemon):
         #Now remove mod that raise an exception
         self.modules_manager.clear_instances(to_del)
 
-
-    # Main loop function
-    def main(self):
-        # Log will be broks
-        for line in self.get_header():
-            self.log.log(line)
-
-        # Use to know if we must still be alive or not
-        self.must_run = True
-
+    def load_config_file(self):
         print "Loading configuration"
-        self.conf = Config()
-        # The config Class must have the USERN macro
-        # There are 256 of them, so we create online
-        Config.fill_usern_macros()
-
         # REF: doc/shinken-conf-dispatching.png (1)
         buf = self.conf.read_config(self.config_files)
-
         raw_objects = self.conf.read_config_buf(buf)
-
-        #### Loading Arbiter module part ####
 
         # First we need to get arbiters and modules first
         # so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
-
 
         self.conf.early_arbiter_linking()
 
@@ -232,45 +197,52 @@ class Arbiter(Daemon):
                 arb.need_conf = False
                 self.me = arb
                 print "I am the arbiter :", arb.get_name()
-                print "Am I the master?", not self.me.spare
+                self.is_master = not self.me.spare
+                print "Am I the master?", self.is_master
             else: #not me
                 arb.need_conf = True
 
-        # If None, there will be huge problems. The conf will be invalid
-        # And we will bail out after print all errors
-        if self.me != None:
-            print "My own modules :"
-            for m in self.me.modules:
-                print m
+        if not self.me:
+            sys.exit("Error: I cannot find my own Arbiter object, I bail out. "
+                     "To solve it, please change the host_name parameter in "
+                     "the object Arbiter in the file shinken-specific.cfg. "
+                     "Thanks.")
 
-            # we request the instances without them being *started* 
-            # (for these that are concerned ("external" modules):
-            # we will *start* these instances after we have been daemonized (if requested)
-            self.modules_manager.set_modules(self.me.modules)
-            self.do_load_modules(False)
+        print "My own modules :"
+        for m in self.me.modules:
+            print m
 
-            # Call modules that manage this read configuration pass
-            self.hook_point('read_configuration')
+        # we request the instances without them being *started* 
+        # (for these that are concerned ("external" modules):
+        # we will *start* these instances after we have been daemonized (if requested)
+        self.modules_manager.set_modules(self.me.modules)
+        self.do_load_modules(False)
 
-            # Now we ask for configuration modules if they
-            # got items for us
-            for inst in self.modules_manager.instances:
-                if 'configuration' in inst.phases:
-                    try :
-                        r = inst.get_objects()
-                        types_creations = self.conf.types_creations
-                        for k in types_creations:
-                            (cls, clss, prop) = types_creations[k]
-                            if prop in r:
-                                for x in r[prop]:
-                                    # test if raw_objects[k] is already set - if not, add empty array
-                                    if not k in raw_objects:
-                                        raw_objects[k] = []
-                                    # now append the object
-                                    raw_objects[k].append(x)
-                                print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
-                    except Exception, exp:
-                        print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
+        # Call modules that manage this read configuration pass
+        self.hook_point('read_configuration')
+
+        # Now we ask for configuration modules if they
+        # got items for us
+        for inst in self.modules_manager.instances:
+            if 'configuration' in inst.phases:
+                try :
+                    r = inst.get_objects()
+                except Exception, exp:
+                    print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
+                    continue
+                
+                types_creations = self.conf.types_creations
+                for k in types_creations:
+                    (cls, clss, prop) = types_creations[k]
+                    if prop in r:
+                        for x in r[prop]:
+                            # test if raw_objects[k] is already set - if not, add empty array
+                            if not k in raw_objects:
+                                raw_objects[k] = []
+                            # now append the object
+                            raw_objects[k].append(x)
+                        print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
+
 
         ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
@@ -278,7 +250,6 @@ class Arbiter(Daemon):
         # Maybe conf is already invalid
         if not self.conf.conf_is_correct:
             sys.exit("***> One or more problems was encountered while processing the config files...")
-
 
         # Change Nagios2 names to Nagios3 ones
         self.conf.old_properties_names_to_new()
@@ -340,8 +311,7 @@ class Arbiter(Daemon):
         self.conf.notice_about_useless_parameters()
 
         # Manage all post-conf modules
-        if self.me != None:
-            self.hook_point('late_configuration')
+        self.hook_point('late_configuration')
         
         # Correct conf?
         self.conf.is_correct()
@@ -349,24 +319,6 @@ class Arbiter(Daemon):
         #If the conf is not correct, we must get out now
         if not self.conf.conf_is_correct:
             sys.exit("Configuration is incorrect, sorry, I bail out")
-
-        #Debug to see memory and objects :)
-        #self.conf.dump()
-        #from guppy import hpy
-        #hp=hpy()
-        #print hp.heap()
-        #print hp.heapu()
-
-        # Search myself as an arbiter object
-        if self.me == None:
-            sys.exit("Error: I cannot find my own Arbiter object, I bail out. "
-                     "To solve it, please change the host_name parameter in "
-                     "the object Arbiter in the file shinken-specific.cfg. "
-                     "Thanks.")
-
-
-        # If I am a spare, I must wait a (true) conf from Arbiter Master
-        self.wait_conf = self.me.spare
 
         # REF: doc/shinken-conf-dispatching.png (2)
         logger.log("Cutting the hosts and services into parts")
@@ -388,8 +340,6 @@ class Arbiter(Daemon):
         # BEWARE: after the cutting part, because we stringify some properties
         self.conf.prepare_for_sending()
 
-        logger.log("Configuration Loaded")
-
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
         self.pidfile = self.conf.lock_file
@@ -401,32 +351,50 @@ class Arbiter(Daemon):
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
         self.port = self.me.port
+        
+        logger.log("Configuration Loaded")
+
+
+    # Main loop function
+    def main(self):
+        # Log will be broks
+        for line in self.get_header():
+            self.log.log(line)
+
+        self.load_config_file()
+
         self.do_daemon_init_and_start(self.conf)
+        self.uri_arb = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
 
         # ok we are now fully daemon (if requested)
         # now we can start our "external" modules (if any) :
         self.modules_manager.init_and_start_instances()
 
-        self.iarbiters = IArbiters(self)
-
-        self.uri_arb = self.daemon.register(self.iarbiters, "ForArbiter") 
-
         ## And go for the main loop
         self.do_mainloop()
 
-        
+
+    def setup_new_conf(self):
+        """ Setup a new conf received from a Master arbiter. """
+        conf = self.new_conf
+        self.new_conf = None
+        self.cur_conf = conf
+        self.conf = conf        
+        for arb in self.conf.arbiterlinks:
+            if (arb.address, arb.port) == (self.host, self.port):
+                self.me = arb
+                arb.is_me = lambda: True  # we now definitively know who we are, just keep it.
+            else:
+                arb.is_me = lambda: False # and we know who we are not, just keep it.
+
     def do_loop_turn(self):
         # If I am a spare, I wait for the master arbiter to send me
         # true conf. When
         if self.me.spare:
-            self.wait_initial_conf()
-        else: # I'm the master, I've got a conf
-            self.is_master = True
-            self.have_conf = True
-
-        #Ok, now It've got a True conf, Now I wait to get too much
-        #time without
-        if self.me.spare:
+            self.wait_for_initial_conf()
+            if not self.new_conf:
+                return
+            self.setup_new_conf()
             print "I must wait now"
             self.wait_for_master_death()
 
@@ -448,29 +416,6 @@ class Arbiter(Daemon):
                 except Empty:
                     break
 
-
-
-    # We wait (block) for arbiter to send us conf
-    def wait_initial_conf(self):
-        self.have_conf = False
-        print "Waiting for configuration from master"
-        timeout = 1.0
-        while not self.have_conf and not self.interrupted:
-            
-            elapsed, _, _ = self.handleRequests(timeout)
-            if elapsed:
-                timeout = timeout - elapsed
-                if timeout < 0:
-                    timeout = 1.0
-            else: # Timeout
-                sys.stdout.write(".")
-                sys.stdout.flush()
-                timeout = 1.0
-
-        if self.interrupted:
-            self.request_stop()
-
-
     # We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
         print "Waiting for master death"
@@ -480,6 +425,8 @@ class Arbiter(Daemon):
         while not self.interrupted:
             elapsed, _, tcdiff = self.handleRequests(timeout)
             # if there was a system Time Change (tcdiff) then we have to adapt last_master_speak:
+            if self.new_conf:
+                self.setup_new_conf()
             if tcdiff:
                 self.last_master_speack += tcdiff
             if elapsed:
@@ -498,13 +445,6 @@ class Arbiter(Daemon):
                 print "Master is dead!!!"
                 self.must_run = True
                 break
-
-
-    def do_stop(self):
-        print "Stopping all network connexions"
-        self.daemon.shutdown(True)
-        self.modules_manager.clear_instances()
-
 
     # Main function
     def run(self):

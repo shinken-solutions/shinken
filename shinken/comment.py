@@ -74,7 +74,7 @@ class Comment:
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = {'id' : self.id}
+        res = { 'id' : self.id }
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
@@ -96,6 +96,9 @@ class Comment:
             if prop in state:
                 setattr(self, prop, state[prop])
 
+        # to prevent duplicate id in comments:
+        if self.id >= cls.id:
+            cls.id = self.id + 1
 
     # Theses 2 functions are DEPRECATED and will be removed in a future version of
     # Shinken. They should not be useful any more after a first load/save pass.
@@ -113,5 +116,7 @@ class Comment:
         self.id = state.pop()
         for prop in cls.properties:
             val = state.pop()
-            setattr(self, prop, val)
+            setattr(self, prop, val)        
+        if self.id >= cls.id:
+            cls.id = self.id + 1
 

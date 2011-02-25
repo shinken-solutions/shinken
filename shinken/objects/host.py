@@ -27,17 +27,16 @@ scheduling/consome check smart things :)
 """
 
 import time
-import re #for keys generator
 
-from item import Items
-from schedulingitem import SchedulingItem
+from shinken.objects import Items, SchedulingItem
 from shinken.autoslots import AutoSlots
-from shinken.util import to_int, to_float, to_char, to_split, to_bool, format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, expand_with_macros
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
+from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger
+
 
 class Host(SchedulingItem):
     #AutoSlots create the __slots__ with properties and

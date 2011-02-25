@@ -42,14 +42,12 @@ from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
 from shinken.log import logger
 
-from shinken.util import to_int, to_char, to_bool
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
-#import psyco
-#psyco.full()
+from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp
 
 
 no_longer_used_txt   = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
 not_interresting_txt = 'We do not think such an option is interesting to manage.'
+
 
 class Config(Item):
     cache_path = "objects.cache"
@@ -235,10 +233,9 @@ class Config(Item):
         'SERVICEPERFDATAFILE':  '',
         'ADMINEMAIL':           '',
         'ADMINPAGER':           ''
-        #'USERn' : '$USERn$' # Add at run in __init__
-        }
-
-
+        #'USERn' : '$USERn$' # Add at run time
+    }
+    
     #We create dict of objects
     #Type: 'name in objects' : {Class of object, Class of objects,
     #'property for self for the objects(config)'
@@ -274,8 +271,6 @@ class Config(Item):
         'nagios_group': 'shinken_group'
     }
 
-
-
     def __init__(self):
         self.params = {}
         self.resource_macros_names = []
@@ -285,20 +280,6 @@ class Config(Item):
         #idify this conf
         random.seed(time.time())
         self.magic_hash = random.randint(1, 100000)
-
-
-
-    def fill_usern_macros(cls):
-        """ Fill all USERN macros with value of properties"""
-        #Now the ressource file part
-        properties = cls.properties
-        macros = cls.macros
-        for n in xrange(1, 256):
-            n = str(n)
-            properties['$USER'+n+'$'] = StringProp(default='')
-            macros['USER'+n] = '$USER'+n+'$'
-    #Set this a Class method
-    fill_usern_macros = classmethod(fill_usern_macros)
 
 
     # We've got macro in the resource file and we want
@@ -1481,3 +1462,16 @@ class Config(Item):
             self.confs[i].instance_id = i
             random.seed(time.time())
             self.confs[i].magic_hash = random.randint(1, 100000)
+
+
+# ...
+def lazy():
+    # let's compute the "USER" properties and macros..
+    for n in xrange(1, 256):
+        n = str(n)
+        Config.properties['$USER'+str(n)+'$'] = StringProp(default='')
+        Config.macros['USER'+str(n)] = '$USER'+n+'$'
+
+lazy()
+del lazy
+

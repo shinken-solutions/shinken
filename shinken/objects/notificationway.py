@@ -22,8 +22,7 @@
 
 
 from item import Item, Items
-from shinken.util import to_split, to_bool
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
 
 _special_properties = ( 'service_notification_commands', 'host_notification_commands',

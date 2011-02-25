@@ -36,10 +36,9 @@ except ImportError:
         import sqlite as sqlite3
 
 from shinken.bin import VERSION
-from shinken.objects import Service
 from shinken.external_command import ExternalCommand
 from shinken.macroresolver import MacroResolver
-from shinken.util import from_bool_to_int,from_list_to_split,from_float_to_int,to_int,to_split,get_customs_keys,get_customs_values
+from shinken.util import from_bool_to_int, from_float_to_int, to_int, to_split, get_customs_keys, get_customs_values
 
 
 LOGCLASS_INFO         = 0 # all messages not in any other class

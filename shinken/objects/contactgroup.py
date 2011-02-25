@@ -25,7 +25,7 @@
 #They are just used for the config read and explode by elements
 
 from itemgroup import Itemgroup, Itemgroups
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import IntegerProp, StringProp
 
 class Contactgroup(Itemgroup):
     id = 1

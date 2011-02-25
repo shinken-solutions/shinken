@@ -28,7 +28,6 @@ import sys
 import signal
 import time
 from Queue import Empty
-from multiprocessing import Process, Queue
 
 
 from shinken.basemodule import BaseModule
@@ -38,7 +37,7 @@ properties = {
     'type' : 'dummy_poller',
     'external' : False,
     'phases' : ['worker'],
-    }
+}
 
 
 #called by the plugin manager to get a broker

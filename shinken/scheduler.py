@@ -21,7 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import select, time, os, errno
+import time, os
 import traceback
 
 import shinken.pyro_wrapper as pyro
@@ -40,8 +40,7 @@ from shinken.log import logger
 
 
 class Scheduler:
-    def __init__(self, pyro_daemon, scheduler_daemon):
-        self.daemon = pyro_daemon # Pyro daemon for incomming orders/askings
+    def __init__(self, scheduler_daemon):
         self.sched_daemon = scheduler_daemon
         # When set to false by us, we die and arbiter launch a new Scheduler
         self.must_run = True 
@@ -88,6 +87,7 @@ class Scheduler:
         self.log.load_obj(self)
 
         self.instance_id = 0 # Temporary set. Will be erase later
+        
         # Ours queues
         self.checks = {}
         self.actions = {}
@@ -95,8 +95,16 @@ class Scheduler:
         self.contact_downtimes = {}
         self.comments = {}
         self.broks = {}
+        
         self.has_full_broks = False # have a initial_broks in broks queue?
 
+
+    def reset(self):
+        self.must_run = True
+        del self.waiting_results[:]
+        for o in self.checks, self.actions, self.downtimes, self.contact_downtimes, self.comments, self.broks:
+            o.clear()
+        
 
 
     # Load conf for future use
@@ -158,10 +166,7 @@ class Scheduler:
     # Oh... Arbiter want us to die... For launch a new Scheduler
     # "Mais qu'a-t-il de plus que je n'ais pas?"
     def die(self):
-        # first update our retention data
-        self.update_retention_file(forced=True)
         self.must_run = False
-
 
     # Load the external commander
     def load_external_command(self, e):
@@ -1050,3 +1055,4 @@ class Scheduler:
             #print hp.heap()
             #print hp.heapu()
 
+        self.update_retention_file(True)

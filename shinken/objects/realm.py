@@ -22,8 +22,7 @@
 
 
 from itemgroup import Itemgroup, Itemgroups
-from shinken.util import to_bool
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp
 
 #It change from hostgroup Class because there is no members
 #propertie, just the realm_members that we rewrite on it.

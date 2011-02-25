@@ -21,7 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.brok import Brok
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import StringProp
 
 class Command(object):
     id = 0

@@ -49,7 +49,6 @@ class ShinkenTest(unittest.TestCase):
 
     def setup_with_file(self, path):
         # i am arbiter-like
-        Config.fill_usern_macros()
         self.broks = {}
         self.me = None
         self.log = logger
@@ -85,7 +84,7 @@ class ShinkenTest(unittest.TestCase):
         self.dispatcher = Dispatcher(self.conf, self.me)
         
         scheddaemon = Shinken(None, False, False, False, None)
-        self.sched = Scheduler(scheddaemon.daemon, scheddaemon)
+        self.sched = Scheduler(scheddaemon)
         
         scheddaemon.sched = self.sched
                 

@@ -22,7 +22,7 @@
 
 
 from shinken.satellite import Satellite
-from shinken.util import to_int, to_bool
+from shinken.util import to_int
 
 
 #Our main APP class
@@ -32,10 +32,10 @@ class Poller(Satellite):
     
     properties = Satellite.properties.copy()
     properties.update({
-        'pidfile':  {'default' : '/usr/local/shinken/var/pollerd.pid', 'pythonize' : None, 'path' : True},
-        'port':     {'default' : '7771', 'pythonize' : to_int},
-        'local_log': {'default' : '/usr/local/shinken/var/pollerd.log', 'pythonize' : None, 'path' : True},
+        'pidfile':   { 'default': '/usr/local/shinken/var/pollerd.pid', 'pythonize': None, 'path': True },
+        'port':      { 'default': '7771', 'pythonize' : to_int},
+        'local_log': { 'default': '/usr/local/shinken/var/pollerd.log', 'pythonize': None, 'path': True },
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-        Satellite.__init__(self, 'poller', config_file, is_daemon, do_replace, debug, debug_file)
+        super(Poller, self).__init__('poller', config_file, is_daemon, do_replace, debug, debug_file)

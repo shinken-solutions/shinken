@@ -29,8 +29,8 @@ from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.objects import CommandCall
 from shinken.log import logger
+from shinken.pollerlink import PollerLink
 
-from shinken.pollerlink import PollerLink, PollerLinks
 
 class ExternalCommand:
     my_type = 'externalcommand'
@@ -1365,7 +1365,6 @@ class ExternalCommandManager:
 
 
 if __name__ == '__main__':
-    import os
 
     FIFO_PATH = '/tmp/my_fifo'
 

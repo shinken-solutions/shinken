@@ -353,6 +353,8 @@ class SatelliteLink(Item):
         for prop in cls.running_properties:
             if prop in state:
                 setattr(self, prop, state[prop])
+        # con needs to be explicitely set:
+        self.con = None
 
 
 

@@ -28,10 +28,9 @@ import traceback
 from multiprocessing import active_children
 from Queue import Empty
 
-from shinken.satellite import Satellite
-from shinken.daemon import Daemon
-from shinken.util import to_int, to_bool, sort_by_ids
-from shinken.modulesmanager import ModulesManager
+from shinken.satellite import BaseSatellite, IForArbiter
+
+from shinken.util import to_int, sort_by_ids
 from shinken.log import logger
 
 import shinken.pyro_wrapper as pyro
@@ -40,226 +39,20 @@ from shinken.pyro_wrapper import Pyro
 from shinken.external_command import ExternalCommand
 
 
-# Interface for Arbiter, our big MASTER
-# It put us our conf
-# TODO: subclass satellite.IForArbiter for factorization..
-class IForArbiter(Pyro.core.ObjBase):
-        # We keep app link because we are just here for it
-    def __init__(self, app):
-        Pyro.core.ObjBase.__init__(self)
-        self.app = app
-        self.schedulers = app.schedulers
-        self.arbiters = app.arbiters
-        self.pollers = app.pollers
-        self.reactionners = app.reactionners
-        self.use_ssl = app.use_ssl
-
-    # function called by arbiter for giving us our conf
-    # conf must be a dict with:
-    # 'schedulers' : schedulers dict (by id) with address and port
-    # TODO: catch case where Arbiter send somethign we already have
-    # (same id+add+port) -> just do nothing :)
-    # REF : doc/shinken-conf-dispatching.png (4)
-    def put_conf(self, conf):
-        # TODO: just save the conf, put a flag to say a new conf is there and return
-        # and handle the setup of this new conf in the main satellite loop ?
-        
-        self.app.have_conf = True
-        self.app.have_new_conf = True
-
-        # Got our name from the globals
-        if 'broker_name' in conf['global']:
-            name = conf['global']['broker_name']
-        else:
-            name = 'Unnamed broker'
-        self.app.name = self.name = name
-        self.app.log.load_obj(self.app, name)
-
-        print "[%s] Sending us configuration %s" % (self.name, conf)
-        # If we've got something in the schedulers, we do not
-        # want it anymore
-        # self.schedulers.clear()
-        for sched_id in conf['schedulers']:
-            # Must look if we already have it to do nto overdie our broks
-            already_got = sched_id in self.schedulers
-            if already_got:
-                broks = self.schedulers[sched_id]['broks']
-                running_id = self.schedulers[sched_id]['running_id']
-            else:
-                broks = {}
-                running_id = 0
-            s = conf['schedulers'][sched_id]
-            self.schedulers[sched_id] = s
-            uri = pyro.create_uri(s['address'], s['port'], 'Broks', self.use_ssl)
-            self.schedulers[sched_id]['uri'] = uri
-            self.schedulers[sched_id]['broks'] = broks
-            self.schedulers[sched_id]['instance_id'] = s['instance_id']
-            self.schedulers[sched_id]['running_id'] = running_id
-            self.schedulers[sched_id]['active'] = s['active']
-            self.schedulers[sched_id]['last_connexion'] = 0
-
-
-        logger.log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
-
-        # Now get arbiter
-        for arb_id in conf['arbiters']:
-            # Must look if we already have it
-            already_got = arb_id in self.arbiters
-            if already_got:
-                broks = self.arbiters[arb_id]['broks']
-            else:
-                broks = {}
-            a = conf['arbiters'][arb_id]
-            self.arbiters[arb_id] = a
-            uri = pyro.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
-            self.arbiters[arb_id]['uri'] = uri
-            self.arbiters[arb_id]['broks'] = broks
-            self.arbiters[arb_id]['instance_id'] = 0 # No use so all to 0
-            self.arbiters[arb_id]['running_id'] = 0
-            self.arbiters[arb_id]['last_connexion'] = 0
-
-            # We do not connect to the arbiter. To connexion hang
-
-        logger.log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
-
-        # Now for pollers
-        for pol_id in conf['pollers']:
-            # Must look if we already have it
-            already_got = pol_id in self.pollers
-            if already_got:
-                broks = self.pollers[pol_id]['broks']
-                running_id = self.schedulers[sched_id]['running_id']
-            else:
-                broks = {}
-                running_id = 0
-            p = conf['pollers'][pol_id]
-            self.pollers[pol_id] = p
-            uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
-            self.pollers[pol_id]['uri'] = uri
-            self.pollers[pol_id]['broks'] = broks
-            self.pollers[pol_id]['instance_id'] = 0 # No use so all to 0
-            self.pollers[pol_id]['running_id'] = running_id
-            self.pollers[pol_id]['last_connexion'] = 0
-
-#                    #And we connect to it
-#                    self.app.pynag_con_init(pol_id, 'poller')
-
-        logger.log("[%s] We have our pollers : %s" % (self.name, self.pollers))
-
-        # Now reactionners
-        for rea_id in conf['reactionners'] :
-            # Must look if we already have it
-            already_got = rea_id in self.reactionners
-            if already_got:
-                broks = self.reactionners[rea_id]['broks']
-                running_id = self.schedulers[sched_id]['running_id']
-            else:
-                broks = {}
-                running_id = 0
-
-            r = conf['reactionners'][rea_id]
-            self.reactionners[rea_id] = r
-            uri = pyro.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
-            self.reactionners[rea_id]['uri'] = uri
-            self.reactionners[rea_id]['broks'] = broks
-            self.reactionners[rea_id]['instance_id'] = 0 # No use so all to 0
-            self.reactionners[rea_id]['running_id'] = running_id
-            self.reactionners[rea_id]['last_connexion'] = 0
-
-#                    #And we connect to it
-#                    self.app.pynag_con_init(rea_id, 'reactionner')
-
-        logger.log("[%s] We have our reactionners : %s" % (self.name, self.reactionners))
-
-        if not self.app.have_modules:
-            self.app.modules = mods = self.app.modules = conf['global']['modules']
-            self.app.have_modules = True
-            logger.log("[%s] We received modules %s " %( self.name,  mods))
-
-        # Set our giving timezone from arbiter
-        use_timezone = conf['global']['use_timezone']
-        if use_timezone != 'NOTSET':
-            logger.log("[%s] Setting our timezone to" %(self.name, use_timezone))
-            os.environ['TZ'] = use_timezone
-            time.tzset()
-
-
-
-    # Arbiter ask us to do not manage a scheduler_id anymore
-    # I do it and don't ask why
-    def remove_from_conf(self, sched_id):
-        try:
-            del self.schedulers[sched_id]
-        except KeyError:
-            pass
-
-
-    # Arbiter ask me which sched_id I manage, If it is not ok with it
-    # It will ask me to remove one or more sched_id
-    def what_i_managed(self):
-        return self.schedulers.keys()
-
-
-    # Use for arbiter to know if we are alive
-    def ping(self):
-        return True
-
-
-    # Use by the Arbiter to push broks to broker
-    def push_broks(self, broks):
-        self.app.add_broks_to_queue(broks.values())
-        return True
-
-    # The arbiter ask us our external commands in queue
-    def get_external_commands(self):
-        return self.app.get_external_commands()
-
-
-    # Use by arbiter to know if we have a conf or not
-    # can be usefull if we must do nothing but
-    # we are not because it can KILL US!
-    def have_conf(self):
-        return self.app.have_conf
-
-
-    # Call by arbiter if it thinks we are running but we must do not (like
-    # if I was a spare that take a conf but the master returns, I must die
-    # and wait a new conf)
-    # Us : No please...
-    # Arbiter : I don't care, hasta la vista baby!
-    # Us : ... <- Nothing! We are die! you don't follow
-    # anything or what??
-    def wait_new_conf(self):
-        print "Arbiter want me to wait a new conf"
-        self.schedulers.clear()
-        self.app.have_conf = False
-
-
-
 # Our main APP class
-class Broker(Satellite):
+class Broker(BaseSatellite):
 
-    properties = Satellite.properties.copy()
+    properties = BaseSatellite.properties.copy()
     properties.update({
-        'pidfile':   { 'default' : '/usr/local/shinken/var/brokerd.pid', 'pythonize' : None, 'path' : True},
-        'port':      { 'default' : '7772', 'pythonize' : to_int},
-        'local_log': { 'default' : '/usr/local/shinken/var/brokerd.log', 'pythonize' : None, 'path' : True},
+        'pidfile':   { 'default': '/usr/local/shinken/var/brokerd.pid', 'pythonize': None, 'path': True },
+        'port':      { 'default': '7772', 'pythonize': to_int },
+        'local_log': { 'default': '/usr/local/shinken/var/brokerd.log', 'pythonize': None, 'path': True },
     })
 
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-
-        self.check_shm()
         
-        # NB: we don't call Satellite.__init__ because we actually totally overide it !
-        Daemon.__init__(self, 'broker', config_file, is_daemon, do_replace, debug, debug_file)
-
-        # Bool to know if we have received conf from arbiter
-        self.have_conf = False
-        self.have_new_conf = False
-        
-        # Ours schedulers
-        self.schedulers = {}
+        super(Broker, self).__init__('broker', config_file, is_daemon, do_replace, debug, debug_file)
 
         # Our arbiters
         self.arbiters = {}
@@ -271,7 +64,6 @@ class Broker(Satellite):
         # Modules are load one time
         self.have_modules = False
 
-
         # Can have a queue of external_commands give by modules
         # will be taken by arbiter to process
         self.external_commands = []
@@ -280,10 +72,6 @@ class Broker(Satellite):
         self.broks = [] # broks to manage
         # broks raised this turn and that need to be put in self.broks
         self.broks_internal_raised = []
-
-
-        self.do_load_config()
-
         
 
     # Schedulers have some queues. We can simplify call by adding
@@ -421,13 +209,9 @@ class Broker(Satellite):
     # Add broks (a tab) to different queues for
     # internal and external modules
     def add_broks_to_queue(self, broks):
-
         # Ok now put in queue brocks for manage by
         # internal modules
         self.broks.extend(broks)
-
-
-
 
     # Each turn we get all broks from
     # self.broks_internal_raised and we put them in
@@ -435,7 +219,6 @@ class Broker(Satellite):
     def interger_internal_broks(self):
         self.add_broks_to_queue(self.broks_internal_raised)
         self.broks_internal_raised = []
-
 
     # Get 'objects' from external modules
     # from now nobody use it, but it can be useful
@@ -450,8 +233,6 @@ class Broker(Satellite):
                     self.add(o)
                 except Empty :
                     full_queue = False
-
-
 
     # We get new broks from schedulers
     # REF: doc/broker-modules.png (2)
@@ -471,15 +252,6 @@ class Broker(Satellite):
                     tmp_broks = con.get_broks()
                     for b in tmp_broks.values():
                         b.instance_id = links[sched_id]['instance_id']
-
-                    #DBG
-#                                        for b in tmp_broks.values():
-#                                           print b.type, b
-#                                            data = b.data
-#                                           print data
-#                                            for k in data:
-#                                                if isinstance(data[k], Service):
-#                                                    print "Fucking service in data!", b
 
                     # Ok, we can add theses broks to our queues
                     self.add_broks_to_queue(tmp_broks.values())
@@ -511,42 +283,162 @@ class Broker(Satellite):
                 logger.log(''.join(Pyro.util.getPyroTraceback(x)))
                 sys.exit(1)
 
-
-
-
     # modules can have process, and they can die
     def check_and_del_zombie_modules(self):
         # Active children make a join with every one, useful :)
         act = active_children()
         self.modules_manager.check_alive_instances()
 
-
     def do_stop(self):
-        #  Maybe we quit before even launch modules
-        # # Maybe not now that we aren't anymore doing this in the signal handler ??
-        #     if hasattr(self, 'modules_manager'):
-        if self.modules_manager:
-            logger.log('Stopping all modules')
-            self.modules_manager.stop_all()
         act = active_children()
         for a in act:
             a.terminate()
             a.join(1)
-        logger.log('Stopping all network connexions')
-        self.daemon.shutdown(True)
+        super(Broker, self).do_stop()
+        
+        
+    def setup_new_conf(self):
+        conf = self.new_conf
+        self.new_conf = None
+        self.cur_conf = conf
+        # Got our name from the globals
+        if 'broker_name' in conf['global']:
+            name = conf['global']['broker_name']
+        else:
+            name = 'Unnamed broker'
+        self.name = name
+        self.log.load_obj(self, name)
 
-        # And finally close the logger too
-        logger.quit()
+        print "[%s] Sending us configuration %s" % (self.name, conf)
+        # If we've got something in the schedulers, we do not
+        # want it anymore
+        # self.schedulers.clear()
+        for sched_id in conf['schedulers']:
+            # Must look if we already have it to do nto overdie our broks
+            already_got = sched_id in self.schedulers
+            if already_got:
+                broks = self.schedulers[sched_id]['broks']
+                running_id = self.schedulers[sched_id]['running_id']
+            else:
+                broks = {}
+                running_id = 0
+            s = conf['schedulers'][sched_id]
+            self.schedulers[sched_id] = s
+            uri = pyro.create_uri(s['address'], s['port'], 'Broks', self.use_ssl)
+            self.schedulers[sched_id]['uri'] = uri
+            self.schedulers[sched_id]['broks'] = broks
+            self.schedulers[sched_id]['instance_id'] = s['instance_id']
+            self.schedulers[sched_id]['running_id'] = running_id
+            self.schedulers[sched_id]['active'] = s['active']
+            self.schedulers[sched_id]['last_connexion'] = 0
+
+
+        logger.log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
+
+        # Now get arbiter
+        for arb_id in conf['arbiters']:
+            # Must look if we already have it
+            already_got = arb_id in self.arbiters
+            if already_got:
+                broks = self.arbiters[arb_id]['broks']
+            else:
+                broks = {}
+            a = conf['arbiters'][arb_id]
+            self.arbiters[arb_id] = a
+            uri = pyro.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
+            self.arbiters[arb_id]['uri'] = uri
+            self.arbiters[arb_id]['broks'] = broks
+            self.arbiters[arb_id]['instance_id'] = 0 # No use so all to 0
+            self.arbiters[arb_id]['running_id'] = 0
+            self.arbiters[arb_id]['last_connexion'] = 0
+
+            # We do not connect to the arbiter. To connexion hang
+
+        logger.log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
+
+        # Now for pollers
+        for pol_id in conf['pollers']:
+            # Must look if we already have it
+            already_got = pol_id in self.pollers
+            if already_got:
+                broks = self.pollers[pol_id]['broks']
+                running_id = self.schedulers[sched_id]['running_id']
+            else:
+                broks = {}
+                running_id = 0
+            p = conf['pollers'][pol_id]
+            self.pollers[pol_id] = p
+            uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
+            self.pollers[pol_id]['uri'] = uri
+            self.pollers[pol_id]['broks'] = broks
+            self.pollers[pol_id]['instance_id'] = 0 # No use so all to 0
+            self.pollers[pol_id]['running_id'] = running_id
+            self.pollers[pol_id]['last_connexion'] = 0
+
+#                    #And we connect to it
+#                    self.app.pynag_con_init(pol_id, 'poller')
+
+        logger.log("[%s] We have our pollers : %s" % (self.name, self.pollers))
+
+        # Now reactionners
+        for rea_id in conf['reactionners'] :
+            # Must look if we already have it
+            already_got = rea_id in self.reactionners
+            if already_got:
+                broks = self.reactionners[rea_id]['broks']
+                running_id = self.schedulers[sched_id]['running_id']
+            else:
+                broks = {}
+                running_id = 0
+
+            r = conf['reactionners'][rea_id]
+            self.reactionners[rea_id] = r
+            uri = pyro.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
+            self.reactionners[rea_id]['uri'] = uri
+            self.reactionners[rea_id]['broks'] = broks
+            self.reactionners[rea_id]['instance_id'] = 0 # No use so all to 0
+            self.reactionners[rea_id]['running_id'] = running_id
+            self.reactionners[rea_id]['last_connexion'] = 0
+
+#                    #And we connect to it
+#                    self.app.pynag_con_init(rea_id, 'reactionner')
+
+        logger.log("[%s] We have our reactionners : %s" % (self.name, self.reactionners))
+
+        if not self.have_modules:
+            self.modules = mods = conf['global']['modules']
+            self.have_modules = True
+            logger.log("[%s] We received modules %s " % (self.name,  mods))
+
+        # Set our giving timezone from arbiter
+        use_timezone = conf['global']['use_timezone']
+        if use_timezone != 'NOTSET':
+            logger.log("[%s] Setting our timezone to" % (self.name, use_timezone))
+            os.environ['TZ'] = use_timezone
+            time.tzset()
+        
+        # Connexion init with Schedulers
+        for sched_id in self.schedulers:
+            self.pynag_con_init(sched_id, type='scheduler')
+
+        for pol_id in self.pollers:
+            self.pynag_con_init(pol_id, type='poller')
+
+        for rea_id in self.reactionners:
+            self.pynag_con_init(rea_id, type='reactionner')
+        
 
     def do_loop_turn(self):
         print "Begin Loop : manage broks", len(self.broks)
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
-        # Now we check if arbiter speek to us in the daemon.
+        # Now we check if arbiter speek to us in the pyro_daemon.
         # If so, we listen for it
         # When it push us conf, we reinit connexions
         self.watch_for_new_conf(0.0)
+        if self.new_conf:
+            self.setup_new_conf()
 
         # Maybe the last loop we raised some broks internally
         # we should interger them in broks
@@ -610,6 +502,8 @@ class Broker(Satellite):
     #  Main function, will loop forever
     def main(self):
         
+        self.do_load_config()
+        
         for line in self.get_header():
             self.log.log(line)
 
@@ -617,11 +511,15 @@ class Broker(Satellite):
         
         self.do_daemon_init_and_start()
 
-        self.uri2 = self.daemon.register(IForArbiter(self), "ForArbiter")
+        self.uri2 = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
         print "The Arbtier uri it at", self.uri2
 
         #  We wait for initial conf
         self.wait_for_initial_conf()
+        if not self.new_conf:
+            return
+
+        self.setup_new_conf()
 
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
@@ -629,16 +527,6 @@ class Broker(Satellite):
         # Do the modules part, we have our modules in self.modules
         # REF: doc/broker-modules.png (1)
 
-
-        # Connexion init with Schedulers
-        for sched_id in self.schedulers:
-            self.pynag_con_init(sched_id, type='scheduler')
-
-        for pol_id in self.pollers:
-            self.pynag_con_init(pol_id, type='poller')
-
-        for rea_id in self.reactionners:
-            self.pynag_con_init(rea_id, type='reactionner')
 
         # Now the main loop
         self.do_mainloop()

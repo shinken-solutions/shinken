@@ -23,8 +23,7 @@
 import socket
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
-from shinken.util import to_int, to_bool, to_split
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
 class ArbiterLink(SatelliteLink):
     id = 0

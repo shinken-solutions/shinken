@@ -23,8 +23,8 @@
 
 #This class is a wrapper for managing Pyro 3 and 4 version
 
+import select, errno
 
-import sys
 import Pyro.core
 
 
@@ -63,8 +63,6 @@ try:
                 raise InvalidWorkDir(e)
             except Pyro.errors.DaemonError, e:
                 msg = "Sorry, the port %d is not free: %s" % (port, e)
-            #if port and self.port != port:
-            #    msg = "Sorry, the port %d is not free" % (port)
                 raise PortNotFree(msg)
 
         def register(self, obj, name):
@@ -156,10 +154,8 @@ except AttributeError:
 
 
     PyroClass = Pyro4Daemon
-    
 
 
-import select, errno, time
 
 class ShinkenPyroDaemon(PyroClass):
     

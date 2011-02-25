@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -20,10 +20,9 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, errno, sys, ConfigParser
-import time
-import signal
-import select
+import os, errno, sys, time, signal, select, random 
+import ConfigParser
+
 
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import InvalidWorkDir
@@ -50,23 +49,58 @@ VERSION = "0.5"
 class InvalidPidDir(Exception): pass
 
 
-class Daemon:
+
+class Interface(object):
+    """ Interface for pyro communications """
+    
+    def __init__(self, app):
+        """ 'app´ is to be set to the owner of this interface. """
+
+        self.pyro_obj = Pyro.core.ObjBase() 
+        self.pyro_obj.delegateTo(self)
+        
+        self.app = app
+        self.running_id = "%d.%d" % (time.time(), random.random())
+
+    def ping(self):
+        return "pong"
+
+    def get_running_id(self):
+        return self.running_id
+    
+    def put_conf(self, conf):
+        self.app.new_conf = conf
+
+    def wait_new_conf(self):
+        self.app.cur_conf = None
+        
+    def have_conf(self):
+        return self.app.cur_conf is not None
+
+
+
+
+class Daemon(object):
 
     properties = {
-        'workdir':      { 'default' : '/usr/local/shinken/var', 'pythonize' : None, 'path' : True},
-        'host':         { 'default' : '0.0.0.0', 'pythonize' : None},
-        'user':         { 'default' : 'shinken', 'pythonize' : None},
-        'group':        { 'default' : 'shinken', 'pythonize' : None},
-        'use_ssl':      { 'default' : '0', 'pythonize' : to_bool},
-        'certs_dir':    { 'default' : 'etc/certs', 'pythonize' : None},
-        'ca_cert':      { 'default' : 'etc/certs/ca.pem', 'pythonize' : None},
-        'server_cert':  { 'default': 'etc/certs/server.pem', 'pythonize' : None},
-        'use_local_log':{ 'default' : '0', 'pythonize' : to_bool},
-        'hard_ssl_name_check':    { 'default' : '0', 'pythonize' : to_bool},
-        'idontcareaboutsecurity': { 'default' : '0', 'pythonize' : to_bool},
+        'workdir':      { 'default': '/usr/local/shinken/var', 'pythonize': None, 'path': True },
+        'host':         { 'default': '0.0.0.0', 'pythonize': None },
+        'user':         { 'default': 'shinken', 'pythonize': None },
+        'group':        { 'default': 'shinken', 'pythonize': None },
+        'use_ssl':      { 'default': '0', 'pythonize': to_bool },
+        'certs_dir':    { 'default': 'etc/certs', 'pythonize': None },
+        'ca_cert':      { 'default': 'etc/certs/ca.pem', 'pythonize': None },
+        'server_cert':  { 'default': 'etc/certs/server.pem', 'pythonize': None },
+        'use_local_log':{ 'default': '0', 'pythonize': to_bool },
+        'hard_ssl_name_check':    { 'default': '0', 'pythonize': to_bool },
+        'idontcareaboutsecurity': { 'default': '0', 'pythonize': to_bool },
+        'spare':        { 'default': '0', 'pythonize': to_bool }
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
+        
+        self.check_shm()   
+        
         self.name = name
         self.config_file = config_file
         self.is_daemon = is_daemon
@@ -79,12 +113,14 @@ class Daemon:
         self.program_start = now
         self.t_each_loop = now # used to track system time change
 
-        self.daemon = None # should'nt it be renamed to "pyro_daemon" for clarity & safety ?
+        self.pyro_daemon = None
 
         # Log init
         self.log = logger
         self.log.load_obj(self)
         
+        self.new_conf = None # used by controller to push conf 
+        self.cur_conf = None
 
         self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
 
@@ -93,7 +129,13 @@ class Daemon:
 
     # At least, lose the local log file if need
     def do_stop(self):
+        if self.modules_manager:
+            logger.log('Stopping all modules')
+            self.modules_manager.stop_all()
+        if self.pyro_daemon:
+            self.pyro_daemon.shutdown(True)
         logger.quit()
+        
 
     def request_stop(self):
         self.unlink()  ## unlink first
@@ -308,7 +350,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.change_to_user_group()
         self.change_to_workdir()  ## must be done AFTER pyro daemon init
         if self.is_daemon:
-            daemon_socket_fds = tuple( sock.fileno() for sock in self.daemon.get_sockets() )
+            daemon_socket_fds = tuple( sock.fileno() for sock in self.pyro_daemon.get_sockets() )
             self.daemonize(skip_close_fds=daemon_socket_fds)
         else:
             self.write_pid()
@@ -336,7 +378,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0        
 
-        self.daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl) 
+        self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl) 
 
 
     def get_socks_activity(self, socks, timeout):
@@ -503,17 +545,17 @@ If not timeout (== some fd got activity):
  - second arg is sublist of suppl_socks that got activity.
  - third arg is possible system time change value, or 0 if no change. """
         before = time.time()
-        socks = self.daemon.get_sockets()
+        socks = self.pyro_daemon.get_sockets()
         if suppl_socks:
             socks.extend(suppl_socks)
         ins = self.get_socks_activity(socks, timeout)
         tcdiff = self.check_for_system_time_change()
         before += tcdiff
-        if ins is []: # trivial case: no fd activity:
+        if len(ins) == 0: # trivial case: no fd activity:
             return 0, [], tcdiff
         for sock in socks:
             if sock in ins:
-                self.daemon.handleRequests(sock)
+                self.pyro_daemon.handleRequests(sock)
                 ins.remove(sock)
         elapsed = time.time() - before
         if elapsed == 0: # we have done a few instructions in 0 second exactly !? quantum computer ?
@@ -543,3 +585,22 @@ positive when we have been sent in the futur and negative if we have been sent i
         """ Default action for system time change. Actually a log is done """
         logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
 
+
+
+    # Use to wait conf from arbiter.
+    # It send us conf in our pyro_daemon. It put the have_conf prop
+    # if he send us something
+    # (it can just do a ping)
+    def wait_for_initial_conf(self, timeout=1.0):
+        logger.log("Waiting for initial configuration")
+        cur_timeout = timeout
+        # Arbiter do not already set our have_conf param
+        while not self.new_conf and not self.interrupted:
+            elapsed, _, _ = self.handleRequests(cur_timeout)
+            if elapsed:
+                cur_timeout -= elapsed
+                if cur_timeout > 0:
+                    continue
+                cur_timeout = timeout
+            sys.stdout.write(".")
+            sys.stdout.flush()

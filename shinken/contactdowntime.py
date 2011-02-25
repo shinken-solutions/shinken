@@ -22,7 +22,7 @@
 
 
 import time
-from comment import Comment
+
 
 class ContactDowntime:
     id = 1
@@ -125,3 +125,5 @@ class ContactDowntime:
         for prop in cls.properties:
             val = state.pop()
             setattr(self, prop, val)
+        if self.id >= cls.id:
+            cls.id = self.id + 1
