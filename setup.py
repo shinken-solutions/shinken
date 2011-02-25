@@ -411,7 +411,7 @@ setup(
                 'bin/init.d/shinken-reactionner',
                 'bin/init.d/shinken-scheduler']),
               (os.path.join(etc_root, 'default',),
-               ['bin/default/shinken']),
+               ['build/bin/default/shinken']),
               (default_paths['var'], ['var/void_for_git']),
               (default_paths['libexec'], ['libexec/check.sh']),
               ]

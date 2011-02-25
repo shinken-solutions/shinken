@@ -21,6 +21,7 @@ sudo rm -fr var/rw/*cmd
 sudo rm -fr /tmp/retention.dat
 sudo rm -fr /tmp/*debug
 sudo rm -fr /etc/default/shinken
+sudo rm -fr bin/default/shinken
 
 #Then kill remaining processes
 killall -9 python2.6 2> /dev/null
