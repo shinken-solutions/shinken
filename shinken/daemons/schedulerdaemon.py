@@ -98,8 +98,7 @@ HE got user entry, so we must listen him carefully and give information he want,
         self.app.sched.run_external_command(command)
 
     def put_conf(self, conf):
-        if self.app.sched:
-            self.app.sched.die()
+        self.app.sched.die()
         super(IForArbiter, self).put_conf(conf)
 
     #Call by arbiter if it thinks we are running but we must do not (like
@@ -111,8 +110,7 @@ HE got user entry, so we must listen him carefully and give information he want,
     #anything or what??
     def wait_new_conf(self):
         print "Arbiter want me to wait a new conf"
-        if self.app.sched:
-            self.app.sched.die()
+        self.app.sched.die()
         super(IForArbiter, self).wait_new_conf()        
 
 
@@ -136,8 +134,8 @@ class Shinken(BaseSatellite):
         BaseSatellite.__init__(self, 'scheduler', config_file, is_daemon, do_replace, debug, debug_file)
 
         self.interface = IForArbiter(self)
-
-        self.sched = None
+        self.sched = Scheduler(self)
+        
         self.ichecks = None
         self.ibroks = None
         self.must_run = True
@@ -153,90 +151,9 @@ class Shinken(BaseSatellite):
 
 
     def do_stop(self):
-        if self.sched:
-            print "Asking for a retention save"
-            self.sched.update_retention_file(forced=True)
         self.pyro_daemon.unregister(self.ibroks.pyro_obj)
         self.pyro_daemon.unregister(self.ichecks.pyro_obj)
         super(Shinken, self).do_stop()
-
-
-    #OK, we've got the conf, now we load it
-    #and launch scheduler with it
-    #we also create interface for poller and reactionner
-    def load_conf(self):
-        #First mix conf and override_conf to have our definitive conf
-        for prop in self.override_conf:
-            print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
-            val = self.override_conf[prop]
-            setattr(self.conf, prop, val)
-
-        if self.conf.use_timezone != 'NOTSET':
-            print "Setting our timezone to", self.conf.use_timezone
-            os.environ['TZ'] = self.conf.use_timezone
-            time.tzset()
-
-        print "I've got modules", self.modules
-        # TODO: if scheduler had previous modules instanciated it must clean them !
-        self.modules_manager.set_modules(self.modules)
-        self.do_load_modules()
-
-        # create scheduler with ref of our pyro_daemon
-        self.sched = Scheduler(self.pyro_daemon, self)
-
-        # give it an interface
-        # But first remove previous interface if exists
-        if self.ichecks != None:
-            print "Deconnecting previous Check Interface from pyro_daemon"
-            self.pyro_daemon.unregister(self.ichecks.pyro_obj)
-
-        #Now create and connect it
-        self.ichecks = IChecks(self.sched)
-        self.uri = self.pyro_daemon.register(self.ichecks.pyro_obj, "Checks")
-        print "The Checks Interface uri is:", self.uri
-
-        #Same for Broks
-        if self.ibroks != None:
-            print "Deconnecting previous Broks Interface from pyro_daemon"
-            self.pyro_daemon.unregister(self.ibroks.pyro_obj)
-
-        #Create and connect it
-        self.ibroks = IBroks(self.sched)
-        self.uri2 = self.pyro_daemon.register(self.ibroks.pyro_obj, "Broks")
-        print "The Broks Interface uri is:", self.uri2
-
-        print "Loading configuration"
-        self.conf.explode_global_conf()
-        
-        #we give sched it's conf
-        self.sched.load_conf(self.conf)
-
-        self.sched.load_satellites(self.pollers, self.reactionners)
-
-        #We must update our Config dict macro with good value
-        #from the config parameters
-        self.sched.conf.fill_resource_macros_names_macros()
-        print "DBG: got macors", self.sched.conf.macros
-        print getattr(self.sched.conf, '$PLUGINSDIR$', 'MONCUL'*100)
-
-        #Creating the Macroresolver Class & unique instance
-        m = MacroResolver()
-        m.init(self.conf)
-
-        #self.conf.dump()
-        #self.conf.quick_debug()
-
-        #Now create the external commander
-        #it's a applyer : it role is not to dispatch commands,
-        #but to apply them
-        e = ExternalCommandManager(self.conf, 'applyer')
-
-        #Scheduler need to know about external command to
-        #activate it if necessery
-        self.sched.load_external_command(e)
-
-        #External command need the sched because he can raise checks
-        e.load_scheduler(self.sched)
 
 
     def compensate_system_time_change(self, difference):
@@ -301,11 +218,8 @@ class Shinken(BaseSatellite):
                     c.t_to_go = new_t
 
 
-
     def manage_signal(self, sig, frame):
-        # self.sched could be still unset if we have not yet received our conf
-        if self.sched: 
-            self.sched.must_run = False
+        self.sched.die()
         self.must_run = False
         Daemon.manage_signal(self, sig, frame)
 
@@ -325,44 +239,105 @@ class Shinken(BaseSatellite):
         #self.use_ssl = self.app.use_ssl
         (conf, override_conf, modules, satellites) = self.new_conf
         self.new_conf = None
-        if not self.cur_conf or self.cur_conf.magic_hash != conf.magic_hash:
-            self.conf = conf
-            self.override_conf = override_conf
-            self.modules = modules
-            self.satellites = satellites
-            #self.pollers = self.app.pollers
-
-            # Now We create our pollers
-            for pol_id in satellites['pollers']:
-                # Must look if we already have it
-                already_got = pol_id in self.pollers
-                p = satellites['pollers'][pol_id]
-                self.pollers[pol_id] = p
-                uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
-                self.pollers[pol_id]['uri'] = uri
-                self.pollers[pol_id]['last_connexion'] = 0
-                print "Got a poller", p
-
-
-            #if app already have a scheduler, we must say him to
-            #DIE Mouahahah
-            #So It will quit, and will load a new conf (and create a brand new scheduler)
-            if self.sched:
-                self.sched.die()
-
-        self.load_conf()
+        
+        if self.cur_conf and self.cur_conf.magic_hash == conf.magic_hash:
+            print("I received a conf with same hash than me, I skip it.")
+            return
+        
+        self.conf = conf
         self.cur_conf = conf
+        self.override_conf = override_conf
+        self.modules = modules
+        self.satellites = satellites
+        #self.pollers = self.app.pollers
 
-    #our main function, launch after the init
+        # Now We create our pollers
+        for pol_id in satellites['pollers']:
+            # Must look if we already have it
+            already_got = pol_id in self.pollers
+            p = satellites['pollers'][pol_id]
+            self.pollers[pol_id] = p
+            uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
+            self.pollers[pol_id]['uri'] = uri
+            self.pollers[pol_id]['last_connexion'] = 0
+            print "Got a poller", p
+
+        #First mix conf and override_conf to have our definitive conf
+        for prop in self.override_conf:
+            print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
+            val = self.override_conf[prop]
+            setattr(self.conf, prop, val)
+
+        if self.conf.use_timezone != 'NOTSET':
+            print "Setting our timezone to", self.conf.use_timezone
+            os.environ['TZ'] = self.conf.use_timezone
+            time.tzset()
+
+        print "I've got modules", self.modules
+        # TODO: if scheduler had previous modules instanciated it must clean them !
+        self.modules_manager.set_modules(self.modules)
+        self.do_load_modules()
+        
+        # give it an interface
+        # But first remove previous interface if exists
+        if self.ichecks != None:
+            print "Deconnecting previous Check Interface from pyro_daemon"
+            self.pyro_daemon.unregister(self.ichecks.pyro_obj)
+        #Now create and connect it
+        self.ichecks = IChecks(self.sched)
+        self.uri = self.pyro_daemon.register(self.ichecks.pyro_obj, "Checks")
+        print "The Checks Interface uri is:", self.uri
+
+        #Same for Broks
+        if self.ibroks != None:
+            print "Deconnecting previous Broks Interface from pyro_daemon"
+            self.pyro_daemon.unregister(self.ibroks.pyro_obj)
+        #Create and connect it
+        self.ibroks = IBroks(self.sched)
+        self.uri2 = self.pyro_daemon.register(self.ibroks.pyro_obj, "Broks")
+        print "The Broks Interface uri is:", self.uri2
+
+        print("Loading configuration..")
+        self.conf.explode_global_conf()
+        
+        #we give sched it's conf
+        self.sched.reset()
+        self.sched.load_conf(self.conf)
+        self.sched.load_satellites(self.pollers, self.reactionners)
+
+        #We must update our Config dict macro with good value
+        #from the config parameters
+        self.sched.conf.fill_resource_macros_names_macros()
+        print "DBG: got macors", self.sched.conf.macros
+
+        #Creating the Macroresolver Class & unique instance
+        m = MacroResolver()
+        m.init(self.conf)
+
+        #self.conf.dump()
+        #self.conf.quick_debug()
+
+        #Now create the external commander
+        #it's a applyer : it role is not to dispatch commands,
+        #but to apply them
+        e = ExternalCommandManager(self.conf, 'applyer')
+
+        #Scheduler need to know about external command to
+        #activate it if necessery
+        self.sched.load_external_command(e)
+
+        #External command need the sched because he can raise checks
+        e.load_scheduler(self.sched)
+
+
+    # our main function, launch after the init
     def main(self):
 
         self.do_load_config()
         
-        self.do_daemon_init_and_start()
-        
+        self.do_daemon_init_and_start()        
         self.uri2 = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
         print "The Arbiter Interface is at:", self.uri2
         
         self.do_mainloop()
             
-
