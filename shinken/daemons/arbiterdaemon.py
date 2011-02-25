@@ -178,26 +178,16 @@ class Arbiter(Daemon):
         #Now remove mod that raise an exception
         self.modules_manager.clear_instances(to_del)
 
-
-    # Main loop function
-    def main(self):
-        # Log will be broks
-        for line in self.get_header():
-            self.log.log(line)
-
+    def load_config_file(self):
         print "Loading configuration"
         # REF: doc/shinken-conf-dispatching.png (1)
         buf = self.conf.read_config(self.config_files)
-
         raw_objects = self.conf.read_config_buf(buf)
-
-        #### Loading Arbiter module part ####
 
         # First we need to get arbiters and modules first
         # so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
-
 
         self.conf.early_arbiter_linking()
 
@@ -212,41 +202,47 @@ class Arbiter(Daemon):
             else: #not me
                 arb.need_conf = True
 
-        # If None, there will be huge problems. The conf will be invalid
-        # And we will bail out after print all errors
-        if self.me != None:
-            print "My own modules :"
-            for m in self.me.modules:
-                print m
+        if not self.me:
+            sys.exit("Error: I cannot find my own Arbiter object, I bail out. "
+                     "To solve it, please change the host_name parameter in "
+                     "the object Arbiter in the file shinken-specific.cfg. "
+                     "Thanks.")
 
-            # we request the instances without them being *started* 
-            # (for these that are concerned ("external" modules):
-            # we will *start* these instances after we have been daemonized (if requested)
-            self.modules_manager.set_modules(self.me.modules)
-            self.do_load_modules(False)
+        print "My own modules :"
+        for m in self.me.modules:
+            print m
 
-            # Call modules that manage this read configuration pass
-            self.hook_point('read_configuration')
+        # we request the instances without them being *started* 
+        # (for these that are concerned ("external" modules):
+        # we will *start* these instances after we have been daemonized (if requested)
+        self.modules_manager.set_modules(self.me.modules)
+        self.do_load_modules(False)
 
-            # Now we ask for configuration modules if they
-            # got items for us
-            for inst in self.modules_manager.instances:
-                if 'configuration' in inst.phases:
-                    try :
-                        r = inst.get_objects()
-                        types_creations = self.conf.types_creations
-                        for k in types_creations:
-                            (cls, clss, prop) = types_creations[k]
-                            if prop in r:
-                                for x in r[prop]:
-                                    # test if raw_objects[k] is already set - if not, add empty array
-                                    if not k in raw_objects:
-                                        raw_objects[k] = []
-                                    # now append the object
-                                    raw_objects[k].append(x)
-                                print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
-                    except Exception, exp:
-                        print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
+        # Call modules that manage this read configuration pass
+        self.hook_point('read_configuration')
+
+        # Now we ask for configuration modules if they
+        # got items for us
+        for inst in self.modules_manager.instances:
+            if 'configuration' in inst.phases:
+                try :
+                    r = inst.get_objects()
+                except Exception, exp:
+                    print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
+                    continue
+                
+                types_creations = self.conf.types_creations
+                for k in types_creations:
+                    (cls, clss, prop) = types_creations[k]
+                    if prop in r:
+                        for x in r[prop]:
+                            # test if raw_objects[k] is already set - if not, add empty array
+                            if not k in raw_objects:
+                                raw_objects[k] = []
+                            # now append the object
+                            raw_objects[k].append(x)
+                        print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
+
 
         ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
@@ -254,7 +250,6 @@ class Arbiter(Daemon):
         # Maybe conf is already invalid
         if not self.conf.conf_is_correct:
             sys.exit("***> One or more problems was encountered while processing the config files...")
-
 
         # Change Nagios2 names to Nagios3 ones
         self.conf.old_properties_names_to_new()
@@ -316,8 +311,7 @@ class Arbiter(Daemon):
         self.conf.notice_about_useless_parameters()
 
         # Manage all post-conf modules
-        if self.me != None:
-            self.hook_point('late_configuration')
+        self.hook_point('late_configuration')
         
         # Correct conf?
         self.conf.is_correct()
@@ -325,21 +319,6 @@ class Arbiter(Daemon):
         #If the conf is not correct, we must get out now
         if not self.conf.conf_is_correct:
             sys.exit("Configuration is incorrect, sorry, I bail out")
-
-        #Debug to see memory and objects :)
-        #self.conf.dump()
-        #from guppy import hpy
-        #hp=hpy()
-        #print hp.heap()
-        #print hp.heapu()
-
-        # Search myself as an arbiter object
-        if self.me == None:
-            sys.exit("Error: I cannot find my own Arbiter object, I bail out. "
-                     "To solve it, please change the host_name parameter in "
-                     "the object Arbiter in the file shinken-specific.cfg. "
-                     "Thanks.")
-
 
         # REF: doc/shinken-conf-dispatching.png (2)
         logger.log("Cutting the hosts and services into parts")
@@ -361,8 +340,6 @@ class Arbiter(Daemon):
         # BEWARE: after the cutting part, because we stringify some properties
         self.conf.prepare_for_sending()
 
-        logger.log("Configuration Loaded")
-
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
         self.pidfile = self.conf.lock_file
@@ -374,16 +351,28 @@ class Arbiter(Daemon):
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
         self.port = self.me.port
+        
+        logger.log("Configuration Loaded")
+
+
+    # Main loop function
+    def main(self):
+        # Log will be broks
+        for line in self.get_header():
+            self.log.log(line)
+
+        self.load_config_file()
+
         self.do_daemon_init_and_start(self.conf)
+        self.uri_arb = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
 
         # ok we are now fully daemon (if requested)
         # now we can start our "external" modules (if any) :
         self.modules_manager.init_and_start_instances()
 
-        self.uri_arb = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter") 
-
         ## And go for the main loop
         self.do_mainloop()
+
 
     def setup_new_conf(self):
         """ Setup a new conf received from a Master arbiter. """
