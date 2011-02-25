@@ -26,3 +26,4 @@ To Laurent Guyon, our best bug hunter :)
 To Alan Brenner for his SSL core for the NRPE module
 To Venelin Petkov for this bug report about missing customs on services
 To Papp Tamas for his bug report of bad python version under ubuntu (and debian)
+To Rémi BUISSON for his bug report about bad etc/default/shinken file :)
