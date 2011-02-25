@@ -163,7 +163,7 @@ class Daemon(object):
         pass
 
  
-    def do_load_config(self):
+    def load_config_file(self):
         self.parse_config_file()
         if self.config_file != None:
             # Some paths can be relatives. We must have a full path by taking

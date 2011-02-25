@@ -59,7 +59,7 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
     def get_poller_daemon(self):
         os.chdir(curdir)
         p = Poller(pollerconfig, False, True, False, None)
-        p.do_load_config()
+        p.load_config_file()
         p.port = 0  # let's here choose automatic port attribution..
         self.get_login_and_group(p)
         return p

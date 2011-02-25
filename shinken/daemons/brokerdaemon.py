@@ -502,7 +502,7 @@ class Broker(BaseSatellite):
     #  Main function, will loop forever
     def main(self):
         
-        self.do_load_config()
+        self.load_config_file()
         
         for line in self.get_header():
             self.log.log(line)

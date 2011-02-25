@@ -32,7 +32,7 @@ from shinken.util import to_int
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 from shinken.log import logger
-from shinken.satellite import BaseSatellite, IForArbiter, Interface
+from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
 
 #Interface for Workers
 
@@ -88,7 +88,7 @@ They connect here and get all broks (data for brokers). datas must be ORDERED! (
             self.app.fill_initial_broks()
 
 
-class IForArbiter(IForArbiter):
+class IForArbiter(IArb):
     """ Interface for Arbiter, our big MASTER. We ask him a conf and after we listen for him.
 HE got user entry, so we must listen him carefully and give information he want, maybe for another scheduler """
 
@@ -333,7 +333,7 @@ class Shinken(BaseSatellite):
     # our main function, launch after the init
     def main(self):
 
-        self.do_load_config()
+        self.load_config_file()
         
         self.do_daemon_init_and_start()        
         self.uri2 = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")

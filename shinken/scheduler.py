@@ -458,7 +458,7 @@ class Scheduler:
 
     # Get teh good tabs for links by the kind. If unknown, return None
     def get_links_from_type(self, type):
-        t = {'poller' : self.pollers, 'reactionner' : self.reactionners}
+        t = { 'poller' : self.pollers, 'reactionner' : self.reactionners }
         if type in t :
             return t[type]
         return None
@@ -529,7 +529,7 @@ class Scheduler:
     # We should push actions to our passives satellites
     def push_actions_to_passives_satellites(self):
         # We loop for our passive pollers
-        for p in [p for p in self.pollers.values() if p['passive']]:
+        for p in filter(lambda p: p['passive'], self.pollers.values()):
             print "I will send actions to the poller", p
             con = p['con']
             poller_tags = p['poller_tags']
@@ -569,7 +569,7 @@ class Scheduler:
     # We should get returns from satellites
     def get_actions_from_passives_satellites(self):
         # We loop for our passive pollers
-        for p in [p for p in self.pollers.values() if p['passive']]:
+        for p in filter(lambda p: p['passive'], self.pollers.values()):
             print "I will get actions from the poller", p
             con = p['con']
             poller_tags = p['poller_tags']

@@ -571,6 +571,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
     def setup_new_conf(self):
         """ Setup the new received conf """
         conf = self.new_conf
+        print "[%s] Sending us a configuration %s " % (self.name, conf)
         self.new_conf = None
         self.cur_conf = conf
         # Gout our name from the globals
@@ -582,7 +583,6 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
             name = 'Unnamed satellite'
         self.name = name
 
-        print "[%s] Sending us a configuration %s " % (self.name, conf)
         # If we've got something in the schedulers, we do not want it anymore
         for sched_id in conf['schedulers'] :
             already_got = False
@@ -614,6 +614,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         print "Is passive?", self.passive
         self.processes_by_worker = conf['global']['processes_by_worker']
         self.polling_interval = conf['global']['polling_interval']
+        self.timeout = self.polling_interval
         if 'poller_tags' in conf['global']:
             self.poller_tags = conf['global']['poller_tags']
         else: # for reactionner, poler_tag is [None]
@@ -649,7 +650,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         for line in self.get_header():
             self.log.log(line)
 
-        self.do_load_config()
+        self.load_config_file()
         
         self.do_daemon_init_and_start()
         
@@ -671,7 +672,5 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
                 self.create_and_launch_worker(module_name=mod)
 
         # Now main loop
-        self.timeout = self.polling_interval
-
         self.do_mainloop()
 
