@@ -59,7 +59,7 @@ class build(_build):
         ('build_config', None),
         ]
     user_options = _build.user_options + [
-        ('build-config', None, 'directory to build the configfiles to'),
+        ('build-config', None, 'directory to build the config files to'),
         ]
     def initialize_options(self):
         _build.initialize_options(self)
@@ -114,7 +114,7 @@ class build_config(Command):
     description = "build the shinken config files"
 
     user_options = [
-        ('build-dir=', None, "directory to build the configfiles to"),
+        ('build-dir=', None, "directory to build the config files to"),
         ]
     
     def initialize_options (self):
@@ -256,7 +256,7 @@ class install_config(Command):
                 log.info("Changing owner of %s to %s:%s", file, self.owner, self.group)
                 if not self.dry_run:
                     os.chown(file, uid, gid)
-            # recursivly change permissions for etc/shinken and var/lib/shinken
+            # recursivly changing permissions for etc/shinken and var/lib/shinken
             self.recursive_chown(self.etc_path, uid, gid, self.owner, self.group)
             self.recursive_chown(self.var_path, uid, gid, self.owner, self.group)
 

@@ -35,7 +35,7 @@ if ($NOTIFICATIONTYPE =~ /PROBLEM/) {
 
 $HOSTOUTPUT =~ s/=/&#61;/g;
 
-$texthtml = $texthtml  . "<strong>Type de notification : <span style='ccolor:$color> $NOTIFICATIONTYPE </span></strong>\n\n";
+$texthtml = $texthtml  . "<strong>Notification type : <span style='ccolor:$color> $NOTIFICATIONTYPE </span></strong>\n\n";
 
 if ($DOWNTIME != 0) {
         $color="#3333FF";

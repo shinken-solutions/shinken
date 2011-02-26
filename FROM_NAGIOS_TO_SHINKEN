@@ -20,7 +20,7 @@ to launch the Arbiter daemon with your Nagios configuration :
 
 $ /usr/local/shinken/src/shinken-arbiter.py -c /usr/local/nagios/etc/nagios.cfg -c /usr/local/shinken/src/etc/shinken-specific.cfg
 
-(you can also be even more lasy and call the bin/launch_all.sh script).
+(you can also be even more lazy and call the bin/launch_all.sh script).
 
 And that's all :)
 

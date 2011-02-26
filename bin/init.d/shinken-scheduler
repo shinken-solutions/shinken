@@ -9,8 +9,8 @@
 # Short-Description: Shinken scheduler daemon
 # Description:       Shinken is a monitoring tool and the Scheduler
 #                    is one of its daemon. This one get configuration from the arbiter
-#                    scheduler some checks and put them in queues for
-#                    other daemons
+#                    His purpose is only to schedule do the checks and actions specified
+#		     in the configuration received from the arbiter
 ### END INIT INFO
 
 ### BEGIN INIT INFO Redhat
@@ -28,7 +28,7 @@ NAME="shinken-scheduler"
 
 curdir=$(dirname "$0")
 
-export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that's it's called by us
+export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
 
 "$curdir/shinken" $@ scheduler
 

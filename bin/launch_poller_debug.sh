@@ -5,5 +5,5 @@ BIN=$DIR"/../bin"
 ETC=$DIR"/../etc"
 DEBUG_PATH="/tmp/poller.debug"
 
-echo "Launching Poller (that launch checks) in debug mode to the file $DEBUG_PATH"
+echo "Launching Poller (that launches the checks) in debug mode to the file $DEBUG_PATH"
 $BIN/shinken-poller -d -c $ETC/pollerd.ini --debug $DEBUG_PATH

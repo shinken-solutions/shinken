@@ -38,7 +38,7 @@ BIN="/usr/local/shinken/bin"
 VAR="/usr/local/shinken/var"
 ETC="/usr/local/shinken/etc"
 
-## This permit to overhidde the default "default shinken cfg file" : 
+## This permits to overhidde the default "default shinken cfg file" : 
 [ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME" 
 ## so you can now do:
 ## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
@@ -72,7 +72,7 @@ SUBMODULES=$*
 if [ -z "$SUBMODULES" ]; then
     SUBMODULES=$AVAIL_MODULES
 else
-    # verify given modules
+    # check given modules
     for mod1 in $SUBMODULES; do
         found=0
         for mod2 in $AVAIL_MODULES; do
@@ -83,7 +83,7 @@ else
 fi
 
 
-# Read configuration variable file if it is present
+# Reads configuration variable file if it is present
 [ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
 
 # Load the VERBOSE setting and other rcS variables
@@ -96,7 +96,7 @@ fi
 ################################################
 
 #
-# return the pid for a submodule
+# returns the pid for a submodule
 #
 getmodpid() {
     mod=$1
@@ -137,7 +137,7 @@ do_status() {
 }
 
 #
-# start our modules
+# starts our modules
 #
 do_start() {
     mod=$1
@@ -166,7 +166,7 @@ do_start() {
 }
 
 #
-# stop modules
+# stops modules
 #
 do_stop() {
     mod=$1
@@ -216,7 +216,7 @@ do_stop() {
             echo "FAILED: one or more process for $mod are still running after kill -9 !"
             echo "Remaining processes are (pids="$allpids"):"
             ps -lf $(for p in $allpids ; do echo -n "-p$p " ; done)
-            echo "You should maybe check and see this." 
+            echo "You should check this." 
             return 1
         fi
         echo "OK"
@@ -227,7 +227,7 @@ do_stop() {
 }
 
 #
-# do the config check
+# does the config check
 #
 do_check() {
     [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"

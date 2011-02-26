@@ -6,11 +6,12 @@
 # Required-Stop:     $all
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Start Shinken poller daemon
+# Short-Description: Shinken poller daemon
 # Description:       Shinken is a monitoring tool and the Poller
-#                    is one of its daemon. This one get configuration from the arbiter
-#                    poller some checks and put them in queues for
-#                    other daemons
+#                    is one of its daemon. This one gets the configuration from the arbiter
+#                    His purpose is to actually do the checks ordered by the schedulers, 
+#                    and then sends the results to the schedulers specified in the
+#		     configuration
 ### END INIT INFO
 
 ### BEGIN INIT INFO Redhat
@@ -28,7 +29,7 @@ NAME="shinken-poller"
 
 curdir=$(dirname "$0")
 
-export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that's it's called by us
+export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
 
 "$curdir/shinken" $@ poller
 

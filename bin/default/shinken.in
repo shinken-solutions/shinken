@@ -1,21 +1,21 @@
 # /etc/default/shinken
 #$ETC$ is where we put all configuration files
 #$VAR$ is where we put all variables files (pid, and all)
-#$SCRIPTS_BIN$ is chere the launch scripts will be send
+#$SCRIPTS_BIN$ is where the launch scripts will be send
 
 
-## These vars will overhide the hardcoded one init script
+## These vars will overRide the hardcoded ones in init script
 ETC=$ETC$
 VAR=$VAR$
 BIN=$SCRIPTS_BIN$
 
 
-###PART FOR ARBITER
+###ARBITER PART
 # location of the nagios configuration file
 SHINKENCFG="$ETC/nagios.cfg"
 
-# We got 2 config because tools like Centreon do nto generate all
-#configuration (onnly the shinken.cfg part)
+# We got 2 configs because tools like Centreon don't generate all
+#configuration (only the shinken.cfg part)
 SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
 
 # The command to launch
@@ -24,8 +24,8 @@ ARBITERDAEMON=$BIN/shinken-arbiter
 #The ARBITER PID
 ARBITERPID=$(grep lock_file $SHINKENCFG | cut -d= -f2)
 
-###PART FOR SCHEDULER
-# The place of the scheduler daemon configuration
+###SCHEDULER PART
+# location of the scheduler daemon configuration
 SCHEDULERCFG="$ETC/schedulerd.ini"
 
 # The command to launch
@@ -35,8 +35,8 @@ SCHEDULERDAEMON=$BIN/shinken-scheduler
 SCHEDULERPID="$VAR/schedulerd.pid"
 
 
-###PART FOR POLLER
-# The place of the poller daemon configuration
+###POLLER PART
+# location of the poller daemon configuration
 POLLERCFG="$ETC/pollerd.ini"
 
 # The command to launch
@@ -46,8 +46,8 @@ POLLERDAEMON=$BIN/shinken-poller
 POLLERPID="$VAR/pollerd.pid"
 
 
-###PART FOR REACTIONNER
-# The place of the reactionner daemon configuration
+###REACTIONNER PART
+# location of the reactionner daemon configuration
 REACTIONNERCFG="$ETC/reactionnerd.ini"
 
 # The command to launch
@@ -57,8 +57,8 @@ REACTIONNERDAEMON=$BIN/shinken-reactionner
 REACTIONNERPID="$VAR/reactionnerd.pid"
 
 
-###PART FOR BROKER
-# The place of the broker daemon configuration
+###BROKER PART
+# location of the broker daemon configuration
 BROKERCFG="$ETC/brokerd.ini"
 
 # The command to launch

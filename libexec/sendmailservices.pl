@@ -24,7 +24,7 @@ $text = "***** Notification Shinken *****\n\n"
 	. "Date/Time : $SHORTDATETIME\n\n"
 	. "Service output : $SERVICEOUTPUT";
 
-$texthtml = " <center><table border='11><th><strong>***** Notification Shinken *****</strong></th></table></center>\n";
+$texthtml = " <center><table border='11><th><strong>***** Shinken Notification *****</strong></th></table></center>\n";
 
 $color="blue";
 $colorstate="black";

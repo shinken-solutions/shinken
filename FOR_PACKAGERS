@@ -2,7 +2,7 @@ Hi,
 
 First of all : THANKS for trying to make a package of Shinken :)
 
-I try to make the setup.py quite useful for you. It will install the shinken
+I try to make the setup.py useful to you. It will install the shinken
 library to the classic python way (in site-package).
 
 You will need Python >=2.4 (for 2.4 and 2.5 you will need the multiprocessing package from http://pypi.python.org/pypi/multiprocessing/ too)
@@ -28,9 +28,9 @@ python setup.py install --install-scripts=/usr/bin/
 
 With the python lib + etc + var it should be ok :)
 
-I don't know what you need exctly more, so please ask in the mailing list at
+I don't know what more you need exactly, so please ask in the mailing list at
 https://lists.sourceforge.net/lists/listinfo/shinken-devel
-or directly at my email : naparuba@gmail.com
+or directly via my email : naparuba@gmail.com
 
 And again : thanks a lot, a tool without package is nothing :)
 

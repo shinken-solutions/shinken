@@ -30,7 +30,7 @@ import os
 try:
     from xml.etree.ElementTree import ElementTree
 except ImportError:
-    print "This script need the python ElementTree module. Please install it"
+    print "This script needs the python ElementTree module. Please install it"
     sys.exit(2)
 
 VERSION = '0.1'
@@ -55,7 +55,7 @@ if not opts.output_dir:
     parser.error("Requires one output directory (option -o/--dir-output")
 if not opts.cfg_output_dir:
     parser.error("Requires one configuration output directory (option -d/--cfg-dir-output")
-#If no criticity, use the default one, 3
+#If no criticity is given, use the default one, 3
 if not opts.criticity:
     criticity = 3
 else:
@@ -64,7 +64,7 @@ if args:
     parser.error("Does not accept any argument.")
 
 
-# Say if a host is up or not
+# Says if a host is up or not
 def is_up(h):
     status = h.find('status')
     state = status.attrib['state']
@@ -227,7 +227,7 @@ class ConfigurationManager:
     # Now for MSSQL
     def gen_srv_1433(self):
         self.generate_service('MSSQL-Connexion', 'check_mssql_connexion')
-        print "Will need check_mssql_health from http://labs.consol.de/nagios/check_mssql_health/"
+        print "I will need check_mssql_health from http://labs.consol.de/nagios/check_mssql_health/"
 
     # SMTP
     def gen_srv_25(self):
@@ -254,10 +254,10 @@ class ConfigurationManager:
     #      For system ones
     ####
     def gen_srv_linux(self):
-        print "Want a Linux checks, but I don't know what to propose sorry..."
+        print "You want a Linux check, but I don't know what to propose, sorry..."
 
     def gen_srv_windows(self):
-        print "Want a Windows checks, but I don't know what to propose sorry..."
+        print "You want a Windows check, but I don't know what to propose, sorry..."
 
     #For a VM we can add cpu, io, mem and net
     def gen_srv_vmware_vm(self):
@@ -265,7 +265,7 @@ class ConfigurationManager:
         self.generate_service('VM-IO', "check_esx_vm!io")
         self.generate_service('VM-Memory', "check_esx_vm!mem")
         self.generate_service('VM-Network', "check_esx_vm!net")
-        print "Will need the check_esx3.pl from http://www.op5.org/community/plugin-inventory/op5-projects/op5-plugins"
+        print "I will need the check_esx3.pl from http://www.op5.org/community/plugin-inventory/op5-projects/op5-plugins"
 
     # Quite the same for the host
     def gen_srv_vmware_host(self):
@@ -273,7 +273,7 @@ class ConfigurationManager:
         self.generate_service('ESX-host-IO', "check_esx_host!io")
         self.generate_service('ESX-host-Memory', "check_esx_host!mem")
         self.generate_service('ESX-host-Network', "check_esx_host!net")
-        print "Will need the check_esx3.pl from http://www.op5.org/community/plugin-inventory/op5-projects/op5-plugins"
+        print "I will need the check_esx3.pl from http://www.op5.org/community/plugin-inventory/op5-projects/op5-plugins"
         
 
 
@@ -286,16 +286,16 @@ class ConfigurationManager:
         
         # Write the directory with the host config
         p = os.path.join(self.hosts_path, name)
-        print "Want to create", p
+        print "I want to create", p
         try:
             os.mkdir(p)
         except OSError, exp:
-            # If directory already exist, it's not a problem
+            # If directory already exists, it's not a problem
             if not exp.errno != '17':
                 print "Cannot create the directory '%s' : '%s'" % (p, exp)
                 return
         cfg_p = os.path.join(p, name+'.cfg')
-        print "Want to wrote", cfg_p
+        print "I want to write", cfg_p
         s = self.get_cfg_for_host()
         try:
             fd = open(cfg_p, 'w')
@@ -314,7 +314,7 @@ class ConfigurationManager:
         
         # Write the directory with the host config
         p = os.path.join(self.srvs_path, name)
-        print "Want to create", p
+        print "I want to create", p
         try:
             os.mkdir(p)
         except OSError, exp:
@@ -326,7 +326,7 @@ class ConfigurationManager:
         r = c.get_cfg_for_services()
         for s in r:
             cfg_p = os.path.join(p, name+'-'+s+'.cfg')
-            print "Want to wrote", cfg_p
+            print "I want to write", cfg_p
             buf = r[s]
             try:
                 fd = open(cfg_p, 'w')
@@ -352,7 +352,7 @@ class DetectedHost:
         self.parent = ''
 
 
-    # Keep the first name we got
+    # Keep the first name we've got
     def set_host_name(self, name):
         if self.host_name == '':
             self.host_name = name
@@ -368,10 +368,10 @@ class DetectedHost:
 
     # We look for the host VMWare
     def is_vmware_esx(self):
-        # If it's not a virtual machine baid out
+        # If it's not a virtual machine bail out
         if self.mac_vendor != 'VMware':
             return False
-        # If we got all theses ports, we ae quite ok for
+        # If we got all theses ports, we are quite ok for
         # a VMWare host
         needed_ports = [22, 80, 443, 902, 903, 5989]
         for p in needed_ports:
@@ -381,7 +381,7 @@ class DetectedHost:
         # Ok all ports are found, we are a ESX :)
         return True
 
-    # Say if we are a virtual machine or not
+    # Says if we are a virtual machine or not
     def is_vmware_vm(self):
         # special case : the esx host itself
         if self.is_vmware_esx():
@@ -423,7 +423,7 @@ except IOError, exp:
     sys.exit(2)
 
 hosts = tree.findall('host')
-print "Number of host", len(hosts)
+print "Number of hosts", len(hosts)
 
 
 all_hosts = []
@@ -449,7 +449,7 @@ for h in hosts:
                 dh.mac_vendor = addr.attrib['vendor']
 
 
-    # Now we got the hostnames
+    # Now we've got the hostnames
     host_names = h.findall('hostnames')
     for h_name in host_names:
         h_names = h_name.findall('hostname')
@@ -469,7 +469,7 @@ for h in hosts:
         if distance >= 2:
             for hop in hops:
                 ttl = int(hop.attrib['ttl'])
-                #We search the direct father
+                #We search for the direct father
                 if ttl == distance-1:
                     print ttl
                     print "Super hop", hop.__dict__

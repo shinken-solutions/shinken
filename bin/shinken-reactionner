@@ -20,21 +20,25 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is an application for launch actions
-#like notifications or event handlers
-#The actionner listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where actionner will take
-#actions.
-#When already launch and have a conf, actionner still listen to arbiter (one
-#a timeout) if arbiter wants it to have a new conf, actionner forgot old
-#chedulers (and actions into) take new ones and do the (new) job.
+#This class is an application that launches actions like 
+#notifications or event handlers
+#The reactionner listens to the Arbiter for the configuration sent through 
+#the port given as first argument.
+#The configuration sent by the arbiter specifies on which schedulers the 
+#will take actions.
+#When the reactionner is already launched and has its own conf, it still 
+#listens to arbiter (one a timeout)
+#In case the arbiter has a new conf to send, the reactionner forget his old 
+#schedulers (and the actions that goes with them) and take the new ones 
+#instead.
+
 
 import sys, os
 import optparse
 
-#Try to load shinken lib.
-#Maybe it's not in our python path, so we detect it
-#it so (it's a untar install) we add .. in the path
+# Try to load shinken lib.
+# Maybe it's not in our python path, so we detect it
+# If so (it's an untar install) we add .. in the path
 try:
     import shinken
 except ImportError, e:

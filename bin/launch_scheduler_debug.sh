@@ -5,5 +5,5 @@ BIN=$DIR"/../bin"
 ETC=$DIR"/../etc"
 DEBUG_PATH="/tmp/scheduler.debug"
 
-echo "Launching Scheduler (that do scheduling only) in debug mode to the file $DEBUG_PATH"
+echo "Launching Scheduler (that is only in charge of the scheduling) in debug mode to the file $DEBUG_PATH"
 $BIN/shinken-scheduler -d -c $ETC/schedulerd.ini --debug $DEBUG_PATH

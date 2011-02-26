@@ -8,8 +8,8 @@
 # Default-Stop:      0 1 6
 # Short-Description: Shinken arbiter daemon
 # Description:       Shinken is a monitoring tool and the Arbiter
-#                    is one of its daemon. This one read the configuration
-#                    cuts its into parts and dispatch it. Then it wait
+#                    is one of its daemon. This one reads the configuration,
+#                    cuts it into parts and dispatches it. Then it waits
 #                    for orders from the users to dispatch them too.
 ### END INIT INFO
 
@@ -21,7 +21,7 @@ NAME="shinken-arbiter"
 
 curdir=$(dirname "$0")
 
-export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that's it's called by us
+export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
 
 "$curdir/shinken" $@ arbiter
 

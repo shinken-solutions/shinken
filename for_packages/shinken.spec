@@ -23,7 +23,7 @@ BuildArch:		noarch
 # Default SysV service
 %define sysv_service shinken-all
 
-# Shinken require python 2.6
+# Shinken requires python 2.6
 %global __python /usr/bin/python26
 
 %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
@@ -34,7 +34,7 @@ BuildArch:		noarch
 Shinken is a new, Nagios(R) compatible monitoring tool, written in Python. The main goal of Shinken is to allow users to have a fully flexible architecture for their monitoring system that can easily scale to large environments.
 
 Shinken is backwards-compatible with the Nagios(R) configuration standard and plugins.
-Shinken also provide interfaces with NDODB and Merlin database, Livestatus connector
+Shinken also provides interfaces with NDODB and Merlin database, Livestatus connector
 Shinken does not include any human interfaces.
 
 Nagios is a registered trademark owned by Nagios Enterprises.

@@ -20,14 +20,15 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is an interface for Broker
-#The broker listen configuration from Arbiter in a port (first argument)
-#the configuration gived by arbiter is schedulers where broker will take broks.
-#When already launch and have a conf, broker still listen to arbiter
-# (one a timeout)
-#if arbiter whant it to have a new conf, broker forgot old chedulers
-#(and broks into)
-#take new ones and do the (new) job.
+#This class is an interface for the Broker
+#The broker listens to the Arbiter for the configuration sent through 
+#the port given as first argument.
+#The configuration sent by the arbiter specifies on which schedulers 
+#the broker will take broks.
+#When the broker is already launched and has its own conf, it still 
+#listens to arbiter (one a timeout)
+#In case the arbiter has a new conf to send, the broker forget his old 
+#schedulers (and their associated broks) and take the new ones instead.
 
 
 import os
@@ -35,20 +36,20 @@ import sys
 import optparse
 
 
-#Try to load shinken lib.
-#Maybe it's not in our python path, so we detect it
-#it so (it's a untar install) we add .. in the path
+# Try to load shinken lib.
+# Maybe it's not in our python path, so we detect it
+# If so (it's an untar install) we add .. in the path
 try:
     import shinken
     # HACK : under python2.4, without this, it seems that
-    # modules are not so happy to import
+    # modules are not so happy to be imported
     if hasattr(sys.modules['__main__'], '__file__'):
         my_path = os.path.abspath(sys.modules['__main__'].__file__)
         parent_path = os.path.dirname(os.path.dirname(my_path))
         sys.path.append(os.path.join(parent_path, 'shinken'))
 except ImportError, e:
-    # We can have problem in importing with direct launch.
-    # if so we must add the shinken lib in .. of this file to
+    # We can have problems during importing with direct launch.
+    # If so, we must add the shinken lib in .. of this file to
     # sys.path
     if hasattr(sys.modules['__main__'], '__file__'):
         my_path = os.path.abspath(sys.modules['__main__'].__file__)

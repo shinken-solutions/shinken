@@ -8,9 +8,9 @@
 # Default-Stop:      0 1 6
 # Short-Description: Shinken reactionner daemon
 # Description:       Shinken is a monitoring tool and the Reactionner
-#                    is one of its daemon. This one get configuration from the arbiter
-#                    reactionner some checks and put them in queues for
-#                    other daemons
+#                    is one of its daemon. This one gets the configuration from the arbiter
+#                    His purpose is to get the actually do the actions like sending an email
+#		     ordered by the schedulers specified in the configuration
 ### END INIT INFO
 
 ### BEGIN INIT INFO Redhat
@@ -28,7 +28,7 @@ NAME="shinken-reactionner"
 
 curdir=$(dirname "$0")
 
-export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that's it's called by us
+export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
 
 "$curdir/shinken" $@ reactionner
 

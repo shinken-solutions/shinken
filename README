@@ -44,7 +44,7 @@ need the `python-setuptools` package for it. Then just run::
   sudo python setup.py install --install-scripts=/usr/bin/
 
 For the compilation part in both way it's easy: there is no
-compilation part!
+compilation!
 
 Requirements
 =========================

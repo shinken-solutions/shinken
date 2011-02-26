@@ -22,11 +22,11 @@
 
 """
 This is the class of the Arbiter. It's role is to read configuration,
-cuts it, and send it to other elements like schedulers, reactionner
-or pollers. It is responsible for hight avaibility part. If a scheduler
-is dead,
-it send it's conf to another if available.
-It also read order form users (nagios.cmd) and send orders to schedulers.
+cut it, and send it to other elements like schedulers, reactionners
+or pollers. It is also responsible for the high avaibility feature. 
+For example, should a scheduler dies, it sends the late scheduler's conf 
+to another scheduler still available.
+It also reads orders form users (nagios.cmd) and sends them to schedulers.
 """
 
 
@@ -35,14 +35,14 @@ import sys
 import optparse
 
 
-# We try to raise up recusion limit on
+# We try to raise up recursion limit on
 # but we don't have resource module on windows
 if os.name != 'nt':
     import resource
     # All the pickle will ask for a lot of recursion, so we must make
     # sure to set it at a high value. The maximum recursion depth depends
     # on the Python version and the process limit "stack size".
-    # The factors used were aquired by testing a broad range of installations
+    # The factors used were acquired by testing a broad range of installations
     stacksize_soft, stacksize_hard = resource.getrlimit(3)
     if sys.version_info < (2,6):
         sys.setrecursionlimit(int(stacksize_soft * 0.65 + 1100))
@@ -54,7 +54,7 @@ if os.name != 'nt':
 
 # Try to load shinken lib.
 # Maybe it's not in our python path, so we detect it
-# it so (it's a untar install) we add .. in the path
+# If so (it's an untar install) we add .. in the path
 try:
     import shinken
 except ImportError, e:
