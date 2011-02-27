@@ -212,7 +212,7 @@ class Timeperiod(Item):
 
             #Min but not the None valus...
             try:
-                local_min = min([d for d in dr_mins if dis notNone])
+                local_min = min([d for d in dr_mins if d is not None])
             except ValueError: #dr_mins if full of None, not good
                 local_min = None
 

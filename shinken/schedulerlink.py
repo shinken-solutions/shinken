@@ -94,7 +94,7 @@ class SchedulerLink(SatelliteLink):
 
 
     def give_satellite_cfg(self):
-        return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.confis notNone}
+        return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.conf is not None}
 
 
     #Some parameters can give as 'overriden parameters' like use_timezone

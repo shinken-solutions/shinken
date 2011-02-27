@@ -187,7 +187,7 @@ class MacroResolver(Borg):
             #Now we get values from elements
             for macro in macros:
                 #If type ARGN, look at ARGN cutting
-                if macros[macro]['type'] == 'ARGN' and argsis not None:
+                if macros[macro]['type'] == 'ARGN' and args is not None:
                     macros[macro]['val'] = self.resolve_argn(macro, args)
                     macros[macro]['type'] = 'resolved'
                 #If class, get value from properties
