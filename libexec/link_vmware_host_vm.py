@@ -180,19 +180,19 @@ def usage(name):
 
 def check_args(check_esx_path, vcenter, user, password, output, rules):
     error = False
-    if vcenter == None:
+    if vcenter is None:
         error = True
         print "Error : missing -V or -Vcenter option for the vcenter IP/DNS address"
-    if user == None:
+    if user is None:
         error = True
         print "Error : missing -u or -user option for the vcenter username"
-    if password == None:
+    if password is None:
         error = True
         print "Error : missing -p or -password option for the vcenter password"
     if not os.path.exists(check_esx_path):
         error = True
         print "Error : the path %s for the check_esx3.pl script is wrong, missing file"
-    if output == None:
+    if output is None:
         error = True
         print "Error : missing -o or -output option for the output mapping file"
 
