@@ -101,7 +101,7 @@ class Hostgroups(Itemgroups):
 
     def get_members_by_name(self, hgname):
         id = self.find_id_by_name(hgname)
-        if id == None:
+        if id is None:
             return []
         return self.itemgroups[id].get_hosts()
 
@@ -123,7 +123,7 @@ class Hostgroups(Itemgroups):
                     new_mbrs.extend(hosts)
                 else:
                     h = hosts.find_by_name(mbr)
-                    if h != None:
+                    if h is not None:
                         new_mbrs.append(h)
                     else:
                         hg.unknown_members.append(mbr)
@@ -152,7 +152,7 @@ class Hostgroups(Itemgroups):
             if not hasattr(hg, 'realm'): continue
 
             r = realms.find_by_name(hg.realm.strip())
-            if r != None:
+            if r is not None:
                 hg.realm = r
                 print "Hostgroup", hg.get_name(), "is in the realm", r.get_name()
             else:
@@ -163,7 +163,7 @@ class Hostgroups(Itemgroups):
             
             for h in hg:
                 if h is None: continue
-                if h.realm == None or h.got_default_realm: #default value not hasattr(h, 'realm'):
+                if h.realm is None or h.got_default_realm: #default value not hasattr(h, 'realm'):
                     print "Apply a realm", hg.realm.get_name(), "to host", h.get_name(), "from a hostgroup rule (%s)" % hg.get_name()
                     h.realm = hg.realm
                 else:
@@ -176,7 +176,7 @@ class Hostgroups(Itemgroups):
     def add_member(self, hname, hgname):
         id = self.find_id_by_name(hgname)
         #if the id do not exist, create the hg
-        if id == None:
+        if id is None:
             hg = Hostgroup({'hostgroup_name' : hgname, 'alias' : hgname, 'members' :  hname})
             self.add(hg)
         else:

@@ -57,7 +57,7 @@ class Check(Action):
 
         self.is_a = 'check'
         self.type = ''
-        if id == None: #id != None is for copy call only
+        if id is None: #id != None is for copy call only
             self.id = Action.id
             Action.id += 1
         self._in_timeout = False

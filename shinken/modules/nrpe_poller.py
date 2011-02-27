@@ -176,7 +176,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
         if use_ssl:
             # The admin want a ssl connexion, but there is not openssl
             # lib installed :(
-            if OpenSSL == None:
+            if OpenSSL is None:
                 self.set_exit(2, "Error : the openssl lib for Python is not installed.")
                 return
             else:
@@ -394,7 +394,7 @@ class Nrpe_poller(BaseModule):
                     command = None
                     
                 # If we do nto have the good args, we bail out for this check
-                if command == None or host == None:
+                if command is None or host is None:
                     chk.status = 'done'
                     chk.exit_status = 2
                     chk.get_outputs('Error : the parameters host or command are not correct.', 8012)

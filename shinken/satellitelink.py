@@ -76,7 +76,7 @@ class SatelliteLink(Item):
 
     def put_conf(self, conf):
 
-        if self.con == None:
+        if self.con is None:
             self.create_connexion()
         #print "Connexion is OK, now we put conf", conf
         #print "Try to put conf:", conf
@@ -154,7 +154,7 @@ class SatelliteLink(Item):
     def ping(self):
         print "Pinging %s" % self.get_name()
         try:
-            if self.con == None:
+            if self.con is None:
                 self.create_connexion()
             self.con.ping()
             self.set_alive()
@@ -176,7 +176,7 @@ class SatelliteLink(Item):
 
 
     def wait_new_conf(self):
-        if self.con == None:
+        if self.con is None:
             self.create_connexion()
         try:
             self.con.wait_new_conf()
@@ -196,11 +196,11 @@ class SatelliteLink(Item):
     #To know if the satellite have a conf (magic_hash = None)
     #OR to know if the satellite have THIS conf (magic_hash != None)
     def have_conf(self,  magic_hash=None):
-        if self.con == None:
+        if self.con is None:
             self.create_connexion()
 
         try:
-            if magic_hash == None:
+            if magic_hash is None:
                 return self.con.have_conf()
             else:
                 return self.con.have_conf(magic_hash)
@@ -217,7 +217,7 @@ class SatelliteLink(Item):
 
 
     def remove_from_conf(self, sched_id):
-        if self.con == None:
+        if self.con is None:
             self.create_connexion()
         try:
             self.con.remove_from_conf(sched_id)
@@ -234,7 +234,7 @@ class SatelliteLink(Item):
 
 
     def what_i_managed(self):
-        if self.con == None:
+        if self.con is None:
             self.create_connexion()
         try:
             tab = self.con.what_i_managed()
@@ -255,7 +255,7 @@ class SatelliteLink(Item):
 
 
     def push_broks(self, broks):
-        if self.con == None:
+        if self.con is None:
             self.create_connexion()
         try:
             return self.con.push_broks(broks)
@@ -275,7 +275,7 @@ class SatelliteLink(Item):
 
 
     def get_external_commands(self):
-        if self.con == None:
+        if self.con is None:
             self.create_connexion()
         try:
             tab = self.con.get_external_commands()
@@ -393,7 +393,7 @@ class SatelliteLinks(Items):
             new_modules = []
             for plug_name in s.modules:
                 plug = modules.find_by_name(plug_name.strip())
-                if plug != None:
+                if plug is not None:
                     new_modules.append(plug)
                 else:
                     print "Error : the module %s is unknow for %s" % (plug_name, s.get_name())

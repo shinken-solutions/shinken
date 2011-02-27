@@ -81,7 +81,7 @@ class ArbiterLink(SatelliteLink):
 
 
     def do_not_run(self):
-        if self.con == None:
+        if self.con is None:
             self.create_connexion()
         try:
             self.con.do_not_run()
@@ -110,7 +110,7 @@ class ArbiterLinks(SatelliteLinks):
             new_modules = []
             for plug_name in s.modules:
                 plug = modules.find_by_name(plug_name.strip())
-                if plug != None:
+                if plug is not None:
                     new_modules.append(plug)
                 else:
                     print "Error : the module %s is unknow for %s" % (plug_name, s.get_name())

@@ -168,7 +168,7 @@ class Livestatus_broker(BaseModule):
         data = b.data
         #In the status, we've got duplicated item, we must relink thems
         h = self.find_host(data['host_name'])
-        if h == None:
+        if h is None:
             print "Warning : the host %s is unknown!" % data['host_name']
             return
         self.update_element(h, data)
@@ -200,7 +200,7 @@ class Livestatus_broker(BaseModule):
         self.set_schedulingitem_values(s)
         
         h = self.find_host(data['host_name'])
-        if h != None:
+        if h is not None:
             # Reconstruct the connection between hosts and services
             h.service_ids.append(s_id)
             h.services.append(s)
@@ -217,7 +217,7 @@ class Livestatus_broker(BaseModule):
         data = b.data
         #In the status, we've got duplicated item, we must relink thems
         s = self.find_service(data['host_name'], data['service_description'])
-        if s == None:
+        if s is None:
             print "Warning : the service %s/%s is unknown!" % (data['host_name'], data['service_description'])
             return
         self.update_element(s, data)
@@ -310,7 +310,7 @@ class Livestatus_broker(BaseModule):
     def manage_update_scheduler_status_brok(self, b):
         data = b.data
         s = self.find_scheduler(data['scheduler_name'])
-        if s != None:
+        if s is not None:
             self.update_element(s, data)
             #print "S:", s
 
@@ -333,7 +333,7 @@ class Livestatus_broker(BaseModule):
     def manage_update_poller_status_brok(self, b):
         data = b.data
         s = self.find_poller(data['poller_name'])
-        if s != None:
+        if s is not None:
             self.update_element(s, data)
             #print "S:", s
 
@@ -356,7 +356,7 @@ class Livestatus_broker(BaseModule):
     def manage_update_reactionner_status_brok(self, b):
         data = b.data
         s = self.find_reactionner(data['reactionner_name'])
-        if s != None:
+        if s is not None:
             self.update_element(s, data)
             #print "S:", s
 
@@ -379,7 +379,7 @@ class Livestatus_broker(BaseModule):
     def manage_update_broker_status_brok(self, b):
         data = b.data
         s = self.find_broker(data['broker_name'])
-        if s != None:
+        if s is not None:
             self.update_element(s, data)
             #print "S:", s
 
@@ -388,7 +388,7 @@ class Livestatus_broker(BaseModule):
     def manage_service_check_result_brok(self, b):
         data = b.data
         s = self.find_service(data['host_name'], data['service_description'])
-        if s != None:
+        if s is not None:
             self.update_element(s, data)
             #print "S:", s
 
@@ -404,7 +404,7 @@ class Livestatus_broker(BaseModule):
     def manage_host_check_result_brok(self, b):
         data = b.data
         h = self.find_host(data['host_name'])
-        if h != None:
+        if h is not None:
             self.update_element(h, data)
             #print "H:", h
 
@@ -568,9 +568,9 @@ class Livestatus_broker(BaseModule):
     def get_contacts(self, cs):
         r = []
         for c in cs:
-            if c != None:
+            if c is not None:
                 find_c = self.find_contact(c.get_name())
-                if find_c != None:
+                if find_c is not None:
                     r.append(find_c)
                 else:
                     print "Error : search for a contact %s that do not exists!" % c.get_name()
@@ -579,9 +579,9 @@ class Livestatus_broker(BaseModule):
 
     #The timeperiods must not be duplicated
     def get_timeperiod(self, t):
-        if t != None:
+        if t is not None:
             find_t = self.find_timeperiod(t.get_name())
-            if find_t != None:
+            if find_t is not None:
                 return find_t
             else:
                 print "Error : search for a timeperiod %s that do not exists!" % t.get_name()

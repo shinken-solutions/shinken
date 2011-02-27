@@ -165,7 +165,7 @@ class Daemon(object):
  
     def load_config_file(self):
         self.parse_config_file()
-        if self.config_file != None:
+        if self.config_file is not None:
             # Some paths can be relatives. We must have a full path by taking
             # the config file by reference
             self.relative_paths_to_full(os.path.dirname(self.config_file))
@@ -449,7 +449,7 @@ If change failed we sys.exit(2) """
 
         uid = self.find_uid_from_name()
         gid = self.find_gid_from_name()
-        if uid == None or gid == None:
+        if uid is None or gid is None:
             print "Exiting"
             sys.exit(2)
         try:
@@ -467,14 +467,14 @@ If change failed we sys.exit(2) """
 If some properties need a pythonization, we do it.
 Also put default value in the properties if some are missing in the config_file """
         properties = self.__class__.properties
-        if self.config_file != None:
+        if self.config_file is not None:
             config = ConfigParser.ConfigParser()
             config.read(self.config_file)
             if config._sections == {}:
                 print "Bad or missing config file : %s " % self.config_file
                 sys.exit(2)
             for (key, value) in config.items('daemon'):
-                if key in properties and properties[key]['pythonize'] != None:
+                if key in properties and properties[key]['pythonize'] is not None:
                     value = properties[key]['pythonize'](value)
                 setattr(self, key, value)
         else:
@@ -483,7 +483,7 @@ Also put default value in the properties if some are missing in the config_file 
         for prop in properties:
             if not hasattr(self, prop):
                 value = properties[prop]['default']
-                if prop in properties and properties[prop]['pythonize'] != None:
+                if prop in properties and properties[prop]['pythonize'] is not None:
                     value = properties[prop]['pythonize'](value)
                 setattr(self, prop, value)
                 print "Using default value :", prop, value

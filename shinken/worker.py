@@ -52,7 +52,7 @@ class Worker:
         self.processes_by_worker = processes_by_worker
         self._c = Queue() # Private Control queue for the Worker
         # By default, take our own code
-        if target == None:
+        if target is None:
             target=self.work
         self._process = Process(target=target, args=(s, returns_queue, self._c))
         self.returns_queue = returns_queue

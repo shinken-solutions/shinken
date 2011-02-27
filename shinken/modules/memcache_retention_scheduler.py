@@ -93,7 +93,7 @@ class Memcache_retention_scheduler(BaseModule):
         for h in sched.hosts:
             key = "HOST-%s" % h.host_name
             val = self.mc.get(key)
-            if val != None:
+            if val is not None:
                 ret_hosts.append(val)
 
         for s in sched.services:
@@ -102,7 +102,7 @@ class Memcache_retention_scheduler(BaseModule):
             key = key.replace(' ', 'SPACE')
             #print "Using key", key
             val = self.mc.get(key)
-            if val != None:
+            if val is not None:
                 ret_services.append(val)
 
 
@@ -115,7 +115,7 @@ class Memcache_retention_scheduler(BaseModule):
 #        ret_hosts = all_data['hosts']
         for ret_h in ret_hosts:
             h = sched.hosts.find_by_name(ret_h.host_name)
-            if h != None:
+            if h is not None:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
@@ -129,7 +129,7 @@ class Memcache_retention_scheduler(BaseModule):
 #        ret_services = all_data['services']
         for ret_s in ret_services:
             s = sched.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
-            if s != None:
+            if s is not None:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]

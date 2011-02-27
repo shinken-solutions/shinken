@@ -262,7 +262,7 @@ class Status_dat_broker(BaseModule):
     def manage_service_check_result_brok(self, b):
         data = b.data
         s = self.find_service(data['host_name'], data['service_description'])
-        if s != None:
+        if s is not None:
             self.update_element(s, data)
             #print "S:", s
 
@@ -278,7 +278,7 @@ class Status_dat_broker(BaseModule):
         data = b.data
         #In the status, we've got duplicated item, we must relink thems
         s = self.find_service(data['host_name'], data['service_description'])
-        if s != None:
+        if s is not None:
             print "Warning : problem with unknown service for brok", b.id
             s.check_period = self.get_timeperiod(s.check_period)
             s.notification_period = self.get_timeperiod(s.notification_period)
@@ -290,7 +290,7 @@ class Status_dat_broker(BaseModule):
     def manage_host_check_result_brok(self, b):
         data = b.data
         h = self.find_host(data['host_name'])
-        if h != None:
+        if h is not None:
             self.update_element(h, data)
             #print "H:", h
 
@@ -306,7 +306,7 @@ class Status_dat_broker(BaseModule):
         data = b.data
         #In the status, we've got duplicated item, we must relink thems
         h = self.find_host(data['host_name'])
-        if h != None:
+        if h is not None:
             h.check_period = self.get_timeperiod(h.check_period)
             h.notification_period = self.get_timeperiod(h.notification_period)
             h.contacts = self.get_contacts(h.contacts)
@@ -319,9 +319,9 @@ class Status_dat_broker(BaseModule):
     def get_contacts(self, cs):
         r = []
         for c in cs:
-            if c != None:
+            if c is not None:
                 find_c = self.find_contact(c.get_name())
-                if find_c != None:
+                if find_c is not None:
                     r.append(find_c)
                 else:
                     print "Error : search for a contact %s that do not exists!" % c.get_name()
@@ -330,9 +330,9 @@ class Status_dat_broker(BaseModule):
 
     #The timeperiods must not be duplicated
     def get_timeperiod(self, t):
-        if t != None:
+        if t is not None:
             find_t = self.find_timeperiod(t.get_name())
-            if find_t != None:
+            if find_t is not None:
                 return find_t
             else:
                 print "Error : search for a timeperiod %s that do not exists!" % t.get_name()
@@ -411,7 +411,7 @@ class Status_dat_broker(BaseModule):
                 print "Generating status file!"
                 r = self.status.create_or_update()
                 #if we get an error (an exception in fact) we bail out
-                if r != None:
+                if r is not None:
                     print "[status_dat] Error :", r
                     break
                 last_generation = time.time()

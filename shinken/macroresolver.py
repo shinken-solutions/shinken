@@ -187,7 +187,7 @@ class MacroResolver(Borg):
             #Now we get values from elements
             for macro in macros:
                 #If type ARGN, look at ARGN cutting
-                if macros[macro]['type'] == 'ARGN' and args!= None:
+                if macros[macro]['type'] == 'ARGN' and argsis not None:
                     macros[macro]['val'] = self.resolve_argn(macro, args)
                     macros[macro]['type'] = 'resolved'
                 #If class, get value from properties
@@ -305,7 +305,7 @@ class MacroResolver(Borg):
                         host_name = elt.host_name
             #Okn now we get service
             s = self.services.find_srv_by_name_and_hostname(host_name, service_description)
-            if s != None:
+            if s is not None:
                 cls = s.__class__
                 prop = cls.macros[macro_name]
                 val = self.get_value_from_element(s, prop)
@@ -327,7 +327,7 @@ class MacroResolver(Borg):
                 if macro_name in cls.macros:
                     prop = cls.macros[macro_name]
                     i = list.find_by_name(elt_name)
-                    if i != None:
+                    if i is not None:
                         val = self.get_value_from_element(i, prop)
             #print "Got val:", val
             return val

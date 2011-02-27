@@ -99,7 +99,7 @@ class Dispatcher:
             #Not alive need new need_conf
             #and spare too if they do not have already a conf
             #REF: doc/shinken-scheduler-lost.png (1)
-            if not elt.alive or hasattr(elt, 'conf') and elt.conf == None:
+            if not elt.alive or hasattr(elt, 'conf') and elt.conf is None:
                 elt.need_conf = True
 
         for arb in self.arbiters:
@@ -129,7 +129,7 @@ class Dispatcher:
         for r in self.realms:
             for cfg_id in r.confs:
                 sched = r.confs[cfg_id].assigned_to
-                if sched == None:
+                if sched is None:
                     if self.first_dispatch_done:
                         logger.log("Scheduler configuration %d is unmanaged!!" % cfg_id)
                     self.dispatch_ok = False
@@ -197,7 +197,7 @@ class Dispatcher:
             if hasattr(elt, 'conf'):
                 #If element have a conf, I do not care, it's a good dispatch
                 #If die : I do not ask it something, it won't respond..
-                if elt.conf == None and elt.reachable:
+                if elt.conf is None and elt.reachable:
                     #print "Ask", elt.get_name() , 'if it got conf'
                     if elt.have_conf():
                         logger.log('Warning : The element %s have a conf and should not have one! I ask it to idle now' % elt.get_name())
@@ -371,7 +371,7 @@ class Dispatcher:
             #so they do not raise dispatch where no use
             if self.dispatch_ok:
                 for sched in self.schedulers.items.values():
-                    if sched.conf == None:
+                    if sched.conf is None:
                         #print "Tagging sched", sched.get_name(), "so it do not ask anymore for conf"
                         sched.need_conf = False
 

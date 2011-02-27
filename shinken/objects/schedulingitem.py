@@ -379,7 +379,7 @@ class SchedulingItem(Item):
                 # cached_check_horizon = cached_service_check_horizon for service
                 if dep.last_state_update < now - cls.cached_check_horizon:
                     i = dep.launch_check(now, ref_check)
-                    if i != None:
+                    if i is not None:
                         checks.append(i)
 #                else:
 #                    print "DBG: **************** The state is FRESH", dep.host_name, time.asctime(time.localtime(dep.last_state_update))
@@ -441,7 +441,7 @@ class SchedulingItem(Item):
             self.next_chk = force_time
 
         # If next time is None, do not go
-        if self.next_chk == None:
+        if self.next_chk is None:
             # Nagios do not raise it, I'm wondering if we should
             # self.raise_no_next_check_log_entry()
             return None
@@ -497,7 +497,7 @@ class SchedulingItem(Item):
 
         # The external command always pass
         # if not, only if we enable them (auto launch)
-        if self.event_handler == None or ((not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd):
+        if self.event_handler is None or ((not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd):
             return
 
         print self.event_handler.__dict__
@@ -599,7 +599,7 @@ class SchedulingItem(Item):
 
         # Before set state, module thems
         for rm in self.resultmodulations:
-            if rm != None:
+            if rm is not None:
                 c.exit_status = rm.module_return(c.exit_status)
 
         # If we got a bad result on a normal check, and we have dep,
@@ -931,7 +931,7 @@ class SchedulingItem(Item):
         for es in self.escalations:
             r = es.get_next_notif_time(std_time, self.state, creation_time, cls.interval_length)
             # If we got a real result (time base escalation), we add it
-            if r != None:
+            if r is not None:
                 t.append(r)
 
         #And we take the minimum of this result. Can be standard or escalation asked
@@ -960,7 +960,7 @@ class SchedulingItem(Item):
         cls = self.__class__
         # t_wished==None for the first notification launch after consume
         # here we must look at the self.notification_period
-        if t_wished == None:
+        if t_wished is None:
             now = time.time()
             t_wished = now
             # if first notification, we must add first_notification_delay
@@ -1070,7 +1070,7 @@ class SchedulingItem(Item):
         # if I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependancy_ check
         # If none, it might be a forced check, so OK, I do a new
-        if not force and (self.in_checking and ref_check != None):
+        if not force and (self.in_checking and ref_check is not None):
             c_in_progress = self.checks_in_progress[0] #0 is OK because in_checking is True
             if c_in_progress.t_to_go > time.time(): #Very far?
                 c_in_progress.t_to_go = time.time() #No, I want a check right NOW
@@ -1104,7 +1104,7 @@ class SchedulingItem(Item):
 
         # We need to put this new check in our actions queue
         # so scheduler can take it
-        if c != None:
+        if c is not None:
             self.actions.append(c)
             return c.id
         # None mean I already take it into account
@@ -1117,7 +1117,7 @@ class SchedulingItem(Item):
         if not cls.process_performance_data or not self.process_perf_data:
             return
 
-        if cls.perfdata_command != None:
+        if cls.perfdata_command is not None:
             m = MacroResolver()
             data = self.get_data_for_event_handler()
             cmd = m.resolve_command(cls.perfdata_command, data)
@@ -1133,7 +1133,7 @@ class SchedulingItem(Item):
         cmdCall = getattr(self, 'check_command', None)
 
         # If we do not have a command, we bailout
-        if cmdCall == None:
+        if cmdCall is None:
             return
 
         # we get our based command, like

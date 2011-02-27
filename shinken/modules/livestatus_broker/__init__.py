@@ -71,7 +71,7 @@ def get_instance(plugin):
 
     if hasattr(plugin, 'max_logs_age'):
         maxmatch = re.match(r'^(\d+)([dwm])$', plugin.max_logs_age)
-        if maxmatch == None:
+        if maxmatch is None:
             print 'Warning : wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number>'
             return None
         else:

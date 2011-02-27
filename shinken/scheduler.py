@@ -188,7 +188,7 @@ class Scheduler:
     def add_Notification(self, notif):
         self.actions[notif.id] = notif
         # A notification ask for a brok
-        if notif.contact != None:
+        if notif.contact is not None:
             b = notif.get_initial_status_brok()
             self.add(b)
             
@@ -355,7 +355,7 @@ class Scheduler:
             for c in self.checks.values():
                 #  If the command is untagged, and the poller too, or if both are taggued
                 # with same name, go for it
-                if (c.poller_tag == None and poller_tags == []) or c.poller_tag in poller_tags:
+                if (c.poller_tag is None and poller_tags == []) or c.poller_tag in poller_tags:
                     # must be ok to launch, and not an internal one (business rules based)
                     if c.status == 'scheduled' and c.is_launchable(now) and not c.internal:
                         c.status = 'inpoller'
@@ -395,7 +395,7 @@ class Scheduler:
                                 # If notifications were sent, then host/service-counter will also be incremented
                                 item.current_notification_number = a.notif_nb
                             
-                            if item.notification_interval != 0 and a.t_to_go != None:
+                            if item.notification_interval != 0 and a.t_to_go is not None:
                                 # We must continue to send notifications.
                                 # Just leave it in the actions list and set it to "scheduled" and it will be found again later
                                 #a.t_to_go = a.t_to_go + item.notification_interval * item.__class__.interval_length
@@ -478,7 +478,7 @@ class Scheduler:
     def pynag_con_init(self, id, type='poller'):
         # Get teh good links tab for looping..
         links = self.get_links_from_type(type)
-        if links == None:
+        if links is None:
             logger.log('DBG: Type unknown for connexion! %s' % type)
             return
 
@@ -533,7 +533,7 @@ class Scheduler:
             print "I will send actions to the poller", p
             con = p['con']
             poller_tags = p['poller_tags']
-            if con != None:
+            if con is not None:
             # get actions
                 lst = self.get_to_run_checks(True, False, poller_tags)
                 try:
@@ -573,7 +573,7 @@ class Scheduler:
             print "I will get actions from the poller", p
             con = p['con']
             poller_tags = p['poller_tags']
-            if con != None:
+            if con is not None:
                 try:
                     # intial ping must be quick
                     pyro.set_timeout(con, 120)
@@ -830,7 +830,7 @@ class Scheduler:
         now = time.time()
 
         # Check maintenance periods
-        for elt in [y for y in [x for x in self.hosts] + [x for x in self.services] if y.maintenance_period != None]:
+        for elt in [y for y in [x for x in self.hosts] + [x for x in self.services] if y.maintenance_period is not None]:
             if not hasattr(elt, 'in_maintenance'):
                 setattr(elt, 'in_maintenance', False)
             if not elt.in_maintenance:

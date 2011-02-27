@@ -44,8 +44,8 @@ class Log:
         global local_log
 
         print message
-        if format == None:
-            if name == None:
+        if format is None:
+            if name is None:
             # We format the log in UTF-8
                 s = u'[%d] %s\n' % (int(time.time()), message.decode('UTF-8', 'replace'))
             else:
@@ -58,7 +58,7 @@ class Log:
         obj.add(b)
 
         # If we want a local log write, do it
-        if local_log != None:
+        if local_log is not None:
             local_log.write(s)
             local_log.flush()
             

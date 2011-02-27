@@ -158,7 +158,7 @@ class NotificationWay(Item):
             state = False
         else:
             for cmd in self.service_notification_commands:
-                if cmd == None:
+                if cmd is None:
                     print self.get_name()," : a service_notification_command is missing"
                     state = False
                 if not cmd.is_valid():
@@ -175,7 +175,7 @@ class NotificationWay(Item):
             state = False
         else:
             for cmd in self.host_notification_commands:
-                if cmd == None :
+                if cmd is None :
                     print self.get_name()," : a host_notification_command is missing"
                     state = False
                 if not cmd.is_valid():
@@ -203,7 +203,7 @@ class NotificationWays(Items):
 
 
     def new_inner_member(self, name=None, params={}):
-        if name == None:
+        if name is None:
             name = NotificationWay.id
         params['notificationway_name'] = name
         #print "Asking a new inner notificationway from name %s with params %s" % (name, params)

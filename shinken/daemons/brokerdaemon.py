@@ -121,7 +121,7 @@ class Broker(BaseSatellite):
     def pynag_con_init(self, id, type='scheduler'):
             # Get teh good links tab for looping..
         links = self.get_links_from_type(type)
-        if links == None:
+        if links is None:
             logger.log('DBG: Type unknown for connexion! %s' % type)
             return
 
@@ -239,7 +239,7 @@ class Broker(BaseSatellite):
     def get_new_broks(self, type='scheduler'):
             # Get teh good links tab for looping..
         links = self.get_links_from_type(type)
-        if links == None:
+        if links is None:
             logger.log('DBG: Type unknown for connexion! %s' % type)
             return
 

@@ -392,7 +392,7 @@ class Service(SchedulingItem):
                 and  self.notifications_enabled == True:
             logger.log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
-        if not hasattr(self, 'host') or self.host == None:
+        if not hasattr(self, 'host') or self.host is None:
             logger.log("%s : I do not have an host" % self.get_name())
             state = False
         if not hasattr(self, 'check_period'):
@@ -725,12 +725,12 @@ class Service(SchedulingItem):
 
 
     def get_ack_author_name(self):
-        if self.acknowledgement == None:
+        if self.acknowledgement is None:
             return ''
         return self.acknowledgement.author
 
     def get_ack_comment(self):
-        if self.acknowledgement == None:
+        if self.acknowledgement is None:
             return ''
         return self.acknowledgement.comment
 
@@ -741,7 +741,7 @@ class Service(SchedulingItem):
 
     # Check if a notification for this service is suppressed at this time
     def notification_is_blocked_by_item(self, type, t_wished = None):
-        if t_wished == None:
+        if t_wished is None:
             t_wished = time.time()
 
         #  TODO
@@ -928,7 +928,7 @@ class Services(Items):
     def find_srv_by_name_and_hostname(self, host_name, name):
         if hasattr(self, 'hosts'):
             h = self.hosts.find_by_name(host_name)
-            if h == None:
+            if h is None:
                 return None
             return h.find_service_by_name(name)
 
@@ -996,7 +996,7 @@ class Services(Items):
                     for sg_name in sgs:
                         sg_name = sg_name.strip()
                         sg = servicegroups.find_by_name(sg_name)
-                        if sg != None:
+                        if sg is not None:
                             new_servicegroups.append(sg)
                         else:
                             err = "Error : the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
@@ -1083,7 +1083,7 @@ class Services(Items):
                 # the generator case, we must create several new services
                 # we must find our host, and get all key:value we need
                 h = hosts.find_by_name(name.strip())
-                if h != None:
+                if h is not None:
                     for new_s in s.duplicate(h):
                         self.items[new_s.id] = new_s
                 else: # TODO : raise an error?

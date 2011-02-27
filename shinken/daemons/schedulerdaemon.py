@@ -179,7 +179,7 @@ class Shinken(BaseSatellite):
                 new_t = ref.check_period.get_next_valid_time_from_t(new_t)
                 # But maybe no there is no more new value! Not good :(
                 # Say as error, with error output
-                if new_t == None:
+                if new_t is None:
                     c.state = 'waitconsume'
                     c.exit_status = 2
                     c.output = '(Error: there is no available check time after time change!)'
@@ -208,7 +208,7 @@ class Shinken(BaseSatellite):
 
                 # But maybe no there is no more new value! Not good :(
                 # Say as error, with error output
-                if new_t == None:
+                if new_t is None:
                     c.state = 'waitconsume'
                     c.exit_status = 2
                     c.output = '(Error: there is no available check time after time change!)'
@@ -280,7 +280,7 @@ class Shinken(BaseSatellite):
         
         # give it an interface
         # But first remove previous interface if exists
-        if self.ichecks != None:
+        if self.ichecks is not None:
             print "Deconnecting previous Check Interface from pyro_daemon"
             self.pyro_daemon.unregister(self.ichecks.pyro_obj)
         #Now create and connect it
@@ -289,7 +289,7 @@ class Shinken(BaseSatellite):
         print "The Checks Interface uri is:", self.uri
 
         #Same for Broks
-        if self.ibroks != None:
+        if self.ibroks is not None:
             print "Deconnecting previous Broks Interface from pyro_daemon"
             self.pyro_daemon.unregister(self.ibroks.pyro_obj)
         #Create and connect it

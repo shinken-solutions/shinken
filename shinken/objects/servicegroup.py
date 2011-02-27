@@ -131,7 +131,7 @@ class Servicegroups(Itemgroups):
                 else:
                     service_desc = mbr.strip()
                     find = services.find_srv_by_name_and_hostname(host_name, service_desc)
-                    if find != None:
+                    if find is not None:
                         new_mbrs.append(find)
                     else:
                         self.itemgroups[id].unknown_members.append('%s,%s' % (host_name,service_desc))
@@ -153,7 +153,7 @@ class Servicegroups(Itemgroups):
     def add_member(self, cname, cgname):
         id = self.find_id_by_name(cgname)
         #if the id do not exist, create the cg
-        if id == None:
+        if id is None:
             cg = Servicegroup({'servicegroup_name' : cgname, 'alias' : cgname, 'members' :  cname})
             self.add(cg)
         else:

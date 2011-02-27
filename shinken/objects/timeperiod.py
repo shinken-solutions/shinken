@@ -212,7 +212,7 @@ class Timeperiod(Item):
 
             #Min but not the None valus...
             try:
-                local_min = min([d for d in dr_mins if d!=None])
+                local_min = min([d for d in dr_mins if dis notNone])
             except ValueError: #dr_mins if full of None, not good
                 local_min = None
 
@@ -225,7 +225,7 @@ class Timeperiod(Item):
             still_loop = False
 
             #if we've got a real value, we check it with the exclude
-            if local_min != None:
+            if local_min is not None:
                 #Now check if local_min is not valid
                 for tp in self.exclude:
                     #print self.get_name(), "Check in TP"
@@ -242,7 +242,7 @@ class Timeperiod(Item):
                     #else:
                     #    print self.get_name(), "Tp ca lui va", tp.get_name()
 
-            if local_min == None:
+            if local_min is None:
                 still_loop = False
             else:
                 t = local_min
@@ -297,7 +297,7 @@ class Timeperiod(Item):
                 m = dr.get_next_invalid_time_from_t(local_min)
 
                 #print self.get_name(), "Dr give me next invalid", time.asctime(time.localtime(m))
-                if m != None:
+                if m is not None:
                     #But maybe it's invalid for this dr, but valid for other ones.
                     if not self.is_time_valid(m):
                     #print "Final : Got a next invalid at", time.asctime(time.localtime(m))
@@ -316,7 +316,7 @@ class Timeperiod(Item):
             still_loop = False
 
             #if we've got a real value, we check it with the exclude
-            if local_min != None:
+            if local_min is not None:
                 #Now check if local_min is not valid
                 for tp in self.exclude:
                     #print self.get_name(),"we check for invalid", time.asctime(time.localtime(local_min)), 'with tp', tp.name
@@ -331,7 +331,7 @@ class Timeperiod(Item):
 
             if not still_loop:#We find a possible value
                 #We take the result the minimal possible
-                if res == None or local_min < res:
+                if res is None or local_min < res:
                     res = local_min
 
         #print "Finished Return the next invalid", time.asctime(time.localtime(local_min))
@@ -575,7 +575,7 @@ class Timeperiod(Item):
             #print "I will exclude from:", excluded_tps
             for tp_name in excluded_tps:
                 tp = timeperiods.find_by_name(tp_name.strip())
-                if tp != None:
+                if tp is not None:
                     new_exclude.append(tp)
                 else:
                     print "Error : the timeperiod", tp_name, "is unknown!"

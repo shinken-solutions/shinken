@@ -101,7 +101,7 @@ class Escalation(Item):
             return False
 
         #Maybe the time is not in our escalation_period
-        if self.escalation_period != None and not self.escalation_period.is_time_valid(t):
+        if self.escalation_period is not None and not self.escalation_period.is_time_valid(t):
             return False
 
         #Ok, I do not see why not escalade. So it's True :)
@@ -130,7 +130,7 @@ class Escalation(Item):
             return None
 
         # Maybe the time we found is not a valid one....
-        if self.escalation_period != None and not self.escalation_period.is_time_valid(start):
+        if self.escalation_period is not None and not self.escalation_period.is_time_valid(start):
             return None
 
         # Ok so I ask for my start as a possibility for the next notification time
@@ -215,7 +215,7 @@ class Escalations(Items):
             for hname in strip_and_uniq( es_hname.split(',') ):
                 for sname in strip_and_uniq( sdesc.split(',') ):
                     s = services.find_srv_by_name_and_hostname(hname, sname)
-                    if s != None:
+                    if s is not None:
                         #print "Linking service", s.get_name(), 'with me', es.get_name()
                         s.escalations.append(es)
                                 #print "Now service", s.get_name(), 'have', s.escalations
@@ -231,7 +231,7 @@ class Escalations(Items):
             #I must be NOT a escalati on for service
             for hname in strip_and_uniq(es.host_name.split(',')):
                 h = hosts.find_by_name(hname)
-                if h != None:
+                if h is not None:
                     #print "Linking host", h.get_name(), 'with me', es.get_name()
                     h.escalations.append(es)
                     #print "Now host", h.get_name(), 'have', h.escalations

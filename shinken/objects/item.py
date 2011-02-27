@@ -358,7 +358,7 @@ class Item(object):
     # Check if we have an acknowledgement and if this is marked as sticky.
     # This is needed when a non-ok state changes
     def unacknowledge_problem_if_not_sticky(self):
-        if hasattr(self, 'acknowledgement') and self.acknowledgement != None:
+        if hasattr(self, 'acknowledgement') and self.acknowledgement is not None:
             if not self.acknowledgement.sticky:
                 self.unacknowledge_problem()
 
@@ -373,7 +373,7 @@ class Item(object):
             #Is this property need preparation for sending?
             if entry.conf_send_preparation is not None:
                 f = entry.conf_send_preparation
-                if f != None:
+                if f is not None:
                     val = f(getattr(self, prop))
                     setattr(self, prop, val)
 
@@ -383,7 +383,7 @@ class Item(object):
             #Is this property need preparation for sending?
                 if entry.conf_send_preparation is not None:
                     f = entry.conf_send_preparation
-                    if f != None:
+                    if f is not None:
                         val = f(getattr(self, prop))
                         setattr(self, prop, val)
 
@@ -400,7 +400,7 @@ class Item(object):
         #Apply brok_transformation if need
         # Look if we must preprocess the value first
         pre_op = entry.brok_transformation
-        if pre_op != None:
+        if pre_op is not None:
             value = pre_op(self, value)
 
         return value
@@ -700,7 +700,7 @@ class Items(object):
                 for c_name in contacts_tab:
                     if c_name != '':
                         c = contacts.find_by_name(c_name)
-                        if c != None:
+                        if c is not None:
                             new_contacts.append(c)
                         # Else : Add in the errors tab.
                         # will be raised at is_correct
@@ -721,7 +721,7 @@ class Items(object):
                 new_escalations = []
                 for es_name in escalations_tab:
                     es = escalations.find_by_name(es_name)
-                    if es != None:
+                    if es is not None:
                         new_escalations.append(es)
                     else: #TODO what?
                         pass
@@ -738,7 +738,7 @@ class Items(object):
                 new_resultmodulations = []
                 for rm_name in resultmodulations_tab:
                     rm = resultmodulations.find_by_name(rm_name)
-                    if rm != None:
+                    if rm is not None:
                         new_resultmodulations.append(rm)
                     else: #TODO WHAT?
                         pass
@@ -755,7 +755,7 @@ class Items(object):
                 cgnames = strip_and_uniq(cgnames)
                 for cgname in cgnames:
                     cg = contactgroups.find_by_name(cgname)
-                    if cg == None:
+                    if cg is None:
                         err = "The contact group '%s'defined on the %s '%s' do not exist" % (cgname, i.__class__.my_type, i.get_name())
                         i.configuration_errors.append(err)
                         continue

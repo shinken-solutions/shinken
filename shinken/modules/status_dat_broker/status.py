@@ -265,7 +265,7 @@ class StatusFile:
                                 f = getattr(value, f)
                                 value = f()
 
-                if value == None:
+                if value is None:
                     try:
                         value = type_map[display]['default']
                     except KeyError:  #Fuck!

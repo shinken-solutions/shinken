@@ -102,7 +102,7 @@ class Ndodb_broker(BaseModule):
         query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='1'" % host_name
         self.db.execute_query(query)
         row = self.db.fetchone ()
-        if row == None or len(row) < 1:
+        if row is None or len(row) < 1:
             return 0
         else:
             self.hosts_cache[host_name] = row[0]
@@ -113,7 +113,7 @@ class Ndodb_broker(BaseModule):
         query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='3'" % hostgroup_name
         self.db.execute_query(query)
         row = self.db.fetchone ()
-        if row == None or len(row) < 1:
+        if row is None or len(row) < 1:
             return 0
         else:
             return row[0]
@@ -128,7 +128,7 @@ class Ndodb_broker(BaseModule):
         query = u"SELECT object_id from nagios_objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
         self.db.execute_query(query)
         row = self.db.fetchone ()
-        if row == None or len(row) < 1:
+        if row is None or len(row) < 1:
             return 0
         else:
             self.services_cache[(host_name, service_description)] = row[0]
@@ -139,7 +139,7 @@ class Ndodb_broker(BaseModule):
         query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='4'" % servicegroup_name
         self.db.execute_query(query)
         row = self.db.fetchone ()
-        if row == None or len(row) < 1:
+        if row is None or len(row) < 1:
             return 0
         else:
             return row[0]
@@ -195,7 +195,7 @@ class Ndodb_broker(BaseModule):
             if prop in mapping:
                 #print "Got a prop to change", prop
                 val = new_b.data[prop]
-                if mapping[prop]['transform'] != None:
+                if mapping[prop]['transform'] is not None:
                     f = mapping[prop]['transform']
                     val = f(val)
                 new_name = mapping[prop]['name']
@@ -220,7 +220,7 @@ class Ndodb_broker(BaseModule):
             if prop in mapping:
                 #print "Got a prop to change", prop
                 val = new_b.data[prop]
-                if mapping[prop]['transform'] != None:
+                if mapping[prop]['transform'] is not None:
                     f = mapping[prop]['transform']
                     val = f(val)
                 new_name = mapping[prop]['name']

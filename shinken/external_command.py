@@ -235,7 +235,7 @@ class ExternalCommandManager:
 
     def open(self):
         #At the first open del and create the fifo
-        if self.fifo == None:
+        if self.fifo is None:
             if os.path.exists(self.pipe_path):
                 os.unlink(self.pipe_path)
 
@@ -1341,7 +1341,7 @@ class ExternalCommandManager:
 
         # First we look for the realm
         r = self.conf.realms.find_by_name(realm_name)
-        if r == None:
+        if r is None:
             print "Sorry, the realm %s is unknown" % realm_name
             return
         print "We found the realm", r

@@ -485,13 +485,13 @@ class LiveStatus:
                 'type' : 'string',
             },
             'in_check_period' : {
-                'fulldepythonize' : lambda p, e, r: from_bool_to_int((p == None and [False] or [p.is_time_valid(r.tic)])[0]),
+                'fulldepythonize' : lambda p, e, r: from_bool_to_int((p is None and [False] or [p.is_time_valid(r.tic)])[0]),
                 'description' : 'Wether this host is currently in its check period (0/1)',
                 'prop' : 'check_period',
                 'type' : 'int',
             },
             'in_notification_period' : {
-                'fulldepythonize' : lambda p, e, r: from_bool_to_int((p == None and [False] or [p.is_time_valid(r.tic)])[0]),
+                'fulldepythonize' : lambda p, e, r: from_bool_to_int((p is None and [False] or [p.is_time_valid(r.tic)])[0]),
                 'description' : 'Wether this host is currently in its notification period (0/1)',
                 'prop' : 'notification_period',
                 'type' : 'int',
@@ -1114,13 +1114,13 @@ class LiveStatus:
                 'type' : 'string',
             },
             'host_in_check_period' : {
-                'depythonize' : lambda h: from_bool_to_int((h.check_period == None and [False] or [h.check_period.is_time_valid(time.time())])[0]),
+                'depythonize' : lambda h: from_bool_to_int((h.check_period is None and [False] or [h.check_period.is_time_valid(time.time())])[0]),
                 'description' : 'Wether this host is currently in its check period (0/1)',
                 'prop' : 'host',
                 'type' : 'int',
             },
             'host_in_notification_period' : {
-                'depythonize' : lambda h: from_bool_to_int((h.notification_period == None and [False] or [h.notification_period.is_time_valid(time.time())])[0]),
+                'depythonize' : lambda h: from_bool_to_int((h.notification_period is None and [False] or [h.notification_period.is_time_valid(time.time())])[0]),
                 'description' : 'Wether this host is currently in its notification period (0/1)',
                 'prop' : 'host',
                 'type' : 'int',
@@ -1373,13 +1373,13 @@ class LiveStatus:
                 'type' : 'string',
             },
             'in_check_period' : {
-                'depythonize' : lambda tp: from_bool_to_int((tp == None and [False] or [tp.is_time_valid(time.time())])[0]),
+                'depythonize' : lambda tp: from_bool_to_int((tp is None and [False] or [tp.is_time_valid(time.time())])[0]),
                 'description' : 'Wether the service is currently in its check period (0/1)',
                 'prop' : 'check_period',
                 'type' : 'int',
             },
             'in_notification_period' : {
-                'depythonize' : lambda tp: from_bool_to_int((tp == None and [False] or [tp.is_time_valid(time.time())])[0]),
+                'depythonize' : lambda tp: from_bool_to_int((tp is None and [False] or [tp.is_time_valid(time.time())])[0]),
                 'description' : 'Wether the service is currently in its notification period (0/1)',
                 'prop' : 'notification_period',
                 'type' : 'int',
@@ -5452,7 +5452,7 @@ class LiveStatus:
         def hook_get_prop_depythonize_notcallable(elt):
             if hasattr(elt, prop):
                 value = getattr(elt, prop)
-                if value == None or value == 'none':
+                if value is None or value == 'none':
                     return default
                 elif isinstance(value, list):
                     # Example: Service['comments'] = { type : 'list', depythonize : 'id' }
@@ -5475,7 +5475,7 @@ class LiveStatus:
                 value = getattr(elt, prop)
                 if callable(value):
                     value = value()
-                if value == None or value == 'none':
+                if value is None or value == 'none':
                     raise
                 elif isinstance(value, list):
                     return [func(item, elt, self) for item in value]
@@ -5525,7 +5525,7 @@ class LiveStatus:
         for objtype in LiveStatus.out_map:
             for attribute in LiveStatus.out_map[objtype]:
                 entry =  LiveStatus.out_map[objtype][attribute]
-                if 'prop' not in entry or entry['prop'] == None:
+                if 'prop' not in entry or entry['prop'] is None:
                     prop = attribute
                 else:
                     prop = entry['prop']
@@ -5792,7 +5792,7 @@ class LiveStatusRequest(LiveStatus):
                 new_map[objtype][attribute] = {}
                 entry =  LiveStatus.out_map[objtype][attribute]
                 if 'hooktype' in entry:
-                    if 'prop' not in entry or entry['prop'] == None:
+                    if 'prop' not in entry or entry['prop'] is None:
                         prop = attribute
                     else:
                         prop = entry['prop']
@@ -6381,7 +6381,7 @@ member_key: the key to be used to sort each resulting element of a group member.
 
 
     def make_filter(self, operator, attribute, reference):
-        if reference != None:
+        if reference is not None:
             # Reference is now datatype string. The referring object attribute on the other hand
             # may be an integer. (current_attempt for example)
             # So for the filter to work correctly (the two values compared must be

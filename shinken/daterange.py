@@ -358,7 +358,7 @@ class Daterange:
         #print 'DR:End:', time.asctime(time.localtime(end_time))
         #The next invalid day can be t day if there a possible
         #invalid time range (timerange is not 00->24
-        if next_future_timerange_invalid != None:
+        if next_future_timerange_invalid is not None:
             if start_time <= t <= end_time:
                 #print "Early Return next invalid day:", time.asctime(time.localtime(get_day(t)))
                 return get_day(t)
@@ -403,7 +403,7 @@ class Daterange:
 
         #We've got a day but no sec_from_morning : the timerange is full (0->24h)
         #so the next invalid is this day at the day_start
-        if t_day is not None and sec_from_morning == None:
+        if t_day is not None and sec_from_morning is None:
             return t_day
 
         #Then we search for the next day of t
@@ -414,7 +414,7 @@ class Daterange:
         if t_day2 is not None and sec_from_morning is not None:
             return t_day2 + sec_from_morning + 1
 
-        if t_day2 is not None and sec_from_morning == None:
+        if t_day2 is not None and sec_from_morning is None:
             return t_day2
         else:
             #I'm not find any valid time

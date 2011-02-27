@@ -463,13 +463,13 @@ class Host(SchedulingItem):
 
 
     def get_ack_author_name(self):
-        if self.acknowledgement == None:
+        if self.acknowledgement is None:
             return ''
         return self.acknowledgement.author
 
 
     def get_ack_comment(self):
-        if self.acknowledgement == None:
+        if self.acknowledgement is None:
             return ''
         return self.acknowledgement.comment
 
@@ -815,7 +815,7 @@ class Host(SchedulingItem):
     #Check if a notification for this host is suppressed at this time
     #This is a check at the host level. Do not look at contacts here
     def notification_is_blocked_by_item(self, type, t_wished = None):
-        if t_wished == None:
+        if t_wished is None:
             t_wished = time.time()
 
         # TODO
@@ -954,7 +954,7 @@ class Hosts(Items):
             for parent in parents:
                 parent = parent.strip()
                 p = self.find_by_name(parent)
-                if p != None:
+                if p is not None:
                     new_parents.append(p)
                 else:
                     err = "Error : the parent '%s' on host '%s' is unknown!" % (parent, h.get_name())
@@ -970,13 +970,13 @@ class Hosts(Items):
         for r in realms:
             if getattr(r, 'default', False):
                 default_realm = r
-        if default_realm == None:
+        if default_realm is None:
             print "Error : there is no default realm defined!"
         for h in self:
             #print h.get_name(), h.realm
-            if h.realm != None:
+            if h.realm is not None:
                 p = realms.find_by_name(h.realm.strip())
-                if p != None:
+                if p is not None:
                     h.realm = p
                     print "Host", h.get_name(), "is in the realm", p.get_name()
                 else:
@@ -1005,7 +1005,7 @@ class Hosts(Items):
                     for hg_name in hgs:
                         hg_name = hg_name.strip()
                         hg = hostgroups.find_by_name(hg_name)
-                        if hg != None:
+                        if hg is not None:
                             new_hostgroups.append(hg)
                         else:
                             err = "Error : the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
@@ -1061,13 +1061,13 @@ class Hosts(Items):
 
         #With all hosts as nodes
         for h in self:
-            if h != None:
+            if h is not None:
                 parents.add_node(h)
 
         #And now fill edges
         for h in self:
             for p in h.parents:
-                if p != None:
+                if p is not None:
                     parents.add_edge(p, h)
 
         #Now get the list of all hosts in a loop
@@ -1093,7 +1093,7 @@ class Hosts(Items):
                 tpl = h
 
         #If we find noone, we return nothing (easy case:) )
-        if tpl == None:
+        if tpl is None:
             return []
 
         #Ok, we find the tpl

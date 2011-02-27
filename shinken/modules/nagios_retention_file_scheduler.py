@@ -175,7 +175,7 @@ class Nagios_retention_scheduler(BaseModule):
             if hasattr(obj, prop) and prop in obj_cfg:
 #                if 'pythonize' in entry:
                 f = entry.pythonize
-                if f != None: # mean it's a string
+                if f is not None: # mean it's a string
                         #print "Apply", f, "to the property", prop, "for ", cls.my_type
                     val = getattr(obj, prop)
                     val = f(val)
@@ -239,7 +239,7 @@ class Nagios_retention_scheduler(BaseModule):
             service_description = obj_cfg['service_description']
             srv = all_obj['service'].find_srv_by_name_and_hostname(host_name, service_description)
         #print "Find my service", srv
-            if srv != None:
+            if srv is not None:
                 cmd = Comment(srv, to_bool(obj_cfg['persistent']), obj_cfg['author'], obj_cfg['comment_data'], 1, int(obj_cfg['entry_type']), int(obj_cfg['source']), to_bool(obj_cfg['expires']), int(obj_cfg['expire_time']))
             #print "Created cmd", cmd
                 srv.add_comment(cmd)
@@ -250,7 +250,7 @@ class Nagios_retention_scheduler(BaseModule):
             host_name = obj_cfg['host_name']
             hst = all_obj['host'].find_by_name(host_name)
         #print "Find my host", hst
-            if hst != None:
+            if hst is not None:
                 cmd = Comment(hst, to_bool(obj_cfg['persistent']), obj_cfg['author'], obj_cfg['comment_data'], 1, int(obj_cfg['entry_type']), int(obj_cfg['source']), to_bool(obj_cfg['expires']), int(obj_cfg['expire_time']))
             #print "Created cmd", cmd
                 hst.add_comment(cmd)
@@ -266,7 +266,7 @@ class Nagios_retention_scheduler(BaseModule):
             service_description = obj_cfg['service_description']
             srv = all_obj['service'].find_srv_by_name_and_hostname(host_name, service_description)
             print "Find my service", srv
-            if srv != None:
+            if srv is not None:
                 dwn = Downtime(srv, int(obj_cfg['start_time']), int(obj_cfg['end_time']), to_bool(obj_cfg['fixed']), int(obj_cfg['triggered_by']), int(obj_cfg['duration']), obj_cfg['author'], obj_cfg['comment'])
                 print "Created dwn", dwn
                 srv.add_downtime(dwn)
@@ -277,7 +277,7 @@ class Nagios_retention_scheduler(BaseModule):
             host_name = obj_cfg['host_name']
             hst = all_obj['host'].find_by_name(host_name)
             print "Find my host", hst
-            if hst != None:
+            if hst is not None:
                 dwn = Downtime(hst, int(obj_cfg['start_time']), int(obj_cfg['end_time']), to_bool(obj_cfg['fixed']), int(obj_cfg['triggered_by']), int(obj_cfg['duration']), obj_cfg['author'], obj_cfg['comment'])
                 print "Created dwn", dwn
                 hst.add_downtime(dwn)
@@ -355,7 +355,7 @@ class Nagios_retention_scheduler(BaseModule):
         ret_hosts = all_obj['host']
         for ret_h in ret_hosts:
             h = sched.hosts.find_by_name(ret_h.host_name)
-            if h != None:
+            if h is not None:
 #                print "Ok, got data for", h.get_dbg_name()
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
@@ -381,7 +381,7 @@ class Nagios_retention_scheduler(BaseModule):
         ret_services = all_obj['service']
         for ret_s in ret_services:
             s = sched.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
-            if s != None:
+            if s is not None:
 #                print "Ok, got data for", s.get_dbg_name()
 #                print "Latency", ret_s.latency, type(ret_s.latency)
                 running_properties = s.__class__.running_properties

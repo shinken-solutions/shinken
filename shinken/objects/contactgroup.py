@@ -102,7 +102,7 @@ class Contactgroups(Itemgroups):
 
     def get_members_by_name(self, cgname):
         id = self.find_id_by_name(cgname)
-        if id == None:
+        if id is None:
             return []
         return self.itemgroups[id].get_contacts()
 
@@ -126,7 +126,7 @@ class Contactgroups(Itemgroups):
             for mbr in mbrs:
                 m = contacts.find_by_name(mbr)
                 #Maybe the contact is missing, if so, must be put in unknown_members
-                if m != None:
+                if m is not None:
                     new_mbrs.append(m)
                 else:
                     self.itemgroups[id].unknown_members.append(mbr)
@@ -143,7 +143,7 @@ class Contactgroups(Itemgroups):
     def add_member(self, cname, cgname):
         id = self.find_id_by_name(cgname)
         #if the id do not exist, create the cg
-        if id == None:
+        if id is None:
             cg = Contactgroup({'contactgroup_name' : cgname, 'alias' : cgname, 'members' :  cname})
             self.add_contactgroup(cg)
         else:

@@ -404,7 +404,7 @@ class Satellite(BaseSatellite):
             a.status = 'queue'
             msg = Message(id=0, type='Do', data=a)
             q = self._got_queue_from_action(a)
-            if q != None:
+            if q is not None:
                 q.put(msg)
             # Update stats
             self.nb_actions_in_workers += 1

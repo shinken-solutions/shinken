@@ -431,7 +431,7 @@ class Merlindb_broker(BaseModule):
                 if prop in mapping:
                     #print "Got a prop to change", prop
                     val = brok.data[prop]
-                    if mapping[prop]['transform'] != None:
+                    if mapping[prop]['transform'] is not None:
                         print "Call function for", type, prop
                         f = mapping[prop]['transform']
                         val = f(val)

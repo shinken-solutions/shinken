@@ -68,7 +68,7 @@ class SchedulerLink(SatelliteLink):
 
 
     def run_external_command(self, command):
-        if self.con == None:
+        if self.con is None:
             self.create_connexion()
         if not self.alive:
             return None
@@ -94,7 +94,7 @@ class SchedulerLink(SatelliteLink):
 
 
     def give_satellite_cfg(self):
-        return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.conf!=None}
+        return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.confis notNone}
 
 
     #Some parameters can give as 'overriden parameters' like use_timezone

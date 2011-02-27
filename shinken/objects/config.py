@@ -1261,12 +1261,12 @@ class Config(Item):
         for pack in tmp_packs:
             tmp_realms = set()
             for elt in pack:
-                if elt.realm != None:
+                if elt.realm is not None:
                     tmp_realms.add(elt.realm)
             if len(tmp_realms) > 1:
                 logger.log("Error : the realm configuration of yours hosts is not good because there a more than one realm in one pack (host relations) :")
                 for h in pack:
-                    if h.realm == None:
+                    if h.realm is None:
                         logger.log('Error : the host %s do not have a realm' % h.get_name())
                     else:
                         logger.log('Error : the host %s is in the realm %s' % (h.get_name(), h.realm.get_name()))
@@ -1274,7 +1274,7 @@ class Config(Item):
                 r = tmp_realms.pop() #There is just one element
                 r.packs.append(pack)
             elif len(tmp_realms) == 0: #Hum.. no realm value? So default Realm
-                if default_realm != None:
+                if default_realm is not None:
                     default_realm.packs.append(pack)
                 else:
                     logger.log("Error : some hosts do not have a realm and you do not defined a default realm!")

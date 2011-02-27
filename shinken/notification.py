@@ -94,7 +94,7 @@ class Notification(Action):
                      notif_nb=1, timeout=10, env={}, module_type='fork'):
         self.is_a = 'notification'
         self.type = type
-        if id == None: #id != None is for copy call only
+        if id is None: #id != None is for copy call only
             self.id = Action.id
             Action.id += 1
 

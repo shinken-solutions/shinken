@@ -348,7 +348,7 @@ class Realm(Itemgroup):
 
         #First our own level
         for s in self.get_schedulers():
-            if s.conf != None:
+            if s.conf is not None:
                 cfg = s.give_satellite_cfg()
                 broker.cfg['schedulers'][s.conf.id] = cfg
 
@@ -356,7 +356,7 @@ class Realm(Itemgroup):
         if broker.manage_sub_realms:
             print "All schedulers", self.get_all_schedulers()
             for s in  self.get_all_schedulers():
-                if s.conf != None:
+                if s.conf is not None:
                     cfg = s.give_satellite_cfg()
                     broker.cfg['schedulers'][s.conf.id] = cfg
         else : 
@@ -399,7 +399,7 @@ class Realms(Itemgroups):
 
     def get_members_by_name(self, pname):
         id = self.find_id_by_name(pname)
-        if id == None:
+        if id is None:
             return []
         return self.itemgroups[id].get_realms()
 
@@ -425,7 +425,7 @@ class Realms(Itemgroups):
             new_mbrs = []
             for mbr in mbrs:
                 new_mbr = self.find_by_name(mbr)
-                if new_mbr != None:
+                if new_mbr is not None:
                     new_mbrs.append(new_mbr)
             #We find the id, we remplace the names
             p.realm_members = new_mbrs

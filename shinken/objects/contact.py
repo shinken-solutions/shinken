@@ -225,7 +225,7 @@ class Contacts(Items):
             new_notificationways = []
             for nw_name in strip_and_uniq(i.notificationways.split(',')):
                 nw = notificationways.find_by_name(nw_name)
-                if nw != None:
+                if nw is not None:
                     new_notificationways.append(nw)
                 else: #TODO: What?
                     pass

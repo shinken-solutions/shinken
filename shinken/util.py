@@ -335,8 +335,8 @@ def get_key_value_sequence(entry, default_value=None):
 
     # now fill the empty values with the default value
     for r in array1:
-        if r['VALUE1'] == None:
-            if default_value == None:
+        if r['VALUE1'] is None:
+            if default_value is None:
                 return (None, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT)
             else:
                 r['VALUE1'] = default_value
@@ -348,7 +348,7 @@ def get_key_value_sequence(entry, default_value=None):
     #import time
     #t0 = time.time()
     #NodeSet = None
-    if NodeSet == None:
+    if NodeSet is None:
         #The patern that will say if we have a [X-Y] key.
         pat = re.compile('\[(\d*)-(\d*)\]')
 
@@ -359,9 +359,9 @@ def get_key_value_sequence(entry, default_value=None):
 
         #We have no choice, we cannot use NodeSet, so we use the
         #simple regexp
-        if NodeSet == None:
+        if NodeSet is None:
             m = pat.search(key)
-            got_xy = (m != None)
+            got_xy = (m is not None)
         else: # Try to look with a nodeset check directly
             try:
                 ns = NodeSet(key)
@@ -378,12 +378,12 @@ def get_key_value_sequence(entry, default_value=None):
             #Ok 2 cases : we have the NodeSet lib or not.
             #if not, we use the dumb algo (quick, but manage less
             #cases like /N or , in paterns)
-            if NodeSet == None: #us the old algo
+            if NodeSet is None: #us the old algo
                 still_loop = True
                 xy_couples = [] # will get all X-Y couples
                 while still_loop:
                     m = pat.search(key)
-                    if m != None: # we've find one X-Y
+                    if m is not None: # we've find one X-Y
                         (x,y) = m.groups()
                         (x,y) = (int(x), int(y))
                         xy_couples.append((x,y))

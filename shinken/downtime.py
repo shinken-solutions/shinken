@@ -193,7 +193,7 @@ class Downtime:
     def del_automatic_comment(self):
         # Extra comment can be None if we load it from a old version of Shinken
         # TODO : remove it in a future verszion when every oen got upgrade
-        if self.extra_comment != None:
+        if self.extra_comment is not None:
             self.extra_comment.can_be_deleted = True
         #self.ref.del_comment(self.comment_id)
 

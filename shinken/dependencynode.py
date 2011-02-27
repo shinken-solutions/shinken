@@ -156,7 +156,7 @@ class DependencyNodeFactory(object):
         p = "^(\d+) *of: *(.+)"
         r = re.compile(p)
         m = r.search(patern)
-        if m != None:
+        if m is not None:
             #print "Match the of: thing N=", m.groups()
             node.operand = 'of:'
             node.of_values = int(m.groups()[0])
@@ -169,7 +169,7 @@ class DependencyNodeFactory(object):
             #print "Try to find?", patern
             node.operand = 'object'
             obj, error = self.find_object(patern, hosts, services)
-            if obj != None:
+            if obj is not None:
                 # Set host or service
                 node.operand = obj.__class__.my_type
                 node.sons.append(obj)
@@ -207,7 +207,7 @@ class DependencyNodeFactory(object):
                 if c in ('&', '|'):
                     current_rule = node.operand
                     #print "Current rule", current_rule
-                    if current_rule != None and current_rule != 'of:' and c != current_rule:
+                    if current_rule is not None and current_rule != 'of:' and c != current_rule:
                         #print "Fuck, you mix all dumbass!"
                         return None
                     if current_rule != 'of:':

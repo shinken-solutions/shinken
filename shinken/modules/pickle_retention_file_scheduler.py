@@ -147,7 +147,7 @@ class Pickle_retention_scheduler(BaseModule):
             #We take the dict of our value to load
             d = all_data['hosts'][ret_h_name]
             h = sched.hosts.find_by_name(ret_h_name)
-            if h != None:
+            if h is not None:
                 running_properties = h.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
@@ -172,7 +172,7 @@ class Pickle_retention_scheduler(BaseModule):
                 for c in h.comments:
                     c.ref = h
                     sched.add(c)
-                if h.acknowledgement != None:
+                if h.acknowledgement is not None:
                     h.acknowledgement.ref = h
 
 
@@ -181,7 +181,7 @@ class Pickle_retention_scheduler(BaseModule):
             #We take the dict of our value to load
             d = all_data['services'][(ret_s_h_name, ret_s_desc)]
             s = sched.services.find_srv_by_name_and_hostname(ret_s_h_name, ret_s_desc)
-            if s != None:
+            if s is not None:
                 running_properties = s.__class__.running_properties
                 for prop in running_properties:
                     entry = running_properties[prop]
@@ -205,7 +205,7 @@ class Pickle_retention_scheduler(BaseModule):
                 for c in s.comments:
                     c.ref = s
                     sched.add(c)
-                if s.acknowledgement != None:
+                if s.acknowledgement is not None:
                     s.acknowledgement.ref = s
 
 

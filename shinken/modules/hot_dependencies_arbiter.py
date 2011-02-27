@@ -159,7 +159,7 @@ class Hot_dependencies_arbiter(BaseModule):
         now = int(time.time())
 
         # If we got no in progress command, look if we should launch a new one
-        if self.process == None:
+        if self.process is None:
             if now - self.last_cmd_launch > self.mapping_command_interval:
                 if self.mapping_command_interval != 0 and self.mapping_command != '':
                     print "The command lunach is too old, launch a new one"
@@ -193,7 +193,7 @@ class Hot_dependencies_arbiter(BaseModule):
             if son_type == 'host' and father_type == 'host':
                 son = arb.conf.hosts.find_by_name(son_name)
                 father = arb.conf.hosts.find_by_name(father_name)
-                if son != None and father != None:
+                if son is not None and father is not None:
                     print "finded!", son_name, father_name
                     if not son.is_linked_with_host(father):
                         print "Doing simple link between", son.get_name(), 'and', father.get_name()
@@ -223,7 +223,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 son = arb.conf.hosts.find_by_name(son_name.strip())
                 father = arb.conf.hosts.find_by_name(father_name.strip())
                 # if we cannot find them in the conf, bypass them
-                if son == None or father == None:
+                if son is None or father is None:
                     print "not find dumbass!"
                     continue
                 print son_name, father_name
@@ -243,7 +243,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 son = arb.conf.hosts.find_by_name(son_name.strip())
                 father = arb.conf.hosts.find_by_name(father_name.strip())
                 # if we cannot find them in the conf, bypass them
-                if son == None or father == None:
+                if son is None or father is None:
                     print "not find dumbass!"
                     continue
                 print son_name, father_name

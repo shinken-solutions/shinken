@@ -55,9 +55,9 @@ class Resultmodulation(Item):
     #Make the return code modulation if need
     def module_return(self, return_code):
         #Only if in modulation_period of modulation_period == None
-        if self.modulation_period == None or self.modulation_period.is_time_valid(time.time()):
+        if self.modulation_period is None or self.modulation_period.is_time_valid(time.time()):
             #Try to change the exit code only if a new one is defined
-            if self.exit_code_modulation != None:
+            if self.exit_code_modulation is not None:
                 #First with the exit_code_match
                 if return_code in self.exit_codes_match:
                     return_code = self.exit_code_modulation

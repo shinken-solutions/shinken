@@ -114,7 +114,7 @@ class CommandCall:
             #the one of the command
             self.poller_tag = poller_tag #from host/service
             self.module_type = self.command.module_type
-            if self.valid and poller_tag == None:
+            if self.valid and poller_tag is None:
                 self.poller_tag = self.command.poller_tag #from command if not set
 
 

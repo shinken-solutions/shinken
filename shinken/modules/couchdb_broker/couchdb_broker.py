@@ -101,7 +101,7 @@ class Couchdb_broker(BaseModule):
         db = self.dbs[table]
 
         #Couchdb index is _id
-        if key != None:
+        if key is not None:
             data['_id'] = key
 
         #Now stringify datas in UTF-8
@@ -121,7 +121,7 @@ class Couchdb_broker(BaseModule):
         db = self.dbs[table]
 
         #Couchdb index is _id
-        if key != None:
+        if key is not None:
             data['_id'] = key
 
         #We take the original doc to update it
