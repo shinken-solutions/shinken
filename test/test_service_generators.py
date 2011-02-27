@@ -54,11 +54,11 @@ class TestConfig(ShinkenTest):
         svc_f = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service F")
         svc_g = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service G")
         
-        self.assert_(svc_c != None)
-        self.assert_(svc_d != None)
-        self.assert_(svc_e != None)
-        self.assert_(svc_f != None)
-        self.assert_(svc_g != None)
+        self.assert_(svc_c is not None)
+        self.assert_(svc_d is not None)
+        self.assert_(svc_e is not None)
+        self.assert_(svc_f is not None)
+        self.assert_(svc_g is not None)
         
         #two classics
         self.assert_(svc_c.check_command.args == ['C', '80%', '90%'])
@@ -89,13 +89,13 @@ class TestConfig(ShinkenTest):
                 n = "Unit %d Port %d" % (unit_id, port_id)
                 print "Look for port", 'Generated Service ' + n
                 svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
-                self.assert_(svc != None)
+                self.assert_(svc is not None)
         for unit_id in xrange(1, 7):
             port_id = 47
             n = "Unit %d Port %d" % (unit_id, port_id)
             print "Look for port", 'Generated Service ' + n
             svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
-            self.assert_(svc != None)
+            self.assert_(svc is not None)
 
 
 
@@ -110,19 +110,19 @@ class TestConfig(ShinkenTest):
             print s.get_name()
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Gigabit0/1')
-        self.assert_(svc != None)
+        self.assert_(svc is not None)
         self.assert_(svc.check_command.call == 'check_service!1!80%!90%')
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Gigabit0/2')
-        self.assert_(svc != None)
+        self.assert_(svc is not None)
         self.assert_(svc.check_command.call == 'check_service!2!80%!90%')
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service Ethernet0/1')
-        self.assert_(svc != None)
+        self.assert_(svc is not None)
         self.assert_(svc.check_command.call == 'check_service!3!80%!95%')
 
         svc = self.sched.services.find_srv_by_name_and_hostname("sw_1", 'Generated Service ISDN1')
-        self.assert_(svc != None)
+        self.assert_(svc is not None)
         self.assert_(svc.check_command.call == 'check_service!4!80%!95%')
 
 

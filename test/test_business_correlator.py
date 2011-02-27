@@ -54,13 +54,13 @@ class TestConfig(ShinkenTest):
         
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
-        self.assert_(svc_bd1.business_rule == None)
+        self.assert_(svc_bd1.business_rule is None)
         svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
         self.assert_(svc_bd2.got_business_rule == False)
-        self.assert_(svc_bd2.business_rule == None)
+        self.assert_(svc_bd2.business_rule is None)
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_Or")
         self.assert_(svc_cor.got_business_rule == True)
-        self.assert_(svc_cor.business_rule != None)
+        self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == '|')
 
@@ -153,13 +153,13 @@ class TestConfig(ShinkenTest):
         
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
-        self.assert_(svc_bd1.business_rule == None)
+        self.assert_(svc_bd1.business_rule is None)
         svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
         self.assert_(svc_bd2.got_business_rule == False)
-        self.assert_(svc_bd2.business_rule == None)
+        self.assert_(svc_bd2.business_rule is None)
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_And")
         self.assert_(svc_cor.got_business_rule == True)
-        self.assert_(svc_cor.business_rule != None)
+        self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == '&')
 
@@ -246,13 +246,13 @@ class TestConfig(ShinkenTest):
         
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
-        self.assert_(svc_bd1.business_rule == None)
+        self.assert_(svc_bd1.business_rule is None)
         svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
         self.assert_(svc_bd2.got_business_rule == False)
-        self.assert_(svc_bd2.business_rule == None)
+        self.assert_(svc_bd2.business_rule is None)
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_1Of")
         self.assert_(svc_cor.got_business_rule == True)
-        self.assert_(svc_cor.business_rule != None)
+        self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
         self.assert_(bp_rule.of_values == 1)
@@ -341,13 +341,13 @@ class TestConfig(ShinkenTest):
         
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
-        self.assert_(svc_bd1.business_rule == None)
+        self.assert_(svc_bd1.business_rule is None)
         svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
         self.assert_(svc_bd2.got_business_rule == False)
-        self.assert_(svc_bd2.business_rule == None)
+        self.assert_(svc_bd2.business_rule is None)
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_Or")
         self.assert_(svc_cor.got_business_rule == True)
-        self.assert_(svc_cor.business_rule != None)
+        self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == '|')
 
@@ -552,13 +552,13 @@ class TestConfig(ShinkenTest):
     def test_dep_node_list_elements(self):
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
-        self.assert_(svc_bd1.business_rule == None)
+        self.assert_(svc_bd1.business_rule is None)
         svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
         self.assert_(svc_bd2.got_business_rule == False)
-        self.assert_(svc_bd2.business_rule == None)
+        self.assert_(svc_bd2.business_rule is None)
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_Or")
         self.assert_(svc_cor.got_business_rule == True)
-        self.assert_(svc_cor.business_rule != None)
+        self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == '|')
 
@@ -591,25 +591,25 @@ class TestConfig(ShinkenTest):
         
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
-        self.assert_(svc_bd1.business_rule == None)
+        self.assert_(svc_bd1.business_rule is None)
         svc_bd2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db2")
         self.assert_(svc_bd2.got_business_rule == False)
-        self.assert_(svc_bd2.business_rule == None)
+        self.assert_(svc_bd2.business_rule is None)
         svc_web1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "web1")
         self.assert_(svc_web1.got_business_rule == False)
-        self.assert_(svc_web1.business_rule == None)
+        self.assert_(svc_web1.business_rule is None)
         svc_web2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "web2")
         self.assert_(svc_web2.got_business_rule == False)
-        self.assert_(svc_web2.business_rule == None)
+        self.assert_(svc_web2.business_rule is None)
         svc_lvs1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "lvs1")
         self.assert_(svc_lvs1.got_business_rule == False)
-        self.assert_(svc_lvs1.business_rule == None)
+        self.assert_(svc_lvs1.business_rule is None)
         svc_lvs2 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "lvs2")
         self.assert_(svc_lvs2.got_business_rule == False)
-        self.assert_(svc_lvs2.business_rule == None)
+        self.assert_(svc_lvs2.business_rule is None)
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "ERP")
         self.assert_(svc_cor.got_business_rule == True)
-        self.assert_(svc_cor.business_rule != None)
+        self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == '&')
 

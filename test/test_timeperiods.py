@@ -43,7 +43,7 @@ class TestTimeperiods(ShinkenTest):
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, '1999-01-28  00:00-24:00')
         t_next = t.get_next_valid_time_from_t(now)
-        self.assert_(t_next == None)
+        self.assert_(t_next is None)
 
         #Then a simple same day
         t = Timeperiod()
@@ -70,7 +70,7 @@ class TestTimeperiods(ShinkenTest):
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, '1999-01-28  00:00-24:00')
         t_next = t.get_next_valid_time_from_t(now)
-        self.assert_(t_next == None)
+        self.assert_(t_next is None)
 
         #Then a simple same day
         t = Timeperiod()

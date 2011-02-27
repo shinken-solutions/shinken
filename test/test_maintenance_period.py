@@ -45,17 +45,17 @@ class TestConfig(ShinkenTest):
 
         #Standard links
         self.assert_(test_router_0.maintenance_period == a_24_7)
-        self.assert_(test_host_0.maintenance_period == None)
-        self.assert_(test_nobody.maintenance_period == None)
+        self.assert_(test_host_0.maintenance_period is None)
+        self.assert_(test_nobody.maintenance_period is None)
 
         #Now inplicit inheritance
         #This one is defined in the service conf
         self.assert_(svc1.maintenance_period == a_24_7)
         #This one is empty, because maintenance_period are not inherited from the
         #host like check/notification_periods
-        self.assert_(svc2.maintenance_period == None)
+        self.assert_(svc2.maintenance_period is None)
         #This one got nothing :)
-        self.assert_(svc3.maintenance_period == None)
+        self.assert_(svc3.maintenance_period is None)
 
 
     def test_check_enter_downtime(self):

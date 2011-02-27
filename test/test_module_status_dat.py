@@ -50,7 +50,7 @@ class TestConfig(ShinkenTest):
         for m in self.conf.modules:
             if m.module_type == 'status_dat':
                 mod = m
-        self.assert_(mod != None)
+        self.assert_(mod is not None)
         self.assert_(mod.status_file == '/usr/local/shinken/var/status.data')
         self.assert_(mod.module_name == 'Status-Dat')
         self.assert_(mod.object_cache_file == '/usr/local/shinken/var/objects.cache')

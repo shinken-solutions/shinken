@@ -40,7 +40,7 @@ class TestConfig(ShinkenTest):
         for m in self.conf.modules:
             if m.module_name == 'ToMerlindb_Sqlite':
                 mod = m
-        self.assert_(mod != None)
+        self.assert_(mod is not None)
         self.assert_(mod.database_path == '/usr/local/shinken/var/merlindb.sqlite')
         self.assert_(mod.module_type == 'merlindb')
         self.assert_(mod.backend == 'sqlite')

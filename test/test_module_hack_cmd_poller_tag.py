@@ -52,9 +52,9 @@ class TestHackCmdPollerTag(ShinkenTest):
         mod.hook_late_configuration(self)
         
         cmd1 = self.sched.commands.find_cmd_by_name('should_change')
-        self.assert_(cmd1 != None)
+        self.assert_(cmd1 is not None)
         cmd2 = self.sched.commands.find_cmd_by_name('should_not_change')
-        self.assert_(cmd2 != None)
+        self.assert_(cmd2 is not None)
         
         # cmd1 should have been updated, but not cmd2
         print "CMD1", cmd1.__dict__
@@ -66,9 +66,9 @@ class TestHackCmdPollerTag(ShinkenTest):
         
         # look for a objects that use it
         h1 = self.sched.hosts.find_by_name("test_host_0")
-        self.assert_(h1 != None)
+        self.assert_(h1 is not None)
         h2 = self.sched.hosts.find_by_name("test_router_0")
-        self.assert_(h2 != None)
+        self.assert_(h2 is not None)
         
         # Ok, host1 call cmd2, and host2 cmd1...
         # sorry for the crossing :p
@@ -83,10 +83,10 @@ class TestHackCmdPollerTag(ShinkenTest):
 
     def test_underscore_commands_module_type_recognition(self):
         cmd_tag = self.sched.commands.find_cmd_by_name('will_tag')
-        self.assert_(cmd_tag != None)
+        self.assert_(cmd_tag is not None)
         self.assert_(cmd_tag.module_type == 'nrpe_poller')
         cmd_not_tag = self.sched.commands.find_cmd_by_name('will_not_tag')
-        self.assert_(cmd_not_tag != None)
+        self.assert_(cmd_not_tag is not None)
         self.assert_(cmd_not_tag.module_type == 'isetwhatiwant')
 
 

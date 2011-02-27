@@ -59,10 +59,10 @@ class TestEscalations(ShinkenTest):
         self.assert_(svc.current_notification_number == 0)
         
         tolevel2 = self.sched.conf.escalations.find_by_name('ToLevel2')
-        self.assert_(tolevel2 != None)
+        self.assert_(tolevel2 is not None)
         self.assert_(tolevel2 in svc.escalations)
         tolevel3 = self.sched.conf.escalations.find_by_name('ToLevel3')
-        self.assert_(tolevel3 != None)
+        self.assert_(tolevel3 is not None)
         self.assert_(tolevel3 in svc.escalations)
 
 
@@ -177,10 +177,10 @@ class TestEscalations(ShinkenTest):
 
         # We check if we correclty linked our escalations
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
-        self.assert_(tolevel2_time != None)
+        self.assert_(tolevel2_time is not None)
         self.assert_(tolevel2_time in svc.escalations)
         tolevel3_time = self.sched.conf.escalations.find_by_name('ToLevel3-time')
-        self.assert_(tolevel3_time != None)
+        self.assert_(tolevel3_time is not None)
         self.assert_(tolevel3_time in svc.escalations)
 
         # Go for the running part!
@@ -316,10 +316,10 @@ class TestEscalations(ShinkenTest):
         
         # We check that we really linked our escalations :)
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
-        self.assert_(tolevel2_time != None)
+        self.assert_(tolevel2_time is not None)
         self.assert_(tolevel2_time in svc.escalations)
         tolevel3_time = self.sched.conf.escalations.find_by_name('ToLevel3-time')
-        self.assert_(tolevel3_time != None)
+        self.assert_(tolevel3_time is not None)
         self.assert_(tolevel3_time in svc.escalations)
 
         #--------------------------------------------------------------

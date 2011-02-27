@@ -41,7 +41,7 @@ class TestConfig(ShinkenTest):
         for m in self.conf.modules:
             if m.module_type == 'host_perfdata':
                 mod = m
-        self.assert_(mod != None)
+        self.assert_(mod is not None)
         self.assert_(mod.path == 'tmp/host-perfdata')
         self.assert_(mod.module_name == 'Host-Perfdata')
         self.assert_(mod.mode == 'a')

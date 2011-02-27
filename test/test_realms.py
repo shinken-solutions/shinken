@@ -42,14 +42,14 @@ class TestConfig(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         realm1 = self.conf.realms.find_by_name('realm1')
-        self.assert_(realm1 != None)
+        self.assert_(realm1 is not None)
         realm2 = self.conf.realms.find_by_name('realm2')
-        self.assert_(realm2 != None)
+        self.assert_(realm2 is not None)
         test_host_realm1 = self.sched.hosts.find_by_name("test_host_realm1")
-        self.assert_(test_host_realm1 != None)
+        self.assert_(test_host_realm1 is not None)
         self.assert_(test_host_realm1.realm == realm1)
         test_host_realm2 = self.sched.hosts.find_by_name("test_host_realm2")
-        self.assert_(test_host_realm2 != None)
+        self.assert_(test_host_realm2 is not None)
         self.assert_(test_host_realm2.realm == realm2)
 
     # We check for each host, if they are in the good realm
@@ -63,22 +63,22 @@ class TestConfig(ShinkenTest):
         now = time.time()
         in_realm2 = self.sched.hostgroups.find_by_name('in_realm2')
         realm1 = self.conf.realms.find_by_name('realm1')
-        self.assert_(realm1 != None)
+        self.assert_(realm1 is not None)
         realm2 = self.conf.realms.find_by_name('realm2')
-        self.assert_(realm2 != None)
+        self.assert_(realm2 is not None)
         # 1 and 2 are link to realm2 because they are in the hostgroup in_realm2
         test_host1_hg_realm2 = self.sched.hosts.find_by_name("test_host1_hg_realm2")
-        self.assert_(test_host1_hg_realm2 != None)
+        self.assert_(test_host1_hg_realm2 is not None)
         self.assert_(test_host1_hg_realm2.realm == realm2)
         self.assert_(in_realm2 in test_host1_hg_realm2.hostgroups)
 
         test_host2_hg_realm2 = self.sched.hosts.find_by_name("test_host2_hg_realm2")
-        self.assert_(test_host2_hg_realm2 != None)
+        self.assert_(test_host2_hg_realm2 is not None)
         self.assert_(test_host2_hg_realm2.realm == realm2)
         self.assert_(in_realm2 in test_host2_hg_realm2.hostgroups)
 
         test_host3_hg_realm2 = self.sched.hosts.find_by_name("test_host3_hg_realm2")
-        self.assert_(test_host3_hg_realm2 != None)
+        self.assert_(test_host3_hg_realm2 is not None)
         self.assert_(test_host3_hg_realm2.realm == realm1)
         self.assert_(in_realm2 in test_host3_hg_realm2.hostgroups)
 

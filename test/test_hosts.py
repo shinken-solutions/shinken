@@ -165,7 +165,7 @@ class TestConfig(ShinkenTest):
 
     def test_hostgroup(self):
         hg = self.sched.hostgroups.find_by_name("hostgroup_01")
-        self.assert_(hg != None)
+        self.assert_(hg is not None)
         h = self.sched.hosts.find_by_name('test_host_0')
         self.assert_(h in hg.members)
         self.assert_(hg in h.hostgroups)

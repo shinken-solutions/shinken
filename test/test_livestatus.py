@@ -223,11 +223,11 @@ class TestConfig(ShinkenTest):
             time.sleep(5)
             if hasattr(self, 'nagios_proc'):
                 attempt = 1
-                while self.nagios_proc.poll() == None and attempt < 4:
+                while self.nagios_proc.poll() is None and attempt < 4:
                     self.nagios_proc.terminate()
                     attempt += 1
                     time.sleep(1)
-                if self.nagios_proc.poll() == None:
+                if self.nagios_proc.poll() is None:
                     self.nagios_proc.kill()
                 if os.path.exists('etc/' + self.nagios_config):
                     shutil.rmtree('etc/' + self.nagios_config)
@@ -246,11 +246,11 @@ class TestConfig(ShinkenTest):
         tac = time.clock()
         print "mklivestatus duration %f" % (tac - tic)
         attempt = 1
-        while unixcat.poll() == None and attempt < 4:
+        while unixcat.poll() is None and attempt < 4:
             unixcat.terminate()
             attempt += 1
             time.sleep(1)
-        if unixcat.poll() == None:
+        if unixcat.poll() is None:
             unixcat.kill()
         print "unixcat says", out
         return out

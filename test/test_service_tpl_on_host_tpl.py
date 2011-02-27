@@ -43,7 +43,7 @@ class TestConfig(ShinkenTest):
             print s.get_dbg_name()
         
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Service_Template_Description")
-        self.assert_(svc != None)
+        self.assert_(svc is not None)
 
 if __name__ == '__main__':
     unittest.main()

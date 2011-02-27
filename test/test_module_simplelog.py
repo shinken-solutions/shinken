@@ -41,7 +41,7 @@ class TestConfig(ShinkenTest):
         for m in self.conf.modules:
             if m.module_type == 'simple_log':
                 mod = m
-        self.assert_(mod != None)
+        self.assert_(mod is not None)
         self.assert_(mod.path == 'tmp/nagios.log')
         self.assert_(mod.module_name == 'Simple-log')
 

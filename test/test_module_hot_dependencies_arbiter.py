@@ -62,11 +62,11 @@ class TestModuleHotDep(ShinkenTest):
         print self.conf.modules
 
         host0 = self.sched.conf.hosts.find_by_name('test_host_0')
-        self.assert_(host0 != None)
+        self.assert_(host0 is not None)
         host1 = self.sched.conf.hosts.find_by_name('test_host_1')
-        self.assert_(host1 != None)
+        self.assert_(host1 is not None)
         host2 = self.sched.conf.hosts.find_by_name('test_host_2')
-        self.assert_(host2 != None)
+        self.assert_(host2 is not None)
 
         # From now there is no link between hosts (just parent with the router)
         # but it's not imporant here
@@ -142,11 +142,11 @@ class TestModuleHotDep(ShinkenTest):
         print self.conf.modules
 
         host0 = self.sched.conf.hosts.find_by_name('test_host_0')
-        self.assert_(host0 != None)
+        self.assert_(host0 is not None)
         host1 = self.sched.conf.hosts.find_by_name('test_host_1')
-        self.assert_(host1 != None)
+        self.assert_(host1 is not None)
         host2 = self.sched.conf.hosts.find_by_name('test_host_2')
-        self.assert_(host2 != None)
+        self.assert_(host2 is not None)
 
         # From now there is no link between hosts (just parent with the router)
         # but it's not imporant here
