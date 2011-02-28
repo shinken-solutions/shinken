@@ -30,7 +30,7 @@ Pyro = pyro.Pyro
 
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
-from shinken.util import to_int, to_bool
+from shinken.property import StringProp, BoolProp, PathProp
 
 
 if os.name != 'nt':
@@ -83,18 +83,18 @@ class Interface(object):
 class Daemon(object):
 
     properties = {
-        'workdir':      { 'default': '/usr/local/shinken/var', 'pythonize': None, 'path': True },
-        'host':         { 'default': '0.0.0.0', 'pythonize': None },
-        'user':         { 'default': 'shinken', 'pythonize': None },
-        'group':        { 'default': 'shinken', 'pythonize': None },
-        'use_ssl':      { 'default': '0', 'pythonize': to_bool },
-        'certs_dir':    { 'default': 'etc/certs', 'pythonize': None },
-        'ca_cert':      { 'default': 'etc/certs/ca.pem', 'pythonize': None },
-        'server_cert':  { 'default': 'etc/certs/server.pem', 'pythonize': None },
-        'use_local_log':{ 'default': '0', 'pythonize': to_bool },
-        'hard_ssl_name_check':    { 'default': '0', 'pythonize': to_bool },
-        'idontcareaboutsecurity': { 'default': '0', 'pythonize': to_bool },
-        'spare':        { 'default': '0', 'pythonize': to_bool }
+        'workdir':       PathProp(default='/usr/local/shinken/var'),
+        'host':          StringProp(default='0.0.0.0'),
+        'user':          StringProp(default='shinken'),
+        'group':         StringProp(default='shinken'),
+        'use_ssl':       BoolProp(default='0'),
+        'certs_dir':     StringProp(default='etc/certs'),
+        'ca_cert':       StringProp(default='etc/certs/ca.pem'),
+        'server_cert':   StringProp(default='etc/certs/server.pem'),
+        'use_local_log': BoolProp(default='0'),
+        'hard_ssl_name_check':    BoolProp(default='0'),
+        'idontcareaboutsecurity': BoolProp(default='0'),
+        'spare':         BoolProp(default='0')
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
@@ -474,17 +474,15 @@ Also put default value in the properties if some are missing in the config_file 
                 print "Bad or missing config file : %s " % self.config_file
                 sys.exit(2)
             for (key, value) in config.items('daemon'):
-                if key in properties and properties[key]['pythonize'] is not None:
-                    value = properties[key]['pythonize'](value)
+                if key in properties:
+                    value = properties[key].pythonize(value)
                 setattr(self, key, value)
         else:
             print "No config file specified, use defaults parameters"
         #Now fill all defaults where missing parameters
         for prop, entry in properties.items():
             if not hasattr(self, prop):
-                value = entry['default']
-                if entry['pythonize'] is not None:
-                    value = entry['pythonize'](value)
+                value = entry.pythonize(entry.default)
                 setattr(self, prop, value)
                 print "Using default value :", prop, value
 
@@ -495,7 +493,7 @@ Also put default value in the properties if some are missing in the config_file 
         #print "Create relative paths with", reference_path
         properties = self.__class__.properties
         for prop, entry in properties.items():
-            if 'path' in entry and entry['path']:
+            if isinstance(entry, PathProp):
                 path = getattr(self, prop)
                 if not os.path.isabs(path):
                     path = os.path.join(reference_path, path)

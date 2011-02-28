@@ -22,7 +22,7 @@
 
 
 from shinken.satellite import Satellite
-from shinken.util import to_int
+from shinken.property import PathProp, IntegerProp
 
 
 #Our main APP class
@@ -32,9 +32,9 @@ class Poller(Satellite):
     
     properties = Satellite.properties.copy()
     properties.update({
-        'pidfile':   { 'default': '/usr/local/shinken/var/pollerd.pid', 'pythonize': None, 'path': True },
-        'port':      { 'default': '7771', 'pythonize' : to_int},
-        'local_log': { 'default': '/usr/local/shinken/var/pollerd.log', 'pythonize': None, 'path': True },
+        'pidfile':   PathProp(default='/usr/local/shinken/var/pollerd.pid'),
+        'port':      IntegerProp(default='7771'),
+        'local_log': PathProp(default='/usr/local/shinken/var/pollerd.log'),
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):

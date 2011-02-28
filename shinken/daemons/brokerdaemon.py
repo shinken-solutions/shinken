@@ -30,7 +30,8 @@ from Queue import Empty
 
 from shinken.satellite import BaseSatellite, IForArbiter
 
-from shinken.util import to_int, sort_by_ids
+from shinken.property import PathProp, IntegerProp
+from shinken.util import sort_by_ids
 from shinken.log import logger
 
 import shinken.pyro_wrapper as pyro
@@ -44,9 +45,9 @@ class Broker(BaseSatellite):
 
     properties = BaseSatellite.properties.copy()
     properties.update({
-        'pidfile':   { 'default': '/usr/local/shinken/var/brokerd.pid', 'pythonize': None, 'path': True },
-        'port':      { 'default': '7772', 'pythonize': to_int },
-        'local_log': { 'default': '/usr/local/shinken/var/brokerd.log', 'pythonize': None, 'path': True },
+        'pidfile':   PathProp(default='/usr/local/shinken/var/brokerd.pid'),
+        'port':      IntegerProp(default='7772'),
+        'local_log': PathProp(default='/usr/local/shinken/var/brokerd.log'),
     })
 
 
