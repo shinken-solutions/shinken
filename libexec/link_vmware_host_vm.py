@@ -24,8 +24,9 @@ import sys
 import shlex
 import shutil
 import getopt
-# Try to load the json (2.5 and higer) or
-# the simplejson if failed (python2.4)
+from subprocess import Popen, PIPE
+
+# Try to load json (2.5 and higer) or simplejson if failed (python2.4)
 try:
     import json
 except ImportError: 
@@ -34,9 +35,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module for this script"
-        sys.exit(2)
-from subprocess import Popen, PIPE
+        sys.exit("Error : you need the json or simplejson module for this script")
 
 
 # Split and clean the rules from a string to a list
