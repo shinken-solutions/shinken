@@ -103,6 +103,21 @@ function check_good_run {
     string_in_file "OK, no more broker sent need" $VAR/nagios.log
 }
 
+function localize_config {
+    # change paths in config files (/usr/local/shinken/*) to
+    # relative paths, so this test runs only in the current directory.
+    cp etc/nagios.cfg etc/nagios.cfg.save
+    cp etc/shinken-specific.cfg etc/shinken-specific.cfg.save
+    sed -e 's/\/usr\/local\/shinken\///g' < etc/nagios.cfg.save > etc/nagios.cfg
+    sed -e 's/\/usr\/local\/shinken\/var\///g' < etc/shinken-specific.cfg.save > etc/shinken-specific.cfg
+}
+
+function globalize_config {
+    mv etc/nagios.cfg.save etc/nagios.cfg
+    mv etc/shinken-specific.cfg.save etc/shinken-specific.cfg
+}
+
+
 
 #Standard launch process packets
 NB_SCHEDULERS=1
@@ -124,7 +139,9 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
+localize_config
 bin/launch_all_debug.sh
+globalize_config
 
 
 echo "Now checking for existing apps"
@@ -235,7 +252,9 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
+localize_config
 test/bin/launch_all_debug2.sh
+globalize_config
 
 
 echo "Now checking for existing apps"
@@ -344,7 +363,9 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
+localize_config
 test/bin/launch_all_debug3.sh
+globalize_config
 
 
 echo "Now checking for existing apps"
