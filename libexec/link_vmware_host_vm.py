@@ -3,6 +3,7 @@
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel <h.goebel@goebel-consult.de>
 #
 #This file is part of Shinken.
 #
@@ -23,7 +24,7 @@ import os
 import sys
 import shlex
 import shutil
-import getopt
+import optparse
 from subprocess import Popen, PIPE
 
 # Try to load json (2.5 and higer) or simplejson if failed (python2.4)
@@ -36,6 +37,8 @@ except ImportError:
         import simplejson as json
     except ImportError:
         sys.exit("Error : you need the json or simplejson module for this script")
+
+VERSION = '0.1'
 
 
 # Split and clean the rules from a string to a list
@@ -126,8 +129,7 @@ def write_output(r, path):
         shutil.move(path+'.tmp', path)
         print "File %s wrote" % path
     except IOError, exp:
-        print "Error writing the file %s : %s" % (path, exp)
-        sys.exit(2)
+        sys.exit("Error writing the file %s : %s" % (path, exp))
 
 
 def main(check_esx_path, vcenter, user, password, output, rules):
@@ -145,105 +147,44 @@ def main(check_esx_path, vcenter, user, password, output, rules):
 
     write_output(r, output)
     print "Finished!"
-    sys.exit(0)
 
-
-VERSION = '0.1'
-def usage(name):
-    print "Shinken VMware links dumping script version %s from :" % VERSION
-    print "        Gabes Jean, naparuba@gmail.com"
-    print "        Gerhard Lausser, Gerhard.Lausser@consol.de"
-    print "Usage: %s -V vcenter-ip -u USER -p PASSWORD -o /tmp/vmware_link.json [--esx3-path  /full/path/check_esx3.pl --rules RULES" % name
-    print "Options:"
-    print " -V, --Vcenter"
-    print "\tThe IP/DNS address of your Vcenter host."
-    print " -u, --user"
-    print "\tUser name to connect to this Vcenter"
-    print " -p, --password"
-    print "\tThe password of this user"
-    print " -o, --output"
-    print "\tPath of the generated mapping file."
-    print " -x, --esx3-path"
-    print "\tFull path of the check_esx3.pl script. By default /usr/local/nagios/libexec/check_esx3.pl"
-    print " -r, --rules"
-    print "\t Rules of name transformation:"
-    print "\t\t lower : to lower names"
-    print "\t\t nofqdn : keep only the first name (server.mydomain.com -> server)"
-    print "\t\t you can use several rules like 'lower|nofqdn'"
-    print " -h, --help"
-    print "\tPrint detailed help screen"
-    print "\n"
-    print "Example :"
-    print "\t %s -V vcenter.google.com -user MySuperUser -password secret --esx3-path  /usr/local/nagios/libexec/check_esx3.pl --rules 'lower|nofqdn'" % name
-
-
-def check_args(check_esx_path, vcenter, user, password, output, rules):
-    error = False
-    if vcenter is None:
-        error = True
-        print "Error : missing -V or -Vcenter option for the vcenter IP/DNS address"
-    if user is None:
-        error = True
-        print "Error : missing -u or -user option for the vcenter username"
-    if password is None:
-        error = True
-        print "Error : missing -p or -password option for the vcenter password"
-    if not os.path.exists(check_esx_path):
-        error = True
-        print "Error : the path %s for the check_esx3.pl script is wrong, missing file"
-    if output is None:
-        error = True
-        print "Error : missing -o or -output option for the output mapping file"
-
-    if error:
-        print "   ^"
-        print "   |"
-        print "   |"
-        print "   |"
-        usage(sys.argv[0])
-        sys.exit(2)
 
 # Here we go!
 if __name__ == "__main__":
-    print sys.argv[1:]
     # Manage the options
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "ho:x:V:u:p:r:", ["help", "output", "esx3-path", "Vcenter", "user", "password", "rules"])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage(sys.argv[0])
-        sys.exit(2)
-    print opts
-    # Default params
-    check_esx_path = '/usr/local/nagios/libexec/check_esx3.pl'
-    vcenter = None
-    user = None
-    password = None
-    rules = ''
-    output = None
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage(sys.argv[0])
-            sys.exit()
-        elif o in ("-o", "--output"):
-            print "Got output", a
-            output = a
-        elif o in ("-x", "--esx3-path"):
-            check_esx_path = a
-        elif o in ("-V", "--Vcenter"):
-            vcenter = a
-        elif o in ("-u", "--user"):
-            user = a
-        elif o in ("-p", "--password"):
-            password = a
-        elif o in ('-r', '--rules'):
-            rules = a
-        else:
-            print "Sorry, the option", o, a, "is unknown"
-            usage(sys.argv[0])
-            sys.exit()
+    parser = optparse.OptionParser(
+        version="Shinken VMware links dumping script version %s" % VERSION)
+    parser.add_option("-o", "--output",
+                      help="Path of the generated mapping file.")
+    parser.add_option("-x", "--esx3-path", dest='check_esx_path',
+                      default='/usr/local/nagios/libexec/check_esx3.pl',
+                      help="Full path of the check_esx3.pl script (default: %default)")
+    parser.add_option("-V", "--vcenter", '--Vcenter',
+                      help="tThe IP/DNS address of your Vcenter host.")
+    parser.add_option("-u", "--user",
+                      help="User name to connect to this Vcenter")
+    parser.add_option("-p", "--password",
+                      help="The password of this user")
+    parser.add_option('-r', '--rules', default='',
+                      help="Rules of name transformation. Valid names are: "
+                      "`lower`: to lower names, "
+                      "`nofqdn`: keep only the first name (server.mydomain.com -> server)."
+                      "You can use several rules like `lower|nofqdn`")
 
-    print "Got", check_esx_path, vcenter, user, password, output, rules
-    check_args(check_esx_path, vcenter, user, password, output, rules)
-    main(check_esx_path, vcenter, user, password, output, rules)
+    opts, args = parser.parse_args()
+    if args:
+        parser.error("does not take any positional arguments")
+
+    if opts.vcenter is None:
+        parser.error("missing -V or --Vcenter option for the vcenter IP/DNS address")
+    if opts.user is None:
+        parser.error("missing -u or --user option for the vcenter username")
+    if opts.password is None:
+        error = True
+        parser.error("missing -p or --password option for the vcenter password")
+    if not os.path.exists(opts.check_esx_path):
+        parser.error("the path %s for the check_esx3.pl script is wrong, missing file" % opts.check_esx_path)
+    if opts.output is None:
+        parser.error("missing -o or --output option for the output mapping file")
+
+    main(**opts.__dict__)
