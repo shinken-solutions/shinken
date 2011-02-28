@@ -51,9 +51,9 @@ class Property(object):
 
 
     """
-    def __init__(self, default=none_object, class_inherit=[],
+    def __init__(self, default=none_object, class_inherit=None,
                  unmanaged=False, help='', no_slots=False,
-                 fill_brok=[], conf_send_preparation=None,
+                 fill_brok=None, conf_send_preparation=None,
                  brok_transformation=None,retention=False,to_send=False,
                  override=False,managed=True):
         """
@@ -93,11 +93,11 @@ class Property(object):
         self.default = default
         self.has_default = (default is not none_object)
         self.required = not self.has_default
-        self.class_inherit = class_inherit
+        self.class_inherit = class_inherit or []
         self.help = help or ''
         self.unmanaged = unmanaged
         self.no_slots = no_slots
-        self.fill_brok = fill_brok
+        self.fill_brok = fill_brok or []
         self.conf_send_preparation = conf_send_preparation
         self.brok_transformation = brok_transformation
         self.retention = retention
