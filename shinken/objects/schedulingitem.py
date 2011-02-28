@@ -38,7 +38,7 @@ from shinken.dependencynode import DependencyNodeFactory, DependencyNode
 
 
 # on system time change just reevaluate the following attributes :
-__on_time_change_update = ( 'last_notification', 'last_state_change', 'last_hard_state_change' )
+on_time_change_update = ( 'last_notification', 'last_state_change', 'last_hard_state_change' )
 
 
 class SchedulingItem(Item):
@@ -455,7 +455,7 @@ class SchedulingItem(Item):
     # checks that will give us the new value
     def compensate_system_time_change(self, difference):
         # We only need to change some value
-        for p in __on_time_change_update:
+        for p in on_time_change_update:
             val = getattr(self, p) # current value
             #Do not go below 1970 :)
             val = max(0, val + difference) #diff can be -

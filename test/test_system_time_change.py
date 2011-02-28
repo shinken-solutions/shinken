@@ -32,6 +32,7 @@ class TestConfig(ShinkenTest):
     def set_time(self, d):
         cmd = 'sudo date -s "%s"' % d
         print "CMD,", cmd
+        # NB: disabled for now because we test in a totally direct way
         #a = commands.getstatusoutput(cmd)
         #Check the time is set correctly!
         #self.assert_(a[0] == 0)
@@ -90,7 +91,7 @@ class TestConfig(ShinkenTest):
         print "current Host check", time.asctime(time.localtime(host_check.t_to_go))
         print "current Service check", time.asctime(time.localtime(srv_check.t_to_go))
         self.set_time(tomorow)
-        self.sched.compensate_system_time_change(86400)
+        self.sched.sched_daemon.compensate_system_time_change(86400)
         print "Tomorow Host check", time.asctime(time.localtime(host_check.t_to_go))
         print "Tomorow Service check", time.asctime(time.localtime(srv_check.t_to_go))
         self.assert_(host_check.t_to_go - host_to_go == 86400)
@@ -100,7 +101,7 @@ class TestConfig(ShinkenTest):
         host_to_go = host_check.t_to_go
         srv_to_go = srv_check.t_to_go
         self.set_time(yesterday)
-        self.sched.compensate_system_time_change(-86400*2)
+        self.sched.sched_daemon.compensate_system_time_change(-86400*2)
         print "Yesterday Host check", time.asctime(time.localtime(host_check.t_to_go))
         print "Yesterday Service check", time.asctime(time.localtime(srv_check.t_to_go))
         print "New host check", time.asctime(time.localtime(host.next_chk))

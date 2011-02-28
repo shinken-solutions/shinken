@@ -355,13 +355,13 @@ class Shinken(Daemon):
         self.program_start = max(0, self.program_start + difference)
 
         # Then we compasate all host/services
-        for h in self.hosts:
+        for h in self.sched.hosts:
             h.compensate_system_time_change(difference)
-        for s in self.services:
+        for s in self.sched.services:
             s.compensate_system_time_change(difference)
 
         # Now all checks and actions
-        for c in self.checks.values():
+        for c in self.sched.checks.values():
             # Already launch checks should not be touch
             if c.status == 'scheduled':
                 t_to_go = c.t_to_go
@@ -382,7 +382,7 @@ class Shinken(Daemon):
                     ref.next_chk = new_t
 
         # Now all checks and actions
-        for c in self.actions.values():
+        for c in self.sched.actions.values():
             # Already launch checks should not be touch
             if c.status == 'scheduled':
                 t_to_go = c.t_to_go
