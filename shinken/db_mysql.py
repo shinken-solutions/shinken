@@ -22,7 +22,8 @@
 
 
 #DBMysql is a MySQL access database class
-from db import DB
+from shinken.db import DB
+
 import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError

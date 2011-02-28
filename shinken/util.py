@@ -20,7 +20,8 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import time, re
+import time
+import re
 try:
     from ClusterShell.NodeSet import NodeSet
 except ImportError:

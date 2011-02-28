@@ -31,7 +31,8 @@
 #schedulers (and the checks that goes with them) and take the new ones 
 #instead.
 
-import sys, os
+import sys
+import os
 import optparse
 
 # Try to load shinken lib.

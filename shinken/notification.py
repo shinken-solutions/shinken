@@ -23,16 +23,8 @@
 
 import time
 
-#Unix and windows do not have the same import
-#if os.name == 'nt':
-#    import subprocess, datetime, os, time, signal
-#    import ctypes
-#    TerminateProcess = ctypes.windll.kernel32.TerminateProcess
-#else:
-#    from pexpect import *
-
-from action import Action
-from brok import Brok
+from shinken.action import Action
+from shinken.brok import Brok
 from shinken.property import BoolProp, IntegerProp, StringProp
 
 class Notification(Action):

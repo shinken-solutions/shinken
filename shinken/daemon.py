@@ -20,13 +20,17 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, errno, sys, time, signal, select, random 
+import os
+import errno
+import sys
+import time
+import signal
+import select
+import random 
 import ConfigParser
 
-
 import shinken.pyro_wrapper as pyro
-from shinken.pyro_wrapper import InvalidWorkDir
-Pyro = pyro.Pyro
+from shinken.pyro_wrapper import InvalidWorkDir, Pyro
 
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager

@@ -21,6 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time, calendar
+
 from shinken.util import get_sec_from_morning, get_day, get_start_of_day, get_end_of_day
 
 

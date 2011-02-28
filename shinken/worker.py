@@ -30,7 +30,8 @@
 from Queue import Empty
 from multiprocessing import Process, Queue
 
-import time, sys
+import time
+import sys
 import signal
 
 

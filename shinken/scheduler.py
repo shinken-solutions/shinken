@@ -21,7 +21,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import time, os
+import time
+import os
 import traceback
 
 import shinken.pyro_wrapper as pyro
@@ -35,8 +36,6 @@ from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.log import logger
-
-#from guppy import hpy
 
 
 class Scheduler:

@@ -22,7 +22,7 @@
 
 
 import time
-from comment import Comment
+from shinken.comment import Comment
 
 class Downtime:
     id = 1

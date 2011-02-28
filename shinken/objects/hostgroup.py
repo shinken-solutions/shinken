@@ -21,7 +21,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from itemgroup import Itemgroup, Itemgroups
+from shinken.objects.itemgroup import Itemgroup, Itemgroups
+
 from shinken.property import StringProp
 
 class Hostgroup(Itemgroup):

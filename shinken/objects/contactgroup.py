@@ -24,7 +24,8 @@
 #Contactgroups are groups for contacts
 #They are just used for the config read and explode by elements
 
-from itemgroup import Itemgroup, Itemgroups
+from shinken.objects.itemgroup import Itemgroup, Itemgroups
+
 from shinken.property import IntegerProp, StringProp
 
 class Contactgroup(Itemgroup):

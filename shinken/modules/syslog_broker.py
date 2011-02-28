@@ -20,7 +20,6 @@
 #This Class is a plugin for the Shinken Broker. It is in charge
 #to brok log into the syslog
 
-
 import syslog
 
 from shinken.basemodule import BaseModule

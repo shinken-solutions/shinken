@@ -29,10 +29,9 @@
 # len(host.services)
 
 import re
-from shinken.borg import Borg
-#from singleton import Singleton
 import time
-#from contact import Contact
+
+from shinken.borg import Borg
 
 
 class MacroResolver(Borg):

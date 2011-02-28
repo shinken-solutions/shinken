@@ -23,9 +23,9 @@
 
 #This class is use to manage modules and call callback
 
-import os, sys
+import os
+import sys
 import traceback
-
 
 from shinken.basemodule import BaseModule
 

@@ -21,8 +21,9 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import time
+import math
 
-import time, math
 #EXP_1=1/math.exp(5/60.0)
 #EXP_5=1/math.exp(5/(5*60.0))
 #EXP_15=1/math.exp(5/(15*60.0))

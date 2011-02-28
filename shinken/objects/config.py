@@ -27,7 +27,11 @@
  them into independant parts. The main user of this is Arbiter, but schedulers
  use it too (but far less)"""
 
-import re, string, copy, os, socket
+import re
+import string
+import copy
+import os
+import socket
 import itertools
 import time
 import random

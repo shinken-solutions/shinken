@@ -21,7 +21,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from itemgroup import Itemgroup, Itemgroups
+from shinken.objects.itemgroup import Itemgroup, Itemgroups
+
 from shinken.property import BoolProp, IntegerProp, StringProp
 
 #It change from hostgroup Class because there is no members

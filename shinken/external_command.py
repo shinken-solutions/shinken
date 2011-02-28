@@ -21,7 +21,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import os, time
+import os
+import time
 
 from shinken.util import to_int, to_bool
 from shinken.downtime import Downtime

@@ -51,14 +51,12 @@ except ImportError:
 Pyro = pyro.Pyro
 
 
-from message import Message
-from worker import Worker
-from load import Load
-from daemon import Daemon
-from log import logger
-from brok import Brok
-
-from shinken.daemon import Interface
+from shinken.message import Message
+from shinken.worker import Worker
+from shinken.load import Load
+from shinken.daemon import Daemon, Interface
+from shinken.log import logger
+from shinken.brok import Brok
 
 # Interface for Arbiter, our big MASTER
 # It put us our conf

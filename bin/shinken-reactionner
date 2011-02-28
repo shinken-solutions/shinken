@@ -33,7 +33,8 @@
 #instead.
 
 
-import sys, os
+import sys
+import os
 import optparse
 
 # Try to load shinken lib.

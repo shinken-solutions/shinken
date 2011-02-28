@@ -22,8 +22,7 @@
 
 
 #DBMysql is a MySQL access database class
-from db import DB
-
+from shinken.db import DB
 
 connect_function = None
 IntegrityError_exp = None
@@ -35,20 +34,13 @@ OperationalError_exp = None
 
 
 #Failed to import will be catch by __init__.py
-from cx_Oracle import connect
-connect_function = connect
-from cx_Oracle import IntegrityError
-IntegrityError_exp = IntegrityError
-from cx_Oracle import ProgrammingError
-ProgrammingError_exp = ProgrammingError
-from cx_Oracle import DatabaseError
-DatabaseError_exp = DatabaseError
-from cx_Oracle import InternalError
-InternalError_exp = InternalError
-from cx_Oracle import DataError
-DataError_exp = DataError
-from cx_Oracle import OperationalError
-OperationalError_exp = OperationalError
+from cx_Oracle import connect as connect_function
+from cx_Oracle import IntegrityError as IntegrityError_exp
+from cx_Oracle import ProgrammingError as ProgrammingError_exp
+from cx_Oracle import DatabaseError as DatabaseError_exp
+from cx_Oracle import InternalError as InternalError_exp
+from cx_Oracle import DataError as DataError_exp
+from cx_Oracle import OperationalError as OperationalError_exp
 
 
 class DBOracle(DB):

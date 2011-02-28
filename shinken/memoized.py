@@ -43,8 +43,6 @@ class memoized(object):
         """Return the function's docstring."""
         return self.func.__doc__
 
-#import cPickle
-
 
 
 #def memoized(function, limit=None):

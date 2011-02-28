@@ -20,8 +20,10 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, random, time
-
+import os
+import sys
+import random
+import time
 
 from shinken.scheduler import Scheduler
 from shinken.objects import Config
@@ -30,7 +32,6 @@ from shinken.external_command import ExternalCommandManager
 from shinken.daemon import Daemon
 from shinken.property import PathProp, IntegerProp
 import shinken.pyro_wrapper as pyro
-from shinken.pyro_wrapper import Pyro
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
 

@@ -21,7 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from item import Item, Items
+from shinken.objects.item import Item, Items
 from shinken.property import BoolProp, StringProp, ListProp
 
 

@@ -24,6 +24,7 @@
 #SatelliteLink is a common Class for link to satellite for
 #Arbiter with Conf Dispatcher.
 
+import cPickle
 
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
@@ -84,7 +85,6 @@ class SatelliteLink(Item):
         try:
             pyro.set_timeout(self.con, self.data_timeout)
             #del conf[0].schedulerlinks
-            import cPickle
             buf=cPickle.dumps(conf)
             print "DBG: put conf to", self.con.__dict__
             self.con.put_conf(conf)

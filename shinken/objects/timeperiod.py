@@ -69,7 +69,8 @@
 #       MONTH DATE
 #       MONTH DAY
 #
-import re, time
+import re
+import time
 
 from item import Item, Items
 from shinken.util import *
