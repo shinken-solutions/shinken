@@ -457,7 +457,7 @@ class Arbiter(Daemon):
         timeout = 1.0
         while not self.have_conf and not self.interrupted:
             
-            elapsed, _ = self.handleRequests(timeout)
+            elapsed, _, _ = self.handleRequests(timeout)
             if elapsed:
                 timeout = timeout - elapsed
                 if timeout < 0:
@@ -478,13 +478,16 @@ class Arbiter(Daemon):
         self.last_master_speack = time.time()
         
         while not self.interrupted:
-            elapsed, _ = self.handleRequests(timeout)
+            elapsed, _, tcdiff = self.handleRequests(timeout)
+            # if there was a system Time Change (tcdiff) then we have to adapt last_master_speak:
+            if tcdiff:
+                self.last_master_speack += tcdiff
             if elapsed:
                 self.last_master_speack = time.time()
                 timeout -= elapsed
                 if timeout > 0:
                     continue
-
+            
             timeout = 1.0            
             sys.stdout.write(".")
             sys.stdout.flush()
@@ -537,7 +540,7 @@ class Arbiter(Daemon):
         
         while self.must_run and not self.interrupted:
             
-            elapsed, ins = self.handleRequests(timeout, suppl_socks)
+            elapsed, ins, _ = self.handleRequests(timeout, suppl_socks)
             
             # If FIFO, read external command
             if ins:

@@ -968,7 +968,7 @@ class Scheduler:
 
         while self.must_run:
 
-            elapsed, _ = self.sched_daemon.handleRequests(timeout)
+            elapsed, _, _ = self.sched_daemon.handleRequests(timeout)
             if elapsed: 
                 timeout -= elapsed
                 if timeout > 0:

@@ -75,7 +75,9 @@ class Daemon:
         self.debug_file = debug_file
         self.interrupted = False
 
-        self.t_each_loop = time.time() # used to track system time change
+        now = time.time()
+        self.program_start = now
+        self.t_each_loop = now # used to track system time change
 
         self.daemon = None # should'nt it be renamed to "pyro_daemon" for clarity & safety ?
 
@@ -494,24 +496,29 @@ Also put default value in the properties if some are missing in the config_file 
     def handleRequests(self, timeout, suppl_socks=None):
         """ Wait up to timeout to handle the pyro daemon requests.
 If suppl_socks is given it also looks for activity on that list of fd.
-If none request come within timeout seconds then returns tuple(0, [])
-Else: returns a tuple with the elapsed time since we have been called and as second argument the fd from suppl_socks that eventually got activity.
-"""
+Returns a 3-tuple:
+If timeout: first arg is 0, second is [], third is possible system time change value
+If not timeout (== some fd got activity): 
+ - first arg is elapsed time since wait, 
+ - second arg is sublist of suppl_socks that got activity.
+ - third arg is possible system time change value, or 0 if no change. """
         before = time.time()
         socks = self.daemon.get_sockets()
         if suppl_socks:
             socks.extend(suppl_socks)
         ins = self.get_socks_activity(socks, timeout)
-        diff = self.check_for_system_time_change()
-        before += diff
-        if ins is []:
-            return 0, []
+        tcdiff = self.check_for_system_time_change()
+        before += tcdiff
+        if ins is []: # trivial case: no fd activity:
+            return 0, [], tcdiff
         for sock in socks:
             if sock in ins:
                 self.daemon.handleRequests(sock)
                 ins.remove(sock)
-        after = time.time() - before
-        return after, ins
+        elapsed = time.time() - before
+        if elapsed == 0: # we have done a few instructions in 0 second exactly !? quantum computer ?
+            elapsed = 0.01  # but we absolutely need to return != 0 to indicate that we got activity
+        return elapsed, ins, tcdiff
         
 
     def check_for_system_time_change(self):

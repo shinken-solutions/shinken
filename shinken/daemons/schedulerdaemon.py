@@ -255,9 +255,9 @@ class Shinken(Daemon):
         timeout = 1.0
         while not self.have_conf and not self.interrupted:
 
-            elapsed, _ = self.handleRequests(timeout)
+            elapsed, _, _ = self.handleRequests(timeout)
             if elapsed:
-                timeout = timeout - elapsed
+                timeout -= elapsed
                 if timeout > 0:
                     continue
             

@@ -408,7 +408,7 @@ class Satellite(Daemon):
         timeout = 1.0
         # Arbiter do not already set our have_conf param
         while not self.have_conf and not self.interrupted:
-            elapsed, _ = self.handleRequests(timeout)
+            elapsed, _, _ = self.handleRequests(timeout)
             if elapsed:
                 timeout -= elapsed
                 if timeout > 0:
