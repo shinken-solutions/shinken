@@ -28,10 +28,10 @@ import os
 
 
 try:
+    # xml.etree.ElementTree is new in Python 2.5
     from xml.etree.ElementTree import ElementTree
 except ImportError:
-    print "This script needs the python ElementTree module. Please install it"
-    sys.exit(2)
+    sys.exit("This script needs the Python ElementTree module. Please install it")
 
 VERSION = '0.1'
 
