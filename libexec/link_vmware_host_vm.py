@@ -42,29 +42,21 @@ VERSION = '0.1'
 
 
 # Split and clean the rules from a string to a list
-def split_rules(rules):
-    t = rules.split('|')
-    new_rules = []
-    for e in t:
-        new_rules.append(e.strip())
-    rules = new_rules
-    return rules
+def _split_rules(rules):
+    return [r.strip() for r in rules.split('|')]
 
 # Apply all rules on the objects names
 def _apply_rules(name, rules):
-    r = name
-    if 'lower' in rules:
-        r = r.lower()
     if 'nofqdn' in rules:
-        r = r.split('.')[0]
-    return r
+        name = name.split('.', 1)[0]
+    if 'lower' in rules:
+        name = name.lower()
+    return name
 
 # Get all vmware hosts from a VCenter and return the list
 def get_vmware_hosts(check_esx_path, vcenter, user, password):
-    list_host_cmd_s = '%s -D %s -u %s -p %s -l runtime -s listhost' % (check_esx_path, vcenter, user, password)
-    list_host_cmd = shlex.split(list_host_cmd_s)
-    
-    hosts = []
+    list_host_cmd = [check_esx_path, '-D', vcenter, '-u', user, '-p', password,
+                     '-l', 'runtime', '-s', 'listhost']
 
     output = Popen(list_host_cmd, stdout=PIPE).communicate()
 
@@ -72,6 +64,7 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     hsts_raw = parts[1].split('|')[0]
     hsts_raw_lst = hsts_raw.split(',')
 
+    hosts = []
     for hst_raw in hsts_raw_lst:
         hst_raw = hst_raw.strip()
         # look as server4.mydomain(UP)
@@ -83,21 +76,22 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
 
 
 # For a specific host, ask all VM on it to the VCenter
-def get_vm_of_host(check_esx_path, vcenter, h, user, password):
-    lst = []
-    print "Listing host", h
-    list_vm_cmd_s = '%s -D %s -H %s -u %s -p %s -l runtime -s list' % (check_esx_path, vcenter, h, user, password)
-    list_vm_cmd = shlex.split(list_vm_cmd_s)
+def get_vm_of_host(check_esx_path, vcenter, host, user, password):
+    print "Listing host", host
+    list_vm_cmd = [check_esx_path, '-D', vcenter, '-H', host,
+                   '-u', user, '-p', password,
+                   '-l', 'runtime', '-s', 'list']
     output = Popen(list_vm_cmd, stdout=PIPE).communicate()
     parts = output[0].split(':')
     # Maybe we got a 'CRITICAL - There are no VMs.' message,
     # if so, we bypass this host
     if len(parts) < 2:
-        return []
+        return None
 
     vms_raw = parts[1].split('|')[0]
     vms_raw_lst = vms_raw.split(',')
     
+    lst = []
     for vm_raw in vms_raw_lst:
         vm_raw = vm_raw.strip()
         # look as MYVM(UP)
@@ -133,14 +127,14 @@ def write_output(r, path):
 
 
 def main(check_esx_path, vcenter, user, password, output, rules):
-    rules = split_rules(rules)
+    rules = _split_rules(rules)
     res = {}
     hosts = get_vmware_hosts(check_esx_path, vcenter, user, password)
     
-    for h in hosts:
-        lst = get_vm_of_host(check_esx_path, vcenter, h, user, password)
-        if lst != []:
-            res[h] = lst
+    for host in hosts:
+        lst = get_vm_of_host(check_esx_path, vcenter, host, user, password)
+        if lst:
+            res[host] = lst
 
     r = create_all_links(res, rules)
     print "Created %d links" % len(r)
