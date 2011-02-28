@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 #
-# Copyright (C) 2010:
+# Copyright (C) 2010-2011:
 #    Hartmut Goebel, h.goebel@goebel-consult.de
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -31,7 +31,7 @@ __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
            'FULL_STATUS', 'CHECK_RESULT']
 
 __author__ = "Hartmut Goebel <h.goebel@goebel-consult.de>"
-__copyright__ = "Copyright 2010 by Hartmut Goebel <h.goebel@goebel-consult.de>"
+__copyright__ = "Copyright 2010-2011 by Hartmut Goebel <h.goebel@goebel-consult.de>"
 __licence__ = "GNU Affero General Public License version 3 (AGPL v3)"
 
 
