@@ -29,7 +29,6 @@ import time
 import select
 import socket
 import struct
-from ctypes import create_string_buffer
 import random
 
 from shinken.basemodule import BaseModule
@@ -103,9 +102,8 @@ class NSCA_arbiter(BaseModule):
          00-127  : IV
          128-131 : unix timestamp
         '''
-        init_packet=create_string_buffer(132)
         iv = ''.join([chr(self.rng.randrange(256)) for i in xrange(128)])
-        init_packet.raw=struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
+        init_packet = struct.pack("!128sI", iv, int(time.mktime(time.gmtime())))
         socket.send(init_packet)
         return iv
 

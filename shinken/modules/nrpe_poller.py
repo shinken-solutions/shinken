@@ -48,7 +48,6 @@ except ImportError:
     SSLWantReadError = None
     SSLZeroReturnError = None
 
-from ctypes import create_string_buffer
 from Queue import Empty
 from shinken.basemodule import BaseModule
 
@@ -79,7 +78,6 @@ class NRPE:
          10-1034   : command (nul terminated)
          1035-1036 : reserved 
         '''
-        self.query = create_string_buffer(1036)
         crc = 0
 
         if not command:
@@ -89,12 +87,12 @@ class NRPE:
             return
 
         # We pack it, then we compute CRC32 of this frist query
-        self.query.raw=struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
+        self.query = struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
         crc = binascii.crc32(self.query)
         
         # we restart with the crc value this time
         # because python2.4 do not have pack_into.
-        self.query.raw=struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
+        self.query = struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
 
     
     def init_query(self,host, port, use_ssl, command):

@@ -11,7 +11,6 @@ import select
 import socket
 import struct
 import sys
-from ctypes import create_string_buffer
 import random
 
 
@@ -50,9 +49,8 @@ class NSCA_client():
          00-127  : IV
          128-131 : unix timestamp
         '''
-        init_packet=create_string_buffer(132)
         iv = ''.join([chr(self.rng.randrange(256)) for i in xrange(128)])
-        init_packet.raw=struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
+        init_packet = struct.pack("!128sI", iv, int(time.mktime(time.gmtime())))
         socket.send(init_packet)
         return iv
 
@@ -113,7 +111,7 @@ class NSCA_client():
         init = server.recv(size)
         print "got init", init
         
-        #init_packet.raw=struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
+        #init_packet = struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
         (iv, t) = struct.unpack("!128sI",init)
         print "IV", iv
         print "T", t
@@ -138,8 +136,7 @@ class NSCA_client():
          204-715 : output of the plugin
          716-720 : padding
         '''
-        init_packet=create_string_buffer(720)
-        init_packet.raw=struct.pack("!hhIIh64s128s512sh", version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2)
+        init_packet = struct.pack("!hhIIh64s128s512sh", version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2)
         print "Create packent len", len(init_packet)
         #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
 
