@@ -106,15 +106,16 @@ function check_good_run {
 function localize_config {
     # change paths in config files (/usr/local/shinken/*) to
     # relative paths, so this test runs only in the current directory.
-    cp etc/nagios.cfg etc/nagios.cfg.save
-    cp etc/shinken-specific.cfg etc/shinken-specific.cfg.save
-    sed -e 's/\/usr\/local\/shinken\///g' < etc/nagios.cfg.save > etc/nagios.cfg
-    sed -e 's/\/usr\/local\/shinken\/var\///g' < etc/shinken-specific.cfg.save > etc/shinken-specific.cfg
+    # takes nagios.cfg and shinken-specific.cfg
+    cp $1 /tmp/nagios.cfg.save
+    cp $2 /tmp/shinken-specific.cfg.save
+    sed -e 's/\/usr\/local\/shinken\///g' < /tmp/nagios.cfg.save > $1
+    sed -e 's/\/usr\/local\/shinken\/var\///g' < /tmp/shinken-specific.cfg.save > $2
 }
 
 function globalize_config {
-    mv etc/nagios.cfg.save etc/nagios.cfg
-    mv etc/shinken-specific.cfg.save etc/shinken-specific.cfg
+    mv /tmp/nagios.cfg.save $1
+    mv /tmp/shinken-specific.cfg.save $2
 }
 
 
@@ -139,9 +140,9 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
-localize_config
+localize_config etc/nagios.cfg etc/shinken-specific.cfg
 bin/launch_all_debug.sh
-globalize_config
+globalize_config etc/nagios.cfg etc/shinken-specific.cfg
 
 
 echo "Now checking for existing apps"
@@ -252,9 +253,9 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
-localize_config
+localize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-ha-only.cfg
 test/bin/launch_all_debug2.sh
-globalize_config
+globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-ha-only.cfg
 
 
 echo "Now checking for existing apps"
@@ -363,9 +364,9 @@ echo "#                                                                         
 echo "####################################################################################"
 
 echo "Now we can start some launch tests"
-localize_config
+localize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-lb-only.cfg
 test/bin/launch_all_debug3.sh
-globalize_config
+globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-lb-only.cfg
 
 
 echo "Now checking for existing apps"
