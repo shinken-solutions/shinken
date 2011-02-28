@@ -49,11 +49,11 @@ class Item(object):
 
         cls = self.__class__
         #adding running properties like latency, dependency list, etc
-        for prop in cls.running_properties:
+        for prop, entry in cls.running_properties.items():
             #Copy is slow, so we check type
             #Type with __iter__ are list or dict, or tuple.
             #Item need it's own list, so qe copy
-            val = cls.running_properties[prop].default
+            val = entry.default
             if hasattr(val, '__iter__'):
                 setattr(self, prop, copy(val))
             else:
@@ -82,8 +82,7 @@ class Item(object):
         """ Copy a copy of the item, but give him a new id """
         cls = self.__class__
         i = cls({})#Dummy item but with it's own running properties
-        properties = cls.properties
-        for prop in properties:
+        for prop in cls.properties:
             if hasattr(self, prop):
                 val = getattr(self, prop)
                 setattr(i, prop, val)
@@ -117,12 +116,10 @@ class Item(object):
     def fill_default(self):
         """ Fill missing properties if they are missing """
         cls = self.__class__
-        properties = cls.properties
 
-        for prop in properties:
-            if not hasattr(self, prop) and properties[prop].has_default:
-                value = properties[prop].default
-                setattr(self, prop, value)
+        for prop, entry in cls.properties.items():
+            if not hasattr(self, prop) and entry.has_default:
+                setattr(self, prop, entry.default)
 
 
     #We load every usefull parameter so no need to access global conf later
@@ -135,12 +132,11 @@ class Item(object):
         # (Contact, None)]}
         #get the name and put the value if None, put the Name
         #(not None) if not (not clear ?)
-        for prop in conf.properties:
+        for prop, entry in conf.properties.items():
             #If we have a class_inherit, and the arbtier really send us it
-#            if 'class_inherit' in conf.properties[prop] and hasattr(conf, prop):
+#            if 'class_inherit' in entry and hasattr(conf, prop):
             if hasattr(conf, prop):
-                entry = conf.properties[prop].class_inherit
-                for (cls_dest, change_name) in entry:
+                for (cls_dest, change_name) in entry.class_inherit:
                     if cls_dest == cls:#ok, we've got something to get
                         value = getattr(conf, prop)
                         if change_name is None:
@@ -155,8 +151,7 @@ class Item(object):
     #Use to make python properties
     def pythonize(self):
         cls = self.__class__
-        for prop in cls.properties:
-            tab = cls.properties[prop]
+        for prop, tab in cls.properties.items():
             try:
 #                if isinstance(tab, dict):
 #                    if 'pythonize' in tab:
@@ -268,8 +263,8 @@ class Item(object):
     def is_correct(self):
         state = True
         properties = self.__class__.properties
-        for prop in properties:
-            if not hasattr(self, prop) and properties[prop].required:
+        for prop, entry in properties.items():
+            if not hasattr(self, prop) and entry.required:
                 print self.get_name(), "missing property :", prop
                 state = False
         return state
@@ -282,8 +277,7 @@ class Item(object):
     #in Classes taht give such modifications to do.
     def old_properties_names_to_new(self):
         old_properties = self.__class__.old_properties
-        for old_name in old_properties:
-            new_name = old_properties[old_name]
+        for old_name, new_name in old_properties.items():
             #Ok, if we got old_name and NO new name,
             #we switch the name
             if hasattr(self, old_name) and not hasattr(self, new_name):
@@ -368,8 +362,7 @@ class Item(object):
     def prepare_for_conf_sending(self):
         cls = self.__class__
 
-        for prop in cls.properties:
-            entry = cls.properties[prop]
+        for prop, entry in cls.properties.items():
             #Is this property need preparation for sending?
             if entry.conf_send_preparation is not None:
                 f = entry.conf_send_preparation
@@ -378,8 +371,7 @@ class Item(object):
                     setattr(self, prop, val)
 
         if hasattr(cls, 'running_properties'):
-            for prop in cls.running_properties:
-                entry = cls.running_properties[prop]
+            for prop, entry in cls.running_properties.items():
             #Is this property need preparation for sending?
                 if entry.conf_send_preparation is not None:
                     f = entry.conf_send_preparation
@@ -411,18 +403,18 @@ class Item(object):
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         #Now config properties
-        for prop in cls.properties:
+        for prop, entry in cls.properties.items():
             #Is this property intended for brokking?
 #            if 'fill_brok' in cls.properties[prop]:
-            if brok_type in cls.properties[prop].fill_brok:
+            if brok_type in entry.fill_brok:
                 data[prop] = self.get_property_value_for_brok(prop, cls.properties)
 
         # Maybe the class do not have running_properties
         if hasattr(cls, 'running_properties'):
             # We've got prop in running_properties too
-            for prop in cls.running_properties:
+            for prop, entry in cls.running_properties.items():
 #                if 'fill_brok' in cls.running_properties[prop]:
-                if brok_type in cls.running_properties[prop].fill_brok:
+                if brok_type in entry.fill_brok:
                     data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
 
 
@@ -660,8 +652,7 @@ class Items(object):
         #We check for all Class properties if the host has it
         #if not, it check all host templates for a value
         cls = self.inner_class
-        properties = cls.properties
-        for prop in properties:
+        for prop in cls.properties:
             self.apply_partial_inheritance(prop)
         for i in self:
             i.get_customs_properties_by_inheritance(self)

@@ -170,9 +170,9 @@ class Notification(Action):
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         #Now config properties
-        for prop in cls.properties:
+        for prop, entry in cls.properties.items():
             if hasattr(prop, 'fill_brok'):
-                if brok_type in cls.properties[prop]['fill_brok']:
+                if brok_type in entry['fill_brok']:
                     data[prop] = getattr(self, prop)
 
 

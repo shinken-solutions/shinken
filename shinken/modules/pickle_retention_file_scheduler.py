@@ -72,8 +72,7 @@ class Pickle_retention_scheduler(BaseModule):
             for h in sched.hosts:
                 d = {}
                 running_properties = h.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
+                for prop, entry in running_properties.items():
                     if entry.retention:
                         d[prop] = getattr(h, prop)
                 #f2 = open('/tmp/moncul2/'+h.host_name, 'wb')
@@ -85,8 +84,7 @@ class Pickle_retention_scheduler(BaseModule):
             for s in sched.services:
                 d = {}
                 running_properties = s.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
+                for prop, entry in running_properties.items():
                     if entry.retention:
                         d[prop] = getattr(s, prop)
                 #f2 = open('/tmp/moncul2/'+s.host_name+'__'+s.service_description, 'wb')
@@ -149,8 +147,7 @@ class Pickle_retention_scheduler(BaseModule):
             h = sched.hosts.find_by_name(ret_h_name)
             if h is not None:
                 running_properties = h.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
+                for prop, entry in running_properties.items():
                     if entry.retention:
                         # Mayeb the save was not with this value, so
                         # we just bypass this
@@ -183,8 +180,7 @@ class Pickle_retention_scheduler(BaseModule):
             s = sched.services.find_srv_by_name_and_hostname(ret_s_h_name, ret_s_desc)
             if s is not None:
                 running_properties = s.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
+                for prop, entry in running_properties.items():
                     if entry.retention:
                         # Mayeb the save was not with this value, so
                         # we just bypass this

@@ -377,9 +377,9 @@ class Host(SchedulingItem):
 
         special_properties = ['contacts', 'contact_groups', 'check_period', \
                                   'notification_interval', 'check_period']
-        for prop in cls.properties:
+        for prop, entry in cls.properties.items():
             if prop not in special_properties:
-                if not hasattr(self, prop) and cls.properties[prop].required:
+                if not hasattr(self, prop) and entry.required:
                     logger.log("%s : I do not have %s" % (self.get_name(), prop))
                     state = False #Bad boy...
 

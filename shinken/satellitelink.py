@@ -56,9 +56,9 @@ class SatelliteLink(Item):
         cls = self.__class__
 
         special_properties = ['realm']
-        for prop in cls.properties:
+        for prop, entry in cls.properties.items():
             if prop not in special_properties:
-                if not hasattr(self, prop) and cls.properties[prop]['required']:
+                if not hasattr(self, prop) and entry['required']:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
         # Ok now we manage special cases...
@@ -301,9 +301,9 @@ class SatelliteLink(Item):
         self.cfg = { 'global' : {}, 'schedulers' : {}, 'arbiters' : {}}
         #cfg_for_satellite['modules'] = satellite.modules
         properties = self.__class__.properties
-        for prop in properties:
-#            if 'to_send' in properties[prop] and properties[prop]['to_send']:
-            if properties[prop].to_send:
+        for prop, entry in properties.items():
+#            if 'to_send' in entry and entry['to_send']:
+            if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
 
     #Some parameters for satellites are not defined in the satellites conf

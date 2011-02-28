@@ -73,12 +73,10 @@ class Realm(Itemgroup):
     #TODO : change itemgroup function pythonize?
     def pythonize(self):
         cls = self.__class__
-        for prop in cls.properties:
+        for prop, tab in cls.properties.items():
             try:
-                tab = cls.properties[prop]
-                f = tab.pythonize
                 old_val = getattr(self, prop)
-                new_val = f(old_val)
+                new_val = tab.pythonize(old_val)
                 #print "Changing ", old_val, "by", new_val
                 setattr(self, prop, new_val)
             except AttributeError , exp:

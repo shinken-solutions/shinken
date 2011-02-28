@@ -102,8 +102,7 @@ class SchedulerLink(SatelliteLink):
     def get_override_configuration(self):
         r = {}
         properties = self.__class__.properties
-        for prop in properties:
-            entry = properties[prop]
+        for prop, entry in properties.items():
             if entry.override:
                 r[prop] = getattr(self, prop)
         return r

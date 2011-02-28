@@ -480,11 +480,11 @@ Also put default value in the properties if some are missing in the config_file 
         else:
             print "No config file specified, use defaults parameters"
         #Now fill all defaults where missing parameters
-        for prop in properties:
+        for prop, entry in properties.items():
             if not hasattr(self, prop):
-                value = properties[prop]['default']
-                if prop in properties and properties[prop]['pythonize'] is not None:
-                    value = properties[prop]['pythonize'](value)
+                value = entry['default']
+                if entry['pythonize'] is not None:
+                    value = entry['pythonize'](value)
                 setattr(self, prop, value)
                 print "Using default value :", prop, value
 
@@ -494,8 +494,8 @@ Also put default value in the properties if some are missing in the config_file 
     def relative_paths_to_full(self, reference_path):
         #print "Create relative paths with", reference_path
         properties = self.__class__.properties
-        for prop in properties:
-            if 'path' in properties[prop] and properties[prop]['path']:
+        for prop, entry in properties.items():
+            if 'path' in entry and entry['path']:
                 path = getattr(self, prop)
                 if not os.path.isabs(path):
                     path = os.path.join(reference_path, path)

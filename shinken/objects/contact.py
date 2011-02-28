@@ -163,9 +163,9 @@ class Contact(Item):
         cls = self.__class__
 
         #All of the above are checks in the notificationways part
-        for prop in cls.properties:
+        for prop, entry in cls.properties.items():
             if prop not in _special_properties:
-                if not hasattr(self, prop) and cls.properties[prop].required:
+                if not hasattr(self, prop) and entry.required:
                     print self.get_name(), " : I do not have", prop
                     state = False #Bad boy...
 

@@ -685,8 +685,7 @@ class Config(Item):
     def notice_about_useless_parameters(self):
         if not self.disable_old_nagios_parameters_whining:
             properties = self.__class__.properties
-            for prop in properties:
-                entry = properties[prop]
+            for prop, entry in properties.items():
                 if isinstance(entry, UnusedProp):
                     text = 'Notice : the parameter %s is useless and can be removed from the configuration (Reason: %s)' %  (prop, entry.text)
                     logger.log(text)
@@ -697,8 +696,7 @@ class Config(Item):
     def warn_about_unmanaged_parameters(self):
         properties = self.__class__.properties
         unmanaged = []
-        for prop in properties:
-            entry = properties[prop]
+        for prop, entry in properties.items():
             if not entry.managed and hasattr(self, prop):
                 if entry.help:
                     s = "%s : %s" % (prop, entry.help)
@@ -1356,12 +1354,11 @@ class Config(Item):
             self.confs[i] = Config()
 
             #Now we copy all properties of conf into the new ones
-            for prop in Config.properties:
-#               if not 'usage' in Config.properties[prop] \
-#               or not (Config.properties[prop]['usage'] == 'unused' \
-#               or  Config.properties[prop]['usage'] == 'unmanaged'):
-                if Config.properties[prop].managed \
-                        and not isinstance(Config.properties[prop], UnusedProp):
+            for prop, entry in Config.properties.items():
+#               if not 'usage' in entry \
+#               or not (entry['usage'] == 'unused' \
+#               or  entry['usage'] == 'unmanaged'):
+                if entry.managed and not isinstance(entry, UnusedProp):
                     val = getattr(self, prop)
                     setattr(self.confs[i], prop, val)
                     #print "Copy", prop, val

@@ -76,13 +76,9 @@ class Itemgroup:
     #If a prop is absent and is not required, put the default value
     def fill_default(self):
         cls = self.__class__
-        properties = cls.properties
-
-        not_required = tuple( prop for prop in properties 
-                         if not properties[prop].required )
-        for prop in not_required:
-            if not hasattr(self, prop):
-                value = properties[prop].default
+        for prop, entry in cls.properties.items():
+            if not hasattr(self, prop) and not entry.required:
+                value = entry.default
                 setattr(self, prop, value)
 
 
@@ -128,8 +124,8 @@ class Itemgroup:
         cls = self.__class__
         data = {}
         #Now config properties
-        for prop in cls.properties:
-            if cls.properties[prop].fill_brok != []:
+        for prop, entry in cls.properties.items():
+            if entry.fill_brok != []:
                 if self.has(prop):
                     data[prop] = getattr(self, prop)
         #Here members is just a bunch of host, I need name in place

@@ -117,8 +117,7 @@ class Memcache_retention_scheduler(BaseModule):
             h = sched.hosts.find_by_name(ret_h.host_name)
             if h is not None:
                 running_properties = h.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
+                for prop, entry in running_properties.items():
                     if 'retention' in entry and entry['retention']:
                         setattr(h, prop, getattr(ret_h, prop))
                         for a in h.notifications_in_progress.values():
@@ -131,8 +130,7 @@ class Memcache_retention_scheduler(BaseModule):
             s = sched.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
             if s is not None:
                 running_properties = s.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
+                for prop, entry in running_properties.items():
                     if 'retention' in entry and entry['retention']:
                         setattr(s, prop, getattr(ret_s, prop))
                         for a in s.notifications_in_progress.values():

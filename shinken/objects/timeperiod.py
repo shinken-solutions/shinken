@@ -595,14 +595,14 @@ class Timeperiod(Item):
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         #Now config properties
-        for prop in cls.properties:
+        for prop, entry in cls.properties.items():
             #Is this property intended for brokking?
-#            if 'fill_brok' in cls.properties[prop]:
-            if brok_type in cls.properties[prop].fill_brok:
+#            if 'fill_brok' in entry:
+            if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)
-                elif 'default' in cls.properties[prop]:
-                    data[prop] = cls.properties[prop].default
+                elif 'default' in entry:
+                    data[prop] = entry.default
 
 
     #Get a brok with initial status

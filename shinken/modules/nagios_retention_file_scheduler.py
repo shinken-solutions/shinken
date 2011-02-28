@@ -170,8 +170,7 @@ class Nagios_retention_scheduler(BaseModule):
     def pythonize_running(self, obj, obj_cfg):
         cls = obj.__class__
         running_properties = cls.running_properties
-        for prop in running_properties:
-            entry = running_properties[prop]
+        for prop, entry in running_properties.items():
             if hasattr(obj, prop) and prop in obj_cfg:
 #                if 'pythonize' in entry:
                 f = entry.pythonize
@@ -358,8 +357,7 @@ class Nagios_retention_scheduler(BaseModule):
             if h is not None:
 #                print "Ok, got data for", h.get_dbg_name()
                 running_properties = h.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
+                for prop, entry in running_properties.items():
                     if entry.retention:
                         setattr(h, prop, getattr(ret_h, prop))
                 for a in h.notifications_in_progress.values():
@@ -385,8 +383,7 @@ class Nagios_retention_scheduler(BaseModule):
 #                print "Ok, got data for", s.get_dbg_name()
 #                print "Latency", ret_s.latency, type(ret_s.latency)
                 running_properties = s.__class__.running_properties
-                for prop in running_properties:
-                    entry = running_properties[prop]
+                for prop, entry in running_properties.items():
                     if entry.retention:
 #                        print "Set service value", getattr(ret_s, prop)
                         setattr(s, prop, getattr(ret_s, prop))
