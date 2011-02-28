@@ -15,11 +15,3 @@
 #
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-
-
-
-from arbiterdaemon import Arbiter
-from schedulerdaemon import Shinken
-from pollerdaemon import Poller
-from brokerdaemon import Broker
-from reactionnerdaemon import Reactionner
