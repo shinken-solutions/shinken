@@ -60,6 +60,7 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
         os.chdir(curdir)
         p = Poller(pollerconfig, False, True, False, None)
         p.do_load_config()
+        p.port = 0  # let's here choose automatic port attribution..
         self.get_login_and_group(p)
         return p
     
@@ -83,7 +84,8 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
         p1 = self.get_poller_daemon()
         p1.do_daemon_init_and_start()           
         os.unlink(p1.pidfile)  ## so that second poller will not see first started poller
-        p2 = self.get_poller_daemon()        
+        p2 = self.get_poller_daemon()
+        p2.port = p1.daemon.port
         self.assertRaises(PortNotFree, p2.do_daemon_init_and_start)
         
         

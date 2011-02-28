@@ -57,14 +57,15 @@ try:
             else:
                 prtcol = 'PYRO'
             try:
-                Pyro.core.Daemon.__init__(self, host=host, port=port, prtcol=prtcol)
+                Pyro.core.Daemon.__init__(self, host=host, port=port, prtcol=prtcol, norange=True)
             except OSError, e:
                 # must be problem with workdir :
                 raise InvalidWorkDir(e)
-            if self.port != port:
-                msg = "Sorry, the port %d is not free" % (port)
+            except Pyro.errors.DaemonError, e:
+                msg = "Sorry, the port %d is not free: %s" % (port, e)
+            #if port and self.port != port:
+            #    msg = "Sorry, the port %d is not free" % (port)
                 raise PortNotFree(msg)
-        
 
         def register(self, obj, name):
             return self.connect(obj, name)
