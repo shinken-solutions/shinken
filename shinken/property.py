@@ -26,6 +26,10 @@
 
 from shinken.util import to_float, to_split, to_char, to_int
 
+__all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
+           'CharProp', 'StringProp', 'ListProp',
+           'FULL_STATUS', 'CHECK_RESULT']
+
 __author__ = "Hartmut Goebel <h.goebel@goebel-consult.de>"
 __copyright__ = "Copyright 2010 by Hartmut Goebel <h.goebel@goebel-consult.de>"
 __licence__ = "GNU Affero General Public License version 3 (AGPL v3)"
