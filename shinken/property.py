@@ -172,6 +172,8 @@ class StringProp(Property):
     def pythonize(self, val):
         return val
 
+class PathProp(StringProp):
+    """A string property representing a path"""
 
 class ListProp(Property):
 #    @staticmethod
