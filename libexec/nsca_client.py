@@ -74,9 +74,9 @@ class NSCA_client():
             data = decrypt_xor(data,iv)
 
         (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
-        hostname, sep, dish =  hostname_dirty.partition("\0")
-        service, sep, dish = service_dirty.partition("\0")
-        output, sep, dish = output_dirty.partition("\0")
+        hostname =  hostname_dirty.partition("\0", 1)[0]
+        service = service_dirty.partition("\0", 1)[0]
+        output = output_dirty.partition("\0", 1)[0]
         return (timestamp, rc, hostname, service, output)
 
     def post_command(self, timestamp, rc, hostname, service, output):
