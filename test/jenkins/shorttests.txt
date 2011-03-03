@@ -46,4 +46,5 @@ test_contactdowntimes.py
 test_nullinheritance.py
 test_create_link_from_ext_cmd.py
 test_dispatcher.py
+test_poller_tag_get_checks.py
 test_livestatus.py

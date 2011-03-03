@@ -92,6 +92,7 @@ launch_and_assert test_module_hack_cmd_poller_tag.py
 launch_and_assert test_unknown_do_not_change.py
 launch_and_assert test_customs_on_service_hosgroups.py
 launch_and_assert test_modules_nrpe_poller.py
+launch_and_assert test_poller_tag_get_checks.py
 
 #Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py
