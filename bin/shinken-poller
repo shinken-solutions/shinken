@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+#Copyright (C) 2009-2011 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 #This file is part of Shinken.
 #
@@ -35,17 +36,15 @@ import sys
 import os
 import optparse
 
-# Try to load shinken lib.
-# Maybe it's not in our python path, so we detect it
-# If so (it's an untar install) we add .. in the path
 try:
-    import shinken
-except ImportError, e:
-    if hasattr(sys.modules['__main__'], '__file__'):
-        my_path = os.path.abspath(sys.modules['__main__'].__file__)
-        parent_path = os.path.dirname(os.path.dirname(my_path))
-        sys.path.append(parent_path)
-        sys.path.append(os.path.join(parent_path, 'shinken'))
+    import PyInstaller
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    if not hasattr(os, "getuid") or os.getuid() != 0:
+        imp.load_module('shinken', *imp.find_module('shinken', [".", ".."]))
 
 
 from shinken.daemons.pollerdaemon import Poller
