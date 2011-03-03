@@ -65,7 +65,7 @@ class Realm(Itemgroup):
 
     def get_realm_members(self):
         if self.has('realm_members'):
-            return self.realm_members.split(',')
+            return [r.strip() for r in self.realm_members.split(',')]
         else:
             return []
 
