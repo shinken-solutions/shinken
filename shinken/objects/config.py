@@ -356,6 +356,7 @@ class Config(Item):
                         cfg_file_name = elts[1]
                     else:
                         cfg_file_name = os.path.join(config_base_dir, elts[1])
+                    cfg_file_name = cfg_file_name.strip()
                     try:
                         fd = open(cfg_file_name, 'rU')
                         logger.log("Processing object config file '%s'" % cfg_file_name)
