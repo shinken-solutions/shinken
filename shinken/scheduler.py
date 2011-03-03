@@ -346,7 +346,7 @@ class Scheduler:
     # Called by poller to get checks
     # Can get checks and actions (notifications and co)
     def get_to_run_checks(self, do_checks=False, do_actions=False,
-                          poller_tags=None):
+                          poller_tags=[]):
         res = []
         now = time.time()
 
