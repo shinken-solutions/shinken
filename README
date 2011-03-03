@@ -117,7 +117,7 @@ Quick and dirty way
 
 It's easy, there is a already launch script for you::
 
-  /usr/local/shinken/bin/launch_all.sh
+  shinken/bin/launch_all.sh
 
 Clean way
 ~~~~~~~~~~~~~~~~~~~~
@@ -138,3 +138,13 @@ None we know :)
 
 If you find one, please post it in our trac site:
 https://sourceforge.net/apps/trac/shinken/report/2
+
+
+How to run uninstall Shinken
+================================
+
+Clean all :)
+~~~~~~~~~~~~~~~~~~~~
+
+There a script call clean.sh on the source directory for this :)
+Beware, it will supress all Shinken related files!
