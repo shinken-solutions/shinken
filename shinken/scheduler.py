@@ -354,8 +354,9 @@ class Scheduler:
         if do_checks:
             for c in self.checks.values():
                 #  If the command is untagged, and the poller too, or if both are taggued
-                # with same name, go for it
-                if (c.poller_tag is None and poller_tags is None) or c.poller_tag in poller_tags:
+                #  with same name, go for it
+                # if do_check, call for poller, and so poller_tags by default is []
+                if (c.poller_tag is None and poller_tags == []) or c.poller_tag in poller_tags:
                     # must be ok to launch, and not an internal one (business rules based)
                     if c.status == 'scheduled' and c.is_launchable(now) and not c.internal:
                         c.status = 'inpoller'
