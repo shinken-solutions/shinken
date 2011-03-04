@@ -53,7 +53,7 @@ if os.name != 'nt':
         sys.setrecursionlimit(int(stacksize_soft * 2.4 + 3200))
 
 try:
-    import PyInstaller
+    import shinken
 except ImportError:
     # If importing shinken fails, try to load from current directory
     # or parent directory to support running without installation.

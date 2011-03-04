@@ -37,7 +37,7 @@ import os
 import optparse
 
 try:
-    import PyInstaller
+    import shinken
 except ImportError:
     # If importing shinken fails, try to load from current directory
     # or parent directory to support running without installation.
