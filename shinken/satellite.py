@@ -57,6 +57,10 @@ from shinken.load import Load
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
+from shinken.check import Check
+from shinken.notification import Notification
+from shinken.eventhandler import EventHandler
+
 
 # Interface for Arbiter, our big MASTER
 # It put us our conf
