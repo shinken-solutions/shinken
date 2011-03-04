@@ -31,6 +31,6 @@ curdir=$(dirname "$0")
 
 export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it's called by us
 
-"$curdir/shinken" $@ -m poller
+"$curdir/shinken" -m poller $@
 
 exit $?
