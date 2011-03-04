@@ -34,6 +34,8 @@ BIN="/usr/local/shinken/bin"
 VAR="/usr/local/shinken/var"
 ETC="/usr/local/shinken/etc"
 
+export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
+
 # default
 DEBUG=false
 CMD=""
