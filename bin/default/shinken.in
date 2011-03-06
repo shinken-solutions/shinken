@@ -22,7 +22,8 @@ SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
 ARBITERDAEMON=$BIN/shinken-arbiter
 
 #The ARBITER PID
-[ -r $SHINKENCFG ] && ARBITERPID=$(grep lock_file $SHINKENCFG | cut -d= -f2)
+[ -r $SHINKENCFG ] && ARBITERPID=$(. "$SHINKENCFG" >/dev/null ; echo $lock_file)
+
 
 ###SCHEDULER PART
 # location of the scheduler daemon configuration
