@@ -22,7 +22,7 @@ SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
 ARBITERDAEMON=$BIN/shinken-arbiter
 
 #The ARBITER PID
-[ -r $SHINKENCFG ] && ARBITERPID=$(. "$SHINKENCFG" >/dev/null ; echo $lock_file)
+[ -r $SHINKENCFG ] && ARBITERPID=$(. "$SHINKENCFG" >/dev/null 2>&1 ; echo ${lock_file-$VAR/arbiterd.pid}) || ARBITERPID="$VAR/arbiterd.pid"
 
 
 ###SCHEDULER PART
