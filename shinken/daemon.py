@@ -60,7 +60,7 @@ class Interface(Pyro.core.ObjBase):
     def __init__(self, app):
         """ 'app´ is to be set to the owner of this interface. """
 
-        super(Pyro.core.ObjBase, self).__init__()
+        Pyro.core.ObjBase.__init__(self)
         
         self.app = app
         self.running_id = "%d.%d" % (time.time(), random.random())
