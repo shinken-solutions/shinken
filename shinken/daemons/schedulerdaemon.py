@@ -152,8 +152,8 @@ class Shinken(BaseSatellite):
 
 
     def do_stop(self):
-        self.pyro_daemon.unregister(self.ibroks.pyro_obj)
-        self.pyro_daemon.unregister(self.ichecks.pyro_obj)
+        self.pyro_daemon.unregister(self.ibroks)
+        self.pyro_daemon.unregister(self.ichecks)
         super(Shinken, self).do_stop()
 
 
@@ -283,19 +283,19 @@ class Shinken(BaseSatellite):
         # But first remove previous interface if exists
         if self.ichecks is not None:
             print "Deconnecting previous Check Interface from pyro_daemon"
-            self.pyro_daemon.unregister(self.ichecks.pyro_obj)
+            self.pyro_daemon.unregister(self.ichecks)
         #Now create and connect it
         self.ichecks = IChecks(self.sched)
-        self.uri = self.pyro_daemon.register(self.ichecks.pyro_obj, "Checks")
+        self.uri = self.pyro_daemon.register(self.ichecks, "Checks")
         print "The Checks Interface uri is:", self.uri
 
         #Same for Broks
         if self.ibroks is not None:
             print "Deconnecting previous Broks Interface from pyro_daemon"
-            self.pyro_daemon.unregister(self.ibroks.pyro_obj)
+            self.pyro_daemon.unregister(self.ibroks)
         #Create and connect it
         self.ibroks = IBroks(self.sched)
-        self.uri2 = self.pyro_daemon.register(self.ibroks.pyro_obj, "Broks")
+        self.uri2 = self.pyro_daemon.register(self.ibroks, "Broks")
         print "The Broks Interface uri is:", self.uri2
 
         print("Loading configuration..")
@@ -337,7 +337,7 @@ class Shinken(BaseSatellite):
         self.load_config_file()
         
         self.do_daemon_init_and_start()        
-        self.uri2 = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
+        self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
         print "The Arbiter Interface is at:", self.uri2
         
         self.do_mainloop()

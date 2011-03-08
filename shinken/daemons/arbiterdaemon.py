@@ -364,7 +364,7 @@ class Arbiter(Daemon):
         self.load_config_file()
 
         self.do_daemon_init_and_start(self.conf)
-        self.uri_arb = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
+        self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
         # ok we are now fully daemon (if requested)
         # now we can start our "external" modules (if any) :

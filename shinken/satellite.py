@@ -156,7 +156,7 @@ class BaseSatellite(Daemon):
     def do_stop(self):
         if self.pyro_daemon:
             print "Stopping all network connexions"
-            self.pyro_daemon.unregister(self.interface.pyro_obj)
+            self.pyro_daemon.unregister(self.interface)
         super(BaseSatellite, self).do_stop()
 
 
@@ -323,8 +323,8 @@ class Satellite(BaseSatellite):
                 pass
         if self.pyro_daemon:
             logger.log('Stopping all network connexions')
-            self.pyro_daemon.unregister(self.brok_interface.pyro_obj)
-            self.pyro_daemon.unregister(self.scheduler_interface.pyro_obj)
+            self.pyro_daemon.unregister(self.brok_interface)
+            self.pyro_daemon.unregister(self.scheduler_interface)
         super(Satellite, self).do_stop()
 
 
@@ -559,9 +559,9 @@ class Satellite(BaseSatellite):
         """ Do this satellite (poller or reactionner) post "daemonize" init:
 we must register our interfaces for 3 possible callers: arbiter, schedulers or brokers. """
         # And we register them
-        self.uri2 = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
-        self.uri3 = self.pyro_daemon.register(self.brok_interface.pyro_obj, "Broks")
-        self.uri4 = self.pyro_daemon.register(self.scheduler_interface.pyro_obj, "Schedulers")
+        self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
+        self.uri3 = self.pyro_daemon.register(self.brok_interface, "Broks")
+        self.uri4 = self.pyro_daemon.register(self.scheduler_interface, "Schedulers")
         
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER

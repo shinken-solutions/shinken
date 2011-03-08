@@ -512,7 +512,7 @@ class Broker(BaseSatellite):
         
         self.do_daemon_init_and_start()
 
-        self.uri2 = self.pyro_daemon.register(self.interface.pyro_obj, "ForArbiter")
+        self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
         print "The Arbtier uri it at", self.uri2
 
         #  We wait for initial conf

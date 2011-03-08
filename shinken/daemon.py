@@ -54,14 +54,13 @@ class InvalidPidDir(Exception): pass
 
 
 
-class Interface(object):
+class Interface(Pyro.core.ObjBase):
     """ Interface for pyro communications """
     
     def __init__(self, app):
         """ 'app´ is to be set to the owner of this interface. """
 
-        self.pyro_obj = Pyro.core.ObjBase() 
-        self.pyro_obj.delegateTo(self)
+        super(Pyro.core.ObjBase, self).__init__()
         
         self.app = app
         self.running_id = "%d.%d" % (time.time(), random.random())
