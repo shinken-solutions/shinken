@@ -936,19 +936,27 @@ class Scheduler:
 
     # Check for orphaned checks : checks that never returns back
     # so if inpoller and t_to_go < now - 300s : pb!
+    # Warn only one time for each "worker"
     def check_orphaned(self):
+        worker_names = {}
         now = int(time.time())
         for c in self.checks.values():
             if c.status == 'inpoller' and c.t_to_go < now - 300:
-                logger.log("Warning : the results of check %d never came back. I'm reenable it for polling" % c.id)
                 c.status = 'scheduled'
+                if c.worker not in worker_names:
+                    worker_names[c.worker] = 1
+                    continue
+                worker_names[c.worker] += 1
         for a in self.actions.values():
             if a.status == 'inpoller' and a.t_to_go < now - 300:
-                logger.log("Warning : the results of action %d never came back. I'm reenable it for polling" % a.id)
                 a.status = 'scheduled'
+                if a.worker not in worker_names:
+                    worker_names[a.worker] = 1
+                    continue
+                worker_names[a.worker] += 1
 
-
-
+        for w in worker_names:
+            logger.log("Warning : %d actions never came back for the satellite '%s'. I'm reenable them for polling" % (worker_names[w], w))
 
 
     # Main function

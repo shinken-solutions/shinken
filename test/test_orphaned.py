@@ -70,6 +70,9 @@ class TestOrphaned(ShinkenTest):
         for c in self.sched.checks.values():
             self.assert_(c.status == 'scheduled')
 
+        # And we correctly raise the log
+        self.assert_(self.any_log_match('actions never came back for the satellite'))
+
 
 if __name__ == '__main__':
     unittest.main()
