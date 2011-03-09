@@ -47,7 +47,7 @@ They connect here and see if they are still OK with our running_id, if not, they
 
 
     # poller or reactionner ask us actions
-    def get_checks(self , do_checks=False, do_actions=False, poller_tags=[], worker_name='none'):
+    def get_checks(self , do_checks=False, do_actions=False, poller_tags=['None'], worker_name='none'):
         #print "We ask us checks"
         res = self.app.get_to_run_checks(do_checks, do_actions, poller_tags, worker_name)
         #print "Sending %d checks" % len(res)
