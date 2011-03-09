@@ -46,5 +46,10 @@ test_contactdowntimes.py
 test_nullinheritance.py
 test_create_link_from_ext_cmd.py
 test_dispatcher.py
+test_customs_on_service_hosgroups.py
+test_unknown_do_not_change.py
+test_module_hack_cmd_poller_tag.py
 test_poller_tag_get_checks.py
+test_module_hot_dependencies_arbiter.py
+test_orphaned.py
 test_livestatus.py
