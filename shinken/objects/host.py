@@ -112,7 +112,7 @@ class Host(SchedulingItem):
         # 'fill_brok' is ok because in scheduler it's already
         # a string from conf_send_preparation
         'realm':                StringProp(default=None, fill_brok=['full_status'], conf_send_preparation=get_obj_name),
-        'poller_tag':           StringProp(default=None),
+        'poller_tag':           StringProp(default='None'),
         'resultmodulations':    StringProp(default=''),
         'escalations':          StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':   StringProp(default='', fill_brok=['full_status']),

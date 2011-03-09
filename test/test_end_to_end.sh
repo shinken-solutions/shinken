@@ -456,7 +456,7 @@ string_in_file "Connexion OK to the poller poller-Master-2" $VAR/nagios.log
 
 
 echo "Now we clean it"
-./clean.sh
+#./clean.sh
 
 
 echo ""

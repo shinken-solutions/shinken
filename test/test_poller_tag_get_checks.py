@@ -56,14 +56,16 @@ class TestPollerTagGetchecks(ShinkenTest):
         # the scheduler need to get this new checks in its own queues
         self.sched.get_new_actions()
         # Ask for untag checks only
-        untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=[])
+        untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'])
         print "Got untaggued_checks", untaggued_checks
+        self.assert_(len(untaggued_checks) > 0)
         for c in untaggued_checks:
             # Should be the service one, but not the host one
             self.assert_(c.command.startswith('plugins/test_servicecheck.pl'))
 
         # Now get only tag ones
         taggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['mytestistrue'])
+        self.assert_(len(taggued_checks) > 0)
         for c in taggued_checks:
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/test_hostcheck.pl'))

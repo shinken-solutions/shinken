@@ -44,7 +44,7 @@ class PollerLink(SatelliteLink):
         'processes_by_worker': IntegerProp(default='256', fill_brok=['full_status'], to_send=True),
         'polling_interval': IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'manage_arbiters': IntegerProp(default='0'),
-        'poller_tags':  ListProp(default='', to_send=True),
+        'poller_tags':  ListProp(default='None', to_send=True),
         'use_timezone': StringProp(default='NOTSET', to_send=True),
         'timeout':      IntegerProp(default='3', fill_brok=['full_status']),
         'data_timeout': IntegerProp(default='120', fill_brok=['full_status']),

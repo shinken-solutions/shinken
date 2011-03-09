@@ -107,7 +107,7 @@ class Service(SchedulingItem):
         'parallelize_check':       BoolProp  (default='1', fill_brok=['full_status']),
 
         # Shinken specific
-        'poller_tag':              StringProp(default=None),
+        'poller_tag':              StringProp(default='None'),
         'resultmodulations':       StringProp(default=''),
         'escalations':             StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':      StringProp(default='', fill_brok=['full_status']),

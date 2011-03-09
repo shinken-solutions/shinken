@@ -30,7 +30,7 @@ class Command(object):
     properties = {
         'command_name': StringProp(fill_brok=['full_status']),
         'command_line': StringProp(fill_brok=['full_status']),
-        'poller_tag':   StringProp(default=None),
+        'poller_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
     }
 
@@ -40,7 +40,7 @@ class Command(object):
         for key in params:
             setattr(self, key, params[key])
         if not hasattr(self, 'poller_tag'):
-            self.poller_tag = None
+            self.poller_tag = 'None'
         if not hasattr(self, 'module_type'):
             # If the command satr with a _, set the module_type
             # as the name of the command, without the _
@@ -96,7 +96,7 @@ class CommandCall:
     __slots__ = ('id', 'call', 'command', 'valid', 'args')
     id = 0
     my_type = 'CommandCall'
-    def __init__(self, commands, call, poller_tag=None):
+    def __init__(self, commands, call, poller_tag='None'):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.call = call
@@ -114,7 +114,7 @@ class CommandCall:
             #the one of the command
             self.poller_tag = poller_tag #from host/service
             self.module_type = self.command.module_type
-            if self.valid and poller_tag is None:
+            if self.valid and poller_tag is 'None':
                 self.poller_tag = self.command.poller_tag #from command if not set
 
 

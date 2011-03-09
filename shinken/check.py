@@ -46,7 +46,7 @@ class Check(Action):
         'check_time':   { 'required': False, 'default': 0 },
         'execution_time': { 'required': False, 'default': 0 },
         'perf_data':    { 'required': False, 'default': '' },
-        'poller_tag':   { 'required': False, 'default': None },
+        'poller_tag':   { 'required': False, 'default': 'None' },
         'env':          { 'required': False, 'default': {} },
         'internal':     { 'required': False, 'default': False },
         'module_type':  { 'required': False, 'default': 'fork' },
@@ -54,7 +54,7 @@ class Check(Action):
     }
 
     #id = 0 #Is common to Actions
-    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag=None, env={}, module_type='fork'):
+    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag='None', env={}, module_type='fork'):
 
         self.is_a = 'check'
         self.type = ''
