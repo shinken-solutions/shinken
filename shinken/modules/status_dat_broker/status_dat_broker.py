@@ -38,8 +38,8 @@ from shinken.objects import Timeperiod
 from shinken.objects import Command
 from shinken.objects import Config
 #And now include from this directory
-from shinken.modules.status_dat_broker.status import StatusFile
-from shinken.modules.status_dat_broker.objectscache import ObjectsCacheFile
+from status import StatusFile
+from objectscache import ObjectsCacheFile
 
 from shinken.basemodule import BaseModule
 

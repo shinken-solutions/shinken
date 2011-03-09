@@ -54,7 +54,7 @@ class InvalidPidDir(Exception): pass
 
 
 
-class Interface(Pyro.core.ObjBase):
+class Interface(Pyro.core.ObjBase, object):
     """ Interface for pyro communications """
     
     def __init__(self, app):
