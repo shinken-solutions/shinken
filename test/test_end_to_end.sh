@@ -34,7 +34,7 @@ cd $DIR/..
 
 #check for a process existance with good number
 function check_process_nb {
-    NB=`ps -fu shinken | grep python | grep -v grep | grep $1 | wc -l`
+    NB=`ps -fu shinken | grep python | grep -v grep | grep "shinken-"$1 | wc -l`
     if [ $NB != "$2" ]
     then
 	echo "Error : There is not enouth $1 launched (only $NB)."
@@ -400,6 +400,60 @@ string_in_file "Dispatch OK of for conf in scheduler scheduler-Master-1" $VAR/na
 string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
 string_in_file "OK, no more poller sent need" $VAR/nagios.log
 string_in_file "OK, no more broker sent need" $VAR/nagios.log
+
+echo "Now we clean it"
+./clean.sh
+
+
+
+echo "####################################################################################"
+echo "#                                                                                  #"
+echo "#                              Passive Poller                                      #"
+echo "#                                                                                  #"
+echo "####################################################################################"
+
+echo "Now we can start some launch tests"
+localize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-passive-poller.cfg
+test/bin/launch_all_debug4.sh
+globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-passive-poller.cfg
+
+
+echo "Now checking for existing apps"
+
+echo "we can sleep 5sec for conf dispatching and so good number of process"
+sleep 5
+
+#The number of process changed, we mush look for it
+
+
+#Standard launch process packets
+NB_SCHEDULERS=2
+#6 for stack 1, and 6 for stack 2
+NB_POLLERS=12
+#3 for stack1, Only 2 for stack 2 because it is not active
+NB_REACTIONNERS=5
+#3 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
+NB_BROKERS=4
+#still 1
+NB_ARBITERS=1
+
+#Now check if the run looks good with var in the direct directory
+check_good_run var
+
+echo "All launch of LB daemons is OK"
+
+
+#Now look if it's also good in the log file too
+string_in_file "Dispatch OK of for conf in scheduler scheduler-Master-2" $VAR/nagios.log
+string_in_file "Dispatch OK of for conf in scheduler scheduler-Master-1" $VAR/nagios.log
+string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
+string_in_file "OK, no more poller sent need" $VAR/nagios.log
+string_in_file "OK, no more broker sent need" $VAR/nagios.log
+# We should see the poller 2 say it is passive
+string_in_file "\[poller-Master-2\] Passive mode enabled." $VAR/nagios.log
+# and the schedulers should connect to it too
+string_in_file "Connexion OK to the poller poller-Master-2" $VAR/nagios.log
+
 
 echo "Now we clean it"
 ./clean.sh

@@ -110,15 +110,15 @@ class ISchedulers(Interface):
 
     # A Scheduler send me actions to do
     def push_actions(self, actions, sched_id):
-        print "A scheduler sned me actions", actions
+        #print "A scheduler sned me actions", actions
         self.app.add_actions(actions, sched_id)
 
 
     # A scheduler ask us its returns
     def get_returns(self, sched_id):
-        print "A scheduler ask me the returns", sched_id
+        #print "A scheduler ask me the returns", sched_id
         ret = self.app.get_return_for_passive(sched_id)
-        print "Send mack", len(ret), "returns"
+        #print "Send mack", len(ret), "returns"
         return ret
 
 
@@ -585,6 +585,11 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
             name = 'Unnamed satellite'
         self.name = name
 
+        self.passive = conf['global']['passive']
+        print "Is passive?", self.passive
+        if self.passive:
+            logger.log("[%s] Passive mode enabled." % self.name)
+
         # If we've got something in the schedulers, we do not want it anymore
         for sched_id in conf['schedulers'] :
             already_got = False
@@ -606,14 +611,15 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
             self.schedulers[sched_id]['running_id'] = 0
             self.schedulers[sched_id]['active'] = s['active']
 
-            # And then we connect to it :)
-            self.pynag_con_init(sched_id)
+            # Do not connect if we are a passive satellite
+            if not self.passive:
+                # And then we connect to it :)
+                self.pynag_con_init(sched_id)
 
         # Now the limit part
         self.max_workers = conf['global']['max_workers']
         self.min_workers = conf['global']['min_workers']
-        self.passive = conf['global']['passive']
-        print "Is passive?", self.passive
+
         self.processes_by_worker = conf['global']['processes_by_worker']
         self.polling_interval = conf['global']['polling_interval']
         self.timeout = self.polling_interval
