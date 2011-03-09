@@ -44,6 +44,7 @@ class EventHandler(Action):
         'check_time':     IntegerProp(default=0),
         'command':        StringProp (default=''),
         'module_type':    StringProp (default=''),
+        'worker':         StringProp (default='none'),
     }
 
     #id = 0 #Is common to Actions
@@ -66,6 +67,7 @@ class EventHandler(Action):
         self.perf_data = ''
         self.env = {}
         self.module_type = module_type
+        self.worker = 'none'
 
 
     #return a copy of the check but just what is important for execution

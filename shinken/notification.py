@@ -61,6 +61,7 @@ class Notification(Action):
         'timeout':             IntegerProp(default=10),
         'check_time':          IntegerProp(default=0),
         'module_type':         StringProp (default='', fill_brok=['full_status']),
+        'worker':           StringProp (default='none'),
     }
 
     macros = {
@@ -121,6 +122,7 @@ class Notification(Action):
         self.notification_type = notification_type
 
         self.creation_time = time.time()
+        self.worker = 'none'
 
 
     #return a copy of the check but just what is important for execution

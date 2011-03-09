@@ -160,8 +160,8 @@ class ShinkenTest(unittest.TestCase):
     def worker_loop(self):
         self.sched.delete_zombie_checks()
         self.sched.delete_zombie_actions()
-        checks = self.sched.get_to_run_checks(True, False)
-        actions = self.sched.get_to_run_checks(False, True)
+        checks = self.sched.get_to_run_checks(True, False, worker_name='tester')
+        actions = self.sched.get_to_run_checks(False, True, worker_name='tester')
         #print "------------ worker loop checks ----------------"
         #print checks
         #print "------------ worker loop actions ----------------"

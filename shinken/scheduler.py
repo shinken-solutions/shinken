@@ -346,7 +346,7 @@ class Scheduler:
     # Called by poller to get checks
     # Can get checks and actions (notifications and co)
     def get_to_run_checks(self, do_checks=False, do_actions=False,
-                          poller_tags=[]):
+                          poller_tags=[], worker_name='none'):
         res = []
         now = time.time()
 
@@ -360,6 +360,7 @@ class Scheduler:
                     # must be ok to launch, and not an internal one (business rules based)
                     if c.status == 'scheduled' and c.is_launchable(now) and not c.internal:
                         c.status = 'inpoller'
+                        c.worker = worker_name
                         # We do not send c, because it it link (c.ref) to
                         # host/service and poller do not need it. It just
                         # need a shell with id, command and defaults
@@ -371,6 +372,7 @@ class Scheduler:
             for a in self.actions.values():
                 if a.status == 'scheduled' and a.is_launchable(now):
                     a.status = 'inpoller'
+                    a.worker = worker_name
                     if a.is_a == 'notification' and not a.contact:
                         # This is a "master" notification created by create_notifications.
                         # It will not be sent itself because it has no contact.
@@ -536,7 +538,7 @@ class Scheduler:
             poller_tags = p['poller_tags']
             if con is not None:
             # get actions
-                lst = self.get_to_run_checks(True, False, poller_tags)
+                lst = self.get_to_run_checks(True, False, poller_tags, worker_name=p['name'])
                 try:
                     # intial ping must be quick
                     pyro.set_timeout(con, 120)

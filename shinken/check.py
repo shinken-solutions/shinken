@@ -50,6 +50,7 @@ class Check(Action):
         'env':          { 'required': False, 'default': {} },
         'internal':     { 'required': False, 'default': False },
         'module_type':  { 'required': False, 'default': 'fork' },
+        'worker':       { 'required': False, 'default': 'none' },
     }
 
     #id = 0 #Is common to Actions
@@ -81,6 +82,8 @@ class Check(Action):
         self.poller_tag = poller_tag
         self.module_type = module_type
         self.env = env
+        # we keep the reference of the poller that will take us
+        self.worker = 'none'
         # If it's a business rule, manage it as a special check
         if ref and ref.got_business_rule or command.startswith('_internal'):
             self.internal = True

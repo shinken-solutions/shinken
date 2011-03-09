@@ -435,7 +435,8 @@ class Satellite(BaseSatellite):
                 if con is not None: # None = not initilized
                     pyro.set_timeout(con, 120)
                     # OK, go for it :)
-                    tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, poller_tags=self.poller_tags)
+                    tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, \
+                                             poller_tags=self.poller_tags, worker_name=self.name)
                     print "Ask actions to", sched_id, "got", len(tmp)
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
