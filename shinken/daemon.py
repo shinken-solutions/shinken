@@ -605,3 +605,22 @@ positive when we have been sent in the futur and negative if we have been sent i
                 cur_timeout = timeout
             sys.stdout.write(".")
             sys.stdout.flush()
+
+
+    # We call the function of modules that got the this
+    # hook function
+    def hook_point(self, hook_name):
+        to_del = []
+        for inst in self.modules_manager.instances:
+            full_hook_name = 'hook_' + hook_name
+            if hasattr(inst, full_hook_name):
+                f = getattr(inst, full_hook_name)
+                try :
+                    print "Calling", full_hook_name, "of", inst.get_name()
+                    f(self)
+                except Exception, exp:
+                    logger.log('The instance %s raise an exception %s. I kill it' % (inst.get_name(), str(exp)))
+                    to_del.append(inst)
+
+        #Now remove mod that raise an exception
+        self.modules_manager.clear_instances(to_del)

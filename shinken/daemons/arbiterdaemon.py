@@ -161,6 +161,16 @@ class Arbiter(Daemon):
                     self.external_commands.append(new_cmd)
 
 
+    # We must take external_commands from all brokers
+    def get_external_commands_from_receivers(self):
+        for rec in self.conf.receivers:
+            # Get only if alive of course
+            if rec.alive:
+                new_cmds = rec.get_external_commands()
+                for new_cmd in new_cmds:
+                    self.external_commands.append(new_cmd)
+
+
     # Our links to satellites can raise broks. We must send them
     def get_broks_from_satellitelinks(self):
         tabs = [self.conf.brokers, self.conf.schedulerlinks, \
@@ -186,25 +196,6 @@ class Arbiter(Daemon):
     def load_external_command(self, e):
         self.external_command = e
         self.fifo = e.open()
-
-
-    # We call the function of modules that got the this
-    # hook function
-    def hook_point(self, hook_name):
-        to_del = []
-        for inst in self.modules_manager.instances:
-            full_hook_name = 'hook_' + hook_name
-            if hasattr(inst, full_hook_name):
-                f = getattr(inst, full_hook_name)
-                try :
-                    print "Calling", full_hook_name, "of", inst.get_name()
-                    f(self)
-                except Exception, exp:
-                    logger.log('The instance %s raise an exception %s. I kill it' % (inst.get_name(), str(exp)))
-                    to_del.append(inst)
-
-        #Now remove mod that raise an exception
-        self.modules_manager.clear_instances(to_del)
 
 
     def get_daemon_links(self, daemon_type):
@@ -564,6 +555,7 @@ class Arbiter(Daemon):
             # we must give him our broks
             self.push_broks_to_broker()
             self.get_external_commands_from_brokers()
+            self.get_external_commands_from_receivers()
             # send_conf_to_schedulers()
 
             print "Nb Broks send:", self.nb_broks_send
