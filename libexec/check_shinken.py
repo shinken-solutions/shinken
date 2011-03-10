@@ -59,53 +59,17 @@ except ImportError, exp:
     raise SystemExit, CRITICAL
 
 
-#The following functions just count the number of deamons with the associated parameters
-def count_total(result):
-    num = 0
-    for cur in result:
-	num += 1
-    return num
-
-def count_alive(result):
-    num = 0
-    for cur in result:
-	if result[cur]['alive'] == True:
-	    num += 1
-    return num
-
-def count_total_spare(result):
-    num = 0
-    for cur in result:
-	if result[cur]['spare'] == True:
-	    num += 1
-    return num
-
-def count_alive_spare(result):
-    num = 0
-    for cur in result:
-	if (result[cur]['spare'] == True and result[cur]['alive'] == True):
-	    num += 1
-    return num
-
-#this function prints the names of the daemons fallen
-def find_dead(result):
-    dead_ones = ''
-    for cur in result:
-	if (result[cur]['alive'] == False):
-	    dead_ones = dead_ones+' '+cur
-    return dead_ones
-
 def check_deamons_numbers(result, target):
-    total_number = count_total(result)
-    alive_number = count_alive(result)
-    total_spare_number = count_total_spare(result)
-    alive_spare_number = count_alive_spare(result)
+    total_number = len(result)
+    alive_number = len([e for e in result.values() if e['alive']])
+    total_spare_number = len([e for e in result.values() if e['spare']])
+    alive_spare_number = len([e for e in result.values() if e['spare'] and e['alive']])
     dead_number = total_number - alive_number
-    dead_list = find_dead(result)
+    dead_list = ','.join([n for n in result if not result[n]['alive']])
     #TODO : perfdata to graph deamons would be nice (in big HA architectures)
     #if alive_number <= critical, then we have a big problem
     if alive_number <= options.critical:
-	print "CRITICAL - %d/%d %s(s) UP" % (alive_number, total_number, target)  
+	print "CRITICAL - only %d/%d %s(s) UP. Down elements : %s" % (alive_number, total_number, target, dead_list)  
 	raise SystemExit, CRITICAL
     #We are not in a case where there is no more daemons, but are there daemons down?
     elif dead_number >= options.warning:
