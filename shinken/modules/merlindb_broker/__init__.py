@@ -21,6 +21,7 @@
 print "I am Generic Merlin Broker"
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'merlindb',
     'phases' : ['running'],
     }

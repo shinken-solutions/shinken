@@ -41,6 +41,7 @@ print "Detected module : Nagios retention file for Scheduler (load only!)"
 
 
 properties = {
+    'daemons' : ['scheduler'],
     'type' : 'nagios_retention_file',
     'external' : False,
     'phases' : ['retention'],

@@ -29,6 +29,7 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
+    'daemons' : ['scheduler'],
     'type' : 'dummy_scheduler',
     'external' : False,
     'phases' : ['retention'],

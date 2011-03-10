@@ -33,6 +33,7 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
+    'daemons' : ['scheduler'],
     'type' : 'pickle_retention_file',
     'external' : False,
     'phases' : ['retention'],

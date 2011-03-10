@@ -29,6 +29,7 @@ print "I am simple syslog Broker"
 
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'syslog',
     'external' : False,
     'phases' : ['running'],

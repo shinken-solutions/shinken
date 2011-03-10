@@ -38,6 +38,7 @@ print "I am the nocdmod broker for pnp"
 
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'npcdmod',
     'external' : True,
     'phases' : ['running'],

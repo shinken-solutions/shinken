@@ -31,6 +31,7 @@ print "Detected module : GLPI importer for Arbiter"
 
 
 properties = {
+    'daemons' : ['arbiter'],
     'type' : 'glpi_import',
     'external' : False,
     'phases' : ['configuration'],

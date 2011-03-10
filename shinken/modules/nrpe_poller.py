@@ -53,6 +53,7 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
+    'daemons' : ['poller'],
     'type' : 'nrpe_poller',
     'external' : False,
     'phases' : ['worker'],

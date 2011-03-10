@@ -24,6 +24,7 @@ print "I am Ndo Broker for Oracle"
 
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'ndodb_oracle',
     'phases' : ['running'],
     }

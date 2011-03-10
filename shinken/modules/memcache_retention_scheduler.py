@@ -32,6 +32,7 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
+    'daemons' : ['scheduler'],
     'type' : 'memcache_retention',
     'external' : False,
     'phases' : ['retention'],

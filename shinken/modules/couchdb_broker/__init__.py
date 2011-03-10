@@ -22,6 +22,7 @@
 print "I am Couchdb Broker"
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'couchdb',
     'phases' : ['running'],
     }

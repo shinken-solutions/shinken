@@ -22,6 +22,7 @@ print "I am Host Perfdata Broker"
 
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'host_perfdata',
     'phases' : ['running'],
     }

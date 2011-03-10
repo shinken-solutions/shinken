@@ -34,6 +34,7 @@ from shinken.external_command import ExternalCommand
 
 
 properties = {
+    'daemons' : ['arbiter'],
     'type' : 'dummy_arbiter',
     'external' : True,
     'phases' : ['configuration', 'late_configuration', 'running'],

@@ -59,6 +59,7 @@ from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NO
 
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'livestatus',
     'external' : True,
     'phases' : ['running'],

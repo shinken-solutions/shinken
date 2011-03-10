@@ -22,6 +22,7 @@ print "I am Service Perfdata Broker"
 
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'service_perfdata',
     'phases' : ['running'],
     }

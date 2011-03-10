@@ -40,6 +40,7 @@ print "I am simple log Broker"
 
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'simple_log',
     'external' : True,
     'phases' : ['running'],

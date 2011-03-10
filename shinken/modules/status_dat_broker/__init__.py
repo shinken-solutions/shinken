@@ -22,6 +22,7 @@ print "I am Status Dat Broker"
 
 
 properties = {
+    'daemons' : ['broker'],
     'type' : 'status_dat',
     'external' : True,
     'phases' : ['running'],

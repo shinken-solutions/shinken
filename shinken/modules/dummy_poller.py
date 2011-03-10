@@ -34,6 +34,7 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
+    'daemons' : ['poller'],
     'type' : 'dummy_poller',
     'external' : False,
     'phases' : ['worker'],

@@ -35,6 +35,7 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
+    'daemons' : ['arbiter'],
     'type' : 'nsca_server',
     'external' : True,
     'phases' : ['running'],

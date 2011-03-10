@@ -29,6 +29,7 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
+    'daemons' : ['arbiter'],
     'type' : 'hack_commands_poller_tag',
     'external' : False,
     'phases' : ['late_configuration'],

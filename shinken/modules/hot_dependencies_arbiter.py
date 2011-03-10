@@ -46,6 +46,7 @@ print "Detected module : Hot dependencies modules for Arbiter"
 
 
 properties = {
+    'daemons' : ['arbiter'],
     'type' : 'hot_dependencies',
     'external' : False,
     'phases' : ['late_configuration'],
