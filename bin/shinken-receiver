@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+#Copyright (C) 2009-2011 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+#This file is part of Shinken.
+#
+#Shinken is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#Shinken is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+
+#This class is an interface for the Receiver
+#The receiver listens to the Arbiter for the configuration sent through 
+#the port given as first argument.
+#The configuration sent by the arbiter specifies on which schedulers 
+#the receiver will take broks.
+#When the receiver is already launched and has its own conf, it still 
+#listens to arbiter (one a timeout)
+#In case the arbiter has a new conf to send, the receiver forget his old 
+#schedulers (and their associated broks) and take the new ones instead.
+
+
+import os
+import sys
+import optparse
+
+try:
+    import shinken
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    if not hasattr(os, "getuid") or os.getuid() != 0:
+        imp.load_module('shinken', *imp.find_module('shinken', [".", ".."]))
+
+from shinken.daemons.receiverdaemon import Receiver
+from shinken.bin import VERSION
+
+parser = optparse.OptionParser(
+    "%prog [options]", version="%prog " + VERSION)
+parser.add_option('-c', '--config',
+                  dest="config_file", metavar="CONFIG-FILE",
+                  help='Config file')
+parser.add_option('-d', '--daemon', action='store_true',
+                  dest="is_daemon",
+                  help="Run in daemon mode")
+parser.add_option('-r', '--replace', action='store_true',
+                  dest="do_replace",
+                  help="Replace previous running receiver")
+parser.add_option('--debugfile', dest='debug_file',
+                  help=("Debug file. Default: not used "
+                        "(why debug a bug free program? :) )"))
+opts, args = parser.parse_args()
+if args:
+    parser.error("Does not accept any argument.")
+
+daemon = Receiver(debug=opts.debug_file is not None, **opts.__dict__)
+daemon.main()
