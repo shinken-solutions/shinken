@@ -200,7 +200,10 @@ class TestModuleHotDep(ShinkenTest):
 
         # Now we go in case2
         print "Go in case2 " * 10
-        sl.mapping_command = 'libexec/hot_dep_export.py case2 tmp/vmware_mapping_file.json'
+        if os.name != 'nt':
+            sl.mapping_command = 'libexec/hot_dep_export.py case2 tmp/vmware_mapping_file.json'
+        else:
+            sl.mapping_command = 'libexec\\hot_dep_export.py case2 tmp\\vmware_mapping_file.json'
         # We lie in the interval :p (not 0, because 0 mean : disabled)
         sl.mapping_command_interval = 0.1
         sl.hook_tick(self)
