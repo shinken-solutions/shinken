@@ -129,11 +129,14 @@ class Hot_dependencies_arbiter(BaseModule):
     def _launch_command(self):
         print "Launching command", self.mapping_command
         self.last_cmd_launch = int(time.time())
+
+        # windows subprocess do not want us to close fd
+        do_close_fd = (not os.name == 'nt')
         try:
             self.process = subprocess.Popen(
                 self.mapping_command,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                close_fds=True, shell=True)
+                close_fds=do_close_fd, shell=True)
         except OSError , exp:
             print "Error in launchign the command %s : %s" % (self.mapping_command, exp)
 
