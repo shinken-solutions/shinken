@@ -19,6 +19,8 @@ $DIR/test_stack2/launch_reactionner2_debug.sh
 $DIR/../../bin/launch_broker_debug.sh
 $DIR/test_stack2/launch_broker2_debug.sh
 
+#One receiver
+$DIR/../../bin/launch_receiver_debug.sh
 
 #From now only one arbtier
 $DIR/launch_arbiter4_debug.sh

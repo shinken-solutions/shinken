@@ -88,6 +88,11 @@ function check_good_run {
     check_process_nb broker $NB_BROKERS
     is_file_present $VAR/brokerd.pid
 
+    echo "Check for $NB_RECEIVERS receivers (one master)"
+    check_process_nb receiver $NB_RECEIVERS
+    is_file_present $VAR/receiverd.pid
+
+
     echo "Check for $NB_ARBITERS arbiter"
     check_process_nb arbiter $NB_ARBITERS
     is_file_present $VAR/arbiterd.pid
@@ -125,6 +130,7 @@ NB_SCHEDULERS=1
 NB_POLLERS=6
 NB_REACTIONNERS=3
 NB_BROKERS=3
+NB_RECEIVERS=1
 NB_ARBITERS=1
 
 
@@ -211,6 +217,7 @@ echo "Now we can test a real run guy"
 /etc/init.d/shinken-poller -d start
 /etc/init.d/shinken-reactionner -d start
 /etc/init.d/shinken-broker -d start
+/etc/init.d/shinken-receiver -d start
 /etc/init.d/shinken-arbiter -d start
 
 echo "We will sleep again 5sec so every one is quite stable...."
@@ -222,12 +229,14 @@ sudo /etc/init.d/shinken-scheduler status
 sudo /etc/init.d/shinken-poller status
 sudo /etc/init.d/shinken-reactionner status
 sudo /etc/init.d/shinken-broker status
+sudo /etc/init.d/shinken-receiver status
 
 sudo /etc/init.d/shinken-arbiter stop
 sudo /etc/init.d/shinken-scheduler stop
 sudo /etc/init.d/shinken-poller stop
 sudo /etc/init.d/shinken-reactionner stop
 sudo /etc/init.d/shinken-broker stop
+sudo /etc/init.d/shinken-receiver stop
 
 sleep 2
 ps -fu shinken
@@ -235,6 +244,7 @@ ps -fu shinken
 check_process_nb arbiter 0
 check_process_nb scheduler 0
 check_process_nb broker 0
+check_process_nb receiver 0
 check_process_nb poller 0
 check_process_nb reactionner 0
 
@@ -274,6 +284,8 @@ NB_POLLERS=8
 NB_REACTIONNERS=5
 #3 for stack 1, 1 for stack2 (no livesatus.dat nor log worker launch)
 NB_BROKERS=4
+#Still 1 receiver
+NB_RECEIVERS=1
 #still 1
 NB_ARBITERS=1
 
@@ -385,6 +397,8 @@ NB_POLLERS=12
 NB_REACTIONNERS=6
 #3 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
 NB_BROKERS=4
+#STill one receivers
+NB_RECEIVERS=1
 #still 1
 NB_ARBITERS=1
 
@@ -434,6 +448,8 @@ NB_POLLERS=12
 NB_REACTIONNERS=5
 #3 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
 NB_BROKERS=4
+#Still oen receiver
+NB_RECEIVERS=1
 #still 1
 NB_ARBITERS=1
 
