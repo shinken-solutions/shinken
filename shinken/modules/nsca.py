@@ -161,7 +161,6 @@ class NSCA_arbiter(BaseModule):
 
         while not self.interrupted:
             inputready,outputready,exceptready = select.select(input,[],[], 1)
-
             for s in inputready:
                 if s == server:
                     # handle the server socket

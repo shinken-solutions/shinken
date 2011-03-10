@@ -186,6 +186,7 @@ class Receiver(BaseSatellite):
         
 
     def do_loop_turn(self):
+        print "."
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
