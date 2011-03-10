@@ -73,11 +73,9 @@ class Dispatcher:
         self.dispatch_ok = False
         self.first_dispatch_done = False
 
-
         #Prepare the satellites confs
         for satellite in self.satellites:
             satellite.prepare_for_conf()
-            #print ""*5,satellite.get_name(), "Spare?", satellite.spare, "manage_sub_realms?", satellite.manage_sub_realms
 
         #Some properties must be give to satellites from global
         #configuration, like the max_plugins_output_length to pollers
@@ -92,6 +90,9 @@ class Dispatcher:
         # Reset need_conf for all schedulers.
         for s in self.schedulers:
             s.need_conf = True
+        # Same for receivers
+        for rec in self.receivers:
+            rec.need_conf = True
 
     #checks alive elements
     def check_alive(self):
@@ -112,23 +113,23 @@ class Dispatcher:
                 #print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
 
 
-    #Check if all active items are still alive
-    #the result go into self.dispatch_ok
-    #TODO : finish need conf
+    # Check if all active items are still alive
+    # the result go into self.dispatch_ok
+    # TODO : finish need conf
     def check_dispatch(self):
-        #Check if the other arbiter have a conf
+        # Check if the other arbiter have a conf
         for arb in self.arbiters:
-            #If not me...
+            # If not me...
             if arb != self.arbiter:
                 if not arb.have_conf(self.conf.magic_hash):
                     arb.put_conf(self.conf)
                 else:
-                    #Ok, he already have the conf. I remember him that
-                    #he do not have to run, I'm stil alive!
+                    # Ok, he already have the conf. I remember him that
+                    # he do not have to run, I'm stil alive!
                     arb.do_not_run()
 
-        #We check for confs to be dispatched on alive scheds. If not dispatch, need dispatch :)
-        #and if dipatch on a failed node, remove the association, and need a new disaptch
+        # We check for confs to be dispatched on alive scheds. If not dispatch, need dispatch :)
+        # and if dipatch on a failed node, remove the association, and need a new disaptch
         for r in self.realms:
             for cfg_id in r.confs:
                 sched = r.confs[cfg_id].assigned_to
@@ -143,7 +144,7 @@ class Dispatcher:
                         sched.conf.assigned_to = None
                         sched.conf.is_assigned = False
                         sched.conf = None
-                    #Else: ok the conf is managed by a living scheduler
+                    # Else: ok the conf is managed by a living scheduler
 
         # Maybe satelite are alive, but do not still have a cfg but
         # I think so. It is not good. I ask a global redispatch for
@@ -186,6 +187,18 @@ class Dispatcher:
                 # At the first pass, there is no cfg_id in to_satellites_managed_by
                 except KeyError:
                     pass
+
+        # Look for receivers. If they got conf, it's ok, if not, need a simple
+        # conf
+        for r in self.realms:
+            for rec in r.receivers:
+                # If the receiver do not have a conf, must got one :)
+                if rec.reachable and not rec.got_conf():
+                    self.dispatch_ok = False #so we will redispatch all
+                    rec.need_conf = True
+                    
+
+
 
 
     # Imagine a world where... oups...
@@ -431,3 +444,16 @@ class Dispatcher:
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
                                 logger.log("[%s] OK, no more %s sent need" % (r.get_name(), kind))
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
+
+
+            # And now we dispatch receivers. It's mroe easy, they need ONE conf
+            # in all their life :)
+            for r in self.realms:
+                for rec in r.receivers:
+                    if rec.need_conf:
+                        logger.log('[%s] Trying to send configuration to receiver %s' %(r.get_name(), rec.get_name()))
+                        is_sent = rec.put_conf(rec.cfg)#_for_satellite)
+                        if is_sent:
+                            rec.active = True
+                            rec.need_conf = False
+                            logger.log('[%s] Dispatch OK of for configuration to receiver %s' %(r.get_name(), rec.get_name()))

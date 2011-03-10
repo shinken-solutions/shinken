@@ -215,6 +215,23 @@ class SatelliteLink(Item):
             return False
 
 
+    # To know if a receiver got a conf or not
+    def got_conf(self):
+        if self.con is None:
+            self.create_connexion()
+        try:
+            return self.con.got_conf()
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return False
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return False
+        except Exception, exp:
+            self.con = None
+            return False
+
+
 
     def remove_from_conf(self, sched_id):
         if self.con is None:

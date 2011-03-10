@@ -102,6 +102,11 @@ class IForArbiter(Interface):
     def get_external_commands(self):
         return self.app.get_external_commands()
 
+    
+    ### NB : only useful for receiver
+    def got_conf(self):
+        return self.app.cur_conf != None
+
 
 # Interface for Schedulers
 # If we are passive, they connect to this and
