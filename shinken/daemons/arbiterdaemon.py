@@ -38,15 +38,15 @@ from shinken.pyro_wrapper import Pyro
 
 
 # Interface for the other Arbiter
-# It connect, and we manage who is the Master, slave etc.
-# Here is a also a fnction to have a new conf from the master
+# It connects, and together we decide who's the Master and who's the Slave, etc.
+# Here is a also a function to get a new conf from the master
 class IForArbiter(Interface):
     
     def have_conf(self, magic_hash):
-        # I've got a conf and the good one
+        # I've got a conf and a good one
         if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
             return True
-        else: #No conf or a bad one
+        else: #I've no conf or a bad one
             return False
 
     # The master Arbiter is sending us a new conf. Ok, we take it
@@ -54,16 +54,45 @@ class IForArbiter(Interface):
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
 
-    # the master arbiter ask me to do not run!
+    # The master arbiter asks me not to run!
     def do_not_run(self):
-        # If i'm the master, just FUCK YOU!
+        # If i'm the master, then F**K YOU!
         if self.app.is_master:
-            print "Some fucking idiot ask me to do not run. I'm a proud master, so I'm still running"
-        # Else I'm just a spare, so I listen to my master
+            print "Some f***ing idiot asks me not to run. I'm a proud master, so I decide to run anyway"
+        # Else, I'm just a spare, so I listen to my master
         else:
-            print "Someone ask me to do not run"
+            print "Someone asks me not to run"
             self.app.last_master_speack = time.time()
             self.app.must_run = False
+
+    # Here a function called by check_shinken to get deamons status
+    def ask_status(self, target):
+	#just to be on the safe side, check if the target is a valid one
+	if (target == 'arbiter' or target == 'broker' or target == 'poller' or target == 'reactionner' or target == 'scheduler'):
+	    status = {};
+	    #We get the list of the daemons from the links
+	    #sadly, the attribute name to get those differs for schedulers and arbiters
+	    if (target == 'scheduler' or target == 'arbiter'):
+                daemons = target+'links'
+            else:
+                daemons = target+'s'
+            if hasattr(self.app.conf, daemons):
+                daemon_list = getattr(self.app.conf,daemons);		
+	    	for dae in daemon_list:
+                    daemon_name = target + "_name"
+		    if (hasattr(dae, daemon_name) and hasattr(dae, 'alive') and hasattr(dae, 'spare')):
+			name = getattr(dae, daemon_name)
+                        status[name] = {'alive' : dae.alive, 'spare' : dae.spare}
+                    #If the daemon name or another parameter cannot be found, we have a problem (bug)
+                    else:
+			return "CRITICAL : one of the daemon attributes could not be retrieved"
+	    #If the links cannot be found, we have a problem (bug)
+	    else:
+		return "CRITICAL : %s daemons not found in configuration" % target 
+	    return status
+	#ERROR : Target unknown, that shouldn't happen because check_shinken checks before asking (bug)
+	else:
+	    return "CRITICAL : target type '%s' is not managed..." % target
 
 
 # Main Arbiter Class
