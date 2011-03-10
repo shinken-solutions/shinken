@@ -30,6 +30,7 @@ import redis
 from shinken.basemodule import BaseModule
 
 properties = {
+    'daemons' : ['scheduler'],
     'type' : 'redis_retention',
     'external' : False,
     'phases' : ['retention'],
