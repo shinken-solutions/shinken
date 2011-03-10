@@ -55,26 +55,31 @@ class ModulesManager(object):
     def load(self):
         """ Try to import the requested modules ; put the imported modules in self.imported_modules.
 The previous imported modules, if any, are cleaned before. """ 
-        #We get all modules file of our type (end with broker.py for example)
+        # We get all modules file with .py
         modules_files = [ fname[:-3] for fname in os.listdir(self.modules_path) 
-                         if fname.endswith(self.modules_type+".py") ]
+                         if fname.endswith(".py") ]
 
-        #And directories (no remove of .py but still with broker for example at the end)
+        # And directories
         modules_files.extend([ fname for fname in os.listdir(self.modules_path)
-                               if fname.endswith(self.modules_type) ])
+                               if os.path.isdir(os.path.join(self.modules_path, fname)) ])
 
         # Now we try to load thems
+        # So first we add their dir into the sys.path
         if not self.modules_path in sys.path:
             sys.path.append(self.modules_path)
 
+        # We try to import them, but we keep only the one of
+        # our type
         del self.imported_modules[:]
         for fname in modules_files:
+            print "Try to load", fname
             try:
-                print("importing %s" % (fname))
                 m = __import__(fname)
+                if not hasattr(m, 'properties'):
+                    continue
+
                 # We want to keep only the modules of our type
                 if self.modules_type in m.properties['daemons']:
-                    print "Keeping the module", fname
                     self.imported_modules.append(m)
             except ImportError , exp:
                 print "Warning :", exp        
