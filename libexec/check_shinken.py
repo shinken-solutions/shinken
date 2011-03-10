@@ -1,24 +1,63 @@
 #!/usr/bin/env python
+#Copyright (C) 2009-2011 :
+#    Denis GERMAIN, dt.germain@gmail.com
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+#This file is part of Shinken.
+#
+#Shinken is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#Shinken is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 ################################################
-#check_shinken.py
+# check_shinken.py :
+#    This check is getting daemons state from
+#    a arbiter connexion.
 ################################################
+
+import os
+
+# Exit statuses recognized by Nagios and thus by Shinken
+OK = 0
+WARNING = 1
+CRITICAL = 2
+UNKNOWN = 3
+
+#Name of the Pyro Object we are searching
+PYRO_OBJECT = 'ForArbiter'
+daemon_types = ['arbiter', 'broker', 'scheduler', 'poller', 'reactionner']
+
+try:
+    import shinken
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    if not hasattr(os, "getuid") or os.getuid() != 0:
+        imp.load_module('shinken', *imp.find_module('shinken', [".", ".."]))
+
 
 from optparse import OptionParser
 try:
     import shinken.pyro_wrapper as pyro
     from shinken.pyro_wrapper import Pyro
-except ImportError:
-    print 'CRITICAL : check_shinken requires the Python Pyro and the shinken.pyro_wrapper module. Please install it.'
+except ImportError, exp:
+    print 'CRITICAL : check_shinken requires the Python Pyro and the shinken.pyro_wrapper module. Please install it. (%s)' % exp
     raise SystemExit, CRITICAL
 
-# Exit statuses recognized by Nagios and thus by Shinken
-UNKNOWN = -1
-OK = 0
-WARNING = 1
-CRITICAL = 2
-#Name of the Pyro Object we are searching
-PYRO_OBJECT = 'ForArbiter'
-daemon_types = ['arbiter', 'broker', 'scheduler', 'poller', 'reactionner']
 
 #The following functions just count the number of deamons with the associated parameters
 def count_total(result):
@@ -99,17 +138,25 @@ options.helpme = False
 # Check for required option target
 if not getattr(options, 'target'):
     print 'CRITICAL - target is not specified; You must specify which daemons you want to check!'
+    parser.print_help()
     raise SystemExit, CRITICAL
 elif options.target not in daemon_types:
     print 'CRITICAL - target %s is not a Shinken daemon!' % options.target
+    parser.print_help()
     raise SystemExit, CRITICAL
 
 uri = pyro.create_uri(options.hostname, options.portnum, PYRO_OBJECT , options.ssl)
+    
 if options.daemon:
-    #We just want a check for a single satellite daemon
-    #Only OK or CRITICAL here
+    # We just want a check for a single satellite daemon
+    # Only OK or CRITICAL here
     daemon_name = options.daemon
-    result = Pyro.core.getProxyForURI(uri).get_satellite_status(options.target, daemon_name)
+    try:
+        result = Pyro.core.getProxyForURI(uri).get_satellite_status(options.target, daemon_name)
+    except Pyro.errors.ProtocolError, exp:
+        print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
+        raise SystemExit, CRITICAL
+    
     if result:
         if result['alive']:
             print 'OK - %s alive' % daemon_name
@@ -121,15 +168,26 @@ if options.daemon:
         print 'UNKNOWN - %s status could not be retrieved' % daemon_name
 	raise SystemExit, UNKNOWN
 else:
-    #If no daemonname is specified, we want a general overview of the "target" daemons
+    # If no daemonname is specified, we want a general overview of the "target" daemons
     result = {}
-    daemon_list = Pyro.core.getProxyForURI(uri).get_satellite_list(options.target)
+
+    try:
+        daemon_list = Pyro.core.getProxyForURI(uri).get_satellite_list(options.target)
+    except Pyro.errors.ProtocolError, exp:
+        print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
+        raise SystemExit, CRITICAL
+
     for daemon_name in daemon_list:
-	#Getting individual daemon and putting status info in the result dictionnary
-	result[daemon_name] = Pyro.core.getProxyForURI(uri).get_satellite_status(options.target, daemon_name)
-    #Now we have all data
+	# Getting individual daemon and putting status info in the result dictionnary
+        try:
+            result[daemon_name] = Pyro.core.getProxyForURI(uri).get_satellite_status(options.target, daemon_name)
+        except Pyro.errors.ProtocolError, exp:
+            print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
+            raise SystemExit, CRITICAL
+
+    # Now we have all data
     if result:
 	check_deamons_numbers(result, options.target)
-    else :            
+    else :
 	print 'UNKNOWN - Arbiter could not retrieve status for %s' % options.target
 	raise SystemExit, UNKNOWN

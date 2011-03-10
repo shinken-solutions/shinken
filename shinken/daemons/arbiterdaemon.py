@@ -65,34 +65,33 @@ class IForArbiter(Interface):
             self.app.last_master_speack = time.time()
             self.app.must_run = False
 
-    # Here a function called by check_shinken to get deamons status
-    def ask_status(self, target):
-	#just to be on the safe side, check if the target is a valid one
-	if (target == 'arbiter' or target == 'broker' or target == 'poller' or target == 'reactionner' or target == 'scheduler'):
-	    status = {};
-	    #We get the list of the daemons from the links
-	    #sadly, the attribute name to get those differs for schedulers and arbiters
-	    if (target == 'scheduler' or target == 'arbiter'):
-                daemons = target+'links'
-            else:
-                daemons = target+'s'
-            if hasattr(self.app.conf, daemons):
-                daemon_list = getattr(self.app.conf,daemons);		
-	    	for dae in daemon_list:
-                    daemon_name = target + "_name"
-		    if (hasattr(dae, daemon_name) and hasattr(dae, 'alive') and hasattr(dae, 'spare')):
-			name = getattr(dae, daemon_name)
-                        status[name] = {'alive' : dae.alive, 'spare' : dae.spare}
-                    #If the daemon name or another parameter cannot be found, we have a problem (bug)
-                    else:
-			return "CRITICAL : one of the daemon attributes could not be retrieved"
-	    #If the links cannot be found, we have a problem (bug)
-	    else:
-		return "CRITICAL : %s daemons not found in configuration" % target 
-	    return status
-	#ERROR : Target unknown, that shouldn't happen because check_shinken checks before asking (bug)
-	else:
-	    return "CRITICAL : target type '%s' is not managed..." % target
+
+
+    # Here a function called by check_shinken to get deamon status
+    def get_satellite_status(self, daemon_type, daemon_name):
+       daemon_name_attr = daemon_type+"_name"
+       daemons = self.app.get_daemons(daemon_type)
+       if daemons:
+           for dae in daemons:
+               if hasattr(dae, daemon_name_attr) and getattr(dae, daemon_name_attr) == daemon_name:
+                       if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
+                               return {'alive' : dae.alive, 'spare' : dae.spare}
+       return None
+
+    # Here a function called by check_shinken to get deamons list
+    def get_satellite_list(self, daemon_type):
+       satellite_list = []
+       daemon_name_attr = daemon_type+"_name"
+       daemons = self.app.get_daemons(daemon_type)
+       if daemons:
+            for dae in daemons:
+               if hasattr(dae, daemon_name_attr):
+                   satellite_list.append(getattr(dae, daemon_name_attr))
+               else:
+                   #If one deamon has no name... ouch!
+                   return None
+            return satellite_list
+       return None
 
 
 # Main Arbiter Class
@@ -207,6 +206,16 @@ class Arbiter(Daemon):
         #Now remove mod that raise an exception
         self.modules_manager.clear_instances(to_del)
 
+
+    def get_daemon_links(self, daemon_type):
+       #the attribute name to get those differs for schedulers and arbiters
+       if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
+            daemon_links = daemon_type+'links'
+       else:
+            daemon_links = daemon_type+'s'
+       return daemon_links
+
+
     def load_config_file(self):
         print "Loading configuration"
         # REF: doc/shinken-conf-dispatching.png (1)
@@ -228,6 +237,8 @@ class Arbiter(Daemon):
                 print "I am the arbiter :", arb.get_name()
                 self.is_master = not self.me.spare
                 print "Am I the master?", self.is_master
+                # Set myself as alive ;)
+                self.me.alive = True
             else: #not me
                 arb.need_conf = True
 
@@ -564,3 +575,20 @@ class Arbiter(Daemon):
             # It's send, do not keep them
             # TODO: check if really send. Queue by scheduler?
             self.external_commands = []
+
+    # This function returns the part of the conf where are stored the daemons of
+    # a given daemon type
+    def get_daemons(self, daemon_type):
+      # We get the list of the daemons from their links
+      # 'schedulerlinks' for schedulers, 'arbiterlinks' for arbiters
+      # and 'pollers', 'brokers', 'reactionners' for the other
+      if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
+          daemon_links = daemon_type+'links'
+      else:
+          daemon_links = daemon_type+'s'
+
+      if hasattr(self.conf, daemon_links):
+          return getattr(self.conf, daemon_links);
+
+      # If the links cannot be found, we have a problem
+      return None
