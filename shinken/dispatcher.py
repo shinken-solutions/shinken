@@ -20,27 +20,27 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#This is the class of the dispatcher. It's role is to dispatch
-#configurations to other elements like schedulers, reactionner,
-#pollers and brokers. It is responsible for hight avaibility part. If an
-#element die and the element type have a spare, it send the confi of the
-#dead to the spare
-
+"""
+ This is the class of the dispatcher. It's role is to dispatch
+ configurations to other elements like schedulers, reactionner,
+ pollers, receivers and brokers. It is responsible for hight avaibility part. If an
+ element die and the element type have a spare, it send the confi of the
+ dead to the spare
+"""
 
 from shinken.util import alive_then_spare_then_deads
 from shinken.log import logger
 
-#Dispatcher Class
+# Dispatcher Class
 class Dispatcher:
-    #Load all elements, set them no assigned
-    #and add them to elements, so loop will be easier :)
+    # Load all elements, set them no assigned
+    # and add them to elements, so loop will be easier :)
     def __init__(self, conf, arbiter):
         self.arbiter = arbiter
-        #Pointer to the whole conf
+        # Pointer to the whole conf
         self.conf = conf
         self.realms = conf.realms
-        #Direct pointer to importants elements for us
+        # Direct pointer to importants elements for us
         self.arbiters = self.conf.arbiterlinks
         self.schedulers = self.conf.schedulerlinks
         self.reactionners = self.conf.reactionners
@@ -452,7 +452,7 @@ class Dispatcher:
                 for rec in r.receivers:
                     if rec.need_conf:
                         logger.log('[%s] Trying to send configuration to receiver %s' %(r.get_name(), rec.get_name()))
-                        is_sent = rec.put_conf(rec.cfg)#_for_satellite)
+                        is_sent = rec.put_conf(rec.cfg)
                         if is_sent:
                             rec.active = True
                             rec.need_conf = False
