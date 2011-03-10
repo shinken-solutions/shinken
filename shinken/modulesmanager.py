@@ -71,9 +71,13 @@ The previous imported modules, if any, are cleaned before. """
         for fname in modules_files:
             try:
                 print("importing %s" % (fname))
-                self.imported_modules.append(__import__(fname))
+                m = __import__(fname)
+                # We want to keep only the modules of our type
+                if self.modules_type in m.properties['daemons']:
+                    print "Keeping the module", fname
+                    self.imported_modules.append(m)
             except ImportError , exp:
-                print "Warning :", exp
+                print "Warning :", exp        
 
         del self.modules_assoc[:]
         for mod_conf in self.modules:
