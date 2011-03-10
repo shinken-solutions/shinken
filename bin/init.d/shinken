@@ -13,11 +13,12 @@
 #     - poller      : receives the checks from a scheduler. Launch them and returns results
 #     - broker      : manage results by looking at scheduler. Like export to flat file or db.
 #     - reactionner : manage the failed checks by looking at scheduler. 
+#     - receiver    : manage all passive data
 ### END INIT INFO
 
 NAME="shinken"
 
-AVAIL_MODULES="scheduler poller reactionner broker arbiter"
+AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
 
 ## SHINKEN_MODULE_FILE is set by shinken-* if it's one of these that's calling us.
 if [ -z "$SHINKEN_MODULE_FILE" ]; then

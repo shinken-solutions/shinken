@@ -72,6 +72,18 @@ BROKERDAEMON=$BIN/shinken-broker
 #The broker pid
 BROKERPID="$VAR/brokerd.pid"
 
+
+###RECEIVER PART
+# location of the broker daemon configuration
+RECEIVERCFG="$ETC/receiverd.ini"
+
+# The command to launch
+RECEIVERDAEMON=$BIN/shinken-receiver
+
+#The broker pid
+RECEIVERPID="$VAR/receiverd.pid"
+
+
 # nicelevel to run nagios daemon with
 NICENESS=5
 
