@@ -22,7 +22,7 @@
 
 
 #This text is print at the import
-print "Detected module : NSCA module for Arbiter"
+print "Detected module : NSCA module for Arbiter/receiver"
 
 
 import time

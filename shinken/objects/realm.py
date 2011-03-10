@@ -241,6 +241,18 @@ class Realm(Itemgroup):
         print self.get_name(),"Add potential brokers :", len(self.potential_brokers)
 
 
+    def count_receivers(self):
+        self.nb_receivers = 0
+        for receiver in self.receivers:
+            if not receiver.spare:
+                self.nb_receivers += 1
+        for realm in self.higher_realms:
+            for receiver in realm.receivers:
+                if not receiver.spare and receiver.manage_sub_realms:
+                    self.nb_receivers += 1
+        print self.get_name(),"Count receivers :", self.nb_receivers
+
+
     #Return the list of satellites of a certain type
     #like reactionner -> self.reactionners
     def get_satellties_by_type(self, type):
@@ -277,26 +289,31 @@ class Realm(Itemgroup):
         self.to_satellites['reactionner'] = {}
         self.to_satellites['poller'] = {}
         self.to_satellites['broker'] = {}
+        self.to_satellites['receiver'] = {}
 
         self.to_satellites_nb_assigned = {}
         self.to_satellites_nb_assigned['reactionner'] = {}
         self.to_satellites_nb_assigned['poller'] = {}
         self.to_satellites_nb_assigned['broker'] = {}
+        self.to_satellites_nb_assigned['receiver'] = {}
 
         self.to_satellites_nb_assigned = {}
         self.to_satellites_nb_assigned['reactionner'] = {}
         self.to_satellites_nb_assigned['poller'] = {}
         self.to_satellites_nb_assigned['broker'] = {}
+        self.to_satellites_nb_assigned['receiver'] = {}
 
         self.to_satellites_need_dispatch = {}
         self.to_satellites_need_dispatch['reactionner'] = {}
         self.to_satellites_need_dispatch['poller'] = {}
         self.to_satellites_need_dispatch['broker'] = {}
+        self.to_satellites_need_dispatch['receiver'] = {}
 
         self.to_satellites_managed_by = {}
         self.to_satellites_managed_by['reactionner'] = {}
         self.to_satellites_managed_by['poller'] = {}
         self.to_satellites_managed_by['broker'] = {}
+        self.to_satellites_managed_by['receiver'] = {}
 
         self.count_reactionners()
         self.fill_potential_reactionners()
@@ -304,6 +321,7 @@ class Realm(Itemgroup):
         self.fill_potential_pollers()
         self.count_brokers()
         self.fill_potential_brokers()
+        self.count_receivers()
 
 
     # TODO: find a better name...
@@ -411,6 +429,7 @@ class Realms(Itemgroups):
             p.schedulers = []
             p.reactionners = []
             p.brokers = []
+            p.receivers = []
             p.packs = []
             p.confs = {}
 

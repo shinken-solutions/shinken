@@ -42,6 +42,7 @@ from shinken.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.schedulerlink import SchedulerLink, SchedulerLinks
 from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
 from shinken.brokerlink import BrokerLink, BrokerLinks
+from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
 from shinken.log import logger
@@ -213,7 +214,8 @@ class Config(Item):
         # SSL PART
         # global boolean for know if we use ssl or not
         'use_ssl':          BoolProp(default='0', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
-                                                                (BrokerLink, None), (PollerLink, None), (ArbiterLink, None)]),
+                                                                (BrokerLink, None), (PollerLink, None), \
+                                                                (ReceiverLink, None),  (ArbiterLink, None)]),
         'certs_dir':        StringProp(default='etc/certs'),
         'ca_cert':          StringProp(default='etc/certs/ca.pem'),
         'server_cert' :     StringProp(default='etc/certs/server.pem'),
@@ -259,6 +261,7 @@ class Config(Item):
         'scheduler':        (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
         'reactionner':      (ReactionnerLink, ReactionnerLinks, 'reactionners'),
         'broker':           (BrokerLink, BrokerLinks, 'brokers'),
+        'receiver':         (ReceiverLink, ReceiverLinks, 'receivers'),
         'poller':           (PollerLink, PollerLinks, 'pollers'),
         'realm':            (Realm, Realms, 'realms'),
         'module':           (Module, Modules, 'modules'),
@@ -416,6 +419,7 @@ class Config(Item):
             'scheduler' : [],
             'reactionner' : [],
             'broker' : [],
+            'receiver' : [],
             'poller' : [],
             'realm' : [],
             'module' : [],
@@ -644,6 +648,7 @@ class Config(Item):
 #        self.arbiterlinks.linkify(self.modules)
         self.schedulerlinks.linkify(self.realms, self.modules)
         self.brokers.linkify(self.realms, self.modules)
+        self.receivers.linkify(self.realms, self.modules)
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
 
@@ -828,6 +833,7 @@ class Config(Item):
         self.reactionners.fill_default()
         self.pollers.fill_default()
         self.brokers.fill_default()
+        self.receivers.fill_default()
         self.schedulerlinks.fill_default()
 #        self.arbiterlinks.fill_default()
         #Now fill some fields we can predict (like adress for hosts)
@@ -850,7 +856,7 @@ class Config(Item):
             default = Realm({'realm_name' : 'Default', 'default' : '1'})
             self.realms = Realms([default])
             logger.log("Notice : the is no defined realms, so I add a new one %s" % default.get_name())
-            lists = [self.pollers, self.brokers, self.reactionners, self.schedulerlinks]
+            lists = [self.pollers, self.brokers, self.reactionners, self.receivers, self.schedulerlinks]
             for l in lists:
                 for elt in l:
                     if not hasattr(elt, 'realm'):
@@ -1037,7 +1043,7 @@ class Config(Item):
             os.environ['TZ'] = self.use_timezone
             time.tzset()
 
-            tab = [self.schedulerlinks, self.pollers, self.brokers, self.reactionners]
+            tab = [self.schedulerlinks, self.pollers, self.brokers, self.receivers, self.reactionners]
             for t in tab:
                 for s in t:
                     if s.use_timezone == 'NOTSET':
@@ -1125,7 +1131,7 @@ class Config(Item):
             logger.log("hosts: detected loop in parents ; conf incorrect")
         
         for x in ( 'servicedependencies', 'hostdependencies', 'arbiterlinks', 'schedulerlinks',
-                   'reactionners', 'pollers', 'brokers', 'resultmodulations'):
+                   'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations'):
             try: cur = getattr(self, x)
             except: continue
             logger.log('Checking %s' % (x))
@@ -1159,6 +1165,7 @@ class Config(Item):
         self.reactionners.pythonize()
         self.pollers.pythonize()
         self.brokers.pythonize()
+        self.receivers.pythonize()
 
 
     #Explode parameters like cached_service_check_horizon in the
@@ -1167,7 +1174,7 @@ class Config(Item):
     def explode_global_conf(self):
         clss = [Service, Host, Contact, SchedulerLink,
                 PollerLink, ReactionnerLink, BrokerLink,
-                ArbiterLink]
+                ReceiverLink, ArbiterLink]
         for cls in clss:
             cls.load_global_conf(self)
 
