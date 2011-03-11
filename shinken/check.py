@@ -47,6 +47,7 @@ class Check(Action):
         'execution_time': { 'required': False, 'default': 0 },
         'perf_data':    { 'required': False, 'default': '' },
         'poller_tag':   { 'required': False, 'default': 'None' },
+        'reactionner_tag':   { 'required': False, 'default': 'None' },
         'env':          { 'required': False, 'default': {} },
         'internal':     { 'required': False, 'default': False },
         'module_type':  { 'required': False, 'default': 'fork' },
@@ -54,7 +55,8 @@ class Check(Action):
     }
 
     #id = 0 #Is common to Actions
-    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10, poller_tag='None', env={}, module_type='fork'):
+    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10,\
+                     poller_tag='None', reactionner_tag='None', env={}, module_type='fork'):
 
         self.is_a = 'check'
         self.type = ''
@@ -80,6 +82,7 @@ class Check(Action):
         self.execution_time = 0
         self.perf_data = ''
         self.poller_tag = poller_tag
+        self.reactionner_tag = reactionner_tag
         self.module_type = module_type
         self.env = env
         # we keep the reference of the poller that will take us

@@ -470,6 +470,9 @@ class Item(object):
                 if hasattr(self, 'poller_tag'):
                     cmdCall = CommandCall(commands, command,
                                           poller_tag=self.poller_tag)
+                elif hasattr(self, 'reactionner_tag'):
+                    cmdCall = CommandCall(commands, command,
+                                          reactionner_tag=self.reactionner_tag)
                 else:
                     cmdCall = CommandCall(commands, command)
                     setattr(self, prop, cmdCall)
@@ -777,6 +780,9 @@ class Items(object):
                     if hasattr(i, 'poller_tag'):
                         cmdCall = CommandCall(commands, command,
                                               poller_tag=i.poller_tag)
+                    elif hasattr(i, 'reactionner_tag'):
+                        cmdCall = CommandCall(commands, command,
+                                              reactionner_tag=i.reactionner_tag)
                     else:
                         cmdCall = CommandCall(commands, command)
                     #TODO: catch None?
@@ -797,6 +803,9 @@ class Items(object):
                         if hasattr(i, 'poller_tag'):
                             cmdCall = CommandCall(commands, com,
                                                   poller_tag=i.poller_tag)
+                        elif hasattr(i, 'reactionner_tag'):
+                            cmdCall = CommandCall(commands, com,
+                                                  reactionner_tag=i.reactionner_tag)
                         else:
                             cmdCall = CommandCall(commands, com)
                         #TODO: catch None?

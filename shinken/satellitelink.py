@@ -338,7 +338,7 @@ class SatelliteLink(Item):
 
     #Here for poller and reactionner. Scheduler have it's own function
     def give_satellite_cfg(self):
-        return {'port' : self.port, 'address' : self.address, 'name' : self.get_name(), 'instance_id' : self.id, 'active' : True, 'passive' : self.passive, 'poller_tags' : getattr(self, 'poller_tags', [])}
+        return {'port' : self.port, 'address' : self.address, 'name' : self.get_name(), 'instance_id' : self.id, 'active' : True, 'passive' : self.passive, 'poller_tags' : getattr(self, 'poller_tags', []), 'reactionner_tags' : getattr(self, 'reactionner_tags', [])}
 
 
 

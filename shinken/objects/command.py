@@ -31,6 +31,7 @@ class Command(object):
         'command_name': StringProp(fill_brok=['full_status']),
         'command_line': StringProp(fill_brok=['full_status']),
         'poller_tag':   StringProp(default='None'),
+        'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
     }
 
@@ -41,6 +42,8 @@ class Command(object):
             setattr(self, key, params[key])
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = 'None'
+        if not hasattr(self, 'reactionner_tag'):
+            self.reactionner_tag = 'None'
         if not hasattr(self, 'module_type'):
             # If the command satr with a _, set the module_type
             # as the name of the command, without the _
@@ -96,7 +99,7 @@ class CommandCall:
     __slots__ = ('id', 'call', 'command', 'valid', 'args')
     id = 0
     my_type = 'CommandCall'
-    def __init__(self, commands, call, poller_tag='None'):
+    def __init__(self, commands, call, poller_tag='None', reactionner_tag='None'):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.call = call
@@ -113,9 +116,14 @@ class CommandCall:
             #If the host/service do not give an override poller_tag, take
             #the one of the command
             self.poller_tag = poller_tag #from host/service
+            self.reactionner_tag = reactionner_tag
             self.module_type = self.command.module_type
             if self.valid and poller_tag is 'None':
                 self.poller_tag = self.command.poller_tag #from command if not set
+            # Same for reactionner tag
+            if self.valid and reactionner_tag is 'None':
+                self.reactionner_tag = self.command.reactionner_tag #from command if not set
+
 
 
     def is_valid(self):

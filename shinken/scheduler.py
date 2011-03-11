@@ -346,7 +346,8 @@ class Scheduler:
     # Called by poller to get checks
     # Can get checks and actions (notifications and co)
     def get_to_run_checks(self, do_checks=False, do_actions=False,
-                          poller_tags=['None'], worker_name='none'):
+                          poller_tags=['None'], reactionner_tags=['None'], \
+                              worker_name='none'):
         res = []
         now = time.time()
 
@@ -355,9 +356,8 @@ class Scheduler:
             for c in self.checks.values():
                 #  If the command is untagged, and the poller too, or if both are taggued
                 #  with same name, go for it
-                # if do_check, call for poller, and so poller_tags by default is []
-                #if (c.poller_tag is None and poller_tags == []) or c.poller_tag in poller_tags:
-                # by defaultpoller_tag is 'None' and poller_tags is ['None']
+                # if do_check, call for poller, and so poller_tags by default is ['None']
+                # by default poller_tag is 'None' and poller_tags is ['None']
                 if c.poller_tag in poller_tags:
                     # must be ok to launch, and not an internal one (business rules based)
                     if c.status == 'scheduled' and c.is_launchable(now) and not c.internal:
@@ -372,6 +372,12 @@ class Scheduler:
         # If reactionner want to notify too
         if do_actions:
             for a in self.actions.values():
+                # if do_action, call from reactionner, and so reactionner_tags by default is ['None']
+                # by default reactionner_tag is 'None' and ractioner_tags is ['None'] too
+                # So if not the good one, loop for next :)
+                if not a.reactionner_tag in reactionner_tags:
+                    continue
+                # And now look for can launch or not :)
                 if a.status == 'scheduled' and a.is_launchable(now):
                     a.status = 'inpoller'
                     a.worker = worker_name
@@ -533,7 +539,7 @@ class Scheduler:
 
     # We should push actions to our passives satellites
     def push_actions_to_passives_satellites(self):
-        # We loop for our passive pollers
+        # We loop for our passive pollers or reactionners
         for p in filter(lambda p: p['passive'], self.pollers.values()):
             print "I will send actions to the poller", p
             con = p['con']
@@ -568,6 +574,43 @@ class Scheduler:
                 pyro.set_timeout(con, 5)
             else : # no connexion? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
+
+        # TODO :factorize
+        # We loop for our passive reactionners
+        for p in filter(lambda p: p['passive'], self.reactionners.values()):
+            print "I will send actions to the reactionner", p
+            con = p['con']
+            reactionner_tags = p['reactionner_tags']
+            if con is not None:
+            # get actions
+                lst = self.get_to_run_checks(False, True, reactionner_tags=reactionner_tags, worker_name=p['name'])
+                try:
+                    # intial ping must be quick
+                    pyro.set_timeout(con, 120)
+                    print "Sending", len(lst), "actions"
+                    con.push_actions(lst, self.instance_id)
+                    self.nb_checks_send += len(lst)
+                except Pyro.errors.ProtocolError, exp:
+                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                except Pyro.errors.NamingError, exp:
+                    logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                except KeyError , exp:
+                    logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    traceback.print_stack()
+                    return
+                except Pyro.errors.CommunicationError, exp:
+                    logger.log("[] the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                #we came back to normal timeout
+                pyro.set_timeout(con, 5)
+            else : # no connexion? try to reconnect
+                self.pynag_con_init(p['instance_id'], type='reactionner')
 
 
 
@@ -608,6 +651,42 @@ class Scheduler:
                 pyro.set_timeout(con, 5)
             else: # no connexion, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
+
+        # We loop for our passive reactionners
+        for p in filter(lambda p: p['passive'], self.reactionners.values()):
+            print "I will get actions from the reactionner", p
+            con = p['con']
+            reactionner_tags = p['reactionner_tags']
+            if con is not None:
+                try:
+                    # intial ping must be quick
+                    pyro.set_timeout(con, 120)
+                    results = con.get_returns(self.instance_id)
+                    nb_received = len(results)
+                    self.nb_check_received += nb_received
+                    print "Received %d passive results" % nb_received
+                    self.waiting_results.extend(results)
+                except Pyro.errors.ProtocolError, exp:
+                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                except Pyro.errors.NamingError, exp:
+                    logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                except KeyError , exp:
+                    logger.log("[] the %s '%s' is not initilised : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    traceback.print_stack()
+                    return
+                except Pyro.errors.CommunicationError, exp:
+                    logger.log("[] the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    p['con'] = None
+                    return
+                #we came back to normal timeout
+                pyro.set_timeout(con, 5)
+            else: # no connexion, try reinit
+                self.pynag_con_init(p['instance_id'], type='reactionner')
 
 
 

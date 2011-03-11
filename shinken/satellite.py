@@ -441,7 +441,9 @@ class Satellite(BaseSatellite):
                     pyro.set_timeout(con, 120)
                     # OK, go for it :)
                     tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, \
-                                             poller_tags=self.poller_tags, worker_name=self.name)
+                                             poller_tags=self.poller_tags, \
+                                             reactionner_tags=self.reactionner_tags, \
+                                             worker_name=self.name)
                     print "Ask actions to", sched_id, "got", len(tmp)
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
@@ -629,10 +631,17 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         self.processes_by_worker = conf['global']['processes_by_worker']
         self.polling_interval = conf['global']['polling_interval']
         self.timeout = self.polling_interval
+        
+        # Now set tags
         if 'poller_tags' in conf['global']:
             self.poller_tags = conf['global']['poller_tags']
         else: # for reactionner, poler_tag is [None]
-            self.poller_tags = []
+            self.poller_tags = ['None']
+        if 'reactionner_tags' in conf['global']:
+            self.reactionner_tags = conf['global']['reactionner_tags']
+        else: # for pollers, poler_tag is [None]
+            self.reactionner_tags = ['None']
+
         if 'max_plugins_output_length' in conf['global']:
             self.max_plugins_output_length = conf['global']['max_plugins_output_length']
         else: # for reactionner, we don't really care about it

@@ -123,6 +123,10 @@ class Worker:
             if len(self.checks) == 0:
                 self._idletime = self._idletime + 1
                 time.sleep(1)
+        # Maybe the Queue() is not available, if so, just return
+        # get back to work :)
+        except IOError, exp:
+            return
 
 
     #Launch checks that are in status

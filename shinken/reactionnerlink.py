@@ -41,11 +41,12 @@ class ReactionnerLink(SatelliteLink):
         'processes_by_worker': IntegerProp(default='256', fill_brok=['full_status'], to_send=True),
         'polling_interval': IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'manage_arbiters':  IntegerProp(default='0'),
+        'reactionner_tags':      ListProp(default='None', to_send=True),
         'use_timezone':     StringProp(default='NOTSET', to_send=True),
         'timeout':          IntegerProp(default='3', fill_brok=['full_status']),
-        'data_timeout': IntegerProp(default='120', fill_brok=['full_status']),
+        'data_timeout':     IntegerProp(default='120', fill_brok=['full_status']),
         'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
-        'realm' : StringProp(default=''),
+        'realm' :           StringProp(default=''),
     }
     
     running_properties = {

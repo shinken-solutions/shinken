@@ -1093,9 +1093,11 @@ class SchedulingItem(Item):
 
             # Make the Check object and put the service in checking
             # Make the check inherit poller_tag from the command
+            # And reactionner_tag too
             c = Check('scheduled', command_line, self, t, ref_check, \
                           timeout=cls.check_timeout, \
-                          poller_tag=self.check_command.poller_tag, env=env, \
+                          poller_tag=self.check_command.poller_tag, \
+                          env=env, \
                           module_type=self.check_command.module_type)
 
             # We keep a trace of all checks in progress

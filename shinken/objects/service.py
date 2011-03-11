@@ -108,6 +108,7 @@ class Service(SchedulingItem):
 
         # Shinken specific
         'poller_tag':              StringProp(default='None'),
+        'reactionner_tag':              StringProp(default='None'),
         'resultmodulations':       StringProp(default=''),
         'escalations':             StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':      StringProp(default='', fill_brok=['full_status']),
@@ -1024,7 +1025,7 @@ class Services(Items):
     def apply_implicit_inheritance(self, hosts):
         for prop in ( 'contacts', 'contact_groups', 'notification_interval',
                          'notification_period', 'resultmodulations', 'escalations',
-                         'poller_tag', 'check_period', 'criticity' ):
+                         'poller_tag', 'reactionner_tag', 'check_period', 'criticity' ):
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):
