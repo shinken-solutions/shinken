@@ -20,9 +20,9 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import copy
 
 from shinken.objects.itemgroup import Itemgroup, Itemgroups
-
 from shinken.property import BoolProp, IntegerProp, StringProp
 
 #It change from hostgroup Class because there is no members
@@ -70,8 +70,8 @@ class Realm(Itemgroup):
             return []
 
 
-    #Use to make pyton properties
-    #TODO : change itemgroup function pythonize?
+    # Use to make pyton properties
+    # TODO : change itemgroup function pythonize?
     def pythonize(self):
         cls = self.__class__
         for prop, tab in cls.properties.items():
@@ -81,28 +81,28 @@ class Realm(Itemgroup):
                 #print "Changing ", old_val, "by", new_val
                 setattr(self, prop, new_val)
             except AttributeError , exp:
-                #print self.get_name(), ' : ', exp
                 pass # Will be catch at the is_correct moment
 
 
-    #We fillfull properties with template ones if need
-    #Because hostgroup we call may not have it's members
-    #we call get_hosts_by_explosion on it
+    # We fillfull properties with template ones if need
+    # Because hostgroup we call may not have it's members
+    # we call get_hosts_by_explosion on it
     def get_realms_by_explosion(self, realms):
-        #First we tag the hg so it will not be explode
-        #if a son of it already call it
+        # First we tag the hg so it will not be explode
+        # if a son of it already call it
         self.already_explode = True
 
-        #Now the recursiv part
-        #rec_tag is set to False avery HG we explode
-        #so if True here, it must be a loop in HG
-        #calls... not GOOD!
+        # Now the recursiv part
+        # rec_tag is set to False avery HG we explode
+        # so if True here, it must be a loop in HG
+        # calls... not GOOD!
         if self.rec_tag:
             print "Error : we've got a loop in realm definition", self.get_name()
             if self.has('members'):
                 return self.members
             else:
                 return ''
+
         #Ok, not a loop, we tag it and continue
         self.rec_tag = True
 
@@ -119,34 +119,8 @@ class Realm(Itemgroup):
         else:
             return ''
 
-
-    def get_schedulers(self):
-        r = []
-        for s in self.schedulers:
-            r.append(s)
-        return r
-
-
-    def get_all_schedulers(self):
-        r = []
-        for s in self.schedulers:
-            r.append(s)
-        for p in self.realm_members:
-            tmps = p.get_all_schedulers()
-            for s in tmps:
-                r.append(s)
-        return r
-
-
-    def get_pollers(self):
-        r = []
-        for p in self.pollers:
-            r.append(p)
-        return r
-
-
     def get_all_subs_pollers(self):
-        r = self.get_pollers()
+        r = copy.copy(self.pollers)
         for p in self.realm_members:
             tmps = p.get_all_subs_pollers()
             for s in tmps:
@@ -154,17 +128,8 @@ class Realm(Itemgroup):
         return r
 
 
-
-
-    def get_reactionners(self):
-        r = []
-        for p in self.reactionners:
-            r.append(p)
-        return r
-
-
     def get_all_subs_reactionners(self):
-        r = self.get_reactionners()
+        r = copy.copy(self.reactionners)
         for p in self.realm_members:
             tmps = p.get_all_subs_reactionners()
             for s in tmps:
@@ -320,11 +285,11 @@ class Realm(Itemgroup):
         broker.cfg['reactionners'] = {}
 
         # First our own level
-        for p in self.get_pollers():
+        for p in self.pollers:
             cfg = p.give_satellite_cfg()
             broker.cfg['pollers'][p.id] = cfg
 
-        for r in self.get_reactionners():
+        for r in self.reactionners:
             cfg = r.give_satellite_cfg()
             broker.cfg['reactionners'][r.id] = cfg
 
@@ -353,11 +318,11 @@ class Realm(Itemgroup):
         cfg['reactionners'] = {}
 
         # First our own level
-        for p in self.get_pollers():
+        for p in self.pollers:
             c = p.give_satellite_cfg()
             cfg['pollers'][p.id] = c
 
-        for r in self.get_reactionners():
+        for r in self.reactionners:
             c = r.give_satellite_cfg()
             cfg['reactionners'][r.id] = c
 
