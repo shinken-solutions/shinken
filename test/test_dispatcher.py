@@ -287,6 +287,201 @@ class TestDispatcher(ShinkenTest):
                 self.assert_(cfg.assigned_to == scheduler1)
                 
 
+
+class TestDispatcherMultiBroker(ShinkenTest):
+    #Uncomment this is you want to use a specific configuration
+    #for your test
+    def setUp(self):
+        self.setup_with_file('etc/nagios_dispatcher_multibrokers.cfg')
+    
+    
+    #Change ME :)
+    def test_simple_dispatch(self):
+        print "The dispatcher", self.dispatcher
+        # dummy for the arbiter
+        for a in self.conf.arbiterlinks:
+            a.__class__ = GoodArbiter
+        print "Preparing schedulers"
+        scheduler1 = self.conf.schedulerlinks.find_by_name('scheduler-all-1')
+        self.assert_(scheduler1 is not None)
+        scheduler1.__class__ = GoodScheduler
+        scheduler2 = self.conf.schedulerlinks.find_by_name('scheduler-all-2')
+        self.assert_(scheduler2 is not None)
+        scheduler2.__class__ = BadScheduler        
+
+        print "Preparing pollers"
+        poller1 = self.conf.pollers.find_by_name('poller-all-1')
+        self.assert_(poller1 is not None)
+        poller1.__class__ = GoodPoller
+        poller2 = self.conf.pollers.find_by_name('poller-all-2')
+        self.assert_(poller2 is not None)
+        poller2.__class__ = BadPoller        
+
+        print "Preparing reactionners"
+        reactionner1 = self.conf.reactionners.find_by_name('reactionner-all-1')
+        self.assert_(reactionner1 is not None)
+        reactionner1.__class__ = GoodReactionner
+        reactionner2 = self.conf.reactionners.find_by_name('reactionner-all-2')
+        self.assert_(reactionner2 is not None)
+        reactionner2.__class__ = BadReactionner        
+
+        print "Preparing brokers"
+        broker1 = self.conf.brokers.find_by_name('broker-all-1')
+        self.assert_(broker1 is not None)
+        broker1.__class__ = GoodBroker
+        broker2 = self.conf.brokers.find_by_name('broker-all-2')
+        self.assert_(broker2 is not None)
+        broker2.__class__ = GoodBroker
+
+        # Ping all elements. Should have 1 as OK, 2 as 
+        # one bad attempt (3 max)
+        self.dispatcher.check_alive()
+
+        # Check good values
+        self.assert_(scheduler1.alive == True)
+        self.assert_(scheduler1.attempt == 0)
+        self.assert_(scheduler1.reachable == True)
+        # still alive, just unreach
+        self.assert_(scheduler2.alive == True)
+        self.assert_(scheduler2.attempt == 1)
+        self.assert_(scheduler2.reachable == False)
+        
+        #and others satellites too
+        self.assert_(poller1.alive == True)
+        self.assert_(poller1.attempt == 0)
+        self.assert_(poller1.reachable == True)
+        # still alive, just unreach
+        self.assert_(poller2.alive == True)
+        self.assert_(poller2.attempt == 1)
+        self.assert_(poller2.reachable == False)
+
+        #and others satellites too
+        self.assert_(reactionner1.alive == True)
+        self.assert_(reactionner1.attempt == 0)
+        self.assert_(reactionner1.reachable == True)
+        # still alive, just unreach
+        self.assert_(reactionner2.alive == True)
+        self.assert_(reactionner2.attempt == 1)
+        self.assert_(reactionner2.reachable == False)
+        
+        #and others satellites too
+        self.assert_(broker1.alive == True)
+        self.assert_(broker1.attempt == 0)
+        self.assert_(broker1.reachable == True)
+        # still alive, just unreach
+        self.assert_(broker2.alive == True)
+        self.assert_(broker2.attempt == 0)
+        self.assert_(broker2.reachable == True)
+
+        ### Now add another attempt, still alive, but attemp=2/3
+        self.dispatcher.check_alive()
+
+        # Check good values
+        self.assert_(scheduler1.alive == True)
+        self.assert_(scheduler1.attempt == 0)
+        self.assert_(scheduler1.reachable == True)
+        # still alive, just unreach
+        self.assert_(scheduler2.alive == True)
+        self.assert_(scheduler2.attempt == 2)
+        self.assert_(scheduler2.reachable == False)
+        
+        #and others satellites too
+        self.assert_(poller1.alive == True)
+        self.assert_(poller1.attempt == 0)
+        self.assert_(poller1.reachable == True)
+        # still alive, just unreach
+        self.assert_(poller2.alive == True)
+        self.assert_(poller2.attempt == 2)
+        self.assert_(poller2.reachable == False)
+
+        #and others satellites too
+        self.assert_(reactionner1.alive == True)
+        self.assert_(reactionner1.attempt == 0)
+        self.assert_(reactionner1.reachable == True)
+        # still alive, just unreach
+        self.assert_(reactionner2.alive == True)
+        self.assert_(reactionner2.attempt == 2)
+        self.assert_(reactionner2.reachable == False)
+        
+        #and others satellites too
+        self.assert_(broker1.alive == True)
+        self.assert_(broker1.attempt == 0)
+        self.assert_(broker1.reachable == True)
+        # still alive, just unreach
+        self.assert_(broker2.alive == True)
+        self.assert_(broker2.attempt == 0)
+        self.assert_(broker2.reachable == True)
+
+        ### Now we get BAD, We go DEAD for N2 !
+        self.dispatcher.check_alive()
+
+        # Check good values
+        self.assert_(scheduler1.alive == True)
+        self.assert_(scheduler1.attempt == 0)
+        self.assert_(scheduler1.reachable == True)
+        # still alive, just unreach
+        self.assert_(scheduler2.alive == False)
+        self.assert_(scheduler2.attempt == 3)
+        self.assert_(scheduler2.reachable == False)
+        
+        #and others satellites too
+        self.assert_(poller1.alive == True)
+        self.assert_(poller1.attempt == 0)
+        self.assert_(poller1.reachable == True)
+        # still alive, just unreach
+        self.assert_(poller2.alive == False)
+        self.assert_(poller2.attempt == 3)
+        self.assert_(poller2.reachable == False)
+
+        #and others satellites too
+        self.assert_(reactionner1.alive == True)
+        self.assert_(reactionner1.attempt == 0)
+        self.assert_(reactionner1.reachable == True)
+        # still alive, just unreach
+        self.assert_(reactionner2.alive == False)
+        self.assert_(reactionner2.attempt == 3)
+        self.assert_(reactionner2.reachable == False)
+        
+        #and others satellites too
+        self.assert_(broker1.alive == True)
+        self.assert_(broker1.attempt == 0)
+        self.assert_(broker1.reachable == True)
+        # still alive, just unreach
+        self.assert_(broker2.alive == True)
+        self.assert_(broker2.attempt == 0)
+        self.assert_(broker2.reachable == True)
+
+        # Now we check how we should dispatch confs
+        self.dispatcher.check_dispatch()
+        # the conf should not be in a good shape
+        self.assert_(self.dispatcher.dispatch_ok == False)
+
+        # Now we really dispatch them!
+        self.dispatcher.dispatch()
+        self.assert_(self.any_log_match('Dispatch OK of for conf in scheduler scheduler-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to reactionner reactionner-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to poller poller-all-1'))
+        
+        #Check the configuration dispatching for broker, should be on one OR the other, but not both!
+        on_one = self.any_log_match('Dispatch OK of for configuration 0 to broker broker-all-1')
+        on_two = self.any_log_match('Dispatch OK of for configuration 0 to broker broker-all-2')
+        # at least one of them
+        self.assert_(on_one or on_two)
+        if on_one:
+            self.assert_(not on_two)
+        if on_two:
+            self.assert_(not on_one)
+        self.clear_logs()
+
+        # And look if we really dispatch conf as we should
+        for r in self.conf.realms:
+            for cfg in r.confs.values():
+                self.assert_(cfg.is_assigned == True)
+                self.assert_(cfg.assigned_to == scheduler1)
+                
+
+
+
 if __name__ == '__main__':
     unittest.main()
 

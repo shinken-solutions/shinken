@@ -28,6 +28,8 @@
  dead to the spare
 """
 
+import random
+
 from shinken.util import alive_then_spare_then_deads
 from shinken.log import logger
 
@@ -401,18 +403,26 @@ class Dispatcher:
                             logger.log('[%s] Dispatching %s' % (r.get_name(),kind) + 's')
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
                             print "*"*10, "DBG: cfg_for_satellite_part", cfg_for_satellite_part, r.get_name(), cfg_id
-
-                            # print "Sched Config part for ", kind+'s',":", cfg_for_satellite_part
+                            
                             # make copies of potential_react list for sort
                             satellites = []
                             for satellite in r.get_potential_satellites_by_type(kind):
                                 satellites.append(satellite)
                             satellites.sort(alive_then_spare_then_deads)
+
                             satellite_string = "[%s] %s satellite order : " % (r.get_name(), kind)
                             for satellite in satellites:
                                 satellite_string += '%s (spare:%s), ' % (satellite.get_name(), str(satellite.spare))
 
                             logger.log(satellite_string)
+
+                            # Only keep alive Satellites
+                            satellites = [s for s in satellites if s.alive]
+
+                            # If we got a broker, we "randomize" the list
+                            # so it will smooth the load to them
+                            if kind == "broker":
+                                random.shuffle(satellites)
 
                             # Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
@@ -423,17 +433,22 @@ class Dispatcher:
                                     satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part
                                     if satellite.manage_arbiters:
                                         satellite.cfg['arbiters'] = arbiters_cfg
-
+                                        
                                     # Brokers should have poller/reactionners links too
                                     if kind == "broker":
                                         r.fill_broker_with_poller_reactionner_links(satellite)
-
-                                    is_sent = satellite.put_conf(satellite.cfg)#_for_satellite)
+                                    
+                                    is_sent = satellite.put_conf(satellite.cfg)
                                     if is_sent:
                                         satellite.active = True
                                         logger.log('[%s] Dispatch OK of for configuration %s to %s %s' %(r.get_name(), cfg_id, kind, satellite.get_name()))
                                         nb_cfg_sent += 1
                                         r.to_satellites_managed_by[kind][cfg_id].append(satellite)
+                                    
+                                        # If we got a broker, the conf_id must be send to only ONE
+                                        # broker, so here it's done, we are happy.
+                                        if kind == "broker":
+                                            break
                             # else:
                             #    #I've got enouth satellite, the next one are spare for me
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
