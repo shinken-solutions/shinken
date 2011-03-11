@@ -307,7 +307,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         scheduler1.__class__ = GoodScheduler
         scheduler2 = self.conf.schedulerlinks.find_by_name('scheduler-all-2')
         self.assert_(scheduler2 is not None)
-        scheduler2.__class__ = BadScheduler        
+        scheduler2.__class__ = GoodScheduler       
 
         print "Preparing pollers"
         poller1 = self.conf.pollers.find_by_name('poller-all-1')
@@ -343,8 +343,8 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(scheduler1.reachable == True)
         # still alive, just unreach
         self.assert_(scheduler2.alive == True)
-        self.assert_(scheduler2.attempt == 1)
-        self.assert_(scheduler2.reachable == False)
+        self.assert_(scheduler2.attempt == 0)
+        self.assert_(scheduler2.reachable == True)
         
         #and others satellites too
         self.assert_(poller1.alive == True)
@@ -382,8 +382,8 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(scheduler1.reachable == True)
         # still alive, just unreach
         self.assert_(scheduler2.alive == True)
-        self.assert_(scheduler2.attempt == 2)
-        self.assert_(scheduler2.reachable == False)
+        self.assert_(scheduler2.attempt == 0)
+        self.assert_(scheduler2.reachable == True)
         
         #and others satellites too
         self.assert_(poller1.alive == True)
@@ -420,9 +420,9 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(scheduler1.attempt == 0)
         self.assert_(scheduler1.reachable == True)
         # still alive, just unreach
-        self.assert_(scheduler2.alive == False)
-        self.assert_(scheduler2.attempt == 3)
-        self.assert_(scheduler2.reachable == False)
+        self.assert_(scheduler2.alive == True)
+        self.assert_(scheduler2.attempt == 0)
+        self.assert_(scheduler2.reachable == True)
         
         #and others satellites too
         self.assert_(poller1.alive == True)
@@ -473,11 +473,12 @@ class TestDispatcherMultiBroker(ShinkenTest):
             self.assert_(not on_one)
         self.clear_logs()
 
+
         # And look if we really dispatch conf as we should
         for r in self.conf.realms:
             for cfg in r.confs.values():
                 self.assert_(cfg.is_assigned == True)
-                self.assert_(cfg.assigned_to == scheduler1)
+                self.assert_(cfg.assigned_to in [ scheduler1, scheduler2])
                 
 
 
