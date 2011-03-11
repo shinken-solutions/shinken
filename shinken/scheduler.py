@@ -377,6 +377,7 @@ class Scheduler:
                 # So if not the good one, loop for next :)
                 if not a.reactionner_tag in reactionner_tags:
                     continue
+
                 # And now look for can launch or not :)
                 if a.status == 'scheduled' and a.is_launchable(now):
                     a.status = 'inpoller'

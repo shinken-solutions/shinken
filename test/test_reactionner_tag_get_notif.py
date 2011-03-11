@@ -36,6 +36,7 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
     # For a service, we generate a notification and a event handler.
     # Each one got a specific reactionner_tag that we will look for.
     def test_good_checks_get_only_tags_with_specific_tags(self):
+        now = int(time.time())
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
         router.act_depend_of = [] # ignore the router
@@ -53,6 +54,11 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
 
         for a in self.sched.actions.values():
+            #Set them go NOW
+            a.t_to_go = now
+            # In fact they are already launched, so we-reenabled them :)
+            a.status = 'scheduled'
+            # And look for good tagging
             if a.command.startswith('plugins/notifier.pl'):
                 print a.__dict__
                 print a.reactionner_tag
@@ -62,6 +68,20 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
                 print a.reactionner_tag
                 self.assert_(a.reactionner_tag == 'eventtag')
 
+
+        # Ok the tags are defined as it should, now try to get them as a reactionner :)
+        # Now get only tag ones
+        taggued_runonwindows_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['runonwindows'])
+        self.assert_(len(taggued_runonwindows_checks) > 0)
+        for c in taggued_runonwindows_checks:
+            # Should be the host one only
+            self.assert_(c.command.startswith('plugins/notifier.pl'))
+
+        taggued_eventtag_checks = self.sched.get_to_run_checks(False, True, reactionner_tags=['eventtag'])
+        self.assert_(len(taggued_eventtag_checks) > 0)
+        for c in taggued_eventtag_checks:
+            # Should be the host one only
+            self.assert_(c.command.startswith('plugins/test_eventhandler.pl'))
 
 
 if __name__ == '__main__':
