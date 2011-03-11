@@ -45,10 +45,12 @@ class EventHandler(Action):
         'command':        StringProp (default=''),
         'module_type':    StringProp (default=''),
         'worker':         StringProp (default='none'),
+        'reactionner_tag':     StringProp (default='None'),
     }
 
     #id = 0 #Is common to Actions
-    def __init__(self, command, id=None, timeout=10, env={}, module_type='fork'):
+    def __init__(self, command, id=None, timeout=10, env={}, \
+                     module_type='fork', reactionner_tag='None'):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
@@ -68,6 +70,7 @@ class EventHandler(Action):
         self.env = {}
         self.module_type = module_type
         self.worker = 'none'
+        self.reactionner_tag = reactionner_tag
 
 
     #return a copy of the check but just what is important for execution

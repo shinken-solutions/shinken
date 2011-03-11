@@ -92,6 +92,7 @@ launch_and_assert test_unknown_do_not_change.py
 launch_and_assert test_customs_on_service_hosgroups.py
 launch_and_assert test_modules_nrpe_poller.py
 launch_and_assert test_poller_tag_get_checks.py
+launch_and_assert test_reactionner_tag_get_notif.py
 launch_and_assert test_orphaned.py
 
 launch_and_assert test_maintenance_period.py

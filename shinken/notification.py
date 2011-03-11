@@ -61,7 +61,8 @@ class Notification(Action):
         'timeout':             IntegerProp(default=10),
         'check_time':          IntegerProp(default=0),
         'module_type':         StringProp (default='', fill_brok=['full_status']),
-        'worker':           StringProp (default='none'),
+        'worker':              StringProp (default='none'),
+        'reactionner_tag':     StringProp (default='None'),
     }
 
     macros = {
@@ -84,7 +85,8 @@ class Notification(Action):
                      reason_type=1, state=0, ack_author='', ack_data='', \
                      escalated=False, contacts_notified=0, \
                      start_time=0, end_time=0, notification_type=0, id=None, \
-                     notif_nb=1, timeout=10, env={}, module_type='fork'):
+                     notif_nb=1, timeout=10, env={}, module_type='fork', \
+                     reactionner_tag='None'):
         self.is_a = 'notification'
         self.type = type
         if id is None: #id != None is for copy call only
@@ -123,6 +125,7 @@ class Notification(Action):
 
         self.creation_time = time.time()
         self.worker = 'none'
+        self.reactionner_tag = reactionner_tag
 
 
     #return a copy of the check but just what is important for execution

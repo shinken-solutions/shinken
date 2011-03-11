@@ -505,7 +505,9 @@ class SchedulingItem(Item):
         m = MacroResolver()
         data = self.get_data_for_event_handler()
         cmd = m.resolve_command(self.event_handler, data)
-        e = EventHandler(cmd, timeout=cls.event_handler_timeout)
+        rt = self.event_handler.reactionner_tag
+        e = EventHandler(cmd, timeout=cls.event_handler_timeout, \
+                             reactionner_tag=rt)
         #print "DBG: Event handler call created"
         #print "DBG: ",e.__dict__
         self.raise_event_handler_log_entry(self.event_handler)
@@ -1042,9 +1044,10 @@ class SchedulingItem(Item):
             notif_commands = contact.get_notification_commands(cls.my_type)
 
             for cmd in notif_commands:
+                rt = cmd.reactionner_tag
                 child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
                     contact, n.t_to_go, timeout=cls.notification_timeout,
-                    notif_nb=n.notif_nb )
+                    notif_nb=n.notif_nb, reactionner_tag=rt )
                 if not self.notification_is_blocked_by_contact(child_n, contact):
                     # Update the notification with fresh status information
                     # of the item. Example: during the notification_delay
@@ -1124,7 +1127,9 @@ class SchedulingItem(Item):
             m = MacroResolver()
             data = self.get_data_for_event_handler()
             cmd = m.resolve_command(cls.perfdata_command, data)
-            e = EventHandler(cmd, timeout=cls.perfdata_timeout)
+            reactionner_tag = cls.perfdata_command.reactionner_tag
+            e = EventHandler(cmd, timeout=cls.perfdata_timeout,
+                             reactionner_tag=reactionner_tag)
 
             # ok we can put it in our temp action queue
             self.actions.append(e)
