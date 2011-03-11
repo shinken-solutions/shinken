@@ -29,6 +29,7 @@
 """
 
 import random
+import itertools
 
 from shinken.util import alive_then_spare_then_deads
 from shinken.log import logger
@@ -409,6 +410,33 @@ class Dispatcher:
                             for satellite in r.get_potential_satellites_by_type(kind):
                                 satellites.append(satellite)
                             satellites.sort(alive_then_spare_then_deads)
+                            print "All broker"
+                            for b in satellites:
+                                print b.get_name(), b.alive
+
+                            # Only keep alive Satellites
+                            satellites = [s for s in satellites if s.alive]
+
+                            # If we got a broker, we make the list to pop a new
+                            # item first for each scheduler, so it will smooth the load
+                            # Butthe spare must stay atteh end ;)
+                            if kind == "broker":
+                                nospare = [s for s in satellites if not s.spare]
+                                #Should look over the list, not over
+                                if len(nospare) != 0:
+                                    idx = cfg_id % len(nospare)
+                                    print "No spare", nospare
+                                    spares = [s for s in satellites if s.spare]
+                                    print "Spare", spares
+                                    print "Got 1", nospare[idx:]
+                                    print "Got 2", nospare[:-idx+1]
+                                    new_satellites = nospare[idx:]
+                                    new_satellites.extend(nospare[:-idx+1])
+                                    #print "New satellites", cfg_id, new_satellites
+                                    #for s in new_satellites:
+                                    #    print "New satellites", cfg_id, s.get_name()
+                                    satellites = new_satellites
+                                    satellites.extend(spares)
 
                             satellite_string = "[%s] %s satellite order : " % (r.get_name(), kind)
                             for satellite in satellites:
@@ -416,13 +444,6 @@ class Dispatcher:
 
                             logger.log(satellite_string)
 
-                            # Only keep alive Satellites
-                            satellites = [s for s in satellites if s.alive]
-
-                            # If we got a broker, we "randomize" the list
-                            # so it will smooth the load to them
-                            if kind == "broker":
-                                random.shuffle(satellites)
 
                             # Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0

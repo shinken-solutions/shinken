@@ -462,15 +462,8 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to reactionner reactionner-all-1'))
         self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to poller poller-all-1'))
         
-        #Check the configuration dispatching for broker, should be on one OR the other, but not both!
-        on_one = self.any_log_match('Dispatch OK of for configuration 0 to broker broker-all-1')
-        on_two = self.any_log_match('Dispatch OK of for configuration 0 to broker broker-all-2')
-        # at least one of them
-        self.assert_(on_one or on_two)
-        if on_one:
-            self.assert_(not on_two)
-        if on_two:
-            self.assert_(not on_one)
+        self.assert_(self.any_log_match('Dispatch OK of for configuration 1 to broker broker-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to broker broker-all-2'))
         self.clear_logs()
 
 
@@ -478,7 +471,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         for r in self.conf.realms:
             for cfg in r.confs.values():
                 self.assert_(cfg.is_assigned == True)
-                self.assert_(cfg.assigned_to in [ scheduler1, scheduler2])
+                self.assert_(cfg.assigned_to in [scheduler1, scheduler2])
                 
 
 
