@@ -358,7 +358,7 @@ class Dispatcher:
                         sched.need_conf = False
                         conf.is_assigned = True
                         conf.assigned_to = sched
-
+                        
                         # Now we generate the conf for satellites:
                         cfg_id = conf.id
                         for kind in ( 'reactionner', 'poller', 'broker' ):

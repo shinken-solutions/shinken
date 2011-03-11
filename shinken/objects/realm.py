@@ -343,33 +343,6 @@ class Realm(Itemgroup):
         print "***** Broker Me %s got a poller/reactionner link : %s and %s" % (broker.get_name(), broker.cfg['pollers'], broker.cfg['reactionners'])
 
 
-    #TODO: find a better name...
-    #TODO : and if he goes active?
-    def fill_broker_with_scheduler_links(self, broker):
-        print "DBG: filling broker", broker.get_name()
-        #First we create/void theses links
-        broker.cfg['schedulers'] = {}
-        #broker.cfg['reactionners'] = {}
-
-        #First our own level
-        for s in self.get_schedulers():
-            if s.conf is not None:
-                cfg = s.give_satellite_cfg()
-                broker.cfg['schedulers'][s.conf.id] = cfg
-
-        #Then sub if we must to it
-        if broker.manage_sub_realms:
-            print "All schedulers", self.get_all_schedulers()
-            for s in  self.get_all_schedulers():
-                if s.conf is not None:
-                    cfg = s.give_satellite_cfg()
-                    broker.cfg['schedulers'][s.conf.id] = cfg
-        else : 
-            print "FUCK, not managing it!"
-
-        print "***** Broker Me %s got schedulers links : %s" % (broker.get_name(), broker.cfg['schedulers'])
-
-
     # Get a conf package of satellites links that can be useful for 
     # a scheduler
     def get_satellites_links_for_scheduler(self):
@@ -411,6 +384,7 @@ class Realms(Itemgroups):
 
     def linkify(self):
         self.linkify_p_by_p()
+
         #prepare list of satallites and confs
         for p in self.itemgroups.values():
             p.pollers = []
