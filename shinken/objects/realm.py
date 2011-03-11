@@ -291,18 +291,6 @@ class Realm(Itemgroup):
         self.to_satellites['broker'] = {}
         self.to_satellites['receiver'] = {}
 
-        self.to_satellites_nb_assigned = {}
-        self.to_satellites_nb_assigned['reactionner'] = {}
-        self.to_satellites_nb_assigned['poller'] = {}
-        self.to_satellites_nb_assigned['broker'] = {}
-        self.to_satellites_nb_assigned['receiver'] = {}
-
-        self.to_satellites_nb_assigned = {}
-        self.to_satellites_nb_assigned['reactionner'] = {}
-        self.to_satellites_nb_assigned['poller'] = {}
-        self.to_satellites_nb_assigned['broker'] = {}
-        self.to_satellites_nb_assigned['receiver'] = {}
-
         self.to_satellites_need_dispatch = {}
         self.to_satellites_need_dispatch['reactionner'] = {}
         self.to_satellites_need_dispatch['poller'] = {}

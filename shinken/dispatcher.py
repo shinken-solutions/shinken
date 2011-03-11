@@ -162,7 +162,6 @@ class Dispatcher:
                             # must be catch by satellite who see that it already have the conf (hash)
                             # and do nothing
                             self.dispatch_ok = False #so we will redispatch all
-                            r.to_satellites_nb_assigned[kind][cfg_id] = 0
                             r.to_satellites_need_dispatch[kind][cfg_id]  = True
                             r.to_satellites_managed_by[kind][cfg_id] = []
                         for satellite in r.to_satellites_managed_by[kind][cfg_id]:
@@ -181,7 +180,6 @@ class Dispatcher:
                             if not satellite.alive or (satellite.reachable and cfg_id not in satellite.what_i_managed()):
                                 logger.log('[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False #so we will redispatch all
-                                r.to_satellites_nb_assigned[kind][cfg_id] = 0
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = True
                                 r.to_satellites_managed_by[kind][cfg_id] = []
                 # At the first pass, there is no cfg_id in to_satellites_managed_by
@@ -330,7 +328,6 @@ class Dispatcher:
                             cfg_id = conf.id
                             for kind in ( 'reactionner', 'poller', 'broker' ):
                                 r.to_satellites[kind][cfg_id] = None
-                                r.to_satellites_nb_assigned[kind][cfg_id] = 0
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
                                 r.to_satellites_managed_by[kind][cfg_id] = []
                             break
@@ -366,7 +363,6 @@ class Dispatcher:
                         cfg_id = conf.id
                         for kind in ( 'reactionner', 'poller', 'broker' ):
                             r.to_satellites[kind][cfg_id] = sched.give_satellite_cfg()
-                            r.to_satellites_nb_assigned[kind][cfg_id] = 0
                             r.to_satellites_need_dispatch[kind][cfg_id]  = True
                             r.to_satellites_managed_by[kind][cfg_id] = []
 
@@ -440,7 +436,6 @@ class Dispatcher:
                                         r.to_satellites_managed_by[kind][cfg_id].append(satellite)
                             # else:
                             #    #I've got enouth satellite, the next one are spare for me
-                            r.to_satellites_nb_assigned[kind][cfg_id] = nb_cfg_sent
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
                                 logger.log("[%s] OK, no more %s sent need" % (r.get_name(), kind))
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
