@@ -49,6 +49,7 @@ test_dispatcher.py
 test_reactionner_tag_get_notif.py
 test_module_pickle_retention_broker.py
 test_module_pickle_retention_arbiter.py
+test_module_nagios_retention.py
 
 # takes long
 test_livestatus.py
