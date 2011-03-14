@@ -482,7 +482,10 @@ class Host(SchedulingItem):
     # For get a nice name
     def get_name(self):
         if not self.is_tpl():
-            return self.host_name
+            try:
+                return self.host_name
+            except AttributeError: # outch, no hostname
+                return 'UNNAMEDHOST'
         else:
             return self.name
 
