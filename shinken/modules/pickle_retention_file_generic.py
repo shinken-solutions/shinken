@@ -35,7 +35,6 @@ properties = {
     'daemons' : ['broker'],
     'type' : 'pickle_retention_file_generic',
     'external' : False,
-    'phases' : ['retention'],
     }
 
 
@@ -63,45 +62,21 @@ class Pickle_retention_generic(BaseModule):
             # Open a file near the path, with .tmp extension
             # so in cae or problem, we do not lost the old one
             f = open(self.path+'.tmp', 'wb')
-            #Just put hosts/services becauses checks and notifications
-            #are already link into
-            #all_data = {'hosts' : sched.hosts, 'services' : sched.services}
             
-            # We create a all_data dict with lsit of dict of retention useful
-            # data of our hosts and services
+            # We get interesting retention data from the daemon it self
             all_data = daemon.get_retention_data()
             print "DBG"
             for b in all_data:
                 print "DBG : saving", b
             
-            #for h in sched.hosts:
-            #    d = {}
-            #    running_properties = h.__class__.running_properties
-            #    for prop, entry in running_properties.items():
-            #        if entry.retention:
-            #            d[prop] = getattr(h, prop)
-            #    #f2 = open('/tmp/moncul2/'+h.host_name, 'wb')
-            #    #cPickle.dump(d, f2)
-            #    #f2.close()
-            #    all_data['hosts'][h.host_name] = d
-
-            #Now same for services
-            #for s in sched.services:
-            #    d = {}
-            #    running_properties = s.__class__.running_properties
-            #    for prop, entry in running_properties.items():
-            #        if entry.retention:
-            #            d[prop] = getattr(s, prop)
-            #    #f2 = open('/tmp/moncul2/'+s.host_name+'__'+s.service_description, 'wb')
-            #    #cPickle.dump(d, f2)
-            #    #f2.close()
-            #    all_data['services'][(s.host.host_name, s.service_description)] = d
+            # And we save it :)
 
             #s = cPickle.dumps(all_data)
             #s_compress = zlib.compress(s)
             cPickle.dump(all_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
             #f.write(s_compress)
             f.close()
+            
             # Now move the .tmp fiel to the real path
             shutil.move(self.path+'.tmp', self.path)
         except IOError , exp:
@@ -111,7 +86,7 @@ class Pickle_retention_generic(BaseModule):
 
 
     #Should return if it succeed in the retention load or not
-    def hook_load_retention(self, daemon):#, log_mgr):
+    def hook_load_retention(self, daemon):
         log_mgr = logger
         print "[PickleRetentionGeneric] asking me to load the retention objects"
 
@@ -139,6 +114,7 @@ class Pickle_retention_generic(BaseModule):
             log_mgr.log(s)
             return False
 
+        # Ok, we send back the data to the daemon
         for b in all_data:
             print "Loading data", b
         daemon.restore_retention_data(all_data)
