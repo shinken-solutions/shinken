@@ -36,7 +36,6 @@ properties = {
     'daemons' : ['scheduler'],
     'type' : 'pickle_retention_file',
     'external' : False,
-    'phases' : ['retention'],
     }
 
 

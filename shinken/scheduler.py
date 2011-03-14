@@ -748,57 +748,15 @@ class Scheduler:
         if self.conf.retention_update_interval == 0 and not forced:
             return
 
-        to_del = []
         self.hook_point('save_retention')
 
-        # OLD WAY:
-        # Do the job for all modules that do the retention
-        # TODO : remove it in a future version, when users will not use the
-        for inst in self.sched_daemon.modules_manager.instances:
-            if 'retention' in inst.phases:
-                try:
-                    logger.log("[%s] WARNING : The module %s is deprecated. It will be removed in a future version" % (self.instance_name, inst.get_name()))
-                    # Ask it with self to they have full access, and a log object
-                    # so they can easily raise log
-                    inst.update_retention_objects(self, logger)
-                except Exception , exp:
-                    print exp.__dict__
-                    logger.log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.instance_name, inst.get_name(),str(exp)))
-                    logger.log("[%s] Exception type : %s" % (self.instance_name, type(exp)))
-                    logger.log("[%s] Traceback: %s" % (self.instance_name, traceback.format_exc()))
-                    to_del.append(inst)
-
-        # Now remove mod that raise an exception
-        self.sched_daemon.modules_manager.clear_instances(to_del)
 
 
     # Load the retention file and get status from it. It do not get all checks in progress
     # for the moment, just the status and the notifications.
     def retention_load(self):
-        to_del = []
-
         self.hook_point('load_retention')
         
-        #OLD WAY
-        # Do this job with modules too
-        for inst in self.sched_daemon.modules_manager.instances:
-            if 'retention' in inst.phases:
-                try:
-                    # give us ourself (full control!) and a log manager object
-                    b = inst.load_retention_objects(self, logger)
-                    # Stop at the first module that succeed to load the retention
-                    if b:
-                        return
-                except Exception , exp:
-                    print exp.__dict__
-                    logger.log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.instance_name, inst.get_name(),str(exp)))
-                    logger.log("[%s] Exception type : %s" % (self.instance_name, type(exp)))
-                    logger.log("[%s] Traceback: %s" % (self.instance_name, traceback.format_exc()))
-                    to_del.append(inst)
-
-        # Now remove mod that raise an exception
-        self.sched_daemon.modules_manager.clear_instances(to_del)
-
 
 
     # Helper function for module, will give our host and service
