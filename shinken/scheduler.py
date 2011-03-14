@@ -771,6 +771,37 @@ class Scheduler:
         self.sched_daemon.modules_manager.clear_instances(to_del)
 
 
+
+    # Helper function for module, will give our host and service
+    # data
+    def get_retention_data(self):
+        # We create a all_data dict with lsit of dict of retention useful
+        # data of our hosts and services
+        all_data = {'hosts' : {}, 'services' : {}}
+        for h in self.hosts:
+            d = {}
+            running_properties = h.__class__.running_properties
+            for prop, entry in running_properties.items():
+                if entry.retention:
+                    d[prop] = getattr(h, prop)
+            all_data['hosts'][h.host_name] = d
+
+        #Now same for services
+        for s in self.services:
+            d = {}
+            running_properties = s.__class__.running_properties
+            for prop, entry in running_properties.items():
+                if entry.retention:
+                    d[prop] = getattr(s, prop)
+            all_data['services'][(s.host.host_name, s.service_description)] = d
+        return all_data
+
+    # Get back our broks from a retention module :)
+    def restore_retention_data(self, data):
+        pass
+
+
+
     # Fill the self.broks with broks of self (process id, and co)
     # broks of service and hosts (initial status)
     def fill_initial_broks(self):

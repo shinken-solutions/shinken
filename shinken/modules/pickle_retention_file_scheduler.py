@@ -69,29 +69,7 @@ class Pickle_retention_scheduler(BaseModule):
             
             # We create a all_data dict with lsit of dict of retention useful
             # data of our hosts and services
-            all_data = {'hosts' : {}, 'services' : {}}
-            for h in sched.hosts:
-                d = {}
-                running_properties = h.__class__.running_properties
-                for prop, entry in running_properties.items():
-                    if entry.retention:
-                        d[prop] = getattr(h, prop)
-                #f2 = open('/tmp/moncul2/'+h.host_name, 'wb')
-                #cPickle.dump(d, f2)
-                #f2.close()
-                all_data['hosts'][h.host_name] = d
-
-            #Now same for services
-            for s in sched.services:
-                d = {}
-                running_properties = s.__class__.running_properties
-                for prop, entry in running_properties.items():
-                    if entry.retention:
-                        d[prop] = getattr(s, prop)
-                #f2 = open('/tmp/moncul2/'+s.host_name+'__'+s.service_description, 'wb')
-                #cPickle.dump(d, f2)
-                #f2.close()
-                all_data['services'][(s.host.host_name, s.service_description)] = d
+            all_data = sched.get_retention_data()
 
             #s = cPickle.dumps(all_data)
             #s_compress = zlib.compress(s)
