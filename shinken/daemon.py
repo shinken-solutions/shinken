@@ -133,8 +133,11 @@ class Daemon(object):
     # At least, lose the local log file if need
     def do_stop(self):
         if self.modules_manager:
-            # We save what we can
-            self.hook_point('save_retention')
+            # We save what we can but NOT for the scheduler
+            # because the current sched object is a dummy one
+            # and the old one aleady do it!
+            if not hasattr(self, 'sched'):
+                self.hook_point('save_retention')
             # And we quit
             logger.log('Stopping all modules')
             self.modules_manager.stop_all()

@@ -239,6 +239,27 @@ class Scheduler:
     }
     
 
+    # We call the function of modules that got the this
+    # hook function
+    # TODO : find a way to merge this and the version in daemon.py
+    def hook_point(self, hook_name):
+        to_del = []
+        for inst in self.sched_daemon.modules_manager.instances:
+            full_hook_name = 'hook_' + hook_name
+            print inst.get_name(), hasattr(inst, full_hook_name), hook_name
+            if hasattr(inst, full_hook_name):
+                f = getattr(inst, full_hook_name)
+                #try :
+                print "Calling", full_hook_name, "of", inst.get_name()
+                f(self)
+                #except Exception, exp:
+                #    logger.log('The instance %s raise an exception %s. I kill it' % (inst.get_name(), str(exp)))
+                #    to_del.append(inst)
+
+        #Now remove mod that raise an exception
+        self.sched_daemon.modules_manager.clear_instances(to_del)
+
+
     # Ours queues may explode if noone ask us for elements
     # It's very dangerous : you can crash your server... and it's a bad thing :)
     # So we 'just' keep last elements : 2 of max is a good overhead
@@ -728,7 +749,10 @@ class Scheduler:
             return
 
         to_del = []
+        print "ASK update retention"
+        self.hook_point('save_retention')
 
+        # OLD WAY:
         # Do the job for all modules that do the retention
         for inst in self.sched_daemon.modules_manager.instances:
             if 'retention' in inst.phases:
@@ -751,6 +775,10 @@ class Scheduler:
     # for the moment, just the status and the notifications.
     def retention_load(self):
         to_del = []
+
+        self.hook_point('load_retention')
+        
+        #OLD WAY
         # Do this job with modules too
         for inst in self.sched_daemon.modules_manager.instances:
             if 'retention' in inst.phases:
@@ -1249,4 +1277,7 @@ class Scheduler:
             #print hp.heap()
             #print hp.heapu()
 
+        # WE must save the retention at the quit BY OURSELF
+        # because our daemon will not be able to do so for us
         self.update_retention_file(True)
+            

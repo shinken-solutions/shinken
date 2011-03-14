@@ -32,7 +32,7 @@ from shinken.basemodule import BaseModule
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['broker', 'arbiter'],
+    'daemons' : ['broker', 'arbiter', 'scheduler' ],
     'type' : 'pickle_retention_file_generic',
     'external' : False,
     }
@@ -57,6 +57,7 @@ class Pickle_retention_generic(BaseModule):
     def hook_save_retention(self, daemon):#, log_mgr):
         log_mgr = logger
         print "[PickleRetentionGeneric] asking me to update the retention objects"
+
         #Now the flat file method
         try:
             # Open a file near the path, with .tmp extension
@@ -65,11 +66,8 @@ class Pickle_retention_generic(BaseModule):
             
             # We get interesting retention data from the daemon it self
             all_data = daemon.get_retention_data()
-            print "DBG"
-            for b in all_data:
-                print "DBG : saving", b
             
-            # And we save it :)
+            # And we save it on file :)
 
             #s = cPickle.dumps(all_data)
             #s_compress = zlib.compress(s)
@@ -115,8 +113,6 @@ class Pickle_retention_generic(BaseModule):
             return False
 
         # Ok, we send back the data to the daemon
-        for b in all_data:
-            print "Loading data", b
         daemon.restore_retention_data(all_data)
 
         log_mgr.log("[PickleRetentionGeneric] OK we've load data from retention file")
