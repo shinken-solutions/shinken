@@ -749,14 +749,15 @@ class Scheduler:
             return
 
         to_del = []
-        print "ASK update retention"
         self.hook_point('save_retention')
 
         # OLD WAY:
         # Do the job for all modules that do the retention
+        # TODO : remove it in a future version, when users will not use the
         for inst in self.sched_daemon.modules_manager.instances:
             if 'retention' in inst.phases:
                 try:
+                    logger.log("[%s] WARNING : The module %s is deprecated. It will be removed in a future version" % (self.instance_name, inst.get_name()))
                     # Ask it with self to they have full access, and a log object
                     # so they can easily raise log
                     inst.update_retention_objects(self, logger)

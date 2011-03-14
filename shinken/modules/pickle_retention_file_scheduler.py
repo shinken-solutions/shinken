@@ -30,7 +30,7 @@ import shutil
 
 
 from shinken.basemodule import BaseModule
-
+from shinken.log import logger
 
 properties = {
     'daemons' : ['scheduler'],
@@ -56,6 +56,10 @@ class Pickle_retention_scheduler(BaseModule):
         self.path = path
 
     # Ok, main function that is called in the retention creation pass
+    def hook_save_retention(self, daemon):
+        self.update_retention_objects(daemon, logger)
+
+    # The real function, this wall module will be soonly removed
     def update_retention_objects(self, sched, log_mgr):
         print "[PickleRetention] asking me to update the retention objects"
         #Now the flat file method
@@ -83,6 +87,10 @@ class Pickle_retention_scheduler(BaseModule):
             return
         log_mgr.log("Updating retention_file %s" % self.path)
 
+
+    
+    def hook_load_retention(self, daemon):
+        return self.load_retention_objects(daemon, logger)
 
     #Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mgr):
