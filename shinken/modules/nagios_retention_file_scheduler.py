@@ -31,9 +31,8 @@ from shinken.objects import Contact, Contacts
 from shinken.comment import Comment
 from shinken.downtime import Downtime
 from shinken.basemodule import BaseModule
-
 from shinken.util import to_bool
-
+from shinken.log import logger
 
 
 #This text is print at the import
@@ -44,7 +43,6 @@ properties = {
     'daemons' : ['scheduler'],
     'type' : 'nagios_retention_file',
     'external' : False,
-    'phases' : ['retention'],
 }
 
 
@@ -63,9 +61,9 @@ class Nagios_retention_scheduler(BaseModule):
         BaseModule.__init__(self, mod_conf)
         self.path = path
 
-    #Ok, main function that is called in the retention creation pass
-    def update_retention_objects(self, sched, log_mgr):
-        print "[NagiosRetention] asking me to update the retention objects, but I won't do it."
+    # Ok, main function that is called in the retention creation pass
+    def hook_save_retention(self, daemon):
+        logger.log("[NagiosRetention] asking me to update the retention objects, but I won't do it.")
 
 
     def _cut_line(self, line):
@@ -284,8 +282,9 @@ class Nagios_retention_scheduler(BaseModule):
 
 
 
-    #Should return if it succeed in the retention load or not
-    def load_retention_objects(self, sched, log_mgr):
+    # Should return if it succeed in the retention load or not
+    def hook_load_retention(self, sched):
+        log_mgr = logger
         print "[NagiosRetention] asking me to load the retention file"
 
         #Now the old flat file way :(
@@ -346,62 +345,27 @@ class Nagios_retention_scheduler(BaseModule):
 
         self.create_and_link_downtimes(raw_objects, all_obj)
 
-        #Now load interesting properties in hosts/services
-        #Taging retention=False prop that not be directly load
-        #Items will be with theirs status, but not in checking, so
-        #a new check will be launch like with a normal begining (random distributed
-        #scheduling)
+        # Taken from the scheduler code... sorry
+        all_data = {'hosts' : {}, 'services' : {}}
+        for h in all_obj['host']:
+            d = {}
+            running_properties = h.__class__.running_properties
+            for prop, entry in running_properties.items():
+                if entry.retention:
+                    d[prop] = getattr(h, prop)
+            all_data['hosts'][h.host_name] = d
 
-        ret_hosts = all_obj['host']
-        for ret_h in ret_hosts:
-            h = sched.hosts.find_by_name(ret_h.host_name)
-            if h is not None:
-#                print "Ok, got data for", h.get_dbg_name()
-                running_properties = h.__class__.running_properties
-                for prop, entry in running_properties.items():
-                    if entry.retention:
-                        setattr(h, prop, getattr(ret_h, prop))
-                for a in h.notifications_in_progress.values():
-                    a.ref = h
-                    sched.add(a)
-                h.update_in_checking()
-
-                #And also add downtimes and comments
-                for dt in h.downtimes:
-                    dt.ref = h
-                    dt.extra_comment.ref = h
-                    sched.add(dt)
-                for c in h.comments:
-                    c.ref = h
-                    sched.add(c)
-
-
-
-        ret_services = all_obj['service']
-        for ret_s in ret_services:
-            s = sched.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
-            if s is not None:
-#                print "Ok, got data for", s.get_dbg_name()
-#                print "Latency", ret_s.latency, type(ret_s.latency)
-                running_properties = s.__class__.running_properties
-                for prop, entry in running_properties.items():
-                    if entry.retention:
-#                        print "Set service value", getattr(ret_s, prop)
-                        setattr(s, prop, getattr(ret_s, prop))
-                for a in s.notifications_in_progress.values():
-                    a.ref = s
-                    sched.add(a)
-                s.update_in_checking()
-                #And also add downtimes and comments
-                for dt in s.downtimes:
-                    dt.ref = s
-                    dt.extra_comment.ref = s
-                    sched.add(dt)
-                for c in s.comments:
-                    c.ref = s
-                    sched.add(c)
-
-
+        #Now same for services
+        for s in all_obj['service']:
+            d = {}
+            running_properties = s.__class__.running_properties
+            for prop, entry in running_properties.items():
+                if entry.retention:
+                    d[prop] = getattr(s, prop)
+            all_data['services'][(s.host_name, s.service_description)] = d
+#        all_data = {'hosts' : {}, 'services' : {}}
+            
+        sched.restore_retention_data(all_data)
         log_mgr.log("[NagiosRetention] OK we've load data from retention file")
 
         return True
