@@ -48,6 +48,7 @@ test_create_link_from_ext_cmd.py
 test_dispatcher.py
 test_reactionner_tag_get_notif.py
 test_module_pickle_retention_broker.py
+test_module_pickle_retention_arbiter.py
 
 # takes long
 test_livestatus.py
