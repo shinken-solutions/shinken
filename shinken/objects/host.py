@@ -487,7 +487,11 @@ class Host(SchedulingItem):
             except AttributeError: # outch, no hostname
                 return 'UNNAMEDHOST'
         else:
-            return self.name
+            try:
+                return self.name
+            except AttributeError: # outch, no name for this template
+                return 'UNNAMEDHOSTTEMPLATE'
+            
 
 
     # For debugin purpose only
