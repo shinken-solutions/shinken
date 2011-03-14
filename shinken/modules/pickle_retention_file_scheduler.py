@@ -112,77 +112,8 @@ class Pickle_retention_scheduler(BaseModule):
             log_mgr.log(s)
             return False
 
-
-        #Now load interesting properties in hosts/services
-        #Taging retention=False prop that not be directly load
-        #Items will be with theirs status, but not in checking, so
-        #a new check will be launch like with a normal begining (random distributed
-        #scheduling)
-
-        ret_hosts = all_data['hosts']
-        for ret_h_name in ret_hosts:
-            #We take the dict of our value to load
-            d = all_data['hosts'][ret_h_name]
-            h = sched.hosts.find_by_name(ret_h_name)
-            if h is not None:
-                running_properties = h.__class__.running_properties
-                for prop, entry in running_properties.items():
-                    if entry.retention:
-                        # Mayeb the save was not with this value, so
-                        # we just bypass this
-                        if prop in d:
-                            setattr(h, prop, d[prop])
-                for a in h.notifications_in_progress.values():
-#                    print "AA,", a.__dict__
-                    a.ref = h
-                    sched.add(a)
-                h.update_in_checking()
-                #And also add downtimes and comments
-                for dt in h.downtimes:
-                    dt.ref = h
-                    if hasattr(dt, 'extra_comment'):
-                        dt.extra_comment.ref = h
-                    else:
-                        dt.extra_comment = None
-                    sched.add(dt)
-                for c in h.comments:
-                    c.ref = h
-                    sched.add(c)
-                if h.acknowledgement is not None:
-                    h.acknowledgement.ref = h
-
-
-        ret_services = all_data['services']
-        for (ret_s_h_name, ret_s_desc) in ret_services:
-            #We take the dict of our value to load
-            d = all_data['services'][(ret_s_h_name, ret_s_desc)]
-            s = sched.services.find_srv_by_name_and_hostname(ret_s_h_name, ret_s_desc)
-            if s is not None:
-                running_properties = s.__class__.running_properties
-                for prop, entry in running_properties.items():
-                    if entry.retention:
-                        # Mayeb the save was not with this value, so
-                        # we just bypass this
-                        if prop in d:
-                            setattr(s, prop, d[prop])
-                for a in s.notifications_in_progress.values():
-                    a.ref = s
-                    sched.add(a)
-                s.update_in_checking()
-                #And also add downtimes and comments
-                for dt in s.downtimes:
-                    dt.ref = s
-                    if hasattr(dt, 'extra_comment'):
-                        dt.extra_comment.ref = s
-                    else:
-                        dt.extra_comment = None
-                    sched.add(dt)
-                for c in s.comments:
-                    c.ref = s
-                    sched.add(c)
-                if s.acknowledgement is not None:
-                    s.acknowledgement.ref = s
-
+        # call the scheduler helper function for restoring values
+        sched.restore_retention_data(all_data)
 
         log_mgr.log("[PickleRetention] OK we've load data from retention file")
 

@@ -796,9 +796,79 @@ class Scheduler:
             all_data['services'][(s.host.host_name, s.service_description)] = d
         return all_data
 
+
     # Get back our broks from a retention module :)
     def restore_retention_data(self, data):
-        pass
+        #Now load interesting properties in hosts/services
+        #Taging retention=False prop that not be directly load
+        #Items will be with theirs status, but not in checking, so
+        #a new check will be launch like with a normal begining (random distributed
+        #scheduling)
+
+        ret_hosts = data['hosts']
+        for ret_h_name in ret_hosts:
+            #We take the dict of our value to load
+            d = data['hosts'][ret_h_name]
+            h = self.hosts.find_by_name(ret_h_name)
+            if h is not None:
+                running_properties = h.__class__.running_properties
+                for prop, entry in running_properties.items():
+                    if entry.retention:
+                        # Mayeb the save was not with this value, so
+                        # we just bypass this
+                        if prop in d:
+                            setattr(h, prop, d[prop])
+                for a in h.notifications_in_progress.values():
+#                    print "AA,", a.__dict__
+                    a.ref = h
+                    self.add(a)
+                h.update_in_checking()
+                #And also add downtimes and comments
+                for dt in h.downtimes:
+                    dt.ref = h
+                    if hasattr(dt, 'extra_comment'):
+                        dt.extra_comment.ref = h
+                    else:
+                        dt.extra_comment = None
+                    self.add(dt)
+                for c in h.comments:
+                    c.ref = h
+                    self.add(c)
+                if h.acknowledgement is not None:
+                    h.acknowledgement.ref = h
+
+
+        ret_services = data['services']
+        for (ret_s_h_name, ret_s_desc) in ret_services:
+            #We take the dict of our value to load
+            d = data['services'][(ret_s_h_name, ret_s_desc)]
+            s = self.services.find_srv_by_name_and_hostname(ret_s_h_name, ret_s_desc)
+            if s is not None:
+                running_properties = s.__class__.running_properties
+                for prop, entry in running_properties.items():
+                    if entry.retention:
+                        # Mayeb the save was not with this value, so
+                        # we just bypass this
+                        if prop in d:
+                            setattr(s, prop, d[prop])
+                for a in s.notifications_in_progress.values():
+                    a.ref = s
+                    self.add(a)
+                s.update_in_checking()
+                #And also add downtimes and comments
+                for dt in s.downtimes:
+                    dt.ref = s
+                    if hasattr(dt, 'extra_comment'):
+                        dt.extra_comment.ref = s
+                    else:
+                        dt.extra_comment = None
+                    self.add(dt)
+                for c in s.comments:
+                    c.ref = s
+                    self.add(c)
+                if s.acknowledgement is not None:
+                    s.acknowledgement.ref = s
+
 
 
 
