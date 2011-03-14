@@ -29,14 +29,14 @@ import copy
 from shinken_test import *
 from shinken.log import logger
 from shinken.objects.module import Module
-from shinken.modules import pickle_retention_file_broker
-from shinken.modules.pickle_retention_file_broker import get_instance 
+from shinken.modules import pickle_retention_file_generic
+from shinken.modules.pickle_retention_file_generic import get_instance 
 
 
 modconf = Module()
-modconf.module_name = "PickleRetentionBroker"
-modconf.module_type = pickle_retention_file_broker.properties['type']
-modconf.properties = pickle_retention_file_broker.properties.copy()
+modconf.module_name = "PickleRetentionGeneric"
+modconf.module_type = pickle_retention_file_generic.properties['type']
+modconf.properties = pickle_retention_file_generic.properties.copy()
 
 
 class TestPickleRetentionBroker(ShinkenTest):
@@ -46,7 +46,7 @@ class TestPickleRetentionBroker(ShinkenTest):
     def test_pickle_retention(self):
         print self.conf.modules
         #get our modules
-        mod = pickle_retention_file_broker.Pickle_retention_broker(modconf, 'tmp/retention-test.dat')
+        mod = pickle_retention_file_generic.Pickle_retention_generic(modconf, 'tmp/retention-test.dat')
         try :
             os.unlink(mod.path)
         except :

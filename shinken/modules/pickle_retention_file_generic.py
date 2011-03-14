@@ -22,7 +22,7 @@
 
 
 #This text is print at the import
-print "Detected module : Picle retention file for Broker"
+print "Detected module : Pickle retention file for Daemons"
 
 import cPickle
 import shutil
@@ -33,7 +33,7 @@ from shinken.log import logger
 
 properties = {
     'daemons' : ['broker'],
-    'type' : 'pickle_retention_file_broker',
+    'type' : 'pickle_retention_file_generic',
     'external' : False,
     'phases' : ['retention'],
     }
@@ -41,23 +41,23 @@ properties = {
 
 #called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a pickle retention broker module for plugin %s" % plugin.get_name()
+    print "Get a pickle retention generic module for plugin %s" % plugin.get_name()
     path = plugin.path
-    instance = Pickle_retention_broker(plugin, path)
+    instance = Pickle_retention_generic(plugin, path)
     return instance
 
 
 
 # Just print some stuff
-class Pickle_retention_broker(BaseModule):
+class Pickle_retention_generic(BaseModule):
     def __init__(self, modconf, path):
         BaseModule.__init__(self, modconf)
         self.path = path
     
     # Ok, main function that is called in the retention creation pass
-    def hook_save_retention(self, broker):#, log_mgr):
+    def hook_save_retention(self, daemon):#, log_mgr):
         log_mgr = logger
-        print "[PickleRetentionBroker] asking me to update the retention objects"
+        print "[PickleRetentionGeneric] asking me to update the retention objects"
         #Now the flat file method
         try:
             # Open a file near the path, with .tmp extension
@@ -69,9 +69,9 @@ class Pickle_retention_broker(BaseModule):
             
             # We create a all_data dict with lsit of dict of retention useful
             # data of our hosts and services
-            all_broks = broker.get_retention_data()
+            all_data = daemon.get_retention_data()
             print "DBG"
-            for b in all_broks:
+            for b in all_data:
                 print "DBG : saving", b
             
             #for h in sched.hosts:
@@ -99,7 +99,7 @@ class Pickle_retention_broker(BaseModule):
 
             #s = cPickle.dumps(all_data)
             #s_compress = zlib.compress(s)
-            cPickle.dump(all_broks, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            cPickle.dump(all_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
             #f.write(s_compress)
             f.close()
             # Now move the .tmp fiel to the real path
@@ -111,15 +111,15 @@ class Pickle_retention_broker(BaseModule):
 
 
     #Should return if it succeed in the retention load or not
-    def hook_load_retention(self, broker):#, log_mgr):
+    def hook_load_retention(self, daemon):#, log_mgr):
         log_mgr = logger
-        print "[PickleRetentionBroker] asking me to load the retention objects"
+        print "[PickleRetentionGeneric] asking me to load the retention objects"
 
         #Now the old flat file way :(
-        log_mgr.log("[PickleRetentionBroker]Reading from retention_file %s" % self.path)
+        log_mgr.log("[PickleRetentionGeneric]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path, 'rb')
-            all_broks = cPickle.load(f)
+            all_data = cPickle.load(f)
             f.close()
         except EOFError , exp:
             print exp
@@ -139,10 +139,10 @@ class Pickle_retention_broker(BaseModule):
             log_mgr.log(s)
             return False
 
-        for b in all_broks:
-            print "Loading brok", b
-        broker.restore_retention_data(all_broks)
+        for b in all_data:
+            print "Loading data", b
+        daemon.restore_retention_data(all_data)
 
-        log_mgr.log("[PickleRetentionBroker] OK we've load data from retention file")
+        log_mgr.log("[PickleRetentionGeneric] OK we've load data from retention file")
         
         return True
