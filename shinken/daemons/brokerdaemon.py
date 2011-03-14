@@ -295,6 +295,8 @@ class Broker(BaseSatellite):
         for a in act:
             a.terminate()
             a.join(1)
+        # Save our data for retentions
+        self.hook_point('save_retention')
         super(Broker, self).do_stop()
         
         
@@ -527,7 +529,7 @@ class Broker(BaseSatellite):
 
         # Do the modules part, we have our modules in self.modules
         # REF: doc/broker-modules.png (1)
-
+        self.hook_point('load_retention')
 
         # Now the main loop
         self.do_mainloop()

@@ -491,7 +491,6 @@ class Host(SchedulingItem):
                 return self.name
             except AttributeError: # outch, no name for this template
                 return 'UNNAMEDHOSTTEMPLATE'
-            
 
 
     # For debugin purpose only
