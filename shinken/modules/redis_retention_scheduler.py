@@ -26,14 +26,15 @@ print "Detected module : Redis retention file for Scheduler"
 
 
 import redis
+import cPickle
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons' : ['scheduler'],
     'type' : 'redis_retention',
     'external' : False,
-    'phases' : ['retention'],
     }
 
 
@@ -60,82 +61,71 @@ class Redis_retention_scheduler(BaseModule):
 
 
     #Ok, main function that is called in the retention creation pass
-    def update_retention_objects(self, sched, log_mgr):
+    def hook_save_retention(self, daemon):
+        log_mgr = logger
         print "[RedisRetention] asking me to update the retention objects"
-        #Now the flat file method
-        for h in sched.hosts:
-            key = "HOST-%s" % h.host_name
-            self.mc.set(key, h)
 
-        for s in sched.services:
-            key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
+        all_data = daemon.get_retention_data()
+        
+        hosts = all_data['hosts']
+        services = all_data['services']
+        
+        #Now the flat file method
+        for h_name in hosts:
+            h = hosts[h_name]
+            key = "HOST-%s" % h_name
+            val = cPickle.dumps(h)
+            self.mc.set(key, val)
+
+        for (h_name, s_desc) in services:
+            s = services[(h_name, s_desc)]
+            key = "SERVICE-%s,%s" % (h_name, s_desc)
             #space are not allowed in memcache key.. so change it by SPACE token
             key = key.replace(' ', 'SPACE')
             #print "Using key", key
-            self.mc.set(key, s)
+            val = cPickle.dumps(s)
+            self.mc.set(key, val)
         log_mgr.log("Retention information updated in Redis")
 
 
 
     #Should return if it succeed in the retention load or not
-    def load_retention_objects(self, sched, log_mgr):
-        print "[RedisRetention] asking me to load the retention objects"
+    def hook_load_retention(self, daemon):
+        log_mgr = logger
 
-        #Now the old flat file way :(
+        # Now the new redis way :)
         log_mgr.log("[RedisRetention] asking me to load the retention objects")
 
         #We got list of loaded data from retention server
-        ret_hosts = []
-        ret_services = []
+        ret_hosts = {}
+        ret_services = {}
 
-        #Now the flat file method
-        for h in sched.hosts:
+        # We must load the data and format as the scheduler want :)
+        for h in daemon.hosts:
             key = "HOST-%s" % h.host_name
             val = self.mc.get(key)
             if val is not None:
-                ret_hosts.append(val)
+                # redis get unicode, but we send string, so we are ok
+                val = str(unicode(val))
+                val = cPickle.loads(val)
+                ret_hosts[h.host_name] = val
 
-        for s in sched.services:
+        for s in daemon.services:
             key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
             #space are not allowed in memcache key.. so change it by SPACE token
             key = key.replace(' ', 'SPACE')
             #print "Using key", key
             val = self.mc.get(key)
             if val is not None:
-                ret_services.append(val)
+                val = str(unicode(val))
+                val = cPickle.loads(val)
+                ret_services[(s.host.host_name, s.service_description)] = val
 
+        
+        all_data = {'hosts' : ret_hosts, 'services' : ret_services}
 
-        #Now load interesting properties in hosts/services
-        #Taging retention=False prop that not be directly load
-        #Items will be with theirs status, but not in checking, so
-        #a new check will be launch like with a normal begining (random distributed
-        #scheduling)
-
-#        ret_hosts = all_data['hosts']
-        for ret_h in ret_hosts:
-            h = sched.hosts.find_by_name(ret_h.host_name)
-            if h is not None:
-                running_properties = h.__class__.running_properties
-                for prop, entry in running_properties.items():
-                    if 'retention' in entry and entry['retention']:
-                        setattr(h, prop, getattr(ret_h, prop))
-                        for a in h.notifications_in_progress.values():
-                            a.ref = h
-                            sched.add(a)
-                        h.update_in_checking()
-
-#        ret_services = all_data['services']
-        for ret_s in ret_services:
-            s = sched.services.find_srv_by_name_and_hostname(ret_s.host_name, ret_s.service_description)
-            if s is not None:
-                running_properties = s.__class__.running_properties
-                for prop, entry in running_properties.items():
-                    if 'retention' in entry and entry['retention']:
-                        setattr(s, prop, getattr(ret_s, prop))
-                        for a in s.notifications_in_progress.values():
-                            a.ref = s
-                            sched.add(a)
-                        s.update_in_checking()
+        # Ok, now comme load them scheduler :)
+        daemon.restore_retention_data(all_data)
 
         log_mgr.log("[RedisRetention] OK we've load data from redis server")
 

@@ -835,7 +835,7 @@ class Scheduler:
 
         ret_hosts = data['hosts']
         for ret_h_name in ret_hosts:
-            #We take the dict of our value to load
+            # We take the dict of our value to load
             d = data['hosts'][ret_h_name]
             h = self.hosts.find_by_name(ret_h_name)
             if h is not None:
@@ -847,7 +847,6 @@ class Scheduler:
                         if prop in d:
                             setattr(h, prop, d[prop])
                 for a in h.notifications_in_progress.values():
-#                    print "AA,", a.__dict__
                     a.ref = h
                     self.add(a)
                 h.update_in_checking()
