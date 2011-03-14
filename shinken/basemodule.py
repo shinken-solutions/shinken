@@ -132,24 +132,24 @@ But clear queues if they were already set before recreating new one.  """
         """ The classic has : do we have a prop or not? """
         return hasattr(self, prop)
 
-    def get_objects(self):
-        """ Called during arbiter configuration phase. Return a dict to the objects that the module provides.
-Possible objects are Host, Service, Timeperiod, etc .. 
-Examples of valid return:
-    h1 = { 'host_name': "server1", register=0 }
-    return { 'hosts': [ h1 ] } """
-        raise NotImplementedError()
+#    def get_objects(self):
+#        """ Called during arbiter configuration phase. Return a dict to the objects that the module provides.
+##Possible objects are Host, Service, Timeperiod, etc .. 
+#Examples of valid return:
+#    h1 = { 'host_name': "server1", register=0 }
+#    return { 'hosts': [ h1 ] } """
+#        raise NotImplementedError()
 
     
-    def update_retention_objects(self, sched, log_mgr):
-        """ Update the retention objects of this module.
-Called recurrently by scheduler. Also during stop of scheduler. """
-        raise NotImplementedError()
+#    def update_retention_objects(self, sched, log_mgr):
+#        """ Update the retention objects of this module.
+#Called recurrently by scheduler. Also during stop of scheduler. """
+#        raise NotImplementedError()
 
 
-    def hook_late_configuration(self, conf):
-        """ Hook for the module "late configuration" : Called by arbiter after the configuration has been fully loaded & built """
-        raise NotImplementedError()
+#    def hook_late_configuration(self, conf):
+#        """ Hook for the module "late configuration" : Called by arbiter after the configuration has been fully loaded & built """
+#        raise NotImplementedError()
 
 
     def manage_brok(self, brok):

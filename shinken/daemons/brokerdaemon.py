@@ -305,8 +305,6 @@ class Broker(BaseSatellite):
         for a in act:
             a.terminate()
             a.join(1)
-        # Save our data for retentions
-        self.hook_point('save_retention')
         super(Broker, self).do_stop()
         
         

@@ -43,6 +43,7 @@ from shinken.brok import Brok
 
 from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
+from shinken.daemons.arbiterdaemon import Arbiter
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):

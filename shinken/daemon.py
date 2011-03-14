@@ -133,6 +133,9 @@ class Daemon(object):
     # At least, lose the local log file if need
     def do_stop(self):
         if self.modules_manager:
+            # We save what we can
+            self.hook_point('save_retention')
+            # And we quit
             logger.log('Stopping all modules')
             self.modules_manager.stop_all()
         if self.pyro_daemon:
@@ -613,6 +616,7 @@ positive when we have been sent in the futur and negative if we have been sent i
         to_del = []
         for inst in self.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
+            print inst.get_name(), hasattr(inst, full_hook_name), hook_name
             if hasattr(inst, full_hook_name):
                 f = getattr(inst, full_hook_name)
                 try :

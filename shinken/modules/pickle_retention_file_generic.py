@@ -32,7 +32,7 @@ from shinken.basemodule import BaseModule
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['broker'],
+    'daemons' : ['broker', 'arbiter'],
     'type' : 'pickle_retention_file_generic',
     'external' : False,
     }

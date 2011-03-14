@@ -401,6 +401,10 @@ class Arbiter(Daemon):
         # now we can start our "external" modules (if any) :
         self.modules_manager.init_and_start_instances()
 
+        # Ok now we can load the retention data
+        print "FOUCK"*100
+        self.hook_point('load_retention')
+
         ## And go for the main loop
         self.do_mainloop()
 
@@ -584,3 +588,20 @@ class Arbiter(Daemon):
 
       # If the links cannot be found, we have a problem
       return None
+
+
+    # Helper functions for retention modules
+    # So we give our broks and external commands
+    def get_retention_data(self):
+        r = {}
+        r['broks'] = self.broks
+        r['external_commands'] = self.external_commands
+        return r
+
+    # Get back our data from a retention module
+    def restore_retention_data(self, data):
+        broks = data['broks']
+        external_commands = data['external_commands']
+        self.broks.update(broks)
+        self.external_commands.extend(external_commands)
+
