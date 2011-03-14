@@ -1060,6 +1060,7 @@ class ExternalCommandManager:
             c.exit_status = status_code
             c.get_outputs(plugin_output, host.max_plugins_output_length)
             c.status = 'waitconsume'
+            c.check_time = now
             self.sched.nb_check_received += 1
             #Ok now this result will be reap by scheduler the next loop
 
@@ -1082,6 +1083,7 @@ class ExternalCommandManager:
             c.exit_status = return_code
             c.get_outputs(plugin_output, service.max_plugins_output_length)
             c.status = 'waitconsume'
+            c.check_time = now
             self.sched.nb_check_received += 1
             #Ok now this result will be reap by scheduler the next loop
 
