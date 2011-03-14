@@ -290,6 +290,16 @@ class Broker(BaseSatellite):
         act = active_children()
         self.modules_manager.check_alive_instances()
 
+        
+    # Helper function for module, will give our broks
+    def get_retention_data(self):
+        return self.broks
+
+    # Get back our broks from a retention module
+    def restore_retention_data(self, data):
+        self.broks.extend(data)
+
+
     def do_stop(self):
         act = active_children()
         for a in act:

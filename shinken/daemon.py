@@ -624,3 +624,13 @@ positive when we have been sent in the futur and negative if we have been sent i
 
         #Now remove mod that raise an exception
         self.modules_manager.clear_instances(to_del)
+
+
+    # Dummy function for daemons. Get all retention data
+    # So a module can save them
+    def get_retention_data(self):
+        return []
+
+    # Save, to get back all data
+    def restore_retention_data(self, data):
+        pass

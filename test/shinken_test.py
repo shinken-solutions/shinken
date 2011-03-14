@@ -42,6 +42,7 @@ from shinken.notification import Notification
 from shinken.brok import Brok
 
 from shinken.daemons.schedulerdaemon import Shinken
+from shinken.daemons.brokerdaemon import Broker
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):

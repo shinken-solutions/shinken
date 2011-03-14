@@ -26,7 +26,7 @@
 import os
 import copy
 
-from shinken_test import unittest, ShinkenTest
+from shinken_test import *
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import pickle_retention_file_broker
@@ -68,20 +68,29 @@ class TestPickleRetentionBroker(ShinkenTest):
         # Saving the broks we got
         old_broks = copy.copy(self.sched.broks)
 
+        # Now get a real broker object
+        broker = Broker('', False, False, False, None)
 
+        broker.broks = self.sched.broks.values()
         #updte the hosts and service in the scheduler in the retentino-file
-        sl.hook_save_retention(self.sched)#, l)
+        sl.hook_save_retention(broker)#, l)
 
         # Now we clean the source, like if we restart
-        self.sched.broks.clear()
-        self.assert_(len(self.sched.broks)==0)
+        broker.broks = []
 
-        r = sl.hook_load_retention(self.sched)
-        print len(old_broks), len(self.sched.broks)
+        self.assert_(len(broker.broks)==0)
+
+        r = sl.hook_load_retention(broker)
+        print len(old_broks), len(broker.broks)
 
         #We check we load them :)
-        for b in old_broks:
-            self.assert_(b in self.sched.broks)
+        for b in old_broks.values():
+            print "Look for good", b
+            finded = False
+            for b2 in broker.broks:
+                if b2.id == b.id:
+                    finded = True
+            self.assert_(finded)
 
         #Ok, we can delete the retention file
         os.unlink(mod.path)

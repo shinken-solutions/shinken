@@ -69,7 +69,7 @@ class Pickle_retention_broker(BaseModule):
             
             # We create a all_data dict with lsit of dict of retention useful
             # data of our hosts and services
-            all_broks = broker.broks
+            all_broks = broker.get_retention_data()
             print "DBG"
             for b in all_broks:
                 print "DBG : saving", b
@@ -141,7 +141,7 @@ class Pickle_retention_broker(BaseModule):
 
         for b in all_broks:
             print "Loading brok", b
-        broker.broks.extend(all_broks)
+        broker.restore_retention_data(all_broks)
 
         log_mgr.log("[PickleRetentionBroker] OK we've load data from retention file")
         
