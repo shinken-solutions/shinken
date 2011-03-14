@@ -94,6 +94,7 @@ launch_and_assert test_modules_nrpe_poller.py
 launch_and_assert test_poller_tag_get_checks.py
 launch_and_assert test_reactionner_tag_get_notif.py
 launch_and_assert test_orphaned.py
+launch_and_assert test_module_pickle_retention_broker.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

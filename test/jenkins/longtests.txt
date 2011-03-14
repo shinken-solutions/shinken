@@ -47,6 +47,8 @@ test_nullinheritance.py
 test_create_link_from_ext_cmd.py
 test_dispatcher.py
 test_reactionner_tag_get_notif.py
+test_module_pickle_retention_broker.py
+
 # takes long
 test_livestatus.py
 # takes very, very long

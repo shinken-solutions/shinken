@@ -53,4 +53,5 @@ test_poller_tag_get_checks.py
 test_reactionner_tag_get_notif.py
 test_module_hot_dependencies_arbiter.py
 test_orphaned.py
+test_module_pickle_retention_broker.py
 test_livestatus.py
