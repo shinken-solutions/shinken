@@ -40,8 +40,6 @@ parser = optparse.OptionParser(
     version="%prog " + VERSION)
 parser.add_option('-x', '--xml-input',
                   dest="xml_input", help=('Output of nmap'))
-parser.add_option('-c', '--criticity', dest="criticity",
-                  help="Criticity level of theses elements in the range (min)[0..5](max).")
 parser.add_option('-v', '--verbose', dest="verbose", action='store_true',
                   help="Verbose output.")
 
@@ -50,11 +48,6 @@ opts, args = parser.parse_args()
 
 if not opts.xml_input:
     parser.error("Requires one nmap xml output file (option -x/--xml-input")
-#If no criticity is given, use the default one, 3
-if not opts.criticity:
-    criticity = 3
-else:
-    criticity = int(opts.criticity)
 if not opts.verbose:
     verbose = False
 else:
