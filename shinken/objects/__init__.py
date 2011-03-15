@@ -39,5 +39,6 @@ from servicegroup import Servicegroup, Servicegroups
 from servicedependency import Servicedependency, Servicedependencies
 from hostdependency import Hostdependency, Hostdependencies
 from module import Module, Modules
+from discoveryrule import Discoveryrule
 
 from config import Config

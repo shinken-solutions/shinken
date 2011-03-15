@@ -406,7 +406,8 @@ class Config(Item):
                  'contact', 'notificationway', 'host', 'service', 'servicegroup',
                  'servicedependency', 'hostdependency', 'arbiter', 'scheduler',
                  'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module', 
-                 'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation']
+                 'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
+                 'discoveryrun', 'discoveryrule']
         objectscfg = {}
         for t in types:
             objectscfg[t] = []
