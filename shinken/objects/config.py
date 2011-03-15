@@ -402,32 +402,15 @@ class Config(Item):
 
     def read_config_buf(self, buf):
         params = []
-        objectscfg = {
-            'void': [],
-            'timeperiod' : [],
-            'command' : [],
-            'contactgroup' : [],
-            'hostgroup' : [],
-            'contact' : [],
-            'notificationway' : [],
-            'host' : [],
-            'service' : [],
-            'servicegroup' : [],
-            'servicedependency' : [],
-            'hostdependency' : [],
-            'arbiter' : [],
-            'scheduler' : [],
-            'reactionner' : [],
-            'broker' : [],
-            'receiver' : [],
-            'poller' : [],
-            'realm' : [],
-            'module' : [],
-            'resultmodulation' : [],
-            'escalation' : [],
-            'serviceescalation' : [],
-            'hostescalation' : [],
-        }
+        types = ['void', 'timeperiod', 'command', 'contactgroup', 'hostgroup',
+                 'contact', 'notificationway', 'host', 'service', 'servicegroup',
+                 'servicedependency', 'hostdependency', 'arbiter', 'scheduler',
+                 'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module', 
+                 'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation']
+        objectscfg = {}
+        for t in types:
+            objectscfg[t] = []
+
         tmp = []
         tmp_type = 'void'
         in_define = False
