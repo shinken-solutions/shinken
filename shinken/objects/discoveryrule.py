@@ -40,6 +40,30 @@ class Discoveryrule(Item):
     macros = {}
 
 
+    # The init of a discovery will set the property of 
+    # Discoveryrule.properties as in setattr, but all others
+    # will be in a list because we need to have all names
+    # and not lost all in __dict__
+    def __init__(self, params={}):
+        cls = self.__class__
+        
+        # We have our own id of My Class type :)
+        # use set attr for going into the slots
+        # instead of __dict__ :)
+        setattr(self, 'id', cls.id)
+        cls.id += 1
+
+        self.matches = {} # for custom variables
+
+        # In property : in __dict__
+        # if not, in matches
+        for key in params:
+            if key in cls.properties:
+                setattr(self, key, params[key])
+            else:
+                self.matches[key] = params[key]
+
+
     #For debugging purpose only (nice name)
     def get_name(self):
         return self.discoveryrule_name

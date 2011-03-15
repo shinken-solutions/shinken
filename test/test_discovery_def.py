@@ -37,6 +37,8 @@ class TestDiscoveryConf(ShinkenTest):
     def test_look_for_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttp')
         self.assert_(genhttp != None)
+        self.assert_(genhttp.matches['openports'] == '80,443')
+        self.assert_(genhttp.matches['os'] == 'windows')
 
 if __name__ == '__main__':
     unittest.main()

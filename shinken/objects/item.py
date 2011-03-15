@@ -37,9 +37,9 @@ from shinken.comment import Comment
 
 class Item(object):
     def __init__(self, params={}):
-        #We have our own id of My Class type :)
-        #use set attr for going into the slots
-        #instead of __dict__ :)
+        # We have our own id of My Class type :)
+        # use set attr for going into the slots
+        # instead of __dict__ :)
         setattr(self, 'id', self.__class__.id)
         self.__class__.id += 1
 
@@ -48,11 +48,11 @@ class Item(object):
         self.plus = {} # for value with a +
 
         cls = self.__class__
-        #adding running properties like latency, dependency list, etc
+        # adding running properties like latency, dependency list, etc
         for prop, entry in cls.running_properties.items():
-            #Copy is slow, so we check type
-            #Type with __iter__ are list or dict, or tuple.
-            #Item need it's own list, so qe copy
+            # Copy is slow, so we check type
+            # Type with __iter__ are list or dict, or tuple.
+            # Item need it's own list, so qe copy
             val = entry.default
             if hasattr(val, '__iter__'):
                 setattr(self, prop, copy(val))
@@ -60,12 +60,12 @@ class Item(object):
                 setattr(self, prop, val)
             #eatch istance to have his own running prop!
 
-        #[0] = +  -> new key-plus
-        #[0] = _  -> new custom entry in UPPER case
+        # [0] = +  -> new key-plus
+        # [0] = _  -> new custom entry in UPPER case
         for key in params:
             if len(params[key]) >= 1 and params[key][0]  == '+':
-                #Special case : a _MACRO can be a plus. so add to plus
-                #but upper the key for the macro name
+                # Special case : a _MACRO can be a plus. so add to plus
+                # but upper the key for the macro name
                 if key[0] == "_":
                     self.plus[key.upper()] = params[key][1:] # we remove the +
                 else:
@@ -105,11 +105,6 @@ class Item(object):
             return self.register == '0'
         except:
             return False
-
-
-    #has = hasattr
-    #def has(self, prop):
-    #    return hasattr(self, prop)
 
 
     #If a prop is absent and is not required, put the default value
