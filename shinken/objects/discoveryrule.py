@@ -20,8 +20,9 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.objects.item import Item, Items
+import re
 
+from shinken.objects.item import Item, Items
 from shinken.property import IntegerProp, StringProp, ListProp
 
 class Discoveryrule(Item):
@@ -64,10 +65,27 @@ class Discoveryrule(Item):
                 self.matches[key] = params[key]
 
 
-    #For debugging purpose only (nice name)
+    # Output name
     def get_name(self):
         return self.discoveryrule_name
 
+
+    # Try to see if the key,value is matching one or
+    # our rule. If value got ',' we must look for each value
+    def is_matching(self, key, value):
+        # If we do not even have the key, we bailout
+        if not key.strip() in self.matches:
+            return False
+        # Get my matching patern
+        m = self.matches[key]
+        if ',' in m:
+            matchings = [mt.strip() for mt in m.split(',')]
+        else:
+            matchings = [m]
+        for m in matchings:
+            if re.search(m, value):
+                return True
+        
 
 class Discoveryrules(Items):
     name_property = "discoveryrule_name"

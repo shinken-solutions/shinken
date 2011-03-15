@@ -40,6 +40,15 @@ class TestDiscoveryConf(ShinkenTest):
         self.assert_(genhttp.matches['openports'] == '80,443')
         self.assert_(genhttp.matches['os'] == 'windows')
 
+        key = 'osversion'
+        value = '2003'
+        # Should not match this
+        self.assert_(genhttp.is_matching(key, value) == False)
+        # But should match this one
+        key = 'openports'
+        value = '80'
+        self.assert_(genhttp.is_matching(key, value) == True)
+        
 if __name__ == '__main__':
     unittest.main()
 
