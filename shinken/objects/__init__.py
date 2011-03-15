@@ -40,5 +40,6 @@ from servicedependency import Servicedependency, Servicedependencies
 from hostdependency import Hostdependency, Hostdependencies
 from module import Module, Modules
 from discoveryrule import Discoveryrule, Discoveryrules
+from discoveryrun import Discoveryrun, Discoveryruns
 
 from config import Config

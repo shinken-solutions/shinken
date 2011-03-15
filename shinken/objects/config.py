@@ -270,6 +270,7 @@ class Config(Item):
         'serviceescalation': (Serviceescalation, Serviceescalations, 'serviceescalations'),
         'hostescalation':   (Hostescalation, Hostescalations, 'hostescalations'),
         'discoveryrule':    (Discoveryrule, Discoveryrules, 'discoveryrules'),
+        'discoveryrun':     (Discoveryrun, Discoveryruns, 'discoveryruns'),
     }
 
     #This tab is used to transform old parameters name into new ones
@@ -800,6 +801,7 @@ class Config(Item):
 
         # Discovery part
         self.discoveryrules.fill_default()
+        self.discoveryruns.fill_default()
 
         #first we create missing sat, so no other sat will
         #be created after this point
@@ -1059,6 +1061,7 @@ class Config(Item):
         self.resultmodulations.create_reversed_list()
         self.escalations.create_reversed_list()
         self.discoveryrules.create_reversed_list()
+        self.discoveryruns.create_reversed_list()
         #For services it's a special case
         #we search for hosts, then for services
         #it's quicker than search in all services
@@ -1114,7 +1117,7 @@ class Config(Item):
         
         for x in ( 'servicedependencies', 'hostdependencies', 'arbiterlinks', 'schedulerlinks',
                    'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations',
-                   'discoveryrules'):
+                   'discoveryrules', 'discoveryruns'):
             try: cur = getattr(self, x)
             except: continue
             logger.log('Checking %s...' % (x))
@@ -1143,6 +1146,7 @@ class Config(Item):
         self.resultmodulations.pythonize()
         self.escalations.pythonize()
         self.discoveryrules.pythonize()
+        self.discoveryruns.pythonize()
         # The arbiters are already done
         # self.arbiterlinks.pythonize()
         self.schedulerlinks.pythonize()
@@ -1173,6 +1177,7 @@ class Config(Item):
         self.hostdependencies.clean_useless()
         self.timeperiods.clean_useless()
         self.discoveryrules.clean_useless()
+        self.discoveryruns.clean_useless()
 
 
     #Create packs of hosts and services so in a pack,
