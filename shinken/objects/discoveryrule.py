@@ -86,6 +86,17 @@ class Discoveryrule(Item):
             if re.search(m, value):
                 return True
         
+    # Look if we match all discovery data or not
+    # a disco data look as a list of (key, values)
+    def is_matching_all_disco_data(self, datas):
+        if len(datas) == 0:
+            return False
+        for (k, v) in datas:
+            if not self.is_matching(k, v):
+                return False
+        return True
+        
+
 
 class Discoveryrules(Items):
     name_property = "discoveryrule_name"

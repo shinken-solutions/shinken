@@ -49,6 +49,14 @@ class TestDiscoveryConf(ShinkenTest):
         value = '80'
         self.assert_(genhttp.is_matching(key, value) == True)
         
+        # Low look for a list of matchings
+        l = [('openports', '80'), ('os', 'windows')]
+        # should match this
+        self.assert_(genhttp.is_matching_all_disco_data(l) == True)
+        # But not this one
+        l = [('openports', '80'), ('os', 'windows'), ('super', 'man')]
+        self.assert_(genhttp.is_matching_all_disco_data(l) == False)
+
 if __name__ == '__main__':
     unittest.main()
 
