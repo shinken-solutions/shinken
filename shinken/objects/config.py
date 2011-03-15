@@ -553,7 +553,6 @@ class Config(Item):
         #First fill default
         self.arbiterlinks.fill_default()
 
-
         #print "****************** Pythonize ******************"
         self.arbiterlinks.pythonize()
 
