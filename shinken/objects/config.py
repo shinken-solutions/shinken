@@ -269,6 +269,7 @@ class Config(Item):
         'escalation':       (Escalation, Escalations, 'escalations'),
         'serviceescalation': (Serviceescalation, Serviceescalations, 'serviceescalations'),
         'hostescalation':   (Hostescalation, Hostescalations, 'hostescalations'),
+        'discoveryrule':    (Discoveryrule, Discoveryrules, 'discoveryrules'),
     }
 
     #This tab is used to transform old parameters name into new ones
@@ -811,6 +812,9 @@ class Config(Item):
         self.servicedependencies.fill_default()
         self.hostdependencies.fill_default()
 
+        # Discovery part
+        self.discoveryrules.fill_default()
+
         #first we create missing sat, so no other sat will
         #be created after this point
         self.fill_default_satellites()
@@ -823,7 +827,10 @@ class Config(Item):
         self.brokers.fill_default()
         self.receivers.fill_default()
         self.schedulerlinks.fill_default()
-#        self.arbiterlinks.fill_default()
+
+        # The arbiters are already done.
+        # self.arbiterlinks.fill_default()
+
         #Now fill some fields we can predict (like adress for hosts)
         self.fill_predictive_missing_parameters()
 
@@ -1065,6 +1072,7 @@ class Config(Item):
 #        self.modules.create_reversed_list()
         self.resultmodulations.create_reversed_list()
         self.escalations.create_reversed_list()
+        self.discoveryrules.create_reversed_list()
         #For services it's a special case
         #we search for hosts, then for services
         #it's quicker than search in all services
@@ -1119,10 +1127,11 @@ class Config(Item):
             logger.log("hosts: detected loop in parents ; conf incorrect")
         
         for x in ( 'servicedependencies', 'hostdependencies', 'arbiterlinks', 'schedulerlinks',
-                   'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations'):
+                   'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations',
+                   'discoveryrules'):
             try: cur = getattr(self, x)
             except: continue
-            logger.log('Checking %s' % (x))
+            logger.log('Checking %s...' % (x))
             if not cur.is_correct():
                 r = False
                 logger.log("\t%s conf incorrect !!" % (x))
@@ -1147,7 +1156,9 @@ class Config(Item):
         self.servicedependencies.pythonize()
         self.resultmodulations.pythonize()
         self.escalations.pythonize()
-#        self.arbiterlinks.pythonize()
+        self.discoveryrules.pythonize()
+        # The arbiters are already done
+        # self.arbiterlinks.pythonize()
         self.schedulerlinks.pythonize()
         self.realms.pythonize()
         self.reactionners.pythonize()
@@ -1175,6 +1186,7 @@ class Config(Item):
         self.servicedependencies.clean_useless()
         self.hostdependencies.clean_useless()
         self.timeperiods.clean_useless()
+        self.discoveryrules.clean_useless()
 
 
     #Create packs of hosts and services so in a pack,
