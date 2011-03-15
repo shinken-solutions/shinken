@@ -74,13 +74,23 @@ class TestDiscoveryConf(ShinkenTest):
         self.assert_(genhttpnowin.is_matching_disco_datas(l) == False)
 
 
-    #Change ME :)
+    #Look for good definition and call of a discoveryrun
     def test_look_for_discorun(self):
         nmap = self.sched.conf.discoveryruns.find_by_name('nmap')
         self.assert_(nmap != None)
         nmapcmd = self.sched.conf.commands.find_cmd_by_name('nmap_runner')
         self.assert_(nmapcmd != None)
         self.assert_(nmap.discoveryrun_command != None)
+        # Launch it
+        nmap.launch()
+        for i in xrange(1, 5):
+            nmap.check_finished()
+            if nmap.is_finished():
+                break
+            time.sleep(1)
+        print "Exit status", nmap.current_launch.exit_status
+        print "Output", nmap.current_launch.output
+        print "LongOutput", nmap.current_launch.long_output
 
 if __name__ == '__main__':
     unittest.main()

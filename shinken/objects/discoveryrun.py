@@ -24,6 +24,9 @@ import re
 
 from shinken.objects.item import Item, Items
 from shinken.property import IntegerProp, StringProp, ListProp
+from shinken.eventhandler import EventHandler
+from shinken.macroresolver import MacroResolver
+
 
 class Discoveryrun(Item):
     id = 1 #0 is always special in database, so we do not take risk here
@@ -34,13 +37,37 @@ class Discoveryrun(Item):
         'discoveryrun_command':         StringProp (),
     }
 
-    running_properties = {}
+    running_properties = {
+        'current_launch': StringProp(default=None),
+        }
 
     macros = {}
 
     # Output name
     def get_name(self):
         return self.discoveryrun_name
+
+    # Get an eventhandler object and launch it
+    def launch(self):
+        m = MacroResolver()
+        data = []
+        cmd = m.resolve_command(self.discoveryrun_command, data)
+        self.current_launch = EventHandler(cmd, timeout=300)
+        self.current_launch.execute()
+
+    def check_finished(self):
+        max_output = 10**9
+        print "Max output", max_output        
+        self.current_launch.check_finished(max_output)
+
+    # Look if the current launch is done or not
+    def is_finished(self):
+        if self.current_launch == None:
+            return True
+        if self.current_launch.status in ('done', 'timeout'):
+            return True
+        return False
+        
 
 
 
