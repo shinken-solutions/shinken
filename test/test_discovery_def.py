@@ -61,6 +61,19 @@ class TestDiscoveryConf(ShinkenTest):
         self.assert_(genhttp.is_matching_disco_datas(l) == False)
 
 
+        # Now search the NOT rule
+        genhttpnowin = self.sched.conf.discoveryrules.find_by_name('GenHttpNotWindows')
+        
+        # Should manage this
+        l = [('openports', '80'), ('os', 'linux')]
+        self.assert_(genhttpnowin.is_matching_disco_datas(l) == True)
+
+        # But NOT this one
+        l = [('openports', '80'), ('os', 'windows')]
+        print "Should NOT match"
+        self.assert_(genhttpnowin.is_matching_disco_datas(l) == False)
+
+
 if __name__ == '__main__':
     unittest.main()
 
