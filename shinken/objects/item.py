@@ -783,6 +783,7 @@ class Items(object):
                     #TODO: catch None?
                     setattr(i, prop, cmdCall)
                 else:
+                    
                     setattr(i, prop, None)
 
 

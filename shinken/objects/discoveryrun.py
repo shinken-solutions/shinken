@@ -48,3 +48,7 @@ class Discoveryruns(Items):
     name_property = "discoveryrun_name"
     inner_class = Discoveryrun
 
+
+    def linkify(self, commands):
+        for r in self:
+            r.linkify_one_command_with_commands(commands, 'discoveryrun_command')

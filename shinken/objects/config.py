@@ -629,6 +629,9 @@ class Config(Item):
         self.escalations.linkify(self.timeperiods, self.contacts, \
                                      self.services, self.hosts)
 
+        # Link discovery commands
+        self.discoveryruns.linkify(self.commands)
+
         #print "Realms"
         self.realms.linkify()
 
