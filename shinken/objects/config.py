@@ -650,9 +650,6 @@ class Config(Item):
 
 
     def dump(self):
-        #print 'Parameters:', self
-        #print 'Hostgroups:',self.hostgroups,'\n'
-        #print 'Services:', self.services
         print "Slots", Service.__slots__
         print 'Hosts:'
         for h in self.hosts:
@@ -660,16 +657,6 @@ class Config(Item):
         print 'Services:'
         for s in self.services:
             print '\t', s.get_name(), s.contacts
-        #print 'Templates:', self.hosts_tpl
-        #print 'Hosts:',self.hosts,'\n'
-        #print 'Contacts:', self.contacts
-        #print 'contactgroups',self.contactgroups
-        #print 'Servicegroups:', self.servicegroups
-        #print 'Timepriods:', self.timeperiods
-        #print 'Commands:', self.commands
-        #print "Number of services:", len(self.services.items)
-        #print "Service Dep", self.servicedependencies
-        #print "Schedulers", self.schedulerlinks
 
 
     #It's used to change Nagios2 names to Nagios3 ones
