@@ -56,4 +56,5 @@ test_orphaned.py
 test_module_pickle_retention_broker.py
 test_module_pickle_retention_arbiter.py
 test_module_nagios_retention.py
+test_discovery_def.py
 test_livestatus.py

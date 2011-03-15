@@ -519,6 +519,7 @@ class DiscoveryMerger:
                 if r.is_matching_disco_datas(datas):
                     print "It match rule"
 
+
 cfg_input = opts.cfg_input
 d = DiscoveryMerger(cfg_input)
 
