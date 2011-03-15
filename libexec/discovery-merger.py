@@ -514,10 +514,13 @@ class DiscoveryMerger:
     def match_rules(self):
         for name in self.disco_data:
             datas = self.disco_data[name]
-            print "Look for datas", datas
             for r in self.discoveryrules:
                 if r.is_matching_disco_datas(datas):
-                    print "It match rule"
+                    if name not in self.disco_matches:
+                        self.disco_matches[name] = []
+                    self.disco_matches[name].append(r)
+                    print "Generating", name, r.check_command
+
 
 
 cfg_input = opts.cfg_input
@@ -537,5 +540,5 @@ d.read_disco_buf(buf)
 
 # Now look for rules
 d.match_rules()
-
+#print d.disco_matches
     
