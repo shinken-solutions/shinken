@@ -472,6 +472,10 @@ class Config(Item):
                 else:
                     params.append(line)
 
+        #Maybe the type of the last element is unknown, declare it
+        if not tmp_type in objectscfg:
+            objectscfg[tmp_type] = []
+
         objectscfg[tmp_type].append(tmp)
         objects = {}
 
