@@ -72,10 +72,15 @@ class Discoveryrule(Item):
 
     # Try to see if the key,value is matching one or
     # our rule. If value got ',' we must look for each value
+    # If one match, we quit
     def is_matching(self, key, value):
+        print "Try to look at", key, value
+
         # If we do not even have the key, we bailout
         if not key.strip() in self.matches:
+            print "Not in our key match"
             return False
+
         # Get my matching patern
         m = self.matches[key]
         if ',' in m:
@@ -83,18 +88,33 @@ class Discoveryrule(Item):
         else:
             matchings = [m]
         for m in matchings:
+            print "Try to match", m, value
             if re.search(m, value):
                 return True
+        return False
+
         
     # Look if we match all discovery data or not
     # a disco data look as a list of (key, values)
-    def is_matching_all_disco_data(self, datas):
+    def is_matching_disco_datas(self, datas):
         if len(datas) == 0:
             return False
-        for (k, v) in datas:
-            if not self.is_matching(k, v):
+        print "Datas", datas, self.matches
+        for m in self.matches:
+            print "Do", m
+            match_one = False
+            for (k, v) in datas:
+                # We found at least one of our match key
+                if m == k:
+                    if self.is_matching(k, v):
+                        match_one = True
+                        continue
+            if not match_one:
+                print "Return false"
                 return False
         return True
+                    
+
         
 
 
