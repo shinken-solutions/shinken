@@ -907,14 +907,20 @@ class Items(object):
         return res_string
 
 
-    #If we've got a hostgroup_name property, we search for all
-    #theses groups and ask them their hosts, and then add them
-    #all into our host_name property
+    # If we've got a hostgroup_name property, we search for all
+    # theses groups and ask them their hosts, and then add them
+    # all into our host_name property
     def explode_host_groups_into_hosts(self, hosts, hostgroups):
         for i in self:
             if hasattr(i, 'hostgroup_name'):
                 hnames = self.evaluate_hostgroup_expression(i.hostgroup_name,
                                                             hosts, hostgroups)
+
+                # Maybe there is no host in the groups, and do not have any
+                # host_name too, so tag is as template to do not look at
+                if hnames == '' and not hasattr(i, 'host_name'):
+                    i.register = '0'
+
                 if hnames != []:
                     if hasattr(i, 'host_name'):
                         i.host_name += ',' + str(hnames)

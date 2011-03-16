@@ -98,6 +98,7 @@ launch_and_assert test_module_pickle_retention_broker.py
 launch_and_assert test_module_pickle_retention_arbiter.py
 launch_and_assert test_module_nagios_retention.py
 launch_and_assert test_discovery_def.py
+launch_and_assert test_hostgroup_no_host.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

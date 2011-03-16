@@ -51,6 +51,7 @@ test_module_pickle_retention_broker.py
 test_module_pickle_retention_arbiter.py
 test_module_nagios_retention.py
 test_discovery_def.py
+test_hostgroup_no_host.py
 
 # takes long
 test_livestatus.py
