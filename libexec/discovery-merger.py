@@ -481,31 +481,32 @@ class DiscoveryMerger:
         pass
 
 
-    def read_disco_buf(self, buf):
+    def read_disco_buf(self):
+        buf = self.raw_disco_data
         for l in buf.split('\n'):
-            print ""
-        # If it's not a disco line, bypass it
+            #print ""
+            # If it's not a disco line, bypass it
             if not re.search('::', l):
                 continue
-            print "line", l
+            #print "line", l
             elts = l.split('::')
             if len(elts) <= 1:
-                print "Bad discovery data"
+                #print "Bad discovery data"
                 continue
             name = elts[0].strip()
             data = '::'.join(elts[1:])
-            print "Name", name
-            print "data", data
+            #print "Name", name
+            #print "data", data
             # Register the name
             if not name in self.disco_data:
                 self.disco_data[name] = []
             # Now get key,values
             if not '=' in data:
-                print "Bad discovery data"
+                #print "Bad discovery data"
                 continue
             elts = data.split('=')
             if len(elts) <= 1:
-                print "Bad discovery data"
+                #print "Bad discovery data"
                 continue
             key = elts[0].strip()
             value = elts[1].strip()
@@ -557,15 +558,7 @@ d.launch_runners()
 d.wait_for_runners_ends()
 d.get_runners_outputs()
 
-#fd = open('/tmp/discodata.dat')
-#buf = fd.read()
-#fd.close()
-
-buf = d.raw_disco_data
-
-d.read_disco_buf(buf)
-
-#print "Disco data", self.disco_data
+d.read_disco_buf()
 
 # Now look for rules
 d.match_rules()

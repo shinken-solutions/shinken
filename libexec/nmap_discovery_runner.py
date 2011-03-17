@@ -23,9 +23,9 @@
 
 import optparse
 import sys
-import cPickle
 import os
-
+import tempfile
+import subprocess
 
 try:
     # xml.etree.ElementTree is new in Python 2.5
@@ -36,24 +36,30 @@ except ImportError:
 VERSION = '0.1'
 
 parser = optparse.OptionParser(
-    "%prog [options] -x nmap.xml -o directory_output",
+    "%prog [options] -t nmap scanning targets",
     version="%prog " + VERSION)
-parser.add_option('-x', '--xml-input',
-                  dest="xml_input", help=('Output of nmap'))
+
+parser.add_option('-t', '--targets', dest="targets", 
+                  help="NMap scanning targets.")
 parser.add_option('-v', '--verbose', dest="verbose", action='store_true',
                   help="Verbose output.")
 
-
+targets = []
 opts, args = parser.parse_args()
+if not opts.targets:
+    parser.error("Requires at least one nmap target for scanning (option -t/--targets")
+else:
+    targets.append(opts.targets)
 
-if not opts.xml_input:
-    parser.error("Requires one nmap xml output file (option -x/--xml-input")
 if not opts.verbose:
     verbose = False
 else:
     verbose = True
+
 if args:
-    parser.error("Does not accept any argument.")
+    targets.extend(args)
+
+print "Got our target", targets
 
 def debug(txt):
     if verbose:
@@ -247,7 +253,31 @@ class DetectedHost:
         return '%s::ip=%s' % (self.get_name(), self.ip)
 
 
-xml_input = opts.xml_input
+(_, tmppath) = tempfile.mkstemp()
+
+print "propose a tmppath", tmppath
+
+cmd = "sudo nmap %s -T4 -O --traceroute -oX %s" % (' '.join(targets) , tmppath)
+print "Launching command,", cmd
+try:
+    nmap_process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        close_fds=True, shell=True)
+except OSError , exp:
+    print "Debug : Error in launching command:", cmd, exp
+    sys.exit(2)
+    
+print "Try to communicate"
+(stdoutdata, stderrdata) = nmap_process.communicate()
+
+if nmap_process.returncode != 0:
+    print "Error : the nmap return an error : '%s'" % stderrdata
+    sys.exit(2)
+
+print "Got it", (stdoutdata, stderrdata)
+
+xml_input = tmppath
 
 tree = ElementTree()
 try:
@@ -377,4 +407,11 @@ for h in all_hosts:
     #print c.__dict__
     print '\n'.join(h.get_discovery_output())
     #print "\n\n\n"
+    
+
+# Try to remove the temppath
+try:
+    os.unlink(tmppath)
+except Exception:
+    pass
     

@@ -151,7 +151,6 @@ if os.name != 'nt':
                 cmd = self.command
             else :
                 cmd = shlex.split(self.command)
-            print "DBG:", cmd
             try:
                 self.process = subprocess.Popen(cmd,
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
