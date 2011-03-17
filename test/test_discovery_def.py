@@ -48,6 +48,7 @@ class TestDiscoveryConf(ShinkenTest):
         key = 'openports'
         value = '80'
         self.assert_(genhttp.is_matching(key, value) == True)
+
         
         # Low look for a list of matchings
         l = [('openports', '80'), ('os', 'windows')]
@@ -72,6 +73,19 @@ class TestDiscoveryConf(ShinkenTest):
         l = [('openports', '80'), ('os', 'windows')]
         print "Should NOT match"
         self.assert_(genhttpnowin.is_matching_disco_datas(l) == False)
+
+        # Now look for strict rule application
+        genhttpstrict = self.sched.conf.discoveryrules.find_by_name('GenHttpStrict')
+        self.assert_(genhttpstrict is not None)
+        key = 'openports'
+        value = '80,443'
+        self.assert_(genhttpstrict.is_matching(key, value) == True)
+
+        #But NOT this one
+        key = 'openports'
+        value = '800'
+        self.assert_(genhttpstrict.is_matching(key, value) == False)
+
 
 
     #Look for good definition and call of a discoveryrun

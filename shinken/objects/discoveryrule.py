@@ -95,9 +95,14 @@ class Discoveryrule(Item):
             matchings = [mt.strip() for mt in m.split(',')]
         else:
             matchings = [m]
+        
+        # Split the alue by , too
+        values = value.split(',')
         for m in matchings:
-            if re.search(m, value):
-                return True
+            for v in values:
+                print "Try to match", m, v
+                if re.search(m, v):
+                    return True
         return False
 
 
