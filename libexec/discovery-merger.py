@@ -446,7 +446,7 @@ class DiscoveryMerger:
         # Add macros on the end of the buf so they will
         # overright the resource.cfg ones
         for (m, v) in macros:
-            buf += '$%s$=%s\n' % (m, v)
+            buf += '\n$%s$=%s\n' % (m, v)
 
         raw_objects = self.conf.read_config_buf(buf)
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
@@ -503,6 +503,11 @@ class DiscoveryMerger:
     def add(self, obj):
         pass
 
+    # Look if the name is a IPV4 address or not
+    def is_ipv4_addr(self, name):
+        p = r"^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$"
+        return (re.match(p, name) is not None)
+
 
     def read_disco_buf(self):
         buf = self.raw_disco_data
@@ -517,7 +522,16 @@ class DiscoveryMerger:
                 #print "Bad discovery data"
                 continue
             name = elts[0].strip()
+
+            # We can choose to keep only the basename
+            # of the nameid, so strip the fqdn
+            # But not if it's a plain ipv4 addr
+            if self.conf.strip_idname_fqdn:
+                if not self.is_ipv4_addr(name):
+                    name = name.split('.', 1)[0]
+
             data = '::'.join(elts[1:])
+
             #print "Name", name
             #print "data", data
             # Register the name

@@ -213,14 +213,17 @@ class Config(Item):
 
         # SSL PART
         # global boolean for know if we use ssl or not
-        'use_ssl':          BoolProp(default='0', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
+        'use_ssl':               BoolProp(default='0', class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
                                                                 (BrokerLink, None), (PollerLink, None), \
                                                                 (ReceiverLink, None),  (ArbiterLink, None)]),
-        'certs_dir':        StringProp(default='etc/certs'),
-        'ca_cert':          StringProp(default='etc/certs/ca.pem'),
-        'server_cert' :     StringProp(default='etc/certs/server.pem'),
-        'hard_ssl_name_check': BoolProp(default='0'),
-    }
+        'certs_dir':             StringProp(default='etc/certs'),
+        'ca_cert':               StringProp(default='etc/certs/ca.pem'),
+        'server_cert' :          StringProp(default='etc/certs/server.pem'),
+        'hard_ssl_name_check':   BoolProp(default='0'),
+
+        ## Discovery part
+        'strip_idname_fqdn' :    BoolProp(default='1'),
+   }
 
     macros = {
         'PREFIX':               'prefix',
