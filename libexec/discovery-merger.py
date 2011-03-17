@@ -26,6 +26,7 @@ import sys
 import cPickle
 import os
 import re
+import time
 
 try:
     import shinken
@@ -559,7 +560,7 @@ class DiscoveryMerger:
                     if name not in self.disco_matches:
                         self.disco_matches[name] = []
                     self.disco_matches[name].append(r)
-                    #print "Generating", name, r.check_command
+                    print "Generating", name, r.check_command
 
 
     def launch_runners(self):
@@ -568,16 +569,20 @@ class DiscoveryMerger:
             print r.discoveryrun_command
             r.launch()
 
+
     def wait_for_runners_ends(self):
         all_ok = False
         while not all_ok:
             all_ok = True
             for r in self.discoveryruns:
-                #print r
-                r.check_finished()
+                if not r.is_finished():
+                    #print "Check finished of", r.get_name()
+                    r.check_finished()
                 b = r.is_finished()
                 if not b:
+                    #print r.get_name(), "is not finished"
                     all_ok = False
+            time.sleep(0.1)
 
     def get_runners_outputs(self):
         self.raw_disco_data = '\n'.join(r.get_output() for r in self.discoveryruns if r.is_finished())

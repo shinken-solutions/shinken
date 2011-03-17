@@ -76,7 +76,15 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     list_host_cmd = [check_esx_path, '-D', vcenter, '-u', user, '-p', password,
                      '-l', 'runtime', '-s', 'listhost']
 
-    output = Popen(list_host_cmd, stdout=PIPE, stderr=PIPE).communicate()
+    print "Got host list"
+    print ' '.join(list_host_cmd)
+    p = Popen(list_host_cmd, stdout=PIPE, stderr=PIPE)
+    output = p.communicate()
+    
+    print "Exit status", p.returncode
+    if p.returncode == 2:
+        print "Error : the check_esx3.pl return in error :", output
+        sys.exit(2)
 
     parts = output[0].split(':')
     hsts_raw = parts[1].split('|')[0]
@@ -100,7 +108,14 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
                    '-u', user, '-p', password,
                    '-l', 'runtime', '-s', 'list']
     print ' '.join(list_vm_cmd)
-    output = Popen(list_vm_cmd, stdout=PIPE).communicate()
+    p = Popen(list_vm_cmd, stdout=PIPE)
+    output = p.communicate()
+
+    print "Exit status", p.returncode
+    if p.returncode == 2:
+        print "Error : the check_esx3.pl return in error :", output
+        sys.exit(2)
+
     parts = output[0].split(':')
     # Maybe we got a 'CRITICAL - There are no VMs.' message,
     # if so, we bypass this host
