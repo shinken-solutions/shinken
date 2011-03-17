@@ -45,7 +45,7 @@ from shinken.macroresolver import MacroResolver
 VERSION = '0.1'
 
 parser = optparse.OptionParser(
-    "%prog [options] -c discovery_config -o config_output",
+    "%prog [options] -c discovery_config -o config_output -m list of macros",
     version="%prog " + VERSION)
 parser.add_option('-c', '--cfg-input',
                   dest="cfg_input", help=('Discovery configuration file (discovery.cfg)'))
@@ -53,9 +53,14 @@ parser.add_option('-o', '--dir-output', dest="output_dir",
                   help="Directory output for results")
 parser.add_option('-w', '--overright', dest="overright", action='store_true',
                   help="Allow overwithing xisting file (disabled by default)")
+parser.add_option('-m', '--macros', dest="macros",
+                  help="List of macros (like NMAPTARGETS=192.168.0.0/24). Should be the last argument")
 
 
 opts, args = parser.parse_args()
+
+raw_macros = []
+macros=[]
 
 if not opts.cfg_input:
     parser.error("Requires a discovery configuration file, dsicovery.cfg (option -c/--cfg-input")
@@ -65,9 +70,21 @@ if not opts.overright:
     overright = False
 else:
     overright = opts.overright
+if opts.macros:
+    raw_macros.append(opts.macros)
 if args:
-    parser.error("Does not accept any argument.")
+    raw_macros.extend(args)
 
+print "Macros", raw_macros
+
+for m in raw_macros:
+    elts = m.split('=')
+    if len(elts) < 2:
+        print "The macro '%s' is malformed. I bail out" % m
+        sys.exit(2)
+    macros.append( (elts[0], '='.join(elts[1:])))
+
+print "Got macros", macros
 
 # Says if a host is up or not
 def is_up(h):
@@ -417,7 +434,7 @@ class DetectedHost:
 
 
 class DiscoveryMerger:
-    def __init__(self, path):
+    def __init__(self, path, macros):
         # i am arbiter-like
         self.log = logger
         self.log.load_obj(self)
@@ -425,6 +442,12 @@ class DiscoveryMerger:
         self.conf = Config()
         self.conf.read_config(self.config_files)
         buf = self.conf.read_config(self.config_files)
+        
+        # Add macros on the end of the buf so they will
+        # overright the resource.cfg ones
+        for (m, v) in macros:
+            buf += '$%s$=%s\n' % (m, v)
+
         raw_objects = self.conf.read_config_buf(buf)
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
@@ -549,7 +572,7 @@ class DiscoveryMerger:
         
 
 cfg_input = opts.cfg_input
-d = DiscoveryMerger(cfg_input)
+d = DiscoveryMerger(cfg_input, macros)
 
 
 output_dir = opts.output_dir
