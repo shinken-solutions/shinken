@@ -450,6 +450,8 @@ class DiscoveryMerger:
         self.conf.is_correct()
 
         self.discoveryrules = self.conf.discoveryrules
+        self.discoveryruns = self.conf.discoveryruns
+        
         #self.confs = self.conf.cut_into_parts()
         #self.dispatcher = Dispatcher(self.conf, self.me)
         
@@ -519,9 +521,31 @@ class DiscoveryMerger:
                     if name not in self.disco_matches:
                         self.disco_matches[name] = []
                     self.disco_matches[name].append(r)
-                    print "Generating", name, r.check_command
+                    #print "Generating", name, r.check_command
 
 
+    def launch_runners(self):
+        for r in self.discoveryruns:
+            print "I'm launching", r.get_name()
+            print r.discoveryrun_command
+            r.launch()
+
+    def wait_for_runners_ends(self):
+        all_ok = False
+        while not all_ok:
+            all_ok = True
+            for r in self.discoveryruns:
+                #print r
+                r.check_finished()
+                b = r.is_finished()
+                if not b:
+                    all_ok = False
+
+    def get_runners_outputs(self):
+        self.raw_disco_data = '\n'.join(r.get_output() for r in self.discoveryruns if r.is_finished())
+        print "Got Raw disco data", self.raw_disco_data
+
+        
 
 cfg_input = opts.cfg_input
 d = DiscoveryMerger(cfg_input)
@@ -529,10 +553,15 @@ d = DiscoveryMerger(cfg_input)
 
 output_dir = opts.output_dir
 
-fd = open('/tmp/discodata.dat')
-buf = fd.read()
-fd.close()
+d.launch_runners()
+d.wait_for_runners_ends()
+d.get_runners_outputs()
 
+#fd = open('/tmp/discodata.dat')
+#buf = fd.read()
+#fd.close()
+
+buf = d.raw_disco_data
 
 d.read_disco_buf(buf)
 

@@ -57,7 +57,7 @@ class Discoveryrun(Item):
 
     def check_finished(self):
         max_output = 10**9
-        print "Max output", max_output        
+        #print "Max output", max_output
         self.current_launch.check_finished(max_output)
 
     # Look if the current launch is done or not
@@ -68,7 +68,10 @@ class Discoveryrun(Item):
             return True
         return False
         
-
+    # we use an EventHandler object, so we have output with a single line
+    # and longoutput with the rest. We just need to return all
+    def get_output(self):
+        return '\n'.join([self.current_launch.output, self.current_launch.long_output])
 
 
 class Discoveryruns(Items):
