@@ -22,7 +22,7 @@
 
 import re
 
-from shinken.objects.item import Item, Items
+from shinken.objects import *
 from shinken.property import IntegerProp, StringProp, ListProp
 
 class Discoveryrule(Item):
@@ -31,9 +31,10 @@ class Discoveryrule(Item):
 
     properties = {
         'discoveryrule_name':    StringProp (),
-        'check_command':         StringProp (),
-        'service_description':   StringProp (),
-        'use':                   StringProp(),
+        'creation_type':         StringProp (default='service'),
+#        'check_command':         StringProp (),
+#        'service_description':   StringProp (),
+#        'use':                   StringProp(),
     }
 
     running_properties = {}
@@ -56,13 +57,33 @@ class Discoveryrule(Item):
 
         self.matches = {} # for matching rules
         self.not_matches = {} # for rules that should NOT match
+        self.writing_properties = {}
 
-        # In property : in __dict__
+        # Get teh properties of the Class we want
+        if not 'creation_type' in params:
+            params['creation_type'] = 'service'
+
+        map = {'service' : Service, 'host' : Host}
+        t =  params['creation_type']
+        if not t in map:
+            return
+        tcls = map[t]
+
+        # In my own property : 
+        #  -> in __dict__
+        # In the properties of the 'creation_type' Class:
+        #  -> in self.writing_properties
         # if not, in matches or not match (if key starts
         # with a !, it's a not rule)
+        # -> in self.matches or self.not_matches
         for key in params:
-            if key in cls.properties:
+            # Some key are quite special
+            if key in ['use']:
+                self.writing_properties[key] = params[key]
+            elif key in cls.properties:
                 setattr(self, key, params[key])
+            elif key in tcls.properties:
+                self.writing_properties[key] = params[key]
             else:
                 if key.startswith('!'):
                     key = key.split('!')[1]
@@ -73,7 +94,10 @@ class Discoveryrule(Item):
 
     # Output name
     def get_name(self):
-        return self.discoveryrule_name
+        try:
+            return self.discoveryrule_name
+        except AttributeError:
+            return "UnnamedDiscoveryRule"
 
 
     # Try to see if the key,value is matching one or
@@ -116,7 +140,7 @@ class Discoveryrule(Item):
         # First we look if it's possible to match
         # we must match All self.matches things
         for m in self.matches:
-            #print "Compare to", m
+            print "Compare to", m
             match_one = False
             for (k, v) in datas:
                 # We found at least one of our match key

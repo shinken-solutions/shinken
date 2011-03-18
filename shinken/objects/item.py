@@ -164,7 +164,7 @@ class Item(object):
 
 
     def get_templates(self):
-        if hasattr(self, 'use'):
+        if hasattr(self, 'use') and self.use != '':
             return self.use.split(',')
         else:
             return []
