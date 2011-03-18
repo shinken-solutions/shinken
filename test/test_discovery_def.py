@@ -40,7 +40,7 @@ class TestDiscoveryConf(ShinkenTest):
         self.assert_(genhttp.creation_type == 'service')
         self.assert_(genhttp.matches['openports'] == '80,443')
         self.assert_(genhttp.matches['os'] == 'windows')
-
+        
         key = 'osversion'
         value = '2003'
         # Should not match this
@@ -49,7 +49,7 @@ class TestDiscoveryConf(ShinkenTest):
         key = 'openports'
         value = '80'
         self.assert_(genhttp.is_matching(key, value) == True)
-
+        
         
         # Low look for a list of matchings
         l = [('openports', '80'), ('os', 'windows')]

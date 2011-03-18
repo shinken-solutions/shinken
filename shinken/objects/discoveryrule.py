@@ -124,7 +124,7 @@ class Discoveryrule(Item):
         values = value.split(',')
         for m in matchings:
             for v in values:
-                print "Try to match", m, v
+                #print "Try to match", m, v
                 if re.search(m, v):
                     return True
         return False
@@ -140,7 +140,7 @@ class Discoveryrule(Item):
         # First we look if it's possible to match
         # we must match All self.matches things
         for m in self.matches:
-            print "Compare to", m
+            #print "Compare to", m
             match_one = False
             for (k, v) in datas:
                 # We found at least one of our match key

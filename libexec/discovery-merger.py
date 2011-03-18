@@ -361,79 +361,6 @@ class ConfigurationManager:
         
         
 
-
-class DetectedHost:
-    def __init__(self):
-        self.ip = ''
-        self.mac_vendor = ''
-        self.host_name = ''
-
-        self.os_possibilities = []
-        self.os = ('', '')
-        self.open_ports = []
-
-        self.parent = ''
-
-
-    # Keep the first name we've got
-    def set_host_name(self, name):
-        if self.host_name == '':
-            self.host_name = name
-
-
-    # Get a identifier for this host
-    def get_name(self):
-        if self.host_name != '':
-            return self.host_name
-        if self.ip != '':
-            return self.ip
-        return None
-
-    # We look for the host VMWare
-    def is_vmware_esx(self):
-        # If it's not a virtual machine bail out
-        if self.mac_vendor != 'VMware':
-            return False
-        # If we got all theses ports, we are quite ok for
-        # a VMWare host
-        needed_ports = [22, 80, 443, 902, 903, 5989]
-        for p in needed_ports:
-            if p not in self.open_ports:
-                # find one missing port, not a VMWare host
-                return False
-        # Ok all ports are found, we are a ESX :)
-        return True
-
-    # Says if we are a virtual machine or not
-    def is_vmware_vm(self):
-        # special case : the esx host itself
-        if self.is_vmware_esx():
-            return False
-        # Else, look at the mac vendor
-        return self.mac_vendor == 'VMware'
-
-
-    # Fill the different os possibilities
-    def add_os_possibility(self, os, osgen, accuracy):
-        self.os_possibilities.append( (os, osgen, accuracy) )
-
-    # Look at ours oses and see which one is the better
-    def compute_os(self):
-        # bailout if we got no os :(
-        if len(self.os_possibilities) == 0:
-            return
-
-        max_accuracy = 0
-        for (os, osgen, accuracy) in self.os_possibilities:
-            if accuracy > max_accuracy:
-                max_accuracy = accuracy
-
-        # now get the entry with the max value
-        for (os, osgen, accuracy) in self.os_possibilities:
-            if accuracy == max_accuracy:
-                self.os = (os, osgen)
-
-
 class DiscoveryMerger:
     def __init__(self, path, macros):
         # i am arbiter-like
@@ -560,7 +487,7 @@ class DiscoveryMerger:
                     if name not in self.disco_matches:
                         self.disco_matches[name] = []
                     self.disco_matches[name].append(r)
-                    print "Generating", name, r.check_command
+                    print "Generating", name, r.writing_properties['check_command']
 
 
     def launch_runners(self):
