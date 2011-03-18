@@ -54,8 +54,11 @@ parser.add_option('-o', '--dir-output', dest="output_dir",
                   help="Directory output for results")
 parser.add_option('-w', '--overright', dest="overright", action='store_true',
                   help="Allow overwithing xisting file (disabled by default)")
+parser.add_option('-r', '--runners', dest="runners",
+                  help="List of runners you allow to run, (like nmap,vsphere)")
 parser.add_option('-m', '--macros', dest="macros",
                   help="List of macros (like NMAPTARGETS=192.168.0.0/24). Should be the last argument")
+
 
 
 opts, args = parser.parse_args()
@@ -71,6 +74,10 @@ if not opts.overright:
     overright = False
 else:
     overright = opts.overright
+if not opts.runners:
+    runners = ['*']
+else:
+    runners = opts.runners.split(',')
 if opts.macros:
     raw_macros.append(opts.macros)
 if args:
@@ -362,10 +369,11 @@ class ConfigurationManager:
         
 
 class DiscoveryMerger:
-    def __init__(self, path, output_dir, macros, overright):
+    def __init__(self, path, output_dir, macros, overright, runners):
         # i am arbiter-like
         self.log = logger
         self.overright = overright
+        self.runners = runners
         self.output_dir = output_dir
         self.log.load_obj(self)
         self.config_files = [path]
@@ -492,8 +500,29 @@ class DiscoveryMerger:
                     print "Generating", name, r.writing_properties
 
 
+    def is_allowing_runners(self, name):
+        name = name.strip()
+
+        # If we got no value, it's * by default
+        if '*' in self.runners:
+            return True
+
+        #print self.runners
+        #If we match the name, ok
+        for r in self.runners:
+            r_name = r.strip()
+            #            print "Look", r_name, name
+            if r_name == name:
+                return True
+
+        # Not good, so not run this!
+        return False
+
+    def allowed_runners(self):
+        return [r for r in self.discoveryruns if self.is_allowing_runners(r.get_name())]
+
     def launch_runners(self):
-        for r in self.discoveryruns:
+        for r in self.allowed_runners():
             print "I'm launching", r.get_name()
             print r.discoveryrun_command
             r.launch()
@@ -503,7 +532,7 @@ class DiscoveryMerger:
         all_ok = False
         while not all_ok:
             all_ok = True
-            for r in self.discoveryruns:
+            for r in self.allowed_runners():
                 if not r.is_finished():
                     #print "Check finished of", r.get_name()
                     r.check_finished()
@@ -515,7 +544,7 @@ class DiscoveryMerger:
 
 
     def get_runners_outputs(self):
-        self.raw_disco_data = '\n'.join(r.get_output() for r in self.discoveryruns if r.is_finished())
+        self.raw_disco_data = '\n'.join(r.get_output() for r in self.allowed_runners() if r.is_finished())
         print "Got Raw disco data", self.raw_disco_data
 
 
@@ -645,7 +674,7 @@ class DiscoveryMerger:
 cfg_input = opts.cfg_input
 output_dir = opts.output_dir
 overright = opts.overright
-d = DiscoveryMerger(cfg_input, output_dir, macros, overright)
+d = DiscoveryMerger(cfg_input, output_dir, macros, overright, runners)
 
 
 
