@@ -362,9 +362,11 @@ class ConfigurationManager:
         
 
 class DiscoveryMerger:
-    def __init__(self, path, macros):
+    def __init__(self, path, output_dir, macros, overright):
         # i am arbiter-like
         self.log = logger
+        self.overright = overright
+        self.output_dir = output_dir
         self.log.load_obj(self)
         self.config_files = [path]
         self.conf = Config()
@@ -487,7 +489,7 @@ class DiscoveryMerger:
                     if name not in self.disco_matches:
                         self.disco_matches[name] = []
                     self.disco_matches[name].append(r)
-                    print "Generating", name, r.writing_properties['check_command']
+                    print "Generating", name, r.writing_properties
 
 
     def launch_runners(self):
@@ -511,17 +513,132 @@ class DiscoveryMerger:
                     all_ok = False
             time.sleep(0.1)
 
+
     def get_runners_outputs(self):
         self.raw_disco_data = '\n'.join(r.get_output() for r in self.discoveryruns if r.is_finished())
         print "Got Raw disco data", self.raw_disco_data
 
+
+    # Write all configuration we've got
+    def write_config(self):
+        for name in self.disco_data:
+            print "Writing", name, "configuration"
+            self.write_host_config(name)
+            self.write_service_config(name)
+
+
+    # We search for all rules of type host, and we merge them
+    def write_host_config(self, host):
+        host_rules = []
+        for (name, rules) in self.disco_matches.items():
+            if name != host:
+                continue
+            rs = [r for r in rules if r.creation_type == 'host']
+            host_rules.extend(rs)
+
+        # now merge them
+        d = {'host_name' : host}
+        for r in host_rules:
+            d.update(r.writing_properties)
+        print "Will generate", d
+        self.write_host_config_to_file(host, d)
+
+        
+    # Will wrote all properties/values of d for the host
+    # in the file
+    def write_host_config_to_file(self, host, d):
+        p = os.path.join(self.output_dir, host)
+        print "Want to create host path", p
+        try:
+            os.mkdir(p)
+        except OSError, exp:
+            # If directory already exist, it's not a problem
+            if not exp.errno != '17':
+                print "Cannot create the directory '%s' : '%s'" % (p, exp)
+                return
+        cfg_p = os.path.join(p, host+'.cfg')
+        if os.path.exists(cfg_p) and not overright:
+            print "The file '%s' already exists" % cfg_p
+            return
+
+        buf = self.get_cfg_bufer(d, 'host')
+
+        # Ok, we create it so (or overright)
+        try:
+            fd = open(cfg_p, 'w')
+            fd.write(buf)
+            fd.close()
+        except OSError, exp:
+            print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+            return
+
+
+    # Generate all service for a host
+    def write_service_config(self, host):
+        srv_rules = {}
+        for (name, rules) in self.disco_matches.items():
+            if name != host:
+                continue
+            rs = [r for r in rules if r.creation_type == 'service']
+            print "RS", rs
+            for r in rs:
+                if 'service_description' in r.writing_properties:
+                    desc = r.writing_properties['service_description']
+                    if not desc in srv_rules:
+                        srv_rules[desc] = []
+                    srv_rules[desc].append(r)
+        #print "Generate services for", host
+        #print srv_rules
+        for (desc, rules) in srv_rules.items():
+            d = {'service_description' : desc, 'host_name' : host}
+            for r in rules:
+                d.update(r.writing_properties)
+            print "Generating", desc, d
+            self.write_service_config_to_file(host, desc, d)
+
+
+    # Will wrote all properties/values of d for the host
+    # in the file
+    def write_service_config_to_file(self, host, desc, d):
+        p = os.path.join(self.output_dir, host)
+        # The host dir should already exist
+
+        cfg_p = os.path.join(p, desc+'.cfg')
+        if os.path.exists(cfg_p) and not overright:
+            print "The file '%s' already exists" % cfg_p
+            return
+
+        buf = self.get_cfg_bufer(d, 'service')
+
+        # Ok, we create it so (or overright)
+        try:
+            fd = open(cfg_p, 'w')
+            fd.write(buf)
+            fd.close()
+        except OSError, exp:
+            print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+            return
+
+            
+    # Create a define t { } with data in d
+    def get_cfg_bufer(self, d, t):
+        tab = ['define %s {' % t]
+        for (key, value) in d.items():
+            tab.append('  %s   %s' % (key, value))
+        tab.append('}\n')
+        return '\n'.join(tab)
         
 
+        
+
+
 cfg_input = opts.cfg_input
-d = DiscoveryMerger(cfg_input, macros)
-
-
 output_dir = opts.output_dir
+overright = opts.overright
+d = DiscoveryMerger(cfg_input, output_dir, macros, overright)
+
+
+
 
 d.launch_runners()
 d.wait_for_runners_ends()
@@ -532,4 +649,5 @@ d.read_disco_buf()
 # Now look for rules
 d.match_rules()
 #print d.disco_matches
-   
+
+d.write_config()

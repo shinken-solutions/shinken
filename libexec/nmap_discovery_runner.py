@@ -206,6 +206,7 @@ class DetectedHost:
     # Return the string of the 'discovery' items
     def get_discovery_output(self):
         r = []
+        r.append('%s::isup=1' % self.get_name())
         r.append(self.get_discovery_system())
         r.append(self.get_discovery_macvendor())
         op = self.get_discovery_ports()
