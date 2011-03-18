@@ -536,6 +536,10 @@ class DiscoveryMerger:
             rs = [r for r in rules if r.creation_type == 'host']
             host_rules.extend(rs)
 
+        # If no rule, bail out
+        if len(host_rules) == 0:
+            return
+    
         # now merge them
         d = {'host_name' : host}
         for r in host_rules:
@@ -587,6 +591,7 @@ class DiscoveryMerger:
                     if not desc in srv_rules:
                         srv_rules[desc] = []
                     srv_rules[desc].append(r)
+
         #print "Generate services for", host
         #print srv_rules
         for (desc, rules) in srv_rules.items():
@@ -601,7 +606,12 @@ class DiscoveryMerger:
     # in the file
     def write_service_config_to_file(self, host, desc, d):
         p = os.path.join(self.output_dir, host)
-        # The host dir should already exist
+
+        # The host conf should already exist
+        cfg_host_p = os.path.join(p, host+'.cfg')
+        if not os.path.exists(cfg_host_p):
+            print "No host configuration available, I bail out"
+            return
 
         cfg_p = os.path.join(p, desc+'.cfg')
         if os.path.exists(cfg_p) and not overright:
