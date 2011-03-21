@@ -394,8 +394,8 @@ class Service(SchedulingItem):
                 and  self.notifications_enabled == True:
             logger.log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
-        if not hasattr(self, 'host') or self.host is None:
-            logger.log("%s : I do not have an host" % self.get_name())
+        if self.host is None:
+            logger.log("The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None

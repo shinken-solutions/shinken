@@ -60,4 +60,5 @@ test_discovery_def.py
 test_hostgroup_no_host.py
 test_nocontacts.py
 test_srv_nohost.py
+test_srv_badhost.py
 test_livestatus.py
