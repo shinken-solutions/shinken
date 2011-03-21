@@ -164,10 +164,11 @@ class DetectedHost:
 
         # now get the entry with the max value
         for (os, osgen, accuracy) in self.os_possibilities:
+            print "Can be", (os, osgen, accuracy)
             if accuracy == max_accuracy:
                 self.os = (os, osgen)
 
-
+        print "Try to match", self.os
 
         #Ok, unknown os... not good
         if self.os == ('', ''):
