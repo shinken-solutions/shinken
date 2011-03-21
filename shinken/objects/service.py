@@ -95,8 +95,8 @@ class Service(SchedulingItem):
         'notification_period':    StringProp (fill_brok=['full_status']),
         'notification_options':   ListProp   (default='w,u,c,r,f,s',fill_brok=['full_status']),
         'notifications_enabled':  BoolProp   (default='1', fill_brok=['full_status']),
-        'contacts':               StringProp (fill_brok=['full_status']),
-        'contact_groups':         StringProp (fill_brok=['full_status']),
+        'contacts':               StringProp (default='', fill_brok=['full_status']),
+        'contact_groups':         StringProp (default='', fill_brok=['full_status']),
         'stalking_options':       ListProp   (default='', fill_brok=['full_status']),
         'notes':                  StringProp (default='', fill_brok=['full_status']),
         'notes_url':              StringProp (default='', fill_brok=['full_status']),
@@ -354,13 +354,16 @@ class Service(SchedulingItem):
         state = True # guilty or not? :)
         cls = self.__class__
 
-        special_properties = ( 'contacts', 'contact_groups', 'check_period',
-                                  'notification_interval', 'host_name',
-                                  'hostgroup_name' )
+        desc = getattr(self, 'service_description', 'unamed')
+        hname = getattr(self, 'host_name', 'unamed')
+
+        special_properties = ('check_period', 'notification_interval', 'host_name',
+                              'hostgroup_name' )
+
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.log('%s : I do not have %s' % (self.get_name(), prop))
+                    logger.log("Error : the service %s on host '%s' do not have %s" % (desc, hname, prop))
                     state = False # Bad boy...
 
         # Raised all previously saw errors like unknown contacts and co
@@ -370,11 +373,9 @@ class Service(SchedulingItem):
                 logger.log(err)
 
         # Ok now we manage special cases...
-        if not hasattr(self, 'contacts') \
-        and not hasattr(self, 'contact_groups') \
-        and  self.notifications_enabled == True:
-            logger.log('%s : I do not have contacts nor contact_groups' % self.get_name())
-            state = False
+        if self.notifications_enabled and self.contacts == []:
+            logger.log("Warning The service '%s' in the host '%s' do not have contacts nor contact_groups" % (desc, hname))
+
         if not hasattr(self, 'check_command'):
             logger.log("%s : I've got no check_command" % self.get_name())
             state = False

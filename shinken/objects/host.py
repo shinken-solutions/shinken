@@ -376,8 +376,7 @@ class Host(SchedulingItem):
         state = True #guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['contacts', 'contact_groups', 'check_period', \
-                                  'notification_interval', 'check_period']
+        special_properties = ['check_period', 'notification_interval', 'check_period']
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
@@ -391,9 +390,8 @@ class Host(SchedulingItem):
                 logger.log(err)
 
         # Ok now we manage special cases...
-        if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups') and self.notifications_enabled == True:
-            logger.log("%s : I do not have contacts nor contact_groups" % self.get_name())
-            state = False
+        if self.notifications_enabled and self.contacts == []:
+            logger.log("Waring : the host %s do not have contacts nor contact_groups" % self.get_name())
         
         if getattr(self, 'check_command', None) is None:
             logger.log("%s : I've got no check_command" % self.get_name())
