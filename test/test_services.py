@@ -78,22 +78,6 @@ class TestConfig(ShinkenTest):
         ### Now special cases
         ###
 
-        #no contacts with notification enabled is a problem
-        svc.notifications_enabled = True
-        contacts = svc.contacts
-        contact_groups = svc.contact_groups
-        del svc.contacts
-        del svc.contact_groups
-        self.assert_(svc.is_correct() == False)
-        #and with disabled it's ok
-        svc.notifications_enabled = False
-        self.assert_(svc.is_correct() == True)
-        svc.contacts = contacts
-        svc.contact_groups = contact_groups
-
-        svc.notifications_enabled = True
-        self.assert_(svc.is_correct() == True)
-
         #no check command
         check_command = svc.check_command
         del svc.check_command
@@ -106,13 +90,6 @@ class TestConfig(ShinkenTest):
         del svc.notification_interval
         self.assert_(svc.is_correct() == False)
         svc.notification_interval = notification_interval
-        self.assert_(svc.is_correct() == True)
-
-        #No host
-        host = svc.host
-        del svc.host
-        self.assert_(svc.is_correct() == False)
-        svc.host = host
         self.assert_(svc.is_correct() == True)
 
 

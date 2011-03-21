@@ -78,22 +78,6 @@ class TestConfig(ShinkenTest):
         ### Now special cases
         ###
 
-        #no contacts with notification enabled is a problem
-        hst.notifications_enabled = True
-        contacts = hst.contacts
-        contact_groups = hst.contact_groups
-        del hst.contacts
-        del hst.contact_groups
-        self.assert_(hst.is_correct() == False)
-        #and with disabled it's ok
-        hst.notifications_enabled = False
-        self.assert_(hst.is_correct() == True)
-        hst.contacts = contacts
-        hst.contact_groups = contact_groups
-
-        hst.notifications_enabled = True
-        self.assert_(hst.is_correct() == True)
-
         #no check command
         check_command = hst.check_command
         del hst.check_command

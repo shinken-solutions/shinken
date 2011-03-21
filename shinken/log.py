@@ -43,13 +43,20 @@ class Log:
         global name
         global local_log
 
-        print message
+        # If the daemon is launch with a non UTF8 shell
+        # we can habe problem in printing
+        try:
+            print message
+        except UnicodeEncodeError:
+            print message.encode('ascii', 'ignore')
+
         if format is None:
             if name is None:
-            # We format the log in UTF-8
-                s = u'[%d] %s\n' % (int(time.time()), message.decode('UTF-8', 'replace'))
+                # We format the log in UTF-8
+                #message.decode('UTF-8', 'replace')
+                s = u'[%d] %s\n' % (int(time.time()), message)
             else:
-                s = u'[%d] [%s] %s\n' % (int(time.time()), name, message.decode('UTF-8', 'replace'))
+                s = u'[%d] [%s] %s\n' % (int(time.time()), name, message)
         else:
             s = format % message
 

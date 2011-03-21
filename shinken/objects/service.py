@@ -95,8 +95,8 @@ class Service(SchedulingItem):
         'notification_period':    StringProp (fill_brok=['full_status']),
         'notification_options':   ListProp   (default='w,u,c,r,f,s',fill_brok=['full_status']),
         'notifications_enabled':  BoolProp   (default='1', fill_brok=['full_status']),
-        'contacts':               StringProp (fill_brok=['full_status']),
-        'contact_groups':         StringProp (fill_brok=['full_status']),
+        'contacts':               StringProp (default='', fill_brok=['full_status']),
+        'contact_groups':         StringProp (default='', fill_brok=['full_status']),
         'stalking_options':       ListProp   (default='', fill_brok=['full_status']),
         'notes':                  StringProp (default='', fill_brok=['full_status']),
         'notes_url':              StringProp (default='', fill_brok=['full_status']),
@@ -354,13 +354,16 @@ class Service(SchedulingItem):
         state = True # guilty or not? :)
         cls = self.__class__
 
-        special_properties = ( 'contacts', 'contact_groups', 'check_period',
-                                  'notification_interval', 'host_name',
-                                  'hostgroup_name' )
+        desc = getattr(self, 'service_description', 'unamed')
+        hname = getattr(self, 'host_name', 'unamed')
+
+        special_properties = ('check_period', 'notification_interval', 'host_name',
+                              'hostgroup_name' )
+
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.log('%s : I do not have %s' % (self.get_name(), prop))
+                    logger.log("Error : the service %s on host '%s' do not have %s" % (desc, hname, prop))
                     state = False # Bad boy...
 
         # Raised all previously saw errors like unknown contacts and co
@@ -370,11 +373,9 @@ class Service(SchedulingItem):
                 logger.log(err)
 
         # Ok now we manage special cases...
-        if not hasattr(self, 'contacts') \
-        and not hasattr(self, 'contact_groups') \
-        and  self.notifications_enabled == True:
-            logger.log('%s : I do not have contacts nor contact_groups' % self.get_name())
-            state = False
+        if self.notifications_enabled and self.contacts == []:
+            logger.log("Warning The service '%s' in the host '%s' do not have contacts nor contact_groups" % (desc, hname))
+
         if not hasattr(self, 'check_command'):
             logger.log("%s : I've got no check_command" % self.get_name())
             state = False
@@ -393,8 +394,8 @@ class Service(SchedulingItem):
                 and  self.notifications_enabled == True:
             logger.log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
-        if not hasattr(self, 'host') or self.host is None:
-            logger.log("%s : I do not have an host" % self.get_name())
+        if self.host is None:
+            logger.log("The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
@@ -974,6 +975,10 @@ class Services(Items):
     # + inform the host we are a service of him
     def linkify_s_by_hst(self, hosts):
         for s in self:
+            # If we do not have an host_name, we set it as
+            # a template element to delete. (like Nagios
+            if not hasattr(s, 'host_name'):
+                continue
             try:
                 hst_name = s.host_name
                 # The new member list, in id
@@ -982,6 +987,10 @@ class Services(Items):
                 # Let the host know we are his service
                 if s.host is not None:
                     hst.add_service_link(s)
+                else: # Ok, the host do not exists!
+                    err = "Error : the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
+                    s.configuration_errors.append(err)
+                    continue
             except AttributeError , exp:
                 pass # Will be catch at the is_correct moment
 
@@ -1119,9 +1128,9 @@ class Services(Items):
             duplicate_for_hosts = [] # get the list of our host_names if more than 1
             not_hosts = [] # the list of !host_name so we remove them after
 
-            # print "Looking for s", s
-#            if hasattr(s, 'duplicate_foreach'):
-#                print s.duplicate_foreach
+            # If do not have an host_name, just delete it
+            if not hasattr(s, 'host_name'):
+                srv_to_remove.append(s.id)
 
             # if not s.is_tpl(): # Exploding template is useless
             # Explode for real service or teplate with a host_name
