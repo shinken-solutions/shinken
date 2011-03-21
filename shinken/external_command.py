@@ -249,7 +249,6 @@ class ExternalCommandManager:
                     print "Error : pipe creation failed (",self.pipe_path,')', exp
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
-        #print 'Fifo:', self.fifo
         return self.fifo
 
 

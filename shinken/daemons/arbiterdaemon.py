@@ -500,6 +500,7 @@ class Arbiter(Daemon):
         self.get_initial_broks_from_satellitelinks()
 
         suppl_socks = None
+
         # Now create the external commander
         if os.name != 'nt':
             e = ExternalCommandManager(self.conf, 'dispatcher')
