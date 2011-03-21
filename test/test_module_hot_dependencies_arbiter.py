@@ -190,6 +190,11 @@ class TestModuleHotDep(ShinkenTest):
         # and so launch the command. We can wait it finished
         time.sleep(1.5)
 
+        # Under windows, call pythoin.exe
+        if os.name == 'nt':
+            sl.mapping_command = 'python.exe libexec/hot_dep_export.py case2 tmp/vmware_mapping_file.json'
+        
+
         # Now we look if it's finished, and we get data and manage them
         # with case 1 (0 and 1 linked, not with 1 and 2)
         sl.hook_tick(self)
@@ -203,7 +208,7 @@ class TestModuleHotDep(ShinkenTest):
         if os.name != 'nt':
             sl.mapping_command = 'libexec/hot_dep_export.py case2 tmp/vmware_mapping_file.json'
         else:
-            sl.mapping_command = 'libexec\\hot_dep_export.py case2 tmp\\vmware_mapping_file.json'
+            sl.mapping_command = 'python.exe libexec\\hot_dep_export.py case2 tmp\\vmware_mapping_file.json'
         # We lie in the interval :p (not 0, because 0 mean : disabled)
         sl.mapping_command_interval = 0.1
         sl.hook_tick(self)
