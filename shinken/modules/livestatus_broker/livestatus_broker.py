@@ -174,6 +174,7 @@ class Livestatus_broker(BaseModule):
             return
         self.update_element(h, data)
         self.set_schedulingitem_values(h)
+        self.livestatus.count_event("host_checks")
 
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
@@ -223,6 +224,7 @@ class Livestatus_broker(BaseModule):
             return
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
+        self.livestatus.count_event("service_checks")
    
 
 
@@ -399,9 +401,6 @@ class Livestatus_broker(BaseModule):
         self.manage_service_check_result_brok(b)
 
 
-    
-
-
     def manage_host_check_result_brok(self, b):
         data = b.data
         h = self.find_host(data['host_name'])
@@ -563,6 +562,7 @@ class Livestatus_broker(BaseModule):
             except sqlite3.Error, e:
                 print "An error occurred:", e.args[0]
                 print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
+        self.livestatus.count_event("log_message")
 
 
     #The contacts must not be duplicated
@@ -745,6 +745,7 @@ class Livestatus_broker(BaseModule):
             #We do not ware about Empty queue
             except Queue.Empty:
                 pass
+                self.livestatus.counters.calc_rate()
             except IOError, e:
                 if e.errno != os.errno.EINTR:
                     raise

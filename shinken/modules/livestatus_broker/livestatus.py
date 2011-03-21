@@ -4409,10 +4409,16 @@ class LiveStatus:
                 'type' : 'int',
             },
             'cached_log_messages' : {
-                'default' : '0',
+                'default' : 0,
                 'description' : 'The current number of log messages MK Livestatus keeps in memory',
                 'prop' : None,
                 'type' : 'int',
+            },
+            'cached_log_messages_rate' : {
+                'default' : 0,
+                'description' : 'The current number of log messages MK Livestatus keeps in memory',
+                'prop' : None,
+                'type' : 'float',
             },
             'check_external_commands' : {
                 'default' : '0',
@@ -4436,15 +4442,17 @@ class LiveStatus:
                 'type' : 'int',
             },
             'connections' : {
-                'default' : '0',
+                'default' : 0,
+                'fulldepythonize' : lambda p, e, r: r.counters.count("connections"),
                 'description' : 'The number of client connections to Livestatus since program start',
-                'prop' : None,
+                'prop' : 'is_running',
                 'type' : 'int',
             },
             'connections_rate' : {
-                'default' : '0',
+                'default' : 0,
+                'fulldepythonize' : lambda p, e, r: r.counters.count("connections_rate"),
                 'description' : 'The averaged number of new client connections to Livestatus per second',
-                'prop' : None,
+                'prop' : 'is_running',
                 'type' : 'float',
             },
             'enable_event_handlers' : {
@@ -4482,16 +4490,57 @@ class LiveStatus:
                 'prop' : 'active_service_checks_enabled',
                 'type' : 'int',
             },
-            'host_checks' : {
-                'default' : '0',
-                'description' : 'The number of host checks since program start',
+            'external_commands_rate' : {
+                'default' : 0,
+                'fulldepythonize' : lambda p, e, r: r.counters.count("external_commands_rate"),
+                'description' : 'The averaged number of external commands per second',
+                'prop' : 'is_running',
+                'type' : 'float',
+            },
+            'external_command_buffer_max' : {
+                'default' : 0,
+                'description' : 'The maximum number of slots used in the external command buffer',
                 'prop' : None,
                 'type' : 'int',
             },
-            'host_checks_rate' : {
-                'default' : '0',
-                'description' : 'the averaged number of host checks per second',
+            'external_command_buffer_slots' : {
+                'default' : 0,
+                'description' : 'The size of the buffer for the external commands',
                 'prop' : None,
+                'type' : 'int',
+            },
+            'external_command_buffer_usage' : {
+                'default' : 0,
+                'description' : 'The number of slots in use of the external command buffer',
+                'prop' : None,
+                'type' : 'int',
+            },
+            'forks' : {
+                'default' : '0',
+                'fulldepythonize' : lambda p, e, r: r.counters.count("forks"),
+                'description' : 'The number of process creations since program start',
+                'prop' : 'is_running',
+                'type' : 'float',
+            },
+            'forks_rate' : {
+                'default' : 0,
+                'fulldepythonize' : lambda p, e, r: r.counters.count("forks_rate"),
+                'description' : 'The averaged number of forks per second',
+                'prop' : 'is_running',
+                'type' : 'float',
+            },
+            'host_checks' : {
+                'default' : '0',
+                'fulldepythonize' : lambda p, e, r: r.counters.count("host_checks"),
+                'description' : 'The number of host checks since program start',
+                'prop' : 'is_running',
+                'type' : 'int',
+            },
+            'host_checks_rate' : {
+                'default' : 0,
+                'fulldepythonize' : lambda p, e, r: r.counters.count("host_checks_rate"),
+                'description' : 'the averaged number of host checks per second',
+                'prop' : 'is_running',
                 'type' : 'float',
             },
             'interval_length' : {
@@ -4517,6 +4566,20 @@ class LiveStatus:
                 'description' : 'The version of the MK Livestatus module',
                 'prop' : None,
                 'type' : 'string',
+            },
+            'log_messages' : {
+                'default' : 0,
+                'fulldepythonize' : lambda p, e, r: r.counters.count("log_messages"),
+                'description' : 'The number of new log messages since program start',
+                'prop' : 'is_running',
+                'type' : 'float',
+            },
+            'log_messages_rate' : {
+                'default' : 0,
+                'fulldepythonize' : lambda p, e, r: r.counters.count("log_messages_rate"),
+                'description' : 'The averaged number of log messages per second',
+                'prop' : 'is_running',
+                'type' : 'float',
             },
             'nagios_pid' : {
                 'default' : '0',
@@ -4582,15 +4645,17 @@ class LiveStatus:
                 'type' : 'float',
             },
             'service_checks' : {
-                'default' : '0',
+                'default' : 0,
+                'fulldepythonize' : lambda p, e, r: r.counters.count("service_checks"),
                 'description' : 'The number of completed service checks since program start',
-                'prop' : None,
+                'prop' : 'is_running',
                 'type' : 'int',
             },
             'service_checks_rate' : {
-                'default' : '0',
+                'default' : 0,
+                'fulldepythonize' : lambda p, e, r: r.counters.count("service_checks_rate"),
                 'description' : 'The averaged number of service checks per second',
-                'prop' : None,
+                'prop' : 'is_running',
                 'type' : 'float',
             },
         },
@@ -5403,6 +5468,8 @@ class LiveStatus:
         for attribute in self.out_map['Service']:
             LiveStatus.out_map['Servicesbyhostgroup'][attribute] = LiveStatus.out_map['Service'][attribute]
 
+        self.counters = LiveStatusCounters()
+
 
     def row_factory(self, cursor, row):
         """Handler for the sqlite fetch method."""
@@ -5417,8 +5484,8 @@ class LiveStatus:
         
         """
         request = LiveStatusRequest(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, 
-                                    self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, 
-                                    self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue)
+            self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, 
+            self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
         request.parse_input(data)
         print "REQUEST\n%s\n" % data
         #print request
@@ -5596,6 +5663,10 @@ class LiveStatus:
                                 entry['as'] = attribute.replace(prefix, '')
 
 
+    def count_event(self, counter):
+        self.counters.increment(counter)
+
+
 
 class LiveStatusResponse:
     
@@ -5688,7 +5759,7 @@ class LiveStatusRequest(LiveStatus):
    
     """A class describing a livestatus request."""
     
-    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue):
+    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue, counters):
         # Runtime data form the global LiveStatus object
         self.configs = configs
         self.hostname_lookup_table = hostname_lookup_table
@@ -5708,6 +5779,7 @@ class LiveStatusRequest(LiveStatus):
         self.dbconn = dbconn
         self.pnp_path = pnp_path
         self.return_queue = return_queue
+        self.counters = counters
 
         # Private attributes for this specific request
         self.response = LiveStatusResponse(responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'undef', separators = LiveStatus.separators)
@@ -5751,29 +5823,32 @@ class LiveStatusRequest(LiveStatus):
 
     def set_default_out_map_name(self):
         """Translate the table name to the corresponding out_map key."""
-        self.out_map_name = {
-            'hosts' : 'Host',
-            'services' : 'Service',
-            'hostgroups' : 'Hostgroup',
-            'servicegroups' : 'Servicegroup',
-            'contacts' : 'Contact',
-            'contactgroups' : 'Contactgroup',
-            'comments' : 'Comment',
-            'downtimes' : 'Downtime',
-            'commands' : 'Command',
-            'timeperiods' : 'Timeperiod',
-            'hostsbygroup' : 'Hostsbygroup',
-            'servicesbygroup' : 'Servicesbygroup',
-            'servicesbyhostgroup' : 'Servicesbyhostgroup',
-            'status' : 'Config',
-            'log' : 'Logline',
-            'schedulers' : 'SchedulerLink',
-            'pollers' : 'PollerLink',
-            'reactionners' : 'ReactionnerLink',
-            'brokers' : 'BrokerLink',
-            'problems' : 'Problem',
-            'columns' : 'Config', # just a dummy
-        }[self.table]
+        try:
+            self.out_map_name = {
+                'hosts' : 'Host',
+                'services' : 'Service',
+                'hostgroups' : 'Hostgroup',
+                'servicegroups' : 'Servicegroup',
+                'contacts' : 'Contact',
+                'contactgroups' : 'Contactgroup',
+                'comments' : 'Comment',
+                'downtimes' : 'Downtime',
+                'commands' : 'Command',
+                'timeperiods' : 'Timeperiod',
+                'hostsbygroup' : 'Hostsbygroup',
+                'servicesbygroup' : 'Servicesbygroup',
+                'servicesbyhostgroup' : 'Servicesbyhostgroup',
+                'status' : 'Config',
+                'log' : 'Logline',
+                'schedulers' : 'SchedulerLink',
+                'pollers' : 'PollerLink',
+                'reactionners' : 'ReactionnerLink',
+                'brokers' : 'BrokerLink',
+                'problems' : 'Problem',
+                'columns' : 'Config', # just a dummy
+            }[self.table]
+        except:
+            self.out_map_name = 'hosts'
 
 
     def copy_out_map_hooks(self):
@@ -6539,3 +6614,66 @@ member_key: the key to be used to sort each resulting element of a group member.
             return match_filter
 
 
+class LiveStatusCounters(LiveStatus):    
+    def __init__(self):
+        self.counters = {
+            'neb_callbacks' : 0,
+            'connections' : 0,
+            'service_checks' : 0,
+            'host_checks' : 0,
+            'forks' : 0,
+            'log_message' : 0,
+            'external_commands' : 0
+        }
+        self.last_counters = {
+            'neb_callbacks' : 0,
+            'connections' : 0,
+            'service_checks' : 0,
+            'host_checks' : 0,
+            'forks' : 0,
+            'log_message' : 0,
+            'external_commands' : 0
+        }
+        self.rate = {
+            'neb_callbacks' : 0.0,
+            'connections' : 0.0,
+            'service_checks' : 0.0,
+            'host_checks' : 0.0,
+            'forks' : 0.0,
+            'log_message' : 0.0,
+            'external_commands' : 0.0
+        }
+        self.last_update = 0
+        self.interval = 10
+        self.rating_weight = 0.25
+
+    def increment(self, counter):
+        if counter in self.counters:
+            self.counters[counter] += 1
+   
+
+    def calc_rate(self):
+        elapsed = time.time() - self.last_update
+        if elapsed > self.interval:
+            self.last_update = time.time()
+            for counter in self.counters:
+                delta = self.counters[counter] - self.last_counters[counter]
+                new_rate = delta / elapsed
+                if self.rate[counter] == 0:
+                    avg_rate = new_rate
+                else:
+                    avg_rate = self.rate[counter] * (1 - self.rating_weight) + new_rate * self.rating_weight
+                self.rate[counter] = avg_rate
+                self.last_counters[counter] = self.counters[counter]
+
+
+    def count(self, counter):
+        if counter in self.counters:
+            return self.counters[counter]
+        elif counter.endswith('_rate'):
+            if counter[0:-5] in self.rate:
+                return self.rate[counter[0:-5]]
+            else:
+                return 0.0
+        else:
+            return 0
