@@ -190,7 +190,6 @@ class Satellite(BaseSatellite):
         self.s = None
         self.manager = None
         self.returns_queue = None
-
         self.worker_modules = {}
 
 
@@ -233,6 +232,12 @@ class Satellite(BaseSatellite):
         sched_id = action.sched_id
         # Now we now where to put action, we do not need sched_id anymore
         del action.sched_id
+        # And we remove it from the actions queue of the scheduler too
+        try:
+            del self.schedulers[sched_id]['actions'][action.get_id()]
+        except KeyError:
+            pass
+        # We tag it as want return, and mvoe it in the wait return queue
         action.status = 'waitforhomerun'
         self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
         # We update stats
@@ -407,6 +412,10 @@ class Satellite(BaseSatellite):
     # Add to our queues a list of actions
     def add_actions(self, lst, sched_id):
         for a in lst:
+            # First we look if we do not already have it, if so
+            # do nothing, we are already working!
+            if a.id in self.schedulers[sched_id]['actions']:
+                continue
             a.sched_id = sched_id
             a.status = 'queue'
             msg = Message(id=0, type='Do', data=a)
@@ -552,7 +561,6 @@ class Satellite(BaseSatellite):
             
         # If we are passive, we do not initiate the check getting
         # and return
-        print "Am I passive?", self.passive
         if not self.passive:
             print "I try to get new actions!"
             # Now we can get new actions from schedulers
@@ -605,6 +613,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
                 logger.log("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
                 already_got = True
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
+                actions = self.schedulers[sched_id]['actions']
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
 
@@ -614,8 +623,10 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
             self.schedulers[sched_id]['uri'] = uri
             if already_got:
                 self.schedulers[sched_id]['wait_homerun'] = wait_homerun
+                self.schedulers[sched_id]['actions'] = actions
             else:
                 self.schedulers[sched_id]['wait_homerun'] = {}
+                self.schedulers[sched_id]['actions'] = {}
             self.schedulers[sched_id]['running_id'] = 0
             self.schedulers[sched_id]['active'] = s['active']
 
