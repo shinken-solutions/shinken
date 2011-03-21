@@ -975,6 +975,10 @@ class Services(Items):
     # + inform the host we are a service of him
     def linkify_s_by_hst(self, hosts):
         for s in self:
+            # If we do not have an host_name, we set it as
+            # a template element to delete. (like Nagios
+            if not hasattr(s, 'host_name'):
+                continue
             try:
                 hst_name = s.host_name
                 # The new member list, in id
@@ -983,6 +987,10 @@ class Services(Items):
                 # Let the host know we are his service
                 if s.host is not None:
                     hst.add_service_link(s)
+                else: # Ok, the host do not exists!
+                    err = "Error : the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
+                    s.configuration_errors.append(err)
+                    continue
             except AttributeError , exp:
                 pass # Will be catch at the is_correct moment
 
@@ -1120,9 +1128,9 @@ class Services(Items):
             duplicate_for_hosts = [] # get the list of our host_names if more than 1
             not_hosts = [] # the list of !host_name so we remove them after
 
-            # print "Looking for s", s
-#            if hasattr(s, 'duplicate_foreach'):
-#                print s.duplicate_foreach
+            # If do not have an host_name, just delete it
+            if not hasattr(s, 'host_name'):
+                srv_to_remove.append(s.id)
 
             # if not s.is_tpl(): # Exploding template is useless
             # Explode for real service or teplate with a host_name
