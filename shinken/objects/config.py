@@ -905,18 +905,17 @@ class Config(Item):
     # so look with strings!
     def got_arbiter_module_type_defined(self, mod_type):
         for a in self.arbiterlinks:
+            # Do like the linkify will do after....
             for m in getattr(a , 'modules', '').split(','):
+                # So look at what the arbiter try to call as module
                 m = m.strip()
                 # Ok, now look in modules...
                 for mod in self.modules:
-                    print "Compare with", mod
-                    print "Type", getattr(mod, 'module_type', '')
-                    if getattr(mod, 'module_type', '') == mod_type:
-                        print "Good type"
-                        if getattr(mod, 'module_name', '') == m:
-                            print "Got one"*100
+                    # try to see if this module is the good type
+                    if getattr(mod, 'module_type', '').strip() == mod_type.strip():
+                        # if so, the good name?
+                        if getattr(mod, 'module_name', '').strip() == m:
                             return True
-        print "Do not have one"*100
         return False
 
 
