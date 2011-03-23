@@ -102,6 +102,7 @@ launch_and_assert test_hostgroup_no_host.py
 launch_and_assert test_nocontacts.py
 launch_and_assert test_srv_nohost.py
 launch_and_assert test_srv_badhost.py
+launch_and_assert test_module_named_pipe_arbiter.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.
