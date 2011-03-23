@@ -255,7 +255,7 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             tab = self.con.what_i_managed()
-            #I don't know why, but tab can be a bool. Not good here
+            # I don't know why, but tab can be a bool. Not good here
             if isinstance(tab, bool):
                 self.con = None
                 return []

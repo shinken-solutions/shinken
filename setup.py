@@ -306,16 +306,23 @@ def update_file_with_string(infilename, outfilename, match, new_string):
 
 
 # Set the default values for the paths
-if os.name == 'nt':
+if 'win' in sys.platform:
     default_paths = {'var':      "c:\\shinken\\var",
                      'etc':      "c:\\shinken\\etc",
                      'libexec':  "c:\\shinken\\libexec",
                      }
-else:
+elif 'linux' in sys.platform:
     default_paths = {'var': "/var/lib/shinken/",
                      'etc': "/etc/shinken",
                      'libexec': "/usr/lib/shinken/plugins",
                      }
+elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
+    default_paths = {'var': "/var/lib/shinken",
+                     'etc': "/usr/local/etc/shinken",
+                     'libexec': "/usr/local/libexec/shinken",
+                     }
+else:
+    raise "Unsupported platform, sorry"
 
 required_pkgs = []
 if sys.version_info < (2, 5):
