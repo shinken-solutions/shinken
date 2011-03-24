@@ -92,16 +92,9 @@ class SatelliteLink(Item):
             self.con.put_conf(conf)
             pyro.set_timeout(self.con, self.timeout)
             return True
-        except Pyro.errors.URIError , exp:
+        except Pyro_exp_pack , exp:
             self.con = None
-            return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except TypeError , exp:
             print ''.join(Pyro.util.getPyroTraceback(exp))
-        except Pyro.errors.CommunicationError , exp:
-            self.con = None
             return False
 
 
@@ -204,16 +197,9 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             return self.con.got_conf()
-        except Pyro.errors.URIError , exp:
+        except Pyro_exp_pack , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except Exception, exp:
-            self.con = None
-            return False
-
 
 
     def remove_from_conf(self, sched_id):
@@ -222,13 +208,7 @@ class SatelliteLink(Item):
         try:
             self.con.remove_from_conf(sched_id)
             return True
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except Exception, exp:
+        except Pyro_exp_pack , exp:
             self.con = None
             return False
 
@@ -243,13 +223,7 @@ class SatelliteLink(Item):
                 self.con = None
                 return []
             return tab
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return []
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return []
-        except Exception, exp:
+        except Pyro_exp_pack , exp:
             self.con = None
             return []
 
@@ -259,19 +233,9 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             return self.con.push_broks(broks)
-        except Pyro.errors.URIError , exp:
+        except Pyro_exp_pack , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except AttributeError , exp:
-            print exp
-            return False
-        except Exception, exp:
-            self.con = None
-            return False
-
 
 
     def get_external_commands(self):
@@ -282,16 +246,7 @@ class SatelliteLink(Item):
             if isinstance(tab, bool):
                 return []
             return tab
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return []
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return []
-        except AttributeError , exp:
-            print exp
-            return []
-        except Exception, exp:
+        except Pyro_exp_pack, exp:
             self.con = None
             return []
 
