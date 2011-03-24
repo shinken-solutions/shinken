@@ -175,17 +175,21 @@ class SatelliteLink(Item):
             
 
 
-    #To know if the satellite have a conf (magic_hash = None)
-    #OR to know if the satellite have THIS conf (magic_hash != None)
+    # To know if the satellite have a conf (magic_hash = None)
+    # OR to know if the satellite have THIS conf (magic_hash != None)
     def have_conf(self,  magic_hash=None):
         if self.con is None:
             self.create_connexion()
 
         try:
             if magic_hash is None:
-                return self.con.have_conf()
+                r = self.con.have_conf()
             else:
-                return self.con.have_conf(magic_hash)
+                r = self.con.have_conf(magic_hash)
+            # Protect against bad Pyro return
+            if not isinstance(r, bool):
+                return False
+            return r
         except Pyro_exp_pack , exp:
             self.con = None
             return False
@@ -196,7 +200,11 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connexion()
         try:
-            return self.con.got_conf()
+            r = self.con.got_conf()
+            # Protect against bad Pyro return
+            if not isinstance(r, bool):
+                return False
+            return r
         except Pyro_exp_pack , exp:
             self.con = None
             return False
@@ -218,8 +226,8 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             tab = self.con.what_i_managed()
-            # I don't know why, but tab can be a bool. Not good here
-            if isinstance(tab, bool):
+            # Protect against bad Pyro return
+            if not isinstance(tab, list):
                 self.con = None
                 return []
             return tab
@@ -243,7 +251,9 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             tab = self.con.get_external_commands()
-            if isinstance(tab, bool):
+            # Protect against bad Pyro return
+            if not isinstance(tab, list):
+                self.con = None
                 return []
             return tab
         except Pyro_exp_pack, exp:
