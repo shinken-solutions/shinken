@@ -99,6 +99,7 @@ class Nagios_retention_scheduler(BaseModule):
         tmp_line = ''
         lines = buf.split('\n')
         for line in lines:
+            line = line.decode('utf8', 'ignore')
             line = line.split(';')[0]
             #A backslash means, there is more to come
             if re.search("\\\s*$", line):
