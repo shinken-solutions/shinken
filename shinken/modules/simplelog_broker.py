@@ -42,7 +42,7 @@ print "I am simple log Broker"
 properties = {
     'daemons' : ['broker'],
     'type' : 'simple_log',
-    'external' : True,
+    'external' : False,
     'phases' : ['running'],
     }
 
@@ -120,6 +120,15 @@ class Simple_log_broker(BaseModule):
         return False
 
 
+    def manage_brok(self, brok):
+        self.check_and_do_archive()
+        """ Request the module to manage the given brok.
+There a lot of different possible broks to manage. """
+        manage = getattr(self, 'manage_' + brok.type + '_brok', None)
+        if manage:
+            return manage(brok)
+
+
     #A service check have just arrived, we UPDATE data info with this
     def manage_log_brok(self, b):
         data = b.data
@@ -132,6 +141,7 @@ class Simple_log_broker(BaseModule):
         if not moved:
             print "I open the log file %s" % self.path
             self.file = open(self.path,'a')
+
 
     def do_loop_turn(self):
         self.check_and_do_archive()
