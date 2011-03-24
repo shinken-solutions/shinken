@@ -30,6 +30,11 @@ Pyro = pyro.Pyro
 
 from shinken.objects import Item, Items
 
+# Pack of common Pyro exceptions
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+                    Pyro.errors.CommunicationError, \
+                    Pyro.errors.DaemonError)
+
 class SatelliteLink(Item):
     #id = 0 each Class will have it's own id
     #properties={'name' : {'required' : True },#, 'pythonize': None},
@@ -159,36 +164,19 @@ class SatelliteLink(Item):
                 self.set_alive()
             else:
                 self.add_failed_check_attempt()
-        except Pyro.errors.ProtocolError , exp:
-            self.add_failed_check_attempt()
-        except Pyro.errors.URIError , exp:
+        except Pyro_exp_pack, exp:
             print exp
             self.add_failed_check_attempt()
-        #Only pyro 4 but will be ProtocolError in 3
-        except Pyro.errors.CommunicationError , exp:
-            #print "Is not alive!", self.uri
-            self.add_failed_check_attempt()
-        except Pyro.errors.DaemonError , exp:
-            print exp
-            self.add_failed_check_attempt()
-        except Exception, exp:
-            print exp
-            self.add_failed_check_attempt()
+
 
 
     def wait_new_conf(self):
         if self.con is None:
             self.create_connexion()
-        try:
+        try :
             self.con.wait_new_conf()
             return True
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except Exception, exp:
+        except Pyro_exp_pack, exp:
             self.con = None
             return False
             
@@ -205,13 +193,7 @@ class SatelliteLink(Item):
                 return self.con.have_conf()
             else:
                 return self.con.have_conf(magic_hash)
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except Exception, exp:
+        except Pyro_exp_pack , exp:
             self.con = None
             return False
 
