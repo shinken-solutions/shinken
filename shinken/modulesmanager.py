@@ -26,9 +26,10 @@
 import os
 import sys
 import traceback
+import cStringIO
 
 from shinken.basemodule import BaseModule
-
+from shinken.log import logger
 
 class ModulesManager(object):
 
@@ -94,8 +95,8 @@ The previous imported modules, if any, are cleaned before. """
                     is_find = True
                     break
             if not is_find:
-                #No module is suitable, we Raise a Warning
-                print "Warning : the module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name())
+                # No module is suitable, we Raise a Warning
+                logger.log("Warning : the module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
 
 
     def try_instance_init(self, inst):
@@ -106,8 +107,11 @@ Returns: True on successfull init. False if instance init method raised any Exce
             inst.create_queues()
             inst.init()
         except Exception, e:
-            print("Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
-            print("Back trace of this remove : %s" % (traceback.format_exc()))
+            logger.log("Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
+            output = cStringIO.StringIO()
+            traceback.print_exc(file=output)
+            logger.log("Back trace of this remove : %s" % (output.getvalue()))
+            output.close()
             return False
         return True
 
@@ -135,9 +139,11 @@ The previous modules instance(s), if any, are all cleaned. """
                 assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
             except Exception , exp:
-                print "Error : the module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), str(exp))
-                print "Back trace of this remove :"
-                traceback.print_exc(file=sys.stdout)
+                logger.log("Error : the module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), str(exp)))
+                output = cStringIO.StringIO()
+                traceback.print_exc(file=output)
+                logger.log("Back trace of this remove : %s" % (output.getvalue()))
+                output.close()
 
         print "Load", len(self.instances), "module instances"
 
@@ -166,7 +172,7 @@ The previous modules instance(s), if any, are all cleaned. """
         for inst in self.instances:
             if not self.try_instance_init(inst):
                 # damn..
-                print("module instance %s could not be init")
+                logger.log("module instance %s could not be init")
                 to_del.append(inst)
         self.clear_instances(to_del) 
         self.__start_ext_instances()
@@ -189,7 +195,7 @@ If instance is external also shutdown it cleanly """
         #Only for external
         for inst in self.instances:
             if inst.is_external and not inst.process.is_alive():
-                print "Error : the external module %s goes down unexpectly!" % inst.get_name()
+                logger.log("Error : the external module %s goes down unexpectly!" % inst.get_name())
                 to_del.append(inst)
 
         self.clear_instances(to_del)
