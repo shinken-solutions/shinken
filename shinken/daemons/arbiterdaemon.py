@@ -501,15 +501,11 @@ class Arbiter(Daemon):
 
         suppl_socks = None
 
-        # Now create the external commander
-        if os.name != 'nt':
-            e = ExternalCommandManager(self.conf, 'dispatcher')
-            e.load_arbiter(self)
-            # Arbiter need to know about external command to activate it
-            # if necessary
-            self.load_external_command(e)
-            if self.fifo is not None:
-                suppl_socks = [ self.fifo ]
+        # Now create the external commander. It's just here to dispatch
+        # the commands to schedulers
+        e = ExternalCommandManager(self.conf, 'dispatcher')
+        e.load_arbiter(self)
+        self.external_command = e
 
         print "Run baby, run..."
         timeout = 1.0             
@@ -572,6 +568,7 @@ class Arbiter(Daemon):
             # It's send, do not keep them
             # TODO: check if really send. Queue by scheduler?
             self.external_commands = []
+
 
     # This function returns the part of the conf where are stored the daemons of
     # a given daemon type
