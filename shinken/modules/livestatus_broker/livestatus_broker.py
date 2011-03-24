@@ -30,6 +30,7 @@ import sys
 import os
 import time
 import errno
+import re
 try:
     import sqlite3
 except ImportError: # python 2.4 do not have it
@@ -174,7 +175,7 @@ class Livestatus_broker(BaseModule):
             return
         self.update_element(h, data)
         self.set_schedulingitem_values(h)
-        self.livestatus.count_event("host_checks")
+        self.livestatus.count_event('host_checks')
 
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
@@ -224,7 +225,7 @@ class Livestatus_broker(BaseModule):
             return
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
-        self.livestatus.count_event("service_checks")
+        self.livestatus.count_event('service_checks')
    
 
 
@@ -562,7 +563,7 @@ class Livestatus_broker(BaseModule):
             except sqlite3.Error, e:
                 print "An error occurred:", e.args[0]
                 print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
-        self.livestatus.count_event("log_message")
+        self.livestatus.count_event('log_message')
 
 
     #The contacts must not be duplicated
@@ -781,6 +782,7 @@ class Livestatus_broker(BaseModule):
                                     client.close()
                                 continue
                         self.input.append(client)
+                        self.livestatus.count_event('connections')
                     else:
                         if socketid in open_connections:
                             # This is a known connection. Register the activity
@@ -861,7 +863,14 @@ class Livestatus_broker(BaseModule):
                                     print "undef state data nobuffer", open_connections[socketid]['state']
 
                         if handle_it:
-                            response, keepalive = self.livestatus.handle_request(open_connections[socketid]['buffer'].rstrip())
+                            request_parts = re.split(r'[\r\n]{2,}', open_connections[socketid]['buffer'].rstrip())
+                            if len(request_parts) > 1:
+                                # This situation occurs when the multisite gui sends
+                                # an external command immediately followed by a GET-request
+                                for part in request_parts:
+                                    response, keepalive = self.livestatus.handle_request(part)
+                            else:
+                                response, keepalive = self.livestatus.handle_request(request_parts[0])
                             try:
                                 s.send(response)
                             except:
