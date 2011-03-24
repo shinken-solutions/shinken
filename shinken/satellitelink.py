@@ -153,8 +153,12 @@ class SatelliteLink(Item):
         try:
             if self.con is None:
                 self.create_connexion()
-            self.con.ping()
-            self.set_alive()
+            r = self.con.ping()
+            # Should return us pong string
+            if r == 'pong':
+                self.set_alive()
+            else:
+                self.add_failed_check_attempt()
         except Pyro.errors.ProtocolError , exp:
             self.add_failed_check_attempt()
         except Pyro.errors.URIError , exp:
