@@ -410,13 +410,13 @@ class SchedulingItem(Item):
         if (not self.active_checks_enabled or not cls.execute_checks) and not force:
             return None
 
-        # If the check_interval is 0, we should not add it
+        # If the check_interval is 0, we should not add it for a service
+        # but suppoe a 5min sched for hosts
         if self.check_interval == 0 and not force:
-            return None
-
-        # If I do not have an check_timeperiod and no force time, i do nothing
-        if getattr(self, 'check_period', None) is None and force_time is None:
-            return None
+            if cls.my_type == 'service':
+                return None
+            else: # host
+                self.check_interval = 5
 
         # Interval change is in a HARD state or not
         # If the retry is 0, take the normal value
@@ -436,10 +436,15 @@ class SchedulingItem(Item):
         else:
             time_add = interval
 
+        # If not force_time, try to schedule
         if force_time is None:
-            self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
+            # maybe we do nto have a check_period, if so, take always good (24x7)
+            if self.check_period:
+                self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
+            else:
+                self.next_chk = int(now + time_add)
         else:
-            self.next_chk = force_time
+            self.next_chk = int(force_time)
 
         # If next time is None, do not go
         if self.next_chk is None:
