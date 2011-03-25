@@ -25,7 +25,7 @@ import os
 import time
 import random
 from Queue import Empty
-
+from multiprocessing import active_children
 
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
@@ -402,7 +402,6 @@ class Arbiter(Daemon):
         self.modules_manager.init_and_start_instances()
 
         # Ok now we can load the retention data
-        print "FOUCK"*100
         self.hook_point('load_retention')
 
         ## And go for the main loop
@@ -481,6 +480,16 @@ class Arbiter(Daemon):
                 self.must_run = True
                 break
 
+    # modules can have process, and they can die
+    def check_and_del_zombie_modules(self):
+        # Active children make a join with every one, useful :)
+        act = active_children()
+        self.modules_manager.check_alive_instances()
+        # and try to restart previous dead :)
+        self.modules_manager.try_to_restart_deads()
+
+
+
     # Main function
     def run(self):
         # Before running, I must be sure who am I
@@ -536,6 +545,10 @@ class Arbiter(Daemon):
             
             # Timeout
             timeout = 1.0 # reset the timeout value
+
+            # Try to see if one of my module is dead, and
+            # try to restart previously dead modules :)
+            self.check_and_del_zombie_modules()
             
             # Call modules that manage a starting tick pass
             self.hook_point('tick')

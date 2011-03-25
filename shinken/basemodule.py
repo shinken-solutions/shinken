@@ -86,6 +86,7 @@ Example of task that a shinken module can do:
         self.to_q = None # the queue the module will receive data to manage
         self.from_q = None # the queue the module will put its result data
         self.process = None
+        self.init_try = 0
 
 
     def init(self):

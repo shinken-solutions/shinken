@@ -289,6 +289,9 @@ class Broker(BaseSatellite):
         # Active children make a join with every one, useful :)
         act = active_children()
         self.modules_manager.check_alive_instances()
+        # and try to restart previous dead :)
+        self.modules_manager.try_to_restart_deads()
+
 
         
     # Helper function for module, will give our broks

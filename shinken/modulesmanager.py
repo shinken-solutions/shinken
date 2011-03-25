@@ -42,6 +42,7 @@ class ModulesManager(object):
         self.imported_modules = []
         self.modules_assoc = []
         self.instances = []
+        self.to_restart = []
 
 
     def set_modules(self, modules):
@@ -107,8 +108,14 @@ The previous imported modules, if any, are cleaned before. """
         """ Try to "init" the given module instance. 
 Returns: True on successfull init. False if instance init method raised any Exception. """ 
         try:
-            # We setup the inst queues before its 'init' method is called. So that it can eventually get ref to the queues.
-            inst.create_queues()
+            inst.last_init_try = time.time()
+            # Maybe it's a retry, so do not create queues again
+            if inst.init_try == 0:
+                # We setup the inst queues before its 'init' method is called.
+                # So that it can eventually get ref to the queues.
+                inst.create_queues()
+            inst.init_try += 1
+
             inst.init()
         except Exception, e:
             logger.log("Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
@@ -140,7 +147,7 @@ The previous modules instance(s), if any, are all cleaned. """
                 mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
                 if inst is None: #None = Bad thing happened :)
-                    print("get_instance for module %s returned None !" % (mod_conf.get_name()))
+                    logger.log("get_instance for module %s returned None !" % (mod_conf.get_name()))
                     continue
                 assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
@@ -153,13 +160,13 @@ The previous modules instance(s), if any, are all cleaned. """
 
         print "Loaded", len(self.instances), "module instances"
 
-        to_del = []
+        #to_del = []
         for inst in self.instances:
             if not self.try_instance_init(inst):
-                # TODO: isn't it very bad if a requested module instance can't be "initialized" ?
-                to_del.append(inst)
+                # If the init failed, we put in in the restart queue
+                to_restart.append(inst)
 
-        self.clear_instances(to_del)
+        #self.clear_instances(to_del)
 
         # We only start the external instances once they all have been "init" called 
         if start_external:
@@ -168,9 +175,11 @@ The previous modules instance(s), if any, are all cleaned. """
         return self.instances
 
 
+    #Launch external instaces that are load corectly
     def __start_ext_instances(self):
         for inst in self.instances:
-            inst.start()
+            if inst not in self.to_restart:
+                inst.start()
 
 
     # actually only called by arbiter... because it instanciate its modules before going daemon
@@ -181,8 +190,9 @@ The previous modules instance(s), if any, are all cleaned. """
             if not self.try_instance_init(inst):
                 # damn..
                 logger.log("module instance %s could not be init")
-                to_del.append(inst)
-        self.clear_instances(to_del) 
+                self.to_restart.append(inst)
+                #to_del.append(inst)
+        #self.clear_instances(to_del) 
         self.__start_ext_instances()
 
      
@@ -202,14 +212,32 @@ If instance is external also shutdown it cleanly """
 
 
     def check_alive_instances(self):
-        to_del = []
+        #to_del = []
         #Only for external
         for inst in self.instances:
-            if inst.is_external and not inst.process.is_alive():
-                logger.log("Error : the external module %s goes down unexpectly!" % inst.get_name())
+            if not inst in self.to_restart:
+                if inst.is_external and not inst.process.is_alive():
+                    logger.log("Error : the external module %s goes down unexpectly!" % inst.get_name())
+                    logger.log("Setting the module %s to restart" % inst.get_name())
+                    self.to_restart.append(inst)
+
+        #self.clear_instances(to_del)
+
+                
+    def try_to_restart_deads(self):
+        to_del = []
+        for inst in self.to_restart:
+            print "I should try to reinit", inst.get_name()
+            if self.try_instance_init(inst):
+                print "Good, I try to restart",  inst.get_name()
+                # If it's an external, it will start it
+                inst.start()
+                # Ok it's good now :)
                 to_del.append(inst)
 
-        self.clear_instances(to_del)
+        # Remove module that are just launched :)
+        self.to_restart = [inst for inst in self.to_restart if not inst in to_del]
+                
 
 
     def get_internal_instances(self, phase=None):
