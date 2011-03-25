@@ -242,9 +242,11 @@ class Shinken(BaseSatellite):
         (conf, override_conf, modules, satellites) = self.new_conf
         self.new_conf = None
         
-        if self.cur_conf and self.cur_conf.magic_hash == conf.magic_hash:
-            print("I received a conf with same hash than me, I skip it.")
-            return
+        # In fact it make the scheduler just DIE as a bad guy. 
+        # Must manage it better or not manage it at all!
+        #if self.cur_conf and self.cur_conf.magic_hash == conf.magic_hash:
+        #    print("I received a conf with same hash than me, I skip it.")
+        #    return
         
         self.conf = conf
         self.cur_conf = conf
