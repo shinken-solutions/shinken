@@ -71,9 +71,12 @@ class Log:
             
 
     # The log can also write to a local file if need
+    # and return the filedecriptor so we can avoid to
+    # close it
     def register_local_log(self, path):
         global local_log
         local_log = open(path, 'a')
+        return local_log.fileno()
         
 
     # Clsoe the local log file at program exit

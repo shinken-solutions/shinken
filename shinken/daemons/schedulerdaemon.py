@@ -337,7 +337,7 @@ class Shinken(BaseSatellite):
 
         self.load_config_file()
         
-        self.do_daemon_init_and_start()        
+        self.do_daemon_init_and_start()
         self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
         print "The Arbiter Interface is at:", self.uri2
         
