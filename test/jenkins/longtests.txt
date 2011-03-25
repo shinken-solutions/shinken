@@ -57,6 +57,7 @@ test_srv_nohost.py
 test_srv_badhost.py
 test_module_named_pipe_arbiter.py
 test_nohostsched.py
+test_modulemanager.py
 
 # takes long
 test_livestatus.py
