@@ -61,6 +61,7 @@ class TestModuleManager(ShinkenTest):
         self.modulemanager.load_and_init(True)
         print "I correctly loaded the modules : %s " % ([ inst.get_name() for inst in self.modulemanager.instances ])
 
+        print "*** First kill ****"
         # Now I will try to kill the livestatus module
         ls = self.modulemanager.instances[0]
         ls._BaseModule__kill()
@@ -71,16 +72,47 @@ class TestModuleManager(ShinkenTest):
         #Should be dead
         self.assert_(not ls.process.is_alive())
         self.modulemanager.check_alive_instances()
+        self.modulemanager.try_to_restart_deads()
+
+        # In fact it's too early, so it won't do it
         
+        #Here the inst should be strill dead so
+        print "Is alive?", ls.process.is_alive()
+        self.assert_(not ls.process.is_alive())
+
+        # So we lie
+        ls.last_init_try =- 5
+        self.modulemanager.check_alive_instances()
+        self.modulemanager.try_to_restart_deads()
+
+        # In fact it's too early, so it won't do it
+
+        #Here the inst should be alive again :)
+        print "Is alive?", ls.process.is_alive()
+        self.assert_(ls.process.is_alive())
+
+        # should be nothing more in to_restart of
+        # the module manager
+        self.assert_(self.modulemanager.to_restart == [])
+
+        # Now we look for time restart so we kill it again
+        ls._BaseModule__kill()
+        time.sleep(1)
+        self.assert_(not ls.process.is_alive())
+
+        #Should be too early
+        self.modulemanager.check_alive_instances()
+        self.modulemanager.try_to_restart_deads()
+        print "Is alive or not", ls.process.is_alive()
+        self.assert_(not ls.process.is_alive())
+        # We lie for the test again
+        ls.last_init_try =- 5
+        self.modulemanager.check_alive_instances()
         self.modulemanager.try_to_restart_deads()
         
         #Here the inst should be alive again :)
         print "Is alive?", ls.process.is_alive()
         self.assert_(ls.process.is_alive())
-        
-        # should be nothing more in to_restart of
-        # the module manager
-        self.assert_(self.modulemanager.to_restart == [])
 
         #And we clear all now :)
         print "Ask to die"

@@ -108,14 +108,19 @@ The previous imported modules, if any, are cleaned before. """
         """ Try to "init" the given module instance. 
 Returns: True on successfull init. False if instance init method raised any Exception. """ 
         try:
-            inst.last_init_try = time.time()
+
+            inst.init_try += 1
             # Maybe it's a retry, so do not create queues again
-            if inst.init_try == 0:
+            if inst.init_try == 1:
                 # We setup the inst queues before its 'init' method is called.
                 # So that it can eventually get ref to the queues.
                 inst.create_queues()
-            inst.init_try += 1
+            else:
+                # do not try until 5 sec, or it's too loopy
+                if inst.last_init_try > time.time() - 5:
+                    return False
 
+            inst.last_init_try = time.time()
             inst.init()
         except Exception, e:
             logger.log("Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
