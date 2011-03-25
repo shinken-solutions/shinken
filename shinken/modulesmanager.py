@@ -244,21 +244,21 @@ If instance is external also shutdown it cleanly """
         self.to_restart = [inst for inst in self.to_restart if not inst in to_del]
                 
 
-
+    # Do not give to others inst that got problems
     def get_internal_instances(self, phase=None):
-        return [ inst for inst in self.instances if not inst.is_external and phase in inst.phases ]
+        return [ inst for inst in self.instances if not inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
 
     def get_external_instances(self, phase=None):
-        return [ inst for inst in self.instances if inst.is_external and phase in inst.phases ]
+        return [ inst for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
 
     def get_external_to_queues(self, phase=None):
-        return [ inst.to_q for inst in self.instances if inst.is_external and phase in inst.phases ]
+        return [ inst.to_q for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
 
     def get_external_from_queues(self, phase=None):
-        return [ inst.from_q for inst in self.instances if inst.is_external and phase in inst.phases ]
+        return [ inst.from_q for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
 
     def stop_all(self):
@@ -267,4 +267,4 @@ If instance is external also shutdown it cleanly """
             if hasattr(inst, 'quit') and callable(inst.quit):
                 inst.quit()
         
-        self.clear_instances(self.get_external_instances())
+        self.clear_instances([ inst for inst in self.instances if inst.is_external])
