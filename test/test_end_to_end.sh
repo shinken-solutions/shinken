@@ -303,7 +303,7 @@ echo "All launch of HA daemons is OK"
 bin/stop_scheduler.sh
 
 #We sleep to be sruethe scheduler see us
-sleep 2
+sleep 4
 NB_SCHEDULERS=1
 print_date
 

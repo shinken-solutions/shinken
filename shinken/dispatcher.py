@@ -174,12 +174,12 @@ class Dispatcher:
                             # Or maybe it is alive but I thought that this reactionner manage the conf
                             # but ot doesn't. I ask a full redispatch of these cfg for both cases
                             # DBG:
-                            print "What I manage", satellite.get_name(), satellite.what_i_managed()
-                            try :
-                                satellite.reachable and cfg_id not in satellite.what_i_managed()
-                            except TypeError, exp:
-                                print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
-                                satellite.reachable = False
+                            #print "What I manage", satellite.get_name(), satellite.what_i_managed()
+                            #try :
+                            #    satellite.reachable and cfg_id not in satellite.what_i_managed()
+                            #except TypeError, exp:
+                            #    print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
+                            #    satellite.reachable = False
 
                             if not satellite.alive or (satellite.reachable and cfg_id not in satellite.what_i_managed()):
                                 logger.log('[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))

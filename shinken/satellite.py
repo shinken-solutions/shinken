@@ -134,7 +134,6 @@ class IBroks(Interface):
 
     # poller or reactionner ask us actions
     def get_broks(self):
-        # print "We ask us broks"
         res = self.app.get_broks()
         return res
 
@@ -500,12 +499,11 @@ class Satellite(BaseSatellite):
 
 
     def do_loop_turn(self):
+        print "Loop turn"
         # Maybe the arbiter ask us to wait for a new conf
         # If true, we must restart all...
         if self.cur_conf is None:
-            print "Begin wait initial"
             self.wait_for_initial_conf()
-            print "End wait initial"
             if not self.new_conf:  # we may have been interrupted or so; then just return from this loop turn
                 return
             self.setup_new_conf()
@@ -514,9 +512,14 @@ class Satellite(BaseSatellite):
         # If so, we listen for it
         # When it push us conf, we reinit connexions
         # Sleep in waiting a new conf :)
-        self.watch_for_new_conf(self.timeout)
-        if self.new_conf:
-            self.setup_new_conf()
+        #TODO : manage the diff... AGAIN!
+        while self.timeout > 0:
+            begin = time.time()
+            self.watch_for_new_conf(self.timeout)
+            end = time.time()
+            if self.new_conf:
+                self.setup_new_conf()
+            self.timeout = self.timeout - (end - begin)
 
         print " ======================== "
 
