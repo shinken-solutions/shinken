@@ -333,7 +333,7 @@ class Config(Item):
 
     def read_config(self, files):
         #just a first pass to get the cfg_file and all files in a buf
-        res = ''
+        res = u''
 
         for file in files:
             #We add a \n (or \r\n) to be sure config files are separated
@@ -353,6 +353,7 @@ class Config(Item):
                 continue
 
             for line in buf:
+                line = line.decode('utf8', 'replace')
                 # Should not be useful anymore with the Universal open
                 # if os.name != 'nt':
                 #  line = line.replace("\r\n", "\n")
@@ -394,7 +395,7 @@ class Config(Item):
                                 try:
 
                                     fd = open(os.path.join(root, file), 'rU')
-                                    res += fd.read()
+                                    res += fd.read().decode('utf8', 'replace')
                                     fd.close()
                                 except IOError, exp:
                                     logger.log("Error: Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
