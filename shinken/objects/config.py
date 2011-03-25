@@ -369,7 +369,7 @@ class Config(Item):
                     try:
                         fd = open(cfg_file_name, 'rU')
                         logger.log("Processing object config file '%s'" % cfg_file_name)
-                        res += fd.read()
+                        res += fd.read().decode('utf8', 'replace')
                         #Be sure to add a line return so we won't mix files
                         res += '\n'
                         fd.close()
