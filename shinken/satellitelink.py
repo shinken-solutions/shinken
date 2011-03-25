@@ -94,7 +94,7 @@ class SatelliteLink(Item):
             return True
         except Pyro_exp_pack , exp:
             self.con = None
-            print ''.join(Pyro.util.getPyroTraceback(exp))
+            #print ''.join(Pyro.util.getPyroTraceback(exp))
             return False
 
 

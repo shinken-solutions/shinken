@@ -24,6 +24,7 @@
 #This class is use to manage modules and call callback
 
 import os
+import time
 import sys
 import traceback
 import cStringIO
@@ -42,18 +43,21 @@ class ModulesManager(object):
         self.modules_assoc = []
         self.instances = []
 
+
     def set_modules(self, modules):
-        
         """ Set the modules requested for this manager """
         self.modules = modules
         self.allowed_types = [ mod.module_type for mod in modules ]
+
 
     def load_and_init(self, start_external=True):
         """ Import, instanciate & "init" the modules we have been requested """
         self.load()
         self.get_instances(start_external)
 
+
     def load(self):
+        now = int(time.time())
         """ Try to import the requested modules ; put the imported modules in self.imported_modules.
 The previous imported modules, if any, are cleaned before. """ 
         # We get all modules file with .py
@@ -115,6 +119,7 @@ Returns: True on successfull init. False if instance init method raised any Exce
             return False
         return True
 
+
     def clear_instances(self, insts=None):
         """ Request to "remove" the given instances list or all if not provided """
         if insts is None:
@@ -122,6 +127,7 @@ Returns: True on successfull init. False if instance init method raised any Exce
         for i in insts:
             self.remove_instance(i)
     
+
     # actually only arbiter call this method with start_external=False..
     def get_instances(self, start_external=True):
         """ Create, init and then returns the list of module instances that the caller needs.
@@ -145,7 +151,7 @@ The previous modules instance(s), if any, are all cleaned. """
                 logger.log("Back trace of this remove : %s" % (output.getvalue()))
                 output.close()
 
-        print "Load", len(self.instances), "module instances"
+        print "Loaded", len(self.instances), "module instances"
 
         to_del = []
         for inst in self.instances:
@@ -161,9 +167,11 @@ The previous modules instance(s), if any, are all cleaned. """
 
         return self.instances
 
+
     def __start_ext_instances(self):
         for inst in self.instances:
             inst.start()
+
 
     # actually only called by arbiter... because it instanciate its modules before going daemon
     # TODO: but this actually leads to a double "init" call.. maybe a "uninit" would be needed ? 
@@ -176,13 +184,16 @@ The previous modules instance(s), if any, are all cleaned. """
                 to_del.append(inst)
         self.clear_instances(to_del) 
         self.__start_ext_instances()
+
      
     def remove_instance(self, inst):
         """ Request to cleanly remove the given instance. 
 If instance is external also shutdown it cleanly """
         # External instances need to be close before (process + queues)
         if inst.is_external:
+            print "Ask stop process for", inst.get_name()
             inst.stop_process()
+            print "Stop process done"
         
         inst.clear_queues()
 

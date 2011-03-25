@@ -22,8 +22,10 @@
 
 import os
 import signal
+import time
 from multiprocessing import Queue, Process
 
+from shinken.log import logger
  
 
 ## TODO: use a class for defining the module "properties" instead of plain dict ??  Like:
@@ -111,18 +113,41 @@ But clear queues if they were already set before recreating new one.  """
         if not self.is_external:
             return
         self.stop_process()
-        print("Starting external process for instance %s" % (self.name))
+        logger.log("Starting external process for instance %s" % (self.name))
         p = self.process = Process(target=self.main, args=())
         self.properties['process'] = p  ## TODO: temporary
         p.start()
-        print("%s is now started ; pid=%d" % (self.name, p.pid))
+        logger.log("%s is now started ; pid=%d" % (self.name, p.pid))
+
+
+    # Sometime terminate() is not enouth, we mush "help"
+    # external modules to die...
+    def __kill(self):
+        if os.name == 'nt':
+            import ctypes
+            TerminateProcess = ctypes.windll.kernel32.TerminateProcess
+            TerminateProcess(int(self.process._handle), -1)
+        else:
+            # Ok, let him 1 second before really KILL IT
+            os.kill(self.process.pid, 15)
+            time.sleep(1)
+            # You do not let me another choice guy...
+            if self.process.is_alive():
+                os.kill(self.process.pid, 9)
+
 
     def stop_process(self):
         """ Request the module process to stop and release it """
         if self.process:
+            logger.log("I'm stopping process pid:%s " % self.process.pid)
             self.process.terminate()
             self.process.join(timeout=1)
+            print dir(self.process)
+            if self.process.is_alive():
+                logger.log("The process is still alive, I help it to die")
+                self.__kill()
             self.process = None
+
 
 
     ## TODO: are these 2 methods really needed ?
@@ -184,11 +209,11 @@ Put in this method all you need to cleanly release all open resource used by you
     def main(self):
         """ module "main" method. Only used by external modules. """
         self.set_signal_handler()
-        print("[%s[%d]]: Now running.." % (self.name, os.getpid()))
+        logger.log("[%s[%d]]: Now running.." % (self.name, os.getpid()))
         while not self.interrupted:
             self.do_loop_turn()
         self.do_stop()
-        print("[%s]: exiting now.." % (self.name))
+        logger.log("[%s]: exiting now.." % (self.name))
         
     work = main # TODO: apparently some modules would uses "work" as the main method ??
 
