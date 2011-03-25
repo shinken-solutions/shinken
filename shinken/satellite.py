@@ -239,7 +239,10 @@ class Satellite(BaseSatellite):
             pass
         # We tag it as want return, and mvoe it in the wait return queue
         action.status = 'waitforhomerun'
-        self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
+        try:
+            self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
+        except KeyError:
+            pass
         # We update stats
         self.nb_actions_in_workers =- 1
 

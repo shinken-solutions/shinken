@@ -445,9 +445,14 @@ class Arbiter(Daemon):
             while True:
                 try:
                     o = f.get(block=False)
-                    print "Got object :", o
+                    #print "Got object :", o
                     self.add(o)
                 except Empty:
+                    break
+                # Maybe the queue got problem
+                # log it and quit it
+                except IOError, exp:
+                    logger.log("Warning : an external module queue got a problem '%s'" % str(exp))
                     break
 
     # We wait (block) for arbiter to send us something
