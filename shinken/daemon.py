@@ -167,7 +167,7 @@ class Daemon(object):
     
     def do_load_modules(self, start_external=True):
         self.modules_manager.load_and_init(start_external)
-        self.log.log("I correctly loaded the modules : %s " % ([ inst.get_name() for inst in self.modules_manager.instances ]))
+        self.log.log("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
  
  
     def add(self, elt):

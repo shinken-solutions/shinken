@@ -361,7 +361,7 @@ string_in_file "\[broker-Slave\] Connexion OK to the scheduler scheduler-Spare" 
 string_in_file "\[broker-Slave\] Connexion OK to the reactionner reactionner-Spare" $VAR/nagios.log
 string_in_file "\[broker-Slave\] Connexion problem to the poller poller-Master : connection failed" $VAR/nagios.log
 #And should have load the modules
-string_in_file "\[broker-Slave\] I correctly loaded the modules : \['Simple-log', 'Livestatus'\]" $VAR/nagios.log
+string_in_file "\[broker-Slave\] I correctly loaded the modules : \[Simple-log,Livestatus\]" $VAR/nagios.log
 
 
 echo "Now we clean it"
