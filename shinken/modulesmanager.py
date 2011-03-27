@@ -236,6 +236,7 @@ If instance is external also shutdown it cleanly """
                 # If it's an external, it will start it
                 inst.start()
                 # Ok it's good now :)
+            else:
                 self.to_restart.append(inst)
                 
 
