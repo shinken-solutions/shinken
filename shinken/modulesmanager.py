@@ -225,22 +225,18 @@ If instance is external also shutdown it cleanly """
                     logger.log("Setting the module %s to restart" % inst.get_name())
                     self.to_restart.append(inst)
 
-        #self.clear_instances(to_del)
-
                 
     def try_to_restart_deads(self):
-        to_del = []
-        for inst in self.to_restart:
+        to_restart = self.to_restart[:]
+        del self.to_restart[:]
+        for inst in to_restart:
             print "I should try to reinit", inst.get_name()
             if self.try_instance_init(inst):
                 print "Good, I try to restart",  inst.get_name()
                 # If it's an external, it will start it
                 inst.start()
                 # Ok it's good now :)
-                to_del.append(inst)
-
-        # Remove module that are just launched :)
-        self.to_restart = [inst for inst in self.to_restart if not inst in to_del]
+                self.to_restart.append(inst)
                 
 
     # Do not give to others inst that got problems
