@@ -49,18 +49,11 @@ class SchedulerLink(SatelliteLink):
         'realm' :           StringProp(default=''),
     }
     
-    running_properties = {
-        'con':       StringProp(default=None),
-        'alive':     StringProp(default=True, fill_brok=['full_status']), # DEAD or not
-        'attempt':   StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
-        'reachable': StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+    running_properties = SatelliteLink.running_properties.copy() 
+    running_properties.update({
         'conf':      StringProp(default=None),
         'need_conf': StringProp(default=True),
-        'broks':     StringProp(default=[]),
-        'configuration_errors' : StringProp(default=[]),
-    }
-    
-    macros = {}
+    })
 
 
     def get_name(self):
