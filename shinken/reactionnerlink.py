@@ -28,26 +28,16 @@ from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 class ReactionnerLink(SatelliteLink):
     id = 0
     my_type = 'reactionner'
-    properties = {
-        'reactionner_name': StringProp(fill_brok=['full_status'], to_send=True),
-        'address':          StringProp(fill_brok=['full_status']), 
+    properties = SatelliteLink.properties.copy()
+    properties.update({
+        'reactionner_name': StringProp(fill_brok=['full_status'], to_send=True), 
         'port':             IntegerProp(default='7769', fill_brok=['full_status']),
-        'spare':            BoolProp(default='0', fill_brok=['full_status']),
         'passive' :         BoolProp(default='0', fill_brok=['full_status'], to_send=True),
-        'manage_sub_realms': BoolProp(default='1', fill_brok=['full_status']),
-        'modules':          ListProp(default='', to_send=True),
         'min_workers':      IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'max_workers':      IntegerProp(default='30', fill_brok=['full_status'], to_send=True),
         'processes_by_worker': IntegerProp(default='256', fill_brok=['full_status'], to_send=True),
-        'polling_interval': IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
-        'manage_arbiters':  IntegerProp(default='0'),
         'reactionner_tags':      ListProp(default='None', to_send=True),
-        'use_timezone':     StringProp(default='NOTSET', to_send=True),
-        'timeout':          IntegerProp(default='3', fill_brok=['full_status']),
-        'data_timeout':     IntegerProp(default='120', fill_brok=['full_status']),
-        'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
-        'realm' :           StringProp(default=''),
-    }
+    })
     
     def get_name(self):
         return self.reactionner_name

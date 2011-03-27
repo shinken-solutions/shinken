@@ -34,20 +34,12 @@ class SchedulerLink(SatelliteLink):
     #Ok we lie a little here because we are a mere link in fact
     my_type = 'scheduler'
 
-    properties = {
+    properties = SatelliteLink.properties.copy()
+    properties.update({
         'scheduler_name':   StringProp(fill_brok=['full_status']),
-        'address':          StringProp(fill_brok=['full_status']),
         'port':             IntegerProp(default='7768', fill_brok=['full_status']),
-        'spare':            BoolProp(default='0', fill_brok=['full_status']),
-        'modules':          ListProp(default=''),
         'weight':           IntegerProp(default='1', fill_brok=['full_status']),
-        'manage_arbiters':  IntegerProp(default='0'),
-        'use_timezone':     StringProp(default='NOTSET', override=True),
-        'timeout':          IntegerProp(default='3', fill_brok=['full_status']),
-        'data_timeout':     IntegerProp(default='120', fill_brok=['full_status']),
-        'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
-        'realm' :           StringProp(default=''),
-    }
+    })
     
     running_properties = SatelliteLink.running_properties.copy() 
     running_properties.update({

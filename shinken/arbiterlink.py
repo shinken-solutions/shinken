@@ -28,19 +28,12 @@ from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 class ArbiterLink(SatelliteLink):
     id = 0
     my_type = 'arbiter'
-    properties = {
+    properties = SatelliteLink.properties.copy()
+    properties.update({
         'arbiter_name':    StringProp(),
         'host_name':       StringProp(default=socket.gethostname()),
-        'address':         StringProp(),
         'port':            IntegerProp(default='7770'),
-        'spare':           BoolProp(default='0'),
-        'modules':         ListProp(default='', to_send=True),
-#        'polling_interval': {'required':  False, 'default' : '1', 'pythonize': to_int, 'to_send' : True},
-        'manage_arbiters': BoolProp(default='0'),
-        'timeout':         IntegerProp(default='3', fill_brok=['full_status']),
-        'data_timeout':    IntegerProp(default='120', fill_brok=['full_status']),
-        'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
-    }
+    })
 
     def get_name(self):
         return self.arbiter_name
