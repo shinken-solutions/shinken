@@ -285,15 +285,6 @@ class Broker(BaseSatellite):
                 logger.log(''.join(Pyro.util.getPyroTraceback(x)))
                 sys.exit(1)
 
-    # modules can have process, and they can die
-    def check_and_del_zombie_modules(self):
-        # Active children make a join with every one, useful :)
-        act = active_children()
-        self.modules_manager.check_alive_instances()
-        # and try to restart previous dead :)
-        self.modules_manager.try_to_restart_deads()
-
-
         
     # Helper function for module, will give our broks
     def get_retention_data(self):
