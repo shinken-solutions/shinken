@@ -146,10 +146,7 @@ if os.name != 'nt':
             # If the command line got shell characters, we should go in a shell
             # mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
-            if force_shell:
-                cmd = self.command
-            else :
-                cmd = shlex.split(self.command)
+            cmd = self.command
             try:
                 self.process = subprocess.Popen(cmd,
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,

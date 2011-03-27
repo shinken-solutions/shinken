@@ -79,17 +79,30 @@ class TestModuleNamedPipe(ShinkenTest):
         
         # Now us we wrote in it
         f = open('tmp/nagios.cmd', 'w')
-        s = "[%lu] PROCESS_HOST_CHECK_RESULT;dc1;2;yoyo est mort\n" % now
+        t = "[%lu] PROCESS_HOST_CHECK_RESULT;dc1;2;yoyo est mort\n" % now
+        
+        s = ''
+        for i in xrange(1, 1000):
+            s += t
+            
+        print "Len s", len(s)
+        
         f.write(s)
         f.flush()
         f.close()
-        
-        ext_cmds = sl.get()
-        print "got ext_cmd", ext_cmds
-        self.assert_(len(ext_cmds) == 1)
-        cmd = ext_cmds.pop()
+        total_cmd = 0
+        for i in xrange(1, 100):
+            ext_cmds = sl.get()
+            print "got ext_cmd", len(ext_cmds)
+            total_cmd += len(ext_cmds)
+            if len(ext_cmds) == 0:
+                sl.open()
+            else:
+                cmd = ext_cmds.pop()
+        print "Total", total_cmd
+        self.assert_(total_cmd == 999)
         print cmd.__dict__
-        self.assert_(cmd.cmd_line.strip() == s.strip())
+        self.assert_(cmd.cmd_line.strip() == t.strip())
 
         #Ok, we can delete the retention file
         os.unlink('tmp/nagios.cmd')

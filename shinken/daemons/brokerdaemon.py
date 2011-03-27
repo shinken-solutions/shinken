@@ -73,7 +73,8 @@ class Broker(BaseSatellite):
         self.broks = [] # broks to manage
         # broks raised this turn and that need to be put in self.broks
         self.broks_internal_raised = []
-        
+
+        self.timeout = 1.0
 
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
@@ -289,6 +290,9 @@ class Broker(BaseSatellite):
         # Active children make a join with every one, useful :)
         act = active_children()
         self.modules_manager.check_alive_instances()
+        # and try to restart previous dead :)
+        self.modules_manager.try_to_restart_deads()
+
 
         
     # Helper function for module, will give our broks
@@ -441,6 +445,7 @@ class Broker(BaseSatellite):
 
     def do_loop_turn(self):
         print "Begin Loop : manage broks", len(self.broks)
+
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
@@ -450,6 +455,7 @@ class Broker(BaseSatellite):
         self.watch_for_new_conf(0.0)
         if self.new_conf:
             self.setup_new_conf()
+
 
         # Maybe the last loop we raised some broks internally
         # we should interger them in broks
@@ -463,7 +469,7 @@ class Broker(BaseSatellite):
 
         # Sort the brok list by id
         self.broks.sort(sort_by_ids)
-
+        
         # and for external queues
         # REF: doc/broker-modules.png (3)
         for b in self.broks:
@@ -504,9 +510,14 @@ class Broker(BaseSatellite):
         self.get_objects_from_from_queues()
 
         # Maybe we do not have something to do, so we wait a little
+        #TODO : redone the diff management....
         if len(self.broks) == 0:
-            # print "watch new conf 1 : begin", len(self.broks)
-            self.watch_for_new_conf(1.0)
+            while self.timeout > 0:
+                begin = time.time()
+                self.watch_for_new_conf(1.0)
+                end = time.time()
+                self.timeout = self.timeout - (end - begin)
+            self.timeout = 1.0
             # print "get enw broks watch new conf 1 : end", len(self.broks)
 
 

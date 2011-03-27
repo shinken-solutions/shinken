@@ -247,8 +247,8 @@ class install_config(Command):
             self.run_command('build_config')
         self.outfiles = self.copy_tree(self.build_dir, self.etc_path)
 
-
-        if pwd:
+        # if root is set, it's for pacakge, so NO chown
+        if pwd and not self.root:
             # assume a posix system
             uid = self.get_uid(self.owner)
             gid = self.get_gid(self.group)

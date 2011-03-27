@@ -24,12 +24,16 @@
 #SatelliteLink is a common Class for link to satellite for
 #Arbiter with Conf Dispatcher.
 
-import cPickle
 
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
 
 from shinken.objects import Item, Items
+
+# Pack of common Pyro exceptions
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+                    Pyro.errors.CommunicationError, \
+                    Pyro.errors.DaemonError)
 
 class SatelliteLink(Item):
     #id = 0 each Class will have it's own id
@@ -84,22 +88,13 @@ class SatelliteLink(Item):
 
         try:
             pyro.set_timeout(self.con, self.data_timeout)
-            #del conf[0].schedulerlinks
-            buf=cPickle.dumps(conf)
             print "DBG: put conf to", self.con.__dict__
             self.con.put_conf(conf)
             pyro.set_timeout(self.con, self.timeout)
             return True
-        except Pyro.errors.URIError , exp:
+        except Pyro_exp_pack , exp:
             self.con = None
-            return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except TypeError , exp:
-            print ''.join(Pyro.util.getPyroTraceback(exp))
-        except Pyro.errors.CommunicationError , exp:
-            self.con = None
+            #print ''.join(Pyro.util.getPyroTraceback(exp))
             return False
 
 
@@ -156,61 +151,46 @@ class SatelliteLink(Item):
         try:
             if self.con is None:
                 self.create_connexion()
-            self.con.ping()
-            self.set_alive()
-        except Pyro.errors.ProtocolError , exp:
-            self.add_failed_check_attempt()
-        except Pyro.errors.URIError , exp:
+            r = self.con.ping()
+            # Should return us pong string
+            if r == 'pong':
+                self.set_alive()
+            else:
+                self.add_failed_check_attempt()
+        except Pyro_exp_pack, exp:
             print exp
             self.add_failed_check_attempt()
-        #Only pyro 4 but will be ProtocolError in 3
-        except Pyro.errors.CommunicationError , exp:
-            #print "Is not alive!", self.uri
-            self.add_failed_check_attempt()
-        except Pyro.errors.DaemonError , exp:
-            print exp
-            self.add_failed_check_attempt()
-        except Exception, exp:
-            print exp
-            self.add_failed_check_attempt()
+
 
 
     def wait_new_conf(self):
         if self.con is None:
             self.create_connexion()
-        try:
+        try :
             self.con.wait_new_conf()
             return True
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except Exception, exp:
+        except Pyro_exp_pack, exp:
             self.con = None
             return False
             
 
 
-    #To know if the satellite have a conf (magic_hash = None)
-    #OR to know if the satellite have THIS conf (magic_hash != None)
+    # To know if the satellite have a conf (magic_hash = None)
+    # OR to know if the satellite have THIS conf (magic_hash != None)
     def have_conf(self,  magic_hash=None):
         if self.con is None:
             self.create_connexion()
 
         try:
             if magic_hash is None:
-                return self.con.have_conf()
+                r = self.con.have_conf()
             else:
-                return self.con.have_conf(magic_hash)
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except Exception, exp:
+                r = self.con.have_conf(magic_hash)
+            # Protect against bad Pyro return
+            if not isinstance(r, bool):
+                return False
+            return r
+        except Pyro_exp_pack , exp:
             self.con = None
             return False
 
@@ -220,17 +200,14 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connexion()
         try:
-            return self.con.got_conf()
-        except Pyro.errors.URIError , exp:
+            r = self.con.got_conf()
+            # Protect against bad Pyro return
+            if not isinstance(r, bool):
+                return False
+            return r
+        except Pyro_exp_pack , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except Exception, exp:
-            self.con = None
-            return False
-
 
 
     def remove_from_conf(self, sched_id):
@@ -239,13 +216,7 @@ class SatelliteLink(Item):
         try:
             self.con.remove_from_conf(sched_id)
             return True
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except Exception, exp:
+        except Pyro_exp_pack , exp:
             self.con = None
             return False
 
@@ -255,18 +226,12 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             tab = self.con.what_i_managed()
-            # I don't know why, but tab can be a bool. Not good here
-            if isinstance(tab, bool):
+            # Protect against bad Pyro return
+            if not isinstance(tab, list):
                 self.con = None
                 return []
             return tab
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return []
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return []
-        except Exception, exp:
+        except Pyro_exp_pack , exp:
             self.con = None
             return []
 
@@ -276,19 +241,9 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             return self.con.push_broks(broks)
-        except Pyro.errors.URIError , exp:
+        except Pyro_exp_pack , exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return False
-        except AttributeError , exp:
-            print exp
-            return False
-        except Exception, exp:
-            self.con = None
-            return False
-
 
 
     def get_external_commands(self):
@@ -296,19 +251,12 @@ class SatelliteLink(Item):
             self.create_connexion()
         try:
             tab = self.con.get_external_commands()
-            if isinstance(tab, bool):
+            # Protect against bad Pyro return
+            if not isinstance(tab, list):
+                self.con = None
                 return []
             return tab
-        except Pyro.errors.URIError , exp:
-            self.con = None
-            return []
-        except Pyro.errors.ProtocolError , exp:
-            self.con = None
-            return []
-        except AttributeError , exp:
-            print exp
-            return []
-        except Exception, exp:
+        except Pyro_exp_pack, exp:
             self.con = None
             return []
 

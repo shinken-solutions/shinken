@@ -75,7 +75,13 @@ try:
             return self.getServerSockets()
 
         def handleRequests(self, s):
-            Pyro.core.Daemon.handleRequests(self)    
+            try:
+                Pyro.core.Daemon.handleRequests(self)    
+            # Sometime Pyro send us xml pickling implementation (gnosis) is not available
+            #and I don't know why... :(
+            except NotImplementedError:
+                pass
+                
 
     def create_uri(address, port, obj_name, use_ssl):
         if not use_ssl:

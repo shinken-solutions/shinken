@@ -84,7 +84,7 @@ function check_good_run {
     check_process_nb reactionner $NB_REACTIONNERS
     is_file_present $VAR/reactionnerd.pid
 
-    echo "Check for $NB_BROKERS brokers (one master, one for livestatus.dat, one for log)"
+    echo "Check for $NB_BROKERS brokers (one master, one for livestatus.dat)"
     check_process_nb broker $NB_BROKERS
     is_file_present $VAR/brokerd.pid
 
@@ -129,7 +129,7 @@ function globalize_config {
 NB_SCHEDULERS=1
 NB_POLLERS=6
 NB_REACTIONNERS=3
-NB_BROKERS=3
+NB_BROKERS=2
 NB_RECEIVERS=1
 NB_ARBITERS=1
 
@@ -282,8 +282,8 @@ NB_SCHEDULERS=2
 NB_POLLERS=8
 #3 for stack1, 2 for stack2 (no worker from now)
 NB_REACTIONNERS=5
-#3 for stack 1, 1 for stack2 (no livesatus.dat nor log worker launch)
-NB_BROKERS=4
+#2 for stack 1, 1 for stack2 (no livesatus.dat nor log worker launch)
+NB_BROKERS=3
 #Still 1 receiver
 NB_RECEIVERS=1
 #still 1
@@ -303,7 +303,7 @@ echo "All launch of HA daemons is OK"
 bin/stop_scheduler.sh
 
 #We sleep to be sruethe scheduler see us
-sleep 2
+sleep 4
 NB_SCHEDULERS=1
 print_date
 
@@ -361,7 +361,7 @@ string_in_file "\[broker-Slave\] Connexion OK to the scheduler scheduler-Spare" 
 string_in_file "\[broker-Slave\] Connexion OK to the reactionner reactionner-Spare" $VAR/nagios.log
 string_in_file "\[broker-Slave\] Connexion problem to the poller poller-Master : connection failed" $VAR/nagios.log
 #And should have load the modules
-string_in_file "\[broker-Slave\] I correctly loaded the modules : \['Simple-log', 'Livestatus'\]" $VAR/nagios.log
+string_in_file "\[broker-Slave\] I correctly loaded the modules : \[Simple-log,Livestatus\]" $VAR/nagios.log
 
 
 echo "Now we clean it"
@@ -395,8 +395,8 @@ NB_SCHEDULERS=2
 NB_POLLERS=12
 #3 for stack1, same for stack 2
 NB_REACTIONNERS=6
-#3 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
-NB_BROKERS=4
+#2 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
+NB_BROKERS=3
 #STill one receivers
 NB_RECEIVERS=1
 #still 1
@@ -446,8 +446,8 @@ NB_SCHEDULERS=2
 NB_POLLERS=12
 #3 for stack1, Only 2 for stack 2 because it is not active
 NB_REACTIONNERS=5
-#3 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
-NB_BROKERS=4
+#2 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
+NB_BROKERS=3
 #Still oen receiver
 NB_RECEIVERS=1
 #still 1
@@ -472,7 +472,7 @@ string_in_file "Connexion OK to the poller poller-Master-2" $VAR/nagios.log
 
 
 echo "Now we clean it"
-#./clean.sh
+./clean.sh
 
 
 echo ""

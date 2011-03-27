@@ -125,6 +125,9 @@ class Daemon(object):
         self.new_conf = None # used by controller to push conf 
         self.cur_conf = None
 
+        #Keep a trace of the local_log file desc if need
+        self.local_log_fd = None
+
         self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
 
         os.umask(UMASK)
@@ -164,7 +167,7 @@ class Daemon(object):
     
     def do_load_modules(self, start_external=True):
         self.modules_manager.load_and_init(start_external)
-        self.log.log("I correctly loaded the modules : %s " % ([ inst.get_name() for inst in self.modules_manager.instances ]))
+        self.log.log("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
  
  
     def add(self, elt):
@@ -202,7 +205,7 @@ class Daemon(object):
         # The arbiter don't have such an attribute
         if hasattr(self, 'use_local_log') and self.use_local_log:
             try:
-                self.log.register_local_log(self.local_log)
+                self.local_log_fd = self.log.register_local_log(self.local_log)
             except IOError, exp:
                 print "Error : opening the log file '%s' failed with '%s'" % (self.local_log, exp)
                 sys.exit(2)
@@ -359,8 +362,13 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.change_to_user_group()
         self.change_to_workdir()  ## must be done AFTER pyro daemon init
         if self.is_daemon:
-            daemon_socket_fds = tuple( sock.fileno() for sock in self.pyro_daemon.get_sockets() )
-            self.daemonize(skip_close_fds=daemon_socket_fds)
+            socket_fds = [sock.fileno() for sock in self.pyro_daemon.get_sockets()]
+            # Do not close the local_log file too if it's open
+            if self.local_log_fd:
+                socket_fds.append(self.local_log_fd)
+
+            socket_fds = tuple(socket_fds)
+            self.daemonize(skip_close_fds=socket_fds)
         else:
             self.write_pid()
 

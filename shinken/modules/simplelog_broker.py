@@ -33,7 +33,7 @@ import datetime
 
 from shinken.basemodule import BaseModule
 from shinken.util import get_day
-
+from shinken.log import logger
 
 #This text is print at the import
 print "I am simple log Broker"
@@ -42,7 +42,7 @@ print "I am simple log Broker"
 properties = {
     'daemons' : ['broker'],
     'type' : 'simple_log',
-    'external' : True,
+    'external' : False,
     'phases' : ['running'],
     }
 
@@ -89,7 +89,7 @@ class Simple_log_broker(BaseModule):
         today = get_day(now)
         #print "Dates: t_last_mod : %d, t_last_mod_day: %d, today : %d" % (t_last_mod, t_last_mod_day, today)
         if t_last_mod_day != today:
-            print "We are archiving the old log file"
+            logger.log("We are archiving the old log file")
 
             #For the first pass, it's not already open
             if not first_pass:
@@ -108,7 +108,7 @@ class Simple_log_broker(BaseModule):
             s_day = d.strftime("-%m-%d-%Y-00")
             archive_name = f_base_name+s_day+ext
             file_archive_path = os.path.join(self.archive_path, archive_name)
-            print "Moving the old log file from %s to %s" % (self.path, file_archive_path)
+            logger.log("Moving the old log file from %s to %s" % (self.path, file_archive_path))
 
             shutil.move(self.path, file_archive_path)
 
@@ -118,6 +118,16 @@ class Simple_log_broker(BaseModule):
 
             return True
         return False
+
+
+    def manage_brok(self, brok):
+
+        """ Request the module to manage the given brok.
+There a lot of different possible broks to manage. """
+        manage = getattr(self, 'manage_' + brok.type + '_brok', None)
+        if manage:
+            self.check_and_do_archive()
+            return manage(brok)
 
 
     #A service check have just arrived, we UPDATE data info with this
@@ -130,8 +140,9 @@ class Simple_log_broker(BaseModule):
     def init(self):
         moved = self.check_and_do_archive(first_pass=True)
         if not moved:
-            print "I open the log file %s" % self.path
+            logger.log("I open the log file %s" % self.path)
             self.file = open(self.path,'a')
+
 
     def do_loop_turn(self):
         self.check_and_do_archive()

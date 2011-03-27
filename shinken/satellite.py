@@ -134,7 +134,6 @@ class IBroks(Interface):
 
     # poller or reactionner ask us actions
     def get_broks(self):
-        # print "We ask us broks"
         res = self.app.get_broks()
         return res
 
@@ -239,7 +238,10 @@ class Satellite(BaseSatellite):
             pass
         # We tag it as want return, and mvoe it in the wait return queue
         action.status = 'waitforhomerun'
-        self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
+        try:
+            self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
+        except KeyError:
+            pass
         # We update stats
         self.nb_actions_in_workers =- 1
 
@@ -383,6 +385,15 @@ class Satellite(BaseSatellite):
             del self.workers[id]
 
 
+    # modules can have process, and they can die
+    def check_and_del_zombie_modules(self):
+        # Active children make a join with every one, useful :)
+        act = active_children()
+        self.modules_manager.check_alive_instances()
+        # and try to restart previous dead :)
+        self.modules_manager.try_to_restart_deads()
+
+
     # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
         # TODO : get a real value for a load
@@ -488,12 +499,11 @@ class Satellite(BaseSatellite):
 
 
     def do_loop_turn(self):
+        print "Loop turn"
         # Maybe the arbiter ask us to wait for a new conf
         # If true, we must restart all...
         if self.cur_conf is None:
-            print "Begin wait initial"
             self.wait_for_initial_conf()
-            print "End wait initial"
             if not self.new_conf:  # we may have been interrupted or so; then just return from this loop turn
                 return
             self.setup_new_conf()
@@ -502,9 +512,14 @@ class Satellite(BaseSatellite):
         # If so, we listen for it
         # When it push us conf, we reinit connexions
         # Sleep in waiting a new conf :)
-        self.watch_for_new_conf(self.timeout)
-        if self.new_conf:
-            self.setup_new_conf()
+        #TODO : manage the diff... AGAIN!
+        while self.timeout > 0:
+            begin = time.time()
+            self.watch_for_new_conf(self.timeout)
+            end = time.time()
+            if self.new_conf:
+                self.setup_new_conf()
+            self.timeout = self.timeout - (end - begin)
 
         print " ======================== "
 
@@ -513,6 +528,9 @@ class Satellite(BaseSatellite):
         # Check if zombies workers are among us :)
         # If so : KILL THEM ALL!!!
         self.check_and_del_zombie_workers()
+
+        # But also modules
+        self.check_and_del_zombie_modules()
 
         # Print stats for debug
         for sched_id in self.schedulers:
