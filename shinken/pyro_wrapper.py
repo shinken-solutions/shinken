@@ -50,7 +50,7 @@ try:
         def __init__(self, host, port, use_ssl=False):
             try:
                 Pyro.core.initServer()
-            except OSError, e: # must be problem with workdir :
+            except (OSError, IOError), e: # must be problem with workdir :
                 raise InvalidWorkDir(e)
             if use_ssl:
                 prtcol = 'PYROSSL'

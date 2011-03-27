@@ -67,12 +67,21 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
     def test_bad_piddir(self):
         print("Testing bad piddir ... mypid=%d" % (os.getpid()))
         p = self.get_poller_daemon()
+        p.workdir = "etc/bad_workdir"
+        os.chmod(p.workdir, 0)
+        p.pidfile = p.workdir + "/daemon.pid"
+        self.assertRaises(InvalidPidDir, p.do_daemon_init_and_start)
+        p = self.get_poller_daemon()
         p.pidfile = self.gen_invalid_directory(p.pidfile)
         self.assertRaises(InvalidPidDir, p.do_daemon_init_and_start)
         p.do_stop()
     
     def test_bad_workdir(self):
         print("Testing bad workdir ... mypid=%d" % (os.getpid()))
+        p = self.get_poller_daemon()
+        p.workdir = "etc/bad_workdir"
+        os.chmod(p.workdir, 0)
+        self.assertRaises(InvalidWorkDir, p.do_daemon_init_and_start)
         p = self.get_poller_daemon()
         p.workdir = self.gen_invalid_directory(p.workdir)
         self.assertRaises(InvalidWorkDir, p.do_daemon_init_and_start)
