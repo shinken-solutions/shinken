@@ -165,11 +165,10 @@ The previous modules instance(s), if any, are all cleaned. """
 
         print "Loaded", len(self.instances), "module instances"
 
-        #to_del = []
         for inst in self.instances:
             if not self.try_instance_init(inst):
                 # If the init failed, we put in in the restart queue
-                to_restart.append(inst)
+                self.to_restart.append(inst)
 
         #self.clear_instances(to_del)
 
