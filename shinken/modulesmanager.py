@@ -110,13 +110,9 @@ Returns: True on successfull init. False if instance init method raised any Exce
         try:
             print "Trying to init module", inst.get_name()
             inst.init_try += 1
-            # Maybe it's a retry, so do not create queues again
-            if inst.init_try == 1:
-                # We setup the inst queues before its 'init' method is called.
-                # So that it can eventually get ref to the queues.
-                inst.create_queues()
-            else:
-                # do not try until 5 sec, or it's too loopy
+            # Maybe it's a retry
+            if inst.init_try > 1:
+                # Do not try until 5 sec, or it's too loopy
                 if inst.last_init_try > time.time() - 5:
                     return False
 
@@ -182,6 +178,9 @@ The previous modules instance(s), if any, are all cleaned. """
     #Launch external instaces that are load corectly
     def start_external_instances(self):
         for inst in self.instances:
+            # All external modules need queues()
+            inst.create_queues()
+            #But maybe the init failed a bit, so bypass this ones from now
             if inst not in self.to_restart:
                 print "Starting external module %s" % inst.get_name()
                 inst.start()
