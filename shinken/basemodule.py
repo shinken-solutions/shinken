@@ -125,9 +125,7 @@ But clear queues if they were already set before recreating new one.  """
     # external modules to die...
     def __kill(self):
         if os.name == 'nt':
-            import ctypes
-            TerminateProcess = ctypes.windll.kernel32.TerminateProcess
-            TerminateProcess(int(self.process._handle), -1)
+            self.process.terminate()
         else:
             # Ok, let him 1 second before really KILL IT
             os.kill(self.process.pid, 15)
