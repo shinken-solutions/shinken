@@ -485,15 +485,6 @@ class Arbiter(Daemon):
                 self.must_run = True
                 break
 
-    # modules can have process, and they can die
-    def check_and_del_zombie_modules(self):
-        # Active children make a join with every one, useful :)
-        act = active_children()
-        self.modules_manager.check_alive_instances()
-        # and try to restart previous dead :)
-        self.modules_manager.try_to_restart_deads()
-
-
 
     # Main function
     def run(self):

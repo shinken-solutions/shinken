@@ -29,6 +29,7 @@ import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
 
 from shinken.objects import Item, Items
+from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
 # Pack of common Pyro exceptions
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
@@ -37,17 +38,31 @@ Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
 
 class SatelliteLink(Item):
     #id = 0 each Class will have it's own id
-    #properties={'name' : {'required' : True },#, 'pythonize': None},
-    #            'address' : {'required' : True},#, 'pythonize': to_bool},
-    #            'port' : {'required':  True, 'pythonize': to_int},
-    #            'spare' : {'required':  False, 'default' : '0', 'pythonize': to_bool},
-    #            }
 
-    #running_properties = {
-    #                      'con' : {'default' : None}
-    #                      }
-    #macros = {}
+    properties = {
+        'address':         StringProp(fill_brok=['full_status']),
+        'timeout':         IntegerProp(default='3', fill_brok=['full_status']),
+        'data_timeout':    IntegerProp(default='120', fill_brok=['full_status']),
+        'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
+        'spare':              BoolProp   (default='0', fill_brok=['full_status']),
+        'manage_sub_realms':  BoolProp   (default='1', fill_brok=['full_status']),
+        'manage_arbiters':    BoolProp   (default='0', fill_brok=['full_status'], to_send=True),
+        'modules':            ListProp   (default='', to_send=True),
+        'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
+        'use_timezone':       StringProp (default='NOTSET', to_send=True),
+        'realm' :             StringProp (default=''),
+    }
+    
+    running_properties = {
+        'con':                  StringProp(default=None),
+        'alive':                StringProp(default=True, fill_brok=['full_status']),
+        'broks':                StringProp(default=[]),
+        'attempt':              StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
+        'reachable':            StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
+        'configuration_errors': StringProp(default=[]),
+    }
 
+    macros = {}
 
     #Clean? Really?
     def clean(self):

@@ -385,15 +385,6 @@ class Satellite(BaseSatellite):
             del self.workers[id]
 
 
-    # modules can have process, and they can die
-    def check_and_del_zombie_modules(self):
-        # Active children make a join with every one, useful :)
-        act = active_children()
-        self.modules_manager.check_alive_instances()
-        # and try to restart previous dead :)
-        self.modules_manager.try_to_restart_deads()
-
-
     # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
         # TODO : get a real value for a load

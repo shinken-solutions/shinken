@@ -29,6 +29,8 @@ import select
 import random 
 import ConfigParser
 
+from multiprocessing import active_children
+
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import InvalidWorkDir, Pyro
 
@@ -427,6 +429,15 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         print("Using modules path : %s" % (modulespath))
         
         return modulespath
+
+
+    # modules can have process, and they can die
+    def check_and_del_zombie_modules(self):
+        # Active children make a join with every one, useful :)
+        act = active_children()
+        self.modules_manager.check_alive_instances()
+        # and try to restart previous dead :)
+        self.modules_manager.try_to_restart_deads()
 
     #Just give the uid of a user by looking at it's name
     def find_uid_from_name(self):
