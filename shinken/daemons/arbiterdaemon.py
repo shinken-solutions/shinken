@@ -247,7 +247,7 @@ class Arbiter(Daemon):
         # (for these that are concerned ("external" modules):
         # we will *start* these instances after we have been daemonized (if requested)
         self.modules_manager.set_modules(self.me.modules)
-        self.do_load_modules(False)
+        self.do_load_modules()
 
         # Call modules that manage this read configuration pass
         self.hook_point('read_configuration')
@@ -399,7 +399,7 @@ class Arbiter(Daemon):
 
         # ok we are now fully daemon (if requested)
         # now we can start our "external" modules (if any) :
-        self.modules_manager.init_and_start_instances()
+        self.modules_manager.start_external_instances()
 
         # Ok now we can load the retention data
         self.hook_point('load_retention')

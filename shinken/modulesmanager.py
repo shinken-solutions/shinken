@@ -51,10 +51,10 @@ class ModulesManager(object):
         self.allowed_types = [ mod.module_type for mod in modules ]
 
 
-    def load_and_init(self, start_external=True):
+    def load_and_init(self):
         """ Import, instanciate & "init" the modules we have been requested """
         self.load()
-        self.get_instances(start_external)
+        self.get_instances()
 
 
     def load(self):
@@ -141,9 +141,8 @@ Returns: True on successfull init. False if instance init method raised any Exce
     
 
     # actually only arbiter call this method with start_external=False..
-    def get_instances(self, start_external=True):
+    def get_instances(self):
         """ Create, init and then returns the list of module instances that the caller needs.
-By default (start_external=True) also start the execution of the instances that are "external".
 If an instance can't be created or init'ed then only log is done. That instance is skipped.
 The previous modules instance(s), if any, are all cleaned. """ 
         self.clear_instances()
@@ -173,30 +172,21 @@ The previous modules instance(s), if any, are all cleaned. """
 
         #self.clear_instances(to_del)
 
-        # We only start the external instances once they all have been "init" called 
-        if start_external:
-            self.__start_ext_instances()
+        ### We only start the external instances once they all have been "init" called 
+        #if start_external:
+        #    self.__start_ext_instances()
 
         return self.instances
 
 
     #Launch external instaces that are load corectly
-    def __start_ext_instances(self):
+    def start_external_instances(self):
         for inst in self.instances:
             if inst not in self.to_restart:
                 print "Starting external module %s" % inst.get_name()
                 inst.start()
 
 
-    # actually only called by arbiter... because it instanciate its modules before going daemon
-    # TODO: but this actually leads to a double "init" call.. maybe a "uninit" would be needed ? 
-    def init_and_start_instances(self):
-        #for inst in self.instances:
-        #    if not self.try_instance_init(inst):
-        #        # damn..
-        #        logger.log("Module instance %s could not be init" % inst.get_name())
-        #        self.to_restart.append(inst)
-        self.__start_ext_instances()
 
      
     def remove_instance(self, inst):

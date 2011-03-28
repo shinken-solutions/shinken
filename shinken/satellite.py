@@ -707,7 +707,10 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         
         # We can load our modules now
         self.modules_manager.set_modules(self.modules_manager.modules)
-        self.modules_manager.load_and_init()
+        self.do_load_modules()
+        # And even start external ones
+        self.modules_manager.start_external_instances()
+        
 
         # Allocate Mortal Threads
         for _ in xrange(1, self.min_workers):

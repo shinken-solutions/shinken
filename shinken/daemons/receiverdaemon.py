@@ -273,6 +273,8 @@ class Receiver(BaseSatellite):
 
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
+        # and start external modules too
+        self.modules_manager.start_external_instances()
 
         # Do the modules part, we have our modules in self.modules
         # REF: doc/receiver-modules.png (1)

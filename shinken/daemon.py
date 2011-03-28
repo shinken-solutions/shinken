@@ -167,8 +167,8 @@ class Daemon(object):
                 break
         self.request_stop()
     
-    def do_load_modules(self, start_external=True):
-        self.modules_manager.load_and_init(start_external)
+    def do_load_modules(self):
+        self.modules_manager.load_and_init()
         self.log.log("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
  
  
@@ -296,7 +296,6 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         for fd in range(0, maxfd):
             if fd in skip_close_fds: continue
             try:
-                print "Try to close fd:", fd
                 os.close(fd)
             except OSError:# ERROR, fd wasn't open to begin with (ignored)
                 pass

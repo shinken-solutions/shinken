@@ -58,7 +58,9 @@ class TestModuleManager(ShinkenTest):
         mod = Module({'module_name' : 'LiveStatus', 'module_type' : 'livestatus'})
         self.modulemanager = ModulesManager('broker', self.find_modules_path(), [])
         self.modulemanager.set_modules([mod])
-        self.modulemanager.load_and_init(True)
+        self.modulemanager.load_and_init()
+        # And start external ones, like our LiveStatus :)
+        self.modulemanager.start_external_instances()
         print "I correctly loaded the modules : %s " % ([ inst.get_name() for inst in self.modulemanager.instances ])
 
         print "*** First kill ****"

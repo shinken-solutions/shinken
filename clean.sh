@@ -24,6 +24,6 @@ sudo rm -fr /etc/default/shinken
 sudo rm -fr bin/default/shinken
 
 #Then kill remaining processes
-killall -9 python2.6 2> /dev/null
-killall -9 python 2> /dev/null
-killall -9 /usr/bin/python 2> /dev/null
+sudo killall -9 python2.6 2> /dev/null
+sudo killall -9 python 2> /dev/null
+sudo killall -9 /usr/bin/python 2> /dev/null

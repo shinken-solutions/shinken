@@ -278,9 +278,12 @@ class Shinken(BaseSatellite):
             time.tzset()
 
         print "I've got modules", self.modules
+
         # TODO: if scheduler had previous modules instanciated it must clean them !
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
+        # And start external ones too
+        self.modules_manager.start_external_instances()
         
         # give it an interface
         # But first remove previous interface if exists

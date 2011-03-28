@@ -534,8 +534,10 @@ class Broker(BaseSatellite):
 
         self.setup_new_conf()
 
+        # Set modules, init them and start external ones
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
+        self.modules_manager.start_external_instances()
 
         # Do the modules part, we have our modules in self.modules
         # REF: doc/broker-modules.png (1)
