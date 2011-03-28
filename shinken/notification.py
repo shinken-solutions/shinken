@@ -206,3 +206,7 @@ class Notification(Action):
         # creation time, must put one
         if not hasattr(self, 'creation_time'):
             self.creation_time = time.time()
+        if not hasattr(self, 'reactionner_tag'):
+            self.reactionner_tag = 'None'
+        if not hasattr(self, 'worker'):
+            self.worker = 'none'

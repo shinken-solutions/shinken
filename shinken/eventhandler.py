@@ -136,3 +136,5 @@ class EventHandler(Action):
         for prop in cls.properties:
             if prop in state:
                 setattr(self, prop, state[prop])
+        if not hasattr(self, 'worker'):
+            self.worker = 'none'
