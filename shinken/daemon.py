@@ -296,6 +296,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         for fd in range(0, maxfd):
             if fd in skip_close_fds: continue
             try:
+                print "Try to close fd:", fd
                 os.close(fd)
             except OSError:# ERROR, fd wasn't open to begin with (ignored)
                 pass
@@ -638,11 +639,9 @@ positive when we have been sent in the futur and negative if we have been sent i
         to_del = []
         for inst in self.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
-            print inst.get_name(), hasattr(inst, full_hook_name), hook_name
             if hasattr(inst, full_hook_name):
                 f = getattr(inst, full_hook_name)
                 try :
-                    print "Calling", full_hook_name, "of", inst.get_name()
                     f(self)
                 except Exception, exp:
                     logger.log('The instance %s raise an exception %s. I kill it' % (inst.get_name(), str(exp)))

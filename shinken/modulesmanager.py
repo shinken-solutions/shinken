@@ -108,7 +108,7 @@ The previous imported modules, if any, are cleaned before. """
         """ Try to "init" the given module instance. 
 Returns: True on successfull init. False if instance init method raised any Exception. """ 
         try:
-
+            print "Trying to init module", inst.get_name()
             inst.init_try += 1
             # Maybe it's a retry, so do not create queues again
             if inst.init_try == 1:
@@ -168,6 +168,7 @@ The previous modules instance(s), if any, are all cleaned. """
         for inst in self.instances:
             if not self.try_instance_init(inst):
                 # If the init failed, we put in in the restart queue
+                logger.log("Warning : the module '%s' failed to init, I will try to restart it later" % inst.get_name())
                 self.to_restart.append(inst)
 
         #self.clear_instances(to_del)
@@ -183,20 +184,18 @@ The previous modules instance(s), if any, are all cleaned. """
     def __start_ext_instances(self):
         for inst in self.instances:
             if inst not in self.to_restart:
+                print "Starting external module %s" % inst.get_name()
                 inst.start()
 
 
     # actually only called by arbiter... because it instanciate its modules before going daemon
     # TODO: but this actually leads to a double "init" call.. maybe a "uninit" would be needed ? 
     def init_and_start_instances(self):
-        to_del = []
-        for inst in self.instances:
-            if not self.try_instance_init(inst):
-                # damn..
-                logger.log("module instance %s could not be init")
-                self.to_restart.append(inst)
-                #to_del.append(inst)
-        #self.clear_instances(to_del) 
+        #for inst in self.instances:
+        #    if not self.try_instance_init(inst):
+        #        # damn..
+        #        logger.log("Module instance %s could not be init" % inst.get_name())
+        #        self.to_restart.append(inst)
         self.__start_ext_instances()
 
      
