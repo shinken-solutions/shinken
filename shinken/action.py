@@ -176,8 +176,8 @@ else:
     class Action(__Action):
         def execute__(self):
             try:
-                self.process = subprocess.Popen(shlex.split(self.command),
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.local_env, shell=True)
+                self.process = subprocess.Popen(self.command,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.local_env, shell=True)
             except WindowsError, exp:
                 print "We kill the process : ", exp, self.command
                 self.status = 'timeout'
