@@ -174,6 +174,9 @@ class TestModuleHotDep(ShinkenTest):
         # Hack here :(
         sl.properties = {}
         sl.properties['to_queue'] = None
+        # Under windows, call python.exe
+        if os.name == 'nt':
+            sl.mapping_command = 'python.exe libexec\\hot_dep_export.py case1 tmp\\vmware_mapping_file.json'
         sl.init()
         l = logger
 
@@ -189,11 +192,6 @@ class TestModuleHotDep(ShinkenTest):
         # The hook_late should have seen a problem of no file
         # and so launch the command. We can wait it finished
         time.sleep(1.5)
-
-        # Under windows, call pythoin.exe
-        if os.name == 'nt':
-            sl.mapping_command = 'python.exe libexec/hot_dep_export.py case2 tmp/vmware_mapping_file.json'
-        
 
         # Now we look if it's finished, and we get data and manage them
         # with case 1 (0 and 1 linked, not with 1 and 2)
