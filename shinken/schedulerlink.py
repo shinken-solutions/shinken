@@ -71,6 +71,10 @@ class SchedulerLink(SatelliteLink):
         except Pyro.errors.CommunicationError , exp:
             self.con = None
             return False
+        except Exception, exp:
+            print ''.join(Pyro.util.getPyroTraceback(exp))
+            self.con = None
+            return False
 
 
 

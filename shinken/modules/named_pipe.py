@@ -35,7 +35,6 @@ properties = {
     'daemons' : ['arbiter', 'receiver'],
     'type' : 'named_pipe',
     'external' : True,
-#    'phases' : ['running'],
     }
 
 #called by the plugin manager to get a broker
@@ -113,9 +112,13 @@ class Named_Pipe_arbiter(BaseModule):
         input = [self.fifo]
 
         while not self.interrupted:
+            if input == []:
+                time.sleep(1)
+                continue
             inputready,outputready,exceptready = select.select(input,[],[], 1)
             for s in inputready:
                 ext_cmds = self.get()
+
                 if ext_cmds:
                     for ext_cmd in ext_cmds:
                         self.from_q.put(ext_cmd)

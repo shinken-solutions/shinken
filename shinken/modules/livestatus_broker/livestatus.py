@@ -6049,6 +6049,7 @@ class LiveStatusRequest(LiveStatus):
         """ Prepare the request object's filter stacks """
         if self.extcmd:
             # External command are send back to broker
+            self.extcmd = self.extcmd.decode('utf8', 'replace')
             e = ExternalCommand(self.extcmd)
             self.return_queue.put(e)
             return []

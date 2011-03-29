@@ -115,6 +115,9 @@ Returns: True on successfull init. False if instance init method raised any Exce
                 # Do not try until 5 sec, or it's too loopy
                 if inst.last_init_try > time.time() - 5:
                     return False
+            # If it's an external, create/update Queues()
+            if inst.is_external:
+                inst.create_queues()
 
             inst.last_init_try = time.time()
             inst.init()
@@ -167,29 +170,27 @@ The previous modules instance(s), if any, are all cleaned. """
         print "Loaded", len(self.instances), "module instances"
 
         for inst in self.instances:
-            if not self.try_instance_init(inst):
+            # External are not init now, but only when they are started
+            if not inst.is_external and not self.try_instance_init(inst):
                 # If the init failed, we put in in the restart queue
                 logger.log("Warning : the module '%s' failed to init, I will try to restart it later" % inst.get_name())
                 self.to_restart.append(inst)
 
-        #self.clear_instances(to_del)
-
-        ### We only start the external instances once they all have been "init" called 
-        #if start_external:
-        #    self.__start_ext_instances()
-
         return self.instances
 
 
-    #Launch external instaces that are load corectly
+    # Launch external instaces that are load corectly
     def start_external_instances(self):
-        for inst in self.instances:
-            # All external modules need queues()
-            inst.create_queues()
-            #But maybe the init failed a bit, so bypass this ones from now
-            if inst not in self.to_restart:
-                print "Starting external module %s" % inst.get_name()
-                inst.start()
+        for inst in [inst for inst in self.instances if inst.is_external]:
+            # But maybe the init failed a bit, so bypass this ones from now
+            if not self.try_instance_init(inst):
+                logger.log("Warning : the module '%s' failed to init, I will try to restart it later" % inst.get_name())
+                self.to_restart.append(inst)
+                continue
+            
+            # ok, init succeed
+            print "Starting external module %s" % inst.get_name(), inst.from_q
+            inst.start()
 
 
 
@@ -229,9 +230,6 @@ If instance is external also shutdown it cleanly """
             print "I should try to reinit", inst.get_name()
             if self.try_instance_init(inst):
                 print "Good, I try to restart",  inst.get_name()
-                # we should recreate queues because they were closed
-                # when we put them into restart list
-                inst.create_queues()
                 # If it's an external, it will start it
                 inst.start()
                 # Ok it's good now :)
@@ -248,12 +246,12 @@ If instance is external also shutdown it cleanly """
         return [ inst for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
 
-    def get_external_to_queues(self, phase=None):
-        return [ inst.to_q for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
+    def get_external_to_queues(self):
+        return [ inst.to_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
 
 
-    def get_external_from_queues(self, phase=None):
-        return [ inst.from_q for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
+    def get_external_from_queues(self):
+        return [ inst.from_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
 
 
     def stop_all(self):
@@ -263,3 +261,4 @@ If instance is external also shutdown it cleanly """
                 inst.quit()
         
         self.clear_instances([ inst for inst in self.instances if inst.is_external])
+

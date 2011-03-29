@@ -26,6 +26,7 @@
 
 
 class Message:
+    my_type = 'message'
     _type = None
     _data = None
     _from = None

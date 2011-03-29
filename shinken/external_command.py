@@ -276,8 +276,9 @@ class ExternalCommandManager:
 
     def resolve_command(self, excmd):
         command = excmd.cmd_line
+
         # Strip and get utf8 only strings
-        command = command.strip().decode('UTF-8', 'replace')
+        command = command.strip()
 
         #Only log if we are in the Arbiter
         if self.mode == 'dispatcher':

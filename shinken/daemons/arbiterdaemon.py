@@ -441,11 +441,10 @@ class Arbiter(Daemon):
     # It can be used for get external commands for example
     def get_objects_from_from_queues(self):
         for f in self.modules_manager.get_external_from_queues():
-            print "Groking from module instance %s" % f
+            #print "Groking from module instance %s" % f
             while True:
                 try:
                     o = f.get(block=False)
-                    #print "Got object :", o
                     self.add(o)
                 except Empty:
                     break

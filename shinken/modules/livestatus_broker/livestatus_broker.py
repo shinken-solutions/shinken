@@ -55,6 +55,7 @@ from shinken.pollerlink import PollerLink
 from shinken.brokerlink import BrokerLink
 from shinken.macroresolver import MacroResolver
 from shinken.basemodule import BaseModule
+from shinken.message import Message
 
 from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
@@ -96,10 +97,13 @@ class Livestatus_broker(BaseModule):
         self.reactionners = {}
         self.brokers = {}
 
+        self.instance_ids = []
+
         self.hostname_lookup_table = {}
         self.servicename_lookup_table = {}
 
         self.number_of_objects = 0
+        self.last_need_data_send = time.time()
 
 
     #Called by Broker so we can do init stuff
@@ -126,17 +130,30 @@ class Livestatus_broker(BaseModule):
     def manage_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
-        #print "Creating config:", c_id, data
+        print "Creating config:", c_id, data
         c = Config()
         for prop in data:
             setattr(c, prop, data[prop])
         #print "CFG:", c
-        self.configs[c_id] = c
+        self.configs[0] = c
+        # And we save that we got data from this instance_id
+        self.instance_ids.append(c_id)
 
 
     def manage_update_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
+
+        if c_id not in self.instance_ids:
+            # Do not ask data too quickly, very dangerous
+            # one a minute
+            if time.time() - self.last_need_data_send > 60:
+                print "I ask the broker for instance id data :", c_id
+                msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
+                self.from_q.put(msg)
+                self.last_need_data_send = time.time()
+            return
+
         # We have only one config here, with id 0
         c = self.configs[0]
         self.update_element(c, data)

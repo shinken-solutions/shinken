@@ -596,9 +596,15 @@ class SchedulingItem(Item):
         # Now get data from check
         self.execution_time = c.execution_time
         self.last_chk = int(c.check_time)
-        # Get output and forgot bad UTF8 values
-        self.output = c.output.decode('utf8', 'ignore')
-        self.long_output = c.long_output.decode('utf8', 'ignore')
+
+        # Get output and forgot bad UTF8 values for simple str ones
+        # (we can get already unicode with external commands)
+        self.output = c.output
+        self.long_output = c.long_output
+        # if str, go in unicode
+        if type(self.output) == 'str':
+            self.output = self.output.decode('utf8', 'ignore')
+            self.long_output = self.long_output.decode('utf8', 'ignore')
 
         # Get the perf_data only if we want it in the configuration
         if self.__class__.process_performance_data and self.process_perf_data:

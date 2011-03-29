@@ -368,6 +368,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             # Do not close the local_log file too if it's open
             if self.local_log_fd:
                 socket_fds.append(self.local_log_fd)
+                
 
             socket_fds = tuple(socket_fds)
             self.daemonize(skip_close_fds=socket_fds)

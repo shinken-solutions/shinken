@@ -91,6 +91,22 @@ class Broker(BaseSatellite):
         elif cls_type == 'externalcommand':
             print "Adding in queue an external command", ExternalCommand.__dict__
             self.external_commands.append(elt)
+        # Maybe we got a Message from the modules, it's way to ask something
+        #like from now a full data from a scheduler for example.
+        elif cls_type == 'message':
+            # We got a message, great!
+            print elt.__dict__
+            if elt.get_type() == 'NeedData':
+                data = elt.get_data()
+                # Full instance id mean : I got no data for this scheduler
+                # so give me all dumbass!
+                if 'full_instance_id' in data:
+                    c_id = data['full_instance_id']
+                    logger.log('A module is asking me to get all initial data from the scheduler %d' % c_id)
+                    # so we just reset the connexion adn the running_id, it will just get all new things
+                    self.schedulers[c_id]['con'] = None
+                    self.schedulers[c_id]['running_id'] = 0
+            
 
 
     # Get teh good tabs for links by the kind. If unknown, return None
