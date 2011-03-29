@@ -211,6 +211,8 @@ If instance is external also shutdown it cleanly """
                 if inst.is_external and not inst.process.is_alive():
                     logger.log("Error : the external module %s goes down unexpectly!" % inst.get_name())
                     logger.log("Setting the module %s to restart" % inst.get_name())
+                    # We clean its queues, they are no more useful
+                    inst.clear_queues()
                     self.to_restart.append(inst)
 
                 
@@ -221,6 +223,9 @@ If instance is external also shutdown it cleanly """
             print "I should try to reinit", inst.get_name()
             if self.try_instance_init(inst):
                 print "Good, I try to restart",  inst.get_name()
+                # we should recreate queues because they were closed
+                # when we put them into restart list
+                inst.create_queues()
                 # If it's an external, it will start it
                 inst.start()
                 # Ok it's good now :)
