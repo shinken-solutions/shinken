@@ -635,7 +635,6 @@ positive when we have been sent in the futur and negative if we have been sent i
     # We call the function of modules that got the this
     # hook function
     def hook_point(self, hook_name):
-        to_del = []
         for inst in self.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
             if hasattr(inst, full_hook_name):
@@ -643,11 +642,8 @@ positive when we have been sent in the futur and negative if we have been sent i
                 try :
                     f(self)
                 except Exception, exp:
-                    logger.log('The instance %s raise an exception %s. I kill it' % (inst.get_name(), str(exp)))
-                    to_del.append(inst)
-
-        #Now remove mod that raise an exception
-        self.modules_manager.clear_instances(to_del)
+                    logger.log('The instance %s raise an exception %s. I disable, and set it to restart later' % (inst.get_name(), str(exp)))
+                    self.modules_manager.set_to_restart(inst)
 
 
     # Dummy function for daemons. Get all retention data

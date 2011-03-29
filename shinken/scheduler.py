@@ -73,6 +73,9 @@ class Scheduler:
             12 : ('check_for_system_time_change', self.sched_daemon.check_for_system_time_change, 1),
             # launch if need all internal checks
             13 : ('manage_internal_checks', self.manage_internal_checks, 1),
+            # clean some times possibel overriden Queues, to do not explode in memory usage
+            # every 1/4 of hour
+            14 : ('clean_queues', self.clean_queues, 1),
         }
 
         # stats part
@@ -118,9 +121,6 @@ class Scheduler:
         self.services.create_reversed_list()
         self.services.optimize_service_search(conf.hosts)
         self.hosts = conf.hosts
-        # DBG:
-#         for h in self.hosts:
-#             print h.get_name(), h.parents
         self.hosts.create_reversed_list()
 
         self.notificationways = conf.notificationways
@@ -144,6 +144,7 @@ class Scheduler:
         # Now we can updte our 'ticks' for special calls
         # like the retention one, etc
         self.update_recurrent_works_tick('update_retention_file', self.conf.retention_update_interval)
+        self.update_recurrent_works_tick('clean_queues', self.conf.cleaning_queues_interval)
 
 
     # Update the 'tick' for a function call in our
@@ -243,27 +244,27 @@ class Scheduler:
     # hook function
     # TODO : find a way to merge this and the version in daemon.py
     def hook_point(self, hook_name):
-        to_del = []
         for inst in self.sched_daemon.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
             print inst.get_name(), hasattr(inst, full_hook_name), hook_name
             if hasattr(inst, full_hook_name):
                 f = getattr(inst, full_hook_name)
-                #try :
-                print "Calling", full_hook_name, "of", inst.get_name()
-                f(self)
-                #except Exception, exp:
-                #    logger.log('The instance %s raise an exception %s. I kill it' % (inst.get_name(), str(exp)))
-                #    to_del.append(inst)
+                try :
+                    f(self)
+                except Exception, exp:
+                    logger.log('The instance %s raise an exception %s. I disable it and set it to restart it later' % (inst.get_name(), str(exp)))
+                    self.sched_daemon.modules_manager.set_to_restart(inst)
 
-        #Now remove mod that raise an exception
-        self.sched_daemon.modules_manager.clear_instances(to_del)
 
 
     # Ours queues may explode if noone ask us for elements
     # It's very dangerous : you can crash your server... and it's a bad thing :)
     # So we 'just' keep last elements : 5 of max is a good overhead
     def clean_queues(self):
+        # if we set the interval at 0, we bailout
+        if self.conf.cleaning_queues_interval == 0:
+            return
+        
         max_checks = 5 * (len(self.hosts) + len(self.services))
         max_broks = 5 * (len(self.hosts) + len(self.services))
         max_actions = 5 * len(self.contacts) * (len(self.hosts) + len(self.services))
@@ -312,14 +313,12 @@ class Scheduler:
                 # Remeber to delete reference of notification in service/host
                 a = self.actions[i]
                 if a.is_a == 'notification':
-                    item = a.ref
-                    item.remove_in_progress_notification(a)
+                    a.ref.remove_in_progress_notification(a)
                 del self.actions[i]
         else:
             nb_actions_drops = 0
 
         if nb_checks_drops != 0 or nb_broks_drops != 0 or nb_actions_drops != 0:
-            print "WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops)
             logger.log("WARNING: We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
 
 

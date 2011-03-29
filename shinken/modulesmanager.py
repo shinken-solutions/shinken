@@ -136,6 +136,12 @@ Returns: True on successfull init. False if instance init method raised any Exce
             self.remove_instance(i)
     
 
+    # Put an instance to the restart queue
+    def set_to_restart(self, inst):
+        self.to_restart.append(inst)
+
+
+
     # actually only arbiter call this method with start_external=False..
     def get_instances(self):
         """ Create, init and then returns the list of module instances that the caller needs.

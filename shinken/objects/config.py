@@ -201,6 +201,9 @@ class Config(Item):
         'idontcareaboutsecurity': BoolProp(default='0'),
         'flap_history': IntegerProp(default='20', class_inherit=[(Host, None), (Service, None)]),
         'max_plugins_output_length': IntegerProp(default='8192', class_inherit=[(Host, None), (Service, None)]),
+        
+        # Interval between cleaning queues pass
+        'cleaning_queues_interval' : IntegerProp(default='900'),
 
         # Enable or not the notice about old Nagios parameters
         'disable_old_nagios_parameters_whining': BoolProp(default='0'),
