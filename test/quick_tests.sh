@@ -105,6 +105,7 @@ launch_and_assert test_srv_badhost.py
 launch_and_assert test_module_named_pipe_arbiter.py
 launch_and_assert test_nohostsched.py
 launch_and_assert test_modulemanager.py
+launch_and_assert test_clean_sched_queues.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.
