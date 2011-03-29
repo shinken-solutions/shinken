@@ -64,11 +64,10 @@ class Hack_cmds_pt(BaseModule):
         for h in arb.conf.hosts:
             if h.check_command.command == cmd:
                 h.check_command.poller_tag = tag
-                print "Updating", h.get_name()
         for s in arb.conf.services:
             if s.check_command.command == cmd:
                 s.check_command.poller_tag = tag
-                print "Updating", s.get_name()
+
 
 
     def hook_late_configuration(self, arb):
@@ -77,7 +76,7 @@ class Hack_cmds_pt(BaseModule):
         for c in arb.conf.commands:
             m = p.match(c.command_line)
             if m is not None and c.poller_tag is 'None':
-                print "[Hack command poller tag] Match! Chaging the poller tag of %s by %s " % (c.command_name, self.poller_tag)
+                #print "[Hack command poller tag] Match! Chaging the poller tag of %s by %s " % (c.command_name, self.poller_tag)
                 c.poller_tag = self.poller_tag
                 self.update_service_and_hosts_commandCall(arb, c, self.poller_tag)
 
