@@ -47,7 +47,7 @@ class TestSchedCleanQueues(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        print "Len actions", host.actions
+
         #host.__class__.obsess_over = True
         #host.obsess_over_host = True
         for i in xrange(1, 1001):
@@ -66,7 +66,6 @@ class TestSchedCleanQueues(ShinkenTest):
         self.assert_(len(self.sched.actions) < 30)
 
         #Now for Notifications and co
-        host.notification_interval = 0.000001
         for i in xrange(1, 1001):
             host.create_notifications('PROBLEM')
         self.sched.get_new_actions()
@@ -78,6 +77,20 @@ class TestSchedCleanQueues(ShinkenTest):
         self.sched.clean_queues()
         print len(self.sched.actions)
         self.assert_(len(self.sched.actions) < 30)
+
+
+        #####  And now broks
+        for i in xrange(1, 1001):
+            b = host.get_update_status_brok()
+            host.broks.append(b)
+
+        self.sched.get_new_broks()
+        print "LEn broks", len(self.sched.broks) 
+        self.assert_(len(self.sched.broks) >= 1000)
+        self.sched.clean_queues()
+        print "LEn broks", len(self.sched.broks)
+        self.assert_(len(self.sched.broks) < 30)
+        
 
 
 if __name__ == '__main__':
