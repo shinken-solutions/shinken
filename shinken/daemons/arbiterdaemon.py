@@ -450,7 +450,7 @@ class Arbiter(Daemon):
                     break
                 # Maybe the queue got problem
                 # log it and quit it
-                except IOError, exp:
+                except (IOError, EOFError), exp:
                     logger.log("Warning : an external module queue got a problem '%s'" % str(exp))
                     break
 
