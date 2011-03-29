@@ -54,7 +54,6 @@ class Log:
             if name is None:
                 # We format the log in UTF-8
                 #message.decode('UTF-8', 'replace')
-                print "Log type", type(message)
                 s = u'[%d] %s\n' % (int(time.time()), message)
             else:
                 s = u'[%d] [%s] %s\n' % (int(time.time()), name, message)
