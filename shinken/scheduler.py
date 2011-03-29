@@ -145,7 +145,7 @@ class Scheduler:
         # like the retention one, etc
         self.update_recurrent_works_tick('update_retention_file', self.conf.retention_update_interval * 60)
         self.update_recurrent_works_tick('clean_queues', self.conf.cleaning_queues_interval)
-
+        
 
     # Update the 'tick' for a function call in our
     # recurrent work
