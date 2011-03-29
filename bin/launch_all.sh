@@ -3,7 +3,7 @@
 DIR=$(cd $(dirname "$0"); pwd)
 echo "Going to dir" $DIR
 
-cd $DIR
+cd $DIR/..
 
 $DIR/launch_scheduler.sh
 $DIR/launch_poller.sh

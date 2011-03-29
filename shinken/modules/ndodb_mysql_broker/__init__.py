@@ -20,12 +20,10 @@
 #This text is print at the import
 print "I am Ndo Mysql Broker"
 
+import sys
+print sys.path
 
-properties = {
-    'daemons' : ['broker'],
-    'type' : 'ndodb_mysql',
-    'phases' : ['running'],
-    }
+from ndodb_mysql_broker import Ndodb_Mysql_broker, properties
 
 
 #called by the plugin manager to get a instance
@@ -34,13 +32,13 @@ def get_instance(mod_conf):
     print "Get a ndoDB instance for plugin %s" % mod_conf.get_name()
 
     #First try to import
-    try:
-        from ndodb_broker import Ndodb_broker
-    except ImportError , exp:
-        print "Warning : the plugin type %s is unavalable : %s" % ('ndo_mysql', exp)
-        return None
+    #try:
+    #
+    #except ImportError , exp:
+    #    print "Warning : the plugin type %s is unavalable : %s" % ('ndo_mysql', exp)
+    #    return None
 
     if not hasattr( mod_conf, 'character_set'):
         mod_conf.character_set = 'utf8'
-    instance = Ndodb_broker(mod_conf)
+    instance = Ndodb_Mysql_broker(mod_conf)
     return instance

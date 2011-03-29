@@ -81,7 +81,9 @@ if os.name != 'nt':
     else:
         sys.setrecursionlimit(int(stacksize_soft * 2.4 + 3200))
 
+
 try:
+    from shinken.bin import VERSION
     import shinken
 except ImportError:
     # If importing shinken fails, try to load from current directory
@@ -89,7 +91,7 @@ except ImportError:
     # Submodules will then be loaded from there, too.
     import imp
     if not hasattr(os, "getuid") or os.getuid() != 0:
-        imp.load_module('shinken', *imp.find_module('shinken', [".", ".."]))
+        imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath("..")]))
 
 from shinken.daemons.schedulerdaemon import Shinken
 from shinken.bin import VERSION

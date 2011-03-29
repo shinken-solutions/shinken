@@ -3,6 +3,7 @@
 DIR=$(cd $(dirname "$0"); pwd)
 echo $DIR
 
+cd $DIR/..
 
 $DIR/launch_scheduler_debug.sh
 $DIR/launch_poller_debug.sh

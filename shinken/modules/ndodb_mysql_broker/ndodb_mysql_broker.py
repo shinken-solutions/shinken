@@ -28,6 +28,13 @@ import copy
 import time
 import sys
 
+properties = {
+    'daemons' : ['broker'],
+    'type' : 'ndodb_mysql',
+    'phases' : ['running'],
+    }
+
+
 from shinken.db_mysql import DBMysql
 from shinken.basemodule import BaseModule
 
@@ -38,7 +45,7 @@ def de_unixify(t):
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Ndodb_broker(BaseModule):
+class Ndodb_Mysql_broker(BaseModule):
     def __init__(self, conf):
         BaseModule.__init__(self, conf)
         #Mapping for name of dataand transform function
