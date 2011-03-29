@@ -476,7 +476,7 @@ class Scheduler:
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
             except KeyError , exp:
-                logger.log("Warning : received an check of an unknown id! %s" % str(exp))
+                pass
         elif c.is_a == 'eventhandler':
             # It just die
             try:

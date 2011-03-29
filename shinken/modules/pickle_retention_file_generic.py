@@ -54,9 +54,9 @@ class Pickle_retention_generic(BaseModule):
         self.path = path
     
     # Ok, main function that is called in the retention creation pass
-    def hook_save_retention(self, daemon):#, log_mgr):
+    def hook_save_retention(self, daemon):
         log_mgr = logger
-        print "[PickleRetentionGeneric] asking me to update the retention objects"
+        logger.log("[PickleRetentionGeneric] asking me to update the retention objects")
 
         #Now the flat file method
         try:
@@ -86,7 +86,6 @@ class Pickle_retention_generic(BaseModule):
     #Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
         log_mgr = logger
-        print "[PickleRetentionGeneric] asking me to load the retention objects"
 
         #Now the old flat file way :(
         log_mgr.log("[PickleRetentionGeneric]Reading from retention_file %s" % self.path)
