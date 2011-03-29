@@ -97,7 +97,7 @@ class Config(Item):
         'lock_file':                StringProp(default='/usr/local/shinken/var/arbiterd.pid'),
         'retain_state_information': UnusedProp(text='sorry, retain state information will not be implemented because it is useless.'),
         'state_retention_file':     StringProp(default=''),
-        'retention_update_interval': IntegerProp(default='0'),
+        'retention_update_interval': IntegerProp(default='60'),
         'use_retained_program_state': UnusedProp(text=not_interresting_txt),
         'use_retained_scheduling_info': UnusedProp(text=not_interresting_txt),
         'retained_host_attribute_mask': UnusedProp(text=not_interresting_txt),
