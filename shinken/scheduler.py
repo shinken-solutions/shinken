@@ -262,11 +262,11 @@ class Scheduler:
 
     # Ours queues may explode if noone ask us for elements
     # It's very dangerous : you can crash your server... and it's a bad thing :)
-    # So we 'just' keep last elements : 2 of max is a good overhead
+    # So we 'just' keep last elements : 5 of max is a good overhead
     def clean_queues(self):
-        max_checks = 2 * (len(self.hosts) + len(self.services))
-        max_broks = 2 * (len(self.hosts) + len(self.services))
-        max_actions = 2* len(self.contacts) * (len(self.hosts) + len(self.services))
+        max_checks = 5 * (len(self.hosts) + len(self.services))
+        max_broks = 5 * (len(self.hosts) + len(self.services))
+        max_actions = 5 * len(self.contacts) * (len(self.hosts) + len(self.services))
 
         # For checks, it's not very simple:
         # For checks, they may be referred to their host/service
@@ -310,10 +310,11 @@ class Scheduler:
             nb_actions_drops = len(id_to_del_actions)
             for i in id_to_del_actions:
                 # Remeber to delete reference of notification in service/host
-                if i.is_a == 'notification':
-                    item = self.actions[i].ref
-                    item.remove_in_progress_notification(self.actions[i])
-                    del self.actions[i]
+                a = self.actions[i]
+                if a.is_a == 'notification':
+                    item = a.ref
+                    item.remove_in_progress_notification(a)
+                del self.actions[i]
         else:
             nb_actions_drops = 0
 

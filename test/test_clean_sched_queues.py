@@ -50,10 +50,23 @@ class TestSchedCleanQueues(ShinkenTest):
         print "Len actions", host.actions
         #host.__class__.obsess_over = True
         #host.obsess_over_host = True
-        for i in xrange(1, 1000):
+        for i in xrange(1, 1001):
             host.get_obsessive_compulsive_processor_command()
         print "New len", len(host.actions)
         self.assert_(len(host.actions) >= 1000)
+        self.sched.get_new_actions()
+        print len(self.sched.actions)
+        # So get our 1000 external commands
+        self.assert_(len(self.sched.actions) >= 1000)
+        
+        # Try to call the clean ,they are jsut too many!
+        self.sched.clean_queues()
+        # Should have something like 16 event handler
+        print len(self.sched.actions)
+        self.assert_(len(self.sched.actions) < 30)
+
+        #Now for Notifications and co
+        host.notification_interval = 0
 
 
 if __name__ == '__main__':
