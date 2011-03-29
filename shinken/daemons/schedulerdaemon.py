@@ -315,7 +315,7 @@ class Shinken(BaseSatellite):
         #We must update our Config dict macro with good value
         #from the config parameters
         self.sched.conf.fill_resource_macros_names_macros()
-        print "DBG: got macors", self.sched.conf.macros
+        #print "DBG: got macors", self.sched.conf.macros
 
         #Creating the Macroresolver Class & unique instance
         m = MacroResolver()
