@@ -66,7 +66,18 @@ class TestSchedCleanQueues(ShinkenTest):
         self.assert_(len(self.sched.actions) < 30)
 
         #Now for Notifications and co
-        host.notification_interval = 0
+        host.notification_interval = 0.000001
+        for i in xrange(1, 1001):
+            host.create_notifications('PROBLEM')
+        self.sched.get_new_actions()
+        print len(self.sched.actions)
+        # So get our 1000 notifications
+        self.assert_(len(self.sched.actions) >= 1000)
+
+        # Try to call the clean ,they are jsut too many!
+        self.sched.clean_queues()
+        print len(self.sched.actions)
+        self.assert_(len(self.sched.actions) < 30)
 
 
 if __name__ == '__main__':
