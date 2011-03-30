@@ -37,7 +37,7 @@ from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.log import logger
 from shinken.util import nighty_five_percent
-
+from shinken.load import Load
 
 class Scheduler:
     def __init__(self, scheduler_daemon):
@@ -1152,6 +1152,8 @@ class Scheduler:
 
         gogogo = time.time()
 
+        self.load_one_min = Load()
+
         while self.must_run:
             elapsed, _, _ = self.sched_daemon.handleRequests(timeout)
             if elapsed: 
@@ -1159,7 +1161,8 @@ class Scheduler:
                 if timeout > 0:
                     continue
 
-            print "Time sleep", self.sched_daemon.sleep_time
+            self.load_one_min.update_load(self.sched_daemon.sleep_time)
+            print "Time sleep : %.2f (average : %.2f)" % (self.sched_daemon.sleep_time, self.load_one_min.get_load())
             self.sched_daemon.sleep_time = 0.0
 
             # Timeout or time over
