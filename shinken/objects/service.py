@@ -690,6 +690,7 @@ class Service(SchedulingItem):
                 need_stalk = True
             elif c.exit_status == 3 and 'u' in self.stalking_options:
                 need_stalk = True
+            
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
