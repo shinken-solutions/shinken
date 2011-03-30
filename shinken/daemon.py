@@ -114,9 +114,11 @@ class Daemon(object):
         self.debug_file = debug_file
         self.interrupted = False
 
+        # Track time
         now = time.time()
         self.program_start = now
         self.t_each_loop = now # used to track system time change
+        self.sleep_time = 0.0 #used to track the time we wait
 
         self.pyro_daemon = None
 
@@ -578,12 +580,15 @@ If not timeout (== some fd got activity):
         ins = self.get_socks_activity(socks, timeout)
         tcdiff = self.check_for_system_time_change()
         before += tcdiff
+        #Increase our sleep time for the time go in select
+        self.sleep_time += time.time() - before
         if len(ins) == 0: # trivial case: no fd activity:
             return 0, [], tcdiff
         for sock in socks:
             if sock in ins and sock not in suppl_socks:
                 self.pyro_daemon.handleRequests(sock)
                 ins.remove(sock)
+        # Tack in elapsed the WHOLE time, even with handling requests
         elapsed = time.time() - before
         if elapsed == 0: # we have done a few instructions in 0 second exactly !? quantum computer ?
             elapsed = 0.01  # but we absolutely need to return != 0 to indicate that we got activity

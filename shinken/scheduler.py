@@ -1153,12 +1153,14 @@ class Scheduler:
         gogogo = time.time()
 
         while self.must_run:
-
             elapsed, _, _ = self.sched_daemon.handleRequests(timeout)
             if elapsed: 
                 timeout -= elapsed
                 if timeout > 0:
                     continue
+
+            print "Time sleep", self.sched_daemon.sleep_time
+            self.sched_daemon.sleep_time = 0.0
 
             # Timeout or time over
             timeout = 1.0
