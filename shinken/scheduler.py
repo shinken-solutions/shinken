@@ -1195,7 +1195,7 @@ class Scheduler:
             latencies = [s.latency for s in self.services]
             lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
             if lat_avg is not None:
-                print "Latency (avg/min/max) : %.2f/%d/%d" % (lat_avg, lat_min, lat_max)
+                print "Latency (avg/min/max) : %.2f/%.2f/%.2f" % (lat_avg, lat_min, lat_max)
             #m = 0.0
             #m_nb = 0
             #for s in self.services:
