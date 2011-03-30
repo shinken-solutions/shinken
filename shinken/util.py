@@ -24,7 +24,7 @@ import time
 import re
 import copy
 try:
-    from ClusterShell.NodeSet import NodeSet
+    from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
 except ImportError:
     NodeSet = None
 
@@ -263,7 +263,7 @@ def strip_and_uniq(tab):
 #################### Patern change application (mainly for host) #######
 
 def expand_xy_patern(pattern):
-    ns = NodeSet(pattern)
+    ns = NodeSet(str(pattern))
     if len(ns) > 1:
         for elem in ns:
             for a in expand_xy_patern(elem):
@@ -397,7 +397,7 @@ def get_key_value_sequence(entry, default_value=None):
             got_xy = (m is not None)
         else: # Try to look with a nodeset check directly
             try:
-                ns = NodeSet(key)
+                ns = NodeSet(str(key))
                 #If we have more than 1 element, we have a xy thing
                 got_xy = (len(ns) != 1)
             except NodeSetParseRangeError:

@@ -362,6 +362,7 @@ class Config(Item):
                 #  line = line.replace("\r\n", "\n")
                 res += line
                 line = line[:-1]
+                line = line.strip()
                 if re.search("^cfg_file", line) or re.search("^resource_file", line):
                     elts = line.split('=')
                     if os.path.isabs(elts[1]):
