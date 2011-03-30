@@ -16,6 +16,10 @@
 #     - receiver    : manage all passive data
 ### END INIT INFO
 
+
+# http://refspecs.freestandards.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
+
+
 NAME="shinken"
 
 AVAIL_MODULES="scheduler poller reactionner broker receiver arbiter"
@@ -48,66 +52,35 @@ SUBMODULES=""
 ## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
 ## to easily use your own config
 
-usage() {
-    cat << EOT
-Usage: $SCRIPTNAME [ -d ] [ -m <submodule> ] <command>
+#echo "Using $SHINKEN_DEFAULT_FILE .."
 
- -h|--help     show this help message
- -d|--debug    start requested module(s) in debug mode, only useful with start|restart
- <command>     command: start|stop|restart|status|check|checkconfig
- -m|--module   $_usage_mods_
-EOT
+usage() {
+    cat << END
+Usage: $SCRIPTNAME [ -d ] {start|stop|restart|status|check} $_usage_mods_
+
+ -d  start requested module(s) in debug mode, only useful with start|restart
+
+END
 }
 
-# option parsing (not getopt way to allow command without dash or double dash to be called)
-eval set -- "$@ --"
+if [ "$1" = "-d" ]; then
+    DEBUG="1"
+    shift
+fi
 
-while true ; do
-    case "$1" in
-        -h|--help) 
-            usage
-            exit 0 
-            ;;
-        -d|--debug) 
-            DEBUG=true
-            shift 1
-            ;;
-	-c|--command)
-	    [ -z "$CMD" ] && CMD=$2 || {
-		echo "You can't specify more than one command !"
-		exit 1
-	    }
-	    shift 2
-	    ;;
-	-m|--module)
-	    SUBMODULES="$SUBMODULES $2"
-	    shift 2
-	    ;;
-	start|stop|restart|status|check|checkconfig) 
-            CMD=$1
-            shift 1
-            ;;
-     
-        --) 
-            shift
-            break 
-            ;;
-        *) echo "Unrecognized option: $1" >&2 ; exit 1 ;;
-    esac
-done
+if [ $# -eq 0 ]; then
+    usage >&2
+    exit 2
+fi
 
-# Reads configuration variable file if it is present
-[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
+CMD=$1
+shift
+SUBMODULES=$*
 
-# Load the VERBOSE setting and other rcS variables
-[ -f /etc/default/rcS ] && . /etc/default/rcS
-
-# Define LSB log_* functions.
-. /lib/lsb/init-functions
-
-# Checking for sub modules availability
-if [ ! -z "$SUBMODULES" ]; then
-   # check given modules
+if [ -z "$SUBMODULES" ]; then
+    SUBMODULES=$AVAIL_MODULES
+else
+    # check given modules
     for mod1 in $SUBMODULES; do
         found=0
         for mod2 in $AVAIL_MODULES; do
@@ -115,144 +88,281 @@ if [ ! -z "$SUBMODULES" ]; then
         done
         [ $found = 0 ] && { usage >&2 ; exit 2 ; }
     done
-else
-    SUBMODULES=$AVAIL_MODULES
 fi
+
+
+# Reads configuration variable file if it is present
+[ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
+
+# 
+echo_success() {
+   log_end_msg 0 $*
+}
+
+echo_failure() {
+    log_end_msg 1 $*
+}
+
+#log_end_msg
+
+
+# Load the VERBOSE setting and other rcS variables
+[ -f /etc/default/rcS ] && . /etc/default/rcS
+
+# Source function library.
+[ -f /etc/rc.d/init.d/functions ] && . /etc/rc.d/init.d/functions
+
+[ -f /lib/lsb/init-functions ] && . /lib/lsb/init-functions
+
+
 
 ################################################
 
 #
-# returns the pid file of a submodule
+# returns the pid for a submodule
 #
-getvar() {
+getmodpid() {
     mod=$1
-    suffix=$2
-    eval "var=$`echo ${mod} | tr '[:lower:]' '[:upper:]'`${suffix}"
-    echo $var
-}
-
-#
-# returns the pid file of a submodule
-#
-getpidfile() {
-    echo $(getvar $1 "PID")
-}
-
-#
-# returns the daemon variable name of a submodule
-#
-getdaemon() {
-    echo $(getvar $1 "DAEMON")
-}
-
-#
-# returns the configuration daemon variable name of a submodule
-#
-getconffile() {
-    echo $(getvar $1 "CFG")
-}
-
-
-#
-# set some variables regarding a submodule
-#
-load_env() {
-    mod=$1
-    daemon=$(getdaemon $mod)
-    pidfile=$(getpidfile $mod)
-
-    if [ "${mod}" != "arbiter" ]; then
-	configfile=$(getconffile $mod)
-	
-        # rescue in case /etc/defaut/shiken do not exists
-	[ -z "$configfile" ] && configfile="$ETC/${mod}d.ini"
-	[ -r $configfile ] || {
-	    echo "FAILED: no configuration file has been found !"
-	    return 5
-	}
-	[ -z "${pidfile}" ] && eval `grep pidfile ${configfile}`
-    fi
-    
-    [ -z "${pidfile}" ] && pidfile="$VAR/${mod}d.pid"
-    [ -z "${daemon}" ] && daemon="$BIN/shinken-${mod}"
-
-    if [ "${mod}" = "arbiter" ]; then
-	[ -z "${SHINKENCFG}" ] && SHINKENCFG="$ETC/nagios.cfg"
-	[ -z "${SHINKENSPECIFICCFG}" ] && SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
+    pidfile="$VAR/${mod}d.pid"
+    if [ -s $pidfile ]; then
+        cat $pidfile
     fi
 }
 
-#
-# do an action on a submodule
-#
-do_action() {
-    action=$1
-    mod=$2
-    load_env $mod
-    
 
-    # now, we can continue and launch the daemon
-    [ -x "$daemon" ] || {
-        echo "FAILED: did not found $mod file ($daemon) or file is not executable; are you sure shinken-$mod is installed ?"
+#
+# Display status
+#
+do_status() {
+    mod=$1
+    pidfile="$VAR/${mod}d.pid"
+    [ -e "$pidfile" ] || {
+        echo "$mod NOT RUNNING (pidfile ($pidfile) not exist)"
+        return 3
+    }
+    [ -r "$pidfile" ] || {
+        echo "$mod NOT RUNNING (pidfile ($pidfile) unreadable)"
+        return 3
+    }
+    pid=$(cat "$pidfile")
+    if [ -z "$pid" ]; then
+        echo "$mod NOT RUNNING (pid file empty)"
+        return 4
+    fi
+    ps -p "$pid" >/dev/null 2>&1
+    rc=$?
+    if [ $rc != 0 ]; then
+        log_failure_msg  "$mod NOT RUNNING (process $pid doesn't exist ?)"
+        return 1
+    fi
+    echo "$mod RUNNING (pid $pid)"
+    return 0
+}
+
+#
+# starts our modules
+#
+do_start() {
+    mod=$1
+    modfilepath="$BIN/shinken-${mod}"
+    [ -e "$modfilepath" ] || {
+        log_failure_msg "FAILED: did not found $mod file ($modfilepath) ; are you sure shinken-$mod is installed ?"
         return 5
     }
+    [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
+    if [ "$mod" != "arbiter" ]; then
+        output=$("$modfilepath" -d -c "$ETC/${mod}d.ini" $DEBUGCMD 2>&1)
+        rc=$?
+    else
+        output=$("$modfilepath" -d -c "$ETC/nagios.cfg" -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1)
+        rc=$?
+    fi
+    if [ $rc != 0 ]; then
+        resfile="/tmp/bad_start_for_$mod"
+        echo "$output" > "$resfile" || true
+        output=$(echo "$output" | tail -1)
+        echo "FAILED: $output (full output is in $resfile)"
+        return 1
+    fi
+    echo "OK"
+    return 0
+}
 
-    $DEBUG && {
-	echo "Debugging informations will be saved in $VAR/${mod}-debug.log"
-	DEBUGCMD="--debug $VAR/${mod}-debug.log"
+#
+# stops modules
+#
+do_stop() {
+    mod=$1
+    pid=$(getmodpid "$mod")
+    statusoutput=$(do_status "$mod")
+    [ $? -ne 0 ] && {
+        echo "$statusoutput"
+        return 0
     }
-    OPT="-d -c ${SHINKENCFG} -c ${SHINKENSPECIFICCFG}"
-    [ "$mod" != "arbiter" ] && OPT="-d -c ${configfile}"
-    case $action in
-	start)
-	    log_progress_msg "Starting $mod daemon: "
-	    start-stop-daemon --start -v --pidfile $pidfile --retry 3 --exec /usr/bin/python -- $daemon $OPT $DEBUGCMD > /dev/null
-	    rt=$?
-	    
-	    [ $rt -eq 0 ] && log_success_msg "started" || log_failure_msg "failed: $!"
-	    ;;
-	stop)
-	    log_progress_msg "Stopping $mod daemon: "
-	    start-stop-daemon --stop -v -m --pidfile $pidfile --retry 3 > /dev/null
-	    rt=$?
-	    
-	    [ $rt -eq 0 ] && { 
-		rm -f $pidfile 
-		log_success_msg "stopped" 
-	    } || log_failure_msg "failed: $!"
-	    ;;
-	status)
-	    pid=$(pidofproc -p $pidfile)
-	    rt=$?
-	    
-	    case $rt in
-		0)
-		    log_success_msg "$daemon is running ($pid)"
-		    ;;
-		1) 
-		    log_failure_msg "$pidfile found but no process is running"
-		    ;;
-		3)
-		    log_failure_msg "no process is running"
-		    ;;
-		4)
-		    log_failure_msg "$pidfile not found"
-		    ;;
+    if [ ! -z "$pid" ]; then
+        kill "$pid"
+        sleep 0.5
+        ## TODO: instead of 'sleep 1' : wait up to when pid file is removed (with timeout) ?
+        for i in 1 2 3
+        do
+            # TODO : use a better way to get the children pids..
+            allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+            if [ -z "$allpids" ]; then
+                echo "OK"
+                return 0
+            fi
+            sleep 1
+        done
+        echo "there are still remaining processes to $mod running.. ; trying to kill them (SIGTERM).."
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+        for cpid in $(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}'); do
+            kill $cpid > /dev/null 2>&1
+        done
+        for i in 1 2 3
+        do
+            # TODO : eventually use a better way to get the children pids..
+            allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+            if [ -z "$allpids" ]; then
+                echo "OK"
+            	return 0
+            fi
+            sleep 1
+        done
+        echo "there are still remaining processes to $mod running.. ; trying to kill -9 them.."
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+        for cpid in $(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}'); do
+            kill -9 $cpid > /dev/null 2>&1
+        done
+        sleep 1
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-$mod" | awk '{print $2}')"
+        if [ ! -z "$allpids" ]; then
+            echo "FAILED: one or more process for $mod are still running after kill -9 !"
+            echo "Remaining processes are (pids="$allpids"):"
+            ps -lf $(for p in $allpids ; do echo -n "-p$p " ; done)
+            echo "You should check this." 
+            return 1
+        fi
+        echo "OK"
+    else
+        echo "NOT RUNNING"
+    fi
+    return 0
+}
 
-		*)
-		    log_failure_msg "an error occured"
-		    ;;
-	    esac
-	    ;;
-	check)
-	    /usr/bin/python $daemon -v -c ${SHINKENCFG} -c ${SHINKENSPECIFICCFG}
-	    ;;
-	*)
-	    log_failure_msg "unknown action $action"
-	    rt=5
-    esac
+#
+# does the config check
+#
+do_check() {
+    [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
+    "$BIN/shinken-arbiter" -v -c "$ETC/nagios.cfg" -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1
+    return $?
+}
 
-    return $rt
+
+############################
+
+do_start_() {
+    echo  "Starting $1: "
+    status=$(do_status "$1")
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        log_warning_msg "Already running"
+        return
+    fi
+    startoutput=$(do_start "$1")
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success  
+    else
+        echo "$startoutput" 
+        echo_failure
+    fi
+    return $rc
+}
+
+do_stop_() {
+    echo  "Stopping $1"
+    statusoutput=$(do_status "$1")
+    rc=$?
+    if [ $rc -ne 0 ]; then
+        failuremsg="Couldn't get status of $1 : $statusoutput"
+    else
+        stopoutput=$(do_stop "$1" 2>&1)
+        rc=$?
+        [ $rc -ne 0 ] && failuremsg="Couldn't stop $1 : $stopoutput"
+    fi
+    if [ $rc -ne 0 ]; then
+        log_failure_msg "$failuremsg"
+        echo_failure
+    else
+        echo_success
+    fi
+    return $rc
+}
+
+do_restart_() {
+    mod="$1"
+    echo "Restarting $mod"
+    if [ "$mod" = "arbiter" ]; then
+        do_check_ "$mod"
+        checkrc=$?
+        if [ $checkrc -ne 0 ]; then
+           return 1
+        fi
+    fi 
+    stopoutput=$(do_stop "$mod")
+    startoutput=$(do_start "$mod")
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success
+    else
+        log_failure_msg "$startoutput"
+        echo_failure
+    fi
+    return $rc
+}
+
+do_status_() {
+    mod=$1
+    echo  "Checking status of $mod"
+    do_status "$1"
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success
+    else
+        echo_failure
+    fi
+
+}
+
+do_check_() {
+    echo "Doing config check"
+    output=$(do_check "$1" 2>&1)
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success
+    else
+        check_res_file="/tmp/shinken_checkconfig_result"
+        echo "$output" > "$check_res_file"
+        output=$(echo "$output" | tail -1)
+        log_warning_msg "full result is in ${check_res_file}"
+        log_failure_msg "ConfigCheck failed: $output"
+        echo_failure
+    fi
+    return $rc
+}
+do_checkconfig_() { do_check_ "$1" ; }
+
+
+############################
+
+do_cmd_on() {
+    action=$1
+    mods=$2
+    for mod in $mods
+    do
+        do_${action}_ "$mod"
+    done
 }
 
 
@@ -260,19 +370,11 @@ do_action() {
 ## Main:
 
 case "$CMD" in
-    start|stop|status)
-	for module in $SUBMODULES; do
-            do_action $CMD "$module"
-	done
+    start|stop|restart|status)
+        do_cmd_on "$CMD" "$SUBMODULES"
         ;;
-    restart)
-	for module in $SUBMODULES; do
-            do_action "stop" "$module"
-            do_action "start" "$module"
-	done
-	;;
     check|checkconfig)
-        do_action "check" "arbiter"
+        do_cmd_on "$CMD" "arbiter"
         ;;
     *)
         usage >&2
