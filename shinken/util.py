@@ -22,6 +22,7 @@
 
 import time
 import re
+import copy
 try:
     from ClusterShell.NodeSet import NodeSet
 except ImportError:
@@ -216,6 +217,37 @@ def sort_by_ids(x, y):
         return 1
     #So is equal
     return 0
+
+
+# From a tab, get the avg, min, max 
+# for the tab values, but not the lower ones
+# and higer ones that are too distinct
+# than major ones
+def nighty_five_percent(t):
+    t2 = copy.copy(t)
+    t2.sort()
+
+    l = len(t)
+
+    #If void tab, wtf??
+    if l == 0:
+        return (None, None, None)
+
+    t_reduce = t2
+    # only take a part if we got more
+    # than 100 elements, or it's a non sense
+    if l > 100:
+        offset = int(l*0.05)
+        t_reduce = t_reduce[offset:-offset]
+        
+    reduce_len = len(t_reduce)
+    reduce_sum = sum(t_reduce)
+
+    reduce_avg = float(reduce_sum)/reduce_len
+    reduce_max = max(t_reduce)
+    reduce_min = min(t_reduce)
+    
+    return (reduce_avg, reduce_min, reduce_max)
 
 
 

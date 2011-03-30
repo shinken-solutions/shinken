@@ -36,6 +36,7 @@ from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.log import logger
+from shinken.util import nighty_five_percent
 
 
 class Scheduler:
@@ -1189,13 +1190,19 @@ class Scheduler:
 
             print "Checks:", "total", len(self.checks), "scheduled", nb_scheduled, "inpoller", nb_inpoller, "zombies", nb_zombies, "notifications", nb_notifications
 
-            m = 0.0
-            m_nb = 0
-            for s in self.services:
-                m += s.latency
-                m_nb += 1
-            if m_nb != 0:
-                print "Average latency:", m, m_nb,  m / m_nb
+            # Get a overview of the latencies with just
+            # a 95 percentile view, but lso min/max values
+            latencies = [s.latency for s in self.services]
+            lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
+            if lat_avg is not None:
+                print "Latency (avg/min/max) : %.2f/%d/%d" % (lat_avg, lat_min, lat_max)
+            #m = 0.0
+            #m_nb = 0
+            #for s in self.services:
+            #    m += s.latency
+            #    m_nb += 1
+            #if m_nb != 0:
+            #    print "Average latency:", m, m_nb,  m / m_nb
 
             # print "Notifications:", nb_notifications
             now = time.time()
