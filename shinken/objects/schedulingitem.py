@@ -579,6 +579,13 @@ class SchedulingItem(Item):
     def consume_result(self, c):
         OK_UP = self.__class__.ok_up #OK for service, UP for host
 
+        # Protect against bad type output
+        # if str, go in unicode
+        if type(c.output) == 'str':
+            c.output = c.output.decode('utf8', 'ignore')
+            c.long_output = c.long_output.decode('utf8', 'ignore')
+
+
         # We check for stalking if necessery
         # so if check is here
         self.manage_stalking(c)
@@ -601,10 +608,6 @@ class SchedulingItem(Item):
         # (we can get already unicode with external commands)
         self.output = c.output
         self.long_output = c.long_output
-        # if str, go in unicode
-        if type(self.output) == 'str':
-            self.output = self.output.decode('utf8', 'ignore')
-            self.long_output = self.long_output.decode('utf8', 'ignore')
 
         # Get the perf_data only if we want it in the configuration
         if self.__class__.process_performance_data and self.process_perf_data:
