@@ -760,9 +760,20 @@ class Items(object):
     def linkify_with_timeperiods(self, timeperiods, prop):
         for i in self:
             if hasattr(i, prop):
-                tpname = getattr(i, prop)
+                tpname = getattr(i, prop).strip()
+                # some default values are '', so set None
+                if tpname == '':
+                    setattr(i, prop, None)
+                    continue
+
+                #Ok, get a real name, search for it
                 tp = timeperiods.find_by_name(tpname)
-                #TODO: catch None?
+                # If nto fidn, it's an error
+                if tp is None:
+                    err = "The %s of the %s '%s' named '%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), tpname)
+                    i.configuration_errors.append(err)
+                    continue
+                #Got a real one, just set it :)
                 setattr(i, prop, tp)
 
 

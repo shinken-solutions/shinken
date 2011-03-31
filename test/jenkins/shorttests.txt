@@ -65,4 +65,6 @@ test_module_named_pipe_arbiter.py
 test_nohostsched.py
 test_modulemanager.py
 test_clean_sched_queues.py
+test_no_notification_period.py
+test_bad_notification_period.py
 test_livestatus.py
