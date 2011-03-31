@@ -48,7 +48,7 @@ class __Action:
     def get_local_environnement(self):
         local_env = copy.copy(os.environ)
         for p in self.env:
-            local_env[p] = self.env[p]
+            local_env[p] = self.env[p].encode('utf8')
         return local_env
 
 
@@ -146,7 +146,15 @@ if os.name != 'nt':
             # If the command line got shell characters, we should go in a shell
             # mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
-            cmd = self.command
+
+            # 2.7 and higer Python version need a list of args for cmd
+            # 2.4->2.6 accept just the string command
+            if sys.version_info < (2, 7):
+                cmd = self.command
+            else:
+                cmd = shlex.split(self.command.encode('utf8', 'ignore'))
+                
+            # Now : GO for launch!
             try:
                 self.process = subprocess.Popen(cmd,
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -175,8 +183,15 @@ else:
 
     class Action(__Action):
         def execute__(self):
+            # 2.7 and higer Python version need a list of args for cmd
+            # 2.4->2.6 accept just the string command
+            if sys.version_info < (2, 7):
+                cmd = self.command
+            else:
+                cmd = shlex.split(self.command.encode('utf8', 'ignore'))
+
             try:
-                self.process = subprocess.Popen(self.command,
+                self.process = subprocess.Popen(cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.local_env, shell=True)
             except WindowsError, exp:
                 print "We kill the process : ", exp, self.command

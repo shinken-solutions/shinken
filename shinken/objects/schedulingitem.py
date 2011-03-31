@@ -471,8 +471,6 @@ class SchedulingItem(Item):
         # The check is consume, uptade the in_checking propertie
         if c in self.checks_in_progress:
             self.checks_in_progress.remove(c)
-        else:
-            print "Not removing check", c, "for ", self.get_name()
         self.update_in_checking()
 
 

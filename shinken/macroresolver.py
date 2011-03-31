@@ -121,9 +121,9 @@ class MacroResolver(Borg):
         try:
             value = getattr(elt, prop)
             if callable(value):
-                return str(value())
+                return unicode(value())
             else:
-                return str(value)
+                return unicode(value)
         except AttributeError , exp:
             # Return no value
             return ''

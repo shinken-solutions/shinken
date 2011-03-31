@@ -61,6 +61,7 @@ test_modulemanager.py
 test_clean_sched_queues.py
 test_no_notification_period.py
 test_bad_notification_period.py
+test_strange_characters_commands.py
 
 # takes long
 test_livestatus.py
