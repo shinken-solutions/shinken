@@ -24,6 +24,7 @@
 
 import os
 import random, time
+import tempfile
 
 from shinken_test import unittest
 
@@ -41,6 +42,7 @@ pollerconfig = "../etc/pollerd.ini"
 curdir = os.getcwd()
 
 class Test_Daemon_Bad_Start(unittest.TestCase):
+
            
     def gen_invalid_directory(self, f):
         basedir = "/invalid_directory42/" + str(random.randint(0,100))
@@ -65,9 +67,10 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
         return p
     
     def test_bad_piddir(self):
-        print("Testing bad piddir ... mypid=%d" % (os.getpid()))
+        d = tempfile.mkdtemp()
+        print "Using temp dir", d
         p = self.get_poller_daemon()
-        p.workdir = "etc/bad_workdir"
+        p.workdir = d
         os.chmod(p.workdir, 0)
         p.pidfile = p.workdir + "/daemon.pid"
         self.assertRaises(InvalidPidDir, p.do_daemon_init_and_start)
@@ -75,25 +78,28 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
         p.pidfile = self.gen_invalid_directory(p.pidfile)
         self.assertRaises(InvalidPidDir, p.do_daemon_init_and_start)
         p.do_stop()
+        #os.chmod(p.workdir, 777)
     
     def test_bad_workdir(self):
+        d = tempfile.mkdtemp()
         print("Testing bad workdir ... mypid=%d" % (os.getpid()))
         p = self.get_poller_daemon()
-        p.workdir = "etc/bad_workdir"
-        os.chmod(p.workdir, 0)
-        self.assertRaises(InvalidWorkDir, p.do_daemon_init_and_start)
-        p = self.get_poller_daemon()
-        p.workdir = self.gen_invalid_directory(p.workdir)
+        p.workdir = "/moncul"
+        p.pidfile = tempfile.mktemp()
         self.assertRaises(InvalidWorkDir, p.do_daemon_init_and_start)
         p.do_stop()
+
 
     def test_port_not_free(self):
         time.sleep(1)
         print("Testing port not free ... mypid=%d" % (os.getpid()))
         p1 = self.get_poller_daemon()
-        p1.do_daemon_init_and_start()           
+        p1.pidfile = tempfile.mktemp()
+        p1.workdir = tempfile.mkdtemp()
+        p1.do_daemon_init_and_start()          
         os.unlink(p1.pidfile)  ## so that second poller will not see first started poller
         p2 = self.get_poller_daemon()
+        p2.pidfile = p1.pidfile
         p2.port = p1.pyro_daemon.port
         self.assertRaises(PortNotFree, p2.do_daemon_init_and_start)
         
