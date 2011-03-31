@@ -72,7 +72,6 @@ class TestStrangeCaracterInCommands(ShinkenTest):
         self.assert_(c.output == '£°é§')
         print "Done with good output, that's great"
         svc.consume_result(c)
-        print svc.output, type(svc.output)
         self.assert_(svc.output == unicode('£°é§'.decode('utf8')))
 
 
