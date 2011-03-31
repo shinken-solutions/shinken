@@ -719,7 +719,7 @@ class Scheduler:
         now = time.time()
         for c in self.checks.values():
             # must be ok to launch, and not an internal one (business rules based)
-            if c.status == 'scheduled' and c.is_launchable(now) and c.internal:
+            if c.internal and c.status == 'scheduled' and c.is_launchable(now):
                 c.ref.manage_internal_check(c)
                 # it manage it, now just ask to consume it
                 # like for all checks
@@ -733,9 +733,6 @@ class Scheduler:
         res = self.broks
         # They are gone, we keep none!
         self.broks = {}
-#       print "returning broks"
-#       for b in res:
-#               print b, res[b]
         return res
 
 

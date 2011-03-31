@@ -399,9 +399,7 @@ class SchedulingItem(Item):
         # if last_chk == 0 put in a random way so all checks
         # are not in the same time
 
-        now = time.time()
         # next_chk il already set, do not change
-        # if self.next_chk >= now or self.in_checking and not force:
         if self.in_checking and not force:
             return None
 
@@ -438,6 +436,7 @@ class SchedulingItem(Item):
 
         # If not force_time, try to schedule
         if force_time is None:
+            now = time.time()
             # maybe we do nto have a check_period, if so, take always good (24x7)
             if self.check_period:
                 self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
@@ -811,8 +810,7 @@ class SchedulingItem(Item):
                 # not retart notifications)
                 if self.state != self.last_state:
                     self.update_hard_unknown_phase_state()
-                    print self.last_state, self.last_state_type, self.state_type, self.state
-                    print "*"*20, 'in unknown state?', self.was_in_hard_unknown_reach_phase, self.in_hard_unknown_reach_phase
+                    #print self.last_state, self.last_state_type, self.state_type, self.state
                     if not self.in_hard_unknown_reach_phase and not self.was_in_hard_unknown_reach_phase:
                         self.unacknowledge_problem_if_not_sticky()
                         self.raise_alert_log_entry()
@@ -849,7 +847,7 @@ class SchedulingItem(Item):
         else:
             self.state_type_id = 0
 
-        # fill last_hard_state_change to now
+        # Fill last_hard_state_change to now
         # if we just change from SOFT->HARD or
         # in HARD we change of state (Warning->critical, or critical->ok, etc etc)
         if self.state_type == 'HARD' and (self.last_state_type == 'SOFT' or self.last_state != self.state):
@@ -925,9 +923,7 @@ class SchedulingItem(Item):
         # We search since when we are in notification for escalations
         # that are based on time
         in_notif_time = cls.interval_length * self.first_notification_delay + (n.notif_nb-1) * self.notification_interval
-        print "In notif time orig:", in_notif_time
         in_notif_time = time.time() - n.creation_time
-        print "In notif time mod:", in_notif_time
 
         # Check is an escalation match the current_notification_number
         for es in self.escalations:
@@ -951,7 +947,7 @@ class SchedulingItem(Item):
         t.append(std_time)
         
         creation_time = n.creation_time
-        in_notif_time = time.time() - n.creation_time
+        in_notif_time = now - n.creation_time
 
         for es in self.escalations:
             r = es.get_next_notif_time(std_time, self.state, creation_time, cls.interval_length)
@@ -1097,9 +1093,10 @@ class SchedulingItem(Item):
         # If ref_check_id is not None , this is a dependancy_ check
         # If none, it might be a forced check, so OK, I do a new
         if not force and (self.in_checking and ref_check is not None):
+            now = time.time()
             c_in_progress = self.checks_in_progress[0] #0 is OK because in_checking is True
-            if c_in_progress.t_to_go > time.time(): #Very far?
-                c_in_progress.t_to_go = time.time() #No, I want a check right NOW
+            if c_in_progress.t_to_go > now: #Very far?
+                c_in_progress.t_to_go = now #No, I want a check right NOW
             c_in_progress.depend_on_me.append(ref_check)
             return c_in_progress.id
 
