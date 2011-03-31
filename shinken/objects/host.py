@@ -376,7 +376,8 @@ class Host(SchedulingItem):
         state = True #guilty or not? :)
         cls = self.__class__
 
-        special_properties = ['check_period', 'notification_interval', 'check_period']
+        special_properties = ['check_period', 'notification_interval', 'check_period',
+                              'notification_period']
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
@@ -388,6 +389,9 @@ class Host(SchedulingItem):
             state = False
             for err in self.configuration_errors:
                 logger.log(err)
+
+        if not hasattr(self, 'notification_period'):
+            self.notification_period = None
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
@@ -832,7 +836,7 @@ class Host(SchedulingItem):
             return True
 
         # Does the notification period allow sending out this notification?
-        if not self.notification_period.is_time_valid(t_wished):
+        if self.notification_period is not None and not self.notification_period.is_time_valid(t_wished):
             return True
 
         # Block if notifications are disabled for this host

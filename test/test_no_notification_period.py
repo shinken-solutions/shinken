@@ -56,6 +56,12 @@ class TestNoNotificationPeriod(ShinkenTest):
         self.assert_(svc.notification_period is None)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
 
+        # Now for the host :)
+        self.scheduler_loop(5, [[host, 2, 'BAD | value1=0 value2=0']])
+        self.assert_(host.notification_period is None)
+        self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
+        
+
 
 if __name__ == '__main__':
     unittest.main()
