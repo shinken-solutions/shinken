@@ -992,7 +992,10 @@ class SchedulingItem(Item):
                     t_wished = now + self.first_notification_delay * cls.interval_length
                 else:
                     t_wished = last_time_non_ok_or_up + self.first_notification_delay * cls.interval_length
-            t = self.notification_period.get_next_valid_time_from_t(t_wished)
+            if self.notification_period is None:
+                t = int(now)
+            else:
+                t = self.notification_period.get_next_valid_time_from_t(t_wished)
         else:
             # We follow our order
             t = t_wished
