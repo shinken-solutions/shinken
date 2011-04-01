@@ -139,7 +139,6 @@ class SatelliteLink(Item):
 
 
     def set_dead(self):
-        print "Set dead for %s" % self.get_name()
         was_alive = self.alive
         self.alive = False
         self.con = None
@@ -147,6 +146,7 @@ class SatelliteLink(Item):
         #We are dead now. Must raise
         #a brok to say it
         if was_alive:
+            print "Setting the satellite %s to a dead state." % self.get_name()
             b = self.get_update_status_brok()
             self.broks.append(b)
 
@@ -167,8 +167,7 @@ class SatelliteLink(Item):
     def ping(self):
         # First look if it's not too early to ping
         now = time.time()
-        since_last_check = now - self.last_check
-
+        since_last_check = now - self.last_check        
         if since_last_check < self.check_interval:            
             return
         

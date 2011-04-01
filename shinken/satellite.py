@@ -402,8 +402,8 @@ class Satellite(BaseSatellite):
     def _got_queue_from_action(self, a):
         if hasattr(a, 'module_type'):
             if a.module_type in self.worker_modules:
-                if a.module_type != 'fork':
-                    print "GOT A SPECIAL QUEUE (%s) for" % a.module_type, a.__dict__, 
+                #if a.module_type != 'fork':
+                #    print "GOT A SPECIAL QUEUE (%s) for" % a.module_type, a.__dict__, 
                 return self.worker_modules[a.module_type]['to_q']
             # Nothing found, it's not good at all!
             return None
@@ -459,15 +459,6 @@ class Satellite(BaseSatellite):
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
                     self.add_actions(tmp, sched_id)
-                    #for a in tmp:
-                    #    a.sched_id = sched_id
-                    #    a.status = 'queue'
-                    #    msg = Message(id=0, type='Do', data=a)
-                    #    q = self._got_queue_from_action(a)
-                    #    if q != None:
-                    #        q.put(msg)
-                    #    # Update stats
-                    #    self.nb_actions_in_workers += 1
                 else: # no con? make the connexion
                     self.pynag_con_init(sched_id)
             # Ok, con is not know, so we create it
