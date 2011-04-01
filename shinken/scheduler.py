@@ -24,8 +24,13 @@
 import time
 import os
 import traceback
+import sys
 
-import shinken.pyro_wrapper as pyro
+try:
+    import shinken.pyro_wrapper as pyro
+except ImportError:
+    sys.exit("Shinken require the Python Pyro module. Please install it.")
+
 from shinken.pyro_wrapper import Pyro
 from shinken.external_command import ExternalCommand
 from shinken.check import Check

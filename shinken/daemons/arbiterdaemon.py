@@ -27,6 +27,11 @@ import random
 from Queue import Empty
 from multiprocessing import active_children
 
+try:
+    import shinken.pyro_wrapper as pyro
+except ImportError:
+    sys.exit("Shinken require the Python Pyro module. Please install it.")
+
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
