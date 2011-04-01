@@ -168,7 +168,8 @@ class SatelliteLink(Item):
         # First look if it's not too early to ping
         now = time.time()
         since_last_check = now - self.last_check
-        if since_last_check < self.check_interval:
+
+        if since_last_check < self.check_interval:            
             return
         
         # Ok, save that we are doing a check now
