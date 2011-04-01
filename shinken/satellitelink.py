@@ -274,6 +274,9 @@ class SatelliteLink(Item):
         except Pyro_exp_pack, exp:
             self.con = None
             return []
+        except AttributeError:
+            self.con = None
+            return []
 
 
 
