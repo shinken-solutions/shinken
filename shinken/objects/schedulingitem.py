@@ -503,7 +503,6 @@ class SchedulingItem(Item):
         if self.event_handler is None or ((not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd):
             return
 
-        print self.event_handler.__dict__
         m = MacroResolver()
         data = self.get_data_for_event_handler()
         cmd = m.resolve_command(self.event_handler, data)

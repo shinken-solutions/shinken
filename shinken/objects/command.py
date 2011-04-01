@@ -21,9 +21,20 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.brok import Brok
-from shinken.property import StringProp
+from shinken.property import StringProp, BoolProp, IntegerProp
+from shinken.autoslots import AutoSlots
 
-class Command(object):
+# Ok, slots are fun : you cannot set the __autoslots__
+# on the same class you use, fun isn't it? So we define*
+# a dummy useless class to get such :)
+class DummyCommand(object):
+    pass
+
+class Command(DummyCommand):
+    # AutoSlots create the __slots__ with properties and
+    # running_properties names
+    __metaclass__ = AutoSlots
+
     id = 0
     my_type = "command"
 
@@ -36,7 +47,8 @@ class Command(object):
     }
 
     def __init__(self, params={}):
-        self.id = self.__class__.id
+        setattr(self, 'id', self.__class__.id)
+        #self.id = self.__class__.id
         self.__class__.id += 1
         for key in params:
             setattr(self, key, params[key])
@@ -93,12 +105,35 @@ class Command(object):
 
 
 
+# Ok, slots are fun : you cannot set the __autoslots__
+# on the same class you use, fun isn't it? So we define*
+# a dummy useless class to get such :)
+class DummyCommandCall(object):
+    pass
+
 #This class is use when a service, contact or host define
 #a command with args.
-class CommandCall:
-    __slots__ = ('id', 'call', 'command', 'valid', 'args')
+class CommandCall(DummyCommandCall):
+    # AutoSlots create the __slots__ with properties and
+    # running_properties names
+    __metaclass__ = AutoSlots
+
+    #__slots__ = ('id', 'call', 'command', 'valid', 'args', 'poller_tag',
+    #             'reactionner_tag', 'module_type', '__dict__')
     id = 0
     my_type = 'CommandCall'
+
+    properties = {
+        'call':            StringProp(),
+        'command':         StringProp(),
+        'poller_tag':      StringProp(default='None'),
+        'reactionner_tag': StringProp(default='None'),
+        'module_type':     StringProp(default=None),
+        'valid' :          BoolProp(default=False),
+        'args' :           StringProp(default=[]),
+    }
+
+
     def __init__(self, commands, call, poller_tag='None', reactionner_tag='None'):
         self.id = self.__class__.id
         self.__class__.id += 1
