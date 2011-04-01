@@ -23,13 +23,15 @@
 
 #This class is a wrapper for managing Pyro 3 and 4 version
 
-import select, errno
+import select
+import errno
+import time
 
+# Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
 try:
     import Pyro
 except ImportError: #ok, no Pyro3, maybe 4
     import Pyro4 as Pyro
-
 
 
 class InvalidWorkDir(Exception): pass
@@ -56,10 +58,13 @@ try:
                 Pyro.core.initServer()
             except (OSError, IOError), e: # must be problem with workdir :
                 raise InvalidWorkDir(e)
+            # Set the protocol as asked (ssl or not)
             if use_ssl:
                 prtcol = 'PYROSSL'
             else:
                 prtcol = 'PYRO'
+
+            # Now the real start
             try:
                 Pyro.core.Daemon.__init__(self, host=host, port=port, prtcol=prtcol, norange=True)
             except OSError, e:
@@ -102,6 +107,11 @@ try:
         return Pyro.core.getProxyForURI(uri)
 
 
+    # Shutdown in 3 take True as arg
+    def shutdown(con):
+        con.shutdown(True)
+
+
     PyroClass = Pyro3Daemon
 
 
@@ -126,18 +136,31 @@ except AttributeError:
         protocol = 'PYRO'
         
         def __init__(self, host, port, use_ssl=False):
-            #Pyro 4 i by default thread, should do select
-            #(I hate threads!)
+            # Pyro 4 i by default thread, should do select
+            # (I hate threads!)
             Pyro.config.SERVERTYPE = "select"
-            #And port already use now raise an exception
-            try:
-                Pyro.core.Daemon.__init__(self, host=host, port=port)
-            except socket.error, exp:
-                msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
-                raise PortNotFree(msg)
-            except Exception, e:
-                # must be problem with pyro workdir :
-                raise InvalidWorkDir(e)
+            nb_try = 0
+            is_good = False
+            # Ok, Pyro4 do not close sockets like it should,
+            # so we got TIME_WAIT socket :(
+            # so we allow to retry during 35 sec (30 sec is the default
+            # timewait for close sockets)
+            while nb_try <= 35:
+                # And port already use now raise an exception
+                try:
+                    Pyro.core.Daemon.__init__(self, host=host, port=port)
+                    # Ok, we got our daemon, we can exit
+                    break
+                except socket.error, exp:
+                    msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
+                    # At 35, we are very not happy
+                    if nb_try == 35:
+                        raise PortNotFree(msg)
+                    print msg, "but we try anoter time in 1 sec"
+                    time.sleep(1)
+                except Exception, e:
+                    # must be problem with pyro workdir :
+                    raise InvalidWorkDir(e)
 
         ## same than this super class so no need:
         # def register(self, obj, name):
@@ -161,6 +184,11 @@ except AttributeError:
 
     def getProxy(uri):
         return Pyro.core.Proxy(uri)
+
+    # Shutdown in 4 do not take arg
+    def shutdown(con):
+        con.shutdown()
+        con.close()
 
 
     PyroClass = Pyro4Daemon

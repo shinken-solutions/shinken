@@ -149,7 +149,7 @@ class Daemon(object):
             logger.log('Stopping all modules')
             self.modules_manager.stop_all()
         if self.pyro_daemon:
-            self.pyro_daemon.shutdown(True)
+            pyro.shutdown(self.pyro_daemon)#.shutdown(True)
         logger.quit()
         
 

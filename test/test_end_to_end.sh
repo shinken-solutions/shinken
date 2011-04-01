@@ -359,7 +359,7 @@ string_in_file "\[All\] Dispatch OK of for configuration 0 to broker broker-Slav
 string_in_file "\[broker-Slave\] Connexion OK to the scheduler scheduler-Spare" $VAR/nagios.log
 #And to other satellites
 string_in_file "\[broker-Slave\] Connexion OK to the reactionner reactionner-Spare" $VAR/nagios.log
-string_in_file "\[broker-Slave\] Connexion problem to the poller poller-Master : connection failed" $VAR/nagios.log
+string_in_file "\[broker-Slave\] Connexion problem to the poller poller-Master" $VAR/nagios.log
 #And should have load the modules
 string_in_file "\[broker-Slave\] I correctly loaded the modules : \[Simple-log,Livestatus\]" $VAR/nagios.log
 

@@ -184,7 +184,7 @@ class Broker(BaseSatellite):
             # else:
             #     print "I do nto ask for brok generation"
             links[id]['running_id'] = new_run_id
-        except Pyro.errors.ProtocolError, exp:
+        except (Pyro.errors.ProtocolError, Pyro.errors.CommunicationError), exp:
             logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
@@ -196,10 +196,6 @@ class Broker(BaseSatellite):
             logger.log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             traceback.print_stack()
-            return
-        except Pyro.errors.CommunicationError, exp:
-            logger.log("[%s] the %s '%s' got CommunicationError : %s" % (self.name, type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
             return
 
         logger.log("[%s] Connexion OK to the %s %s" % (self.name, type, links[id]['name']))
