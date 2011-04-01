@@ -30,6 +30,7 @@ import time
 # Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
 try:
     import Pyro
+    import Pyro.core
 except ImportError: #ok, no Pyro3, maybe 4
     import Pyro4 as Pyro
 
@@ -115,7 +116,7 @@ try:
     PyroClass = Pyro3Daemon
 
 
-except AttributeError:
+except AttributeError, exp:
     
     print "Using Pyro", Pyro.constants.VERSION
     
