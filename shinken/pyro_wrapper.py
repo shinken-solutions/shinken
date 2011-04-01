@@ -25,7 +25,11 @@
 
 import select, errno
 
-import Pyro.core
+try:
+    import Pyro
+except ImportError: #ok, no Pyro3, maybe 4
+    import Pyro4 as Pyro
+
 
 
 class InvalidWorkDir(Exception): pass
@@ -106,8 +110,8 @@ except AttributeError:
     print "Using Pyro", Pyro.constants.VERSION
     
     # Ok, in Pyro 4, interface do not need to
-    # inherit from ObjBase, just object is good
-    Pyro.core.ObjBase = object
+    # inherit from ObjBase, just a dummy class is good
+    Pyro.core.ObjBase = dict
     Pyro.errors.URIError = Pyro.errors.ProtocolError
     Pyro.core.getProxyForURI = Pyro.core.Proxy
     
