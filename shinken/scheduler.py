@@ -103,8 +103,10 @@ class Scheduler:
         self.contact_downtimes = {}
         self.comments = {}
         self.broks = {}
-        
+
+        # Some flags
         self.has_full_broks = False # have a initial_broks in broks queue?
+        self.need_dump_memory = False # set by signal 1
 
 
     def reset(self):
@@ -1226,6 +1228,9 @@ class Scheduler:
             time_elapsed = now - gogogo
             print "Check average =", int(self.nb_check_received / time_elapsed), "checks/s"
 
+            if self.need_dump_memory:
+                self.sched_daemon.dump_memory()
+                self.need_dump_memory = False
             #for n in  self.actions.values():
             #    if n.ref_type == 'service':
             #        print 'Service notification', n

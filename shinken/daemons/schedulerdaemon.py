@@ -221,9 +221,13 @@ class Shinken(BaseSatellite):
 
 
     def manage_signal(self, sig, frame):
-        self.sched.die()
-        self.must_run = False
-        Daemon.manage_signal(self, sig, frame)
+        # If we got USR1, just dump memory
+        if sig == 10:
+            self.sched.need_dump_memory = True
+        else: # if not, die :)
+            self.sched.die()
+            self.must_run = False
+            Daemon.manage_signal(self, sig, frame)
 
 
     def do_loop_turn(self):        

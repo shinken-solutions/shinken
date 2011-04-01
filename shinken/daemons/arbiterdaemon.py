@@ -582,6 +582,11 @@ class Arbiter(Daemon):
             # TODO: check if really send. Queue by scheduler?
             self.external_commands = []
 
+            # If ask me to dump my memory, I do it
+            if self.need_dump_memory:
+                self.dump_memory()
+                self.need_dump_memory = False
+
 
     # This function returns the part of the conf where are stored the daemons of
     # a given daemon type

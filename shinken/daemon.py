@@ -129,6 +129,9 @@ class Daemon(object):
         self.new_conf = None # used by controller to push conf 
         self.cur_conf = None
 
+        # Flag to know if we need to dump memory or not
+        self.need_dump_memory = False
+
         #Keep a trace of the local_log file desc if need
         self.local_log_fd = None
 
@@ -162,9 +165,16 @@ class Daemon(object):
     def do_loop_turn(self):
         raise NotImplementedError()
 
+    # Main loop for nearly all daemon
+    # the scheduler is not managed by it :'(
     def do_mainloop(self):
         while True:
             self.do_loop_turn()
+            # If ask us to dump memory, do it
+            if self.need_dump_memory:
+                self.dump_memory()
+                self.need_dump_memory = False
+            # Maybe we ask us to die, if so, do it :)
             if self.interrupted:
                 break
         self.request_stop()
@@ -177,6 +187,16 @@ class Daemon(object):
     def add(self, elt):
         """ Dummy method for adding broker to this daemon """
         pass
+
+    def dump_memory(self):
+        logger.log("I dump my memory, it can ask some seconds to do")
+        try:
+            from guppy import hpy
+            hp = hpy()
+            logger.log(hp.heap())
+        except ImportError:
+            logger.log('I do not have the module guppy for memory dump, please install it')
+            
 
  
     def load_config_file(self):
@@ -534,7 +554,10 @@ Also put default value in the properties if some are missing in the config_file 
 
     def manage_signal(self, sig, frame):
         print("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
-        self.interrupted = True
+        if sig == 10: # if USR1, ask a memory dump
+            self.need_dump_memory = True
+        else: #Ok, really ask us to die :)
+            self.interrupted = True
 
 
     def set_exit_handler(self):
@@ -547,7 +570,7 @@ Also put default value in the properties if some are missing in the config_file 
                 version = ".".join(map(str, sys.version_info[:2]))
                 raise Exception("pywin32 not installed for Python " + version)
         else:
-            for sig in (signal.SIGTERM, signal.SIGINT):
+            for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1):
                 signal.signal(sig, func)
 
 
