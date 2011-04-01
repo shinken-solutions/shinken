@@ -231,6 +231,9 @@ class Satellite(BaseSatellite):
         sched_id = action.sched_id
         # Now we now where to put action, we do not need sched_id anymore
         del action.sched_id
+        # Unset the tag of the worker_id
+        del action.worker_id
+
         # And we remove it from the actions queue of the scheduler too
         try:
             del self.schedulers[sched_id]['actions'][action.get_id()]
@@ -302,7 +305,8 @@ class Satellite(BaseSatellite):
     # Create and launch a new worker, and put it into self.workers
     # It can be mortal or not
     def create_and_launch_worker(self, module_name='fork', mortal=True):
-        q = self.worker_modules[module_name]['to_q']
+        # ceate the input queue of this worker
+        q = Queue()#self.worker_modules[module_name]['queues']
 
         # If we are in the fork module, do not specify a target
         target = None
@@ -317,6 +321,9 @@ class Satellite(BaseSatellite):
         w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
                    mortal=mortal,max_plugins_output_length = self.max_plugins_output_length, target=target )
         self.workers[w.id] = w
+        w.module_name = module_name
+        # And save the Queue of this worker, with key = worker id
+        self.worker_modules[module_name]['queues'][w.id] = q
         logger.log("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
         w.start()
 
@@ -380,8 +387,20 @@ class Satellite(BaseSatellite):
                 w.terminate()
                 w.join(timeout=1)
                 w_to_del.append(w.id)
+
         # OK, now really del workers
+        # And requeue the actiosn it was managed
         for id in w_to_del:
+            w = self.workers[id]
+            # Del the queue of the module queue
+            del self.worker_modules[w.module_name]['queues'][w.id]
+            for sched_id in self.schedulers:
+                sched = self.schedulers[sched_id]
+                for a in sched['actions'].values():
+                    if a.status == 'queue' and a.worker_id == id:
+                        # Got a check that will NEVER return if we do not
+                        # restart it
+                        self.assign_to_a_queue(a)
             del self.workers[id]
 
 
@@ -404,11 +423,16 @@ class Satellite(BaseSatellite):
             if a.module_type in self.worker_modules:
                 #if a.module_type != 'fork':
                 #    print "GOT A SPECIAL QUEUE (%s) for" % a.module_type, a.__dict__, 
-                return self.worker_modules[a.module_type]['to_q']
+                for (i, q) in self.worker_modules[a.module_type]['queues'].items():
+                    #print "Giving the queue of the worker %d for %s" % (i, a.module_type)
+                    return (i, q)
             # Nothing found, it's not good at all!
-            return None
+            return (0, None)
         # If none, call the standard 'fork'
-        return self.worker_modules['fork']['to_q']
+        for (i, q) in self.worker_modules['fork']['queues'].items():
+            #print "Giving the queue of the worker %d for %s" % (i, a.module_type)
+            return (i, q)
+
 
 
     # Add to our queues a list of actions
@@ -420,12 +444,24 @@ class Satellite(BaseSatellite):
                 continue
             a.sched_id = sched_id
             a.status = 'queue'
-            msg = Message(id=0, type='Do', data=a)
-            q = self._got_queue_from_action(a)
-            if q is not None:
-                q.put(msg)
+            #msg = Message(id=0, type='Do', data=a)
+            #(i, q) = self._got_queue_from_action(a)
+            ## Tag the action as "in the worker i"
+            #a.worker_id = i
+            #if q is not None:
+            #    q.put(msg)
+            self.assign_to_a_queue(a)
             # Update stats
             self.nb_actions_in_workers += 1
+
+    # Take an action and put it into one queue
+    def assign_to_a_queue(self, a):
+        msg = Message(id=0, type='Do', data=a)
+        (i, q) = self._got_queue_from_action(a)
+        # Tag the action as "in the worker i"
+        a.worker_id = i
+        if q is not None:
+            q.put(msg)
 
 
     # We get new actions from schedulers, we create a Message ant we
@@ -519,10 +555,10 @@ class Satellite(BaseSatellite):
             sched = self.schedulers[sched_id]
             for mod in self.worker_modules:
                 # In workers we've got actions send to queue - queue size
-                q = self.worker_modules[mod]['to_q']
-                print '[%d][%s][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
-                    (sched_id, sched['name'], mod, len(self.workers), q.qsize(), \
-                         self.nb_actions_in_workers - q.qsize(), len(self.returns_queue))
+                for q in self.worker_modules[mod]['queues'].values():
+                    print '[%d][%s][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
+                        (sched_id, sched['name'], mod, len(self.workers), q.qsize(), \
+                             self.nb_actions_in_workers - q.qsize(), len(self.returns_queue))
 
 
         # Before return or get new actions, see how we manage
@@ -531,8 +567,8 @@ class Satellite(BaseSatellite):
         wait_ratio = self.wait_ratio.get_load()
         total_q = 0
         for mod in self.worker_modules:
-            q = self.worker_modules[mod]['to_q']
-            total_q += q.qsize()
+            for q in self.worker_modules[mod]['queues'].values():
+                total_q += q.qsize()
         if total_q != 0 and wait_ratio < 5*self.polling_interval:
             print "I decide to up wait ratio"
             self.wait_ratio.update_load(wait_ratio * 2)
@@ -581,7 +617,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER
-        self.worker_modules['fork'] = {'to_q' : Queue()}
+        self.worker_modules['fork'] = {'queues' : {}}#Queue()}
         self.manager = Manager()
         self.returns_queue = self.manager.list()
 
@@ -676,7 +712,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
                 print "Add module object", module
                 self.modules_manager.modules.append(module)
                 logger.log("[%s] Got module : %s " % (self.name, module.module_type))
-                self.worker_modules[module.module_type] = {'to_q' : Queue()}
+                self.worker_modules[module.module_type] = {'queues' : {}}#}Queue()}
 
 
     def main(self):

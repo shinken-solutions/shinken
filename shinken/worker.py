@@ -51,6 +51,7 @@ class Worker:
         self._idletime = 0
         self._timeout = timeout
         self.processes_by_worker = processes_by_worker
+        self.input_queue = s
         self._c = Queue() # Private Control queue for the Worker
         # By default, take our own code
         if target is None:
@@ -70,12 +71,14 @@ class Worker:
 
 
     # Kill the background process
-    # AND close correctly the queue
-    # the queue have a thread, so close it too....
+    # AND close correctly the queues (input and output)
+    # each queue got a thread, so close it too....
     def terminate(self):
         self._process.terminate()
         self._c.close()
         self._c.join_thread()
+        self.input_queue.close()
+        self.input_queue.join_thread()
 
 
     def join(self, timeout=None):
