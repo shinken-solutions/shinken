@@ -27,21 +27,13 @@ from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 class ReceiverLink(SatelliteLink):
     id = 0
     my_type = 'receiver'
-    properties = {
+    properties = SatelliteLink.properties.copy()
+    properties.update({
         'receiver_name':        StringProp (fill_brok=['full_status'], to_send=True),
-        'address':            StringProp (fill_brok=['full_status']),
         'port':               IntegerProp(default='7772', fill_brok=['full_status']),
-        'spare':              BoolProp   (default='0', fill_brok=['full_status']),
         'manage_sub_realms':  BoolProp   (default='1', fill_brok=['full_status']),
         'manage_arbiters':    BoolProp   (default='0', fill_brok=['full_status'], to_send=True),
-        'modules':            ListProp   (default='', to_send=True),
-        'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
-        'use_timezone':       StringProp (default='NOTSET', to_send=True),
-        'timeout':            IntegerProp(default='3', fill_brok=['full_status']),
-        'data_timeout':       IntegerProp(default='120', fill_brok=['full_status']),
-        'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
-        'realm' :             StringProp (default=''),
-    }
+    })
   
     def get_name(self):
         return self.receiver_name

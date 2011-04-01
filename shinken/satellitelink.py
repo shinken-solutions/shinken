@@ -24,6 +24,7 @@
 #SatelliteLink is a common Class for link to satellite for
 #Arbiter with Conf Dispatcher.
 
+import time
 
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
@@ -43,6 +44,7 @@ class SatelliteLink(Item):
         'address':         StringProp(fill_brok=['full_status']),
         'timeout':         IntegerProp(default='3', fill_brok=['full_status']),
         'data_timeout':    IntegerProp(default='120', fill_brok=['full_status']),
+        'check_interval':  IntegerProp(default='60', fill_brok=['full_status']),
         'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
         'spare':              BoolProp   (default='0', fill_brok=['full_status']),
         'manage_sub_realms':  BoolProp   (default='1', fill_brok=['full_status']),
@@ -60,6 +62,7 @@ class SatelliteLink(Item):
         'attempt':              StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
         'reachable':            StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
         'configuration_errors': StringProp(default=[]),
+        'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
     }
 
     macros = {}
@@ -162,6 +165,14 @@ class SatelliteLink(Item):
 
 
     def ping(self):
+        # First look if it's not too early to ping
+        now = time.time()
+        since_last_check = now - self.last_check
+        if since_last_check < self.check_interval:
+            return
+        
+        # Ok, save that we are doing a check now
+        self.last_check = now
         print "Pinging %s" % self.get_name()
         try:
             if self.con is None:
