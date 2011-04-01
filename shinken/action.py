@@ -38,7 +38,7 @@ shellchars = ( '!', '$', '^', '&', '*', '(', ')', '~', '[', ']',
 
 
 # This abstract class is use just for having a common id between actions and checks
-class __Action:
+class __Action(object):
     id = 0
 
     # Mix the env into the environnment variables

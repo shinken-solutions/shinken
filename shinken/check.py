@@ -22,36 +22,36 @@
 
 
 from shinken.action import Action
-
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.autoslots import AutoSlots
 
 class Check(Action):
-    __slots__ = ( 'id', 'is_a', 'type', '_in_timeout', 'status', 'exit_status',
-                  '_command', 'output', 'long_output', 'ref', 'ref_type',
-                  't_to_go', 'depend_on', 'depend_on_me', 'check_time',
-                  'execution_time', 'env' )
+    # AutoSlots create the __slots__ with properties and
+    # running_properties names
+    __metaclass__ = AutoSlots
 
     properties = {
-        'is_a':         { 'required': False, 'default': 'check' },
-        'type':         { 'required': False, 'default': '' },
-        '_in_timeout':  { 'required': False, 'default': False },
-        'status' :      { 'required': False, 'default': '' },
-        'exit_status' : { 'required': False, 'default': 3 },
-        'state':        { 'required': False, 'default': 0 },
-        'output':       { 'required': False, 'default': '' },
-        'long_output':  { 'required': False, 'default': '' },
-        'ref':          { 'required': False, 'default': -1 },
-        't_to_go':      { 'required': False, 'default': 0 },
-        'depend_on':    { 'required': False, 'default': [] },
-        'dep_check':    { 'required': False, 'default': [] },
-        'check_time':   { 'required': False, 'default': 0 },
-        'execution_time': { 'required': False, 'default': 0 },
-        'perf_data':    { 'required': False, 'default': '' },
-        'poller_tag':   { 'required': False, 'default': 'None' },
-        'reactionner_tag':   { 'required': False, 'default': 'None' },
-        'env':          { 'required': False, 'default': {} },
-        'internal':     { 'required': False, 'default': False },
-        'module_type':  { 'required': False, 'default': 'fork' },
-        'worker':       { 'required': False, 'default': 'none' },
+        'is_a':         StringProp(default='check'),
+        'type':         StringProp(default=''),
+        '_in_timeout':  BoolProp(default=False),
+        'status' :      StringProp(default=''),
+        'exit_status' : IntegerProp(default=3),
+        'state':        IntegerProp(default=0),
+        'output':       StringProp(default=''),
+        'long_output':  StringProp(default=''),
+        'ref':          IntegerProp(default=-1),
+        't_to_go':      IntegerProp(default=0),
+        'depend_on':    StringProp(default=[]),
+        'dep_check':    StringProp(default=[]),
+        'check_time':   IntegerProp(default=0),
+        'execution_time': IntegerProp(default=0),
+        'perf_data':    StringProp(default=''),
+        'poller_tag':   StringProp(default='None'),
+        'reactionner_tag':   StringProp(default='None'),
+        'env':          StringProp(default={}),
+        'internal':     BoolProp(default=False),
+        'module_type':  StringProp(default='fork'),
+        'worker':       StringProp(default='none'),
     }
 
     #id = 0 #Is common to Actions

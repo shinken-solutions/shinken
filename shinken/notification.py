@@ -26,8 +26,13 @@ import time
 from shinken.action import Action
 from shinken.brok import Brok
 from shinken.property import BoolProp, IntegerProp, StringProp
+from shinken.autoslots import AutoSlots
 
 class Notification(Action):
+    # AutoSlots create the __slots__ with properties and
+    # running_properties names
+    __metaclass__ = AutoSlots
+
     #id = 0 #Is in fact in the Action class to be common with Checks and
     #events handlers
 
