@@ -417,21 +417,24 @@ class Satellite(BaseSatellite):
 
 
     # Get the Queue() from an action by looking at which module
-    # it wants
+    # it wants with a round robin way to scale the load between
+    # workers
     def _got_queue_from_action(self, a):
-        if hasattr(a, 'module_type'):
-            if a.module_type in self.worker_modules:
-                #if a.module_type != 'fork':
-                #    print "GOT A SPECIAL QUEUE (%s) for" % a.module_type, a.__dict__, 
-                for (i, q) in self.worker_modules[a.module_type]['queues'].items():
-                    #print "Giving the queue of the worker %d for %s" % (i, a.module_type)
-                    return (i, q)
-            # Nothing found, it's not good at all!
+        # get the module name, if not, take fork
+        mod = getattr(a, 'module_type', 'fork')
+        queues = self.worker_modules[mod]['queues'].items()
+
+        # Maybe there is no more queue, it's very bad!
+        if len(queues) == 0:
             return (0, None)
-        # If none, call the standard 'fork'
-        for (i, q) in self.worker_modules['fork']['queues'].items():
-            #print "Giving the queue of the worker %d for %s" % (i, a.module_type)
-            return (i, q)
+
+        # if not get a round robin index to get a queue based
+        # on the action id
+        rr_idx = a.id % len(queues)
+        (i, q) = queues[rr_idx]
+
+        # return the id of the worker (i), and its queue
+        return (i, q)
 
 
 
@@ -444,13 +447,8 @@ class Satellite(BaseSatellite):
                 continue
             a.sched_id = sched_id
             a.status = 'queue'
-            #msg = Message(id=0, type='Do', data=a)
-            #(i, q) = self._got_queue_from_action(a)
-            ## Tag the action as "in the worker i"
-            #a.worker_id = i
-            #if q is not None:
-            #    q.put(msg)
             self.assign_to_a_queue(a)
+
             # Update stats
             self.nb_actions_in_workers += 1
 
@@ -555,10 +553,9 @@ class Satellite(BaseSatellite):
             sched = self.schedulers[sched_id]
             for mod in self.worker_modules:
                 # In workers we've got actions send to queue - queue size
-                for q in self.worker_modules[mod]['queues'].values():
-                    print '[%d][%s][%s]Stats : Workers:%d (Queued:%d Processing:%d ReturnWait:%d)' % \
-                        (sched_id, sched['name'], mod, len(self.workers), q.qsize(), \
-                             self.nb_actions_in_workers - q.qsize(), len(self.returns_queue))
+                for (i, q) in self.worker_modules[mod]['queues'].values():
+                    print '[%d][%s][%s]Stats : Workers:%d (Queued:%d TotalReturnWait:%d)' % \
+                        (sched_id, sched['name'], mod, i, q.qsize(), len(self.returns_queue))
 
 
         # Before return or get new actions, see how we manage
