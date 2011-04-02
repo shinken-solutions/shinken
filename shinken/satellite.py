@@ -578,7 +578,7 @@ class Satellite(BaseSatellite):
             sched = self.schedulers[sched_id]
             for mod in self.worker_modules:
                 # In workers we've got actions send to queue - queue size
-                for (i, q) in self.worker_modules[mod]['queues'].values():
+                for (i, q) in self.worker_modules[mod]['queues'].items():
                     print '[%d][%s][%s]Stats : Workers:%d (Queued:%d TotalReturnWait:%d)' % \
                         (sched_id, sched['name'], mod, i, q.qsize(), len(self.returns_queue))
 
