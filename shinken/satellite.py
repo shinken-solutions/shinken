@@ -142,7 +142,8 @@ class IBroks(Interface):
 class BaseSatellite(Daemon):
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):     
         
-        super(BaseSatellite, self).__init__(name, config_file, is_daemon, do_replace, debug, debug_file)
+        super(BaseSatellite, self).__init__(name, config_file, is_daemon, \
+                                                do_replace, debug, debug_file)
 
         # Ours schedulers
         self.schedulers = {}
@@ -168,7 +169,8 @@ class BaseSatellite(Daemon):
 class Satellite(BaseSatellite):
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
         
-        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace, debug, debug_file)
+        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace,\
+                                            debug, debug_file)
         
         # Keep broks so they can be eaten by a broker
         self.broks = {}
@@ -195,14 +197,18 @@ class Satellite(BaseSatellite):
     def pynag_con_init(self, id):
         """ Initialize or re-initialize connexion with scheduler """
         sched = self.schedulers[id]
+
         # If sched is not active, I do not try to init
         # it is just useless
         if not sched['active']:
             return
 
-        logger.log("[%s] Init de connexion with %s at %s" % (self.name, sched['name'], sched['uri']))
+        sname = sched['name']
+        uri = sched['uri']
         running_id = sched['running_id']
-        sch_con = sched['con'] = Pyro.core.getProxyForURI(sched['uri'])
+        logger.log("[%s] Init de connexion with %s at %s" % (self.name, sname, uri))
+
+        sch_con = sched['con'] = Pyro.core.getProxyForURI(uri)
 
         # timeout of 120 s
         # and get the running id
@@ -210,17 +216,17 @@ class Satellite(BaseSatellite):
             pyro.set_timeout(sch_con, 5)
             new_run_id = sch_con.get_running_id()
         except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
-            logger.log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sched['name'], str(exp)))
+            logger.log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
 
         # The schedulers have been restart : it has a new run_id.
         # So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
-            logger.log("[%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sched['name']))
+            logger.log("[%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sname))
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
-        logger.log("[%s] Connexion OK with scheduler %s" % (self.name, sched['name']))
+        logger.log("[%s] Connexion OK with scheduler %s" % (self.name, sname))
 
 
     # Manage action return from Workers
@@ -229,9 +235,10 @@ class Satellite(BaseSatellite):
     def manage_action_return(self, action):
         # Ok, it's a result. We get it, and fill verifs of the good sched_id
         sched_id = action.sched_id
+
         # Now we now where to put action, we do not need sched_id anymore
         del action.sched_id
-        # Unset the tag of the worker_id
+        # Unset the tag of the worker_id too
         del action.worker_id
 
         # And we remove it from the actions queue of the scheduler too
@@ -239,12 +246,13 @@ class Satellite(BaseSatellite):
             del self.schedulers[sched_id]['actions'][action.get_id()]
         except KeyError:
             pass
-        # We tag it as want return, and mvoe it in the wait return queue
+        # We tag it as want return, and move it in the wait return queue
         action.status = 'waitforhomerun'
         try:
             self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
         except KeyError:
             pass
+
         # We update stats
         self.nb_actions_in_workers =- 1
 
@@ -296,9 +304,13 @@ class Satellite(BaseSatellite):
 
         sched = self.schedulers[sched_id]
         print "Preparing to return", sched['wait_homerun'].values()
+        
+        # prepare our return
         ret = copy.copy(sched['wait_homerun'].values())
+
+        # and clear our dict
         sched['wait_homerun'].clear()
-        print "Finally return", ret
+
         return ret
 
 
@@ -306,7 +318,7 @@ class Satellite(BaseSatellite):
     # It can be mortal or not
     def create_and_launch_worker(self, module_name='fork', mortal=True):
         # ceate the input queue of this worker
-        q = Queue()#self.worker_modules[module_name]['queues']
+        q = Queue()
 
         # If we are in the fork module, do not specify a target
         target = None
@@ -319,31 +331,37 @@ class Satellite(BaseSatellite):
             if target is None:
                 return
         w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
-                   mortal=mortal,max_plugins_output_length = self.max_plugins_output_length, target=target )
-        self.workers[w.id] = w
+                   mortal=mortal, max_plugins_output_length = self.max_plugins_output_length, target=target )
         w.module_name = module_name
+        # save this worker
+        self.workers[w.id] = w
+        
         # And save the Queue of this worker, with key = worker id
         self.worker_modules[module_name]['queues'][w.id] = q
         logger.log("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
+        
+        # Ok, all is good. Start it!
         w.start()
 
 
+    # The main stop of this daemon. Stop all workers
+    # modules and sockets
     def do_stop(self):
         logger.log('Stopping all workers')
         for w in self.workers.values():
             try:
                 w.terminate()
                 w.join(timeout=1)
-                # queue = w.return_queue
-                # self.return_messages.remove(queue)
             except AttributeError: # A already die worker
                 pass
             except AssertionError: # In a worker
                 pass
+        # Close the pyro server socket if it was open
         if self.pyro_daemon:
             logger.log('Stopping all network connexions')
             self.pyro_daemon.unregister(self.brok_interface)
             self.pyro_daemon.unregister(self.scheduler_interface)
+        # and then call our master stop fro satellite code
         super(Satellite, self).do_stop()
 
 
@@ -388,12 +406,14 @@ class Satellite(BaseSatellite):
                 w.join(timeout=1)
                 w_to_del.append(w.id)
 
-        # OK, now really del workers
-        # And requeue the actiosn it was managed
+        # OK, now really del workers from queues
+        # And requeue the actions it was managed
         for id in w_to_del:
             w = self.workers[id]
+
             # Del the queue of the module queue
             del self.worker_modules[w.module_name]['queues'][w.id]
+
             for sched_id in self.schedulers:
                 sched = self.schedulers[sched_id]
                 for a in sched['actions'].values():
@@ -401,6 +421,8 @@ class Satellite(BaseSatellite):
                         # Got a check that will NEVER return if we do not
                         # restart it
                         self.assign_to_a_queue(a)
+
+            # So now we can really forgot it
             del self.workers[id]
 
 
@@ -452,6 +474,7 @@ class Satellite(BaseSatellite):
             # Update stats
             self.nb_actions_in_workers += 1
 
+
     # Take an action and put it into one queue
     def assign_to_a_queue(self, a):
         msg = Message(id=0, type='Do', data=a)
@@ -469,7 +492,7 @@ class Satellite(BaseSatellite):
         # Here are the differences between a
         # poller and a reactionner:
         # Poller will only do checks,
-        # reactionner do actions
+        # reactionner do actions (notif + event handlers)
         do_checks = self.__class__.do_checks
         do_actions = self.__class__.do_actions
 
@@ -496,14 +519,14 @@ class Satellite(BaseSatellite):
                 else: # no con? make the connexion
                     self.pynag_con_init(sched_id)
             # Ok, con is not know, so we create it
-            # Or maybe is the connexion lsot, we recreate it
+            # Or maybe is the connexion lost, we recreate it
             except (KeyError, Pyro.errors.ProtocolError) , exp:
                 print exp
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
             except (AttributeError, Pyro.errors.NamingError) , exp:
-                print exp
+                pass
             # What the F**k? We do not know what happenned,
             # so.. bye bye :)
             except Pyro.errors.ConnectionClosedError , exp:
@@ -520,7 +543,9 @@ class Satellite(BaseSatellite):
         # If true, we must restart all...
         if self.cur_conf is None:
             self.wait_for_initial_conf()
-            if not self.new_conf:  # we may have been interrupted or so; then just return from this loop turn
+            # we may have been interrupted or so; then 
+            # just return from this loop turn
+            if not self.new_conf:  
                 return
             self.setup_new_conf()
 
@@ -528,7 +553,7 @@ class Satellite(BaseSatellite):
         # If so, we listen for it
         # When it push us conf, we reinit connexions
         # Sleep in waiting a new conf :)
-        #TODO : manage the diff... AGAIN!
+        # TODO : manage the diff again.
         while self.timeout > 0:
             begin = time.time()
             self.watch_for_new_conf(self.timeout)
@@ -595,7 +620,6 @@ class Satellite(BaseSatellite):
         # If we are passive, we do not initiate the check getting
         # and return
         if not self.passive:
-            print "I try to get new actions!"
             # Now we can get new actions from schedulers
             self.get_new_actions()
 
@@ -614,7 +638,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER
-        self.worker_modules['fork'] = {'queues' : {}}#Queue()}
+        self.worker_modules['fork'] = {'queues' : {}}
         self.manager = Manager()
         self.returns_queue = self.manager.list()
 
