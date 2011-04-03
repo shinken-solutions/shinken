@@ -215,7 +215,7 @@ class Satellite(BaseSatellite):
         try:
             pyro.set_timeout(sch_con, 5)
             new_run_id = sch_con.get_running_id()
-        except (Pyro.errors.ProtocolError,Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
+        except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
             logger.log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
@@ -260,8 +260,8 @@ class Satellite(BaseSatellite):
     # Return the chk to scheduler and clean them
     # REF: doc/shinken-action-queues.png (6)
     def manage_returns(self):
-        total_sent = 0
-        # Fot all schedulers, we check for waitforhomerun and we send back results
+        # Fot all schedulers, we check for waitforhomerun
+        # and we send back results
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
             # If sched is not active, I do not try return
@@ -392,7 +392,7 @@ class Satellite(BaseSatellite):
     # So they need to be detected, and restart if need
     def check_and_del_zombie_workers(self):
         # Active children make a join with every one, useful :)
-        act = active_children()
+        active_children()
 
         w_to_del = []
         for w in self.workers.values():
@@ -430,9 +430,11 @@ class Satellite(BaseSatellite):
     def adjust_worker_number_by_load(self):
         # TODO : get a real value for a load
         wish_worker = 1
-        # I want at least min_workers or wish_workers (the biggest) but not more than max_workers
+        # I want at least min_workers or wish_workers (the biggest)
+        # but not more than max_workers
         while len(self.workers) < self.min_workers \
-                    or (wish_worker > len(self.workers) and len(self.workers) < self.max_workers):
+                    or (wish_worker > len(self.workers) \
+                            and len(self.workers) < self.max_workers):
             for mod in self.q_by_mod:
                 self.create_and_launch_worker(module_name=mod)
         # TODO : if len(workers) > 2*wish, maybe we can kill a worker?
