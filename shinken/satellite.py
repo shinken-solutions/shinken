@@ -191,7 +191,7 @@ class Satellite(BaseSatellite):
         self.s = None
         self.manager = None
         self.returns_queue = None
-        self.worker_modules = {}
+        self.q_by_mod = {}
 
 
     def pynag_con_init(self, id):
@@ -337,7 +337,7 @@ class Satellite(BaseSatellite):
         self.workers[w.id] = w
         
         # And save the Queue of this worker, with key = worker id
-        self.worker_modules[module_name]['queues'][w.id] = q
+        self.q_by_mod[module_name]['queues'][w.id] = q
         logger.log("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
         
         # Ok, all is good. Start it!
@@ -412,7 +412,7 @@ class Satellite(BaseSatellite):
             w = self.workers[id]
 
             # Del the queue of the module queue
-            del self.worker_modules[w.module_name]['queues'][w.id]
+            del self.q_by_mod[w.module_name]['queues'][w.id]
 
             for sched_id in self.schedulers:
                 sched = self.schedulers[sched_id]
@@ -433,7 +433,7 @@ class Satellite(BaseSatellite):
         # I want at least min_workers or wish_workers (the biggest) but not more than max_workers
         while len(self.workers) < self.min_workers \
                     or (wish_worker > len(self.workers) and len(self.workers) < self.max_workers):
-            for mod in self.worker_modules:
+            for mod in self.q_by_mod:
                 self.create_and_launch_worker(module_name=mod)
         # TODO : if len(workers) > 2*wish, maybe we can kill a worker?
 
@@ -444,7 +444,7 @@ class Satellite(BaseSatellite):
     def _got_queue_from_action(self, a):
         # get the module name, if not, take fork
         mod = getattr(a, 'module_type', 'fork')
-        queues = self.worker_modules[mod]['queues'].items()
+        queues = self.q_by_mod[mod]['queues'].items()
 
         # Maybe there is no more queue, it's very bad!
         if len(queues) == 0:
@@ -576,9 +576,9 @@ class Satellite(BaseSatellite):
         # Print stats for debug
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
-            for mod in self.worker_modules:
+            for mod in self.q_by_mod:
                 # In workers we've got actions send to queue - queue size
-                for (i, q) in self.worker_modules[mod]['queues'].items():
+                for (i, q) in self.q_by_mod[mod]['queues'].items():
                     print '[%d][%s][%s]Stats : Workers:%d (Queued:%d TotalReturnWait:%d)' % \
                         (sched_id, sched['name'], mod, i, q.qsize(), len(self.returns_queue))
 
@@ -588,8 +588,8 @@ class Satellite(BaseSatellite):
         # must wait more or at least have more workers
         wait_ratio = self.wait_ratio.get_load()
         total_q = 0
-        for mod in self.worker_modules:
-            for q in self.worker_modules[mod]['queues'].values():
+        for mod in self.q_by_mod:
+            for q in self.q_by_mod[mod]['queues'].values():
                 total_q += q.qsize()
         if total_q != 0 and wait_ratio < 5*self.polling_interval:
             print "I decide to up wait ratio"
@@ -638,7 +638,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER
-        self.worker_modules['fork'] = {'queues' : {}}
+        self.q_by_mod['fork'] = {'queues' : {}}
         self.manager = Manager()
         self.returns_queue = self.manager.list()
 
@@ -729,11 +729,11 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         mods = conf['global']['modules']
         for module in mods:
             # If we already got it, bypass
-            if not module.module_type in self.worker_modules:
+            if not module.module_type in self.q_by_mod:
                 print "Add module object", module
                 self.modules_manager.modules.append(module)
                 logger.log("[%s] Got module : %s " % (self.name, module.module_type))
-                self.worker_modules[module.module_type] = {'queues' : {}}#}Queue()}
+                self.q_by_mod[module.module_type] = {'queues' : {}}#}Queue()}
 
 
     def main(self):
@@ -762,7 +762,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
 
         # Allocate Mortal Threads
         for _ in xrange(1, self.min_workers):
-            for mod in self.worker_modules:
+            for mod in self.q_by_mod:
                 self.create_and_launch_worker(module_name=mod)
 
         # Now main loop
