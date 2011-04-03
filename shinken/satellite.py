@@ -522,7 +522,7 @@ class Satellite(BaseSatellite):
                     self.pynag_con_init(sched_id)
             # Ok, con is not know, so we create it
             # Or maybe is the connexion lost, we recreate it
-            except (KeyError, Pyro.errors.ProtocolError) , exp:
+            except (KeyError, Pyro.errors.ProtocolError, Pyro.errors.ConnectionClosedError) , exp:
                 print exp
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
@@ -531,9 +531,6 @@ class Satellite(BaseSatellite):
                 pass
             # What the F**k? We do not know what happenned,
             # so.. bye bye :)
-            except Pyro.errors.ConnectionClosedError , exp:
-                print exp
-                self.pynag_con_init(sched_id)
             except Exception , exp:
                 print ''.join(Pyro.util.getPyroTraceback(exp))
                 sys.exit(0)
@@ -646,21 +643,22 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
 
 
     def setup_new_conf(self):
-        """ Setup the new received conf """
+        """ Setup the new received conf from arbiter """
         conf = self.new_conf
         print "[%s] Sending us a configuration %s " % (self.name, conf)
         self.new_conf = None
         self.cur_conf = conf
-        # Gout our name from the globals
-        if 'poller_name' in conf['global']:
-            name = conf['global']['poller_name']
-        elif 'reactionner_name' in conf['global']:
-            name = conf['global']['reactionner_name']
+        g_conf = conf['global']
+        # Got our name from the globals
+        if 'poller_name' in g_conf:
+            name = g_conf['poller_name']
+        elif 'reactionner_name' in g_conf:
+            name = g_conf['reactionner_name']
         else:
             name = 'Unnamed satellite'
         self.name = name
 
-        self.passive = conf['global']['passive']
+        self.passive = g_conf['passive']
         print "Is passive?", self.passive
         if self.passive:
             logger.log("[%s] Passive mode enabled." % self.name)
@@ -695,30 +693,22 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
                 self.pynag_con_init(sched_id)
 
         # Now the limit part
-        self.max_workers = conf['global']['max_workers']
-        self.min_workers = conf['global']['min_workers']
+        self.max_workers = g_conf['max_workers']
+        self.min_workers = g_conf['min_workers']
 
-        self.processes_by_worker = conf['global']['processes_by_worker']
-        self.polling_interval = conf['global']['polling_interval']
+        self.processes_by_worker = g_conf['processes_by_worker']
+        self.polling_interval = g_conf['polling_interval']
         self.timeout = self.polling_interval
         
         # Now set tags
-        if 'poller_tags' in conf['global']:
-            self.poller_tags = conf['global']['poller_tags']
-        else: # for reactionner, poler_tag is [None]
-            self.poller_tags = ['None']
-        if 'reactionner_tags' in conf['global']:
-            self.reactionner_tags = conf['global']['reactionner_tags']
-        else: # for pollers, poler_tag is [None]
-            self.reactionner_tags = ['None']
-
-        if 'max_plugins_output_length' in conf['global']:
-            self.max_plugins_output_length = conf['global']['max_plugins_output_length']
-        else: # for reactionner, we don't really care about it
-            self.max_plugins_output_length = 8192
+        # ['None'] is the default tags
+        self.poller_tags = g_conf.get('poller_tags', ['None'])
+        self.reactionner_tags = g_conf.get('reactionner_tags', ['None'])
+        self.max_plugins_output_length = g_conf.get('max_plugins_output_length', 8192)
         print "Max output lenght" , self.max_plugins_output_length
+
         # Set our giving timezone from arbiter
-        use_timezone = conf['global']['use_timezone']
+        use_timezone = g_conf['use_timezone']
         if use_timezone != 'NOTSET':
             logger.log("[%s] Setting our timezone to %s" %(self.name, use_timezone))
             os.environ['TZ'] = use_timezone
@@ -728,7 +718,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
 
         # Now manage modules
         # TODO: check how to better handle this with modules_manager..
-        mods = conf['global']['modules']
+        mods = g_conf['modules']
         for module in mods:
             # If we already got it, bypass
             if not module.module_type in self.q_by_mod:
