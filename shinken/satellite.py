@@ -352,16 +352,15 @@ class Satellite(BaseSatellite):
             try:
                 w.terminate()
                 w.join(timeout=1)
-            except AttributeError: # A already die worker
-                pass
-            except AssertionError: # In a worker
+            # A already die worker or in a worker
+            except (AttributeError, AssertionError): 
                 pass
         # Close the pyro server socket if it was open
         if self.pyro_daemon:
             logger.log('Stopping all network connexions')
             self.pyro_daemon.unregister(self.brok_interface)
             self.pyro_daemon.unregister(self.scheduler_interface)
-        # and then call our master stop fro satellite code
+        # And then call our master stop fro satellite code
         super(Satellite, self).do_stop()
 
 
