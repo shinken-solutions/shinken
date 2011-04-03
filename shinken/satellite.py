@@ -337,7 +337,7 @@ class Satellite(BaseSatellite):
         self.workers[w.id] = w
         
         # And save the Queue of this worker, with key = worker id
-        self.q_by_mod[module_name]['queues'][w.id] = q
+        self.q_by_mod[module_name][w.id] = q
         logger.log("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
         
         # Ok, all is good. Start it!
@@ -412,7 +412,7 @@ class Satellite(BaseSatellite):
             w = self.workers[id]
 
             # Del the queue of the module queue
-            del self.q_by_mod[w.module_name]['queues'][w.id]
+            del self.q_by_mod[w.module_name][w.id]
 
             for sched_id in self.schedulers:
                 sched = self.schedulers[sched_id]
@@ -444,7 +444,7 @@ class Satellite(BaseSatellite):
     def _got_queue_from_action(self, a):
         # get the module name, if not, take fork
         mod = getattr(a, 'module_type', 'fork')
-        queues = self.q_by_mod[mod]['queues'].items()
+        queues = self.q_by_mod[mod].items()
 
         # Maybe there is no more queue, it's very bad!
         if len(queues) == 0:
@@ -578,7 +578,7 @@ class Satellite(BaseSatellite):
             sched = self.schedulers[sched_id]
             for mod in self.q_by_mod:
                 # In workers we've got actions send to queue - queue size
-                for (i, q) in self.q_by_mod[mod]['queues'].items():
+                for (i, q) in self.q_by_mod[mod].items():
                     print '[%d][%s][%s]Stats : Workers:%d (Queued:%d TotalReturnWait:%d)' % \
                         (sched_id, sched['name'], mod, i, q.qsize(), len(self.returns_queue))
 
@@ -589,7 +589,7 @@ class Satellite(BaseSatellite):
         wait_ratio = self.wait_ratio.get_load()
         total_q = 0
         for mod in self.q_by_mod:
-            for q in self.q_by_mod[mod]['queues'].values():
+            for q in self.q_by_mod[mod].values():
                 total_q += q.qsize()
         if total_q != 0 and wait_ratio < 5*self.polling_interval:
             print "I decide to up wait ratio"
@@ -638,7 +638,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER
-        self.q_by_mod['fork'] = {'queues' : {}}
+        self.q_by_mod['fork'] = {}
         self.manager = Manager()
         self.returns_queue = self.manager.list()
 
@@ -733,7 +733,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
                 print "Add module object", module
                 self.modules_manager.modules.append(module)
                 logger.log("[%s] Got module : %s " % (self.name, module.module_type))
-                self.q_by_mod[module.module_type] = {'queues' : {}}#}Queue()}
+                self.q_by_mod[module.module_type] = {}
 
 
     def main(self):
