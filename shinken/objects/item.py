@@ -862,7 +862,7 @@ class Items(object):
 
         #Now add in locals() dict (yes, real variables!)
         for token in tokens:
-            #ALLELEMENTS is a private group for us
+            # ALLELEMENTS is a private group for us
             if token != 'ALLELEMENTS':
                 #Maybe the token was with - at the begining,
                 #but we change all by "MINUSSIGN". We must change it back now
@@ -910,10 +910,18 @@ class Items(object):
         # we must OR them in the result
         if ',' in expr:
             for part in evaluation:
-                #print "PART", part
-                res.extend(list(part))
-        else:#no , so we do not have a tuple but a simple uniq set
-            res.extend(list(evaluation))
+                # Maybe we gotthe '*' member group, if so, take all
+                # hosts instead
+                if part == set('*'):
+                    res.extend(list(self.get_all_host_names_set(hosts)))
+                else:
+                    #print "PART", part
+                    res.extend(list(part))
+        else: # no , so we do not have a tuple but a simple uniq set
+            if evaluation == set('*'):
+                res.extend(list(self.get_all_host_names_set(hosts)))
+            else:
+                res.extend(list(evaluation))
         res_string = ','.join(res)
         #print "Final resolution is", res_string
         return res_string

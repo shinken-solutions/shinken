@@ -119,6 +119,7 @@ class Hostgroups(Itemgroups):
             mbrs = hg.get_hosts()
             #The new member list, in id
             new_mbrs = []
+
             for mbr in mbrs:
                 if mbr == '*':
                     new_mbrs.extend(hosts)
@@ -129,16 +130,17 @@ class Hostgroups(Itemgroups):
                     else:
                         hg.unknown_members.append(mbr)
 
-            #Make members uniq
+            # Make members uniq
             new_mbrs = list(set(new_mbrs))
 
-            #We find the id, we remplace the names
+
+            # We find the id, we remplace the names
             hg.replace_members(new_mbrs)
 
-            #Now register us in our members
+            # Now register us in our members
             for h in hg.members:
                 h.hostgroups.append(hg)
-                #and be sure we are uniq in it
+                # and be sure we are uniq in it
                 h.hostgroups = list(set(h.hostgroups))
 
 
