@@ -115,11 +115,12 @@ Returns: True on successfull init. False if instance init method raised any Exce
                 # Do not try until 5 sec, or it's too loopy
                 if inst.last_init_try > time.time() - 5:
                     return False
+            inst.last_init_try = time.time()
+
             # If it's an external, create/update Queues()
             if inst.is_external:
                 inst.create_queues()
 
-            inst.last_init_try = time.time()
             inst.init()
         except Exception, e:
             logger.log("Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
