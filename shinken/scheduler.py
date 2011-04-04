@@ -40,6 +40,7 @@ from shinken.brok import Brok
 from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
+from shinken.acknowledge import Acknowledge
 from shinken.log import logger
 from shinken.util import nighty_five_percent
 from shinken.load import Load
@@ -816,6 +817,9 @@ class Scheduler:
                 for a in h.notifications_in_progress.values():
                     a.ref = h
                     self.add(a)
+                    # Also raise the action id, so do not overlap ids
+                    cls = a.__class__
+                    cls.id = max(cls.id, a.id + 1)
                 h.update_in_checking()
                 #And also add downtimes and comments
                 for dt in h.downtimes:
@@ -824,12 +828,19 @@ class Scheduler:
                         dt.extra_comment.ref = h
                     else:
                         dt.extra_comment = None
+                    # raise the downtime id to do not overlap
+                    Downtime.id = max(Comment.id, dt.id + 1)
                     self.add(dt)
                 for c in h.comments:
                     c.ref = h
                     self.add(c)
+                    # raise comment id to do not overlap ids
+                    Comment.id = max(Comment.id, c.id + 1)
                 if h.acknowledgement is not None:
                     h.acknowledgement.ref = h
+                    # Raise the id of future ack so we don't overwrite
+                    # these one
+                    Acknowledge.id = max(Acknowledge.id, h.acknowledgement.id + 1)
 
 
         ret_services = data['services']
@@ -847,10 +858,15 @@ class Scheduler:
                         if prop in d:
                             #if prop in ('acknowledgement', 'problem_has_been_acknowledged', 'acknowledgement_type'):
                             #    print "Loading", prop, "for", s.get_dbg_name(), ' :', d[prop]
+                            #    if prop == 'acknowledgement' and d[prop] is not None:
+                            #        print d[prop].__dict__
                             setattr(s, prop, d[prop])
                 for a in s.notifications_in_progress.values():
                     a.ref = s
                     self.add(a)
+                    # Also raise the action id, so do not overlap ids
+                    cls = a.__class__
+                    cls.id = max(cls.id, a.id + 1)
                 s.update_in_checking()
                 #And also add downtimes and comments
                 for dt in s.downtimes:
@@ -859,12 +875,19 @@ class Scheduler:
                         dt.extra_comment.ref = s
                     else:
                         dt.extra_comment = None
+                    # raise the downtime id to do not overlap
+                    Downtime.id = max(Comment.id, dt.id + 1)
                     self.add(dt)
                 for c in s.comments:
                     c.ref = s
                     self.add(c)
+                    # raise comment id to do not overlap ids
+                    Comment.id = max(Comment.id, c.id + 1)
                 if s.acknowledgement is not None:
                     s.acknowledgement.ref = s
+                    # Raise the id of future ack so we don't overwrite
+                    # these one
+                    Acknowledge.id = max(Acknowledge.id, s.acknowledgement.id + 1)
 
 
 

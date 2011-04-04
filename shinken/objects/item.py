@@ -333,6 +333,7 @@ class Item(object):
     # but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
+            print "Deleting acknowledged of", self.get_dbg_name()
             self.problem_has_been_acknowledged = False
             #Should not be deleted, a None is Good
             self.acknowledgement = None

@@ -26,7 +26,7 @@ By acknowledging the current problem, future notifications (for the same
 servicestate) are disabled.
 """
 class Acknowledge:
-    id = 0
+    id = 1
 
     #Just to list the properties we will send as pickle
     #so to others daemons, so all but NOT REF
