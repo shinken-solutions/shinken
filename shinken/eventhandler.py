@@ -88,10 +88,10 @@ class EventHandler(Action):
     def get_return_from(self, e):
         self.exit_status  = e.exit_status
         self.output = e.output
-        self.long_output = e.long_output
+        self.long_output = getattr(e, 'long_output', '')
         self.check_time = e.check_time
-        self.execution_time = e.execution_time
-        self.perf_data = e.perf_data
+        self.execution_time = getattr(e, 'execution_time', 0.0)
+        self.perf_data = getattr(e, 'perf_data', '')
 
 
     def get_outputs(self, out, max_plugins_output_length):
