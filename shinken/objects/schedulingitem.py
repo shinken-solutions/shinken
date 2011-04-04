@@ -400,7 +400,8 @@ class SchedulingItem(Item):
         # are not in the same time
 
         # next_chk il already set, do not change
-        if self.in_checking and not force:
+        # unless we force the check or the time
+        if self.in_checking and not (force or force_time):
             return None
 
         cls = self.__class__

@@ -110,8 +110,8 @@ class Downtime:
         return self.is_in_effect
 
 
-    #The referenced host/service object enters now a (or another) scheduled
-    #downtime. Write a log message only if it was not already in a downtime
+    # The referenced host/service object enters now a (or another) scheduled
+    # downtime. Write a log message only if it was not already in a downtime
     def enter(self):
         res = []
         self.is_in_effect = True
