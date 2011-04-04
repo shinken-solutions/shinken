@@ -238,8 +238,12 @@ class Satellite(BaseSatellite):
 
         # Now we now where to put action, we do not need sched_id anymore
         del action.sched_id
+
         # Unset the tag of the worker_id too
-        del action.worker_id
+        try:
+            del action.worker_id
+        except AttributeError:
+            pass
 
         # And we remove it from the actions queue of the scheduler too
         try:
