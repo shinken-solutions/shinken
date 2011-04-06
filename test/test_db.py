@@ -44,7 +44,7 @@ class TestConfig(ShinkenTest):
         # Now some UTF8 funny characters
         data = {'id' : "1", "is_master" : True, 'plop' : u'£°é§'}
         q = self.db.create_insert_query('instances' , data)
-        print "Q", q
+        #print "Q", q
         c = u"INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , '£°é§'  )"
         print type(q), type(c)
         print len(q), len(c)
