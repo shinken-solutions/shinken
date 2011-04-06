@@ -845,6 +845,7 @@ class Service(SchedulingItem):
 
         # In macro, it's all in UPPER case
         prop = self.duplicate_foreach.strip().upper()
+        
         # If I do not have the property, we bail out
         if prop in host.customs:
             entry = host.customs[prop]
@@ -1081,7 +1082,8 @@ class Services(Items):
         # we've got, not a real host_name/ So we must get a list of host_name
         # that use this template
         else:
-            hosts_from_tpl = hosts.find_hosts_that_use_template(hname)
+            hosts_from_tpl = hosts.find_hosts_that_use_template(hname.strip())
+
             # And now copy our real services
             for n in hosts_from_tpl:
                 for_hosts_to_create.append(n)
@@ -1098,11 +1100,13 @@ class Services(Items):
                 # the generator case, we must create several new services
                 # we must find our host, and get all key:value we need
                 h = hosts.find_by_name(name.strip())
+
                 if h is not None:
                     for new_s in s.duplicate(h):
                         self.items[new_s.id] = new_s
                 else: # TODO : raise an error?
-                    pass
+                    err = 'Error : The hostname %s is unknown for the service %s!' % (name, s.get_name())
+                    s.configuration_errors.append(err)
 
         # Now really create the services
         for name in for_hosts_to_create:

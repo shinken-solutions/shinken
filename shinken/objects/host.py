@@ -1098,7 +1098,7 @@ class Hosts(Items):
         tpl = None
         for h in self:
             #Look fortemplate with the good name
-            if h.is_tpl() and hasattr(h, 'name') and h.name == tpl_name:
+            if h.is_tpl() and hasattr(h, 'name') and h.name.strip() == tpl_name.strip():
                 tpl = h
 
         #If we find noone, we return nothing (easy case:) )
