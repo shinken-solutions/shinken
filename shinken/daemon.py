@@ -462,6 +462,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         # and try to restart previous dead :)
         self.modules_manager.try_to_restart_deads()
 
+
     #Just give the uid of a user by looking at it's name
     def find_uid_from_name(self):
         try:
@@ -469,6 +470,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         except KeyError , exp:
             print "Error: the user", self.user, "is unknown"
             return None
+
 
     #Just give the gid of a group by looking at it's name
     def find_gid_from_name(self):

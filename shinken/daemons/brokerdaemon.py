@@ -205,19 +205,16 @@ class Broker(BaseSatellite):
     # THEY MUST DO NOT CHANGE data of b !!!
     # REF: doc/broker-modules.png (4-5)
     def manage_brok(self, b):
-        to_del = []
         # Call all modules if they catch the call
         for mod in self.modules_manager.get_internal_instances():
             try:
                 mod.manage_brok(b)
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
                 logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
-                to_del.append(mod)
-        # Now remove mod that raise an exception
-        self.modules_manager.clear_instances(to_del)
+                self.modules_manager.set_to_restart(inst)
 
 
     # Add broks (a tab) to different queues for
