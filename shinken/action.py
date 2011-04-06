@@ -95,7 +95,7 @@ class __Action(object):
             now = time.time()
             if (now - self.check_time) > self.timeout:
                 self.kill__()
-                #print "Kill", self.process.pid, self.command, now - self.check_time
+                #print "Kill for timeout", self.process.pid, self.command, now - self.check_time
                 self.status = 'timeout'
                 self.execution_time = now - self.check_time
                 self.exit_status = 3
@@ -146,10 +146,11 @@ if os.name != 'nt':
             # If the command line got shell characters, we should go in a shell
             # mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
-
+            #force_shell = False
+            
             # 2.7 and higer Python version need a list of args for cmd
             # 2.4->2.6 accept just the string command
-            if sys.version_info < (2, 7):
+            if sys.version_info < (2, 7):# and False:
                 cmd = self.command
             else:
                 cmd = shlex.split(self.command.encode('utf8', 'ignore'))

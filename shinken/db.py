@@ -27,6 +27,18 @@ class DB(object):
     def __init__(self, table_prefix = ''):
         self.table_prefix = table_prefix
 
+    # Get a unicode from a value
+    def stringify(self, val):
+        # If raw string, go in unicode
+        if isinstance(val, str):
+            val = val.decode('utf8', 'ignore').replace("'", "''")
+        elif isinstance(val, unicode):
+            val = val.replace("'", "''")
+        else: # other type, we can str
+            val = unicode(str(val))
+            val = val.replace("'", "''")
+        return val
+
 
     #Create a INSERT query in table with all data of data (a dict)
     def create_insert_query(self, table, data):
@@ -44,11 +56,8 @@ class DB(object):
                 else:
                     val = 0
 
-            if isinstance(val, unicode) or isinstance(val, str):
-                val = val.decode('utf8', 'ignore').replace("'", "''")
-            else:
-                val = str(val)
-                val = val.replace("'", "''")
+            # Get a string of the value
+            val = self.stringify(val)
 
             if i == 1:
                 props_str = props_str + u"%s " % prop
@@ -84,11 +93,10 @@ class DB(object):
                         val = 1
                     else:
                         val = 0
-                if isinstance(val, unicode) or isinstance(val, str):
-                    val = val.decode('utf8', 'ignore').replace("'", "''")
-                else:
-                    val = str(val)
-                    val = val.replace("'", "''")
+
+                # Get a string of the value
+                val = self.stringify(val)
+
                 if i == 1:
                     query_folow += u"%s='%s' " % (prop, val)
                 else:
@@ -106,11 +114,10 @@ class DB(object):
                     val = 1
                 else:
                     val = 0
-            if isinstance(val, unicode) or isinstance(val, str):
-                val = val.decode('utf8', 'ignore').replace("'", "''")
-            else:
-                val = str(val)
-                val = val.replace("'", "''")
+
+
+            # Get a string of the value
+            val = self.stringify(val)
 
             if i == 1:
                 where_clause += u"%s='%s' " % (prop, val)

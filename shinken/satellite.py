@@ -264,6 +264,7 @@ class Satellite(BaseSatellite):
     # Return the chk to scheduler and clean them
     # REF: doc/shinken-action-queues.png (6)
     def manage_returns(self):
+        #return
         # Fot all schedulers, we check for waitforhomerun
         # and we send back results
         for sched_id in self.schedulers:
@@ -494,6 +495,15 @@ class Satellite(BaseSatellite):
     # put it in the s queue (from master to slave)
     # REF: doc/shinken-action-queues.png (1)
     def get_new_actions(self):
+        now = time.time()
+        # HACK
+        #r = []
+        #for i in xrange(1, 1500):#750):
+        #    c = Check('scheduled', '/bin/ping localhost -p 1 -c 1', None, now)
+        #    r.append(c)
+        #self.add_actions(r, 0)
+        #return
+        
         # Here are the differences between a
         # poller and a reactionner:
         # Poller will only do checks,
@@ -596,6 +606,7 @@ class Satellite(BaseSatellite):
         if total_q != 0 and wait_ratio < 5*self.polling_interval:
             print "I decide to up wait ratio"
             self.wait_ratio.update_load(wait_ratio * 2)
+            #self.wait_ratio.update_load(self.polling_interval)
         else:
             # Go to self.polling_interval on normal run, if wait_ratio
             # was >5*self.polling_interval,
