@@ -65,7 +65,7 @@ class TestConfig(ShinkenTest):
         data = {'id' : "1", "is_master" : True, 'plop' : u'£°é§'}
         where = {'id' : "£°é§", "is_master" : True}
         q = self.db.create_update_query('instances' , data, where)
-        print "Q", q
+        #print "Q", q
         c = u"UPDATE test_instances set plop='£°é§'  WHERE is_master='1' and id='£°é§'"
         self.assert_(q.strip() == c.strip())
 
