@@ -95,3 +95,6 @@ if args:
 
 daemon = Arbiter(debug=opts.debug_file is not None, **opts.__dict__)
 daemon.main()
+# For perf tuning :
+#import cProfile
+#cProfile.run('''daemon.main()''', '/tmp/arbiter.profile')

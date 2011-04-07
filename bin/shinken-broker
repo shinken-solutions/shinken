@@ -71,3 +71,7 @@ if args:
 
 daemon = Broker(debug=opts.debug_file is not None, **opts.__dict__)
 daemon.main()
+
+# For perf tuning: 
+#import cProfile
+#cProfile.run('''daemon.main()''', '/tmp/broker.profile')

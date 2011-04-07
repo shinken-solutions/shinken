@@ -231,10 +231,10 @@ class Service(SchedulingItem):
         # so our parents as network relation, or a host
         # we are depending in a hostdependency
         # or even if we are businesss based.
-        'parent_dependencies': StringProp(default=[], brok_transformation=to_svc_hst_distinct_lists, fill_brok=['full_status']),
+        'parent_dependencies': StringProp(default=set(), brok_transformation=to_svc_hst_distinct_lists, fill_brok=['full_status']),
         # Here it's the guys taht depend on us. So it's the total
         # oposite of the parent_dependencies 
-        'child_dependencies': StringProp(brok_transformation=to_svc_hst_distinct_lists, default=[], fill_brok=['full_status']),
+        'child_dependencies': StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
 
         # Manage the unkown/unreach during hard state
         'in_hard_unknown_reach_phase': BoolProp(default=False, retention=True),

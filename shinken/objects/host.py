@@ -222,12 +222,12 @@ class Host(SchedulingItem):
         # so our parents as network relation, or a host
         # we are depending in a hostdependency
         # or even if we are businesss based.
-        'parent_dependencies' : StringProp(brok_transformation=to_svc_hst_distinct_lists, default=[], fill_brok=['full_status']),
+        'parent_dependencies' : StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
         # Here it's the guys taht depend on us. So it's the total
         # oposite of the parent_dependencies 
         'child_dependencies':   StringProp(
             brok_transformation=to_svc_hst_distinct_lists,
-            default=[],
+            default=set(),
             fill_brok=['full_status']),
 
         # All errors and warning raised during the configuration parsing

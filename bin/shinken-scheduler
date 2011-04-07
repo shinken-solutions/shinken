@@ -117,3 +117,6 @@ if args:
 
 daemon = Shinken(debug=opts.debug_file is not None, **opts.__dict__)
 daemon.main()
+# For perf running :
+#import cProfile
+#cProfile.run('''daemon.main()''', '/tmp/scheduler.profile')

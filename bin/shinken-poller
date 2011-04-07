@@ -73,3 +73,8 @@ if args:
 
 daemon = Poller(debug=opts.debug_file is not None, **opts.__dict__)
 daemon.main()
+
+# For perf tuning :
+#import cProfile
+#cProfile.run('''daemon.main()''', '/tmp/poller.profile')
+

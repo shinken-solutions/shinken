@@ -50,14 +50,14 @@ class SchedulingItem(Item):
 
 
     # Register the son in my child_dependencies, and
-    #myself in its parent_dependencies
+    # myself in its parent_dependencies
     def register_son_in_parent_child_dependencies(self, son):
         # So we register it in our list
-        self.child_dependencies.append(son)
-        self.child_dependencies = list(set(self.child_dependencies))
+        self.child_dependencies.add(son)
+
         # and us to its parents
-        son.parent_dependencies.append(self)
-        son.parent_dependencies = list(set(son.parent_dependencies))
+        son.parent_dependencies.add(self)
+
 
 
     # Add a flapping change, but no more than 20 states
