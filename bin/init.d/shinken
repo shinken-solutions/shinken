@@ -40,7 +40,7 @@ VAR="/usr/local/shinken/var"
 ETC="/usr/local/shinken/etc"
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
-export LANG=us_US.UTF8
+export LANG=en_US.UTF8
 
 # default
 DEBUG=false
