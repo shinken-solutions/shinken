@@ -24,6 +24,7 @@ import re
 
 from shinken.objects import *
 from shinken.property import IntegerProp, StringProp, ListProp
+from copy import copy
 
 class Discoveryrule(Item):
     id = 1 #0 is always special in database, so we do not take risk here
@@ -37,7 +38,9 @@ class Discoveryrule(Item):
 #        'use':                   StringProp(),
     }
 
-    running_properties = {}
+    running_properties = {
+        'configuration_errors': ListProp(default=[]),
+        }
 
     macros = {}
 
@@ -90,6 +93,20 @@ class Discoveryrule(Item):
                     self.not_matches[key] = params['!'+key]
                 else:
                     self.matches[key] = params[key]
+
+        # Then running prop :)
+        cls = self.__class__
+        # adding running properties like latency, dependency list, etc
+        for prop, entry in cls.running_properties.items():
+            # Copy is slow, so we check type
+            # Type with __iter__ are list or dict, or tuple.
+            # Item need it's own list, so qe copy
+            val = entry.default
+            if hasattr(val, '__iter__'):
+                setattr(self, prop, copy(val))
+            else:
+                setattr(self, prop, val)
+            #eatch istance to have his own running prop!
 
 
     # Output name

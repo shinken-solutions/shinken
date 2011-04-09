@@ -40,7 +40,9 @@ class Resultmodulation(Item):
         'modulation_period':     StringProp(default=None),
     }
     
-    running_properties = {}
+    running_properties = {
+        'configuration_errors': ListProp(default=[]),
+        }
     macros = {}
 
 
@@ -97,7 +99,9 @@ class Resultmodulations(Items):
         for rm in self:
             mtp_name = rm.modulation_period
 
-            #The new member list, in id
+            # The new member list, in id
             mtp = timeperiods.find_by_name(mtp_name)
-
+            if mtp_name.strip() != '' and mtp is None:
+                err = "Error : the result modulation '%s' got an unknown modulation_period '%s'" % (rm.get_name(), mtp_name)
+                rm.configuration_errors.append(err)
             rm.modulation_period = mtp
