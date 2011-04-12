@@ -85,19 +85,19 @@ class Notification(Action):
     }
 
 
-    def __init__(self, type , status, command, command_call, ref, contact, t_to_go, \
+    def __init__(self, type='PROBLEM' , status='scheduled', command='UNSET', command_call=None, ref=None, contact=None, t_to_go=0, \
                      contact_name='', host_name='', service_description='',
                      reason_type=1, state=0, ack_author='', ack_data='', \
                      escalated=False, contacts_notified=0, \
                      start_time=0, end_time=0, notification_type=0, id=None, \
                      notif_nb=1, timeout=10, env={}, module_type='fork', \
                      reactionner_tag='None'):
+
         self.is_a = 'notification'
         self.type = type
         if id is None: #id != None is for copy call only
             self.id = Action.id
             Action.id += 1
-
 
         self._in_timeout = False
         self.timeout = timeout
@@ -215,3 +215,4 @@ class Notification(Action):
             self.reactionner_tag = 'None'
         if not hasattr(self, 'worker'):
             self.worker = 'none'
+
