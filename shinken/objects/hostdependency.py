@@ -48,10 +48,12 @@ class Hostdependency(Item):
         'dependency_period':             StringProp(default='')
     }
     
-    running_properties = {}
+    running_properties = {
+        'configuration_errors': ListProp(default=[]),
+        }
 
-    #Give a nice name output, for debbuging purpose
-    #(debugging happens more often than expected...)
+    # Give a nice name output, for debbuging purpose
+    # (debugging happens more often than expected...)
     def get_name(self):
         return self.dependent_host_name+'/'+self.host_name
 
@@ -99,15 +101,22 @@ class Hostdependencies(Items):
                 h_name = hd.host_name
                 dh_name = hd.dependent_host_name
                 h = hosts.find_by_name(h_name)
+                if h is None:
+                    err = "Error : the host dependency got a bad host_name definition '%s'" % h_name
+                    hd.configuration_errors.append(err)
                 dh = hosts.find_by_name(dh_name)
+                if dh is None:
+                    err = "Error : the host dependency got a bad dependent_host_name definition '%s'" % dh_name
+                    hd.configuration_errors.append(err)
                 hd.host_name = h
                 hd.dependent_host_name = dh
             except AttributeError , exp:
-                print exp
+                err = "Error : the host dependency miss a property '%s'" % exp
+                hd.configuration_errors.append(err)
 
 
-    #We just search for each hostdep the id of the host
-    #and replace the name by the id
+    # We just search for each hostdep the id of the host
+    # and replace the name by the id
     def linkify_hd_by_tp(self, timeperiods):
         for hd in self:
             try:
@@ -118,11 +127,17 @@ class Hostdependencies(Items):
                 print exp
 
 
-    #We backport host dep to host. So HD is not need anymore
+    # We backport host dep to host. So HD is not need anymore
     def linkify_h_by_hd(self):
         for hd in self:
+            # Link template is useless
+            if hd.is_tpl():
+                continue
+            # if the host dep conf is bad, pass this one
+            if getattr(hd, 'host_name', None) is None or getattr(hd, 'dependent_host_name', None) is None:
+                continue
+            # Ok, link!
             depdt_hname = hd.dependent_host_name
-            if hd.is_tpl() or depdt_hname is None: continue
             dp = getattr(hd, 'dependency_period', None)
             depdt_hname.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, dp, hd.inherits_parent)
             depdt_hname.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent)

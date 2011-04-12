@@ -39,6 +39,7 @@ class Discoveryrun(Item):
 
     running_properties = {
         'current_launch': StringProp(default=None),
+        'configuration_errors': ListProp(default=[]),
         }
 
     macros = {}

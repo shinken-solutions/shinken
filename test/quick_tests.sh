@@ -41,7 +41,6 @@ function launch_and_assert {
 
 #Launching only quick tests for quick regression check
 #for ii in `ls -1 test_*py`; do echo "Launching Test $ii" && python $ii; done
-launch_and_assert test_bad_start.py
 launch_and_assert test_system_time_change.py
 launch_and_assert test_services.py
 launch_and_assert test_hosts.py
@@ -114,6 +113,9 @@ launch_and_assert test_startmember_group.py
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py
+
+# Can failed on non prepared box
+launch_and_assert test_bad_start.py
 
 # And create the coverage file
 coverage xml --omit=/usr/lib

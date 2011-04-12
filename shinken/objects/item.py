@@ -34,6 +34,7 @@ from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
+from shinken.log import logger
 
 class Item(object):
     def __init__(self, params={}):
@@ -258,6 +259,14 @@ class Item(object):
     def is_correct(self):
         state = True
         properties = self.__class__.properties
+        
+        # Raised all previously saw errors like unknown contacts and co
+        if self.configuration_errors != []:
+            state = False
+            for err in self.configuration_errors:
+                logger.log(err)
+
+
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
                 print self.get_name(), "missing property :", prop
