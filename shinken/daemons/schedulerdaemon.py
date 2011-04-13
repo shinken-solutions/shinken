@@ -276,7 +276,7 @@ class Shinken(BaseSatellite):
             val = self.override_conf[prop]
             setattr(self.conf, prop, val)
 
-        if self.conf.use_timezone != 'NOTSET':
+        if self.conf.use_timezone != '':
             print "Setting our timezone to", self.conf.use_timezone
             os.environ['TZ'] = self.conf.use_timezone
             time.tzset()
