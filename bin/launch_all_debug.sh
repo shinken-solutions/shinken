@@ -5,6 +5,8 @@ echo $DIR
 
 cd $DIR/..
 
+export LANG=us_US.UTF-8
+
 $DIR/launch_scheduler_debug.sh
 $DIR/launch_poller_debug.sh
 $DIR/launch_reactionner_debug.sh
