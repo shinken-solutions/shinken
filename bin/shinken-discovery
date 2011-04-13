@@ -44,6 +44,11 @@ from shinken.macroresolver import MacroResolver
 
 
 VERSION = '0.1'
+if os.name != 'nt': 
+    DEFAULT_CFG = '/etc/shinken/discovery.cfg'
+else:
+    DEFAULT_CFG = 'c:\\shinken\\etc\\discovery.cfg'
+
 
 parser = optparse.OptionParser(
     "%prog [options] -c discovery_config -o config_output -m list of macros",
@@ -67,7 +72,10 @@ raw_macros = []
 macros=[]
 
 if not opts.cfg_input:
-    parser.error("Requires a discovery configuration file, dsicovery.cfg (option -c/--cfg-input")
+    if not os.path.exists(DEFAULT_CFG):
+        parser.error("Requires a discovery configuration file, discovery.cfg (option -c/--cfg-input")
+    else : # take the default file
+        opts.cfg_input = DEFAULT_CFG
 if not opts.output_dir:
     parser.error("Requires one output directory (option -o/--dir-output")
 if not opts.overright:
