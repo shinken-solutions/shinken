@@ -912,7 +912,7 @@ class Items(object):
         except NameError:
             print "There is a unknow name in %s" % original_expr
             return res
-        #print "Evaluation :", evaluation
+        #print "Evaluation :", evaluation, expr
 
         # In evaluation we can have multiples values because
         # of , (so it make a tuple in fact)
@@ -924,13 +924,14 @@ class Items(object):
                 if part == set('*'):
                     res.extend(list(self.get_all_host_names_set(hosts)))
                 else:
-                    #print "PART", part
-                    res.extend(list(part))
+                    # Extend but remove all u'' that is in fact void hostgroups members
+                    res.extend([e for e in list(part) if e !=u''])
         else: # no , so we do not have a tuple but a simple uniq set
             if evaluation == set('*'):
                 res.extend(list(self.get_all_host_names_set(hosts)))
             else:
-                res.extend(list(evaluation))
+                # Extend but remove all u'' that is in fact void hostgroups members
+                res.extend([e for e in list(evaluation) if e !=u''])
         res_string = ','.join(res)
         #print "Final resolution is", res_string
         return res_string
