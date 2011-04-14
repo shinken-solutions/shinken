@@ -51,6 +51,15 @@ class TestNestedHostgroups(ShinkenTest):
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "NestedService")
         self.assert_(svc2 is not None)
 
+
+        # And now look for the service testHostToGroup apply on the group
+        # high_level, and the host test_host_2 should be on it, so it must have
+        # this service too
+        host2 = self.sched.hosts.find_by_name("test_host_2")
+        self.assert_(host2 in hg_high.members)
+        svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "testHostToGroup")
+        self.assert_(svc3 is not None)
+        
         
 
 if __name__ == '__main__':
