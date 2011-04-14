@@ -42,7 +42,6 @@ if not *%CONT:~0,1% == *I if not *%CONT:~0,1% == *i goto remove
 if exist %PATH_INSTSRV%\instsrv.exe goto main
 echo You need to install  %PATH_INSTSRV%\instsrv.exe from Microsoft Website !!!
 echo  http://www.microsoft.com/downloads/details.aspx?FamilyID=9D467A69-57FF-4AE7-96EE-B18C4790CFFD
-start /w iexplorer  http://www.microsoft.com/downloads/details.aspx?FamilyID=9D467A69-57FF-4AE7-96EE-B18C4790CFFD
 pause
 exit
 
