@@ -21,12 +21,15 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import logging
+from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
 
 obj = None
 name = None
 local_log = None
+
 
 class Log:
     # We load the object where we will put log broks
@@ -66,17 +69,27 @@ class Log:
 
         # If we want a local log write, do it
         if local_log is not None:
-            local_log.write(s)
-            local_log.flush()
-            
+            logging.info(s)
+
 
     # The log can also write to a local file if need
     # and return the filedecriptor so we can avoid to
     # close it
     def register_local_log(self, path):
         global local_log
-        local_log = open(path, 'a')
-        return local_log.fileno()
+
+        # Open the log and set to rotate once a day
+        log_level = logging.DEBUG
+        basic_log_handler = TimedRotatingFileHandler(path,'midnight',backupCount=5)
+        basic_log_handler.setLevel(log_level)
+        basic_log_formatter = logging.Formatter('%(asctime)s %(message)s')
+        basic_log_handler.setFormatter(basic_log_formatter)
+        logging.getLogger('').addHandler(basic_log_handler)
+        logging.getLogger('').setLevel(log_level)
+        local_log = logging
+
+        # Return the file descriptor of this file
+        return basic_log_handler.stream.fileno()
         
 
     # Clsoe the local log file at program exit
