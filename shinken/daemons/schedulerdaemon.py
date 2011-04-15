@@ -24,6 +24,7 @@ import os
 import sys
 import random
 import time
+import traceback
 
 from shinken.scheduler import Scheduler
 from shinken.objects import Config
@@ -343,12 +344,17 @@ class Shinken(BaseSatellite):
 
     # our main function, launch after the init
     def main(self):
+        try:
+            self.load_config_file()
+            self.do_daemon_init_and_start()
+            self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
+            logger.log("[scheduler] General interface is at: %s" % self.uri2)
+            self.do_mainloop()
 
-        self.load_config_file()
-        
-        self.do_daemon_init_and_start()
-        self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
-        print "The Arbiter Interface is at:", self.uri2
-        
-        self.do_mainloop()
+        except Exception, exp:
+            logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
+            logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
+            logger.log("Back trace of it: %s" % (traceback.format_exc()))
+            raise
+            
             
