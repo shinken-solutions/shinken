@@ -753,7 +753,6 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         
             self.do_post_daemon_init()
 
-            raise Exception("Moncul")
             # We wait for initial conf
             self.wait_for_initial_conf()
             if not self.new_conf: # we must have either big problem or was requested to shutdown

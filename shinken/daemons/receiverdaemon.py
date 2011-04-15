@@ -251,35 +251,43 @@ class Receiver(BaseSatellite):
 
     #  Main function, will loop forever
     def main(self):
+        try:
+            self.load_config_file()
         
-        self.load_config_file()
+            for line in self.get_header():
+                self.log.log(line)
+
+            logger.log("[Receiver] Using working directory : %s" % os.path.abspath(self.workdir))
         
-        for line in self.get_header():
-            self.log.log(line)
+            self.do_daemon_init_and_start()
+            
+            self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
+            print "The Arbtier uri it at", self.uri2
 
-        logger.log("[Receiver] Using working directory : %s" % os.path.abspath(self.workdir))
-        
-        self.do_daemon_init_and_start()
+            raise Exception("Moncul")
 
-        self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
-        print "The Arbtier uri it at", self.uri2
+            #  We wait for initial conf
+            self.wait_for_initial_conf()
+            if not self.new_conf:
+                return
 
-        #  We wait for initial conf
-        self.wait_for_initial_conf()
-        if not self.new_conf:
-            return
+            self.setup_new_conf()
 
-        self.setup_new_conf()
+            self.modules_manager.set_modules(self.modules)
+            self.do_load_modules()
+            # and start external modules too
+            self.modules_manager.start_external_instances()
 
-        self.modules_manager.set_modules(self.modules)
-        self.do_load_modules()
-        # and start external modules too
-        self.modules_manager.start_external_instances()
-
-        # Do the modules part, we have our modules in self.modules
-        # REF: doc/receiver-modules.png (1)
+            # Do the modules part, we have our modules in self.modules
+            # REF: doc/receiver-modules.png (1)
 
 
-        # Now the main loop
-        self.do_mainloop()
+            # Now the main loop
+            self.do_mainloop()
+
+        except Exception, exp:
+            logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
+            logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
+            logger.log("Back trace of it: %s" % (traceback.format_exc()))
+            raise
 
