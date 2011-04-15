@@ -29,7 +29,7 @@ from brok import Brok
 obj = None
 name = None
 local_log = None
-
+human_timestamp_log = False
 
 class Log:
     # We load the object where we will put log broks
@@ -45,6 +45,7 @@ class Log:
         global obj
         global name
         global local_log
+        global human_timestamp_log
 
         # If the daemon is launch with a non UTF8 shell
         # we can habe problem in printing
@@ -57,9 +58,15 @@ class Log:
             if name is None:
                 # We format the log in UTF-8
                 #message.decode('UTF-8', 'replace')
-                s = u'[%d] %s\n' % (int(time.time()), message)
+                if human_timestamp_log:
+                    s = u'[%s] %s\n' % (time.asctime(time.localtime(time.time())), message)
+                else:
+                    s = u'[%d] %s\n' % (int(time.time()), message)
             else:
-                s = u'[%d] [%s] %s\n' % (int(time.time()), name, message)
+                if human_timestamp_log:
+                    s = u'[%s] [%s] %s\n' % (time.asctime(time.localtime(time.time())), name, message)
+                else:
+                    s = u'[%d] [%s] %s\n' % (int(time.time()), name, message)
         else:
             s = format % message
 
@@ -97,6 +104,11 @@ class Log:
         global local_log
         if local_log:
             local_log.close()
-        
+
+
+    # Set teh output as human format
+    def set_human_format(self):
+        global human_timestamp_log
+        human_timestamp_log = True
 
 logger = Log()

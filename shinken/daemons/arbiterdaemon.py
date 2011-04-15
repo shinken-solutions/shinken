@@ -433,6 +433,7 @@ class Arbiter(Daemon):
             else:
                 arb.is_me = lambda: False # and we know who we are not, just keep it.
 
+
     def do_loop_turn(self):
         # If I am a spare, I wait for the master arbiter to send me
         # true conf. When
@@ -505,6 +506,8 @@ class Arbiter(Daemon):
             if arb.is_me():
                 self.me = arb
 
+        if self.conf.human_timestamp_log:
+            logger.set_human_format()
         logger.log("Begin to dispatch configurations to satellites")
         self.dispatcher = Dispatcher(self.conf, self.me)
         self.dispatcher.check_alive()

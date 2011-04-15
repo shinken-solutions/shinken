@@ -224,6 +224,9 @@ class Config(Item):
         'server_cert' :          StringProp(default='etc/certs/server.pem'),
         'hard_ssl_name_check':   BoolProp(default='0'),
 
+        # Log format
+        'human_timestamp_log':   BoolProp(default='0'),
+
         ## Discovery part
         'strip_idname_fqdn' :    BoolProp(default='1'),
    }
