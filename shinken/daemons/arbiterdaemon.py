@@ -24,6 +24,7 @@ import sys
 import os
 import time
 import random
+import traceback
 from Queue import Empty
 from multiprocessing import active_children
 
@@ -393,24 +394,30 @@ class Arbiter(Daemon):
 
     # Main loop function
     def main(self):
-        # Log will be broks
-        for line in self.get_header():
-            self.log.log(line)
+        try:
+            # Log will be broks
+            for line in self.get_header():
+                self.log.log(line)
 
-        self.load_config_file()
+            self.load_config_file()
 
-        self.do_daemon_init_and_start(self.conf)
-        self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
+            self.do_daemon_init_and_start(self.conf)
+            self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
-        # ok we are now fully daemon (if requested)
-        # now we can start our "external" modules (if any) :
-        self.modules_manager.start_external_instances()
+            # ok we are now fully daemon (if requested)
+            # now we can start our "external" modules (if any) :
+            self.modules_manager.start_external_instances()
+            
+            # Ok now we can load the retention data
+            self.hook_point('load_retention')
 
-        # Ok now we can load the retention data
-        self.hook_point('load_retention')
-
-        ## And go for the main loop
-        self.do_mainloop()
+            ## And go for the main loop
+            self.do_mainloop()
+        except Exception, exp:
+            logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
+            logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
+            logger.log("Back trace of it: %s" % (traceback.format_exc()))
+            raise
 
 
     def setup_new_conf(self):
