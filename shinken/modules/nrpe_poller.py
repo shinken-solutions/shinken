@@ -98,7 +98,7 @@ class NRPE:
     
     def init_query(self,host, port, use_ssl, command):
         self.state = 'creation'
-        print 'build with', command
+        #print 'build with', command
         self.build_query(command)
         self.host = host
         self.port = port
@@ -180,11 +180,11 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 return
             else:
                 # Ok we can wrap the socket
-                print "Wrapping ssl!"
+                #print "Wrapping ssl!"
                 self.wrap_ssl()
 
         try:
-            print "Connect to", host, port
+            #print "Connect to", host, port
             self.connect( (host, port) )
         except socket.error,exp:
             self.set_exit(2, str(exp))
@@ -317,7 +317,7 @@ def parse_args(cmd_args):
     except getopt.GetoptError, err:
         # If we got problem, bail out
         return (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
-    print  "Opts", opts, "Args", args
+    #print  "Opts", opts, "Args", args
     for o, a in opts:
         if o in ("-H"):
             host = a
@@ -380,14 +380,17 @@ class Nrpe_poller(BaseModule):
             if chk.status == 'queue':
                 # Ok we launch it
                 chk.status = 'launched'
+
                 # Want the args of the commands so we parse it like a shell
-                clean_command = shlex.split(chk.command)
+                # shlex want str only
+                clean_command = shlex.split(chk.command.encode('utf8', 'ignore'))
+
                 # If the command seems good
                 if len(clean_command) > 1:
                     # we do not want the first member, check_nrpe thing
                     args = parse_args(clean_command[1:])
                     (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args) = args
-                    print (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
+                    #print (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
                 else:
                     # Set an error so we will quit tis check
                     command = None
