@@ -350,7 +350,6 @@ class Shinken(BaseSatellite):
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
             logger.log("[scheduler] General interface is at: %s" % self.uri2)
             self.do_mainloop()
-
         except Exception, exp:
             logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
             logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")

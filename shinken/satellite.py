@@ -41,7 +41,7 @@ import copy
 import time
 import sys
 import cPickle
-
+import traceback
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -743,34 +743,41 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
 
 
     def main(self):
+        try:
+            for line in self.get_header():
+                self.log.log(line)
 
-        for line in self.get_header():
-            self.log.log(line)
-
-        self.load_config_file()
+            self.load_config_file()
         
-        self.do_daemon_init_and_start()
+            self.do_daemon_init_and_start()
         
-        self.do_post_daemon_init()
+            self.do_post_daemon_init()
 
-        # We wait for initial conf
-        self.wait_for_initial_conf()
-        if not self.new_conf: # we must have either big problem or was requested to shutdown
-            return
-        self.setup_new_conf()
+            raise Exception("Moncul")
+            # We wait for initial conf
+            self.wait_for_initial_conf()
+            if not self.new_conf: # we must have either big problem or was requested to shutdown
+                return
+            self.setup_new_conf()
         
-        # We can load our modules now
-        self.modules_manager.set_modules(self.modules_manager.modules)
-        self.do_load_modules()
-        # And even start external ones
-        self.modules_manager.start_external_instances()
+            # We can load our modules now
+            self.modules_manager.set_modules(self.modules_manager.modules)
+            self.do_load_modules()
+            # And even start external ones
+            self.modules_manager.start_external_instances()
         
 
-        # Allocate Mortal Threads
-        for _ in xrange(1, self.min_workers):
-            for mod in self.q_by_mod:
-                self.create_and_launch_worker(module_name=mod)
+            # Allocate Mortal Threads
+            for _ in xrange(1, self.min_workers):
+                for mod in self.q_by_mod:
+                    self.create_and_launch_worker(module_name=mod)
 
-        # Now main loop
-        self.do_mainloop()
+            # Now main loop
+            self.do_mainloop()
+        except Exception, exp:
+            logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
+            logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
+            logger.log("Back trace of it: %s" % (traceback.format_exc()))
+            raise
+
 
