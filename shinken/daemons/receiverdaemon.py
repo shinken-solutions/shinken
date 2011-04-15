@@ -264,8 +264,6 @@ class Receiver(BaseSatellite):
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
             print "The Arbtier uri it at", self.uri2
 
-            raise Exception("Moncul")
-
             #  We wait for initial conf
             self.wait_for_initial_conf()
             if not self.new_conf:
