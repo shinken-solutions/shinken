@@ -52,9 +52,6 @@ class Servicedependency(Item):
         'dependency_period':             StringProp(default='')
     })
     
-    running_properties = {
-        'configuration_errors': ListProp(default=[]),
-    }
 
     #Give a nice name output, for debbuging purpose
     #(Yes, debbuging CAN happen...)

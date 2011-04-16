@@ -20,6 +20,8 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from copy import copy
+
 from item import Item, Items
 from shinken.brok import Brok
 from shinken.property import StringProp
@@ -50,6 +52,7 @@ class Command(Item):
         'module_type':  StringProp(default=None),
     })
 
+    # TODO: factorize with item.__init__ ? 
     def __init__(self, params={}):
         setattr(self, 'id', self.__class__.id)
         #self.id = self.__class__.id
@@ -70,6 +73,19 @@ class Command(Item):
             # If no command starting with _, be fork :)
             else:
                 self.module_type = 'fork'
+        
+                
+        cls = self.__class__
+        # adding running properties like latency, dependency list, etc
+        for prop, entry in cls.running_properties.items():
+            # Copy is slow, so we check type
+            # Type with __iter__ are list or dict, or tuple.
+            # Item need it's own list, so qe copy
+            val = entry.default
+            if hasattr(val, '__iter__'):
+                setattr(self, prop, copy(val))
+            else:
+                setattr(self, prop, val)
 
     def get_name(self):
         return self.command_name

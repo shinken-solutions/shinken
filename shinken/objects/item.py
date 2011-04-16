@@ -32,7 +32,7 @@ from copy import copy
 
 from shinken.commandcall import CommandCall
 
-from shinken.property import StringProp
+from shinken.property import StringProp, ListProp
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
@@ -42,7 +42,17 @@ from shinken.log import logger
 class Item(object):
     
     properties = {
-        'imported_from': StringProp(default='unknown')
+        'imported_from':            StringProp(default='unknown')
+    }
+    
+    running_properties = {
+        # All errors and warning raised during the configuration parsing
+        # and that will raised real warning/errors during the is_correct
+        'configuration_warnings':   ListProp(default=[]),
+        'configuration_errors':     ListProp(default=[]),              
+    }
+    
+    macros = {
     }
     
     def __init__(self, params={}):
@@ -279,7 +289,10 @@ class Item(object):
                 print self.get_name(), "missing property :", prop
                 state = False
                 
-        del self.imported_from
+        try:
+            del self.imported_from
+        except AttributeError:
+            pass
                 
         return state
 

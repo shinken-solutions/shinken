@@ -70,13 +70,10 @@ class Contact(Item):
         'notificationways': StringProp(default=''),
     })
 
-    running_properties = {
-        #All errors and warning raised during the configuration parsing
-        #and taht will raised real warning/errors during the is_correct
-        'configuration_warnings': ListProp(default=[]),
-        'configuration_errors': ListProp(default=[]),
+    running_properties = Item.running_properties.copy()
+    running_properties.update({
         'downtimes':        StringProp(default=[], fill_brok=['full_status'], retention=True),
-    }
+    })
 
 
     macros = {

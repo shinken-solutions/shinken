@@ -41,12 +41,6 @@ class Resultmodulation(Item):
         'modulation_period':     StringProp(default=None),
     })
     
-    running_properties = {
-        'configuration_errors': ListProp(default=[]),
-    }
-    
-    macros = {}
-
 
     #For debugging purpose only (nice name)
     def get_name(self):

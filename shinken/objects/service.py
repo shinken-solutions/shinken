@@ -64,7 +64,7 @@ class Service(SchedulingItem):
     #  full_status for initial and update status, check_result for check results
     # no_slots : do not take this property for __slots__
     properties = SchedulingItem.properties.copy()
-    properties.update( {
+    properties.update({
         'host_name':              StringProp (fill_brok=['full_status', 'check_result', 'next_schedule']),
         'hostgroup_name':         StringProp (default = '', fill_brok=['full_status']),
         'service_description':    StringProp (fill_brok= ['full_status', 'check_result', 'next_schedule']),
@@ -120,10 +120,11 @@ class Service(SchedulingItem):
 
         # Criticity value
         'criticity':               IntegerProp(default='3', fill_brok=['full_status']),
-    } )
+    })
 
     # properties used in the running state
-    running_properties = {
+    running_properties = SchedulingItem.running_properties.copy()
+    running_properties.update({
         'last_chk':           IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':           IntegerProp(default=0, fill_brok=['full_status', 'next_schedule']),
         'in_checking':        BoolProp   (default=False, fill_brok=['full_status', 'check_result', 'next_schedule'], retention=True),
@@ -198,10 +199,6 @@ class Service(SchedulingItem):
         'actions':            ListProp   (default=[]), #put here checks and notif raised
         'broks':              ListProp   (default=[]), #and here broks raised
 
-        # All errors and warning raised during the configuration parsing
-        # and taht will raised real warning/errors during the is_correct
-        'configuration_warnings' : ListProp(default=[]),
-        'configuration_errors': ListProp(default=[]),
 
         # Problem/impact part
         'is_problem':         BoolProp   (default=False, fill_brok=['full_status']),
@@ -241,7 +238,7 @@ class Service(SchedulingItem):
         'in_hard_unknown_reach_phase': BoolProp(default=False, retention=True),
         'was_in_hard_unknown_reach_phase': BoolProp(default=False, retention=True),
         'state_before_hard_unknown_reach_phase': StringProp(default='OK', retention=True),
-    }
+    })
 
     # Mapping between Macros and properties (can be prop or a function)
     macros = {

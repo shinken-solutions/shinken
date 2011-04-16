@@ -49,16 +49,10 @@ class Escalation(Item):
         'contact_groups':       StringProp(),
     })
     
-    running_properties = {
-        # All errors and warning raised during the configuration parsing
-        # and that will raised real warning/errors during the is_correct
-        'configuration_warnings': StringProp(default=[]),
-        'configuration_errors': StringProp(default=[]),
+    running_properties = Item.running_properties.copy()
+    running_properties.update({
         'time_based':           BoolProp(default=False),
-    }
-
-    macros = {}
-
+    })
     
     # For debugging purpose only (nice name)
     def get_name(self):

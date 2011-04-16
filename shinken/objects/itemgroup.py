@@ -23,8 +23,10 @@
 
 #And itemgroup is like a item, but it's a group of items :)
 
+from copy import copy
+
 from shinken.brok import Brok
-from shinken.property import StringProp
+from shinken.property import StringProp, ListProp
 
 # TODO: subclass Item & Items for Itemgroup & Itemgroups ?
 
@@ -33,14 +35,36 @@ class Itemgroup:
     id = 0
 
     properties = {
-        'imported_from': StringProp(default='unknown')
+        'imported_from':            StringProp(default='unknown')
+    }
+    
+    running_properties = {
+        # All errors and warning raised during the configuration parsing
+        # and that will raised real warning/errors during the is_correct
+        'configuration_warnings':   ListProp(default=[]),
+        'configuration_errors':     ListProp(default=[]),              
     }
 
     def __init__(self, params={}):
         self.id = self.__class__.id
         self.__class__.id += 1
+        
+        cls = self.__class__
+        # adding running properties like latency, dependency list, etc
+        for prop, entry in cls.running_properties.items():
+            # Copy is slow, so we check type
+            # Type with __iter__ are list or dict, or tuple.
+            # Item need it's own list, so qe copy
+            val = entry.default
+            if hasattr(val, '__iter__'):
+                setattr(self, prop, copy(val))
+            else:
+                setattr(self, prop, val)
+            #eatch istance to have his own running prop!
+        
         for key in params:
             setattr(self, key, params[key])
+            
 
 
     def clean(self):

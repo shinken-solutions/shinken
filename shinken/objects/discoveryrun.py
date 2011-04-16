@@ -38,12 +38,10 @@ class Discoveryrun(Item):
         'discoveryrun_command':         StringProp (),
     })
 
-    running_properties = {
+    running_properties = Item.running_properties.copy()
+    running_properties.update({
         'current_launch': StringProp(default=None),
-        'configuration_errors': ListProp(default=[]),
-        }
-
-    macros = {}
+    })
 
     # Output name
     def get_name(self):

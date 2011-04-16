@@ -87,20 +87,17 @@ class Timeperiod(Item):
     my_type = 'timeperiod'
 
     properties = Item.properties.copy()
-    properties.update( {
+    properties.update({
         'timeperiod_name':  StringProp (fill_brok=['full_status']),
         'alias':            StringProp (default='',fill_brok=['full_status']),
         'use':              StringProp (default=''),
         'exclude':          StringProp (default=''),
         'register':         IntegerProp(default='1'),
-        #All errors and warning raised during the configuration parsing
-        #and taht will raised real warning/errors during the is_correct
-        'configuration_warnings': ListProp(default=[]),
-        'configuration_errors': ListProp(default=[]),
+
         # These are needed if a broker module calls methods on timeperiod objects
         'dateranges':       ListProp   (fill_brok=['full_status'], default=[]),
         'exclude':          ListProp   (fill_brok=['full_status'], default=[]),
-    } )
+    })
 
 
     def __init__(self, params={}):

@@ -42,11 +42,6 @@ class Hostescalation(Item):
         'contact_groups':        StringProp (),
     })
 
-    running_properties = {}
-
-    macros = {}
-
-
     #For debugging purpose only (nice name)
     def get_name(self):
         return ''

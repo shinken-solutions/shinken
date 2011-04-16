@@ -39,7 +39,6 @@ class Servicegroup(Itemgroup):
         'members':           StringProp(default='',fill_brok=['full_status']),
         #Shinken specific
         'unknown_members':   StringProp(default=[]),
-        'configuration_errors': StringProp(default = []),
     })
     
     macros = {
