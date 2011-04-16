@@ -22,7 +22,7 @@
 
 import re
 
-from shinken.objects.item import Item, Items
+from item import Item, Items
 from shinken.property import IntegerProp, StringProp, ListProp
 from shinken.eventhandler import EventHandler
 from shinken.macroresolver import MacroResolver

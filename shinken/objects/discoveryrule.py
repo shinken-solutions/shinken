@@ -22,7 +22,9 @@
 
 import re
 
-from shinken.objects import *
+from item import Item, Items
+from service import Service, Services
+from host import Host 
 from shinken.property import IntegerProp, StringProp, ListProp
 from copy import copy
 

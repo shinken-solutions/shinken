@@ -24,7 +24,7 @@ from item import Item, Items
 from timeperiod import Timeperiod, Timeperiods
 from schedulingitem import SchedulingItem
 from service import Service, Services
-from command import Command, Commands, CommandCall
+from command import Command, Commands
 from resultmodulation import Resultmodulation, Resultmodulations
 from escalation import Escalation, Escalations
 from serviceescalation import Serviceescalation, Serviceescalations

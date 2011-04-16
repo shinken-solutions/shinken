@@ -28,7 +28,7 @@ from shinken.util import to_int, to_bool
 from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
-from shinken.objects import CommandCall
+from shinken.commandcall import CommandCall
 from shinken.log import logger
 from shinken.pollerlink import PollerLink
 
