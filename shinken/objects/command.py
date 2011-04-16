@@ -42,13 +42,14 @@ class Command(Item):
     id = 0
     my_type = "command"
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'command_name': StringProp(fill_brok=['full_status']),
         'command_line': StringProp(fill_brok=['full_status']),
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
-    }
+    })
 
     def __init__(self, params={}):
         setattr(self, 'id', self.__class__.id)
