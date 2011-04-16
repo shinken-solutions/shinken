@@ -79,7 +79,10 @@ try:
             return self.connect(obj, name)
 
         def unregister(self, obj):
-            self.disconnect(obj)
+            try:
+                self.disconnect(obj)
+            except Exception:
+                pass
 
         def get_sockets(self):
             return self.getServerSockets()
