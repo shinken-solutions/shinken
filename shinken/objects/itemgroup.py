@@ -23,13 +23,13 @@
 
 #And itemgroup is like a item, but it's a group of items :)
 
-from copy import copy
 
+from item import init_running_properties
 from shinken.brok import Brok
 from shinken.property import StringProp, ListProp
 
-# TODO: subclass Item & Items for Itemgroup & Itemgroups ?
 
+# TODO: subclass Item & Items for Itemgroup & Itemgroups ?
 class Itemgroup:
     
     id = 0
@@ -49,23 +49,11 @@ class Itemgroup:
         self.id = self.__class__.id
         self.__class__.id += 1
         
-        cls = self.__class__
-        # adding running properties like latency, dependency list, etc
-        for prop, entry in cls.running_properties.items():
-            # Copy is slow, so we check type
-            # Type with __iter__ are list or dict, or tuple.
-            # Item need it's own list, so qe copy
-            val = entry.default
-            if hasattr(val, '__iter__'):
-                setattr(self, prop, copy(val))
-            else:
-                setattr(self, prop, val)
-            #eatch istance to have his own running prop!
+        init_running_properties(self)
         
         for key in params:
             setattr(self, key, params[key])
             
-
 
     def clean(self):
         pass

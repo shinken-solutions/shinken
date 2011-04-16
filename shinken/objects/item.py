@@ -39,6 +39,20 @@ from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 from shinken.log import logger
 
+
+def init_running_properties(obj):
+    for prop, entry in obj.__class__.running_properties.items():
+        # Copy is slow, so we check type
+        # Type with __iter__ are list or dict, or tuple.
+        # Item need it's own list, so qe copy
+        val = entry.default
+        if hasattr(val, '__iter__'):
+            setattr(obj, prop, copy(val))
+        else:
+            setattr(obj, prop, val)
+        #eatch istance to have his own running prop!
+
+
 class Item(object):
     
     properties = {
@@ -59,26 +73,15 @@ class Item(object):
         # We have our own id of My Class type :)
         # use set attr for going into the slots
         # instead of __dict__ :)
-        setattr(self, 'id', self.__class__.id)
-        self.__class__.id += 1
-
+        cls = self.__class__
+        self.id = cls.id
+        cls.id += 1
 
         self.customs = {} # for custom variables
         self.plus = {} # for value with a +
 
-        cls = self.__class__
-        # adding running properties like latency, dependency list, etc
-        for prop, entry in cls.running_properties.items():
-            # Copy is slow, so we check type
-            # Type with __iter__ are list or dict, or tuple.
-            # Item need it's own list, so qe copy
-            val = entry.default
-            if hasattr(val, '__iter__'):
-                setattr(self, prop, copy(val))
-            else:
-                setattr(self, prop, val)
-            #eatch istance to have his own running prop!
-
+        init_running_properties(self)
+        
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
         for key in params:

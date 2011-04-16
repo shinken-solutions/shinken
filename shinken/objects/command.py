@@ -20,9 +20,8 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from copy import copy
 
-from item import Item, Items
+from item import Item, Items, init_running_properties
 from shinken.brok import Brok
 from shinken.property import StringProp
 from shinken.autoslots import AutoSlots
@@ -56,21 +55,11 @@ class Command(Item):
         #self.id = self.__class__.id
         self.__class__.id += 1
         
-        cls = self.__class__
-        # adding running properties like latency, dependency list, etc
-        for prop, entry in cls.running_properties.items():
-            # Copy is slow, so we check type
-            # Type with __iter__ are list or dict, or tuple.
-            # Item need it's own list, so qe copy
-            val = entry.default
-            if hasattr(val, '__iter__'):
-                setattr(self, prop, copy(val))
-            else:
-                setattr(self, prop, val)
-            #eatch istance to have his own running prop!
+        init_running_properties(self)
         
         for key in params:
             setattr(self, key, params[key])
+        
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = 'None'
         if not hasattr(self, 'reactionner_tag'):
