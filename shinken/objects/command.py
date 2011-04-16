@@ -22,9 +22,9 @@
 
 from item import Item, Items
 from shinken.brok import Brok
-from shinken.property import StringProp, BoolProp, IntegerProp
+from shinken.property import StringProp
 from shinken.autoslots import AutoSlots
-from shinken.commandcall import CommandCall
+
 
 # Ok, slots are fun : you cannot set the __autoslots__
 # on the same class you use, fun isn't it? So we define*

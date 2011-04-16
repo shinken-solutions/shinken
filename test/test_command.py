@@ -24,7 +24,9 @@
 
 #It's ugly I know....
 from shinken_test import *
-from shinken.objects.command import CommandCall, Command, Commands
+
+from shinken.commandcall import CommandCall
+from shinken.objects import Command, Commands
 
 class TestConfig(ShinkenTest):
     #setUp is in shinken_test
