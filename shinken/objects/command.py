@@ -28,7 +28,6 @@ from shinken.property import StringProp
 from shinken.autoslots import AutoSlots
 
 
-
 # Ok, slots are fun : you cannot set the __autoslots__
 # on the same class you use, fun isn't it? So we define*
 # a dummy useless class to get such :)
@@ -43,20 +42,32 @@ class Command(Item):
     id = 0
     my_type = "command"
 
-    properties = Item.properties.copy()
-    properties.update({
+    properties = {
         'command_name': StringProp(fill_brok=['full_status']),
         'command_line': StringProp(fill_brok=['full_status']),
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
-    })
+    }
 
-    # TODO: factorize with item.__init__ ? 
     def __init__(self, params={}):
         setattr(self, 'id', self.__class__.id)
         #self.id = self.__class__.id
         self.__class__.id += 1
+        
+        cls = self.__class__
+        # adding running properties like latency, dependency list, etc
+        for prop, entry in cls.running_properties.items():
+            # Copy is slow, so we check type
+            # Type with __iter__ are list or dict, or tuple.
+            # Item need it's own list, so qe copy
+            val = entry.default
+            if hasattr(val, '__iter__'):
+                setattr(self, prop, copy(val))
+            else:
+                setattr(self, prop, val)
+            #eatch istance to have his own running prop!
+        
         for key in params:
             setattr(self, key, params[key])
         if not hasattr(self, 'poller_tag'):
@@ -73,19 +84,6 @@ class Command(Item):
             # If no command starting with _, be fork :)
             else:
                 self.module_type = 'fork'
-        
-                
-        cls = self.__class__
-        # adding running properties like latency, dependency list, etc
-        for prop, entry in cls.running_properties.items():
-            # Copy is slow, so we check type
-            # Type with __iter__ are list or dict, or tuple.
-            # Item need it's own list, so qe copy
-            val = entry.default
-            if hasattr(val, '__iter__'):
-                setattr(self, prop, copy(val))
-            else:
-                setattr(self, prop, val)
 
     def get_name(self):
         return self.command_name
@@ -130,5 +128,5 @@ class Command(Item):
 class Commands(Items):
 
     inner_class = Command
-    name_property = "command_name"    
+    name_property = "command_name"
 
