@@ -20,6 +20,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from item import Item, Items
 from shinken.brok import Brok
 from shinken.property import StringProp, BoolProp, IntegerProp
 from shinken.autoslots import AutoSlots
@@ -31,7 +32,7 @@ from shinken.commandcall import CommandCall
 class DummyCommand(object):
     pass
 
-class Command(DummyCommand):
+class Command(Item):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
     __metaclass__ = AutoSlots
@@ -68,6 +69,8 @@ class Command(DummyCommand):
             else:
                 self.module_type = 'fork'
 
+    def get_name(self):
+        return self.command_name
 
     def pythonize(self):
         self.command_name = self.command_name.strip()
@@ -106,35 +109,7 @@ class Command(DummyCommand):
 
 
 
+class Commands(Items):
 
+    name_property = "command_name"
 
-class Commands(object):
-    def __init__(self, commands):
-        self.commands = {}
-        for c in commands:
-            self.commands[c.id] = c
-
-
-    def __iter__(self):
-        return self.commands.itervalues()
-
-
-    def __str__(self):
-        s = ''
-        for c in self.commands.values():
-            s += str(c)
-        return s
-
-
-    def find_cmd_id_by_name(self, name):
-        for id in self.commands:
-            if getattr(self.commands[id], 'command_name', '') == name:
-                return id
-        return None
-
-    def find_cmd_by_name(self, name):
-        id = self.find_cmd_id_by_name(name)
-        if id is not None:
-            return self.commands[id]
-        else:
-            return None

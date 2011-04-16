@@ -403,7 +403,7 @@ class ExternalCommandManager:
                         args.append(val)
 
                     elif type_searched == 'command':
-                        c = self.commands.find_cmd_by_name(val)
+                        c = self.commands.find_by_name(val)
                         if c is not None:
                             args.append(val)#the find will be redone by
                             #the commandCall creation, but != None

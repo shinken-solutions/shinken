@@ -51,9 +51,9 @@ class TestHackCmdPollerTag(ShinkenTest):
         # Calls the mod with our config
         mod.hook_late_configuration(self)
         
-        cmd1 = self.sched.commands.find_cmd_by_name('should_change')
+        cmd1 = self.sched.commands.find_by_name('should_change')
         self.assert_(cmd1 is not None)
-        cmd2 = self.sched.commands.find_cmd_by_name('should_not_change')
+        cmd2 = self.sched.commands.find_by_name('should_not_change')
         self.assert_(cmd2 is not None)
         
         # cmd1 should have been updated, but not cmd2
@@ -82,10 +82,10 @@ class TestHackCmdPollerTag(ShinkenTest):
 
 
     def test_underscore_commands_module_type_recognition(self):
-        cmd_tag = self.sched.commands.find_cmd_by_name('will_tag')
+        cmd_tag = self.sched.commands.find_by_name('will_tag')
         self.assert_(cmd_tag is not None)
         self.assert_(cmd_tag.module_type == 'nrpe_poller')
-        cmd_not_tag = self.sched.commands.find_cmd_by_name('will_not_tag')
+        cmd_not_tag = self.sched.commands.find_by_name('will_not_tag')
         self.assert_(cmd_not_tag is not None)
         self.assert_(cmd_not_tag.module_type == 'isetwhatiwant')
 
