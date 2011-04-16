@@ -1139,6 +1139,8 @@ class Config(Item):
         self.escalations.create_reversed_list()
         self.discoveryrules.create_reversed_list()
         self.discoveryruns.create_reversed_list()
+        self.commands.create_reversed_list()
+        
         #For services it's a special case
         #we search for hosts, then for services
         #it's quicker than search in all services
