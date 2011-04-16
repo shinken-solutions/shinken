@@ -26,6 +26,7 @@ from shinken.property import StringProp
 from shinken.autoslots import AutoSlots
 
 
+
 # Ok, slots are fun : you cannot set the __autoslots__
 # on the same class you use, fun isn't it? So we define*
 # a dummy useless class to get such :)
@@ -40,13 +41,14 @@ class Command(Item):
     id = 0
     my_type = "command"
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'command_name': StringProp(fill_brok=['full_status']),
         'command_line': StringProp(fill_brok=['full_status']),
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
-    }
+    })
 
     def __init__(self, params={}):
         setattr(self, 'id', self.__class__.id)

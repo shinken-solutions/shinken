@@ -33,7 +33,8 @@ class Realm(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'realm'
 
-    properties = {
+    properties = Itemgroup.properties.copy()
+    properties.update({
         'id':            IntegerProp(default=0, fill_brok=['full_status']),
         'realm_name':    StringProp (fill_brok=['full_status']),
         'realm_members': StringProp (default=''),#No status_broker_name because it put hosts, not host_name
@@ -43,7 +44,7 @@ class Realm(Itemgroup):
         #'notes': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
         #'notes_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
         #'action_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
-    }
+    })
 
     macros = {
         'REALMNAME':    'realm_name',

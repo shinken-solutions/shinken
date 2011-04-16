@@ -32,10 +32,11 @@ class Discoveryrun(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'discoveryrun'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'discoveryrun_name':            StringProp (),
         'discoveryrun_command':         StringProp (),
-    }
+    })
 
     running_properties = {
         'current_launch': StringProp(default=None),

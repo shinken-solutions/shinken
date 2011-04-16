@@ -32,13 +32,14 @@ class Discoveryrule(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'discoveryrule'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'discoveryrule_name':    StringProp (),
         'creation_type':         StringProp (default='service'),
 #        'check_command':         StringProp (),
 #        'service_description':   StringProp (),
 #        'use':                   StringProp(),
-    }
+    })
 
     running_properties = {
         'configuration_errors': ListProp(default=[]),

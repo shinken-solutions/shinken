@@ -43,7 +43,8 @@ class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'contact'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'contact_name':     StringProp(fill_brok=['full_status']),
         'alias':            StringProp(default='none', fill_brok=['full_status']),
         'contactgroups':    StringProp(default='', fill_brok=['full_status']),
@@ -67,7 +68,7 @@ class Contact(Item):
         'can_submit_commands': BoolProp(default='0', fill_brok=['full_status']),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'notificationways': StringProp(default=''),
-    }
+    })
 
     running_properties = {
         #All errors and warning raised during the configuration parsing

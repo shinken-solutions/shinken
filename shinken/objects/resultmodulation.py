@@ -33,16 +33,18 @@ class Resultmodulation(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'resultmodulation'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'resultmodulation_name': StringProp(),
         'exit_codes_match':      ListProp  (default=''),
         'exit_code_modulation':  StringProp(default=None),
         'modulation_period':     StringProp(default=None),
-    }
+    })
     
     running_properties = {
         'configuration_errors': ListProp(default=[]),
-        }
+    }
+    
     macros = {}
 
 

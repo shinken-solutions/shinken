@@ -28,7 +28,8 @@ class Servicegroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'servicegroup'
 
-    properties = {
+    properties = Itemgroup.properties.copy()
+    properties.update({
         'id':                StringProp(default=0, fill_brok=['full_status']),
         'servicegroup_name': StringProp(fill_brok=['full_status']),
         'alias':             StringProp(fill_brok=['full_status']),
@@ -39,8 +40,7 @@ class Servicegroup(Itemgroup):
         #Shinken specific
         'unknown_members':   StringProp(default=[]),
         'configuration_errors': StringProp(default = []),
-
-    }
+    })
     
     macros = {
         'SERVICEGROUPALIAS':     'alias',

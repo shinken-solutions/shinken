@@ -37,7 +37,8 @@ class Hostdependency(Item):
 #       inherits_parent         1
 #       dependency_period       24x7
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'dependent_host_name':           StringProp(),
         'dependent_hostgroup_name':      StringProp(default=''),
         'host_name':                     StringProp(),
@@ -46,11 +47,11 @@ class Hostdependency(Item):
         'execution_failure_criteria':    ListProp(default='n'),
         'notification_failure_criteria': ListProp(default='n'),
         'dependency_period':             StringProp(default='')
-    }
+    })
     
     running_properties = {
         'configuration_errors': ListProp(default=[]),
-        }
+    }
 
     # Give a nice name output, for debbuging purpose
     # (debugging happens more often than expected...)

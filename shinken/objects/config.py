@@ -345,6 +345,7 @@ class Config(Item):
             #We add a \n (or \r\n) to be sure config files are separated
             #if the previous does not finish with a line return
             res += os.linesep
+            res += '# IMPORTEDFROM=%s' % (file) + os.linesep
             print "Opening configuration file", file
             try:
                 # Open in Universal way for Windows, Mac, Linux
@@ -376,6 +377,7 @@ class Config(Item):
                     try:
                         fd = open(cfg_file_name, 'rU')
                         logger.log("Processing object config file '%s'" % cfg_file_name)
+                        res += os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep
                         res += fd.read().decode('utf8', 'replace')
                         #Be sure to add a line return so we won't mix files
                         res += '\n'
@@ -400,7 +402,7 @@ class Config(Item):
                             if re.search("\.cfg$", file):
                                 logger.log("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
-
+                                    res += os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep
                                     fd = open(os.path.join(root, file), 'rU')
                                     res += fd.read().decode('utf8', 'replace')
                                     fd.close()
@@ -432,6 +434,9 @@ class Config(Item):
         tmp_line = ''
         lines = buf.split('\n')
         for line in lines:
+            if line.startswith("# IMPORTEDFROM="):
+                filefrom = line.split('=')[1]
+                continue
             line = line.split(';')[0]
             #A backslash means, there is more to come
             if re.search("\\\s*$", line):
@@ -459,6 +464,7 @@ class Config(Item):
                     objectscfg[tmp_type] = []
                 objectscfg[tmp_type].append(tmp)
                 tmp = []
+                tmp.append("imported_from "+ filefrom)
                 #Get new type
                 elts = re.split('\s', line)
                 tmp_type = elts[1]

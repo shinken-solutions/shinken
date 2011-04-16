@@ -29,7 +29,10 @@
 #from util import to_int, to_char, to_split, to_bool
 from copy import copy
 
+
 from shinken.commandcall import CommandCall
+
+from shinken.property import StringProp
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
@@ -37,6 +40,11 @@ from shinken.comment import Comment
 from shinken.log import logger
 
 class Item(object):
+    
+    properties = {
+        'imported_from': StringProp(default='unknown')
+    }
+    
     def __init__(self, params={}):
         # We have our own id of My Class type :)
         # use set attr for going into the slots
@@ -266,11 +274,13 @@ class Item(object):
             for err in self.configuration_errors:
                 logger.log(err)
 
-
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
                 print self.get_name(), "missing property :", prop
                 state = False
+                
+        del self.imported_from
+                
         return state
 
 
@@ -603,7 +613,7 @@ class Items(object):
             #Ok, look at no twins (it's bad!)
             for id in self.twins:
                 i = self.items[id]
-                print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated"
+                print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from
                 r = False
         #Then look if we have some errors in the conf
         #Juts print warnings, but raise errors
@@ -615,7 +625,11 @@ class Items(object):
 
         #Then look for individual ok
         for i in self:
-            r &= i.is_correct()
+            if not i.is_correct():
+                n = getattr(i, 'imported_from', "unknown")
+                print "Error: In ", i.get_name(), "is incorrect ; from", n
+                r = False        
+        
         return r
 
 

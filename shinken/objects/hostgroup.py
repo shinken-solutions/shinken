@@ -29,7 +29,8 @@ class Hostgroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'hostgroup'
 
-    properties = {
+    properties = Itemgroup.properties.copy()
+    properties.update({
         'id':             StringProp(default=0, fill_brok=['full_status']),
         'hostgroup_name': StringProp(fill_brok=['full_status']),
         'alias':          StringProp(fill_brok=['full_status']),
@@ -40,7 +41,7 @@ class Hostgroup(Itemgroup):
         #Shinken specific
         'unknown_members':StringProp(default=[]),
         'configuration_errors': StringProp(default = []),
-    }
+    })
 
     macros = {
         'HOSTGROUPALIAS':     'alias',

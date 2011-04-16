@@ -19,6 +19,7 @@
 #
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+from shinken.objects.schedulingitem import SchedulingItem
 
 """ This is the main class for the Host. In fact it's mainly
 about the configuration part. for the running one, it's better
@@ -59,7 +60,8 @@ class Host(SchedulingItem):
     #  some dangerous properties like realms that are too 'linked' to be send like that.
     # brok_transformation : if set, will call the function with the value of the property
     #  the major times it will be to flatten the data (like realm_name instead of the realm object).
-    properties = {
+    properties = SchedulingItem.properties.copy()
+    properties.update({
         'host_name':            StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'alias':                StringProp(fill_brok=['full_status']),
         'display_name':         StringProp(default='none', fill_brok=['full_status']),
@@ -120,7 +122,7 @@ class Host(SchedulingItem):
 
         # Criticity value
         'criticity':            IntegerProp(default='3', fill_brok=['full_status']),
-    }
+    })
 
     # properties set only for running purpose
     # retention : save/load this property from retention

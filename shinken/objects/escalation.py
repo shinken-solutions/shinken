@@ -35,7 +35,8 @@ class Escalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'escalation'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'escalation_name':      StringProp(),
         'first_notification':   IntegerProp(),
         'last_notification':    IntegerProp(),
@@ -46,7 +47,7 @@ class Escalation(Item):
         'escalation_options':   ListProp(default='d,u,r,w,c'),
         'contacts':             StringProp(),
         'contact_groups':       StringProp(),
-    }
+    })
     
     running_properties = {
         # All errors and warning raised during the configuration parsing

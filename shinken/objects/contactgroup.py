@@ -32,7 +32,8 @@ class Contactgroup(Itemgroup):
     id = 1
     my_type = 'contactgroup'
 
-    properties = {
+    properties = Itemgroup.properties.copy()
+    properties.update({
         'id':                   IntegerProp(default=0, fill_brok=['full_status']),
         'contactgroup_name':    StringProp (fill_brok=['full_status']),
         'alias':                StringProp (fill_brok=['full_status']),
@@ -40,7 +41,7 @@ class Contactgroup(Itemgroup):
         #Shinken specific
         'unknown_members':      StringProp (default=[]),
         'configuration_errors': StringProp (default=[]),
-    }
+    })
     
     macros = {
         'CONTACTGROUPALIAS':    'alias',

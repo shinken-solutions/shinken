@@ -21,12 +21,20 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#And itemgroup is like a item, but it's a group if items :)
+#And itemgroup is like a item, but it's a group of items :)
 
 from shinken.brok import Brok
+from shinken.property import StringProp
+
+# TODO: subclass Item & Items for Itemgroup & Itemgroups ?
 
 class Itemgroup:
+    
     id = 0
+
+    properties = {
+        'imported_from': StringProp(default='unknown')
+    }
 
     def __init__(self, params={}):
         self.id = self.__class__.id
@@ -200,7 +208,9 @@ class Itemgroups:
             r = False
         #Then look for individual ok
         for ig in self:
-            r &= ig.is_correct()
+            if not ig.is_correct():
+                r = False
+                print "Error : the", ig.__class__.my_type, ig.get_name(), "is incorrect - imported from", ig.imported_from
         return r
 
 

@@ -63,7 +63,8 @@ class Service(SchedulingItem):
     # fill_brok : if set, send to broker. there are two categories:
     #  full_status for initial and update status, check_result for check results
     # no_slots : do not take this property for __slots__
-    properties = {
+    properties = SchedulingItem.properties.copy()
+    properties.update( {
         'host_name':              StringProp (fill_brok=['full_status', 'check_result', 'next_schedule']),
         'hostgroup_name':         StringProp (default = '', fill_brok=['full_status']),
         'service_description':    StringProp (fill_brok= ['full_status', 'check_result', 'next_schedule']),
@@ -119,7 +120,7 @@ class Service(SchedulingItem):
 
         # Criticity value
         'criticity':               IntegerProp(default='3', fill_brok=['full_status']),
-    }
+    } )
 
     # properties used in the running state
     running_properties = {

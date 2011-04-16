@@ -29,7 +29,8 @@ class Hostescalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'hostescalation'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'host_name':             StringProp (),
         'hostgroup_name':        StringProp (),
         'first_notification':    IntegerProp(),
@@ -39,7 +40,7 @@ class Hostescalation(Item):
         'escalation_options':    ListProp   (default='d,u,r,w,c'),
         'contacts':              StringProp (),
         'contact_groups':        StringProp (),
-    }
+    })
 
     running_properties = {}
 
