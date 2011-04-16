@@ -111,5 +111,6 @@ class Command(Item):
 
 class Commands(Items):
 
-    name_property = "command_name"
+    inner_class = Command
+    name_property = "command_name"    
 
