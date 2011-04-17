@@ -1744,7 +1744,7 @@ test_host_0;1
         self.assert_(self.lines_equal(response, goodresponse))
 
 
-    def test_thruk_action_notes_url(self):
+    def test_thruk_action_notes_url_icon_image(self):
         self.print_header()
         now = time.time()
         self.update_broker()
@@ -1772,15 +1772,66 @@ ResponseHeader: fixed16
 test_host_0;test_ok_0;/nagios/pnp/index.php?host=test_host_0&srv=test_ok_0
 """)
 
+        request = """GET services
+Columns: host_name service_description icon_image_expanded
+Filter: host_name = test_host_0
+Filter: service_description = test_ok_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """200          79
+test_host_0;test_ok_0;../../docs/images/tip.gif?host=test_host_0&srv=test_ok_0
+""")
+
+        request = """GET services
+Columns: host_name service_description notes_url_expanded
+Filter: host_name = test_host_0
+Filter: service_description = test_ok_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """200          66
+test_host_0;test_ok_0;/nagios/wiki/doku.php/test_host_0/test_ok_0
+""")
+
         request = """GET hosts
-Columns: host_name action_url_expanded notes_url_expanded
+Columns: host_name action_url_expanded
 Filter: host_name = test_host_0
 OutputFormat: csv
 ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response == """200          85
-test_host_0;/nagios/pnp/index.php?host=test_host_0;/nagios/wiki/doku.php/test_host_0
+        print response
+        self.assert_(response == """200          51
+test_host_0;/nagios/pnp/index.php?host=test_host_0
+""")
+
+        request = """GET hosts
+Columns: host_name icon_image_expanded
+Filter: host_name = test_router_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """200          62
+test_router_0;../../docs/images/switch.png?host=test_router_0
+""")
+
+        request = """GET hosts
+Columns: host_name notes_url_expanded
+Filter: host_name = test_host_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """200          46
+test_host_0;/nagios/wiki/doku.php/test_host_0
 """)
 
 

@@ -481,7 +481,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'icon_image_expanded' : {
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The same as icon_image, but with the most important macros expanded',
+                'prop' : 'icon_image',
                 'type' : 'string',
             },
             'in_check_period' : {
@@ -592,7 +594,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'notes_expanded' : {
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The same as notes, but with the most important macros expanded',
+                'prop' : 'notes',
                 'type' : 'string',
             },
             'notes_url' : {
@@ -972,7 +976,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'host_action_url_expanded' : {
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The same as action_url, but with the most important macros expanded',
+                'prop' : 'host',
                 'type' : 'string',
             },
             'host_active_checks_enabled' : {
@@ -1110,7 +1116,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'host_icon_image_expanded' : {
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The same as icon_image, but with the most important macros expanded',
+                'prop' : 'host',
                 'type' : 'string',
             },
             'host_in_check_period' : {
@@ -1197,7 +1205,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'host_notes_expanded' : {
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The same as notes, but with the most important macros expanded',
+                'prop' : 'host',
                 'type' : 'string',
             },
             'host_notes_url' : {
@@ -1205,7 +1215,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'host_notes_url_expanded' : {
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'Same es notes_url, but with the most important macros expanded',
+                'prop' : 'host',
                 'type' : 'string',
             },
             'host_notification_interval' : {
@@ -1369,7 +1381,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'icon_image_expanded' : {
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The icon_image with (the most important) macros expanded',
+                'prop' : 'icon_image',
                 'type' : 'string',
             },
             'in_check_period' : {
@@ -1469,7 +1483,9 @@ class LiveStatus:
                 'type' : 'string',
             },
             'notes_expanded' : {
+                'fulldepythonize' : lambda p, e, r: MacroResolver().resolve_simple_macros_in_string(p, e.get_data_for_checks()),
                 'description' : 'The notes with (the most important) macros expanded',
+                'prop' : 'notes',
                 'type' : 'string',
             },
             'notes_url' : {
