@@ -117,8 +117,8 @@ class Servicegroups(Itemgroups):
     #TODO: very slow for hight services, so search with host list,
     #not service one
     def linkify_sg_by_srv(self, services):
-        for id in self.itemgroups:
-            mbrs = self.itemgroups[id].get_services()
+        for sg in self:
+            mbrs = sg.get_services()
 
             #The new member list, in id
             new_mbrs = []
@@ -133,50 +133,51 @@ class Servicegroups(Itemgroups):
                     if find is not None:
                         new_mbrs.append(find)
                     else:
-                        self.itemgroups[id].unknown_members.append('%s,%s' % (host_name,service_desc))
+                        sg.unknown_members.append('%s,%s' % (host_name, service_desc))
                 seek += 1
 
             #Make members uniq
             new_mbrs = list(set(new_mbrs))
 
             #We find the id, we remplace the names
-            self.itemgroups[id].replace_members(new_mbrs)
-            for s in self.itemgroups[id].members:
-                s.servicegroups.append(self.itemgroups[id])
+            sg.replace_members(new_mbrs)
+            for s in sg.members:
+                s.servicegroups.append(sg)
                 #and make this uniq
                 s.servicegroups = list(set(s.servicegroups))
 
 
     #Add a service string to a service member
     #if the service group do not exist, create it
-    def add_member(self, cname, cgname):
-        id = self.find_id_by_name(cgname)
+    def add_member(self, cname, sgname):
+        sg = self.find_by_name(sgname)
         #if the id do not exist, create the cg
-        if id is None:
-            cg = Servicegroup({'servicegroup_name' : cgname, 'alias' : cgname, 'members' :  cname})
-            self.add(cg)
+        if sg is None:
+            sg = Servicegroup({'servicegroup_name' : sgname, 'alias' : sgname, 'members' :  cname})
+            self.add(sg)
         else:
-            self.itemgroups[id].add_string_member(cname)
+            sg.add_string_member(cname)
 
 
     #Use to fill members with contactgroup_members
     def explode(self):
         #We do not want a same hg to be explode again and again
         #so we tag it
-        for tmp_sg in self.itemgroups.values():
-            tmp_sg.already_explode = False
+        for sg in self:
+            sg.already_explode = False
 
-        for id in self.itemgroups:
-            sg = self.itemgroups[id]
+        for sg in self:
             if sg.has('servicegroup_members') and not sg.already_explode:
                 #get_services_by_explosion is a recursive
                 #function, so we must tag hg so we do not loop
-                for tmp_sg in self.itemgroups.values():
-                    tmp_sg.rec_tag = False
+                for sg2 in self:
+                    sg2.rec_tag = False
                 sg.get_services_by_explosion(self)
 
         #We clean the tags
-        for tmp_sg in self.itemgroups.values():
-            if hasattr(tmp_sg, 'rec_tag'):
-                del tmp_sg.rec_tag
-            del tmp_sg.already_explode
+        for sg in self:
+            try:
+                del sg.rec_tag
+            except AttributeError:
+                pass
+            del sg.already_explode

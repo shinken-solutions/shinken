@@ -625,9 +625,10 @@ class Items(object):
         r = True
         #Some class do not have twins, because they do not have names
         #like servicedependancies
-        if hasattr(self, 'twins'):
+        twins = getattr(self, 'twins', None)
+        if twins is not None:
             #Ok, look at no twins (it's bad!)
-            for id in self.twins:
+            for id in twins:
                 i = self.items[id]
                 print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from
                 r = False

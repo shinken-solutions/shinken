@@ -24,26 +24,15 @@
 #And itemgroup is like a item, but it's a group of items :)
 
 
-from item import init_running_properties
+from item import Item, Items, init_running_properties
 from shinken.brok import Brok
 from shinken.property import StringProp, ListProp
 
 
 # TODO: subclass Item & Items for Itemgroup & Itemgroups ?
-class Itemgroup:
+class Itemgroup(Item):
     
     id = 0
-
-    properties = {
-        'imported_from':            StringProp(default='unknown')
-    }
-    
-    running_properties = {
-        # All errors and warning raised during the configuration parsing
-        # and that will raised real warning/errors during the is_correct
-        'configuration_warnings':   ListProp(default=[]),
-        'configuration_errors':     ListProp(default=[]),              
-    }
 
     def __init__(self, params={}):
         self.id = self.__class__.id
@@ -92,7 +81,6 @@ class Itemgroup:
         self.members = members
 
 
-
     #If a prop is absent and is not required, put the default value
     def fill_default(self):
         cls = self.__class__
@@ -120,18 +108,24 @@ class Itemgroup:
     #a item group is correct if all members actually exists,
     #so if unknown_members is still []
     def is_correct(self):
-        b = True
+        res = True
 
         if self.unknown_members != []:
             for m in self.unknown_members:
                 print "Error : the", self.__class__.my_type, self.get_name(), "got a unknown member" , m
-            b = False
+            res = False
 
         if self.configuration_errors != []:
             for err in self.configuration_errors:
                 print err
-            b = False
-        return b
+            res = False
+            
+        try:
+            del self.imported_from
+        except AttributeError:
+            pass
+            
+        return res
 
 
     def has(self, prop):
@@ -158,42 +152,7 @@ class Itemgroup:
 
 
 
-class Itemgroups:
-    def __init__(self, itemgroups):
-        self.itemgroups = {}
-        for ig in itemgroups:
-            self.itemgroups[ig.id] = ig
-
-
-    def find_id_by_name(self, name):
-        for id in self.itemgroups:
-            name_property = self.__class__.name_property
-            if getattr(self.itemgroups[id], name_property) == name:
-                return id
-        return None
-
-
-    def find_by_name(self, name):
-        id = self.find_id_by_name(name)
-        if id is not None:
-            return self.itemgroups[id]
-        else:
-            return None
-
-
-    def __str__(self):
-        s = ''
-        for id in self.itemgroups:
-            s += str(self.itemgroups[id])+'\n'
-        return s
-
-    def __iter__(self):
-        return self.itemgroups.itervalues()
-
-
-    def __len__(self):
-        return len(self.itemgroups)
-
+class Itemgroups(Items):            
 
     #If a prop is absent and is not required, put the default value
     def fill_default(self):
@@ -202,41 +161,11 @@ class Itemgroups:
 
 
     def add(self, ig):
-        self.itemgroups[ig.id] = ig
+        self.items[ig.id] = ig
 
 
-    def pythonize(self):
-        for ig in self:
-            ig.pythonize()
-
-
-    def is_correct(self):
-        #we are ok at the begining. Hope we still ok at the end...
-        r = True
-        #First look at no twins (it's bad!)
-        for id in self.twins:
-            i = self.itemgroups[id]
-            print "Error : the", i.__class__.my_type, i.get_name(), "is duplicated"
-            r = False
-        #Then look for individual ok
-        for ig in self:
-            if not ig.is_correct():
-                r = False
-                print "Error : the", ig.__class__.my_type, ig.get_name(), "is incorrect - imported from", ig.imported_from
-        return r
-
-
-    #We create the reversed list so search will be faster
-    #We also create a twins list with id of twins (not the original
-    #just the others, higher twins)
-    def create_reversed_list(self):
-        self.reversed_list = {}
-        self.twins = []
-        name_property = self.__class__.name_property
-        for id in self.itemgroups:
-            if hasattr(self.itemgroups[id], name_property):
-                name = getattr(self.itemgroups[id], name_property)
-                if name not in self.reversed_list:
-                    self.reversed_list[name] = id
-                else:
-                    self.twins.append(id)
+    def get_members_by_name(self, gname):
+        g = self.find_by_name(gname)
+        if g is None:
+            return []
+        return getattr(g, 'members', [])
