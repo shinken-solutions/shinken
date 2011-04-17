@@ -34,6 +34,13 @@ class Itemgroup(Item):
     
     id = 0
 
+    properties = Item.properties.copy()
+    properties.update({
+        'members':              StringProp (fill_brok=['full_status']),
+        # Shinken specific
+        'unknown_members':      StringProp (default=[]),
+    })
+
     def __init__(self, params={}):
         self.id = self.__class__.id
         self.__class__.id += 1

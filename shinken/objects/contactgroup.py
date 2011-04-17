@@ -37,9 +37,6 @@ class Contactgroup(Itemgroup):
         'id':                   IntegerProp(default=0, fill_brok=['full_status']),
         'contactgroup_name':    StringProp (fill_brok=['full_status']),
         'alias':                StringProp (fill_brok=['full_status']),
-        'members':              StringProp (fill_brok=['full_status']),
-        #Shinken specific
-        'unknown_members':      StringProp (default=[]),
     })
     
     macros = {
