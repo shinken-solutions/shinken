@@ -47,10 +47,6 @@ class Resultmodulation(Item):
         return self.resultmodulation_name
 
 
-    def clean(self):
-        pass
-
-
     #Make the return code modulation if need
     def module_return(self, return_code):
         #Only if in modulation_period of modulation_period == None

@@ -121,10 +121,6 @@ class NotificationWay(Item):
         return False
 
 
-    def clean(self):
-        pass
-
-
     #Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
         #service_notification_commands for service

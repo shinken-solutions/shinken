@@ -114,7 +114,13 @@ class Item(object):
 
 
     def clean(self):
-        pass
+        """ Clean useless things not requested once item has been fully initialized&configured.
+Like temporary attributes such as "imported_from", etc.. """
+        for name in ( 'imported_from', 'use', 'plus', 'templates', ): 
+            try:
+                delattr(self, name)
+            except AttributeError:
+                pass
 
 
     def __str__(self):
@@ -291,11 +297,6 @@ class Item(object):
             if not hasattr(self, prop) and entry.required:
                 print self.get_name(), "missing property :", prop
                 state = False
-                
-        try:
-            del self.imported_from
-        except AttributeError:
-            pass
                 
         return state
 
@@ -650,24 +651,21 @@ class Items(object):
         return r
 
 
-    #We remove useless properties and templates
-    def clean_useless(self):
-        #First templates
-        tpls = [id for id in self.items if self.items[id].is_tpl()]
-        for id in tpls:
-            del self.items[id]
-        #Ok now delete useless in items
-        for i in self:
-            try:
-                del i.templates
-                del i.use
-                del i.plus
-            except AttributeError:
-                pass
+    def remove_templates(self):
+        """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
+        tpls = [ i for i in self if i.is_tpl() ]
+        for i in tpls:
+            del self.items[i.id]
         del self.templates
 
 
-    #If a prop is absent and is not required, put the default value
+    def clean(self):
+        """ Request to remove the unecessary attributes/others from our items """
+        for i in self:
+            i.clean()
+        Item.clean(self)
+
+    # If a prop is absent and is not required, put the default value
     def fill_default(self):
         for i in self:
             i.fill_default()

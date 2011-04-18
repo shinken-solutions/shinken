@@ -67,11 +67,6 @@ class SatelliteLink(Item):
     })
 
 
-    #Clean? Really?
-    def clean(self):
-        pass
-
-
     #Check is required prop are set:
     #contacts OR contactgroups is need
     def is_correct(self):

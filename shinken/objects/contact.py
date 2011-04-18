@@ -139,11 +139,6 @@ class Contact(Item):
         return False
 
 
-    #Useless function from now
-    def clean(self):
-        pass
-
-
     #Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
         r = []

@@ -124,10 +124,6 @@ class Timeperiod(Item):
         return self.timeperiod_name
 
 
-    def clean(self):
-        pass
-
-
     #We fillfull properties with template ones if need
     #for the unresolved values (like sunday ETCETC)
     def get_unresolved_properties_by_inheritance(self, items):

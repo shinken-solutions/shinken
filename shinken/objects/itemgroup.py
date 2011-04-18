@@ -51,10 +51,6 @@ class Itemgroup(Item):
             setattr(self, key, params[key])
             
 
-    def clean(self):
-        pass
-
-
     #Copy the groups properties EXCEPT the members
     #members need to be fill after manually
     def copy_shell(self):
@@ -126,11 +122,6 @@ class Itemgroup(Item):
             for err in self.configuration_errors:
                 print err
             res = False
-            
-        try:
-            del self.imported_from
-        except AttributeError:
-            pass
             
         return res
 

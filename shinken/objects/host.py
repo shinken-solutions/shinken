@@ -325,10 +325,6 @@ class Host(SchedulingItem):
     }
 
 
-    def clean(self):
-        pass
-
-
     # Call by picle for data-ify the host
     # we do a dict because list are too dangerous for
     # retention save and co :( even if it's more

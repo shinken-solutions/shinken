@@ -311,10 +311,10 @@ class Arbiter(Daemon):
 
         # Fill default values
         self.conf.fill_default()
-
-        # Clean templates
-        self.conf.clean_useless()
-
+        
+        # Remove templates from config
+        self.conf.remove_templates()
+        
         # Pythonize values
         self.conf.pythonize()
 
@@ -367,6 +367,9 @@ class Arbiter(Daemon):
             sys.exit("Configuration is incorrect, sorry, I bail out")
 
         logger.log('Things look okay - No serious problems were detected during the pre-flight check')
+
+        # Now clean objects of temporary/unecessary attributes for live work:
+        self.conf.clean()
 
         # Exit if we are just here for config checking
         if self.verify_only:

@@ -82,10 +82,6 @@ class Command(Item):
         self.command_name = self.command_name.strip()
 
 
-    def clean(self):
-        pass
-
-
     def __str__(self):
         return str(self.__dict__)
 

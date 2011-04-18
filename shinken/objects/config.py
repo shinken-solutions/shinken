@@ -545,11 +545,10 @@ class Config(Item):
         #List where we put objects
         lst = []
         for obj_cfg in raw_objects[t]:
-            #We create teh object
+            # We create the object
             o = cls(obj_cfg)
-            o.clean()
             lst.append(o)
-        #we create the objects Class and we set it in prop
+        # we create the objects Class and we set it in prop
         setattr(self, prop, clss(lst))
 
 
@@ -1248,15 +1247,15 @@ class Config(Item):
 
 
     #Clean useless elements like templates because they are not needed anymore
-    def clean_useless(self):
-        self.hosts.clean_useless()
-        self.contacts.clean_useless()
-        self.services.clean_useless()
-        self.servicedependencies.clean_useless()
-        self.hostdependencies.clean_useless()
-        self.timeperiods.clean_useless()
-        self.discoveryrules.clean_useless()
-        self.discoveryruns.clean_useless()
+    def remove_templates(self):
+        self.hosts.remove_templates()
+        self.contacts.remove_templates()
+        self.services.remove_templates()
+        self.servicedependencies.remove_templates()
+        self.hostdependencies.remove_templates()
+        self.timeperiods.remove_templates()
+        self.discoveryrules.remove_templates()
+        self.discoveryruns.remove_templates()
 
 
     #Create packs of hosts and services so in a pack,
