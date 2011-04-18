@@ -140,8 +140,13 @@ class NRPE:
 
         self.state = 'received'
         # TODO : check crc
-            
-        response = struct.unpack(">2hih1024s", data)
+
+        try:
+            response = struct.unpack(">2hih1024s", data)
+        except: # bad format...
+            self.rc = 3
+            self.message = "Error : cannot read output from nrpe daemon..."
+            return (self.rc, self.message)
 
         self.rc = response[3]
         # the output is fill with \x00 at the end. We 
