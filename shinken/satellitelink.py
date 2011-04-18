@@ -40,7 +40,8 @@ Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
 class SatelliteLink(Item):
     #id = 0 each Class will have it's own id
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'address':         StringProp(fill_brok=['full_status']),
         'timeout':         IntegerProp(default='3', fill_brok=['full_status']),
         'data_timeout':    IntegerProp(default='120', fill_brok=['full_status']),
@@ -53,23 +54,17 @@ class SatelliteLink(Item):
         'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'use_timezone':       StringProp (default='NOTSET', to_send=True),
         'realm' :             StringProp (default=''),
-    }
+    })
     
-    running_properties = {
+    running_properties = Item.properties.copy()
+    running_properties.update({
         'con':                  StringProp(default=None),
         'alive':                StringProp(default=True, fill_brok=['full_status']),
         'broks':                StringProp(default=[]),
         'attempt':              StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
         'reachable':            StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
-        'configuration_errors': StringProp(default=[]),
         'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
-    }
-
-    macros = {}
-
-    #Clean? Really?
-    def clean(self):
-        pass
+    })
 
 
     #Check is required prop are set:

@@ -262,7 +262,7 @@ class Receiver(BaseSatellite):
             self.do_daemon_init_and_start()
             
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
-            print "The Arbtier uri it at", self.uri2
+            print "The Arbiter uri it at", self.uri2
 
             #  We wait for initial conf
             self.wait_for_initial_conf()

@@ -24,7 +24,7 @@
 #Contactgroups are groups for contacts
 #They are just used for the config read and explode by elements
 
-from shinken.objects.itemgroup import Itemgroup, Itemgroups
+from itemgroup import Itemgroup, Itemgroups
 
 from shinken.property import IntegerProp, StringProp
 
@@ -32,15 +32,12 @@ class Contactgroup(Itemgroup):
     id = 1
     my_type = 'contactgroup'
 
-    properties = {
+    properties = Itemgroup.properties.copy()
+    properties.update({
         'id':                   IntegerProp(default=0, fill_brok=['full_status']),
         'contactgroup_name':    StringProp (fill_brok=['full_status']),
         'alias':                StringProp (fill_brok=['full_status']),
-        'members':              StringProp (fill_brok=['full_status']),
-        #Shinken specific
-        'unknown_members':      StringProp (default=[]),
-        'configuration_errors': StringProp (default=[]),
-    }
+    })
     
     macros = {
         'CONTACTGROUPALIAS':    'alias',
@@ -102,14 +99,14 @@ class Contactgroups(Itemgroups):
     inner_class = Contactgroup
 
     def get_members_by_name(self, cgname):
-        id = self.find_id_by_name(cgname)
-        if id is None:
+        cg = self.find_by_name(cgname)
+        if cg is None:
             return []
-        return self.itemgroups[id].get_contacts()
+        return cg.get_contacts()
 
 
     def add_contactgroup(self, cg):
-        self.itemgroups[cg.id] = cg
+        self.items[cg.id] = cg
 
 
     def linkify(self, contacts):
@@ -119,8 +116,8 @@ class Contactgroups(Itemgroups):
     #We just search for each host the id of the host
     #and replace the name by the id
     def linkify_cg_by_cont(self, contacts):
-        for id in self.itemgroups:
-            mbrs = self.itemgroups[id].get_contacts()
+        for cg in self:
+            mbrs = cg.get_contacts()
 
             #The new member list, in id
             new_mbrs = []
@@ -130,44 +127,44 @@ class Contactgroups(Itemgroups):
                 if m is not None:
                     new_mbrs.append(m)
                 else:
-                    self.itemgroups[id].unknown_members.append(mbr)
+                    cg.unknown_members.append(mbr)
 
             #Make members uniq
             new_mbrs = list(set(new_mbrs))
 
             #We find the id, we remplace the names
-            self.itemgroups[id].replace_members(new_mbrs)
+            cg.replace_members(new_mbrs)
 
 
     #Add a contact string to a contact member
     #if the contact group do not exist, create it
     def add_member(self, cname, cgname):
-        id = self.find_id_by_name(cgname)
+        cg = self.find_by_name(cgname)
         #if the id do not exist, create the cg
-        if id is None:
+        if cg is None:
             cg = Contactgroup({'contactgroup_name' : cgname, 'alias' : cgname, 'members' :  cname})
             self.add_contactgroup(cg)
         else:
-            self.itemgroups[id].add_string_member(cname)
+            cg.add_string_member(cname)
 
 
     #Use to fill members with contactgroup_members
     def explode(self):
         #We do not want a same hg to be explode again and again
         #so we tag it
-        for tmp_cg in self.itemgroups.values():
+        for tmp_cg in self.items.values():
             tmp_cg.already_explode = False
 
-        for cg in self.itemgroups.values():
+        for cg in self.items.values():
             if cg.has('contactgroup_members') and not cg.already_explode:
                 #get_contacts_by_explosion is a recursive
                 #function, so we must tag hg so we do not loop
-                for tmp_cg in self.itemgroups.values():
+                for tmp_cg in self.items.values():
                     tmp_cg.rec_tag = False
                 cg.get_contacts_by_explosion(self)
 
         #We clean the tags
-        for tmp_cg in self.itemgroups.values():
+        for tmp_cg in self.items.values():
             if hasattr(tmp_cg, 'rec_tag'):
                 del tmp_cg.rec_tag
             del tmp_cg.already_explode

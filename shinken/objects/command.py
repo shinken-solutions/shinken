@@ -20,9 +20,12 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
+from item import Item, Items, init_running_properties
 from shinken.brok import Brok
-from shinken.property import StringProp, BoolProp, IntegerProp
+from shinken.property import StringProp
 from shinken.autoslots import AutoSlots
+
 
 # Ok, slots are fun : you cannot set the __autoslots__
 # on the same class you use, fun isn't it? So we define*
@@ -30,7 +33,7 @@ from shinken.autoslots import AutoSlots
 class DummyCommand(object):
     pass
 
-class Command(DummyCommand):
+class Command(Item):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
     __metaclass__ = AutoSlots
@@ -38,20 +41,25 @@ class Command(DummyCommand):
     id = 0
     my_type = "command"
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'command_name': StringProp(fill_brok=['full_status']),
         'command_line': StringProp(fill_brok=['full_status']),
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
-    }
+    })
 
     def __init__(self, params={}):
         setattr(self, 'id', self.__class__.id)
         #self.id = self.__class__.id
         self.__class__.id += 1
+        
+        init_running_properties(self)
+        
         for key in params:
             setattr(self, key, params[key])
+        
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = 'None'
         if not hasattr(self, 'reactionner_tag'):
@@ -67,13 +75,11 @@ class Command(DummyCommand):
             else:
                 self.module_type = 'fork'
 
+    def get_name(self):
+        return self.command_name
 
     def pythonize(self):
         self.command_name = self.command_name.strip()
-
-
-    def clean(self):
-        pass
 
 
     def __str__(self):
@@ -105,101 +111,8 @@ class Command(DummyCommand):
 
 
 
-# Ok, slots are fun : you cannot set the __autoslots__
-# on the same class you use, fun isn't it? So we define*
-# a dummy useless class to get such :)
-class DummyCommandCall(object):
-    pass
+class Commands(Items):
 
-#This class is use when a service, contact or host define
-#a command with args.
-class CommandCall(DummyCommandCall):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
+    inner_class = Command
+    name_property = "command_name"
 
-    #__slots__ = ('id', 'call', 'command', 'valid', 'args', 'poller_tag',
-    #             'reactionner_tag', 'module_type', '__dict__')
-    id = 0
-    my_type = 'CommandCall'
-
-    properties = {
-        'call':            StringProp(),
-        'command':         StringProp(),
-        'poller_tag':      StringProp(default='None'),
-        'reactionner_tag': StringProp(default='None'),
-        'module_type':     StringProp(default=None),
-        'valid' :          BoolProp(default=False),
-        'args' :           StringProp(default=[]),
-    }
-
-
-    def __init__(self, commands, call, poller_tag='None', reactionner_tag='None'):
-        self.id = self.__class__.id
-        self.__class__.id += 1
-        self.call = call
-        tab = call.split('!')
-        self.command = tab[0]
-        self.args = tab[1:]
-        self.command = commands.find_cmd_by_name(self.command.strip())
-        if self.command is not None:
-            self.valid = True
-        else:
-            self.valid = False
-            self.command = tab[0]
-        if self.valid:
-            #If the host/service do not give an override poller_tag, take
-            #the one of the command
-            self.poller_tag = poller_tag #from host/service
-            self.reactionner_tag = reactionner_tag
-            self.module_type = self.command.module_type
-            if self.valid and poller_tag is 'None':
-                self.poller_tag = self.command.poller_tag #from command if not set
-            # Same for reactionner tag
-            if self.valid and reactionner_tag is 'None':
-                self.reactionner_tag = self.command.reactionner_tag #from command if not set
-
-
-
-    def is_valid(self):
-        return self.valid
-
-
-    def __str__(self):
-        return str(self.__dict__)
-
-
-    def get_name(self):
-        return self.call
-
-
-class Commands(object):
-    def __init__(self, commands):
-        self.commands = {}
-        for c in commands:
-            self.commands[c.id] = c
-
-
-    def __iter__(self):
-        return self.commands.itervalues()
-
-
-    def __str__(self):
-        s = ''
-        for c in self.commands.values():
-            s += str(c)
-        return s
-
-
-    def find_cmd_id_by_name(self, name):
-        for id in self.commands:
-            if getattr(self.commands[id], 'command_name', '') == name:
-                return id
-        return None
-
-    def find_cmd_by_name(self, name):
-        id = self.find_cmd_id_by_name(name)
-        if id is not None:
-            return self.commands[id]
-        else:
-            return None

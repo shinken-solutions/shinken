@@ -29,38 +29,59 @@
 #from util import to_int, to_char, to_split, to_bool
 from copy import copy
 
-from shinken.objects.command import CommandCall
+
+from shinken.commandcall import CommandCall
+
+from shinken.property import StringProp, ListProp
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 from shinken.log import logger
 
+
+def init_running_properties(obj):
+    for prop, entry in obj.__class__.running_properties.items():
+        # Copy is slow, so we check type
+        # Type with __iter__ are list or dict, or tuple.
+        # Item need it's own list, so qe copy
+        val = entry.default
+        if hasattr(val, '__iter__'):
+            setattr(obj, prop, copy(val))
+        else:
+            setattr(obj, prop, val)
+        #eatch istance to have his own running prop!
+
+
 class Item(object):
+    
+    properties = {
+        'imported_from':            StringProp(default='unknown')
+    }
+    
+    running_properties = {
+        # All errors and warning raised during the configuration parsing
+        # and that will raised real warning/errors during the is_correct
+        'configuration_warnings':   ListProp(default=[]),
+        'configuration_errors':     ListProp(default=[]),              
+    }
+    
+    macros = {
+    }
+    
     def __init__(self, params={}):
         # We have our own id of My Class type :)
         # use set attr for going into the slots
         # instead of __dict__ :)
-        setattr(self, 'id', self.__class__.id)
-        self.__class__.id += 1
-
+        cls = self.__class__
+        self.id = cls.id
+        cls.id += 1
 
         self.customs = {} # for custom variables
         self.plus = {} # for value with a +
 
-        cls = self.__class__
-        # adding running properties like latency, dependency list, etc
-        for prop, entry in cls.running_properties.items():
-            # Copy is slow, so we check type
-            # Type with __iter__ are list or dict, or tuple.
-            # Item need it's own list, so qe copy
-            val = entry.default
-            if hasattr(val, '__iter__'):
-                setattr(self, prop, copy(val))
-            else:
-                setattr(self, prop, val)
-            #eatch istance to have his own running prop!
-
+        init_running_properties(self)
+        
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
@@ -93,7 +114,13 @@ class Item(object):
 
 
     def clean(self):
-        pass
+        """ Clean useless things not requested once item has been fully initialized&configured.
+Like temporary attributes such as "imported_from", etc.. """
+        for name in ( 'imported_from', 'use', 'plus', 'templates', ): 
+            try:
+                delattr(self, name)
+            except AttributeError:
+                pass
 
 
     def __str__(self):
@@ -266,11 +293,11 @@ class Item(object):
             for err in self.configuration_errors:
                 logger.log(err)
 
-
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
                 print self.get_name(), "missing property :", prop
                 state = False
+                
         return state
 
 
@@ -599,11 +626,12 @@ class Items(object):
         r = True
         #Some class do not have twins, because they do not have names
         #like servicedependancies
-        if hasattr(self, 'twins'):
+        twins = getattr(self, 'twins', None)
+        if twins is not None:
             #Ok, look at no twins (it's bad!)
-            for id in self.twins:
+            for id in twins:
                 i = self.items[id]
-                print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated"
+                print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from
                 r = False
         #Then look if we have some errors in the conf
         #Juts print warnings, but raise errors
@@ -615,28 +643,29 @@ class Items(object):
 
         #Then look for individual ok
         for i in self:
-            r &= i.is_correct()
+            if not i.is_correct():
+                n = getattr(i, 'imported_from', "unknown")
+                print "Error: In ", i.get_name(), "is incorrect ; from", n
+                r = False        
+        
         return r
 
 
-    #We remove useless properties and templates
-    def clean_useless(self):
-        #First templates
-        tpls = [id for id in self.items if self.items[id].is_tpl()]
-        for id in tpls:
-            del self.items[id]
-        #Ok now delete useless in items
-        for i in self:
-            try:
-                del i.templates
-                del i.use
-                del i.plus
-            except AttributeError:
-                pass
+    def remove_templates(self):
+        """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
+        tpls = [ i for i in self if i.is_tpl() ]
+        for i in tpls:
+            del self.items[i.id]
         del self.templates
 
 
-    #If a prop is absent and is not required, put the default value
+    def clean(self):
+        """ Request to remove the unecessary attributes/others from our items """
+        for i in self:
+            i.clean()
+        Item.clean(self)
+
+    # If a prop is absent and is not required, put the default value
     def fill_default(self):
         for i in self:
             i.fill_default()

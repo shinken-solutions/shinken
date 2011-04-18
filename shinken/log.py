@@ -91,9 +91,10 @@ class Log:
         basic_log_handler.setLevel(log_level)
         basic_log_formatter = logging.Formatter('%(asctime)s %(message)s')
         basic_log_handler.setFormatter(basic_log_formatter)
-        logging.getLogger('').addHandler(basic_log_handler)
-        logging.getLogger('').setLevel(log_level)
-        local_log = logging
+        logger = logging.getLogger()
+        logger.addHandler(basic_log_handler)
+        logger.setLevel(log_level)
+        local_log = basic_log_handler
 
         # Return the file descriptor of this file
         return basic_log_handler.stream.fileno()
@@ -103,6 +104,7 @@ class Log:
     def quit(self):
         global local_log
         if local_log:
+            print "Closing local_log ..", local_log
             local_log.close()
 
 

@@ -27,7 +27,6 @@ import time
 import traceback
 
 from shinken.scheduler import Scheduler
-from shinken.objects import Config
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager
 from shinken.daemon import Daemon

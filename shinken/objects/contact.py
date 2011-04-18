@@ -21,7 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from shinken.objects.item import Item, Items
+from item import Item, Items
 
 from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
@@ -43,7 +43,8 @@ class Contact(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'contact'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'contact_name':     StringProp(fill_brok=['full_status']),
         'alias':            StringProp(default='none', fill_brok=['full_status']),
         'contactgroups':    StringProp(default='', fill_brok=['full_status']),
@@ -67,15 +68,12 @@ class Contact(Item):
         'can_submit_commands': BoolProp(default='0', fill_brok=['full_status']),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'notificationways': StringProp(default=''),
-    }
+    })
 
-    running_properties = {
-        #All errors and warning raised during the configuration parsing
-        #and taht will raised real warning/errors during the is_correct
-        'configuration_warnings': ListProp(default=[]),
-        'configuration_errors': ListProp(default=[]),
+    running_properties = Item.running_properties.copy()
+    running_properties.update({
         'downtimes':        StringProp(default=[], fill_brok=['full_status'], retention=True),
-    }
+    })
 
 
     macros = {
@@ -139,11 +137,6 @@ class Contact(Item):
 
         #Oh, nobody..so NO :)
         return False
-
-
-    #Useless function from now
-    def clean(self):
-        pass
 
 
     #Call to get our commands to launch a Notification

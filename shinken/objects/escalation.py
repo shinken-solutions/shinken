@@ -35,7 +35,8 @@ class Escalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'escalation'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'escalation_name':      StringProp(),
         'first_notification':   IntegerProp(),
         'last_notification':    IntegerProp(),
@@ -46,18 +47,12 @@ class Escalation(Item):
         'escalation_options':   ListProp(default='d,u,r,w,c'),
         'contacts':             StringProp(),
         'contact_groups':       StringProp(),
-    }
+    })
     
-    running_properties = {
-        # All errors and warning raised during the configuration parsing
-        # and that will raised real warning/errors during the is_correct
-        'configuration_warnings': StringProp(default=[]),
-        'configuration_errors': StringProp(default=[]),
+    running_properties = Item.running_properties.copy()
+    running_properties.update({
         'time_based':           BoolProp(default=False),
-    }
-
-    macros = {}
-
+    })
     
     # For debugging purpose only (nice name)
     def get_name(self):

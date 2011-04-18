@@ -93,7 +93,7 @@ class TestDiscoveryConf(ShinkenTest):
     def test_look_for_discorun(self):
         nmap = self.sched.conf.discoveryruns.find_by_name('nmap')
         self.assert_(nmap != None)
-        nmapcmd = self.sched.conf.commands.find_cmd_by_name('nmap_runner')
+        nmapcmd = self.sched.conf.commands.find_by_name('nmap_runner')
         self.assert_(nmapcmd != None)
         self.assert_(nmap.discoveryrun_command != None)
         # Launch it

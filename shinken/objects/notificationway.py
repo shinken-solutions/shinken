@@ -34,7 +34,8 @@ class NotificationWay(Item):
     id = 1#0 is always special in database, so we do not take risk here
     my_type = 'notificationway'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'notificationway_name':         StringProp (fill_brok=['full_status']),
         'host_notifications_enabled':   BoolProp   (default='1', fill_brok=['full_status']),
         'service_notifications_enabled':BoolProp   (default='1', fill_brok=['full_status']),
@@ -45,7 +46,7 @@ class NotificationWay(Item):
         'host_notification_commands':   StringProp (fill_brok=['full_status']),
         'service_notification_commands':StringProp (fill_brok=['full_status']),
         'min_criticity':                IntegerProp(default = '0', fill_brok=['full_status']),
-    }
+    })
     
     running_properties = {}
 
@@ -118,10 +119,6 @@ class NotificationWay(Item):
             return b and 's' in self.host_notification_options
 
         return False
-
-
-    def clean(self):
-        pass
 
 
     #Call to get our commands to launch a Notification

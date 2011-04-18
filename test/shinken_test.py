@@ -74,7 +74,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.remove_twins()
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
-        self.conf.clean_useless()
+        self.conf.remove_templates()
         self.conf.pythonize()
         self.conf.linkify()
         self.conf.apply_dependancies()

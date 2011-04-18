@@ -345,6 +345,7 @@ class Config(Item):
             #We add a \n (or \r\n) to be sure config files are separated
             #if the previous does not finish with a line return
             res += os.linesep
+            res += '# IMPORTEDFROM=%s' % (file) + os.linesep
             print "Opening configuration file", file
             try:
                 # Open in Universal way for Windows, Mac, Linux
@@ -376,6 +377,7 @@ class Config(Item):
                     try:
                         fd = open(cfg_file_name, 'rU')
                         logger.log("Processing object config file '%s'" % cfg_file_name)
+                        res += os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep
                         res += fd.read().decode('utf8', 'replace')
                         #Be sure to add a line return so we won't mix files
                         res += '\n'
@@ -400,7 +402,7 @@ class Config(Item):
                             if re.search("\.cfg$", file):
                                 logger.log("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
-
+                                    res += os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep
                                     fd = open(os.path.join(root, file), 'rU')
                                     res += fd.read().decode('utf8', 'replace')
                                     fd.close()
@@ -432,6 +434,9 @@ class Config(Item):
         tmp_line = ''
         lines = buf.split('\n')
         for line in lines:
+            if line.startswith("# IMPORTEDFROM="):
+                filefrom = line.split('=')[1]
+                continue
             line = line.split(';')[0]
             #A backslash means, there is more to come
             if re.search("\\\s*$", line):
@@ -459,6 +464,7 @@ class Config(Item):
                     objectscfg[tmp_type] = []
                 objectscfg[tmp_type].append(tmp)
                 tmp = []
+                tmp.append("imported_from "+ filefrom)
                 #Get new type
                 elts = re.split('\s', line)
                 tmp_type = elts[1]
@@ -539,11 +545,10 @@ class Config(Item):
         #List where we put objects
         lst = []
         for obj_cfg in raw_objects[t]:
-            #We create teh object
+            # We create the object
             o = cls(obj_cfg)
-            o.clean()
             lst.append(o)
-        #we create the objects Class and we set it in prop
+        # we create the objects Class and we set it in prop
         setattr(self, prop, clss(lst))
 
 
@@ -1133,6 +1138,8 @@ class Config(Item):
         self.escalations.create_reversed_list()
         self.discoveryrules.create_reversed_list()
         self.discoveryruns.create_reversed_list()
+        self.commands.create_reversed_list()
+        
         #For services it's a special case
         #we search for hosts, then for services
         #it's quicker than search in all services
@@ -1173,7 +1180,7 @@ class Config(Item):
             logger.log("check global parameters failed")
             
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
-                  'escalations', 'services', 'servicegroups', 'timeperiods'):
+                  'escalations', 'services', 'servicegroups', 'timeperiods', 'commands'):
             logger.log('Checking %s...' % (x))
             cur = getattr(self, x)
             if not cur.is_correct():
@@ -1240,15 +1247,15 @@ class Config(Item):
 
 
     #Clean useless elements like templates because they are not needed anymore
-    def clean_useless(self):
-        self.hosts.clean_useless()
-        self.contacts.clean_useless()
-        self.services.clean_useless()
-        self.servicedependencies.clean_useless()
-        self.hostdependencies.clean_useless()
-        self.timeperiods.clean_useless()
-        self.discoveryrules.clean_useless()
-        self.discoveryruns.clean_useless()
+    def remove_templates(self):
+        self.hosts.remove_templates()
+        self.contacts.remove_templates()
+        self.services.remove_templates()
+        self.servicedependencies.remove_templates()
+        self.hostdependencies.remove_templates()
+        self.timeperiods.remove_templates()
+        self.discoveryrules.remove_templates()
+        self.discoveryruns.remove_templates()
 
 
     #Create packs of hosts and services so in a pack,
@@ -1425,7 +1432,7 @@ class Config(Item):
         self.confs = {}
         for i in xrange(0, nb_parts):
             #print "Create Conf:", i, '/', nb_parts -1
-            self.confs[i] = Config()
+            cur_conf = self.confs[i] = Config()
 
             #Now we copy all properties of conf into the new ones
             for prop, entry in Config.properties.items():
@@ -1434,34 +1441,34 @@ class Config(Item):
 #               or  entry['usage'] == 'unmanaged'):
                 if entry.managed and not isinstance(entry, UnusedProp):
                     val = getattr(self, prop)
-                    setattr(self.confs[i], prop, val)
+                    setattr(cur_conf, prop, val)
                     #print "Copy", prop, val
             
             # we need a deepcopy because each conf
             # will have new hostgroups
-            self.confs[i].id = i
-            self.confs[i].commands = self.commands
-            self.confs[i].timeperiods = self.timeperiods
+            cur_conf.id = i
+            cur_conf.commands = self.commands
+            cur_conf.timeperiods = self.timeperiods
             #Create hostgroups with just the name and same id, but no members
             new_hostgroups = []
             for hg in self.hostgroups:
                 new_hostgroups.append(hg.copy_shell())
-            self.confs[i].hostgroups = Hostgroups(new_hostgroups)
-            self.confs[i].notificationways = self.notificationways
-            self.confs[i].contactgroups = self.contactgroups
-            self.confs[i].contacts = self.contacts
-            self.confs[i].schedulerlinks = copy.copy(self.schedulerlinks)
+            cur_conf.hostgroups = Hostgroups(new_hostgroups)
+            cur_conf.notificationways = self.notificationways
+            cur_conf.contactgroups = self.contactgroups
+            cur_conf.contacts = self.contacts
+            cur_conf.schedulerlinks = copy.copy(self.schedulerlinks)
             #Create hostgroups with just the name and same id, but no members
             new_servicegroups = []
             for sg in self.servicegroups:
                 new_servicegroups.append(sg.copy_shell())
-            self.confs[i].servicegroups = Servicegroups(new_servicegroups)
-            self.confs[i].hosts = [] # will be fill after
-            self.confs[i].services = [] # will be fill after
+            cur_conf.servicegroups = Servicegroups(new_servicegroups)
+            cur_conf.hosts = [] # will be fill after
+            cur_conf.services = [] # will be fill after
             # The elements of the others conf will be tag here
-            self.confs[i].other_elements = {}  
+            cur_conf.other_elements = {}  
             # if a scheduler have accepted the conf
-            self.confs[i].is_assigned = False 
+            cur_conf.is_assigned = False 
 
         logger.log("Creating packs for realms")
 

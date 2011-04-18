@@ -19,6 +19,7 @@
 #
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+from shinken.objects.schedulingitem import SchedulingItem
 
 """ This is the main class for the Host. In fact it's mainly
 about the configuration part. for the running one, it's better
@@ -59,7 +60,8 @@ class Host(SchedulingItem):
     #  some dangerous properties like realms that are too 'linked' to be send like that.
     # brok_transformation : if set, will call the function with the value of the property
     #  the major times it will be to flatten the data (like realm_name instead of the realm object).
-    properties = {
+    properties = SchedulingItem.properties.copy()
+    properties.update({
         'host_name':            StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'alias':                StringProp(fill_brok=['full_status']),
         'display_name':         StringProp(default='none', fill_brok=['full_status']),
@@ -120,11 +122,12 @@ class Host(SchedulingItem):
 
         # Criticity value
         'criticity':            IntegerProp(default='3', fill_brok=['full_status']),
-    }
+    })
 
     # properties set only for running purpose
     # retention : save/load this property from retention
-    running_properties = {
+    running_properties = SchedulingItem.running_properties.copy()
+    running_properties.update({
         'last_chk':             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':             IntegerProp(default=0, fill_brok=['full_status', 'next_schedule']),
         'in_checking':          BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule']),
@@ -230,10 +233,6 @@ class Host(SchedulingItem):
             default=set(),
             fill_brok=['full_status']),
 
-        # All errors and warning raised during the configuration parsing
-        # and taht will raised real warning/errors during the is_correct
-        'configuration_warnings': StringProp(default=[]),
-        'configuration_errors': StringProp(default=[]),
 
         ### Problem/impact part
         'is_problem':           StringProp(default=False, fill_brok=['full_status']),
@@ -265,7 +264,7 @@ class Host(SchedulingItem):
         'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'state_before_hard_unknown_reach_phase' : StringProp(default='UP', retention=True),
-    }
+    })
 
     # Hosts macros and prop that give the information
     # the prop can be callable or not
@@ -324,10 +323,6 @@ class Host(SchedulingItem):
         'normal_check_interval': 'check_interval',
         'retry_check_interval':  'retry_interval'
     }
-
-
-    def clean(self):
-        pass
 
 
     # Call by picle for data-ify the host

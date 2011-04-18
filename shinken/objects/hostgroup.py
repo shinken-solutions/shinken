@@ -21,7 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from shinken.objects.itemgroup import Itemgroup, Itemgroups
+from itemgroup import Itemgroup, Itemgroups
 
 from shinken.property import StringProp
 
@@ -29,18 +29,15 @@ class Hostgroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'hostgroup'
 
-    properties = {
+    properties = Itemgroup.properties.copy()
+    properties.update({
         'id':             StringProp(default=0, fill_brok=['full_status']),
         'hostgroup_name': StringProp(fill_brok=['full_status']),
         'alias':          StringProp(fill_brok=['full_status']),
         'notes':          StringProp(default='', fill_brok=['full_status']),
         'notes_url':      StringProp(default='', fill_brok=['full_status']),
         'action_url':     StringProp(default='', fill_brok=['full_status']),
-        'members':        StringProp(default='', fill_brok=['full_status']),
-        #Shinken specific
-        'unknown_members':StringProp(default=[]),
-        'configuration_errors': StringProp(default = []),
-    }
+    })
 
     macros = {
         'HOSTGROUPALIAS':     'alias',
@@ -101,10 +98,10 @@ class Hostgroups(Itemgroups):
     inner_class = Hostgroup
 
     def get_members_by_name(self, hgname):
-        id = self.find_id_by_name(hgname)
-        if id is None:
+        hg = self.find_by_name(hgname)
+        if hg is None:
             return []
-        return self.itemgroups[id].get_hosts()
+        return hg.get_hosts()
 
 
     def linkify(self, hosts=None, realms=None):
@@ -115,7 +112,7 @@ class Hostgroups(Itemgroups):
     #We just search for each hostgroup the id of the hosts
     #and replace the name by the id
     def linkify_hg_by_hst(self, hosts):
-        for hg in self.itemgroups.values():
+        for hg in self:
             mbrs = hg.get_hosts()
             #The new member list, in id
             new_mbrs = []
@@ -177,31 +174,31 @@ class Hostgroups(Itemgroups):
     #Add a host string to a hostgroup member
     #if the host group do not exist, create it
     def add_member(self, hname, hgname):
-        id = self.find_id_by_name(hgname)
+        hg = self.find_by_name(hgname)
         #if the id do not exist, create the hg
-        if id is None:
+        if hg is None:
             hg = Hostgroup({'hostgroup_name' : hgname, 'alias' : hgname, 'members' :  hname})
             self.add(hg)
         else:
-            self.itemgroups[id].add_string_member(hname)
+            hg.add_string_member(hname)
 
 
     #Use to fill members with hostgroup_members
     def explode(self):
         #We do not want a same hg to be explode again and again
         #so we tag it
-        for tmp_hg in self.itemgroups.values():
+        for tmp_hg in self.items.values():
             tmp_hg.already_explode = False
-        for hg in self.itemgroups.values():
+        for hg in self.items.values():
             if hg.has('hostgroup_members') and not hg.already_explode:
                 #get_hosts_by_explosion is a recursive
                 #function, so we must tag hg so we do not loop
-                for tmp_hg in self.itemgroups.values():
+                for tmp_hg in self.items.values():
                     tmp_hg.rec_tag = False
                 hg.get_hosts_by_explosion(self)
 
         #We clean the tags
-        for tmp_hg in self.itemgroups.values():
+        for tmp_hg in self.items.values():
             if hasattr(tmp_hg, 'rec_tag'):
                 del tmp_hg.rec_tag
             del tmp_hg.already_explode

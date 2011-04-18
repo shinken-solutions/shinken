@@ -28,7 +28,7 @@ from shinken.util import to_int, to_bool
 from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
-from shinken.objects import CommandCall
+from shinken.commandcall import CommandCall
 from shinken.log import logger
 from shinken.pollerlink import PollerLink
 
@@ -403,7 +403,7 @@ class ExternalCommandManager:
                         args.append(val)
 
                     elif type_searched == 'command':
-                        c = self.commands.find_cmd_by_name(val)
+                        c = self.commands.find_by_name(val)
                         if c is not None:
                             args.append(val)#the find will be redone by
                             #the commandCall creation, but != None

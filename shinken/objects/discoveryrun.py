@@ -22,7 +22,7 @@
 
 import re
 
-from shinken.objects.item import Item, Items
+from item import Item, Items
 from shinken.property import IntegerProp, StringProp, ListProp
 from shinken.eventhandler import EventHandler
 from shinken.macroresolver import MacroResolver
@@ -32,17 +32,16 @@ class Discoveryrun(Item):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'discoveryrun'
 
-    properties = {
+    properties = Item.properties.copy()
+    properties.update({
         'discoveryrun_name':            StringProp (),
         'discoveryrun_command':         StringProp (),
-    }
+    })
 
-    running_properties = {
+    running_properties = Item.running_properties.copy()
+    running_properties.update({
         'current_launch': StringProp(default=None),
-        'configuration_errors': ListProp(default=[]),
-        }
-
-    macros = {}
+    })
 
     # Output name
     def get_name(self):

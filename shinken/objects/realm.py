@@ -33,7 +33,8 @@ class Realm(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
     my_type = 'realm'
 
-    properties = {
+    properties = Itemgroup.properties.copy()
+    properties.update({
         'id':            IntegerProp(default=0, fill_brok=['full_status']),
         'realm_name':    StringProp (fill_brok=['full_status']),
         'realm_members': StringProp (default=''),#No status_broker_name because it put hosts, not host_name
@@ -43,7 +44,7 @@ class Realm(Itemgroup):
         #'notes': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
         #'notes_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
         #'action_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
-    }
+    })
 
     macros = {
         'REALMNAME':    'realm_name',
@@ -337,22 +338,19 @@ class Realms(Itemgroups):
     inner_class = Realm
 
 
-    def __len__(self):
-        return len(self.itemgroups)
-
 
     def get_members_by_name(self, pname):
-        id = self.find_id_by_name(pname)
-        if id is None:
+        realm = self.find_by_name(pname)
+        if realm is None:
             return []
-        return self.itemgroups[id].get_realms()
+        return realm.get_realms()
 
 
     def linkify(self):
         self.linkify_p_by_p()
 
-        #prepare list of satallites and confs
-        for p in self.itemgroups.values():
+        # prepare list of satellites and confs
+        for p in self:
             p.pollers = []
             p.schedulers = []
             p.reactionners = []
@@ -365,7 +363,7 @@ class Realms(Itemgroups):
     #We just search for each realm the others realms
     #and replace the name by the realm
     def linkify_p_by_p(self):
-        for p in self.itemgroups.values():
+        for p in self.items.values():
             mbrs = p.get_realm_members()
             #The new member list, in id
             new_mbrs = []
@@ -381,10 +379,10 @@ class Realms(Itemgroups):
 
         #Now put higher realm in sub realms
         #So after they can
-        for p in self.itemgroups.values():
+        for p in self.items.values():
             p.higher_realms = []
 
-        for p in self.itemgroups.values():
+        for p in self.items.values():
             for sub_p in p.realm_members:
                 sub_p.higher_realms.append(p)
 
@@ -393,18 +391,18 @@ class Realms(Itemgroups):
     def explode(self):
         #We do not want a same hg to be explode again and again
         #so we tag it
-        for tmp_p in self.itemgroups.values():
+        for tmp_p in self.items.values():
             tmp_p.already_explode = False
-        for p in self.itemgroups.values():
+        for p in self:
             if p.has('realm_members') and not p.already_explode:
                 #get_hosts_by_explosion is a recursive
                 #function, so we must tag hg so we do not loop
-                for tmp_p in self.itemgroups.values():
+                for tmp_p in self:
                     tmp_p.rec_tag = False
                 p.get_realms_by_explosion(self)
 
         #We clean the tags
-        for tmp_p in self.itemgroups.values():
+        for tmp_p in self.items.values():
             if hasattr(tmp_p, 'rec_tag'):
                 del tmp_p.rec_tag
             del tmp_p.already_explode
