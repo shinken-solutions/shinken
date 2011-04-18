@@ -214,7 +214,7 @@ class Broker(BaseSatellite):
                 logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
                 logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
-                self.modules_manager.set_to_restart(inst)
+                self.modules_manager.set_to_restart(mod)
 
 
     # Add broks (a tab) to different queues for
