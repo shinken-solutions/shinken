@@ -1433,7 +1433,7 @@ class Config(Item):
         self.confs = {}
         for i in xrange(0, nb_parts):
             #print "Create Conf:", i, '/', nb_parts -1
-            self.confs[i] = Config()
+            cur_conf = self.confs[i] = Config()
 
             #Now we copy all properties of conf into the new ones
             for prop, entry in Config.properties.items():
@@ -1442,34 +1442,34 @@ class Config(Item):
 #               or  entry['usage'] == 'unmanaged'):
                 if entry.managed and not isinstance(entry, UnusedProp):
                     val = getattr(self, prop)
-                    setattr(self.confs[i], prop, val)
+                    setattr(cur_conf, prop, val)
                     #print "Copy", prop, val
             
             # we need a deepcopy because each conf
             # will have new hostgroups
-            self.confs[i].id = i
-            self.confs[i].commands = self.commands
-            self.confs[i].timeperiods = self.timeperiods
+            cur_conf.id = i
+            cur_conf.commands = self.commands
+            cur_conf.timeperiods = self.timeperiods
             #Create hostgroups with just the name and same id, but no members
             new_hostgroups = []
             for hg in self.hostgroups:
                 new_hostgroups.append(hg.copy_shell())
-            self.confs[i].hostgroups = Hostgroups(new_hostgroups)
-            self.confs[i].notificationways = self.notificationways
-            self.confs[i].contactgroups = self.contactgroups
-            self.confs[i].contacts = self.contacts
-            self.confs[i].schedulerlinks = copy.copy(self.schedulerlinks)
+            cur_conf.hostgroups = Hostgroups(new_hostgroups)
+            cur_conf.notificationways = self.notificationways
+            cur_conf.contactgroups = self.contactgroups
+            cur_conf.contacts = self.contacts
+            cur_conf.schedulerlinks = copy.copy(self.schedulerlinks)
             #Create hostgroups with just the name and same id, but no members
             new_servicegroups = []
             for sg in self.servicegroups:
                 new_servicegroups.append(sg.copy_shell())
-            self.confs[i].servicegroups = Servicegroups(new_servicegroups)
-            self.confs[i].hosts = [] # will be fill after
-            self.confs[i].services = [] # will be fill after
+            cur_conf.servicegroups = Servicegroups(new_servicegroups)
+            cur_conf.hosts = [] # will be fill after
+            cur_conf.services = [] # will be fill after
             # The elements of the others conf will be tag here
-            self.confs[i].other_elements = {}  
+            cur_conf.other_elements = {}  
             # if a scheduler have accepted the conf
-            self.confs[i].is_assigned = False 
+            cur_conf.is_assigned = False 
 
         logger.log("Creating packs for realms")
 
