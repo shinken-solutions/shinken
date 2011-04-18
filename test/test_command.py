@@ -26,7 +26,7 @@
 from shinken_test import *
 from shinken.objects.command import CommandCall, Command, Commands
 
-class TestConfig(ShinkenTest):
+class TestCommand(ShinkenTest):
     #setUp is in shinken_test
 
     #Change ME :)

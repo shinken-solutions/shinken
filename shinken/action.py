@@ -149,12 +149,13 @@ if os.name != 'nt':
             #force_shell = False
             
             # 2.7 and higer Python version need a list of args for cmd
+            # and if not force shell (if, it's useless, even dangerous)
             # 2.4->2.6 accept just the string command
-            if sys.version_info < (2, 7):# and False:
+            if sys.version_info < (2, 7) or force_shell:
                 cmd = self.command
             else:
                 cmd = shlex.split(self.command.encode('utf8', 'ignore'))
-                
+            
             # Now : GO for launch!
             try:
                 self.process = subprocess.Popen(cmd,

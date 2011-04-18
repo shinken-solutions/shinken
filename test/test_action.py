@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 #Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -28,7 +28,7 @@ import os
 from shinken_test import *
 from shinken.action import Action
 
-class TestConfig(ShinkenTest):
+class TestAction(ShinkenTest):
     #setUp is in shinken_test
 
     def wait_finished(self, a):
@@ -117,6 +117,24 @@ class TestConfig(ShinkenTest):
         print "FUck", a.status, a.output
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
+
+
+    def test_got_pipe_shell_characters(self):
+        a = Action()
+        a.timeout = 10
+        a.command = "libexec/dummy_command_nobang.sh | grep 'Please do not use me directly'"
+        a.env = {}
+        if os.name == 'nt':
+            return
+        self.assert_(a.got_shell_characters() == True)
+        a.execute()
+
+        self.assert_(a.status == 'launched')
+        self.wait_finished(a)
+        print "FUck", a.status, a.output
+        self.assert_(a.exit_status == 0)
+        self.assert_(a.status == 'done')
+
 
 if __name__ == '__main__':
     import sys
