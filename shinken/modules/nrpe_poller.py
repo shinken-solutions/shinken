@@ -440,9 +440,10 @@ class Nrpe_poller(BaseModule):
             if c.status == 'launched' and c.con.is_done():
                 n = c.con
                 c.status = 'done'
-                c.exit_status = n.rc
-                c.get_outputs(n.message, 8012)
-                c.execution_time  = c.con.execution_time
+                c.exit_status = getattr(n, 'rc', 3)
+                c.get_outputs(getattr(n, 'message', 'Error in launching command.'), 8012)
+                c.execution_time  = getattr(n, 'execution_time', 0.0)
+
                 # unlink our object from the original check
                 if hasattr(c, 'con'):
                     delattr(c, 'con')
@@ -499,6 +500,9 @@ class Nrpe_poller(BaseModule):
                     break
             except :
                 pass
+
+            #TODO : better time management
+            time.sleep(.1)
 
             timeout -= time.time() - begin
             if timeout < 0:
