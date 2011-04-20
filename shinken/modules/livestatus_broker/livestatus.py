@@ -2503,9 +2503,11 @@ class LiveStatus(object):
             },
             'host_name' : {
                 'default' : None,
-                'depythonize' : lambda x: x.host_name,
+                # automatic delegation does not work here, because it would
+                # ref always to be a host
+                'delegate' : 'ref',
+                'as' : 'host_name',
                 'description' : 'Host name',
-                'prop' : 'ref',
                 'type' : 'string',
             },
             'host_next_check' : {
@@ -3489,6 +3491,8 @@ class LiveStatus(object):
             },
             'host_name' : {
                 'default' : None,
+                'delegate' : 'ref',
+                'as' : 'host_name',
                 'description' : 'Host name',
                 'type' : 'string',
             },
@@ -5511,6 +5515,7 @@ class LiveStatus(object):
 
         self.create_out_map_delegates()
         self.create_out_map_hooks()
+        print "rsrsrs",LiveStatus.out_map['Downtime']['host_name']
         # add Host attributes to Hostsbygroup etc.
         for attribute in LiveStatus.out_map['Host']:
             LiveStatus.out_map['Hostsbygroup'][attribute] = LiveStatus.out_map['Host'][attribute]
@@ -5638,10 +5643,7 @@ class LiveStatus(object):
                 if value is None or value == 'none':
                     raise
                 elif isinstance(value, list):
-                    # self is a <class 'livestatus_broker.livestatus.LiveStatusQuery'>
-                    # self is a <class 'livestatus_broker.livestatus.LiveStatus'>
                     return [func(item, elt, self) for item in value]
-                    # comment host req
                 else:
                     return func(value, elt, self)
             except Exception, e:
@@ -5658,10 +5660,8 @@ class LiveStatus(object):
                 attr = getattr(elt, func)
                 if callable(attr):
                     attr = attr()
-                # attr is now elt.host
                 new_hook = self.out_map[attr.__class__.__name__][new_prop]['hook']
                 if 'fulldepythonize' in self.out_map[attr.__class__.__name__][new_prop]:
-                    print "watch out!!!! fulldepythonize", type(self)
                     return new_hook(attr, self)
                 return new_hook(attr)
             else:
@@ -5691,11 +5691,8 @@ class LiveStatus(object):
         
         """
         for objtype in LiveStatus.out_map:
-            print "OBJETC", objtype
             for attribute in LiveStatus.out_map[objtype]:
                 entry =  LiveStatus.out_map[objtype][attribute]
-                if str(objtype) == "Service" and attribute == "host_address":
-                    print entry
                 if 'prop' not in entry or entry['prop'] is None:
                     prop = attribute
                 else:
@@ -5727,6 +5724,18 @@ class LiveStatus(object):
                         entry['hooktype'] = 'depythonize'
                     else:
                         entry['hook'] = self.make_hook('get_prop', prop, default, None, None)
+            # This hack is ugly, i should be beaten up for it. But whithout it
+            # mapping of Downtime.host_name would not work if it's a
+            # host downtime. It cannot automatically be delegated to ref,
+            # because autom. delegation assumes ref is a Host then, so
+            # service_description would not work.
+            # So the request will be delegated to a host, but with the full
+            # property "host_name" which is only possible with the 
+            # following code.
+            if objtype == 'Host':
+                attributes = LiveStatus.out_map[objtype].keys()
+                for attribute in attributes:
+                    LiveStatus.out_map[objtype]['host_' + attribute] =  LiveStatus.out_map[objtype][attribute]
                     
 
     def create_out_map_delegates(self):
@@ -5752,19 +5761,19 @@ class LiveStatus(object):
         """
         delegate_map = {
             'Logline' : {
-                'current_service_' : ('log_service', 'Service'),
-                'current_host_' : ('log_host', 'Host'),
+                'current_service_' : 'log_service',
+                'current_host_' : 'log_host',
             },
             'Service' : {
-                'host_' : ('host', 'Host'),
+                'host_' : 'host',
             },
             'Comment' : {
-                'service_' : ('ref', 'Service'),
-                'host_' : ('ref', 'Host'),
+                'service_' : 'ref',
+                'host_' : 'ref',
             },
             'Downtime' : {
-                'service_' : ('ref', 'Service'),
-                'host_' : ('ref', 'Host'),
+                'service_' : 'ref',
+                'host_' : 'ref',
             }
         }
         for objtype in LiveStatus.out_map:
@@ -5774,11 +5783,7 @@ class LiveStatus(object):
                     for prefix in delegate_map[objtype]:
                         if attribute.startswith(prefix):
                             if 'delegate' not in entry:
-                                delegate_prop, delegate_objtype = delegate_map[objtype][prefix]
-                                entry['delegate'] = delegate_prop
-                                # We need the objtype later in 
-                                # LiveStatusQuery.copy_out_map_hooks()
-                                entry['delegateobj'] = delegate_objtype
+                                entry['delegate'] = delegate_map[objtype][prefix]
                                 entry['as'] = attribute.replace(prefix, '')
 
 
@@ -6069,10 +6074,6 @@ class LiveStatusQuery(LiveStatus):
                 new_map[objtype][attribute] = {}
                 entry =  LiveStatus.out_map[objtype][attribute]
                 if 'hooktype' in entry:
-                    if objtype == "Comment" and attribute == "host_name":
-                        print "has hooktype"
-                    if objtype == "Service" and attribute == "host_name":
-                        print "has hooktype"
                     if 'prop' not in entry or entry['prop'] is None:
                         prop = attribute
                     else:

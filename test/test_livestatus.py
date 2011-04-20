@@ -2088,6 +2088,27 @@ Limit: 1001"""
         #self.assert_(self.contains_line(response, '3;0'))
 
 
+    def test_downtimes_ref(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        duration = 180
+        now = time.time()
+        cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;0;0;%d;lausser;blablub" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        self.update_broker(True)
+        request = 'GET downtimes\nColumns: host_name service_description id comment\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == 'test_host_0;test_ok_0;1;blablub\n')
+
+
 
 class TestConfigBig(TestConfig):
     def setUp(self):
