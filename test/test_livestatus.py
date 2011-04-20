@@ -325,6 +325,10 @@ class TestConfigSmall(TestConfig):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
+        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
+        for attr in to_del:
+            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
+        self.livestatus_broker = None
 
 
     def test_childs(self):
@@ -2143,6 +2147,10 @@ class TestConfigBig(TestConfig):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
+        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
+        for attr in to_del:
+            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
+        self.livestatus_broker = None
 
 
     def test_stats(self):
@@ -2527,6 +2535,10 @@ class TestConfigComplex(TestConfig):
             os.remove(self.livelogs)
         if os.path.exists(self.pnp4nagios):
             shutil.rmtree(self.pnp4nagios)
+        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
+        for attr in to_del:
+            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
+        self.livestatus_broker = None
 
 
     #  test_host_0  has parents test_router_0,test_router_1

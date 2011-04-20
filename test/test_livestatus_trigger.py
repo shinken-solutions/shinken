@@ -325,6 +325,10 @@ class TestConfigSmall(TestConfig):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
+        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
+        for attr in to_del:
+            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
+        self.livestatus_broker = None
 
 
 
