@@ -177,6 +177,9 @@ class Livestatus_broker(BaseModule):
         
         h.service_ids = []
         h.services = []
+        # We need to rebuild Downtime and Comment relationship
+        for dtc in h.downtimes + h.comments:
+            dtc.ref = h
         self.hosts[h_id] = h
         self.hostname_lookup_table[h.host_name] = h_id
         self.number_of_objects += 1
@@ -192,6 +195,8 @@ class Livestatus_broker(BaseModule):
             return
         self.update_element(h, data)
         self.set_schedulingitem_values(h)
+        for dtc in h.downtimes + h.comments:
+            dtc.ref = h
         self.livestatus.count_event('host_checks')
 
     def manage_initial_hostgroup_status_brok(self, b):
@@ -227,6 +232,8 @@ class Livestatus_broker(BaseModule):
             # There is already a s.host_name, but a reference to the h object can be useful too
             s.host = h
         
+        for dtc in s.downtimes + s.comments:
+            dtc.ref = s
         self.services[s_id] = s
         self.servicename_lookup_table[s.host_name + s.service_description] = s_id
         self.number_of_objects += 1
@@ -242,6 +249,8 @@ class Livestatus_broker(BaseModule):
             return
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
+        for dtc in s.downtimes + s.comments:
+            dtc.ref = s
         self.livestatus.count_event('service_checks')
    
 
@@ -774,12 +783,71 @@ class Livestatus_broker(BaseModule):
             inputready,outputready,exceptready = select.select(self.input,[],[], 0)
 
             now = time.time()
+            if True:
+                # It's True, this is a horrible implementation
+                # It doesn't use triggers yet, so it may be very slow.
+                for socketid in open_connections:
+                    if open_connections[socketid]['state'] == 'waiting' and now > open_connections[socketid]['nexttry']:
+                        wait = open_connections[socketid]['wait']
+                        query = open_connections[socketid]['query']
+                        s = open_connections[socketid]['socket']
+                        if wait.wait_timeout:
+                            if now - wait.wait_start > wait.wait_timeout:
+                                print "wait timeout", socketid
+                                # Launch the request and respond
+                                result = query.launch_query()
+                                response = query.response
+                                response.format_live_data(result, query.columns, query.aliases)
+                                output, keepalive = response.respond()
+                                try:
+                                    s.send(output)
+                                    self.write_protocol('', output)
+                                except Exception, e:
+                                    pass
+                                open_connections[socketid]['buffer'] = None
+                                del open_connections[socketid]['wait']
+                                del open_connections[socketid]['query']
+                                if keepalive == 'on':
+                                    open_connections[socketid]['keepalive'] = True
+                                    open_connections[socketid]['state'] = 'receiving'
+                                else:
+                                    open_connections[socketid]['state'] = 'idle'
+                                pass
+                            else:
+                                if wait.condition_fulfilled():
+                                    print "fulfulled", socketid
+                                    # Condition is met, launch the query
+                                    result = query.launch_query()
+                                    response = query.response
+                                    response.format_live_data(result, query.columns, query.aliases)
+                                    output, keepalive = response.respond()
+                                    try:
+                                        s.send(output)
+                                        self.write_protocol('', output)
+                                    except Exception, e:
+                                        pass
+                                    open_connections[socketid]['buffer'] = None
+                                    del open_connections[socketid]['wait']
+                                    del open_connections[socketid]['query']
+                                    if keepalive == 'on':
+                                        open_connections[socketid]['keepalive'] = True
+                                        open_connections[socketid]['state'] = 'receiving'
+                                    else:
+                                        open_connections[socketid]['state'] = 'idle'
+                                else:
+                                    print "missed", socketid
+                                    # Condition is not met
+                                    open_connections[socketid]['nexttry'] = now + 0.5
+                                    pass
+                        else:
+                            # This one has no timeout, so try forever
+                            pass
+
             # At the end of this loop we probably will discard connections
             kick_connections = []
             if len(exceptready) > 0:
                 pass
-            if len(outputready) > 0:
-                pass
+                                
             if len(inputready) > 0:
                 for s in inputready:
                 # We will identify sockets by their filehandle number
@@ -806,7 +874,7 @@ class Livestatus_broker(BaseModule):
                             open_connections[socketid]['lastseen'] = now
                         else:
                             # This is a new connection
-                            open_connections[socketid] = { 'keepalive' : False, 'lastseen' : now, 'buffer' : None, 'state' : 'receiving' }
+                            open_connections[socketid] = { 'keepalive' : False, 'lastseen' : now, 'buffer' : None, 'state' : 'receiving', 'socket' : s }
 
                         data = ''
                         try:
@@ -880,39 +948,35 @@ class Livestatus_broker(BaseModule):
                                     print "undef state data nobuffer", open_connections[socketid]['state']
 
                         if handle_it:
-                            request_parts = re.split(r'[\r\n]{2,}', open_connections[socketid]['buffer'].rstrip())
-                            if len(request_parts) > 1:
-                                # This situation occurs when the multisite gui sends
-                                # an external command immediately followed by a GET-request
-                                for part in request_parts:
-                                    response, keepalive = self.livestatus.handle_request(part)
+                            open_connections[socketid]['buffer'] = open_connections[socketid]['buffer'].rstrip()
+                            response, keepalive = self.livestatus.handle_request(open_connections[socketid]['buffer'])
+                            if isinstance(response, str):
+                                try:
+                                    s.send(response)
+                                    self.write_protocol(open_connections[socketid]['buffer'], response)
+                                except:
+                                    # Maybe the request was an external command and
+                                    # the peer is not interested in a response at all
+                                    pass
+
+                                # Empty the input buffer for the next request
+                                open_connections[socketid]['buffer'] = None
+                                if keepalive == 'on':
+                                    open_connections[socketid]['keepalive'] = True
+                                    open_connections[socketid]['state'] = 'receiving'
+                                else:
+                                    open_connections[socketid]['state'] = 'idle'
                             else:
-                                response, keepalive = self.livestatus.handle_request(request_parts[0])
-                            try:
-                                s.send(response)
-                            except:
-                                # Maybe the request was an external command and
-                                # the peer is not interested in a response at all
-                                pass
-
-                            # Write request/response in a tracefile
-#                            if os.path.exists('/tmp/shinken.modules.livestatus.trace'):
-#                               try:
-#                                   trace = open('/tmp/shinken.modules.livestatus.trace', 'a')
-#                                   trace.write("REQUEST>>>>>\n" + open_connections[socketid]['buffer'].rstrip() + "\n\n")
-#                                   trace.write("RESPONSE<<<<\n" + response + "\n\n")
-#                                   trace.close()
-#                               except Exception , exp:
-#                                   print str(exp)
-#                                   print "please check the permissions on the tracefile"
-
-                            # Empty the input buffer for the next request
-                            open_connections[socketid]['buffer'] = None
-                            if keepalive == 'on':
+                                self.write_protocol(open_connections[socketid]['buffer'], "not yet")
+                                # Complicated. A trigger is involved
+                                wait, query = response
+                                open_connections[socketid]['buffer'] = None
                                 open_connections[socketid]['keepalive'] = True
-                                open_connections[socketid]['state'] = 'receiving'
-                            else:
-                                open_connections[socketid]['state'] = 'idle'
+                                open_connections[socketid]['state'] = 'waiting'
+                                open_connections[socketid]['wait'] = wait
+                                open_connections[socketid]['query'] = query
+                                open_connections[socketid]['nexttry'] = now
+                                pass
 
                         if close_it:
                             # Register this socket for deletion
@@ -960,6 +1024,20 @@ class Livestatus_broker(BaseModule):
                 pass
 
         self.do_stop()
+
+
+    def write_protocol(self, request, response):
+        # Write request/response in a tracefile
+        if os.path.exists('/tmp/shinken.modules.livestatus.trace'):
+            try:
+                trace = open('/tmp/shinken.modules.livestatus.trace', 'a')
+                trace.write("REQUEST>>>>>\n" + request + "\n\n")
+                trace.write("RESPONSE<<<<\n" + response + "\n\n")
+                trace.close()
+            except Exception , exp:
+                print str(exp)
+                print "please check the permissions on the tracefile"
+
 
 def livestatus_factory(cursor, row):
     return Logline(row)
