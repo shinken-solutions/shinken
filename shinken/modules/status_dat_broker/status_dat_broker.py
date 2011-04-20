@@ -142,6 +142,9 @@ class Status_dat_broker(BaseModule):
         del h.escalations
 
         #print "H:", h
+        # We need to rebuild Downtime and Comment relationship
+        for dtc in h.downtimes + h.comments:
+            dtc.ref = h
         self.hosts[h_id] = h
         self.number_of_objects += 1
 
@@ -182,6 +185,9 @@ class Status_dat_broker(BaseModule):
         del s.escalations
 
         #print "S:", s
+        # We need to rebuild Downtime and Comment relationship
+        for dtc in s.downtimes + s.comments:
+            dtc.ref = s
         self.services[s_id] = s
         self.number_of_objects += 1
 
@@ -279,11 +285,13 @@ class Status_dat_broker(BaseModule):
         #In the status, we've got duplicated item, we must relink thems
         s = self.find_service(data['host_name'], data['service_description'])
         if s is not None:
-            print "Warning : problem with unknown service for brok", b.id
             s.check_period = self.get_timeperiod(s.check_period)
             s.notification_period = self.get_timeperiod(s.notification_period)
             s.contacts = self.get_contacts(s.contacts)
             del s.escalations
+            # We need to rebuild Downtime and Comment relationship
+            for dtc in s.downtimes + s.comments:
+                dtc.ref = s
 
 
 
@@ -312,6 +320,10 @@ class Status_dat_broker(BaseModule):
             h.contacts = self.get_contacts(h.contacts)
             #Escalations is not use for status_dat
             del h.escalations
+            # We need to rebuild Downtime and Comment relationship
+            for dtc in h.downtimes + h.comments:
+                dtc.ref = h
+
 
 
 
