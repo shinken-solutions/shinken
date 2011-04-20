@@ -80,6 +80,16 @@ def get_livestatus_full_name(prop, ref, request):
         pass
 
 
+def join_with_separators(prop, ref, request, *args):
+    if request.response.outputformat == 'csv':
+        return request.response.separators[3].join([str(arg) for arg in args])
+    elif request.response.outputformat == 'json' or request.response.outputformat == 'python':
+        return args
+    else:
+        return None
+    pass
+
+
 def from_svc_hst_distinct_lists(dct):
     """Transform a dict with keys hosts and services to a list."""
     t = []
@@ -283,6 +293,11 @@ class LiveStatusStack:
             return self.get()
 
 
+    def put_stack(self, element):
+        """Wrapper for a stack put operation which corresponds to get_stack"""
+        self.put(element)
+
+
 try:
     Queue.LifoQueue
     LiveStatusStack.__bases__ = (Queue.LifoQueue,)
@@ -292,7 +307,7 @@ except AttributeError:
     LiveStatusStack.__bases__ = (MyLifoQueue,)
 
 
-class LiveStatus:
+class LiveStatus(object):
     """A class that represents the status of all objects in the broker
     
     """
@@ -389,6 +404,13 @@ class LiveStatus:
                 'description' : 'A list of the ids of all comments of this host',
                 'type' : 'list',
             },
+            'comments_with_info' : {
+                'default' : '',
+                'fulldepythonize' : lambda p, e, r: join_with_separators(p, e, r, str(p.id), p.author, p.comment),
+                'description' : 'A list of the ids of all comments of this host with id, author and comment',
+                'prop' : 'comments',
+                'type' : 'list',
+            },
             'contacts' : {
                 'depythonize' : 'contact_name',
                 'description' : 'A list of all contacts of this host, either direct or via a contact group',
@@ -423,6 +445,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'downtimes' : {
+                'depythonize' : 'id',
                 'description' : 'A list of the ids of all scheduled downtimes of this host',
                 'type' : 'list',
             },
@@ -871,6 +894,13 @@ class LiveStatus:
                 'description' : 'A list of all comment ids of the service',
                 'type' : 'list',
             },
+            'comments_with_info' : {
+                'default' : '',
+                'fulldepythonize' : lambda p, e, r: join_with_separators(p, e, r, str(p.id), p.author, p.comment),
+                'description' : 'A list of the ids of all comments of this service with id, author and comment',
+                'prop' : 'comments',
+                'type' : 'list',
+            },
             'contacts' : {
                 'depythonize' : 'contact_name',
                 'description' : 'A list of all contacts of the service, either direct or via a contact group',
@@ -908,6 +938,7 @@ class LiveStatus:
                 'type' : 'string',
             },
             'downtimes' : {
+                'depythonize' : lambda x: x.id,
                 'description' : 'A list of all downtime ids of the service',
                 'type' : 'list',
             },
@@ -1032,10 +1063,17 @@ class LiveStatus:
                 'type' : 'list',
             },
             'host_comments' : {
-                'default' : '',
-                'depythonize' : lambda h: ([c.id for c in h.comments]),
+                #'default' : '',
+                #'depythonize' : lambda h: ([c.id for c in h.comments]),
                 'description' : 'A list of the ids of all comments of this host',
-                'prop' : 'host',
+                #'prop' : 'host',
+                'type' : 'list',
+            },
+            'host_comments_with_info' : {
+                #'default' : '',
+                #'depythonize' : lambda h: ([c.id for c in h.comments]),
+                'description' : 'A list of the ids of all comments of this host',
+                #'prop' : 'host',
                 'type' : 'list',
             },
             'host_contacts' : {
@@ -3451,9 +3489,7 @@ class LiveStatus:
             },
             'host_name' : {
                 'default' : None,
-                'depythonize' : lambda x: x.host_name,
                 'description' : 'Host name',
-                'prop' : 'ref',
                 'type' : 'string',
             },
             'host_next_check' : {
@@ -3801,7 +3837,6 @@ class LiveStatus:
             },
             'service_description' : {
                 'default' : None,
-                'depythonize' : lambda x: getattr(x, 'service_description', ''),
                 'description' : 'Description of the service (also used as key)',
                 'prop' : 'ref',
                 'type' : 'string',
@@ -5499,24 +5534,65 @@ class LiveStatus:
         handles the execution of the request and formatting of the result.
         
         """
-        request = LiveStatusRequest(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, 
+        request = LiveStatusRequest(data, self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, 
             self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, 
             self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
         request.parse_input(data)
         print "REQUEST\n%s\n" % data
-        #print request
-        result = request.launch_query()
-        # Now bring the retrieved information to a form which can be sent back to the client
-        response = request.response
-        response.format_live_data(result, request.columns, request.aliases)
-        output, keepalive = response.respond()
+        to_del = []
+        if sorted([q.my_type for q in request.queries]) == ['command', 'query', 'wait']:
+            # The Multisite way
+            for query in [q for q in request.queries if q.my_type == 'command']:
+                result = query.launch_query()
+                response = query.response
+                response.format_live_data(result, query.columns, query.aliases)
+                output, keepalive = response.respond()
+            output = [q for q in request.queries if q.my_type == 'wait'] + [q for q in request.queries if q.my_type == 'query']
+        elif sorted([q.my_type for q in request.queries]) == ['query', 'wait']:
+            # The Thruk way
+            output = [q for q in request.queries if q.my_type == 'wait'] + [q for q in request.queries if q.my_type == 'query']
+            keepalive = True
+        elif sorted([q.my_type for q in request.queries]) == ['command', 'query']:
+            for query in [q for q in request.queries if q.my_type == 'command']:
+                result = query.launch_query()
+                response = query.response
+                response.format_live_data(result, query.columns, query.aliases)
+                output, keepalive = response.respond()
+            for query in [q for q in request.queries if q.my_type == 'query']:
+                # This was a simple query, respond immediately
+                result = query.launch_query()
+                # Now bring the retrieved information to a form which can be sent back to the client
+                response = query.response
+                response.format_live_data(result, query.columns, query.aliases)
+                output, keepalive = response.respond()
+
+        elif sorted([q.my_type for q in request.queries]) == ['query']:
+            for query in [q for q in request.queries if q.my_type == 'query']:
+                # This was a simple query, respond immediately
+                result = query.launch_query()
+                # Now bring the retrieved information to a form which can be sent back to the client
+                response = query.response
+                response.format_live_data(result, query.columns, query.aliases)
+                output, keepalive = response.respond()
+        elif sorted([q.my_type for q in request.queries]) == ['command']:
+            for query in [q for q in request.queries if q.my_type == 'command']:
+                result = query.launch_query()
+                response = query.response
+                response.format_live_data(result, query.columns, query.aliases)
+                output, keepalive = response.respond()
+        else:
+            # We currently do not handle this kind of composed request
+            output = ""
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            print "We currently do not handle this kind of composed request"
+            print sorted([q.my_type for q in request.queries])
+
         print "RESPONSE\n%s\n" % output
         print "DURATION %.4fs" % (time.time() - request.tic)
         return output, keepalive
 
 
     def make_hook(self, hook, prop, default, func, as_prop):
-
 
         def hook_get_prop(elt):
             return getattr(elt, prop, default)
@@ -5528,7 +5604,8 @@ class LiveStatus:
                 if callable(attr):
                     attr = attr()
                 return func(attr)
-            except:
+            except Exception, e:
+                print "i am an exception", e
                 return default
 
 
@@ -5561,10 +5638,14 @@ class LiveStatus:
                 if value is None or value == 'none':
                     raise
                 elif isinstance(value, list):
+                    # self is a <class 'livestatus_broker.livestatus.LiveStatusQuery'>
+                    # self is a <class 'livestatus_broker.livestatus.LiveStatus'>
                     return [func(item, elt, self) for item in value]
+                    # comment host req
                 else:
                     return func(value, elt, self)
-            except:
+            except Exception, e:
+                print "i am an exception", e
                 return default
 
 
@@ -5577,7 +5658,11 @@ class LiveStatus:
                 attr = getattr(elt, func)
                 if callable(attr):
                     attr = attr()
+                # attr is now elt.host
                 new_hook = self.out_map[attr.__class__.__name__][new_prop]['hook']
+                if 'fulldepythonize' in self.out_map[attr.__class__.__name__][new_prop]:
+                    print "watch out!!!! fulldepythonize", type(self)
+                    return new_hook(attr, self)
                 return new_hook(attr)
             else:
                 return default
@@ -5606,8 +5691,11 @@ class LiveStatus:
         
         """
         for objtype in LiveStatus.out_map:
+            print "OBJETC", objtype
             for attribute in LiveStatus.out_map[objtype]:
                 entry =  LiveStatus.out_map[objtype][attribute]
+                if str(objtype) == "Service" and attribute == "host_address":
+                    print entry
                 if 'prop' not in entry or entry['prop'] is None:
                     prop = attribute
                 else:
@@ -5664,9 +5752,20 @@ class LiveStatus:
         """
         delegate_map = {
             'Logline' : {
-                'current_service_' : 'log_service',
-                'current_host_' : 'log_host',
+                'current_service_' : ('log_service', 'Service'),
+                'current_host_' : ('log_host', 'Host'),
             },
+            'Service' : {
+                'host_' : ('host', 'Host'),
+            },
+            'Comment' : {
+                'service_' : ('ref', 'Service'),
+                'host_' : ('ref', 'Host'),
+            },
+            'Downtime' : {
+                'service_' : ('ref', 'Service'),
+                'host_' : ('ref', 'Host'),
+            }
         }
         for objtype in LiveStatus.out_map:
             for attribute in LiveStatus.out_map[objtype]:
@@ -5675,8 +5774,13 @@ class LiveStatus:
                     for prefix in delegate_map[objtype]:
                         if attribute.startswith(prefix):
                             if 'delegate' not in entry:
-                                entry['delegate'] = delegate_map[objtype][prefix]
+                                delegate_prop, delegate_objtype = delegate_map[objtype][prefix]
+                                entry['delegate'] = delegate_prop
+                                # We need the objtype later in 
+                                # LiveStatusQuery.copy_out_map_hooks()
+                                entry['delegateobj'] = delegate_objtype
                                 entry['as'] = attribute.replace(prefix, '')
+
 
 
     def count_event(self, counter):
@@ -5705,6 +5809,13 @@ class LiveStatusResponse:
         pass
 
 
+    def __str__(self):
+        output = "LiveStatusResponse:\n"
+        for attr in ["responseheader", "outputformat", "keepalive", "columnheaders", "separators"]:
+            output += "response %s: %s\n" % (attr, getattr(self, attr))
+        return output
+
+
     def respond(self):
         self.output += '\n'
         if self.responseheader == 'fixed16':
@@ -5719,6 +5830,8 @@ class LiveStatusResponse:
         lines = []
         header = ''
         showheader = False
+        print "my result is", result
+        print "outputformat", self.outputformat
         if len(result) > 0:
             if self.columnheaders != 'off' or len(columns) == 0:
                 if len(aliases) > 0:
@@ -5758,6 +5871,7 @@ class LiveStatusResponse:
             if self.outputformat == 'json':
                 self.output = json.dumps(lines, separators=(',', ':'))
             else:
+                print "type is ", type(self)
                 self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
 
 
@@ -5775,6 +5889,80 @@ class LiveStatusRequest(LiveStatus):
    
     """A class describing a livestatus request."""
     
+    def __init__(self, data, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue, counters):
+        self.data = data
+        # Runtime data form the global LiveStatus object
+        self.configs = configs
+        self.hostname_lookup_table = hostname_lookup_table
+        self.servicename_lookup_table = servicename_lookup_table
+        self.hosts = hosts
+        self.services = services
+        self.contacts = contacts
+        self.hostgroups = hostgroups
+        self.servicegroups = servicegroups
+        self.contactgroups = contactgroups
+        self.timeperiods = timeperiods
+        self.commands = commands
+        self.schedulers = schedulers
+        self.pollers = pollers
+        self.reactionners = reactionners
+        self.brokers = brokers
+        self.dbconn = dbconn
+        self.pnp_path = pnp_path
+        self.return_queue = return_queue
+        self.counters = counters
+
+        self.queries = []
+        # Set a timestamp for this specific request
+        self.tic = time.time()
+
+
+    def parse_input(self, data):
+        """Parse the lines of a livestatus request.
+        
+        This function looks for keywords in input lines and
+        sets the attributes of the request object
+        
+        """
+        external_cmds = []
+        query_cmds = []
+        wait_cmds = []
+        for line in data.splitlines():
+            line = line.strip()
+            # Tools like NagVis send KEYWORK:option, and we prefer to have
+            # a space folowing the :
+            if ':' in line and not ' ' in line:
+                line = line.replace(':', ': ')
+            keyword = line.split(' ')[0].rstrip(':')
+            if len(line) == 0:
+                pass
+            elif keyword in ('GET'):
+                query_cmds.append(line)
+                wait_cmds.append(line)
+            elif keyword in ('WaitObject', 'WaitCondition', 'WaitConditionOr', 'WaitConditionAnd', 'WaitTrigger', 'WaitTimeout'):
+                wait_cmds.append(line)
+            elif keyword in ('COMMAND'):
+                external_cmds.append(line)
+            else:
+                query_cmds.append(line)
+        if len(external_cmds) > 0:
+            query = LiveStatusCommandQuery(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+            query.parse_input('\n'.join(external_cmds))
+            self.queries.append(query)
+        if len(wait_cmds) > 1:
+            query = LiveStatusWaitQuery(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+            query.parse_input('\n'.join(wait_cmds))
+            self.queries.append(query)
+        if len(query_cmds) > 0:
+            query = LiveStatusQuery(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+            query.parse_input('\n'.join(query_cmds))
+            self.queries.append(query)
+
+
+class LiveStatusQuery(LiveStatus):
+
+    my_type = 'query'
+
     def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue, counters):
         # Runtime data form the global LiveStatus object
         self.configs = configs
@@ -5819,8 +6007,6 @@ class LiveStatusRequest(LiveStatus):
         self.stats_postprocess_stack = LiveStatusStack()
         self.stats_request = False
 
-        # Set a timestamp for this specific request
-        self.tic = time.time()
         # Clients can also send their local time with the request
         self.client_localtime = time.time()
 
@@ -5883,6 +6069,10 @@ class LiveStatusRequest(LiveStatus):
                 new_map[objtype][attribute] = {}
                 entry =  LiveStatus.out_map[objtype][attribute]
                 if 'hooktype' in entry:
+                    if objtype == "Comment" and attribute == "host_name":
+                        print "has hooktype"
+                    if objtype == "Service" and attribute == "host_name":
+                        print "has hooktype"
                     if 'prop' not in entry or entry['prop'] is None:
                         prop = attribute
                     else:
@@ -6063,12 +6253,6 @@ class LiveStatusRequest(LiveStatus):
 
     def launch_query(self):
         """ Prepare the request object's filter stacks """
-        if self.extcmd:
-            # External command are send back to broker
-            self.extcmd = self.extcmd.decode('utf8', 'replace')
-            e = ExternalCommand(self.extcmd)
-            self.return_queue.put(e)
-            return []
         
         # A minimal integrity check
         if not self.table:
@@ -6629,6 +6813,275 @@ member_key: the key to be used to sort each resulting element of a group member.
             return ne_filter
         if operator == '~':
             return match_filter
+
+
+class LiveStatusWaitQuery(LiveStatusQuery):
+
+    my_type = 'wait'
+
+    def __init__(self, *args, **kwargs):
+        super(LiveStatusWaitQuery, self).__init__(*args, **kwargs)
+        self.response = LiveStatusResponse(responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'off', separators = LiveStatus.separators)
+        self.wait_start = time.time()
+        self.wait_timeout = 0
+        self.wait_trigger = 'all'
+
+
+    def parse_input(self, data):
+        """Parse the lines of a livestatus request.
+        
+        This function looks for keywords in input lines and
+        sets the attributes of the request object
+        
+        """
+        for line in data.splitlines():
+            line = line.strip()
+            # Tools like NagVis send KEYWORK:option, and we prefer to have
+            # a space folowing the :
+            if ':' in line and not ' ' in line:
+                line = line.replace(':', ': ')
+            keyword = line.split(' ')[0].rstrip(':')
+            if keyword == 'GET': # Get the name of the base table
+                cmd, self.table = self.split_command(line)
+                self.set_default_out_map_name()
+            elif keyword == 'WaitObject': # Pick a specific object by name
+                cmd, object = self.split_option(line)
+                # It's like Filter: name = %s
+                # Only for services it's host<blank>servicedesc
+                if self.table == 'services':
+                    host_name, service_description = object.split(' ', 1)
+                    self.filtercolumns.append('host_name')
+                    self.prefiltercolumns.append('host_name')
+                    self.filter_stack.put(self.make_filter('=', 'host_name', host_name))
+                    self.filtercolumns.append('description')
+                    self.prefiltercolumns.append('description')
+                    self.filter_stack.put(self.make_filter('=', 'description', service_description))
+                else:
+                    attribute = self.strip_table_from_column('name')
+                    self.filtercolumns.append('name')
+                    self.prefiltercolumns.append('name')
+                    self.filter_stack.put(self.make_filter('=', 'name', object))
+                # At the moment this works like an ordinary query. But it has
+                # potential for huge performance improvements. Instead of
+                # searching the whole list of objects with a Filter, we could
+                # get the desired object with a get_by_name() call from the
+                # livestatus inventory and make a search list of one element.
+            elif keyword == 'WaitTrigger':
+                cmd, self.wait_trigger = self.split_option(line)
+                if self.wait_trigger not in ['check', 'state', 'log', 'downtime', 'comment', 'command']:
+                    self.wait_trigger = 'all'
+            elif keyword == 'WaitCondition':
+                try:
+                    cmd, attribute, operator, reference = self.split_option(line, 3)
+                except:
+                    cmd, attribute, operator, reference = self.split_option(line, 2) + ['']
+                if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
+                    # We need to set columns, if not columnheaders will be set to "on"
+                    self.columns.append(attribute)
+                    # Cut off the table name
+                    attribute = self.strip_table_from_column(attribute)
+                    # Some operators can simply be negated
+                    if operator in ['!>', '!>=', '!<', '!<=']:
+                        operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
+                    # Put a function on top of the filter_stack which implements
+                    # the desired operation
+                    self.filtercolumns.append(attribute)
+                    self.prefiltercolumns.append(attribute)
+                    self.filter_stack.put(self.make_filter(operator, attribute, reference))
+                    if self.table == 'log':
+                        if attribute == 'time':
+                            self.sql_filter_stack.put(self.make_sql_filter(operator, attribute, reference))
+                else:
+                    print "illegal operation", operator
+                    pass # illegal operation
+            elif keyword == 'WaitConditionAnd':
+                cmd, andnum = self.split_option(line)
+                # Take the last andnum functions from the stack
+                # Construct a new function which makes a logical and
+                # Put the function back onto the stack
+                self.filter_stack.and_elements(andnum)
+            elif keyword == 'WaitConditionOr':
+                cmd, ornum = self.split_option(line)
+                # Take the last ornum functions from the stack
+                # Construct a new function which makes a logical or
+                # Put the function back onto the stack
+                self.filter_stack.or_elements(ornum)
+            elif keyword == 'WaitTimeout':
+                cmd, self.wait_timeout = self.split_option(line)
+                self.wait_timeout = int(self.wait_timeout) / 1000
+            else:
+                # This line is not valid or not implemented
+                print "Received a line of input which i can't handle : '%s'" % line
+                pass
+        # Make columns unique
+        self.filtercolumns = list(set(self.filtercolumns))
+        self.prefiltercolumns = list(set(self.prefiltercolumns))
+
+        # Make one big filter where the single filters are anded
+        self.filter_stack.and_elements(self.filter_stack.qsize())
+
+        if self.table == 'log':
+            self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
+
+
+    def launch_query(self):
+        """ Prepare the request object's filter stacks """
+        
+        print "."
+        # A minimal integrity check
+        if not self.table:
+            return []
+
+        try:
+            # Remember the number of stats filters. We need these numbers as columns later.
+            # But we need to ask now, because get_live_data() will empty the stack
+            if self.table == 'log':
+                result = self.get_live_data_log()
+            else:
+                # If the pnpgraph_present column is involved, then check
+                # with each request if the pnp perfdata path exists
+                if 'pnpgraph_present' in self.columns + self.filtercolumns + self.prefiltercolumns and self.pnp_path and os.access(self.pnp_path, os.R_OK):
+                    self.pnp_path_readable = True
+                else:
+                    self.pnp_path_readable = False
+                # Apply the filters on the broker's host/service/etc elements
+          
+                result = self.get_live_data()
+                
+        except Exception, e:
+            import traceback
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            print e
+            traceback.print_exc(32) 
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            result = []
+        
+        return result
+
+
+    def get_live_data(self):
+        """Find the objects which match the request.
+        
+        This function scans a list of objects (hosts, services, etc.) and
+        applies the filter functions first. The remaining objects are
+        converted to simple dicts which have only the keys that were
+        requested through Column: attributes. """
+        # We will use prefiltercolumns here for some serious speedup.
+        # For example, if nagvis wants Filter: host_groups >= hgxy
+        # we don't have to use the while list of hostgroups in
+        # the innermost loop
+        # Filter: host_groups >= linux-servers
+        # host_groups is a service attribute
+        # We can get all services of all hosts of all hostgroups and filter at the end
+        # But it would save a lot of time to already filter the hostgroups. This means host_groups must be hard-coded
+        # Also host_name, but then we must filter the second step.
+        # And a mixture host_groups/host_name with FilterAnd/Or? Must have several filter functions
+
+        handler = self.objects_get_handlers.get(self.table, None)
+        if not handler:
+            print("Got unhandled table: %s" % (self.table))
+            return []
+
+        # Get the function which implements the Filter: statements
+        filter_func     = self.filter_stack.get_stack()
+        out_map         = self.out_map[self.out_map_name]
+        filter_map      = dict([(k, out_map.get(k)) for k in self.filtercolumns])
+        output_map      = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
+        without_filter  = len(self.filtercolumns) == 0
+
+        cs = LiveStatusConstraints(filter_func, out_map, filter_map, output_map, without_filter)
+        res = handler(self, cs)
+
+        # A LiveStatusWaitQuery is launched several times, so we need to
+        # put back the big filter function
+        self.filter_stack.put_stack(filter_func)
+        return res
+
+
+    def get_live_data_log(self):
+        """Like get_live_data, but for log objects"""
+        filter_func = self.filter_stack.get_stack()
+        sql_filter_func = self.sql_filter_stack.get_stack()
+        out_map = self.out_map[self.out_map_name]
+        filter_map = dict([(k, out_map.get(k)) for k in self.filtercolumns])
+        output_map = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
+        without_filter = len(self.filtercolumns) == 0
+        result = []
+        if self.table == 'log':
+            out_map = self.out_map['Logline']
+            # We can apply the filterstack here as well. we have columns and filtercolumns.
+            # the only additional step is to enrich log lines with host/service-attributes
+            # A timerange can be useful for a faster preselection of lines
+            filter_clause, filter_values = sql_filter_func()
+            c = self.dbconn.cursor()
+            try:
+                if sqlite3.paramstyle == 'pyformat':
+                    matchcount = 0
+                    for m in re.finditer(r"\?", filter_clause):
+                        filter_clause = re.sub('\\?', '%(' + str(matchcount) + ')s', filter_clause, 1)
+                        matchcount += 1
+                    filter_values = dict(zip([str(x) for x in xrange(len(filter_values))], filter_values))
+                c.execute('SELECT * FROM logs WHERE %s' % filter_clause, filter_values)
+            except sqlite3.Error, e:
+                print "An error occurred:", e.args[0]
+            dbresult = c.fetchall()
+            if sqlite3.paramstyle == 'pyformat':
+                dbresult = [self.row_factory(c, d) for d in dbresult]
+
+            prefiltresult = [y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
+            filtresult = [self.create_output(output_map, x) for x in prefiltresult]
+            result = filtresult
+
+        self.filter_stack.put_stack(filter_func)
+        self.sql_filter_stack.put_stack(sql_filter_func)
+        #print "result is", result
+        return result
+
+
+    def condition_fulfilled(self):
+         result = self.launch_query()
+         response = self.response
+         response.format_live_data(result, self.columns, self.aliases)
+         output, keepalive = response.respond()
+         return output.strip()
+
+
+
+class LiveStatusCommandQuery(LiveStatusQuery):
+
+    my_type = 'command'
+
+    def parse_input(self, data):
+        """Parse the lines of a livestatus request.
+        
+        This function looks for keywords in input lines and
+        sets the attributes of the request object
+        
+        """
+        for line in data.splitlines():
+            line = line.strip()
+            # Tools like NagVis send KEYWORK:option, and we prefer to have
+            # a space folowing the :
+            if ':' in line and not ' ' in line:
+                line = line.replace(':', ': ')
+            keyword = line.split(' ')[0].rstrip(':')
+            if keyword == 'COMMAND':
+                cmd, self.extcmd = line.split(' ', 1)
+            else:
+                # This line is not valid or not implemented
+                print "Received a line of input which i can't handle : '%s'" % line
+                pass
+
+
+    def launch_query(self):
+        """ Prepare the request object's filter stacks """
+        if self.extcmd:
+            # External command are send back to broker
+            self.extcmd = self.extcmd.decode('utf8', 'replace')
+            e = ExternalCommand(self.extcmd)
+            self.return_queue.put(e)
+            return []
+
 
 
 class LiveStatusCounters(LiveStatus):    
