@@ -793,7 +793,6 @@ class Livestatus_broker(BaseModule):
                         s = open_connections[socketid]['socket']
                         if wait.wait_timeout:
                             if now - wait.wait_start > wait.wait_timeout:
-                                print "wait timeout", socketid
                                 # Launch the request and respond
                                 result = query.launch_query()
                                 response = query.response
@@ -815,7 +814,6 @@ class Livestatus_broker(BaseModule):
                                 pass
                             else:
                                 if wait.condition_fulfilled():
-                                    print "fulfulled", socketid
                                     # Condition is met, launch the query
                                     result = query.launch_query()
                                     response = query.response
@@ -835,7 +833,6 @@ class Livestatus_broker(BaseModule):
                                     else:
                                         open_connections[socketid]['state'] = 'idle'
                                 else:
-                                    print "missed", socketid
                                     # Condition is not met
                                     open_connections[socketid]['nexttry'] = now + 0.5
                                     pass
