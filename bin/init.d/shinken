@@ -42,6 +42,10 @@ ETC="/usr/local/shinken/etc"
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
 export LANG=en_US.UTF8
 
+# Uncomment the line below if you got the **lib** shinken installed
+# on a non standard place (not in /usr/lib/python*)
+#export PYTHONPATH="${PATH:+$PATH:}/opt/shinken"
+
 # default
 DEBUG=false
 CMD=""
