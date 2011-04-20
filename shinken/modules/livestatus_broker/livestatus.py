@@ -6012,8 +6012,10 @@ class LiveStatusQuery(LiveStatus):
         self.stats_postprocess_stack = LiveStatusStack()
         self.stats_request = False
 
+        # When was this query launched?
+        self.tic = time.time()
         # Clients can also send their local time with the request
-        self.client_localtime = time.time()
+        self.client_localtime = self.tic
 
 
     def find_converter(self, attribute):
