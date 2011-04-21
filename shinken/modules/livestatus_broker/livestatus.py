@@ -5585,6 +5585,14 @@ class LiveStatus(object):
                 response = query.response
                 response.format_live_data(result, query.columns, query.aliases)
                 output, keepalive = response.respond()
+        elif [q.my_type for q in request.queries if q.my_type != 'command'] == []:
+            # Only external commands. Thruk uses it when it sends multiple
+            # objects into a downtime.
+            for query in [q for q in request.queries if q.my_type == 'command']:
+                result = query.launch_query()
+                response = query.response
+                response.format_live_data(result, query.columns, query.aliases)
+                output, keepalive = response.respond()
         else:
             # We currently do not handle this kind of composed request
             output = ""
