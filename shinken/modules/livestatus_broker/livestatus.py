@@ -5515,7 +5515,7 @@ class LiveStatus(object):
 
         self.create_out_map_delegates()
         self.create_out_map_hooks()
-        print "rsrsrs",LiveStatus.out_map['Downtime']['host_name']
+
         # add Host attributes to Hostsbygroup etc.
         for attribute in LiveStatus.out_map['Host']:
             LiveStatus.out_map['Hostsbygroup'][attribute] = LiveStatus.out_map['Host'][attribute]
@@ -6859,16 +6859,33 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                     self.filtercolumns.append('description')
                     self.prefiltercolumns.append('description')
                     self.filter_stack.put(self.make_filter('=', 'description', service_description))
+                    try:
+                        # A WaitQuery works like an ordinary Query. But if
+                        # we already know which object we're watching for
+                        # changes, instead of scanning the entire list and
+                        # applying a Filter:, we simply reduce the list
+                        # so it has just one element.
+                        idx = self.servicename_lookup_table[host_name + service_description]
+                        self.services = { idx : self.services[idx] }
+                    except:
+                        pass
+                elif self.table == 'hosts':
+                    attribute = self.strip_table_from_column('name')
+                    self.filtercolumns.append('name')
+                    self.prefiltercolumns.append('name')
+                    self.filter_stack.put(self.make_filter('=', 'name', object))
+                    try:
+                        idx = self.hostname_lookup_table[host_name]
+                        self.hosts = { idx : self.hosts[idx] }
+                    except:
+                        pass
                 else:
                     attribute = self.strip_table_from_column('name')
                     self.filtercolumns.append('name')
                     self.prefiltercolumns.append('name')
                     self.filter_stack.put(self.make_filter('=', 'name', object))
-                # At the moment this works like an ordinary query. But it has
-                # potential for huge performance improvements. Instead of
-                # searching the whole list of objects with a Filter, we could
-                # get the desired object with a get_by_name() call from the
-                # livestatus inventory and make a search list of one element.
+                    # For the other tables this works like an ordinary query.
+                    # In the future there might be more lookup-tables
             elif keyword == 'WaitTrigger':
                 cmd, self.wait_trigger = self.split_option(line)
                 if self.wait_trigger not in ['check', 'state', 'log', 'downtime', 'comment', 'command']:
