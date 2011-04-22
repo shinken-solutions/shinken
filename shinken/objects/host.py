@@ -19,7 +19,7 @@
 #
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-from shinken.objects.schedulingitem import SchedulingItem
+
 
 """ This is the main class for the Host. In fact it's mainly
 about the configuration part. for the running one, it's better
@@ -29,7 +29,9 @@ scheduling/consome check smart things :)
 
 import time
 
-from shinken.objects import Items, SchedulingItem
+from item import Items
+from schedulingitem import SchedulingItem
+
 from shinken.autoslots import AutoSlots
 from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
@@ -121,7 +123,7 @@ class Host(SchedulingItem):
         'maintenance_period':   StringProp(default='', fill_brok=['full_status']),
 
         # Criticity value
-        'criticity':            IntegerProp(default='3', fill_brok=['full_status']),
+        'criticity':            IntegerProp(default='2', fill_brok=['full_status']),
     })
 
     # properties set only for running purpose
@@ -323,37 +325,6 @@ class Host(SchedulingItem):
         'normal_check_interval': 'check_interval',
         'retry_check_interval':  'retry_interval'
     }
-
-
-    # Call by picle for data-ify the host
-    # we do a dict because list are too dangerous for
-    # retention save and co :( even if it's more
-    # extensive
-    # The setstate function do the inverse
-    def __getstate__(self):
-        cls = self.__class__
-        # id is not in *_properties
-        res = {'id' : self.id}
-        for prop in cls.properties:
-            if hasattr(self, prop):
-                res[prop] = getattr(self, prop)
-        for prop in cls.running_properties:
-            if hasattr(self, prop):
-                res[prop] = getattr(self, prop)
-        return res
-
-
-    # Inversed funtion of getstate
-    def __setstate__(self, state):
-        cls = self.__class__
-        self.id = state['id']
-        for prop in cls.properties:
-            if prop in state:
-                setattr(self, prop, state[prop])
-        for prop in cls.running_properties:
-            if prop in state:
-                setattr(self, prop, state[prop])
-
 
 
     # Fill adresse with host_name if not already set

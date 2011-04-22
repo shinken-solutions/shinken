@@ -25,10 +25,7 @@
  elements like service, hosts or contacts.
 """
 
-#from command import CommandCall
-#from util import to_int, to_char, to_split, to_bool
 from copy import copy
-
 
 from shinken.commandcall import CommandCall
 
@@ -39,18 +36,6 @@ from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 from shinken.log import logger
 
-
-def init_running_properties(obj):
-    for prop, entry in obj.__class__.running_properties.items():
-        # Copy is slow, so we check type
-        # Type with __iter__ are list or dict, or tuple.
-        # Item need it's own list, so qe copy
-        val = entry.default
-        if hasattr(val, '__iter__'):
-            setattr(obj, prop, copy(val))
-        else:
-            setattr(obj, prop, val)
-        #eatch istance to have his own running prop!
 
 
 class Item(object):
@@ -80,7 +65,7 @@ class Item(object):
         self.customs = {} # for custom variables
         self.plus = {} # for value with a +
 
-        init_running_properties(self)
+        self.init_running_properties()
         
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
@@ -98,10 +83,22 @@ class Item(object):
             else:
                 setattr(self, key, params[key])
 
+    
+    def init_running_properties(self):
+        for prop, entry in self.__class__.running_properties.items():
+            # Copy is slow, so we check type
+            # Type with __iter__ are list or dict, or tuple.
+            # Item need it's own list, so qe copy
+            val = entry.default
+            if hasattr(val, '__iter__'):
+                setattr(self, prop, copy(val))
+            else:
+                setattr(self, prop, val)
+            # each instance to have his own running prop!
 
-    #return a copy of the item, but give him a new id
+
     def copy(self):
-        """ Copy a copy of the item, but give him a new id """
+        """ Return a copy of the item, but give him a new id """
         cls = self.__class__
         i = cls({})#Dummy item but with it's own running properties
         for prop in cls.properties:

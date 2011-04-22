@@ -22,7 +22,8 @@
 
 import copy
 
-from shinken.objects.itemgroup import Itemgroup, Itemgroups
+from itemgroup import Itemgroup, Itemgroups
+
 from shinken.property import BoolProp, IntegerProp, StringProp
 
 #It change from hostgroup Class because there is no members

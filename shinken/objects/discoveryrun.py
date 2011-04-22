@@ -20,10 +20,10 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 
 from item import Item, Items
-from shinken.property import IntegerProp, StringProp, ListProp
+
+from shinken.property import StringProp
 from shinken.eventhandler import EventHandler
 from shinken.macroresolver import MacroResolver
 

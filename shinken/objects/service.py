@@ -36,8 +36,10 @@ from shinken.objects.item import Items
 from shinken.objects.schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
-from shinken.util import to_int, to_char, to_split, to_bool, to_float, strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, expand_with_macros
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.util import strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, \
+    get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, \
+    GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names
+from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.log import logger
@@ -119,7 +121,7 @@ class Service(SchedulingItem):
         'default_value':           StringProp(default=''),
 
         # Criticity value
-        'criticity':               IntegerProp(default='3', fill_brok=['full_status']),
+        'criticity':               IntegerProp(default='2', fill_brok=['full_status']),
     })
 
     # properties used in the running state
@@ -309,38 +311,6 @@ class Service(SchedulingItem):
     # Need the whole name for debugin purpose
     def get_dbg_name(self):
         return "%s/%s" % (self.host.host_name, self.service_description)
-
-
-    # Call by picle for dataify service
-    # we do a dict because list are too dangerous for
-    # retention save and co :( even if it's more
-    # extensive
-    # The setstate function do the inverse
-    def __getstate__(self):
-#        print "Asking a getstate for service", self.get_dbg_name()
-        cls = self.__class__
-        # id is not in *_properties
-        res = {'id' : self.id}
-        for prop in cls.properties:
-            if hasattr(self, prop):
-                res[prop] = getattr(self, prop)
-        for prop in cls.running_properties:
-            if hasattr(self, prop):
-                res[prop] = getattr(self, prop)
-
-        return res
-
-
-    # Inversed funtion of getstate
-    def __setstate__(self, state):
-        cls = self.__class__
-        self.id = state['id']
-        for prop in cls.properties:
-            if prop in state:
-                setattr(self, prop, state[prop])
-        for prop in cls.running_properties:
-            if prop in state:
-                setattr(self, prop, state[prop])
 
 
     # Check is required prop are set:

@@ -29,13 +29,13 @@ or the consume_check ones. It's a quite important class!
 import random
 import time
 
-from shinken.objects.item import Item
+from item import Item
 
 from shinken.check import Check
 from shinken.notification import Notification
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
-from shinken.dependencynode import DependencyNodeFactory, DependencyNode
+from shinken.dependencynode import DependencyNodeFactory
 
 
 # on system time change just reevaluate the following attributes :
@@ -47,6 +47,35 @@ class SchedulingItem(Item):
     # global counters used for [current|last]_[host|service]_[event|problem]_id
     current_event_id = 0
     current_problem_id = 0
+
+
+    # Call by picle for data-ify the host
+    # we do a dict because list are too dangerous for
+    # retention save and co :( even if it's more
+    # extensive
+    # The setstate function do the inverse
+    def __getstate__(self):
+        cls = self.__class__
+        # id is not in *_properties
+        res = { 'id' : self.id }
+        for prop in cls.properties:
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+        for prop in cls.running_properties:
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+        return res
+
+    # Inversed function of __getstate__
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state['id']
+        for prop in cls.properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
+        for prop in cls.running_properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
 
 
     # Register the son in my child_dependencies, and
