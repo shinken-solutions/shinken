@@ -21,7 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from item import Item, Items, init_running_properties
+from item import Item, Items
 from shinken.brok import Brok
 from shinken.property import StringProp
 from shinken.autoslots import AutoSlots
@@ -55,7 +55,7 @@ class Command(Item):
         #self.id = self.__class__.id
         self.__class__.id += 1
         
-        init_running_properties(self)
+        self.init_running_properties()
         
         for key in params:
             setattr(self, key, params[key])

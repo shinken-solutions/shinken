@@ -40,18 +40,6 @@ from shinken.comment import Comment
 from shinken.log import logger
 
 
-def init_running_properties(obj):
-    for prop, entry in obj.__class__.running_properties.items():
-        # Copy is slow, so we check type
-        # Type with __iter__ are list or dict, or tuple.
-        # Item need it's own list, so qe copy
-        val = entry.default
-        if hasattr(val, '__iter__'):
-            setattr(obj, prop, copy(val))
-        else:
-            setattr(obj, prop, val)
-        #eatch istance to have his own running prop!
-
 
 class Item(object):
     
@@ -80,7 +68,7 @@ class Item(object):
         self.customs = {} # for custom variables
         self.plus = {} # for value with a +
 
-        init_running_properties(self)
+        self.init_running_properties()
         
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
@@ -97,6 +85,19 @@ class Item(object):
                 self.customs[custom_name] = params[key]
             else:
                 setattr(self, key, params[key])
+
+    
+    def init_running_properties(self):
+        for prop, entry in self.__class__.running_properties.items():
+            # Copy is slow, so we check type
+            # Type with __iter__ are list or dict, or tuple.
+            # Item need it's own list, so qe copy
+            val = entry.default
+            if hasattr(val, '__iter__'):
+                setattr(self, prop, copy(val))
+            else:
+                setattr(self, prop, val)
+            # each instance to have his own running prop!
 
 
     #return a copy of the item, but give him a new id
