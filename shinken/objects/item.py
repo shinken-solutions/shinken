@@ -96,33 +96,6 @@ class Item(object):
                 setattr(self, prop, val)
             # each instance to have his own running prop!
 
-    # Call by picle for data-ify the host
-    # we do a dict because list are too dangerous for
-    # retention save and co :( even if it's more
-    # extensive
-    # The setstate function do the inverse
-    def __getstate__(self):
-        cls = self.__class__
-        # id is not in *_properties
-        res = { 'id': self.id }
-        for prop in cls.properties:
-            if hasattr(self, prop):
-                res[prop] = getattr(self, prop)
-        for prop in cls.running_properties:
-            if hasattr(self, prop):
-                res[prop] = getattr(self, prop)
-        return res
-
-    # Inversed function of __getstate__
-    def __setstate__(self, state):
-        cls = self.__class__
-        self.id = state['id']
-        for prop in cls.properties:
-            if prop in state:
-                setattr(self, prop, state[prop])
-        for prop in cls.running_properties:
-            if prop in state:
-                setattr(self, prop, state[prop])
 
     def copy(self):
         """ Return a copy of the item, but give him a new id """

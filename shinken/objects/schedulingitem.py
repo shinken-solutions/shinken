@@ -49,6 +49,35 @@ class SchedulingItem(Item):
     current_problem_id = 0
 
 
+    # Call by picle for data-ify the host
+    # we do a dict because list are too dangerous for
+    # retention save and co :( even if it's more
+    # extensive
+    # The setstate function do the inverse
+    def __getstate__(self):
+        cls = self.__class__
+        # id is not in *_properties
+        res = { 'id' : self.id }
+        for prop in cls.properties:
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+        for prop in cls.running_properties:
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+        return res
+
+    # Inversed function of __getstate__
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state['id']
+        for prop in cls.properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
+        for prop in cls.running_properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
+
+
     # Register the son in my child_dependencies, and
     # myself in its parent_dependencies
     def register_son_in_parent_child_dependencies(self, son):
