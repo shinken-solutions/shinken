@@ -25,8 +25,9 @@
 
 
 from item import Item, Items
+
 from shinken.brok import Brok
-from shinken.property import StringProp, ListProp
+from shinken.property import StringProp
 
 
 # TODO: subclass Item & Items for Itemgroup & Itemgroups ?

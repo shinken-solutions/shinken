@@ -25,10 +25,7 @@
  elements like service, hosts or contacts.
 """
 
-#from command import CommandCall
-#from util import to_int, to_char, to_split, to_bool
 from copy import copy
-
 
 from shinken.commandcall import CommandCall
 

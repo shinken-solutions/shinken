@@ -23,9 +23,9 @@
 import re
 
 from item import Item, Items
-from service import Service, Services
+from service import Service
 from host import Host 
-from shinken.property import IntegerProp, StringProp, ListProp
+from shinken.property import StringProp, ListProp
 from copy import copy
 
 class Discoveryrule(Item):

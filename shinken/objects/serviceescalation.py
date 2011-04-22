@@ -20,10 +20,11 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken.objects.item import Item, Items
-from shinken.objects.escalation import Escalation
+from item import Item, Items
+from escalation import Escalation
 
 from shinken.property import IntegerProp, StringProp, ListProp
+
 
 class Serviceescalation(Item):
     id = 1 #0 is always special in database, so we do not take risk here

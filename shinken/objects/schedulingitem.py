@@ -29,13 +29,13 @@ or the consume_check ones. It's a quite important class!
 import random
 import time
 
-from shinken.objects.item import Item
+from item import Item
 
 from shinken.check import Check
 from shinken.notification import Notification
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
-from shinken.dependencynode import DependencyNodeFactory, DependencyNode
+from shinken.dependencynode import DependencyNodeFactory
 
 
 # on system time change just reevaluate the following attributes :

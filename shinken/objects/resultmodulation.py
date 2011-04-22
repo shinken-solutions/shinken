@@ -25,7 +25,7 @@
 
 import time
 
-from shinken.objects.item import Item, Items
+from item import Item, Items
 
 from shinken.property import StringProp, ListProp
 

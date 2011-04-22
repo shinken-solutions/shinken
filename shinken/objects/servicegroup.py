@@ -22,6 +22,7 @@
 
 
 from itemgroup import Itemgroup, Itemgroups
+
 from shinken.property import StringProp
 
 class Servicegroup(Itemgroup):
