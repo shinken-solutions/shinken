@@ -110,6 +110,8 @@ launch_and_assert test_no_notification_period.py
 launch_and_assert test_strange_characters_commands.py
 launch_and_assert test_startmember_group.py
 launch_and_assert test_nested_hostgroups.py
+launch_and_assert test_contactgroup_nomembers.py
+
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

@@ -46,11 +46,11 @@ class Contactgroup(Itemgroup):
 
 
     def get_contacts(self):
-        return self.members
+        return getattr(self, 'members', '')
 
 
     def get_name(self):
-        return self.contactgroup_name
+        return getattr(self, 'contactgroup_name', 'UNNAMED-CONTACTGROUP')
 
 
     def get_contactgroup_members(self):
