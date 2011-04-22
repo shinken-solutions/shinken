@@ -464,6 +464,42 @@ ColumnHeaders: off
 """
 
 
+    def test_multiple_externals(self):
+        self.print_header()
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
+        self.update_broker(True)
+        print ".#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#."
+        print "i updated the broker at", time.time()
+        print ".#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#."
+
+        #---------------------------------------------------------------
+        # get only the host names and addresses
+        #---------------------------------------------------------------
+        request = """COMMAND [1303425876] SCHEDULE_FORCED_HOST_CHECK;test_host_0;1303425870
+
+COMMAND [1303425876] SCHEDULE_FORCED_HOST_CHECK;test_host_0;1303425870
+
+COMMAND [1303425876] SCHEDULE_FORCED_HOST_CHECK;test_host_0;1303425870
+
+COMMAND [1303425876] SCHEDULE_FORCED_HOST_CHECK;test_host_0;1303425870
+
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        good_response = ""
+        self.assert_(isinstance(response, str))
+        self.assert_(self.lines_equal(response, good_response))
+
 
 
 

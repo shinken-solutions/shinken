@@ -5959,9 +5959,10 @@ class LiveStatusRequest(LiveStatus):
             else:
                 query_cmds.append(line)
         if len(external_cmds) > 0:
-            query = LiveStatusCommandQuery(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
-            query.parse_input('\n'.join(external_cmds))
-            self.queries.append(query)
+            for external_cmd in external_cmds:
+                query = LiveStatusCommandQuery(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+                query.parse_input(external_cmd)
+                self.queries.append(query)
         if len(wait_cmds) > 1:
             query = LiveStatusWaitQuery(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
             query.parse_input('\n'.join(wait_cmds))
