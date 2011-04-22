@@ -313,38 +313,6 @@ class Service(SchedulingItem):
         return "%s/%s" % (self.host.host_name, self.service_description)
 
 
-    # Call by picle for dataify service
-    # we do a dict because list are too dangerous for
-    # retention save and co :( even if it's more
-    # extensive
-    # The setstate function do the inverse
-    def __getstate__(self):
-#        print "Asking a getstate for service", self.get_dbg_name()
-        cls = self.__class__
-        # id is not in *_properties
-        res = {'id' : self.id}
-        for prop in cls.properties:
-            if hasattr(self, prop):
-                res[prop] = getattr(self, prop)
-        for prop in cls.running_properties:
-            if hasattr(self, prop):
-                res[prop] = getattr(self, prop)
-
-        return res
-
-
-    # Inversed funtion of getstate
-    def __setstate__(self, state):
-        cls = self.__class__
-        self.id = state['id']
-        for prop in cls.properties:
-            if prop in state:
-                setattr(self, prop, state[prop])
-        for prop in cls.running_properties:
-            if prop in state:
-                setattr(self, prop, state[prop])
-
-
     # Check is required prop are set:
     # template are always correct
     # contacts OR contactgroups is need
