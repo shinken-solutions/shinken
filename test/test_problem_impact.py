@@ -45,10 +45,10 @@ class TestConfig(ShinkenTest):
         
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
-        self.assert_(host_router_0.criticity == 3)
+        self.assert_(host_router_0.criticity == 2)
         host_router_1 = self.sched.hosts.find_by_name("test_router_1")
         host_router_1.checks_in_progress = []
-        self.assert_(host_router_1.criticity == 3)
+        self.assert_(host_router_1.criticity == 2)
 
         #Then initialize host under theses routers
         host_0 = self.sched.hosts.find_by_name("test_host_0")
@@ -113,7 +113,7 @@ class TestConfig(ShinkenTest):
                 self.assert_(s.get_dbg_name() in host_router_1_brok.data['impacts']['hosts'])
 
         # Should have host notification, but it's not so simple:
-        # our contact say : not under 5, and our hosts are 3. But
+        # our contact say : not under 5, and our hosts are 2. But
         # the impacts have huge criticity, so the hosts gain such criticity
         self.assert_(self.any_log_match('HOST NOTIFICATION.*;'))
         self.show_and_clear_logs()
@@ -183,9 +183,9 @@ class TestConfig(ShinkenTest):
             self.assert_(s.source_problems == [])
 
         # And our "criticity" should have failed back to our
-        # conf value, so 3
-        self.assert_(host_router_0.criticity == 3)
-        self.assert_(host_router_1.criticity == 3)
+        # conf value, so 2
+        self.assert_(host_router_0.criticity == 2)
+        self.assert_(host_router_1.criticity == 2)
         #It's done :)
 
 

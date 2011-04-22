@@ -123,7 +123,7 @@ class Host(SchedulingItem):
         'maintenance_period':   StringProp(default='', fill_brok=['full_status']),
 
         # Criticity value
-        'criticity':            IntegerProp(default='3', fill_brok=['full_status']),
+        'criticity':            IntegerProp(default='2', fill_brok=['full_status']),
     })
 
     # properties set only for running purpose
