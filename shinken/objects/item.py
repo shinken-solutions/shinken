@@ -742,7 +742,7 @@ class Items(object):
                 escalations_tab = i.escalations.split(',')
                 escalations_tab = strip_and_uniq(escalations_tab)
                 new_escalations = []
-                for es_name in escalations_tab:
+                for es_name in [e for e in escalations_tab if e != '']:
                     es = escalations.find_by_name(es_name)
                     if es is not None:
                         new_escalations.append(es)
