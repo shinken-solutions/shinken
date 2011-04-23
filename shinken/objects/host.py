@@ -327,6 +327,18 @@ class Host(SchedulingItem):
     }
 
 
+####### 
+#                   __ _                       _   _             
+#                  / _(_)                     | | (_)            
+#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __  
+#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \ 
+# | (_| (_) | | | | | | | (_| | |_| | | | (_| | |_| | (_) | | | |
+#  \___\___/|_| |_|_| |_|\__, |\__,_|_|  \__,_|\__|_|\___/|_| |_|
+#                         __/ |                                  
+#                        |___/                                   
+######
+
+
     # Fill adresse with host_name if not already set
     def fill_predictive_missing_parameters(self):
         if hasattr(self, 'host_name') and not hasattr(self, 'address'):
@@ -410,43 +422,6 @@ class Host(SchedulingItem):
         return None
 
 
-    # Macro part
-    def get_total_services(self):
-        return str(len(self.services))
-
-
-    def get_total_services_ok(self):
-        return str(len([s for s in self.services if s.state_id == 0]))
-
-
-    def get_total_services_warning(self):
-        return str(len([s for s in self.services if s.state_id == 1]))
-
-
-    def get_total_services_critical(self):
-        return str(len([s for s in self.services if s.state_id == 2]))
-
-
-    def get_total_services_unknown(self):
-        return str(len([s for s in self.services if s.state_id == 3]))
-
-
-    def get_ack_author_name(self):
-        if self.acknowledgement is None:
-            return ''
-        return self.acknowledgement.author
-
-
-    def get_ack_comment(self):
-        if self.acknowledgement is None:
-            return ''
-        return self.acknowledgement.comment
-
-
-    def get_check_command(self):
-        return self.check_command.get_name()
-
-
     # For get a nice name
     def get_name(self):
         if not self.is_tpl():
@@ -512,8 +487,6 @@ class Host(SchedulingItem):
     # on the database service with the srv=ERP service
     def add_business_rule_act_dependancy(self, h, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
-#        self.act_depend_of.append( (srv, status, 'logic_dep',
-#                                    timeperiod, inherits_parent) )
         # I only register so he know that I WILL be a inpact
         self.act_depend_of_me.append( (h, status, 'business_dep',
                                       timeperiod, inherits_parent) )
@@ -537,6 +510,20 @@ class Host(SchedulingItem):
     # Add one of our service to services (at linkify)
     def add_service_link(self, service):
         self.services.append(service)
+
+
+
+#####
+#                         _             
+#                        (_)            
+#  _ __ _   _ _ __  _ __  _ _ __   __ _ 
+# | '__| | | | '_ \| '_ \| | '_ \ / _` |
+# | |  | |_| | | | | | | | | | | | (_| |
+# |_|   \__,_|_| |_|_| |_|_|_| |_|\__, |
+#                                  __/ |
+#                                 |___/ 
+####
+
 
 
     # Set unreachable : all our parents are down!
@@ -879,7 +866,48 @@ class Host(SchedulingItem):
 
 
 
+    # Macro part
+    def get_total_services(self):
+        return str(len(self.services))
 
+
+    def get_total_services_ok(self):
+        return str(len([s for s in self.services if s.state_id == 0]))
+
+
+    def get_total_services_warning(self):
+        return str(len([s for s in self.services if s.state_id == 1]))
+
+
+    def get_total_services_critical(self):
+        return str(len([s for s in self.services if s.state_id == 2]))
+
+
+    def get_total_services_unknown(self):
+        return str(len([s for s in self.services if s.state_id == 3]))
+
+
+    def get_ack_author_name(self):
+        if self.acknowledgement is None:
+            return ''
+        return self.acknowledgement.author
+
+
+    def get_ack_comment(self):
+        if self.acknowledgement is None:
+            return ''
+        return self.acknowledgement.comment
+
+
+    def get_check_command(self):
+        return self.check_command.get_name()
+
+
+
+
+
+# CLass for the hosts lists. It's mainly for configuration
+# part
 class Hosts(Items):
     name_property = "host_name" #use for the search by name
     inner_class = Host #use for know what is in items
@@ -891,11 +919,11 @@ class Hosts(Items):
             h.prepare_for_conf_sending()
 
 
-    #Create link between elements:
-    #hosts -> timeperiods
-    #hosts -> hosts (parents, etc)
-    #hosts -> commands (check_command)
-    #hosts -> contacts
+    # Create link between elements:
+    # hosts -> timeperiods
+    # hosts -> hosts (parents, etc)
+    # hosts -> commands (check_command)
+    # hosts -> contacts
     def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, escalations=None, hostgroups=None):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
@@ -908,19 +936,19 @@ class Hosts(Items):
         self.linkify_with_contacts(contacts)
         self.linkify_h_by_realms(realms)
         self.linkify_with_resultmodulations(resultmodulations)
-        #WARNING: all escalations will not be link here
-        #(just the escalation here, not serviceesca or hostesca).
-        #This last one will be link in escalations linkify.
+        # WARNING: all escalations will not be link here
+        # (just the escalation here, not serviceesca or hostesca).
+        # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
 
 
-    #Fill adress by host_name if not set
+    # Fill adress by host_name if not set
     def fill_predictive_missing_parameters(self):
         for h in self:
             h.fill_predictive_missing_parameters()
 
 
-    #Link host with hosts (parents)
+    # Link host with hosts (parents)
     def linkify_h_by_h(self):
         for h in self:
             parents = h.parents
@@ -939,7 +967,7 @@ class Hosts(Items):
             h.parents = new_parents
 
 
-    #Link with realms and set a default realm if none
+    # Link with realms and set a default realm if none
     def linkify_h_by_realms(self, realms):
         default_realm = None
         for r in realms:
@@ -964,14 +992,10 @@ class Hosts(Items):
                 h.got_default_realm = True
 
 
-    #We look for hostgroups property in hosts and
-    #link them
+    # We look for hostgroups property in hosts and
+    # link them
     def linkify_h_by_hg(self, hostgroups):
-        #Hostgroups property need to be fullfill for got the informations
-        #self.apply_partial_inheritance('hostgroups')
-        #self.apply_partial_inheritance('contact_groups')
-
-        #Register host in the hostgroups
+        # Register host in the hostgroups
         for h in self:
             if not h.is_tpl():
                 new_hostgroups = []
@@ -989,21 +1013,17 @@ class Hosts(Items):
 
 
 
-    #It's used to change old Nagios2 names to
-    #Nagios3 ones
+    # It's used to change old Nagios2 names to
+    # Nagios3 ones
     def old_properties_names_to_new(self):
         for h in self:
             h.old_properties_names_to_new()
 
 
 
-    #We look for hostgroups property in hosts and
+    # We look for hostgroups property in hosts and
     def explode(self, hostgroups, contactgroups):
-        #Hostgroups property need to be fullfill for got the informations
-        #self.apply_partial_inheritance('hostgroups')
-        #self.apply_partial_inheritance('contact_groups')
-
-        #Register host in the hostgroups
+        # Register host in the hostgroups
         for h in self:
             if not h.is_tpl() and hasattr(h, 'host_name'):
                 hname = h.host_name
@@ -1012,43 +1032,43 @@ class Hosts(Items):
                     for hg in hgs:
                         hostgroups.add_member(hname, hg.strip())
 
-        #items::explode_contact_groups_into_contacts
-        #take all contacts from our contact_groups into our contact property
+        # items::explode_contact_groups_into_contacts
+        # take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
 
 
 
-    #Create depenancies:
-    #Depencies at the host level: host parent
+    # Create depenancies:
+    # Depencies at the host level: host parent
     def apply_dependancies(self):
         for h in self:
             h.fill_parents_dependancie()
 
 
-    #Parent graph: use to find quickly relations between all host, and loop
-    #return True if tehre is a loop
+    # Parent graph: use to find quickly relations between all host, and loop
+    # return True if tehre is a loop
     def no_loop_in_parents(self):
-        #Ok, we say "from now, no loop :) "
+        # Ok, we say "from now, no loop :) "
         r = True
 
-        #Create parent graph
+        # Create parent graph
         parents = Graph()
 
-        #With all hosts as nodes
+        # With all hosts as nodes
         for h in self:
             if h is not None:
                 parents.add_node(h)
 
-        #And now fill edges
+        # And now fill edges
         for h in self:
             for p in h.parents:
                 if p is not None:
                     parents.add_edge(p, h)
 
-        #Now get the list of all hosts in a loop
+        # Now get the list of all hosts in a loop
         host_in_loops = parents.loop_check()
 
-        #and raise errors about it
+        # and raise errors about it
         for h in host_in_loops:
             logger.log("Error: The host '%s' is part of a circular parent/child chain!" % h.get_name())
             r = False
@@ -1056,22 +1076,22 @@ class Hosts(Items):
         return r
 
 
-    #Return a list of the host_name of the hosts
-    #that gotthe template with name=tpl_name
+    # Return a list of the host_name of the hosts
+    # that gotthe template with name=tpl_name
     def find_hosts_that_use_template(self, tpl_name):
         res = []
-        #first find the template
+        # first find the template
         tpl = None
         for h in self:
-            #Look fortemplate with the good name
+            # Look for template with the good name
             if h.is_tpl() and hasattr(h, 'name') and h.name.strip() == tpl_name.strip():
                 tpl = h
 
-        #If we find noone, we return nothing (easy case:) )
+        # If we find noone, we return nothing (easy case:) )
         if tpl is None:
             return []
 
-        #Ok, we find the tpl
+        # Ok, we find the tpl
         for h in self:
             if tpl in h.templates and hasattr(h, 'host_name'):
                 res.append(h.host_name)

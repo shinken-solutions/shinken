@@ -293,6 +293,16 @@ class Service(SchedulingItem):
         'retry_check_interval':     'retry_interval'
     }
 
+####### 
+#                   __ _                       _   _             
+#                  / _(_)                     | | (_)            
+#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __  
+#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \ 
+# | (_| (_) | | | | | | | (_| | |_| | | | (_| | |_| | (_) | | | |
+#  \___\___/|_| |_|_| |_|\__, |\__,_|_|  \__,_|\__|_|\___/|_| |_|
+#                         __/ |                                  
+#                        |___/                                   
+######
 
     # Give a nice name output
     def get_name(self):
@@ -439,6 +449,68 @@ class Service(SchedulingItem):
 
         # And the parent/child dep lists too
         srv.register_son_in_parent_child_dependencies(self)
+
+
+
+    # For a given host, look for all copy we must
+    # create for for_each property
+    def duplicate(self, host):
+        duplicates = []
+
+        # In macro, it's all in UPPER case
+        prop = self.duplicate_foreach.strip().upper()
+        
+        # If I do not have the property, we bail out
+        if prop in host.customs:
+            entry = host.customs[prop]
+
+            default_value = getattr(self, 'default_value', None)
+            #  Transform the generator string to a list
+            # Missing values are filled with the default value
+            (key_values, errcode) = get_key_value_sequence(entry, default_value)
+
+            if key_values:
+                for key_value in key_values:
+                    key = key_value['KEY']
+                    value = key_value['VALUE']
+                    new_s = self.copy()
+                    new_s.host_name = host.get_name()
+                    if self.is_tpl(): # if template, the new one is not
+                        new_s.register = 1
+                    for key in key_value:
+                        if key == 'KEY':
+                            if hasattr(self, 'service_description'):
+                                new_s.service_description = self.service_description.replace('$'+key+'$', key_value[key])
+                        if hasattr(self, 'check_command'):
+                            # here we can replace VALUE, VALUE1, VALUE2,...
+                            new_s.check_command = new_s.check_command.replace('$'+key+'$', key_value[key])
+                    # And then add in our list this new service
+                    duplicates.append(new_s)
+            else:
+                if errcode == GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX:
+                    err = "The custom property '%s' of the host '%s' is not a valid entry %s for a service generator" % (self.duplicate_foreach.strip(), host.get_name(), entry)
+                    self.configuration_errors.append(err)
+                elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT:
+                    err = "The custom property '%s 'of the host '%s' has empty values %s but the service %s has no default_value" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
+                    self.configuration_errors.append(err)
+                elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODE:
+                    err = "The custom property '%s 'of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
+                    self.configuration_errors.append(err)
+        return duplicates
+
+
+
+
+#####
+#                         _             
+#                        (_)            
+#  _ __ _   _ _ __  _ __  _ _ __   __ _ 
+# | '__| | | | '_ \| '_ \| | '_ \ / _` |
+# | |  | |_| | | | | | | | | | | | (_| |
+# |_|   \__,_|_| |_|_| |_|_|_| |_|\__, |
+#                                  __/ |
+#                                 |___/ 
+####
 
 
     # Set unreachable : our host is DOWN, but it mean nothing for a service
@@ -806,52 +878,9 @@ class Service(SchedulingItem):
         self.actions.append(e)
 
 
-    def duplicate(self, host):
-        duplicates = []
-
-        # In macro, it's all in UPPER case
-        prop = self.duplicate_foreach.strip().upper()
-        
-        # If I do not have the property, we bail out
-        if prop in host.customs:
-            entry = host.customs[prop]
-
-            default_value = getattr(self, 'default_value', None)
-            #  Transform the generator string to a list
-            # Missing values are filled with the default value
-            (key_values, errcode) = get_key_value_sequence(entry, default_value)
-
-            if key_values:
-                for key_value in key_values:
-                    key = key_value['KEY']
-                    value = key_value['VALUE']
-                    new_s = self.copy()
-                    new_s.host_name = host.get_name()
-                    if self.is_tpl(): # if template, the new one is not
-                        new_s.register = 1
-                    for key in key_value:
-                        if key == 'KEY':
-                            if hasattr(self, 'service_description'):
-                                new_s.service_description = self.service_description.replace('$'+key+'$', key_value[key])
-                        if hasattr(self, 'check_command'):
-                            # here we can replace VALUE, VALUE1, VALUE2,...
-                            new_s.check_command = new_s.check_command.replace('$'+key+'$', key_value[key])
-                    # And then add in our list this new service
-                    duplicates.append(new_s)
-            else:
-                if errcode == GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX:
-                    err = "The custom property '%s' of the host '%s' is not a valid entry %s for a service generator" % (self.duplicate_foreach.strip(), host.get_name(), entry)
-                    self.configuration_errors.append(err)
-                elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT:
-                    err = "The custom property '%s 'of the host '%s' has empty values %s but the service %s has no default_value" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
-                    self.configuration_errors.append(err)
-                elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODE:
-                    err = "The custom property '%s 'of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
-                    self.configuration_errors.append(err)
-        return duplicates
 
 
-
+# Class for list of services. It's mainly, mainly for configuration part
 class Services(Items):
     inner_class = Service # use for know what is in items
     # Create the reversed list for speedup search by host_name/name
