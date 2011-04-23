@@ -334,7 +334,6 @@ class Scheduler:
     # For tunning purpose we use caches but we do not whant them to explode
     # So we clean thems
     def clean_caches(self):
-        # print "********** Clean caches *********"
         for tp in self.timeperiods:
             tp.clean_cache()
 

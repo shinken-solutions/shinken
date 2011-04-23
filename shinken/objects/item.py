@@ -28,7 +28,6 @@
 from copy import copy
 
 from shinken.commandcall import CommandCall
-
 from shinken.property import StringProp, ListProp
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
@@ -100,7 +99,7 @@ class Item(object):
     def copy(self):
         """ Return a copy of the item, but give him a new id """
         cls = self.__class__
-        i = cls({})#Dummy item but with it's own running properties
+        i = cls({})# Dummy item but with it's own running properties
         for prop in cls.properties:
             if hasattr(self, prop):
                 val = getattr(self, prop)
@@ -132,7 +131,7 @@ Like temporary attributes such as "imported_from", etc.. """
             return False
 
 
-    #If a prop is absent and is not required, put the default value
+    # If a prop is absent and is not required, put the default value
     def fill_default(self):
         """ Fill missing properties if they are missing """
         cls = self.__class__
@@ -142,33 +141,33 @@ Like temporary attributes such as "imported_from", etc.. """
                 setattr(self, prop, entry.default)
 
 
-    #We load every usefull parameter so no need to access global conf later
-    #Must be called after a change in a gloabl conf parameter
+    # We load every usefull parameter so no need to access global conf later
+    # Must be called after a change in a gloabl conf parameter
     def load_global_conf(cls, conf):
         """ Used to put global values in the sub Class like
         hosts ro services """
-        #conf have properties, if 'enable_notifications' :
-        #{ [...] 'class_inherit' : [(Host, None), (Service, None),
-        # (Contact, None)]}
-        #get the name and put the value if None, put the Name
-        #(not None) if not (not clear ?)
+        # conf have properties, if 'enable_notifications' :
+        # { [...] 'class_inherit' : [(Host, None), (Service, None),
+        #  (Contact, None)]}
+        # get the name and put the value if None, put the Name
+        # (not None) if not (not clear ?)
         for prop, entry in conf.properties.items():
-            #If we have a class_inherit, and the arbtier really send us it
-#            if 'class_inherit' in entry and hasattr(conf, prop):
+            # If we have a class_inherit, and the arbtier really send us it
+            # if 'class_inherit' in entry and hasattr(conf, prop):
             if hasattr(conf, prop):
                 for (cls_dest, change_name) in entry.class_inherit:
-                    if cls_dest == cls:#ok, we've got something to get
+                    if cls_dest == cls:# ok, we've got something to get
                         value = getattr(conf, prop)
                         if change_name is None:
                             setattr(cls, prop, value)
                         else:
                             setattr(cls, change_name, value)
 
-    #Make this method a classmethod
+    # Make this method a classmethod
     load_global_conf = classmethod(load_global_conf)
 
 
-    #Use to make python properties
+    # Use to make python properties
     def pythonize(self):
         cls = self.__class__
         for prop, tab in cls.properties.items():
@@ -184,7 +183,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 new_val = tab.pythonize(getattr(self, prop))
                 setattr(self, prop, new_val)
             except AttributeError , exp:
-                #print self.get_name(), ' : ', exp
+                # print self.get_name(), ' : ', exp
                 pass # Will be catch at the is_correct moment
 
 
@@ -195,10 +194,10 @@ Like temporary attributes such as "imported_from", etc.. """
             return []
 
 
-    #We fillfull properties with template ones if need
+    # We fillfull properties with template ones if need
     def get_property_by_inheritance(self, items, prop):
-        #If I have the prop, I take mine but I check if I must
-        #add a plus porperty
+        # If I have the prop, I take mine but I check if I must
+        # add a plus porperty
         if hasattr(self, prop):
             value = getattr(self, prop)
             # Maybe this value is 'null'. If so, we should NOT inherit
@@ -212,7 +211,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 value += ',' + self.get_plus_and_delete(prop)
             return value
         #Ok, I do not have prop, Maybe my templates do?
-        #Same story for plus
+        # Same story for plus
         for i in self.templates:
             value = i.get_property_by_inheritance(items, prop)
             if value is not None:
@@ -220,16 +219,16 @@ Like temporary attributes such as "imported_from", etc.. """
                     value += ','+self.get_plus_and_delete(prop)
                 setattr(self, prop, value)
                 return value
-        #I do not have prop, my templates too... Maybe a plus?
+        # I do not have prop, my templates too... Maybe a plus?
         if self.has_plus(prop):
             value = self.get_plus_and_delete(prop)
             setattr(self, prop, value)
             return value
-        #Not event a plus... so None :)
+        # Not event a plus... so None :)
         return None
 
 
-    #We fillfull properties with template ones if need
+    # We fillfull properties with template ones if need
     def get_customs_properties_by_inheritance(self, items):
         for i in self.templates:
             tpl_cv = i.get_customs_properties_by_inheritance(items)
@@ -247,9 +246,9 @@ Like temporary attributes such as "imported_from", etc.. """
             if self.has_plus(prop):
                 value = value = value+','+self.get_plus_and_delete(prop)
                 self.customs[prop] = value
-        #We can get custom properties in plus, we need to get all
-        #entires and put
-        #them into customs
+        # We can get custom properties in plus, we need to get all
+        # entires and put
+        # them into customs
         cust_in_plus = self.get_all_plus_and_delete()
         for prop in cust_in_plus:
             self.customs[prop] = cust_in_plus[prop]
@@ -266,7 +265,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
     def get_all_plus_and_delete(self):
         res = {}
-        props = self.plus.keys() #we delete entries, so no for ... in ...
+        props = self.plus.keys() # we delete entries, so no for ... in ...
         for prop in props:
             res[prop] = self.get_plus_and_delete(prop)
         return res
@@ -278,8 +277,8 @@ Like temporary attributes such as "imported_from", etc.. """
         return val
 
 
-    #Check is required prop are set:
-    #template are always correct
+    # Check is required prop are set:
+    # template are always correct
     def is_correct(self):
         state = True
         properties = self.__class__.properties
@@ -298,16 +297,16 @@ Like temporary attributes such as "imported_from", etc.. """
         return state
 
 
-    #This function is used by service and hosts
-    #to transform Nagios2 parameters to Nagios3
-    #ones, like normal_check_interval to
-    #check_interval. There is a old_parameters tab
-    #in Classes taht give such modifications to do.
+    # This function is used by service and hosts
+    # to transform Nagios2 parameters to Nagios3
+    # ones, like normal_check_interval to
+    # check_interval. There is a old_parameters tab
+    # in Classes taht give such modifications to do.
     def old_properties_names_to_new(self):
         old_properties = self.__class__.old_properties
         for old_name, new_name in old_properties.items():
-            #Ok, if we got old_name and NO new name,
-            #we switch the name
+            # Ok, if we got old_name and NO new name,
+            # we switch the name
             if hasattr(self, old_name) and not hasattr(self, new_name):
                 value = getattr(self, old_name)
                 setattr(self, new_name, value)
@@ -362,15 +361,15 @@ Like temporary attributes such as "imported_from", etc.. """
             self.broks.append(self.get_update_status_brok())
 
 
-    # Delete the acknowledgement object and reset the flag
-    # but do not remove the associated comment.
+    #  Delete the acknowledgement object and reset the flag
+    #  but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
             print "Deleting acknowledged of", self.get_dbg_name()
             self.problem_has_been_acknowledged = False
-            #Should not be deleted, a None is Good
+            # Should not be deleted, a None is Good
             self.acknowledgement = None
-            #del self.acknowledgement
+            # del self.acknowledgement
             # find comments of non-persistent ack-comments and delete them too
             for c in self.comments:
                 if c.entry_type == 4 and not c.persistent:
@@ -386,13 +385,13 @@ Like temporary attributes such as "imported_from", etc.. """
                 self.unacknowledge_problem()
 
 
-    #Will flatten some parameters taggued by the 'conf_send_preparation'
+    # Will flatten some parameters taggued by the 'conf_send_preparation'
     #property because they are too "linked" to be send like that (like realms)
     def prepare_for_conf_sending(self):
         cls = self.__class__
 
         for prop, entry in cls.properties.items():
-            #Is this property need preparation for sending?
+            # Is this property need preparation for sending?
             if entry.conf_send_preparation is not None:
                 f = entry.conf_send_preparation
                 if f is not None:
@@ -401,7 +400,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         if hasattr(cls, 'running_properties'):
             for prop, entry in cls.running_properties.items():
-            #Is this property need preparation for sending?
+            # Is this property need preparation for sending?
                 if entry.conf_send_preparation is not None:
                     f = entry.conf_send_preparation
                     if f is not None:
@@ -411,14 +410,14 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
 
-    #Get the property for an object, with good value
-    #and brok_transformation if need
+    # Get the property for an object, with good value
+    # and brok_transformation if need
     def get_property_value_for_brok(self, prop, tab):
         entry = tab[prop]
-        #Get the current value, or the default if need
+        # Get the current value, or the default if need
         value = getattr(self, prop, entry.default)
 
-        #Apply brok_transformation if need
+        # Apply brok_transformation if need
         # Look if we must preprocess the value first
         pre_op = entry.brok_transformation
         if pre_op is not None:
@@ -427,13 +426,13 @@ Like temporary attributes such as "imported_from", etc.. """
         return value
 
 
-    #Fill data with info of item by looking at brok_type
-    #in props of properties or running_propterties
+    # Fill data with info of item by looking at brok_type
+    # in props of properties or running_propterties
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
-        #Now config properties
+        # Now config properties
         for prop, entry in cls.properties.items():
-            #Is this property intended for brokking?
+            # Is this property intended for brokking?
 #            if 'fill_brok' in cls.properties[prop]:
             if brok_type in entry.fill_brok:
                 data[prop] = self.get_property_value_for_brok(prop, cls.properties)
@@ -447,7 +446,7 @@ Like temporary attributes such as "imported_from", etc.. """
                     data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
 
 
-    #Get a brok with initial status
+    # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
@@ -458,7 +457,7 @@ Like temporary attributes such as "imported_from", etc.. """
         return b
 
 
-    #Get a brok with update item status
+    # Get a brok with update item status
     def get_update_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
@@ -469,7 +468,7 @@ Like temporary attributes such as "imported_from", etc.. """
         return b
 
 
-    #Get a brok with check_result
+    # Get a brok with check_result
     def get_check_result_brok(self):
         cls = self.__class__
         my_type = cls.my_type
@@ -480,7 +479,7 @@ Like temporary attributes such as "imported_from", etc.. """
         return b
 
 
-    #Get brok about the new schedule (next_check)
+    # Get brok about the new schedule (next_check)
     def get_next_schedule_brok(self):
         cls = self.__class__
         my_type = cls.my_type
@@ -491,7 +490,7 @@ Like temporary attributes such as "imported_from", etc.. """
         return b
 
 
-    #Link one command property to a class (for globals like oc*p_command)
+    # Link one command property to a class (for globals like oc*p_command)
     def linkify_one_command_with_commands(self, commands, prop):
         if hasattr(self, prop):
             command = getattr(self, prop).strip()
@@ -541,9 +540,9 @@ class Items(object):
         return self.items[key]
 
 
-    #We create the reversed list so search will be faster
-    #We also create a twins list with id of twins (not the original
-    #just the others, higher twins)
+    # We create the reversed list so search will be faster
+    # We also create a twins list with id of twins (not the original
+    # just the others, higher twins)
     def create_reversed_list(self):
         self.reversed_list = {}
         self.twins = []
@@ -563,7 +562,7 @@ class Items(object):
                 return self.reversed_list[name]
             else:
                 return None
-        else: #ok, an early ask, with no reversed list from now...
+        else: # ok, an early ask, with no reversed list from now...
             name_property = self.__class__.name_property
             for i in self:
                 if hasattr(i, name_property):
@@ -602,7 +601,7 @@ class Items(object):
 
 
     def linkify_templates(self):
-        #First we create a list of all templates
+        # First we create a list of all templates
         self.create_tpl_list()
         for i in self:
             tpls = i.get_templates()
@@ -619,26 +618,26 @@ class Items(object):
 
 
     def is_correct(self):
-        #we are ok at the begining. Hope we still ok at the end...
+        # we are ok at the begining. Hope we still ok at the end...
         r = True
-        #Some class do not have twins, because they do not have names
-        #like servicedependancies
+        # Some class do not have twins, because they do not have names
+        # like servicedependancies
         twins = getattr(self, 'twins', None)
         if twins is not None:
-            #Ok, look at no twins (it's bad!)
+            # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
                 print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from
                 r = False
-        #Then look if we have some errors in the conf
-        #Juts print warnings, but raise errors
+        # Then look if we have some errors in the conf
+        # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
             print err
         for err in self.configuration_errors:
             print err
             r = False
 
-        #Then look for individual ok
+        # Then look for individual ok
         for i in self:
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown")
@@ -683,8 +682,8 @@ class Items(object):
 
 
     def apply_inheritance(self):
-        #We check for all Class properties if the host has it
-        #if not, it check all host templates for a value
+        # We check for all Class properties if the host has it
+        # if not, it check all host templates for a value
         cls = self.inner_class
         for prop in cls.properties:
             self.apply_partial_inheritance(prop)
@@ -692,30 +691,30 @@ class Items(object):
             i.get_customs_properties_by_inheritance(self)
 
 
-    #We remove twins
-    #Remember: item id respect the order of conf. So if and item
-    # is defined multiple times,
-    #we want to keep the first one.
-    #Services are also managed here but they are specials:
-    #We remove twins services with the same host_name/service_description
-    #Remember: host service are take into account first before hostgroup service
-    #Id of host service are lower than hostgroups one, so they are
-    #in self.twins_services
-    #and we can remove them.
+    # We remove twins
+    # Remember: item id respect the order of conf. So if and item
+    #  is defined multiple times,
+    # we want to keep the first one.
+    # Services are also managed here but they are specials:
+    # We remove twins services with the same host_name/service_description
+    # Remember: host service are take into account first before hostgroup service
+    # Id of host service are lower than hostgroups one, so they are
+    # in self.twins_services
+    # and we can remove them.
     def remove_twins(self):
         for id in self.twins:
             i = self.items[id]
             type = i.__class__.my_type
             print 'Warning: the', type, i.get_name(), 'is already defined.'
-            del self.items[id] #bye bye
-        #do not remove twins, we should look in it, but just void it
+            del self.items[id] # bye bye
+        # do not remove twins, we should look in it, but just void it
         self.twins = []
         #del self.twins #no more need
 
 
 
-    #We've got a contacts property with , separated contacts names
-    #and we want have a list of Contacts
+    # We've got a contacts property with , separated contacts names
+    # and we want have a list of Contacts
     def linkify_with_contacts(self, contacts):
         for i in self:
             if hasattr(i, 'contacts'):
@@ -740,7 +739,6 @@ class Items(object):
     def linkify_with_escalations(self, escalations):
         for i in self:
             if hasattr(i, 'escalations'):
-                #print i.get_name(), 'going to link escalations', i.escalations
                 escalations_tab = i.escalations.split(',')
                 escalations_tab = strip_and_uniq(escalations_tab)
                 new_escalations = []
@@ -748,13 +746,13 @@ class Items(object):
                     es = escalations.find_by_name(es_name)
                     if es is not None:
                         new_escalations.append(es)
-                    else: #TODO what?
-                        pass
+                    else: # Escalation not find, not good!
+                        err = "ERROR : the escalation '%s' defined for '%s' is unknown" % (es_name, i.get_name())
+                        i.configuration_errors.append(err)
                 i.escalations = new_escalations
-                #print i.get_name(), 'finallygot escalation', i.escalations
 
 
-    #Make link between item and it's resultmodulations
+    # Make link between item and it's resultmodulations
     def linkify_with_resultmodulations(self, resultmodulations):
         for i in self:
             if hasattr(i, 'resultmodulations'):
@@ -765,14 +763,14 @@ class Items(object):
                     rm = resultmodulations.find_by_name(rm_name)
                     if rm is not None:
                         new_resultmodulations.append(rm)
-                    else: #TODO WHAT?
+                    else: # TODO WHAT?
                         pass
                 i.resultmodulations = new_resultmodulations
 
 
-    #If we've got a contact_groups properties, we search for all
-    #theses groups and ask them their contacts, and then add them
-    #all into our contacts property
+    # If we've got a contact_groups properties, we search for all
+    # theses groups and ask them their contacts, and then add them
+    # all into our contacts property
     def explode_contact_groups_into_contacts(self, contactgroups):
         for i in self:
             if hasattr(i, 'contact_groups'):
@@ -785,14 +783,14 @@ class Items(object):
                         i.configuration_errors.append(err)
                         continue
                     cnames = contactgroups.get_members_by_name(cgname)
-                    #We add contacts into our contacts
+                    # We add contacts into our contacts
                     if cnames != []:
                         if hasattr(i, 'contacts'):
                             i.contacts += ','+cnames
                         else:
                             i.contacts = cnames
 
-    #Link a timeperiod property (prop)
+    # Link a timeperiod property (prop)
     def linkify_with_timeperiods(self, timeperiods, prop):
         for i in self:
             if hasattr(i, prop):
@@ -802,18 +800,18 @@ class Items(object):
                     setattr(i, prop, None)
                     continue
 
-                #Ok, get a real name, search for it
+                # Ok, get a real name, search for it
                 tp = timeperiods.find_by_name(tpname)
                 # If nto fidn, it's an error
                 if tp is None:
                     err = "The %s of the %s '%s' named '%s' is unknown!" % (prop, i.__class__.my_type, i.get_name(), tpname)
                     i.configuration_errors.append(err)
                     continue
-                #Got a real one, just set it :)
+                # Got a real one, just set it :)
                 setattr(i, prop, tp)
 
 
-    #Link one command property
+    # Link one command property
     def linkify_one_command_with_commands(self, commands, prop):
         for i in self:
             if hasattr(i, prop):
@@ -827,14 +825,14 @@ class Items(object):
                                               reactionner_tag=i.reactionner_tag)
                     else:
                         cmdCall = CommandCall(commands, command)
-                    #TODO: catch None?
+                    # TODO: catch None?
                     setattr(i, prop, cmdCall)
                 else:
                     
                     setattr(i, prop, None)
 
 
-    #Link a command list (commands with , between) in real CommandCalls
+    # Link a command list (commands with , between) in real CommandCalls
     def linkify_command_list_with_commands(self, commands, prop):
         for i in self:
             if hasattr(i, prop):
@@ -851,14 +849,14 @@ class Items(object):
                                                   reactionner_tag=i.reactionner_tag)
                         else:
                             cmdCall = CommandCall(commands, com)
-                        #TODO: catch None?
+                        # TODO: catch None?
                         com_list.append(cmdCall)
                     else: # TODO: catch?
                         pass
                 setattr(i, prop, com_list)
 
 
-    #Return a set with ALL hosts (used in ! expressions)
+    # Return a set with ALL hosts (used in ! expressions)
     def get_all_host_names_set(self, hosts):
         hnames = [h.host_name for h in hosts.items.values()
                   if hasattr(h, 'host_name')]
@@ -868,18 +866,18 @@ class Items(object):
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups):
         res = []
         original_expr = expr
-        #print "I'm trying to prepare the expression", expr
+        # print "I'm trying to prepare the expression", expr
 
-        #We've got problem with the "-" sign. It can be in a
-        #valid name but it's a sign of difference for sets
-        #so we change the - now by something, then we reverse after
+        # We've got problem with the "-" sign. It can be in a
+        # valid name but it's a sign of difference for sets
+        # so we change the - now by something, then we reverse after
         if '-' in expr:
             expr = expr.replace('-', 'MINUSSIGN')
 
         # ! (not) should be changed as "ALL-" (all but not...)
         if '!' in expr:
             ALLELEMENTS = self.get_all_host_names_set(hosts)
-            #print "Changing ! by ALLELEMENTS- in ", expr
+            # print "Changing ! by ALLELEMENTS- in ", expr
             expr = expr.replace('!', 'ALLELEMENTS-')
 
         # We change all separaton token by 10 spaces
@@ -888,7 +886,7 @@ class Items(object):
         strip_expr = expr
         for c in ['|', '&', '(', ')', ',', '-']:
             strip_expr = strip_expr.replace(c, ' '*10)
-        #print "Stripped expression:", strip_expr
+        # print "Stripped expression:", strip_expr
 
         tokens = strip_expr.split(' '*10)
         # Strip and non void token
@@ -900,8 +898,8 @@ class Items(object):
             # ALLELEMENTS is a private group for us
             if token != 'ALLELEMENTS':
                 #Maybe the token was with - at the begining,
-                #but we change all by "MINUSSIGN". We must change it back now
-                #for the search
+                # but we change all by "MINUSSIGN". We must change it back now
+                # for the search
                 if 'MINUSSIGN' in token:
                     tmp_token = token.replace('MINUSSIGN', '-')
                     members = hostgroups.get_members_by_name(tmp_token)
