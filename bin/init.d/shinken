@@ -32,12 +32,13 @@ else
     SCRIPTNAME=$SHINKEN_MODULE_FILE
 fi
 
-curpath=$(dirname "$0")
+curpath=$(cd $(dirname "$0") && pwd)
+#echo curpath is $curpath filename is $(basename "$0")
 
 ## Default paths :
-BIN="/usr/local/shinken/bin"
-VAR="/usr/local/shinken/var"
-ETC="/usr/local/shinken/etc"
+test "$BIN" || BIN=$(cd $curpath/.. && pwd)
+test "$VAR" || VAR=$(cd $curpath/../../var && pwd)
+test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
 export LANG=en_US.UTF8
@@ -98,6 +99,12 @@ fi
 
 # Reads configuration variable file if it is present
 [ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
+
+#echo BIN=$BIN
+#echo VAR=$VAR
+#echo ETC=$ETC
+
+#set -xv
 
 # 
 echo_success() {
@@ -182,6 +189,9 @@ do_start() {
         output=$("$modfilepath" -d -c "$ETC/nagios.cfg" -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1)
         rc=$?
     fi
+    # debug:
+    #resfile="/tmp/bad_start_for_$mod"
+    #echo "$output" > "$resfile" || true
     if [ $rc != 0 ]; then
         resfile="/tmp/bad_start_for_$mod"
         echo "$output" > "$resfile" || true
@@ -273,6 +283,18 @@ do_start_() {
     if [ $rc -eq 0 ]; then
         log_warning_msg "Already running"
         return
+    fi
+    if test "$1" = "arbiter"
+    then
+        # arbiter is special : 
+        # it doesn't actually declare a "workdir" properties in its config
+        # so we have explicitely to cd to the "VAR" directory.
+        # so that the default pidfile ( == nagios lock_file) which is now "arbiterd.pid"
+        # will be created at the correct place.  
+        cd "$VAR"
+        # TODO: check if other possibility wouldn't be better:
+        # declare a "workdir" properties for the arbiter module definition.. in shinken-specific.cfg.
+        # but if the lock_file path is absolute then this 'cd' isn't required.
     fi
     startoutput=$(do_start "$1")
     rc=$?

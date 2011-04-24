@@ -23,32 +23,35 @@
 #
 
 import os
-import random, time
 import tempfile
 
 from shinken_test import unittest
 
-from shinken.daemon import InvalidPidDir, InvalidWorkDir
+import shinken.log as shinken_log
+
+from shinken.daemon import InvalidPidFile, InvalidWorkDir
 from shinken.pyro_wrapper import PortNotFree
 
 from shinken.daemons.pollerdaemon import Poller
-# all shinken-* services are subclassing Daemon so we only need to test one normally...
+from shinken.daemons.brokerdaemon import Broker
+from shinken.daemons.schedulerdaemon import Shinken
+from shinken.daemons.reactionnerdaemon import Reactionner
+from shinken.daemons.arbiterdaemon import Arbiter
 
-# I choose poller.
-
-# and we can use its default/dev config : 
-pollerconfig = "../etc/pollerd.ini"
 
 curdir = os.getcwd()
 
-class Test_Daemon_Bad_Start(unittest.TestCase):
 
-           
-    def gen_invalid_directory(self, f):
-        basedir = "/invalid_directory42/" + str(random.randint(0,100))
-        while os.path.exists(basedir):
-            basedir = os.path.join(basedir, str(random.randint(0,100)))
-        return os.path.join(basedir, f)
+daemons_config = {
+    Broker:       "../etc/brokerd.ini", 
+    Poller:       "../etc/pollerd.ini",
+    Reactionner:  "../etc/reactionnerd.ini",
+    Shinken:      "../etc/schedulerd.ini",
+    Arbiter:    [ "../etc/nagios.cfg", "../etc/shinken-specific.cfg" ]
+}
+
+
+class template_Test_Daemon_Bad_Start():
 
     def get_login_and_group(self, p):
         try:
@@ -58,51 +61,83 @@ class Test_Daemon_Bad_Start(unittest.TestCase):
             return
         p.user = p.group = user
 
-    def get_poller_daemon(self):
+    def create_daemon(self):
+        cls = self.daemon_cls
+        return cls(daemons_config[cls], False, True, False, None)
+        
+    def get_daemon(self):
         os.chdir(curdir)
-        p = Poller(pollerconfig, False, True, False, None)
-        p.load_config_file()
-        p.port = 0  # let's here choose automatic port attribution..
-        self.get_login_and_group(p)
-        return p
+        shinken_log.local_log = None # otherwise get some "trashs" logs..
+        d = self.create_daemon()
+        d.load_config_file()
+        d.port = 0
+        self.get_login_and_group(d)
+        return d
+
     
     def test_bad_piddir(self):
-        d = tempfile.mkdtemp()
-        print "Using temp dir", d
-        p = self.get_poller_daemon()
-        p.workdir = d
-        os.chmod(p.workdir, 0)
-        p.pidfile = p.workdir + "/daemon.pid"
-        self.assertRaises(InvalidPidDir, p.do_daemon_init_and_start)
-        p = self.get_poller_daemon()
-        p.pidfile = self.gen_invalid_directory(p.pidfile)
-        self.assertRaises(InvalidPidDir, p.do_daemon_init_and_start)
-        p.do_stop()
-        #os.chmod(p.workdir, 777)
+        print "Testing bad pidfile ..."
+        d = self.get_daemon()
+        d.workdir = tempfile.mkdtemp()
+        d.pidfile = os.path.join(d.workdir, "daemon.pid")
+        f = open(d.pidfile, "w")
+        f.close()
+        os.chmod(d.pidfile, 0)
+        self.assertRaises(InvalidPidFile, d.do_daemon_init_and_start)
+        os.unlink(d.pidfile)
+        os.rmdir(d.workdir)
+    
     
     def test_bad_workdir(self):
-        d = tempfile.mkdtemp()
         print("Testing bad workdir ... mypid=%d" % (os.getpid()))
-        p = self.get_poller_daemon()
-        p.workdir = "/moncul"
-        p.pidfile = tempfile.mktemp()
-        self.assertRaises(InvalidWorkDir, p.do_daemon_init_and_start)
-        p.do_stop()
+        d = self.get_daemon()
+        d.workdir = tempfile.mkdtemp()
+        os.chmod(d.workdir, 0)
+        self.assertRaises(InvalidWorkDir, d.do_daemon_init_and_start)
+        d.do_stop()
+        os.rmdir(d.workdir)
 
 
     def test_port_not_free(self):
-        time.sleep(1)
         print("Testing port not free ... mypid=%d" % (os.getpid()))
-        p1 = self.get_poller_daemon()
-        p1.pidfile = tempfile.mktemp()
-        p1.workdir = tempfile.mkdtemp()
-        p1.do_daemon_init_and_start()          
-        os.unlink(p1.pidfile)  ## so that second poller will not see first started poller
-        p2 = self.get_poller_daemon()
-        p2.pidfile = p1.pidfile
-        p2.port = p1.pyro_daemon.port
-        self.assertRaises(PortNotFree, p2.do_daemon_init_and_start)
-        
-        
+        d1 = self.get_daemon()
+        d1.workdir = tempfile.mkdtemp()
+        d1.do_daemon_init_and_start()          
+        os.unlink(d1.pidfile)  ## so that second poller will not see first started poller
+        d2 = self.get_daemon()
+        d2.workdir = d1.workdir
+        d2.port = d1.pyro_daemon.port
+        self.assertRaises(PortNotFree, d2.do_daemon_init_and_start)
+        d2.do_stop()
+        d1.do_stop()
+        os.unlink(d1.pidfile)
+        if hasattr(d1, 'local_log'):
+            os.unlink(os.path.join(d1.workdir, d1.local_log))
+        os.rmdir(d1.workdir)
+
+
+
+class Test_Broker_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+    daemon_cls = Broker
+    
+class Test_Scheduler_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+    daemon_cls = Shinken
+    
+class Test_Poller_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+    daemon_cls = Poller
+
+class Test_Reactionner_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+    daemon_cls = Reactionner
+
+class Test_Arbiter_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
+    daemon_cls = Arbiter
+
+    def create_daemon(self):
+        """ arbiter is always a bit special .. """
+        cls = self.daemon_cls
+        #Arbiter(config_files, is_daemon, do_replace, verify_only, debug, debug_file)
+        return cls(daemons_config[cls], False, True, False, False, None)
+
+
 if __name__ == '__main__':
     unittest.main()

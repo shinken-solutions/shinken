@@ -54,6 +54,7 @@ from distutils.command.install import install as _install
 from distutils.util import change_root
 from distutils.errors import DistutilsOptionError
 
+
 class build(_build):
     sub_commands = _build.sub_commands + [
         ('build_config', None),
@@ -69,20 +70,25 @@ class build(_build):
         _build.finalize_options(self)
         if self.build_config is None:
             self.build_config = os.path.join(self.build_base, 'etc')
-    
+
+
 class install(_install):
     sub_commands = _install.sub_commands + [
-        ('install_config', None),
-        ]
+        ( 'install_config', None ),
+    ]
     user_options = _install.user_options + [
-        ('etc-path=', None, 'read-only single-machine data'),
-        ('var-path=', None, 'modifiable single-machine data'),
-        ('plugins-path=', None, 'program executables'),
-        ('owner=', None, ('change owner for etc/* and var '
-                          '(default: %s)' % DEFAULT_OWNER)),
-        ('group=', None, ('change group for etc/* and var '
-                          '(default: %s)' % DEFAULT_GROUP)),
-        ]
+        ( 'etc-path=', None, 'read-only single-machine data' ),
+        ( 'var-path=', None, 'modifiable single-machine data' ),
+        ( 'plugins-path=', None, 'program executables' ),
+        ( 'owner=', None, ( 
+                'change owner for etc/* and var (default: %s)' % DEFAULT_OWNER
+            )
+        ),
+        ( 'group=', None, (
+                'change group for etc/* and var (default: %s)' % DEFAULT_GROUP
+            )
+        ),
+    ]
     
     def initialize_options(self):
         _install.initialize_options(self)
@@ -114,8 +120,8 @@ class build_config(Command):
     description = "build the shinken config files"
 
     user_options = [
-        ('build-dir=', None, "directory to build the config files to"),
-        ]
+        ( 'build-dir=', None, "directory to build the config files to"),
+    ]
     
     def initialize_options (self):
         self.build_dir = None
@@ -125,20 +131,25 @@ class build_config(Command):
         self.plugins_path = None
 
         self._install_scripts = None
+
+        self.owner = None
+        self.group = None
         
     def finalize_options (self):
         self.set_undefined_options('build',
                                    ('build_base', 'build_base'),
                                    ('build_config', 'build_dir'),
-                                   )
+        )
         self.set_undefined_options('install',
                                    ('install_scripts', '_install_scripts'),
-                                   )
+        )
         self.set_undefined_options('install_config',
                                    ('etc_path', 'etc_path'),
                                    ('var_path', 'var_path'),
                                    ('plugins_path', 'plugins_path'),
-                                   )
+                                   ('owner', 'owner'),
+                                   ('group', 'group')
+        )
         if self.build_dir is None:
             self.build_dir = os.path.join(self.build_base, 'etc')
         
@@ -177,12 +188,25 @@ class build_config(Command):
 
         # Open a /etc/*d.ini file and change the ../var occurence with a
         # good value from the configuration file
+        
         for name in daemon_ini_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
-            log.info('updating path in %s', outname)
-            update_file_with_string(inname, outname,
+            log.info('updating path in %s : to "%s"' % (outname, self.var_path))
+            
+            if False:
+                ## disabled for now:
+                ## all daemons are now using relative paths by default 
+                ## (relative to the "VAR" one of /etc/default/shinken)
+                update_file_with_string(inname, outname,
                                     "../var", self.var_path)
+            
+            # but we have to force the user/group & workdir values still:
+            append_file_with(inname, outname, """
+user=%s
+group=%s
+workdir=%s
+""" % ( self.owner, self.group, self.var_path, ))
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
@@ -200,19 +224,29 @@ class build_config(Command):
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
-            update_file_with_string(inname, outname,
+            
+            if False:
+                ## disabled for now :
+                ## nagios.cfg & shinken-specific use now relative paths (relative to the "VAR" one) 
+                update_file_with_string(inname, outname,
                                     "/usr/local/shinken/var",
                                     self.var_path)
-
+            
+            ## but we HAVE to set the shinken_user & shinken_group to thoses requested :
+            append_file_with(inname, outname, """
+shinken_user=%s
+shinken_group=%s
+""" % ( self.owner, self.group )
+            )
 
 class install_config(Command):
     description = "install the shinken config files"
 
     user_options = [
-        ('install-dir=', 'd', "directory to install config files to"),
-        ('build-dir=','b', "build directory (where to install from)"),
-        ('force', 'f', "force installation (overwrite existing files)"),
-        ('skip-build', None, "skip the build steps"),
+        ( 'install-dir=', 'd', "directory to install config files to" ),
+        ( 'build-dir=',   'b', "build directory (where to install from)" ),
+        ( 'force',        'f', "force installation (overwrite existing files)"),
+        ( 'skip-build',   None, "skip the build steps" ),
     ]
 
     boolean_options = ['force', 'skip-build']
@@ -230,15 +264,19 @@ class install_config(Command):
         self.plugins_path = None    # typically /libexec on Posix systems
 
     def finalize_options(self):
-        self.set_undefined_options('build',
-                                   ('build_config', 'build_dir'))
-        self.set_undefined_options('install',
-                                   ('root', 'root'),
-                                   ('etc_path', 'etc_path'),
-                                   ('var_path', 'var_path'),
-                                   ('plugins_path', 'plugins_path'),
-                                   ('owner', 'owner'),
-                                   ('group', 'group'))
+        self.set_undefined_options(
+            'build',
+                ( 'build_config', 'build_dir' ),
+        )
+        self.set_undefined_options(
+            'install',
+               ('root', 'root'),
+               ('etc_path', 'etc_path'),
+               ('var_path', 'var_path'),
+               ('plugins_path', 'plugins_path'),
+               ('owner', 'owner'),
+               ('group', 'group')
+        )
 
     def run(self):
         #log.warn('>>> %s', self.lib)
@@ -293,6 +331,16 @@ class install_config(Command):
             raise DistutilsOptionError("The group %s is unknown. "
                                        "Maybe you should create this group"
                                        % group_name)
+
+
+def append_file_with(infilename, outfilename, append_string):
+    f = open(infilename)
+    buf = f.read()
+    f.close()
+    f = open(outfilename, "w")
+    f.write(buf)
+    f.write(append_string)
+    f.close()
 
 
 def update_file_with_string(infilename, outfilename, match, new_string):
@@ -357,75 +405,110 @@ daemon_ini_files = ('brokerd.ini',
 resource_cfg_files = ('resource.cfg', )
 
 
+if __name__ == "__main__":
+    
+    setup(
+        cmdclass = {
+            'build': build,
+            'install': install,
+            'build_config': build_config,
+            'install_config': install_config
+        },
+      
+        name = "Shinken",
+        version = "0.5",
+        packages = find_packages(),
+        package_data = {'':['*.py','modules/*.py','modules/*/*.py']},
+        description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
+        long_description=open('README').read(),
+        author = "Gabes Jean",
+        author_email = "naparuba@gmail.com",
+        license = "GNU Affero General Public License",
+        url = "http://www.shinken-monitoring.org",
+        zip_safe=False,
+        classifiers = [
+            'Development Status :: 5 - Production/Stable',
+            'Environment :: Console',
+            'Intended Audience :: System Administrators',
+            'License :: OSI Approved :: GNU Affero General Public License v3',
+            'Operating System :: MacOS :: MacOS X',
+            'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX',
+            'Programming Language :: Python',
+            'Topic :: System :: Monitoring',
+            'Topic :: System :: Networking :: Monitoring',
+        ],
+    
+        install_requires = [
+            required_pkgs
+        ],
+    
+        scripts = glob('bin/shinken-[!_]*'),
+        
+        data_files = [
+            (
+                default_paths['etc'],
+                [ # other configs
+                    'etc/commands.cfg',
+                    'etc/contactgroups.cfg',
+                    'etc/dependencies.cfg',
+                    'etc/escalations.cfg',
+                    'etc/hostgroups.cfg',
+                    #'etc/resource.cfg', # see above
+                    'etc/servicegroups.cfg',
+                    'etc/templates.cfg',
+                    'etc/timeperiods.cfg',
+                    'etc/discovery.cfg',
+                    'etc/discovery_rules.cfg',
+                    'etc/discovery_runs.cfg',
+                ]
+            ),
 
-setup(
-  cmdclass = {'build': build,
-              'install': install,
-              'build_config': build_config,
-              'install_config': install_config},
-  name = "Shinken",
-  version = "0.5",
-  packages = find_packages(),
-  package_data = {'':['*.py','modules/*.py','modules/*/*.py']},
-  description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
-  long_description=open('README').read(),
-  author = "Gabes Jean",
-  author_email = "naparuba@gmail.com",
-  license = "GNU Affero General Public License",
-  url = "http://www.shinken-monitoring.org",
-  zip_safe=False,
-  classifiers=['Development Status :: 5 - Production/Stable',
-               'Environment :: Console',
-               'Intended Audience :: System Administrators',
-               'License :: OSI Approved :: GNU Affero General Public License v3',
-               'Operating System :: MacOS :: MacOS X',
-               'Operating System :: Microsoft :: Windows',
-               'Operating System :: POSIX',
-               'Programming Language :: Python',
-               'Topic :: System :: Monitoring',
-               'Topic :: System :: Networking :: Monitoring',
-               ],
+            ( 
+                os.path.join(default_paths['etc'], 'objects', 'hosts' ),
+                glob('etc/objects/hosts/[!_]*.cfg')
+            ),
+            (
+                os.path.join(default_paths['etc'], 'objects', 'services'),
+                glob('etc/objects/services/[!_]*.cfg')
+            ),
+            (
+                os.path.join(default_paths['etc'], 'objects', 'contacts'),
+                glob('etc/objects/contacts/[!_]*.cfg')
+            ),
+            
+            (   os.path.join(default_paths['etc'], 'objects', 'discovery'), tuple() ), 
+            
+            (   
+                os.path.join(default_paths['etc'], 'certs') ,
+                glob('etc/certs/[!_]*.pem')
+            ),
+            
+            (   
+                os.path.join('/etc', 'init.d'),
+                [
+                    'bin/init.d/shinken',
+                    'bin/init.d/shinken-arbiter',
+                    'bin/init.d/shinken-broker',
+                    'bin/init.d/shinken-receiver',
+                    'bin/init.d/shinken-poller',
+                    'bin/init.d/shinken-reactionner',
+                    'bin/init.d/shinken-scheduler'
+                ]
+            ),
+            
+            (
+                os.path.join(etc_root, 'default',),
+                [   'build/bin/default/shinken' ]
+            ),
 
-  install_requires = [
-                      required_pkgs
-                      ],
+            (
+                default_paths['var'], 
+                [ 'var/void_for_git' ]
+            ),
 
-  scripts = glob('bin/shinken-[!_]*'),
-  data_files=[(default_paths['etc'],
-               [# other configs
-                'etc/commands.cfg',
-                'etc/contactgroups.cfg',
-                'etc/dependencies.cfg',
-                'etc/escalations.cfg',
-                'etc/hostgroups.cfg',
-                #'etc/resource.cfg', # see above
-                'etc/servicegroups.cfg',
-                'etc/templates.cfg',
-                'etc/timeperiods.cfg',
-                'etc/discovery.cfg',
-                'etc/discovery_rules.cfg',
-                'etc/discovery_runs.cfg',
-                ]),
-              (os.path.join(default_paths['etc'], 'objects', 'hosts'),
-               glob('etc/objects/hosts/[!_]*.cfg')),
-              (os.path.join(default_paths['etc'], 'objects', 'services'),
-               glob('etc/objects/services/[!_]*.cfg')),
-              (os.path.join(default_paths['etc'], 'objects', 'contacts'),
-               glob('etc/objects/contacts/[!_]*.cfg')),
-              (os.path.join(default_paths['etc'], 'objects', 'discovery'), tuple() ), 
-              (os.path.join(default_paths['etc'], 'certs') ,
-               glob('etc/certs/[!_]*.pem')),
-              (os.path.join('/etc', 'init.d'),
-               ['bin/init.d/shinken',
-                'bin/init.d/shinken-arbiter',
-                'bin/init.d/shinken-broker',
-                'bin/init.d/shinken-receiver',
-                'bin/init.d/shinken-poller',
-                'bin/init.d/shinken-reactionner',
-                'bin/init.d/shinken-scheduler']),
-              (os.path.join(etc_root, 'default',),
-               ['build/bin/default/shinken']),
-              (default_paths['var'], ['var/void_for_git']),
-              (default_paths['libexec'], ['libexec/check.sh']),
-              ]
-)
+            (
+                default_paths['libexec'], ['libexec/check.sh']
+            ),
+        ]
+    )

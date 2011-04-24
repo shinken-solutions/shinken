@@ -45,9 +45,9 @@ class Receiver(BaseSatellite):
 
     properties = BaseSatellite.properties.copy()
     properties.update({
-        'pidfile':   PathProp(default='/usr/local/shinken/var/receiverd.pid'),
+        'pidfile':   PathProp(default='receiverd.pid'),
         'port':      IntegerProp(default='7773'),
-        'local_log': PathProp(default='/usr/local/shinken/var/receiverd.log'),
+        'local_log': PathProp(default='receiverd.log'),
     })
 
 

@@ -121,9 +121,9 @@ class Shinken(BaseSatellite):
 
     properties = BaseSatellite.properties.copy()
     properties.update({
-        'pidfile':   PathProp(default='/usr/local/shinken/var/schedulerd.pid'),
+        'pidfile':   PathProp(default='schedulerd.pid'),
         'port':      IntegerProp(default='7768'),
-        'local_log': PathProp(default='/usr/local/shinken/var/schedulerd.log'),
+        'local_log': PathProp(default='schedulerd.log'),
     })
     
     
@@ -153,8 +153,9 @@ class Shinken(BaseSatellite):
 
 
     def do_stop(self):
-        self.pyro_daemon.unregister(self.ibroks)
-        self.pyro_daemon.unregister(self.ichecks)
+        if self.pyro_daemon:
+            self.pyro_daemon.unregister(self.ibroks)
+            self.pyro_daemon.unregister(self.ichecks)
         super(Shinken, self).do_stop()
 
 

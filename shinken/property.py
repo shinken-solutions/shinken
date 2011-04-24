@@ -173,7 +173,10 @@ class StringProp(Property):
         return val
 
 class PathProp(StringProp):
-    """A string property representing a path"""
+    """ A string property representing a "running" (== VAR) file path """
+
+class ConfigPathProp(StringProp):
+    """ A string property representing a config file path """
 
 class ListProp(Property):
 #    @staticmethod

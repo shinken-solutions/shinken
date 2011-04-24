@@ -36,10 +36,11 @@ from shinken.pyro_wrapper import InvalidWorkDir, Pyro
 
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
-from shinken.property import StringProp, BoolProp, PathProp
+from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp
 
 
 if os.name != 'nt':
+    import pwd, grp
     from pwd import getpwnam
     from grp import getgrnam
 
@@ -52,7 +53,7 @@ UMASK = 0
 VERSION = "0.5"
 
 
-class InvalidPidDir(Exception): pass
+class InvalidPidFile(Exception): pass
 
 
 
@@ -84,14 +85,28 @@ class Interface(Pyro.core.ObjBase, object):
 
 
 
+def get_cur_user():
+    return pwd.getpwuid( os.getuid() ).pw_name
+
+def get_cur_group():
+    return grp.getgrgid( os.getgid() ).gr_name
+
+
 
 class Daemon(object):
 
     properties = {
-        'workdir':       PathProp(default='/usr/local/shinken/var'),
+        # workdir is relative to $(dirname "$0"/..) 
+        # where "$0" is the path of the file being executed, 
+        # in python normally known as:
+        #
+        #  os.path.join( os.getcwd(), sys.argv[0] )
+        # 
+        # as returned once the daemon is started.
+        'workdir':       PathProp(default='var'),
         'host':          StringProp(default='0.0.0.0'),
-        'user':          StringProp(default='shinken'),
-        'group':         StringProp(default='shinken'),
+        'user':          StringProp(default=get_cur_user()),
+        'group':         StringProp(default=get_cur_group()),
         'use_ssl':       BoolProp(default='0'),
         'certs_dir':     StringProp(default='etc/certs'),
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
@@ -104,7 +119,7 @@ class Daemon(object):
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
         
-        self.check_shm()   
+        self.check_shm()
         
         self.name = name
         self.config_file = config_file
@@ -205,8 +220,8 @@ class Daemon(object):
             # Some paths can be relatives. We must have a full path by taking
             # the config file by reference
             self.relative_paths_to_full(os.path.dirname(self.config_file))
-        # Then start to log all in the local file if asked so
-        self.register_local_log()
+            pass
+        
 
 
     def change_to_workdir(self):
@@ -250,9 +265,10 @@ class Daemon(object):
     def __open_pidfile(self):
         ## if problem on open or creating file it'll be raised to the caller:
         try:
-            self.fpid = open(self.pidfile, 'arw+')
+            print "opening pid file:", self.pidfile, os.path.abspath(self.pidfile) 
+            self.fpid = open(os.path.abspath(self.pidfile), 'arw+')
         except Exception, e:
-            raise InvalidPidDir(e)     
+            raise InvalidPidFile(e)     
 
 
     def check_parallel_run(self):
@@ -380,11 +396,13 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         print("We are now fully daemonized :) pid=%d" % (self.pid))
 
 
-    def do_daemon_init_and_start(self, ssl_conf=None):
-        self.check_parallel_run()
-        self.setup_pyro_daemon(ssl_conf)
+    def do_daemon_init_and_start(self):
         self.change_to_user_group()
-        self.change_to_workdir()  ## must be done AFTER pyro daemon init
+        self.change_to_workdir()
+        self.check_parallel_run()
+        self.setup_pyro_daemon()
+        # Then start to log all in the local file if asked so
+        self.register_local_log()
         if self.is_daemon:
             socket_fds = [sock.fileno() for sock in self.pyro_daemon.get_sockets()]
             # Do not close the local_log file too if it's open
@@ -398,10 +416,13 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             self.write_pid()
 
 
-    def setup_pyro_daemon(self, ssl_conf=None):
-        if ssl_conf is None: 
-            ssl_conf = self
+    def setup_pyro_daemon(self):
         
+        if hasattr(self, 'use_ssl'): # "common" daemon
+            ssl_conf = self
+        else:
+            ssl_conf = self.conf     # arbiter daemon..
+    
         # The SSL part
         if ssl_conf.use_ssl:
             Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
@@ -416,7 +437,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
                 Pyro.config.PYROSSL_POSTCONNCHECK=0
 
         # create the server
-        Pyro.config.PYRO_STORAGE = self.workdir
+        Pyro.config.PYRO_STORAGE = "."
         Pyro.config.PYRO_COMPRESSION = 1
         Pyro.config.PYRO_MULTITHREADED = 0        
 
@@ -546,10 +567,12 @@ Also put default value in the properties if some are missing in the config_file 
         #print "Create relative paths with", reference_path
         properties = self.__class__.properties
         for prop, entry in properties.items():
-            if isinstance(entry, PathProp):
+            if isinstance(entry, ConfigPathProp):
                 path = getattr(self, prop)
                 if not os.path.isabs(path):
-                    path = os.path.join(reference_path, path)
+                    new_path = os.path.join(reference_path, path)
+                    print "DBG: changing", entry, "from", path, "to", new_path
+                    path = new_path
                 setattr(self, prop, path)
                 #print "Setting %s for %s" % (path, prop)
 

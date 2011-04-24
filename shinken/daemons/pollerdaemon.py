@@ -32,9 +32,9 @@ class Poller(Satellite):
     
     properties = Satellite.properties.copy()
     properties.update({
-        'pidfile':   PathProp(default='/usr/local/shinken/var/pollerd.pid'),
+        'pidfile':   PathProp(default='pollerd.pid'),
         'port':      IntegerProp(default='7771'),
-        'local_log': PathProp(default='/usr/local/shinken/var/pollerd.log'),
+        'local_log': PathProp(default='pollerd.log'),
     })
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):

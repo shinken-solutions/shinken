@@ -102,8 +102,6 @@ class IForArbiter(Interface):
 
 # Main Arbiter Class
 class Arbiter(Daemon):
-    
-    #properties = {}
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
         
@@ -382,11 +380,15 @@ class Arbiter(Daemon):
 
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
-        self.pidfile = self.conf.lock_file
+        self.pidfile = os.path.abspath(self.conf.lock_file)
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
-        self.workdir = os.path.expanduser('~'+self.user)
+        
+        self.workdir = os.path.abspath(os.path.dirname(self.pidfile))
+        #print "DBG curpath=", os.getcwd()
+        #print "DBG pidfile=", self.pidfile
+        #print "DBG workdir=", self.workdir
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
@@ -404,7 +406,7 @@ class Arbiter(Daemon):
 
             self.load_config_file()
 
-            self.do_daemon_init_and_start(self.conf)
+            self.do_daemon_init_and_start()
             self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
             # ok we are now fully daemon (if requested)

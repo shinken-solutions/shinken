@@ -45,9 +45,9 @@ class Broker(BaseSatellite):
 
     properties = BaseSatellite.properties.copy()
     properties.update({
-        'pidfile':   PathProp(default='/usr/local/shinken/var/brokerd.pid'),
+        'pidfile':   PathProp(default='brokerd.pid'),
         'port':      IntegerProp(default='7772'),
-        'local_log': PathProp(default='/usr/local/shinken/var/brokerd.log'),
+        'local_log': PathProp(default='brokerd.log'),
     })
 
 

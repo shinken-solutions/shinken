@@ -66,8 +66,8 @@ from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
 from shinken.log import logger
-
 from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp
+from shinken.daemon import get_cur_user, get_cur_group
 
 
 no_longer_used_txt   = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
@@ -98,8 +98,8 @@ class Config(Item):
         'temp_file':                UnusedProp(text=' temporary files are not used in the shinken architecture.'),
         'status_file':              UnusedProp(text=no_longer_used_txt),
         'status_update_interval':   UnusedProp(text=no_longer_used_txt),
-        'shinken_user':             StringProp(default='shinken'),
-        'shinken_group':            StringProp(default='shinken'),
+        'shinken_user':             StringProp(default=get_cur_user()),
+        'shinken_group':            StringProp(default=get_cur_group()),
         'enable_notifications':     BoolProp(default='1', class_inherit=[(Host, None), (Service, None), (Contact, None)]),
         'execute_service_checks':   BoolProp(default='1', class_inherit=[(Service, 'execute_checks')]),
         'accept_passive_service_checks': BoolProp(default='1', class_inherit=[(Service, 'accept_passive_checks')]),
@@ -114,7 +114,7 @@ class Config(Item):
         'external_command_buffer_slots': UnusedProp(text='We do not limit the external command slot.'),
         'check_for_updates':        UnusedProp(text='network administrators will never allow such communication between server and the external world. Use your distribution packet manager to know if updates are available or go to the http://www.shinken-monitoring.org website instead.'),
         'bare_update_checks':       UnusedProp(text=None),
-        'lock_file':                StringProp(default='/usr/local/shinken/var/arbiterd.pid'),
+        'lock_file':                StringProp(default='arbiterd.pid'),
         'retain_state_information': UnusedProp(text='sorry, retain state information will not be implemented because it is useless.'),
         'state_retention_file':     StringProp(default=''),
         'retention_update_interval': IntegerProp(default='60'),

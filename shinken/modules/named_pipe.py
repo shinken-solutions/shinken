@@ -68,11 +68,13 @@ class Named_Pipe_arbiter(BaseModule):
 
             if not os.path.exists(self.pipe_path):
                 os.umask(0)
-                try :
+                try:
+                    if not os.path.exists(os.path.dirname(self.pipe_path)):
+                        os.mkdir(os.path.dirname(self.pipe_path))
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
                 except OSError , exp:
-                    print "Error : pipe creation failed (",self.pipe_path,')', exp
+                    print "Error : pipe creation failed (",self.pipe_path,')', exp, os.getcwd()
                     return None
         print "[%s] Trying to open the named pipe '%s'" % (self.get_name(), self.pipe_path)
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
