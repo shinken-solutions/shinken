@@ -2,6 +2,78 @@
 Shinken ChangeLog
 #######################
 
+
+0.6 - X/04/2011
+------------------
+ENHANCEMENTS
+	* Add : discovery script and rule engine
+	* Enh : lot of code clean from Gregory Starck, big Thanks :)
+	* Add : manage several brokers by realm
+	* Add : LiveStatus Wait commands
+	* Add : Recevier daemon, for distributed realms in distant LAN
+	* Add : passive poller for DMZ management	
+	* Add : (David Guenault) a way for people that install shinken lib in non standard place (like /opt) to get it working for python path.	
+	* Add : poller and reactionner modules
+	* Add : nrpe poller module for tuning nrpe calls without having to 'forks'
+	* Add : human_timestamp_log option so the log will output time as human readable format.
+	* Add : make the local log rotate with the logging module, max keep file at 5.
+	* Add : the crash catching in the log for all daemons
+	* Add : enable by default local log, should be enable by default, and if the admin want it down, he can.
+	* Add : (Eric Beaulieu) Windows installation script
+	* Add : Thte configuration is read as UTF8
+	* Add : round robin dispatching way between the worker of a module for the satellites.
+	* Add : set a check_interval to satellites, so we do not try every second to ping them, each a minute is quite enouth.
+	* Add : sending USR1 do a memory dump of the daemon
+	* Add : Manage Pyro4.2 and higer.
+	* Add : manage no notification period for hosts and services
+	* Add : print the sleep_time as a load average, so will smooth in one minute average, so is a good scheduler load indicator
+	* Add : force LANG=us and UTF8 in init scripts. No sense admin can set another langage for system and hope for tools to work.
+	* Add : print the latencies for scheduler in 95percentile way
+	* Add : when a hook point failed set the module to restart, not to kill, even external ones	
+	* Add : support for multisite's double-requests (extcmd+query) to the livestatus module
+	* Add : now the nagios.cmd named pipe reading is an external module
+	* Add : statistics for the livestatus module (multisite needs it)
+	* Add : retention modules for broker and arbiter
+	* Add : reationner tag, like poller tag, but for reactionner
+	* Add : (Denis GERMAIN) check_shinken plugin and interface in the arbiter to get data.
+	* Add : (Rémi BUISSON) common init script for easy launch
+	* Add : sendmailhost.pl + sendmailservices.pl in libexec.
+	* Add : hot poller addition commands
+	* Add : automatic VMware host-> VM dependencies modules, with VMotion support
+	* Add : "Unknown phase", so limit useless notifications
+
+	
+FIXES
+	* Fix :the livestatus module so that multiple external commands in one request are possible. (thruk uses this for mass operations)
+	* Fix :the livestatus, so that host_name and service_description are shown correctly for downtiems and comments.
+	* Fix : (reported by : Raynald de Lahondès) for python2.7, if shell launch, do not go in shlex split pass.
+	* Fix : catch an exception when deregistering Pyro. (When the scheduler was started as the only process and no communication happened
+	* Fix : Add the path of the current script (ex: bin/shinken-arbiter) and ".." to the list of paths where Python looks for shinken modules.
+	* Fix: default config had duplicate command name define: check_http
+	* Fix : clean Command(s) now subclass Item(s) as any "shinken.objects"
+	* Fix : (reported by Raynald de Lahondès) if a hostgroup member got no host defined, create a dummy service for no host, so failed.
+	* Fix : bad UTC hour for scheduler.
+	* Fix : in a rare case, the picle need to call the __init__ of notification before the __get_state__, but it will call it without args.
+	* Fix : (reported by : Raynald de Lahondès) bad hostdep definition (link host) was badly detected.
+	* Fix : utf8 management in the db class.
+	* Fix : the * member was wrong in service calling hostgroup of this kind.
+	* Fix : the schedule immediate check now work without having to force it.
+	* Fix : correct the check launch under python2.7 with utf8 char.
+	* Fix : (reported by Denis GERMAIN) set by default retention update inverval to 60 minutes.
+	* Fix : bad sys.path management for ndo module
+	* Fix : too much loop in daemons! do_loop_tunr must WAIT a little! To managed in the main_loop part I think.
+	* Fix : if the scheduler gotthe same conf but got a wait a new one before, it do a zombie scheduler then....
+	* Fix : (reported by : Hienz Michael) do not close local file in the daemon pass.
+	* Fix : (Raynald de Lahondès) setup.py for bsd systems.
+	* Fix : service without host will be just droped, like Nagios.
+	* Fix : Nagios allow elements without contacts. Do alike.
+	* Fix : add protection against adding again and again the same actions ifthe scheduler ask it, like for orphaned checks.
+	* Fix : sys.path management, not far more clear and error proof
+	* Fix : (reported by capibaru) add a strip pass before loading cfg files.
+	* Fix : raise only one log for orphaned instead of xK useless logs.
+	* Fix : (Venelin Petkov) missing customs on services copy of a based one (multiple hosts, hostgroups, etc)
+
+	
 0.5.1 - 19/01/2011
 ------------------
 ENHANCEMENTS
