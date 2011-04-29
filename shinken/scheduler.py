@@ -24,6 +24,7 @@
 import time
 import os
 import traceback
+import cStringIO
 import sys
 
 try:
@@ -262,6 +263,10 @@ class Scheduler:
                     f(self)
                 except Exception, exp:
                     logger.log('The instance %s raise an exception %s. I disable it and set it to restart it later' % (inst.get_name(), str(exp)))
+                    output = cStringIO.StringIO()
+                    traceback.print_exc(file=output)
+                    logger.log("Back trace of this remove : %s" % (output.getvalue()))
+                    output.close()
                     self.sched_daemon.modules_manager.set_to_restart(inst)
 
 

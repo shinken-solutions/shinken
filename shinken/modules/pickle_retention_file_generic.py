@@ -31,6 +31,13 @@ import shutil
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
+# Hack for making 0.5 retetnion file load in a 0.6 version
+# because the commandCall class was moved
+import shinken
+from shinken.commandcall import CommandCall
+shinken.objects.command.CommandCall = CommandCall
+
+
 properties = {
     'daemons' : ['broker', 'arbiter', 'scheduler' ],
     'type' : 'pickle_retention_file_generic',
