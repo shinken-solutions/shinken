@@ -87,6 +87,8 @@ class Simple_log_broker(BaseModule):
         #print "Ctime %d" % os.path.getctime(self.path)
         t_last_mod_day = get_day(t_last_mod)
         today = get_day(now)
+        # Will be saved with the date of yesterday because all elemetns arefrom yesterday
+        yesterday = get_day(now-3600)
         #print "Dates: t_last_mod : %d, t_last_mod_day: %d, today : %d" % (t_last_mod, t_last_mod_day, today)
         if t_last_mod_day != today:
             logger.log("We are archiving the old log file")
@@ -104,7 +106,7 @@ class Simple_log_broker(BaseModule):
             (f_base_name, ext) = os.path.splitext(f_name)
             #make the good looking day for archive name
             #like -05-09-2010-00
-            d = datetime.datetime.fromtimestamp(today)
+            d = datetime.datetime.fromtimestamp(yesterday)
             s_day = d.strftime("-%m-%d-%Y-00")
             archive_name = f_base_name+s_day+ext
             file_archive_path = os.path.join(self.archive_path, archive_name)
