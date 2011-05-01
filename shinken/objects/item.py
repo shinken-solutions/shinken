@@ -874,12 +874,16 @@ class Items(object):
         if '-' in expr:
             expr = expr.replace('-', 'MINUSSIGN')
 
+
+        hg_dict_mapping = {} # to get the "groupname" -> "hosts" list
+        
         # ! (not) should be changed as "ALL-" (all but not...)
         if '!' in expr:
             ALLELEMENTS = self.get_all_host_names_set(hosts)
             # print "Changing ! by ALLELEMENTS- in ", expr
             expr = expr.replace('!', 'ALLELEMENTS-')
-
+            hg_dict_mapping["ALLELEMENTS"] = ALLELEMENTS
+        
         # We change all separaton token by 10 spaces
         # (so names can still have some spaces
         # on them like Europe Servers because we wil cut byy this 10spaces after
@@ -913,7 +917,7 @@ class Items(object):
                     elts = set(elts)
                     #print "Elements:", elts
                     #print "Now set in locals the token new values"
-                    locals()[token.upper()] = elts
+                    hg_dict_mapping[token] = elts
                 else:
                     if 'MINUSSIGN' in token:
                         token = token.replace('MINUSSIGN', '-')
@@ -923,13 +927,13 @@ class Items(object):
                     self.configuration_errors.append(err)
                     return res
 
-            # Now changing the exprtoken value with
-            # UPPER one (so less risk of problem...
-            expr = expr.replace(token, token.upper())
-
-        #print "Final expression:", expr
+        # Now changing the exprtoken value with UPPER one (so less risk of problem...
+        # NO : this cause parse error when there exist some groups that share a 
+        # common subpart (that was not fully upper case) of their name, like:
+        #     hostgroup_x and hostgroup_x_y
+        # common part here is 'hostgroup_x' and it's definitively not all upper case.
         try:
-            evaluation = eval(expr)
+            evaluation = eval(expr, hg_dict_mapping)
         except SyntaxError:
             print "The syntax of %s is invalid" % original_expr
             return res
