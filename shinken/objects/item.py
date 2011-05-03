@@ -973,7 +973,10 @@ class Items(object):
             if hasattr(i, 'hostgroup_name'):
                 hnames = self.evaluate_hostgroup_expression(i.hostgroup_name,
                                                             hosts, hostgroups)
-
+                # We should look at host_name too to remvoe all the elements that
+                # start with a !
+                lst = hnames.split(',')
+                
                 # Maybe there is no host in the groups, and do not have any
                 # host_name too, so tag is as template to do not look at
                 if hnames == '' and not hasattr(i, 'host_name'):
@@ -981,6 +984,19 @@ class Items(object):
 
                 if hnames != []:
                     if hasattr(i, 'host_name'):
-                        i.host_name += ',' + str(hnames)
-                    else:
-                        i.host_name = str(hnames)
+                        hst = i.host_name.split(',')
+                        for n in hst:
+                            n = n.strip()
+                            # If the host start with a !, it's to be remvoed from
+                            # the hostgroup get list
+                            if n.startswith('!'):
+                                hst_to_remove = n[1:]
+                                try:
+                                    lst.remove(hst_to_remove)
+                                # was not in it
+                                except ValueError:
+                                    pass
+                            # Else it's an host to add
+                            else:
+                                lst.append(n)
+                i.host_name = ','.join(list(set(lst)))
