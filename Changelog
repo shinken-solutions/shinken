@@ -3,7 +3,7 @@ Shinken ChangeLog
 #######################
 
 
-0.6 - X/04/2011
+0.6 - 03/05/2011
 ------------------
 ENHANCEMENTS
 	* Add : discovery script and rule engine
@@ -11,8 +11,8 @@ ENHANCEMENTS
 	* Add : manage several brokers by realm
 	* Add : LiveStatus Wait commands
 	* Add : Recevier daemon, for distributed realms in distant LAN
-	* Add : passive poller for DMZ management	
-	* Add : (David Guenault) a way for people that install shinken lib in non standard place (like /opt) to get it working for python path.	
+	* Add : passive poller for DMZ management
+	* Add : (David Guenault) a way for people that install shinken lib in non standard place (like /opt) to get it working for python path.
 	* Add : poller and reactionner modules
 	* Add : nrpe poller module for tuning nrpe calls without having to 'forks'
 	* Add : human_timestamp_log option so the log will output time as human readable format.
@@ -29,7 +29,7 @@ ENHANCEMENTS
 	* Add : print the sleep_time as a load average, so will smooth in one minute average, so is a good scheduler load indicator
 	* Add : force LANG=us and UTF8 in init scripts. No sense admin can set another langage for system and hope for tools to work.
 	* Add : print the latencies for scheduler in 95percentile way
-	* Add : when a hook point failed set the module to restart, not to kill, even external ones	
+	* Add : when a hook point failed set the module to restart, not to kill, even external ones
 	* Add : support for multisite's double-requests (extcmd+query) to the livestatus module
 	* Add : now the nagios.cmd named pipe reading is an external module
 	* Add : statistics for the livestatus module (multisite needs it)
@@ -42,7 +42,7 @@ ENHANCEMENTS
 	* Add : automatic VMware host-> VM dependencies modules, with VMotion support
 	* Add : "Unknown phase", so limit useless notifications
 
-	
+
 FIXES
 	* Fix :the livestatus module so that multiple external commands in one request are possible. (thruk uses this for mass operations)
 	* Fix :the livestatus, so that host_name and service_description are shown correctly for downtiems and comments.
@@ -72,8 +72,9 @@ FIXES
 	* Fix : (reported by capibaru) add a strip pass before loading cfg files.
 	* Fix : raise only one log for orphaned instead of xK useless logs.
 	* Fix : (Venelin Petkov) missing customs on services copy of a based one (multiple hosts, hostgroups, etc)
+	* Fix : (reported by Ronny Lindner) manage the not host expressions for services.
 
-	
+
 0.5.1 - 19/01/2011
 ------------------
 ENHANCEMENTS
