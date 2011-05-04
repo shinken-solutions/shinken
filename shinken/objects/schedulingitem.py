@@ -449,16 +449,16 @@ class SchedulingItem(Item):
         # Interval change is in a HARD state or not
         # If the retry is 0, take the normal value
         if self.state_type == 'HARD' or self.retry_interval == 0:
-            interval = self.check_interval * 60
+            interval = self.check_interval * cls.interval_length
         else: #TODO : if no retry_interval?
-            interval = self.retry_interval * 60
+            interval = self.retry_interval * cls.interval_length
 
         # The next_chk is pass so we need a new one
         # so we got a check_interval
         if self.next_chk == 0:
             # At the start, we cannot have a interval more than cls.max_check_spread
             # is service_max_check_spread or host_max_check_spread in config
-            interval = min(interval, cls.max_check_spread * 60)
+            interval = min(interval, cls.max_check_spread * cls.interval_length)
             r = interval * (random.random() - 0.5)
             time_add = interval/2 + r
         else:
