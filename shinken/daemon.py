@@ -43,7 +43,17 @@ if os.name != 'nt':
     import pwd, grp
     from pwd import getpwnam
     from grp import getgrnam
+    def get_cur_user():
+        return pwd.getpwuid( os.getuid() ).pw_name
 
+    def get_cur_group():
+        return grp.getgrgid( os.getgid() ).gr_name
+else:
+    # temporary workarround :
+    def get_cur_user():
+        return "shinken"
+    def get_cur_group():
+        return "shinken"
 
 ##########################   DAEMON PART    ###############################
 # The standard I/O file descriptors are redirected to /dev/null by default.
@@ -82,14 +92,6 @@ class Interface(Pyro.core.ObjBase, object):
         
     def have_conf(self):
         return self.app.cur_conf is not None
-
-
-
-def get_cur_user():
-    return pwd.getpwuid( os.getuid() ).pw_name
-
-def get_cur_group():
-    return grp.getgrgid( os.getgid() ).gr_name
 
 
 
