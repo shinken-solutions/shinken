@@ -854,115 +854,47 @@ class Items(object):
                     else: # TODO: catch?
                         pass
                 setattr(i, prop, com_list)
-
-
-    # Return a set with ALL hosts (used in ! expressions)
-    def get_all_host_names_set(self, hosts):
-        hnames = [h.host_name for h in hosts.items.values()
-                  if hasattr(h, 'host_name')]
-        return set(hnames)
+    
+    hgn_chars_separator = ( '|', ',', '&', '^', )
+    specials_hostgroup_name_chars = ( '*', '(', ')', '!', ) + hgn_chars_separator
+    
+    space_chars = ( ' ', '\t', )
+    # no group should be named like that :
+    catch_all_name = "__ALLELEMENTS__"
+    minus_sign_in_name = "__MINUSSIGN_IN_NAME__"   
 
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups):
-        res = []
-        original_expr = expr
-        # print "I'm trying to prepare the expression", expr
-
-        # We've got problem with the "-" sign. It can be in a
-        # valid name but it's a sign of difference for sets
-        # so we change the - now by something, then we reverse after
-        if '-' in expr:
-            expr = expr.replace('-', 'MINUSSIGN')
-
-
-        hg_dict_mapping = {} # to get the "groupname" -> "hosts" list
-        
-        # ! (not) should be changed as "ALL-" (all but not...)
-        if '!' in expr:
-            ALLELEMENTS = self.get_all_host_names_set(hosts)
-            # print "Changing ! by ALLELEMENTS- in ", expr
-            expr = expr.replace('!', 'ALLELEMENTS-')
-            hg_dict_mapping["ALLELEMENTS"] = ALLELEMENTS
-        
-        # We change all separaton token by 10 spaces
-        # (so names can still have some spaces
-        # on them like Europe Servers because we wil cut byy this 10spaces after
-        strip_expr = expr
-        for c in ['|', '&', '(', ')', ',', '-']:
-            strip_expr = strip_expr.replace(c, ' '*10)
-        # print "Stripped expression:", strip_expr
-
-        tokens = strip_expr.split(' '*10)
-        # Strip and non void token
-        tokens = [token.strip() for  token in tokens if token != '']
-        #print "Tokens:", tokens
-
-        #Now add in locals() dict (yes, real variables!)
-        for token in tokens:
-            # ALLELEMENTS is a private group for us
-            if token != 'ALLELEMENTS':
-                #Maybe the token was with - at the begining,
-                # but we change all by "MINUSSIGN". We must change it back now
-                # for the search
-                if 'MINUSSIGN' in token:
-                    tmp_token = token.replace('MINUSSIGN', '-')
-                    members = hostgroups.get_members_by_name(tmp_token)
-                else:
-                    members = hostgroups.get_members_by_name(token)
-
-                if members != []:
-                    #print "Get members", members
-                    elts = members.split(',')
-                    elts = strip_and_uniq(elts)
-                    elts = set(elts)
-                    #print "Elements:", elts
-                    #print "Now set in locals the token new values"
-                    hg_dict_mapping[token] = elts
-                else:
-                    if 'MINUSSIGN' in token:
-                        token = token.replace('MINUSSIGN', '-')
-                    print self.__dict__, type(self)
-                    err = "ERROR: the group %s is unknown !" % (token,)
-                    print err
-                    self.configuration_errors.append(err)
-                    return res
-
-        # Now changing the exprtoken value with UPPER one (so less risk of problem...
-        # NO : this cause parse error when there exist some groups that share a 
-        # common subpart (that was not fully upper case) of their name, like:
-        #     hostgroup_x and hostgroup_x_y
-        # common part here is 'hostgroup_x' and it's definitively not all upper case.
+        ctxres = hg_name_parse_EXPR(expr) 
+        if ctxres.rc:
+            err = "The syntax of %s is invalid : %s" % (expr, ctxres.reason)
+            self.configuration_errors.append(err)
+            print err
+            return []
+        print "DBG, in evaluate_hg_expr, expr=%s ; pos=%s, neg=%s" % (expr, ctxres.pos_res, ctxres.neg_res)
+        allres = []
+        allres.extend(ctxres.pos_res)
+        allres.extend(ctxres.neg_res)
+        groupsname2hostsnames = hg_name_get_groupnames(ctxres.full_res, hosts, hostgroups)
+        print "DBG, in eval: dict= \n" + "\n".join( "%s=%s" % (gn, val) for gn, val in groupsname2hostsnames.items() )
+        str_setexpr = hg_name_rebuild_str(ctxres.full_res)
+        newgroupname2hostnames = {}
+        for gn, val in groupsname2hostsnames.items():
+            gn = gn.replace('-', Items.minus_sign_in_name)
+            newgroupname2hostnames[gn] = val
+        set_res = []
         try:
-            evaluation = eval(expr, hg_dict_mapping)
-        except SyntaxError:
-            print "The syntax of %s is invalid" % original_expr
-            return res
-        except NameError:
-            print "There is a unknow name in %s" % original_expr
-            return res
-        #print "Evaluation :", evaluation, expr
-
-        # In evaluation we can have multiples values because
-        # of , (so it make a tuple in fact)
-        # we must OR them in the result
-        if ',' in expr:
-            for part in evaluation:
-                # Maybe we gotthe '*' member group, if so, take all
-                # hosts instead
-                if part == set('*'):
-                    res.extend(list(self.get_all_host_names_set(hosts)))
-                else:
-                    # Extend but remove all u'' that is in fact void hostgroups members
-                    res.extend([e for e in list(part) if e !=u''])
-        else: # no , so we do not have a tuple but a simple uniq set
-            if evaluation == set('*'):
-                res.extend(list(self.get_all_host_names_set(hosts)))
-            else:
-                # Extend but remove all u'' that is in fact void hostgroups members
-                res.extend([e for e in list(evaluation) if e !=u''])
-        res_string = ','.join(res)
-        #print "Final resolution is", res_string
-        return res_string
+            set_res = set(eval(str_setexpr, newgroupname2hostnames, {})) 
+        except SyntaxError, e:
+            err = "The syntax of %s is invalid (%s)" % (expr, e)
+            self.configuration_errors.append(err)
+            print err
+        except NameError, e:
+            err = "There is a unknow name in %s (names=%s)" % (expr, groupsname2hostsnames)
+            self.configuration_errors.append(err)
+            print err
+        
+        return list(set_res) 
 
 
     # If we've got a hostgroup_name property, we search for all
@@ -970,33 +902,404 @@ class Items(object):
     # all into our host_name property
     def explode_host_groups_into_hosts(self, hosts, hostgroups):
         for i in self:
+            hnames_list = []
             if hasattr(i, 'hostgroup_name'):
-                hnames = self.evaluate_hostgroup_expression(i.hostgroup_name,
-                                                            hosts, hostgroups)
-                # We should look at host_name too to remvoe all the elements that
-                # start with a !
-                lst = hnames.split(',')
-                
+                hnames_list.extend(self.evaluate_hostgroup_expression(i.hostgroup_name, hosts, hostgroups))
+
                 # Maybe there is no host in the groups, and do not have any
                 # host_name too, so tag is as template to do not look at
-                if hnames == '' and not hasattr(i, 'host_name'):
+                if hnames_list == [] and not hasattr(i, 'host_name'):
                     i.register = '0'
 
-                if hnames != []:
-                    if hasattr(i, 'host_name'):
-                        hst = i.host_name.split(',')
-                        for n in hst:
-                            n = n.strip()
-                            # If the host start with a !, it's to be remvoed from
-                            # the hostgroup get list
-                            if n.startswith('!'):
-                                hst_to_remove = n[1:]
-                                try:
-                                    lst.remove(hst_to_remove)
-                                # was not in it
-                                except ValueError:
-                                    pass
-                            # Else it's an host to add
-                            else:
-                                lst.append(n)
-                i.host_name = ','.join(list(set(lst)))
+            if hasattr(i, 'host_name'):
+                hst = i.host_name.split(',')
+                for h in hst:
+                    h = h.strip()
+                    # If the host start with a !, it's to be remvoed from
+                    # the hostgroup get list
+                    if h.startswith('!'):
+                        hst_to_remove = h[1:].strip()
+                        try:
+                            hnames_list.remove(hst_to_remove)
+                        # was not in it
+                        except ValueError:
+                            pass
+                    # Else it's an host to add
+                    elif h == '*':
+                        for newhost in get_all_host_names_set(hosts):
+                            hnames_list.append(newhost)
+                            print "DBG in item.explode_host_groups_into_hosts , added '%s' to group '%s'" % (newhost, i)
+                    else:
+                        hnames_list.append(h)
+            
+            i.host_name = ','.join(list(set(hnames_list)))
+
+
+
+class HostGroup_Name_Parse_Ctx(object):       
+    
+    # flags:
+    empty_item_ok = 0
+     
+    def __init__(self, expr, flags=None):
+        if flags is None:
+            flags = []
+        self.expr = expr
+        self.len = len(expr)
+        self.flags = flags
+        self.last_is_expr = False
+        self.prev_res = None
+        self.res_i = 0 
+        self.rc = 0
+        self.reason = ""
+        self.pos_res = []
+        self.neg_res = []
+
+    def __str__(self):
+        return "< prev_item='%s' last_is_expr=%s res_i=%d rc=%d >" % (self.prev_res, self.last_is_expr, self.res_i, self.rc)
+
+    __repr__ = __str__
+
+
+
+def skip_space(expr):
+    i = 0
+    try:
+        while expr[i] in Items.space_chars:
+            i += 1
+    except IndexError:
+        pass
+    return i
+
+
+def find_matching_closing(expr):
+    # special case, need to find matching closing parenthese for this opening one..
+    n_opening = 0
+    lenexpr = len(expr)
+    i = 0
+    while i < lenexpr:
+        c = expr[i]
+        if c == '(':
+            n_opening += 1
+        elif c == ')':
+            n_opening -= 1
+            if n_opening < 0:
+                return i
+        i += 1
+    # ouch..
+    # (An unmatched left parenthesis creates an unresolved tension that will stay with you all day.
+    #
+    return None
+
+
+def hg_name_parse_item(ctx, expr):
+    if ctx.last_is_expr:
+        ctx.rc = -1
+        ctx.reason = "2 consecutive items without valid separator : '%s' and '%s ..'" % (ctx.prev_res, expr[:10])
+        return None
+    i = s = skip_space(expr)
+    lenexpr = len(expr)
+    while i < lenexpr:
+        c = expr[i]
+        if c in Items.specials_hostgroup_name_chars:
+            break
+        i += 1
+    if i == s:
+        if HostGroup_Name_Parse_Ctx.empty_item_ok in ctx.flags:
+            ctx.res_i = i
+            return "set([])"
+            
+        ctx.rc = -1
+        ctx.reason = "Invalid item: size is zero, near '%s'." % (expr[i:i+10])
+        return None
+    ctx.res_i = i
+    # returns the stripped version of the item :
+    res = expr[s:i].strip()
+    ctx.prev_res = res
+    ctx.last_is_expr = True
+    return res
+
+
+def hg_name_parse_single_expr(ctx, expr):
+    """ Parse a "single" expression: either an item, or a "subexpression" """
+    i = skip_space(expr)
+    expr = expr[i:]
+    if len(expr) > 0 and expr[0] == '(':
+        res = hg_name_parse_subexpr(ctx, expr)
+    else:
+        res = hg_name_parse_item(ctx, expr)
+    #elif expr[i] == '!':
+        #i_end = 
+        #subctx = 
+    #    pass
+
+    ctx.res_i += i
+    return res
+    
+def hg_name_parse_all(ctx, expr):
+    if ctx.last_is_expr:
+        ctx.rc = -1
+        ctx.reason = "* must be on its own, near '%s'" % (expr[:10])
+        return
+    ctx.pos_res.append("*")
+    ctx.last_is_expr = True
+    ctx.res_i = 1 # just skip the '*'
+    
+
+def hg_name_parse_and(ctx, expr):
+    if not ctx.last_is_expr:
+        ctx.rc = -1
+        ctx.reason = "& must follow a valid expression, near '%s'" % (expr[:10])
+    ctx.pos_res.append("&")
+    ctx.last_is_expr = False
+    ctx.res_i = 1 # just skip the '&'
+
+
+def hg_name_parse_or(ctx, expr): # '|' or ','
+    if not ctx.last_is_expr:
+        ctx.rc = -1
+        ctx.reason = "'%s' must follow a valid expression, near '%s'" % (expr[0], expr[0:10])
+        return
+    if len(ctx.pos_res) > 0:
+        ctx.pos_res.append("|")
+    ctx.last_is_expr = False
+    ctx.res_i = 1
+
+
+def hg_name_parse_xor(ctx, expr):
+    if not ctx.last_is_expr:
+        ctx.rc = -1
+        ctx.reason = "^ must follow a valid expression, near '%s'" % (expr[:10])
+    ctx.pos_res.append("^")
+    ctx.last_is_expr = False
+    ctx.res_i = 1 # just skip the '^'
+
+
+def hg_name_parse_not(ctx, expr):
+    i = s = skip_space(expr)
+    try:
+        c = expr[s]
+    except IndexError:
+        ctx.rc = -1
+        return
+    
+    if c not in tabs_hg_name_list_operators:
+        while True:
+            try:
+                c = expr[i]
+            except IndexError:
+                break
+            if c in tabs_hg_name_list_operators:
+                break
+            i += 1
+
+        if i == s: # bad
+            ctx.rc = -1
+            ctx.reason = "Invalid item after '!', near '%'" % (expr[:10])
+            return
+        
+        res = hg_name_parse_item(ctx, expr[s:i])
+    else:
+        if c != '(':
+            ctx.rc = -1
+            return
+        s += 1
+        n = find_matching_closing(expr[s:])
+        if n is None:
+            ctx.rc = -1
+            ctx.reason = "Near '%s' : ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[i:10])
+            return
+        n += s
+        subctx = hg_name_parse_EXPR(expr[s:n], ctx.flags)
+        if subctx.rc:
+            ctx.rc = subctx.rc
+            ctx.reason = subctx.reason
+            return
+        res = subctx.full_res
+        i = n + 1
+
+    ctx.res_i = i
+    ctx.neg_res.append(res)
+    ctx.last_is_expr = True
+    return
+
+
+def parse_neg_or_not__(ctx, expr):
+    expr = expr[1:]
+    if not ctx.last_is_expr:
+        # ( ... ,) ! X case :
+        res = hg_name_parse_not(ctx, expr)
+    else:
+        # A ! B case :
+        ctx.pos_res.append("-")
+        ctx.last_is_expr = False
+        res = hg_name_parse_single_expr(ctx, expr)
+    ctx.res_i += 1
+    return res
+    
+
+def hg_name_parse_subexpr(ctx, expr):
+    if ctx.last_is_expr:
+        ctx.rc = -1
+        ctx.reason = "'(' following directly an expression, prev_item='%s', near '%s'" % (ctx.prev_res, expr[:10])
+    i2s = 1 + skip_space(expr[1:])
+    i2e = find_matching_closing(expr[i2s:])
+    if i2e is None:
+        ctx.rc = -1
+        ctx.reason = "Near '%s' : ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[:10])        
+        return
+    i2e += i2s
+    subctx = hg_name_parse_EXPR(expr[i2s:i2e], ctx.flags)
+    if subctx.rc:
+        ctx.rc = subctx.rc
+        ctx.reason = subctx.reason
+        return
+    ctx.res_i = i2e + 1
+    ctx.last_is_expr = True
+    ctx.prev_res = subctx.prev_res
+    return subctx.full_res
+
+
+tabs_hg_name_list_operators = {
+    '*': hg_name_parse_all,
+    ',': hg_name_parse_or,
+    '|': hg_name_parse_or,
+    '!': parse_neg_or_not__,
+    '&': hg_name_parse_and,
+    '^': hg_name_parse_xor,
+    '(': hg_name_parse_subexpr,
+}
+
+
+def hg_name_parse_expr(ctx, expr):
+    """ Parse a hostgroup_name expression, 
+Returns a "parse_expr_result" :
+    a tuple of 2 item. each one is a list.
+    first list is a list of "sub-parse_expr_result" to include.
+    second list is a list of "sub-parse_expr_result" to exclude.
+A "sub-parse_expr_result" is either:
+ - a "parse_expr_result" (== tuple)
+ - or a string.
+"""
+
+    end = ctx.len
+    i = skip_space(expr)
+
+    while i < end:
+
+        c = expr[i]
+        
+        handler = tabs_hg_name_list_operators.get(c, hg_name_parse_item)
+        res = handler(ctx, expr[i:])
+        if ctx.rc:
+            break
+        
+        if res is not None:
+            ctx.pos_res.append(res)
+
+        i += ctx.res_i
+        while i < end:
+            if expr[i] not in Items.space_chars:
+                break
+            i += 1
+
+# Return a set with ALL hosts (used in ! expressions)
+def get_all_host_names_set(hosts):
+    return set(
+        h.host_name
+        for h in hosts.items.values()
+        if getattr(h, 'host_name', '') != ''
+    )
+
+
+def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None):
+    if res is None:
+        res = {}
+    for tok in all_res:
+        if isinstance(tok, tuple):
+            hg_name_get_groupnames(tok[0], hosts, hostgroups, res)
+            hg_name_get_groupnames(tok[1], hosts, hostgroups, res)
+            continue
+        if isinstance(tok, list):
+            hg_name_get_groupnames(tok, hosts, hostgroups, res)
+            continue
+        if tok in res: # we already got it, good.
+            continue
+        print "DBG: in hg_name_get_groupnames: tok='%s'" % (tok)
+        if tok == '*':
+            print "DBG in get_groupnames: [%s]" % (Items.catch_all_name)
+            res[Items.catch_all_name] = get_all_host_names_set(hosts)
+            print "DBG in get_groupnames:", res
+            continue
+        if tok in Items.specials_hostgroup_name_chars + ( '-', ):
+            continue
+        
+        # we got a group name :
+        members = hostgroups.get_members_by_name(tok)
+        print "DBG: in hg_name_get_groupnames: members='%s'" % (members)
+        if isinstance(members, list):
+            elts = members
+        else:
+            elts = members.split(',')
+        elts = strip_and_uniq(elts)
+        # the "host_name" members of a hostgroup can also be '*' :
+        if '*' in elts:
+            if '*' not in res:
+                elts = get_all_host_names_set(hosts)
+        elts = set(elts)
+        res[tok] = elts
+
+    return res
+
+def hg_name_rebuild_str(parse_res):
+    """ rebuild the expression based on the input 'input' """
+    
+    print "DBG in rebuild: '%s' %s" % (parse_res, type(parse_res))
+    
+    if isinstance(parse_res, (str, unicode)):
+        if parse_res != "-":
+            parse_res = parse_res.replace('-', Items.minus_sign_in_name)
+        if parse_res == '*':
+            parse_res = Items.catch_all_name
+        return parse_res
+    
+    if isinstance(parse_res, list):
+        if len(parse_res) == 0:
+            return "set([])"
+        return " ".join( hg_name_rebuild_str(i) for i in parse_res )
+    
+    print "DBG in rebuild parse_res='%s'" % (str(parse_res))
+    
+    posres = " ".join( hg_name_rebuild_str(i) for i in parse_res[0] )
+    negres = " ".join( hg_name_rebuild_str(i) for i in parse_res[1] )
+    
+    posres.strip()
+    negres.strip()
+    
+    res = ""
+    lenpos = len(posres)
+    lenneg = len(negres)
+    if lenpos == 0 and lenneg == 0:
+        res += "set([])"
+    else:
+        res += "( "
+        if lenpos == 0:
+            res += "set([])"
+        else:
+            res += " ( " + posres + " ) "
+        if lenneg > 0:
+            res += " - ( " + negres + " )"
+            
+        res += " )"
+    
+    return res
+
+
+def hg_name_parse_EXPR(expr, flags=None):
+    ctx = HostGroup_Name_Parse_Ctx(expr, flags)
+    hg_name_parse_expr(ctx, expr)
+    for g in ctx.pos_res, ctx.neg_res:
+        if len(g) and g[-1] == '|':
+            del g[-1]
+    ctx.full_res = ( ctx.pos_res, ctx.neg_res, )
+    return ctx

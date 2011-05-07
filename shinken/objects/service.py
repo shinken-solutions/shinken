@@ -1156,6 +1156,9 @@ class Services(Items):
                         else: # the standard list
                             duplicate_for_hosts.append(hname)
 
+                    # remove duplicate items from duplicate_for_hosts: 
+                    duplicate_for_hosts = list(set(duplicate_for_hosts))
+                    
                     # Ok now we clean the duplicate_for_hosts with all hosts
                     # of the not
                     for hname in not_hosts:

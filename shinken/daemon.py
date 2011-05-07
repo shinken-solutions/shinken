@@ -113,7 +113,7 @@ class Daemon(object):
         'certs_dir':     StringProp(default='etc/certs'),
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
         'server_cert':   StringProp(default='etc/certs/server.pem'),
-        'use_local_log': BoolProp(default='0'),
+        'use_local_log': BoolProp(default='1'),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
         'spare':         BoolProp(default='0')
