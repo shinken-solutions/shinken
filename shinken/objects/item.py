@@ -872,9 +872,6 @@ class Items(object):
             print err
             return []
         print "DBG, in evaluate_hg_expr, expr=%s ; pos=%s, neg=%s" % (expr, ctxres.pos_res, ctxres.neg_res)
-        allres = []
-        allres.extend(ctxres.pos_res)
-        allres.extend(ctxres.neg_res)
         groupsname2hostsnames = hg_name_get_groupnames(ctxres.full_res, hosts, hostgroups)
         print "DBG, in eval: dict= \n" + "\n".join( "%s=%s" % (gn, val) for gn, val in groupsname2hostsnames.items() )
         str_setexpr = hg_name_rebuild_str(ctxres.full_res)
@@ -884,17 +881,17 @@ class Items(object):
             newgroupname2hostnames[gn] = val
         set_res = []
         try:
-            set_res = set(eval(str_setexpr, newgroupname2hostnames, {})) 
+            set_res = set(eval(str_setexpr, newgroupname2hostnames, {}))
         except SyntaxError, e:
-            err = "The syntax of %s is invalid (%s)" % (expr, e)
+            err = "The syntax of '%s' is invalid (%s)" % (expr, e)
             self.configuration_errors.append(err)
             print err
         except NameError, e:
-            err = "There is a unknow name in %s (names=%s)" % (expr, groupsname2hostsnames)
+            err = "There is an unknown name in '%s' (names=%s)" % (expr, groupsname2hostsnames)
             self.configuration_errors.append(err)
             print err
         
-        return list(set_res) 
+        return list(set_res)
 
 
     # If we've got a hostgroup_name property, we search for all
