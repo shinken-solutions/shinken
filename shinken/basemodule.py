@@ -121,7 +121,7 @@ But clear queues if they were already set before recreating new one.  """
         logger.log("%s is now started ; pid=%d" % (self.name, p.pid))
 
 
-    # Sometime terminate() is not enouth, we mush "help"
+    # Sometime terminate() is not enough, we must "help"
     # external modules to die...
     def __kill(self):
         if os.name == 'nt':

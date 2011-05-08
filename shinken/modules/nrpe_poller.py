@@ -84,10 +84,10 @@ class NRPE:
         if not command:
             self.state = 'received'
             self.rc = 3
-            self.message = "Error : no command asked fro nrpe query"
+            self.message = "Error : no command asked from nrpe query"
             return
 
-        # We pack it, then we compute CRC32 of this frist query
+        # We pack it, then we compute CRC32 of this first query
         self.query = struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
         crc = binascii.crc32(self.query)
         
@@ -174,11 +174,11 @@ class NRPEAsyncClient(asyncore.dispatcher):
         self.nrpe = NRPE()
         self.nrpe.init_query(host, 5666, use_ssl, msg)
 
-        # And now we create a socket for our connexion
+        # And now we create a socket for our connection
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         
         if use_ssl:
-            # The admin want a ssl connexion, but there is not openssl
+            # The admin want a ssl connection, but there is not openssl
             # lib installed :(
             if OpenSSL is None:
                 self.set_exit(2, "Error : the openssl lib for Python is not installed.")
@@ -227,13 +227,13 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 rc = 3
             else:
                 rc = 2
-            message = 'Error : connexion timeout after %d seconds' % self.timeout
+            message = 'Error : connection timeout after %d seconds' % self.timeout
             self.set_exit(rc, message)
 
 
-    # We got a read for the socekt. We do it if we do not already
+    # We got a read for the socket. We do it if we do not already
     # finished. Maybe it's just a SSL handshake continuation, if so
-    # we continue it and wait for hadshake finish
+    # we continue it and wait for handshake finish
     def handle_read(self):
         if not self.is_done():
             try:
@@ -259,7 +259,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 buf = ''
 
             # Maybe we got nothing from the server (it refuse our ip,
-            # of refuse arguments...)
+            # or refuse arguments...)
             if len(buf) != 0:
                 (rc, message) = self.nrpe.read(buf)
                 self.set_exit(rc, message)
@@ -273,7 +273,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
     def writable(self):
         return not self.is_done() and (len(self.nrpe.query) > 0)
 
-    # We can write to the socket. If we are in the ssk handshake phase
+    # We can write to the socket. If we are in the ssl handshake phase
     # we just continue it and return. If we finished it, we can write our
     # query
     def handle_write(self):
@@ -296,8 +296,8 @@ class NRPEAsyncClient(asyncore.dispatcher):
                     # still not finished, we continue
                     return
                 return
-            # Maybe we did not send all oru query
-            # so we buferize it
+            # Maybe we did not send all our query
+            # so we bufferize it
             self.nrpe.query = self.nrpe.query[sent:]
 
     
@@ -356,7 +356,7 @@ class Nrpe_poller(BaseModule):
 
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the nrpe poller module"
+        print "Initialization of the nrpe poller module"
         self.i_am_dying = False
 
 
@@ -400,7 +400,7 @@ class Nrpe_poller(BaseModule):
                     # Set an error so we will quit tis check
                     command = None
                     
-                # If we do nto have the good args, we bail out for this check
+                # If we do not have the good args, we bail out for this check
                 if command is None or host is None:
                     chk.status = 'done'
                     chk.exit_status = 2
@@ -427,10 +427,10 @@ class Nrpe_poller(BaseModule):
             if c.status == 'launched':
                 c.con.look_for_timeout()
 
-        # We check if all new things in connexions
+        # We check if all new things in connections
         asyncore.poll(timeout=1)
         
-        # Now we look for finised checks
+        # Now we look for finished checks
         for c in self.checks:
             # First manage check in error, bad formed
             if c.status == 'done':
