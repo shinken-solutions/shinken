@@ -83,7 +83,7 @@ ENHANCEMENTS
 	*Add : Escalations based on time, with notification period shorting capabilities
 	*Add : options allowed_hosts and max_logs_age to the livestatus broker
 	*Add : some rarely used operators to the livestatus module (!>=)
-	*Add : SSL connexions between daemons with certificates and a CA
+	*Add : SSL connections between daemons with certificates and a CA
 	*Add : module exception/kill catch in the scheduler.
 	*Add : use the binary format for the pickle, so it take less space.
 	*Add : (Hartmut Goebel) use universal open way for conf reading.

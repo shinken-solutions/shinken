@@ -39,7 +39,7 @@ class DBMysql(DB):
         self.table_prefix = table_prefix
 
 
-    #Create the database connexion
+    #Create the database connection
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         #self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")

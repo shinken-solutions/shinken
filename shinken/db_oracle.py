@@ -51,7 +51,7 @@ class DBOracle(DB):
         self.table_prefix = table_prefix
 
 
-    #Create the database connexion
+    #Create the database connection
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         connstr='%s/%s@%s' % (self.user, self.password, self.database)

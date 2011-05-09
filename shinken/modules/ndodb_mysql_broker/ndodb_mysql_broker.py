@@ -94,7 +94,7 @@ class Ndodb_Mysql_broker(BaseModule):
         #print "(ndodb)I don't manage this brok type", b
 
 
-    #Create the database connexion
+    #Create the database connection
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         self.db.connect_database()

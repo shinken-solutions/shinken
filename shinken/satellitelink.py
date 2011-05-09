@@ -86,7 +86,7 @@ class SatelliteLink(Item):
         return state
 
 
-    def create_connexion(self):
+    def create_connection(self):
         self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
         self.con = pyro.getProxy(self.uri)
         pyro.set_timeout(self.con, self.timeout)
@@ -95,7 +95,7 @@ class SatelliteLink(Item):
     def put_conf(self, conf):
 
         if self.con is None:
-            self.create_connexion()
+            self.create_connection()
         #print "Connexion is OK, now we put conf", conf
         #print "Try to put conf:", conf
 
@@ -171,7 +171,7 @@ class SatelliteLink(Item):
         print "Pinging %s" % self.get_name()
         try:
             if self.con is None:
-                self.create_connexion()
+                self.create_connection()
             r = self.con.ping()
             # Should return us pong string
             if r == 'pong':
@@ -186,7 +186,7 @@ class SatelliteLink(Item):
 
     def wait_new_conf(self):
         if self.con is None:
-            self.create_connexion()
+            self.create_connection()
         try :
             self.con.wait_new_conf()
             return True
@@ -200,7 +200,7 @@ class SatelliteLink(Item):
     # OR to know if the satellite have THIS conf (magic_hash != None)
     def have_conf(self,  magic_hash=None):
         if self.con is None:
-            self.create_connexion()
+            self.create_connection()
 
         try:
             if magic_hash is None:
@@ -219,7 +219,7 @@ class SatelliteLink(Item):
     # To know if a receiver got a conf or not
     def got_conf(self):
         if self.con is None:
-            self.create_connexion()
+            self.create_connection()
         try:
             r = self.con.got_conf()
             # Protect against bad Pyro return
@@ -233,7 +233,7 @@ class SatelliteLink(Item):
 
     def remove_from_conf(self, sched_id):
         if self.con is None:
-            self.create_connexion()
+            self.create_connection()
         try:
             self.con.remove_from_conf(sched_id)
             return True
@@ -244,7 +244,7 @@ class SatelliteLink(Item):
 
     def what_i_managed(self):
         if self.con is None:
-            self.create_connexion()
+            self.create_connection()
         try:
             tab = self.con.what_i_managed()
             # Protect against bad Pyro return
@@ -259,7 +259,7 @@ class SatelliteLink(Item):
 
     def push_broks(self, broks):
         if self.con is None:
-            self.create_connexion()
+            self.create_connection()
         try:
             return self.con.push_broks(broks)
         except Pyro_exp_pack , exp:
@@ -269,7 +269,7 @@ class SatelliteLink(Item):
 
     def get_external_commands(self):
         if self.con is None:
-            self.create_connexion()
+            self.create_connection()
         try:
             tab = self.con.get_external_commands()
             # Protect against bad Pyro return

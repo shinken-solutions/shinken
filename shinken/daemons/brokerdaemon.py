@@ -103,7 +103,7 @@ class Broker(BaseSatellite):
                 if 'full_instance_id' in data:
                     c_id = data['full_instance_id']
                     logger.log('A module is asking me to get all initial data from the scheduler %d' % c_id)
-                    # so we just reset the connexion adn the running_id, it will just get all new things
+                    # so we just reset the connection adn the running_id, it will just get all new things
                     self.schedulers[c_id]['con'] = None
                     self.schedulers[c_id]['running_id'] = 0
             
@@ -126,21 +126,21 @@ class Broker(BaseSatellite):
 
 
     # Check if we do not connect to ofthen to this
-    def is_connexion_try_too_close(self, elt):
+    def is_connection_try_too_close(self, elt):
         now = time.time()
-        last_connexion = elt['last_connexion']
-        if now - last_connexion < 5:
+        last_connection = elt['last_connection']
+        if now - last_connection < 5:
             return  True
         return False
 
 
-    # initialise or re-initialise connexion with scheduler or
+    # initialise or re-initialise connection with scheduler or
     # arbiter if type == arbiter
     def pynag_con_init(self, id, type='scheduler'):
             # Get teh good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
-            logger.log('DBG: Type unknown for connexion! %s' % type)
+            logger.log('DBG: Type unknown for connection! %s' % type)
             return
 
         if type == 'scheduler':
@@ -151,15 +151,15 @@ class Broker(BaseSatellite):
                 return
 
         # If we try to connect too much, we slow down our tests
-        if self.is_connexion_try_too_close(links[id]):
+        if self.is_connection_try_too_close(links[id]):
             return
 
         # Ok, we can now update it
-        links[id]['last_connexion'] = time.time()
+        links[id]['last_connection'] = time.time()
 
-        # DBG: print "Init connexion with", links[id]['uri']
+        # DBG: print "Init connection with", links[id]['uri']
         running_id = links[id]['running_id']
-        # DBG: print "Running id before connexion", running_id
+        # DBG: print "Running id before connection", running_id
         uri = links[id]['uri']
         links[id]['con'] = Pyro.core.getProxyForURI(uri)
 
@@ -251,7 +251,7 @@ class Broker(BaseSatellite):
             # Get teh good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
-            logger.log('DBG: Type unknown for connexion! %s' % type)
+            logger.log('DBG: Type unknown for connection! %s' % type)
             return
 
         # We check for new check in each schedulers and put
@@ -267,7 +267,7 @@ class Broker(BaseSatellite):
                     # Ok, we can add theses broks to our queues
                     self.add_broks_to_queue(tmp_broks.values())
 
-                else: # no con? make the connexion
+                else: # no con? make the connection
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not know, so we create it
             except KeyError , exp:
@@ -345,7 +345,7 @@ class Broker(BaseSatellite):
             self.schedulers[sched_id]['instance_id'] = s['instance_id']
             self.schedulers[sched_id]['running_id'] = running_id
             self.schedulers[sched_id]['active'] = s['active']
-            self.schedulers[sched_id]['last_connexion'] = 0
+            self.schedulers[sched_id]['last_connection'] = 0
 
 
         logger.log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
@@ -365,9 +365,9 @@ class Broker(BaseSatellite):
             self.arbiters[arb_id]['broks'] = broks
             self.arbiters[arb_id]['instance_id'] = 0 # No use so all to 0
             self.arbiters[arb_id]['running_id'] = 0
-            self.arbiters[arb_id]['last_connexion'] = 0
+            self.arbiters[arb_id]['last_connection'] = 0
 
-            # We do not connect to the arbiter. To connexion hang
+            # We do not connect to the arbiter. To connection hang
 
         logger.log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
 
@@ -388,7 +388,7 @@ class Broker(BaseSatellite):
             self.pollers[pol_id]['broks'] = broks
             self.pollers[pol_id]['instance_id'] = 0 # No use so all to 0
             self.pollers[pol_id]['running_id'] = running_id
-            self.pollers[pol_id]['last_connexion'] = 0
+            self.pollers[pol_id]['last_connection'] = 0
 
 #                    #And we connect to it
 #                    self.app.pynag_con_init(pol_id, 'poller')
@@ -413,7 +413,7 @@ class Broker(BaseSatellite):
             self.reactionners[rea_id]['broks'] = broks
             self.reactionners[rea_id]['instance_id'] = 0 # No use so all to 0
             self.reactionners[rea_id]['running_id'] = running_id
-            self.reactionners[rea_id]['last_connexion'] = 0
+            self.reactionners[rea_id]['last_connection'] = 0
 
 #                    #And we connect to it
 #                    self.app.pynag_con_init(rea_id, 'reactionner')
@@ -451,7 +451,7 @@ class Broker(BaseSatellite):
 
         # Now we check if arbiter speek to us in the pyro_daemon.
         # If so, we listen for it
-        # When it push us conf, we reinit connexions
+        # When it push us conf, we reinit connections
         self.watch_for_new_conf(0.0)
         if self.new_conf:
             self.setup_new_conf()

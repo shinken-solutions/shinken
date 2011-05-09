@@ -62,7 +62,7 @@ class Couchdb_broker(BaseModule):
         return BaseModule.manage_brok(self, copy.deepcopy(b))
 
 
-    #Create the database connexion
+    #Create the database connection
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         #First connect to server

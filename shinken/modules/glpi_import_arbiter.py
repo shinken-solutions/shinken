@@ -65,7 +65,7 @@ class Glpi_importer_arbiter(BaseModule):
 
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "I open the GLPI connexion to %s" % self.uri
+        print "I open the GLPI connection to %s" % self.uri
         self.con = xmlrpclib.ServerProxy(self.uri)
         print "Connexion opened"
         print "Authentification in progress"

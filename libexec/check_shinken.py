@@ -24,7 +24,7 @@
 ################################################
 # check_shinken.py :
 #    This check is getting daemons state from
-#    a arbiter connexion.
+#    a arbiter connection.
 ################################################
 
 import os

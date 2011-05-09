@@ -185,7 +185,7 @@ class Receiver(BaseSatellite):
 
         # Now we check if arbiter speek to us in the pyro_daemon.
         # If so, we listen for it
-        # When it push us conf, we reinit connexions
+        # When it push us conf, we reinit connections
         self.watch_for_new_conf(0.0)
         if self.new_conf:
             self.setup_new_conf()

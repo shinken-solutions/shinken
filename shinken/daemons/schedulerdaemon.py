@@ -271,7 +271,7 @@ class Shinken(BaseSatellite):
             self.pollers[pol_id] = p
             uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
             self.pollers[pol_id]['uri'] = uri
-            self.pollers[pol_id]['last_connexion'] = 0
+            self.pollers[pol_id]['last_connection'] = 0
             print "Got a poller", p
 
         #First mix conf and override_conf to have our definitive conf

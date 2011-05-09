@@ -154,13 +154,13 @@ class BaseSatellite(Daemon):
     # The arbiter can resent us new conf in the pyro_daemon port.
     # We do not want to loose time about it, so it's not a bloking
     # wait, timeout = 0s
-    # If it send us a new conf, we reinit the connexions of all schedulers
+    # If it send us a new conf, we reinit the connections of all schedulers
     def watch_for_new_conf(self, timeout):
         self.handleRequests(timeout)
 
     def do_stop(self):
         if self.pyro_daemon:
-            print "Stopping all network connexions"
+            print "Stopping all network connections"
             self.pyro_daemon.unregister(self.interface)
         super(BaseSatellite, self).do_stop()
 
@@ -195,7 +195,7 @@ class Satellite(BaseSatellite):
 
 
     def pynag_con_init(self, id):
-        """ Initialize or re-initialize connexion with scheduler """
+        """ Initialize or re-initialize connection with scheduler """
         sched = self.schedulers[id]
 
         # If sched is not active, I do not try to init
@@ -206,7 +206,7 @@ class Satellite(BaseSatellite):
         sname = sched['name']
         uri = sched['uri']
         running_id = sched['running_id']
-        logger.log("[%s] Init de connexion with %s at %s" % (self.name, sname, uri))
+        logger.log("[%s] Init de connection with %s at %s" % (self.name, sname, uri))
 
         sch_con = sched['con'] = Pyro.core.getProxyForURI(uri)
 
@@ -362,7 +362,7 @@ class Satellite(BaseSatellite):
                 pass
         # Close the pyro server socket if it was open
         if self.pyro_daemon:
-            logger.log('Stopping all network connexions')
+            logger.log('Stopping all network connections')
             self.pyro_daemon.unregister(self.brok_interface)
             self.pyro_daemon.unregister(self.scheduler_interface)
         # And then call our master stop fro satellite code
@@ -531,10 +531,10 @@ class Satellite(BaseSatellite):
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
                     self.add_actions(tmp, sched_id)
-                else: # no con? make the connexion
+                else: # no con? make the connection
                     self.pynag_con_init(sched_id)
             # Ok, con is not know, so we create it
-            # Or maybe is the connexion lost, we recreate it
+            # Or maybe is the connection lost, we recreate it
             except (KeyError, Pyro.errors.ProtocolError, Pyro.errors.ConnectionClosedError) , exp:
                 print exp
                 self.pynag_con_init(sched_id)
@@ -563,7 +563,7 @@ class Satellite(BaseSatellite):
 
         # Now we check if arbiter speek to us in the pyro_daemon.
         # If so, we listen for it
-        # When it push us conf, we reinit connexions
+        # When it push us conf, we reinit connections
         # Sleep in waiting a new conf :)
         # TODO : manage the diff again.
         while self.timeout > 0:

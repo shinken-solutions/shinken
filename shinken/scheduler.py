@@ -514,37 +514,37 @@ class Scheduler:
 
 
     # Check if we do not connect to ofthen to this
-    def is_connexion_try_too_close(self, elt):
+    def is_connection_try_too_close(self, elt):
         now = time.time()
-        last_connexion = elt['last_connexion']
-        if now - last_connexion < 5:
+        last_connection = elt['last_connection']
+        if now - last_connection < 5:
             return  True
         return False
 
 
-    # initialise or re-initialise connexion with a poller
+    # initialise or re-initialise connection with a poller
     # or a reactionner
     def pynag_con_init(self, id, type='poller'):
         # Get teh good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
-            logger.log('DBG: Type unknown for connexion! %s' % type)
+            logger.log('DBG: Type unknown for connection! %s' % type)
             return
 
-        # We want only to initiate connexions to the passive
+        # We want only to initiate connections to the passive
         # pollers and reactionners
         passive = links[id]['passive']
         if not passive:
             return
         
         # If we try to connect too much, we slow down our tests
-        if self.is_connexion_try_too_close(links[id]):
+        if self.is_connection_try_too_close(links[id]):
             return
 
         # Ok, we can now update it
-        links[id]['last_connexion'] = time.time()
+        links[id]['last_connection'] = time.time()
 
-        print "Init connexion with", links[id]['uri']
+        print "Init connection with", links[id]['uri']
 
         uri = links[id]['uri']
         links[id]['con'] = Pyro.core.getProxyForURI(uri)
@@ -610,7 +610,7 @@ class Scheduler:
                     return
                 #we came back to normal timeout
                 pyro.set_timeout(con, 5)
-            else : # no connexion? try to reconnect
+            else : # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
 
         # TODO :factorize
@@ -647,7 +647,7 @@ class Scheduler:
                     return
                 #we came back to normal timeout
                 pyro.set_timeout(con, 5)
-            else : # no connexion? try to reconnect
+            else : # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
 
@@ -687,7 +687,7 @@ class Scheduler:
                     return
                 #we came back to normal timeout
                 pyro.set_timeout(con, 5)
-            else: # no connexion, try reinit
+            else: # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
 
         # We loop for our passive reactionners
@@ -723,7 +723,7 @@ class Scheduler:
                     return
                 #we came back to normal timeout
                 pyro.set_timeout(con, 5)
-            else: # no connexion, try reinit
+            else: # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
 

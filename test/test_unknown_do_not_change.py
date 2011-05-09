@@ -33,7 +33,7 @@ class TestUnknownNotChangeState(ShinkenTest):
     #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
     
-    # We got problem with unknown results on bad connexions 
+    # We got problem with unknown results on bad connections 
     # for critical services and host : if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
     # not a reason to warn about it
@@ -101,7 +101,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.show_and_clear_logs()
 
 
-    # We got problem with unknown results on bad connexions 
+    # We got problem with unknown results on bad connections 
     # for critical services and host : if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
     # not a reason to warn about it
@@ -210,7 +210,7 @@ class TestUnknownNotChangeState(ShinkenTest):
 
 
 
-    # We got problem with unknown results on bad connexions 
+    # We got problem with unknown results on bad connections 
     # for critical services and host : if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
     # not a reason to warn about it

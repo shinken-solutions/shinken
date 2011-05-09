@@ -263,7 +263,7 @@ class ConfigurationManager:
 
     # Now for MSSQL
     def gen_srv_1433(self):
-        self.generate_service('MSSQL-Connexion', 'check_mssql_connexion')
+        self.generate_service('MSSQL-Connexion', 'check_mssql_connection')
         print "I will need check_mssql_health from http://labs.consol.de/nagios/check_mssql_health/"
 
     # SMTP
@@ -284,7 +284,7 @@ class ConfigurationManager:
     
     #Mysql
     def gen_srv_3306(self):
-        self.generate_service('Mysql', 'check_mysql_connexion')
+        self.generate_service('Mysql', 'check_mysql_connection')
 
 
     #### 

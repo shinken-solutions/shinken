@@ -140,7 +140,7 @@ class Arbiter(Daemon):
 
             
     # We must push our broks to the broker
-    # because it's stupid to make a crossing connexion
+    # because it's stupid to make a crossing connection
     # so we find the broker responbile for our broks,
     # and we send him it
     # TODO : better find the broker, here it can be dead?

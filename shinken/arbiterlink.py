@@ -63,7 +63,7 @@ class ArbiterLink(SatelliteLink):
 
     def do_not_run(self):
         if self.con is None:
-            self.create_connexion()
+            self.create_connection()
         try:
             self.con.do_not_run()
             return True

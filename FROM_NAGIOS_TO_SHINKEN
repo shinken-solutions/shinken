@@ -24,6 +24,6 @@ $ /usr/local/shinken/src/shinken-arbiter.py -c /usr/local/nagios/etc/nagios.cfg 
 
 And that's all :)
 
-Shinken arbiter can take multiples configuration file, so classic Nagios things are called by nagios.cfg, all specific things (like daemons connexions or realms) are in shinken-specific.cfg.
+Shinken arbiter can take multiples configuration file, so classic Nagios things are called by nagios.cfg, all specific things (like daemons connections or realms) are in shinken-specific.cfg.
 
 

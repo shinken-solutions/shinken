@@ -32,7 +32,7 @@ class DBSqlite(DB):
         self.db_path = db_path
 
 
-    #Create the database connexion
+    #Create the database connection
     def connect_database(self):
         self.db = sqlite3.connect(self.db_path)
         self.db_cursor = self.db.cursor ()
