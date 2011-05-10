@@ -1,0 +1,20 @@
+
+To install this Mockup:
+
+* Edit the webui/multisite.mk sites if your livestatus interface is not on localhost:5000 (should be ok)
+* Edit the zzz_mk.conf and change all /home/shinken/shinken/webui/ by the directory where you put your sources
+* zzz_mk.conf to your apache conf.d directory.
+
+You need to enable some Apache modules too :
+* mod_wsgi
+* mod_rewrite
+
+
+Then restart Apache.
+
+You can connect to http://localhost/check_mk/htdocs/index.py 
+and you will see the main page. On the side page, go to the critical impact to got the mockup impact page :)
+
+From now all credential and user checking is disabled, everyone is nagiosadmin. So of course, DO NOT PUT IT IN PRODUCTION OR YOU ARE A TOTAL MORRON! It's a MOCKUP and WILL change.
+
+The js lib used for slinging effect is the mootolls, looks good and easy to use :)
