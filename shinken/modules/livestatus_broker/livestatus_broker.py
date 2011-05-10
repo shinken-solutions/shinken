@@ -750,6 +750,7 @@ class Livestatus_broker(BaseModule):
         if self.port:
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.setblocking(0)
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
             server.bind((self.host, self.port))
             server.listen(backlog)
             self.listeners.append(server)
