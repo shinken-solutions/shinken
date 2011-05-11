@@ -903,10 +903,10 @@ class Items(object):
             if hasattr(i, 'hostgroup_name'):
                 hnames_list.extend(self.evaluate_hostgroup_expression(i.hostgroup_name, hosts, hostgroups))
 
-                # Maybe there is no host in the groups, and do not have any
-                # host_name too, so tag is as template to do not look at
-                if hnames_list == [] and not hasattr(i, 'host_name'):
-                    i.register = '0'
+            # Maybe there is no host in the groups, and do not have any
+            # host_name too, so tag is as template to do not look at
+            if hnames_list == [] and not hasattr(i, 'host_name'):
+                i.register = '0'
 
             if hasattr(i, 'host_name'):
                 hst = i.host_name.split(',')

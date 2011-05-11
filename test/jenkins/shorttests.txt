@@ -71,4 +71,5 @@ test_strange_characters_commands.py
 test_startmember_group.py
 test_nested_hostgroups.py
 test_contactgroup_nomembers.py
+test_service_nohost.py
 test_livestatus.py
