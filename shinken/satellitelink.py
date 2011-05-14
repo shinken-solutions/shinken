@@ -56,7 +56,7 @@ class SatelliteLink(Item):
         'realm' :             StringProp (default=''),
     })
     
-    running_properties = Item.properties.copy()
+    running_properties = Item.running_properties.copy()
     running_properties.update({
         'con':                  StringProp(default=None),
         'alive':                StringProp(default=True, fill_brok=['full_status']),
@@ -65,25 +65,6 @@ class SatelliteLink(Item):
         'reachable':            StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
         'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
     })
-
-
-    #Check is required prop are set:
-    #contacts OR contactgroups is need
-    def is_correct(self):
-        state = True #guilty or not? :)
-        cls = self.__class__
-
-        special_properties = ['realm']
-        for prop, entry in cls.properties.items():
-            if prop not in special_properties:
-                if not hasattr(self, prop) and entry['required']:
-                    print self.get_name(), " : I do not have", prop
-                    state = False #Bad boy...
-        # Ok now we manage special cases...
-        if getattr(self, 'realm', None) is None: 
-            print self.get_name()," : I do not have a valid realm"
-            state = False
-        return state
 
 
     def create_connection(self):
@@ -385,5 +366,6 @@ class SatelliteLinks(Items):
                 if plug is not None:
                     new_modules.append(plug)
                 else:
-                    print "Error : the module %s is unknow for %s" % (plug_name, s.get_name())
+                    err = "Error : the module %s is unknow for %s" % (plug_name, s.get_name())
+                    s.configuration_errors.append(err)
             s.modules = new_modules

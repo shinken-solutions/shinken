@@ -32,6 +32,7 @@ class BrokerLink(SatelliteLink):
         'broker_name':        StringProp (fill_brok=['full_status'], to_send=True),
         'port':               IntegerProp(default='7772', fill_brok=['full_status']),
     })
+
     
     def get_name(self):
         return self.broker_name

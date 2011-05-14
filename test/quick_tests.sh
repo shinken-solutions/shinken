@@ -112,6 +112,7 @@ launch_and_assert test_startmember_group.py
 launch_and_assert test_nested_hostgroups.py
 launch_and_assert test_contactgroup_nomembers.py
 launch_and_assert test_service_nohost.py
+launch_and_assert test_bad_sat_realm_conf.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.
