@@ -1953,6 +1953,7 @@ table.aggrtree td.node {
     font-size: 15px;
     position: relative;
     zoom: 1;
+    cursor: pointer;
 }
 
 
