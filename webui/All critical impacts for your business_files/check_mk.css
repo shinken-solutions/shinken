@@ -1965,6 +1965,9 @@ table.aggrtree td.node {
     background-image: url("alpha_orange.png");
 }
 
+.alpha_black {
+    background-image: url("alpha_black.png");
+}
 
 /* One problem block*/
 .problem {
