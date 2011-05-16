@@ -631,6 +631,8 @@ window.addEvent('domready', function(){
 	
 	/* Keep a pointer to the currently open problem*/
 	var old_problem = null;
+    /* And one to the current active image >> to revert it if need*/
+    var old_im = null;
 
 	/* We must avoid $$() call for IE, so call a standad way*/
 	var problems = $(document.body).getElements('.problems-panel');
@@ -649,6 +651,9 @@ window.addEvent('domready', function(){
 	/* Our main toggle function */
 	function toggleBox(pb_nb){
 	    el = document.getElementById("problems-"+pb_nb);
+
+	    /* Image >> of the impact to reverse sense too*/
+	    im = document.getElementById("show-problem-img-"+pb_nb);
 	    
 	    var click_same_problem = false;
 	    if (old_problem == el ) {
@@ -665,17 +670,30 @@ window.addEvent('domready', function(){
 		old_problem.setStyle('left', -450);
 		old_problem.setStyle('opacity', 0);
 		old_problem.setStyle('display','none');
+		// Revert the >> image too
+		old_im.src = old_im.src.replace("left.png", "right.png");
 	    }
 	    
 	    old_problem = el;
-		    
-	    if(el.getStyle('opacity')==0){
+	    old_im = im;
+	    
+	    /* If it was hide, it was on the left, go right and show up
+	       and reverse the >> right image */
+	    if(el.getStyle('opacity') == 0){
 		el.setStyle('display','block');
-		toggleEffect.start(0, 1);
-		new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(5);
+		toggleEffect.start(0, 1); // go show by in opacity
+		new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(5); // and by moving right
+		if (im != null){
+		    im.src = im.src.replace("right.png", "left.png"); // and inverse the >> image
+		}
+
+		/* else it was show, go left and hide :)*/
 	    } else {
-		toggleEffect.start(1, 0);
-		new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(-450);
+		toggleEffect.start(1, 0); // go hide by opacity
+		new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(-450); // go left
+		if (im != null){
+		    im.src = im.src.replace("left.png", "right.png"); // and get back to normal >> image
+		}
 	    }
 	    
 	}
