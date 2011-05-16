@@ -1923,6 +1923,7 @@ table.aggrtree td.node {
     display: none;
     overflow: hidden;
     opacity : 0;
+    padding: 10px 20px;
 }
 
 
