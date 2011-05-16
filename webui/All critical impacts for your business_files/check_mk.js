@@ -597,12 +597,20 @@ window.addEvent('domready', function(){
     var old_problem = null;
     /* And one to the current active image >> to revert it if need*/
     var old_im = null;
-
+    /* Keep a trace of the click show problem div*/
+    var old_show_pb = null;
+    /* And the id of the problem */
+    var current_id = 0;
+  
+    /* We must avoid $$() call for IE, so call a standad way*/
+    var impacts = $(document.body).getElements('.impact');
     /* We must avoid $$() call for IE, so call a standad way*/
     var problems = $(document.body).getElements('.problems-panel');
+  
     
     /* Activate all problems, but in invisible from now*/
     problems.setStyle('opacity', 0);
+
 
     /* Register the toggle function for all problem links*/
     var clicks = $(document.body).getElements('.pblink');
@@ -610,15 +618,23 @@ window.addEvent('domready', function(){
     clicks.addEvent('click', function(){
 	var pb_nb = this.get('id');
 	toggleBox(pb_nb);
+
     });
 
     /* Our main toggle function */
     function toggleBox(pb_nb){
-	el = document.getElementById("problems-"+pb_nb);
+      // Keep the id of the impac twe want to look at
+    	//current_id = pb_nb;
+	    el = document.getElementById("problems-"+pb_nb);
 
-	/* Image >> of the impact to reverse sense too*/
-	im = document.getElementById("show-problem-img-"+pb_nb);
+    	/* Image >> of the impact to reverse sense too*/
+	    im = document.getElementById("show-problem-img-"+pb_nb);
 	
+      if (old_show_pb != null) {
+        new Fx.Tween(old_show_pb, {property: 'opacity'}).start(0);
+        old_show_pb = null;
+      }
+      
 	var click_same_problem = false;
 	if (old_problem == el ) {
 	    click_same_problem = true;
@@ -637,13 +653,14 @@ window.addEvent('domready', function(){
 	    // Revert the >> image too
 	    old_im.src = old_im.src.replace("left.png", "right.png");
 	}
-	
+
 	old_problem = el;
 	old_im = im;
 	
 	/* If it was hide, it was on the left, go right and show up
 	   and reverse the >> right image */
 	if(el.getStyle('opacity') == 0){
+	    current_id = pb_nb;
 	    el.setStyle('display','block');
 	    toggleEffect.start(0, 1); // go show by in opacity
 	    new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(5); // and by moving right
@@ -653,6 +670,7 @@ window.addEvent('domready', function(){
 
 	    /* else it was show, go left and hide :)*/
 	} else {
+	    current_id = 0;
 	    toggleEffect.start(1, 0); // go hide by opacity
 	    new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(-450); // go left
 	    if (im != null){
@@ -661,6 +679,29 @@ window.addEvent('domready', function(){
 	}
 	
     }
+    
+    
+    // We set display >> image on hover
+    impacts.addEvent('mouseenter', function(){
+      var nb = this.get('id');
+      el = document.getElementById("show-problem-" + nb);
+      new Fx.Tween(el, {property: 'opacity'}).start(1);
+      });
+    
+    // And on leaving, hide it with opacity -> 0
+    impacts.addEvent('mouseleave', function(){
+       var nb = this.get('id');
+       //alert("bla"+nb+"blabla"+current_id)
+       el = document.getElementById("show-problem-" + nb);
+       // Do not go hide if it's the current element
+       if (nb != current_id){
+          new Fx.Tween(el, {property: 'opacity'}).start(0);
+          
+	     }else{
+	        old_show_pb = el;
+	     }
+	  });
+
 });
 
 
@@ -755,12 +796,15 @@ window.addEvent('domready', function(){
 
 
 
-/* Now a function for made right impact >> image to show/hide when the mouse is on the impact */
+/* Now a function for made right impact >> image to show/hide when the mouse is on the impact 
 
 window.addEvent('domready', function(){
     
-    /* We must avoid $$() call for IE, so call a standad way*/
+    // We must avoid $$() call for IE, so call a standad way
     var impacts = $(document.body).getElements('.impact');
+    // IE I do not love you, is that clear??!?
+    var show_pbs = $(document.body).getElements('.show-problem');
+    show_pbs.setStyle('opacity','0');
     
     // We set display >> image on hover
     impacts.addEvent('mouseenter', function(){
@@ -778,5 +822,5 @@ window.addEvent('domready', function(){
     });
 
 
-});
+}); */
 
