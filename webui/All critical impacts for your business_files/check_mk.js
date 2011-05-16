@@ -772,3 +772,31 @@ window.addEvent('domready', function(){
 
 
 
+
+
+/* Now a function for made right impact >> image to show/hide when the mouse is on the impact */
+
+window.addEvent('domready', function(){
+	
+    /* We must avoid $$() call for IE, so call a standad way*/
+    var impacts = $(document.body).getElements('.impact');
+	
+
+    // We set display >> image on hover
+    impacts.addEvent('mouseenter', function(){
+	var nb = this.get('id');
+	el = document.getElementById("show-problem-" + nb);
+	new Fx.Tween(el, {property: 'opacity'}).start(1);
+		    
+    });
+    
+    // And on leaving, hide it with opacity -> 0
+    impacts.addEvent('mouseleave', function(){
+        var nb = this.get('id');
+        el = document.getElementById("show-problem-" + nb);
+	new Fx.Tween(el, {property: 'opacity'}).start(0);
+    });
+
+
+});
+

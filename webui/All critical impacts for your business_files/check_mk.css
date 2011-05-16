@@ -1993,6 +1993,7 @@ table.aggrtree td.node {
     z-index: 1;
     outline: none;
     right: 20px;
+    opacity : 0;
 }
 
 /* The impact icon (so the service one or the host one) */
