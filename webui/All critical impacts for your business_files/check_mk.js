@@ -587,206 +587,169 @@ function toggle_assumption(oImg, site, host, service)
 
 
 
-/* Simple toggle function */
-function toggleElement(e) {
-    /*alert(e);*/
-    var toc = document.getElementById(e);
-    /*var imgLink = document.getElementById('img-'+e);*/
-
-    if (toc && toc.style.display == 'none') {
-	toc.style.display = 'block';
-	/*imgLink.src = img_src+'go-up.png';*/
-    } else {
-	toc.style.display = 'none';
-	/*imgLink.src = img_src+'go-next.png';*/
-    }
-}
-
-/* Hide all elements from a list */
-function ShowOnly(e) {
-    
-    for (i=0; i<all_ids.length; i++)
-	{
-	    k = all_ids[i]
-	    var v = "problems-" + k;
-	    if (v != e ) {
-		toc = document.getElementById(v);
-		if (toc && toc.style.display == 'block') {
-		    toc.style.display = 'none';
-		}
-	    }
-	}
-    toggleElement(e);
-    /*toc = document.getElementById(e);
-      toc.style.display = 'block';*/
-}
-
-
-
-
 
 /* Add for > icons a toggle root problem panel of this impact
-and hide all previously open ones */
+   and hide all previously open ones 
+*/
 window.addEvent('domready', function(){
-	
-	/* Keep a pointer to the currently open problem*/
-	var old_problem = null;
+    
+    /* Keep a pointer to the currently open problem*/
+    var old_problem = null;
     /* And one to the current active image >> to revert it if need*/
     var old_im = null;
 
-	/* We must avoid $$() call for IE, so call a standad way*/
-	var problems = $(document.body).getElements('.problems-panel');
-	
-	/* Activate all problems, but in invisible from now*/
-	problems.setStyle('opacity', 0);
+    /* We must avoid $$() call for IE, so call a standad way*/
+    var problems = $(document.body).getElements('.problems-panel');
+    
+    /* Activate all problems, but in invisible from now*/
+    problems.setStyle('opacity', 0);
 
-	/* Register the toggle function for all problem links*/
-	var clicks = $(document.body).getElements('.pblink');
-	/* And we register our toggle function */
-	clicks.addEvent('click', function(){
-		var pb_nb = this.get('id');
-		toggleBox(pb_nb);
-	    });
-
-	/* Our main toggle function */
-	function toggleBox(pb_nb){
-	    el = document.getElementById("problems-"+pb_nb);
-
-	    /* Image >> of the impact to reverse sense too*/
-	    im = document.getElementById("show-problem-img-"+pb_nb);
-	    
-	    var click_same_problem = false;
-	    if (old_problem == el ) {
-		click_same_problem = true;
-	    }
-
-	    var toggleEffect = new Fx.Tween(el, {
-		    property : 'opacity',
-		    duration :500/*'short'*/
-		});
-
-	    // If we got an open problem, close it
-	    if (old_problem != null && old_problem != el){
-		old_problem.setStyle('left', -450);
-		old_problem.setStyle('opacity', 0);
-		old_problem.setStyle('display','none');
-		// Revert the >> image too
-		old_im.src = old_im.src.replace("left.png", "right.png");
-	    }
-	    
-	    old_problem = el;
-	    old_im = im;
-	    
-	    /* If it was hide, it was on the left, go right and show up
-	       and reverse the >> right image */
-	    if(el.getStyle('opacity') == 0){
-		el.setStyle('display','block');
-		toggleEffect.start(0, 1); // go show by in opacity
-		new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(5); // and by moving right
-		if (im != null){
-		    im.src = im.src.replace("right.png", "left.png"); // and inverse the >> image
-		}
-
-		/* else it was show, go left and hide :)*/
-	    } else {
-		toggleEffect.start(1, 0); // go hide by opacity
-		new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(-450); // go left
-		if (im != null){
-		    im.src = im.src.replace("left.png", "right.png"); // and get back to normal >> image
-		}
-	    }
-	    
-	}
+    /* Register the toggle function for all problem links*/
+    var clicks = $(document.body).getElements('.pblink');
+    /* And we register our toggle function */
+    clicks.addEvent('click', function(){
+	var pb_nb = this.get('id');
+	toggleBox(pb_nb);
     });
+
+    /* Our main toggle function */
+    function toggleBox(pb_nb){
+	el = document.getElementById("problems-"+pb_nb);
+
+	/* Image >> of the impact to reverse sense too*/
+	im = document.getElementById("show-problem-img-"+pb_nb);
+	
+	var click_same_problem = false;
+	if (old_problem == el ) {
+	    click_same_problem = true;
+	}
+
+	var toggleEffect = new Fx.Tween(el, {
+	    property : 'opacity',
+	    duration :500/*'short'*/
+	});
+
+	// If we got an open problem, close it
+	if (old_problem != null && old_problem != el){
+	    old_problem.setStyle('left', -450);
+	    old_problem.setStyle('opacity', 0);
+	    old_problem.setStyle('display','none');
+	    // Revert the >> image too
+	    old_im.src = old_im.src.replace("left.png", "right.png");
+	}
+	
+	old_problem = el;
+	old_im = im;
+	
+	/* If it was hide, it was on the left, go right and show up
+	   and reverse the >> right image */
+	if(el.getStyle('opacity') == 0){
+	    el.setStyle('display','block');
+	    toggleEffect.start(0, 1); // go show by in opacity
+	    new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(5); // and by moving right
+	    if (im != null){
+		im.src = im.src.replace("right.png", "left.png"); // and inverse the >> image
+	    }
+
+	    /* else it was show, go left and hide :)*/
+	} else {
+	    toggleEffect.start(1, 0); // go hide by opacity
+	    new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(-450); // go left
+	    if (im != null){
+		im.src = im.src.replace("left.png", "right.png"); // and get back to normal >> image
+	    }
+	}
+	
+    }
+});
 
 
 
 
 /* Now a function for managingthe hovering of the problems. Will make
-appears the actiosn buttons with a smoot way (opacity)*/
+   appears the actiosn buttons with a smoot way (opacity)*/
 
 window.addEvent('domready', function(){
+    
+    /* We must avoid $$() call for IE, so call a standad way*/
+    var problems = $(document.body).getElements('.problem');
+    
+
+    // We set display actions on hover
+    problems.addEvent('mouseenter', function(){
+	var pb_nb = this.get('id');
+	el = document.getElementById("actions-" + pb_nb);
+	new Fx.Tween(el, {property: 'opacity'}).start(1);
 	
-	/* We must avoid $$() call for IE, so call a standad way*/
-	var problems = $(document.body).getElements('.problem');
-	
-
-	// We set display actions on hover
-	problems.addEvent('mouseenter', function(){
-		var pb_nb = this.get('id');
-		el = document.getElementById("actions-" + pb_nb);
-		new Fx.Tween(el, {property: 'opacity'}).start(1);
-		    
-	    });
-	// And on leaving, hide them with opacity -> 0
-	problems.addEvent('mouseleave', function(){
-                var pb_nb = this.get('id');
-                el = document.getElementById("actions-" + pb_nb);
-		new Fx.Tween(el, {property: 'opacity'}).start(0.4);
-	    });
-
-
     });
+    // And on leaving, hide them with opacity -> 0
+    problems.addEvent('mouseleave', function(){
+        var pb_nb = this.get('id');
+        el = document.getElementById("actions-" + pb_nb);
+	new Fx.Tween(el, {property: 'opacity'}).start(0.4);
+    });
+
+
+});
 
 
 
 /* Now register for images FIXIT a fitit call*/
 window.addEvent('domready', function(){
-	
-	/* We must avoid $$() call for IE, so call a standad way*/
-	var actions_fixit = $(document.body).getElements('.action-fixit');
-	
+    
+    /* We must avoid $$() call for IE, so call a standad way*/
+    var actions_fixit = $(document.body).getElements('.action-fixit');
+    
 
-	// We set display actions on hover
-	actions_fixit.addEvent('click', function(){
-		var args = this.get('id');
-		var reg = new RegExp("[/]+", "g");
-		var tab = args.split(reg);
-		var action = tab[0];
-		var site = tab[1];
-		var host = tab[2];
-		var desc = '';
-		var type = 'host' ;
-		// If got 4 part, it's a service
-		if (tab.length == 4){
-		    desc = tab[3];
-		    type = 'service';
-		}
-		
-		//alert('got tab'+tab);
-		performAction(this, action, type, site, host, desc);
-	    });
+    // We set display actions on hover
+    actions_fixit.addEvent('click', function(){
+	var args = this.get('id');
+	var reg = new RegExp("[/]+", "g");
+	var tab = args.split(reg);
+	var action = tab[0];
+	var site = tab[1];
+	var host = tab[2];
+	var desc = '';
+	var type = 'host' ;
+	// If got 4 part, it's a service
+	if (tab.length == 4){
+	    desc = tab[3];
+	    type = 'service';
+	}
+	
+	//alert('got tab'+tab);
+	performAction(this, action, type, site, host, desc);
     });
+});
 
 
 /* Now register for images an ACKNO call*/
 window.addEvent('domready', function(){
-	
-	/* We must avoid $$() call for IE, so call a standad way*/
-	var actions_ack = $(document.body).getElements('.action-ack');
-	
+    
+    /* We must avoid $$() call for IE, so call a standad way*/
+    var actions_ack = $(document.body).getElements('.action-ack');
 
-	// We set display actions on hover
-	actions_ack.addEvent('click', function(){
-		var args = this.get('id');
-		var reg = new RegExp("[/]+", "g");
-		var tab = args.split(reg);
-		var action = tab[0];
-		var site = tab[1];
-		var host = tab[2];
-		var desc = '';
-		var type = 'host' ;
-		// If got 4 part, it's a service
-		if (tab.length == 4){
-		    desc = tab[3];
-		    type = 'service';
-		}
-		
-		//alert('got tab'+tab);
-		performAction(this, action, type, site, host, desc);
+    // We set display actions on hover
+    actions_ack.addEvent('click', function(){
+	var args = this.get('id');
+	var reg = new RegExp("[/]+", "g");
+	var tab = args.split(reg);
+	var action = tab[0];
+	var site = tab[1];
+	var host = tab[2];
+	var desc = '';
+	var type = 'host' ;
+	// If got 4 part, it's a service
+	if (tab.length == 4){
+	    desc = tab[3];
+	    type = 'service';
+	}
+	
+	//alert('got tab'+tab);
+	performAction(this, action, type, site, host, desc);
 
-	    });
     });
+});
 
 
 
@@ -795,17 +758,16 @@ window.addEvent('domready', function(){
 /* Now a function for made right impact >> image to show/hide when the mouse is on the impact */
 
 window.addEvent('domready', function(){
-	
+    
     /* We must avoid $$() call for IE, so call a standad way*/
     var impacts = $(document.body).getElements('.impact');
-	
-
+    
     // We set display >> image on hover
     impacts.addEvent('mouseenter', function(){
 	var nb = this.get('id');
 	el = document.getElementById("show-problem-" + nb);
 	new Fx.Tween(el, {property: 'opacity'}).start(1);
-		    
+	
     });
     
     // And on leaving, hide it with opacity -> 0
