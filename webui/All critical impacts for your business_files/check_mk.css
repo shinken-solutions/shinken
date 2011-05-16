@@ -1954,6 +1954,15 @@ table.aggrtree td.node {
     position: relative;
     zoom: 1;
     cursor: pointer;
+/*    background-image: url("alpha.png");*/
+}
+
+.alpha_red {
+    background-image: url("alpha_red.png");
+}
+
+.alpha_orange {
+    background-image: url("alpha_orange.png");
 }
 
 
@@ -1974,7 +1983,6 @@ table.aggrtree td.node {
 
 /* The show problem image, on the right of the impact*/
 .show-problem {
-    _visibility: hidden!important;
     width: 20px;
     height: 20px;
     position: absolute;
@@ -1993,12 +2001,48 @@ table.aggrtree td.node {
     margin-top: 3px;
 }
 
+/* The show problem image, on the right of the impact*/
+.criticity-icon-1 {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    margin-top: 8px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+}
+
+
+/* The show problem image, on the right of the impact*/
+.criticity-icon-2 {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    margin-top: 18px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+}
+
+
+/* The show problem image, on the right of the impact*/
+.criticity-icon-3 {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    margin-top: 28px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+}
+
 
 /* Each line of the impact text is a row */
 .impact-row {
     display: block;
     position: relative;
     line-height: 15px;
+    left: 5px;
 }
 
 /* The link of the impact on its name */
