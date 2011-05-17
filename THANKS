@@ -32,3 +32,4 @@ To Raynald de Lahondès and the Sibio team for the FreeBSD testing, Tuto and the
 To Hienz Michael for the bug report about bad local_file :)
 To Ronny Lindner for the bug report about non host expressions for services
 To Olivier Hanesse for his bug report about fixed 60s interval in checks
+To Markus Elger for this bug report about no schedule retention data

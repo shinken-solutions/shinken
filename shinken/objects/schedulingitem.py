@@ -467,11 +467,16 @@ class SchedulingItem(Item):
         # If not force_time, try to schedule
         if force_time is None:
             now = time.time()
-            # maybe we do nto have a check_period, if so, take always good (24x7)
-            if self.check_period:
-                self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
-            else:
-                self.next_chk = int(now + time_add)
+            # Maybe we already got a next_chk that is in the future
+            # like from a previous run (load from retention). If so, use it
+            # by default it's 0, so there is no problem
+            if self.next_chk < now:
+                # maybe we do not have a check_period, if so, take always good (24x7)
+                if self.check_period:
+                    self.next_chk = self.check_period.get_next_valid_time_from_t(now + time_add)
+                else:
+                    self.next_chk = int(now + time_add)
+            # else: keep the self.next_chk value in the future
         else:
             self.next_chk = int(force_time)
 

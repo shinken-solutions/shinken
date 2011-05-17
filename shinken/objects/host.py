@@ -131,7 +131,7 @@ class Host(SchedulingItem):
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
         'last_chk':             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'next_chk':             IntegerProp(default=0, fill_brok=['full_status', 'next_schedule']),
+        'next_chk':             IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
         'in_checking':          BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule']),
         'latency':              FloatProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'attempt':              IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),

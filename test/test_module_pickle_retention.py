@@ -24,6 +24,7 @@
 #
 
 import os
+import time
 
 from shinken_test import unittest, ShinkenTest
 
@@ -45,6 +46,7 @@ class TestConfig(ShinkenTest):
     #Change ME :)
     def test_pickle_retention(self):
         print self.conf.modules
+        now = time.time()
         #get our modules
         mod = pickle_retention_file_scheduler.Pickle_retention_scheduler(modconf, 'tmp/retention-test.dat')
         try :
@@ -60,17 +62,29 @@ class TestConfig(ShinkenTest):
         sl.init()
         l = logger
 
+        in_the_future = now + 500
+        #Now we change thing
+        svc = self.sched.hosts.find_by_name("test_host_0")
+        # We want it to go in the future
+        svc.next_chk = in_the_future
+
         #updte the hosts and service in the scheduler in the retentino-file
         sl.hook_save_retention(self.sched)
         
-        #Now we change thing
-        svc = self.sched.hosts.find_by_name("test_host_0")
         self.assert_(svc.state == 'PENDING')
         print "State", svc.state
         svc.state = 'UP' #was PENDING in the save time
         
+        # now we try to change it
+        svc.next_chk = now - 3000
+
         r = sl.hook_load_retention(self.sched)
         self.assert_(r == True)
+        
+        print "Fuck after load, will go in", svc.next_chk - now
+
+        # Should be ok, because we load it from retention
+        self.assert_(svc.next_chk == in_the_future)
         
         #search if the host is not changed by the loading thing
         svc2 = self.sched.hosts.find_by_name("test_host_0")
@@ -81,6 +95,19 @@ class TestConfig(ShinkenTest):
         #Ok, we can delete the retention file
         os.unlink(mod.path)
 
+        # Lie about us in checking or not
+        svc.in_checking = False
+        diff = svc.next_chk - now
+        print "Fuck Ok go for a enw scheduling!", diff
+        #should be near 500 seconds ahead
+        self.assert_(499 < diff < 501)
+
+        # Now we reschedule it, should be our time_to_go
+        svc.schedule()
+        print "Fuck after a reschedule", svc.next_chk - now
+        # should be the same value in the future, we want to keep it
+        diff = svc.next_chk - now
+        self.assert_(499 < diff < 501)
 
         # Now make real loops with notifications
         self.scheduler_loop(10, [[svc, 2, 'CRITICAL | bibi=99%']])
