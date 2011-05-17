@@ -75,19 +75,19 @@ class Host(SchedulingItem):
         'max_check_attempts':   IntegerProp(fill_brok=['full_status']),
         'check_interval':       IntegerProp(default='0', fill_brok=['full_status']),
         'retry_interval':       IntegerProp(default='0', fill_brok=['full_status']),
-        'active_checks_enabled': BoolProp(default='1', fill_brok=['full_status']),
-        'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status']),
+        'active_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
+        'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'check_period':         StringProp(fill_brok=['full_status']),
-        'obsess_over_host':     BoolProp(default='0', fill_brok=['full_status']),
-        'check_freshness':      BoolProp(default='0', fill_brok=['full_status']),
+        'obsess_over_host':     BoolProp(default='0', fill_brok=['full_status'], retention=True),
+        'check_freshness':      BoolProp(default='0', fill_brok=['full_status'], retention=True),
         'freshness_threshold':  IntegerProp(default='0', fill_brok=['full_status']),
         'event_handler':        StringProp(default='', fill_brok=['full_status']),
         'event_handler_enabled': BoolProp(default='0', fill_brok=['full_status']),
         'low_flap_threshold':   IntegerProp(default='25', fill_brok=['full_status']),
         'high_flap_threshold':  IntegerProp(default='50', fill_brok=['full_status']),
-        'flap_detection_enabled': BoolProp(default='1', fill_brok=['full_status']),
+        'flap_detection_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'flap_detection_options': ListProp(default='o,d,u', fill_brok=['full_status']),
-        'process_perf_data':    BoolProp(default='1', fill_brok=['full_status']),
+        'process_perf_data':    BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
         'contacts':             StringProp(default='', fill_brok=['full_status']),
@@ -123,7 +123,7 @@ class Host(SchedulingItem):
         'maintenance_period':   StringProp(default='', fill_brok=['full_status']),
 
         # Criticity value
-        'criticity':            IntegerProp(default='2', fill_brok=['full_status']),
+        'criticity':            IntegerProp(default='2', fill_brok=['full_status'], retention=True),
     })
 
     # properties set only for running purpose

@@ -68,6 +68,11 @@ class TestConfig(ShinkenTest):
         # We want it to go in the future
         svc.next_chk = in_the_future
 
+        # By default in the conf, the active checsk are active
+        self.assert_(svc.active_checks_enabled == True)
+        # and passive one too
+        self.assert_(svc.passive_checks_enabled == True)
+
         #updte the hosts and service in the scheduler in the retentino-file
         sl.hook_save_retention(self.sched)
         
@@ -75,12 +80,23 @@ class TestConfig(ShinkenTest):
         print "State", svc.state
         svc.state = 'UP' #was PENDING in the save time
         
+        # We try to change active state change too
+        svc.active_checks_enabled = False
+        svc.passive_checks_enabled = False
+
         # now we try to change it
         svc.next_chk = now - 3000
 
         r = sl.hook_load_retention(self.sched)
         self.assert_(r == True)
         
+        # Now look at checks active or not
+        # Should be back as normal values :)
+        self.assert_(svc.active_checks_enabled == True)
+        # and passive one too
+        self.assert_(svc.passive_checks_enabled == True)
+
+
         print "Fuck after load, will go in", svc.next_chk - now
 
         # Should be ok, because we load it from retention

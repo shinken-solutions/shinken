@@ -78,19 +78,19 @@ class Service(SchedulingItem):
         'max_check_attempts':     IntegerProp(fill_brok=['full_status']),
         'check_interval':         IntegerProp(fill_brok=['full_status']),
         'retry_interval':         IntegerProp(fill_brok=['full_status']),
-        'active_checks_enabled':  BoolProp   (default='1', fill_brok= ['full_status']),
-        'passive_checks_enabled': BoolProp   (default='1', fill_brok=['full_status']),
+        'active_checks_enabled':  BoolProp   (default='1', fill_brok= ['full_status'], retention=True),
+        'passive_checks_enabled': BoolProp   (default='1', fill_brok=['full_status'], retention=True),
         'check_period':           StringProp (fill_brok= ['full_status']),
-        'obsess_over_service':    BoolProp   (default='0', fill_brok=['full_status']),
-        'check_freshness':        BoolProp   (default='0', fill_brok=['full_status']),
+        'obsess_over_service':    BoolProp   (default='0', fill_brok=['full_status'], retention=True),
+        'check_freshness':        BoolProp   (default='0', fill_brok=['full_status'], retention=True),
         'freshness_threshold':    IntegerProp(default='0', fill_brok=['full_status']),
         'event_handler':          StringProp (default='', fill_brok=['full_status']),
-        'event_handler_enabled':  BoolProp   (default='0',fill_brok=['full_status']),
+        'event_handler_enabled':  BoolProp   (default='0',fill_brok=['full_status'], retention=True),
         'low_flap_threshold':     IntegerProp(default='-1', fill_brok= ['full_status']),
         'high_flap_threshold':    IntegerProp(default='-1', fill_brok=['full_status']),
-        'flap_detection_enabled': BoolProp   (default='1', fill_brok=['full_status']),
+        'flap_detection_enabled': BoolProp   (default='1', fill_brok=['full_status'], retention=True),
         'flap_detection_options': ListProp   (default='o,w,c,u', fill_brok=['full_status']),
-        'process_perf_data':      BoolProp   (default='1', fill_brok=['full_status']),
+        'process_perf_data':      BoolProp   (default='1', fill_brok=['full_status'], retention=True),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
         'notification_interval':  IntegerProp(default='60', fill_brok=['full_status']),
@@ -121,7 +121,7 @@ class Service(SchedulingItem):
         'default_value':           StringProp(default=''),
 
         # Criticity value
-        'criticity':               IntegerProp(default='2', fill_brok=['full_status']),
+        'criticity':               IntegerProp(default='2', fill_brok=['full_status'], retention=True),
     })
 
     # properties used in the running state

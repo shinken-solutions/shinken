@@ -784,13 +784,24 @@ class Scheduler:
             for prop, entry in running_properties.items():
                 if entry.retention:
                     d[prop] = getattr(h, prop)
+            # and some properties are also like this, like
+            # active chekcs enabled or not
+            properties = h.__class__.properties
+            for prop, entry in properties.items():
+                if entry.retention:
+                    d[prop] = getattr(h, prop)
             all_data['hosts'][h.host_name] = d
 
-        #Now same for services
+        # Now same for services
         for s in self.services:
             d = {}
             running_properties = s.__class__.running_properties
             for prop, entry in running_properties.items():
+                if entry.retention:
+                    d[prop] = getattr(s, prop)
+            # Same for properties, like active chekcs enabled or not
+            properties = s.__class__.properties
+            for prop, entry in properties.items():
                 if entry.retention:
                     d[prop] = getattr(s, prop)
             all_data['services'][(s.host.host_name, s.service_description)] = d
@@ -811,8 +822,18 @@ class Scheduler:
             d = data['hosts'][ret_h_name]
             h = self.hosts.find_by_name(ret_h_name)
             if h is not None:
+                # First manage all running properties
                 running_properties = h.__class__.running_properties
                 for prop, entry in running_properties.items():
+                    if entry.retention:
+                        # Mayeb the save was not with this value, so
+                        # we just bypass this
+                        if prop in d:
+                            setattr(h, prop, d[prop])
+                # Ok, some are in properties too (like active check enabled
+                # or not. Will OVERRIDE THE CONFIGURATION VALUE!
+                properties = h.__class__.properties
+                for prop, entry in properties.items():
                     if entry.retention:
                         # Mayeb the save was not with this value, so
                         # we just bypass this
@@ -854,17 +875,23 @@ class Scheduler:
             s = self.services.find_srv_by_name_and_hostname(ret_s_h_name, ret_s_desc)
 
             if s is not None:
+                # Load the major values from running properties
                 running_properties = s.__class__.running_properties
                 for prop, entry in running_properties.items():
                     if entry.retention:
                         # Maybe the save was not with this value, so
                         # we just bypass this
                         if prop in d:
-                            #if prop in ('acknowledgement', 'problem_has_been_acknowledged', 'acknowledgement_type'):
-                            #    print "Loading", prop, "for", s.get_dbg_name(), ' :', d[prop]
-                            #    if prop == 'acknowledgement' and d[prop] is not None:
-                            #        print d[prop].__dict__
                             setattr(s, prop, d[prop])
+                # And some others from properties dict too
+                properties = s.__class__.properties
+                for prop, entry in properties.items():
+                    if entry.retention:
+                        # Maybe the save was not with this value, so
+                        # we just bypass this
+                        if prop in d:
+                            setattr(s, prop, d[prop])
+
                 for a in s.notifications_in_progress.values():
                     a.ref = s
                     self.add(a)
