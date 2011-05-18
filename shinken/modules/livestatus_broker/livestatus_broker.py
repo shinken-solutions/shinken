@@ -139,6 +139,27 @@ class Livestatus_broker(BaseModule):
         # And we save that we got data from this instance_id
         self.instance_ids.append(c_id)
 
+        # We should clean all previously added hosts and services
+        inst_id = data['instance_id']
+        to_del = []
+        for h in self.hosts.values():
+            # If the host was in this instance, del it
+            if h.instance_id == inst_id:
+                for s in h.services.values():
+                    s_id = service.id
+                    try:
+                        del self.servicename_lookup_table[s.host_name + s.service_description]
+                        del self.services[s_id]
+                    except: #maybe the hsot is deleted before we got it's service?
+                        print "Debug warning : host service deleted but not found!"
+                        
+                    del self.hostname_lookup_table[h.host_name]
+                    to_del.append(h.id)
+
+        # Ok, really clean the hosts
+        for i in to_del:
+            del self.hosts[i]
+
 
     def manage_update_program_status_brok(self, b):
         data = b.data
@@ -169,20 +190,25 @@ class Livestatus_broker(BaseModule):
         
     def manage_initial_host_status_brok(self, b):
         data = b.data
+        
         h_id = data['id']
-        #print "Creating host:", h_id, data
+
+        inst_id = data['instance_id']
+        #print "Creating host:", h_id, b
         h = Host({})
         self.update_element(h, data)        
         self.set_schedulingitem_values(h)
         
         h.service_ids = []
         h.services = []
+        h.instance_id = inst_id
         # We need to rebuild Downtime and Comment relationship
         for dtc in h.downtimes + h.comments:
             dtc.ref = h
         self.hosts[h_id] = h
         self.hostname_lookup_table[h.host_name] = h_id
         self.number_of_objects += 1
+
 
     #In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
