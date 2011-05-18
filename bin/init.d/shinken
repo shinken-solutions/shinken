@@ -100,6 +100,10 @@ fi
 # Reads configuration variable file if it is present
 [ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
 
+# Now place us in our var directory so even our arbiter will be
+# happy for opening its pid and cmd files
+cd $VAR
+
 #echo BIN=$BIN
 #echo VAR=$VAR
 #echo ETC=$ETC
