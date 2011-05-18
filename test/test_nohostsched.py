@@ -53,9 +53,11 @@ class TestHostspecialSched(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2']])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
-        print "Final", host.next_chk
+        # Reschedule the host as a normal way
+        host.schedule()
+        print "Final", host.next_chk, host.in_checking
         print "Next check?", host.next_chk - now
-        print "Next check should be still < 300"
+        print "Next check should be still < 300", host.next_chk - now
         self.assert_(host.next_chk - now < 301)
         # but in 5min in fact, so more than 290,
         # something like 299.0

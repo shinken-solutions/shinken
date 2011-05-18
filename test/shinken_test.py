@@ -121,6 +121,12 @@ class ShinkenTest(unittest.TestCase):
         self.sched.add(check)  # check is now in sched.checks[]
         # fake execution
         check.check_time = now
+        
+        # and lie about when we will launch it because
+        # if not, the schedule call for ref
+        # will not really reschedule it because there
+        # is a valid value in the future
+        ref.next_chk = now - 0.5
 
         elts_line1 = output.split('|')
         #First line before | is output
