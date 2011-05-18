@@ -28,7 +28,7 @@ th {
 body.main {
     background-attachment: fixed;
     /*background-image: url("images/contentframe_background.jpg");*/
-    background-image: url("images/backgrounds/to-green.jpg");
+    background-image: url("images/to-green.jpg");
     background-repeat: repeat;
     /*background-repeat: repeat-x;*/
     font-family: arial, helvetica, sans-serif;
@@ -120,7 +120,7 @@ body.side {
     background-attachment: fixed;
     background-repeat: repeat;
     /*background-image: url("images/snapinframe_background.jpg");*/
-    background-image: url("images/backgrounds/to-green.png");
+    background-image: url("images/to-green.png");
     font-family: arial, helvetica, sans-serif;
     font-size: 9pt;
     padding: 0;
@@ -1959,15 +1959,15 @@ table.aggrtree td.node {
 }
 
 .alpha_red {
-    background-image: url("alpha_red.png");
+    background-image: url("images/alpha_red.png");
 }
 
 .alpha_orange {
-    background-image: url("alpha_orange.png");
+    background-image: url("images/alpha_orange.png");
 }
 
 .alpha_black {
-    background-image: url("alpha_black.png");
+    background-image: url("images/alpha_black.png");
 }
 
 /* One problem block*/
