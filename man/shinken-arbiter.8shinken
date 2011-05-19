@@ -4,7 +4,7 @@ Command - Shinken arbiter command.
 
 =head1 SYNOPSIS
 
-/usr/bin/shinken-arbiter  [options...]
+/usr/sbin/shinken-arbiter  [options...]
 
 =head1 DESCRIPTION
 
