@@ -1,30 +1,26 @@
-=head1 SHINKEN-ARBITER                                                                   
+=head1 SHINKEN-RECEIVER                                                                   
 
-Command - Shinken arbiter command.
+Command - Shinken receiver command.
 
 =head1 SYNOPSIS
 
-/usr/sbin/shinken-arbiter  [options...]
+/usr/sbin/shinken-receiver  [options...]
 
 =head1 DESCRIPTION
 
-Shinken Arbiter Daemon 
+Shinken receiver Daemon 
 
 =head1 OPTIONS
 
 =over 8
 
-=item B<-c|--config=/etc/nagios.cfg>
+=item B<-c|--config>
 
-Config file (your nagios.cfg). Multiple -c can be used, it will be like if all files was just one.
+Config file. Multiple -c can be used, it will be like if all files was just one.
 
 =item B<-d|--daemon>
 
 Run in daemon mode.
-
-=item B<-r|--replace>
-
-Replace previous running scheduler.
 
 =item B<-h|--help>
 
@@ -42,7 +38,7 @@ This command has absolutely no bugs, as I have written it. Also, as it has no bu
 
 =head1 AUTHORS
 
-Bshinken-arbiter was written by Jean Gabes <naparuba@gmail.com>. This manual page was written by David Hannequin <david.hannequin@gmail.com>.
+Bshinken-poller was written by Jean Gabes <naparuba@gmail.com>. This manual page was written by David Hannequin <david.hannequin@gmail.com>.
 
 Both are released under the GNU Affero General Public License, version 3 or later.
 

@@ -1,0 +1,10 @@
+[Unit]
+Description=Shinken Poller
+After=syslog.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/shinken-poller -d -c /etc/shinken/pollerd.ini
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Shinken Reactionner
+After=syslog.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/shinken-reactionner -d -c /etc/shinken/reactionnerd.ini
+
+[Install]
+WantedBy=multi-user.target
