@@ -418,6 +418,10 @@ class Arbiter(Daemon):
 
             ## And go for the main loop
             self.do_mainloop()
+        except SystemExit, exp:
+            # With a 2.4 interpreter the sys.exit() in load_config_file
+            # ends up here and must be handled.
+            sys.exit(exp.code)
         except Exception, exp:
             logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
             logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
