@@ -142,24 +142,40 @@ class Livestatus_broker(BaseModule):
         # We should clean all previously added hosts and services
         inst_id = data['instance_id']
         to_del = []
+        to_del_srv = []
         for h in self.hosts.values():
             # If the host was in this instance, del it
             if h.instance_id == inst_id:
-                for s in h.services:
-                    s_id = s.id
-                    try:
-                        del self.servicename_lookup_table[s.host_name + s.service_description]
-                    except: # not found? not a crime
-                        pass
-                    try:
-                        del self.services[s_id]
-                    except: #maybe the hsot is deleted before we got it's service?
-                        print "Debug warning : host service deleted but not found!"
-                    try:
-                        del self.hostname_lookup_table[h.host_name]
-                    except KeyError: # maybe it was not inserted in a good way, pass it
-                        pass
-                    to_del.append(h.id)
+                try:
+                    del self.hostname_lookup_table[h.host_name]
+                except KeyError: # maybe it was not inserted in a good way, pass it
+                    pass
+                to_del.append(h.id)
+
+                
+        for s in self.services.values():
+            if s.instance_id == inst_id:
+                s_id = s.id
+                try:
+                    del self.servicename_lookup_table[s.host_name + s.service_description]
+                except: # not found? not a crime
+                    pass
+                try:
+                    del self.services[s_id]
+                except: #maybe the hsot is deleted before we got it's service?
+                    print "Debug warning : host service deleted but not found!"
+                to_del_srv.append(s_id)
+
+        # Now clean hostgroups too
+        for hg in self.hostgroups.values():
+            print "Len before exclude", len(hg.members)
+            # Exclude from members the hosts with this inst_id
+            hg.members = [h for h in hg.members if h.instance_id != inst_id]
+            print "Len after", len(hg.members)
+
+        # Now clean service groups
+        for sg in self.servicegroups.values():
+            sg.members = [s for s in sg.members if s.instance_id != inst_id]
 
         # Ok, really clean the hosts
         for i in to_del:
@@ -167,6 +183,14 @@ class Livestatus_broker(BaseModule):
                 del self.hosts[i]
             except KeyError: # maybe it was not inserted in a good way, pass it
                 pass
+
+        # And services
+        for i in to_del_srv:
+            try:
+                del self.services[i]
+            except KeyError: # maybe it was not inserted in a good way, pass it
+                pass
+
 
 
     def manage_update_program_status_brok(self, b):
@@ -266,8 +290,13 @@ class Livestatus_broker(BaseModule):
     def manage_initial_service_status_brok(self, b):
         data = b.data
         s_id = data['id']
+
+        inst_id = data['instance_id']
+        
         #print "Creating Service:", s_id, data
         s = Service({})
+        s.instance_id = inst_id
+
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
         
@@ -284,6 +313,7 @@ class Livestatus_broker(BaseModule):
         self.services[s_id] = s
         self.servicename_lookup_table[s.host_name + s.service_description] = s_id
         self.number_of_objects += 1
+
 
     #In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
