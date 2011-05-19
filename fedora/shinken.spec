@@ -6,17 +6,26 @@ Source0:        http://shinken-monitoring.org/pub/shinken-%{version}.tar.gz
 License:        AGPLv3
 Group:          Applications/System
 URL:            http://www.shinken-monitoring.org/
-Requires:       python >= 2.6, python-pyro, chkconfig, logrotate, systemd-units, nmap
+Requires:       python >= 2.6, python-pyro, python-simplejson, python-sqlite2, logrotate, systemd-units, nmap
 BuildRequires:  python-devel, systemd-units
 BuildRoot:      %{_tmppath}/%{name}-%{version}-buildroot
+# Patch to fix wrong path for shinken-broker
 Patch0:         shinken-brokerd.ini.patch
+# Patch to fix wrong path for shinken-poller
 Patch1:         shinken-pollerd.ini.patch
+# Patch to fix wrong path for shinken-reactionner
 Patch2:         shinken-reactionnerd.ini.patch
+# Patch to fix wrong path for shinken-receiver
 Patch3:         shinken-receiverd.ini.patch
+# Patch to fix wrong path for shinken-scheduler
 Patch4:         shinken-schedulerd.ini.patch
+# Patch to fix wrong path for shinken-discovery 
 Patch5:         shinken-discovery.cfg.patch
+# Patch to fix shinken configuration
 Patch6:         shinken-specific.cfg.patch
+# Patch to fix shinken configuration
 Patch7:         shinken-servicegroups.cfg.patch
+# Patch to fix shinken configuration
 Patch8:         shinken-localhost.cfg.patch
 Source1:        shinken.logrotate
 Source2:        shinken-arbiter.service
