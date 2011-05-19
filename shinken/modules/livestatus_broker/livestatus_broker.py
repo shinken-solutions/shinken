@@ -145,20 +145,28 @@ class Livestatus_broker(BaseModule):
         for h in self.hosts.values():
             # If the host was in this instance, del it
             if h.instance_id == inst_id:
-                for s in h.services.values():
-                    s_id = service.id
+                for s in h.services:
+                    s_id = s.id
                     try:
                         del self.servicename_lookup_table[s.host_name + s.service_description]
+                    except: # not found? not a crime
+                        pass
+                    try:
                         del self.services[s_id]
                     except: #maybe the hsot is deleted before we got it's service?
                         print "Debug warning : host service deleted but not found!"
-                        
-                    del self.hostname_lookup_table[h.host_name]
+                    try:
+                        del self.hostname_lookup_table[h.host_name]
+                    except KeyError: # maybe it was not inserted in a good way, pass it
+                        pass
                     to_del.append(h.id)
 
         # Ok, really clean the hosts
         for i in to_del:
-            del self.hosts[i]
+            try:
+                del self.hosts[i]
+            except KeyError: # maybe it was not inserted in a good way, pass it
+                pass
 
 
     def manage_update_program_status_brok(self, b):
