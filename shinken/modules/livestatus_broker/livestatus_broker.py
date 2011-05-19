@@ -238,13 +238,26 @@ class Livestatus_broker(BaseModule):
         hg_id = data['id']
         members = data['members']
         del data['members']
-        #print "Creating hostgroup:", hg_id, data
-        hg = Hostgroup()
+        
+        # Maybe we already got this hostgroup. If so, use the existing object
+        # because in different instance, we will ahve the same group with different
+        # elements
+        if hg_id in self.hostgroups:
+            hg = self.hostgroups[hg_id]
+        else: #need to create a new one
+            #print "Creating hostgroup:", hg_id, data
+            hg = Hostgroup()
+            # Set by default members to a void list
+            setattr(hg, 'members', [])
+
         self.update_element(hg, data)
-        setattr(hg, 'members', [])
+
         for (h_id, h_name) in members:
             if h_id in self.hosts:
                 hg.members.append(self.hosts[h_id])
+                # Should got uniq value, do uniq this list
+                hg.members = list(set(hg.members))
+
         #print "HG:", hg
         self.hostgroups[hg_id] = hg
         self.number_of_objects += 1
@@ -294,13 +307,25 @@ class Livestatus_broker(BaseModule):
         sg_id = data['id']
         members = data['members']
         del data['members']
-        #print "Creating servicegroup:", sg_id, data
-        sg = Servicegroup()
+
+        # Like for hostgroups, maybe we already got this
+        # service group from another instance, need to
+        # factorize all
+        if sg_id in self.servicegroups:
+            sg = self.servicegroups[sg_id]
+        else:
+            #print "Creating servicegroup:", sg_id, data
+            sg = Servicegroup()
+            # By default set members as a void list
+            setattr(sg, 'members', [])
+
         self.update_element(sg, data)
-        setattr(sg, 'members', [])
+
         for (s_id, s_name) in members:
             if s_id in self.services:
                 sg.members.append(self.services[s_id])
+                # Need to be sure we unique theses elements
+                sg.members = list(set(sg.members))
         #print "SG:", sg
         self.servicegroups[sg_id] = sg
         self.number_of_objects += 1
