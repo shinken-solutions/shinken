@@ -1227,9 +1227,9 @@ class SchedulingItem(Item):
         elif c.command == '_internal_host_up':
             state = 0
             c.execution_time = 0
-            c.check_time = time.time()
             c.output = 'Host assumed to be UP'
             c.long_output = c.output
+        c.check_time = time.time()
         c.exit_status = state
         #print "DBG, setting state", state
 

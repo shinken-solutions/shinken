@@ -382,9 +382,11 @@ class Nrpe_poller(BaseModule):
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
         for chk in self.checks:
+            now = time.time()
             if chk.status == 'queue':
                 # Ok we launch it
                 chk.status = 'launched'
+                chk.check_time = now
 
                 # Want the args of the commands so we parse it like a shell
                 # shlex want str only
