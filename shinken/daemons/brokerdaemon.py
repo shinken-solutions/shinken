@@ -104,9 +104,11 @@ class Broker(BaseSatellite):
                     c_id = data['full_instance_id']
                     logger.log('A module is asking me to get all initial data from the scheduler %d' % c_id)
                     # so we just reset the connection adn the running_id, it will just get all new things
-                    self.schedulers[c_id]['con'] = None
-                    self.schedulers[c_id]['running_id'] = 0
-            
+                    try:
+                        self.schedulers[c_id]['con'] = None
+                        self.schedulers[c_id]['running_id'] = 0
+                    except KeyError: # maybe this instance was not known, forget it
+                        print "WARNING: a module ask me a full_instance_id for an unknown ID!", c_id
 
 
     # Get teh good tabs for links by the kind. If unknown, return None
