@@ -946,6 +946,10 @@ class Scheduler:
                 b = i.get_initial_status_brok()
                 self.add(b)
 
+        # Add a brok to say that we finished all initial_pass
+        b = Brok('initial_broks_done', {'instance_id' : self.instance_id})
+        self.add(b)
+
         # We now have all full broks
         self.has_full_broks = True
 
