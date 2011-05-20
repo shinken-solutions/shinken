@@ -266,9 +266,10 @@ class Livestatus_broker(BaseModule):
         # Maybe we already got this hostgroup. If so, use the existing object
         # because in different instance, we will ahve the same group with different
         # elements
-        if hg_id in self.hostgroups:
-            hg = self.hostgroups[hg_id]
-        else: #need to create a new one
+        name = data['hostgroup_name']
+        hg = self.find_hostgroup(name)
+        # If we got none, create a new one
+        if not hg:
             #print "Creating hostgroup:", hg_id, data
             hg = Hostgroup()
             # Set by default members to a void list
@@ -341,9 +342,9 @@ class Livestatus_broker(BaseModule):
         # Like for hostgroups, maybe we already got this
         # service group from another instance, need to
         # factorize all
-        if sg_id in self.servicegroups:
-            sg = self.servicegroups[sg_id]
-        else:
+        name = data['servicegroup_name']
+        sg = self.find_servicegroup(name)
+        if not sg:
             #print "Creating servicegroup:", sg_id, data
             sg = Servicegroup()
             # By default set members as a void list
@@ -742,6 +743,18 @@ class Livestatus_broker(BaseModule):
         for s in self.schedulers.values():
             if s.scheduler_name == name:
                 return s
+        return None
+
+    def find_hostgroup(self, name):
+        for hg in self.hostgroups.values():
+            if hg.hostgroup_name == name:
+                return hg
+        return None
+
+    def find_servicegroup(self, name):
+        for sg in self.servicegroups.values():
+            if sg.servicegroup_name == name:
+                return sg
         return None
 
 
