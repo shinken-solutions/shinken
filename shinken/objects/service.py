@@ -121,7 +121,7 @@ class Service(SchedulingItem):
         'default_value':           StringProp(default=''),
 
         # Criticity value
-        'criticity':               IntegerProp(default='2', fill_brok=['full_status'], retention=True),
+        'criticity':               IntegerProp(default='2', fill_brok=['full_status']),
     })
 
     # properties used in the running state
