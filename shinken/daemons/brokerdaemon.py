@@ -472,11 +472,13 @@ class Broker(BaseSatellite):
         
         # and for external queues
         # REF: doc/broker-modules.png (3)
-        for b in self.broks:
+        # We put to external queues broks that was not already send
+        queues = self.modules_manager.get_external_to_queues()
+        for b in (b for b in self.broks if getattr(b, 'need_send_to_ext', True)):
             # if b.type != 'log':
-            #     print "Broker : put brok id : %d" % b.id
-            for q in self.modules_manager.get_external_to_queues():
+            for q in queues:
                 q.put(b)
+                b.need_send_to_ext = False
 
         # We must had new broks at the end of the list, so we reverse the list
         self.broks.reverse()
