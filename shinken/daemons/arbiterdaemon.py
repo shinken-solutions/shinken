@@ -75,29 +75,29 @@ class IForArbiter(Interface):
 
     # Here a function called by check_shinken to get deamon status
     def get_satellite_status(self, daemon_type, daemon_name):
-       daemon_name_attr = daemon_type+"_name"
-       daemons = self.app.get_daemons(daemon_type)
-       if daemons:
-           for dae in daemons:
-               if hasattr(dae, daemon_name_attr) and getattr(dae, daemon_name_attr) == daemon_name:
-                       if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
-                               return {'alive' : dae.alive, 'spare' : dae.spare}
-       return None
+        daemon_name_attr = daemon_type+"_name"
+        daemons = self.app.get_daemons(daemon_type)
+        if daemons:
+            for dae in daemons:
+                if hasattr(dae, daemon_name_attr) and getattr(dae, daemon_name_attr) == daemon_name:
+                    if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
+                        return {'alive' : dae.alive, 'spare' : dae.spare}
+        return None
 
     # Here a function called by check_shinken to get deamons list
     def get_satellite_list(self, daemon_type):
-       satellite_list = []
-       daemon_name_attr = daemon_type+"_name"
-       daemons = self.app.get_daemons(daemon_type)
-       if daemons:
+        satellite_list = []
+        daemon_name_attr = daemon_type+"_name"
+        daemons = self.app.get_daemons(daemon_type)
+        if daemons:
             for dae in daemons:
-               if hasattr(dae, daemon_name_attr):
-                   satellite_list.append(getattr(dae, daemon_name_attr))
-               else:
-                   #If one deamon has no name... ouch!
-                   return None
+                if hasattr(dae, daemon_name_attr):
+                    satellite_list.append(getattr(dae, daemon_name_attr))
+                else:
+                    #If one deamon has no name... ouch!
+                    return None
             return satellite_list
-       return None
+        return None
 
 
 # Main Arbiter Class
@@ -610,19 +610,19 @@ class Arbiter(Daemon):
     # This function returns the part of the conf where are stored the daemons of
     # a given daemon type
     def get_daemons(self, daemon_type):
-      # We get the list of the daemons from their links
-      # 'schedulerlinks' for schedulers, 'arbiterlinks' for arbiters
-      # and 'pollers', 'brokers', 'reactionners' for the other
-      if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
-          daemon_links = daemon_type+'links'
-      else:
-          daemon_links = daemon_type+'s'
+    # We get the list of the daemons from their links
+    # 'schedulerlinks' for schedulers, 'arbiterlinks' for arbiters
+    # and 'pollers', 'brokers', 'reactionners' for the other
+        if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
+            daemon_links = daemon_type+'links'
+        else:
+            daemon_links = daemon_type+'s'
 
-      if hasattr(self.conf, daemon_links):
-          return getattr(self.conf, daemon_links);
+        if hasattr(self.conf, daemon_links):
+            return getattr(self.conf, daemon_links);
 
-      # If the links cannot be found, we have a problem
-      return None
+        # If the links cannot be found, we have a problem
+        return None
 
 
     # Helper functions for retention modules

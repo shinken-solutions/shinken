@@ -69,16 +69,16 @@ def check_deamons_numbers(result, target):
     #TODO : perfdata to graph deamons would be nice (in big HA architectures)
     #if alive_number <= critical, then we have a big problem
     if alive_number <= options.critical:
-	print "CRITICAL - only %d/%d %s(s) UP. Down elements : %s" % (alive_number, total_number, target, dead_list)  
-	raise SystemExit, CRITICAL
+        print "CRITICAL - only %d/%d %s(s) UP. Down elements : %s" % (alive_number, total_number, target, dead_list)  
+        raise SystemExit, CRITICAL
     #We are not in a case where there is no more daemons, but are there daemons down?
     elif dead_number >= options.warning:
-	print "WARNING - %d/%d %s(s) DOWN :%s" % (dead_number, total_number, target, dead_list)
-	raise SystemExit, WARNING
+        print "WARNING - %d/%d %s(s) DOWN :%s" % (dead_number, total_number, target, dead_list)
+        raise SystemExit, WARNING
         #Everything seems fine. But that's no surprise, is it?
     else :
-	print "OK - %d/%d %s(s) UP, with %d/%d spare(s) UP" % (alive_number, total_number, target, alive_spare_number, total_spare_number)
-	raise SystemExit, OK
+        print "OK - %d/%d %s(s) UP, with %d/%d spare(s) UP" % (alive_number, total_number, target, alive_spare_number, total_spare_number)
+        raise SystemExit, OK
 
 # Adding options. None are required, check_shinken will use shinken defaults
 #TODO : Add more control in args problem and usage than the default OptionParser one
@@ -130,7 +130,7 @@ if options.daemon:
             raise SystemExit, CRITICAL
     else:
         print 'UNKNOWN - %s status could not be retrieved' % daemon_name
-	raise SystemExit, UNKNOWN
+        raise SystemExit, UNKNOWN
 else:
     # If no daemonname is specified, we want a general overview of the "target" daemons
     result = {}
@@ -142,7 +142,7 @@ else:
         raise SystemExit, CRITICAL
 
     for daemon_name in daemon_list:
-	# Getting individual daemon and putting status info in the result dictionnary
+        # Getting individual daemon and putting status info in the result dictionnary
         try:
             result[daemon_name] = Pyro.core.getProxyForURI(uri).get_satellite_status(options.target, daemon_name)
         except Pyro.errors.ProtocolError, exp:
@@ -151,7 +151,7 @@ else:
 
     # Now we have all data
     if result:
-	check_deamons_numbers(result, options.target)
+        check_deamons_numbers(result, options.target)
     else :
-	print 'UNKNOWN - Arbiter could not retrieve status for %s' % options.target
-	raise SystemExit, UNKNOWN
+        print 'UNKNOWN - Arbiter could not retrieve status for %s' % options.target
+        raise SystemExit, UNKNOWN
