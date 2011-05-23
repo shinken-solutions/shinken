@@ -526,7 +526,8 @@ class Satellite(BaseSatellite):
                     tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, \
                                              poller_tags=self.poller_tags, \
                                              reactionner_tags=self.reactionner_tags, \
-                                             worker_name=self.name)
+                                             worker_name=self.name, \
+                                             module_types=self.q_by_mod.keys())
                     print "Ask actions to", sched_id, "got", len(tmp)
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)

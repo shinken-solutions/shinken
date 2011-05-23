@@ -71,6 +71,42 @@ class TestPollerTagGetchecks(ShinkenTest):
             self.assert_(c.command.startswith('plugins/test_hostcheck.pl'))
 
 
+#Change ME :)
+    def test_good_checks_get_only_tags_with_specific_module_types(self):
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+
+        # schedule the host so it will have a check :)
+        # and for ce the execution now
+        host.schedule()
+        self.assert_(host.check_command.command.poller_tag == 'mytestistrue')
+        for a in host.actions:
+            print "Tag", a.poller_tag
+            a.t_to_go = 0
+        svc.schedule()
+        for a in svc.actions:
+            print "Tag", a.poller_tag
+            a.t_to_go = 0
+        # the scheduler need to get this new checks in its own queues
+        self.sched.get_new_actions()
+
+
+        # Ask for badly named module type
+        untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'], module_types=['fork'])
+        print "Got untaggued_checks for forks", untaggued_checks
+        self.assert_(len(untaggued_checks) > 0)
+        for c in untaggued_checks:
+            # Should be the service one, but not the host one
+            self.assert_(c.command.startswith('plugins/test_servicecheck.pl'))
+
+        # Now get only tag ones and with a bad module type, so get NOTHING
+        taggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['mytestistrue'], module_types=['myassischicken'])
+        self.assert_(len(taggued_checks) == 0)
+
 if __name__ == '__main__':
     unittest.main()
 

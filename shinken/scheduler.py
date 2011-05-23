@@ -381,7 +381,8 @@ class Scheduler:
     # Can get checks and actions (notifications and co)
     def get_to_run_checks(self, do_checks=False, do_actions=False,
                           poller_tags=['None'], reactionner_tags=['None'], \
-                              worker_name='none'):
+                              worker_name='none', module_types=['fork']
+                          ):
         res = []
         now = time.time()
 
@@ -392,7 +393,8 @@ class Scheduler:
                 #  with same name, go for it
                 # if do_check, call for poller, and so poller_tags by default is ['None']
                 # by default poller_tag is 'None' and poller_tags is ['None']
-                if c.poller_tag in poller_tags:
+                # and same for module_type, the default is the 'fork' type
+                if c.poller_tag in poller_tags and c.module_type in module_types:
                     # must be ok to launch, and not an internal one (business rules based)
                     if c.status == 'scheduled' and c.is_launchable(now) and not c.internal:
                         c.status = 'inpoller'
@@ -410,6 +412,10 @@ class Scheduler:
                 # by default reactionner_tag is 'None' and ractioner_tags is ['None'] too
                 # So if not the good one, loop for next :)
                 if not a.reactionner_tag in reactionner_tags:
+                    continue
+                
+                # same for module_type
+                if not a.module_type in module_types:
                     continue
 
                 # And now look for can launch or not :)
@@ -583,7 +589,7 @@ class Scheduler:
             con = p['con']
             poller_tags = p['poller_tags']
             if con is not None:
-            # get actions
+                # get actions
                 lst = self.get_to_run_checks(True, False, poller_tags, worker_name=p['name'])
                 try:
                     # intial ping must be quick

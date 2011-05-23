@@ -65,7 +65,7 @@ class Notification(Action):
         'sched_id':            IntegerProp(default=0),
         'timeout':             IntegerProp(default=10),
         'check_time':          IntegerProp(default=0),
-        'module_type':         StringProp (default='', fill_brok=['full_status']),
+        'module_type':         StringProp (default='fork', fill_brok=['full_status']),
         'worker':              StringProp (default='none'),
         'reactionner_tag':     StringProp (default='None'),
     }
@@ -215,4 +215,6 @@ class Notification(Action):
             self.reactionner_tag = 'None'
         if not hasattr(self, 'worker'):
             self.worker = 'none'
-
+        if not getattr(self, 'module_type', None):
+            self.module_type = 'fork'
+    

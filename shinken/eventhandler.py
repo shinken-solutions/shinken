@@ -48,7 +48,7 @@ class EventHandler(Action):
         'timeout':        IntegerProp(default=10),
         'check_time':     IntegerProp(default=0),
         'command':        StringProp (default=''),
-        'module_type':    StringProp (default=''),
+        'module_type':    StringProp (default='fork'),
         'worker':         StringProp (default='none'),
         'reactionner_tag':     StringProp (default='None'),
     }
@@ -143,3 +143,5 @@ class EventHandler(Action):
                 setattr(self, prop, state[prop])
         if not hasattr(self, 'worker'):
             self.worker = 'none'
+        if not getattr(self, 'module_type', None):
+            self.module_type = 'fork'

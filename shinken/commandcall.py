@@ -46,7 +46,7 @@ class CommandCall(DummyCommandCall):
         'command':         StringProp(),
         'poller_tag':      StringProp(default='None'),
         'reactionner_tag': StringProp(default='None'),
-        'module_type':     StringProp(default=None),
+        'module_type':     StringProp(default='fork'),
         'valid' :          BoolProp(default=False),
         'args' :           StringProp(default=[]),
     }
