@@ -100,6 +100,18 @@ fi
 # Reads configuration variable file if it is present
 [ -r "$SHINKEN_DEFAULT_FILE" ] && . "$SHINKEN_DEFAULT_FILE"
 
+
+# Now look if some required variables are pre defined :
+if ! test "$SHINKENCFG"
+then
+    SHINKENCFG="$ETC/nagios.cfg"
+fi
+if ! test "$SHINKENSPECIFICCFG"
+then
+    SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
+fi
+
+
 # Now place us in our var directory so even our arbiter will be
 # happy for opening its pid and cmd files
 cd $VAR
@@ -137,21 +149,46 @@ echo_failure() {
 #
 # returns the pid for a submodule
 #
+
+getpidfile() {
+    mod="$1"
+    modPIDVAR=$(echo $mod | tr 'a-z' 'A-Z')"PID"
+    pidfile=$(echo $(eval echo \${$modPIDVAR}))
+    if test "$pidfile"
+    then
+        echo "$pidfile"
+    else
+        echo "$VAR/${mod}d.pid"
+    fi
+}
+
 getmodpid() {
     mod=$1
-    pidfile="$VAR/${mod}d.pid"
+    pidfile=$(getpidfile "$mod")
     if [ -s $pidfile ]; then
         cat $pidfile
     fi
 }
 
 
+getdebugfile() {
+    mod="$1"
+    modDEBUG=$(echo $mod | tr 'a-z' 'A-Z')"DEBUGFILE"
+    debugfile=$(echo $(eval echo \${$modDEBUG}))
+    if test "$debugfile"
+    then
+        echo "$debugfile"
+    else
+        echo "${VAR}/${mod}-debug.log"
+    fi
+}
+
 #
 # Display status
 #
 do_status() {
     mod=$1
-    pidfile="$VAR/${mod}d.pid"
+    pidfile=$(getpidfile "$mod")
     [ -e "$pidfile" ] || {
         echo "$mod NOT RUNNING (pidfile ($pidfile) not exist)"
         return 3
@@ -185,12 +222,12 @@ do_start() {
         log_failure_msg "FAILED: did not found $mod file ($modfilepath) ; are you sure shinken-$mod is installed ?"
         return 5
     }
-    [ "$DEBUG" = 1 ] && DEBUGCMD="--debug $VAR/${mod}-debug.log"
+    [ "$DEBUG" = 1 ] && DEBUGCMD="--debug "$(getdebugfile "$mod")
     if [ "$mod" != "arbiter" ]; then
         output=$("$modfilepath" -d -c "$ETC/${mod}d.ini" $DEBUGCMD 2>&1)
         rc=$?
     else
-        output=$("$modfilepath" -d -c "$ETC/nagios.cfg" -c "$ETC/shinken-specific.cfg" $DEBUGCMD 2>&1)
+        output=$("$modfilepath" -d -c "$SHINKENCFG" -c "$SHINKENSPECIFICCFG" $DEBUGCMD 2>&1)
         rc=$?
     fi
     # debug:
@@ -412,3 +449,4 @@ case "$CMD" in
         exit 2
         ;;
 esac
+

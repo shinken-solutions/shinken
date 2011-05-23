@@ -18,6 +18,7 @@ SHINKENCFG="$ETC/nagios.cfg"
 #configuration (only the shinken.cfg part)
 SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
 
+
 # The command to launch
 ARBITERDAEMON=$BIN/shinken-arbiter
 
@@ -29,6 +30,9 @@ else
     ARBITERPID="$VAR/arbiterd.pid"
 fi
 
+ARBITERDEBUGFILE="$VAR/arbiter-debug.log"
+
+
 ###SCHEDULER PART
 # location of the scheduler daemon configuration
 SCHEDULERCFG="$ETC/schedulerd.ini"
@@ -39,6 +43,7 @@ SCHEDULERDAEMON=$BIN/shinken-scheduler
 #The SCHEDULER PID
 SCHEDULERPID="$VAR/schedulerd.pid"
 
+SCHEDULERDEBUGFILE="$VAR/scheduler-debug.log"
 
 ###POLLER PART
 # location of the poller daemon configuration
@@ -49,6 +54,8 @@ POLLERDAEMON=$BIN/shinken-poller
 
 #The poller pid
 POLLERPID="$VAR/pollerd.pid"
+
+POLLERDEBUGFILE="$VAR/poller-debug.log"
 
 
 ###REACTIONNER PART
@@ -61,6 +68,8 @@ REACTIONNERDAEMON=$BIN/shinken-reactionner
 #The reactionner pid
 REACTIONNERPID="$VAR/reactionnerd.pid"
 
+REACTIONNERDEBUGFILE="$VAR/reactionner-debug.log"
+
 
 ###BROKER PART
 # location of the broker daemon configuration
@@ -72,6 +81,8 @@ BROKERDAEMON=$BIN/shinken-broker
 #The broker pid
 BROKERPID="$VAR/brokerd.pid"
 
+BROKERDEBUGFILE="$VAR/broker-debug.log"
+
 
 ###RECEIVER PART
 # location of the broker daemon configuration
@@ -82,6 +93,8 @@ RECEIVERDAEMON=$BIN/shinken-receiver
 
 #The broker pid
 RECEIVERPID="$VAR/receiverd.pid"
+
+RECEIVERDEBUGFILE="$VAR/receiver-debug.log"
 
 
 # nicelevel to run nagios daemon with
