@@ -614,7 +614,7 @@ Also put default value in the properties if some are missing in the config_file 
         for line in self.get_header():
             print line
 
-    def handleRequests(self, timeout, suppl_socks=[]):
+    def handleRequests(self, timeout, suppl_socks=None):
         """ Wait up to timeout to handle the pyro daemon requests.
 If suppl_socks is given it also looks for activity on that list of fd.
 Returns a 3-tuple:
@@ -623,6 +623,8 @@ If not timeout (== some fd got activity):
  - first arg is elapsed time since wait, 
  - second arg is sublist of suppl_socks that got activity.
  - third arg is possible system time change value, or 0 if no change. """
+        if suppl_socks is None:
+            suppl_socks = []
         before = time.time()
         socks = self.pyro_daemon.get_sockets()
         if suppl_socks:
