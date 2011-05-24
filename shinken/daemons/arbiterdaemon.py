@@ -555,7 +555,7 @@ class Arbiter(Daemon):
                         suppl_socks = [ self.fifo ]
                     else:
                         suppl_socks = None
-                elapsed += now - time.time()
+                elapsed += time.time() - now
 
             if elapsed or ins:
                 timeout -= elapsed
