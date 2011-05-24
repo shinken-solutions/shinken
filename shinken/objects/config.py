@@ -131,7 +131,7 @@ class Config(Item):
         'log_service_retries':      BoolProp(default='1', class_inherit=[(Service, 'log_retries')]),
         'log_host_retries':         BoolProp(default='1', class_inherit=[(Host, 'log_retries')]),
         'log_event_handlers':       BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
-        'log_initial_states':       BoolProp(default='1'),
+        'log_initial_states':       BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
         'log_external_commands':    BoolProp(default='1'),
         'log_passive_checks':       BoolProp(default='1'),
         'global_host_event_handler': StringProp(default='', class_inherit=[(Host, 'global_event_handler')]),

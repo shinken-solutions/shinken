@@ -952,6 +952,12 @@ class Scheduler:
                 b = i.get_initial_status_brok()
                 self.add(b)
 
+        # Ask for INITIAL logs for services and hosts
+        for i in self.hosts:
+            i.raise_initial_state()
+        for i in self.services:
+            i.raise_initial_state()
+
         # Add a brok to say that we finished all initial_pass
         b = Brok('initial_broks_done', {'instance_id' : self.instance_id})
         self.add(b)
