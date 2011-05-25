@@ -129,8 +129,8 @@ class NSCA_arbiter(BaseModule):
 
         (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
         hostname =  hostname_dirty.split("\0", 1)[0]
-        service = service_dirty.partition("\0", 1)[0]
-        output = output_dirty.partition("\0", 1)[0]
+        service = service_dirty.split("\0", 1)[0]
+        output = output_dirty.split("\0", 1)[0]
         return (timestamp, rc, hostname, service, output)
 
     def post_command(self, timestamp, rc, hostname, service, output):
