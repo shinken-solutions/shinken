@@ -632,6 +632,13 @@ class Host(SchedulingItem):
         logger.log('HOST ALERT: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.attempt, self.output))
 
 
+    # If the configuration allow it, raise an initial log like
+    # CURRENT HOST STATE: server;DOWN;HARD;1;I don't know what to say...
+    def raise_initial_state(self):
+        if self.__class__.log_initial_states:
+            logger.log('CURRENT HOST STATE: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.attempt, self.output))
+
+
     # Add a log entry with a Freshness alert like:
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     # I'm forcing an immediate check of the host.
