@@ -237,6 +237,7 @@ class ObjectsCacheFile:
         if elt_type in ObjectsCacheFile.out_map:
             type_map = ObjectsCacheFile.out_map[elt_type]
             for display in type_map:
+
                 value = ''
                 if 'prop' not in type_map[display]:
                     prop = display
