@@ -374,9 +374,6 @@ class Realms(Itemgroups):
                     new_mbrs.append(new_mbr)
             #We find the id, we remplace the names
             p.realm_members = new_mbrs
-            print "For realm", p.get_name()
-            for m in p.realm_members:
-                print "Member:", m.get_name()
 
         #Now put higher realm in sub realms
         #So after they can
@@ -411,6 +408,6 @@ class Realms(Itemgroups):
 
     def get_default(self):
         for r in self:
-            if r.default:
+            if getattr(r, 'default', False):
                 return r
         return None

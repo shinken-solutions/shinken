@@ -401,11 +401,9 @@ class Host(SchedulingItem):
             logger.log("%s : My check_period is not correct" % self.get_name())
             state = False
         
-        if getattr(self, 'realm', None) is None:
-            logger.log("%s : My realm is not correct" % self.get_name())
-            state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
+
         if hasattr(self, 'host_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.host_name:
@@ -980,19 +978,15 @@ class Hosts(Items):
         for r in realms:
             if getattr(r, 'default', False):
                 default_realm = r
-        if default_realm is None:
-            print "Error : there is no default realm defined!"
+        #if default_realm is None:
+        #    print "Error : there is no default realm defined!"
         for h in self:
-            #print h.get_name(), h.realm
             if h.realm is not None:
                 p = realms.find_by_name(h.realm.strip())
-                if p is not None:
-                    h.realm = p
-                    print "Host", h.get_name(), "is in the realm", p.get_name()
-                else:
+                if p is None:
                     err = "Error : the host %s got a invalid realm (%s)!" % (h.get_name(), h.realm)
                     h.configuration_errors.append(err)
-                    h.realm = None
+                h.realm = p
             else:
                 #print "Notice : applying default realm %s to host %s" % (default_realm.get_name(), h.get_name())
                 h.realm = default_realm

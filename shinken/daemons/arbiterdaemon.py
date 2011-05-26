@@ -352,8 +352,8 @@ class Arbiter(Daemon):
         self.conf.is_correct()
 
         #If the conf is not correct, we must get out now
-        if not self.conf.conf_is_correct:
-            sys.exit("Configuration is incorrect, sorry, I bail out")
+        #if not self.conf.conf_is_correct:
+        #    sys.exit("Configuration is incorrect, sorry, I bail out")
 
         # REF: doc/shinken-conf-dispatching.png (2)
         logger.log("Cutting the hosts and services into parts")
@@ -362,6 +362,7 @@ class Arbiter(Daemon):
         # The conf can be incorrect here if the cut into parts see errors like
         # a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
+            self.conf.show_errors()
             sys.exit("Configuration is incorrect, sorry, I bail out")
 
         logger.log('Things look okay - No serious problems were detected during the pre-flight check')

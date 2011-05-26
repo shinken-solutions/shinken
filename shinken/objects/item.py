@@ -629,10 +629,12 @@ class Items(object):
                 i = self.items[id]
                 print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from
                 r = False
+
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
             print err
+
         for err in self.configuration_errors:
             print err
             r = False
@@ -641,7 +643,7 @@ class Items(object):
         for i in self:
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown")
-                print "Error: In ", i.get_name(), "is incorrect ; from", n
+                print "Error: In", i.get_name(), "is incorrect ; from", n
                 r = False        
         
         return r
