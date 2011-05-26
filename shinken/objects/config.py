@@ -1405,17 +1405,19 @@ class Config(Item):
         for r in self.realms:
             #print "Load balancing realm", r.get_name()
             packs = {}
-            #create roundrobin iterator for id of cfg
-            #So dispatching is loadbalanced in a realm
-            #but add a entry in the roundrobin tourniquet for
-            #every weight point schedulers (so Weight round robin)
+            # create roundrobin iterator for id of cfg
+            # So dispatching is loadbalanced in a realm
+            # but add a entry in the roundrobin tourniquet for
+            # every weight point schedulers (so Weight round robin)
             weight_list = []
             no_spare_schedulers = [s for s in r.schedulers if not s.spare]
             nb_schedulers = len(no_spare_schedulers)
 
-            #Maybe there is no scheduler in the realm, it's can be a
-            #big problem if there are elements in packs
-            nb_elements = len([elt for elt in [pack for pack in r.packs]])
+            # Maybe there is no scheduler in the realm, it's can be a
+            # big problem if there are elements in packs
+            nb_elements = 0
+            for pack in r.packs:
+                nb_elements += len(pack)
             logger.log("Number of hosts in the realm %s : %d" %(r.get_name(), nb_elements))
 
             if nb_schedulers == 0 and nb_elements != 0:
@@ -1434,7 +1436,7 @@ class Config(Item):
 
             rr = itertools.cycle(weight_list)
 
-            #we must have nb_schedulers packs)
+            # we must have nb_schedulers packs)
             for i in xrange(0, nb_schedulers):
                 packs[i] = []
 
