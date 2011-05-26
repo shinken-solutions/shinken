@@ -114,6 +114,7 @@ launch_and_assert test_contactgroup_nomembers.py
 launch_and_assert test_service_nohost.py
 launch_and_assert test_bad_sat_realm_conf.py
 launch_and_assert test_bad_realm_conf.py
+launch_and_assert test_no_broker_in_realm_warning.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

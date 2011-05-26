@@ -409,6 +409,7 @@ class Host(SchedulingItem):
                 if c in self.host_name:
                     logger.log("%s : My host_name got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
+
         return state
 
 

@@ -685,6 +685,9 @@ class Config(Item):
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
 
+        # Ok, now update all realms with backlinks of
+        # satellites
+        self.realms.prepare_for_satellites_conf()
 
 
     #Some properties are dangerous to be send like that
@@ -1224,7 +1227,14 @@ class Config(Item):
                 r = False
                 logger.log("\t%s conf incorrect !!" % (x))
             logger.log('\tChecked %d %s' % (len(cur), x))
-    
+
+        # Look that all scheduler got a broker that will take brok.
+        # If there are no, raiea Warning
+        for s in self.schedulerlinks:
+            r = s.realm
+            if r:
+                if len(r.potential_brokers) == 0:
+                    logger.log("Warning : the scheduler %s got no broker in its realm or upper" % s.get_name())
 
         self.conf_is_correct = r
 

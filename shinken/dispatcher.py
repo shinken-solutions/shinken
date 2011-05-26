@@ -86,10 +86,6 @@ class Dispatcher:
         for poller in self.pollers:
             poller.add_global_conf_parameters(parameters)
 
-        #Now realm will have a cfg pool for satellites
-        for r in self.realms:
-            r.prepare_for_satellites_conf()
-
         # Reset need_conf for all schedulers.
         for s in self.schedulers:
             s.need_conf = True

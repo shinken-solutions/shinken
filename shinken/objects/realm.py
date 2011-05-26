@@ -411,3 +411,8 @@ class Realms(Itemgroups):
             if getattr(r, 'default', False):
                 return r
         return None
+
+
+    def prepare_for_satellites_conf(self):
+        for r in self:
+            r.prepare_for_satellites_conf()
