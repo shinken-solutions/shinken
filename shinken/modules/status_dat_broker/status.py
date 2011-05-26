@@ -270,7 +270,7 @@ class StatusFile:
                         value = type_map[display]['default']
                     except KeyError:  #Fuck!
                         value = ''
-                output += '\t' + display + '=' + str(value) + '\n'
+                output += '\t' + display + '=' + unicode(value) + '\n'
 
         return output
 
@@ -337,7 +337,7 @@ class StatusFile:
         #print "Create output :", output
         try :
             temp_fh, temp_status_file = tempfile.mkstemp(dir=os.path.dirname(self.path))
-            os.write(temp_fh, output)
+            os.write(temp_fh, output.encode('ascii', 'ignore'))
             os.close(temp_fh)
             os.chmod(temp_status_file, 0640)
             os.rename(temp_status_file, self.path)

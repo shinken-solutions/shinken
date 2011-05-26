@@ -61,6 +61,8 @@ class TestConfig(ShinkenTest):
         except :
             pass
 
+
+
         sl = get_instance(mod)
         print sl
         #Hack here :(
@@ -72,6 +74,11 @@ class TestConfig(ShinkenTest):
         for b in self.sched.broks.values():
             b.instance_id = 0
             sl.manage_brok(b)
+
+        # Be fun, and add some utf8 char in hosts ;)
+        for h in sl.hosts.values():
+            print h.__dict__
+            h.host_name = h.host_name + u'\xf6'
 
         #Now verify the objects.dat file
         sl.objects_cache.create_or_update()
@@ -85,7 +92,7 @@ class TestConfig(ShinkenTest):
         nb_hosts = self.nb_of_string(buf, "define host {")
         self.assert_(nb_hosts == 2)
 
-        #Same for status.dat.
+        #Same for status.dat.        
         sl.status.create_or_update()
         status = open(mod.status_file)
         buf = status.read()

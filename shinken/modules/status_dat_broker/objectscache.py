@@ -272,8 +272,8 @@ class ObjectsCacheFile:
                                     value = f()
                                 else:
                                     value = f
-
-                    if len(str(value)) == 0:
+                    
+                    if len(unicode(value)) == 0:
                         value = ''
                 elif 'required' in type_map[display] and type_map[display]['required'] == True:
                     try:
@@ -282,8 +282,9 @@ class ObjectsCacheFile:
                         value = ''
                 if value == 'none':
                     value = ''
-                if len(str(value)) > 0:
-                    output += '\t' + display + '\t' + str(value) + '\n'
+
+                if len(unicode(value)) > 0:
+                    output += u'\t' + display + u'\t' + unicode(value) + u'\n'
 
         return output
 
@@ -341,7 +342,7 @@ class ObjectsCacheFile:
 
         try :
             temp_fh, temp_objects_cache_file = tempfile.mkstemp(dir=os.path.dirname(self.path))
-            os.write(temp_fh, output)
+            os.write(temp_fh, output.encode('ascii', 'ignore'))
             os.close(temp_fh)
             os.chmod(temp_objects_cache_file, 0640)
             os.rename(temp_objects_cache_file, self.path)
