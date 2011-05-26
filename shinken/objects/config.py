@@ -1440,14 +1440,14 @@ class Config(Item):
             for i in xrange(0, nb_schedulers):
                 packs[i] = []
 
-            #Now we explode the numerous packs into nb_packs reals packs:
-            #we 'load balance' them in a roundrobin way
+            # Now we explode the numerous packs into nb_packs reals packs:
+            # we 'load balance' them in a roundrobin way
             for pack in r.packs:
                 i = rr.next()
                 for elt in pack:
                     packs[packindices[i]].append(elt)
-            #Now in packs we have the number of packs [h1, h2, etc]
-            #equal to the number of schedulers.
+            # Now in packs we have the number of packs [h1, h2, etc]
+            # equal to the number of schedulers.
             r.packs = packs
 
 
@@ -1458,7 +1458,7 @@ class Config(Item):
     # That can be need is macro in commands
     def cut_into_parts(self):
         #print "Scheduler configurated :", self.schedulerlinks
-        #I do not care about alive or not. User must have set a spare if need it
+        # I do not care about alive or not. User must have set a spare if need it
         nb_parts = len([s for s in self.schedulerlinks if not s.spare])
 
         if nb_parts == 0:
@@ -1475,9 +1475,6 @@ class Config(Item):
 
             #Now we copy all properties of conf into the new ones
             for prop, entry in Config.properties.items():
-#               if not 'usage' in entry \
-#               or not (entry['usage'] == 'unused' \
-#               or  entry['usage'] == 'unmanaged'):
                 if entry.managed and not isinstance(entry, UnusedProp):
                     val = getattr(self, prop)
                     setattr(cur_conf, prop, val)
@@ -1511,14 +1508,14 @@ class Config(Item):
 
         logger.log("Creating packs for realms")
 
-        #Just create packs. There can be numerous ones
-        #In pack we've got hosts and service
-        #packs are in the realms
-        #REF: doc/pack-creation.png
+        # Just create packs. There can be numerous ones
+        # In pack we've got hosts and service
+        # packs are in the realms
+        # REF: doc/pack-creation.png
         self.create_packs(nb_parts)
 
-        #We've got all big packs and get elements into configurations
-        #REF: doc/pack-agregation.png
+        # We've got all big packs and get elements into configurations
+        # REF: doc/pack-agregation.png
         offset = 0
         for r in self.realms:
             for i in r.packs:
@@ -1527,24 +1524,24 @@ class Config(Item):
                     self.confs[i+offset].hosts.append(h)
                     for s in h.services:
                         self.confs[i+offset].services.append(s)
-                #Now the conf can be link in the realm
+                # Now the conf can be link in the realm
                 r.confs[i+offset] = self.confs[i+offset]
             offset += len(r.packs)
             del r.packs
 
-        #We've nearly have hosts and services. Now we want REALS hosts (Class)
-        #And we want groups too
-        #print "Finishing packs"
+        # We've nearly have hosts and services. Now we want REALS hosts (Class)
+        # And we want groups too
+        # print "Finishing packs"
         for i in self.confs:
             #print "Finishing pack Nb:", i
             cfg = self.confs[i]
 
-            #Create ours classes
+            # Create ours classes
             cfg.hosts = Hosts(cfg.hosts)
             cfg.hosts.create_reversed_list()
             cfg.services = Services(cfg.services)
             cfg.services.create_reversed_list()
-            #Fill host groups
+            # Fill host groups
             for ori_hg in self.hostgroups:
                 hg = cfg.hostgroups.find_by_name(ori_hg.get_name())
                 mbrs = ori_hg.members
@@ -1555,7 +1552,7 @@ class Config(Item):
                 for h in cfg.hosts:
                     if h.id in mbrs_id:
                         hg.members.append(h)
-            #Fill servicegroup
+            # Fill servicegroup
             for ori_sg in self.servicegroups:
                 sg = cfg.servicegroups.find_by_name(ori_sg.get_name())
                 mbrs = ori_sg.members
@@ -1567,14 +1564,14 @@ class Config(Item):
                     if s.id in mbrs_id:
                         sg.members.append(s)
 
-        #Now we fill other_elements by host (service are with their host
-        #so they are not tagged)
+        # Now we fill other_elements by host (service are with their host
+        # so they are not tagged)
         for i in self.confs:
             for h in self.confs[i].hosts:
                 for j in [j for j in self.confs if j != i]: #So other than i
                     self.confs[i].other_elements[h.get_name()] = i
 
-        #We tag conf with instance_id
+        # We tag conf with instance_id
         for i in self.confs:
             self.confs[i].instance_id = i
             random.seed(time.time())
