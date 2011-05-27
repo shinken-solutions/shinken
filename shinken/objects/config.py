@@ -1231,9 +1231,9 @@ class Config(Item):
         # Look that all scheduler got a broker that will take brok.
         # If there are no, raiea Warning
         for s in self.schedulerlinks:
-            r = s.realm
-            if r:
-                if len(r.potential_brokers) == 0:
+            rea = s.realm
+            if rea:
+                if len(rea.potential_brokers) == 0:
                     logger.log("Warning : the scheduler %s got no broker in its realm or upper" % s.get_name())
 
         self.conf_is_correct = r
