@@ -4,7 +4,7 @@ Command - Shinken scheduler command.
 
 =head1 SYNOPSIS
 
-/usr/bin/shinken-scheduler  [options...]
+/usr/sbin/shinken-scheduler  [options...]
 
 =head1 DESCRIPTION
 

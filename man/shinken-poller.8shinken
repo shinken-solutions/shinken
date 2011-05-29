@@ -4,7 +4,7 @@ Command - Shinken poller command.
 
 =head1 SYNOPSIS
 
-/usr/bin/shinken-poller  [options...]
+/usr/sbin/shinken-poller  [options...]
 
 =head1 DESCRIPTION
 

@@ -4,7 +4,7 @@ Command - Shinken reactionner command.
 
 =head1 SYNOPSIS
 
-/usr/bin/shinken-reactionner  [options...]
+/usr/sbin/shinken-reactionner  [options...]
 
 =head1 DESCRIPTION
 

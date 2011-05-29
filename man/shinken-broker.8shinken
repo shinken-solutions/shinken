@@ -4,7 +4,7 @@ Command - Shinken broker command.
 
 =head1 SYNOPSIS
 
-/usr/bin/shinken-broker  [options...]
+/usr/sbin/shinken-broker  [options...]
 
 =head1 DESCRIPTION
 
