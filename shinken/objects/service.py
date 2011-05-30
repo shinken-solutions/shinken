@@ -1197,7 +1197,7 @@ class Services(Items):
         # Servicegroups property need to be fullfill for got the informations
         # And then just register to this service_group
         for s in self:
-            if not s.is_tpl():
+            if not s.is_tpl() and hasattr(s,'service_description'):
                 sname = s.service_description
                 shname = getattr(s ,'host_name', '')
                 if hasattr(s, 'servicegroups'):
