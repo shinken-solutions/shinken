@@ -24,6 +24,8 @@
 #Maybe one day host data will be usefull too
 #It will need just a new file, and a new manager :)
 
+import codecs
+
 from shinken.basemodule import BaseModule
 
 
@@ -46,7 +48,7 @@ class Service_perfdata_broker(BaseModule):
     #Conf from arbiter!
     def init(self):
         print "[%s] I open the service-perfdata file '%s'" % (self.name, self.path)
-        self.file = open(self.path, self.mode)
+        self.file = codecs.open( self.path, self.mode, "utf-8" )
 
 
     #We've got a 0, 1, 2 or 3 (or something else? ->3
@@ -76,7 +78,7 @@ class Service_perfdata_broker(BaseModule):
         s = self.template
         for m in macros:
             #print "Replacing in %s %s by %s" % (s, m, str(macros[m]))
-            s = s.replace(m, str(macros[m]))
+            s = s.replace(m, unicode(macros[m]))
         #s = "%s\t%s\t%s\t%s\t%s\t%s\n" % (int(data['last_chk']),data['host_name'], \
         #                                  data['service_description'], data['output'], \
         #                                  current_state, data['perf_data'] )
