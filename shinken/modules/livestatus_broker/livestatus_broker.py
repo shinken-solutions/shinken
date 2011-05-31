@@ -31,6 +31,7 @@ import os
 import time
 import errno
 import re
+import traceback
 try:
     import sqlite3
 except ImportError: # python 2.4 do not have it
@@ -853,8 +854,20 @@ class Livestatus_broker(BaseModule):
         os.dup2(fdtemp, 2) # standard error (2)
 
 
-
     def main(self):
+        try:
+            self.do_main()
+        except Exception, exp:
+            
+            msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
+            self.from_q.put(msg)
+            # wait 2 sec so we know that the broker got our message, and die
+            time.sleep(2)
+            raise
+
+
+
+    def do_main(self):
         #I register my exit function
         self.set_exit_handler()
         

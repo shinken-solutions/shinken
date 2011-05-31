@@ -92,7 +92,7 @@ class Broker(BaseSatellite):
             print "Adding in queue an external command", ExternalCommand.__dict__
             self.external_commands.append(elt)
         # Maybe we got a Message from the modules, it's way to ask something
-        #like from now a full data from a scheduler for example.
+        # like from now a full data from a scheduler for example.
         elif cls_type == 'message':
             # We got a message, great!
             print elt.__dict__
@@ -109,6 +109,12 @@ class Broker(BaseSatellite):
                         self.schedulers[c_id]['running_id'] = 0
                     except KeyError: # maybe this instance was not known, forget it
                         print "WARNING: a module ask me a full_instance_id for an unknown ID!", c_id
+            # Maybe a module say me that it's dead, I must log it's last words...
+            if elt.get_type() == 'ICrash':
+                data = elt.get_data()
+                logger.log('ERROR : the module %s just crash! Please look at the traceback:' % data['name'])
+                logger.log(data['trace'])
+                # The module dead will be look elsewhere and put in restarted.
 
 
     # Get teh good tabs for links by the kind. If unknown, return None
