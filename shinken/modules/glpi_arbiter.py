@@ -44,24 +44,18 @@ def get_instance(plugin):
     uri = plugin.uri
     login_name = plugin.login_name
     login_password = plugin.login_password
-    if hasattr(plugin, 'use_property'):
-        use_property = plugin.use_property
-    else:
-        use_property = 'otherserial'
-    instance = Glpi_arbiter(plugin, uri, login_name, login_password, use_property)
+    instance = Glpi_arbiter(plugin, uri, login_name, login_password)
     return instance
 
 
 
 #Just get hostname from a GLPI webservices
 class Glpi_arbiter(BaseModule):
-    def __init__(self, mod_conf, uri, login_name, login_password, use_property):
+    def __init__(self, mod_conf, uri, login_name, login_password):
         BaseModule.__init__(self, mod_conf)
         self.uri = uri
         self.login_name = login_name
         self.login_password = login_password
-        self.use_property = use_property
-
 
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
@@ -92,11 +86,6 @@ class Glpi_arbiter(BaseModule):
             h = {'command_name' : command_info['command_name'],
                  'command_line' : command_info['command_line'],
                  }
-
-            #Then take use only if there is a value inside
-            if command_info[self.use_property] != '':
-                h['use'] = command_info[self.use_property]
-
             r['commands'].append(h)
 
         # Get timeperiods
@@ -114,10 +103,6 @@ class Glpi_arbiter(BaseModule):
                  'friday' : timeperiod_info['friday'],
                  'saturday' : timeperiod_info['saturday'],
                  }
-            #Then take use only if there is a value inside
-            if timeperiod_info[self.use_property] != '':
-                h['use'] = timeperiod_info[self.use_property]
-
             r['timeperiods'].append(h)
 
         # Get hosts
@@ -136,10 +121,6 @@ class Glpi_arbiter(BaseModule):
                  'check_period' : host_info['check_period'],
                  'contacts' : host_info['contacts'],
                  }
-            #Then take use only if there is a value inside
-            if host_info[self.use_property] != '':
-                h['use'] = host_info[self.use_property]
-
             r['hosts'].append(h)
 
         # Get contacts
@@ -161,10 +142,6 @@ class Glpi_arbiter(BaseModule):
                  'email' : contact_info['email'],
                  'pager' : contact_info['pager'],
                  }
-            #Then take use only if there is a value inside
-            if contact_info[self.use_property] != '':
-                h['use'] = contact_info[self.use_property]
-
             r['contacts'].append(h)
 
         #print "Returning to Arbiter the hosts:", r
