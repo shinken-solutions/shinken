@@ -416,7 +416,7 @@ class Host(SchedulingItem):
     # Search in my service if I've got the service
     def find_service_by_name(self, service_description):
         for s in self.services:
-            if s.service_description == service_description:
+            if getattr(s, 'service_description', '__UNNAMED_SERVICE__') == service_description:
                 return s
         return None
 
