@@ -77,9 +77,26 @@ class Glpi_arbiter(BaseModule):
 
     #Ok, main function that will load hosts from GLPI
     def get_objects(self):
-        # Get hosts
-        r = {'hosts' : []}
+        r = {'commands' : [],
+             'hosts' : []}
         arg = {'session' : self.session}
+
+        # Get commands
+        all_commands = self.con.monitoring.shinkenCommands(arg)
+        print "Get all commands", all_commands
+        for command_info in all_commands:
+            print "\n\n"
+            print "Command info in GLPI", command_info
+            h = {'command_name' : command_info['command_name'],
+                 'command_line' : command_info['command_line'],
+                 }
+            #Then take use only if there is a value inside
+            if command_info[self.use_property] != '':
+                h['use'] = command_info[self.use_property]
+
+            r['commands'].append(h)
+
+        # Get hosts
         all_hosts = self.con.monitoring.shinkenHosts(arg)
         print "Get all hosts", all_hosts
         for host_info in all_hosts:
@@ -100,5 +117,5 @@ class Glpi_arbiter(BaseModule):
                 h['use'] = host_info[self.use_property]
 
             r['hosts'].append(h)
-        print "Returning to Arbiter the hosts:", r
+        #print "Returning to Arbiter the hosts:", r
         return r
