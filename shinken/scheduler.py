@@ -479,6 +479,7 @@ class Scheduler:
         if c.is_a == 'notification':
             # We will only see childnotifications here
             try:
+                timeout = False
                 if c.status == 'timeout':
                     # Unfortunately the remove_in_progress_notification
                     # sets the status to zombie, so we need to save it here.
