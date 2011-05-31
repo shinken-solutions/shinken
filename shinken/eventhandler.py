@@ -54,7 +54,7 @@ class EventHandler(Action):
     }
 
     #id = 0 #Is common to Actions
-    def __init__(self, command, id=None, timeout=10, env={}, \
+    def __init__(self, command, id=None, ref=None, timeout=10, env={}, \
                      module_type='fork', reactionner_tag='None'):
         self.is_a = 'eventhandler'
         self.type = ''
@@ -62,6 +62,7 @@ class EventHandler(Action):
         if id is None: #id != None is for copy call only
             self.id = Action.id
             Action.id += 1
+        self.ref = ref
         self._in_timeout = False
         self.timeout = timeout
         self.exit_status = 3

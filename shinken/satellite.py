@@ -251,7 +251,9 @@ class Satellite(BaseSatellite):
         except KeyError:
             pass
         # We tag it as want return, and move it in the wait return queue
-        action.status = 'waitforhomerun'
+        # Stop, if it is "timeout" we need this information later 
+        # in the scheduler
+        #action.status = 'waitforhomerun'
         try:
             self.schedulers[sched_id]['wait_homerun'][action.get_id()] = action
         except KeyError:

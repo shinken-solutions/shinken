@@ -31,7 +31,7 @@ __all__ = ( 'Action' )
 
 valid_exit_status = (0, 1, 2, 3)
 
-only_copy_prop = ('id', 'status', 'command', 't_to_go', 'timeout', 'env', 'module_type')
+only_copy_prop = ('id', 'status', 'command', 't_to_go', 'timeout', 'env', 'module_type', 'execution_time')
 
 shellchars = ( '!', '$', '^', '&', '*', '(', ')', '~', '[', ']',
                    '|', '{', '}', ';', '<', '>', '?', '`')

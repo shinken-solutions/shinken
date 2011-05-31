@@ -37,6 +37,7 @@ class Notification(Action):
     #events handlers
 
     properties = {
+        'is_a' :               StringProp (default='notification'),
         'type' :               StringProp (default=''),
         'notification_type':   IntegerProp(default=0,  fill_brok=['full_status']),
         'start_time':          StringProp (default=0,  fill_brok=['full_status']),
@@ -54,6 +55,7 @@ class Notification(Action):
         'env':                 StringProp (default={}),
         'exit_status':         IntegerProp(default=3),
         'command_call':        StringProp (default=None),
+        'execution_time':      IntegerProp (default=0),
         'contact':             StringProp (default=None),
         '_in_timeout':         BoolProp   (default=False),
         'notif_nb':            IntegerProp(default=0),
@@ -106,6 +108,7 @@ class Notification(Action):
         self.command = command
         self.command_call = command_call
         self.output = None
+        self.execution_time = 0
         self.ref = ref
         self.env = env
         self.module_type = module_type

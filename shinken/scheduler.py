@@ -479,13 +479,20 @@ class Scheduler:
         if c.is_a == 'notification':
             # We will only see childnotifications here
             try:
+                if c.status == 'timeout':
+                    # Unfortunately the remove_in_progress_notification
+                    # sets the status to zombie, so we need to save it here.
+                    timeout = True
+                    execution_time = c.execution_time
                 self.actions[c.id].get_return_from(c)
                 item = self.actions[c.id].ref
                 item.remove_in_progress_notification(c)
                 self.actions[c.id].status = 'zombie'
                 item.last_notification = c.check_time
                 #If we' ve got a problem with the notification, raise a Warning log
-                if c.exit_status != 0:
+                if timeout:
+                    logger.log("Warning: Contact %s %s notification command '%s ' timed out after %d seconds" % (self.actions[c.id].contact.contact_name, self.actions[c.id].ref.__class__.my_type, self.actions[c.id].command, int(execution_time)))
+                elif c.exit_status != 0:
                     logger.log("Warning : the notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
             except KeyError , exp: #bad number for notif, not so terrible
                 pass
@@ -495,6 +502,9 @@ class Scheduler:
 
         elif c.is_a == 'check':
             try:
+                if c.status == 'timeout':
+                    c.output = "(%s Check Timed Out)" % self.checks[c.id].ref.__class__.my_type.capitalize()
+                    c.long_output = c.output
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
             except KeyError , exp:
@@ -502,6 +512,8 @@ class Scheduler:
         elif c.is_a == 'eventhandler':
             # It just die
             try:
+                if c.status == 'timeout':
+                    logger.log("Warning: %s event handler command '%s ' timed out after %d seconds" % (self.actions[c.id].ref.__class__.my_type.capitalize(), self.actions[c.id].command, int(c.execution_time)))
                 self.actions[c.id].status = 'zombie'
             # Maybe we reveied a return of a old even handler, so we can forget it
             except KeyError:

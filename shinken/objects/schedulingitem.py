@@ -543,7 +543,7 @@ class SchedulingItem(Item):
         cmd = m.resolve_command(self.event_handler, data)
         rt = self.event_handler.reactionner_tag
         e = EventHandler(cmd, timeout=cls.event_handler_timeout, \
-                             reactionner_tag=rt)
+                             ref=self, reactionner_tag=rt)
         #print "DBG: Event handler call created"
         #print "DBG: ",e.__dict__
         self.raise_event_handler_log_entry(self.event_handler)
@@ -1183,7 +1183,7 @@ class SchedulingItem(Item):
             cmd = m.resolve_command(cls.perfdata_command, data)
             reactionner_tag = cls.perfdata_command.reactionner_tag
             e = EventHandler(cmd, timeout=cls.perfdata_timeout,
-                             reactionner_tag=reactionner_tag)
+                             ref=self, reactionner_tag=reactionner_tag)
 
             # ok we can put it in our temp action queue
             self.actions.append(e)
