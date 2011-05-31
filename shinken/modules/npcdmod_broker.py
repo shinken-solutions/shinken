@@ -31,7 +31,7 @@ import re
 
 
 from shinken.basemodule import BaseModule
-
+from shinken.message import Message
 
 #This text is print at the import
 print "I am the nocdmod broker for pnp"
@@ -85,6 +85,22 @@ class Npcd_broker(BaseModule):
         except:
             print "could not open file %s" % self.perfdata_file
             raise
+        # use so we do nto ask a reinit ofan instance too quickly
+        self.last_need_data_send = time.time()
+
+        
+    # Ask for a full reinit of a scheduler because we lost some data.... sorry
+    def ask_reinit(self, c_id):
+        # Do not ask data too quickly, very dangerous
+        # one a minute
+        if time.time() - self.last_need_data_send > 60:
+            print "I ask the broker for instance id data :", c_id
+            msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
+            self.from_q.put(msg)
+            self.last_need_data_send = time.time()
+        return
+
+
 
 
     #Get a brok, parse it, and put in in database
@@ -111,6 +127,8 @@ class Npcd_broker(BaseModule):
             print "npcdmod: I start processing performance data"
 
 
+
+
     # also manage initial_broks, because of the check_command (which is not part of check_result_broks)
     # save it in service_commands[host/service]
     def manage_initial_host_status_brok(self, b):
@@ -125,6 +143,11 @@ class Npcd_broker(BaseModule):
 
     # A host check has just arrived. Write the performance data to the file
     def manage_host_check_result_brok(self, b):
+        #If we don't know about the host or the service, ask for a full init phase!
+        if not b.data['host_name'] in self.service_commands:
+            self.ask_reinit(b.data['instance_id'])
+            return
+
         line = "DATATYPE::HOSTPERFDATA\tTIMET::%d\tHOSTNAME::%s\tHOSTPERFDATA::%s\tHOSTCHECKCOMMAND::%s\tHOSTSTATE::%d\tHOSTSTATETYPE::%d\n" % (\
             b.data['last_chk'],
             b.data['host_name'],
@@ -138,6 +161,12 @@ class Npcd_broker(BaseModule):
 
     # A service check has just arrived. Write the performance data to the file
     def manage_service_check_result_brok(self, b):
+        #If we don't know about the host or the service, ask for a full init phase!
+        if not b.data['host_name'] in self.service_commands or not b.data['service_description'] in self.service_commands[b.data['host_name']]:
+            self.ask_reinit(b.data['instance_id'])
+            return
+
+        # check if we really got the host and service data
         line = "DATATYPE::SERVICEPERFDATA\tTIMET::%d\tHOSTNAME::%s\tSERVICEDESC::%s\tSERVICEPERFDATA::%s\tSERVICECHECKCOMMAND::%s\tSERVICESTATE::%d\tSERVICESTATETYPE::%d\n" % (\
             b.data['last_chk'],
             b.data['host_name'],
@@ -148,6 +177,7 @@ class Npcd_broker(BaseModule):
             b.data['state_type_id'])
         self.logfile.write(line)
         self.processed_lines += 1
+
 
 
     def process_config_file(self):
@@ -173,7 +203,7 @@ class Npcd_broker(BaseModule):
                 shutil.move(self.perfdata_file, target)
             self.logfile = open(self.perfdata_file, 'a', 1)
         except OSError:
-            "could not rotate perfdata_file to %s" % target
+            print "could not rotate perfdata_file to %s" % target
             raise
         self.processed_lines = 0
 

@@ -24,6 +24,7 @@
 #
 
 import os, sys, string, time
+from multiprocessing import Queue
 
 from shinken_test import unittest, ShinkenTest
 
@@ -42,7 +43,7 @@ modconf.properties = npcdmod_broker.properties.copy()
 
 
 
-class TestConfig(ShinkenTest):
+class TestNpcd(ShinkenTest):
 
 
     def add(self, b):
@@ -104,7 +105,11 @@ class TestConfig(ShinkenTest):
 
 
     def update_broker(self):
-        for brok in self.sched.broks.values():
+        self.sched.get_new_broks()
+        ids = self.sched.broks.keys()
+        ids.sort()
+        for i in ids:
+            brok = self.sched.broks[i]
             self.npcdmod_broker.manage_brok(brok)
         self.sched.broks = {}
 
@@ -159,6 +164,45 @@ class TestConfig(ShinkenTest):
             self.npcdmod_broker.logfile.close()
             os.unlink("./perfdata")
 
+
+    def test_npcd_got_missing_conf(self):
+        self.print_header()
+        if os.path.exists("./perfdata"):
+            os.unlink("./perfdata")
+
+        self.npcdmod_broker = Npcd_broker(modconf, None, './perfdata', '.', 'perfdata-target', 15)
+        self.npcdmod_broker.properties['to_queue'] = 0
+        self.npcdmod_broker.from_q = Queue()
+
+        self.npcdmod_broker.init()
+        self.sched.fill_initial_broks()
+
+        print "got initial broks"
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+
+        #We are a bad guy, and we change the service name
+        svc.service_description = "Unkown"
+        # and we force it to raise an asking now
+        self.npcdmod_broker.last_need_data_send = 0
+
+        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
+        self.update_broker()
+        self.assert_(os.path.exists("./perfdata"))
+        if os.path.exists("./perfdata"):
+            self.npcdmod_broker.logfile.close()
+            os.unlink("./perfdata")
+        print "Len"*20, self.npcdmod_broker.from_q.qsize()
+        self.assert_(self.npcdmod_broker.from_q.qsize() == 1)
+        self.npcdmod_broker.from_q.close()
 
 
 if __name__ == '__main__':
