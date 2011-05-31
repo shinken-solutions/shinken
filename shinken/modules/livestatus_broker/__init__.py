@@ -95,7 +95,10 @@ def get_instance(plugin):
         pnp_path = plugin.pnp_path
     else:
         pnp_path = ''
-    instance = Livestatus_broker(plugin, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path)
+
+    debug = getattr(plugin, 'debug', None)
+
+    instance = Livestatus_broker(plugin, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path, debug)
     return instance
 
 

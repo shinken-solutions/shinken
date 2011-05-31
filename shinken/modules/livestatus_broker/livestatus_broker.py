@@ -71,7 +71,7 @@ properties = {
 #Class for the Livestatus Broker
 #Get broks and listen to livestatus query language requests
 class Livestatus_broker(BaseModule):
-    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path):
+    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path, debug=None):
         BaseModule.__init__(self, mod_conf)
         self.host = host
         self.port = port
@@ -80,6 +80,7 @@ class Livestatus_broker(BaseModule):
         self.database_file = database_file
         self.max_logs_age = max_logs_age
         self.pnp_path = pnp_path
+        self.debug = debug
 
         #Our datas
         self.configs = {}
@@ -839,10 +840,26 @@ class Livestatus_broker(BaseModule):
         except:
             pass
 
+        
+    def set_debug(self):
+        fdtemp = os.open(self.debug, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
+        
+        ## We close out and err
+        os.close(1)
+        os.close(2)
+
+        os.dup2(fdtemp, 1) # standard output (1)
+        os.dup2(fdtemp, 2) # standard error (2)
+
+
 
     def main(self):
         #I register my exit function
         self.set_exit_handler()
+        
+        # Maybe we got a debug dump to do
+        if self.debug:
+            self.set_debug()
 
         last_number_of_objects = 0
         last_db_cleanup_time = 0
