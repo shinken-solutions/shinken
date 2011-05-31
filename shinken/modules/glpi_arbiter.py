@@ -78,7 +78,9 @@ class Glpi_arbiter(BaseModule):
     #Ok, main function that will load hosts from GLPI
     def get_objects(self):
         r = {'commands' : [],
-             'hosts' : []}
+             'timeperiods' : [],
+             'hosts' : [],
+             'contacts' : []}
         arg = {'session' : self.session}
 
         # Get commands
@@ -90,11 +92,33 @@ class Glpi_arbiter(BaseModule):
             h = {'command_name' : command_info['command_name'],
                  'command_line' : command_info['command_line'],
                  }
+
             #Then take use only if there is a value inside
             if command_info[self.use_property] != '':
                 h['use'] = command_info[self.use_property]
 
             r['commands'].append(h)
+
+        # Get timeperiods
+        all_timeperiods = self.con.monitoring.shinkenTimeperiods(arg)
+        print "Get all timeperiods", all_timeperiods
+        for timeperiod_info in all_timeperiods:
+            print "\n\n"
+            print "Timeperiod info in GLPI", timeperiod_info
+            h = {'timeperiod_name' : timeperiod_info['timeperiod_name'],
+                 'sunday' : timeperiod_info['sunday'],
+                 'monday' : timeperiod_info['monday'],
+                 'tuesday' : timeperiod_info['tuesday'],
+                 'wednesday' : timeperiod_info['wednesday'],
+                 'thursday' : timeperiod_info['thursday'],
+                 'friday' : timeperiod_info['friday'],
+                 'saturday' : timeperiod_info['saturday'],
+                 }
+            #Then take use only if there is a value inside
+            if timeperiod_info[self.use_property] != '':
+                h['use'] = timeperiod_info[self.use_property]
+
+            r['timeperiods'].append(h)
 
         # Get hosts
         all_hosts = self.con.monitoring.shinkenHosts(arg)
@@ -117,5 +141,31 @@ class Glpi_arbiter(BaseModule):
                 h['use'] = host_info[self.use_property]
 
             r['hosts'].append(h)
+
+        # Get contacts
+        all_contacts = self.con.monitoring.shinkenContacts(arg)
+        print "Get all contacts", all_contacts
+        for contact_info in all_contacts:
+            print "\n\n"
+            print "Contact info in GLPI", contact_info
+            h = {'contact_name' : contact_info['contact_name'],
+                 'alias' : contact_info['alias'],
+                 'host_notifications_enabled' : contact_info['host_notifications_enabled'],
+                 'service_notifications_enabled' : contact_info['service_notifications_enabled'],
+                 'service_notification_period' : contact_info['service_notification_period'],
+                 'host_notification_period' : contact_info['host_notification_period'],
+                 'service_notification_options' : contact_info['service_notification_options'],
+                 'host_notification_options' : contact_info['host_notification_options'],
+                 'service_notification_commands' : contact_info['service_notification_commands'],
+                 'host_notification_commands' : contact_info['host_notification_commands'],
+                 'email' : contact_info['email'],
+                 'pager' : contact_info['pager'],
+                 }
+            #Then take use only if there is a value inside
+            if contact_info[self.use_property] != '':
+                h['use'] = contact_info[self.use_property]
+
+            r['contacts'].append(h)
+
         #print "Returning to Arbiter the hosts:", r
         return r
