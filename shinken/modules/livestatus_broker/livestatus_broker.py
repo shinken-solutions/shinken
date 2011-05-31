@@ -71,7 +71,7 @@ properties = {
 #Class for the Livestatus Broker
 #Get broks and listen to livestatus query language requests
 class Livestatus_broker(BaseModule):
-    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path, debug=None):
+    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path, debug=None, debug_queries=False):
         BaseModule.__init__(self, mod_conf)
         self.host = host
         self.port = port
@@ -81,6 +81,7 @@ class Livestatus_broker(BaseModule):
         self.max_logs_age = max_logs_age
         self.pnp_path = pnp_path
         self.debug = debug
+        self.debug_queries = debug_queries
 
         #Our datas
         self.configs = {}
@@ -842,7 +843,7 @@ class Livestatus_broker(BaseModule):
 
         
     def set_debug(self):
-        fdtemp = os.open(self.debug, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
+        fdtemp = os.open(self.debug, os.O_CREAT | os.O_WRONLY | os.O_APPEND)
         
         ## We close out and err
         os.close(1)
@@ -1144,16 +1145,9 @@ class Livestatus_broker(BaseModule):
 
 
     def write_protocol(self, request, response):
-        # Write request/response in a tracefile
-        if os.path.exists('/tmp/shinken.modules.livestatus.trace'):
-            try:
-                trace = open('/tmp/shinken.modules.livestatus.trace', 'a')
-                trace.write("REQUEST>>>>>\n" + request + "\n\n")
-                trace.write("RESPONSE<<<<\n" + response + "\n\n")
-                trace.close()
-            except Exception , exp:
-                print str(exp)
-                print "please check the permissions on the tracefile"
+        if self.debug_queries:
+            print "REQUEST>>>>>\n" + request + "\n\n"
+            print "RESPONSE<<<<\n" + response + "\n\n"
 
 
 def livestatus_factory(cursor, row):

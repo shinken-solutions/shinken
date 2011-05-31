@@ -5543,7 +5543,7 @@ class LiveStatus(object):
             self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, 
             self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
         request.parse_input(data)
-        print "REQUEST\n%s\n" % data
+        #print "REQUEST\n%s\n" % data
         to_del = []
         if sorted([q.my_type for q in request.queries]) == ['command', 'query', 'wait']:
             # The Multisite way
@@ -5600,7 +5600,7 @@ class LiveStatus(object):
             print "We currently do not handle this kind of composed request"
             print sorted([q.my_type for q in request.queries])
 
-        print "RESPONSE\n%s\n" % output
+        #print "RESPONSE\n%s\n" % output
         print "DURATION %.4fs" % (time.time() - request.tic)
         return output, keepalive
 
@@ -5843,7 +5843,7 @@ class LiveStatusResponse:
         lines = []
         header = ''
         showheader = False
-        print "my result is", result
+        #print "my result is", result
         print "outputformat", self.outputformat
         if len(result) > 0:
             if self.columnheaders != 'off' or len(columns) == 0:
