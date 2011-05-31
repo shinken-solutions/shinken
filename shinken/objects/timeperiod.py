@@ -595,7 +595,7 @@ class Timeperiod(Item):
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)
-                elif 'default' in entry:
+                elif entry.has_default:
                     data[prop] = entry.default
 
 
