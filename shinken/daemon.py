@@ -60,7 +60,7 @@ else:
 REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
 UMASK = 0
-VERSION = "0.5"
+from shinken.bin import VERSION
 
 
 class InvalidPidFile(Exception): pass
