@@ -83,7 +83,7 @@ class Glpidb_broker(BaseModule):
 
 
 
-    def preprocess(self, type, brok):
+    def preprocess(self, type, brok, checkst):
         new_brok = copy.deepcopy(brok)
         #Only preprocess if we can apply a mapping
         if type in self.mapping:
@@ -91,17 +91,18 @@ class Glpidb_broker(BaseModule):
                s = brok.data['host_name'].split('-')
                new_brok.data['plugin_monitoring_hosts_id'] = s[1]
                # If last check have same message, not add entry in DB
-               lhc = brok.data['output'].split('-')
-               if new_brok.data['plugin_monitoring_hosts_id'] in self.checkstatus:
-                  if self.checkstatus[new_brok.data['plugin_monitoring_hosts_id']] == lhc[0]:
-                     return brok
-                  else:
+               if checkst:
+                  lhc = brok.data['output'].split('-')
+                  if new_brok.data['plugin_monitoring_hosts_id'] in self.checkstatus:
+                     if self.checkstatus[new_brok.data['plugin_monitoring_hosts_id']] == lhc[0]:
+                        return brok
+                     else:
+                        self.checkstatus[new_brok.data['plugin_monitoring_hosts_id']] = lhc[0]
+                  else :
                      self.checkstatus[new_brok.data['plugin_monitoring_hosts_id']] = lhc[0]
-               else :
-                  self.checkstatus[new_brok.data['plugin_monitoring_hosts_id']] = lhc[0]
-               brok.data['plugin_monitoring_hosts_id'] = s[1]
+               #brok.data['plugin_monitoring_hosts_id'] = s[1]
                new_brok.data['event'] = brok.data['output']
-               brok.data['event'] = brok.data['output']
+               #brok.data['event'] = brok.data['output']
             to_del = []
             to_add = []
             mapping = self.mapping[brok.type]
@@ -109,7 +110,7 @@ class Glpidb_broker(BaseModule):
             #ex : 'name' : 'program_start_time', 'transform'
                 if prop in mapping:
                     #print "Got a prop to change", prop
-                    val = brok.data[prop]
+                    val = new_brok.data[prop]
                     if mapping[prop]['transform'] is not None:
                         print "Call function for", type, prop
                         f = mapping[prop]['transform']
@@ -136,9 +137,18 @@ class Glpidb_broker(BaseModule):
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         type = b.type
+        # To update check in glpi_plugin_monitoring_hosts
+        manager = 'manage_'+type+'up_brok'
+        if hasattr(self, manager):
+            new_b = self.preprocess(type, b, 0)
+            f = getattr(self, manager)
+            queries = f(new_b)
+            #Ok, we've got queries, now : run them!
+            for q in queries :
+                self.db_backend.execute_query(q)
         manager = 'manage_'+type+'_brok'
         if hasattr(self, manager):
-            new_b = self.preprocess(type, b)
+            new_b = self.preprocess(type, b, '1')
             if 'host_name' in new_b.data:
                if 'plugin_monitoring_hosts_id' not in new_b.data:
                   return
@@ -152,7 +162,20 @@ class Glpidb_broker(BaseModule):
 
     #Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
-        logger.log("GLPI : data in DB %s " % b)
+        #logger.log("GLPI : data in DB %s " % b)
         b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
         query = self.db_backend.create_insert_query('glpi_plugin_monitoring_hostevents', b.data)
+        return [query]
+
+
+    #Same than service result, but for host result
+    def manage_host_check_resultup_brok(self, b):
+        #logger.log("GLPI : data in DB %s " % b)
+        new_data = copy.deepcopy(b.data)
+        new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
+        new_data['id'] = b.data['plugin_monitoring_hosts_id']
+        del new_data['plugin_monitoring_hosts_id']
+        del new_data['perf_data']
+        where_clause = {'id' : new_data['id']}
+        query = self.db_backend.create_update_query('glpi_plugin_monitoring_hosts', new_data, where_clause)
         return [query]
