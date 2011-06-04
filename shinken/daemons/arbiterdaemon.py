@@ -23,15 +23,10 @@
 import sys
 import os
 import time
-import random
+
 import traceback
 from Queue import Empty
-from multiprocessing import active_children
 
-try:
-    import shinken.pyro_wrapper as pyro
-except ImportError:
-    sys.exit("Shinken require the Python Pyro module. Please install it.")
 
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
@@ -40,7 +35,6 @@ from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-from shinken.pyro_wrapper import Pyro
 
 
 # Interface for the other Arbiter
@@ -73,7 +67,7 @@ class IForArbiter(Interface):
 
 
 
-    # Here a function called by check_shinken to get deamon status
+    # Here a function called by check_shinken to get daemon status
     def get_satellite_status(self, daemon_type, daemon_name):
         daemon_name_attr = daemon_type+"_name"
         daemons = self.app.get_daemons(daemon_type)
@@ -84,7 +78,7 @@ class IForArbiter(Interface):
                         return {'alive' : dae.alive, 'spare' : dae.spare}
         return None
 
-    # Here a function called by check_shinken to get deamons list
+    # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type):
         satellite_list = []
         daemon_name_attr = daemon_type+"_name"
@@ -94,7 +88,7 @@ class IForArbiter(Interface):
                 if hasattr(dae, daemon_name_attr):
                     satellite_list.append(getattr(dae, daemon_name_attr))
                 else:
-                    #If one deamon has no name... ouch!
+                    #If one daemon has no name... ouch!
                     return None
             return satellite_list
         return None
@@ -203,12 +197,12 @@ class Arbiter(Daemon):
 
 
     def get_daemon_links(self, daemon_type):
-       #the attribute name to get those differs for schedulers and arbiters
-       if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
+        #the attribute name to get those differs for schedulers and arbiters
+        if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
             daemon_links = daemon_type+'links'
-       else:
+        else:
             daemon_links = daemon_type+'s'
-       return daemon_links
+        return daemon_links
 
 
     def load_config_file(self):
@@ -608,23 +602,18 @@ class Arbiter(Daemon):
                 self.need_dump_memory = False
 
 
-    # This function returns the part of the conf where are stored the daemons of
-    # a given daemon type
     def get_daemons(self, daemon_type):
-    # We get the list of the daemons from their links
-    # 'schedulerlinks' for schedulers, 'arbiterlinks' for arbiters
-    # and 'pollers', 'brokers', 'reactionners' for the other
+        """ Returns the daemons list defined in our conf for the given type """
+        # We get the list of the daemons from their links
+        # 'schedulerlinks' for schedulers, 'arbiterlinks' for arbiters
+        # and 'pollers', 'brokers', 'reactionners' for the others
         if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
             daemon_links = daemon_type+'links'
         else:
             daemon_links = daemon_type+'s'
 
-        if hasattr(self.conf, daemon_links):
-            return getattr(self.conf, daemon_links);
-
-        # If the links cannot be found, we have a problem
-        return None
-
+        # shouldn't the 'daemon_links' (whetever it is above) be always present ?
+        return getattr(self.conf, daemon_links, None)
 
     # Helper functions for retention modules
     # So we give our broks and external commands

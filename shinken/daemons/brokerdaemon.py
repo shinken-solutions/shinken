@@ -28,7 +28,7 @@ import traceback
 from multiprocessing import active_children
 from Queue import Empty
 
-from shinken.satellite import BaseSatellite, IForArbiter
+from shinken.satellite import BaseSatellite
 
 from shinken.property import PathProp, IntegerProp
 from shinken.util import sort_by_ids

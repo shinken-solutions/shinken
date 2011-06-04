@@ -157,10 +157,10 @@ except AttributeError, exp:
                     break
                 except socket.error, exp:
                     msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
-                    # At 35, we are very not happy
-                    if nb_try == 35:
+                    # At 35 (or over), we are very not happy
+                    if nb_try >= 35:
                         raise PortNotFree(msg)
-                    print msg, "but we try anoter time in 1 sec"
+                    print msg, "but we try another time in 1 sec"
                     time.sleep(1)
                 except Exception, e:
                     # must be problem with pyro workdir :
