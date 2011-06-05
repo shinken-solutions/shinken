@@ -802,6 +802,8 @@ class Livestatus_broker(BaseModule):
         self.dbcursor.execute(cmd)
         cmd = "CREATE INDEX IF NOT EXISTS logs_time ON logs (time)"
         self.dbcursor.execute(cmd)
+        cmd = "PRAGMA journal_mode=truncate"
+        self.dbcursor.execute(cmd)
         self.dbconn.commit()
         # rowfactory will later be redefined (in livestatus.py)
 
@@ -813,6 +815,9 @@ class Livestatus_broker(BaseModule):
             self.dbcursor.execute('DELETE FROM LOGS WHERE time < %(limit)s', { 'limit' : limit })
         else:
             self.dbcursor.execute('DELETE FROM LOGS WHERE time < ?', (limit,))
+        self.dbconn.commit()
+        # This is necessary to shrink the database file
+        self.dbcursor.execute('VACUUM')
         self.dbconn.commit()
         
 
