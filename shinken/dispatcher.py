@@ -121,7 +121,7 @@ class Dispatcher:
         # Check if the other arbiter have a conf
         for arb in self.arbiters:
             # If not me and I'm a master
-            if arb != self.arbiter and not self.arbiter.spare:
+            if arb != self.arbiter and self.arbiter and not self.arbiter.spare:
                 if not arb.have_conf(self.conf.magic_hash):
                     arb.put_conf(self.conf)
                 else:
