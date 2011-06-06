@@ -120,13 +120,13 @@ class Dispatcher:
     def check_dispatch(self):
         # Check if the other arbiter have a conf
         for arb in self.arbiters:
-            # If not me...
-            if arb != self.arbiter:
+            # If not me and I'm a master
+            if arb != self.arbiter and not self.arbiter.spare:
                 if not arb.have_conf(self.conf.magic_hash):
                     arb.put_conf(self.conf)
                 else:
                     # Ok, he already have the conf. I remember him that
-                    # he do not have to run, I'm stil alive!
+                    # he do not have to run, I'm still alive!
                     arb.do_not_run()
 
         # We check for confs to be dispatched on alive scheds. If not dispatch, need dispatch :)
