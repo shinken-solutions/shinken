@@ -64,6 +64,7 @@ class SatelliteLink(Item):
         'attempt':              StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
         'reachable':            StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
         'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
+        'managed_confs':        StringProp(default=[]),
     })
 
 
@@ -140,15 +141,32 @@ class SatelliteLink(Item):
             self.set_dead()
 
 
-    def ping(self):
+    # Update satellite info each self.check_interval seconds
+    # so we smooth arbtier actions for just useful actions
+    # and not cry for a little timeout
+    def update_infos(self):
         # First look if it's not too early to ping
         now = time.time()
-        since_last_check = now - self.last_check        
-        if since_last_check < self.check_interval:            
+        since_last_check = now - self.last_check
+        if since_last_check < self.check_interval:
             return
-        
-        # Ok, save that we are doing a check now
+
         self.last_check = now
+
+        #We ping and update the managed list
+        self.ping()
+        self.update_managed_list()
+
+
+    # The elements just got a new conf_id, we put it in our list
+    # because maybe the satellite is too buzy to answer from now
+    def known_conf_managed_push(self, i):
+        self.managed_confs.append(i)
+        # unique the list
+        self.managed_confs = list(set(self.managed_confs))
+
+
+    def ping(self):        
         print "Pinging %s" % self.get_name()
         try:
             if self.con is None:
@@ -223,19 +241,31 @@ class SatelliteLink(Item):
             return False
 
 
-    def what_i_managed(self):
+    def update_managed_list(self):
         if self.con is None:
             self.create_connection()
         try:
             tab = self.con.what_i_managed()
+            print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
             # Protect against bad Pyro return
             if not isinstance(tab, list):
                 self.con = None
-                return []
-            return tab
+                self.managed_confs = []
+            # We can update our list now
+            self.managed_confs = tab
         except Pyro_exp_pack , exp:
+            # A timeout is not a crime, put this case aside
+            if type(exp) == Pyro.errors.TimeoutError:
+                return
             self.con = None
-            return []
+            print "[%s]What i managed : Got exception : %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
+            self.managed_confs = []
+
+
+    # Return True if the satelltie said to managed a configuration
+    def do_i_manage(self, i):
+        return i in self.managed_confs
+        
 
 
     def push_broks(self, broks):

@@ -28,6 +28,7 @@
  dead to the spare
 """
 
+import time
 import random
 import itertools
 
@@ -96,7 +97,7 @@ class Dispatcher:
     #checks alive elements
     def check_alive(self):
         for elt in self.elements:
-            elt.ping()
+            elt.update_infos()
             #print "Element", elt.get_name(), " alive:", elt.alive, "
 
             #Not alive need new need_conf
@@ -108,7 +109,7 @@ class Dispatcher:
         for arb in self.arbiters:
             #If not me...
             if arb != self.arbiter:
-                arb.ping()
+                arb.update_infos()
                 #print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
 
 
@@ -176,8 +177,9 @@ class Dispatcher:
                             #except TypeError, exp:
                             #    print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
                             #    satellite.reachable = False
-
-                            if not satellite.alive or (satellite.reachable and cfg_id not in satellite.what_i_managed()):
+                            wim = satellite.managed_confs# what_i_managed()
+                            print "%s [%s]Look at what manage the %s %s (alive? %s, reachable? %s): %s (look for %s)" % (int(time.time()), r.get_name(), kind, satellite.get_name(), satellite.alive, satellite.reachable, wim, cfg_id)
+                            if not satellite.alive or (satellite.reachable and cfg_id not in wim):
                                 logger.log('[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False #so we will redispatch all
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = True
@@ -227,7 +229,7 @@ class Dispatcher:
         for satellite in self.satellites:
             kind = satellite.get_my_type()
             if satellite.reachable:
-                cfg_ids = satellite.what_i_managed()
+                cfg_ids = satellite.managed_confs #what_i_managed()
                 # I do nto care about satellites that do nothing, it already
                 # do what I want :)
                 if len(cfg_ids) != 0:
@@ -354,6 +356,7 @@ class Dispatcher:
                             continue
                         
                         logger.log('[%s] Dispatch OK of for conf in scheduler %s' % (r.get_name(), sched.get_name()))
+
                         sched.conf = conf
                         sched.need_conf = False
                         conf.is_assigned = True
@@ -460,6 +463,9 @@ class Dispatcher:
                                     if is_sent:
                                         satellite.active = True
                                         logger.log('[%s] Dispatch OK of for configuration %s to %s %s' %(r.get_name(), cfg_id, kind, satellite.get_name()))
+                                        # We change the satellite configuration, update our data
+                                        satellite.known_conf_managed_push(cfg_id)
+
                                         nb_cfg_sent += 1
                                         r.to_satellites_managed_by[kind][cfg_id].append(satellite)
                                     
@@ -485,3 +491,4 @@ class Dispatcher:
                             rec.active = True
                             rec.need_conf = False
                             logger.log('[%s] Dispatch OK of for configuration to receiver %s' %(r.get_name(), rec.get_name()))
+                            
