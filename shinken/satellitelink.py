@@ -176,6 +176,12 @@ class SatelliteLink(Item):
         try:
             if self.con is None:
                 self.create_connection()
+
+            # If the connexion failed to initialize, bailout
+            if self.con is None:
+                self.add_failed_check_attempt()
+                return
+
             r = self.con.ping()
             # Should return us pong string
             if r == 'pong':
@@ -206,6 +212,11 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
+        # If the connexion failed to initialize, bailout
+        if self.con is None:
+            return False
+
+
         try:
             if magic_hash is None:
                 r = self.con.have_conf()
@@ -224,6 +235,12 @@ class SatelliteLink(Item):
     def got_conf(self):
         if self.con is None:
             self.create_connection()
+
+        # If the connexion failed to initialize, bailout
+        if self.con is None:
+            return False
+
+
         try:
             r = self.con.got_conf()
             # Protect against bad Pyro return
@@ -238,6 +255,11 @@ class SatelliteLink(Item):
     def remove_from_conf(self, sched_id):
         if self.con is None:
             self.create_connection()
+
+        # If the connexion failed to initialize, bailout
+        if self.con is None:
+            return
+
         try:
             self.con.remove_from_conf(sched_id)
             return True
@@ -249,6 +271,12 @@ class SatelliteLink(Item):
     def update_managed_list(self):
         if self.con is None:
             self.create_connection()
+
+        # If the connexion failed to initialize, bailout
+        if self.con is None:
+            self.managed_confs = []
+            return
+
         try:
             tab = self.con.what_i_managed()
             print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
@@ -276,6 +304,12 @@ class SatelliteLink(Item):
     def push_broks(self, broks):
         if self.con is None:
             self.create_connection()
+
+        # If the connexion failed to initialize, bailout
+        if self.con is None:
+            return False
+
+
         try:
             return self.con.push_broks(broks)
         except Pyro_exp_pack , exp:
@@ -286,6 +320,12 @@ class SatelliteLink(Item):
     def get_external_commands(self):
         if self.con is None:
             self.create_connection()
+
+        # If the connexion failed to initialize, bailout
+        if self.con is None:
+            return []
+
+
         try:
             tab = self.con.get_external_commands()
             # Protect against bad Pyro return
