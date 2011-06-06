@@ -31,6 +31,7 @@ Pyro = pyro.Pyro
 
 from shinken.objects import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.log import logger
 
 # Pack of common Pyro exceptions
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
@@ -69,9 +70,13 @@ class SatelliteLink(Item):
 
 
     def create_connection(self):
-        self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
-        self.con = pyro.getProxy(self.uri)
-        pyro.set_timeout(self.con, self.timeout)
+        try:
+            self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
+            self.con = pyro.getProxy(self.uri)
+            pyro.set_timeout(self.con, self.timeout)
+        except Pyro_exp_pack , exp:
+            self.con = None
+            logger.log('Error : in creation connexion for %s : %s' % (self.get_name(), str(exp)))
 
 
     def put_conf(self, conf):
