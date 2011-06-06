@@ -817,7 +817,10 @@ class Livestatus_broker(BaseModule):
             self.dbcursor.execute('DELETE FROM LOGS WHERE time < ?', (limit,))
         self.dbconn.commit()
         # This is necessary to shrink the database file
-        self.dbcursor.execute('VACUUM')
+        try:
+            self.dbcursor.execute('VACUUM')
+        except sqlite3.DatabaseError, exp:
+            print "WARNING : yit seems your database is corrupted. Please recreate it"
         self.dbconn.commit()
         
 

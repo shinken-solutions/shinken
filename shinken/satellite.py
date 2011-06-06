@@ -325,7 +325,16 @@ class Satellite(BaseSatellite):
     # It can be mortal or not
     def create_and_launch_worker(self, module_name='fork', mortal=True):
         # ceate the input queue of this worker
-        q = Queue()
+        try:
+            q = Queue()
+        # If we got no /dev/shm on linux, we can got problem here. 
+        # Must raise with a good message
+        except OSError, exp:
+            # We look for the "Function not implemented" under Linux
+            if e.errno == 38 and os.name == 'posix':
+                logger.log("ERROR : get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
+            raise
+            
 
         # If we are in the fork module, do not specify a target
         target = None
