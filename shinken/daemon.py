@@ -264,11 +264,16 @@ class Daemon(object):
                 print("The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
                 sys.exit(2)   
 
-    def __open_pidfile(self):
+    def __open_pidfile(self, write=False):
         ## if problem on open or creating file it'll be raised to the caller:
         try:
-            print "opening pid file:", self.pidfile, os.path.abspath(self.pidfile) 
-            self.fpid = open(os.path.abspath(self.pidfile), 'arw+')
+            p = os.path.abspath(self.pidfile)
+            print "opening pid file:", self.pidfile, p
+            # Windows do not manage arw+ mode, so we must open in read mode first, then reopen it write mode...
+            if not write and os.path.exists(p):
+               self.fpid = open(p, 'r+')
+            else: # If do not exist too, we create it as void
+               self.fpid = open(p, 'w+')
         except Exception, e:
             raise InvalidPidFile(e)     
 
@@ -277,6 +282,14 @@ class Daemon(object):
         """ Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
 Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 """
+
+        # TODO: other daemon run on nt
+        if os.name == 'nt':
+            print("Sorry, the parallel daemon check is not available on nt")
+            self.__open_pidfile(write=True)
+            return
+
+        # First open the pid file in open mode
         self.__open_pidfile()
         try:
             pid = int(self.fpid.read())
@@ -309,8 +322,9 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.fpid.close()
         ## TODO: give some time to wait that previous instance finishes ?
         time.sleep(1)
-        ## we must also reopen the pid file cause the previous instance will normally have deleted it !!
-        self.__open_pidfile()
+        # we must also reopen the pid file in write mode 
+        # because cause the previous instance will normally have deleted it !!
+        self.__open_pidfile(write=True)
 
 
     def write_pid(self, pid=None):
