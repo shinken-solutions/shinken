@@ -908,7 +908,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
-        self.assert_(bp_rule.of_values == (5,5,5))
+        self.assert_(bp_rule.of_values == (5,1,1))
         
         
         sons = bp_rule.sons

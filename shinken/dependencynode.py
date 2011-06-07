@@ -154,15 +154,21 @@ class DependencyNodeFactory(object):
         is_of_nb = False
 
         node = DependencyNode()
-        p = "^(\d+) *of: *(.+)"
+        p = "^(\d+),*(\d*),*(\d*) *of: *(.+)"
         r = re.compile(p)
         m = r.search(patern)
         if m is not None:
-            #print "Match the of: thing N=", m.groups()
+            print "Match the of: thing N=", m.groups()
             node.operand = 'of:'
-            v = int(m.groups()[0])
-            node.of_values = (v,v,v)
-            patern = m.groups()[1]
+            g = m.groups()
+            # We can have a Aof: rule, or a multiple A,B,Cof: rule.
+            mul_of = (g[1] != u'' and g[2] != u'')
+            # If multi got (A,B,C)
+            if mul_of:
+                node.of_values = (int(g[0]), int(g[1]), int(g[2]))
+            else: #if not, use A,A,A
+                node.of_values = (int(g[0]), int(g[0]), int(g[0]))
+            patern = m.groups()[3]
 
         #print "Is so complex?", patern, complex_node
 
