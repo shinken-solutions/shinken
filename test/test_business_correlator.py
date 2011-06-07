@@ -990,8 +990,58 @@ class TestBusinesscorrel(ShinkenTest):
 
 
 
+        # Ok now more fun, with changing of_values and states
 
-        
+        ### W O O O O
+        # 4 of:   -> Ok (we got 4 OK, and not 4 warn or crit, so it's OK)
+        # 5,1,1  -> Warning (at least one warning, and no crit -> warning)
+        # 5,2,1 -> OK (we want warning only if we got 2 bad states, so not here)
+        self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 0, 'OK']])
+        #4 of: -> 4,5,5
+        bp_rule.of_values = (4,5,5)
+        bp_rule.is_of_mul = False
+        self.assert_(bp_rule.get_state() == 0)
+        # 5,1,1 
+        bp_rule.of_values = (5,1,1)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 1)
+        # 5,2,1
+        bp_rule.of_values = (5,2,1)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 0)
+
+        ###* W C O O O
+        # 4 of: -> Crtitical (not 4 ok, so we take the worse state, the critical)
+        # 4,1,1 -> Critical (2 states raise the waring, but on raise critical, so worse state is critical)
+        self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit']])
+        #4 of: -> 4,5,5
+        bp_rule.of_values = (4,5,5)
+        bp_rule.is_of_mul = False
+        self.assert_(bp_rule.get_state() == 2)
+        # 4,1,1
+        bp_rule.of_values = (4,1,1)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 2)
+
+        ##* W C C O O
+        #* 2 of: OK
+        #* 4,1,1 -> Critical (same as before)
+        #* 4,1,3 -> warning (the warning rule is raised, but the critical is not)
+        self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit'], [C, 2, 'Crit']])
+        #* 2 of: 2,5,5
+        bp_rule.of_values = (2,5,5)
+        bp_rule.is_of_mul = False
+        self.assert_(bp_rule.get_state() == 0)
+        #* 4,1,1
+        bp_rule.of_values = (4,1,1)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 2)
+        #* 4,1,3
+        bp_rule.of_values = (4,1,3)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 1)
+
+
 
 
 class TestConfigBroken(ShinkenTest):

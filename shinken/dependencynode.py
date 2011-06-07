@@ -38,6 +38,7 @@ class DependencyNode(object):
         self.sons = []
         # Of: values are a triple OK,WARN,CRIT
         self.of_values = (0,0,0)
+        self.is_of_mul = False
         self.configuration_errors = []
 
     def __str__(self):
@@ -101,15 +102,17 @@ class DependencyNode(object):
         nb_warn = len([s for s in states if s == 1])
         nb_crit = len([s for s in states if s == 2])
 
-        print "NB:", nb_ok, nb_warn, nb_crit
+        #print "NB:", nb_ok, nb_warn, nb_crit
 
         # Ok and Crit apply with their own values
         # Warn can apply with warn or crit values
+        # so a W C can raise a Warning, but not enouth for 
+        # a critical
         ok_apply = nb_ok >= nb_search_ok
         warn_apply = nb_warn + nb_crit >= nb_search_warn
         crit_apply = nb_crit >= nb_search_crit
 
-        print "What apply?", ok_apply, warn_apply, crit_apply
+        #print "What apply?", ok_apply, warn_apply, crit_apply
 
         # return the worse state that apply
         if crit_apply:
@@ -118,8 +121,18 @@ class DependencyNode(object):
         if warn_apply:
             return 1
 
-        # ok, so it's ok :)
-        return 0
+        if ok_apply:
+            return 0
+
+        # Maybe even OK is not possible, is so, it depend if the admin
+        # ask a simple form Xof: or a multiple one A,B,Cof:
+        # the simple should give OK, the mult should give the worse state
+        if self.is_of_mul:
+            #print "Is mul, send 0"
+            return 0
+        else:
+            #print "not mul, return worse", worse_state
+            return worse_state
 
 
 
@@ -196,6 +209,7 @@ class DependencyNodeFactory(object):
             mul_of = (g[1] != u'' and g[2] != u'')
             # If multi got (A,B,C)
             if mul_of:
+                node.is_of_mul = True
                 node.of_values = (int(g[0]), int(g[1]), int(g[2]))
             else: #if not, use A,0,0, we will change 0 after to put MAX
                 node.of_values = (int(g[0]), 0, 0)
