@@ -89,20 +89,38 @@ class DependencyNode(object):
             return worse_state
 
         # Ok we've got a 'of:' rule
-        nb_search = self.of_values[0]
-        # Look if we've got enouth 0
-        if len([s for s in states if s == 0]) >= nb_search:
-            #print "Good, we find at least %d 0 in states for a of:" % nb_search, states
-            return 0
+        # We search for OK, WARN or CRIT applications
+        # And we will choice between them
+        
+        nb_search_ok = self.of_values[0]
+        nb_search_warn = self.of_values[1]
+        nb_search_crit = self.of_values[2]
+        
+        # We look for each application
+        nb_ok = len([s for s in states if s == 0])
+        nb_warn = len([s for s in states if s == 1])
+        nb_crit = len([s for s in states if s == 2])
 
-        # Now maybe at least enouth WARNING, still beter than CRITICAL...
-        if len([s for s in states if s == 1]) >= nb_search:
-            #print "Beter than nothing, we find at least %d 1 in states for a of:" % nb_search, states
+        print "NB:", nb_ok, nb_warn, nb_crit
+
+        # Ok and Crit apply with their own values
+        # Warn can apply with warn or crit values
+        ok_apply = nb_ok >= nb_search_ok
+        warn_apply = nb_warn + nb_crit >= nb_search_warn
+        crit_apply = nb_crit >= nb_search_crit
+
+        print "What apply?", ok_apply, warn_apply, crit_apply
+
+        # return the worse state that apply
+        if crit_apply:
+            return 2
+
+        if warn_apply:
             return 1
 
-        # Sic... not good, return 2
-        #print "ARG, not enough 1 or 0, return 2..."
-        return 2
+        # ok, so it's ok :)
+        return 0
+
 
 
     #return a list of all host/service in our node and below
@@ -118,6 +136,19 @@ class DependencyNode(object):
 
         #and uniq the result
         return list(set(r))
+
+
+    # If we are a of: rule, we can get some 0 in of_values,
+    # if so, change them with NB sons instead
+    def switch_zeros_of_values(self):
+        nb_sons = len(self.sons)
+        # Need a list for assignement
+        self.of_values = list(self.of_values)
+        for i in [0, 1, 2]:
+            if self.of_values[i] == 0:
+                self.of_values[i] = nb_sons
+        self.of_values = tuple(self.of_values)
+        
 
 
     def is_valid(self):
@@ -158,7 +189,7 @@ class DependencyNodeFactory(object):
         r = re.compile(p)
         m = r.search(patern)
         if m is not None:
-            print "Match the of: thing N=", m.groups()
+            #print "Match the of: thing N=", m.groups()
             node.operand = 'of:'
             g = m.groups()
             # We can have a Aof: rule, or a multiple A,B,Cof: rule.
@@ -166,8 +197,8 @@ class DependencyNodeFactory(object):
             # If multi got (A,B,C)
             if mul_of:
                 node.of_values = (int(g[0]), int(g[1]), int(g[2]))
-            else: #if not, use A,A,A
-                node.of_values = (int(g[0]), int(g[0]), int(g[0]))
+            else: #if not, use A,0,0, we will change 0 after to put MAX
+                node.of_values = (int(g[0]), 0, 0)
             patern = m.groups()[3]
 
         #print "Is so complex?", patern, complex_node
@@ -237,6 +268,10 @@ class DependencyNodeFactory(object):
             o = self.eval_cor_patern(tmp, hosts, services)
             #print "4end I've %s got new sons" % patern , o
             node.sons.append(o)
+
+        # We got our nodes, so we can update 0 values of of_values
+        # with the number of sons
+        node.switch_zeros_of_values()
 
         #print "End, tmp", tmp
         #print "R %s :" % patern, node

@@ -255,8 +255,8 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
-        # Simple 1of: so in fact a triple (1,1,1)
-        self.assert_(bp_rule.of_values == (1,1,1))
+        # Simple 1of: so in fact a triple (1,2,2) (1of and MAX,MAX
+        self.assert_(bp_rule.of_values == (1,2,2))
         
         
         sons = bp_rule.sons
@@ -986,7 +986,7 @@ class TestBusinesscorrel(ShinkenTest):
         # Must be WARNING (worse no 0 value for both, like for AND rule)
         state = bp_rule.get_state()
         print "state", state
-        self.assert_(state == 2)
+        self.assert_(state == 1)
 
 
 
