@@ -765,9 +765,47 @@ class Items(object):
                     rm = resultmodulations.find_by_name(rm_name)
                     if rm is not None:
                         new_resultmodulations.append(rm)
+                    else:
+                        err = "The result modulation '%s'defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
+                        i.configuration_errors.append(err)
+                        continue
+                i.resultmodulations = new_resultmodulations
+
+
+    # Make link between item and it's resultmodulations
+    def linkify_with_criticitymodulations(self, criticitymodulations):
+        for i in self:
+            if hasattr(i, 'criticitymodulations'):
+                criticitymodulations_tab = i.criticitymodulations.split(',')
+                criticitymodulations_tab = strip_and_uniq(criticitymodulations_tab)
+                new_criticitymodulations = []
+                for rm_name in criticitymodulations_tab:
+                    rm = criticitymodulations.find_by_name(rm_name)
+                    if rm is not None:
+                        new_criticitymodulations.append(rm)
+                    else:
+                        err = "The criticity modulation '%s'defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
+                        i.configuration_errors.append(err)
+                        continue
+                i.criticitymodulations = new_criticitymodulations
+
+
+
+    # Make link between item and it's resultmodulations
+    def linkify_with_resultmodulations(self, resultmodulations):
+        for i in self:
+            if hasattr(i, 'resultmodulations'):
+                resultmodulations_tab = i.resultmodulations.split(',')
+                resultmodulations_tab = strip_and_uniq(resultmodulations_tab)
+                new_resultmodulations = []
+                for rm_name in resultmodulations_tab:
+                    rm = resultmodulations.find_by_name(rm_name)
+                    if rm is not None:
+                        new_resultmodulations.append(rm)
                     else: # TODO WHAT?
                         pass
                 i.resultmodulations = new_resultmodulations
+
 
 
     # If we've got a contact_groups properties, we search for all

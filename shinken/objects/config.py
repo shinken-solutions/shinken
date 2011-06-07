@@ -623,8 +623,8 @@ class Config(Item):
         # link hosts with timeperiods and commands
         self.hosts.linkify(self.timeperiods, self.commands, \
                                self.contacts, self.realms, \
-                               self.resultmodulations, self.escalations,\
-                               self.hostgroups)
+                               self.resultmodulations, self.criticitymodulations, \
+                               self.escalations, self.hostgroups)
 
         # Do the simplify AFTER explode groups
         #print "Hostgroups"
@@ -635,8 +635,8 @@ class Config(Item):
         # link services with other objects
         self.services.linkify(self.hosts, self.commands, \
                                   self.timeperiods, self.contacts,\
-                                  self.resultmodulations, self.escalations,\
-                                  self.servicegroups)
+                                  self.resultmodulations, self.criticitymodulations, \
+                                  self.escalations, self.servicegroups)
 
         #print "Service groups"
         # link servicegroups members with services

@@ -119,6 +119,7 @@ class Host(SchedulingItem):
         'poller_tag':           StringProp(default='None'),
         'reactionner_tag':           StringProp(default='None'),
         'resultmodulations':    StringProp(default=''),
+        'criticitymodulations': StringProp(default=''),
         'escalations':          StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':   StringProp(default='', fill_brok=['full_status']),
 
@@ -930,7 +931,7 @@ class Hosts(Items):
     # hosts -> hosts (parents, etc)
     # hosts -> commands (check_command)
     # hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, escalations=None, hostgroups=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, criticitymodulations=None, escalations=None, hostgroups=None):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -942,6 +943,7 @@ class Hosts(Items):
         self.linkify_with_contacts(contacts)
         self.linkify_h_by_realms(realms)
         self.linkify_with_resultmodulations(resultmodulations)
+        self.linkify_with_criticitymodulations(criticitymodulations)
         # WARNING: all escalations will not be link here
         # (just the escalation here, not serviceesca or hostesca).
         # This last one will be link in escalations linkify.

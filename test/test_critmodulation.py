@@ -42,7 +42,9 @@ class TestCritMod(ShinkenTest):
         print "Get our criticity modulation"
         cm = self.sched.conf.criticitymodulations.find_by_name('CritMod')
         self.assert_(cm is not None)
-        
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        print svc.criticitymodulations
+        self.assert_(cm in svc.criticitymodulations)
         
 
 
