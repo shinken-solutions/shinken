@@ -241,6 +241,7 @@ class Service(SchedulingItem):
         'in_hard_unknown_reach_phase': BoolProp(default=False, retention=True),
         'was_in_hard_unknown_reach_phase': BoolProp(default=False, retention=True),
         'state_before_hard_unknown_reach_phase': StringProp(default='OK', retention=True),
+        
     })
 
     # Mapping between Macros and properties (can be prop or a function)

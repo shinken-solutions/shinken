@@ -240,6 +240,7 @@ class Host(SchedulingItem):
         ### Problem/impact part
         'is_problem':           StringProp(default=False, fill_brok=['full_status']),
         'is_impact':            StringProp(default=False, fill_brok=['full_status']),
+
         # the save value of our criticity for "problems"
         'my_own_criticity':     IntegerProp(default=-1),
 
@@ -267,6 +268,7 @@ class Host(SchedulingItem):
         'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'state_before_hard_unknown_reach_phase' : StringProp(default='UP', retention=True),
+
     })
 
     # Hosts macros and prop that give the information

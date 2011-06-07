@@ -208,16 +208,34 @@ class SchedulingItem(Item):
         if self.my_own_criticity == -1:
             self.my_own_criticity = self.criticity
 
+        # We look at our crit modulations. If one apply, we take apply it
+        # and it's done
+        in_modulation = False
+        for cm in self.criticitymodulations:
+            now = time.time()
+            print cm.__dict__
+            period = cm.modulation_period
+            if period is None or period.is_time_valid(now):
+                print "My self", self.get_name(), "go from crit", self.criticity, "to crit", cm.criticity
+                self.criticity = cm.criticity
+                in_modulation = True
+                # We apply the first available, taht's all
+                break
+
         # If we trully have impacts, we get the max criticity
         # if it's huge than ourselve
         if len(self.impacts) != 0:
             self.criticity = max(self.criticity, max([e.criticity for e in self.impacts]))
-        elif self.my_own_criticity != -1:
+            return
+        # If we are not a problem, we setup our own_crit if we are not in a 
+        # modulation period
+        if self.my_own_criticity != -1 and not in_modulation:
             self.criticity = self.my_own_criticity
 
 
     # Look for my impacts, and remove me from theirs problems list
     def no_more_a_problem(self):
+        was_pb = self.is_problem
         if self.is_problem:
             self.is_problem = False
 
@@ -228,12 +246,16 @@ class SchedulingItem(Item):
             # we can just drop our impacts list
             self.impacts = []
 
+        # We update our criticy value, it's not a huge thing :)
+        self.update_criticity_value()
+
+        # If we were a problem, we say to everyone
+        # our new status, with good criticity value
+        if was_pb:
             # And we register a new broks for update status
             b = self.get_update_status_brok()
             self.broks.append(b)
 
-        # We update our criticy value, it's not a huge thing :)
-        self.update_criticity_value()
 
 
     # call recursively by potentials impacts so they

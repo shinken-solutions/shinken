@@ -46,34 +46,6 @@ class Criticitymodulation(Item):
         return self.resultmodulation_name
 
 
-    # Make the return code modulation if need
-    def module_return(self, return_code):
-        #Only if in modulation_period of modulation_period == None
-        if self.modulation_period is None or self.modulation_period.is_time_valid(time.time()):
-            #Try to change the exit code only if a new one is defined
-            if self.exit_code_modulation is not None:
-                #First with the exit_code_match
-                if return_code in self.exit_codes_match:
-                    return_code = self.exit_code_modulation
-
-        return return_code
-
-
-    # We override the pythonize because we have special cases that we do not want
-    # to be do at running
-    def pythonize(self):
-        # First apply Item pythonize
-        super(self.__class__, self).pythonize()
-
-        # Then very special cases
-        # Intify the exit_codes_match, and make list
-        self.exit_codes_match = [ int(ec) for ec in getattr(self, 'exit_codes_match', []) ]
-
-        if hasattr(self, 'exit_code_modulation'):
-            self.exit_code_modulation = int(self.exit_code_modulation)
-        else:
-            self.exit_code_modulation = None
-
 
 class Criticitymodulations(Items):
     name_property = "criticitymodulation_name"
