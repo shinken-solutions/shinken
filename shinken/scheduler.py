@@ -84,6 +84,8 @@ class Scheduler:
             # clean some times possibel overriden Queues, to do not explode in memory usage
             # every 1/4 of hour
             14 : ('clean_queues', self.clean_queues, 1),
+            # Look for new criticity change by modulation every minute
+            15 : ('update_criticities', self.update_criticities, 60),
         }
 
         # stats part
@@ -375,6 +377,37 @@ class Scheduler:
         if c_id in self.comments:
             self.comments[c_id].ref.del_comment(c_id)
             del self.comments[c_id]
+
+    # We update all criticity for looking at new modulation
+    # start for impacts, and so update broks status and
+    # problems value too
+    def update_criticities(self):
+        for t in [self.hosts, self.services]:
+            # We first update impacts and classic elements
+            for i in [i for i in t if not i.is_problem]:
+                was = i.criticity
+                i.update_criticity_value()
+                new = i.criticity
+                # Ok, the criticity change, we can update the broks
+                if new != was:
+                    #print "The elements", i.get_name(), "change it's criticity value"
+                    self.get_and_register_status_brok(i)
+                    
+        # When all impacts and classic elements are updated,
+        # we can update problems (their value depend on impacts, so
+        # they must be done after)
+        for t in [self.hosts, self.services]:
+            # We first update impacts and classic elements
+            for i in [i for i in t if i.is_problem]:
+                was = i.criticity
+                i.update_criticity_value()
+                new = i.criticity
+                # Maybe one of the impacts change it's criticity to a high value
+                # and so ask for the problem to raise too
+                if new != was:
+                    #print "The elements", i.get_name(), "change it's criticity value from", was, "to", new 
+                    self.get_and_register_status_brok(i)
+
 
 
     # Called by poller to get checks

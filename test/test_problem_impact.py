@@ -323,8 +323,12 @@ class TestProblemImpact(ShinkenTest):
 
         # Now we set the modulation period as always good, we check that the service
         # really update it's criticity value
-        crit_srv.update_criticity_value()
+        self.sched.update_criticities()
+        # So the service with the modulation should got it's criticity raised
         self.assert_(crit_srv.criticity == 5)
+        # And the routers too (problems)
+        self.assert_(host_router_0.criticity == 5)
+        self.assert_(host_router_1.criticity == 5)
 
         #--------------------------------------------------------------
         # One router get UP now

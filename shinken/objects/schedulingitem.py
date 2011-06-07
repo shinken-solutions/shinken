@@ -213,13 +213,12 @@ class SchedulingItem(Item):
         in_modulation = False
         for cm in self.criticitymodulations:
             now = time.time()
-            print cm.__dict__
             period = cm.modulation_period
-            if period is None or period.is_time_valid(now):
-                print "My self", self.get_name(), "go from crit", self.criticity, "to crit", cm.criticity
+            if period is None or period.is_time_valid(now):                    
+                #print "My self", self.get_name(), "go from crit", self.criticity, "to crit", cm.criticity
                 self.criticity = cm.criticity
                 in_modulation = True
-                # We apply the first available, taht's all
+                # We apply the first available, that's all
                 break
 
         # If we trully have impacts, we get the max criticity
@@ -227,10 +226,12 @@ class SchedulingItem(Item):
         if len(self.impacts) != 0:
             self.criticity = max(self.criticity, max([e.criticity for e in self.impacts]))
             return
+
         # If we are not a problem, we setup our own_crit if we are not in a 
         # modulation period
         if self.my_own_criticity != -1 and not in_modulation:
             self.criticity = self.my_own_criticity
+            
 
 
     # Look for my impacts, and remove me from theirs problems list
