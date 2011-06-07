@@ -908,7 +908,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
-        self.assert_(bp_rule.of_values == (4,4,4))
+        self.assert_(bp_rule.of_values == (5,5,5))
         
         
         sons = bp_rule.sons
@@ -961,7 +961,7 @@ class TestBusinesscorrel(ShinkenTest):
         
         # The rule still be OK
         state = bp_rule.get_state()
-        self.assert_(state == 0)
+        self.assert_(state == 2)
 
         # Now we also set B as CRITICAL/HARD...
         self.scheduler_loop(2, [[B, 2, 'CRITICAL']])
