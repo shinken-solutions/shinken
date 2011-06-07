@@ -36,7 +36,8 @@ class DependencyNode(object):
     def __init__(self):
         self.operand = None
         self.sons = []
-        self.of_values = 0
+        # Of: values are a triple OK,WARN,CRIT
+        self.of_values = (0,0,0)
         self.configuration_errors = []
 
     def __str__(self):
@@ -88,7 +89,7 @@ class DependencyNode(object):
             return worse_state
 
         # Ok we've got a 'of:' rule
-        nb_search = self.of_values
+        nb_search = self.of_values[0]
         # Look if we've got enouth 0
         if len([s for s in states if s == 0]) >= nb_search:
             #print "Good, we find at least %d 0 in states for a of:" % nb_search, states
@@ -159,7 +160,8 @@ class DependencyNodeFactory(object):
         if m is not None:
             #print "Match the of: thing N=", m.groups()
             node.operand = 'of:'
-            node.of_values = int(m.groups()[0])
+            v = int(m.groups()[0])
+            node.of_values = (v,v,v)
             patern = m.groups()[1]
 
         #print "Is so complex?", patern, complex_node
