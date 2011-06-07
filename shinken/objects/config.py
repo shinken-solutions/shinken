@@ -42,6 +42,7 @@ from timeperiod import Timeperiod, Timeperiods
 from service import Service, Services
 from command import Command, Commands
 from resultmodulation import Resultmodulation, Resultmodulations
+from criticitymodulation import Criticitymodulation, Criticitymodulations
 from escalation import Escalation, Escalations
 from serviceescalation import Serviceescalation, Serviceescalations
 from hostescalation import Hostescalation, Hostescalations
@@ -295,6 +296,7 @@ class Config(Item):
         'realm':            (Realm, Realms, 'realms'),
         'module':           (Module, Modules, 'modules'),
         'resultmodulation': (Resultmodulation, Resultmodulations, 'resultmodulations'),
+        'criticitymodulation': (Criticitymodulation, Criticitymodulations, 'criticitymodulations'),
         'escalation':       (Escalation, Escalations, 'escalations'),
         'serviceescalation': (Serviceescalation, Serviceescalations, 'serviceescalations'),
         'hostescalation':   (Hostescalation, Hostescalations, 'hostescalations'),
@@ -443,7 +445,7 @@ class Config(Item):
                  'servicedependency', 'hostdependency', 'arbiter', 'scheduler',
                  'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module', 
                  'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
-                 'discoveryrun', 'discoveryrule']
+                 'discoveryrun', 'discoveryrule', 'criticitymodulation']
         objectscfg = {}
         for t in types:
             objectscfg[t] = []
@@ -666,6 +668,8 @@ class Config(Item):
         #print "Resultmodulations"
         self.resultmodulations.linkify(self.timeperiods)
 
+        self.criticitymodulations.linkify(self.timeperiods)
+
         #print "Escalations"
         self.escalations.linkify(self.timeperiods, self.contacts, \
                                      self.services, self.hosts)
@@ -841,6 +845,7 @@ class Config(Item):
         self.services.fill_default()
         self.servicegroups.fill_default()
         self.resultmodulations.fill_default()
+        self.criticitymodulations.fill_default()
 
         #Also fill default of host/servicedep objects
         self.servicedependencies.fill_default()
@@ -1159,6 +1164,7 @@ class Config(Item):
         self.timeperiods.create_reversed_list()
 #        self.modules.create_reversed_list()
         self.resultmodulations.create_reversed_list()
+        self.criticitymodulations.create_reversed_list()
         self.escalations.create_reversed_list()
         self.discoveryrules.create_reversed_list()
         self.discoveryruns.create_reversed_list()
@@ -1219,7 +1225,7 @@ class Config(Item):
         
         for x in ( 'servicedependencies', 'hostdependencies', 'arbiterlinks', 'schedulerlinks',
                    'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations',
-                   'discoveryrules', 'discoveryruns'):
+                   'discoveryrules', 'discoveryruns', 'criticitymodulations'):
             try: cur = getattr(self, x)
             except: continue
             logger.log('Checking %s...' % (x))
@@ -1253,6 +1259,7 @@ class Config(Item):
         self.services.pythonize()
         self.servicedependencies.pythonize()
         self.resultmodulations.pythonize()
+        self.criticitymodulations.pythonize()
         self.escalations.pythonize()
         self.discoveryrules.pythonize()
         self.discoveryruns.pythonize()
