@@ -1900,7 +1900,7 @@ table.aggrtree td.node {
     position: fixed;
     left: 515px;
     right: 0;
-    top: 100px;
+    top: 200px;
     width: 100%;
 }
 
@@ -2111,12 +2111,13 @@ table.aggrtree td.node {
 
 /* Global container */
 .whole-page {
-    min-width: 920px;
-    max-width: 1040px;
-    /*margin: 5px 40px;*/
-    margin-top : 5px;
+    width: 92%;
     margin-left: 4%;
     margin-right: 4%;
+    /*min-width: 920px;
+    max-width: 1040px;*/
+    /*margin: 5px 40px;*/
+    margin-top : 5px;
     position: relative;
     z-index: 1;
     border-radius: 5px;
@@ -2290,4 +2291,13 @@ h1#branding {
     background:#005577;
     padding:.7em 1em;
     margin-bottom:0;
+}
+
+h4#page-heading {
+font-weight: normal;
+padding: .5em;
+margin: 0 0 10px 0;
+border-bottom: 1px solid #CCC;
+background: #EDF4F5;
+font-size: 19px;
 }
