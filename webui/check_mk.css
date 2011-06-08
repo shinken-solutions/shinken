@@ -1908,7 +1908,7 @@ table.aggrtree td.node {
 /* problem impact panel */
 .problems-panel {
     height: 600px; 
-    width: 575px;
+    width: 550px;
     background: white;
     position: relative;
     /* by default it's hidden*/
