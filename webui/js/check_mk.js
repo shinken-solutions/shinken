@@ -593,116 +593,145 @@ function toggle_assumption(oImg, site, host, service)
 */
 window.addEvent('domready', function(){
     
-    /* Keep a pointer to the currently open problem*/
-    var old_problem = null;
-    /* And one to the current active image >> to revert it if need*/
-    var old_im = null;
-    /* Keep a trace of the click show problem div*/
-    var old_show_pb = null;
-    /* And the id of the problem */
-    var current_id = 0;
+	/* Keep a pointer to the currently open problem*/
+	var old_problem = null;
+	/* Keep the currently click impact */
+	var old_impact = null;
+	/* And one to the current active image >> to revert it if need*/
+	var old_im = null;
+	/* Keep a trace of the click show problem div*/
+	var old_show_pb = null;
+	/* And the id of the problem */
+	var current_id = 0;
   
-    /* We must avoid $$() call for IE, so call a standad way*/
-    var impacts = $(document.body).getElements('.impact');
-    /* We must avoid $$() call for IE, so call a standad way*/
-    var problems = $(document.body).getElements('.problems-panel');
+	/* We must avoid $$() call for IE, so call a standad way*/
+	var impacts = $(document.body).getElements('.impact');
+
+	/* We must avoid $$() call for IE, so call a standad way*/
+	var problems = $(document.body).getElements('.problems-panel');
   
     
-    /* Activate all problems, but in invisible from now*/
-    problems.setStyle('opacity', 0);
+	/* Activate all problems, but in invisible from now*/
+	problems.setStyle('opacity', 0);
 
 
-    /* Register the toggle function for all problem links*/
-    var clicks = $(document.body).getElements('.pblink');
-    /* And we register our toggle function */
-    clicks.addEvent('click', function(){
-	var pb_nb = this.get('id');
-	toggleBox(pb_nb);
+	/* Register the toggle function for all problem links*/
+	var clicks = $(document.body).getElements('.pblink');
+	/* And we register our toggle function */
+	clicks.addEvent('click', function(){
+		var pb_nb = this.get('id');
+		toggleBox(pb_nb);
 
-    });
+	    });
 
-    /* Our main toggle function */
-    function toggleBox(pb_nb){
-      // Keep the id of the impac twe want to look at
-    	//current_id = pb_nb;
+	function get_impact(impacts, id){
+	    for(var i = 0; i< impacts.length; i++) {
+		var impact = impacts[i];
+		/*alert("Look for impact"+i+impact+"\n");*/
+		if (impact.get('id') == id){
+		    return impact;
+		}
+	    }
+	    return none;
+	}
+
+
+	/* Our main toggle function */
+	function toggleBox(pb_nb){
+	    // Get our current impact click element
+	    impact = get_impact(impacts, pb_nb);
+
+	    // And fidn the panel we will slide
 	    el = document.getElementById("problems-"+pb_nb);
 
-    	/* Image >> of the impact to reverse sense too*/
+	    /* Image >> of the impact to reverse sense too*/
 	    im = document.getElementById("show-problem-img-"+pb_nb);
 	
-      if (old_show_pb != null) {
-        new Fx.Tween(old_show_pb, {property: 'opacity'}).start(0);
-        old_show_pb = null;
-      }
+	    if (old_show_pb != null) {
+		new Fx.Tween(old_show_pb, {property: 'opacity'}).start(0);
+		old_show_pb = null;
+	    }
       
-	var click_same_problem = false;
-	if (old_problem == el ) {
-	    click_same_problem = true;
-	}
-
-	var toggleEffect = new Fx.Tween(el, {
-	    property : 'opacity',
-	    duration :500/*'short'*/
-	});
-
-	// If we got an open problem, close it
-	if (old_problem != null && old_problem != el){
-	    old_problem.setStyle('left', -450);
-	    old_problem.setStyle('opacity', 0);
-	    old_problem.setStyle('display','none');
-	    // Revert the >> image too
-	    old_im.src = old_im.src.replace("left.png", "right.png");
-	}
-
-	old_problem = el;
-	old_im = im;
-	
-	/* If it was hide, it was on the left, go right and show up
-	   and reverse the >> right image */
-	if(el.getStyle('opacity') == 0){
-	    current_id = pb_nb;
-	    el.setStyle('display','block');
-	    toggleEffect.start(0, 1); // go show by in opacity
-	    new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(5); // and by moving right
-	    if (im != null){
-		im.src = im.src.replace("right.png", "left.png"); // and inverse the >> image
+	    var click_same_problem = false;
+	    if (old_problem == el ) {
+		click_same_problem = true;
 	    }
 
-	    /* else it was show, go left and hide :)*/
-	} else {
-	    current_id = 0;
-	    toggleEffect.start(1, 0); // go hide by opacity
-	    new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(-450); // go left
-	    if (im != null){
-		im.src = im.src.replace("left.png", "right.png"); // and get back to normal >> image
+	    var toggleEffect = new Fx.Tween(el, {
+		    property : 'opacity',
+		    duration :500/*'short'*/
+		});
+
+	    // If we got an open problem, close it
+	    if (old_problem != null && old_problem != el){
+		old_problem.setStyle('left', -450);
+		old_problem.setStyle('opacity', 0);
+		old_problem.setStyle('display','none');
+		// Revert the >> image too
+		old_im.src = old_im.src.replace("left.png", "right.png");
+		// And clean the active impact class too
+		old_impact.removeClass("impact-active");
 	    }
-	}
+
+	    old_problem = el;
+	    old_im = im;
+	    old_impact = impact;
+	    
+
+	    /* If it was hide, it was on the left, go right and show up
+	       and reverse the >> right image */
+	    if(el.getStyle('opacity') == 0){
+		current_id = pb_nb;
+		el.setStyle('display','block');
+		toggleEffect.start(0, 1); // go show by in opacity
+		new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(5); // and by moving right
+		if (im != null){
+		    im.src = im.src.replace("right.png", "left.png"); // and inverse the >> image
+		}
+
+		// Add the active class on the current impact
+		impact.addClass("impact-active");
+		
+
+		/* else it was show, go left and hide :)*/
+	    } else {
+		current_id = 0;
+		toggleEffect.start(1, 0); // go hide by opacity
+		new Fx.Tween(el, {property: 'left', transition: 'circ:in:out'}).start(-450); // go left
+		if (im != null){
+		    im.src = im.src.replace("left.png", "right.png"); // and get back to normal >> image
+		}
+		
+		// Add the active class on the current impact
+		impact.removeClass("impact-active");
+
+	    }
 	
-    }
+	}
     
     
-    // We set display >> image on hover
-    impacts.addEvent('mouseenter', function(){
-      var nb = this.get('id');
-      el = document.getElementById("show-problem-" + nb);
-      new Fx.Tween(el, {property: 'opacity'}).start(1);
-      });
+	// We set display >> image on hover
+	impacts.addEvent('mouseenter', function(){
+		var nb = this.get('id');
+		el = document.getElementById("show-problem-" + nb);
+		new Fx.Tween(el, {property: 'opacity'}).start(1);
+	    });
     
-    // And on leaving, hide it with opacity -> 0
-    impacts.addEvent('mouseleave', function(){
-       var nb = this.get('id');
-       //alert("bla"+nb+"blabla"+current_id)
-       el = document.getElementById("show-problem-" + nb);
-       // Do not go hide if it's the current element
-       if (nb != current_id){
-          new Fx.Tween(el, {property: 'opacity'}).start(0);
+	// And on leaving, hide it with opacity -> 0
+	impacts.addEvent('mouseleave', function(){
+		var nb = this.get('id');
+		//alert("bla"+nb+"blabla"+current_id)
+		el = document.getElementById("show-problem-" + nb);
+		// Do not go hide if it's the current element
+		if (nb != current_id){
+		    new Fx.Tween(el, {property: 'opacity'}).start(0);
           
-	     }else{
-	        old_show_pb = el;
-	     }
-	  });
+		}else{
+		    old_show_pb = el;
+		}
+	    });
 
-});
+    });
 
 
 

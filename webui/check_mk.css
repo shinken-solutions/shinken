@@ -1897,7 +1897,7 @@ table.aggrtree td.node {
 /* The panel that will contain all problem panels*/
 .problems-panels {
     position: fixed;
-    left: 500px;
+    left: 495px;
     right: 0;
     top: 60px;
     width: 100%;
@@ -1929,7 +1929,7 @@ table.aggrtree td.node {
 
 /* The whole left panel for impacts*/
 .impacts-panel {
-    width: 450px;
+    width: 445px;
     float: left;
     display: inline-block;
     border-radius: 6px;
@@ -1968,6 +1968,29 @@ table.aggrtree td.node {
 
 .alpha_black {
     background-image: url("images/alpha_black.png");
+}
+
+.impact-active{
+    background-image: url("images/right-black-arrow.png");
+    color: #FFF!important;
+}
+
+/*p.impact-active {
+            background:  url('../feature-tab-current.png');
+            color: #FFF;
+        }
+*/
+
+.impact-active .impact-state-text {
+    color: #FFF;
+}
+
+.impact-active .impact-duration{
+    color: #FFF;
+}
+
+.impact-active .impact-name{
+    color: #FFF;
 }
 
 /* One problem block*/
@@ -2053,17 +2076,17 @@ table.aggrtree td.node {
 /* The link of the impact on its name */
 .impact-name {
     font-weight: bold;
-    color: #333!important;
+    color: #333;
 }
 
 /* The link of the impact on its name */
 .impact-state-text {
-    color: #333!important;
+    color: #333
 }
 
 /* The text of the duration of impacts */
 .impact-duration {
-    color: #999!important;
+    color: #999;
     font-size: 11px;
 }
 
