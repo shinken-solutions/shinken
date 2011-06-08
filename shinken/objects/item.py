@@ -960,12 +960,15 @@ class Items(object):
                     elif h == '*':
                         for newhost in get_all_host_names_set(hosts):
                             hnames_list.append(newhost)
-                            print "DBG in item.explode_host_groups_into_hosts , added '%s' to group '%s'" % (newhost, i)
+                            #print "DBG in item.explode_host_groups_into_hosts , added '%s' to group '%s'" % (newhost, i)
                     else:
                         hnames_list.append(h)
             
             i.host_name = ','.join(list(set(hnames_list)))
 
+            # Ok, enven with all of it, there is still no host, put it as a template
+            if i.host_name == '':
+                i.register = '0'
 
 
 

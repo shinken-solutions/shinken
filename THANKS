@@ -34,3 +34,4 @@ To Ronny Lindner for the bug report about non host expressions for services
 To Olivier Hanesse for his bug report about fixed 60s interval in checks
 To Markus Elger for this bug report about no schedule retention data
 To Vincent Riquer for his bug report about HA installation and sapre broker that stay alive
+To Michael Grundmann for his bug report about service host exclusion and void hostgroup
