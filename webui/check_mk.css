@@ -2029,6 +2029,15 @@ table.aggrtree td.node {
     margin-top: 3px;
 }
 
+.impact-icon-big {
+    float: left;
+    height: 80px;
+    overflow: hidden;
+    width: 80px;
+    margin-top: 3px;
+}
+
+
 /* The show problem image, on the right of the impact*/
 .criticity-icon-1 {
     width: 20px;
