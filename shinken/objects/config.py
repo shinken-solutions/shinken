@@ -777,10 +777,10 @@ class Config(Item):
         #print "Timeperiods"
         self.timeperiods.explode()
 
-        self.hostdependencies.explode()
+        self.hostdependencies.explode(self.hostgroups)
 
         #print "Servicedependancy"
-        self.servicedependencies.explode()
+        self.servicedependencies.explode(self.hostgroups)
 
         #Serviceescalations hostescalations will create new escalations
         self.serviceescalations.explode(self.escalations)

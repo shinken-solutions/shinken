@@ -70,6 +70,7 @@ test_bad_sat_realm_conf.py
 test_bad_realm_conf.py
 test_no_broker_in_realm_warning.py
 test_critmodulation.py
+test_hostdep_withno_depname.py
 test_timeout.py
 
 # takes long

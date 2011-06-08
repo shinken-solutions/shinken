@@ -82,7 +82,7 @@ class Servicedependencies(Items):
 
 
     #We create new servicedep if necessery (host groups and co)
-    def explode(self):
+    def explode(self, hostgroups):
         #The "old" services will be removed. All services with
         #more than one host or a host group will be in it
         srvdep_to_remove = []
@@ -94,9 +94,23 @@ class Servicedependencies(Items):
             sd = self.items[id]
             if sd.is_tpl(): #Exploding template is useless
                 continue
+
+            hnames = []
+            if hasattr(sd, 'dependent_hostgroup_name'):
+                hg_names = sd.dependent_hostgroup_name.split(',')
+                hg_names = [hg_name.strip() for hg_name in hg_names]
+                for hg_name in hg_names:
+                    hg = hostgroups.find_by_name(hg_name)
+                    if hg is None:
+                        err = "ERROR : the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
+                        hg.configuration_errors.append(err)
+                        continue
+                    hnames.extend(hg.members.split(','))
+            
             if not hasattr(sd, 'dependent_host_name'):
                 sd.dependent_host_name = sd.host_name
-            hnames = sd.dependent_host_name.split(',')
+            
+            hnames.extend(sd.dependent_host_name.split(','))
             snames = sd.dependent_service_description.split(',')
             couples = []
             for hname in hnames:
