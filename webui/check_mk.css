@@ -28,7 +28,8 @@ th {
 body.main {
     background-attachment: fixed;
     /*background-image: url("images/contentframe_background.jpg");*/
-    background-image: url("images/to-green.jpg");
+    /*background-image: url("images/to-green.jpg");*/
+    background-color : black;
     background-repeat: repeat;
     /*background-repeat: repeat-x;*/
     font-family: arial, helvetica, sans-serif;
@@ -120,7 +121,7 @@ body.side {
     background-attachment: fixed;
     background-repeat: repeat;
     /*background-image: url("images/snapinframe_background.jpg");*/
-    background-image: url("images/to-green.png");
+    /*background-image: url("images/to-green.png");*/
     font-family: arial, helvetica, sans-serif;
     font-size: 9pt;
     padding: 0;
@@ -427,7 +428,7 @@ h1 {
     font-size: 17pt;
     margin-top: 0px;
     margin-bottom: 5px;
-    margin-left: 5px;
+/*    margin-left: 5px;*/
 }
 
 table.heading {
@@ -1897,9 +1898,9 @@ table.aggrtree td.node {
 /* The panel that will contain all problem panels*/
 .problems-panels {
     position: fixed;
-    left: 495px;
+    left: 515px;
     right: 0;
-    top: 60px;
+    top: 100px;
     width: 100%;
 }
 
@@ -2112,7 +2113,10 @@ table.aggrtree td.node {
 .whole-page {
     min-width: 920px;
     max-width: 1040px;
-    margin: 0 40px;
+    /*margin: 5px 40px;*/
+    margin-top : 5px;
+    margin-left: 4%;
+    margin-right: 4%;
     position: relative;
     z-index: 1;
     border-radius: 5px;
@@ -2271,3 +2275,19 @@ cursor: pointer;
     color:#FFF;
 }
 
+
+
+
+
+
+/* From Meatball css */
+/* branding
+----------------------------------------------- */
+h1#branding {
+    font-weight:normal;
+    font-size:3em;
+    text-align:left;
+    background:#005577;
+    padding:.7em 1em;
+    margin-bottom:0;
+}
