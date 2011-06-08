@@ -442,6 +442,7 @@ class LiveStatus(object):
             },
             'display_name' : {
                 'description' : 'Optional display name of the host - not used by Nagios\' web interface',
+                'prop' : 'host_name',
                 'type' : 'string',
             },
             'downtimes' : {
@@ -935,6 +936,7 @@ class LiveStatus(object):
             },
             'display_name' : {
                 'description' : 'An optional display name (not used by Nagios standard web pages)',
+                'prop' : 'service_description',
                 'type' : 'string',
             },
             'downtimes' : {

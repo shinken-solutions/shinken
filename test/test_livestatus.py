@@ -2151,6 +2151,31 @@ Limit: 1001"""
         self.assert_(response == 'test_host_0;test_ok_0;1;blablub\n')
 
 
+    def test_display_name(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hosts
+Filter: name = test_host_0
+Columns: name display_name"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == 'test_host_0;test_host_0\n')
+        request = """GET services
+Filter: host_name = test_host_0
+Filter: description = test_ok_0
+Columns: description host_name display_name"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "hihi",response
+        self.assert_(response == 'test_ok_0;test_host_0;test_ok_0\n')
+
+
 
 class TestConfigBig(TestConfig):
     def setUp(self):
