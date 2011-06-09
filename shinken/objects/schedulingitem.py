@@ -99,6 +99,7 @@ class SchedulingItem(Item):
 
         if len(self.flapping_changes) > flap_history:
             self.flapping_changes.pop(0)
+
         # Now we add a value, we update the is_flapping prop
         self.update_flapping()
 
@@ -115,6 +116,11 @@ class SchedulingItem(Item):
             if b:
                 r += i*(1.2-0.8)/flap_history + 0.8
         r = r / flap_history
+        r *= 100
+
+        # Look if we are full in our states, because if not
+        # the value is not accurate
+        is_full = len(self.flapping_changes) >= flap_history
 
         # Now we get the low_flap_threshold and high_flap_threshold values
         # They can be from self, or class
@@ -126,12 +132,13 @@ class SchedulingItem(Item):
             cls = self.__class__
             high_flap_threshold = cls.high_flap_threshold
 
-        # Now we check is flapping change
-        if self.is_flapping and r < low_flap_threshold:
+        # Now we check is flapping change, but only if we got enouth
+        # states to llok at the value accurancy
+        if self.is_flapping and r < low_flap_threshold and is_full:
             self.is_flapping = False
             #We also raise a log entry
             self.raise_flapping_stop_log_entry(r, low_flap_threshold)
-        if not self.is_flapping and r >= high_flap_threshold:
+        if not self.is_flapping and r >= high_flap_threshold and is_full:
             self.is_flapping = True
             # We also raise a log entry
             self.raise_flapping_start_log_entry(r, high_flap_threshold)
