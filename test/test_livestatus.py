@@ -621,10 +621,6 @@ ResponseHeader: fixed16
         #---------------------------------------------------------------
         # get the full hosts table
         #---------------------------------------------------------------
-        request = 'GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
-
         request = """GET hosts
 Stats: name !=
 Stats: check_type = 0
@@ -853,6 +849,31 @@ ResponseHeader: fixed16"""
         print response
         for s in self.livestatus_broker.livestatus.services.values():
             print "%s %d %s;%d" % (s.state, s.state_id, s.state_type, s.attempt)
+
+
+    def test_thruk_config(self):
+        self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('1r_1h_1s')
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get the full hosts table
+        #---------------------------------------------------------------
+        request = 'GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
 
 
     def test_thruk_comments(self):

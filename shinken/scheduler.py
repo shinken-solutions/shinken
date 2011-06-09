@@ -1055,6 +1055,9 @@ class Scheduler:
                 "modified_service_attributes" : 0,
                 "global_host_event_handler" : self.conf.global_host_event_handler,
                 'global_service_event_handler' : self.conf.global_service_event_handler,
+                'check_external_commands' : self.conf.check_external_commands,
+                'check_service_freshness' : self.conf.check_service_freshness,
+                'check_host_freshness' : self.conf.check_host_freshness,
                 'command_file' : self.conf.command_file
                 }
         b = Brok('program_status', data)
