@@ -290,7 +290,7 @@ class Ndodb_Mysql_broker(BaseModule):
                            'last_hard_state_change' :  de_unixify(data['last_hard_state_change']),
                            'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                            #set check to 1 so nagvis is happy
-                           'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], data['is_flapping'],
+                           'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
                            }
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
 
@@ -348,7 +348,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'last_hard_state_change' :  de_unixify(data['last_hard_state_change']),
                               'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                               #set check to 1 so nagvis is happy
-                              'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], data['is_flapping'],
+                              'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
                               }
         servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
@@ -493,7 +493,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                               'execution_time' : data['execution_time'], 'latency' : data['latency'],
                               'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
-                              'percent_state_change' : data['percent_state_change'], data['is_flapping'],
+                              'percent_state_change' : data['percent_state_change'],
         }
 
         servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
@@ -555,7 +555,7 @@ class Ndodb_Mysql_broker(BaseModule):
                            'last_hard_state_change' :  de_unixify(data['last_hard_state_change']),
                            'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                            #set check to 1 so nagvis is happy
-                           'has_been_checked' : 1, data['is_flapping'], 'percent_state_change' : data['percent_state_change'], 
+                           'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'], 
                            }
         hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
@@ -604,7 +604,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'last_hard_state_change' :  de_unixify(data['last_hard_state_change']),
                               'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                               #set check to 1 so nagvis is happy
-                              'has_been_checked' : 1, data['is_flapping'], 'percent_state_change' : data['percent_state_change'],
+                              'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'],
                               }
 
         where_clause = {'service_object_id' : service_id}
