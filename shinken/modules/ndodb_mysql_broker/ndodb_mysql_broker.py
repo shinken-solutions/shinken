@@ -290,6 +290,7 @@ class Ndodb_Mysql_broker(BaseModule):
                            'last_hard_state_change' :  de_unixify(data['last_hard_state_change']),
                            'last_state_change' :  de_unixify(data['last_state_change']),
                            'last_notification' : de_unixify(data['last_notification']),
+                           'current_notification_number' : data['current_notification_number'],
                            'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                            #set check to 1 so nagvis is happy
                            'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
@@ -351,6 +352,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'last_hard_state_change' :  de_unixify(data['last_hard_state_change']),
                               'last_state_change' :  de_unixify(data['last_state_change']),
                               'last_notification' : de_unixify(data['last_notification']),
+                              'current_notification_number' : data['current_notification_number'],
                               'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                               #set check to 1 so nagvis is happy
                               'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
@@ -561,6 +563,7 @@ class Ndodb_Mysql_broker(BaseModule):
                            'last_hard_state_change' :  de_unixify(data['last_hard_state_change']),
                            'last_state_change' :  de_unixify(data['last_state_change']),
                            'last_notification' : de_unixify(data['last_notification']),
+                           'current_notification_number' : data['current_notification_number'],
                            'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                            #set check to 1 so nagvis is happy
                            'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'], 
@@ -613,6 +616,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'last_hard_state_change' :  de_unixify(data['last_hard_state_change']),
                               'last_state_change' :  de_unixify(data['last_state_change']),
                               'last_notification' : de_unixify(data['last_notification']),
+                              'current_notification_number' : data['current_notification_number'],
                               'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                               #set check to 1 so nagvis is happy
                               'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'],
