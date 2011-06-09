@@ -118,6 +118,9 @@ class SchedulingItem(Item):
         r = r / flap_history
         r *= 100
 
+        # We can update our value
+        self.percent_state_change = r
+
         # Look if we are full in our states, because if not
         # the value is not accurate
         is_full = len(self.flapping_changes) >= flap_history
@@ -136,13 +139,20 @@ class SchedulingItem(Item):
         # states to llok at the value accurancy
         if self.is_flapping and r < low_flap_threshold and is_full:
             self.is_flapping = False
-            #We also raise a log entry
+            # We also raise a log entry
             self.raise_flapping_stop_log_entry(r, low_flap_threshold)
+            # And update our status for modules
+            b = self.get_update_status_brok()
+            self.broks.append(b)
+
         if not self.is_flapping and r >= high_flap_threshold and is_full:
             self.is_flapping = True
             # We also raise a log entry
             self.raise_flapping_start_log_entry(r, high_flap_threshold)
-        self.percent_state_change = r
+            # And update our status for modules
+            b = self.get_update_status_brok()
+            self.broks.append(b)
+
 
 
     # Add an attempt but cannot be more than max_check_attempts
