@@ -269,7 +269,7 @@ class Ndodb_Mysql_broker(BaseModule):
                       'freshness_checks_enabled' : data['check_freshness'], 'freshness_threshold' : data['freshness_threshold'],
                       'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
                       'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                      'obsess_over_host' : data['obsess_over_host'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
+                      'obsess_over_host' : data['obsess_over_host'], 'notes' : data['notes'], 'notes_url' : data['notes_url'],
             }
 
         #print "HOST DATA", hosts_data
@@ -291,6 +291,7 @@ class Ndodb_Mysql_broker(BaseModule):
                            'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                            #set check to 1 so nagvis is happy
                            'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
+                           'flap_detection_enabled' : data['flap_detection_enabled'],
                            }
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
 
@@ -349,6 +350,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                               #set check to 1 so nagvis is happy
                               'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
+                              'flap_detection_enabled' : data['flap_detection_enabled'],
                               }
         servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
@@ -556,6 +558,7 @@ class Ndodb_Mysql_broker(BaseModule):
                            'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                            #set check to 1 so nagvis is happy
                            'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'], 
+                           'flap_detection_enabled' : data['flap_detection_enabled'],
                            }
         hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
@@ -605,6 +608,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'problem_has_been_acknowledged' : data['problem_has_been_acknowledged'], 'acknowledgement_type' : data['acknowledgement_type'],
                               #set check to 1 so nagvis is happy
                               'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'],
+                              'flap_detection_enabled' : data['flap_detection_enabled'],
                               }
 
         where_clause = {'service_object_id' : service_id}
