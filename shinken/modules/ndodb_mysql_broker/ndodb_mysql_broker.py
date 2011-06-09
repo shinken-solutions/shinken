@@ -447,7 +447,8 @@ class Ndodb_Mysql_broker(BaseModule):
                            'check_type' : 0, 'current_check_attempt' : data['attempt'],
                            'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
                            'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                           'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk'])
+                           'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
+                           'percent_state_change' : data['percent_state_change'],
         }
         hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
@@ -488,10 +489,11 @@ class Ndodb_Mysql_broker(BaseModule):
 
         #Now servicestatus
         servicestatus_data = {'instance_id' : data['instance_id'],
-                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
-                           'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
-                           'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                           'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk'])
+                              'check_type' : 0, 'current_check_attempt' : data['attempt'],
+                              'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
+                              'execution_time' : data['execution_time'], 'latency' : data['latency'],
+                              'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
+                              'percent_state_change' : data['percent_state_change'],
         }
 
         servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)

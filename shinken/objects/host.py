@@ -182,7 +182,7 @@ class Host(SchedulingItem):
         'downtimes':            StringProp(default=[], fill_brok=['full_status'], retention=True),
         'comments':             StringProp(default=[], fill_brok=['full_status'], retention=True),
         'flapping_changes':     StringProp(default=[], fill_brok=['full_status'], retention=True),
-        'percent_state_change': FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
+        'percent_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'problem_has_been_acknowledged': BoolProp(default=False, fill_brok=['full_status'], retention=True),
         'acknowledgement':      StringProp(default=None, retention=True),
         'acknowledgement_type': IntegerProp(default=1, fill_brok=['full_status', 'check_result'], retention=True),
