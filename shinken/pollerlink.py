@@ -48,8 +48,6 @@ class PollerLink(SatelliteLink):
 
     def register_to_my_realm(self):
         self.realm.pollers.append(self)
-        if self.poller_tags != []:
-            print "I %s manage tags : %s " % (self.get_name(), self.poller_tags)
 
 class PollerLinks(SatelliteLinks):
     name_property = "poller_name"

@@ -58,7 +58,8 @@ They connect here and see if they are still OK with our running_id, if not, they
     def put_results(self, results):
         nb_received = len(results)
         self.app.nb_check_received += nb_received
-        print "Received %d results" % nb_received
+        if nb_received != 0:
+            print "Received %d results" % nb_received
         self.app.waiting_results.extend(results)
 
         #for c in results:
@@ -271,11 +272,10 @@ class Shinken(BaseSatellite):
             uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
             self.pollers[pol_id]['uri'] = uri
             self.pollers[pol_id]['last_connection'] = 0
-            print "Got a poller", p
 
         #First mix conf and override_conf to have our definitive conf
         for prop in self.override_conf:
-            print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
+            #print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
             val = self.override_conf[prop]
             setattr(self.conf, prop, val)
 
@@ -284,7 +284,8 @@ class Shinken(BaseSatellite):
             os.environ['TZ'] = self.conf.use_timezone
             time.tzset()
 
-        print "I've got modules", self.modules
+        if len(self.modules) != 0:
+            print "I've got modules", self.modules
 
         # TODO: if scheduler had previous modules instanciated it must clean them !
         self.modules_manager.set_modules(self.modules)

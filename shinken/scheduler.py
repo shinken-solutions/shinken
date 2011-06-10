@@ -1281,7 +1281,7 @@ class Scheduler:
 
         gogogo = time.time()
 
-        self.load_one_min = Load()
+        self.load_one_min = Load(initial_value=1)
 
         while self.must_run:
             elapsed, _, _ = self.sched_daemon.handleRequests(timeout)
@@ -1291,7 +1291,11 @@ class Scheduler:
                     continue
 
             self.load_one_min.update_load(self.sched_daemon.sleep_time)
-            print "Time sleep : %.2f (average : %.2f)" % (self.sched_daemon.sleep_time, self.load_one_min.get_load())
+
+            # load of the scheduler is the percert of time it is waiting
+            l = min(100, 100.0 - self.load_one_min.get_load() * 100)
+            print "Load : (sleep) %.2f (average : %.2f) -> %d%%" % (self.sched_daemon.sleep_time, self.load_one_min.get_load(), l)
+
             self.sched_daemon.sleep_time = 0.0
 
             # Timeout or time over
@@ -1345,9 +1349,11 @@ class Scheduler:
             #        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, a.contact.get_name(), 'level:%d' % a.notif_nb, 'launch in', int(a.t_to_go - now)
             #    else:
             #        print "Event:", a.id, a.status
-            print "Nb checks send:", self.nb_checks_send
+            if self.nb_checks_send != 0:
+                print "Nb checks/notifications/event send:", self.nb_checks_send
             self.nb_checks_send = 0
-            print "Nb Broks send:", self.nb_broks_send
+            if self.nb_broks_send != 0:
+                print "Nb Broks send:", self.nb_broks_send
             self.nb_broks_send = 0
 
             time_elapsed = now - gogogo

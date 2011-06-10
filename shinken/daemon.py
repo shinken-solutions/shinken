@@ -584,7 +584,6 @@ Also put default value in the properties if some are missing in the config_file 
             if not hasattr(self, prop):
                 value = entry.pythonize(entry.default)
                 setattr(self, prop, value)
-                print "Using default value :", prop, value
 
 
     #Some paths can be relatives. We must have a full path by taking

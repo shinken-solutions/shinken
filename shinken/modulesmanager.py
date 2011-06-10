@@ -168,8 +168,6 @@ The previous modules instance(s), if any, are all cleaned. """
                 logger.log("Back trace of this remove : %s" % (output.getvalue()))
                 output.close()
 
-        print "Loaded", len(self.instances), "module instances"
-
         for inst in self.instances:
             # External are not init now, but only when they are started
             if not inst.is_external and not self.try_instance_init(inst):
