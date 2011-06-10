@@ -152,10 +152,16 @@ class Daemon(object):
         #Keep a trace of the local_log file desc if need
         self.local_log_fd = None
 
+        # Put in queue some debug output we will raise
+        # when we will be in daemon
+        self.debug_output = []
+
         self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
 
         os.umask(UMASK)
         self.set_exit_handler()
+
+
 
     # At least, lose the local log file if need
     def do_stop(self):
@@ -410,6 +416,10 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         del self.fpid
         self.pid = os.getpid()
         print("We are now fully daemonized :) pid=%d" % (self.pid))
+        # We can now output some previouly silented debug ouput
+        for s in self.debug_output:
+            print s
+        del self.debug_output
 
 
     def do_daemon_init_and_start(self):
@@ -480,13 +490,13 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         # Now get the module path. It's in fact the directory modules
         # inside the shinken directory. So let's find it.
 
-        print "modulemanager file", shinken.modulesmanager.__file__
+        self.debug_output.append("modulemanager file %s" % shinken.modulesmanager.__file__)
         modulespath = os.path.abspath(shinken.modulesmanager.__file__)
-        print "modulemanager absolute file", modulespath
+        self.debug_output.append("modulemanager absolute file %s" % modulespath)
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        print("Using modules path : %s" % (modulespath))
+        self.debug_output.append("Using modules path : %s" % (modulespath))
         
         return modulespath
 

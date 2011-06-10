@@ -327,7 +327,8 @@ class Arbiter(Daemon):
         self.conf.hack_old_nagios_parameters()
 
         # Raise warning about curently unmanaged parameters
-        self.conf.warn_about_unmanaged_parameters()
+        if self.verify_only:
+            self.conf.warn_about_unmanaged_parameters()
 
         # Exlode global conf parameters into Classes
         self.conf.explode_global_conf()
@@ -342,7 +343,8 @@ class Arbiter(Daemon):
 
 
         # Warn about useless parameters in Shinken
-        self.conf.notice_about_useless_parameters()
+        if self.verify_only:
+            self.conf.notice_about_useless_parameters()
 
         # Manage all post-conf modules
         self.hook_point('late_configuration')
