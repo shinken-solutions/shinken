@@ -17,11 +17,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This text is print at the import
-print "I am Ndo Mysql Broker"
-
 import sys
-print sys.path
 
 from ndodb_mysql_broker import Ndodb_Mysql_broker, properties
 

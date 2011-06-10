@@ -41,9 +41,6 @@ except ImportError:
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
-#This text is print at the import
-print "Detected module : Hot dependencies modules for Arbiter"
-
 
 properties = {
     'daemons' : ['arbiter'],

@@ -33,10 +33,6 @@ import re
 from shinken.basemodule import BaseModule
 from shinken.message import Message
 
-#This text is print at the import
-print "I am the nocdmod broker for pnp"
-
-
 properties = {
     'daemons' : ['broker'],
     'type' : 'npcdmod',

@@ -19,10 +19,6 @@
 
 import os
 
-#This text is print at the import
-print "I am Ndo Broker for Oracle"
-
-
 properties = {
     'daemons' : ['broker'],
     'type' : 'ndodb_oracle',

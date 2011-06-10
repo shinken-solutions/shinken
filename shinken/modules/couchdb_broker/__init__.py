@@ -17,15 +17,12 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#This text is print at the import
-print "I am Couchdb Broker"
-
 properties = {
     'daemons' : ['broker'],
     'type' : 'couchdb',
     'phases' : ['running'],
     }
+
 
 #called by the plugin manager to get a broker
 def get_instance(plugin):

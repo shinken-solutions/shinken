@@ -26,9 +26,6 @@ import xmlrpclib
 
 from shinken.basemodule import BaseModule
 
-#This text is print at the import
-print "Detected module : GLPI importer configuration for Arbiter"
-
 
 properties = {
     'daemons' : ['arbiter'],

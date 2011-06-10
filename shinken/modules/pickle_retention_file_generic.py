@@ -21,9 +21,6 @@
 #Here for the configuration phase AND running one
 
 
-#This text is print at the import
-print "Detected module : Pickle retention file for Daemons"
-
 import cPickle
 import shutil
 

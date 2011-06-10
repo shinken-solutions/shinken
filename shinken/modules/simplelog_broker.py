@@ -35,9 +35,6 @@ from shinken.basemodule import BaseModule
 from shinken.util import get_day
 from shinken.log import logger
 
-#This text is print at the import
-print "I am simple log Broker"
-
 
 properties = {
     'daemons' : ['broker'],

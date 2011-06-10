@@ -24,8 +24,6 @@ import MySQLdb
 
 from shinken.basemodule import BaseModule
 
-#This text is print at the import
-print "Detected module : MySQL importer for Arbiter"
 
 properties = {
     'daemons' : ['arbiter'],

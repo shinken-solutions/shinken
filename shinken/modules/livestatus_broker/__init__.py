@@ -21,10 +21,6 @@ import re
 import sys
 
 
-
-#This text is print at the import
-print "I am Livestatus Broker"
-
 from livestatus_broker import Livestatus_broker, properties
 
 #called by the plugin manager to get a broker

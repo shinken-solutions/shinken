@@ -25,6 +25,8 @@ import socket
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
+from shinken.log import logger
+
 class ArbiterLink(SatelliteLink):
     id = 0
     my_type = 'arbiter'
@@ -53,7 +55,7 @@ class ArbiterLink(SatelliteLink):
 
 
     def is_me(self):
-        print "Hostname:%s, gethostname:%s" % (self.host_name, socket.gethostname())
+        logger.log("And arbiter is launched with the hostname:%s of addr :%s" % (self.host_name, socket.gethostname()), print_it=False)
         return self.host_name == socket.gethostname()
 
 

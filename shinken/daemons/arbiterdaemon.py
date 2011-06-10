@@ -23,10 +23,9 @@
 import sys
 import os
 import time
-
 import traceback
 from Queue import Empty
-
+import socket
 
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
@@ -228,9 +227,12 @@ class Arbiter(Daemon):
             if arb.is_me():
                 arb.need_conf = False
                 self.me = arb
-                print "I am the arbiter :", arb.get_name()
                 self.is_master = not self.me.spare
-                print "Am I the master?", self.is_master
+                if self.is_master:
+                    logger.log("I am the master Arbiter : %s" % arb.get_name())
+                else:
+                    logger.log("I am the spare Arbiter : %s" % arb.get_name())
+
                 # Set myself as alive ;)
                 self.me.alive = True
             else: #not me
@@ -240,11 +242,10 @@ class Arbiter(Daemon):
             sys.exit("Error: I cannot find my own Arbiter object, I bail out. "
                      "To solve it, please change the host_name parameter in "
                      "the object Arbiter in the file shinken-specific.cfg. "
+                     "With the value %s " % socket.gethostname(),
                      "Thanks.")
 
-        print "My own modules :"
-        for m in self.me.modules:
-            print m
+        logger.log("My own modules :" + ','.join(self.me.modules))
 
         # we request the instances without them being *started* 
         # (for these that are concerned ("external" modules):

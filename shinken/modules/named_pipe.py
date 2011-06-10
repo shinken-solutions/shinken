@@ -21,9 +21,6 @@
 #Here for the configuration phase AND running one
 
 
-#This text is print at the import
-print "Detected module : Named pipe module for Arbiter/receiver"
-
 import os
 import time
 import select

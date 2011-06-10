@@ -21,9 +21,6 @@
 #Here for the configuration phase AND running one
 
 
-#This text is print at the import
-print "Detected module : Hack commands poller tag module for Arbiter"
-
 import re
 from shinken.basemodule import BaseModule
 
