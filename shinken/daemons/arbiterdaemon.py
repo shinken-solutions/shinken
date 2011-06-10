@@ -398,6 +398,7 @@ class Arbiter(Daemon):
         self.port = self.me.port
         
         logger.log("Configuration Loaded")
+        print ""
 
 
     # Main loop function
@@ -593,8 +594,9 @@ class Arbiter(Daemon):
             self.get_external_commands_from_brokers()
             self.get_external_commands_from_receivers()
             # send_conf_to_schedulers()
-
-            print "Nb Broks send:", self.nb_broks_send
+            
+            if self.nb_broks_send != 0:
+                print "Nb Broks send:", self.nb_broks_send
             self.nb_broks_send = 0
 
             # Now send all external commands to schedulers

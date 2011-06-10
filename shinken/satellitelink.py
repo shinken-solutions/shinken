@@ -88,7 +88,6 @@ class SatelliteLink(Item):
 
         try:
             pyro.set_timeout(self.con, self.data_timeout)
-            print "DBG: put conf to", self.con.__dict__
             self.con.put_conf(conf)
             pyro.set_timeout(self.con, self.timeout)
             return True
@@ -128,20 +127,22 @@ class SatelliteLink(Item):
         #We are dead now. Must raise
         #a brok to say it
         if was_alive:
-            print "Setting the satellite %s to a dead state." % self.get_name()
+            logger.log("WARNING : Setting the satellite %s to a dead state." % self.get_name())
             b = self.get_update_status_brok()
             self.broks.append(b)
 
 
-    #Go in reachable=False and add a failed attempt
-    #if we reach the max, go dead
-    def add_failed_check_attempt(self):
-        print "Add failed attempt to", self.get_name()
+    # Go in reachable=False and add a failed attempt
+    # if we reach the max, go dead
+    def add_failed_check_attempt(self, reason=''):
         self.reachable = False
         self.attempt += 1
         self.attempt = min(self.attempt, self.max_check_attempts)
-        print "Attemps", self.attempt, self.max_check_attempts
-        #check when we just go HARD (dead)
+        # Don't need to warn again and again if the satellite is already dead
+        if self.alive:
+            s = "Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason)
+            logger.log(s)
+        # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
             self.set_dead()
 
@@ -189,8 +190,7 @@ class SatelliteLink(Item):
             else:
                 self.add_failed_check_attempt()
         except Pyro_exp_pack, exp:
-            print exp
-            self.add_failed_check_attempt()
+            self.add_failed_check_attempt(reason=str(exp))
 
 
 
@@ -279,7 +279,7 @@ class SatelliteLink(Item):
 
         try:
             tab = self.con.what_i_managed()
-            print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
+            #print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
             # Protect against bad Pyro return
             if not isinstance(tab, list):
                 self.con = None
@@ -291,7 +291,7 @@ class SatelliteLink(Item):
             if type(exp) == Pyro.errors.TimeoutError:
                 return
             self.con = None
-            print "[%s]What i managed : Got exception : %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
+            #print "[%s]What i managed : Got exception : %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = []
 
 

@@ -138,10 +138,9 @@ But clear queues if they were already set before recreating new one.  """
     def stop_process(self):
         """ Request the module process to stop and release it """
         if self.process:
-            logger.log("I'm stopping process pid:%s " % self.process.pid)
+            logger.log("I'm stopping module '%s' process pid:%s " % (self.get_name(), self.process.pid))
             self.process.terminate()
             self.process.join(timeout=1)
-            print dir(self.process)
             if self.process.is_alive():
                 logger.log("The process is still alive, I help it to die")
                 self.__kill()

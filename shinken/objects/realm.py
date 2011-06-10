@@ -323,8 +323,6 @@ class Realm(Itemgroup):
                 cfg = r.give_satellite_cfg()
                 broker.cfg['reactionners'][r.id] = cfg
 
-        print "***** Broker Me %s got a poller/reactionner link : %s and %s" % (broker.get_name(), broker.cfg['pollers'], broker.cfg['reactionners'])
-
 
     # Get a conf package of satellites links that can be useful for 
     # a scheduler
@@ -344,7 +342,7 @@ class Realm(Itemgroup):
             c = r.give_satellite_cfg()
             cfg['reactionners'][r.id] = c
 
-        print "***** Preparing a satellites conf for a scheduler", cfg
+        #print "***** Preparing a satellites conf for a scheduler", cfg
         return cfg
 
 

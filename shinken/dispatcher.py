@@ -179,7 +179,7 @@ class Dispatcher:
                             #    print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
                             #    satellite.reachable = False
                             wim = satellite.managed_confs# what_i_managed()
-                            print "%s [%s]Look at what manage the %s %s (alive? %s, reachable? %s): %s (look for %s)" % (int(time.time()), r.get_name(), kind, satellite.get_name(), satellite.alive, satellite.reachable, wim, cfg_id)
+                            #print "%s [%s]Look at what manage the %s %s (alive? %s, reachable? %s): %s (look for %s)" % (int(time.time()), r.get_name(), kind, satellite.get_name(), satellite.alive, satellite.reachable, wim, cfg_id)
                             if not satellite.alive or (satellite.reachable and cfg_id not in wim):
                                 logger.log('[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False #so we will redispatch all
@@ -278,14 +278,10 @@ class Dispatcher:
         scheds.sort(alive_then_spare_then_deads)
         scheds.reverse() #pop is last, I need first
 
-        #DBG: dump
         print_sched = [s.get_name() for s in scheds]
         print_sched.reverse()
-        print_string = '[%s] Schedulers order : ' % r.get_name()
-        for s in print_sched:
-            print_string += '%s ' % s
+        print_string = '[%s] Schedulers order : %s' % (r.get_name(), ','.join([s.get_name() for s in scheds]))
         logger.log(print_string)
-        #END DBG
 
         return scheds
 
@@ -314,7 +310,7 @@ class Dispatcher:
                 # Now we do the real job
                 # every_one_need_conf = False
                 for conf in conf_to_dispatch:
-                    logger.log('[%s] Dispatching one configuration' % r.get_name())
+                    logger.log('[%s] Dispatching configuration %s' % (r.get_name(), conf.id))
 
                     # If there is no alive schedulers, not good...
                     if len(scheds) == 0:
@@ -348,12 +344,12 @@ class Dispatcher:
                         # REF: doc/shinken-scheduler-lost.png (2)
                         override_conf = sched.get_override_configuration()
                         satellites_for_sched = r.get_satellites_links_for_scheduler()
-                        print "Want to give a satellites pack for the scheduler", satellites_for_sched
+                        #print "Want to give a satellites pack for the scheduler", satellites_for_sched
                         conf_package = (conf, override_conf, sched.modules, satellites_for_sched)
-                        print "Try to put the conf", conf_package
+                        #print "Try to put the conf", conf_package
                         is_sent = sched.put_conf(conf_package)
                         if not is_sent:
-                            logger.log('[%s] Warning : Dispatch fault for scheduler %s' %(r.get_name(), sched.get_name()))
+                            logger.log('[%s] WARNING : configuration dispatching error for scheduler %s' %(r.get_name(), sched.get_name()))
                             continue
                         
                         logger.log('[%s] Dispatch OK of for conf in scheduler %s' % (r.get_name(), sched.get_name()))
@@ -404,16 +400,13 @@ class Dispatcher:
                         if r.to_satellites_need_dispatch[kind][cfg_id]:
                             logger.log('[%s] Dispatching %s' % (r.get_name(),kind) + 's')
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
-                            print "*"*10, "DBG: cfg_for_satellite_part", cfg_for_satellite_part, r.get_name(), cfg_id
+                            #print "*"*10, "DBG: cfg_for_satellite_part", cfg_for_satellite_part, r.get_name(), cfg_id
                             
                             # make copies of potential_react list for sort
                             satellites = []
                             for satellite in r.get_potential_satellites_by_type(kind):
                                 satellites.append(satellite)
                             satellites.sort(alive_then_spare_then_deads)
-                            print "All broker"
-                            for b in satellites:
-                                print b.get_name(), b.alive
 
                             # Only keep alive Satellites
                             satellites = [s for s in satellites if s.alive]
@@ -426,11 +419,11 @@ class Dispatcher:
                                 #Should look over the list, not over
                                 if len(nospare) != 0:
                                     idx = cfg_id % len(nospare)
-                                    print "No spare", nospare
+                                    #print "No spare", nospare
                                     spares = [s for s in satellites if s.spare]
-                                    print "Spare", spares
-                                    print "Got 1", nospare[idx:]
-                                    print "Got 2", nospare[:-idx+1]
+                                    #print "Spare", spares
+                                    #print "Got 1", nospare[idx:]
+                                    #print "Got 2", nospare[:-idx+1]
                                     new_satellites = nospare[idx:]
                                     new_satellites.extend(nospare[:-idx+1])
                                     #print "New satellites", cfg_id, new_satellites
@@ -492,4 +485,6 @@ class Dispatcher:
                             rec.active = True
                             rec.need_conf = False
                             logger.log('[%s] Dispatch OK of for configuration to receiver %s' %(r.get_name(), rec.get_name()))
+                        else:
+                            logger.log('[%s] WARNING : dispatching failed for receiver %s' %(r.get_name(), rec.get_name()))
                             
