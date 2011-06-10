@@ -351,12 +351,11 @@ class SatelliteLink(Item):
             if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
 
-    #Some parameters for satellites are not defined in the satellites conf
-    #but in the global configuration. We can pass them in the global
-    #property
+    # Some parameters for satellites are not defined in the satellites conf
+    # but in the global configuration. We can pass them in the global
+    # property
     def add_global_conf_parameters(self, params):
         for prop in params:
-            print "Add global parameter", prop, params[prop]
             self.cfg['global'][prop] = params[prop]
 
 
@@ -425,22 +424,26 @@ class SatelliteLinks(Items):
                 s.realm = p
             # Check if what we get is OK or not
             if p is not None:
-                print "Me", s.get_name(), "is linked with realm", s.realm.get_name()
                 s.register_to_my_realm()
             else:
                 err = "The %s %s got a unknown realm '%s'" % (s.__class__.my_type, s.get_name(), p_name)
                 s.configuration_errors.append(err)
-                print err
+                #print err
 
 
     def linkify_s_by_plug(self, modules):
         for s in self:
             new_modules = []
             for plug_name in s.modules:
-                plug = modules.find_by_name(plug_name.strip())
+                plug_name = plug_name.strip()
+                # don't tread void names
+                if plug_name == '':
+                    continue
+
+                plug = modules.find_by_name(plug_name)
                 if plug is not None:
                     new_modules.append(plug)
                 else:
-                    err = "Error : the module %s is unknow for %s" % (plug_name, s.get_name())
+                    err = "Error : the module %s is unknown for %s" % (plug_name, s.get_name())
                     s.configuration_errors.append(err)
             s.modules = new_modules

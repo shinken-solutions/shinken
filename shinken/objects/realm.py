@@ -23,8 +23,8 @@
 import copy
 
 from itemgroup import Itemgroup, Itemgroups
-
 from shinken.property import BoolProp, IntegerProp, StringProp
+from shinken.log import logger
 
 #It change from hostgroup Class because there is no members
 #propertie, just the realm_members that we rewrite on it.
@@ -99,7 +99,8 @@ class Realm(Itemgroup):
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
-            print "Error : we've got a loop in realm definition", self.get_name()
+            err = "Error : we've got a loop in realm definition %s" % self.get_name()
+            self.configuration_errors.append(err)
             if self.has('members'):
                 return self.members
             else:
@@ -148,7 +149,6 @@ class Realm(Itemgroup):
             for reactionner in realm.reactionners:
                 if not reactionner.spare and reactionner.manage_sub_realms:
                     self.nb_reactionners += 1
-        print self.get_name(),"Count reactionners :", self.nb_reactionners
 
 
     def fill_potential_reactionners(self):
@@ -159,7 +159,6 @@ class Realm(Itemgroup):
             for reactionner in realm.reactionners:
                 if reactionner.manage_sub_realms:
                     self.potential_reactionners.append(reactionner)
-        print self.get_name(),"Add potential reactionners :", len(self.potential_reactionners)
 
 
     def count_pollers(self):
@@ -171,7 +170,6 @@ class Realm(Itemgroup):
             for poller in realm.pollers:
                 if not poller.spare and poller.manage_sub_realms:
                     self.nb_pollers += 1
-        print self.get_name(),"Count pollers :", self.nb_pollers
 
 
     def fill_potential_pollers(self):
@@ -182,7 +180,6 @@ class Realm(Itemgroup):
             for poller in realm.pollers:
                 if poller.manage_sub_realms:
                     self.potential_pollers.append(poller)
-        print self.get_name(),"Add potential pollers :", len(self.potential_pollers)
 
 
     def count_brokers(self):
@@ -194,7 +191,6 @@ class Realm(Itemgroup):
             for broker in realm.brokers:
                 if not broker.spare and broker.manage_sub_realms:
                     self.nb_brokers += 1
-        print self.get_name(),"Count brokers :", self.nb_brokers
 
 
     def fill_potential_brokers(self):
@@ -205,7 +201,6 @@ class Realm(Itemgroup):
             for broker in realm.brokers:
                 if broker.manage_sub_realms:
                     self.potential_brokers.append(broker)
-        print self.get_name(),"Add potential brokers :", len(self.potential_brokers)
 
 
     def count_receivers(self):
@@ -217,7 +212,16 @@ class Realm(Itemgroup):
             for receiver in realm.receivers:
                 if not receiver.spare and receiver.manage_sub_realms:
                     self.nb_receivers += 1
-        print self.get_name(),"Count receivers :", self.nb_receivers
+
+
+    def fill_potential_receivers(self):
+        self.potential_receivers = []
+        for broker in self.receivers:
+            self.potential_receivers.append(broker)
+        for realm in self.higher_realms:
+            for broker in realm.receivers:
+                if broker.manage_sub_realms:
+                    self.potential_receivers.append(broker)
 
 
     #Return the list of satellites of a certain type
@@ -277,6 +281,17 @@ class Realm(Itemgroup):
         self.count_brokers()
         self.fill_potential_brokers()
         self.count_receivers()
+        self.fill_potential_receivers()
+
+        s = "%s : (in/potential) (pollers:%d/%d) (reactionners:%d/%d) (brokers:%d/%d) (receivers:%d/%d)" % \
+            (self.get_name(),
+             #self.nb_schedulers, len(self.potential_schedulers),
+             self.nb_pollers, len(self.potential_pollers),
+             self.nb_reactionners, len(self.potential_reactionners),
+             self.nb_brokers, len(self.potential_brokers),
+             self.nb_receivers, len(self.potential_receivers)
+             )
+        logger.log(s)
 
 
 

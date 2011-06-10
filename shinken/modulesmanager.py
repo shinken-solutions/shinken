@@ -190,7 +190,7 @@ The previous modules instance(s), if any, are all cleaned. """
                 continue
             
             # ok, init succeed
-            print "Starting external module %s" % inst.get_name(), inst.from_q
+            logger.log("Starting external module %s" % inst.get_name())
             inst.start()
 
 

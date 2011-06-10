@@ -245,7 +245,7 @@ class Arbiter(Daemon):
                      "With the value %s " % socket.gethostname(),
                      "Thanks.")
 
-        logger.log("My own modules :" + ','.join(self.me.modules))
+        logger.log("My own modules : " + ','.join([m.get_name() for m in self.me.modules]))
 
         # we request the instances without them being *started* 
         # (for these that are concerned ("external" modules):
