@@ -35,7 +35,7 @@ if arbiter want it to have a new conf, satellite forgot old schedulers
 """
 
 
-from multiprocessing import Queue, Manager, active_children
+from multiprocessing import Queue, Manager, active_children, cpu_count
 import os
 import copy
 import time
@@ -719,9 +719,22 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
                 # And then we connect to it :)
                 self.pynag_con_init(sched_id)
 
-        # Now the limit part
+        # Now the limit part, 0 mean : number of cpu of this machine :)
+        # if not available, use 4 (modern hardware)
         self.max_workers = g_conf['max_workers']
+        if self.max_workers == 0:
+            try:
+                self.max_workers = cpu_count()
+            except NotImplementedError:
+                self.max_workers =4
+            logger.log("Using max workers : %s" % self.max_workers)
         self.min_workers = g_conf['min_workers']
+        if self.min_workers == 0:
+            try:
+                self.min_workers = cpu_count()
+            except NotImplementedError:
+                self.min_workers =4
+            logger.log("Using min workers : %s" % self.min_workers)
 
         self.processes_by_worker = g_conf['processes_by_worker']
         self.polling_interval = g_conf['polling_interval']
@@ -732,7 +745,6 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         self.poller_tags = g_conf.get('poller_tags', ['None'])
         self.reactionner_tags = g_conf.get('reactionner_tags', ['None'])
         self.max_plugins_output_length = g_conf.get('max_plugins_output_length', 8192)
-        print "Max output lenght" , self.max_plugins_output_length
 
         # Set our giving timezone from arbiter
         use_timezone = g_conf['use_timezone']
