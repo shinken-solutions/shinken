@@ -1893,7 +1893,7 @@ test_host_0;test_ok_0;CUSTNAME;custvalue
         self.update_broker()
         # timeperiods must be manipulated in the broker, because status-broks
         # contain timeperiod names, not objects.
-        lshost = self.livestatus_broker.find_host("test_host_0")
+        lshost = self.livestatus_broker.hosts["test_host_0"]
         now = time.time()
         localnow = time.localtime(now)
         if localnow[5] > 45:
@@ -2592,6 +2592,89 @@ OutputFormat: csv
         print response
         # take first line, take members column, count list elements = 400 services
         self.assert_(len(((response.split("\n")[0]).split(';')[1]).split(',')) == 400)
+
+
+    def test_sorted_limit(self):
+        self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('5r_100h_2000s')
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        # now send the list of services to the broker in an unordered way
+        sched_unsorted = '\n'.join(["%s;%s;%d" % (s.host_name, s.service_description, s.state_id) for s in self.sched.services])
+
+        self.update_broker()
+        live_sorted = '\n'.join(["%s;%s;%d" % (s.host_name, s.service_description, s.state_id) for s in self.livestatus_broker.services.values()])
+
+        # Unsorted in the scheduler, sorted in livestatus
+        self.assert_(sched_unsorted != live_sorted)
+        sched_live_sorted = '\n'.join(sorted(sched_unsorted.split('\n'))) + '\n'
+        sched_live_sorted = sched_live_sorted.strip()
+        print "first of sched\n(%s)\n--------------\n" % sched_unsorted[:100]
+        print "first of live \n(%s)\n--------------\n" % live_sorted[:100]
+        print "first of sssed \n(%s)\n--------------\n" % sched_live_sorted[:100]
+        print "last of sched\n(%s)\n--------------\n" % sched_unsorted[-100:]
+        print "last of live \n(%s)\n--------------\n" % live_sorted[-100:]
+        print "last of sssed \n(%s)\n--------------\n" % sched_live_sorted[-100:]
+        # But sorted they are the same. 
+        self.assert_('\n'.join(sorted(sched_unsorted.split('\n'))) == live_sorted)
+  
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
+        print svc1
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_15")
+        print svc2
+        svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
+        print svc3
+        svc4 = self.sched.services.find_srv_by_name_and_hostname("test_host_007", "test_ok_05")
+        print svc4
+        svc5 = self.sched.services.find_srv_by_name_and_hostname("test_host_007", "test_ok_11")
+        svc6 = self.sched.services.find_srv_by_name_and_hostname("test_host_025", "test_ok_01")
+        svc7 = self.sched.services.find_srv_by_name_and_hostname("test_host_025", "test_ok_03")
+        self.scheduler_loop(1, [[svc1, 1, 'W'], [svc2, 1, 'W'], [svc3, 1, 'W'], [svc4, 2, 'C'], [svc5, 3, 'U'], [svc6, 2, 'C'], [svc7, 2, 'C']])
+        self.update_broker()
+        # 1993O, 3xW, 3xC, 1xU
+
+        # Get all bad services from livestatus
+        request = """GET services
+Columns: host_name service_description state
+ColumnHeaders: off
+OutputFormat: csv
+Filter: state != 0"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # Get all bad services from the scheduler
+        sched_bad_unsorted = '\n'.join(["%s;%s;%d" % (s.host_name, s.service_description, s.state_id) for s in self.sched.services if s.state_id != 0])
+        # Check if the result of the query is sorted
+        self.assert_('\n'.join(sorted(sched_bad_unsorted.split('\n'))) == response.strip())
+
+        # Now get the first 3 bad services from livestatus
+        request = """GET services
+Limit: 3
+Columns: host_name service_description state
+ColumnHeaders: off
+OutputFormat: csv
+Filter: state != 0"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_6_______________\n%s\n%s\n' % (request, response)
+
+        # Now compare the first 3 bad services with the scheduler data
+        self.assert_('\n'.join(sorted(sched_bad_unsorted.split('\n'))[:3]) == response.strip())
+
+        # Now check if all services are sorted when queried with a livestatus request
+        request = """GET services
+Columns: host_name service_description state
+ColumnHeaders: off
+OutputFormat: csv"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # Again, get all bad services from the scheduler
+        sched_bad_unsorted = '\n'.join(["%s;%s;%d" % (s.host_name, s.service_description, s.state_id) for s in self.sched.services])
+        # Check if the result of the query is sorted
+        self.assert_('\n'.join(sorted(sched_bad_unsorted.split('\n'))) == response.strip())
+
 
 
 class TestConfigComplex(TestConfig):

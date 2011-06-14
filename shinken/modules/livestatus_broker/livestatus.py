@@ -157,7 +157,7 @@ class Logline(dict):
             setattr(self, col[0], row[idx])
 
 
-    def fill(self, hosts, services, hostname_lookup_table, servicename_lookup_table, columns):
+    def fill(self, hosts, services, columns):
         """Attach host and/or service objects to a Logline object
         
         Lines describing host or service events only contain host_name
@@ -167,13 +167,16 @@ class Logline(dict):
         
         """
         if self.logobject == LOGOBJECT_HOST:
-            if self.host_name in hostname_lookup_table:
-                setattr(self, 'log_host', hosts[hostname_lookup_table[self.host_name]])
+            try:
+                setattr(self, 'log_host', hosts[self.host_name])
+            except:
+                pass
         elif self.logobject == LOGOBJECT_SERVICE:
-            if self.host_name in hostname_lookup_table:
-                setattr(self, 'log_host', hosts[hostname_lookup_table[self.host_name]])
-            if self.host_name + self.service_description in servicename_lookup_table:
-                setattr(self, 'log_service', services[servicename_lookup_table[self.host_name + self.service_description]])
+            try:
+                setattr(self, 'log_host', hosts[self.host_name])
+                setattr(self, 'log_service', services[self.host_name + self.service_description])
+            except:
+                pass
         return self
 
 
@@ -1693,7 +1696,7 @@ class LiveStatus(object):
                 'type' : 'list',
             },
             'num_services' : {
-                'depythonize' : lambda x: sum((len(y.service_ids) for y in x)),
+                'depythonize' : lambda x: sum((len(y.services) for y in x)),
                 'description' : 'The total number of services of hosts in this group',
                 'prop' : 'get_hosts',
                 'type' : 'list',
@@ -5493,10 +5496,8 @@ class LiveStatus(object):
     separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
 
 
-    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue):
+    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue):
         self.configs = configs
-        self.hostname_lookup_table = hostname_lookup_table
-        self.servicename_lookup_table = servicename_lookup_table
         self.hosts = hosts
         self.services = services
         self.contacts = contacts
@@ -5541,7 +5542,7 @@ class LiveStatus(object):
         handles the execution of the request and formatting of the result.
         
         """
-        request = LiveStatusRequest(data, self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, 
+        request = LiveStatusRequest(data, self.configs, self.hosts, self.services, 
             self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, 
             self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
         request.parse_input(data)
@@ -5904,12 +5905,10 @@ class LiveStatusRequest(LiveStatus):
    
     """A class describing a livestatus request."""
     
-    def __init__(self, data, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue, counters):
+    def __init__(self, data, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue, counters):
         self.data = data
         # Runtime data form the global LiveStatus object
         self.configs = configs
-        self.hostname_lookup_table = hostname_lookup_table
-        self.servicename_lookup_table = servicename_lookup_table
         self.hosts = hosts
         self.services = services
         self.contacts = contacts
@@ -5962,15 +5961,15 @@ class LiveStatusRequest(LiveStatus):
                 query_cmds.append(line)
         if len(external_cmds) > 0:
             for external_cmd in external_cmds:
-                query = LiveStatusCommandQuery(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+                query = LiveStatusCommandQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
                 query.parse_input(external_cmd)
                 self.queries.append(query)
         if len(wait_cmds) > 1:
-            query = LiveStatusWaitQuery(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+            query = LiveStatusWaitQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
             query.parse_input('\n'.join(wait_cmds))
             self.queries.append(query)
         if len(query_cmds) > 0:
-            query = LiveStatusQuery(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+            query = LiveStatusQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
             query.parse_input('\n'.join(query_cmds))
             self.queries.append(query)
 
@@ -5979,11 +5978,9 @@ class LiveStatusQuery(LiveStatus):
 
     my_type = 'query'
 
-    def __init__(self, configs, hostname_lookup_table, servicename_lookup_table, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue, counters):
+    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue, counters):
         # Runtime data form the global LiveStatus object
         self.configs = configs
-        self.hostname_lookup_table = hostname_lookup_table
-        self.servicename_lookup_table = servicename_lookup_table
         self.hosts = hosts
         self.services = services
         self.contacts = contacts
@@ -6328,27 +6325,36 @@ class LiveStatusQuery(LiveStatus):
         return result
 
     
-    def get_hosts_or_services_livedata(self, cs, key):
+    def get_hosts_or_services_livedata(self, cs):
         objects = getattr(self, self.table)
-        if not self.limit:
-            objects = objects.values()
+        if cs.without_filter and not self.limit:
+            # Simply format the output
+            return [self.create_output(cs.output_map, x) for x in objects.itervalues()]
+        elif cs.without_filter and self.limit:
+            # Simply format the output of a subset of the objects
+            return [self.create_output(cs.output_map, x) for x in objects.values()[:self.limit]]
         else:
-            objects = sorted(objects.values(), key=key)
-        return [ 
-            self.create_output(cs.output_map, y) for y in (
-                x for x in objects 
-                if cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, x)))
-        ]
+            # Filter the objects and format the output. At least hosts
+            # and services are already sorted by name.
+            return [
+                self.create_output(cs.output_map, y) for y in (
+                    x for x in objects.itervalues() 
+                    if cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, x)))
+            ]
+
     
     def get_hosts_livedata(self, cs):
-        return self.get_hosts_or_services_livedata(cs, lambda k: (k.host_name))
+        return self.get_hosts_or_services_livedata(cs)
     
+
     def get_services_livedata(self, cs):
-        return self.get_hosts_or_services_livedata(cs, lambda k: (k.host_name, k.service_description))
+        return self.get_hosts_or_services_livedata(cs)
+
 
     def get_simple_livedata(self, cs):
         objects = getattr(self, self.table)
         return [ self.create_output(cs.output_map, obj) for obj in objects.values() ]
+
 
     def get_filtered_livedata(self, cs):
         objects = getattr(self, self.table).values()
@@ -6356,6 +6362,7 @@ class LiveStatusQuery(LiveStatus):
             return [ y for y in [ self.create_output(cs.output_map, x) for x in objects ] if cs.filter_func(y) ]
         res = [ x for x in objects if cs.filter_func(self.create_output(cs.filter_map, x)) ]
         return [ self.create_output(cs.output_map, x) for x in res ]
+
 
     def get_list_livedata(self, cs):
         t = self.table
@@ -6394,16 +6401,19 @@ member_key: the key to be used to sort each resulting element of a group member.
                         ) if (cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, svc))))
         ]
 
+
     def get_hostbygroups_livedata(self, cs):
         member_key = lambda k: k.host_name
         group_key = lambda k: k.hostgroup_name
         return self.get_group_livedata(cs, self.hostgroups.values(), 'hostgroup', group_key, member_key)        
+
 
     def get_servicebygroups_livedata(self, cs):
         member_key = lambda k: k.get_name()
         group_key = lambda k: k.servicegroup_name
         return self.get_group_livedata(cs, self.servicegroups.values(), 'servicegroup', group_key, member_key)
     
+
     def get_problem_livedata(self, cs):
         # We will crate a problems list first with all problems and source in it
         # TODO : create with filter
@@ -6419,9 +6429,11 @@ member_key: the key to be used to sort each resulting element of a group member.
         # Then return
         return [ self.create_output(cs.output_map, pb) for pb in problems ]
 
+
     def get_status_livedata(self, cs):
         cs.out_map = self.out_map['Config']
         return [ self.create_output(cs.output_map, c) for c in self.configs.values() ]
+
 
     def get_columns_livedata(self, cs):
         result = []
@@ -6442,6 +6454,7 @@ member_key: the key to be used to sort each resulting element of a group member.
                     else:
                         result.append({'description' : 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LiveStatus.out_map[obj][attr]['type'] })
         return result
+
 
     def get_servicebyhostgroups_livedata(self, cs):
         # to test..
@@ -6485,6 +6498,7 @@ member_key: the key to be used to sort each resulting element of a group member.
         'columns':              get_columns_livedata,
         'servicesbyhostgroup':  get_servicebyhostgroups_livedata
     }
+
 
     def get_live_data(self):
         """Find the objects which match the request.
@@ -6558,7 +6572,7 @@ member_key: the key to be used to sort each resulting element of a group member.
             if sqlite3.paramstyle == 'pyformat':
                 dbresult = [self.row_factory(c, d) for d in dbresult]
 
-            prefiltresult = [y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
+            prefiltresult = [y for y in (x.fill(self.hosts, self.services, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
             filtresult = [self.create_output(output_map, x) for x in prefiltresult]
             if self.stats_request:
                 result = self.statsify_result(filtresult)
@@ -6876,8 +6890,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                         # changes, instead of scanning the entire list and
                         # applying a Filter:, we simply reduce the list
                         # so it has just one element.
-                        idx = self.servicename_lookup_table[host_name + service_description]
-                        self.services = { idx : self.services[idx] }
+                        self.services = { host_name + service_description : self.services[host_name + service_description] }
                     except:
                         pass
                 elif self.table == 'hosts':
@@ -6886,8 +6899,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                     self.prefiltercolumns.append('name')
                     self.filter_stack.put(self.make_filter('=', 'name', object))
                     try:
-                        idx = self.hostname_lookup_table[host_name]
-                        self.hosts = { idx : self.hosts[idx] }
+                        self.hosts = { host_name : self.hosts[host_name] }
                     except:
                         pass
                 else:
@@ -7059,7 +7071,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
             if sqlite3.paramstyle == 'pyformat':
                 dbresult = [self.row_factory(c, d) for d in dbresult]
 
-            prefiltresult = [y for y in (x.fill(self.hosts, self.services, self.hostname_lookup_table, self.servicename_lookup_table, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
+            prefiltresult = [y for y in (x.fill(self.hosts, self.services, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
             filtresult = [self.create_output(output_map, x) for x in prefiltresult]
             result = filtresult
 

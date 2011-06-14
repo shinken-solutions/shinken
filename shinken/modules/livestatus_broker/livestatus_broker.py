@@ -57,6 +57,7 @@ from shinken.brokerlink import BrokerLink
 from shinken.macroresolver import MacroResolver
 from shinken.basemodule import BaseModule
 from shinken.message import Message
+from shinken.sorteddict import SortedDict
 
 from livestatus import LiveStatus, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
@@ -86,24 +87,21 @@ class Livestatus_broker(BaseModule):
 
         #Our datas
         self.configs = {}
-        self.hosts = {}
-        self.services = {}
-        self.contacts = {}
-        self.hostgroups = {}
-        self.servicegroups = {}
-        self.contactgroups = {}
-        self.timeperiods = {}
-        self.commands = {}
+        self.hosts = SortedDict()
+        self.services = SortedDict()
+        self.contacts = SortedDict()
+        self.hostgroups = SortedDict()
+        self.servicegroups = SortedDict()
+        self.contactgroups = SortedDict()
+        self.timeperiods = SortedDict()
+        self.commands = SortedDict()
         #Now satellites
-        self.schedulers = {}
-        self.pollers = {}
-        self.reactionners = {}
-        self.brokers = {}
+        self.schedulers = SortedDict()
+        self.pollers = SortedDict()
+        self.reactionners = SortedDict()
+        self.brokers = SortedDict()
 
         self.instance_ids = []
-
-        self.hostname_lookup_table = {}
-        self.servicename_lookup_table = {}
 
         self.number_of_objects = 0
         self.last_need_data_send = time.time()
@@ -124,7 +122,7 @@ class Livestatus_broker(BaseModule):
         self.prepare_pnp_path()
 
 
-        self.livestatus = LiveStatus(self.configs, self.hostname_lookup_table, self.servicename_lookup_table, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.from_q)
+        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.from_q)
 
         m = MacroResolver()
         m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
@@ -149,25 +147,12 @@ class Livestatus_broker(BaseModule):
         for h in self.hosts.values():
             # If the host was in this instance, del it
             if h.instance_id == inst_id:
-                try:
-                    del self.hostname_lookup_table[h.host_name]
-                except KeyError: # maybe it was not inserted in a good way, pass it
-                    pass
-                to_del.append(h.id)
+                to_del.append(h.host_name)
 
                 
         for s in self.services.values():
             if s.instance_id == inst_id:
-                s_id = s.id
-                try:
-                    del self.servicename_lookup_table[s.host_name + s.service_description]
-                except: # not found? not a crime
-                    pass
-                try:
-                    del self.services[s_id]
-                except: #maybe the hsot is deleted before we got it's service?
-                    print "Debug warning : host service deleted but not found!"
-                to_del_srv.append(s_id)
+                to_del_srv.append(s.host_name + s.service_description)
 
         # Now clean hostgroups too
         for hg in self.hostgroups.values():
@@ -223,11 +208,11 @@ class Livestatus_broker(BaseModule):
         #Escalations is not use for status_dat
         del i.escalations
         
+
     def manage_initial_host_status_brok(self, b):
         data = b.data
         
-        h_id = data['id']
-
+        host_name = data['host_name']
         inst_id = data['instance_id']
         #print "Creating host:", h_id, b
         h = Host({})
@@ -240,8 +225,7 @@ class Livestatus_broker(BaseModule):
         # We need to rebuild Downtime and Comment relationship
         for dtc in h.downtimes + h.comments:
             dtc.ref = h
-        self.hosts[h_id] = h
-        self.hostname_lookup_table[h.host_name] = h_id
+        self.hosts[host_name] = h
         self.number_of_objects += 1
 
 
@@ -249,10 +233,12 @@ class Livestatus_broker(BaseModule):
     def manage_update_host_status_brok(self, b):
         self.manage_host_check_result_brok(b)
         data = b.data
+        host_name = data['host_name']
         #In the status, we've got duplicated item, we must relink thems
-        h = self.find_host(data['host_name'])
-        if h is None:
-            print "Warning : the host %s is unknown!" % data['host_name']
+        try:
+            h = self.hosts[host_name]
+        except KeyError:
+            print "Warning : the host %s is unknown!" % host_name
             return
         self.update_element(h, data)
         self.set_schedulingitem_values(h)
@@ -260,19 +246,20 @@ class Livestatus_broker(BaseModule):
             dtc.ref = h
         self.livestatus.count_event('host_checks')
 
+
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
-        hg_id = data['id']
+        hostgroup_name = data['hostgroup_name']
         members = data['members']
         del data['members']
         
         # Maybe we already got this hostgroup. If so, use the existing object
         # because in different instance, we will ahve the same group with different
         # elements
-        name = data['hostgroup_name']
-        hg = self.find_hostgroup(name)
-        # If we got none, create a new one
-        if not hg:
+        try:
+            hg = self.hostgroups[hostgroup_name]
+        except KeyError:
+            # If we got none, create a new one
             #print "Creating hostgroup:", hg_id, data
             hg = Hostgroup()
             # Set by default members to a void list
@@ -281,20 +268,21 @@ class Livestatus_broker(BaseModule):
         self.update_element(hg, data)
 
         for (h_id, h_name) in members:
-            if h_id in self.hosts:
-                hg.members.append(self.hosts[h_id])
+            if h_name in self.hosts:
+                hg.members.append(self.hosts[h_name])
                 # Should got uniq value, do uniq this list
                 hg.members = list(set(hg.members))
 
         #print "HG:", hg
-        self.hostgroups[hg_id] = hg
+        self.hostgroups[hostgroup_name] = hg
         self.number_of_objects += 1
 
 
     def manage_initial_service_status_brok(self, b):
         data = b.data
         s_id = data['id']
-
+        host_name = data['host_name']
+        service_description = data['service_description']
         inst_id = data['instance_id']
         
         #print "Creating Service:", s_id, data
@@ -304,18 +292,17 @@ class Livestatus_broker(BaseModule):
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
         
-        h = self.find_host(data['host_name'])
-        if h is not None:
+        try:
+            h = self.hosts[host_name]
             # Reconstruct the connection between hosts and services
-            h.service_ids.append(s_id)
             h.services.append(s)
             # There is already a s.host_name, but a reference to the h object can be useful too
             s.host = h
-        
+        except Exception:
+            return
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
-        self.services[s_id] = s
-        self.servicename_lookup_table[s.host_name + s.service_description] = s_id
+        self.services[host_name+service_description] = s
         self.number_of_objects += 1
 
 
@@ -323,10 +310,13 @@ class Livestatus_broker(BaseModule):
     def manage_update_service_status_brok(self, b):
         self.manage_service_check_result_brok(b)
         data = b.data
+        host_name = data['host_name']
+        service_description = data['service_description']
         #In the status, we've got duplicated item, we must relink thems
-        s = self.find_service(data['host_name'], data['service_description'])
-        if s is None:
-            print "Warning : the service %s/%s is unknown!" % (data['host_name'], data['service_description'])
+        try:
+            s = self.services[host_name+service_description]
+        except KeyError:
+            print "Warning : the service %s/%s is unknown!" % (host_name, service_description)
             return
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
@@ -339,15 +329,16 @@ class Livestatus_broker(BaseModule):
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
         sg_id = data['id']
+        servicegroup_name = data['servicegroup_name']
         members = data['members']
         del data['members']
 
         # Like for hostgroups, maybe we already got this
         # service group from another instance, need to
         # factorize all
-        name = data['servicegroup_name']
-        sg = self.find_servicegroup(name)
-        if not sg:
+        try:
+            sg = self.servicegroups[servicegroup_name]
+        except KeyError:
             #print "Creating servicegroup:", sg_id, data
             sg = Servicegroup()
             # By default set members as a void list
@@ -356,29 +347,32 @@ class Livestatus_broker(BaseModule):
         self.update_element(sg, data)
 
         for (s_id, s_name) in members:
-            if s_id in self.services:
-                sg.members.append(self.services[s_id])
-                # Need to be sure we unique theses elements
-                sg.members = list(set(sg.members))
-        #print "SG:", sg
-        self.servicegroups[sg_id] = sg
+            # A direct lookup by s_host_name+s_name is not possible
+            # because we don't have the host_name in members, only ids.
+            for s in self.services.values():
+                if s_id == s.id:
+                    sg.members.append(s)
+                    sg.members = list(set(sg.members))
+                    break
+                
+        self.servicegroups[servicegroup_name] = sg
         self.number_of_objects += 1
 
 
     def manage_initial_contact_status_brok(self, b):
         data = b.data
-        c_id = data['id']
+        contact_name = data['contact_name']
         #print "Creating Contact:", c_id, data
         c = Contact({})
         self.update_element(c, data)
         #print "C:", c
-        self.contacts[c_id] = c
+        self.contacts[contact_name] = c
         self.number_of_objects += 1
 
 
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
-        cg_id = data['id']
+        contactgroup_name = data['contactgroup_name']
         members = data['members']
         del data['members']
         #print "Creating contactgroup:", cg_id, data
@@ -386,45 +380,45 @@ class Livestatus_broker(BaseModule):
         self.update_element(cg, data)
         setattr(cg, 'members', [])
         for (c_id, c_name) in members:
-            if c_id in self.contacts:
-                cg.members.append(self.contacts[c_id])
+            if c_name in self.contacts:
+                cg.members.append(self.contacts[c_name])
         #print "CG:", cg
-        self.contactgroups[cg_id] = cg
+        self.contactgroups[contactgroup_name] = cg
         self.number_of_objects += 1
 
 
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
-        tp_id = data['id']
+        timeperiod_name = data['timeperiod_name']
         #print "Creating Timeperiod:", tp_id, data
         tp = Timeperiod({})
         self.update_element(tp, data)
         #print "TP:", tp
-        self.timeperiods[tp_id] = tp
+        self.timeperiods[timeperiod_name] = tp
         self.number_of_objects += 1
 
 
     def manage_initial_command_status_brok(self, b):
         data = b.data
-        c_id = data['id']
+        command_name = data['command_name']
         #print "Creating Command:", c_id, data
         c = Command({})
         self.update_element(c, data)
         #print "CMD:", c
-        self.commands[c_id] = c
+        self.commands[command_name] = c
         self.number_of_objects += 1
 
 
     def manage_initial_scheduler_status_brok(self, b):
         data = b.data
-        sched_id = data['id']
-        print "Creating Scheduler:", sched_id, data
+        scheduler_name = data['scheduler_name']
+        print "Creating Scheduler:", scheduler_name, data
         sched = SchedulerLink({})
         print "Created a new scheduler", sched
         self.update_element(sched, data)
         print "Updated scheduler"
         #print "CMD:", c
-        self.schedulers[sched_id] = sched
+        self.schedulers[scheduler_name] = sched
         print "scheduler added"
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
@@ -432,22 +426,25 @@ class Livestatus_broker(BaseModule):
 
     def manage_update_scheduler_status_brok(self, b):
         data = b.data
-        s = self.find_scheduler(data['scheduler_name'])
-        if s is not None:
+        scheduler_name = data['scheduler_name']
+        try:
+            s = self.schedulers[scheduler_name]
             self.update_element(s, data)
             #print "S:", s
+        except Exception:
+            pass
 
 
     def manage_initial_poller_status_brok(self, b):
         data = b.data
-        reac_id = data['id']
-        print "Creating Poller:", reac_id, data
-        reac = PollerLink({})
-        print "Created a new poller", reac
-        self.update_element(reac, data)
+        poller_name = data['poller_name']
+        print "Creating Poller:", poller_name, data
+        poller = PollerLink({})
+        print "Created a new poller", poller
+        self.update_element(poller, data)
         print "Updated poller"
         #print "CMD:", c
-        self.pollers[reac_id] = reac
+        self.pollers[poller_name] = poller
         print "poller added"
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
@@ -455,22 +452,24 @@ class Livestatus_broker(BaseModule):
 
     def manage_update_poller_status_brok(self, b):
         data = b.data
-        s = self.find_poller(data['poller_name'])
-        if s is not None:
+        poller_name = data['poller_name']
+        try:
+            s = self.pollers[poller_name]
             self.update_element(s, data)
-            #print "S:", s
+        except Exception:
+            pass
 
 
     def manage_initial_reactionner_status_brok(self, b):
         data = b.data
-        reac_id = data['id']
-        print "Creating Reactionner:", reac_id, data
+        reactionner_name = data['reactionner_name']
+        print "Creating Reactionner:", reactionner_name, data
         reac = ReactionnerLink({})
         print "Created a new reactionner", reac
         self.update_element(reac, data)
         print "Updated reactionner"
         #print "CMD:", c
-        self.reactionners[reac_id] = reac
+        self.reactionners[reactionner_name] = reac
         print "reactionner added"
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
@@ -478,22 +477,24 @@ class Livestatus_broker(BaseModule):
 
     def manage_update_reactionner_status_brok(self, b):
         data = b.data
-        s = self.find_reactionner(data['reactionner_name'])
-        if s is not None:
+        reactionner_name = data['reactionner_name']
+        try:
+            s = self.reactionners[reactionner_name]
             self.update_element(s, data)
-            #print "S:", s
+        except Exception:
+            pass
 
 
     def manage_initial_broker_status_brok(self, b):
         data = b.data
-        reac_id = data['id']
-        print "Creating Broker:", reac_id, data
-        reac = BrokerLink({})
-        print "Created a new broker", reac
-        self.update_element(reac, data)
+        broker_name = data['broker_name']
+        print "Creating Broker:", broker_name, data
+        broker = BrokerLink({})
+        print "Created a new broker", broker
+        self.update_element(broker, data)
         print "Updated broker"
         #print "CMD:", c
-        self.brokers[reac_id] = reac
+        self.brokers[broker_name] = broker
         print "broker added"
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
@@ -501,19 +502,24 @@ class Livestatus_broker(BaseModule):
 
     def manage_update_broker_status_brok(self, b):
         data = b.data
-        s = self.find_broker(data['broker_name'])
-        if s is not None:
+        broker_name = data['broker_name']
+        try:
+            s = self.brokers[broker_name]
             self.update_element(s, data)
-            #print "S:", s
+        except Exception:
+            pass
 
 
     #A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
-        s = self.find_service(data['host_name'], data['service_description'])
-        if s is not None:
+        host_name = data['host_name']
+        service_description = data['service_description']
+        try:
+            s = self.services[host_name+service_description]
             self.update_element(s, data)
-            #print "S:", s
+        except Exception:
+            pass
 
 
     #A service check update have just arrived, we UPDATE data info with this
@@ -523,10 +529,12 @@ class Livestatus_broker(BaseModule):
 
     def manage_host_check_result_brok(self, b):
         data = b.data
-        h = self.find_host(data['host_name'])
-        if h is not None:
+        host_name = data['host_name']
+        try:
+            h = self.hosts[host_name]
             self.update_element(h, data)
-            #print "H:", h
+        except Exception:
+            pass
 
 
     # this brok should arrive within a second after the host_check_result_brok
@@ -710,76 +718,18 @@ class Livestatus_broker(BaseModule):
             return None
 
 
-    def find_host(self, host_name):
-        if host_name in self.hostname_lookup_table:
-            return self.hosts[self.hostname_lookup_table[host_name]]
-        for h in self.hosts.values():
-            if h.host_name == host_name:
-                return h
-        return None
-
-
-    def find_service(self, host_name, service_description):
-        if host_name + service_description in self.servicename_lookup_table:
-            return self.services[self.servicename_lookup_table[host_name + service_description]]
-        for s in self.services.values():
-            if s.host_name == host_name and s.service_description == service_description:
-                return s
-        return None
-
-
     def find_timeperiod(self, timeperiod_name):
-        for t in self.timeperiods.values():
-            if t.timeperiod_name == timeperiod_name:
-                return t
-        return None
+        try:
+            return self.timeperiods[timeperiod_name]
+        except KeyError:
+            return None
 
 
     def find_contact(self, contact_name):
-        for c in self.contacts.values():
-            if c.contact_name == contact_name:
-                return c
-        return None
-
-    ###Find satellites
-    def find_scheduler(self, name):
-        for s in self.schedulers.values():
-            if s.scheduler_name == name:
-                return s
-        return None
-
-    def find_hostgroup(self, name):
-        for hg in self.hostgroups.values():
-            if hg.hostgroup_name == name:
-                return hg
-        return None
-
-    def find_servicegroup(self, name):
-        for sg in self.servicegroups.values():
-            if sg.servicegroup_name == name:
-                return sg
-        return None
-
-
-    def find_poller(self, name):
-        for s in self.pollers.values():
-            if s.poller_name == name:
-                return s
-        return None
-
-
-    def find_reactionner(self, name):
-        for s in self.reactionners.values():
-            if s.reactionner_name == name:
-                return s
-        return None
-
-
-    def find_broker(self, name):
-        for s in self.brokers.values():
-            if s.broker_name == name:
-                return s
-        return None
+        try:
+            return self.contacts[contact_name]
+        except KeyError:
+            return None
 
 
     def update_element(self, e, data):
