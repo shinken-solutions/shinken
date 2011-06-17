@@ -36,5 +36,7 @@ def get_instance(mod_conf):
 
     if not hasattr( mod_conf, 'character_set'):
         mod_conf.character_set = 'utf8'
+    if not hasattr(mod_conf, 'nagios_mix_offset'):
+        mod_conf.nagios_mix_offset = '0'
     instance = Ndodb_Mysql_broker(mod_conf)
     return instance

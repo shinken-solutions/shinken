@@ -62,6 +62,7 @@ class Ndodb_Mysql_broker(BaseModule):
         self.password = conf.password
         self.database = conf.database
         self.character_set = conf.character_set
+        self.nagios_mix_offset = int(conf.nagios_mix_offset) + 1
 
 
     #Called by Broker so we can do init stuff
@@ -82,9 +83,16 @@ class Ndodb_Mysql_broker(BaseModule):
     #Get a brok, parse it, and put in in database
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
-        #We've got problem with instance_id == 0 so we add 1 every where
+        # We need to do some brok mod, so we copy it
+        b = copy.deepcopy(b)
+
+        # We've got problem with instance_id == 0 so we add 1 every where
         if 'instance_id' in b.data:
-            b.data['instance_id'] = b.data['instance_id'] + 1
+            #For nagios mix install, move more than 1
+            if self.nagios_mix_offset != 0:
+                b.data['instance_id'] = b.data['instance_id'] + self.nagios_mix_offset
+            else:
+                b.data['instance_id'] = b.data['instance_id'] + 1
         #print "(Ndo) I search manager:", manager
         queries = BaseModule.manage_brok(self, b)
         if queries is not None:
@@ -152,11 +160,11 @@ class Ndodb_Mysql_broker(BaseModule):
             return row[0]
 
 
-    #Ok, we are at launch and a scheduler want him only, OK...
-    #So ca create several queries with all tables we need to delete with
-    #our instance_id
-    #This brob must be send at the begining of a scheduler session,
-    #if not, BAD THINGS MAY HAPPENED :)
+    # Ok, we are at launch and a scheduler want him only, OK...
+    # So ca create several queries with all tables we need to delete with
+    # our instance_id
+    # This brob must be send at the begining of a scheduler session,
+    # if not, BAD THINGS MAY HAPPENED :)
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
         tables = ['commands', 'contacts', 'contactgroups', 'hosts',
@@ -171,7 +179,7 @@ class Ndodb_Mysql_broker(BaseModule):
             res.append(q)
 
         #We also clean cache, because we are not sure about this data now
-        print "[MySQL/NDO] Flushing caches"
+        print "[MySQL/NDO] Flushing caches (clean from instance %d)" % instance_id
         self.services_cache = {}
         self.hosts_cache = {}
 
