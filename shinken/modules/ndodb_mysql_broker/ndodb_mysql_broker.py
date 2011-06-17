@@ -62,7 +62,7 @@ class Ndodb_Mysql_broker(BaseModule):
         self.password = conf.password
         self.database = conf.database
         self.character_set = conf.character_set
-        self.nagios_mix_offset = int(conf.nagios_mix_offset) + 1
+        self.nagios_mix_offset = int(conf.nagios_mix_offset)
 
 
     #Called by Broker so we can do init stuff
@@ -84,17 +84,17 @@ class Ndodb_Mysql_broker(BaseModule):
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         # We need to do some brok mod, so we copy it
-        b = copy.deepcopy(b)
+        new_b = copy.deepcopy(b)
 
         # We've got problem with instance_id == 0 so we add 1 every where
-        if 'instance_id' in b.data:
+        if 'instance_id' in new_b.data:
             #For nagios mix install, move more than 1
             if self.nagios_mix_offset != 0:
-                b.data['instance_id'] = b.data['instance_id'] + self.nagios_mix_offset
+                new_b.data['instance_id'] = new_b.data['instance_id'] + self.nagios_mix_offset
             else:
-                b.data['instance_id'] = b.data['instance_id'] + 1
-        #print "(Ndo) I search manager:", manager
-        queries = BaseModule.manage_brok(self, b)
+                new_b.data['instance_id'] = new_b.data['instance_id'] + 1
+
+        queries = BaseModule.manage_brok(self, new_b)
         if queries is not None:
             for q in queries :
                 self.db.execute_query(q)
@@ -202,7 +202,8 @@ class Ndodb_Mysql_broker(BaseModule):
         'instance_id' : new_b.data['instance_id']
         })
 
-        to_del = ['instance_name', 'command_file']
+        to_del = ['instance_name', 'command_file', 'check_external_commands', 'check_service_freshness',
+                  'check_host_freshness']
         to_add = []
         mapping = self.mapping['program_status']
         for prop in new_b.data:
@@ -227,7 +228,8 @@ class Ndodb_Mysql_broker(BaseModule):
     #TODO : fill nagios_instances
     def manage_update_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
-        to_del = ['instance_name', 'command_file']
+        to_del = ['instance_name', 'command_file', 'check_external_commands', 'check_service_freshness',
+                  'check_host_freshness']
         to_add = []
         mapping = self.mapping['program_status']
         for prop in new_b.data:
