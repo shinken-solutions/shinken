@@ -170,6 +170,17 @@ class Ndodb_Mysql_broker(BaseModule):
         else:
             return row[0]
 
+        
+    def get_contactgroup_object_id_by_name(self, contactgroup_name):
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='11'" % contactgroup_name
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            return 0
+        else:
+            return row[0]
+
+
 
     # Ok, we are at launch and a scheduler want him only, OK...
     # So ca create several queries with all tables we need to delete with
@@ -686,8 +697,17 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
+        #First add to nagios_objects
+        objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 11,
+                        'name1' : data['contactgroup_name'], 'is_active' : 1
+                        }
+        object_query = self.db.create_insert_query('objects', objects_data)
+        self.db.execute_query(object_query)
+
+        contactgroup_id = self.get_contactgroup_object_id_by_name(data['contactgroup_name'])
+
         contactgroups_data = {'contactgroup_id' : data['id'], 'instance_id' :  data['instance_id'],
-                           'config_type' : 0, 'contactgroup_object_id' : data['id'],
+                           'config_type' : 0, 'contactgroup_object_id' : contactgroup_id,
                            'alias' : data['alias']
             }
 
