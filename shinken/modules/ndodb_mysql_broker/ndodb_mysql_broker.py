@@ -698,8 +698,9 @@ class Ndodb_Mysql_broker(BaseModule):
         #between hosts and hostgroups
         for (c_id, c_name) in b.data['members']:
             #print c_name
+            contact_obj_id = self.get_contact_object_id_by_name(c_name)
             contactgroup_members_data = {'instance_id' : data['instance_id'], 'contactgroup_id' : data['id'],
-                                         'contact_object_id' : c_id}
+                                         'contact_object_id' : contact_obj_id}
             q = self.db.create_insert_query('contactgroup_members', contactgroup_members_data)
             res.append(q)
         return res

@@ -2200,6 +2200,7 @@ Columns: description host_name display_name"""
 
 class TestConfigBig(TestConfig):
     def setUp(self):
+        start_setUp = time.time()
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
@@ -2211,11 +2212,12 @@ class TestConfigBig(TestConfig):
         #    'to_queue' : 0,
         #    'from_queue' : 0
         #}
+        print "************* Intermediate SetUp:", time.time() - start_setUp
         self.livestatus_broker.init()
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()
-
+        print "************* Overall Setup:", time.time() - start_setUp
 
     def tearDown(self):
         self.stop_nagios()
