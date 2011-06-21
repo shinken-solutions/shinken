@@ -123,6 +123,17 @@ class Ndodb_Mysql_broker(BaseModule):
             self.hosts_cache[host_name] = row[0]
             return row[0]
 
+    def get_contact_object_id_by_name(self, contact_name):
+        #Not in cache, not good
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='10'" % contact_name
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            return 0
+        else:
+            return row[0]
+
+
 
     def get_hostgroup_object_id_by_name(self, hostgroup_name):
         query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='3'" % hostgroup_name
@@ -646,8 +657,17 @@ class Ndodb_Mysql_broker(BaseModule):
         data = b.data
         #print "DATA:", data
 
+        #First add to nagios_objects
+        objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 10,
+                        'name1' : data['contact_name'], 'is_active' : 1
+                        }
+        object_query = self.db.create_insert_query('objects', objects_data)
+        self.db.execute_query(object_query)
+
+        contact_obj_id = self.get_contact_object_id_by_name(data['contact_name'])
+
         contacts_data = {'contact_id' : data['id'], 'instance_id' : data['instance_id'],
-                      'contact_object_id' : data['id'], 'contact_object_id' : data['id'],
+                      'contact_object_id' : contact_obj_id,
                       'alias' : data['alias'],
                       'email_address' : data['email'], 'pager_address' : data['pager'],
                       'host_notifications_enabled' : data['host_notifications_enabled'],
