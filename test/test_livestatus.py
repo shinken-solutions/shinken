@@ -2274,6 +2274,7 @@ Stats: state = 3"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print 'query_6_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == '2000;1993;3;3;1\n')
+
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
             print nagresponse
