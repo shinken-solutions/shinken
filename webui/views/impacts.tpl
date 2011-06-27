@@ -57,80 +57,27 @@
 
       <div class="impacts-panel" style="min-height: 983px; ">
 
+%for imp_id in impacts:
+%   impact = impacts[imp_id]
 
-	<div class="impact pblink" id="3">
-	  <div class="show-problem" id="show-problem-3">
-	    <img src="static/images/trig_right.png" id="show-problem-img-3">
+	<div class="impact pblink" id="{{imp_id}}">
+	  <div class="show-problem" id="show-problem-{{imp_id}}">
+	    <img src="static/images/trig_right.png" id="show-problem-img-{{imp_id}}">
 	  </div>
-	  
-	  <div class="criticity-icon-1">
-	    <img src="static/images/star.png">
-	  </div>
-	  <div class="criticity-icon-2">
-	    <img src="static/images/star.png">
-	  </div>
-	  <div class="criticity-icon-3">
-	    <img src="static/images/star.png">
-	  </div>
+	  %for i in range(2, impact['criticity']):
+	    <div class="criticity-icon-{{i-1}}">
+	      <img src="static/images/star.png">
+	    </div>
+	  %end
 
 
 	  <div class="impact-icon"><img src="static/images/50x50.png"></div>
-	  <div class="impact-row"><span class="impact-name">Mails</span> is <span class="impact-state-text">Critical</span><img src="static/images/bomb.png"></div>
+	  <div class="impact-row"><span class="impact-name">{{impact['name']}}</span> is <span class="impact-state-text">{{impact['status']}}</span><img src="static/images/bomb.png"></div>
 	  <div class="impact-row"><span class="impact-output">No mails can be send nor received</span></div>
 	  <div class="impact-row"><span class="impact-duration">since one hour</span></div>
 	</div>
-
-
-
-
-	<div class="impact pblink" id="1">
-	  <div class="show-problem" id="show-problem-1">
-	    <img src="static/images/trig_right.png" id="show-problem-img-1">
-	  </div>
-	  <div class="criticity-icon-1">
-	    <img src="static/images/star.png">
-	  </div>
-	  <div class="criticity-icon-2">
-	    <img src="static/images/star.png">
-	  </div>
-
-	  <div class="impact-icon"><img src="static/images/50x50.png"></div>
-	  <div class="impact-row"><span class="impact-name">ERP</span> is <span class="impact-state-text">Critical</span><img src="static/images/bomb.png"></div>
-	  <div class="impact-row"><span class="impact-output"></span></div>
-	  <div class="impact-row"><span class="impact-duration">since one day</span></div>
-	</div>
-
-	
-	<div class="impact pblink" id="2">
-	  <div class="show-problem" id="show-problem-2">
-	    <img src="static/images/trig_right.png" id="show-problem-img-2">
-	  </div>
-	  <div class="criticity-icon-1">
-	    <img src="static/images/star.png">
-	  </div>
-
-	  <div class="impact-icon"><img src="static/images/50x50.png"></div>
-	  <div class="impact-row"><span class="impact-name">server/FileShare</span> is <span class="impact-state-text">Warning</span><img src="static/images/error.png"></div>
-	  <div class="impact-row"><span class="impact-output">No more file access</span></div>
-	  <div class="impact-row"><span class="impact-duration">since one day</span></div>
-	</div>
-
-
-	<div class="impact pblink" id="4">
-	  <div class="show-problem" id="show-problem-4">
-	    <img src="static/images/trig_right.png" id="show-problem-img-4">
-	  </div>
-	  <div class="criticity-icon-1">
-	    <img src="static/images/star.png">
-	  </div>
-
-	  <div class="impact-icon"><img src="static/images/50x50.png"></div>
-	  <div class="impact-row"><span class="impact-name">server/Print</span> is <span class="impact-state-text">Warning</span><img src="static/images/error.png"></div>
-	  <div class="impact-row"><span class="impact-output">Print service id stopped</span></div>
-	  <div class="impact-row"><span class="impact-duration">since one day</span></div>
-	</div>
-
-
+%# end of the for imp_id in impacts:
+%end
 
       </div>
       
@@ -141,113 +88,45 @@
 
       
 
-
+%########    Now we will output righ panel with all root problems
       <div class="problems-panels">
 
+%for imp_id in impacts:
+%   impact = impacts[imp_id]
 
 
 
 
-
-
-	<div class="problems-panel" id="problems-1" style="visibility: hidden; zoom: 1; opacity: 0; ">
-	  <div class="right-panel-top">
-	    <div class="pblink" id="1"> Close </div>
-	  </div><br style="clear: both">
-	  <div class="impact-icon-big"><img src="static/images/80x80.png"></div>
-	  <center>
-	    <div class="impact-row"><span class="impact-name">applications/ERP</span> is <span class="impact-state-text">Critical</span></div>
-	  </center>
-	  <br style="clear: both">Root problems unamanaged :
-	  
-	  <div class="problem" id="2">
-	    <div class="divhstate1">router-us is Down since 93294 with output Return in Dummy 2</div>
-	    <div class="problem-actions" id="actions-2">
-	      <div class="action-fixit" id="fixit/paris/router-us"><img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</div>
-	      <div class="action-ack" id="ack/paris/router-us"><img class="icon" title="Acknoledge it" src="static/images/link_processes.gif">Acknoledge it</div>
-	    </div>
-	  </div>
-	</div>
-
-
-
-	<div class="problems-panel" id="problems-2" style="visibility: hidden; zoom: 1; opacity: 0; ">
+	<div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
 	  <div class="right-panel-top"> 
-	    <div class="pblink" id="2"> Close </div>
-	  </div><br style="clear: both">
-	  <div class="impact-icon-big">
-	    <img src="static/images/80x80.png">
-	  </div>
-	  <center>
-	    <div class="impact-row"><span class="impact-name">databasehost-us/Mysql State</span> is <span class="impact-state-text">Critical</span>
-	    </div>
-	  </center>
-	  <br style="clear: both">Root problems unamanaged :
-	  <div class="problem" id="1">
-	    <div class="divhstate1">router-us is Down since 93294 with output Return in Dummy 2</div>
-	    <div class="problem-actions" id="actions-1">
-	      <div class="action-fixit" id="fixit/paris/router-us"><img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</div> 
-	      <div class="action-ack" id="ack/paris/router-us"><img class="icon" title="Acknoledge it" src="static/images/link_processes.gif">Acknoledge it</div>
-	    </div>
-	  </div>
-	</div>
-
-
-
-	<div class="problems-panel" id="problems-3" style="visibility: hidden; zoom: 1; opacity: 0; ">
-	  <div class="right-panel-top"> 
-	    <div class="pblink" id="3"> Close </div>
+	    <div class="pblink" id="{{imp_id}}"> Close </div>
 	  </div><br style="clear: both">
 	  <div class="impact-icon-big"><img src="static/images/80x80.png">
 	  </div>
 	  <center>
-	    <div class="impact-row"><span class="impact-name">Mail</span> is <span class="impact-state-text">Critical</span>
-
-	    </div>
-	  </center>
-	  <br style="clear: both">Root problems unamanaged :
-
-	  <div class="problem" id="3">
-	    <div class="divhstate1">router-us is Down since one hour with output connexion failed</div>
-	    <div class="problem-actions" id="actions-3">
-	      <div class="action-fixit" id="fixit/paris/router-us"><img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</div> 
-	      <div class="action-ack" id="ack/paris/router-us"><img class="icon" title="Acknoledge it" src="static/images/link_processes.gif">Acknoledge it</div>
-	    </div>
-	  </div>
-	</div>
-
-
-
-	<div class="problems-panel" id="problems-4" style="visibility: hidden; zoom: 1; opacity: 0; ">
-	  <div class="right-panel-top"> 
-	    <div class="pblink" id="4"> Close </div>
-	  </div><br style="clear: both">
-	  <div class="impact-icon-big"><img src="static/images/80x80.png">
-	  </div>
-	  <center>
-	    <div class="impact-row"><span class="impact-name">Mail</span> is <span class="impact-state-text">Critical</span>
+	    <div class="impact-row"><span class="impact-name">{{impact['name']}}</span> is <span class="impact-state-text">{{impact['status']}}</span>
 	    </div>
 	  </center>
 	  <br style="clear: both">
 	  Root problems unamanaged :
 
-	  <div class="problem" id="4">
-	    <div class="divhstate1">router-us is Down since one hour with output connexion failed</div>
-	    <div class="problem-actions" id="actions-4">
+	  %for pb_id in impact['problems']:
+	  %   pb = problems[pb_id]
+	  <div class="problem" id="{{pb_id}}">
+	    <div class="divhstate1">{{pb['name']}}</div>
+	    <div class="problem-actions" id="actions-pb_id">
 	      <div class="action-fixit" id="fixit/paris/router-us"><img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</div> 
 	      <div class="action-ack" id="ack/paris/router-us"><img class="icon" title="Acknoledge it" src="static/images/link_processes.gif">Acknoledge it</div>
 	    </div>
 	  </div>
-	  <div class="problem" id="5">
-	    <div class="divhstate2">db-server/Mssql is Warning since one hour with output connexion failed</div>
-	    <div class="problem-actions" id="actions-5">
-	      <div class="action-fixit" id="fixit/paris/router-us"><img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</div> 
-	      <div class="action-ack" id="ack/paris/router-us"><img class="icon" title="Acknoledge it" src="static/images/link_processes.gif">Acknoledge it</div>
-	    </div>
-	  </div>
+	  %# end for pb_id in impacts['problems']:
+	  %end
 	  
 	</div>
-	
+%# end for imp_id in impacts:
+%end
+
+
 
 
       </div>
@@ -258,5 +137,3 @@
 
 %include footer
     
-%#  </body>
-%#</html>

@@ -30,43 +30,47 @@ my_dir = os.path.abspath(os.path.dirname(__file__))
 os.chdir(my_dir)
 sys.path.append(my_dir)
 
-from bottle import Bottle, run, static_file, view
+from bottle import Bottle, run, static_file, view, route
 
 # Debug
 import bottle
 bottle.debug(True)
 
 # Main app object
-app = Bottle()
+#app = Bottle()
 
 
 
 # Route static files css files
-@app.route('/static/:path#.+#')
+@route('/static/:path#.+#')
 def server_static(path):
-    print "Getting static files from", os.path.join(my_dir, 'htdocs'), path
+    #print "Getting static files from", os.path.join(my_dir, 'htdocs'), path
     return static_file(path, root=os.path.join(my_dir, 'htdocs'))
 
 
 
 
 # hello/bla will use the hello_template.tpl template
-@app.route('/hello/:name')
+@route('/hello/:name')
 @view('hello_template')
 def hello(name='World'):
     return dict(name=name)
 
 
 # Output json
-@app.route('/bla')
+@route('/bla')
 def bla():
     return {1:2}
 
-# Main impacts view
-@app.route('/impacts')
-@view('impacts')
-def show_impacts():
-    return dict()
 
-print "Sarting application"
-run(app, host='0.0.0.0', port=8080)
+# Main impacts view
+#@app.route('/impacts')
+#@view('impacts')
+#def show_impacts():
+#    return dict()
+
+import impacts
+
+
+print "Starting application"
+run(host='0.0.0.0', port=8080)
