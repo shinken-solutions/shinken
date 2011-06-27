@@ -33,6 +33,8 @@ class Notification(Action):
     # running_properties names
     __metaclass__ = AutoSlots
 
+    my_type = 'notification'
+
     #id = 0 #Is in fact in the Action class to be common with Checks and
     #events handlers
 
@@ -70,6 +72,7 @@ class Notification(Action):
         'module_type':         StringProp (default='fork', fill_brok=['full_status']),
         'worker':              StringProp (default='none'),
         'reactionner_tag':     StringProp (default='None'),
+        'creation_time':       IntegerProp(default=0),
     }
 
     macros = {

@@ -31,6 +31,8 @@ class EventHandler(Action):
     # running_properties names
     __metaclass__ = AutoSlots
 
+    my_type = 'eventhandler'
+
     properties = {
         'is_a':           StringProp (default='eventhandler'),
         'type':           StringProp (default=''),
