@@ -1,19 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
-<html slick-uniqueid="1"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <title>All critical impacts for your business</title>
-    <link rel="stylesheet" type="text/css" href="static/check_mk.css">
-    <link rel="stylesheet" type="text/css" href="static/nav.css">
-    <script type="text/javascript" src="static/js/mootools.js"></script>
-    <script type="text/javascript" src="static/js/mootools-more.js"></script>
-    <script type="text/javascript" src="static/js/mootools-message.js"></script>
-    <script type="text/javascript" src="static/js/check_mk.js"></script>
-    <script type="text/javascript" src="static/js/hover.js"></script>
+%include header js=['check_mk.js', 'hover.js'], title='All critical impacts for your business', css=['check_mk.css']
 
-  </head>
-  <body class="main">
-    
+
+
+
     <div class="whole-page">
       <div>
 	<h1 id="branding">
@@ -264,6 +255,8 @@
     
     <table class="footer"><tbody><tr><td class="left"></td><td class="middle"></td><td class="right"></td></tr></tbody>
     </table>
+
+%include footer
     
-  </body>
-</html>
+%#  </body>
+%#</html>
