@@ -5621,7 +5621,7 @@ class LiveStatus(object):
                     attr = attr()
                 return func(attr)
             except Exception, e:
-                print "i am an exception", e
+                print "i am an exception in hook_get_prop_depythonize for managing an object '%s' with the property '%s' and the value '%s'" % (type(elt), prop, getattr(elt, prop, '')), e
                 return default
 
 
