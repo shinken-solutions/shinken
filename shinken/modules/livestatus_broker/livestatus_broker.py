@@ -814,6 +814,8 @@ class Livestatus_broker(BaseModule):
 
     def main(self):
         try:
+            #import cProfile
+            #cProfile.runctx('''self.do_main()''', globals(), locals(),'/tmp/livestatus.profile')
             self.do_main()
         except Exception, exp:
             
