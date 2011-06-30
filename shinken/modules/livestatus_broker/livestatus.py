@@ -40,21 +40,9 @@ from shinken.macroresolver import MacroResolver
 from shinken.util import from_bool_to_int, from_float_to_int, to_int, to_split, get_customs_keys, get_customs_values
 
 from livestatus_stack import LiveStatusStack
+from livestatus_counters import LiveStatusCounters
 from log_line import Logline
 
-LOGCLASS_INFO         = 0 # all messages not in any other class
-LOGCLASS_ALERT        = 1 # alerts: the change service/host state
-LOGCLASS_PROGRAM      = 2 # important programm events (restart, ...)
-LOGCLASS_NOTIFICATION = 3 # host/service notifications
-LOGCLASS_PASSIVECHECK = 4 # passive checks
-LOGCLASS_COMMAND      = 5 # external commands
-LOGCLASS_STATE        = 6 # initial or current states
-LOGCLASS_INVALID      = -1 # never stored
-LOGCLASS_ALL          = 0xffff
-LOGOBJECT_INFO        = 0
-LOGOBJECT_HOST        = 1
-LOGOBJECT_SERVICE     = 2
-LOGOBJECT_CONTACT     = 3
 
 
 def get_livestatus_full_name(prop, ref, request):
@@ -6967,66 +6955,3 @@ class LiveStatusCommandQuery(LiveStatusQuery):
 
 
 
-class LiveStatusCounters(LiveStatus):    
-    def __init__(self):
-        self.counters = {
-            'neb_callbacks' : 0,
-            'connections' : 0,
-            'service_checks' : 0,
-            'host_checks' : 0,
-            'forks' : 0,
-            'log_message' : 0,
-            'external_commands' : 0
-        }
-        self.last_counters = {
-            'neb_callbacks' : 0,
-            'connections' : 0,
-            'service_checks' : 0,
-            'host_checks' : 0,
-            'forks' : 0,
-            'log_message' : 0,
-            'external_commands' : 0
-        }
-        self.rate = {
-            'neb_callbacks' : 0.0,
-            'connections' : 0.0,
-            'service_checks' : 0.0,
-            'host_checks' : 0.0,
-            'forks' : 0.0,
-            'log_message' : 0.0,
-            'external_commands' : 0.0
-        }
-        self.last_update = 0
-        self.interval = 10
-        self.rating_weight = 0.25
-
-    def increment(self, counter):
-        if counter in self.counters:
-            self.counters[counter] += 1
-   
-
-    def calc_rate(self):
-        elapsed = time.time() - self.last_update
-        if elapsed > self.interval:
-            self.last_update = time.time()
-            for counter in self.counters:
-                delta = self.counters[counter] - self.last_counters[counter]
-                new_rate = delta / elapsed
-                if self.rate[counter] == 0:
-                    avg_rate = new_rate
-                else:
-                    avg_rate = self.rate[counter] * (1 - self.rating_weight) + new_rate * self.rating_weight
-                self.rate[counter] = avg_rate
-                self.last_counters[counter] = self.counters[counter]
-
-
-    def count(self, counter):
-        if counter in self.counters:
-            return self.counters[counter]
-        elif counter.endswith('_rate'):
-            if counter[0:-5] in self.rate:
-                return self.rate[counter[0:-5]]
-            else:
-                return 0.0
-        else:
-            return 0

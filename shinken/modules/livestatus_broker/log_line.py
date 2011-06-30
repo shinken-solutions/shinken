@@ -17,6 +17,21 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+LOGCLASS_INFO         = 0 # all messages not in any other class
+LOGCLASS_ALERT        = 1 # alerts: the change service/host state
+LOGCLASS_PROGRAM      = 2 # important programm events (restart, ...)
+LOGCLASS_NOTIFICATION = 3 # host/service notifications
+LOGCLASS_PASSIVECHECK = 4 # passive checks
+LOGCLASS_COMMAND      = 5 # external commands
+LOGCLASS_STATE        = 6 # initial or current states
+LOGCLASS_INVALID      = -1 # never stored
+LOGCLASS_ALL          = 0xffff
+LOGOBJECT_INFO        = 0
+LOGOBJECT_HOST        = 1
+LOGOBJECT_SERVICE     = 2
+LOGOBJECT_CONTACT     = 3
+
+
 class Logline(dict):
     """A class which represents a line from the logfile
     
