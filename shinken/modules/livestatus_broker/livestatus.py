@@ -40,6 +40,7 @@ from shinken.macroresolver import MacroResolver
 from shinken.util import from_bool_to_int, from_float_to_int, to_int, to_split, get_customs_keys, get_customs_values
 
 from livestatus_stack import LiveStatusStack
+from log_line import Logline
 
 LOGCLASS_INFO         = 0 # all messages not in any other class
 LOGCLASS_ALERT        = 1 # alerts: the change service/host state
@@ -144,40 +145,6 @@ class Problem:
 
 
 
-class Logline(dict):
-    """A class which represents a line from the logfile
-    
-    Public functions:
-    fill -- Attach host and/or service objects to a Logline object
-    
-    """
-    
-    def __init__(self, cursor, row):
-        for idx, col in enumerate(cursor.description):
-            setattr(self, col[0], row[idx])
-
-
-    def fill(self, hosts, services, columns):
-        """Attach host and/or service objects to a Logline object
-        
-        Lines describing host or service events only contain host_name
-        and/or service_description. This method finds the corresponding
-        objects and adds them to the line as attributes log_host
-        and/or log_service
-        
-        """
-        if self.logobject == LOGOBJECT_HOST:
-            try:
-                setattr(self, 'log_host', hosts[self.host_name])
-            except:
-                pass
-        elif self.logobject == LOGOBJECT_SERVICE:
-            try:
-                setattr(self, 'log_host', hosts[self.host_name])
-                setattr(self, 'log_service', services[self.host_name + self.service_description])
-            except:
-                pass
-        return self
 
 
 
