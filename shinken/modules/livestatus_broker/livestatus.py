@@ -5676,7 +5676,9 @@ class LiveStatusResponse:
         showheader = False
         #print "my result is", result
         print "outputformat", self.outputformat
-        if len(result) > 0:
+        #---
+        if False:
+        #if len(result) > 0:
             if self.columnheaders != 'off' or len(columns) == 0:
                 if len(aliases) > 0:
                     showheader = True
@@ -5685,18 +5687,51 @@ class LiveStatusResponse:
                     if len(columns) == 0:
                         # Show all available columns
                         columns = sorted(result[0].keys())
+                        print "allavail", columns
         elif self.columnheaders == 'on':
             showheader = True
+        #---
         if self.outputformat == 'csv':
-            for object in result:
-                # Construct one line of output for each object found
-                l = []
-                for x in [object[c] for c in columns]:
-                    if isinstance(x, list):
-                        l.append(self.separators[2].join(str(y) for y in x))
+            if len(columns) == 0:
+                # There is no pre-selected list of columns. In this case
+                # we output all columns.
+                for object in result:
+                    # Construct one line of output for each object found
+                    l = []
+                    for x in [object[c] for c in sorted(object.keys())]:
+                        if isinstance(x, list):
+                            l.append(self.separators[2].join(str(y) for y in x))
+                        else:
+                            l.append(str(x))
+                    lines.append(self.separators[1].join(l))
+            else:
+                for object in result:
+                    # Construct one line of output for each object found
+                    l = []
+                    for x in [object[c] for c in columns]:
+                        if isinstance(x, list):
+                            l.append(self.separators[2].join(str(y) for y in x))
+                        else:
+                            l.append(str(x))
+                    lines.append(self.separators[1].join(l))
+            #---
+            print "showheader", showheader
+            print "lines", lines
+            if len(lines) > 0:
+            #if False:
+                if self.columnheaders != 'off' or len(columns) == 0:
+                    if len(aliases) > 0:
+                        showheader = True
                     else:
-                        l.append(str(x))
-                lines.append(self.separators[1].join(l))
+                        showheader = True
+                        if len(columns) == 0:
+                            # Show all available columns
+                            columns = sorted(object.keys())
+                            print "xllavail", columns
+            elif self.columnheaders == 'on':
+                showheader = True
+            #---
+            print "showheader2", showheader
             if showheader:
                 if len(aliases) > 0:
                     # This is for statements like "Stats: .... as alias_column
@@ -6154,21 +6189,20 @@ class LiveStatusQuery(LiveStatus):
 
     
     def get_hosts_or_services_livedata(self, cs):
-        objects = getattr(self, self.table)
         if cs.without_filter and not self.limit:
             # Simply format the output
-            return [self.create_output(cs.output_map, x) for x in objects.itervalues()]
+            return (self.create_output(cs.output_map, x) for x in getattr(self, self.table).itervalues())
         elif cs.without_filter and self.limit:
             # Simply format the output of a subset of the objects
-            return [self.create_output(cs.output_map, x) for x in objects.values()[:self.limit]]
+            return (self.create_output(cs.output_map, x) for x in getattr(self, self.table).values()[:self.limit])
         else:
             # Filter the objects and format the output. At least hosts
             # and services are already sorted by name.
-            return [
+            return (
                 self.create_output(cs.output_map, y) for y in (
-                    x for x in objects.itervalues() 
+                    x for x in getattr(self, self.table).itervalues() 
                     if cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, x)))
-            ]
+            )
 
     
     def get_hosts_livedata(self, cs):
@@ -6362,7 +6396,10 @@ member_key: the key to be used to sort each resulting element of a group member.
         res = handler(self, cs)
 
         if self.limit:
-            res = res[:self.limit]
+            if isinstance(res, list):
+                res = res[:self.limit]
+            else:
+                res = list(res)[:self.limit]
             
         if self.stats_request:
             res = self.statsify_result(res)
@@ -6416,11 +6453,9 @@ member_key: the key to be used to sort each resulting element of a group member.
     def create_output(self, out_map, elt):
         """Convert an object to a dict with selected keys.""" 
         output = {} 
-        display_attributes = out_map.keys()
-        for display in display_attributes:
+        for display in out_map.keys():
             try:
-                hook = out_map[display]['hook']
-                value = hook(elt)
+                value = out_map[display]['hook'](elt)
             except:
                 value = ''
             output[display] = value
@@ -6502,7 +6537,12 @@ member_key: the key to be used to sort each resulting element of a group member.
                     resultdict[group][stats_number] = postprocess(filter(filtfunc, groupedresult[group]))
             else:
                 # Calc statistics over _all_ elements of filtresult
-                resultdict[stats_number] = postprocess(filter(filtfunc, filtresult))
+                if isinstance(filtresult, list):
+                    resultdict[stats_number] = postprocess(filter(filtfunc, filtresult))
+                else:
+                    # it's a generator
+                    filtresult = list(filtresult)
+                    resultdict[stats_number] = postprocess(filter(filtfunc, filtresult))
         if self.stats_group_by:
             for group in resultdict:
                 result.append(resultdict[group])
