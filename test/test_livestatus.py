@@ -3051,7 +3051,6 @@ ResponseHeader: fixed16
         # 6th Query
         query_start = time.time()
         request = """
-REQUEST
 GET services
 Filter: host_has_been_checked = 0
 Filter: host_state = 0
