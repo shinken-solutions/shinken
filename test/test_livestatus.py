@@ -3185,6 +3185,130 @@ test_host_1;test_router_0,test_router_1;
 
 
 
+def isprime(startnumber):
+    startnumber*=1.0
+    for divisor in range(2,int(startnumber**0.5)+1):
+        if startnumber/divisor==int(startnumber/divisor):
+            return False
+    return True
+
+
+# only for >= 2.7 @skip("skipping a very huge config. uncomment me for performance tests")
+class TestConfigCrazy(TestConfig):
+    def setUp(self):
+        print "comment me for performance tests"; return
+        self.setup_with_file('etc/nagios_10r_1000h_20000s.cfg')
+        self.testid = str(os.getpid() + random.randint(1, 1000))
+        self.livelogs = 'tmp/livelogs.db' + self.testid
+        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
+        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
+        self.livestatus_broker.create_queues()
+        self.livestatus_broker.init()
+        self.sched.fill_initial_broks()
+        self.update_broker()
+        self.nagios_path = None
+        self.livestatus_path = None
+        self.nagios_config = None
+
+
+    def tearDown(self):
+        print "comment me for performance tests"; return
+        self.stop_nagios()
+        self.livestatus_broker.dbconn.commit()
+        self.livestatus_broker.dbconn.close()
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.pnp4nagios):
+            shutil.rmtree(self.pnp4nagios)
+        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
+        for attr in to_del:
+            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
+        self.livestatus_broker = None
+
+
+    def test_perf(self):
+        print "comment me for performance tests"; return
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        primes = [num for num in xrange(0, 999) if isprime(num)]
+        down_hosts = [self.sched.hosts.find_by_name("test_host_%04d" % num) for num in xrange(0, 1000) if num in primes]
+        crit_services = []
+        warn_services = []
+        for num in [x for x in xrange(100, 200) if x in primes]:
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_01"))
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_05"))
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_11"))
+        for num in [x for x in xrange(100, 200) if x in primes]:
+            warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_19"))
+
+        for num in [x for x in xrange(201, 999) if x in primes]:
+            warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_03"))
+            warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_07"))
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_13"))
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_17"))
+        print "%d services are in a warning state" % len(warn_services)
+        print "%d services are in a critical state" % len(crit_services)
+        nonok = []
+        nonok.extend([[w, 1, "W"] for w in warn_services])
+        nonok.extend([[c, 2, "C"] for c in crit_services])
+        nonok.extend([[h, 2, "D"] for h in down_hosts])
+        print "nonono", nonok
+        self.scheduler_loop(1, nonok)
+        nonok = []
+        nonok.extend([[w, 1, "W"] for w in warn_services if warn_services.index(w) in primes])
+        lenw = len(nonok)
+        nonok.extend([[c, 2, "C"] for c in crit_services if crit_services.index(c) in primes])
+        lenc = len(nonok) - lenw
+        nonok.extend([[h, 2, "D"] for h in down_hosts if down_hosts.index(h) in primes])
+        lenh = len(nonok) -lenc - lenw
+        print "%d hosts are hard/down" % lenh
+        print "%d services are in a hard/warning state" % lenw
+        print "%d services are in a hard/critical state" % lenc
+        self.scheduler_loop(3, nonok)
+        self.update_broker()
+
+        request = """GET services
+Columns: host_name description state state_type plugin_output
+OutputFormat: csv
+Filter: state != 0
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+
+        # Now read services but execute a lot of lambda-functions to read
+        # also host attributes
+        request = """GET services
+Columns: host_name description state state_type plugin_output host_state host_state_type host_plugin_output
+OutputFormat: csv
+Filter: host_state != 0
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+
+        # Now again the simple services-read, but with limit
+        request = """GET services
+Columns: host_name description state state_type plugin_output
+OutputFormat: csv
+Filter: state != 0
+Limit: 5000
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+
+        # Now again the services-read with host-lambdas, but with limit
+        request = """GET services
+Columns: host_name description state state_type plugin_output host_state host_state_type host_plugin_output
+OutputFormat: csv
+Filter: state != 0
+Limit: 5000
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+
+
+
 if __name__ == '__main__':
     #import cProfile
     command = """unittest.main()"""
