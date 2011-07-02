@@ -101,6 +101,7 @@ class Livestatus_broker(BaseModule):
         self.pollers = SortedDict()
         self.reactionners = SortedDict()
         self.brokers = SortedDict()
+        self.service_id_cache = {}
 
         self.instance_ids = []
 
@@ -305,6 +306,9 @@ class Livestatus_broker(BaseModule):
             dtc.ref = s
         self.services[host_name+service_description] = s
         self.number_of_objects += 1
+        # We need this for manage_initial_servicegroup_status_brok where it
+        # will speed things up dramatically
+        self.service_id_cache[s.id] = s
 
 
     #In fact, an update of a service is like a check return
@@ -350,12 +354,12 @@ class Livestatus_broker(BaseModule):
         for (s_id, s_name) in members:
             # A direct lookup by s_host_name+s_name is not possible
             # because we don't have the host_name in members, only ids.
-            for s in self.services.values():
-                if s_id == s.id:
-                    sg.members.append(s)
-                    sg.members = list(set(sg.members))
-                    break
-                
+            try:
+                sg.members.append(self.service_id_cache[s_id])
+            except Exception:
+                pass
+
+        sg.members = list(set(sg.members))
         self.servicegroups[servicegroup_name] = sg
         self.number_of_objects += 1
 
