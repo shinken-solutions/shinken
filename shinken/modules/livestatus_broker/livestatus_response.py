@@ -68,21 +68,6 @@ class LiveStatusResponse:
         showheader = False
         #print "my result is", result
         print "outputformat", self.outputformat
-        #---
-        if False:
-        #if len(result) > 0:
-            if self.columnheaders != 'off' or len(columns) == 0:
-                if len(aliases) > 0:
-                    showheader = True
-                else:
-                    showheader = True
-                    if len(columns) == 0:
-                        # Show all available columns
-                        columns = sorted(result[0].keys())
-                        print "allavail", columns
-        elif self.columnheaders == 'on':
-            showheader = True
-        #---
         if self.outputformat == 'csv':
             if len(columns) == 0:
                 # There is no pre-selected list of columns. In this case
@@ -106,11 +91,7 @@ class LiveStatusResponse:
                         else:
                             l.append(str(x))
                     lines.append(self.separators[1].join(l))
-            #---
-            print "showheader", showheader
-            print "lines", lines
             if len(lines) > 0:
-            #if False:
                 if self.columnheaders != 'off' or len(columns) == 0:
                     if len(aliases) > 0:
                         showheader = True
@@ -119,11 +100,8 @@ class LiveStatusResponse:
                         if len(columns) == 0:
                             # Show all available columns
                             columns = sorted(object.keys())
-                            print "xllavail", columns
             elif self.columnheaders == 'on':
                 showheader = True
-            #---
-            print "showheader2", showheader
             if showheader:
                 if len(aliases) > 0:
                     # This is for statements like "Stats: .... as alias_column
