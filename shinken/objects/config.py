@@ -250,6 +250,7 @@ class Config(Item):
 
         ## Discovery part
         'strip_idname_fqdn' :    BoolProp(default='1'),
+        'runners_timeout'   :    IntegerProp(default='3600'),
    }
 
     macros = {

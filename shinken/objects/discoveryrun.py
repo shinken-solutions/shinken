@@ -48,11 +48,11 @@ class Discoveryrun(Item):
         return self.discoveryrun_name
 
     # Get an eventhandler object and launch it
-    def launch(self):
+    def launch(self, timeout=300):
         m = MacroResolver()
         data = []
         cmd = m.resolve_command(self.discoveryrun_command, data)
-        self.current_launch = EventHandler(cmd, timeout=300)
+        self.current_launch = EventHandler(cmd, timeout=timeout)
         self.current_launch.execute()
 
     def check_finished(self):
