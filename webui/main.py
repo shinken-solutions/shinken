@@ -71,7 +71,7 @@ def bla():
 #    return dict()
 
 import impacts
-
+import hostdetail
 
 print "Starting application"
 run(host='0.0.0.0', port=8080)
