@@ -6,52 +6,7 @@
 
 
     <div class="whole-page">
-      <div>
-	<h1 id="branding">
-	  <a class="header_link">Shinken UI (inspired by Meatball)</a>
-	</h1>
-      </div>
       
-      <div class="placemainmenu">
-	<ul id="mainmenu" class="twoLevelMenu">
-	  
-	  <li class=""><a href="#" target="_blank">Dashboard</a>
-	    
-	  </li>
-
-	  <li class=""><a href="#">Host</a>
-	    <ul style="display: none; ">
-	      <li><a href="#">Quick Overview</a></li>
-	    </ul>
-	  </li>
-	  
-	  <li class=""><a href="#">Services</a>
-	    <ul style="display: none; ">
-	      <li><a href="#">Quick Overview</a></li>
-	    </ul>
-	  </li>
-	  
-	  <li class="active"><a href="#">Incidents</a>
-	    <ul style="display: block; ">
-	      <li><a href="#">Business Impacts</a></li>
-	      <li><a href="#">IT problems</a></li>
-	    </ul>
-	  </li>
-	  <li><a href="">System</a>
-	    <ul>
-	      <li><a href="#">System Info</a></li>
-	      <li><a href="#">Performance Info</a></li>
-	    </ul>
-	  </li>
-	  
-	</ul>
-      </div>
-      
-      
-
-      <div>
-	<h4 id="page-heading">Incidents &gt;&gt; Business impacts</h4>
-      </div>
       
       
 

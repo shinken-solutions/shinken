@@ -17,6 +17,15 @@
     <script type="text/javascript" src="static/js/mootools.js"></script>
     <script type="text/javascript" src="static/js/mootools-more.js"></script>
     <script type="text/javascript" src="static/js/mootools-message.js"></script>
+		<link rel="stylesheet" type="text/css" href="static/reset.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="static/text.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="static/grid.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="static/layout.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="static/nav-new.css" media="screen">
+		<script src="static/js/rotater.js" type="text/javascript"></script>
+		<script src="static/js/tabs.js" type="text/javascript"></script>
+
+
 
 %# End of classic js import. Now call for specific ones
 %for p in js:
@@ -31,3 +40,19 @@
 
   </head>
   <body class="main">
+		<div class="container_16">
+			<div id="header" class="grid_16">
+				<h1 class="box_textshadow">Meatball</h1>
+			</div>
+			<div class="clear"></div>
+			<div id="nav" class="grid_16">
+				<ul>
+					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">Dashboard</a></li>
+					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">Hosts</a></li>
+					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#" id="selected">Incidents</a></li>
+					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">Services</a></li>
+					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">System</a></li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+			<div id="main_container" class="grid_16">

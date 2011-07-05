@@ -2111,9 +2111,9 @@ table.aggrtree td.node {
 
 /* Global container */
 .whole-page {
-    width: 92%;
+/*    width: 92%;
     margin-left: 4%;
-    margin-right: 4%;
+    margin-right: 4%;*/
     /*min-width: 920px;
     max-width: 1040px;*/
     /*margin: 5px 40px;*/
