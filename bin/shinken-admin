@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+#Copyright (C) 2009-2011 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+#This file is part of Shinken.
+#
+#Shinken is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#Shinken is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+import os
+import cmd 
+import sys 
+
+
+try:
+    from shinken.bin import VERSION
+    import shinken
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+
+
+from shinken.bin import VERSION
+try:
+    import shinken.pyro_wrapper as pyro
+except ImportError:
+    sys.exit("Shinken require the Python Pyro module. Please install it.")
+from shinken.arbiterlink import ArbiterLink
+Pyro = pyro.Pyro
+
+class Dummy:
+    def add(self, o):
+        pass
+
+from shinken.log import logger
+logger.load_obj(Dummy())
+
+
+sat_types = ['arbiter', 'scheduler', 'poller', 'reactionner',
+             'receiver', 'broker']
+
+
+class ShinkenAdmin(cmd.Cmd):
+    prompt = "> " 
+    
+    def __init__(self):
+        cmd.Cmd.__init__(self)
+        self.arb = None
+    
+    # If we got no connexions, connect with a standard localhost one
+    def look_connexion(self):
+        if not self.arb:
+            self.do_connect('')
+
+
+    def do_connect(self, line): 
+        line = line.strip()
+      	tokens = line.split(':')
+        if line == '':
+            addr = 'localhost'
+            port = '7770'
+        else:
+            addr = tokens[0]
+            try:
+                port = tokens[1]
+            except IndexError:
+                port = '7770'
+        #port = int(port)
+        print "Connection to %s:%s" % (addr, port)
+        ArbiterLink.use_ssl = False
+        self.arb = ArbiterLink({'arbiter_name': 'unnamed arbiter', 'address' : addr, 'port' : port})
+        self.arb.fill_default()
+        self.arb.pythonize()
+        self.arb.update_infos()
+        if self.arb.reachable:
+            print "Connection OK"
+        else:
+            print "Connection problem"
+
+
+    def do_status(self, line):
+        self.look_connexion()
+        for t in sat_types:
+            print "Looking for", t
+            r = self.arb.get_satellite_list(t)
+            print r
+            for s in r:
+                print "Getting %s state" % s
+                st = self.arb.get_satellite_status(t, s)
+                print st
+
+    def do_EOF(self,line): 
+        print "", 
+        return True 
+
+
+
+intro = '# connect [localhost:7770] \n# status'
+
+if __name__ == "__main__": 
+    ShinkenAdmin().cmdloop(intro)

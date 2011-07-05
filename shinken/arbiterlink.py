@@ -24,6 +24,8 @@ import socket
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+import shinken.pyro_wrapper as pyro
+Pyro = pyro.Pyro
 
 from shinken.log import logger
 
@@ -75,6 +77,33 @@ class ArbiterLink(SatelliteLink):
         except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
+
+    def get_satellite_list(self, daemon_type):
+        if self.con is None:
+            self.create_connection()
+        try:
+            r = self.con.get_satellite_list(daemon_type)
+            return r
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return []
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return []
+
+    def get_satellite_status(self, daemon_type, name):
+        if self.con is None:
+            self.create_connection()
+        try:
+            r = self.con.get_satellite_status(daemon_type, name)
+            return r
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return {}
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return {}
+
 
 
 
