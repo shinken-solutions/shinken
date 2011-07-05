@@ -14,16 +14,16 @@
     <title>{{title or 'No title'}}</title>
 
     <link rel="stylesheet" type="text/css" href="static/nav.css">
+    <link rel="stylesheet" type="text/css" href="static/reset.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="static/text.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="static/grid.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="static/layout.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="static/nav-new.css" media="screen">
+    <script type="text/javascript" src="static/js/rotater.js"></script>
+    <script type="text/javascript" src="static/js/tabs.js"></script>
     <script type="text/javascript" src="static/js/mootools.js"></script>
     <script type="text/javascript" src="static/js/mootools-more.js"></script>
     <script type="text/javascript" src="static/js/mootools-message.js"></script>
-		<link rel="stylesheet" type="text/css" href="static/reset.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="static/text.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="static/grid.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="static/layout.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="static/nav-new.css" media="screen">
-		<script src="static/js/rotater.js" type="text/javascript"></script>
-		<script src="static/js/tabs.js" type="text/javascript"></script>
 
 
 

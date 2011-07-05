@@ -1898,9 +1898,9 @@ table.aggrtree td.node {
 /* The panel that will contain all problem panels*/
 .problems-panels {
     position: fixed;
-    left: 515px;
+    left: 480px;
     right: 0;
-    top: 200px;
+    top: 100px;
     width: 100%;
 }
 
