@@ -75,18 +75,8 @@ class ShinkenAdmin(cmd.Cmd):
         if not self.arb:
             self.do_connect('')
 
-    def do_help(self, line):
-        line = line.strip()
-        f = getattr(self, 'do_'+line, None)
-        if f:
-            d = getattr(f, '__doc__', None)
-            if d:
-                print d
-            else:
-                print "No help for this function"
-            
-        else:
-            print "Unknown command"
+    def emptyline(self):
+        return
             
 
     def do_connect(self, line):
@@ -123,6 +113,11 @@ class ShinkenAdmin(cmd.Cmd):
 
 
     def do_status(self, line):
+        '''
+        Get daemons status as the connected arbiter know. If you call it
+        without an already open arbiter connection with 'connect' it will automatically
+        connect to locahost:7770.
+        '''
         self.look_connexion()
         data = self.arb.get_all_states()
         
@@ -156,20 +151,20 @@ class ShinkenAdmin(cmd.Cmd):
             print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.receiver_name, s.address, s.port,
                                                 s.alive, s.reachable, get_since(s.last_check))
 
-        #for t in sat_types:
-        #    print "Looking for", t
-        #    sats = data[t]
-        #    for s in sats:
-        #        print s
         
 
     def do_gethostname(self, line):
+        '''
+        Return the hostname of this machine as is it look for the*
+        host_name parameter of the arbiter configuration.
+        '''
         import socket
         print socket.gethostname()
 
 
     def do_EOF(self, line):
         return self.do_quit('')
+
 
     def do_quit(self,line): 
         print "", 
