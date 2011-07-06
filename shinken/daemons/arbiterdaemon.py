@@ -98,6 +98,16 @@ class IForArbiter(Interface):
         return []
 
 
+    def get_all_states(self):
+        res = {'arbiter' : self.app.conf.arbiterlinks,
+               'scheduler' : self.app.conf.schedulerlinks,
+               'poller' : self.app.conf.pollers,
+               'reactionner' : self.app.conf.reactionners,
+               'receiver' : self.app.conf.receivers,
+               'broker' : self.app.conf.brokers}
+        return res
+
+
 # Main Arbiter Class
 class Arbiter(Daemon):
 

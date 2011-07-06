@@ -105,6 +105,20 @@ class ArbiterLink(SatelliteLink):
             return {}
 
 
+    def get_all_states(self):
+        if self.con is None:
+            self.create_connection()
+        try:
+            r = self.con.get_all_states()
+            return r
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return None
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return None
+
+
 
 
 class ArbiterLinks(SatelliteLinks):

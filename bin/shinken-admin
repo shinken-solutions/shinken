@@ -23,7 +23,7 @@
 import os
 import cmd 
 import sys 
-
+import time
 
 try:
     from shinken.bin import VERSION
@@ -56,6 +56,13 @@ sat_types = ['arbiter', 'scheduler', 'poller', 'reactionner',
              'receiver', 'broker']
 
 
+def get_since(t):
+    now = time.time()
+    if t == 0:
+        return "never"
+    return "%ds ago" % (int(now - t))
+    
+
 class ShinkenAdmin(cmd.Cmd):
     prompt = "> " 
     
@@ -68,8 +75,29 @@ class ShinkenAdmin(cmd.Cmd):
         if not self.arb:
             self.do_connect('')
 
+    def do_help(self, line):
+        line = line.strip()
+        f = getattr(self, 'do_'+line, None)
+        if f:
+            d = getattr(f, '__doc__', None)
+            if d:
+                print d
+            else:
+                print "No help for this function"
+            
+        else:
+            print "Unknown command"
+            
 
-    def do_connect(self, line): 
+    def do_connect(self, line):
+        '''
+        Connect to an arbiter daemon
+        Syntax : connect [host]:[port]
+        Ex : for Connecting to server, port 7770
+        > connect server:7770
+        Ex : connect to localhost, port 7770
+        > connect
+        '''
         line = line.strip()
       	tokens = line.split(':')
         if line == '':
@@ -96,22 +124,72 @@ class ShinkenAdmin(cmd.Cmd):
 
     def do_status(self, line):
         self.look_connexion()
-        for t in sat_types:
-            print "Looking for", t
-            r = self.arb.get_satellite_list(t)
-            print r
-            for s in r:
-                print "Getting %s state" % s
-                st = self.arb.get_satellite_status(t, s)
-                print st
+        data = self.arb.get_all_states()
+        
+        arbs = data['arbiter']
+        print "Arbiter \t\t address \t port \t alive \t reachable \t last_check"
+        for a in arbs:
+            print " %.15s \t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (a.arbiter_name, a.address, a.port,
+                                                                     a.alive, a.reachable, get_since(a.last_check))
+        print "\nScheduler \t\t address \t port \t alive \t reachable \t last_check"
+        for s in data['scheduler']:
+            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.scheduler_name, s.address, s.port,
+                                                s.alive, s.reachable, get_since(s.last_check))
+            
+        print "\nPoller \t\t address \t port \t alive \t reachable \t last_check"
+        for s in data['poller']:
+            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.poller_name, s.address, s.port,
+                                                s.alive, s.reachable, get_since(s.last_check))
+            
+        print "\nReactionner \t\t address \t port \t alive \t reachable \t last_check"
+        for s in data['reactionner']:
+            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.reactionner_name, s.address, s.port,
+                                                s.alive, s.reachable, get_since(s.last_check))
 
-    def do_EOF(self,line): 
+        print "\nBroker \t\t address \t port \t alive \t reachable \t last_check"
+        for s in data['broker']:
+            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.broker_name, s.address, s.port,
+                                                s.alive, s.reachable, get_since(s.last_check))
+
+        print "\nReceiver \t\t address \t port \t alive \t reachable \t last_check"
+        for s in data['receiver']:
+            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.receiver_name, s.address, s.port,
+                                                s.alive, s.reachable, get_since(s.last_check))
+
+        #for t in sat_types:
+        #    print "Looking for", t
+        #    sats = data[t]
+        #    for s in sats:
+        #        print s
+        
+
+    def do_gethostname(self, line):
+        import socket
+        print socket.gethostname()
+
+
+    def do_EOF(self, line):
+        return self.do_quit('')
+
+    def do_quit(self,line): 
         print "", 
         return True 
 
+    
+    def do_easter(self, line):
+        '''
+        Surprise. Look closer to the code to know what to launch with it.
+        '''
+        import shinken.easter as easter
+        line = line.strip()
+        f = getattr(easter, line, None)
+        if f:
+            f()
+    
 
 
-intro = '# connect [localhost:7770] \n# status'
+
+intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# quit'
 
 if __name__ == "__main__": 
     ShinkenAdmin().cmdloop(intro)
