@@ -550,7 +550,9 @@ class Livestatus_broker(BaseModule):
     #A log brok will be written into a database
     def manage_log_brok(self, b):
         data = b.data
+
         line = data['log'].encode('UTF-8').rstrip()
+
         # split line and make sql insert
         #print "LOG--->", line
         # [1278280765] SERVICE ALERT: test_host_0
@@ -751,6 +753,8 @@ class Livestatus_broker(BaseModule):
         # create db file and tables if not existing
         self.dbconn = sqlite3.connect(self.database_file)
         self.dbcursor = self.dbconn.cursor()
+        # Get no rpoblem for utf8 insert
+        self.dbconn.text_factory = str
         # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
         # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
         cmd = "CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options VARCHAR(512), plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))"
