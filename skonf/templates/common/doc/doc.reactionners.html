@@ -1,5 +1,0 @@
-<div class="boxwhite doc">
-The Reactionner object is a way to the Arbiter daemons to talk with a scheduler and give it hosts to manage. They are in charge of notifications and launching event_handlers. They are not managed by pollers because it is more easy to have only one place to send notifications (and another one for spare) for example to have less SMTP authorisations or RSS feeds to read (only one for all hosts/services). There can be numerous reactionners if the administrator desires so.
-<br/><br/>
-The Reactionner definition is optionnal. If no poller is defined, Shinken will “create” one for the user. There will be no high availability for it (no spare), and will use the default port in the server where the deamon is launched.
-</div>
