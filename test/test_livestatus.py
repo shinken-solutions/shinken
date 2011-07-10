@@ -1147,6 +1147,74 @@ And: 2"""
         print response
 
 
+    def test_thruk_logs_utf8(self):
+        self.print_header()
+        start = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        # -----------------------------------------------------------------> HERE is the UTF8 char :)
+        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, u'WARNINGé']])
+        self.update_broker()
+        duration = 600
+        now = time.time()
+        # downtime valid for the next 2 minutes
+        cmd = u"[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;1;0;%d;lausser;blablubé" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        now = time.time()
+        cmd = "u[%lu] ADD_SVC_COMMENT;test_host_0;test_ok_0;1;lausser;commenté" % now
+        self.sched.run_external_command(cmd)
+        time.sleep(1)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 2, 'DOWN'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 0, 'UUP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+#        time.sleep(1)
+#        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
+#        self.update_broker()
+        end = time.time()
+
+        # show history for service
+        request = """GET log
+Columns: time type options state current_host_name
+Filter: time >= """ + str(int(start)) + """
+Filter: time <= """ + str(int(end)) + """
+Filter: type = SERVICE ALERT
+Filter: type = HOST ALERT
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Or: 6
+Filter: current_host_name = test_host_0
+Filter: current_service_description = test_ok_0
+And: 2"""
+        request = """GET log
+Columns: time type options state current_host_name
+Filter: time >= """ + str(int(start)) + """
+Filter: time <= """ + str(int(end)) + """
+Filter: current_host_name = test_host_0
+Filter: current_service_description = test_ok_0
+And: 2"""
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
+
+
     def test_thruk_tac_svc(self):
         self.print_header()
         if self.nagios_installed():

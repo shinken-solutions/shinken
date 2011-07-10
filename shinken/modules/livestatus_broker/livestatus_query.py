@@ -407,7 +407,7 @@ class LiveStatusQuery(Hooker):
             return (
                 self.create_output(cs.output_map, y) for y in (
                     x for x in getattr(self, self.table).itervalues() 
-                    if cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, x)))
+                    if cs.filter_func(self.create_output(cs.filter_map, x)))
             )
 
     
