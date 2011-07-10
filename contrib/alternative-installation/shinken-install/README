@@ -1,0 +1,39 @@
+===== WARNING : THIS SCRIPT IS STILL IN ALPHA =====
+
+==== Contact ====
+
+You can contact me at dguenault at monitoring-fr dot org if you find a bug
+or you can write an issue in the github interface
+
+==== get shinken  ====
+
+
+==== Usage ====
+
+This is a really simple script allowing to install a fully fonctionnal shinken in seconds !
+Curently only tested with Ubuntu/Debian and RHEL/CentOS 5 distros. RHEL 6 will be integrated soon
+
+Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c 
+	-k	Kill shinken
+	-i	Install shinkeni
+	-d 	Remove shinken
+	-u	Update an existing shinken installation
+	-v	purge livestatus sqlite db and shrink sqlite db
+	-b	Backup shinken configuration plugins and data
+	-r 	Restore shinken configuration plugins and data
+	-l	List shinken backups
+	-c	Compress rotated logs
+	-a 	install addon (curently thruk). THIS ONE IS NIT USABLE AT THE MOMENT !!!!!!
+	-h	Show help
+
+==== configuration file ====
+
+You can modify the target folder, version, backup folder or user/group  by editing the shinken.conf file 
+
+export TMP=/tmp
+export VERSION="0.6.5"
+export TARGET=/opt/shinken
+export BACKUPDIR="/opt/backup"
+export SKUSER=shinken
+export SKGROUP=shinken
+
