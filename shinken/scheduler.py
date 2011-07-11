@@ -187,7 +187,11 @@ class Scheduler:
 
     # We've got activity in the fifo, we get and run commands
     def run_external_command(self, command):
-        print "scheduler resolves command", command
+        # Non unicode runner are really a problem...
+        try:
+            print "scheduler resolves command", command
+        except UnicodeEncodeError:
+            print "scheduler resolves command", command.decode('utf8', 'ignore')
         ext_cmd = ExternalCommand(command)
         self.external_command.resolve_command(ext_cmd)
 

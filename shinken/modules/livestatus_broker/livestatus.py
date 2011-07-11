@@ -24,7 +24,6 @@ import os
 import time
 
 
-from shinken.external_command import ExternalCommand
 from shinken.util import from_bool_to_int, from_float_to_int, to_int, to_split, get_customs_keys, get_customs_values
 
 from hooker import Hooker
