@@ -26,7 +26,7 @@ import os
 import sys
 
 #Thrift Specificities
-sys.path.append('../../thrift/gen-py')
+sys.path.append('../thrift/gen-py')
 from org.shinken_monitoring.tsca import StateService
 from org.shinken_monitoring.tsca.ttypes import *
 from thrift.transport import TSocket
@@ -38,7 +38,7 @@ from shinken.external_command import ExternalCommand
 
 properties = {
     'daemons' : ['arbiter', 'receiver'],
-    'type' : 'thrift_server',
+    'type' : 'tsca_server',
     'external' : True,
     'phases' : ['running'],
     }
