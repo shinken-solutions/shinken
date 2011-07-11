@@ -23,7 +23,7 @@
 import socket
 import asyncore
 
-class LSConnection:
+class LSSyncConnection:
     def __init__(self, addr='127.0.0.1', port=50000, path=None, timeout=10):
 	self.addr = addr
         self.port = port
@@ -117,6 +117,9 @@ class LSConnection:
 
 # Query class for define a query, and its states
 class Query(object):
+
+    id = 0
+
     def __init__(self, q):
         # The query string
         if not q.endswith("\n"):
@@ -124,6 +127,8 @@ class Query(object):
         q += "OutputFormat: python\nKeepAlive: on\nResponseHeader: fixed16\n\n"
 
         self.q = q
+        self.id = Query.id
+        Query.id += 1
         # Got some states PENDING -> PICKUP -> DONE
         self.state = 'PENDING'
         self.result = None
@@ -139,7 +144,7 @@ class Query(object):
     def put(self, r):
         self.result = r
         self.state = 'DONE'
-        print "Got a result", r
+        #print "Got a result", r
     
 
 
@@ -232,7 +237,8 @@ class LSAsynConnection(asyncore.dispatcher):
 
 
     def handle_connect(self):
-        print "In handle_connect"
+        pass
+        #print "In handle_connect"
 
 
     def handle_close(self):
@@ -332,7 +338,7 @@ class LSAsynConnection(asyncore.dispatcher):
     # We are finished only if we got no pending queries and
     # no in progress query too
     def is_finished(self):
-        print "State:", self.current, len(self.queries)
+        #print "State:", self.current, len(self.queries)
         return self.current == None and len(self.queries) == 0
             
 
@@ -341,6 +347,11 @@ class LSAsynConnection(asyncore.dispatcher):
         while self.alive and not self.is_finished():
             asyncore.poll(timeout=0.001)
             
+
+    def get_returns(self):
+        r = self.results
+        self.results = self.results[:]
+        return r
 
 
     def launch_raw_query(self, query):
@@ -374,7 +385,7 @@ if __name__ == "__main__":
     print "Start to wait"
     c.wait_returns()
     print "End to wait"
-
+    print "Results", c.get_returns()
     #while time.time() - t < 1:
     #    asyncore.poll()
 
