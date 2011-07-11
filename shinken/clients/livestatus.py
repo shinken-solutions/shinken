@@ -115,7 +115,32 @@ class LSConnection:
             print "COMMAND EXEC error:", exp
 
 
+# Query class for define a query, and its states
+class Query(object):
+    def __init__(self, q):
+        # The query string
+        if not q.endswith("\n"):
+            q += "\n"
+        q += "OutputFormat: python\nKeepAlive: on\nResponseHeader: fixed16\n\n"
 
+        self.q = q
+        # Got some states PENDING -> PICKUP -> DONE
+        self.state = 'PENDING'
+        self.result = None
+        #By default, an error :)
+        self.return_code = '500'
+
+
+    def get(self):
+        print "Someone ask my query", self.q
+        self.state = 'PICKUP'
+        return self.q
+
+    def put(self, r):
+        self.result = r
+        self.state = 'DONE'
+        print "Got a result", r
+    
 
 
 class LSAsynConnection(asyncore.dispatcher):
@@ -141,8 +166,19 @@ class LSAsynConnection(asyncore.dispatcher):
         self.socket.settimeout(timeout)
         self.do_connect()
 
-        self.queries = ['GET hosts\nColumns name\n']
 
+        # And our queries
+        q = Query('GET hosts\nColumns name\n')
+        self.queries = [q]
+        
+        self.current = None
+
+
+    # Get a query and put it in current
+    def get_query(self):
+        q = self.queries.pop()
+        self.current = q
+        return q
 
 
     def do_connect(self):
@@ -175,9 +211,8 @@ class LSAsynConnection(asyncore.dispatcher):
     def launch_query(self, query):
         if not self.alive:
 	    self.do_connect()
-        if not query.endswith("\n"):
-	    query += "\n"
-        query += "OutputFormat: python\nKeepAlive: on\nResponseHeader: fixed16\n\n"
+
+        q = self.current
 
         try:
 	    self.socket.send(query)
@@ -188,17 +223,22 @@ class LSAsynConnection(asyncore.dispatcher):
             print "Len", length
 	    data = self.do_read(length)
             print "DATA", data
+            # We update the current query
+
+            q.return_code = code
 	    if code == "200":
 		try:
-		    return eval(data)
+                    r = eval(data)
+                    q.put(r)
 		except:
                     print "BAD VALUE RETURN", data
-                    return None
+                    q.put(None)
 	    else:
                 print "BAD RETURN CODE", code, data
-                return None
+                q.put(None)
         except IOError, exp:
 	    self.alive = False
+            
             print "SOCKET ERROR", exp
             return None
 
@@ -249,6 +289,14 @@ class LSAsynConnection(asyncore.dispatcher):
     # we continue it and wait for handshake finish
     def handle_read(self):
         print "Handle read"
+
+        q = self.current
+        # get a read but no current query? Not normal!
+
+        if not q:
+            print "WARNING : got LS read while no current query in progress. I return"
+            return
+
         try:
             data = self.do_read(16)
             code = data[0:3]
@@ -288,13 +336,12 @@ class LSAsynConnection(asyncore.dispatcher):
     # query
     def handle_write(self):
         print "handle write"
-        try : 
-                q = self.queries.pop()
-                q += "OutputFormat: python\nKeepAlive: on\nResponseHeader: fixed16\n\n"
-                sent = self.send(q)
+        try :
+            q = self.get_query()
+            sent = self.send(q.get())
         except socket.error, exp:
-                print "Fuck in write exception", exp
-                return
+            print "Fuck in write exception", exp
+            return
 
         print "Sent", sent, "data"
     
