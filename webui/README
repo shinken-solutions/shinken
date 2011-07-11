@@ -1,0 +1,8 @@
+This part of Shinken is still under active work in progress and alpha phase.
+
+Of course you can test it :)
+
+To launch the Shinken Webui (if you got a cool name for it, let us know) it's very easy :
+python webui/main.py
+
+Then you can connect to http://localhost:8080/host to see an host detail, and /impacts to see the impacts page.
