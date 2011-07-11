@@ -132,7 +132,7 @@ class Query(object):
 
 
     def get(self):
-        print "Someone ask my query", self.q
+        #print "Someone ask my query", self.q
         self.state = 'PICKUP'
         return self.q
 
@@ -168,10 +168,15 @@ class LSAsynConnection(asyncore.dispatcher):
 
 
         # And our queries
-        q = Query('GET hosts\nColumns name\n')
-        self.queries = [q]
+        #q = Query('GET hosts\nColumns name\n')
+        self.queries = []
+        self.results = []
         
         self.current = None
+
+
+    def stack_query(self, q):
+        self.queries.append(q)
 
 
     # Get a query and put it in current
@@ -193,6 +198,7 @@ class LSAsynConnection(asyncore.dispatcher):
             except IOError, exp:
                 self.alive = False
                 print "Connexion problem", exp
+                self.handle_close()
 
 
     def do_read(self, size):
@@ -207,40 +213,6 @@ class LSAsynConnection(asyncore.dispatcher):
             res = res + data
 	return res
 
-
-    def launch_query(self, query):
-        if not self.alive:
-	    self.do_connect()
-
-        q = self.current
-
-        try:
-	    self.socket.send(query)
-	    data = self.do_read(16)
-	    code = data[0:3]
-            print "RAW DATA", data
-	    length = int(data[4:15])
-            print "Len", length
-	    data = self.do_read(length)
-            print "DATA", data
-            # We update the current query
-
-            q.return_code = code
-	    if code == "200":
-		try:
-                    r = eval(data)
-                    q.put(r)
-		except:
-                    print "BAD VALUE RETURN", data
-                    q.put(None)
-	    else:
-                print "BAD RETURN CODE", code, data
-                q.put(None)
-        except IOError, exp:
-	    self.alive = False
-            
-            print "SOCKET ERROR", exp
-            return None
 
 
     def exec_command(self, command):
@@ -263,9 +235,10 @@ class LSAsynConnection(asyncore.dispatcher):
         print "In handle_connect"
 
 
-
     def handle_close(self):
-        print "In close"
+        print "Closing connexion"
+        self.current = None
+        self.queries = []
         self.close()
 
         
@@ -288,73 +261,129 @@ class LSAsynConnection(asyncore.dispatcher):
     # finished. Maybe it's just a SSL handshake continuation, if so
     # we continue it and wait for handshake finish
     def handle_read(self):
-        print "Handle read"
+        #print "Handle read"
 
         q = self.current
         # get a read but no current query? Not normal!
 
         if not q:
-            print "WARNING : got LS read while no current query in progress. I return"
+            #print "WARNING : got LS read while no current query in progress. I return"
             return
 
         try:
             data = self.do_read(16)
             code = data[0:3]
-            print "RAW DATA", data
+            q.return_code = code
+
             length = int(data[4:15])
-            print "Len", length
             data = self.do_read(length)
-            print "DATA", data
+            
             if code == "200":
                 try:
-                    v = eval(data)
-                    print "Type?", type(v)
-                    print v
+                    d = eval(data)
+                    #print d
+                    q.put(d)
                 except:
-                    print "BAD VALUE RETURN", data
-                    return None
+                    q.put(None)
             else:
-                print "BAD RETURN CODE", code, data
+                q.put(None)
                 return None
         except IOError, exp:
 	    self.alive = False
             print "SOCKET ERROR", exp
-            return None
+            return q.put(None)
 
+        # Now the current is done. We put in in our results queue
+        self.results.append(q)
+        self.current = None
 
 
 
     # Did we finished our job?
     def writable(self):
-        b = (len(self.queries) != 0)
-        print "Is writable?", b
-        return (len(self.queries) > 0)
+        b = (len(self.queries) != 0 and not self.current)
+        #print "Is writable?", b
+        return b
+
+    def readable(self):
+        b = self.current is not None
+        #print "Redable", b
+        return True
 
 
     # We can write to the socket. If we are in the ssl handshake phase
     # we just continue it and return. If we finished it, we can write our
     # query
     def handle_write(self):
-        print "handle write"
+        if not self.writable():
+            print "Not writable, I bail out"
+            return
+        
+        #print "handle write"
         try :
             q = self.get_query()
             sent = self.send(q.get())
         except socket.error, exp:
             print "Fuck in write exception", exp
             return
-
-        print "Sent", sent, "data"
+        #print "Sent", sent, "data"
     
 
+    # We are finished only if we got no pending queries and
+    # no in progress query too
+    def is_finished(self):
+        print "State:", self.current, len(self.queries)
+        return self.current == None and len(self.queries) == 0
+            
+
+    # Will loop over the time until all returns are back
+    def wait_returns(self):
+        while self.alive and not self.is_finished():
+            asyncore.poll(timeout=0.001)
+            
 
 
+    def launch_raw_query(self, query):
+        if not self.alive:
+            print "Cannot launch query. Connexion is closed"
+            return None
 
+        if not self.is_finished():
+            print "Try to launch a new query in a normal mode but the connection already got async queries in progress"
+            return None
 
+        q = Query(query)
+        self.stack_query(q)
+        self.wait_returns()
+        q = self.results.pop()
+        return q.result
+        
 
 
 
 if __name__ == "__main__":
     c = LSAsynConnection()
-    asyncore.loop()
+    import time
+    t = time.time()
 
+    q = Query('GET hosts\nColumns name\n')
+    c.stack_query(q)
+    q2 = Query('GET hosts\nColumns name\n')
+    c.stack_query(q)
+
+    print "Start to wait"
+    c.wait_returns()
+    print "End to wait"
+
+    #while time.time() - t < 1:
+    #    asyncore.poll()
+
+
+    #while time.time() - t < 1:
+    #    asyncore.poll()
     #print c.launch_query('GET hosts\nColumns name')
+    #print c.__dict__
+
+    print "Launch raw query"
+    r = c.launch_raw_query('GET hosts\nColumns name\n')
+    print "Result", r

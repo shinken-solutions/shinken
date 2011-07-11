@@ -18,7 +18,7 @@
 
 
 from livestatus_query import LiveStatusQuery
-
+from shinken.external_command import ExternalCommand
 
 class LiveStatusCommandQuery(LiveStatusQuery):
 
