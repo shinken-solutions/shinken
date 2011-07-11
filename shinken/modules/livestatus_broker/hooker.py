@@ -42,7 +42,8 @@ class Hooker:
 
 
         def hook_get_prop_depythonize_notcallable(elt):
-            if hasattr(elt, prop):
+            #if hasattr(elt, prop):
+            try:
                 value = getattr(elt, prop)
                 if value is None or value == 'none':
                     return default
@@ -58,7 +59,8 @@ class Hooker:
                         return f()
                     else:
                         return f
-            else:
+            #else:
+            except Exception:
                 return default
 
 
@@ -83,7 +85,8 @@ class Hooker:
                 new_prop = prop
             else:
                 new_prop = as_prop
-            if hasattr(elt, func):
+            #if hasattr(elt, func):
+            try:
                 attr = getattr(elt, func)
                 if callable(attr):
                     attr = attr()
@@ -91,7 +94,8 @@ class Hooker:
                 if 'fulldepythonize' in self.out_map[attr.__class__.__name__][new_prop]:
                     return new_hook(attr, self)
                 return new_hook(attr)
-            else:
+            #else:
+            except Exception:
                 return default
 
 

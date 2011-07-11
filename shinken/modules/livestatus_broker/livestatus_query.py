@@ -401,7 +401,7 @@ class LiveStatusQuery(Hooker):
         elif cs.without_filter and self.limit:
             # Simply format the output of a subset of the objects
             return (self.create_output(cs.output_map, x) for x in getattr(self, self.table).values()[:self.limit])
-        else:
+        elif not cs.without_filter and not self.limit:
             # Filter the objects and format the output. At least hosts
             # and services are already sorted by name.
             return (
@@ -409,7 +409,25 @@ class LiveStatusQuery(Hooker):
                     x for x in getattr(self, self.table).itervalues() 
                     if cs.filter_func(self.create_output(cs.filter_map, x)))
             )
+        elif not cs.without_filter and self.limit:
+            # This is a generator which returns up to <limit> elements
+            # which passed the filter. If the limit has been reached
+            # it is no longer necessary to loop through the original list.
+            def genlimit(values, maxelements, filterfunc):
+                loopcnt = 1
+                for val in values:
+                    if loopcnt > maxelements:
+                        return
+                    else:
+                        if filterfunc(self.create_output(cs.filter_map, val)):
+                            yield val
+                            loopcnt += 1
 
+            return (
+                self.create_output(cs.output_map, y) for y in (
+                    genlimit((x for x in getattr(self, self.table).itervalues()), self.limit, cs.filter_func)
+                )
+            )
     
     def get_hosts_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
