@@ -152,7 +152,7 @@ if os.name != 'nt':
             # and if not force shell (if, it's useless, even dangerous)
             # 2.4->2.6 accept just the string command
             if sys.version_info < (2, 7) or force_shell:
-                cmd = self.command
+                cmd = self.command                    
             else:
                 cmd = shlex.split(self.command.encode('utf8', 'ignore'))
             

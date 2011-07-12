@@ -24,7 +24,7 @@
 import os
 import time
 
-from shinken.util import to_int, to_bool
+from shinken.util import to_int, to_bool, safe_print
 from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
@@ -315,7 +315,7 @@ class ExternalCommandManager:
 
     #We need to get the first part, the command name
     def get_command_and_args(self, command):
-        print "Trying to resolve", command
+        safe_print("Trying to resolve", command)
         command = command.rstrip()
         elts = command.split(';') # danger!!! passive checkresults with perfdata
         part1 = elts[0]
@@ -364,16 +364,16 @@ class ExternalCommandManager:
         tmp_host = ''
         try:
             for elt in elts[1:]:
-                print "Searching for a new arg:", elt, i
+                safe_print("Searching for a new arg:", elt, i)
                 val = elt.strip()
                 if val[-1] == '\n':
                     val = val[:-1]
 
-                print "For command arg", val
+                safe_print("For command arg", val)
 
                 if not in_service:
                     type_searched = entry['args'][i-1]
-                    print "Search for a arg", type_searched
+                    safe_print("Search for a arg", type_searched)
 
                     if type_searched == 'host':
                         if self.mode == 'dispatcher':

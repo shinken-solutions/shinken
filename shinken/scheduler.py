@@ -43,7 +43,7 @@ from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.acknowledge import Acknowledge
 from shinken.log import logger
-from shinken.util import nighty_five_percent
+from shinken.util import nighty_five_percent, safe_print
 from shinken.load import Load
 
 class Scheduler:
@@ -187,11 +187,7 @@ class Scheduler:
 
     # We've got activity in the fifo, we get and run commands
     def run_external_command(self, command):
-        # Non unicode runner are really a problem...
-        try:
-            print "scheduler resolves command", command
-        except UnicodeEncodeError:
-            print "scheduler resolves command", command.decode('utf8', 'ignore')
+        safe_print("scheduler resolves command", command)
         ext_cmd = ExternalCommand(command)
         self.external_command.resolve_command(ext_cmd)
 
