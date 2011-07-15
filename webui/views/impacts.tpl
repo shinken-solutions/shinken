@@ -1,6 +1,6 @@
 
 
-%include header js=['check_mk.js', 'hover.js'], title='All critical impacts for your business', css=['check_mk.css']
+%include header js=['impacts.js', 'hover.js'], title='All critical impacts for your business', css=['impacts.css']
 
 
 
@@ -36,8 +36,7 @@
 
       </div>
       
-      <div class="right-panel"><h3>This view was generated from CheckMK multisite backend. You can get this application <a href='http://mathias-kettner.de/checkmk_multisite.html'> here </a></h3>
-
+      <div class="right-panel">
       </div><script language="JavaScript"> var all_ids = new Array('3','2','1')</script>
 
 
