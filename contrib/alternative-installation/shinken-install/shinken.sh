@@ -95,6 +95,77 @@ cecho ()
         return
 }
 
+cline ()                    
+{
+
+        # Argument $1 = message
+        # Argument $2 = foreground color
+        # Argument $3 = background color
+
+        case "$2" in
+                "black")
+                        fcolor='30'
+                        ;;
+                "red")
+                        fcolor='31'
+                        ;;
+                "green")
+                        fcolor='32'
+                        ;;
+                "yellow")
+                        fcolor='33'
+                        ;;
+                "blue")
+                        fcolor='34'
+                        ;;
+                "magenta")
+                        fcolor='35'
+                        ;;
+                "cyan")
+                        fcolor='36'
+                        ;;
+                "white")
+                        fcolor='37'
+                        ;;
+                *)
+                        fcolor=''
+        esac
+        case "$3" in
+                "black")
+                        bcolor='40'
+                        ;;
+               "red")
+                        bcolor='41'
+                        ;;
+                "green")
+                        bcolor='42'
+                        ;;
+                "yellow")
+                        bcolor='43'
+                        ;;
+                "blue")
+                        bcolor='44'
+                        ;;
+                "magenta")
+                        bcolor='45'
+                        ;;
+                "cyan")
+                        bcolor='46'
+                        ;;
+                "white")
+                        bcolor='47'
+                        ;;
+                *)
+                        bcolor=""
+        esac
+        if [ -z $bcolor ]
+        then
+                echo -ne "\E["$fcolor"m"$1 
+        else
+                echo -ne "\E["$fcolor";"$bcolor"m"$1  
+        fi
+        return
+}
 ######################################################################
 #   AUTHOR: Joe Negron - LOGIC Wizards ~ NYC
 #  LICENSE: BuyMe-a-Drinkware: Dual BSD or GPL (pick one)
@@ -382,7 +453,7 @@ function rheldvd(){
 			mkdir -p "/media/cdrom"
 		fi
 		cecho " > Insert RHEL/CENTOS DVD and press ENTER" yellow
-		read enter
+		read -p " > ENTER when ready "
 		mount -t iso9660 -o ro /dev/cdrom /media/cdrom > /dev/null 2>&1
 		if [ $? -eq 0 ]
 		then
@@ -687,11 +758,9 @@ function shelp(){
 
 function install_thruk(){
 	cd $TMP
-	
-	cecho "What do you want to do ? " green
-	cecho "[i]nstall or [r]emove"
+	cline " > What do you want to do ( [i]nstall or [r]emove )? : " green
 	read action
-
+	tput sgr0
 	case $(uname -i) in
 		x86_64)
 			suffix="64"
@@ -713,13 +782,13 @@ function install_thruk(){
 				groupdel $THRUKGRP > /dev/null 2>&1
 				case $CODE in
 					REDHAT)
-						chkconfig --level thruk off
-						chkconfig --del thruk
+						chkconfig --level thruk off > /dev/null 2>&1
+						chkconfig --del thruk > /dev/null 2>&1
 						rm -f /etc/httpd/conf.d/thruk.conf 
 						rm -Rf $THRUKDIR
 						;;
 					*)
-						update-rc.d -f thruk remove
+						update-rc.d -f thruk remove > /dev/null 2>&1
 						;;
 				esac
 				exit 0
@@ -799,11 +868,31 @@ function install_thruk(){
 		exit 2 
 	else
 		cecho " > Getting thruk version $THRUKVERS" green
+		lvers=$(echo $vers | awk -F\. '{print $1"."$2""}')
+		larch=$(echo $arch | sed -e "s/linux-/linux-gnu-/g")
+		
+		case $lvers in
+			5.10)
+				vers="5.10.0"
+				arch=$larch
+				;;
+			5.8)
+				vers="5.8.8"
+				;;
+			5.12)
+				vers="5.12.1"
+				;;
+			*)
+				cecho "Unsuported version" red
+				exit 2
+				;;
+		esac	
+		cecho " > Arch is $arch, vers is $vers : downloading Thruk-$THRUKVERS-$arch-$vers.tar.gz" green
 		wget http://www.thruk.org/files/Thruk-$THRUKVERS-$arch-$vers.tar.gz > /dev/null 2>&1
+
 		if [ $? -ne 0 ]
 		then
-			cecho " > Error while getting thruk package version $THRUKVERS" red
-			exit 2
+			cecho " > Error while getting Thruk-$THRUKVERS-$arch-$vers.tar.gz" red 
 		fi
 		cecho " > Extract thruk archive" green
 		tar zxvf Thruk-$THRUKVERS-$arch-$vers.tar.gz > /dev/null 2>&1
@@ -854,9 +943,15 @@ function install_thruk(){
 		sed -i "s/# Short-Description:\(.*\)/# Short-Description: &\n#Description: &/" /etc/init.d/thruk 
 		foo=$(enable)
 
+		# create htpasswd.users
+		cecho " > Deploy htpasswd.users file" green
+		cp $myscripts/addons/thruk/htpasswd.users $THRUKDIR/htpasswd.users
+
 
 		cecho " > Fix permissions" green
-		chown -R $THRUKUSER:$THRUKGRP $THRUKDIR
+		chmod -R g+rx $THRUKDIR
+		chown -R $THRUKUSER:$WWWGROUP $THRUKDIR
+		chown $WWWUSER:$WWWGROUP $THRUKDIR/htpasswd.users
 		
 	fi
 	mcadre "mcline" green
