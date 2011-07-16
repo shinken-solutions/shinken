@@ -5,13 +5,14 @@
 You can contact me at dguenault at monitoring-fr dot org if you find a bug
 or you can write an issue in the github interface
 
-==== get shinken  ====
+==== Minimal requirements ====
 
+For RedHat/CentOs you will need redhat-lsb 
 
 ==== Usage ====
 
 This is a really simple script allowing to install a fully fonctionnal shinken in seconds !
-Curently only tested with Ubuntu/Debian and RHEL/CentOS 5 distros. RHEL 6 will be integrated soon
+Curently only tested with Ubuntu/Debian and RHEL/CentOS 5/6 distros. 
 
 Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c 
 	-k	Kill shinken

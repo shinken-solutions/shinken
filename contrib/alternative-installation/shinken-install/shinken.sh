@@ -147,13 +147,43 @@ function check_distro(){
 		exit 2
 	fi
 
-	if [ -z $CODE ]
+	if [ -z "$CODE" ]
 	then
-		cecho " > No compatible distribution found" red
+		cecho " > $DIST is not suported" red
 		exit 2
-	else
-		cecho " > Found $DIST $VERS" yellow 
 	fi
+
+	versionok=0
+	distrook=0
+
+	for d in $DISTROS
+	do
+		distro=$(echo $d | awk -F: '{print $1}')
+		version=$(echo $d | awk -F: '{print $2}')
+		if [ "$CODE" = "$distro" ]
+		then
+			if [ "$version" = "" ]
+			then
+				cecho " > Version checking for $DIST is not needed" green
+				versionok=1
+			else
+				if [ "$VERS" = "$version" ]
+				then
+					versionok=1
+				else
+					versionok=0
+				fi		
+			fi
+		fi
+	done
+
+	if [ $versionok -ne 1 ]
+	then	
+		cecho " > $DIST $VERS is not supported" red
+		exit 2
+	fi
+
+	cecho " > Found $DIST $VERS" yellow 
 }
 
 function remove(){
@@ -534,24 +564,37 @@ function prerequisites(){
 	# distro prereq
 	case $CODE in
 		REDHAT)
-			PACKAGES=$YUMPKGS
-			QUERY="rpm -q "
-			cd $TMP
-			$QUERY $RPMFORGENAME > /dev/null 2>&1
-			if [ $? -ne 0 ]
-			then
-				cecho " > Installing $RPMFORGEPKG" yellow
-				wget $RPMFORGE > /dev/null 2>&1 
-				if [ $? -ne 0 ]
-				then
-					cecho " > Error while trying to download rpm forge repositories" red 
+			case $VERS in
+				5)
+					PACKAGES=$YUMPKGS
+					QUERY="rpm -q "
+					cd $TMP
+					$QUERY $RPMFORGENAME > /dev/null 2>&1
+					if [ $? -ne 0 ]
+					then
+						cecho " > Installing $RPMFORGEPKG" yellow
+						wget $RPMFORGE > /dev/null 2>&1 
+						if [ $? -ne 0 ]
+						then
+							cecho " > Error while trying to download rpm forge repositories" red 
+							exit 2
+						fi
+						rpm -Uvh ./$RPMFORGEPKG > /dev/null 2>&1
+					else
+						cecho " > $RPMFORGEPKG allready installed" green 
+					fi
+					;;
+				6)
+					PACKAGES=$YUMPKGS
+					QUERY="rpm -q "
+					;;
+				*)
+					cecho " > Unsupported RedHat/CentOs version" red
 					exit 2
-				fi
-				rpm -Uvh ./$RPMFORGEPKG > /dev/null 2>&1
-			else
-				cecho " > $RPMFORGEPKG allready installed" green 
-			fi
+					;;
+			esac
 			;;
+
 		DEBIAN)
 			PACKAGES=$APTPKGS
 			QUERY="dpkg -l "
@@ -576,7 +619,15 @@ function prerequisites(){
 	# python prereq
 	if [ "$CODE" = "REDHAT" ]
 	then
-		for p in $PYLIBSRHEL
+		case $VERS in
+			5)
+				PYLIBS=$PYLIBSRHEL
+				;;
+			6)
+				PYLIBS=$PYLIBSRHEL6
+				;;
+		esac
+		for p in $PYLIBS
 		do
 			module=$(echo $p | awk -F: '{print $1'})
 			import=$(echo $p | awk -F: '{print $2'})
