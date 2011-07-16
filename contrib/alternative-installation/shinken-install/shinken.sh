@@ -1,10 +1,9 @@
-#!/bin/bash 
+#!/bin/bash  
 
 # environnement
-myscripts=$(dirname $0)
-cd $myscripts
-myscripts=$(pwd)
-. ./shinken.conf
+myscripts=$(readlink -f $(dirname $0))
+src=$(readlink -f "$myscripts/../../..")
+. $myscripts/shinken.conf
 
 function trap_handler()
 {
@@ -164,22 +163,23 @@ function remove(){
 	
 	if [ -d "$TARGET" ]
 	then 
-		rm -Rf $TARGET 
+		cecho " > removing $TARGET" green
+		rm -Rf $TARGET
 	fi
 	if [ -h "/etc/default/shinken" ]
 	then 
+		cecho " > removing defaults" green
 		rm -Rf /etc/default/shinken 
 	fi
 	if [ -f "/etc/init.d/shinken" ]
         then
+		cecho " > Removing startup scripts" green
                 case $CODE in
                         REDHAT)
-				cecho " > Removing startup script" green
                                 chkconfig shinken off
                                 chkconfig --del shinken
                                 ;;
                         DEBIAN)
-				cecho " > Removing startup script" green
                                 update-rc.d -f shinken remove > /dev/null 2>&1
                                 ;;
                 esac    
@@ -214,7 +214,6 @@ function skill(){
 	/etc/init.d/shinken stop > /dev/null 2>&1
 	#cecho "Killing shinken" green
 	pc=$(ps -aef | grep "$TARGET" | grep -v "grep" | wc -l )
-	cecho " > $pc proc founds" green
 	if [ $pc -ne 0 ]
 	then	
 		OLDIFS=$IFS
@@ -229,7 +228,6 @@ function skill(){
 	fi
 	rm -Rf /tmp/bad_start*
 	rm -Rf $TARGET/var/*.pid
-	return 0
 }
 
 function get_from_git(){
@@ -244,6 +242,7 @@ function get_from_git(){
 	cd shinken
 	cecho " > Switching to version $VERSION" green
 	git checkout $VERSION > /dev/null 2>&1
+	export src=$TMP/shinken
 	# clean up .git folder
 	rm -Rf .git
 }
@@ -254,14 +253,14 @@ function setdirectives(){
 	fic=$2
 	mpath=$3
 	
-	#cecho ">>>>going to $mpath" green
+	cecho "    > going to $mpath" green
 	cd $mpath
 
 	for pair in $directives
 	do
 		directive=$(echo $pair | awk -F= '{print $1}')
 		value=$(echo $pair | awk -F= '{print $2}')
-		#cecho ">>>>setting $directive to $value in $fic" green
+		cecho "       > setting $directive to $value in $fic" green
 		sed -i 's#^\# \?'$directive'=\(.*\)$#'$directive'='$value'#g' $mpath/etc/$(basename $fic)
 	done
 }
@@ -270,19 +269,21 @@ function relocate(){
 	trap 'trap_handler ${LINENO} $? relocate' ERR
 	cadre "Relocate source tree to $TARGET" green
 	# relocate source tree
-	for fic in $(find . | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
+	cd $TARGET
+	for fic in $(find . | grep -v "shinken-install" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
 	do 
 		cecho " > Processing $fic" green
 		cp $fic $fic.orig 
-		sed -i 's#/usr/local/shinken#'$TARGET'#g' $fic 
+		sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
 	done
 	# set some directives 
+	cadre "Set some configuration directives" green
 	directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP"
-	for fic in ./etc/*.ini; 
+	for fic in $(ls -1 etc/*.ini)
 	do 
 		cecho " > Processing $fic" green;
-		setdirectives "$directives" $fic $TMP/shinken
-		cp -f $fic $TARGET/etc/; 
+		setdirectives "$directives" $fic $TARGET
+		#cp -f $fic $TARGET/etc/; 
 	done
 	# relocate default file
 	cd $TARGET/bin/default
@@ -326,8 +327,7 @@ function sinstall(){
 	check_exist
 	prerequisites
 	create_user
-	get_from_git
-	cp -Rf $TMP/shinken $TARGET
+	cp -Rf $src $TARGET
 	relocate
 	ln -s $TARGET/bin/default/shinken /etc/default/shinken
 	cp $TARGET/bin/init.d/shinken* /etc/init.d/
@@ -442,7 +442,13 @@ function supdate(){
 	skill
 	backup
 	remove
-	sinstall
+	get_from_git
+	cp -Rf $src $TARGET
+	relocate
+	ln -s $TARGET/bin/default/shinken /etc/default/shinken
+	cp $TARGET/bin/init.d/shinken* /etc/init.d/
+	mkdir -p $TARGET/var/archives
+	fix
 	restore $DATE
 }
 
@@ -814,7 +820,7 @@ You can access thruk at the followinf url : http://localhost:3000" green
 function usage(){
 echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a 
 	-k	Kill shinken
-	-i	Install shinkeni
+	-i	Install shinken 
 	-d 	Remove shinken
 	-u	Update an existing shinken installation
 	-v	purge livestatus sqlite db and shrink sqlite db
@@ -867,6 +873,7 @@ while getopts "kidubcr:lzhsa:v" opt; do
                         exit 0
                         ;;
                 i)
+			FROMSRC=1
                        	sinstall 
                         exit 0
                         ;;
@@ -901,5 +908,6 @@ while getopts "kidubcr:lzhsa:v" opt; do
         esac
 done
 usage
+echo $src
 exit 0
 
