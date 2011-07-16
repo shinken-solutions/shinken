@@ -372,20 +372,57 @@ class LSAsynConnection(asyncore.dispatcher):
 
 
 
+class LSConnexionPool(object):
+    def __init__(self, con_addrs):
+        self.connexions = []
+        for s in con_addrs:
+            if s.startswith('tcp:'):
+                s = s[4:]
+                addr = s.split(':')[0]
+                port = int(s.split(':')[1])
+                con = LSAsynConnection(addr=addr, port=port)
+            elif s.startswith('unix:'):
+                s = s[5:]
+                path = s
+                con = LSAsynConnection(path=path)
+            else:
+                print "Connexion type", con, "not managed"
+
+            self.connexions.append(con)
+
+
+    def launch_raw_query(self, query):
+        for c in self.connexions:
+            q = Query(query)
+            c.stack_query(q)
+        still_working = [c for c in self.connexions if c.alive and not c.is_finished()]
+        while len(still_working) > 0:
+            asyncore.poll(timeout=0.001)
+            still_working = [c for c in self.connexions if c.alive and not c.is_finished()]
+        # Now get all results
+        res = []
+        for c in self.connexions:
+            q = c.get_returns().pop()
+            r = q.result
+            print r
+            res.extend(r)
+        return res
+
+
 if __name__ == "__main__":
     c = LSAsynConnection()
     import time
     t = time.time()
 
     q = Query('GET hosts\nColumns name\n')
-    c.stack_query(q)
-    q2 = Query('GET hosts\nColumns name\n')
-    c.stack_query(q)
+    #c.stack_query(q)
+    #q2 = Query('GET hosts\nColumns name\n')
+    #c.stack_query(q)
 
-    print "Start to wait"
-    c.wait_returns()
-    print "End to wait"
-    print "Results", c.get_returns()
+    #print "Start to wait"
+    #c.wait_returns()
+    #print "End to wait"
+    #print "Results", c.get_returns()
     #while time.time() - t < 1:
     #    asyncore.poll()
 
@@ -395,6 +432,10 @@ if __name__ == "__main__":
     #print c.launch_query('GET hosts\nColumns name')
     #print c.__dict__
 
-    print "Launch raw query"
-    r = c.launch_raw_query('GET hosts\nColumns name\n')
+    #print "Launch raw query"
+    #r = c.launch_raw_query('GET hosts\nColumns name\n')
+    #print "Result", r
+
+    cp = LSConnexionPool(['tcp:localhost:50000', 'tcp:localhost:50000'])
+    r = cp.launch_raw_query('GET hosts\nColumns name\n')
     print "Result", r
