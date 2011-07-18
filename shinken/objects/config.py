@@ -461,7 +461,7 @@ class Config(Item):
             if line.startswith("# IMPORTEDFROM="):
                 filefrom = line.split('=')[1]
                 continue
-            line = line.split(';')[0]
+            line = line.split(';')[0].strip()
             #A backslash means, there is more to come
             if re.search("\\\s*$", line):
                 continuation_line = True
