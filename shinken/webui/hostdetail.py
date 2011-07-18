@@ -1,6 +1,7 @@
 
-from bottle import route, view
+from shinken.webui.bottle import route, view
 
+print "Loaded hostdetail page"
 
 # Main impacts view
 @route('/host')

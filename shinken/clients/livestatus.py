@@ -402,10 +402,11 @@ class LSConnexionPool(object):
         # Now get all results
         res = []
         for c in self.connexions:
-            q = c.get_returns().pop()
-            r = q.result
-            print r
-            res.extend(r)
+            if len(c.get_returns()) > 0:
+                q = c.get_returns().pop()
+                r = q.result
+                print r
+                res.extend(r)
         return res
 
 

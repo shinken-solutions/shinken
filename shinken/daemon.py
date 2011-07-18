@@ -422,11 +422,12 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         del self.debug_output
 
 
-    def do_daemon_init_and_start(self):
+    def do_daemon_init_and_start(self, use_pyro=False):
         self.change_to_user_group()
         self.change_to_workdir()
         self.check_parallel_run()
-        self.setup_pyro_daemon()
+        if use_pyro:
+            self.setup_pyro_daemon()
         # Then start to log all in the local file if asked so
         self.register_local_log()
         if self.is_daemon:

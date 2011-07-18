@@ -1,5 +1,5 @@
 
-from bottle import route, view
+from shinken.webui.bottle import route, view
 
 
 # Main impacts view

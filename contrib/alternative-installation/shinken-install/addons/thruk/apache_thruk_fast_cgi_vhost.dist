@@ -11,7 +11,7 @@ Alias /thruk/ THRUKDIR/root/thruk/
 	<Location "/thruk">
 	AuthName "Monitoring Access"
 	AuthType Basic
-	AuthUserFile /home/thruk/Thruk/htpasswd.users
+	AuthUserFile THRUKDIR/htpasswd.users
 	Order Allow,Deny
 	Allow from all
 	require valid-user

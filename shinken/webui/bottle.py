@@ -2644,7 +2644,7 @@ _HTTP_STATUS_LINES = dict((k, '%d %s'%(k,v)) for (k,v) in HTTP_CODES.iteritems()
 #: The default template used for error pages. Override with @error()
 ERROR_PAGE_TEMPLATE = """
 %try:
-    %from bottle import DEBUG, HTTP_CODES, request, touni
+    %from shinken.webui.bottle import DEBUG, HTTP_CODES, request, touni
     %status_name = HTTP_CODES.get(e.status, 'Unknown').title()
     <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
     <html>

@@ -1,10 +1,9 @@
-#!/bin/bash 
+#!/bin/bash  
 
 # environnement
-myscripts=$(dirname $0)
-cd $myscripts
-myscripts=$(pwd)
-. ./shinken.conf
+myscripts=$(readlink -f $(dirname $0))
+src=$(readlink -f "$myscripts/../../..")
+. $myscripts/shinken.conf
 
 function trap_handler()
 {
@@ -96,6 +95,77 @@ cecho ()
         return
 }
 
+cline ()                    
+{
+
+        # Argument $1 = message
+        # Argument $2 = foreground color
+        # Argument $3 = background color
+
+        case "$2" in
+                "black")
+                        fcolor='30'
+                        ;;
+                "red")
+                        fcolor='31'
+                        ;;
+                "green")
+                        fcolor='32'
+                        ;;
+                "yellow")
+                        fcolor='33'
+                        ;;
+                "blue")
+                        fcolor='34'
+                        ;;
+                "magenta")
+                        fcolor='35'
+                        ;;
+                "cyan")
+                        fcolor='36'
+                        ;;
+                "white")
+                        fcolor='37'
+                        ;;
+                *)
+                        fcolor=''
+        esac
+        case "$3" in
+                "black")
+                        bcolor='40'
+                        ;;
+               "red")
+                        bcolor='41'
+                        ;;
+                "green")
+                        bcolor='42'
+                        ;;
+                "yellow")
+                        bcolor='43'
+                        ;;
+                "blue")
+                        bcolor='44'
+                        ;;
+                "magenta")
+                        bcolor='45'
+                        ;;
+                "cyan")
+                        bcolor='46'
+                        ;;
+                "white")
+                        bcolor='47'
+                        ;;
+                *)
+                        bcolor=""
+        esac
+        if [ -z $bcolor ]
+        then
+                echo -ne "\E["$fcolor"m"$1 
+        else
+                echo -ne "\E["$fcolor";"$bcolor"m"$1  
+        fi
+        return
+}
 ######################################################################
 #   AUTHOR: Joe Negron - LOGIC Wizards ~ NYC
 #  LICENSE: BuyMe-a-Drinkware: Dual BSD or GPL (pick one)
@@ -148,13 +218,43 @@ function check_distro(){
 		exit 2
 	fi
 
-	if [ -z $CODE ]
+	if [ -z "$CODE" ]
 	then
-		cecho " > No compatible distribution found" red
+		cecho " > $DIST is not suported" red
 		exit 2
-	else
-		cecho " > Found $DIST $VERS" yellow 
 	fi
+
+	versionok=0
+	distrook=0
+
+	for d in $DISTROS
+	do
+		distro=$(echo $d | awk -F: '{print $1}')
+		version=$(echo $d | awk -F: '{print $2}')
+		if [ "$CODE" = "$distro" ]
+		then
+			if [ "$version" = "" ]
+			then
+				cecho " > Version checking for $DIST is not needed" green
+				versionok=1
+			else
+				if [ "$VERS" = "$version" ]
+				then
+					versionok=1
+				else
+					versionok=0
+				fi		
+			fi
+		fi
+	done
+
+	if [ $versionok -ne 1 ]
+	then	
+		cecho " > $DIST $VERS is not supported" red
+		exit 2
+	fi
+
+	cecho " > Found $DIST $VERS" yellow 
 }
 
 function remove(){
@@ -164,22 +264,23 @@ function remove(){
 	
 	if [ -d "$TARGET" ]
 	then 
-		rm -Rf $TARGET 
+		cecho " > removing $TARGET" green
+		rm -Rf $TARGET
 	fi
 	if [ -h "/etc/default/shinken" ]
 	then 
+		cecho " > removing defaults" green
 		rm -Rf /etc/default/shinken 
 	fi
 	if [ -f "/etc/init.d/shinken" ]
         then
+		cecho " > Removing startup scripts" green
                 case $CODE in
                         REDHAT)
-				cecho " > Removing startup script" green
                                 chkconfig shinken off
                                 chkconfig --del shinken
                                 ;;
                         DEBIAN)
-				cecho " > Removing startup script" green
                                 update-rc.d -f shinken remove > /dev/null 2>&1
                                 ;;
                 esac    
@@ -214,7 +315,6 @@ function skill(){
 	/etc/init.d/shinken stop > /dev/null 2>&1
 	#cecho "Killing shinken" green
 	pc=$(ps -aef | grep "$TARGET" | grep -v "grep" | wc -l )
-	cecho " > $pc proc founds" green
 	if [ $pc -ne 0 ]
 	then	
 		OLDIFS=$IFS
@@ -229,7 +329,6 @@ function skill(){
 	fi
 	rm -Rf /tmp/bad_start*
 	rm -Rf $TARGET/var/*.pid
-	return 0
 }
 
 function get_from_git(){
@@ -244,6 +343,7 @@ function get_from_git(){
 	cd shinken
 	cecho " > Switching to version $VERSION" green
 	git checkout $VERSION > /dev/null 2>&1
+	export src=$TMP/shinken
 	# clean up .git folder
 	rm -Rf .git
 }
@@ -254,14 +354,14 @@ function setdirectives(){
 	fic=$2
 	mpath=$3
 	
-	#cecho ">>>>going to $mpath" green
+	cecho "    > going to $mpath" green
 	cd $mpath
 
 	for pair in $directives
 	do
 		directive=$(echo $pair | awk -F= '{print $1}')
 		value=$(echo $pair | awk -F= '{print $2}')
-		#cecho ">>>>setting $directive to $value in $fic" green
+		cecho "       > setting $directive to $value in $fic" green
 		sed -i 's#^\# \?'$directive'=\(.*\)$#'$directive'='$value'#g' $mpath/etc/$(basename $fic)
 	done
 }
@@ -270,19 +370,21 @@ function relocate(){
 	trap 'trap_handler ${LINENO} $? relocate' ERR
 	cadre "Relocate source tree to $TARGET" green
 	# relocate source tree
-	for fic in $(find . | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
+	cd $TARGET
+	for fic in $(find . | grep -v "shinken-install" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
 	do 
 		cecho " > Processing $fic" green
 		cp $fic $fic.orig 
-		sed -i 's#/usr/local/shinken#'$TARGET'#g' $fic 
+		sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
 	done
 	# set some directives 
+	cadre "Set some configuration directives" green
 	directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP"
-	for fic in ./etc/*.ini; 
+	for fic in $(ls -1 etc/*.ini)
 	do 
 		cecho " > Processing $fic" green;
-		setdirectives "$directives" $fic $TMP/shinken
-		cp -f $fic $TARGET/etc/; 
+		setdirectives "$directives" $fic $TARGET
+		#cp -f $fic $TARGET/etc/; 
 	done
 	# relocate default file
 	cd $TARGET/bin/default
@@ -326,8 +428,7 @@ function sinstall(){
 	check_exist
 	prerequisites
 	create_user
-	get_from_git
-	cp -Rf $TMP/shinken $TARGET
+	cp -Rf $src $TARGET
 	relocate
 	ln -s $TARGET/bin/default/shinken /etc/default/shinken
 	cp $TARGET/bin/init.d/shinken* /etc/init.d/
@@ -352,7 +453,7 @@ function rheldvd(){
 			mkdir -p "/media/cdrom"
 		fi
 		cecho " > Insert RHEL/CENTOS DVD and press ENTER" yellow
-		read enter
+		read -p " > ENTER when ready "
 		mount -t iso9660 -o ro /dev/cdrom /media/cdrom > /dev/null 2>&1
 		if [ $? -eq 0 ]
 		then
@@ -442,7 +543,13 @@ function supdate(){
 	skill
 	backup
 	remove
-	sinstall
+	get_from_git
+	cp -Rf $src $TARGET
+	relocate
+	ln -s $TARGET/bin/default/shinken /etc/default/shinken
+	cp $TARGET/bin/init.d/shinken* /etc/init.d/
+	mkdir -p $TARGET/var/archives
+	fix
 	restore $DATE
 }
 
@@ -528,24 +635,37 @@ function prerequisites(){
 	# distro prereq
 	case $CODE in
 		REDHAT)
-			PACKAGES=$YUMPKGS
-			QUERY="rpm -q "
-			cd $TMP
-			$QUERY $RPMFORGENAME > /dev/null 2>&1
-			if [ $? -ne 0 ]
-			then
-				cecho " > Installing $RPMFORGEPKG" yellow
-				wget $RPMFORGE > /dev/null 2>&1 
-				if [ $? -ne 0 ]
-				then
-					cecho " > Error while trying to download rpm forge repositories" red 
+			case $VERS in
+				5)
+					PACKAGES=$YUMPKGS
+					QUERY="rpm -q "
+					cd $TMP
+					$QUERY $RPMFORGENAME > /dev/null 2>&1
+					if [ $? -ne 0 ]
+					then
+						cecho " > Installing $RPMFORGEPKG" yellow
+						wget $RPMFORGE > /dev/null 2>&1 
+						if [ $? -ne 0 ]
+						then
+							cecho " > Error while trying to download rpm forge repositories" red 
+							exit 2
+						fi
+						rpm -Uvh ./$RPMFORGEPKG > /dev/null 2>&1
+					else
+						cecho " > $RPMFORGEPKG allready installed" green 
+					fi
+					;;
+				6)
+					PACKAGES=$YUMPKGS
+					QUERY="rpm -q "
+					;;
+				*)
+					cecho " > Unsupported RedHat/CentOs version" red
 					exit 2
-				fi
-				rpm -Uvh ./$RPMFORGEPKG > /dev/null 2>&1
-			else
-				cecho " > $RPMFORGEPKG allready installed" green 
-			fi
+					;;
+			esac
 			;;
+
 		DEBIAN)
 			PACKAGES=$APTPKGS
 			QUERY="dpkg -l "
@@ -570,7 +690,15 @@ function prerequisites(){
 	# python prereq
 	if [ "$CODE" = "REDHAT" ]
 	then
-		for p in $PYLIBSRHEL
+		case $VERS in
+			5)
+				PYLIBS=$PYLIBSRHEL
+				;;
+			6)
+				PYLIBS=$PYLIBSRHEL6
+				;;
+		esac
+		for p in $PYLIBS
 		do
 			module=$(echo $p | awk -F: '{print $1'})
 			import=$(echo $p | awk -F: '{print $2'})
@@ -630,11 +758,9 @@ function shelp(){
 
 function install_thruk(){
 	cd $TMP
-	
-	cecho "What do you want to do ? " green
-	cecho "[i]nstall or [r]emove"
+	cline " > What do you want to do ( [i]nstall or [r]emove )? : " green
 	read action
-
+	tput sgr0
 	case $(uname -i) in
 		x86_64)
 			suffix="64"
@@ -656,13 +782,13 @@ function install_thruk(){
 				groupdel $THRUKGRP > /dev/null 2>&1
 				case $CODE in
 					REDHAT)
-						chkconfig --level thruk off
-						chkconfig --del thruk
+						chkconfig --level thruk off > /dev/null 2>&1
+						chkconfig --del thruk > /dev/null 2>&1
 						rm -f /etc/httpd/conf.d/thruk.conf 
 						rm -Rf $THRUKDIR
 						;;
 					*)
-						update-rc.d -f thruk remove
+						update-rc.d -f thruk remove > /dev/null 2>&1
 						;;
 				esac
 				exit 0
@@ -742,11 +868,31 @@ function install_thruk(){
 		exit 2 
 	else
 		cecho " > Getting thruk version $THRUKVERS" green
+		lvers=$(echo $vers | awk -F\. '{print $1"."$2""}')
+		larch=$(echo $arch | sed -e "s/linux-/linux-gnu-/g")
+		
+		case $lvers in
+			5.10)
+				vers="5.10.0"
+				arch=$larch
+				;;
+			5.8)
+				vers="5.8.8"
+				;;
+			5.12)
+				vers="5.12.1"
+				;;
+			*)
+				cecho "Unsuported version" red
+				exit 2
+				;;
+		esac	
+		cecho " > Arch is $arch, vers is $vers : downloading Thruk-$THRUKVERS-$arch-$vers.tar.gz" green
 		wget http://www.thruk.org/files/Thruk-$THRUKVERS-$arch-$vers.tar.gz > /dev/null 2>&1
+
 		if [ $? -ne 0 ]
 		then
-			cecho " > Error while getting thruk package version $THRUKVERS" red
-			exit 2
+			cecho " > Error while getting Thruk-$THRUKVERS-$arch-$vers.tar.gz" red 
 		fi
 		cecho " > Extract thruk archive" green
 		tar zxvf Thruk-$THRUKVERS-$arch-$vers.tar.gz > /dev/null 2>&1
@@ -797,9 +943,15 @@ function install_thruk(){
 		sed -i "s/# Short-Description:\(.*\)/# Short-Description: &\n#Description: &/" /etc/init.d/thruk 
 		foo=$(enable)
 
+		# create htpasswd.users
+		cecho " > Deploy htpasswd.users file" green
+		cp $myscripts/addons/thruk/htpasswd.users $THRUKDIR/htpasswd.users
+
 
 		cecho " > Fix permissions" green
-		chown -R $THRUKUSER:$THRUKGRP $THRUKDIR
+		chmod -R g+rx $THRUKDIR
+		chown -R $THRUKUSER:$WWWGROUP $THRUKDIR
+		chown $WWWUSER:$WWWGROUP $THRUKDIR/htpasswd.users
 		
 	fi
 	mcadre "mcline" green
@@ -814,7 +966,7 @@ You can access thruk at the followinf url : http://localhost:3000" green
 function usage(){
 echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a 
 	-k	Kill shinken
-	-i	Install shinkeni
+	-i	Install shinken 
 	-d 	Remove shinken
 	-u	Update an existing shinken installation
 	-v	purge livestatus sqlite db and shrink sqlite db
@@ -867,6 +1019,7 @@ while getopts "kidubcr:lzhsa:v" opt; do
                         exit 0
                         ;;
                 i)
+			FROMSRC=1
                        	sinstall 
                         exit 0
                         ;;
@@ -901,5 +1054,6 @@ while getopts "kidubcr:lzhsa:v" opt; do
         esac
 done
 usage
+echo $src
 exit 0
 

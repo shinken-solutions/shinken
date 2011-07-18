@@ -251,6 +251,12 @@ class Config(Item):
         ## Discovery part
         'strip_idname_fqdn' :    BoolProp(default='1'),
         'runners_timeout'   :    IntegerProp(default='3600'),
+
+
+        ## WEBUI part
+        'webui_lock_file'   :    StringProp(default='webui.pid'),
+        'webui_port'        :    IntegerProp(default='8080'),
+        'webui_host'        :    StringProp(default='0.0.0.0'),
    }
 
     macros = {
@@ -461,7 +467,7 @@ class Config(Item):
             if line.startswith("# IMPORTEDFROM="):
                 filefrom = line.split('=')[1]
                 continue
-            line = line.split(';')[0]
+            line = line.split(';')[0].strip()
             #A backslash means, there is more to come
             if re.search("\\\s*$", line):
                 continuation_line = True
