@@ -251,6 +251,12 @@ class Config(Item):
         ## Discovery part
         'strip_idname_fqdn' :    BoolProp(default='1'),
         'runners_timeout'   :    IntegerProp(default='3600'),
+
+
+        ## WEBUI part
+        'webui_lock_file'   :    StringProp(default='webui.pid'),
+        'webui_port'        :    IntegerProp(default='8080'),
+        'webui_host'        :    StringProp(default='0.0.0.0'),
    }
 
     macros = {

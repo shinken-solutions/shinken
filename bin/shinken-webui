@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+#Copyright (C) 2009-2011 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+#This file is part of Shinken.
+#
+#Shinken is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#Shinken is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+
+"""
+This is the class of the WebUI interface. It will read an optionnal configuration file,
+and launch a Bottle.py application, the Shinken web interface.
+"""
+
+
+import os
+import sys
+import optparse
+
+
+# Try to import all Shinken Libs :)
+try:
+    from shinken.bin import VERSION
+    import shinken
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+
+
+from shinken.bin import VERSION
+from shinken.daemons.webuidaemon import Webui
+
+
+parser = optparse.OptionParser(
+    "%prog [options] -c configfile [-c additional_config_file]",
+    version="%prog : " + VERSION)
+parser.add_option('-c', '--config', action='append',
+                  dest="config_files", metavar="CONFIG-FILE",
+                  help=('Config file (your webui.cfg). Multiple -c can be '
+                        'used, it will be like if all files was just one'))
+parser.add_option('-d', '--daemon', action='store_true',
+                  dest="is_daemon",
+                  help="Run in daemon mode")
+parser.add_option('-r', '--replace', action='store_true',
+                  dest="do_replace",
+                  help="Replace previous running arbiter")
+parser.add_option('--debugfile', dest='debug_file',
+                  help=("Debug file. Default: not used "
+                        "(why debug a bug free program? :) )"))
+
+opts, args = parser.parse_args()
+
+
+if not opts.config_files:
+    parser.error("Requires at least one config file (option -c/--config")
+
+# Protect for windows multiprocessing that will RELAUNCH all
+if __name__ == '__main__':
+    daemon = Webui(debug=opts.debug_file is not None, **opts.__dict__)
+    daemon.main()
+# For perf tuning :
+#import cProfile
+#cProfile.run('''daemon.main()''', '/tmp/arbiter.profile')
