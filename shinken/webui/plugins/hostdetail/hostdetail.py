@@ -1,16 +1,12 @@
-#from shinken.webui.bottle import route, view
 
-print "Loaded hostdetail page"
-
-
-
+### Will be populated by the UI with it's own value
+app = None
 
 # Main impacts view
 #@route('/host')
 #@view('hostdetail')
 def show_host():
     return get_data()
-
 
 
 
@@ -39,10 +35,8 @@ def get_data():
     problems[3] = {'name' : 'Mssql@db-server is Down since 93294 with output connexion failed'}
 
     
-    
-
     return {'impacts' : impacts, 'problems' : problems}
 
 
 
-pages = {show_host : { 'routes' : ['/host'], 'view' : 'hostdetail'}}
+pages = {show_host : { 'routes' : ['/host'], 'view' : 'hostdetail', 'static' : True}}

@@ -43,11 +43,6 @@ bottle.TEMPLATE_PATH.append(os.path.join(bottle_dir, 'views'))
 bottle.TEMPLATE_PATH.append(bottle_dir)
 
 
-# Route static files css files
-@route('/static/:path#.+#')
-def server_static(path):
-    #print "Getting static files from", os.path.join(my_dir, 'htdocs'), path
-    return static_file(path, root=os.path.join(bottle_dir, 'htdocs'))
 
 # hello/bla will use the hello_template.tpl template
 @route('/hello/:name')
@@ -239,21 +234,10 @@ class Webui(Daemon):
             logger.log('ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
             sys.exit(2)
 
-        """from shinken.webui.plugins.impacts import index
-        impact_dir = os.path.abspath(os.path.dirname(index.__file__))
-        sys.path.append(impact_dir)
-        bottle.TEMPLATE_PATH.append(os.path.join(impact_dir, 'views'))
-        print "NEw teplate path", bottle.TEMPLATE_PATH"""
-        
-        """from shinken.webui.plugins.hostdetail import index
-        host_dir = os.path.abspath(os.path.dirname(index.__file__))
-        sys.path.append(host_dir)
-        bottle.TEMPLATE_PATH.append(os.path.join(host_dir, 'views'))
-        print "NEw teplate path", bottle.TEMPLATE_PATH"""
-        
-        #self.app = bottle.Bottle()
-
         self.load_plugins()
+
+        # Declare the whole app static files AFTER the plugin ones
+        self.declare_static()
 
         print "Starting application"
         run(host=self.host, port=self.port)
@@ -288,6 +272,7 @@ class Webui(Daemon):
                 for (f, entry) in pages.items():
                     routes = entry.get('routes', None)
                     v = entry.get('view', None)
+                    static = entry.get('static', False)
 
                     # IMPORTANT : apply VIEW BEFORE route!
                     if v:
@@ -300,13 +285,36 @@ class Webui(Daemon):
                             print "link function", f, "and route", r
                             f = route(r, callback=f)
                         
+                    # Ifthe plugin declare a static entry, register it
+                    if static:
+                        #print "Declaring static entry", '/static/'+fdir+'/:path#.+#'
+                        # Route static files css files
+                        @route('/static/'+fdir+'/:path#.+#')
+                        def plugin_static(path):
+                            return static_file(path, root=os.path.join(m_dir, 'htdocs'))
+
+
                 # And we add the views dir of this plugin in our TEMPLATE
                 # PATH
                 bottle.TEMPLATE_PATH.append(os.path.join(m_dir, 'views'))
+
+                # And finally register me so the pages can get data and other
+                # useful stuff
+                m.app = self
                         
                         
             except Exception, exp:
                 logger.log("Warning in loading plugins : %s" % exp)
+
+
+
+
+    def declare_static(self):
+        # Route static files css files
+        @route('/static/:path#.+#')
+        def server_static(path):
+            #print "Getting static files from", os.path.join(my_dir, 'htdocs'), path
+            return static_file(path, root=os.path.join(bottle_dir, 'htdocs'))
 
 
 

@@ -1,5 +1,9 @@
 
 
+# Global value that will be changed by the main app
+app = None
+
+
 # Main impacts view
 #@route('/impacts')
 #@view('impacts')
@@ -40,4 +44,4 @@ def get_data():
 
 
 
-pages = {show_impacts : { 'routes' : ['/impacts'], 'view' : 'impacts'}}
+pages = {show_impacts : { 'routes' : ['/impacts'], 'view' : 'impacts', 'static' : True}  }
