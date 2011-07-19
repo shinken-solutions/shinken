@@ -29,7 +29,7 @@
 
 %# End of classic js import. Now call for specific ones
 %for p in js:
-  <script type="text/javascript" src="static/js/{{p}}"></script>
+  <script type="text/javascript" src="static/{{p}}"></script>
 %end
 
 
