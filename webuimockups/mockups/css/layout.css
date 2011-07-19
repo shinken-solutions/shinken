@@ -1,22 +1,22 @@
 /* ----------------------------------------------------------------
  *  TABLE OF CONTENT
  * ----------------------------------------------------------------
- *  + Body:					body
- *  + Header:				#header
- *  + Main container:			#main_container
- *  + Sidebar:				#left_container
- *  + Footer:				#footer
- *  + Login Footer:			#login_footer
+ *  + Body:							body
+ *  + Header:						#header
+ *  + Main container:				#main_container
+ *  + Sidebar:						#left_container
+ *  + Footer:						#footer
+ *  + Login Footer:					#login_footer
  *  + Special:
  *     - Host / Service preview:	#host_preview, #service_preview
- *     - Host header			#host_header
- *     - Host more			#host_more
+ *     - Host header				#host_header
+ *     - Host more					#host_more
  *  + Elements:
  *     - Headlines 
  *     - 
  *     - Tables				
  *  + Classes
- *     - General				 -> http://css3please.com/
+ *     - General				 	-> http://css3please.com/
  *     - Images
  *
  *  * Todo: change #left_container-> #sidebar
@@ -272,6 +272,10 @@ td.actions a {
 .border_right {
 	border-right: 1px solid #E3E3E5;
 }
+
+.prefix_custom_1 {
+	margin-left: 38.5%;
+}
 /* ----------------------------------------------------------------
  *  Classes: Images
  * ----------------------------------------------------------------*/
@@ -381,4 +385,48 @@ td.actions a {
     text-decoration: none;
     text-shadow: 1px 1px 0 #FFFFFF;
     white-space: nowrap;
-}	
+}
+
+		#controls{
+			margin-bottom: 20px
+		}
+		
+		#employee_list {
+			width:300px;
+		}
+		
+		.ms_container {
+			width:282px;
+			background-color: #F7F8F3;
+			border: 1px solid #dddddd;
+			float:left;
+			margin:5px; 
+			padding: 3px 10px 15px 10px
+		}
+		
+		.info{
+			padding-top:10px;
+			clear:both;
+		}
+		
+		.info img {
+			padding: 1px;
+			background:#FFF;
+			border:1px solid #c8c8c8;
+			float:left;
+		}
+		
+		.vitals {
+			float:right;
+			width: 200px;
+		}
+		
+		.vitals h4 {
+			font-size:16px;
+		}
+		
+		.control {
+			cursor:pointer;
+			text-align:right;
+			color:#777;
+			

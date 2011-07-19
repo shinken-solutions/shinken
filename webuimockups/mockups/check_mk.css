@@ -1898,9 +1898,9 @@ table.aggrtree td.node {
 /* The panel that will contain all problem panels*/
 .problems-panels {
     position: fixed;
-    left: 515px;
+    /*left: 515px;*/
     right: 0;
-    top: 200px;
+    top: 100px;
     width: 100%;
 }
 
@@ -1909,14 +1909,15 @@ table.aggrtree td.node {
 /* problem impact panel */
 .problems-panel {
     height: 600px; 
-    width: 550px;
+    width: 58%;
     background: white;
     position: relative;
     /* by default it's hidden*/
     left: -450px;
     top: 5px;
     z-index: 3;
-    /*max-width: 575px;
+    min-height: 960px;;
+    /*max-width: 120%;
     min-width: 600px;*/
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
@@ -1930,7 +1931,7 @@ table.aggrtree td.node {
 
 /* The whole left panel for impacts*/
 .impacts-panel {
-    width: 445px;
+    /*width: 445px;*/
     float: left;
     display: inline-block;
     border-radius: 6px;
