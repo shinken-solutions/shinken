@@ -1,12 +1,11 @@
 
-from shinken.webui.bottle import route, view
+#from shinken.webui.bottle import route, view
 
-print "Loaded hostdetail page"
 
 # Main impacts view
-@route('/host')
-@view('hostdetail')
-def show_host():
+#@route('/impacts')
+#@view('impacts')
+def show_impacts():
     return get_data()
 
 

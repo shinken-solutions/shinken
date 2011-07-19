@@ -77,6 +77,7 @@ class Webui(Daemon):
         
         self.conf = Config()
 
+        self.plugins = []
 
 
     def load_config_file(self):
@@ -238,17 +239,73 @@ class Webui(Daemon):
             logger.log('ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
             sys.exit(2)
 
-        from shinken.webui.plugins.impacts import index
+        """from shinken.webui.plugins.impacts import index
         impact_dir = os.path.abspath(os.path.dirname(index.__file__))
         sys.path.append(impact_dir)
         bottle.TEMPLATE_PATH.append(os.path.join(impact_dir, 'views'))
-        print "NEw teplate path", bottle.TEMPLATE_PATH
-        from shinken.webui import hostdetail
+        print "NEw teplate path", bottle.TEMPLATE_PATH"""
+        
+        """from shinken.webui.plugins.hostdetail import index
+        host_dir = os.path.abspath(os.path.dirname(index.__file__))
+        sys.path.append(host_dir)
+        bottle.TEMPLATE_PATH.append(os.path.join(host_dir, 'views'))
+        print "NEw teplate path", bottle.TEMPLATE_PATH"""
+        
+        #self.app = bottle.Bottle()
+
+        self.load_plugins()
 
         print "Starting application"
         run(host=self.host, port=self.port)
 
 
+
+    def load_plugins(self):
+        from shinken.webui import plugins
+        plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
+        print "Loading plugin directory : %s" % plugin_dir
+        
+        # Load plugin directories
+        plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
+                        if os.path.isdir(os.path.join(plugin_dir, fname)) ]
+
+        print "Plugin dirs", plugin_dirs
+        sys.path.append(plugin_dir)
+        # We try to import them, but we keep only the one of
+        # our type
+        for fdir in plugin_dirs:
+            print "Try to load", fdir
+            mod_path = 'shinken.webui.plugins.%s.%s' % (fdir, fdir)
+            try:
+                m = __import__(mod_path, fromlist=[mod_path])
+                m_dir = os.path.abspath(os.path.dirname(m.__file__))
+                sys.path.append(m_dir)
+
+                print "Loaded module m", m
+                print m.__file__
+                pages = m.pages
+                print "Try to laod pages", pages
+                for (f, entry) in pages.items():
+                    r = entry.get('route', None)
+                    v = entry.get('view', None)
+
+                    # IMPORTANT : apply VIEW BEFORE route!
+                    if v:
+                        print "Link function", f, "and view", v
+                        f = view(v)(f)
+
+                    # Maybe there is no route to link, so pass
+                    if r:
+                        print "link function", f, "and route", r
+                        f = route(r, callback=f)
+                        
+                # And we add the views dir of this plugin in our TEMPLATE
+                # PATH
+                bottle.TEMPLATE_PATH.append(os.path.join(m_dir, 'views'))
+                        
+                        
+            except Exception, exp:
+                logger.log("Warning in loading plugins : %s" % exp)
 
 
 
