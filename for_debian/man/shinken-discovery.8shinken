@@ -13,51 +13,52 @@
 .IX Title "shinken-discovery"
 .TH shinken
 .SH NAME
-
-shinken-discovery - Shinken discovery command.
-
-=head1 SYNOPSIS
-
-/usr/sbin/shinken-discovery  [options...]
-
-=head1 DESCRIPTION
-
-Shinken discovery command
-
-=head1 OPTIONS
-
-=over 8
-
-=item B<-o|--output>
-
-ouput file.
-
-=item B<-r>
-
-Indicate where nmap binary.
-
-=item B<-m>
-
-Indicate lan to scan.
-
-=item B<-h|--help>
-
-Print detailed help screen.
-
-=item B<--debug>
-
-Debug File. Default : no use (why debug a bug free program? :) ).
-
-Displays information about the currently installed version and exists.
-
-=head1 BUGS
-
-This command has absolutely no bugs, as I have written it. Also, as it has no bugs, there is no need for a bug tracker.
-
-=head1 AUTHORS
-
-Bshinken-poller was written by Jean Gabes <naparuba@gmail.com>. This manual page was written by David Hannequin <david.hannequin@gmail.com>.
-
-Both are released under the GNU Affero General Public License, version 3 or later.
-
-=cut
+Command - Shinken discovery command.
+.SH SYNOPSIS
+.B shinken-discovery 
+.RI [ options ] " files" ...
+.br
+.SH DESCRIPTION
+Shinken Discovery Daemon 
+.PP
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics,
+.\" respectively.
+\fBshinken-arbiter\fP can help you start your new monitoring tool with a major part of your network in.
+Until now, there are two “discovery” modules :
+standard network one, that uses the nmap tool
+VMware one, that uses the check_esx3.pl script and a vcenter installation.
+It's better to do the whole discovery in one pass, because one module can use data from the other.
+.SH OPTIONS
+These programs follow the usual GNU command line syntax, with long
+options starting with two dashes (`-').
+A summary of options is included below.
+For a complete description, see the Info files.
+.TP
+.B \-c \-\-cfg-config=/etc/shinken/discovery.cfg
+Discovery configuration file (discovery.cfg)
+.TP
+.B \-h \-\-help
+Show summary of options.
+.TP
+.B \-v \-\-version
+Show version of program.
+.TP
+.B \-o \-\-dir-output=/tmp
+Directory output for results.
+.TP
+.B \-w \-\-overright
+Allow overwithing xisting file (disabled by default)
+.TP
+.B \-r \-\-runners 
+List of runners you allow to run, (like nmap,vsphere)
+.TP
+.B \-m \-\-macros 
+List of macros (like NMAPTARGETS=192.168.0.0/24).
+Should be the last argument
+.TP
+.SH AUTHOR
+shinken-discovery was written by Jean Gabes <naparuba@gmail.com>
+.PP
+This manual page was written by David Hannequin <david.hannequin@gmail.com>,
+for the Debian project (and may be used by others).
