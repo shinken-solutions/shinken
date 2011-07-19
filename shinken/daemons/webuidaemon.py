@@ -286,7 +286,7 @@ class Webui(Daemon):
                 pages = m.pages
                 print "Try to laod pages", pages
                 for (f, entry) in pages.items():
-                    r = entry.get('route', None)
+                    routes = entry.get('routes', None)
                     v = entry.get('view', None)
 
                     # IMPORTANT : apply VIEW BEFORE route!
@@ -295,9 +295,10 @@ class Webui(Daemon):
                         f = view(v)(f)
 
                     # Maybe there is no route to link, so pass
-                    if r:
-                        print "link function", f, "and route", r
-                        f = route(r, callback=f)
+                    if routes:
+                        for r in routes:
+                            print "link function", f, "and route", r
+                            f = route(r, callback=f)
                         
                 # And we add the views dir of this plugin in our TEMPLATE
                 # PATH

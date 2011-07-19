@@ -1,6 +1,4 @@
 
-#from shinken.webui.bottle import route, view
-
 
 # Main impacts view
 #@route('/impacts')
@@ -39,3 +37,7 @@ def get_data():
     
 
     return {'impacts' : impacts, 'problems' : problems}
+
+
+
+pages = {show_impacts : { 'routes' : ['/impacts'], 'view' : 'impacts'}}

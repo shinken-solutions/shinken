@@ -45,4 +45,4 @@ def get_data():
 
 
 
-pages = {show_host : { 'route' : '/host', 'view' : 'hostdetail'}}
+pages = {show_host : { 'routes' : ['/host'], 'view' : 'hostdetail'}}
