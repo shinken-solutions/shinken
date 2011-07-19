@@ -24,6 +24,7 @@ import sys
 import os
 import time
 import traceback
+import copy
 
 from shinken.objects import Config
 from shinken.daemon import Daemon
@@ -287,11 +288,20 @@ class Webui(Daemon):
                         
                     # Ifthe plugin declare a static entry, register it
                     if static:
-                        #print "Declaring static entry", '/static/'+fdir+'/:path#.+#'
-                        # Route static files css files
-                        @route('/static/'+fdir+'/:path#.+#')
-                        def plugin_static(path):
-                            return static_file(path, root=os.path.join(m_dir, 'htdocs'))
+                        self.add_static(fdir, m_dir)
+                        #static_route = '/static/'+fdir+'/:path#.+#'
+                        #print "Declaring static entry", static_route, lamb
+                        #f = route(static_route, callback=lamb)
+                        #def plugin_static(path):
+                        #    print "Addr f", plugin_static, plugin_static.entry
+                        #    m_dir = plugin_static.m_dir
+                        #    print "Get a plugin static file %s from" % path, os.path.join(m_dir, 'htdocs')
+                        #    return static_file(path, root=os.path.join(m_dir, 'htdocs'))
+                        #g = copy.deepcopy(plugin_static)
+                        #print "Addr plugin_static", plugin_static, g, static_route
+                        #g.m_dir = m_dir
+                        #g.entry = static_route
+                        #route(static_route, callback=g)
 
 
                 # And we add the views dir of this plugin in our TEMPLATE
@@ -305,6 +315,22 @@ class Webui(Daemon):
                         
             except Exception, exp:
                 logger.log("Warning in loading plugins : %s" % exp)
+
+
+    def add_static(self, fdir, m_dir):
+        static_route = '/static/'+fdir+'/:path#.+#'
+        #print "Declaring static entry", static_route, lamb
+        #f = route(static_route, callback=lamb)
+        def plugin_static(path):
+            print "Addr f", plugin_static, plugin_static.entry
+            m_dir = plugin_static.m_dir
+            print "Get a plugin static file %s from" % path, os.path.join(m_dir, 'htdocs')
+            return static_file(path, root=os.path.join(m_dir, 'htdocs'))
+        g = copy.deepcopy(plugin_static)
+        print "Addr plugin_static", plugin_static, g, static_route
+        g.m_dir = m_dir
+        g.entry = g
+        route(static_route, callback=g)
 
 
 

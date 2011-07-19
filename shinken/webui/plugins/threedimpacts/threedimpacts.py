@@ -5,7 +5,7 @@ app = None
 # Main impacts view
 #@route('/host')
 #@view('hostdetail')
-def show_host():
+def show_3dimpacts():
     return get_data()
 
 
@@ -39,4 +39,4 @@ def get_data():
 
 
 
-pages = {show_host : { 'routes' : ['/host'], 'view' : 'hostdetail', 'static' : True}}
+pages = {show_3dimpacts : { 'routes' : ['/3dimpacts'], 'view' : 'threedimpacts', 'static' : True}}
