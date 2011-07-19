@@ -28,7 +28,6 @@ import traceback
 from shinken.objects import Config
 from shinken.daemon import Daemon
 from shinken.log import logger
-print sys.path
 from shinken.webui.bottle import Bottle, run, static_file, view, route
 
 # Debug
@@ -38,15 +37,10 @@ bottle.debug(True)
 #Import bottle lib to make bottle happy
 bottle_dir = os.path.abspath(os.path.dirname(bottle.__file__))
 sys.path.insert(0, bottle_dir)
-#sys.path.insert(0, '.')
-print "Sys path", sys.path
+
 
 bottle.TEMPLATE_PATH.append(os.path.join(bottle_dir, 'views'))
 bottle.TEMPLATE_PATH.append(bottle_dir)
-print "Get view path", bottle.TEMPLATE_PATH
-#os.chdir(bottle_dir)
-print "GO pwd?", os.getcwd()
-
 
 
 # Route static files css files
@@ -193,8 +187,7 @@ class Webui(Daemon):
                 self.log.log(line)
 
             self.load_config_file()
-            print "GO pwd?", os.getcwd()
-            #self.do_daemon_init_and_start(use_pyro=False)
+            self.do_daemon_init_and_start(use_pyro=False)
 
             ## And go for the main loop
             self.do_mainloop()
@@ -229,56 +222,6 @@ class Webui(Daemon):
             self.run()
 
 
-    # Get 'objects' from external modules
-    # It can be used for get external commands for example
-    def get_objects_from_from_queues(self):
-        for f in self.modules_manager.get_external_from_queues():
-            #print "Groking from module instance %s" % f
-            while True:
-                try:
-                    o = f.get(block=False)
-                    self.add(o)
-                except Empty:
-                    break
-                # Maybe the queue got problem
-                # log it and quit it
-                except (IOError, EOFError), exp:
-                    logger.log("Warning : an external module queue got a problem '%s'" % str(exp))
-                    break
-
-    # We wait (block) for arbiter to send us something
-    def wait_for_master_death(self):
-        print "Waiting for master death"
-        timeout = 1.0
-        self.last_master_speack = time.time()
-        
-        while not self.interrupted:
-            elapsed, _, tcdiff = self.handleRequests(timeout)
-            # if there was a system Time Change (tcdiff) then we have to adapt last_master_speak:
-            if self.new_conf:
-                self.setup_new_conf()
-            if tcdiff:
-                self.last_master_speack += tcdiff
-            if elapsed:
-                self.last_master_speack = time.time()
-                timeout -= elapsed
-                if timeout > 0:
-                    continue
-            
-            timeout = 1.0            
-            sys.stdout.write(".")
-            sys.stdout.flush()
-
-            # Now check if master is dead or not
-            now = time.time()
-            if now - self.last_master_speack > 5:
-                print "Master is dead!!!"
-                self.must_run = True
-                break
-
-
-
-
 
     # Main function
     def run(self):
@@ -295,9 +238,11 @@ class Webui(Daemon):
             logger.log('ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
             sys.exit(2)
 
-
-
-        from shinken.webui import impacts
+        from shinken.webui.plugins.impacts import index
+        impact_dir = os.path.abspath(os.path.dirname(index.__file__))
+        sys.path.append(impact_dir)
+        bottle.TEMPLATE_PATH.append(os.path.join(impact_dir, 'views'))
+        print "NEw teplate path", bottle.TEMPLATE_PATH
         from shinken.webui import hostdetail
 
         print "Starting application"
@@ -305,102 +250,10 @@ class Webui(Daemon):
 
 
 
-        # Now we can get all initial broks for our satellites
-        self.get_initial_broks_from_satellitelinks()
-
-        suppl_socks = None
-
-        # Now create the external commander. It's just here to dispatch
-        # the commands to schedulers
-        e = ExternalCommandManager(self.conf, 'dispatcher')
-        e.load_arbiter(self)
-        self.external_command = e
-
-        print "Run baby, run..."
-        timeout = 1.0             
-        
-        while self.must_run and not self.interrupted:
-            
-            elapsed, ins, _ = self.handleRequests(timeout, suppl_socks)
-            
-            # If FIFO, read external command
-            if ins:
-                now = time.time()
-                ext_cmds = self.external_command.get()
-                if ext_cmds:
-                    for ext_cmd in ext_cmds:
-                        self.external_commands.append(ext_cmd)
-                else:
-                    self.fifo = self.external_command.open()
-                    if self.fifo is not None:
-                        suppl_socks = [ self.fifo ]
-                    else:
-                        suppl_socks = None
-                elapsed += time.time() - now
-
-            if elapsed or ins:
-                timeout -= elapsed
-                if timeout > 0: # only continue if we are not over timeout
-                    continue  
-            
-            # Timeout
-            timeout = 1.0 # reset the timeout value
-
-            # Try to see if one of my module is dead, and
-            # try to restart previously dead modules :)
-            self.check_and_del_zombie_modules()
-            
-            # Call modules that manage a starting tick pass
-            self.hook_point('tick')
-            
-            self.dispatcher.check_alive()
-            self.dispatcher.check_dispatch()
-            # REF: doc/shinken-conf-dispatching.png (3)
-            self.dispatcher.dispatch()
-            self.dispatcher.check_bad_dispatch()
-
-            # Now get things from our module instances
-            self.get_objects_from_from_queues()
-
-            # Maybe our satellites links raise new broks. Must reap them
-            self.get_broks_from_satellitelinks()
-
-            # One broker is responsible for our broks,
-            # we must give him our broks
-            self.push_broks_to_broker()
-            self.get_external_commands_from_brokers()
-            self.get_external_commands_from_receivers()
-            # send_conf_to_schedulers()
-            
-            if self.nb_broks_send != 0:
-                print "Nb Broks send:", self.nb_broks_send
-            self.nb_broks_send = 0
-
-            # Now send all external commands to schedulers
-            for ext_cmd in self.external_commands:
-                self.external_command.resolve_command(ext_cmd)
-            # It's send, do not keep them
-            # TODO: check if really send. Queue by scheduler?
-            self.external_commands = []
-
-            # If ask me to dump my memory, I do it
-            if self.need_dump_memory:
-                self.dump_memory()
-                self.need_dump_memory = False
 
 
-    def get_daemons(self, daemon_type):
-        """ Returns the daemons list defined in our conf for the given type """
-        # We get the list of the daemons from their links
-        # 'schedulerlinks' for schedulers, 'arbiterlinks' for arbiters
-        # and 'pollers', 'brokers', 'reactionners' for the others
-        if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
-            daemon_links = daemon_type+'links'
-        else:
-            daemon_links = daemon_type+'s'
 
-        # shouldn't the 'daemon_links' (whetever it is above) be always present ?
-        return getattr(self.conf, daemon_links, None)
+###Old things that can be used in the future :)
 
     # Helper functions for retention modules
     # So we give our broks and external commands
