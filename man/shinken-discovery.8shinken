@@ -16,7 +16,7 @@ Shinken discovery command
 
 =item B<-o|--output>
 
-ouput file.
+ouput directory.
 
 =item B<-r>
 

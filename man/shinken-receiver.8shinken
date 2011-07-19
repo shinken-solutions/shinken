@@ -16,7 +16,7 @@ Shinken receiver Daemon
 
 =item B<-c|--config>
 
-Config file. Multiple -c can be used, it will be like if all files was just one.
+Config file.
 
 =item B<-d|--daemon>
 
