@@ -422,7 +422,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         del self.debug_output
 
 
-    def do_daemon_init_and_start(self, use_pyro=False):
+    def do_daemon_init_and_start(self, use_pyro=True):
         self.change_to_user_group()
         self.change_to_workdir()
         self.check_parallel_run()
