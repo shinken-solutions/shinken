@@ -6,6 +6,7 @@
  *  + Main container:			#main_container
  *  + Sidebar:				#left_container
  *  + Footer:				#footer
+ *  + Login Footer:			#login_footer
  *  + Special:
  *     - Host / Service preview:	#host_preview, #service_preview
  *     - Host header			#host_header
@@ -70,9 +71,34 @@ body {
  *  Footer
  * ----------------------------------------------------------------*/
 
-#footer{
+#footer {
 	background: #787878;
 	height: 20px;
+}
+
+/* ----------------------------------------------------------------
+ *  Footer
+ * ----------------------------------------------------------------*/
+
+#login_footer {
+	background: #787878;
+	height: 90px;
+}
+
+#login_footer h3 {
+	font-size: 16px;
+	margin-bottom: 5px;
+	color: #FFFFFF;
+}
+
+#login_footer dl {
+	color: #BCBCBC;
+}
+
+#login_footer a {
+	color: #BCBCBC;
+	text-decoration: none;
+	text-underline: none; 
 }
 
 /* ----------------------------------------------------------------
@@ -243,6 +269,9 @@ td.actions a {
   -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box; 
 }
 
+.border_right {
+	border-right: 1px solid #E3E3E5;
+}
 /* ----------------------------------------------------------------
  *  Classes: Images
  * ----------------------------------------------------------------*/
@@ -314,3 +343,42 @@ td.actions a {
 #dummy_box {
 	height: 100px;
 }
+
+#login {
+	/*height: 500px;*/
+	width: 300px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -250px 0px 0px -250px;
+	background-color: #ffffff;
+	/*border: 1px solid #000000;*/
+}
+#login h1 {
+	margin-left: 70px;
+}
+#login p {
+	color: #787878;
+	font-size: 13px;
+	font-weight: bold;
+}
+
+.form button {
+	float:right;
+    border: 1px solid #CACACA;
+    border-radius: 2px 2px 2px 2px;
+    color: #3C3C3D;
+    cursor: pointer;
+    display: inline-block;
+    font-family: 'lucida grande',tahoma,verdana,arial,sans-serif;
+    font-size: 12px;
+    line-height: 1.11;
+    outline: medium none;
+    overflow: visible;
+    padding: 5px;
+    margin-right: 25px;
+    position: relative;
+    text-decoration: none;
+    text-shadow: 1px 1px 0 #FFFFFF;
+    white-space: nowrap;
+}	
