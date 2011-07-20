@@ -1,4 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+
+%include header title='Shinken UI login', print_menu=False
+
+<!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -8,13 +13,11 @@
 		<link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen" />
 		<link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen" />
 		<link rel="stylesheet" type="text/css" href="/static/nav.css" media="screen" />
-		<!--<link rel="stylesheet" type="text/css" href="style.css" media="screen" />-->
-		<!--[if IE 6]><link rel="stylesheet" type="text/css" href="css/ie6.css" media="screen" /><![endif]-->
-		<!--[if IE 7]><link rel="stylesheet" type="text/css" href="css/ie.css" media="screen" /><![endif]-->
 	</head>
 	<body>
 		<div class="container_16">
 			<div id="main_container" class="grid_16">
+-->
 				<div id="login">
 				
 				<h1>Login</h1>

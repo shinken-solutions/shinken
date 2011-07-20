@@ -20,7 +20,7 @@
 
 
 
-%include header title='Host detail about {{host_name}}'
+%include header title='Host detail about ' + host_name
 
 <script type="text/javascript">
   var tabs = new MGFX.Tabs('.tab','.feature',{
