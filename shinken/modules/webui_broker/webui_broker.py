@@ -57,8 +57,8 @@ class Webui_broker(BaseModule):
 
         self.plugins = []
 
-        self.port = 8080
-        self.host = '0.0.0.0'
+        self.port = int(getattr(modconf, 'port', '8080'))
+        self.host = getattr(modconf, 'host', '0.0.0.0')
 
 
 
