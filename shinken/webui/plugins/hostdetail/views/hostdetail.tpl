@@ -3,18 +3,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		
 		<title>Meatball</title>
-		<link rel="stylesheet" type="text/css" href="static/reset.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="static/text.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="static/grid.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="static/layout.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="static/nav-new.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="/static/reset.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="/static/text.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="/static/nav-new.css" media="screen">
 		<!--<link rel="stylesheet" type="text/css" href="style.css" media="screen" />-->
 		<!--[if IE 6]><link rel="stylesheet" type="text/css" href="css/ie6.css" media="screen" /><![endif]-->
 		<!--[if IE 7]><link rel="stylesheet" type="text/css" href="css/ie.css" media="screen" /><![endif]-->
 		
-		<script src="static/js/mootools-more.js" type="text/javascript"></script>
-		<script src="static/js/rotater.js" type="text/javascript"></script>
-		<script src="static/js/tabs.js" type="text/javascript"></script>
+		<script src="/static/js/mootools-more.js" type="text/javascript"></script>
+		<script src="/static/js/rotater.js" type="text/javascript"></script>
+		<script src="/static/js/tabs.js" type="text/javascript"></script>
 		<script type="text/javascript">
 			var tabs = new MGFX.Tabs('.tab','.feature',{
 				autoplay: false,
@@ -55,7 +55,7 @@
 				</div>
 				<div class="grid_13">
 					<div id="host_preview">
-						<h2 class="icon_warning">Warning: host</h2>
+						<h2 class="icon_warning">Warning: {{host_name}}</h2>
 						<dl class="grid_6">
 						    <dt>Alias:</dt>
 						    <dd>alias-name</dd>
@@ -69,7 +69,7 @@
 						    <dd>Personal notes (inline editing?) <br> The Hitchhiker’s Guide to the Galaxy / 42</dd>
 						</dl>
 						<div class="grid_4">
-							<img class="box_shadow host_img_80" src="static/images/no_image.png">
+							<img class="box_shadow host_img_80" src="/static/images/no_image.png">
 						</div>
 					</div>
 					<hr>

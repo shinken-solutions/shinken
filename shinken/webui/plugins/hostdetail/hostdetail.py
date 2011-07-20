@@ -5,38 +5,14 @@ app = None
 # Main impacts view
 #@route('/host')
 #@view('hostdetail')
-def show_host():
-    return get_data()
+def show_host(name):
+    return get_data(name)
 
 
 
-def get_data():
-    # We need to output impacts:
-    # 1 : Mails/Critical/criticity=5/since one hour/No mails can be send nor received   ---> 1, 2
-    # 2 : ERP/Critical/criticiy=4/since one day/""       ---> 1
-    # 3 : FileShare@server/warning/criticity=3/since one day/No more file access   ---> 1
-    # 4 : Print@server/Warning/since one day/Printer service is stopped  ---> 1,2
-
-
-    # problems:
-    # 1 : router-us is Down since 93294 with output Return in Dummy 2
-    # 2 : router-asia is Down since one hour with output connexion failed
-    # 3 : db-server/Mssql is Warning since one hour with output connexion failed
-
-    impacts = {}
-    impacts[1] = {'name' : 'Mails', 'status' : 'Critical', 'criticity' : 5, 'since' : 'one hour', 'output' : 'No mails can be send nor received', 'problems' : [1, 3]}
-    impacts[2] = {'name' : 'ERP', 'status' : 'Critical', 'criticity' : 4, 'since' : 'one day', 'output' : '', 'problems' : [1]}
-    impacts[3] = {'name' : 'FileShare@server', 'status' : 'Warning', 'criticity' : 4, 'since' : 'one hour', 'output' : 'No more file access', 'problems' : [1]}
-    impacts[4] = {'name' : 'Print@server', 'status' : 'Warning', 'criticity' : 3, 'since' : 'one day', 'output' : 'Printer service is stopped', 'problems' : [1, 2]}
-    
-    problems = {}
-    problems[1] = {'name' : 'router-us is Down since 93294 with output Return in Dummy 2'}
-    problems[2] = {'name' : 'router-asia is Down since 93294 with output Return in Dummy 2'}
-    problems[3] = {'name' : 'Mssql@db-server is Down since 93294 with output connexion failed'}
-
-    
-    return {'impacts' : impacts, 'problems' : problems}
+def get_data(name):
+    return {'host_name' : 'srv-web1'}
 
 
 
-pages = {show_host : { 'routes' : ['/host'], 'view' : 'hostdetail', 'static' : True}}
+pages = {show_host : { 'routes' : ['/host/:name'], 'view' : 'hostdetail', 'static' : True}}
