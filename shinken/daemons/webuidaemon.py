@@ -330,7 +330,7 @@ class Webui(Daemon):
         print "Addr plugin_static", plugin_static, g, static_route
         g.m_dir = m_dir
         g.entry = g
-        route(static_route, callback=g)
+        route(static_route, callback=plugin_static)
 
 
 

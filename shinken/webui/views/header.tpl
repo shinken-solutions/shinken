@@ -1,3 +1,4 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
 
 %#Set default values
@@ -5,9 +6,6 @@
 %if not 'title' in locals() : title = 'No title'
 %if not 'css' in locals() : css = []
 
-
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
 <html slick-uniqueid="1"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -18,7 +16,6 @@
     <link rel="stylesheet" type="text/css" href="/static/text.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="/static/nav-new.css" media="screen">
     <script type="text/javascript" src="/static/js/mootools.js"></script>
     <script type="text/javascript" src="/static/js/mootools-more.js"></script>
     <script type="text/javascript" src="/static/js/mootools-message.js"></script>
