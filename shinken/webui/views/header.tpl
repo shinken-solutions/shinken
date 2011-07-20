@@ -7,35 +7,36 @@
 
 
 
- <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
 <html slick-uniqueid="1"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
     <title>{{title or 'No title'}}</title>
 
-    <link rel="stylesheet" type="text/css" href="static/nav.css">
-    <link rel="stylesheet" type="text/css" href="static/reset.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="static/text.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="static/grid.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="static/layout.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="static/nav-new.css" media="screen">
-    <script type="text/javascript" src="static/js/rotater.js"></script>
-    <script type="text/javascript" src="static/js/tabs.js"></script>
-    <script type="text/javascript" src="static/js/mootools.js"></script>
-    <script type="text/javascript" src="static/js/mootools-more.js"></script>
-    <script type="text/javascript" src="static/js/mootools-message.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/nav.css">
+    <link rel="stylesheet" type="text/css" href="/static/reset.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/text.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/nav-new.css" media="screen">
+    <script type="text/javascript" src="/static/js/mootools.js"></script>
+    <script type="text/javascript" src="/static/js/mootools-more.js"></script>
+    <script type="text/javascript" src="/static/js/mootools-message.js"></script>
+
+    <script type="text/javascript" src="/static/js/rotater.js"></script>
+    <script type="text/javascript" src="/static/js/tabs.js"></script>
 
 
 
 %# End of classic js import. Now call for specific ones
 %for p in js:
-  <script type="text/javascript" src="static/{{p}}"></script>
+  <script type="text/javascript" src="/static/{{p}}"></script>
 %end
 
 
 %# And now for css files
 %for p in css:
-    <link rel="stylesheet" type="text/css" href="static/{{p}}">
+    <link rel="stylesheet" type="text/css" href="/static/{{p}}">
 %end
 
   </head>

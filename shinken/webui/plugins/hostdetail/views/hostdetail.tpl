@@ -1,33 +1,37 @@
+
+<!--
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!-- saved from url=(0050)http://unitedseed.de/tmp/Meatball/host_detail.html -->
 <html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		
+				
 		<title>Meatball</title>
 		<link rel="stylesheet" type="text/css" href="/static/reset.css" media="screen">
 		<link rel="stylesheet" type="text/css" href="/static/text.css" media="screen">
 		<link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen">
 		<link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
 		<link rel="stylesheet" type="text/css" href="/static/nav-new.css" media="screen">
-		<!--<link rel="stylesheet" type="text/css" href="style.css" media="screen" />-->
-		<!--[if IE 6]><link rel="stylesheet" type="text/css" href="css/ie6.css" media="screen" /><![endif]-->
-		<!--[if IE 7]><link rel="stylesheet" type="text/css" href="css/ie.css" media="screen" /><![endif]-->
-		
 		<script src="/static/js/mootools-more.js" type="text/javascript"></script>
 		<script src="/static/js/rotater.js" type="text/javascript"></script>
 		<script src="/static/js/tabs.js" type="text/javascript"></script>
-		<script type="text/javascript">
-			var tabs = new MGFX.Tabs('.tab','.feature',{
-				autoplay: false,
-				transitionDuration:500,
-				slideInterval:3000,
-				hover:true
-			});
-		</script>
 
 	</head>
 	<body>
 		<div class="container_16">
-			<div id="header" class="grid_16">
+-->
+
+
+
+%include header title='Host detail about {{host_name}}'
+
+<script type="text/javascript">
+  var tabs = new MGFX.Tabs('.tab','.feature',{
+  autoplay: false,
+  transitionDuration:500,
+  slideInterval:3000,
+  hover:true
+  });
+</script>
+
+<!--			<div id="header" class="grid_16">
 				<h1 class="box_textshadow">Meatball</h1>
 			</div>
 			<div class="clear"></div>
@@ -42,6 +46,7 @@
 			</div>
 			<div class="clear"></div>
 			<div id="main_container" class="grid_16">
+-->
 				<div id="left_container" class="grid_3">
 					<div id="dummy_box" class="box_gradient_horizontal"> 
 						<p>Dummy box</p>
@@ -176,5 +181,6 @@
 			</div>
 			<div class="clear"></div>
 		</div>
-	
-</body></html>
+
+%include footer
+
