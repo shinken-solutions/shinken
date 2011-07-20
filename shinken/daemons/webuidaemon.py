@@ -62,8 +62,7 @@ def bla():
 # Main WebUI Class
 class Webui(Daemon):
 
-    def __init__(self, config_files, is_daemon, do_replace, debug, debug_file):
-        
+    def __init__(self, config_files, is_daemon, do_replace, debug, debug_file):        
         super(Webui, self).__init__('webui', config_files[0], is_daemon, do_replace, debug, debug_file)
         
         self.config_files = config_files
