@@ -98,7 +98,11 @@ class Webui_broker(BaseModule):
         self.declare_common_static()
         
         print "Starting WebUI application"
-        run(host=self.host, port=self.port)
+        srv = run(host=self.host, port=self.port, server='wsgirefselect')
+        print "Launch server", srv
+        while True:
+            print "Handle a request"
+            srv.handle_request()
 
 
 
