@@ -29,8 +29,10 @@ import sys
 import os
 import time
 import traceback
+import select
 
 from shinken.basemodule import BaseModule
+from shinken.message import Message
 from shinken.webui.bottle import Bottle, run, static_file, view, route
 
 # Debug
@@ -100,9 +102,23 @@ class Webui_broker(BaseModule):
         print "Starting WebUI application"
         srv = run(host=self.host, port=self.port, server='wsgirefselect')
         print "Launch server", srv
+
+        # Main blocking loop
         while True:
-            print "Handle a request"
-            srv.handle_request()
+            # _reader is the underliying file handle of the Queue()
+            # so we can select it too :)
+            input = [srv.socket, self.to_q._reader]
+            inputready,_,_ = select.select(input,[],[], 1)
+            for s in inputready:
+                # If it's a web request, ask the webserver to do it
+                if s == srv.socket:
+                    print "Handle Web request"
+                    srv.handle_request()
+                # Else it can be data from the broker
+                if s == self.to_q._reader:
+                    print "Handle Queue() request"
+                    d = self.to_q.get()
+            
 
 
 
