@@ -238,7 +238,7 @@ class Webui(Daemon):
         self.load_plugins()
 
         # Declare the whole app static files AFTER the plugin ones
-        self.declare_static()
+        self.declare_common_static()
 
         print "Starting application"
         run(host=self.host, port=self.port)
@@ -322,20 +322,14 @@ class Webui(Daemon):
         #print "Declaring static entry", static_route, lamb
         #f = route(static_route, callback=lamb)
         def plugin_static(path):
-            print "Addr f", plugin_static, plugin_static.entry
-            m_dir = plugin_static.m_dir
-            print "Get a plugin static file %s from" % path, os.path.join(m_dir, 'htdocs')
+            #print "Addr f", plugin_static, plugin_static.entry
             return static_file(path, root=os.path.join(m_dir, 'htdocs'))
-        g = copy.deepcopy(plugin_static)
-        print "Addr plugin_static", plugin_static, g, static_route
-        g.m_dir = m_dir
-        g.entry = g
         route(static_route, callback=plugin_static)
 
 
 
 
-    def declare_static(self):
+    def declare_common_static(self):
         # Route static files css files
         @route('/static/:path#.+#')
         def server_static(path):
