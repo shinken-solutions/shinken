@@ -3,11 +3,11 @@
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<title>Meatball</title>
-		<link rel="stylesheet" type="text/css" href="css/reset.css" media="screen" />
-		<link rel="stylesheet" type="text/css" href="css/text.css" media="screen" />
-		<link rel="stylesheet" type="text/css" href="css/grid.css" media="screen" />
-		<link rel="stylesheet" type="text/css" href="css/layout.css" media="screen" />
-		<link rel="stylesheet" type="text/css" href="css/nav.css" media="screen" />
+		<link rel="stylesheet" type="text/css" href="/static/reset.css" media="screen" />
+		<link rel="stylesheet" type="text/css" href="/static/text.css" media="screen" />
+		<link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen" />
+		<link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen" />
+		<link rel="stylesheet" type="text/css" href="/static/nav.css" media="screen" />
 		<!--<link rel="stylesheet" type="text/css" href="style.css" media="screen" />-->
 		<!--[if IE 6]><link rel="stylesheet" type="text/css" href="css/ie6.css" media="screen" /><![endif]-->
 		<!--[if IE 7]><link rel="stylesheet" type="text/css" href="css/ie.css" media="screen" /><![endif]-->
