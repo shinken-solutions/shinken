@@ -101,6 +101,15 @@ class Regenerator:
         self.commands.create_reversed_list()
 
 
+    def set_schedulingitem_values(self, i):
+        return
+        i.check_period = self.get_timeperiod(i.check_period)
+        i.notification_period = self.get_timeperiod(i.notification_period)
+        i.contacts = self.get_contacts(i.contacts)
+        i.rebuild_ref()
+
+
+
     def manage_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
@@ -177,15 +186,7 @@ class Regenerator:
         # We have only one config here, with id 0
         c = self.configs[c_id]
         self.update_element(c, data)
-    
-
-    def set_schedulingitem_values(self, i):
-        return
-        i.check_period = self.get_timeperiod(i.check_period)
-        i.notification_period = self.get_timeperiod(i.notification_period)
-        i.contacts = self.get_contacts(i.contacts)
-        i.rebuild_ref()
-        
+            
 
     # Get a new host. Add in in in progress tab
     def manage_initial_host_status_brok(self, b):
@@ -195,11 +196,13 @@ class Regenerator:
 
         # Try to get the inp progress Hosts
         try:
-            hosts = self.inp_hosts[c_id]
-        except: #not good. we will cry in theprogram update
+            hosts = self.inp_hosts[inst_id]
+        except Exception, exp: #not good. we will cry in theprogram update
+            print "Not good!", exp
             return
 
         print "Creating an host: %s in instance %d" % (hname, inst_id)
+
         h = Host({})
         self.update_element(h, data)        
         self.set_schedulingitem_values(h)
@@ -210,7 +213,6 @@ class Regenerator:
         # We need to rebuild Downtime and Comment relationship
         for dtc in h.downtimes + h.comments:
             dtc.ref = h
-        self.hosts[host_name] = h
         #self.number_of_objects += 1
 
 
