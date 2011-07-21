@@ -340,6 +340,9 @@ class Regenerator:
 
 ############### Brok management part
 
+
+####### INITIAL PART
+
     def manage_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
@@ -394,26 +397,6 @@ class Regenerator:
         self.create_reversed_list()
 
 
-    def manage_update_program_status_brok(self, b):
-        data = b.data
-        c_id = data['instance_id']
-
-        # If we got an update about an unknow isntance, cry and ask for a full
-        # version!
-        if c_id not in self.instance_ids:
-            # Do not ask data too quickly, very dangerous
-            # one a minute
-            if time.time() - self.last_need_data_send > 60:
-                print "I ask the broker for instance id data :", c_id
-                msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
-                self.from_q.put(msg)
-                self.last_need_data_send = time.time()
-            return
-
-        # We have only one config here, with id 0
-        c = self.configs[c_id]
-        self.update_element(c, data)
-            
 
     # Get a new host. Add in in in progress tab
     def manage_initial_host_status_brok(self, b):
@@ -442,22 +425,6 @@ class Regenerator:
 
 
 
-    #In fact, an update of a host is like a check return
-    def manage_update_host_status_brok(self, b):
-        self.manage_host_check_result_brok(b)
-        data = b.data
-        host_name = data['host_name']
-        #In the status, we've got duplicated item, we must relink thems
-        try:
-            h = self.hosts[host_name]
-        except KeyError:
-            print "Warning : the host %s is unknown!" % host_name
-            return
-        self.update_element(h, data)
-        self.set_schedulingitem_values(h)
-        for dtc in h.downtimes + h.comments:
-            dtc.ref = h
-        self.livestatus.count_event('host_checks')
 
 
     # From now we only create an hostgroup in the in prepare
@@ -514,22 +481,6 @@ class Regenerator:
 
 
 
-    #In fact, an update of a service is like a check return
-    def manage_update_service_status_brok(self, b):
-        self.manage_service_check_result_brok(b)
-        data = b.data
-        host_name = data['host_name']
-        service_description = data['service_description']
-        #In the status, we've got duplicated item, we must relink thems
-        try:
-            s = self.services[host_name+service_description]
-        except KeyError:
-            print "Warning : the service %s/%s is unknown!" % (host_name, service_description)
-            return
-        self.update_element(s, data)
-        self.set_schedulingitem_values(s)
-        for dtc in s.downtimes + s.comments:
-            dtc.ref = s
    
 
     # We create a servicegroup in our in progress part
@@ -703,15 +654,6 @@ class Regenerator:
         #self.number_of_objects += 1
 
 
-    def manage_update_scheduler_status_brok(self, b):
-        data = b.data
-        scheduler_name = data['scheduler_name']
-        try:
-            s = self.schedulers[scheduler_name]
-            self.update_element(s, data)
-            #print "S:", s
-        except Exception:
-            pass
 
 
     def manage_initial_poller_status_brok(self, b):
@@ -729,15 +671,6 @@ class Regenerator:
         #self.number_of_objects += 1
 
 
-    def manage_update_poller_status_brok(self, b):
-        data = b.data
-        poller_name = data['poller_name']
-        try:
-            s = self.pollers[poller_name]
-            self.update_element(s, data)
-        except Exception:
-            pass
-
 
     def manage_initial_reactionner_status_brok(self, b):
         data = b.data
@@ -753,15 +686,6 @@ class Regenerator:
         #print "MONCUL: Add a new scheduler ", sched
         #self.number_of_objects += 1
 
-
-    def manage_update_reactionner_status_brok(self, b):
-        data = b.data
-        reactionner_name = data['reactionner_name']
-        try:
-            s = self.reactionners[reactionner_name]
-            self.update_element(s, data)
-        except Exception:
-            pass
 
 
     def manage_initial_broker_status_brok(self, b):
@@ -779,6 +703,83 @@ class Regenerator:
         #self.number_of_objects += 1
 
 
+
+    # This brok is here when the WHOLE initial phase is done.
+    # So we got all data, we can link all together :)
+    def manage_initial_broks_done_brok(self, b):
+        inst_id = b.data['instance_id']
+        print "Finish the configuration of instance", inst_id
+        
+        self.all_done_linking(inst_id)
+
+
+        
+
+################# Status Update part
+
+    # A scheduler send us a "I'm alive" brok. If we never
+    # heard about this one, we got some problem and we 
+    # ask him some initial data :)
+    def manage_update_program_status_brok(self, b):
+        data = b.data
+        c_id = data['instance_id']
+
+        # If we got an update about an unknow isntance, cry and ask for a full
+        # version!
+        if c_id not in self.instance_ids:
+            # Do not ask data too quickly, very dangerous
+            # one a minute
+            if time.time() - self.last_need_data_send > 60:
+                print "I ask the broker for instance id data :", c_id
+                msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
+                self.from_q.put(msg)
+                self.last_need_data_send = time.time()
+            return
+
+        # We have only one config here, with id 0
+        c = self.configs[c_id]
+        self.update_element(c, data)
+            
+
+
+    #In fact, an update of a host is like a check return
+    def manage_update_host_status_brok(self, b):
+        self.manage_host_check_result_brok(b)
+        data = b.data
+        host_name = data['host_name']
+        #In the status, we've got duplicated item, we must relink thems
+        try:
+            h = self.hosts[host_name]
+        except KeyError:
+            print "Warning : the host %s is unknown!" % host_name
+            return
+        self.update_element(h, data)
+        self.set_schedulingitem_values(h)
+        for dtc in h.downtimes + h.comments:
+            dtc.ref = h
+        self.livestatus.count_event('host_checks')
+
+
+
+    #In fact, an update of a service is like a check return
+    def manage_update_service_status_brok(self, b):
+        self.manage_service_check_result_brok(b)
+        data = b.data
+        host_name = data['host_name']
+        service_description = data['service_description']
+        #In the status, we've got duplicated item, we must relink thems
+        try:
+            s = self.services[host_name+service_description]
+        except KeyError:
+            print "Warning : the service %s/%s is unknown!" % (host_name, service_description)
+            return
+        self.update_element(s, data)
+        self.set_schedulingitem_values(s)
+        for dtc in s.downtimes + s.comments:
+            dtc.ref = s
+
+
+
     def manage_update_broker_status_brok(self, b):
         data = b.data
         broker_name = data['broker_name']
@@ -787,6 +788,55 @@ class Regenerator:
             self.update_element(s, data)
         except Exception:
             pass
+
+
+
+    def manage_update_reactionner_status_brok(self, b):
+        data = b.data
+        reactionner_name = data['reactionner_name']
+        try:
+            s = self.reactionners[reactionner_name]
+            self.update_element(s, data)
+        except Exception:
+            pass
+
+
+    def manage_update_poller_status_brok(self, b):
+        data = b.data
+        poller_name = data['poller_name']
+        try:
+            s = self.pollers[poller_name]
+            self.update_element(s, data)
+        except Exception:
+            pass
+
+
+    def manage_update_scheduler_status_brok(self, b):
+        data = b.data
+        scheduler_name = data['scheduler_name']
+        try:
+            s = self.schedulers[scheduler_name]
+            self.update_element(s, data)
+            #print "S:", s
+        except Exception:
+            pass
+
+
+
+################# Check result and schedule part
+    def manage_host_check_result_brok(self, b):
+        data = b.data
+        host_name = data['host_name']
+        try:
+            h = self.hosts[host_name]
+            self.update_element(h, data)
+        except Exception:
+            pass
+
+
+    # this brok should arrive within a second after the host_check_result_brok
+    def manage_host_next_schedule_brok(self, b):
+        self.manage_host_check_result_brok(b)
 
 
     #A service check have just arrived, we UPDATE data info with this
@@ -805,28 +855,3 @@ class Regenerator:
     def manage_service_next_schedule_brok(self, b):
         self.manage_service_check_result_brok(b)
 
-
-    def manage_host_check_result_brok(self, b):
-        data = b.data
-        host_name = data['host_name']
-        try:
-            h = self.hosts[host_name]
-            self.update_element(h, data)
-        except Exception:
-            pass
-
-
-    # this brok should arrive within a second after the host_check_result_brok
-    def manage_host_next_schedule_brok(self, b):
-        self.manage_host_check_result_brok(b)
-
-
-    
-    def manage_initial_broks_done_brok(self, b):
-        inst_id = b.data['instance_id']
-        print "Finish the configuration of instance", inst_id
-        
-        self.all_done_linking(inst_id)
-
-
-        
