@@ -160,6 +160,8 @@ class Regenerator:
             self.linkify_a_timeperiod(h, 'check_period')
             self.linkify_a_timeperiod(h, 'maintenance_period')
 
+            # And link contacts too
+            self.linkify_contacts(h. 'contacts')
 
         # Linking TIMEPERIOD exclude with real ones now
         for tp in self.timeperiods:
@@ -217,6 +219,22 @@ class Regenerator:
             print "Seeting", prop, tp.get_name(), 'of', o.get_name()
             setattr(o, prop, tp)
             
+
+    # We look at o.prop and for each contacts in it,
+    # we replace it with true object in self.contacts
+    def linkify_contacts(self, o, prop):
+        v = getattr(o, prop)
+        if not v:
+            return
+        new_v = []
+        for oc in v:
+            cname = cc.contact_name
+            c = self.contacts.find_by_name(cname)
+            if c:
+                print "Find a legal contact", cname, "for", o.get_name(), prop
+                new_v.append(c)
+        setattr(o, prop, new_v)
+                
 
 
 ############### Brok management part
