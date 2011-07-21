@@ -435,15 +435,23 @@ class Regenerator:
         #self.number_of_objects += 1
 
 
+    # For Contacts, it's a global value, so 2 cases :
+    # We got it -> we update it
+    # We don't -> we crete it
+    # In both cases we need to relink it
     def manage_initial_contact_status_brok(self, b):
         data = b.data
-        contact_name = data['contact_name']
-        #print "Creating Contact:", c_id, data
-        c = Contact({})
-        self.update_element(c, data)
-        #print "C:", c
-        self.contacts[contact_name] = c
-        #self.number_of_objects += 1
+        cname = data['contact_name']
+        print "Contact with data", data
+        c = self.contacts.find_by_name(cname)
+        if c:
+            self.update_element(c, data)
+        else:
+            print "Creating Contact:", cname
+            c = Contact({})
+            self.update_element(c, data)
+        
+
 
 
     def manage_initial_contactgroup_status_brok(self, b):
