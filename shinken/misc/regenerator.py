@@ -197,6 +197,20 @@ class Regenerator:
                     new_members.append(c)
             cg.members = new_members
 
+        # Merge contactgroups with real ones
+        for inpcg in inp_contactgroups:
+            cgname = inpcg.contactgroup_name
+            cg = self.contactgroups.find_by_name(cgname)
+            # If the contactgroup already exist, just add the new
+            # contacts into it
+            if cg:
+                cg.members.extend(inpcg.members)
+            else: # else take the new one
+                self.contactgroups[inpcg.id] = inpcg
+        # We can delare contactgroups done
+        self.contactgroups.create_reversed_list()
+
+
         # Ok, we can regenerate ALL find list, so your clietns will
         # see new objects now
         self.create_reversed_list()            
