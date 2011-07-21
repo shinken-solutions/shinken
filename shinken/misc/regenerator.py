@@ -138,17 +138,41 @@ class Regenerator:
                     new_members.append(h)
             hg.members = new_members
                 
-        # Now link host with hostgroups
+        # Now link host with hostgroups, and commands
         for h in inp_hosts:
-            print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
+            #print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
             new_hostgroups = []
             for hgname in h.hostgroups.split(','):
                 hg = inp_hostgroups.find_by_name(hgname)
                 if hg:
                     new_hostgroups.append(hg)
             h.hostgroups = new_hostgroups
+            
+            # Now link Command() objects
+            props = ['check_command', 'event_handler']
+            for p in props:
+                cc = getattr(h, p)
+                # if the command call is void, bypass it
+                if not cc:
+                    continue
+                cmdname = cc.command.command_name
+                c = self.commands.find_by_name(cmdname)
+                if c:
+                    cc.command = c
+
+        # Linking Timeperiods exclude with real ones now
+        for tp in self.timeperiods:
+            new_exclude = []
+            for ex in tp.exclude:
+                exname = ex.timeperiod_name
+                t = self.timeperiods(exname)
+                if t:
+                    new_exclude.append(t)
+            tp.exclude = new_exclude
 
 
+        # Ok, we can regenerate ALL find list, so your clietns will
+        # see new objects now
         self.create_reversed_list()            
 
 
@@ -415,26 +439,44 @@ class Regenerator:
         #self.number_of_objects += 1
 
 
+    # For Timeperiods we got 2 cases : do we already got the command or not.
+    # if got : just update it
+    # if not : create it and delacre it in our main commands
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
-        timeperiod_name = data['timeperiod_name']
-        #print "Creating Timeperiod:", tp_id, data
-        tp = Timeperiod({})
-        self.update_element(tp, data)
-        #print "TP:", tp
-        self.timeperiods[timeperiod_name] = tp
-        #self.number_of_objects += 1
+        print "Creatin timeperiod", data
+        tpname = data['timeperiod_name']
+        
+        tp = self.timeperiods.find_by_name(tpname)
+        if tp:
+            # print "Already exisintg timeperiod", tpname
+            self.update_element(tp, data)
+        else:
+            print "Creating Timeperiod:", tpname
+            tp = Timeperiod({})
+            self.update_element(tp, data)
+            self.timeperiods[tp.id] = tp
+            self.timeperiods.create_reversed_list()
 
 
+    # For command we got 2 cases : do we already got the command or not.
+    # if got : just update it
+    # if not : create it and delacre it in our main commands
     def manage_initial_command_status_brok(self, b):
         data = b.data
-        command_name = data['command_name']
-        #print "Creating Command:", c_id, data
-        c = Command({})
-        self.update_element(c, data)
-        #print "CMD:", c
-        self.commands[command_name] = c
-        #self.number_of_objects += 1
+        cname = data['command_name']
+        
+        c = self.commands.find_by_name(cname)
+        if c:
+            #print "Already existing command", cname, "updating it"
+            self.update_element(c, data)
+        else:
+            #print "Creating a new command", cname
+            c = Command({})
+            self.update_element(c, data)
+            self.commands[c.id] = c
+            # Ok, we can regenerate the reversed list so
+            self.commands.create_reversed_list()
 
 
     def manage_initial_scheduler_status_brok(self, b):
