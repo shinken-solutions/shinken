@@ -118,6 +118,7 @@ launch_and_assert test_no_broker_in_realm_warning.py
 launch_and_assert test_critmodulation.py
 launch_and_assert test_hostdep_withno_depname.py
 launch_and_assert test_service_withhost_exclude.py
+launch_and_assert test_regenerator.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

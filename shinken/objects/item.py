@@ -529,8 +529,10 @@ class Items(object):
 
 
     def __delitem__(self, key):
-        del self.items[key]
-
+        try:
+            del self.items[key]
+        except KeyError: #we don't want it, we do not have it. All is perfect
+            pass
 
     def __setitem__(self, key, value):
         self.items[key] = value

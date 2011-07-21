@@ -61,56 +61,59 @@ class Regenerator:
         self.last_need_data_send = time.time()
 
 
+    def manage_brok(self, brok):
+        """ Look for a manager function for a brok, and call it """
+        manage = getattr(self, 'manage_' + brok.type + '_brok', None)
+        if manage:
+            return manage(brok)
+
+
+    def update_element(self, e, data):
+        for prop in data:
+            setattr(e, prop, data[prop])
+
+
+
     def manage_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
-        print "Creating config:", c_id, data
+        print "Regenerator : Creating config:", c_id
+        
+        # We get a real Conf object ,adn put our data
         c = Config()
-        for prop in data:
-            setattr(c, prop, data[prop])
-        #print "CFG:", c
-        self.configs[0] = c
-        # And we save that we got data from this instance_id
-        self.instance_ids.append(c_id)
+        self.update_element(c, data)
+        #for prop in data:
+        #    setattr(c, prop, data[prop])
+
+        # And we save it
+        self.configs[c_id] = c
 
         # We should clean all previously added hosts and services
-        inst_id = data['instance_id']
-        to_del = []
-        to_del_srv = []
-        for h in self.hosts.values():
-            # If the host was in this instance, del it
-            if h.instance_id == inst_id:
-                to_del.append(h.host_name)
+        print "Clean hosts/service of", c_id
+        to_del_h = [h for h in self.hosts if h.instance_id == c_id]
+        to_del_srv = [s for s in self.services if s.instance_id == c_id]
 
-                
-        for s in self.services.values():
-            if s.instance_id == inst_id:
-                to_del_srv.append(s.host_name + s.service_description)
+        print "Cleaning host:%d srv:%d" % (len(to_del_h), len(to_del_srv))
+        # Clean hosts from hosts and hostgroups
+        for h in to_del_h:
+            print "Deleting", h.get_name()
+            del self.hosts[h.id]
 
-        # Now clean hostgroups too
-        for hg in self.hostgroups.values():
-            print "Len before exclude", len(hg.members)
+        # Now clean all hostgroups too
+        for hg in self.hostgroups:
+            print "Cleaning hostgroup %s:%d" % (hg.get_name(), len(hg.members))
             # Exclude from members the hosts with this inst_id
             hg.members = [h for h in hg.members if h.instance_id != inst_id]
             print "Len after", len(hg.members)
 
+        for s in to_del_srv:
+            print "Deleting", s.gt_dbg_name()
+            del self.services[s.id]
+
         # Now clean service groups
-        for sg in self.servicegroups.values():
+        for sg in self.servicegroups:
             sg.members = [s for s in sg.members if s.instance_id != inst_id]
 
-        # Ok, really clean the hosts
-        for i in to_del:
-            try:
-                del self.hosts[i]
-            except KeyError: # maybe it was not inserted in a good way, pass it
-                pass
-
-        # And services
-        for i in to_del_srv:
-            try:
-                del self.services[i]
-            except KeyError: # maybe it was not inserted in a good way, pass it
-                pass
 
 
 
@@ -134,6 +137,7 @@ class Regenerator:
     
 
     def set_schedulingitem_values(self, i):
+        return
         i.check_period = self.get_timeperiod(i.check_period)
         i.notification_period = self.get_timeperiod(i.notification_period)
         i.contacts = self.get_contacts(i.contacts)
@@ -159,7 +163,7 @@ class Regenerator:
         for dtc in h.downtimes + h.comments:
             dtc.ref = h
         self.hosts[host_name] = h
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     #In fact, an update of a host is like a check return
@@ -208,7 +212,7 @@ class Regenerator:
 
         #print "HG:", hg
         self.hostgroups[hostgroup_name] = hg
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_initial_service_status_brok(self, b):
@@ -236,10 +240,9 @@ class Regenerator:
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
         self.services[host_name+service_description] = s
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
         # We need this for manage_initial_servicegroup_status_brok where it
         # will speed things up dramatically
-        self.service_id_cache[s.id] = s
 
 
     #In fact, an update of a service is like a check return
@@ -258,7 +261,6 @@ class Regenerator:
         self.set_schedulingitem_values(s)
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
-        self.livestatus.count_event('service_checks')
    
 
 
@@ -292,7 +294,7 @@ class Regenerator:
 
         sg.members = list(set(sg.members))
         self.servicegroups[servicegroup_name] = sg
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_initial_contact_status_brok(self, b):
@@ -303,7 +305,7 @@ class Regenerator:
         self.update_element(c, data)
         #print "C:", c
         self.contacts[contact_name] = c
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_initial_contactgroup_status_brok(self, b):
@@ -320,7 +322,7 @@ class Regenerator:
                 cg.members.append(self.contacts[c_name])
         #print "CG:", cg
         self.contactgroups[contactgroup_name] = cg
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_initial_timeperiod_status_brok(self, b):
@@ -331,7 +333,7 @@ class Regenerator:
         self.update_element(tp, data)
         #print "TP:", tp
         self.timeperiods[timeperiod_name] = tp
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_initial_command_status_brok(self, b):
@@ -342,7 +344,7 @@ class Regenerator:
         self.update_element(c, data)
         #print "CMD:", c
         self.commands[command_name] = c
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_initial_scheduler_status_brok(self, b):
@@ -357,7 +359,7 @@ class Regenerator:
         self.schedulers[scheduler_name] = sched
         print "scheduler added"
         #print "MONCUL: Add a new scheduler ", sched
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_update_scheduler_status_brok(self, b):
@@ -383,7 +385,7 @@ class Regenerator:
         self.pollers[poller_name] = poller
         print "poller added"
         #print "MONCUL: Add a new scheduler ", sched
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_update_poller_status_brok(self, b):
@@ -408,7 +410,7 @@ class Regenerator:
         self.reactionners[reactionner_name] = reac
         print "reactionner added"
         #print "MONCUL: Add a new scheduler ", sched
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_update_reactionner_status_brok(self, b):
@@ -433,7 +435,7 @@ class Regenerator:
         self.brokers[broker_name] = broker
         print "broker added"
         #print "MONCUL: Add a new scheduler ", sched
-        self.number_of_objects += 1
+        #self.number_of_objects += 1
 
 
     def manage_update_broker_status_brok(self, b):
