@@ -41,6 +41,25 @@ class TestRegenerator(ShinkenTest):
         #
         self.sched.fill_initial_broks()
         rg = Regenerator()
+
+        # Got the initial creation ones
+        ids = self.sched.broks.keys()
+        ids.sort()
+        for i in ids:
+            b = self.sched.broks[i]
+            print "Manage b", b.type
+            rg.manage_brok(b)
+        self.sched.broks.clear()
+
+        # Look at Regenerator values
+        print "Hosts:", rg.hosts.__dict__
+        for h in rg.hosts:
+            orig_h = self.sched.hosts.find_by_name(h.host_name)
+            print h.state, orig_h.state
+            self.assert_(h.state == orig_h.state)
+            self.assert_(h.state_type == orig_h.state_type)
+
+
         print "Get the hosts and services"
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -63,7 +82,9 @@ class TestRegenerator(ShinkenTest):
             b = self.sched.broks[i]
             print "Manage b", b.type
             rg.manage_brok(b)
-        
+        self.sched.broks.clear()
+
+            
 
 
 if __name__ == '__main__':

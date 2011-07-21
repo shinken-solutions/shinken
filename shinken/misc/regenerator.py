@@ -174,6 +174,11 @@ class Regenerator:
             # And link contacts too
             self.linkify_contacts(h, 'contacts')
 
+            # We can really declare this host OK now
+            self.hosts[h.id] = h
+
+        self.hosts.create_reversed_list()
+
         # Linking TIMEPERIOD exclude with real ones now
         for tp in self.timeperiods:
             new_exclude = []
@@ -210,7 +215,7 @@ class Regenerator:
 
         # Ok, we can regenerate ALL find list, so your clietns will
         # see new objects now
-        self.create_reversed_list()            
+#        self.create_reversed_list()            
 
 
 
