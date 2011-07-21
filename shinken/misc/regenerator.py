@@ -41,7 +41,7 @@ from shinken.brokerlink import BrokerLink, BrokerLinks
 class Regenerator:
     def __init__(self):
 
-        # Our datas
+        # Our Real datas
         self.configs = {}
         self.hosts = Hosts([])
         self.services = Services([])
@@ -51,13 +51,23 @@ class Regenerator:
         self.contactgroups = Contactgroups([])
         self.timeperiods = Timeperiods([])
         self.commands = Commands([])
-
-        # Now satellites
         self.schedulers = SchedulerLinks([])
         self.pollers = PollerLinks([])
         self.reactionners = ReactionnerLinks([])
         self.brokers = BrokerLinks([])
+
+        # And in progress one
+        self.inp_hosts = {}
+        self.inp_services = {}
+        self.inp_contacts = {}
+        self.inp_hostgroups = {}
+        self.inp_servicegroups = {}
+        self.inp_contactgroups = {}
+        self.inp_timeperiods = {}
+        self.inp_commands = {}
         
+
+        # Do not ask for full data resent too much
         self.last_need_data_send = time.time()
 
 
@@ -73,6 +83,23 @@ class Regenerator:
             setattr(e, prop, data[prop])
 
 
+    def create_reversed_list(self):
+        self.hosts.create_reversed_list()
+        self.hostgroups.create_reversed_list()
+        self.contacts.create_reversed_list()
+        self.contactgroups.create_reversed_list()
+        #self.notificationways.create_reversed_list()
+        self.services.create_reversed_list()
+        self.servicegroups.create_reversed_list()
+        self.timeperiods.create_reversed_list()
+        #self.modules.create_reversed_list()
+        #self.resultmodulations.create_reversed_list()
+        #self.criticitymodulations.create_reversed_list()
+        #self.escalations.create_reversed_list()
+        #self.discoveryrules.create_reversed_list()
+        #self.discoveryruns.create_reversed_list()
+        self.commands.create_reversed_list()
+
 
     def manage_program_status_brok(self, b):
         data = b.data
@@ -85,8 +112,21 @@ class Regenerator:
         #for prop in data:
         #    setattr(c, prop, data[prop])
 
+        # Clean all in_progress things.
+        # And in progress one
+        self.inp_hosts[c_id] = Hosts([])
+        self.inp_services[c_id] = Services([])
+        self.inp_contacts[c_id] = Contacts([])
+        self.inp_hostgroups[c_id] = Hostgroups([])
+        self.inp_servicegroups[c_id] = Servicegroups([])
+        self.inp_contactgroups[c_id] = Contactgroups([])
+        self.inp_timeperiods[c_id] = Timeperiods([])
+        self.inp_commands[c_id] = Commands([])
+
         # And we save it
         self.configs[c_id] = c
+
+        ##Clean the old "hard" objects
 
         # We should clean all previously added hosts and services
         print "Clean hosts/service of", c_id
@@ -114,7 +154,8 @@ class Regenerator:
         for sg in self.servicegroups:
             sg.members = [s for s in sg.members if s.instance_id != inst_id]
 
-
+        # We now regererate reversed list so the client will find only real objects
+        self.create_reversed_list()
 
 
     def manage_update_program_status_brok(self, b):
@@ -479,3 +520,10 @@ class Regenerator:
     def manage_host_next_schedule_brok(self, b):
         self.manage_host_check_result_brok(b)
 
+
+    
+    def manage_initial_broks_done_brok(self, b):
+        inst_id = b.data['instance_id']
+        print "Finish the configuration of instance", inst_id
+
+        self.create_reversed_list()
