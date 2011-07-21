@@ -109,6 +109,38 @@ class Regenerator:
         i.rebuild_ref()
 
 
+    # Now we get all data about an instance, link all this stuff :)
+    def all_done_linking(self, inst_id):
+        print "In ALL Done linking phase for isntance", inst_id
+        # check if the instance is really defined, so got ALL the
+        # init phase
+        if not inst_id in self.configs.keys():
+            print "Warning : the instance %d is not fully given, bailout" % inst_id
+            return
+
+
+        try:
+            inp_hosts = self.inp_hosts[inst_id]
+            inp_hostgroups = self.inp_hostgroups[inst_id]
+        except Exception, exp:
+            print "Warning all done: ", exp
+            return
+
+        # Link hostgroups with hosts
+        for hg in inp_hostgroups:
+            new_members = []
+            for (i, hname) in hg.members:
+                h = inp_hosts.find_by_name(hname)
+                if h != None:
+                    new_members.append(h)
+            hg.members = new_members
+                
+            
+        self.create_reversed_list()
+
+
+
+############### Brok management part
 
     def manage_program_status_brok(self, b):
         data = b.data
@@ -196,7 +228,7 @@ class Regenerator:
 
         # Try to get the inp progress Hosts
         try:
-            hosts = self.inp_hosts[inst_id]
+            inp_hosts = self.inp_hosts[inst_id]
         except Exception, exp: #not good. we will cry in theprogram update
             print "Not good!", exp
             return
@@ -205,15 +237,14 @@ class Regenerator:
 
         h = Host({})
         self.update_element(h, data)        
-        self.set_schedulingitem_values(h)
-        
-        h.service_ids = []
-        h.services = []
-        h.instance_id = inst_id
+
         # We need to rebuild Downtime and Comment relationship
         for dtc in h.downtimes + h.comments:
             dtc.ref = h
-        #self.number_of_objects += 1
+
+        # Ok, put in in the in progress hosts
+        inp_hosts[h.id] = h
+
 
 
     #In fact, an update of a host is like a check return
@@ -236,33 +267,28 @@ class Regenerator:
 
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
-        hostgroup_name = data['hostgroup_name']
+        hgname = data['hostgroup_name']
         members = data['members']
-        del data['members']
+        inst_id = data['instance_id']
         
-        # Maybe we already got this hostgroup. If so, use the existing object
-        # because in different instance, we will ahve the same group with different
-        # elements
+        # Try to get the inp progress Hostgroups
         try:
-            hg = self.hostgroups[hostgroup_name]
-        except KeyError:
-            # If we got none, create a new one
-            #print "Creating hostgroup:", hg_id, data
-            hg = Hostgroup()
-            # Set by default members to a void list
-            setattr(hg, 'members', [])
+            inp_hostgroups = self.inp_hostgroups[inst_id]
+        except Exception, exp: #not good. we will cry in theprogram update
+            print "Not good!", exp
+            return
 
+        print "Creating an hostgroup: %s in instance %d" % (hgname, inst_id)
+        
+        # With void members
+        hg = Hostgroup([])
+
+        # populate data
         self.update_element(hg, data)
 
-        for (h_id, h_name) in members:
-            if h_name in self.hosts:
-                hg.members.append(self.hosts[h_name])
-                # Should got uniq value, do uniq this list
-                hg.members = list(set(hg.members))
-
-        #print "HG:", hg
-        self.hostgroups[hostgroup_name] = hg
-        #self.number_of_objects += 1
+        # We will link hosts into hostgroups later
+        # so now only save it
+        inp_hostgroups[hg.id] = hg
 
 
     def manage_initial_service_status_brok(self, b):
@@ -534,5 +560,8 @@ class Regenerator:
     def manage_initial_broks_done_brok(self, b):
         inst_id = b.data['instance_id']
         print "Finish the configuration of instance", inst_id
+        
+        self.all_done_linking(inst_id)
 
-        self.create_reversed_list()
+
+        
