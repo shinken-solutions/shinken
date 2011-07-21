@@ -128,6 +128,8 @@ class Regenerator:
             inp_hosts.create_reversed_list()
             inp_hostgroups = self.inp_hostgroups[inst_id]
             inp_hostgroups.create_reversed_list()
+            inp_contactgroups = self.inp_contactgroups[inst_id]
+            inp_contactgroups.create_reversed_list()
         except Exception, exp:
             print "Warning all done: ", exp
             return
@@ -173,6 +175,15 @@ class Regenerator:
                     new_exclude.append(t)
             tp.exclude = new_exclude
 
+
+        # Link CONTACTGROUPS with contacts
+        for cg in inp_contactgroups:
+            new_members = []
+            for (i, cname) in cg.members:
+                c = self.contacts.find_by_name(cname)
+                if c:
+                    new_members.append(c)
+            cg.members = new_members
 
         # Ok, we can regenerate ALL find list, so your clietns will
         # see new objects now
@@ -363,10 +374,11 @@ class Regenerator:
         self.livestatus.count_event('host_checks')
 
 
+    # From now we only create an hostgroup in the in prepare
+    # part. We will link at the end.
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
         hgname = data['hostgroup_name']
-        members = data['members']
         inst_id = data['instance_id']
         
         # Try to get the inp progress Hostgroups
@@ -531,22 +543,32 @@ class Regenerator:
         self.notificationways.create_reversed_list()
 
 
-
+    # From now we only create an hostgroup with unlink data in the
+    # in prepare list. We will link all of them at the end.
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
-        contactgroup_name = data['contactgroup_name']
-        members = data['members']
-        del data['members']
-        #print "Creating contactgroup:", cg_id, data
-        cg = Contactgroup()
+        cgname = data['contactgroup_name']
+        inst_id = data['instance_id']
+        
+        # Try to get the inp progress Contactgroups
+        try:
+            inp_contactgroups = self.inp_contactgroups[inst_id]
+        except Exception, exp: #not good. we will cry in theprogram update
+            print "Not good!", exp
+            return
+
+        print "Creating an contactgroup: %s in instance %d" % (cgname, inst_id)
+        
+        # With void members
+        cg = Contactgroup([])
+
+        # populate data
         self.update_element(cg, data)
-        setattr(cg, 'members', [])
-        for (c_id, c_name) in members:
-            if c_name in self.contacts:
-                cg.members.append(self.contacts[c_name])
-        #print "CG:", cg
-        self.contactgroups[contactgroup_name] = cg
-        #self.number_of_objects += 1
+
+        # We will link hosts into hostgroups later
+        # so now only save it
+        inp_contactgroups[cg.id] = cg
+
 
 
     # For Timeperiods we got 2 cases : do we already got the command or not.
