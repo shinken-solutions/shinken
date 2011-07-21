@@ -129,7 +129,7 @@ class Regenerator:
             print "Warning all done: ", exp
             return
 
-        # Link hostgroups with hosts
+        # Link HOSTGROUPS with hosts
         for hg in inp_hostgroups:
             new_members = []
             for (i, hname) in hg.members:
@@ -138,7 +138,7 @@ class Regenerator:
                     new_members.append(h)
             hg.members = new_members
                 
-        # Now link host with hostgroups, and commands
+        # Now link HOSTS with hostgroups, and commands
         for h in inp_hosts:
             #print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
             new_hostgroups = []
@@ -149,18 +149,16 @@ class Regenerator:
             h.hostgroups = new_hostgroups
             
             # Now link Command() objects
-            props = ['check_command', 'event_handler']
-            for p in props:
-                cc = getattr(h, p)
-                # if the command call is void, bypass it
-                if not cc:
-                    continue
-                cmdname = cc.command.command_name
-                c = self.commands.find_by_name(cmdname)
-                if c:
-                    cc.command = c
+            self.linkify_a_command(h, 'check_command')
+            self.linkify_a_command(h, 'event_handler')
+            
+            # Now link timeperiods
+            self.linkify_a_timeperiod(h, 'notification_period')
+            self.linkify_a_timeperiod(h, 'check_period')
+            self.linkify_a_timeperiod(h, 'maintenance_period')
 
-        # Linking Timeperiods exclude with real ones now
+
+        # Linking TIMEPERIOD exclude with real ones now
         for tp in self.timeperiods:
             new_exclude = []
             for ex in tp.exclude:
@@ -176,6 +174,32 @@ class Regenerator:
         self.create_reversed_list()            
 
 
+
+    # We look for o.prop (CommandCall) and we link the inner
+    # Command() object with our real ones
+    def linkify_a_command(self, o, prop):
+        cc = getattr(o, prop)
+        # if the command call is void, bypass it
+        if not cc:
+            return
+        cmdname = cc.command.command_name
+        c = self.commands.find_by_name(cmdname)
+        if c:
+            cc.command = c
+
+
+    # We look at the timeperiod() object of o.prop
+    # and we replace it with our true one
+    def linkify_a_timeperiod(self, o, prop):
+        t = getattr(o, prop)
+        if not t:
+            return
+        tpname = t.timeperiod_name
+        tp = self.timeperiods.find_by_name(tpname)
+        if tp:
+            print "Seeting", prop, tp.get_name(), 'of', o.get_name()
+            setattr(o, prop, tp)
+            
 
 
 ############### Brok management part
