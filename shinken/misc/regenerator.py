@@ -118,10 +118,13 @@ class Regenerator:
             print "Warning : the instance %d is not fully given, bailout" % inst_id
             return
 
-
+        # Try to load the in progress list and make them available for 
+        # finding
         try:
             inp_hosts = self.inp_hosts[inst_id]
+            inp_hosts.create_reversed_list()
             inp_hostgroups = self.inp_hostgroups[inst_id]
+            inp_hostgroups.create_reversed_list()
         except Exception, exp:
             print "Warning all done: ", exp
             return
@@ -131,12 +134,23 @@ class Regenerator:
             new_members = []
             for (i, hname) in hg.members:
                 h = inp_hosts.find_by_name(hname)
-                if h != None:
+                if h:
                     new_members.append(h)
             hg.members = new_members
                 
-            
-        self.create_reversed_list()
+        # Now link host with hostgroups
+        for h in inp_hosts:
+            print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
+            new_hostgroups = []
+            for hgname in h.hostgroups.split(','):
+                hg = inp_hostgroups.find_by_name(hgname)
+                if hg:
+                    new_hostgroups.append(hg)
+            h.hostgroups = new_hostgroups
+
+
+        self.create_reversed_list()            
+
 
 
 
