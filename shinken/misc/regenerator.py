@@ -162,6 +162,8 @@ class Regenerator:
         data = b.data
         c_id = data['instance_id']
 
+        # If we got an update about an unknow isntance, cry and ask for a full
+        # version!
         if c_id not in self.instance_ids:
             # Do not ask data too quickly, very dangerous
             # one a minute
@@ -173,7 +175,7 @@ class Regenerator:
             return
 
         # We have only one config here, with id 0
-        c = self.configs[0]
+        c = self.configs[c_id]
         self.update_element(c, data)
     
 
@@ -183,16 +185,21 @@ class Regenerator:
         i.notification_period = self.get_timeperiod(i.notification_period)
         i.contacts = self.get_contacts(i.contacts)
         i.rebuild_ref()
-        #Escalations is not use for status_dat
-        del i.escalations
         
 
+    # Get a new host. Add in in in progress tab
     def manage_initial_host_status_brok(self, b):
         data = b.data
-        
-        host_name = data['host_name']
+        hname = data['host_name']
         inst_id = data['instance_id']
-        #print "Creating host:", h_id, b
+
+        # Try to get the inp progress Hosts
+        try:
+            hosts = self.inp_hosts[c_id]
+        except: #not good. we will cry in theprogram update
+            return
+
+        print "Creating an host: %s in instance %d" % (hname, inst_id)
         h = Host({})
         self.update_element(h, data)        
         self.set_schedulingitem_values(h)
