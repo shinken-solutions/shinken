@@ -57,7 +57,6 @@ class Regenerator:
         self.pollers = PollerLinks([])
         self.reactionners = ReactionnerLinks([])
         self.brokers = BrokerLinks([])
-        
 
         # And in progress one
         self.inp_hosts = {}
@@ -68,7 +67,6 @@ class Regenerator:
         self.inp_contactgroups = {}
         self.inp_timeperiods = {}
         self.inp_commands = {}
-        
 
         # Do not ask for full data resent too much
         self.last_need_data_send = time.time()
@@ -114,7 +112,7 @@ class Regenerator:
 
     # Now we get all data about an instance, link all this stuff :)
     def all_done_linking(self, inst_id):
-        print "In ALL Done linking phase for isntance", inst_id
+        print "In ALL Done linking phase for instance", inst_id
         # check if the instance is really defined, so got ALL the
         # init phase
         if not inst_id in self.configs.keys():
@@ -127,12 +125,13 @@ class Regenerator:
             inp_hosts = self.inp_hosts[inst_id]
             inp_hosts.create_reversed_list()
             inp_hostgroups = self.inp_hostgroups[inst_id]
-            inp_hostgroups.create_reversed_list()
+            #inp_hostgroups.create_reversed_list()
             inp_contactgroups = self.inp_contactgroups[inst_id]
             inp_contactgroups.create_reversed_list()
         except Exception, exp:
             print "Warning all done: ", exp
             return
+
 
         # Link HOSTGROUPS with hosts
         for hg in inp_hostgroups:
@@ -142,13 +141,26 @@ class Regenerator:
                 if h:
                     new_members.append(h)
             hg.members = new_members
+
+        # Merge HOSTGROUPS with real ones
+        for inphg in inp_hostgroups:
+            hgname = inphg.hostgroup_name
+            hg = self.hostgroups.find_by_name(hgname)
+            # If hte hostgroup already exist, just add the new
+            # hosts into it
+            if hg:
+                hg.members.extend(inphg.members)
+            else: # else take the new one
+                self.hostgroups[inphg.id] = inphg
+        # We can delare hostgroups done
+        self.hostgroups.create_reversed_list()
                 
         # Now link HOSTS with hostgroups, and commands
         for h in inp_hosts:
             #print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
             new_hostgroups = []
             for hgname in h.hostgroups.split(','):
-                hg = inp_hostgroups.find_by_name(hgname)
+                hg = self.hostgroups.find_by_name(hgname)
                 if hg:
                     new_hostgroups.append(hg)
             h.hostgroups = new_hostgroups
