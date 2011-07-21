@@ -125,6 +125,7 @@ class Regenerator:
             inp_contactgroups = self.inp_contactgroups[inst_id]
             inp_services = self.inp_services[inst_id]
             inp_services.create_reversed_list()
+            inp_servicegroups = self.inp_servicegroups[inst_id]
         except Exception, exp:
             print "Warning all done: ", exp
             return
@@ -180,16 +181,42 @@ class Regenerator:
         self.hosts.create_reversed_list()
 
 
+
+        # Link SERVICEGROUPS with services
+        for sg in inp_servicegroups:
+            new_members = []
+            print sg.members
+            for (i, sname) in sg.members:
+                if i not in inp_services:
+                    continue
+                s = inp_services[i]
+                new_members.append(s)
+            sg.members = new_members
+
+        # Merge SERVICEGROUPS with real ones
+        for inpsg in inp_servicegroups:
+            sgname = inpsg.servicegroup_name
+            sg = self.servicegroups.find_by_name(sgname)
+            # If the servicegroup already exist, just add the new
+            # services into it
+            if sg:
+                sg.members.extend(inpsg.members)
+            else: # else take the new one
+                self.servicegroups[inpsg.id] = inpsg
+        # We can delare servicegroups done
+        self.servicegroups.create_reversed_list()
+
+
         # Now link SERVICES with hosts, servicesgroups, and commands
         for s in inp_services:
-            #print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
-            #new_hostgroups = []
-            #for hgname in h.hostgroups.split(','):
-            #    hg = self.hostgroups.find_by_name(hgname)
-            #    if hg:
-            #        new_hostgroups.append(hg)
-            #h.hostgroups = new_hostgroups
+            new_servicegroups = []
+            for sgname in s.servicegroups.split(','):
+                sg = self.servicegroups.find_by_name(sgname)
+                if sg:
+                    new_servicegroups.append(sg)
+            s.servicegroups = new_servicegroups
             
+            # Now link with host
             hname = s.host_name
             s.host = self.hosts.find_by_name(hname)
             if s.host:
@@ -505,38 +532,32 @@ class Regenerator:
             dtc.ref = s
    
 
-
+    # We create a servicegroup in our in progress part
+    # we will link it after
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
-        sg_id = data['id']
-        servicegroup_name = data['servicegroup_name']
-        members = data['members']
-        del data['members']
-
-        # Like for hostgroups, maybe we already got this
-        # service group from another instance, need to
-        # factorize all
+        sgname = data['servicegroup_name']
+        inst_id = data['instance_id']
+        
+        # Try to get the inp progress Hostgroups
         try:
-            sg = self.servicegroups[servicegroup_name]
-        except KeyError:
-            #print "Creating servicegroup:", sg_id, data
-            sg = Servicegroup()
-            # By default set members as a void list
-            setattr(sg, 'members', [])
+            inp_servicegroups = self.inp_servicegroups[inst_id]
+        except Exception, exp: #not good. we will cry in theprogram update
+            print "Not good!", exp
+            return
 
+        print "Creating a servicegroup: %s in instance %d" % (sgname, inst_id)
+        
+        # With void members
+        sg = Servicegroup([])
+
+        # populate data
         self.update_element(sg, data)
 
-        for (s_id, s_name) in members:
-            # A direct lookup by s_host_name+s_name is not possible
-            # because we don't have the host_name in members, only ids.
-            try:
-                sg.members.append(self.service_id_cache[s_id])
-            except Exception:
-                pass
+        # We will link hosts into hostgroups later
+        # so now only save it
+        inp_servicegroups[sg.id] = sg
 
-        sg.members = list(set(sg.members))
-        self.servicegroups[servicegroup_name] = sg
-        #self.number_of_objects += 1
 
 
     # For Contacts, it's a global value, so 2 cases :
@@ -621,7 +642,7 @@ class Regenerator:
         # populate data
         self.update_element(cg, data)
 
-        # We will link hosts into hostgroups later
+        # We will link contacts into contactgroups later
         # so now only save it
         inp_contactgroups[cg.id] = cg
 
