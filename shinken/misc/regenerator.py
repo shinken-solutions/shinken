@@ -161,7 +161,7 @@ class Regenerator:
             self.linkify_a_timeperiod(h, 'maintenance_period')
 
             # And link contacts too
-            self.linkify_contacts(h. 'contacts')
+            self.linkify_contacts(h, 'contacts')
 
         # Linking TIMEPERIOD exclude with real ones now
         for tp in self.timeperiods:
@@ -224,14 +224,15 @@ class Regenerator:
     # we replace it with true object in self.contacts
     def linkify_contacts(self, o, prop):
         v = getattr(o, prop)
+
         if not v:
             return
+
         new_v = []
         for oc in v:
-            cname = cc.contact_name
+            cname = oc.contact_name
             c = self.contacts.find_by_name(cname)
             if c:
-                print "Find a legal contact", cname, "for", o.get_name(), prop
                 new_v.append(c)
         setattr(o, prop, new_v)
                 
@@ -485,6 +486,7 @@ class Regenerator:
             print "Creating Contact:", cname
             c = Contact({})
             self.update_element(c, data)
+            self.contacts[c.id] = c
         
         # Delete some useless contact values
         del c.host_notification_commands
