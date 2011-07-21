@@ -789,6 +789,8 @@ member_key: the key to be used to sort each resulting element of a group member.
         # The filters are closures.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         def eq_filter(ref):
+            if ((ref[attribute] is None) and (reference == "")):
+                return True
             return ref[attribute] == reference
 
         def eq_nocase_filter(ref):
