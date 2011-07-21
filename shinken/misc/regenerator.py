@@ -122,9 +122,9 @@ class Regenerator:
             inp_hosts = self.inp_hosts[inst_id]
             inp_hosts.create_reversed_list()
             inp_hostgroups = self.inp_hostgroups[inst_id]
-            #inp_hostgroups.create_reversed_list()
             inp_contactgroups = self.inp_contactgroups[inst_id]
-            inp_contactgroups.create_reversed_list()
+            inp_services = self.inp_services[inst_id]
+            inp_services.create_reversed_list()
         except Exception, exp:
             print "Warning all done: ", exp
             return
@@ -178,6 +178,40 @@ class Regenerator:
             self.hosts[h.id] = h
 
         self.hosts.create_reversed_list()
+
+
+        # Now link SERVICES with hosts, servicesgroups, and commands
+        for s in inp_services:
+            #print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
+            #new_hostgroups = []
+            #for hgname in h.hostgroups.split(','):
+            #    hg = self.hostgroups.find_by_name(hgname)
+            #    if hg:
+            #        new_hostgroups.append(hg)
+            #h.hostgroups = new_hostgroups
+            
+            hname = s.host_name
+            s.host = self.hosts.find_by_name(hname)
+            if s.host:
+                s.host.services.append(s)
+            
+            # Now link Command() objects
+            self.linkify_a_command(s, 'check_command')
+            self.linkify_a_command(s, 'event_handler')
+            
+            # Now link timeperiods
+            self.linkify_a_timeperiod(s, 'notification_period')
+            self.linkify_a_timeperiod(s, 'check_period')
+            self.linkify_a_timeperiod(s, 'maintenance_period')
+
+            # And link contacts too
+            self.linkify_contacts(s, 'contacts')
+
+            # We can really declare this host OK now
+            self.services[s.id] = s
+
+        self.services.create_reversed_list()
+
 
         # Linking TIMEPERIOD exclude with real ones now
         for tp in self.timeperiods:
@@ -428,32 +462,29 @@ class Regenerator:
 
     def manage_initial_service_status_brok(self, b):
         data = b.data
-        s_id = data['id']
-        host_name = data['host_name']
-        service_description = data['service_description']
+        hname = data['host_name']
+        sdesc = data['service_description']
         inst_id = data['instance_id']
-        
-        #print "Creating Service:", s_id, data
-        s = Service({})
-        s.instance_id = inst_id
 
-        self.update_element(s, data)
-        self.set_schedulingitem_values(s)
-        
+        # Try to get the inp progress Hosts
         try:
-            h = self.hosts[host_name]
-            # Reconstruct the connection between hosts and services
-            h.services.append(s)
-            # There is already a s.host_name, but a reference to the h object can be useful too
-            s.host = h
-        except Exception:
+            inp_services = self.inp_services[inst_id]
+        except Exception, exp: #not good. we will cry in theprogram update
+            print "Not good!", exp
             return
+
+        print "Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id)
+
+        s = Service({})
+        self.update_element(s, data)
+
+        # We need to rebuild Downtime and Comment relationship
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
-        self.services[host_name+service_description] = s
-        #self.number_of_objects += 1
-        # We need this for manage_initial_servicegroup_status_brok where it
-        # will speed things up dramatically
+
+        # Ok, put in in the in progress hosts
+        inp_services[s.id] = s
+
 
 
     #In fact, an update of a service is like a check return
