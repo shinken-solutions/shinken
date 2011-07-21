@@ -67,7 +67,7 @@ class Contact(Item):
         'address6':         StringProp(default='none', fill_brok=['full_status']),
         'can_submit_commands': BoolProp(default='0', fill_brok=['full_status']),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
-        'notificationways': StringProp(default=''),
+        'notificationways': StringProp(default='', fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()

@@ -25,6 +25,7 @@ from shinken.objects import Service, Services
 from shinken.objects import Servicegroup, Servicegroups
 from shinken.objects import Contact, Contacts
 from shinken.objects import Contactgroup, Contactgroups
+from shinken.objects import NotificationWay, NotificationWays
 from shinken.objects import Timeperiod, Timeperiods
 from shinken.objects import Command, Commands
 from shinken.objects import Config
@@ -45,6 +46,7 @@ class Regenerator:
         self.configs = {}
         self.hosts = Hosts([])
         self.services = Services([])
+        self.notificationways = NotificationWays([])
         self.contacts = Contacts([])
         self.hostgroups = Hostgroups([])
         self.servicegroups = Servicegroups([])
@@ -55,6 +57,7 @@ class Regenerator:
         self.pollers = PollerLinks([])
         self.reactionners = ReactionnerLinks([])
         self.brokers = BrokerLinks([])
+        
 
         # And in progress one
         self.inp_hosts = {}
@@ -88,7 +91,7 @@ class Regenerator:
         self.hostgroups.create_reversed_list()
         self.contacts.create_reversed_list()
         self.contactgroups.create_reversed_list()
-        #self.notificationways.create_reversed_list()
+        self.notificationways.create_reversed_list()
         self.services.create_reversed_list()
         self.servicegroups.create_reversed_list()
         self.timeperiods.create_reversed_list()
@@ -186,6 +189,20 @@ class Regenerator:
         c = self.commands.find_by_name(cmdname)
         if c:
             cc.command = c
+
+
+    # We look at o.prop and for each command we relink it
+    def linkify_commands(self, o, prop):
+        v = getattr(o, prop)
+        if not v:
+            return
+
+        for cc in v:
+            cmdname = cc.command.command_name
+            c = self.commands.find_by_name(cmdname)
+            if c:
+                cc.command = c
+        
 
 
     # We look at the timeperiod() object of o.prop
@@ -451,6 +468,47 @@ class Regenerator:
             c = Contact({})
             self.update_element(c, data)
         
+        # Delete some useless contact values
+        del c.host_notification_commands
+        del c.service_notification_commands
+        del c.host_notification_period
+        del c.service_notification_period
+
+        # Now manage notification ways too
+        # Same than for cotnacts. We create or
+        # update
+        nws = c.notificationways
+        print "Got notif ways", nws
+        new_notifways = []
+        for cnw in nws:
+            nwname = cnw.notificationway_name
+            nw = self.notificationways.find_by_name(nwname)
+            if not nw:
+                print "Creating notif way", nwname
+                nw = NotificationWay([])
+                self.notificationways[nw.id] = nw
+            # Now update it
+            for prop in NotificationWay.properties:
+                if hasattr(cnw, prop):
+                    setattr(nw, prop, getattr(cnw, prop))
+            new_notifways.append(nw)
+            
+            # Linking the notification way
+            # With commands
+            self.linkify_commands(nw, 'host_notification_commands')
+            self.linkify_commands(nw, 'service_notification_commands')
+            
+            
+            # Now link timeperiods
+            self.linkify_a_timeperiod(nw, 'host_notification_period')
+            self.linkify_a_timeperiod(nw, 'service_notification_period')
+
+        c.notificationways = new_notifways
+
+        # Ok, declare this contact now :)
+        # And notif ways too
+        self.contacts.create_reversed_list()
+        self.notificationways.create_reversed_list()
 
 
 
