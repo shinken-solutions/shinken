@@ -61,12 +61,9 @@ class Regenerator:
         # And in progress one
         self.inp_hosts = {}
         self.inp_services = {}
-        self.inp_contacts = {}
         self.inp_hostgroups = {}
         self.inp_servicegroups = {}
         self.inp_contactgroups = {}
-        self.inp_timeperiods = {}
-        self.inp_commands = {}
 
         # Do not ask for full data resent too much
         self.last_need_data_send = time.time()
@@ -292,12 +289,9 @@ class Regenerator:
         # And in progress one
         self.inp_hosts[c_id] = Hosts([])
         self.inp_services[c_id] = Services([])
-        self.inp_contacts[c_id] = Contacts([])
         self.inp_hostgroups[c_id] = Hostgroups([])
         self.inp_servicegroups[c_id] = Servicegroups([])
         self.inp_contactgroups[c_id] = Contactgroups([])
-        self.inp_timeperiods[c_id] = Timeperiods([])
-        self.inp_commands[c_id] = Commands([])
 
         # And we save it
         self.configs[c_id] = c
