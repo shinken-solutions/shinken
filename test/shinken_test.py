@@ -46,6 +46,8 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 
+from shinken.misc.regenerator import Regenerator
+
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')

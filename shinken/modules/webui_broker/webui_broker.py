@@ -17,12 +17,10 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Broker. It is in charge
-#to brok information of the service perfdata into the file
-#var/service-perfdata
-#So it just manage the service_check_return
-#Maybe one day host data will be usefull too
-#It will need just a new file, and a new manager :)
+"""
+This Class is a plugin for the Shinken Broker. It is in charge
+to get brok and recreate real objects, and propose a Web intnerface :)
+"""
 
 import traceback
 import sys
