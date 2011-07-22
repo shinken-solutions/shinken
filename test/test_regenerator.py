@@ -71,8 +71,8 @@ class TestRegenerator(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
-        self.assert_(host.state == 'UP')
+        self.scheduler_loop(3, [[host, 2, 'DOWN | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
+        self.assert_(host.state == 'DOWN')
         self.assert_(host.state_type == 'HARD')
 
 
@@ -84,7 +84,14 @@ class TestRegenerator(ShinkenTest):
             rg.manage_brok(b)
         self.sched.broks.clear()
 
-            
+        # Look at Regenerator values
+        print "Hosts:", rg.hosts.__dict__
+        for h in rg.hosts:
+            orig_h = self.sched.hosts.find_by_name(h.host_name)
+            print h.state, orig_h.state
+            self.assert_(h.state == orig_h.state)
+            self.assert_(h.state_type == orig_h.state_type)
+
 
 
 if __name__ == '__main__':

@@ -351,8 +351,6 @@ class Regenerator:
         # We get a real Conf object ,adn put our data
         c = Config()
         self.update_element(c, data)
-        #for prop in data:
-        #    setattr(c, prop, data[prop])
 
         # Clean all in_progress things.
         # And in progress one
@@ -604,7 +602,7 @@ class Regenerator:
     # if not : create it and delacre it in our main commands
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
-        print "Creatin timeperiod", data
+        #print "Creatin timeperiod", data
         tpname = data['timeperiod_name']
         
         tp = self.timeperiods.find_by_name(tpname)
@@ -612,10 +610,11 @@ class Regenerator:
             # print "Already exisintg timeperiod", tpname
             self.update_element(tp, data)
         else:
-            print "Creating Timeperiod:", tpname
+            #print "Creating Timeperiod:", tpname
             tp = Timeperiod({})
             self.update_element(tp, data)
             self.timeperiods[tp.id] = tp
+            # We add a timeperiod, we update the reversed list
             self.timeperiods.create_reversed_list()
 
 
@@ -637,6 +636,7 @@ class Regenerator:
             self.commands[c.id] = c
             # Ok, we can regenerate the reversed list so
             self.commands.create_reversed_list()
+
 
 
     def manage_initial_scheduler_status_brok(self, b):
@@ -736,28 +736,41 @@ class Regenerator:
                 self.last_need_data_send = time.time()
             return
 
-        # We have only one config here, with id 0
+        # Ok, good conf, we can update it
         c = self.configs[c_id]
         self.update_element(c, data)
             
 
 
-    #In fact, an update of a host is like a check return
+    # In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
-        self.manage_host_check_result_brok(b)
+        # There are some properties taht should nto change and are already linked
+        # so just remove them
+        clean_prop = ['childs', 'parents', 'check_command', 'hostgroups',
+                      'contacts', 'notification_period', 'contact_groups', 'child_dependencies',
+                      'check_period', 'parent_dependencies', 'event_handler',
+                      'maintenance_period', 'realm', 'customs', 'escalations']
+
         data = b.data
-        host_name = data['host_name']
-        #In the status, we've got duplicated item, we must relink thems
-        try:
-            h = self.hosts[host_name]
-        except KeyError:
-            print "Warning : the host %s is unknown!" % host_name
-            return
-        self.update_element(h, data)
-        self.set_schedulingitem_values(h)
-        for dtc in h.downtimes + h.comments:
-            dtc.ref = h
-        self.livestatus.count_event('host_checks')
+        for prop in clean_prop:
+            del data[prop]
+
+        
+        print "Update host status with"
+        for (key, value) in data.items():
+            print "Key:", key, value
+            
+        hname = data['host_name']
+        h = self.hosts.find_by_name(hname)
+
+        if h:
+            self.update_element(h, data)
+
+            #TODO : relink impacts and problems
+
+            # Relink downtimes and comments
+            for dtc in h.downtimes + h.comments:
+                dtc.ref = h
 
 
 
@@ -826,12 +839,11 @@ class Regenerator:
 ################# Check result and schedule part
     def manage_host_check_result_brok(self, b):
         data = b.data
-        host_name = data['host_name']
-        try:
-            h = self.hosts[host_name]
+        hname = data['host_name']
+
+        h = self.hosts.find_by_name(hname)
+        if h:
             self.update_element(h, data)
-        except Exception:
-            pass
 
 
     # this brok should arrive within a second after the host_check_result_brok
