@@ -776,18 +776,32 @@ class Regenerator:
 
     #In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
-        self.manage_service_check_result_brok(b)
+        # There are some properties taht should nto change and are already linked
+        # so just remove them
+        clean_prop = ['check_command', 'servicegroups',
+                      'contacts', 'notification_period', 'contact_groups', 'child_dependencies',
+                      'check_period', 'parent_dependencies', 'event_handler',
+                      'maintenance_period', 'customs', 'escalations']
+
         data = b.data
-        host_name = data['host_name']
-        service_description = data['service_description']
-        #In the status, we've got duplicated item, we must relink thems
-        try:
-            s = self.services[host_name+service_description]
-        except KeyError:
-            print "Warning : the service %s/%s is unknown!" % (host_name, service_description)
-            return
-        self.update_element(s, data)
-        self.set_schedulingitem_values(s)
+        for prop in clean_prop:
+            del data[prop]
+
+        
+        print "Update service status with"
+        for (key, value) in data.items():
+            print "Key:", key, value
+
+
+        hname = data['host_name']
+        sdesc = data['service_description']
+        s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
+        if s:
+            self.update_element(s, data)
+
+        # TODO : relink impacts and problems
+
+        # Relink downtimes and comments with the service
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
 
@@ -854,13 +868,11 @@ class Regenerator:
     #A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
-        host_name = data['host_name']
-        service_description = data['service_description']
-        try:
-            s = self.services[host_name+service_description]
+        hname = data['host_name']
+        sdesc = data['service_description']
+        s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
+        if s:
             self.update_element(s, data)
-        except Exception:
-            pass
 
 
     #A service check update have just arrived, we UPDATE data info with this

@@ -59,6 +59,13 @@ class TestRegenerator(ShinkenTest):
             self.assert_(h.state == orig_h.state)
             self.assert_(h.state_type == orig_h.state_type)
 
+        print "Services:", rg.services.__dict__
+        for s in rg.services:
+            orig_s = self.sched.services.find_srv_by_name_and_hostname(s.host.host_name, s.service_description)
+            print s.state, orig_s.state
+            self.assert_(s.state == orig_s.state)
+            self.assert_(s.state_type == orig_s.state_type)
+
 
         print "Get the hosts and services"
         now = time.time()
@@ -92,6 +99,13 @@ class TestRegenerator(ShinkenTest):
             self.assert_(h.state == orig_h.state)
             self.assert_(h.state_type == orig_h.state_type)
 
+
+        print "Services:", rg.services.__dict__
+        for s in rg.services:
+            orig_s = self.sched.services.find_srv_by_name_and_hostname(s.host.host_name, s.service_description)
+            print s.state, orig_s.state
+            self.assert_(s.state == orig_s.state)
+            self.assert_(s.state_type == orig_s.state_type)
 
 
 if __name__ == '__main__':
