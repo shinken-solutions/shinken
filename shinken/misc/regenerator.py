@@ -243,17 +243,17 @@ class Regenerator:
         for h in inp_hosts:
             self.linkify_dict_srv_and_hosts(h, 'impacts')
             self.linkify_dict_srv_and_hosts(h, 'source_problems')
-            self.linkify_dict_srv_and_hosts(h, 'parents')
-            self.linkify_dict_srv_and_hosts(h, 'childs')
+            self.linkify_host_and_hosts(h, 'parents')
+            self.linkify_host_and_hosts(h, 'childs')
             self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')
             self.linkify_dict_srv_and_hosts(h, 'child_dependencies')
 
-            
+        # Now services too
         for s in inp_services:
             self.linkify_dict_srv_and_hosts(s, 'impacts')
             self.linkify_dict_srv_and_hosts(s, 'source_problems')
-            self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')
-            self.linkify_dict_srv_and_hosts(h, 'child_dependencies')
+            self.linkify_dict_srv_and_hosts(s, 'parent_dependencies')
+            self.linkify_dict_srv_and_hosts(s, 'child_dependencies')
 
         # Linking TIMEPERIOD exclude with real ones now
         for tp in self.timeperiods:
@@ -360,8 +360,32 @@ class Regenerator:
             return
                 
         new_v = []
-        print "Linkify Dict SRV/Host", v
+        print "Linkify Dict SRV/Host", v, o.get_name(), prop
+        for name in v['services']:
+            elts = name.split('/')
+            hname = elts[0]
+            sdesc = elts[1]
+            s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
+            if s:
+                new_v.append(s)
+        for hname in v['hosts']:
+            h = self.hosts.find_by_name(hname)
+            if h:
+                new_v.append(h)
+        setattr(o, prop, new_v)
 
+    def linkify_host_and_hosts(self, o, prop):
+        v = getattr(o, prop)
+
+        if not v:
+            return
+
+        new_v = []
+        for hname in v:
+            h = self.hosts.find_by_name(hname)
+            if h:
+                new_v.append(h)
+        setattr(o, prop, new_v)
 
 ############### Brok management part
 
@@ -786,7 +810,9 @@ class Regenerator:
         if h:
             self.update_element(h, data)
 
-            #TODO : relink impacts and problems
+            # We can have some change in our impacts and source problems.
+            self.linkify_dict_srv_and_hosts(h, 'impacts')
+            self.linkify_dict_srv_and_hosts(h, 'source_problems')
 
             # Relink downtimes and comments
             for dtc in h.downtimes + h.comments:
@@ -813,11 +839,13 @@ class Regenerator:
         if s:
             self.update_element(s, data)
 
-        # TODO : relink impacts and problems
+            # We can have some change in our impacts and source problems.
+            self.linkify_dict_srv_and_hosts(s, 'impacts')
+            self.linkify_dict_srv_and_hosts(s, 'source_problems')
 
-        # Relink downtimes and comments with the service
-        for dtc in s.downtimes + s.comments:
-            dtc.ref = s
+            # Relink downtimes and comments with the service
+            for dtc in s.downtimes + s.comments:
+                dtc.ref = s
 
 
 
