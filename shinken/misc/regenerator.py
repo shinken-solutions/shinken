@@ -236,9 +236,16 @@ class Regenerator:
 
             # We can really declare this host OK now
             self.services[s.id] = s
-
         self.services.create_reversed_list()
 
+        # Now we can link all impacts/source problem list
+        # but only for the new ones here of course
+        for h in inp_hosts:
+            self.linkify_dict_srv_and_hosts(h, 'impacts')
+            self.linkify_dict_srv_and_hosts(h, 'source_problems')
+        for s in inp_services:
+            self.linkify_dict_srv_and_hosts(s, 'impacts')
+            self.linkify_dict_srv_and_hosts(s, 'source_problems')
 
         # Linking TIMEPERIOD exclude with real ones now
         for tp in self.timeperiods:
@@ -335,7 +342,17 @@ class Regenerator:
             if c:
                 new_v.append(c)
         setattr(o, prop, new_v)
+
+    # We got a service/host dict, we want to get back to a
+    # flat list
+    def linkify_dict_srv_and_hosts(self, o, prop):
+        v = getattr(o, prop)
+
+        if not v:
+            return
                 
+        new_v = []
+        print "Linkify Dict SRV/Host", v
 
 
 ############### Brok management part
@@ -754,11 +771,6 @@ class Regenerator:
         data = b.data
         for prop in clean_prop:
             del data[prop]
-
-        
-        print "Update host status with"
-        for (key, value) in data.items():
-            print "Key:", key, value
             
         hname = data['host_name']
         h = self.hosts.find_by_name(hname)
@@ -786,12 +798,6 @@ class Regenerator:
         data = b.data
         for prop in clean_prop:
             del data[prop]
-
-        
-        print "Update service status with"
-        for (key, value) in data.items():
-            print "Key:", key, value
-
 
         hname = data['host_name']
         sdesc = data['service_description']
