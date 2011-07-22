@@ -33,6 +33,7 @@ from shinken.basemodule import BaseModule
 from shinken.message import Message
 from shinken.webui.bottle import Bottle, run, static_file, view, route
 from shinken.misc.regenerator import Regenerator
+from datamanager import datamgr
 
 # Debug
 import shinken.webui.bottle as bottle
@@ -60,6 +61,8 @@ class Webui_broker(BaseModule):
         self.host = getattr(modconf, 'host', '0.0.0.0')
 
         self.rg = Regenerator()
+        self.datamgr = datamgr
+        datamgr.load(self.rg)
 
 
     # Called by Broker so we can do init stuff

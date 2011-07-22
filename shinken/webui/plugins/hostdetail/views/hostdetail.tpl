@@ -20,7 +20,7 @@
 
 
 
-%include header title='Host detail about ' + host_name
+%include header title='Host detail about ' + host.host_name
 
 <script type="text/javascript">
   var tabs = new MGFX.Tabs('.tab','.feature',{
@@ -60,7 +60,7 @@
 				</div>
 				<div class="grid_13">
 					<div id="host_preview">
-						<h2 class="icon_warning">Warning: {{host_name}}</h2>
+						<h2 class="icon_warning">Warning: {{host.host_name}}</h2>
 						<dl class="grid_6">
 						    <dt>Alias:</dt>
 						    <dd>alias-name</dd>
