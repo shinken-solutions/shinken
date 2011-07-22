@@ -109,6 +109,7 @@ class Regenerator:
 
     # Now we get all data about an instance, link all this stuff :)
     def all_done_linking(self, inst_id):
+        start = time.time()
         print "In ALL Done linking phase for instance", inst_id
         # check if the instance is really defined, so got ALL the
         # init phase
@@ -129,7 +130,6 @@ class Regenerator:
         except Exception, exp:
             print "Warning all done: ", exp
             return
-
 
         # Link HOSTGROUPS with hosts
         for hg in inp_hostgroups:
@@ -180,8 +180,6 @@ class Regenerator:
 
         self.hosts.create_reversed_list()
 
-
-
         # Link SERVICEGROUPS with services
         for sg in inp_servicegroups:
             new_members = []
@@ -205,7 +203,6 @@ class Regenerator:
                 self.servicegroups[inpsg.id] = inpsg
         # We can delare servicegroups done
         self.servicegroups.create_reversed_list()
-
 
         # Now link SERVICES with hosts, servicesgroups, and commands
         for s in inp_services:
@@ -236,7 +233,8 @@ class Regenerator:
 
             # We can really declare this host OK now
             self.services[s.id] = s
-        self.services.create_reversed_list()
+        self.services.optimize_service_search(self.hosts)
+        #self.services.create_reversed_list()
 
         # Now we can link all impacts/source problem list
         # but only for the new ones here of course
@@ -265,7 +263,6 @@ class Regenerator:
                     new_exclude.append(t)
             tp.exclude = new_exclude
 
-
         # Link CONTACTGROUPS with contacts
         for cg in inp_contactgroups:
             new_members = []
@@ -288,19 +285,17 @@ class Regenerator:
         # We can delare contactgroups done
         self.contactgroups.create_reversed_list()
 
-
-        # Ok, we can regenerate ALL find list, so your clietns will
-        # see new objects now
-#        self.create_reversed_list()            
+        print "ALL LINKING TIME"*10, time.time() - start
 
 
 
     # We look for o.prop (CommandCall) and we link the inner
     # Command() object with our real ones
     def linkify_a_command(self, o, prop):
-        cc = getattr(o, prop)
+        cc = getattr(o, prop, None)
         # if the command call is void, bypass it
         if not cc:
+            setattr(o, prop, None)
             return
         cmdname = cc.command.command_name
         c = self.commands.find_by_name(cmdname)
@@ -310,8 +305,10 @@ class Regenerator:
 
     # We look at o.prop and for each command we relink it
     def linkify_commands(self, o, prop):
-        v = getattr(o, prop)
+        v = getattr(o, prop, None)
         if not v:
+            # If do not have a command list, put a void list instead
+            setattr(o, prop, [])
             return
 
         for cc in v:
@@ -325,13 +322,14 @@ class Regenerator:
     # We look at the timeperiod() object of o.prop
     # and we replace it with our true one
     def linkify_a_timeperiod(self, o, prop):
-        t = getattr(o, prop)
+        t = getattr(o, prop, None)
         if not t:
+            setattr(o, prop, None)
             return
         tpname = t.timeperiod_name
         tp = self.timeperiods.find_by_name(tpname)
         if tp:
-            print "Seeting", prop, tp.get_name(), 'of', o.get_name()
+            #print "Seeting", prop, tp.get_name(), 'of', o.get_name()
             setattr(o, prop, tp)
             
 
@@ -360,7 +358,7 @@ class Regenerator:
             return
                 
         new_v = []
-        print "Linkify Dict SRV/Host", v, o.get_name(), prop
+        #print "Linkify Dict SRV/Host", v, o.get_name(), prop
         for name in v['services']:
             elts = name.split('/')
             hname = elts[0]
@@ -775,7 +773,7 @@ class Regenerator:
 
         # If we got an update about an unknow isntance, cry and ask for a full
         # version!
-        if c_id not in self.instance_ids:
+        if not c_id in self.configs.keys():
             # Do not ask data too quickly, very dangerous
             # one a minute
             if time.time() - self.last_need_data_send > 60:

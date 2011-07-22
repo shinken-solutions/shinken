@@ -32,6 +32,7 @@ import select
 from shinken.basemodule import BaseModule
 from shinken.message import Message
 from shinken.webui.bottle import Bottle, run, static_file, view, route
+from shinken.misc.regenerator import Regenerator
 
 # Debug
 import shinken.webui.bottle as bottle
@@ -58,6 +59,7 @@ class Webui_broker(BaseModule):
         self.port = int(getattr(modconf, 'port', '8080'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
 
+        self.rg = Regenerator()
 
 
     # Called by Broker so we can do init stuff
@@ -115,8 +117,9 @@ class Webui_broker(BaseModule):
                 # Else it can be data from the broker
                 if s == self.to_q._reader:
                     print "Handle Queue() request"
-                    d = self.to_q.get()
-            
+                    b = self.to_q.get()
+                    self.rg.manage_brok(b)
+                    
 
 
 
