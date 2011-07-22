@@ -109,6 +109,11 @@ class Regenerator:
 
     # Now we get all data about an instance, link all this stuff :)
     def all_done_linking(self, inst_id):
+        # Mem debug phase
+        #from guppy import hpy
+        #hp = hpy()
+        #print hp.heap()
+
         start = time.time()
         print "In ALL Done linking phase for instance", inst_id
         # check if the instance is really defined, so got ALL the
@@ -168,9 +173,9 @@ class Regenerator:
             self.linkify_a_command(h, 'event_handler')
             
             # Now link timeperiods
-            self.linkify_a_timeperiod(h, 'notification_period')
-            self.linkify_a_timeperiod(h, 'check_period')
-            self.linkify_a_timeperiod(h, 'maintenance_period')
+            self.linkify_a_timeperiod_by_name(h, 'notification_period')
+            self.linkify_a_timeperiod_by_name(h, 'check_period')
+            self.linkify_a_timeperiod_by_name(h, 'maintenance_period')
 
             # And link contacts too
             self.linkify_contacts(h, 'contacts')
@@ -224,9 +229,9 @@ class Regenerator:
             self.linkify_a_command(s, 'event_handler')
             
             # Now link timeperiods
-            self.linkify_a_timeperiod(s, 'notification_period')
-            self.linkify_a_timeperiod(s, 'check_period')
-            self.linkify_a_timeperiod(s, 'maintenance_period')
+            self.linkify_a_timeperiod_by_name(s, 'notification_period')
+            self.linkify_a_timeperiod_by_name(s, 'check_period')
+            self.linkify_a_timeperiod_by_name(s, 'maintenance_period')
 
             # And link contacts too
             self.linkify_contacts(s, 'contacts')
@@ -287,6 +292,17 @@ class Regenerator:
 
         print "ALL LINKING TIME"*10, time.time() - start
 
+        # clean old objects
+        del self.inp_hosts[inst_id]
+        del self.inp_hostgroups[inst_id]
+        del self.inp_contactgroups[inst_id]
+        del self.inp_services[inst_id]
+        del self.inp_servicegroups[inst_id]
+
+        # Mem debug phase
+        #from guppy import hpy
+        #hp = hpy()
+        #print hp.heap()
 
 
     # We look for o.prop (CommandCall) and we link the inner
@@ -332,6 +348,19 @@ class Regenerator:
             #print "Seeting", prop, tp.get_name(), 'of', o.get_name()
             setattr(o, prop, tp)
             
+    # same than before, but the value is a string here
+    def linkify_a_timeperiod_by_name(self, o, prop):
+        tpname = getattr(o, prop, None)
+        if not tpname:
+            setattr(o, prop, None)
+            return
+        tp = self.timeperiods.find_by_name(tpname)
+        if tp:
+            #print "Seeting", prop, tp.get_name(), 'of', o.get_name()
+            setattr(o, prop, tp)
+
+
+
 
     # We look at o.prop and for each contacts in it,
     # we replace it with true object in self.contacts
@@ -342,8 +371,7 @@ class Regenerator:
             return
 
         new_v = []
-        for oc in v:
-            cname = oc.contact_name
+        for cname in v:
             c = self.contacts.find_by_name(cname)
             if c:
                 new_v.append(c)
@@ -461,6 +489,16 @@ class Regenerator:
         h = Host({})
         self.update_element(h, data)        
 
+        # Now we will only keep some flat data, instead of useless real objects
+        # Change contacts with their name only
+        h.contacts = [c.get_name() for c in h.contacts]
+        if h.notification_period:
+            h.notification_period = h.notification_period.get_name()
+        if h.check_period:
+            h.check_period = h.check_period.get_name()
+        if h.maintenance_period:
+            h.maintenance_period = h.maintenance_period.get_name()
+
         # We need to rebuild Downtime and Comment relationship
         for dtc in h.downtimes + h.comments:
             dtc.ref = h
@@ -516,6 +554,16 @@ class Regenerator:
 
         s = Service({})
         self.update_element(s, data)
+
+        # Now we will only keep some flat data, instead of useless real objects
+        # Change contacts and periods with their name only
+        s.contacts = [c.get_name() for c in s.contacts]
+        if s.notification_period:
+            s.notification_period = s.notification_period.get_name()
+        if s.check_period:
+            s.check_period = s.check_period.get_name()
+        if s.maintenance_period:
+            s.maintenance_period = s.maintenance_period.get_name()
 
         # We need to rebuild Downtime and Comment relationship
         for dtc in s.downtimes + s.comments:

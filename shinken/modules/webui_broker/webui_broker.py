@@ -112,11 +112,11 @@ class Webui_broker(BaseModule):
             for s in inputready:
                 # If it's a web request, ask the webserver to do it
                 if s == srv.socket:
-                    print "Handle Web request"
+                    #print "Handle Web request"
                     srv.handle_request()
                 # Else it can be data from the broker
                 if s == self.to_q._reader:
-                    print "Handle Queue() request"
+                    #print "Handle Queue() request"
                     b = self.to_q.get()
                     self.rg.manage_brok(b)
                     
