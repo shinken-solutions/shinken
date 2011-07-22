@@ -152,7 +152,7 @@ class Config(Item):
         'auto_reschedule_checks':   BoolProp(managed=False, default='1'),
         'auto_rescheduling_interval': IntegerProp(managed=False, default='1'),
         'auto_rescheduling_window': IntegerProp(managed=False, default='180'),
-        'use_aggressive_host_checking': UnusedProp(text='Host agressive checking is an heritage from Nagios 1 and is really useless now.'),
+        'use_aggressive_host_checking': BoolProp(default='0', class_inherit=[(Host, None)]),
         'translate_passive_host_checks': BoolProp(managed=False, default='1'),
         'passive_host_checks_are_soft': BoolProp(managed=False, default='1'),
         'enable_predictive_host_dependency_checks': BoolProp(managed=False, default='1', class_inherit=[(Host, 'enable_predictive_dependency_checks')]),

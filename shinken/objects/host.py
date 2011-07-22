@@ -583,12 +583,12 @@ class Host(SchedulingItem):
         else:
             self.last_state = self.state
 
-        if status == 0:
+        if status == 0 or (status == 1 and cls.use_aggressive_host_checking == 0):
             self.state = 'UP'
             self.state_id = 0
             self.last_time_up = int(self.last_state_update)
             state_code = 'u'
-        elif status in (1, 2, 3):
+        elif status in (2, 3) or (status == 1 and cls.use_aggressive_host_checking == 1):
             self.state = 'DOWN'
             self.state_id = 1
             self.last_time_down = int(self.last_state_update)
