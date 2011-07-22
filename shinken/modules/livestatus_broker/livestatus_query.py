@@ -19,6 +19,7 @@
 import os
 import re
 import time
+import copy 
 
 try:
     import sqlite3
