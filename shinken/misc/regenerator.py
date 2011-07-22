@@ -243,9 +243,17 @@ class Regenerator:
         for h in inp_hosts:
             self.linkify_dict_srv_and_hosts(h, 'impacts')
             self.linkify_dict_srv_and_hosts(h, 'source_problems')
+            self.linkify_dict_srv_and_hosts(h, 'parents')
+            self.linkify_dict_srv_and_hosts(h, 'childs')
+            self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')
+            self.linkify_dict_srv_and_hosts(h, 'child_dependencies')
+
+            
         for s in inp_services:
             self.linkify_dict_srv_and_hosts(s, 'impacts')
             self.linkify_dict_srv_and_hosts(s, 'source_problems')
+            self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')
+            self.linkify_dict_srv_and_hosts(h, 'child_dependencies')
 
         # Linking TIMEPERIOD exclude with real ones now
         for tp in self.timeperiods:
