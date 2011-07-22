@@ -356,16 +356,6 @@ td.actions a {
     padding-left: 24px;
 }
 
-.state_ok {
-	color: green;
-	font-weight: bold;
-}
-
-.state_critical {
-	color: red;
-	font-weight: bold;
-}
-
 /*
  * Dummy elements
  * 
@@ -425,6 +415,50 @@ td.actions a {
 	margin-left: 5px;
 }
 
+.bi_box ul {
+	margin-bottom: 0px;
+	padding-top: 5px;
+}
+
 .bi_box li {
 	display: inline;
+	line-height: 16px;
+}
+
+.bi_box a {
+	padding: 2px 4px;
+	margin-right: 10px;
+	text-decoration: none;
+	color: #FFFFFF;
+	font-weight: bold;
+}
+
+.bi_box a:hover {
+	color: #FFFFFF;
+	text-decoration: none;
+}
+
+.state_critical {
+    background-color: #B40406;
+    color: #FFFFFF;
+}
+
+.state_warning {
+    background-color: #FFDD00;
+    color: #787878;
+}
+
+.state_warning a, .state_warning a:hover {
+    background-color: #FFDD00;
+    color: #787878;
+}
+
+.state_unreachable {
+    background-color: #87B2D3;
+    color: #FFFFFF;
+}
+
+.state_ok {
+    background-color: #7AB317;
+    color: #FFFFFF;
 }
