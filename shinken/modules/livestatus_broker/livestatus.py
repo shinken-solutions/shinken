@@ -19,7 +19,6 @@
 
 #File for a Livestatus class which can be used by the status-dat-broker
 import re
-import copy
 import os
 import time
 

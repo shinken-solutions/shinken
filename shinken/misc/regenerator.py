@@ -61,12 +61,9 @@ class Regenerator:
         # And in progress one
         self.inp_hosts = {}
         self.inp_services = {}
-        self.inp_contacts = {}
         self.inp_hostgroups = {}
         self.inp_servicegroups = {}
         self.inp_contactgroups = {}
-        self.inp_timeperiods = {}
-        self.inp_commands = {}
 
         # Do not ask for full data resent too much
         self.last_need_data_send = time.time()
@@ -112,6 +109,12 @@ class Regenerator:
 
     # Now we get all data about an instance, link all this stuff :)
     def all_done_linking(self, inst_id):
+        # Mem debug phase
+        #from guppy import hpy
+        #hp = hpy()
+        #print hp.heap()
+
+        start = time.time()
         print "In ALL Done linking phase for instance", inst_id
         # check if the instance is really defined, so got ALL the
         # init phase
@@ -125,13 +128,13 @@ class Regenerator:
             inp_hosts = self.inp_hosts[inst_id]
             inp_hosts.create_reversed_list()
             inp_hostgroups = self.inp_hostgroups[inst_id]
-            #inp_hostgroups.create_reversed_list()
             inp_contactgroups = self.inp_contactgroups[inst_id]
-            inp_contactgroups.create_reversed_list()
+            inp_services = self.inp_services[inst_id]
+            inp_services.create_reversed_list()
+            inp_servicegroups = self.inp_servicegroups[inst_id]
         except Exception, exp:
             print "Warning all done: ", exp
             return
-
 
         # Link HOSTGROUPS with hosts
         for hg in inp_hostgroups:
@@ -170,12 +173,90 @@ class Regenerator:
             self.linkify_a_command(h, 'event_handler')
             
             # Now link timeperiods
-            self.linkify_a_timeperiod(h, 'notification_period')
-            self.linkify_a_timeperiod(h, 'check_period')
-            self.linkify_a_timeperiod(h, 'maintenance_period')
+            self.linkify_a_timeperiod_by_name(h, 'notification_period')
+            self.linkify_a_timeperiod_by_name(h, 'check_period')
+            self.linkify_a_timeperiod_by_name(h, 'maintenance_period')
 
             # And link contacts too
             self.linkify_contacts(h, 'contacts')
+
+            # We can really declare this host OK now
+            self.hosts[h.id] = h
+
+        self.hosts.create_reversed_list()
+
+        # Link SERVICEGROUPS with services
+        for sg in inp_servicegroups:
+            new_members = []
+            print sg.members
+            for (i, sname) in sg.members:
+                if i not in inp_services:
+                    continue
+                s = inp_services[i]
+                new_members.append(s)
+            sg.members = new_members
+
+        # Merge SERVICEGROUPS with real ones
+        for inpsg in inp_servicegroups:
+            sgname = inpsg.servicegroup_name
+            sg = self.servicegroups.find_by_name(sgname)
+            # If the servicegroup already exist, just add the new
+            # services into it
+            if sg:
+                sg.members.extend(inpsg.members)
+            else: # else take the new one
+                self.servicegroups[inpsg.id] = inpsg
+        # We can delare servicegroups done
+        self.servicegroups.create_reversed_list()
+
+        # Now link SERVICES with hosts, servicesgroups, and commands
+        for s in inp_services:
+            new_servicegroups = []
+            for sgname in s.servicegroups.split(','):
+                sg = self.servicegroups.find_by_name(sgname)
+                if sg:
+                    new_servicegroups.append(sg)
+            s.servicegroups = new_servicegroups
+            
+            # Now link with host
+            hname = s.host_name
+            s.host = self.hosts.find_by_name(hname)
+            if s.host:
+                s.host.services.append(s)
+            
+            # Now link Command() objects
+            self.linkify_a_command(s, 'check_command')
+            self.linkify_a_command(s, 'event_handler')
+            
+            # Now link timeperiods
+            self.linkify_a_timeperiod_by_name(s, 'notification_period')
+            self.linkify_a_timeperiod_by_name(s, 'check_period')
+            self.linkify_a_timeperiod_by_name(s, 'maintenance_period')
+
+            # And link contacts too
+            self.linkify_contacts(s, 'contacts')
+
+            # We can really declare this host OK now
+            self.services[s.id] = s
+        self.services.optimize_service_search(self.hosts)
+        #self.services.create_reversed_list()
+
+        # Now we can link all impacts/source problem list
+        # but only for the new ones here of course
+        for h in inp_hosts:
+            self.linkify_dict_srv_and_hosts(h, 'impacts')
+            self.linkify_dict_srv_and_hosts(h, 'source_problems')
+            self.linkify_host_and_hosts(h, 'parents')
+            self.linkify_host_and_hosts(h, 'childs')
+            self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')
+            self.linkify_dict_srv_and_hosts(h, 'child_dependencies')
+
+        # Now services too
+        for s in inp_services:
+            self.linkify_dict_srv_and_hosts(s, 'impacts')
+            self.linkify_dict_srv_and_hosts(s, 'source_problems')
+            self.linkify_dict_srv_and_hosts(s, 'parent_dependencies')
+            self.linkify_dict_srv_and_hosts(s, 'child_dependencies')
 
         # Linking TIMEPERIOD exclude with real ones now
         for tp in self.timeperiods:
@@ -186,7 +267,6 @@ class Regenerator:
                 if t:
                     new_exclude.append(t)
             tp.exclude = new_exclude
-
 
         # Link CONTACTGROUPS with contacts
         for cg in inp_contactgroups:
@@ -210,19 +290,28 @@ class Regenerator:
         # We can delare contactgroups done
         self.contactgroups.create_reversed_list()
 
+        print "ALL LINKING TIME"*10, time.time() - start
 
-        # Ok, we can regenerate ALL find list, so your clietns will
-        # see new objects now
-        self.create_reversed_list()            
+        # clean old objects
+        del self.inp_hosts[inst_id]
+        del self.inp_hostgroups[inst_id]
+        del self.inp_contactgroups[inst_id]
+        del self.inp_services[inst_id]
+        del self.inp_servicegroups[inst_id]
 
+        # Mem debug phase
+        #from guppy import hpy
+        #hp = hpy()
+        #print hp.heap()
 
 
     # We look for o.prop (CommandCall) and we link the inner
     # Command() object with our real ones
     def linkify_a_command(self, o, prop):
-        cc = getattr(o, prop)
+        cc = getattr(o, prop, None)
         # if the command call is void, bypass it
         if not cc:
+            setattr(o, prop, None)
             return
         cmdname = cc.command.command_name
         c = self.commands.find_by_name(cmdname)
@@ -232,8 +321,10 @@ class Regenerator:
 
     # We look at o.prop and for each command we relink it
     def linkify_commands(self, o, prop):
-        v = getattr(o, prop)
+        v = getattr(o, prop, None)
         if not v:
+            # If do not have a command list, put a void list instead
+            setattr(o, prop, [])
             return
 
         for cc in v:
@@ -247,15 +338,29 @@ class Regenerator:
     # We look at the timeperiod() object of o.prop
     # and we replace it with our true one
     def linkify_a_timeperiod(self, o, prop):
-        t = getattr(o, prop)
+        t = getattr(o, prop, None)
         if not t:
+            setattr(o, prop, None)
             return
         tpname = t.timeperiod_name
         tp = self.timeperiods.find_by_name(tpname)
         if tp:
-            print "Seeting", prop, tp.get_name(), 'of', o.get_name()
+            #print "Seeting", prop, tp.get_name(), 'of', o.get_name()
             setattr(o, prop, tp)
             
+    # same than before, but the value is a string here
+    def linkify_a_timeperiod_by_name(self, o, prop):
+        tpname = getattr(o, prop, None)
+        if not tpname:
+            setattr(o, prop, None)
+            return
+        tp = self.timeperiods.find_by_name(tpname)
+        if tp:
+            #print "Seeting", prop, tp.get_name(), 'of', o.get_name()
+            setattr(o, prop, tp)
+
+
+
 
     # We look at o.prop and for each contacts in it,
     # we replace it with true object in self.contacts
@@ -266,16 +371,52 @@ class Regenerator:
             return
 
         new_v = []
-        for oc in v:
-            cname = oc.contact_name
+        for cname in v:
             c = self.contacts.find_by_name(cname)
             if c:
                 new_v.append(c)
         setattr(o, prop, new_v)
-                
 
+    # We got a service/host dict, we want to get back to a
+    # flat list
+    def linkify_dict_srv_and_hosts(self, o, prop):
+        v = getattr(o, prop)
+
+        if not v:
+            return
+                
+        new_v = []
+        #print "Linkify Dict SRV/Host", v, o.get_name(), prop
+        for name in v['services']:
+            elts = name.split('/')
+            hname = elts[0]
+            sdesc = elts[1]
+            s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
+            if s:
+                new_v.append(s)
+        for hname in v['hosts']:
+            h = self.hosts.find_by_name(hname)
+            if h:
+                new_v.append(h)
+        setattr(o, prop, new_v)
+
+    def linkify_host_and_hosts(self, o, prop):
+        v = getattr(o, prop)
+
+        if not v:
+            return
+
+        new_v = []
+        for hname in v:
+            h = self.hosts.find_by_name(hname)
+            if h:
+                new_v.append(h)
+        setattr(o, prop, new_v)
 
 ############### Brok management part
+
+
+####### INITIAL PART
 
     def manage_program_status_brok(self, b):
         data = b.data
@@ -285,19 +426,14 @@ class Regenerator:
         # We get a real Conf object ,adn put our data
         c = Config()
         self.update_element(c, data)
-        #for prop in data:
-        #    setattr(c, prop, data[prop])
 
         # Clean all in_progress things.
         # And in progress one
         self.inp_hosts[c_id] = Hosts([])
         self.inp_services[c_id] = Services([])
-        self.inp_contacts[c_id] = Contacts([])
         self.inp_hostgroups[c_id] = Hostgroups([])
         self.inp_servicegroups[c_id] = Servicegroups([])
         self.inp_contactgroups[c_id] = Contactgroups([])
-        self.inp_timeperiods[c_id] = Timeperiods([])
-        self.inp_commands[c_id] = Commands([])
 
         # And we save it
         self.configs[c_id] = c
@@ -334,26 +470,6 @@ class Regenerator:
         self.create_reversed_list()
 
 
-    def manage_update_program_status_brok(self, b):
-        data = b.data
-        c_id = data['instance_id']
-
-        # If we got an update about an unknow isntance, cry and ask for a full
-        # version!
-        if c_id not in self.instance_ids:
-            # Do not ask data too quickly, very dangerous
-            # one a minute
-            if time.time() - self.last_need_data_send > 60:
-                print "I ask the broker for instance id data :", c_id
-                msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
-                self.from_q.put(msg)
-                self.last_need_data_send = time.time()
-            return
-
-        # We have only one config here, with id 0
-        c = self.configs[c_id]
-        self.update_element(c, data)
-            
 
     # Get a new host. Add in in in progress tab
     def manage_initial_host_status_brok(self, b):
@@ -373,6 +489,16 @@ class Regenerator:
         h = Host({})
         self.update_element(h, data)        
 
+        # Now we will only keep some flat data, instead of useless real objects
+        # Change contacts with their name only
+        h.contacts = [c.get_name() for c in h.contacts]
+        if h.notification_period:
+            h.notification_period = h.notification_period.get_name()
+        if h.check_period:
+            h.check_period = h.check_period.get_name()
+        if h.maintenance_period:
+            h.maintenance_period = h.maintenance_period.get_name()
+
         # We need to rebuild Downtime and Comment relationship
         for dtc in h.downtimes + h.comments:
             dtc.ref = h
@@ -382,22 +508,6 @@ class Regenerator:
 
 
 
-    #In fact, an update of a host is like a check return
-    def manage_update_host_status_brok(self, b):
-        self.manage_host_check_result_brok(b)
-        data = b.data
-        host_name = data['host_name']
-        #In the status, we've got duplicated item, we must relink thems
-        try:
-            h = self.hosts[host_name]
-        except KeyError:
-            print "Warning : the host %s is unknown!" % host_name
-            return
-        self.update_element(h, data)
-        self.set_schedulingitem_values(h)
-        for dtc in h.downtimes + h.comments:
-            dtc.ref = h
-        self.livestatus.count_event('host_checks')
 
 
     # From now we only create an hostgroup in the in prepare
@@ -429,84 +539,69 @@ class Regenerator:
 
     def manage_initial_service_status_brok(self, b):
         data = b.data
-        s_id = data['id']
-        host_name = data['host_name']
-        service_description = data['service_description']
+        hname = data['host_name']
+        sdesc = data['service_description']
         inst_id = data['instance_id']
-        
-        #print "Creating Service:", s_id, data
+
+        # Try to get the inp progress Hosts
+        try:
+            inp_services = self.inp_services[inst_id]
+        except Exception, exp: #not good. we will cry in theprogram update
+            print "Not good!", exp
+            return
+
+        print "Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id)
+
         s = Service({})
-        s.instance_id = inst_id
-
         self.update_element(s, data)
-        self.set_schedulingitem_values(s)
-        
-        try:
-            h = self.hosts[host_name]
-            # Reconstruct the connection between hosts and services
-            h.services.append(s)
-            # There is already a s.host_name, but a reference to the h object can be useful too
-            s.host = h
-        except Exception:
-            return
+
+        # Now we will only keep some flat data, instead of useless real objects
+        # Change contacts and periods with their name only
+        s.contacts = [c.get_name() for c in s.contacts]
+        if s.notification_period:
+            s.notification_period = s.notification_period.get_name()
+        if s.check_period:
+            s.check_period = s.check_period.get_name()
+        if s.maintenance_period:
+            s.maintenance_period = s.maintenance_period.get_name()
+
+        # We need to rebuild Downtime and Comment relationship
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
-        self.services[host_name+service_description] = s
-        #self.number_of_objects += 1
-        # We need this for manage_initial_servicegroup_status_brok where it
-        # will speed things up dramatically
+
+        # Ok, put in in the in progress hosts
+        inp_services[s.id] = s
 
 
-    #In fact, an update of a service is like a check return
-    def manage_update_service_status_brok(self, b):
-        self.manage_service_check_result_brok(b)
-        data = b.data
-        host_name = data['host_name']
-        service_description = data['service_description']
-        #In the status, we've got duplicated item, we must relink thems
-        try:
-            s = self.services[host_name+service_description]
-        except KeyError:
-            print "Warning : the service %s/%s is unknown!" % (host_name, service_description)
-            return
-        self.update_element(s, data)
-        self.set_schedulingitem_values(s)
-        for dtc in s.downtimes + s.comments:
-            dtc.ref = s
+
    
 
-
+    # We create a servicegroup in our in progress part
+    # we will link it after
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
-        sg_id = data['id']
-        servicegroup_name = data['servicegroup_name']
-        members = data['members']
-        del data['members']
-
-        # Like for hostgroups, maybe we already got this
-        # service group from another instance, need to
-        # factorize all
+        sgname = data['servicegroup_name']
+        inst_id = data['instance_id']
+        
+        # Try to get the inp progress Hostgroups
         try:
-            sg = self.servicegroups[servicegroup_name]
-        except KeyError:
-            #print "Creating servicegroup:", sg_id, data
-            sg = Servicegroup()
-            # By default set members as a void list
-            setattr(sg, 'members', [])
+            inp_servicegroups = self.inp_servicegroups[inst_id]
+        except Exception, exp: #not good. we will cry in theprogram update
+            print "Not good!", exp
+            return
 
+        print "Creating a servicegroup: %s in instance %d" % (sgname, inst_id)
+        
+        # With void members
+        sg = Servicegroup([])
+
+        # populate data
         self.update_element(sg, data)
 
-        for (s_id, s_name) in members:
-            # A direct lookup by s_host_name+s_name is not possible
-            # because we don't have the host_name in members, only ids.
-            try:
-                sg.members.append(self.service_id_cache[s_id])
-            except Exception:
-                pass
+        # We will link hosts into hostgroups later
+        # so now only save it
+        inp_servicegroups[sg.id] = sg
 
-        sg.members = list(set(sg.members))
-        self.servicegroups[servicegroup_name] = sg
-        #self.number_of_objects += 1
 
 
     # For Contacts, it's a global value, so 2 cases :
@@ -591,7 +686,7 @@ class Regenerator:
         # populate data
         self.update_element(cg, data)
 
-        # We will link hosts into hostgroups later
+        # We will link contacts into contactgroups later
         # so now only save it
         inp_contactgroups[cg.id] = cg
 
@@ -602,7 +697,7 @@ class Regenerator:
     # if not : create it and delacre it in our main commands
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
-        print "Creatin timeperiod", data
+        #print "Creatin timeperiod", data
         tpname = data['timeperiod_name']
         
         tp = self.timeperiods.find_by_name(tpname)
@@ -610,10 +705,11 @@ class Regenerator:
             # print "Already exisintg timeperiod", tpname
             self.update_element(tp, data)
         else:
-            print "Creating Timeperiod:", tpname
+            #print "Creating Timeperiod:", tpname
             tp = Timeperiod({})
             self.update_element(tp, data)
             self.timeperiods[tp.id] = tp
+            # We add a timeperiod, we update the reversed list
             self.timeperiods.create_reversed_list()
 
 
@@ -637,6 +733,7 @@ class Regenerator:
             self.commands.create_reversed_list()
 
 
+
     def manage_initial_scheduler_status_brok(self, b):
         data = b.data
         scheduler_name = data['scheduler_name']
@@ -652,15 +749,6 @@ class Regenerator:
         #self.number_of_objects += 1
 
 
-    def manage_update_scheduler_status_brok(self, b):
-        data = b.data
-        scheduler_name = data['scheduler_name']
-        try:
-            s = self.schedulers[scheduler_name]
-            self.update_element(s, data)
-            #print "S:", s
-        except Exception:
-            pass
 
 
     def manage_initial_poller_status_brok(self, b):
@@ -678,15 +766,6 @@ class Regenerator:
         #self.number_of_objects += 1
 
 
-    def manage_update_poller_status_brok(self, b):
-        data = b.data
-        poller_name = data['poller_name']
-        try:
-            s = self.pollers[poller_name]
-            self.update_element(s, data)
-        except Exception:
-            pass
-
 
     def manage_initial_reactionner_status_brok(self, b):
         data = b.data
@@ -702,15 +781,6 @@ class Regenerator:
         #print "MONCUL: Add a new scheduler ", sched
         #self.number_of_objects += 1
 
-
-    def manage_update_reactionner_status_brok(self, b):
-        data = b.data
-        reactionner_name = data['reactionner_name']
-        try:
-            s = self.reactionners[reactionner_name]
-            self.update_element(s, data)
-        except Exception:
-            pass
 
 
     def manage_initial_broker_status_brok(self, b):
@@ -728,6 +798,103 @@ class Regenerator:
         #self.number_of_objects += 1
 
 
+
+    # This brok is here when the WHOLE initial phase is done.
+    # So we got all data, we can link all together :)
+    def manage_initial_broks_done_brok(self, b):
+        inst_id = b.data['instance_id']
+        print "Finish the configuration of instance", inst_id
+        
+        self.all_done_linking(inst_id)
+
+
+        
+
+################# Status Update part
+
+    # A scheduler send us a "I'm alive" brok. If we never
+    # heard about this one, we got some problem and we 
+    # ask him some initial data :)
+    def manage_update_program_status_brok(self, b):
+        data = b.data
+        c_id = data['instance_id']
+
+        # If we got an update about an unknow isntance, cry and ask for a full
+        # version!
+        if not c_id in self.configs.keys():
+            # Do not ask data too quickly, very dangerous
+            # one a minute
+            if time.time() - self.last_need_data_send > 60:
+                print "I ask the broker for instance id data :", c_id
+                msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
+                self.from_q.put(msg)
+                self.last_need_data_send = time.time()
+            return
+
+        # Ok, good conf, we can update it
+        c = self.configs[c_id]
+        self.update_element(c, data)
+            
+
+
+    # In fact, an update of a host is like a check return
+    def manage_update_host_status_brok(self, b):
+        # There are some properties taht should nto change and are already linked
+        # so just remove them
+        clean_prop = ['childs', 'parents', 'check_command', 'hostgroups',
+                      'contacts', 'notification_period', 'contact_groups', 'child_dependencies',
+                      'check_period', 'parent_dependencies', 'event_handler',
+                      'maintenance_period', 'realm', 'customs', 'escalations']
+
+        data = b.data
+        for prop in clean_prop:
+            del data[prop]
+            
+        hname = data['host_name']
+        h = self.hosts.find_by_name(hname)
+
+        if h:
+            self.update_element(h, data)
+
+            # We can have some change in our impacts and source problems.
+            self.linkify_dict_srv_and_hosts(h, 'impacts')
+            self.linkify_dict_srv_and_hosts(h, 'source_problems')
+
+            # Relink downtimes and comments
+            for dtc in h.downtimes + h.comments:
+                dtc.ref = h
+
+
+
+    #In fact, an update of a service is like a check return
+    def manage_update_service_status_brok(self, b):
+        # There are some properties taht should nto change and are already linked
+        # so just remove them
+        clean_prop = ['check_command', 'servicegroups',
+                      'contacts', 'notification_period', 'contact_groups', 'child_dependencies',
+                      'check_period', 'parent_dependencies', 'event_handler',
+                      'maintenance_period', 'customs', 'escalations']
+
+        data = b.data
+        for prop in clean_prop:
+            del data[prop]
+
+        hname = data['host_name']
+        sdesc = data['service_description']
+        s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
+        if s:
+            self.update_element(s, data)
+
+            # We can have some change in our impacts and source problems.
+            self.linkify_dict_srv_and_hosts(s, 'impacts')
+            self.linkify_dict_srv_and_hosts(s, 'source_problems')
+
+            # Relink downtimes and comments with the service
+            for dtc in s.downtimes + s.comments:
+                dtc.ref = s
+
+
+
     def manage_update_broker_status_brok(self, b):
         data = b.data
         broker_name = data['broker_name']
@@ -738,31 +905,47 @@ class Regenerator:
             pass
 
 
-    #A service check have just arrived, we UPDATE data info with this
-    def manage_service_check_result_brok(self, b):
+
+    def manage_update_reactionner_status_brok(self, b):
         data = b.data
-        host_name = data['host_name']
-        service_description = data['service_description']
+        reactionner_name = data['reactionner_name']
         try:
-            s = self.services[host_name+service_description]
+            s = self.reactionners[reactionner_name]
             self.update_element(s, data)
         except Exception:
             pass
 
 
-    #A service check update have just arrived, we UPDATE data info with this
-    def manage_service_next_schedule_brok(self, b):
-        self.manage_service_check_result_brok(b)
-
-
-    def manage_host_check_result_brok(self, b):
+    def manage_update_poller_status_brok(self, b):
         data = b.data
-        host_name = data['host_name']
+        poller_name = data['poller_name']
         try:
-            h = self.hosts[host_name]
-            self.update_element(h, data)
+            s = self.pollers[poller_name]
+            self.update_element(s, data)
         except Exception:
             pass
+
+
+    def manage_update_scheduler_status_brok(self, b):
+        data = b.data
+        scheduler_name = data['scheduler_name']
+        try:
+            s = self.schedulers[scheduler_name]
+            self.update_element(s, data)
+            #print "S:", s
+        except Exception:
+            pass
+
+
+
+################# Check result and schedule part
+    def manage_host_check_result_brok(self, b):
+        data = b.data
+        hname = data['host_name']
+
+        h = self.hosts.find_by_name(hname)
+        if h:
+            self.update_element(h, data)
 
 
     # this brok should arrive within a second after the host_check_result_brok
@@ -770,12 +953,17 @@ class Regenerator:
         self.manage_host_check_result_brok(b)
 
 
-    
-    def manage_initial_broks_done_brok(self, b):
-        inst_id = b.data['instance_id']
-        print "Finish the configuration of instance", inst_id
-        
-        self.all_done_linking(inst_id)
+    #A service check have just arrived, we UPDATE data info with this
+    def manage_service_check_result_brok(self, b):
+        data = b.data
+        hname = data['host_name']
+        sdesc = data['service_description']
+        s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
+        if s:
+            self.update_element(s, data)
 
 
-        
+    #A service check update have just arrived, we UPDATE data info with this
+    def manage_service_next_schedule_brok(self, b):
+        self.manage_service_check_result_brok(b)
+
