@@ -94,15 +94,21 @@ class Glpi_arbiter(BaseModule):
         for timeperiod_info in all_timeperiods:
             print "\n\n"
             print "Timeperiod info in GLPI", timeperiod_info
-            h = {'timeperiod_name' : timeperiod_info['timeperiod_name'],
-                 'sunday' : timeperiod_info['sunday'],
-                 'monday' : timeperiod_info['monday'],
-                 'tuesday' : timeperiod_info['tuesday'],
-                 'wednesday' : timeperiod_info['wednesday'],
-                 'thursday' : timeperiod_info['thursday'],
-                 'friday' : timeperiod_info['friday'],
-                 'saturday' : timeperiod_info['saturday'],
-                 }
+            h = {'timeperiod_name' : timeperiod_info['timeperiod_name']};
+            if "timeperiod_info['sunday']" in locals():
+                h = {'sunday' : timeperiod_info['sunday']};
+            if "timeperiod_info['monday']" in locals():
+                h = {'monday' : timeperiod_info['monday']};
+            if "timeperiod_info['tuesday']" in locals():
+                h = {'tuesday' : timeperiod_info['tuesday']};
+            if "timeperiod_info['wednesday']" in locals():
+                h = {'wednesday' : timeperiod_info['wednesday']};
+            if "timeperiod_info['thursday']" in locals():
+                h = {'thursday' : timeperiod_info['thursday']};
+            if "timeperiod_info['friday']" in locals():
+                h = {'friday' : timeperiod_info['friday']};
+            if "timeperiod_info['saturday']" in locals():
+                h = {'saturday' : timeperiod_info['saturday']};
             r['timeperiods'].append(h)
 
         # Get hosts
