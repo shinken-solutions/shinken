@@ -53,12 +53,16 @@ class Glpidb_broker(BaseModule):
                'plugin_monitoring_hosts_id' : {'transform' : None},
                'event' : {'transform' : None},
                'perf_data' : {'transform' : None},
+               'output' : {'transform' : None},
+               'state' : {'transform' : None},
+               'latency' : {'transform' : None},
+               'execution_time' : {'transform' : None},
                }
            }
         # Last state of check
-        self.checkstatus = {
-           '0' : None,
-           }
+#        self.checkstatus = {
+#           '0' : None,
+#           }
         BaseModule.__init__(self, modconf)
         self.host = host
         self.user = user
@@ -90,19 +94,7 @@ class Glpidb_broker(BaseModule):
             if brok.data['host_name']:
                s = brok.data['host_name'].split('-')
                new_brok.data['plugin_monitoring_hosts_id'] = s[1]
-               # If last check have same message, not add entry in DB
-               if checkst:
-                  lhc = brok.data['output'].split('-')
-                  if new_brok.data['plugin_monitoring_hosts_id'] in self.checkstatus:
-                     if self.checkstatus[new_brok.data['plugin_monitoring_hosts_id']] == lhc[0]:
-                        return brok
-                     else:
-                        self.checkstatus[new_brok.data['plugin_monitoring_hosts_id']] = lhc[0]
-                  else :
-                     self.checkstatus[new_brok.data['plugin_monitoring_hosts_id']] = lhc[0]
-               #brok.data['plugin_monitoring_hosts_id'] = s[1]
                new_brok.data['event'] = brok.data['output']
-               #brok.data['event'] = brok.data['output']
             to_del = []
             to_add = []
             mapping = self.mapping[brok.type]
@@ -176,6 +168,10 @@ class Glpidb_broker(BaseModule):
         new_data['id'] = b.data['plugin_monitoring_hosts_id']
         del new_data['plugin_monitoring_hosts_id']
         del new_data['perf_data']
+        del new_data['output']
+        del new_data['state']
+        del new_data['latency']
+        del new_data['execution_time']
         where_clause = {'id' : new_data['id']}
         query = self.db_backend.create_update_query('glpi_plugin_monitoring_hosts', new_data, where_clause)
         return [query]
