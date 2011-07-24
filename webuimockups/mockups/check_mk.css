@@ -1908,17 +1908,18 @@ table.aggrtree td.node {
 
 /* problem impact panel */
 .problems-panel {
-    height: 600px; 
+    height: 745px; 
     width: 58%;
-    background: white;
+    background: #FFFFFF;
     position: relative;
     /* by default it's hidden*/
-    left: -450px;
+    left: -250px;
     top: 5px;
     z-index: 3;
-    min-height: 960px;;
-    /*max-width: 120%;
+    /*min-height: 960px;;
+    max-width: 120%;
     min-width: 600px;*/
+   border-top: 1px solid #E3E3E5;
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
     box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4);
@@ -1937,7 +1938,7 @@ table.aggrtree td.node {
     border-radius: 6px;
     box-shadow: 0 2px 2px rgba(0, 0, 0, .3);
     position: relative;
-    background: white;
+    background: #FFFFFF;
     height: 100%;
     min-height: 600px;
     z-index: 4;
@@ -2130,7 +2131,7 @@ table.aggrtree td.node {
 
 /* The right panel under problems */
 .right-panel {
-    z-index: 1;
+    /*z-index: 1;*/
     max-width: 460px;
     min-width: 340px;
     position: relative;
