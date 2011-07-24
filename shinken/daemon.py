@@ -59,7 +59,7 @@ else:
 # The standard I/O file descriptors are redirected to /dev/null by default.
 REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
-UMASK = 0
+UMASK = 027
 from shinken.bin import VERSION
 
 
