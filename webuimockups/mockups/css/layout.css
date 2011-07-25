@@ -46,7 +46,7 @@ body {
 	background-image:     -ms-linear-gradient(top, #2F5F8F, #005086); /* IE10 */
 	background-image:      -o-linear-gradient(top, #2F5F8F, #005086); /* Opera 11.10+ */
 	background-image:         linear-gradient(top, #2F5F8F, #005086);
-            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#DDE1EC', EndColorStr='#005086'); /* IE6â��IE9 */
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#2F5F8F', EndColorStr='#005086'); /* IE6â��IE9 */
 }
 
 #header h1 {
