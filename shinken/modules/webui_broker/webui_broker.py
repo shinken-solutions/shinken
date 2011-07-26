@@ -28,6 +28,8 @@ import os
 import time
 import traceback
 import select
+import threading
+
 
 from shinken.basemodule import BaseModule
 from shinken.message import Message
@@ -65,6 +67,7 @@ class Webui_broker(BaseModule):
         datamgr.load(self.rg)
 
 
+
     # Called by Broker so we can do init stuff
     # TODO : add conf param to get pass with init
     # Conf from arbiter!
@@ -92,6 +95,9 @@ class Webui_broker(BaseModule):
         self.set_exit_handler()
         print "Go run"
 
+        self.global_lock = threading.RLock()
+        self.data_thread = None
+
         # Check if the view dir really exist
         if not os.path.exists(bottle.TEMPLATE_PATH[0]):
             logger.log('ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
@@ -102,28 +108,55 @@ class Webui_broker(BaseModule):
         # Declare the whole app static files AFTER the plugin ones
         self.declare_common_static()
         
+        
+        
         print "Starting WebUI application"
         srv = run(host=self.host, port=self.port, server='wsgirefselect')
         print "Launch server", srv
 
+        # Launch the data thread"
+        self.data_thread = threading.Thread(None, self.manage_brok_thread, 'datathread')
+        self.data_thread.start()
+        # TODO : look for alive and killing
+
+
         # Main blocking loop
         while True:
-            # _reader is the underliying file handle of the Queue()
-            # so we can select it too :)
-            input = [srv.socket, self.to_q._reader]
+            # Ok, you want to know why we are using a data thread instead of
+            # just call for a select with q._reader, the underliying file 
+            # handle of the Queue()? That's just because under Windows, select
+            # only manage winsock (so network) file descriptor! What a shame!
+            input = [srv.socket]
             inputready,_,_ = select.select(input,[],[], 1)
             for s in inputready:
                 # If it's a web request, ask the webserver to do it
                 if s == srv.socket:
-                    #print "Handle Web request"
-                    srv.handle_request()
-                # Else it can be data from the broker
-                if s == self.to_q._reader:
-                    #print "Handle Queue() request"
-                    b = self.to_q.get()
-                    self.rg.manage_brok(b)
+                    print "Handle Web request"
+                    self.global_lock.acquire()
+                    try:
+                       print "Got lock for http"
+                       srv.handle_request()
+                    finally:
+                       print "realease http lock"
+                       self.global_lock.release()
                     
-
+    # It's the thread function that will get broks
+    # and update data. Will lock the whole thing
+    # while updating
+    def manage_brok_thread(self):
+        print "Data thread started"
+        while True:
+           b = self.to_q.get()
+           print "Got a brok"
+           # For updating, we cannot do it while
+           # answer queries, so lock it
+           self.global_lock.acquire()
+           try:
+              print "Got data lock, manage brok"
+              self.rg.manage_brok(b)
+           finally:
+              print "Release data lock"
+              self.global_lock.release()
 
 
     def load_plugins(self):
