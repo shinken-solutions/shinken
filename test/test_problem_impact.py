@@ -74,7 +74,7 @@ class TestProblemImpact(ShinkenTest):
         # Now we add some problems to routers
         #--------------------------------------------------------------
         print "- routers get DOWN /SOFT-------------------------------------"
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
         #Max attempt is at 5, should be soft now
         for h in all_routers:
             self.assert_(h.state == 'DOWN')
@@ -82,10 +82,10 @@ class TestProblemImpact(ShinkenTest):
 
         print "- routers get DOWN /HARD-------------------------------------"
         #Now put 4 more checks so we get DOWN/HARD
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
 
         #Max attempt is reach, should be HARD now
         for h in all_routers:
@@ -246,7 +246,7 @@ class TestProblemImpact(ShinkenTest):
         # Now we add some problems to routers
         #--------------------------------------------------------------
         print "- routers get DOWN /SOFT-------------------------------------"
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
         #Max attempt is at 5, should be soft now
         for h in all_routers:
             self.assert_(h.state == 'DOWN')
@@ -254,10 +254,10 @@ class TestProblemImpact(ShinkenTest):
 
         print "- routers get DOWN /HARD-------------------------------------"
         #Now put 4 more checks so we get DOWN/HARD
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
-        self.scheduler_loop(1, [[host_router_0, 1, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
+        self.scheduler_loop(1, [[host_router_0, 2, 'DOWN'], [host_router_1, 2, 'DOWN']], do_sleep=False)
 
         #Max attempt is reach, should be HARD now
         for h in all_routers:
