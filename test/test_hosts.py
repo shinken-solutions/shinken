@@ -116,10 +116,10 @@ class TestConfig(ShinkenTest):
         self.assert_(hst.is_state('o') == True)
         #Then warning
         hst.set_state_from_exit_status(1)
-        self.assert_(hst.state == 'DOWN')
-        self.assert_(hst.state_id == 1)
-        self.assert_(hst.is_state('DOWN') == True)
-        self.assert_(hst.is_state('d') == True)
+        self.assert_(hst.state == 'UP')
+        self.assert_(hst.state_id == 0)
+        self.assert_(hst.is_state('UP') == True)
+        self.assert_(hst.is_state('o') == True)
         #Then Critical
         hst.set_state_from_exit_status(2)
         self.assert_(hst.state == 'DOWN')
@@ -135,6 +135,14 @@ class TestConfig(ShinkenTest):
 
         #And something else :)
         hst.set_state_from_exit_status(99)
+        self.assert_(hst.state == 'DOWN')
+        self.assert_(hst.state_id == 1)
+        self.assert_(hst.is_state('DOWN') == True)
+        self.assert_(hst.is_state('d') == True)
+
+        #And a special case: use_aggressive_host_checking
+        hst.__class__.use_aggressive_host_checking = 1
+        hst.set_state_from_exit_status(1)
         self.assert_(hst.state == 'DOWN')
         self.assert_(hst.state_id == 1)
         self.assert_(hst.is_state('DOWN') == True)
