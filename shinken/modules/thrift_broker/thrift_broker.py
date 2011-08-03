@@ -119,7 +119,7 @@ class Thrift_brokerHandler(Hooker):
             cmd.extcmd = "[%lu] %s\n" % (timestamp,command)
             print cmd.extcmd
             cmd.launch_query()
-        except Exception as e:
+        except Exception, e:
             print e
 
     def get(self, request):
@@ -192,7 +192,7 @@ class Thrift_brokerHandler(Hooker):
             output, keepalive = query.response.respond()
             print output
             r.result_table = output
-        except Exception as e:
+        except Exception, e:
             r.rc = 1
             print e
 
