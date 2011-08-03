@@ -308,6 +308,10 @@ class TestConfigSmall(TestConfig):
         self.nagios_path = None
         self.livestatus_path = None
         self.nagios_config = None
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.__class__.use_aggressive_host_checking = 1
 
 
 
@@ -2286,6 +2290,10 @@ class TestConfigBig(TestConfig):
         self.sched.fill_initial_broks()
         self.update_broker()
         print "************* Overall Setup:", time.time() - start_setUp
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        host = self.sched.hosts.find_by_name("test_host_000")
+        host.__class__.use_aggressive_host_checking = 1
 
     def tearDown(self):
         self.stop_nagios()
@@ -3211,6 +3219,10 @@ class TestConfigComplex(TestConfig):
         self.nagios_path = None
         self.livestatus_path = None
         self.nagios_config = None
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.__class__.use_aggressive_host_checking = 1
 
 
     def tearDown(self):
@@ -3277,6 +3289,10 @@ class TestConfigCrazy(TestConfig):
         self.nagios_path = None
         self.livestatus_path = None
         self.nagios_config = None
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        host = self.sched.hosts.find_by_name("test_host_0000")
+        host.__class__.use_aggressive_host_checking = 1
 
 
     def tearDown(self):
