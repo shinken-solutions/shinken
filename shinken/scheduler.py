@@ -523,9 +523,9 @@ class Scheduler:
                 item.remove_in_progress_notification(c)
                 self.actions[c.id].status = 'zombie'
                 item.last_notification = c.check_time
-#                if isinstance(c.output, str):
-#                    c.output = c.output.decode('utf8', 'ignore')
-#                    c.long_output = c.long_output.decode('utf8', 'ignore')
+                if isinstance(c.output, str):
+                    c.output = c.output.decode('utf8', 'ignore')
+                    c.long_output = c.long_output.decode('utf8', 'ignore')
                 #If we' ve got a problem with the notification, raise a Warning log
                 if timeout:
                     logger.log("Warning: Contact %s %s notification command '%s ' timed out after %d seconds" % (self.actions[c.id].contact.contact_name, self.actions[c.id].ref.__class__.my_type, self.actions[c.id].command, int(execution_time)))
