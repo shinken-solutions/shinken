@@ -750,7 +750,7 @@ class Config(Item):
         if len(unmanaged) != 0:
             print "\n"
             mailing_list_uri = "https://lists.sourceforge.net/lists/listinfo/shinken-devel"
-            text = 'Warning : the folowing parameter(s) are not curently managed.'
+            text = 'Warning : the following parameter(s) are not curently managed.'
             logger.log(text)
             for s in unmanaged:
                 logger.log(s)
