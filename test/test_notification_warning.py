@@ -23,7 +23,7 @@
 #
 
 
-from shinken_test import unittest, ShinkenTest
+from shinken_test import *#unittest, ShinkenTest
 
 from shinken.notification import Notification
 
@@ -40,10 +40,13 @@ class TestConfig(ShinkenTest):
         #Create a dummy notif
         n = Notification('PROBLEM', 'scheduled', 'BADCOMMAND', cmd, host, None, 0)
         n.execute()
+        time.sleep(0.2)
+        n.check_finished(8000)
+        print n.__dict__
         self.sched.actions[n.id] = n
         self.sched.put_results(n)
         #Should have raised something like "Warning : the notification command 'BADCOMMAND' raised an error (exit code=2) : '[Errno 2] No such file or directory'"
-        self.assert_(self.log_match(1, u'BADCOMMAND'))
+        self.assert_(self.any_log_match(u'BADCOMMAND'))
 
 
 if __name__ == '__main__':
