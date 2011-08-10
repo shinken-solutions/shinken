@@ -37,3 +37,4 @@ To Vincent Riquer for his bug report about HA installation and sapre broker that
 To Michael Grundmann for his bug report about service host exclusion and void hostgroup 
 To Jan Kaliszewski for his implementation of sorted dicts
 To Claneys Skyne for his typo report
+To Etienne Obriot for his patch about multiple = in macos values

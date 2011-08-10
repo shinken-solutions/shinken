@@ -344,7 +344,7 @@ class Config(Item):
 
     def load_params(self, params):
         for elt in params:
-            elts = elt.split('=')
+            elts = elt.split('=', 1)
             if len(elts) == 1: #error, there is no = !
                 self.conf_is_correct = False
                 print "Error : the parameter %s is malformed! (no = sign)" % elts[0]
@@ -398,7 +398,7 @@ class Config(Item):
                 line = line[:-1]
                 line = line.strip()
                 if re.search("^cfg_file", line) or re.search("^resource_file", line):
-                    elts = line.split('=')
+                    elts = line.split('=', 1)
                     if os.path.isabs(elts[1]):
                         cfg_file_name = elts[1]
                     else:
@@ -417,7 +417,7 @@ class Config(Item):
                     #The configuration is invalid because we have a bad file!
                         self.conf_is_correct = False
                 elif re.search("^cfg_dir", line):
-                    elts = line.split('=')
+                    elts = line.split('=', 1)
                     if os.path.isabs(elts[1]):
                         cfg_dir_name = elts[1]
                     else:
