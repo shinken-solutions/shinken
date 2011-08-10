@@ -332,7 +332,7 @@ class Satellite(BaseSatellite):
         # Must raise with a good message
         except OSError, exp:
             # We look for the "Function not implemented" under Linux
-            if e.errno == 38 and os.name == 'posix':
+            if exp.errno == 38 and os.name == 'posix':
                 logger.log("ERROR : get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
             raise
             
