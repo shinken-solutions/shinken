@@ -43,7 +43,7 @@ class TestConfig(ShinkenTest):
         self.sched.actions[n.id] = n
         self.sched.put_results(n)
         #Should have raised something like "Warning : the notification command 'BADCOMMAND' raised an error (exit code=2) : '[Errno 2] No such file or directory'"
-        self.assert_(self.log_match(1, 'BADCOMMAND'))
+        self.assert_(self.log_match(1, u'BADCOMMAND'))
 
 
 if __name__ == '__main__':
