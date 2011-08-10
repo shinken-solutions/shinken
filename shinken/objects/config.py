@@ -344,7 +344,7 @@ class Config(Item):
 
     def load_params(self, params):
         for elt in params:
-            elts = elt.split('=')
+            elts = elt.split('=', 1)
             if len(elts) == 1: #error, there is no = !
                 self.conf_is_correct = False
                 print "Error : the parameter %s is malformed! (no = sign)" % elts[0]
