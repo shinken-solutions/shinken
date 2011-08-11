@@ -723,6 +723,8 @@ class Config(Item):
         super(Config, self).old_properties_names_to_new()
         self.hosts.old_properties_names_to_new()
         self.services.old_properties_names_to_new()
+        self.notificationways.old_properties_names_to_new()
+        self.contacts.old_properties_names_to_new()
 
 
     #It's used to warn about useless parameter and print why it's not use.

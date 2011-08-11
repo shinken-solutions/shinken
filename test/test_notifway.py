@@ -55,8 +55,8 @@ class TestConfig(ShinkenTest):
         self.assert_(sms_the_night in contact.notificationways)
         
         # And check the criticity values
-        self.assert_(email_in_day.min_criticity == 0)
-        self.assert_(sms_the_night.min_criticity == 5)
+        self.assert_(email_in_day.min_business_impact == 0)
+        self.assert_(sms_the_night.min_business_impact == 5)
         
 
         print "Contact notification way(s) :"

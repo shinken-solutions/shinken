@@ -45,10 +45,18 @@ class NotificationWay(Item):
         'service_notification_options': ListProp   (fill_brok=['full_status']),
         'host_notification_commands':   StringProp (fill_brok=['full_status']),
         'service_notification_commands':StringProp (fill_brok=['full_status']),
-        'min_criticity':                IntegerProp(default = '0', fill_brok=['full_status']),
+        'min_business_impact':                IntegerProp(default = '0', fill_brok=['full_status']),
     })
     
     running_properties = {}
+
+    # This tab is used to transform old parameters name into new ones
+    # so from Nagios2 format, to Nagios3 ones.
+    # Or Shinken deprecated names like criticity
+    old_properties = {
+        'min_criticity'            :    'min_business_impact',
+    }
+
 
     macros = {}
 
@@ -59,12 +67,12 @@ class NotificationWay(Item):
 
     #Search for notification_options with state and if t is
     #in service_notification_period
-    def want_service_notification(self, t, state, type, criticity):
+    def want_service_notification(self, t, state, type, business_impact):
         if not self.service_notifications_enabled:
             return False
 
-        # If the criticity is not high enough, we bail out
-        if criticity < self.min_criticity:
+        # If the business_impact is not high enough, we bail out
+        if business_impact < self.min_business_impact:
             return False
 
         b = self.service_notification_period.is_time_valid(t)
@@ -92,12 +100,12 @@ class NotificationWay(Item):
 
     #Search for notification_options with state and if t is in
     #host_notification_period
-    def want_host_notification(self, t, state, type, criticity):
+    def want_host_notification(self, t, state, type, business_impact):
         if not self.host_notifications_enabled:
             return False
 
-        # If the criticity is not high enough, we bail out
-        if criticity < self.min_criticity:
+        # If the business_impact is not high enough, we bail out
+        if business_impact < self.min_business_impact:
             return False
 
         b = self.host_notification_period.is_time_valid(t)

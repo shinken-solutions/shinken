@@ -36,7 +36,7 @@ _special_properties = ( 'service_notification_commands', 'host_notification_comm
 _simple_way_parameters = ( 'service_notification_period', 'host_notification_period',
                            'service_notification_options', 'host_notification_options',
                            'service_notification_commands', 'host_notification_commands',
-                           'min_criticity' )
+                           'min_business_impact' )
 
 
 class Contact(Item):
@@ -56,7 +56,7 @@ class Contact(Item):
         'service_notification_options': ListProp(fill_brok=['full_status']),
         'host_notification_commands': StringProp(fill_brok=['full_status']),
         'service_notification_commands': StringProp(fill_brok=['full_status']),
-        'min_criticity':    IntegerProp(default = '0', fill_brok=['full_status']),
+        'min_business_impact':    IntegerProp(default = '0', fill_brok=['full_status']),
         'email':            StringProp(default='none', fill_brok=['full_status']),
         'pager':            StringProp(default='none', fill_brok=['full_status']),
         'address1':         StringProp(default='none', fill_brok=['full_status']),
@@ -74,6 +74,13 @@ class Contact(Item):
     running_properties.update({
         'downtimes':        StringProp(default=[], fill_brok=['full_status'], retention=True),
     })
+
+    # This tab is used to transform old parameters name into new ones
+    # so from Nagios2 format, to Nagios3 ones.
+    # Or Shinken deprecated names like criticity
+    old_properties = {
+        'min_criticity'            :    'min_business_impact',
+    }
 
 
     macros = {
@@ -99,7 +106,7 @@ class Contact(Item):
 
     #Search for notification_options with state and if t is
     #in service_notification_period
-    def want_service_notification(self, t, state, type, criticity):
+    def want_service_notification(self, t, state, type, business_impact):
         if not self.service_notifications_enabled:
             return False
 
@@ -110,7 +117,7 @@ class Contact(Item):
 
         #Now the rest is for sub notificationways. If one is OK, we are ok
         for nw in self.notificationways:
-            nw_b = nw.want_service_notification(t, state, type, criticity)
+            nw_b = nw.want_service_notification(t, state, type, business_impact)
             if nw_b:
                 return True
 
@@ -120,7 +127,7 @@ class Contact(Item):
 
     #Search for notification_options with state and if t is in
     #host_notification_period
-    def want_host_notification(self, t, state, type, criticity):
+    def want_host_notification(self, t, state, type, business_impact):
         if not self.host_notifications_enabled:
             return False
 
@@ -131,7 +138,7 @@ class Contact(Item):
 
         #Now it's all for sub notificationways. If one is OK, we are OK
         for nw in self.notificationways:
-            nw_b = nw.want_host_notification(t, state, type, criticity)
+            nw_b = nw.want_host_notification(t, state, type, business_impact)
             if nw_b:
                 return True
 
