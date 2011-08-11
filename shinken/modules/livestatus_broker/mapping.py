@@ -106,6 +106,11 @@ out_map = {
                 'description' : 'An alias name for the host',
                 'type' : 'string',
             },
+            'business_impact' : {
+                'converter' : int,
+                'description' : 'The importance we gave to this host between hte minimum 0 and the maximum 5',
+                'type' : 'int',
+            },
             'check_command' : {
                 'depythonize' : 'call',
                 'description' : 'Nagios command for active host check of this host',
@@ -546,6 +551,7 @@ out_map = {
                 'converter' : int,
                 'description' : 'The importance we gave to this host between hte minimum 0 and the maximum 5',
                 'type' : 'int',
+                'prop' : 'business_impact',
             },
             'source_problems' : {
                 'description' : 'The name of the source problems (host or service)',
@@ -604,6 +610,11 @@ out_map = {
             'active_checks_enabled' : {
                 'depythonize' : from_bool_to_int,
                 'description' : 'Wether active checks are enabled for the service (0/1)',
+                'type' : 'int',
+            },
+            'business_impact' : {
+                'converter' : int,
+                'description' : 'The importance we gave to this service between hte minimum 0 and the maximum 5',
                 'type' : 'int',
             },
             'check_command' : {
@@ -1354,6 +1365,7 @@ out_map = {
                 'converter' : int,
                 'description' : 'The importance we gave to this service between hte minimum 0 and the maximum 5',
                 'type' : 'int',
+                'prop' : 'business_impact',
             },
             'source_problems' : {
                 'description' : 'The name of the source problems (host or service)',

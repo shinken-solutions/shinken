@@ -208,22 +208,22 @@ class SchedulingItem(Item):
                         # Make element unique in this list
                         self.impacts = list(set(self.impacts))
 
-        # We can update our criticity value now
-        self.update_criticity_value()
+        # We can update our business_impact value now
+        self.update_business_impact_value()
 
         # And we register a new broks for update status
         b = self.get_update_status_brok()
         self.broks.append(b)
 
 
-    # We update our 'criticity' value with the max of
+    # We update our 'business_impact' value with the max of
     # the impacts criticy if we got impacts. And save our 'configuration'
-    # criticity if we do not have do it before
+    # business_impact if we do not have do it before
     # If we do not have impacts, we revert our value
-    def update_criticity_value(self):
-        # First save our criticity if not already do
-        if self.my_own_criticity == -1:
-            self.my_own_criticity = self.criticity
+    def update_business_impact_value(self):
+        # First save our business_impact if not already do
+        if self.my_own_business_impact == -1:
+            self.my_own_business_impact = self.business_impact
 
         # We look at our crit modulations. If one apply, we take apply it
         # and it's done
@@ -232,22 +232,22 @@ class SchedulingItem(Item):
             now = time.time()
             period = cm.modulation_period
             if period is None or period.is_time_valid(now):                    
-                #print "My self", self.get_name(), "go from crit", self.criticity, "to crit", cm.criticity
-                self.criticity = cm.criticity
+                #print "My self", self.get_name(), "go from crit", self.business_impact, "to crit", cm.business_impact
+                self.business_impact = cm.criticity
                 in_modulation = True
                 # We apply the first available, that's all
                 break
 
-        # If we trully have impacts, we get the max criticity
+        # If we trully have impacts, we get the max business_impact
         # if it's huge than ourselve
         if len(self.impacts) != 0:
-            self.criticity = max(self.criticity, max([e.criticity for e in self.impacts]))
+            self.business_impact = max(self.business_impact, max([e.business_impact for e in self.impacts]))
             return
 
         # If we are not a problem, we setup our own_crit if we are not in a 
         # modulation period
-        if self.my_own_criticity != -1 and not in_modulation:
-            self.criticity = self.my_own_criticity
+        if self.my_own_business_impact != -1 and not in_modulation:
+            self.business_impact = self.my_own_business_impact
             
 
 
@@ -265,10 +265,10 @@ class SchedulingItem(Item):
             self.impacts = []
 
         # We update our criticy value, it's not a huge thing :)
-        self.update_criticity_value()
+        self.update_business_impact_value()
 
         # If we were a problem, we say to everyone
-        # our new status, with good criticity value
+        # our new status, with good business_impact value
         if was_pb:
             # And we register a new broks for update status
             b = self.get_update_status_brok()

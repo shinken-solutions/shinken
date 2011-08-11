@@ -27,7 +27,7 @@ import copy
 from shinken_test import *
 
 
-class TestConfig(ShinkenTest):
+class TestService(ShinkenTest):
     #setUp is in shinken_test
 
     def get_svc(self):
@@ -180,10 +180,11 @@ class TestConfig(ShinkenTest):
         self.assert_(self.log_match(1, 'Warning: The results of service'))
 
 
-    def test_criticity_value(self):
+    def test_business_impact_value(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         #This service inherit the improtance value from his father, 5
-        self.assert_(svc.criticity == 5)
+        print "FUCK", svc.business_impact
+        self.assert_(svc.business_impact == 5)
 
 
     #Look if the service is in the servicegroup

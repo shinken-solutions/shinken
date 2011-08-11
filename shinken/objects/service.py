@@ -121,8 +121,8 @@ class Service(SchedulingItem):
         'duplicate_foreach':       StringProp(default=''),
         'default_value':           StringProp(default=''),
 
-        # Criticity value
-        'criticity':               IntegerProp(default='2', fill_brok=['full_status']),
+        # Business_Impact value
+        'business_impact':               IntegerProp(default='2', fill_brok=['full_status']),
     })
 
     # properties used in the running state
@@ -206,8 +206,8 @@ class Service(SchedulingItem):
         # Problem/impact part
         'is_problem':         BoolProp   (default=False, fill_brok=['full_status']),
         'is_impact':          BoolProp   (default=False, fill_brok=['full_status']),
-        # the save value of our criticity for "problems"
-        'my_own_criticity':   IntegerProp(default=-1),
+        # the save value of our business_impact for "problems"
+        'my_own_business_impact':   IntegerProp(default=-1),
         # list of problems that make us an impact
         'source_problems':    ListProp   (default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
         # list of the impact I'm the cause of
@@ -289,10 +289,12 @@ class Service(SchedulingItem):
     }
 
     # This tab is used to transform old parameters name into new ones
-    # so from Nagios2 format, to Nagios3 ones
+    # so from Nagios2 format, to Nagios3 ones.
+    # Or Shinken deprecated names like criticity
     old_properties = {
         'normal_check_interval':    'check_interval',
-        'retry_check_interval':     'retry_interval'
+        'retry_check_interval' :    'retry_interval',
+        'criticity'            :    'business_impact',
     }
 
 ####### 
@@ -770,7 +772,7 @@ class Service(SchedulingItem):
 
     # See if the notification is launchable (time is OK and contact is OK too)
     def notification_is_blocked_by_contact(self, n, contact):
-        return not contact.want_service_notification(self.last_chk, self.state, n.type, self.criticity)
+        return not contact.want_service_notification(self.last_chk, self.state, n.type, self.business_impact)
 
 
     def get_duration_sec(self):
@@ -1051,7 +1053,7 @@ class Services(Items):
     def apply_implicit_inheritance(self, hosts):
         for prop in ( 'contacts', 'contact_groups', 'notification_interval',
                          'notification_period', 'resultmodulations', 'criticitymodulations', 'escalations',
-                         'poller_tag', 'reactionner_tag', 'check_period', 'criticity' ):
+                         'poller_tag', 'reactionner_tag', 'check_period', 'business_impact' ):
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):

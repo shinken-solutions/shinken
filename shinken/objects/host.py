@@ -123,8 +123,8 @@ class Host(SchedulingItem):
         'escalations':          StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':   StringProp(default='', fill_brok=['full_status']),
 
-        # Criticity value
-        'criticity':            IntegerProp(default='2', fill_brok=['full_status']),
+        # Business impact value
+        'business_impact':            IntegerProp(default='2', fill_brok=['full_status']),
     })
 
     # properties set only for running purpose
@@ -241,8 +241,8 @@ class Host(SchedulingItem):
         'is_problem':           StringProp(default=False, fill_brok=['full_status']),
         'is_impact':            StringProp(default=False, fill_brok=['full_status']),
 
-        # the save value of our criticity for "problems"
-        'my_own_criticity':     IntegerProp(default=-1),
+        # the save value of our business_impact for "problems"
+        'my_own_business_impact':     IntegerProp(default=-1),
 
         # list of problems that make us an impact
         'source_problems':      StringProp(brok_transformation=to_svc_hst_distinct_lists, default=[], fill_brok=['full_status']),
@@ -323,10 +323,13 @@ class Host(SchedulingItem):
 
 
     # This tab is used to transform old parameters name into new ones
-    # so from Nagios2 format, to Nagios3 ones
+    # so from Nagios2 format, to Nagios3 ones.
+    # Or Shinken deprecated names like criticity
     old_properties = {
-        'normal_check_interval': 'check_interval',
-        'retry_check_interval':  'retry_interval'
+        'normal_check_interval' : 'check_interval',
+        'retry_check_interval'  : 'retry_interval',
+        'criticity'             : 'business_impact',
+        
     }
 
 
@@ -769,7 +772,7 @@ class Host(SchedulingItem):
 
     #See if the notification is launchable (time is OK and contact is OK too)
     def notification_is_blocked_by_contact(self, n, contact):
-        return not contact.want_host_notification(self.last_chk, self.state, n.type, self.criticity)
+        return not contact.want_host_notification(self.last_chk, self.state, n.type, self.business_impact)
 
 
     #MACRO PART

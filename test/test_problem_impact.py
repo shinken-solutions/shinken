@@ -45,10 +45,10 @@ class TestProblemImpact(ShinkenTest):
         
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
-        self.assert_(host_router_0.criticity == 2)
+        self.assert_(host_router_0.business_impact == 2)
         host_router_1 = self.sched.hosts.find_by_name("test_router_1")
         host_router_1.checks_in_progress = []
-        self.assert_(host_router_1.criticity == 2)
+        self.assert_(host_router_1.business_impact == 2)
 
         #Then initialize host under theses routers
         host_0 = self.sched.hosts.find_by_name("test_host_0")
@@ -105,8 +105,8 @@ class TestProblemImpact(ShinkenTest):
         for h in all_routers:
             self.assert_(h.is_problem == True)
             # Now routers are problems, they should have take the max
-            # criticity value ofthe impacts, so here 5
-            self.assert_(h.criticity == 5)
+            # business_impact value ofthe impacts, so here 5
+            self.assert_(h.business_impact == 5)
             for s in all_servers:
                 self.assert_(s in h.impacts)
                 self.assert_(s.get_dbg_name() in host_router_0_brok.data['impacts']['hosts'])
@@ -114,7 +114,7 @@ class TestProblemImpact(ShinkenTest):
 
         # Should have host notification, but it's not so simple:
         # our contact say : not under 5, and our hosts are 2. But
-        # the impacts have huge criticity, so the hosts gain such criticity
+        # the impacts have huge business_impact, so the hosts gain such business_impact
         self.assert_(self.any_log_match('HOST NOTIFICATION.*;'))
         self.show_and_clear_logs()
 
@@ -182,10 +182,10 @@ class TestProblemImpact(ShinkenTest):
             self.assert_(s.state == 'UP')
             self.assert_(s.source_problems == [])
 
-        # And our "criticity" should have failed back to our
+        # And our "business_impact" should have failed back to our
         # conf value, so 2
-        self.assert_(host_router_0.criticity == 2)
-        self.assert_(host_router_1.criticity == 2)
+        self.assert_(host_router_0.business_impact == 2)
+        self.assert_(host_router_1.business_impact == 2)
         #It's done :)
 
 
@@ -207,10 +207,10 @@ class TestProblemImpact(ShinkenTest):
         
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
-        self.assert_(host_router_0.criticity == 2)
+        self.assert_(host_router_0.business_impact == 2)
         host_router_1 = self.sched.hosts.find_by_name("test_router_1")
         host_router_1.checks_in_progress = []
-        self.assert_(host_router_1.criticity == 2)
+        self.assert_(host_router_1.business_impact == 2)
 
         #Then initialize host under theses routers
         host_0 = self.sched.hosts.find_by_name("test_host_0")
@@ -223,14 +223,14 @@ class TestProblemImpact(ShinkenTest):
         all_servers = [host_0, host_1]
 
         #Our crit mod that will allow us to play with on the fly 
-        # criticity modulation
+        # business_impact modulation
         critmod = self.sched.conf.criticitymodulations.find_by_name('Raise')
 
 
         # We lie here, from now we do not want criticities
         for h in all_hosts:
             for s in h.services:
-                s.criticity = 2
+                s.business_impact = 2
 
         #--------------------------------------------------------------
         # initialize host states as UP
@@ -277,8 +277,8 @@ class TestProblemImpact(ShinkenTest):
         for h in all_routers:
             self.assert_(h.is_problem == True)
             # Now routers are problems, they should have take the max
-            # criticity value ofthe impacts, so here 2 because we lower all critcity for our test
-            self.assert_(h.criticity == 2)
+            # business_impact value ofthe impacts, so here 2 because we lower all critcity for our test
+            self.assert_(h.business_impact == 2)
             for s in all_servers:
                 self.assert_(s in h.impacts)
                 self.assert_(s.get_dbg_name() in host_router_0_brok.data['impacts']['hosts'])
@@ -286,7 +286,7 @@ class TestProblemImpact(ShinkenTest):
 
         # Should have host notification, but it's not so simple:
         # our contact say : not under 5, and our hosts are 2. And here
-        #the criticity was still low for our test
+        #the business_impact was still low for our test
         self.assert_(not self.any_log_match('HOST NOTIFICATION.*;'))
         self.show_and_clear_logs()
 
@@ -311,8 +311,8 @@ class TestProblemImpact(ShinkenTest):
 
         for h in all_hosts:
             for s in h.services:
-                s.update_criticity_value()
-                self.assert_(s.criticity == 2)
+                s.update_business_impact_value()
+                self.assert_(s.business_impact == 2)
 
         #Now we play with modulation!
         # We put modulation period as None so it will be right all time :)
@@ -322,13 +322,13 @@ class TestProblemImpact(ShinkenTest):
         self.assert_(critmod in crit_srv.criticitymodulations)
 
         # Now we set the modulation period as always good, we check that the service
-        # really update it's criticity value
-        self.sched.update_criticities()
-        # So the service with the modulation should got it's criticity raised
-        self.assert_(crit_srv.criticity == 5)
+        # really update it's business_impact value
+        self.sched.update_business_values()
+        # So the service with the modulation should got it's business_impact raised
+        self.assert_(crit_srv.business_impact == 5)
         # And the routers too (problems)
-        self.assert_(host_router_0.criticity == 5)
-        self.assert_(host_router_1.criticity == 5)
+        self.assert_(host_router_0.business_impact == 5)
+        self.assert_(host_router_1.business_impact == 5)
 
         #--------------------------------------------------------------
         # One router get UP now
@@ -375,10 +375,10 @@ class TestProblemImpact(ShinkenTest):
             self.assert_(s.state == 'UP')
             self.assert_(s.source_problems == [])
 
-        # And our "criticity" should have failed back to our
+        # And our "business_impact" should have failed back to our
         # conf value, so 2
-        self.assert_(host_router_0.criticity == 2)
-        self.assert_(host_router_1.criticity == 2)
+        self.assert_(host_router_0.business_impact == 2)
+        self.assert_(host_router_1.business_impact == 2)
         #It's done :)
 
 
