@@ -586,6 +586,13 @@ class Items(object):
             return None
 
 
+    # It's used to change old Nagios2 names to
+    # Nagios3 ones
+    def old_properties_names_to_new(self):
+        for i in self:
+            i.old_properties_names_to_new()
+
+
     def pythonize(self):
         for id in self.items:
             self.items[id].pythonize()

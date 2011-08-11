@@ -1021,15 +1021,6 @@ class Hosts(Items):
                 h.hostgroups = new_hostgroups
 
 
-
-    # It's used to change old Nagios2 names to
-    # Nagios3 ones
-    def old_properties_names_to_new(self):
-        for h in self:
-            h.old_properties_names_to_new()
-
-
-
     # We look for hostgroups property in hosts and
     def explode(self, hostgroups, contactgroups):
         # Register host in the hostgroups
