@@ -281,7 +281,7 @@ class ExternalCommandManager:
         command = command.strip()
 
         #Only log if we are in the Arbiter
-        if self.mode == 'dispatcher':
+        if self.mode == 'dispatcher' and self.conf.log_external_commands:
             logger.log('EXTERNAL COMMAND: '+command.rstrip())
         self.get_command_and_args(command)
 
