@@ -182,9 +182,13 @@ Like temporary attributes such as "imported_from", etc.. """
 #                else: #new style for service
                 new_val = tab.pythonize(getattr(self, prop))
                 setattr(self, prop, new_val)
-            except AttributeError , exp:
-                # print self.get_name(), ' : ', exp
+            except AttributeError, exp:
+                #print exp
                 pass # Will be catch at the is_correct moment
+            except KeyError, exp:
+                #print "Missing prop value", exp
+                err = "ERROR : the property '%s' of '%s' do not have value" % (prop, self.get_name())
+                self.configuration_errors.append(err)
 
 
     def get_templates(self):
