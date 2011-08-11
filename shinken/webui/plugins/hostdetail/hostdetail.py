@@ -12,7 +12,7 @@ def show_host(name):
 
 
 def get_data(name):
-    h = app.datamgr.rg.hosts.find_by_name('localhost')
+    h = app.datamgr.get_host(name)
     return {'host' : h}
 
 

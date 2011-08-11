@@ -7,5 +7,9 @@ class DataManager(object):
     def load(self, rg):
         self.rg = rg
 
+    def get_host(self, hname):
+        return self.rg.hosts.find_by_name(hname)
+
+    
 
 datamgr = DataManager()

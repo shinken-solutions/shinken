@@ -1,24 +1,4 @@
 
-<!--
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-				
-		<title>Meatball</title>
-		<link rel="stylesheet" type="text/css" href="/static/reset.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="/static/text.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="/static/nav-new.css" media="screen">
-		<script src="/static/js/mootools-more.js" type="text/javascript"></script>
-		<script src="/static/js/rotater.js" type="text/javascript"></script>
-		<script src="/static/js/tabs.js" type="text/javascript"></script>
-
-	</head>
-	<body>
-		<div class="container_16">
--->
-
-
 
 %include header title='Host detail about ' + host.host_name
 
@@ -31,22 +11,6 @@
   });
 </script>
 
-<!--			<div id="header" class="grid_16">
-				<h1 class="box_textshadow">Meatball</h1>
-			</div>
-			<div class="clear"></div>
-			<div id="nav" class="grid_16">
-				<ul>
-					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">Dashboard</a></li>
-					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">Hosts</a></li>
-					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#" id="selected">Incidents</a></li>
-					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">Services</a></li>
-					<li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">System</a></li>
-				</ul>
-			</div>
-			<div class="clear"></div>
-			<div id="main_container" class="grid_16">
--->
 				<div id="left_container" class="grid_3">
 					<div id="dummy_box" class="box_gradient_horizontal"> 
 						<p>Dummy box</p>
