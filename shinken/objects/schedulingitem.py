@@ -217,7 +217,7 @@ class SchedulingItem(Item):
 
 
     # We update our 'business_impact' value with the max of
-    # the impacts criticy if we got impacts. And save our 'configuration'
+    # the impacts business_impact if we got impacts. And save our 'configuration'
     # business_impact if we do not have do it before
     # If we do not have impacts, we revert our value
     def update_business_impact_value(self):
@@ -228,12 +228,12 @@ class SchedulingItem(Item):
         # We look at our crit modulations. If one apply, we take apply it
         # and it's done
         in_modulation = False
-        for cm in self.criticitymodulations:
+        for cm in self.business_impact_modulations:
             now = time.time()
             period = cm.modulation_period
             if period is None or period.is_time_valid(now):                    
                 #print "My self", self.get_name(), "go from crit", self.business_impact, "to crit", cm.business_impact
-                self.business_impact = cm.criticity
+                self.business_impact = cm.business_impact
                 in_modulation = True
                 # We apply the first available, that's all
                 break
@@ -264,7 +264,7 @@ class SchedulingItem(Item):
             # we can just drop our impacts list
             self.impacts = []
 
-        # We update our criticy value, it's not a huge thing :)
+        # We update our business_impact value, it's not a huge thing :)
         self.update_business_impact_value()
 
         # If we were a problem, we say to everyone

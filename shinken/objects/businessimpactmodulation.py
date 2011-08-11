@@ -29,27 +29,27 @@ from item import Item, Items
 
 from shinken.property import StringProp, IntegerProp
 
-class Criticitymodulation(Item):
+class Businessimpactmodulation(Item):
     id = 1#0 is always special in database, so we do not take risk here
-    my_type = 'criticitymodulation'
+    my_type = 'businessimpactmodulation'
 
     properties = Item.properties.copy()
     properties.update({
-        'criticitymodulation_name': StringProp(),
-        'criticity':                IntegerProp(),
-        'modulation_period':        StringProp(default=None),
+            'business_impact_modulation_name': StringProp(),
+            'business_impact':                IntegerProp(),
+            'modulation_period':        StringProp(default=None),
     })
     
 
     # For debugging purpose only (nice name)
     def get_name(self):
-        return self.resultmodulation_name
+        return self.business_impact_modulation_name
 
 
 
-class Criticitymodulations(Items):
-    name_property = "criticitymodulation_name"
-    inner_class = Criticitymodulation
+class Businessimpactmodulations(Items):
+    name_property = "business_impact_modulation_name"
+    inner_class = Businessimpactmodulation
 
 
     def linkify(self, timeperiods):
@@ -66,7 +66,7 @@ class Criticitymodulations(Items):
             mtp = timeperiods.find_by_name(mtp_name)
 
             if mtp_name != '' and mtp is None:
-                err = "Error : the criticty modulation '%s' got an unknown modulation_period '%s'" % (rm.get_name(), mtp_name)
+                err = "Error : the business impact modulation '%s' got an unknown modulation_period '%s'" % (rm.get_name(), mtp_name)
                 rm.configuration_errors.append(err)
 
             rm.modulation_period = mtp

@@ -224,8 +224,8 @@ class TestProblemImpact(ShinkenTest):
 
         #Our crit mod that will allow us to play with on the fly 
         # business_impact modulation
-        critmod = self.sched.conf.criticitymodulations.find_by_name('Raise')
-
+        critmod = self.sched.conf.businessimpactmodulations.find_by_name('Raise')
+        self.assert_(critmod is not None)
 
         # We lie here, from now we do not want criticities
         for h in all_hosts:
@@ -319,7 +319,7 @@ class TestProblemImpact(ShinkenTest):
         critmod.modulation_period = None
 
         crit_srv = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_ok_1")
-        self.assert_(critmod in crit_srv.criticitymodulations)
+        self.assert_(critmod in crit_srv.business_impact_modulations)
 
         # Now we set the modulation period as always good, we check that the service
         # really update it's business_impact value

@@ -113,7 +113,7 @@ class Service(SchedulingItem):
         'poller_tag':              StringProp(default='None'),
         'reactionner_tag':              StringProp(default='None'),
         'resultmodulations':       StringProp(default=''),
-        'criticitymodulations':    StringProp(default=''),
+        'business_impact_modulations':    StringProp(default=''),
         'escalations':             StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':      StringProp(default='', fill_brok=['full_status']),
 
@@ -295,6 +295,7 @@ class Service(SchedulingItem):
         'normal_check_interval':    'check_interval',
         'retry_check_interval' :    'retry_interval',
         'criticity'            :    'business_impact',
+#        'criticitymodulations' :    'business_impact_modulations',
     }
 
 ####### 
@@ -964,7 +965,7 @@ class Services(Items):
     # service -> timepriods
     # service -> contacts
     def linkify(self, hosts, commands, timeperiods, contacts,
-                resultmodulations, criticitymodulations, escalations,
+                resultmodulations, businessimpactmodulations, escalations,
                 servicegroups):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
@@ -975,7 +976,7 @@ class Services(Items):
         self.linkify_one_command_with_commands(commands, 'event_handler')
         self.linkify_with_contacts(contacts)
         self.linkify_with_resultmodulations(resultmodulations)
-        self.linkify_with_criticitymodulations(criticitymodulations)
+        self.linkify_with_business_impact_modulations(businessimpactmodulations)
         # WARNING: all escalations will not be link here
         # (just the escalation here, not serviceesca or hostesca).
         # This last one will be link in escalations linkify.
@@ -1045,7 +1046,7 @@ class Services(Items):
     # So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
         for prop in ( 'contacts', 'contact_groups', 'notification_interval',
-                         'notification_period', 'resultmodulations', 'criticitymodulations', 'escalations',
+                         'notification_period', 'resultmodulations', 'business_impact_modulations', 'escalations',
                          'poller_tag', 'reactionner_tag', 'check_period', 'business_impact' ):
             for s in self:
                 if not s.is_tpl():
