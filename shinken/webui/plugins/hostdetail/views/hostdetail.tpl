@@ -1,6 +1,16 @@
 
 
+%print 'Host value?', host
+
+%# If got no Host, bailout
+%if not host:
+%include header title='Invalid host'
+
+Invalid host
+%else:
+
 %include header title='Host detail about ' + host.host_name
+
 
 <script type="text/javascript">
   var tabs = new MGFX.Tabs('.tab','.feature',{
@@ -145,6 +155,9 @@
 			</div>
 			<div class="clear"></div>
 		</div>
+
+%#End of the Host Exist or not case
+%end
 
 %include footer
 
