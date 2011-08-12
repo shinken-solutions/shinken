@@ -7,6 +7,9 @@
 %if not 'css' in locals() : css = []
 %if not 'print_menu' in locals() : print_menu = True
 
+
+
+
 <html slick-uniqueid="1"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
     <title>{{title or 'No title'}}</title>
@@ -38,6 +41,7 @@
 
   </head>
   <body class="main">
+
 		<div class="container_16">
 			<div id="header" class="grid_16">
 				<h1 class="box_textshadow">Meatball</h1>

@@ -13,7 +13,7 @@ def show_host(name):
 
 def get_data(name):
     h = app.datamgr.get_host(name)
-    return {'host' : h}
+    return {'app' : app, 'host' : h}
 
 
 
