@@ -28,8 +28,8 @@
 
 	  <div class="impact-icon"><img src="static/images/50x50.png"></div>
 	  <div class="impact-row"><span class="impact-name">{{impact['name']}}</span> is <span class="impact-state-text">{{impact['status']}}</span><img src="static/images/bomb.png"></div>
-	  <div class="impact-row"><span class="impact-output">No mails can be send nor received</span></div>
-	  <div class="impact-row"><span class="impact-duration">since one hour</span></div>
+	  <div class="impact-row"><span class="impact-output">{{impact['output']}}</span></div>
+	  <div class="impact-row"><span class="impact-duration">{{impact['since']}}</span></div>
 	</div>
 %# end of the for imp_id in impacts:
 %end

@@ -16,8 +16,8 @@ def get_data():
     # 2 : ERP/Critical/criticiy=4/since one day/""       ---> 1
     # 3 : FileShare@server/warning/criticity=3/since one day/No more file access   ---> 1
     # 4 : Print@server/Warning/since one day/Printer service is stopped  ---> 1,2
-
-
+    
+    
     # problems:
     # 1 : router-us is Down since 93294 with output Return in Dummy 2
     # 2 : router-asia is Down since one hour with output connexion failed
@@ -33,7 +33,7 @@ def get_data():
     problems[1] = {'name' : 'router-us is Down since 93294 with output Return in Dummy 2'}
     problems[2] = {'name' : 'router-asia is Down since 93294 with output Return in Dummy 2'}
     problems[3] = {'name' : 'Mssql@db-server is Down since 93294 with output connexion failed'}
-
+    
     
     return {'impacts' : impacts, 'problems' : problems}
 

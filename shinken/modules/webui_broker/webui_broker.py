@@ -35,6 +35,7 @@ from shinken.basemodule import BaseModule
 from shinken.message import Message
 from shinken.webui.bottle import Bottle, run, static_file, view, route
 from shinken.misc.regenerator import Regenerator
+from shinken.log import logger
 from datamanager import datamgr
 
 # Debug
