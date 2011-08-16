@@ -92,7 +92,7 @@ Invalid host
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Last Check Time</th>
-	    <td title='Last check was at {{time.asctime(time.localtime(host.last_chk))}}'>was {{helper.print_duration(host.last_chk)}} ago</td>
+	    <td title='Last check was at {{time.asctime(time.localtime(host.last_chk))}}'>was {{helper.print_duration(host.last_chk)}}</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Check Latency / Duration</th>
@@ -100,7 +100,7 @@ Invalid host
 	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Next Scheduled Active Check</th>
-	    <td title='Next active check at {{time.asctime(time.localtime(host.next_chk))}}'> in {{helper.print_duration(host.next_chk)}}</td>
+	    <td title='Next active check at {{time.asctime(time.localtime(host.next_chk))}}'>{{helper.print_duration(host.next_chk)}}</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Last State Change</th>

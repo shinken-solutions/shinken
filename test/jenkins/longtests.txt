@@ -74,6 +74,7 @@ test_hostdep_withno_depname.py
 test_regenerator.py
 test_service_withhost_exclude.py
 test_missing_object_value.py
+test_uihelper.py
 test_timeout.py
 
 # takes long
