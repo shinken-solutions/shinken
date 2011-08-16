@@ -59,6 +59,12 @@ class TestUIHelper(ShinkenTest):
         print "Res", s
         self.assert_(s == '2s ago')
 
+        # Ask only the furation string
+        s = helper.print_duration(now - 2, just_duration=True)
+        print "Res", s
+        self.assert_(s == '2s')
+
+
         #Got 2minutes
         s = helper.print_duration(now - 120)
         print "Res", s

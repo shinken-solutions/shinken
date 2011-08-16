@@ -105,6 +105,10 @@ class Helper(object):
         if x_elts >= 1:
             duration = duration[:x_elts]
 
+        # Maybe the user just want the duration
+        if just_duration:
+            return ' '.join(duration)
+
         # Now manage the future or not print
         if in_future:
             return 'in '+' '.join(duration)

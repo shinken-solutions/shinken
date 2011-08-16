@@ -72,7 +72,7 @@ Invalid host
 	<tbody>
 	  <tr>
 	    <th scope="row" class="column1">Host Status</th>
-	    <td><span class="state_ok icon_ok">{{host.state}}</span> (for {{helper.print_duration(host.last_state_change)}}) </td>
+	    <td><span class="state_ok icon_ok">{{host.state}}</span> (since {{helper.print_duration(host.last_state_change, just_duration=True, x_elts=2)}}) </td>
 	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Status Information</th>
