@@ -323,6 +323,13 @@ td.actions a {
     padding-left: 24px;
 }
 
+.icon_up {
+	background: url("../img/icons/state_ok.png") no-repeat scroll transparent;
+	background-position: 4px;
+    padding-left: 24px;
+}
+
+
 .icon_unreachable {
 	background: url("../img/icons/state_unreachable.png") no-repeat scroll transparent;
 	background-position: 4px;
@@ -334,9 +341,19 @@ td.actions a {
 	font-weight: bold;
 }
 
+.state_up {
+        color: green;
+        font-weight: bold;
+}
+
 .state_critical {
 	color: red;
 	font-weight: bold;
+}
+
+.state_down {
+        color: red;
+        font-weight: bold;
 }
 
 /*
