@@ -223,7 +223,9 @@ class Webui_broker(BaseModule):
 
     def add_static(self, fdir, m_dir):
         static_route = '/static/'+fdir+'/:path#.+#'
+        print "Declaring static route", static_route
         def plugin_static(path):
+            print "Ask %s and give %s" % (path, os.path.join(m_dir, 'htdocs'))
             return static_file(path, root=os.path.join(m_dir, 'htdocs'))
         route(static_route, callback=plugin_static)
 

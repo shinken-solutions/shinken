@@ -10,7 +10,7 @@
 Invalid host
 %else:
 
-%include header title='Host detail about ' + host.host_name
+%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js'],  css=['hostdetail/eltdeps.css']
 
 
 %helper = app.helper
@@ -152,7 +152,22 @@ Invalid host
   <div id="host_more">
 
   </div>
+<dl class="grid_6">
+
+  <div id="infovis"></div> 
+
+  <div id="right-container">
+    <div id="inner-details"></div>
+  </div>
+
+  <div id="log">Mon cul c'est du poulet</div>
+</dl>
+
 </div>
+
+</div>
+
+
 
 </div>
 <div class="clear"></div>

@@ -300,38 +300,38 @@ td.actions a {
 }
 
 .icon_warning {
-	background: url("../img/icons/warning.png") no-repeat scroll transparent;
+	background: url("/static/images/warning.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
 } 
 
 .icon_tick {
-	background: url("../img/icons/tick.png") no-repeat scroll transparent;
+	background: url("/static/images/tick.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
 } 
 
 .icon_cross {
-	background: url("../img/icons/cross.png") no-repeat scroll transparent;
+	background: url("/static/images/cross.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
 }
 
 .icon_ok {
-	background: url("../img/icons/state_ok.png") no-repeat scroll transparent;
+	background: url("/static/images/state_ok.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
 }
 
 .icon_up {
-	background: url("../img/icons/state_ok.png") no-repeat scroll transparent;
+	background: url("/static/images/state_ok.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
 }
 
 
 .icon_unreachable {
-	background: url("../img/icons/state_unreachable.png") no-repeat scroll transparent;
+	background: url("/static/images/state_unreachable.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
 }
