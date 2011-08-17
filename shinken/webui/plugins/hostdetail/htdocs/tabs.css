@@ -1,0 +1,10 @@
+
+#home {background-color:#ddd; position:relative; height:600px; width:600px; margin-bottom:10px; }
+.feature { height:600px; position:absolute; width:600px; overflow:hidden; }
+.feature img { border:none; }
+#tabs { margin-left:0;margin-bottom:0;}
+#tabs li {background-color:transparent;display:inline;float:none;list-style:none; }
+#tabs li a {background-color:#edd; color:#333; display:inline; height:auto;padding:5px 20px;text-decoration:none;width:auto;}
+#tabs li a.active { background-color:#ddd;color:#000; }
+
+

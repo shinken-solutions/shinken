@@ -10,20 +10,12 @@
 Invalid host
 %else:
 
-%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js'],  css=['hostdetail/eltdeps.css']
+%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css']
 
 
 %helper = app.helper
 
 
-<script type="text/javascript">
-  var tabs = new MGFX.Tabs('.tab','.feature',{
-  autoplay: false,
-  transitionDuration:500,
-  slideInterval:3000,
-  hover:true
-  });
-</script>
 
 <div id="left_container" class="grid_3">
   <div id="dummy_box" class="box_gradient_horizontal"> 
@@ -152,18 +144,35 @@ Invalid host
   <div id="host_more">
 
   </div>
-<dl class="grid_6">
+<dl class="grid_10">
 
-  <div id="infovis"></div> 
+    <ul id="tabs">
+    <li><a class="tab" href="#" id="one">Depenencies graph</a></li>
+    <li><a class="tab" href="#" id="two">Other</a></li>
+    <li><a class="tab" href="#" id="three">Something else</a></li>
+    </ul>
+    <div id="home">
+    <div class="feature">
+      <div id="infovis"> </div>
+      <div id="right-container">
+	<div id="inner-details"></div>
+      </div>
 
-  <div id="right-container">
-    <div id="inner-details"></div>
-  </div>
+      <div id="log">Mon cul c'est du poulet</div>
+    </div>
 
-  <div id="log">Mon cul c'est du poulet</div>
+
+    <div class="feature"">
+			 BLA
+    </div>
+    <div class="feature">
+      BLA
+    </div>
+    </div>
+
+
 </dl>
 
-</div>
 
 </div>
 
@@ -172,6 +181,19 @@ Invalid host
 </div>
 <div class="clear"></div>
 <div id="footer" class="grid_16">
+
+
+
+
+
+<script type="text/javascript">
+  window.addEvent('domready',function(){
+  this.tabs = new MGFX.Tabs('.tab','.feature', {
+  autoplay: true
+  });
+  });
+  </script>
+
 </div>
 <div class="clear"></div>
 </div>
