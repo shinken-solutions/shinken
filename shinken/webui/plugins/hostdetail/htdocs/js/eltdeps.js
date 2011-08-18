@@ -21,7 +21,7 @@ var Log = {
 	if (!this.elem)
 	    this.elem = document.getElementById('log');
 	this.elem.innerHTML = text;
-	this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
+	//this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
     }
 };
 
@@ -191,7 +191,7 @@ window.onload = function init(){
 			rgraph.onClick(node.id, {
 				hideLabels: false,
 				onComplete: function() {
-				    Log.write("done");
+				    Log.write(" ");
 				}
 			    });
 		    };
@@ -220,7 +220,7 @@ window.onload = function init(){
 	//alert('Roto is'+rgraph.root);
 	//rgraph.root =  graph.get('localhost');
 	rgraph.controller.onBeforeCompute(rgraph.graph.getNode(rgraph.root));
-	Log.write('done');
+	Log.write('');
 
 }
 
