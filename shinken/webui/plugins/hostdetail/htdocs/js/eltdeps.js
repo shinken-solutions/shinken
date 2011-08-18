@@ -25,6 +25,87 @@ var Log = {
     }
 };
 
+var json_graph_old = [
+		  {"id": "routerus", "name": "routerus"}, {"id": "routerus2", "name": "routerus2"}
+		  ]/*, "adjacencies": [], "data": {"some other key": "some other value", "$dim": 10, "$color": "red"}}];*/;
+
+
+var json_graph_old = [{"adjacencies": [{"nodeTo": "test_router_0", "data": {"$type": "arrow", "$direction": ["test_host_0", "test_router_0"]}}], "data": {"$dim": 10, "$color": "green"}, "id": "test_host_0", "name": "test_host_0"}, {"adjacencies": [], "data": {"$dim": 4, "$color": "green"}, "id": "test_router_0", "name": "test_router_0"}, {"adjacencies": [{"nodeTo": "test_host_0", "data": {"$type": "arrow", "$direction": ["test_host_0/test_ok_0", "test_host_0"]}}], "data": {"$type": "star", "$dim": 10, "$color": "green"}, "id": "test_host_0/test_ok_0", "name": "test_host_0/test_ok_0"}];
+
+var json_graph_old = [
+		  {
+		      "id": "Mem",
+		      "name": "Mem",
+		      "data": {
+			  "$dim": 5,
+			  "$type": "star",
+			  "$color":"red",
+			  "some other key": "some other value"
+		      },
+		      "adjacencies": [{
+			      "nodeTo": "localhost",
+			      "data": {
+				  "$type":"arrow",
+				  "$color":"red",
+				  "weight": 3,
+				  "$direction": ["Mem", "localhost"],
+			      }
+			  }]
+		  },
+		  
+		  
+		  {
+		      "id": "localhost",
+		      "name": "localhost",
+		      "data": {
+			  "$color":"red",
+			  "$dim": 5*2,
+			  "some other key": "some other value"
+		      },
+		      "adjacencies": [{
+			      "nodeTo": "main router",
+			      "data": {
+				  "$type":"arrow",
+				  "$color":"gray",
+				  "weight": 3,
+				  "$direction": ["localhost", "main router"],
+			      }
+			  }
+			  ]
+		  },{
+		      "id": "main router",
+		      "name": "main router",
+		      "data": {
+			  //"$dim": 32.26403873194912,
+			  //"$type": "star",
+			  "$color":"green",
+			  "some other key": "some other value"
+		      },
+		      "adjacencies": []
+		  }
+		  ,{
+		      "id": "CPU",
+		      "name": "CPU",
+		      "data": {
+			  //"$dim": 32.26403873194912,
+			  "$type": "star",
+			  "$dim": 5*2,
+			  "$color":"red",
+			  "some other key": "some other value"
+		      },
+		      "adjacencies": [{
+			      "nodeTo": "localhost",
+			      "data": {
+				  "$type":"arrow",
+				  "$color":"red",
+				  "weight": 3,
+				  "$direction": ["CPU", "localhost"],
+			      }
+			  }]
+		  }
+		  ];
+	//end
+
 
 window.onload = function init(){
     //init data
@@ -33,82 +114,12 @@ window.onload = function init(){
     //defined it will override the "type" and
     //"dim" parameters globally defined in the
     //RGraph constructor.
-        var json = [
-		    {
-			"id": "Mem",
-			"name": "Mem",
-			"data": {
-			    "$dim": 5,
-			    "$type": "star",
-			    "$color":"red",
-			    "some other key": "some other value"
-			},
-			"adjacencies": [{
-				"nodeTo": "localhost",
-				"data": {
-				    "$type":"arrow",
-				    "$color":"red",
-				    "weight": 3,
-				    "$direction": ["Mem", "localhost"],
-				}
-			    }]
-		    },
 
-
-		    {
-			"id": "localhost",
-			"name": "localhost",
-			"data": {
-			    "$color":"red",
-			    "$dim": 5*2,
-			    "some other key": "some other value"
-			},
-			"adjacencies": [{
-				"nodeTo": "main router",
-				"data": {
-				    "$type":"arrow",
-				    "$color":"gray",
-				    "weight": 3,
-				    "$direction": ["localhost", "main router"],
-				}
-			    }
-			            ]
-		    },{
-			"id": "main router",
-			"name": "main router",
-			"data": {
-			    //"$dim": 32.26403873194912,
-			    //"$type": "star",
-			    "$color":"green",
-			    "some other key": "some other value"
-			},
-			"adjacencies": []
-		    }
-		    ,{
-			"id": "CPU",
-			"name": "CPU",
-			"data": {
-			    //"$dim": 32.26403873194912,
-			    "$type": "star",
-			    "$dim": 5*2,
-			    "$color":"red",
-			    "some other key": "some other value"
-			},
-			"adjacencies": [{
-				"nodeTo": "localhost",
-				"data": {
-				    "$type":"arrow",
-				    "$color":"red",
-				    "weight": 3,
-				    "$direction": ["CPU", "localhost"],
-				}
-			    }]
-		    }
-		    ];
-	//end
 	//init RGraph
 	var rgraph = new $jit.RGraph({
 		'injectInto': 'infovis',
+		'width'     : 500,  
+		'height'    : 500,
 		//Optional: Add a background canvas
 		//that draws some concentric circles.
 		'background': {
@@ -200,8 +211,9 @@ window.onload = function init(){
 		}
 	    });
 	//load graph.
-	rgraph.loadJSON(json, 1);
-	rgraph.root =  'localhost';
+	/*alert('Loading graph'+json_graph);*/
+	rgraph.loadJSON(json_graph, 1);
+	rgraph.root =  graph_root;
 	//compute positions and plot
 	rgraph.refresh();
 	//end

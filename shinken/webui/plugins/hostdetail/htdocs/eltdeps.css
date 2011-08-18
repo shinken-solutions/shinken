@@ -15,11 +15,20 @@
 
 #infovis {
     position:relative;
-    width:600px;
-    height:600px;
+/*    width:600px;
+    height:600px;*/
     margin:auto;
     overflow:hidden;
     background-color:black;
+}
+
+#right-container {
+right: 0;
+background-position: center left;
+border-right: 1px solid #DDD;
+position: absolute;
+top : 0;
+background-color:white;
 }
 
 /*TOOLTIPS*/

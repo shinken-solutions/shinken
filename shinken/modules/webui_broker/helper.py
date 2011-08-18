@@ -1,5 +1,8 @@
 
 import time
+import json
+
+
 
 class Helper(object):
     def __init__(self):
@@ -116,4 +119,84 @@ class Helper(object):
             return ' '.join(duration) + ' ago'
 
 
+    # Need to create a X level higer and lower to teh element
+    def create_json_dep_graph(self, elt, levels=2):
+        # First we need ALL elements
+        all_elts = self.get_all_linked_elts(elt, levels=levels)
+        print "We got all our elements"
+        dicts = []
+        for i in all_elts:
+            print "Elt", i.get_dbg_name()
+            d = self.get_dep_graph_struct(i)
+            dicts.append(d)
+        j = json.dumps(dicts)
+        print "Create json", j
+        return j
+
+    # Return something like:
+    #{
+    #                  "id": "localhost",
+    #                  "name": "localhost",
+    #                  "data": {"$color":"red", "$dim": 5*2, "some other key": "some other value"},
+    #                  "adjacencies": [{
+    #                          "nodeTo": "main router",
+    #                          "data": {
+    #                              "$type":"arrow",
+    #                              "$color":"gray",
+    #                              "weight": 3,
+    #                              "$direction": ["localhost", "main router"],
+    #                          }
+    #                      }
+    #                      ]
+    #              }
+    # But as a python dict
+    def get_dep_graph_struct(self, elt, levels=2):
+        t = elt.__class__.my_type
+        d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
+             'data' : {'$dim': elt.business_impact*2},
+             'adjacencies' : []
+             }
+        # Service got a 'star' type :)
+        if t == 'service':
+            d['data']["$type"] = "star"
+            d['data']["$color"] = {0 : 'green', 1 : 'orange', 2 : 'red', 3 : 'gray'}.get(elt.state_id, 'red')
+        else: #host
+            d['data']["$color"] = {0 : 'green', 1 : 'red', 2 : 'orange', 3 : 'gray'}.get(elt.state_id, 'red')
+
+        # Now put in adj our parents
+        for p in elt.parent_dependencies:
+            pd = {'nodeTo' : p.get_dbg_name(),
+                  'data' : {"$type":"arrow", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
+            # Naive way of looking at impact
+            if elt.state_id != 0 and p.state_id != 0:
+                pd['data']["$color"] = 'red'
+            d['adjacencies'].append(pd)
+
+        # The sons case is now useful, it will be done by our sons
+        # that will link us
+
+        return d
+        
+
+    def get_all_linked_elts(self, elt, levels=2):
+        if levels == 0 :
+            return set()
+
+        my = set()
+        for i in elt.child_dependencies:
+            my.add(i)
+            child_elts = self.get_all_linked_elts(i, levels=levels - 1)
+            for c in child_elts:
+                my.add(c)
+        for i in elt.parent_dependencies:
+            my.add(i)
+            par_elts = self.get_all_linked_elts(i, levels=levels - 1)
+            for c in par_elts:
+                my.add(c)
+            
+        print "get_all_linked_elts::Give elements", my
+        return my
+
+
+    
 helper = Helper()

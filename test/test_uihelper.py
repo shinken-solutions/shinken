@@ -30,8 +30,7 @@ class TestUIHelper(ShinkenTest):
     #Uncomment this is you want to use a specific configuration
     #for your test
     def setUp(self):
-        pass
-        #self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
     
     #Change ME :)
@@ -153,9 +152,20 @@ class TestUIHelper(ShinkenTest):
 
 
 
+    #Change ME :)
+    def test_dep_graph(self):
+        now = time.time()
 
+        host = self.sched.hosts.find_by_name("test_host_0")
+        print host.parent_dependencies
+        struc = helper.get_dep_graph_struct(host)
+        print struc
+        j = helper.create_json_dep_graph(host)
+        print j
 
-        
+        all_elts = helper.get_all_linked_elts(host)
+        print "All elts", all_elts
+
 
 if __name__ == '__main__':
     unittest.main()

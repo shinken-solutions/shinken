@@ -15,9 +15,12 @@ Invalid host
 
 %helper = app.helper
 
+<script type="text/javascript">
+  var graph_root = '{{host.get_name()}}';   /*'test_host_0';*/
+  var json_graph = {{helper.create_json_dep_graph(host, levels=3)}};
+</script>
 
-
-<div id="left_container" class="grid_3">
+<div id="left_container" class="grid_2">
   <div id="dummy_box" class="box_gradient_horizontal"> 
     <p>Dummy box</p>
   </div>
@@ -140,42 +143,68 @@ Invalid host
 	</tbody>	
       </table>
     </div>
-  </div>
-  <div id="host_more">
+  
 
-  </div>
-<dl class="grid_10">
+    <dl class="grid_10">
+      
+      <ul id="tabs">
+	
+	<li><a class="tab" href="#" id="tabone">Actions</a></li>
+	<li><a class="tab" href="#" id="tabtwo">Services</a></li>
+	<li><a class="tab" href="#" id="tabthree">Depenencies graph</a></li>
 
-    <ul id="tabs">
-    <li><a class="tab" href="#" id="one">Depenencies graph</a></li>
-    <li><a class="tab" href="#" id="two">Other</a></li>
-    <li><a class="tab" href="#" id="three">Something else</a></li>
-    </ul>
-    <div id="home">
-    <div class="feature">
-      <div id="infovis"> </div>
-      <div id="right-container">
-	<div id="inner-details"></div>
+      </ul>
+      <div>
+	<div class="feature">
+	  <div id="box_commannd">
+	    <ul class="list_commands">
+	      <li><a class="icon_find" href="#">Locate host on map</a></li>
+	      <li><a class="icon_cross" href="#">Disable active checks of this host</a></li>
+	      <li><a class="icon_time" href="#">Re-schedule Next Host Check</a></li>
+
+	      <li><a class="icon_cross" href="#">Submit Passive Check Result For This Host</a></li>
+	      <li><a class="icon_passiv" href="#">Stop Accepting Passive Checks For This Host</a></li>
+	      <li><a class="icon_tick" href="#">Start Obsessing Over This Host</a></li>
+	      <li><a class="icon_wrench" href="#">Acknowledge This Host Problem</a></li>
+	      <li><a class="icon_cross" href="#">Disable Notifications For This Host</a></li>
+	      <li><a class="icon_notification" href="#">Send Custom Notification</a></li>
+
+	      <li><a class="icon_time" href="#">Delay Next Host Notification</a></li>
+	      <li><a class="icon_time" href="#">Schedule Downtime For This Host</a></li>
+	      <li><a class="icon_cross" href="#">Disable Notifications For All Services On This Host</a></li>
+	      <li><a class="icon_tick" href="#">Enable Notifications For All Services On This Host</a></li>
+	      <li><a class="icon_time" href="#">Schedule A Check Of All Services On This Host</a></li>
+	      <li><a class="icon_cross" href="#">Disable Checks Of All Services On This Host</a></li>
+
+	      <li><a class="icon_tick" href="#">Enable Checks Of All Services On This Host</a></li>
+	      <li><a class="icon_wrench" href="#">Launch event handler</a></li>
+	      <li><a class="icon_tick" href="#">Enable Event Handler For This Host</a></li>
+	      <li><a class="icon_cross" href="#">Disable Flap Detection For This Host</a></li>
+	      </ul>
+	    </div>
+	</div>
+
+	<div class="feature">
+	  Services
+        </div>
+
+
+	<div class="feature">
+	  <div id="infovis"> </div>
+	  <div id="right-container">
+	    <div id="inner-details"></div>
+	  </div>
+
+	  <div id="log">Loading host informations...</div>
+	</div>
+	
       </div>
-
-      <div id="log">Mon cul c'est du poulet</div>
-    </div>
-
-
-    <div class="feature"">
-			 BLA
-    </div>
-    <div class="feature">
-      BLA
-    </div>
-    </div>
+    </dl>
+  </div>
 
 
-</dl>
-
-
-</div>
-
+  <div id="host_more">
+  </div>
 
 
 </div>
@@ -185,7 +214,7 @@ Invalid host
 
 
 
-
+%# We link tabs and real code here
 <script type="text/javascript">
   window.addEvent('domready',function(){
   this.tabs = new MGFX.Tabs('.tab','.feature', {
