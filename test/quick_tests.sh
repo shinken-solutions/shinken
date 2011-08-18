@@ -121,6 +121,7 @@ launch_and_assert test_service_withhost_exclude.py
 launch_and_assert test_regenerator.py
 launch_and_assert test_missing_object_value.py
 launch_and_assert test_uihelper.py
+launch_and_assert test_linkify_template.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

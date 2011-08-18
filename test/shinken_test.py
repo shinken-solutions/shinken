@@ -78,6 +78,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
         self.conf.remove_templates()
+        self.conf.create_reversed_list()
         self.conf.pythonize()
         self.conf.linkify()
         self.conf.apply_dependancies()

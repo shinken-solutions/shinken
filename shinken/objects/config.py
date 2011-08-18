@@ -1293,7 +1293,7 @@ class Config(Item):
             cls.load_global_conf(self)
 
 
-    #Clean useless elements like templates because they are not needed anymore
+    # Clean useless elements like templates because they are not needed anymore
     def remove_templates(self):
         self.hosts.remove_templates()
         self.contacts.remove_templates()
