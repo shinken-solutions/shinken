@@ -470,7 +470,12 @@ class Broker(BaseSatellite):
         
 
     def do_loop_turn(self):
-        print "Begin Loop : manage broks", len(self.broks)
+        print "Begin Loop : managing old broks", len(self.broks)
+        
+        # Dump modules Queues size
+        insts = [ inst for inst in self.modules_manager.instances if inst.is_external]
+        for inst in insts:
+            print "External Queue len (%s) : %s" % (inst.get_name(), inst.to_q.qsize())
 
         # Begin to clean modules
         self.check_and_del_zombie_modules()

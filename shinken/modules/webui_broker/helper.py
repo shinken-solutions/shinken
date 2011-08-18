@@ -121,6 +121,7 @@ class Helper(object):
 
     # Need to create a X level higer and lower to teh element
     def create_json_dep_graph(self, elt, levels=2):
+        t0 = time.time()
         # First we need ALL elements
         all_elts = self.get_all_linked_elts(elt, levels=levels)
         print "We got all our elements"
@@ -131,6 +132,7 @@ class Helper(object):
             dicts.append(d)
         j = json.dumps(dicts)
         print "Create json", j
+        print "create_json_dep_graph::Json creation time", time.time() - t0
         return j
 
     # Return something like:
