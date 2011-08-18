@@ -7,7 +7,7 @@
 %if not 'css' in locals() : css = []
 %if not 'print_menu' in locals() : print_menu = True
 
-
+%if not 'top_right_banner_state' in locals() : top_right_banner_state = 1
 
 
 <html slick-uniqueid="1"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -42,9 +42,20 @@
   </head>
   <body class="main">
 
+
 		<div class="container_16">
+
 			<div id="header" class="grid_16">
 				<h1 class="box_textshadow">Meatball</h1>
+%# Set the Top right banner if need
+%if top_right_banner_state != 0:
+<img style="position: absolute;
+top: 0;
+right: 0;
+border: 0;" src="/static/images/top_rigth_banner_{{top_right_banner_state}}.png" alt="Banner state{{top_right_banner_st\
+ate}}">
+%end
+
 			</div>
 			<div class="clear"></div>
 %# Only show the menu if we want.
