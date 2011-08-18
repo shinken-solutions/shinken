@@ -475,7 +475,10 @@ class Broker(BaseSatellite):
         # Dump modules Queues size
         insts = [ inst for inst in self.modules_manager.instances if inst.is_external]
         for inst in insts:
-            print "External Queue len (%s) : %s" % (inst.get_name(), inst.to_q.qsize())
+            try:
+                print "External Queue len (%s) : %s" % (inst.get_name(), inst.to_q.qsize())
+            except Exception, exp:
+                print "External Queue len (%s) : Exception! %s" % (inst.get_name(), inst.to_q.qsize())
 
         # Begin to clean modules
         self.check_and_del_zombie_modules()
