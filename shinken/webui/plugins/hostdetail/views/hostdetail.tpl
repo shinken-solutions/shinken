@@ -16,7 +16,7 @@ Invalid host
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js', 'hostdetail/js/hide.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css', 'hostdetail/hostdetail.css'], top_right_banner_state=top_right_banner_state 
+%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js', 'hostdetail/js/hide.js', 'hostdetail/js/switchbuttons.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css', 'hostdetail/hostdetail.css', 'hostdetail/switchbuttons.css'], top_right_banner_state=top_right_banner_state 
 
 
 
@@ -124,27 +124,27 @@ Invalid host
 	<tbody>
 	  <tr class="odd">
 	    <th scope="row" class="column1">Active Checks</th>
-	    <td class="icon_tick">{{helper.ena_disa(host.active_checks_enabled)}}</td>			
+	    <td> {{!helper.get_input_bool(host.active_checks_enabled)}}</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Passive Checks</th>
-	    <td class="icon_tick">{{helper.ena_disa(host.passive_checks_enabled)}}</td>
+	    <td> {{!helper.get_input_bool(host.passive_checks_enabled)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Obsessing</th>
-	    <td class="icon_tick">{{helper.ena_disa(host.obsess_over_host)}}</td>
+	    <td> {{!helper.get_input_bool(host.obsess_over_host)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Notifications</th>
-	    <td class="icon_cross">{{helper.ena_disa(host.notifications_enabled)}}</td>
+	    <td> {{!helper.get_input_bool(host.notifications_enabled)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Event Handler</th>
-	    <td class="icon_tick">{{helper.ena_disa(host.event_handler_enabled)}}</td>
+	    <td> {{!helper.get_input_bool(host.event_handler_enabled)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Flap Detection</th>
-	    <td class="icon_cross">{{helper.ena_disa(host.flap_detection_enabled)}}</td>
+	    <td> {{!helper.get_input_bool(host.flap_detection_enabled)}}</td>
 	  </tr>
 	</tbody>	
       </table>

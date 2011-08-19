@@ -271,5 +271,11 @@ class Helper(object):
         t.sort(srv_sort)
         return t
 
+
+    def get_input_bool(self, b):
+        if b:
+            return """<input type="checkbox" checked="checked"/>\n"""
+        else:
+            return """<input type="checkbox" />\n"""
     
 helper = Helper()
