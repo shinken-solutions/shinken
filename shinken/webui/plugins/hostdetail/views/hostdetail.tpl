@@ -10,10 +10,16 @@
 Invalid host
 %else:
 
-%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css']
-
-
 %helper = app.helper
+%datamgr = app.datamgr
+
+%top_right_banner_state = datamgr.get_overall_state()
+
+
+%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css'], top_right_banner_state=top_right_banner_state 
+
+
+
 
 <script type="text/javascript">
   var graph_root = '{{host.get_name()}}';   /*'test_host_0';*/
@@ -218,7 +224,7 @@ Invalid host
 <script type="text/javascript">
   window.addEvent('domready',function(){
   this.tabs = new MGFX.Tabs('.tab','.feature', {
-  autoplay: true
+  autoplay: false
   });
   });
   </script>
