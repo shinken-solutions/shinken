@@ -16,7 +16,7 @@ Invalid host
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css'], top_right_banner_state=top_right_banner_state 
+%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js', 'hostdetail/js/hide.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css', 'hostdetail/hide.css'], top_right_banner_state=top_right_banner_state 
 
 
 
@@ -155,44 +155,41 @@ Invalid host
       
       <ul id="tabs">
 	
-	<li><a class="tab" href="#" id="tabone">Actions</a></li>
-	<li><a class="tab" href="#" id="tabtwo">Services</a></li>
+	<li><a class="tab" href="#" id="tabone">Services</a></li>
+	<li><a class="tab" href="#" id="tabtwo">Actions</a></li>
 	<li><a class="tab" href="#" id="tabthree">Depenencies graph</a></li>
 
       </ul>
       <div>
-	<div class="feature">
-	  <div id="box_commannd">
-	    <ul class="list_commands">
-	      <li><a class="icon_find" href="#">Locate host on map</a></li>
-	      <li><a class="icon_cross" href="#">Disable active checks of this host</a></li>
-	      <li><a class="icon_time" href="#">Re-schedule Next Host Check</a></li>
-
-	      <li><a class="icon_cross" href="#">Submit Passive Check Result For This Host</a></li>
-	      <li><a class="icon_passiv" href="#">Stop Accepting Passive Checks For This Host</a></li>
-	      <li><a class="icon_tick" href="#">Start Obsessing Over This Host</a></li>
-	      <li><a class="icon_wrench" href="#">Acknowledge This Host Problem</a></li>
-	      <li><a class="icon_cross" href="#">Disable Notifications For This Host</a></li>
-	      <li><a class="icon_notification" href="#">Send Custom Notification</a></li>
-
-	      <li><a class="icon_time" href="#">Delay Next Host Notification</a></li>
-	      <li><a class="icon_time" href="#">Schedule Downtime For This Host</a></li>
-	      <li><a class="icon_cross" href="#">Disable Notifications For All Services On This Host</a></li>
-	      <li><a class="icon_tick" href="#">Enable Notifications For All Services On This Host</a></li>
-	      <li><a class="icon_time" href="#">Schedule A Check Of All Services On This Host</a></li>
-	      <li><a class="icon_cross" href="#">Disable Checks Of All Services On This Host</a></li>
-
-	      <li><a class="icon_tick" href="#">Enable Checks Of All Services On This Host</a></li>
-	      <li><a class="icon_wrench" href="#">Launch event handler</a></li>
-	      <li><a class="icon_tick" href="#">Enable Event Handler For This Host</a></li>
-	      <li><a class="icon_cross" href="#">Disable Flap Detection For This Host</a></li>
-	      </ul>
-	    </div>
-	</div>
 
 	<div class="feature">
 	  Services
         </div>
+
+	<div class="feature">
+	  <div id="box_commannd">
+	    {{!helper.get_button('Try to fix it!', img='/static/images/find.png')}}
+	    <div class="clear"></div>
+	    {{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}
+	    <div class="clear"></div>
+	    {{!helper.get_button('Recheck now', img='/static/images/time.png')}}
+	    <div class="clear"></div>
+	    {{!helper.get_button('Show advanced options', img='/static/images/accept.png', id='toggle_advanced_actions')}}
+	    <div class="clear"></div>
+	    <hr>
+	    <div id="advanced_actions">
+	      {{!helper.get_button('Submit Passive Check Result', img='/static/images/cross.png')}}
+	      {{!helper.get_button('Stop Accepting Passive Checks', img='/static/images/passiv.png')}}
+	      {{!helper.get_button('Start Obsessing Over', img='/static/images/tick.png')}}
+	      {{!helper.get_button('Disable Notifications For This Host', img='/static/images/cross.png')}}
+	      {{!helper.get_button('Send Custom Notification', img='/static/images/notification.png')}}
+	      {{!helper.get_button('Schedule Downtime For This Host', img='/static/images/time.png')}}
+	      {{!helper.get_button('Disable Flap Detection For This Host', img='/static/images/cross.png')}}
+	      
+	    </div>
+	  </div>
+	</div>
+	
 
 
 	<div class="feature">
