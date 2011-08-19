@@ -2,7 +2,7 @@ window.addEvent('domready',function(){
 	(function($) {
 
 	    this.IPhoneCheckboxes = new Class({
-
+		    
 		    //implements
 		    Implements: [Options],
 

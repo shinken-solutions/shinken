@@ -188,7 +188,12 @@ Invalid host
 	    <div class="clear"></div>
 	    {{!helper.get_button('Recheck now', img='/static/images/time.png')}}
 	    <div class="clear"></div>
-	    {{!helper.get_button('Show advanced options', img='/static/images/accept.png', id='toggle_advanced_actions')}}
+	    <table>
+	      <tr>
+		<th scope="row" class="column1">Show advanced options</th>
+		<td id='toggle_advanced_actions'> {{!helper.get_input_bool(False)}}</td>
+              </tr>
+	    </table>
 	    <div class="clear"></div>
 	    <hr>
 	    <div id="advanced_actions">
