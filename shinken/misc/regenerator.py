@@ -455,7 +455,7 @@ class Regenerator:
         for hg in self.hostgroups:
             print "Cleaning hostgroup %s:%d" % (hg.get_name(), len(hg.members))
             # Exclude from members the hosts with this inst_id
-            hg.members = [h for h in hg.members if h.instance_id != inst_id]
+            hg.members = [h for h in hg.members if h.instance_id != c_id]
             print "Len after", len(hg.members)
 
         for s in to_del_srv:
@@ -464,7 +464,7 @@ class Regenerator:
 
         # Now clean service groups
         for sg in self.servicegroups:
-            sg.members = [s for s in sg.members if s.instance_id != inst_id]
+            sg.members = [s for s in sg.members if s.instance_id != c_id]
 
         # We now regererate reversed list so the client will find only real objects
         self.create_reversed_list()

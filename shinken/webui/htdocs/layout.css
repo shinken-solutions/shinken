@@ -448,10 +448,3 @@ td.actions a {
 			color:#777;
 			
 
-/*   Top right banner */
-.top_rigth_banner {
-    position: absolute;
-    top: 0;
-    right: 0;
-    border: 0;
-}
