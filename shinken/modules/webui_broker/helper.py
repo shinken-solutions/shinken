@@ -21,6 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import copy
 try:
     import json
 except ImportError:
@@ -206,10 +207,11 @@ class Helper(object):
 
         # The sons case is now useful, it will be done by our sons
         # that will link us
-
         return d
         
 
+    # Return all linked elements of this elt, and 2 level
+    # higer and lower :)
     def get_all_linked_elts(self, elt, levels=2):
         if levels == 0 :
             return set()
@@ -230,7 +232,7 @@ class Helper(object):
         return my
 
 
-
+    # Return a button with text, image, id and class (if need)
     def get_button(self, text, img=None, id=None, cls=None):
         s = '<div class="buttons">\n'
         if cls and not id:
@@ -248,6 +250,26 @@ class Helper(object):
             </div>\n'''
         return s
 
+
+    # For and host, return the services sorted by business
+    # impact, then state, then desc
+    def get_host_services_sorted(self, host):
+        def srv_sort(s1, s2):
+            if s1.business_impact > s2.business_impact:
+                return -1
+            if s2.business_impact > s1.business_impact:
+                return 1
+            # ok, here, same business_impact
+            # Compare warn and crit state
+            if s1.state_id > s2.state_id:
+                return -1
+            if s2.state_id > s1.state_id:
+                return 1
+            # Ok, so by name...
+            return s1.service_description > s2.service_description
+        t = copy.copy(host.services)
+        t.sort(srv_sort)
+        return t
 
     
 helper = Helper()
