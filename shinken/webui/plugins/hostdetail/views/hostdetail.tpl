@@ -16,7 +16,7 @@ Invalid host
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js', 'hostdetail/js/hide.js', 'hostdetail/js/switchbuttons.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css', 'hostdetail/hostdetail.css', 'hostdetail/switchbuttons.css'], top_right_banner_state=top_right_banner_state 
+%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js', 'hostdetail/js/hide.js', 'hostdetail/js/switchbuttons.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css', 'hostdetail/hostdetail.css', 'hostdetail/switchbuttons.css', 'hostdetail/hide.css'], top_right_banner_state=top_right_banner_state 
 
 
 
@@ -121,7 +121,7 @@ Invalid host
 	    <td>{{helper.yes_no(host.in_scheduled_downtime)}}</td>
 	  </tr>	
 	</tbody>
-	<tbody>
+	<tbody class="switches">
 	  <tr class="odd">
 	    <th scope="row" class="column1">Active Checks</th>
 	    <td> {{!helper.get_input_bool(host.active_checks_enabled)}}</td>
@@ -164,18 +164,20 @@ Invalid host
 	
 	%# Here print all services of this host, sorted by business impact
 	<div class="feature">
-	  %for s in helper.get_host_services_sorted(host):
-	  <div class="service">
-	    <div class="divstate{{s.state_id}}">
-	      %for i in range(0, s.business_impact-2):
-	      <img src='/static/images/star.png'>
-	      %end
-	    
-	      <span style="font-size:125%">{{s.service_description}}</span> is <span style="font-size:125%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}, last check was {{helper.print_duration(s.last_chk)}}
+	  <div class='host-services'>
+	    %for s in helper.get_host_services_sorted(host):
+	    <div class="service">
+	      <div class="divstate{{s.state_id}}">
+		%for i in range(0, s.business_impact-2):
+		<img src='/static/images/star.png'>
+		%end
+		
+		<span style="font-size:125%">{{s.service_description}}</span> is <span style="font-size:125%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}, last check was {{helper.print_duration(s.last_chk)}}
+	      </div>
 	    </div>
-	    </div>
-	  %# End of this service
-	  %end
+	    %# End of this service
+	    %end
+	  </div>
         </div>
 
 	<div class="feature">

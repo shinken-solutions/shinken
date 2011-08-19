@@ -272,10 +272,13 @@ class Helper(object):
         return t
 
 
-    def get_input_bool(self, b):
+    def get_input_bool(self, b, id=None):
+        id_s = ''
+        if id:
+            id_s = 'id="%s"' % id
         if b:
-            return """<input type="checkbox" checked="checked"/>\n"""
+            return """<input type="checkbox" checked="checked" %s/>\n""" % id_s
         else:
-            return """<input type="checkbox" />\n"""
+            return """<input type="checkbox" %s />\n""" % id_s
     
 helper = Helper()
