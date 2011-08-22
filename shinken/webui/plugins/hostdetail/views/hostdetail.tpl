@@ -150,81 +150,59 @@ Invalid host
 
 
       <div id="box_commannd">
-	{{!helper.get_button('Try to fix it!', img='/static/images/find.png')}}
+	{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}
 	{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}
-	{{!helper.get_button('Recheck now', img='/static/images/time.png')}}
+	{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}
 	<a href="/depgraph/{{host.host_name}}" class="mb" title="Impact map of {{host.host_name}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
+	{{!helper.get_button('Submit Passive Check Result', img='/static/images/passiveonly.gif')}}
+	{{!helper.get_button('Send Custom Notification', img='/static/images/notification.png')}}
+	{{!helper.get_button('Schedule Downtime For This Host', img='/static/images/downtime.png')}}
+
 	<div class="clear"/>
       </div>
-      
-      <ul id="tabs">
-	
-	<li><a class="tab" href="#" id="tabone">Services</a></li>
-	<li><a class="tab" href="#" id="tabtwo">Advanced actions</a></li>
 
-      </ul>
-      <div>
-	
-	%# Here print all services of this host, sorted by business impact
-	<div class="feature">
-	  <div class='host-services'>
-	    %for s in helper.get_host_services_sorted(host):
-	    <div class="service">
-	      <div class="divstate{{s.state_id}}">
-		%for i in range(0, s.business_impact-2):
-		<img src='/static/images/star.png'>
-		%end
+      <div class='host-services'>
+	%for s in helper.get_host_services_sorted(host):
+	  <div class="service">
+	    <div class="divstate{{s.state_id}}">
+	      %for i in range(0, s.business_impact-2):
+	        <img src='/static/images/star.png'>
+	      %end
 		
 		<span style="font-size:125%">{{s.service_description}}</span> is <span style="font-size:125%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}, last check was {{helper.print_duration(s.last_chk)}}
-	      </div>
 	    </div>
-	    %# End of this service
-	    %end
 	  </div>
-        </div>
-
+	  %# End of this service
+	  %end
+      </div>
+      
+    </dl>
+  </div>
+  <div class="clear"></div>
+  <hr>
+  <div id="host_more">
+    <dl class="grid_6">
+      <ul id="tabs">
+	<li><a class="tab" href="#" id="tabone">Comments</a></li>
+	<li><a class="tab" href="#" id="tabtwo">Downtimes</a></li>
+      </ul>
+      <div>
 	<div class="feature">
-	  <div id="box_commannd">
-	    {{!helper.get_button('Try to fix it!', img='/static/images/find.png')}}
-	    <div class="clear"></div>
-	    {{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}
-	    <div class="clear"></div>
-	    {{!helper.get_button('Recheck now', img='/static/images/time.png')}}
-	    <div class="clear"></div>
-	    <table>
-	      <tr>
-		<th scope="row" class="column1">Show advanced options</th>
-		<td id='toggle_advanced_actions'> {{!helper.get_input_bool(False)}}</td>
-              </tr>
-	    </table>
-	    <div class="clear"></div>
-	    <hr>
-	    <div id="advanced_actions">
-	      {{!helper.get_button('Submit Passive Check Result', img='/static/images/cross.png')}}
-	      {{!helper.get_button('Stop Accepting Passive Checks', img='/static/images/passiv.png')}}
-	      {{!helper.get_button('Start Obsessing Over', img='/static/images/tick.png')}}
-	      {{!helper.get_button('Disable Notifications For This Host', img='/static/images/cross.png')}}
-	      {{!helper.get_button('Send Custom Notification', img='/static/images/notification.png')}}
-	      {{!helper.get_button('Schedule Downtime For This Host', img='/static/images/time.png')}}
-	      {{!helper.get_button('Disable Flap Detection For This Host', img='/static/images/cross.png')}}
-	      
-	    </div>
-	  </div>
+	  1
+	</div>
+      
+	<div class="feature">
+	  adv
 	</div>
 	
-	
       </div>
+      blabla
     </dl>
   </div>
 
 
-  <div id="host_more">
-  </div>
-
-
-</div>
-<div class="clear"></div>
-<div id="footer" class="grid_16">
+  <div class="clear"></div>
+  <div id="footer" class="grid_16">
 
 
 

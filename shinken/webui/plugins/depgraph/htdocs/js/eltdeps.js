@@ -26,7 +26,6 @@ var Log = {
 };
 
 
-
 window.onload = function init(){
     //init data
     //If a node in this JSON structure
