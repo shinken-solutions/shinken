@@ -14,7 +14,7 @@ Invalid host
 %datamgr = app.datamgr
 
 
-%include header title='Dependenci graph of ' + host.host_name,  js=['depgraph/js/jit-yc.js', 'depgraph/js/excanvas.js', 'depgraph/js/eltdeps.js', 'depgraph/js/hide.js', 'depgraph/js/switchbuttons.js', 'depgraph/js/multibox.js', 'depgraph/js/multi.js' ],  css=['depgraph/eltdeps.css', 'depgraph/tabs.css', 'depgraph/hostdetail.css', 'depgraph/switchbuttons.css', 'depgraph/hide.css', 'depgraph/multibox.css'],  print_menu=False
+%include header title='Dependencies graph of ' + host.host_name,  js=['depgraph/js/jit-yc.js', 'depgraph/js/excanvas.js', 'depgraph/js/eltdeps.js'],  css=['depgraph/eltdeps.css'],  print_menu=False
 
 
 

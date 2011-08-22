@@ -21,28 +21,32 @@ var Log = {
 	if (!this.elem)
 	    this.elem = document.getElementById('log');
 	this.elem.innerHTML = text;
-	this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
+	//this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
     }
 };
 
 
-function init(){
+
+window.onload = function init(){
     //init data
     //If a node in this JSON structure
     //has the "$type" or "$dim" parameters
     //defined it will override the "type" and
     //"dim" parameters globally defined in the
     //RGraph constructor.
+
     //init RGraph
     var rgraph = new $jit.RGraph({
 	    'injectInto': 'infovis',
+	    'width'     : 700,  
+	    'height'    : 700,
 	    //Optional: Add a background canvas
 	    //that draws some concentric circles.
 	    'background': {
 		'CanvasStyles': {
 		    'strokeStyle': '#555',
-		    'shadowBlur': 50,
-		    'shadowColor': '#ccc'
+		    //'shadowBlur': 50,
+		    //'shadowColor': '#ccc'
 		}
 	    },
 	    //Add navigation capabilities:
@@ -71,7 +75,6 @@ function init(){
 	    interpolation: 'polar',
 	    //Change the transition effect from linear
 	    //to elastic.
-	    //transition: $jit.Trans.Elastic.ea
 	    //transition: $jit.Trans.Elastic.ea
 	    //Change other animation parameters.
 	    duration:1000,
@@ -140,3 +143,5 @@ function init(){
     Log.write('');
 
 }
+
+
