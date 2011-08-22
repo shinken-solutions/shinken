@@ -16,7 +16,7 @@ Invalid host
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js', 'hostdetail/js/hide.js', 'hostdetail/js/switchbuttons.js'],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css', 'hostdetail/hostdetail.css', 'hostdetail/switchbuttons.css', 'hostdetail/hide.css'], top_right_banner_state=top_right_banner_state 
+%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/hide.js', 'hostdetail/js/switchbuttons.js', 'hostdetail/js/multibox.js', 'hostdetail/js/multi.js' ],  css=['hostdetail/tabs.css', 'hostdetail/hostdetail.css', 'hostdetail/switchbuttons.css', 'hostdetail/hide.css', 'hostdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
 
 
 
@@ -40,6 +40,7 @@ Invalid host
 <div class="grid_13">
   <div id="host_preview">
     <h2 class="icon_{{host.state.lower()}}">{{host.state}}: {{host.host_name}}</h2>
+
     <dl class="grid_6">
       <dt>Alias:</dt>
       <dd>{{host.alias}}</dd>
@@ -152,12 +153,20 @@ Invalid host
   
 
     <dl class="grid_10">
+
+
+      <div id="box_commannd">
+	{{!helper.get_button('Try to fix it!', img='/static/images/find.png')}}
+	{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}
+	{{!helper.get_button('Recheck now', img='/static/images/time.png')}}
+	<a href="/depgraph/{{host.host_name}}" class="mb" title="example title a">{{!helper.get_button('Impact map', img='/static/images/state_ok.png')}}</a>
+	<div class="clear"/>
+      </div>
       
       <ul id="tabs">
 	
 	<li><a class="tab" href="#" id="tabone">Services</a></li>
-	<li><a class="tab" href="#" id="tabtwo">Actions</a></li>
-	<li><a class="tab" href="#" id="tabthree">Depenencies graph</a></li>
+	<li><a class="tab" href="#" id="tabtwo">Advanced actions</a></li>
 
       </ul>
       <div>
@@ -209,16 +218,6 @@ Invalid host
 	  </div>
 	</div>
 	
-
-
-	<div class="feature">
-	  <div id="infovis"> </div>
-	  <div id="right-container">
-	    <div id="inner-details"></div>
-	  </div>
-
-	  <div id="log">Loading host informations...</div>
-	</div>
 	
       </div>
     </dl>

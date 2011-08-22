@@ -118,8 +118,8 @@ window.onload = function init(){
 	//init RGraph
 	var rgraph = new $jit.RGraph({
 		'injectInto': 'infovis',
-		'width'     : 500,  
-		'height'    : 500,
+		'width'     : 700,  
+		'height'    : 700,
 		//Optional: Add a background canvas
 		//that draws some concentric circles.
 		'background': {
