@@ -16,15 +16,9 @@ Invalid host
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/hide.js', 'hostdetail/js/switchbuttons.js', 'hostdetail/js/multibox.js', 'hostdetail/js/multi.js' ],  css=['hostdetail/tabs.css', 'hostdetail/hostdetail.css', 'hostdetail/switchbuttons.css', 'hostdetail/hide.css', 'hostdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
+%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/hide.js', 'hostdetail/js/switchbuttons.js', 'hostdetail/js/multibox.js', 'hostdetail/js/multi.js'],  css=['hostdetail/tabs.css', 'hostdetail/hostdetail.css', 'hostdetail/switchbuttons.css', 'hostdetail/hide.css', 'hostdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
 
 
-
-
-<script type="text/javascript">
-  var graph_root = '{{host.get_name()}}';   /*'test_host_0';*/
-  var json_graph = {{helper.create_json_dep_graph(host, levels=3)}};
-</script>
 
 <div id="left_container" class="grid_2">
   <div id="dummy_box" class="box_gradient_horizontal"> 
@@ -41,6 +35,14 @@ Invalid host
   <div id="host_preview">
     <h2 class="icon_{{host.state.lower()}}">{{host.state}}: {{host.host_name}}</h2>
 
+
+
+<div class="tip">
+  <a href="#" title="Ok, you got it." class="right">Right</a>
+</div>
+
+
+    
     <dl class="grid_6">
       <dt>Alias:</dt>
       <dd>{{host.alias}}</dd>
@@ -159,7 +161,7 @@ Invalid host
 	{{!helper.get_button('Try to fix it!', img='/static/images/find.png')}}
 	{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}
 	{{!helper.get_button('Recheck now', img='/static/images/time.png')}}
-	<a href="/depgraph/{{host.host_name}}" class="mb" title="example title a">{{!helper.get_button('Impact map', img='/static/images/state_ok.png')}}</a>
+	<a href="/depgraph/{{host.host_name}}" class="mb" title="Impact map of {{host.host_name}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
 	<div class="clear"/>
       </div>
       

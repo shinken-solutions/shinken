@@ -13,10 +13,8 @@ Invalid host
 %helper = app.helper
 %datamgr = app.datamgr
 
-%top_right_banner_state = datamgr.get_overall_state()
 
-
-%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/jit-yc.js', 'hostdetail/js/excanvas.js', 'hostdetail/js/eltdeps.js', 'hostdetail/js/hide.js', 'hostdetail/js/switchbuttons.js', 'hostdetail/js/multibox.js', 'hostdetail/js/multi.js' ],  css=['hostdetail/eltdeps.css', 'hostdetail/tabs.css', 'hostdetail/hostdetail.css', 'hostdetail/switchbuttons.css', 'hostdetail/hide.css', 'hostdetail/multibox.css'], top_right_banner_state=top_right_banner_state,  print_menu=False
+%include header title='Dependenci graph of ' + host.host_name,  js=['depgraph/js/jit-yc.js', 'depgraph/js/excanvas.js', 'depgraph/js/eltdeps.js', 'depgraph/js/hide.js', 'depgraph/js/switchbuttons.js', 'depgraph/js/multibox.js', 'depgraph/js/multi.js' ],  css=['depgraph/eltdeps.css', 'depgraph/tabs.css', 'depgraph/hostdetail.css', 'depgraph/switchbuttons.css', 'depgraph/hide.css', 'depgraph/multibox.css'],  print_menu=False
 
 
 

@@ -28,6 +28,8 @@
     <script type="text/javascript" src="/static/js/rotater.js"></script>
     <script type="text/javascript" src="/static/js/tabs.js"></script>
     <script type="text/javascript" src="/static/js/top_right_banner.js"></script>
+    <script type="text/javascript" src="/static/js/floatingtips.js"></script>
+    <script type="text/javascript" src="/static/js/tip.js"></script>
 
 
 %# End of classic js import. Now call for specific ones

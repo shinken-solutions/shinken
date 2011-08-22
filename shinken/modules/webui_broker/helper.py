@@ -280,5 +280,6 @@ class Helper(object):
             return """<input type="checkbox" checked="checked" %s/>\n""" % id_s
         else:
             return """<input type="checkbox" %s />\n""" % id_s
+
     
 helper = Helper()

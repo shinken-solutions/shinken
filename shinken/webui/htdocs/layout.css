@@ -522,3 +522,26 @@ td.actions a {
     border:1px solid #d12f19;
     color:#fff;
 }
+
+
+
+/*    ************* TIP       ************* */
+/* The following is the only rule you need to customize your tip look */
+
+.floating-tip {
+    background-color: black;
+    padding: 5px 15px;
+    color: #dddddd;
+    font-weight: bold;
+    font-size: 11px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.tip a {
+   position: relative;
+   color: #787878;
+   text-decoration: none;
+   border-bottom: 1px gray dotted; /* We underline the text */
+}
