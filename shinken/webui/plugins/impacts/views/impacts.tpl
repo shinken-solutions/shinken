@@ -1,6 +1,6 @@
 
 
-%include header js=['impacts/js/impacts.js', 'js/hover.js'], title='All critical impacts for your business', css=['impacts/impacts.css']
+%include header js=['impacts/js/impacts.js'], title='All critical impacts for your business', css=['impacts/impacts.css']
 
 
 
