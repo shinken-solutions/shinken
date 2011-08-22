@@ -35,14 +35,6 @@ Invalid host
   <div id="host_preview">
     <h2 class="icon_{{host.state.lower()}}">{{host.state}}: {{host.host_name}}</h2>
 
-
-
-<div class="tip">
-  <a href="#" title="Ok, you got it." class="right">Right</a>
-</div>
-
-
-    
     <dl class="grid_6">
       <dt>Alias:</dt>
       <dd>{{host.alias}}</dd>
