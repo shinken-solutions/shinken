@@ -31,9 +31,12 @@ except ImportError:
 
 from shinken.macroresolver import MacroResolver
 #from memoized import memoized
-
-stdout_encoding = sys.stdout.encoding
-safe_stdout = (stdout_encoding == 'UTF-8')
+try:
+    stdout_encoding = sys.stdout.encoding
+    safe_stdout = (stdout_encoding == 'UTF-8')
+except Exception, exp:
+    print "Encoding detection error", exp
+    safe_stdout = False
 #import locale
 #print locale.getdefaultlocale()
 #utf8_safe = (locale.getdefaultlocale() == ('en_US','UTF8'))
