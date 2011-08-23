@@ -296,10 +296,23 @@ class Helper(object):
             s += "%s is %s since %s\n" % (name, node.state, self.print_duration(node.last_state_change, just_duration=True))
         # If we got no parents, no need to print the expand icon
         if len(fathers) > 0:
-            #If we are the root, we already got this
+            # We look ifthe below tree is goodor not
+            tree_is_good = (node.state_id == 0)
+            
+            # If the tree is good, we will use an expand image
+            # and hide the tree
+            if tree_is_good:
+                display = 'none'
+                img = 'expand.png'
+            else: # we will already show the tree, and use a reduce image
+                display = 'block'
+                img = 'reduce.png'
+
+            # If we are the root, we already got this
             if level != 0:
-                s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/expand.png"> </a> \n""" % (name, name, name)
-            s += """<ul id="business-parents-%s" style="display: none; ">""" % name
+                s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/%s"> </a> \n""" % (name, name, name, img)
+                
+            s += """<ul id="business-parents-%s" style="display: %s; ">""" % (name, display)
         
             for n in fathers:
                 sub_node = n['node']
