@@ -290,14 +290,21 @@ class Helper(object):
         node = tree['node']
         name = node.get_dbg_name()
         fathers = tree['fathers']
-        s = "Node : %s\n" % name
-        s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/expand.png"> </a> \n""" % (name, name, name)
-        s += """<ul id="business-parents-%s" style="display: block; ">""" % name
+        s = ''
+        # Do not print the node if it's the root one, we already know its state!
+        if level != 0:
+            s += "%s is %s since %s\n" % (name, node.last_hard_state, self.print_duration(node.last_hard_state_change, just_duration=True))
+        # If we got no parents, no need to print the expand icon
+        if len(fathers) > 0:
+            #If we are the root, we already got this
+            if level != 0:
+                s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/expand.png"> </a> \n""" % (name, name, name)
+            s += """<ul id="business-parents-%s" style="display: none; ">""" % name
         
-        for n in fathers:
-            sub_s = self.print_business_rules(n)
-            s += '<li>%s</li>' % sub_s
-        s += "</ul>"
+            for n in fathers:
+                sub_s = self.print_business_rules(n, level=level+1)
+                s += '<li>%s</li>' % sub_s
+            s += "</ul>"
         print "Returing s:", s
         return s
 

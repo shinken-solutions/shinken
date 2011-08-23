@@ -163,9 +163,9 @@ Invalid host
       </div>
       <hr>
       
-      %#    Now print the business rules elements if need
-      %if host.got_business_rule:
-      <a id="togglelink-{{host.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{host.get_dbg_name()}}')"> {{!helper.get_button('Expand business rules', img='/static/images/expand.png')}}</a>
+      %#    Now print the dependencies if we got somes
+      %if len(host.parent_dependencies) > 0:
+      <a id="togglelink-{{host.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{host.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
       <div class="clear"></div>
       {{!helper.print_business_rules(datamgr.get_business_parents(host))}}
       <hr>
