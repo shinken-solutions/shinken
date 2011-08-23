@@ -293,7 +293,7 @@ class Helper(object):
         s = ''
         # Do not print the node if it's the root one, we already know its state!
         if level != 0:
-            s += "%s is %s since %s\n" % (name, node.last_hard_state, self.print_duration(node.last_hard_state_change, just_duration=True))
+            s += "%s is %s since %s\n" % (name, node.state, self.print_duration(node.last_state_change, just_duration=True))
         # If we got no parents, no need to print the expand icon
         if len(fathers) > 0:
             #If we are the root, we already got this
@@ -302,11 +302,26 @@ class Helper(object):
             s += """<ul id="business-parents-%s" style="display: none; ">""" % name
         
             for n in fathers:
+                sub_node = n['node']
                 sub_s = self.print_business_rules(n, level=level+1)
-                s += '<li>%s</li>' % sub_s
+                s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
         print "Returing s:", s
         return s
 
+
+    # Get the small state for host/service icons
+    def get_small_icon_state(self, obj):
+        if obj.state == 'PENDING':
+            return 'unknown'
+        if obj.state == 'OK':
+            return 'ok'
+        if obj.state == 'up':
+            return 'up'
+        # Outch, not a good state...
+        if obj.problem_has_been_acknowledged:
+            return 'ack'
+        return obj.state.lower()
+            
     
 helper = Helper()
