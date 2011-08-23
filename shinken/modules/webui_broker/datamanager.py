@@ -71,4 +71,19 @@ class DataManager(object):
         # Ok, now return the max of hosts and services states
         return max(h_state, s_state)
 
+    # Return a tree of {'elt' : Host, 'fathers' : [{}, {}]}
+    def get_business_parents(self, obj, levels=2):
+        res = {'node' : obj, 'fathers' : []}
+        if levels == 0 :
+            return res
+
+        for i in obj.parent_dependencies:
+            par_elts = self.get_business_parents(i, levels=levels - 1)
+            res['fathers'].append(par_elts)
+
+        print "get_business_parents::Give elements", res
+        return res
+
+        
+
 datamgr = DataManager()

@@ -284,5 +284,22 @@ class Helper(object):
         else:
             return """<input type="checkbox" %s />\n""" % id_s
 
+
+    def print_business_rules(self, tree, level=0):
+        print "Should print tree", tree
+        node = tree['node']
+        name = node.get_dbg_name()
+        fathers = tree['fathers']
+        s = "Node : %s\n" % name
+        s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/expand.png"> </a> \n""" % (name, name, name)
+        s += """<ul id="business-parents-%s" style="display: block; ">""" % name
+        
+        for n in fathers:
+            sub_s = self.print_business_rules(n)
+            s += '<li>%s</li>' % sub_s
+        s += "</ul>"
+        print "Returing s:", s
+        return s
+
     
 helper = Helper()

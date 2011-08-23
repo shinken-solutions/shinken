@@ -158,8 +158,18 @@ Invalid host
 	{{!helper.get_button('Send Custom Notification', img='/static/images/notification.png')}}
 	{{!helper.get_button('Schedule Downtime For This Host', img='/static/images/downtime.png')}}
 
-	<div class="clear"/>
+
+	<div class="clear"></div>
       </div>
+      <hr>
+      
+      %#    Now print the business rules elements if need
+      %if host.got_business_rule:
+      <a id="togglelink-{{host.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{host.get_dbg_name()}}')"> {{!helper.get_button('Expand business rules', img='/static/images/expand.png')}}</a>
+      <div class="clear"></div>
+      {{!helper.print_business_rules(datamgr.get_business_parents(host))}}
+      <hr>
+      %end
 
       <div class='host-services'>
 	%for s in helper.get_host_services_sorted(host):
