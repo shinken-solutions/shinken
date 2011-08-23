@@ -186,7 +186,7 @@ class Helper(object):
     def get_dep_graph_struct(self, elt, levels=2):
         t = elt.__class__.my_type
         d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
-             'data' : {'$dim': elt.business_impact*2},
+             'data' : {'$dim': max(elt.business_impact*elt.business_impact / 2, 5)},
              'adjacencies' : []
              }
         # Service got a 'star' type :)
@@ -194,15 +194,18 @@ class Helper(object):
             d['data']["$type"] = "star"
             d['data']["$color"] = {0 : 'green', 1 : 'orange', 2 : 'red', 3 : 'gray'}.get(elt.state_id, 'red')
         else: #host
-            d['data']["$color"] = {0 : 'green', 1 : 'red', 2 : 'orange', 3 : 'gray'}.get(elt.state_id, 'red')
+            d['data']["$color"] = {0 : 'green', 1 : 'red', 2 : '#CC6600', 3 : 'gray'}.get(elt.state_id, 'red')
 
         # Now put in adj our parents
         for p in elt.parent_dependencies:
             pd = {'nodeTo' : p.get_dbg_name(),
-                  'data' : {"$type":"arrow", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
+                  'data' : {"$type":"line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
             # Naive way of looking at impact
             if elt.state_id != 0 and p.state_id != 0:
-                pd['data']["$color"] = 'red'
+                pd['data']["$color"] = 'Tomato'
+            # If OK, show host->service as a green link
+            elif elt.__class__.my_type != p.__class__.my_type:
+                 pd['data']["$color"] = 'PaleGreen'
             d['adjacencies'].append(pd)
 
         # The sons case is now useful, it will be done by our sons

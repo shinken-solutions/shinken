@@ -43,7 +43,7 @@ window.onload = function init(){
 	    //that draws some concentric circles.
 	    'background': {
 		'CanvasStyles': {
-		    'strokeStyle': '#555',
+		    'strokeStyle': '#FFFFFF',
 		    //'shadowBlur': 50,
 		    //'shadowColor': '#ccc'
 		}
@@ -61,14 +61,15 @@ window.onload = function init(){
 	    //This way we can define different node
 	    //types individually.
 	    Node: {
-		color: '#ddeeff',
+		color: 'green',
 		'overridable': true,
 	    },
 	    Edge: {
-		color: '#C17878',
-		lineWidth:1.5,
+		color: 'SeaGreen',
+		lineWidth : 0.5,
 		'overridable': true,
 	    },
+
 	    //Set polar interpolation.
 	    //Default's linear.
 	    interpolation: 'polar',
@@ -79,7 +80,7 @@ window.onload = function init(){
 	    duration:1000,
 	    fps: 30,
 	    //Change father-child distance.
-	    levelDistance: 100,
+	    levelDistance: 75,
 	    //This method is called right before plotting
 	    //an edge. This method is useful to change edge styles
 	    //individually.
@@ -117,7 +118,7 @@ window.onload = function init(){
 		var style = domElement.style;
 		style.cursor = 'pointer';
 		style.fontSize = "0.8em";
-		style.color = "#fff";
+		style.color = "#000";
 	    },
 	    //This method is called when rendering/moving a label.
 	    //This is method is useful to make some last minute changes
