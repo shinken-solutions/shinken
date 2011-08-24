@@ -51,9 +51,13 @@
 
 			<div id="header" class="grid_16">
 				<h1 class="box_textshadow">Shinken</h1>
+
+
 %# Set the Top right banner if need
 %if top_right_banner_state != 0:
-<a href='/impacts'><img class="top_right_banner" style="position: absolute;top: 0;right: 0;border: 0;" src="/static/images/top_rigth_banner_{{top_right_banner_state}}.png" alt="Banner state{{top_right_banner_state}}" id="top_right_banner"></a>
+<div id="animate-area" style="background-image:url(/static/images/sky_{{top_right_banner_state}}.png);">
+  <a href='/impacts'><img class="top_right_banner" style="position: absolute;top: 0;right: 0;border: 0;" src="/static/images/top_rigth_banner_{{top_right_banner_state}}.png" alt="Banner state{{top_right_banner_state}}" id="top_right_banner"></a>
+</div>
 %end
 
 			</div>

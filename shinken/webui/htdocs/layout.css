@@ -545,3 +545,20 @@ td.actions a {
    text-decoration: none;
    border-bottom: 1px gray dotted; /* We underline the text */
 }
+
+
+/* Top rigth banner */
+#animate-area  { 
+/*  background-image:url(/static/images/sky_warning.png);*/
+  background-position:0px 0px;
+  background-repeat:repeat-x;
+  z-index : 5;
+  width:128px; 
+  height:128px; 
+/*  position:relative; */
+  zoom:1; 
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 0;
+}
