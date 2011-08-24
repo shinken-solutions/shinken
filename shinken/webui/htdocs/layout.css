@@ -548,6 +548,8 @@ td.actions a {
 
 
 /* Top rigth banner */
+/* This is the front cloud aera. The image will change with the 
+overall status */
 #animate-area  { 
 /*  background-image:url(/static/images/sky_warning.png);*/
   background-position:0px 0px;
@@ -555,10 +557,38 @@ td.actions a {
   z-index : 5;
   width:128px; 
   height:128px; 
-/*  position:relative; */
   zoom:1; 
   position: absolute;
   top: 0;
   right: 0;
   border: 0;
+}
+
+/* The two area below are for parallax effect*/
+#animate-area-back-1  {     
+    background-image:url(/static/images/back_sky_1.png);
+    background-position:-40px -40px;
+    background-repeat:repeat-x;
+    z-index : 5;
+    width:128px; 
+    height:128px; 
+    zoom:1; 
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
+}
+
+#animate-area-back-2  { 
+    background-image:url(/static/images/back_sky_2.png);
+    background-position:-128px -20px;
+    background-repeat:repeat-x;
+    z-index : 5;
+    width:128px; 
+    height:128px; 
+    zoom:1; 
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
 }
