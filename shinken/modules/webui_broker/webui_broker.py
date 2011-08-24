@@ -96,6 +96,13 @@ class Webui_broker(BaseModule):
             raise
 
 
+    # A plugin send us en external command. We just put it
+    # in the good queue
+    def push_external_command(self, e):
+        print "WebUI: got an external command", e.__dict__
+        self.from_q.put(e)
+        
+
     # Real main function
     def do_main(self):
         #I register my exit function

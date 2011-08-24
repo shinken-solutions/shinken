@@ -21,6 +21,7 @@
     <link rel="stylesheet" type="text/css" href="/static/text.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/message.css" media="screen">
     <script type="text/javascript" src="/static/js/mootools.js"></script>
     <script type="text/javascript" src="/static/js/mootools-more.js"></script>
     <script type="text/javascript" src="/static/js/mootools-message.js"></script>
@@ -30,6 +31,8 @@
     <script type="text/javascript" src="/static/js/top_right_banner.js"></script>
     <script type="text/javascript" src="/static/js/floatingtips.js"></script>
     <script type="text/javascript" src="/static/js/tip.js"></script>
+    <script type="text/javascript" src="/static/js/action.js"></script>
+    
 
 
 %# End of classic js import. Now call for specific ones

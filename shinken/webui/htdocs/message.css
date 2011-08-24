@@ -1,0 +1,61 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* Message Boxes */
+.msgBox{
+    font-family:Arial, Helvetica, sans-serif;
+    opacity: 0;
+    position:absolute;
+    top:-1000px;
+    left:0px;
+    max-width: 250px;
+    min-width: 150px;
+    color:#aaa;
+    background: rgb(0, 0, 0); /* compatibility fallback */
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: 2px 2px 6px #666;
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+    -moz-box-shadow: 2px 2px 6px #666;
+    -webkit-box-shadow: 2px 2px 5px #666;
+    z-index:-1;
+}
+
+.msgBoxImage{
+    width: 40px;
+    height: 40px;
+}
+
+.msgBoxIcon{
+    float:left;
+    width: 40px;
+    height: 40px;
+    padding-right: 7px;
+}
+
+.msgBoxTitle{
+    float:left;
+    color: #FFFFFF;
+}
+
+.msgBoxContent{ 
+    float:left;
+    max-width: 80%;
+    font-size:12px;
+}
+
+.msgBoxMessage{float:left;}
+.msgBoxLink{color:#6699CC;}
+.msgBoxLink:hover{color:#FF9900;}
+
+.msgEditable{
+    font-family:Arial, Helvetica, sans-serif;
+    font-size:12px;
+    width:250px;
+    background: rgb(0, 0, 0); /* compatibility fallback */
+    background: rgba(255, 255, 255, 0.1);
+    border:#000;
+    color:#FFF;
+}
