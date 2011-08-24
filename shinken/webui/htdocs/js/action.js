@@ -40,18 +40,56 @@ function manage_error(response){
     raise_message_error(response.responseText);
 }
 
+
+function launch(url){
+    // this code will send a data object via a GET request and alert the retrieved data.
+    var jsonRequest = new Request.JSON(
+                                       {url: url,
+                                        onSuccess: react,
+                                        onFailure : manage_error,
+                                       }).get();
+
+}
+
 /* The command that will launch an event handler */
 function try_to_fix(hname) {
     
     //alert('Try to fix' + hname);
     var url = '/action/LAUNCH_HOST_EVENT_HANDLER/'+hname;
-    
-    // this code will send a data object via a GET request and alert the retrieved data.
-    var jsonRequest = new Request.JSON(
-				       {url: url,
-					onSuccess: react,
-					onFailure : manage_error,
-				       }).get();    
+    // We can launch it :)
+    launch(url);
 }
 
 
+
+/* For acknoledge, we can ask for a message first */
+var ackno_element = null;
+function acknoledge(hname){
+    ackno_element = hname;
+    var obj = new Element('div', {
+	    'id': 'dummydummy',
+	    'events': {
+		'click': function(){
+		    sendComment();
+		    this.destroy();
+		}
+	    }
+	});
+    new Message({
+	    icon: "questionMedium.png",
+		iconPath: "/static/images/",
+		width: 300,
+		fontSize: 14,
+		/*passEvent: e,*/
+		autoDismiss: false,
+		title: 'Have a Comment?' ,
+		message: '<textarea id="commentText" cols="3" rows="5" class="msgEditable">Acknoledged.</textarea>',
+		callback: do_acknoledge
+		}).say();
+}
+ 
+function do_acknoledge(text){
+    alert('acknoledge'+ackno_element+text);
+    var url = '/action/ACKNOWLEDGE_HOST_PROBLEM/'+ackno_element+'/1/0/1/webui/'+text;
+    launch(url);
+}

@@ -151,7 +151,7 @@ Invalid host
 
       <div id="box_commannd">
 	<a href="#" onclick="try_to_fix('{{host.host_name}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
-	{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}
+	<a href="#" onclick="acknoledge('{{host.host_name}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
 	{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}
 	<a href="/depgraph/{{host.host_name}}" class="mb" title="Impact map of {{host.host_name}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
 	{{!helper.get_button('Submit Passive Check Result', img='/static/images/passiveonly.gif')}}
