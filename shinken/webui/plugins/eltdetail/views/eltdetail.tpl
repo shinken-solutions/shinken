@@ -16,7 +16,7 @@ Invalid host
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='Host detail about ' + host.host_name,  js=['hostdetail/js/hide.js', 'hostdetail/js/switchbuttons.js', 'hostdetail/js/multibox.js', 'hostdetail/js/multi.js'],  css=['hostdetail/tabs.css', 'hostdetail/hostdetail.css', 'hostdetail/switchbuttons.css', 'hostdetail/hide.css', 'hostdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
+%include header title='Host detail about ' + host.host_name,  js=['eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
 
 
 

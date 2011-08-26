@@ -5,7 +5,6 @@ app = None
 
 # Main impacts view
 #@route('/host')
-#@view('hostdetail')
 def show_host(name):
     return get_data(name)
 
@@ -16,5 +15,5 @@ def get_data(name):
 
 
 
-pages = {show_host : { 'routes' : ['/host/:name'], 'view' : 'hostdetail', 'static' : True}}
+pages = {show_host : { 'routes' : ['/host/:name'], 'view' : 'eltdetail', 'static' : True}}
 

@@ -3,9 +3,6 @@
 app = None
 
 
-# Main impacts view
-#@route('/host')
-#@view('hostdetail')
 def show_host(name):
     return get_data(name)
 
