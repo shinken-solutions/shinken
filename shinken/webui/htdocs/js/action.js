@@ -57,13 +57,32 @@ function launch(url){
 
 /* ************************************* Commands ******************* */
 
+function get_elements(name){
+    var elts = name.split('/');
+    var elt = {type : 'UNKNOWN',
+	   namevalue : 'NOVALUE'
+    };
+    /* 1 element mean HOST*/
+    if (elts.length == 1){
+	elt.type = 'HOST';
+	elt.namevalue = elts[0];
+	elt.nameslash = elts[0];
+    }else{ // 2 means Service
+	elt.type = 'SVC';
+	elt.namevalue = elts[0]+';'+elts[1];
+	elt.nameslash = elts[0]+'/'+elts[1];
+    }
+    return elt
+
+}
+
 /* The command that will launch an event handler */
-function try_to_fix(hname) {
-    
-    //alert('Try to fix' + hname);
-    var url = '/action/LAUNCH_HOST_EVENT_HANDLER/'+hname;
+function try_to_fix(name) {
+    var elts = get_elements(name);
+    var url = '/action/LAUNCH_'+elt.type+'_EVENT_HANDLER/'+elt.namevalue;
     // We can launch it :)
     launch(url);
+
 }
 
 
@@ -95,8 +114,9 @@ function acknoledge(hname){
 }
  
 function do_acknoledge(text){
+    var elts = get_elements(ackno_element);
     /*alert('acknoledge'+ackno_element+text);*/
-    var url = '/action/ACKNOWLEDGE_HOST_PROBLEM/'+ackno_element+'/1/0/1/webui/'+text;
+    var url = '/action/ACKNOWLEDGE_'+elts.type+'_PROBLEM/'+elts.nameslash+'/1/0/1/webui/'+text;
     launch(url);
 }
 
@@ -104,11 +124,11 @@ function do_acknoledge(text){
 
 
 /* The command that will launch an event handler */
-function recheck_now(hname) {
-    
+function recheck_now(name) {
+    var elts = get_elements(name);    
     //alert('Try to fix' + hname);
     var now = Math.round(new Date().getTime()/1000.0);
-    var url = '/action/SCHEDULE_HOST_CHECK/'+hname+'/'+now;
+    var url = '/action/SCHEDULE_'+elts.type+'_CHECK/'+elts.nameslash+'/'+now;
     // We can launch it :)
     launch(url);
 }
@@ -118,61 +138,71 @@ function recheck_now(hname) {
 
 /* We to the active AND passive in the same way, and the services
 in the same time */
-function toggle_checks(hname, b){
+function toggle_checks(name, b){
     //alert('toggle_active_checks::'+hname+b);
+    var elts = get_elements(name);
     // Inverse the active check or not for the element
     if(b == 'True'){ // go disable
-	var url = '/action/DISABLE_HOST_CHECK/'+hname;
+	var url = '/action/DISABLE_'+elts.type+'_CHECK/'+elts.nameslash;
 	launch(url);
-	var url = '/action/DISABLE_PASSIVE_HOST_CHECKS/'+hname;
+	var url = '/action/DISABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
 	launch(url);
-	var url = '/action/DISABLE_HOST_SVC_CHECKS/'+hname;
-	launch(url);
+	// Disable host services only if it's an host ;)
+	if(elts.type == 'HOST'){
+	    var url = '/action/DISABLE_HOST_SVC_CHECKS/'+elts.nameslash;
+	    launch(url);
+	}
     }else{ // Go enable
-	var url = '/action/ENABLE_HOST_CHECK/'+hname;
+	var url = '/action/ENABLE_'+elts.type+'_CHECK/'+elts.nameslash;
 	launch(url);
-	var url = '/action/ENABLE_PASSIVE_HOST_CHECKS/'+hname;
+	var url = '/action/ENABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
 	launch(url);
-	var url = '/action/ENABLE_HOST_SVC_CHECKS/'+hname;
-	launch(url);
+	// Disable host services only if it's an host ;)
+        if(elts.type == 'HOST'){
+	    var url = '/action/ENABLE_HOST_SVC_CHECKS/'+elts.nameslash;
+	    launch(url);
+	}
     }
 }
 
 
-function toggle_notifications(hname, b){
+function toggle_notifications(name, b){
+    var elts = get_elements(name);
     //alert('toggle_active_checks::'+hname+b);
     // Inverse the active check or not for the element
     if(b == 'True'){ // go disable
-        var url = '/action/DISABLE_HOST_NOTIFICATIONS/'+hname;
+        var url = '/action/DISABLE_'+elts.type+'_NOTIFICATIONS/'+elts.nameslash;
         launch(url);
     }else{ // Go enable
-        var url = '/action/ENABLE_HOST_NOTIFICATIONS/'+hname;
-        launch(url);
-    }
-}
-
-
-function toggle_event_handlers(hname, b){
-    //alert('toggle_active_checks::'+hname+b);
-    // Inverse the active check or not for the element
-    if(b == 'True'){ // go disable
-        var url = '/action/DISABLE_HOST_EVENT_HANDLER/'+hname;
-        launch(url);
-    }else{ // Go enable
-        var url = '/action/ENABLE_HOST_EVENT_HANDLER/'+hname;
+        var url = '/action/ENABLE_'+elts.type+'_NOTIFICATIONS/'+elts.nameslash;
         launch(url);
     }
 }
 
 
-function toggle_flap_detection(hname, b){
+function toggle_event_handlers(name, b){
+    var elts = get_elements(name);
     //alert('toggle_active_checks::'+hname+b);
     // Inverse the active check or not for the element
     if(b == 'True'){ // go disable
-        var url = '/action/DISABLE_HOST_FLAP_DETECTION/'+hname;
+        var url = '/action/DISABLE_'+elts.type+'_EVENT_HANDLER/'+elts.nameslash;
         launch(url);
     }else{ // Go enable
-        var url = '/action/ENABLE_HOST_FLAP_DETECTION/'+hname;
+        var url = '/action/ENABLE_'+elts.type+'_EVENT_HANDLER/'+elts.nameslash;
+        launch(url);
+    }
+}
+
+
+function toggle_flap_detection(name, b){
+    var elts = get_elements(name);
+    //alert('toggle_active_checks::'+hname+b);
+    // Inverse the active check or not for the element
+    if(b == 'True'){ // go disable
+        var url = '/action/DISABLE_'+elts.type+'_FLAP_DETECTION/'+elts.nameslash;
+        launch(url);
+    }else{ // Go enable
+        var url = '/action/ENABLE_'+elts.type+'_FLAP_DETECTION/'+elts.nameslash;
         launch(url);
     }
 }

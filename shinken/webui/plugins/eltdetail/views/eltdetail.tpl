@@ -18,7 +18,7 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='Host detail about ' + elt.host_name,  js=['eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
+%include header title=elt_type.upper() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
 
 
 
@@ -35,7 +35,7 @@ Invalid element name
 </div>
 <div class="grid_13">
   <div id="host_preview">
-    <h2 class="icon_{{elt.state.lower()}}">{{elt.state}}: {{elt.host_name}}</h2>
+    <h2 class="icon_{{elt.state.lower()}}">{{elt.state}}: {{elt.get_full_name()}}</h2>
 
     <dl class="grid_6">
       %#Alias, apretns and hostgroups arefor host only
@@ -136,19 +136,19 @@ Invalid element name
 	<tbody class="switches">
 	  <tr class="odd">
 	    <th scope="row" class="column1">Active/passive Checks</th>
-	    <td title='This will also enable/disable this host services' onclick="toggle_checks('{{elt.host_name}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}</td>
+	    <td title='This will also enable/disable this host services' onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Notifications</th>
-	    <td onclick="toggle_notifications('{{elt.host_name}}' , '{{elt.notifications_enabled}}')"> {{!helper.get_input_bool(elt.notifications_enabled)}}</td>
+	    <td onclick="toggle_notifications('{{elt.get_full_name()}}' , '{{elt.notifications_enabled}}')"> {{!helper.get_input_bool(elt.notifications_enabled)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Event Handler</th>
-	    <td onclick="toggle_event_handlers('{{elt.host_name}}' , '{{elt.event_handler_enabled}}')" > {{!helper.get_input_bool(elt.event_handler_enabled)}}</td>
+	    <td onclick="toggle_event_handlers('{{elt.get_full_name()}}' , '{{elt.event_handler_enabled}}')" > {{!helper.get_input_bool(elt.event_handler_enabled)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Flap Detection</th>
-	    <td onclick="toggle_flap_detection('{{elt.host_name}}' , '{{elt.flap_detection_enabled}}')" > {{!helper.get_input_bool(elt.flap_detection_enabled)}}</td>
+	    <td onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" > {{!helper.get_input_bool(elt.flap_detection_enabled)}}</td>
 	  </tr>
 	</tbody>	
       </table>
@@ -159,10 +159,10 @@ Invalid element name
 
 
       <div id="box_commannd">
-	<a href="#" onclick="try_to_fix('{{elt.host_name}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
-	<a href="#" onclick="acknoledge('{{elt.host_name}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
-	<a href="#" onclick="recheck_now('{{elt.host_name}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
-	<a href="/depgraph/{{elt.host_name}}" class="mb" title="Impact map of {{elt.host_name}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
+	<a href="#" onclick="try_to_fix('{{elt.get_full_name()}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
+	<a href="#" onclick="acknoledge('{{elt.get_full_name()}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
+	<a href="#" onclick="recheck_now('{{elt.get_full_name()}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
+	<a href="/depgraph/{{elt.get_full_name()}}" class="mb" title="Impact map of {{elt.get_full_name()}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
 	{{!helper.get_button('Submit Check Result', img='/static/images/passiveonly.gif')}}
 	{{!helper.get_button('Send Custom Notification', img='/static/images/notification.png')}}
 	{{!helper.get_button('Schedule Downtime', img='/static/images/downtime.png')}}

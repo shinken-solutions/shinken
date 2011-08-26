@@ -46,8 +46,6 @@ window.addEvent('domready', function(){
 	    });
     }
 
-
-
 });
 
 
