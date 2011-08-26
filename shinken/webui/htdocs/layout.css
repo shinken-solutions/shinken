@@ -255,9 +255,12 @@ td.actions a {
 }
 
 .box_shadow {
-    -moz-box-shadow: 0px 0px 4px #E3E3E5; /* FF3.5+ */
-  	-webkit-box-shadow: 0px 0px 4px #E3E3E5; /* Saf3.0+, Chrome */
-    box-shadow: 0px 0px 4px #E3E3E5; /* Opera 10.5, IE9, Chrome 10+ */
+    -moz-box-shadow: 0px 0px 4px #777; /* FF3.5+ */
+    -webkit-box-shadow: 0px 0px 4px #777; /* Saf3.0+, Chrome */
+    box-shadow: 0px 0px 4px #777; /* Opera 10.5, IE9, Chrome 10+ */
+    /* For old IEs */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#E3E3E5')";
+    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#E3E3E5');
 }
 
 .box_round {

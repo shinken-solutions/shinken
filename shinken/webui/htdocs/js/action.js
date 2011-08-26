@@ -1,4 +1,6 @@
 
+
+/* ************************************* Message raise part ******************* */
 function raise_message_ok(text){
     // Simplest way to use the class...
     new Message({
@@ -40,6 +42,7 @@ function manage_error(response){
     raise_message_error(response.responseText);
 }
 
+/* ************************************* Launch the request ******************* */
 
 function launch(url){
     // this code will send a data object via a GET request and alert the retrieved data.
@@ -50,6 +53,9 @@ function launch(url){
                                        }).get();
 
 }
+
+
+/* ************************************* Commands ******************* */
 
 /* The command that will launch an event handler */
 function try_to_fix(hname) {
@@ -89,7 +95,20 @@ function acknoledge(hname){
 }
  
 function do_acknoledge(text){
-    alert('acknoledge'+ackno_element+text);
+    /*alert('acknoledge'+ackno_element+text);*/
     var url = '/action/ACKNOWLEDGE_HOST_PROBLEM/'+ackno_element+'/1/0/1/webui/'+text;
+    launch(url);
+}
+
+
+
+
+/* The command that will launch an event handler */
+function recheck_now(hname) {
+    
+    //alert('Try to fix' + hname);
+    var now = Math.round(new Date().getTime()/1000.0);
+    var url = '/action/SCHEDULE_HOST_CHECK/'+hname+'/'+now;
+    // We can launch it :)
     launch(url);
 }

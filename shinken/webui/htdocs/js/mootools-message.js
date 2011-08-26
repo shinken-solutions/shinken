@@ -25,19 +25,19 @@ var Message=new Class({Implements:[Options,Events],msgChain:null,end:false,isDis
 		       function(){
 			   var formValue = null;
 			   var inputField = this.box.getElement('input');
-			   alert('input'+inputField);
+			   /*alert('input'+inputField);*/
 			   var textArea = this.box.getElement('textarea');
-			   alert('text aera'+textArea);
+			   /*alert('text aera'+textArea);*/
 			   if(inputField || textArea) {
 			       formValue = (inputField ? inputField.get("value") :
 					    (textArea ? textArea.get("value") : null));
 			   }
-			   alert(formValue == null);
+			   /*alert(formValue == null);*/
 			   if(typeOf(this.options.callback)=="element"){
 			       this.options.callback.fireEvent("click", formValue)}
 			   else{
 			       if(typeOf(this.options.callback)=="function"){
-				   alert('raise function'+formValue);
+				   /*alert('raise function'+formValue);*/
 				   this.options.callback.run(formValue)
 			       }else{
 				   eval(this.options.callback)}}}

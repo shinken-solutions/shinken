@@ -63,8 +63,9 @@ Invalid host
   <hr>
   <div id="host_overview">
     <h2>Host Overview</h2>
+
     <div class="grid_6">
-      <table>
+      <table class="box_shadow">
 	<tbody>
 	  <tr>
 	    <th scope="row" class="column1">Host Status</th>
@@ -146,15 +147,15 @@ Invalid host
     </div>
   
 
-    <dl class="grid_10">
+    <dl class="grid_10 box_shadow">
 
 
       <div id="box_commannd">
 	<a href="#" onclick="try_to_fix('{{host.host_name}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
 	<a href="#" onclick="acknoledge('{{host.host_name}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
-	{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}
+	<a href="#" onclick="recheck_now('{{host.host_name}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
 	<a href="/depgraph/{{host.host_name}}" class="mb" title="Impact map of {{host.host_name}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
-	{{!helper.get_button('Submit Passive Check Result', img='/static/images/passiveonly.gif')}}
+	{{!helper.get_button('Submit Check Result', img='/static/images/passiveonly.gif')}}
 	{{!helper.get_button('Send Custom Notification', img='/static/images/notification.png')}}
 	{{!helper.get_button('Schedule Downtime For This Host', img='/static/images/downtime.png')}}
 
