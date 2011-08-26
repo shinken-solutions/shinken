@@ -2,10 +2,12 @@
 app = None
 
 # We will need external commands here
+import time
 from shinken.external_command import ExternalCommand, ExternalCommandManager
 
 # Our page
 def get_page(cmd=None):
+    now = int(time.time())
     print "Ask us an /action page", cmd
     elts = cmd.split('/')
     cmd_name = elts[0]
@@ -17,7 +19,7 @@ def get_page(cmd=None):
     if cmd_name not in ExternalCommandManager.commands:
         return {'status' : 404, 'text' : 'Unknown command %s' % cmd_name}
 
-    extcmd = ';'.join(elts)
+    extcmd = '[%d] %s' % (now, ';'.join(elts))
     print "Got the; form", extcmd
     
     # Ok, if good, we can launch the command

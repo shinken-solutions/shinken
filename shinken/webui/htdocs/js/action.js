@@ -112,3 +112,67 @@ function recheck_now(hname) {
     // We can launch it :)
     launch(url);
 }
+
+
+/* For some commands, it's a toggle/un-toggle way */
+
+/* We to the active AND passive in the same way, and the services
+in the same time */
+function toggle_checks(hname, b){
+    //alert('toggle_active_checks::'+hname+b);
+    // Inverse the active check or not for the element
+    if(b == 'True'){ // go disable
+	var url = '/action/DISABLE_HOST_CHECK/'+hname;
+	launch(url);
+	var url = '/action/DISABLE_PASSIVE_HOST_CHECKS/'+hname;
+	launch(url);
+	var url = '/action/DISABLE_HOST_SVC_CHECKS/'+hname;
+	launch(url);
+    }else{ // Go enable
+	var url = '/action/ENABLE_HOST_CHECK/'+hname;
+	launch(url);
+	var url = '/action/ENABLE_PASSIVE_HOST_CHECKS/'+hname;
+	launch(url);
+	var url = '/action/ENABLE_HOST_SVC_CHECKS/'+hname;
+	launch(url);
+    }
+}
+
+
+function toggle_notifications(hname, b){
+    //alert('toggle_active_checks::'+hname+b);
+    // Inverse the active check or not for the element
+    if(b == 'True'){ // go disable
+        var url = '/action/DISABLE_HOST_NOTIFICATIONS/'+hname;
+        launch(url);
+    }else{ // Go enable
+        var url = '/action/ENABLE_HOST_NOTIFICATIONS/'+hname;
+        launch(url);
+    }
+}
+
+
+function toggle_event_handlers(hname, b){
+    //alert('toggle_active_checks::'+hname+b);
+    // Inverse the active check or not for the element
+    if(b == 'True'){ // go disable
+        var url = '/action/DISABLE_HOST_EVENT_HANDLER/'+hname;
+        launch(url);
+    }else{ // Go enable
+        var url = '/action/ENABLE_HOST_EVENT_HANDLER/'+hname;
+        launch(url);
+    }
+}
+
+
+function toggle_flap_detection(hname, b){
+    //alert('toggle_active_checks::'+hname+b);
+    // Inverse the active check or not for the element
+    if(b == 'True'){ // go disable
+        var url = '/action/DISABLE_HOST_FLAP_DETECTION/'+hname;
+        launch(url);
+    }else{ // Go enable
+        var url = '/action/ENABLE_HOST_FLAP_DETECTION/'+hname;
+        launch(url);
+    }
+}

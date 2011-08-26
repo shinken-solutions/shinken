@@ -119,28 +119,20 @@ Invalid host
 	</tbody>
 	<tbody class="switches">
 	  <tr class="odd">
-	    <th scope="row" class="column1">Active Checks</th>
-	    <td> {{!helper.get_input_bool(host.active_checks_enabled)}}</td>
+	    <th scope="row" class="column1">Active/passive Checks</th>
+	    <td title='This will also enable/disable this host services' onclick="toggle_checks('{{host.host_name}}' , '{{host.active_checks_enabled|host.passive_checks_enabled}}')"> {{!helper.get_input_bool(host.active_checks_enabled|host.passive_checks_enabled)}}</td>
 	  </tr>	
 	  <tr>
-	    <th scope="row" class="column1">Passive Checks</th>
-	    <td> {{!helper.get_input_bool(host.passive_checks_enabled)}}</td>
-	  </tr>
-	  <tr>
-	    <th scope="row" class="column1">Obsessing</th>
-	    <td> {{!helper.get_input_bool(host.obsess_over_host)}}</td>
-	  </tr>
-	  <tr>
 	    <th scope="row" class="column1">Notifications</th>
-	    <td> {{!helper.get_input_bool(host.notifications_enabled)}}</td>
+	    <td onclick="toggle_notifications('{{host.host_name}}' , '{{host.notifications_enabled}}')"> {{!helper.get_input_bool(host.notifications_enabled)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Event Handler</th>
-	    <td> {{!helper.get_input_bool(host.event_handler_enabled)}}</td>
+	    <td onclick="toggle_event_handlers('{{host.host_name}}' , '{{host.event_handler_enabled}}')" > {{!helper.get_input_bool(host.event_handler_enabled)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Flap Detection</th>
-	    <td> {{!helper.get_input_bool(host.flap_detection_enabled)}}</td>
+	    <td onclick="toggle_flap_detection('{{host.host_name}}' , '{{host.flap_detection_enabled}}')" > {{!helper.get_input_bool(host.flap_detection_enabled)}}</td>
 	  </tr>
 	</tbody>	
       </table>
