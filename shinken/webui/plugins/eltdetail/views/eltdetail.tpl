@@ -70,15 +70,25 @@ Invalid element name
     </dl>
     <dl class="grid_6">
       <dt>Notes:</dt>
-      <dd>{{elt.notes}}</dd>
+      <dd>{{elt.notes}} </dd>
     </dl>
     <div class="grid_4">
       <img class="box_shadow host_img_80" src="/static/images/no_image.png">
     </div>
+    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
+    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
+    <div class="grid_4 box_shadow" id="important_banner">
+      <table>
+	<th scope="row" class="column1"><img src="/static/images/errorMedium.png"></th>
+	<td>
+	  This element got an important impact on your business, please fix it or acknoledge it.
+      </td></table>
+    </div>
+    %# "end of the 'SOLVE THIS' highlight box"
+    %end
   </div>
   <hr>
   <div id="host_overview">
-    <h2>Host Overview</h2>
 
     <div class="grid_6">
       <table class="box_shadow">
@@ -183,6 +193,7 @@ Invalid element name
       %# " Only print host service if elt is an host of course"
       %if elt_type=='host':
         <div class='host-services'>
+	  <h3> Services </h3>
 	  %for s in helper.get_host_services_sorted(elt):
 	    <div class="service">
 	      <div class="divstate{{s.state_id}}">
@@ -198,6 +209,7 @@ Invalid element name
 	</div>
 	%end #of the only host part
       
+
     </dl>
   </div>
   <div class="clear"></div>

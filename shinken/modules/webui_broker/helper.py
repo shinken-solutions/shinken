@@ -347,5 +347,14 @@ class Helper(object):
         res = "%s %s" % (txts.get(obj.business_impact, 'Unknown'), stars)
         return res
             
+
+    # We will outpout as a ul/li list the impacts of this 
+    def got_impacts_list_as_li(self, obj):
+        impacts = obj.impacts
+        r = '<ul>\n'
+        for i in impacts:
+            r += '<li>%s</li>\n' % i.get_full_name()
+        r += '</ul>\n'
+        return r
     
 helper = Helper()

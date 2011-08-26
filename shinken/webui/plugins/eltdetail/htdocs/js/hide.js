@@ -68,3 +68,25 @@ function toggleBusinessElt(e) {
 	imgLink.src = img_src+'expand.png';
     }
 }
+
+
+
+/* Important_impact_div */
+window.addEvent('domready', function(){
+	
+	var important_banner = $('important_banner');
+	if (important_banner != null){
+
+	    var fx = new Fx.Tween(important_banner, {property: 'opacity'});
+	    fx.start(0).chain(
+			      //Notice that "this" refers to the calling object (in this case, the myFx object).
+			      function(){ fx.start(1); },
+			      function(){ fx.start(0); },
+			      function(){ fx.start(1); },
+			      function(){ fx.start(0); },
+			      function(){ fx.start(1); },
+			      function(){ fx.start(0); },
+			      function(){ fx.start(1); }
+			      ); //Will fade the Element out and in twice.
+	}
+    });
