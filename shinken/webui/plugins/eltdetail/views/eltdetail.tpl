@@ -1,13 +1,13 @@
 
 
-%print 'Host value?', host
+%print 'Elt value?', elt
 %import time
 
-%# If got no Host, bailout
-%if not host:
-%include header title='Invalid host'
+%# If got no Elt, bailout
+%if not elt:
+%include header title='Invalid name'
 
-Invalid host
+Invalid element name
 %else:
 
 %helper = app.helper
@@ -16,7 +16,7 @@ Invalid host
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='Host detail about ' + host.host_name,  js=['eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
+%include header title='Host detail about ' + elt.host_name,  js=['eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
 
 
 
@@ -33,28 +33,28 @@ Invalid host
 </div>
 <div class="grid_13">
   <div id="host_preview">
-    <h2 class="icon_{{host.state.lower()}}">{{host.state}}: {{host.host_name}}</h2>
+    <h2 class="icon_{{elt.state.lower()}}">{{elt.state}}: {{elt.host_name}}</h2>
 
     <dl class="grid_6">
       <dt>Alias:</dt>
-      <dd>{{host.alias}}</dd>
+      <dd>{{elt.alias}}</dd>
       
       <dt>Parents:</dt>
-      %if len(host.parents) > 0:
-      <dd> {{','.join([h.get_name() for h in host.parents])}}</dd>
+      %if len(elt.parents) > 0:
+      <dd> {{','.join([h.get_name() for h in elt.parents])}}</dd>
       %else:
       <dd> No parents </dd>
       %end
       <dt>Members of:</dt>
-      %if len(host.hostgroups) > 0:
-      <dd> {{','.join([hg.get_name() for hg in host.hostgroups])}}</dd>
+      %if len(elt.hostgroups) > 0:
+      <dd> {{','.join([hg.get_name() for hg in elt.hostgroups])}}</dd>
       %else:
       <dd> No groups </dd>
       %end
     </dl>
     <dl class="grid_6">
       <dt>Notes:</dt>
-      <dd>{{host.notes}}</dd>
+      <dd>{{elt.notes}}</dd>
     </dl>
     <div class="grid_4">
       <img class="box_shadow host_img_80" src="/static/images/no_image.png">
@@ -69,70 +69,70 @@ Invalid host
 	<tbody>
 	  <tr>
 	    <th scope="row" class="column1">Host Status</th>
-	    <td><span class="state_{{host.state.lower()}} icon_{{host.state.lower()}}">{{host.state}}</span> (since {{helper.print_duration(host.last_state_change, just_duration=True, x_elts=2)}}) </td>
+	    <td><span class="state_{{elt.state.lower()}} icon_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
 	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Status Information</th>
-	    <td>{{host.output}}</td>
+	    <td>{{elt.output}}</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Performance Data</th>	
-	    <td>{{host.perf_data}}</td>
+	    <td>{{elt.perf_data}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Business impact</th>	
-	    <td>{{host.business_impact}}</td>
+	    <td>{{elt.business_impact}}</td>
 	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Current Attempt</th>
-	    <td>{{host.attempt}}/{{host.max_check_attempts}} ({{host.state_type}} state)</td>
+	    <td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Last Check Time</th>
-	    <td title='Last check was at {{time.asctime(time.localtime(host.last_chk))}}'>was {{helper.print_duration(host.last_chk)}}</td>
+	    <td title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Check Latency / Duration</th>
-	    <td>{{'%.2f' % host.latency}} / {{'%.2f' % host.execution_time}} seconds</td>
+	    <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Next Scheduled Active Check</th>
-	    <td title='Next active check at {{time.asctime(time.localtime(host.next_chk))}}'>{{helper.print_duration(host.next_chk)}}</td>
+	    <td title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Last State Change</th>
-	    <td>{{time.asctime(time.localtime(host.last_state_change))}}</td>
+	    <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Last Notification</th>
-	    <td>{{helper.print_date(host.last_notification)}} (notification {{host.current_notification_number}})</td>
+	    <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
 	  </tr>	
 	  <tr>						
 	    <th scope="row" class="column1">Is This Host Flapping?</th>
-	    <td>{{helper.yes_no(host.is_flapping)}} ({{helper.print_float(host.percent_state_change)}}% state change)</td>
+	    <td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
 
 	  </tr>
 	  <tr class="odd">
 	    <th scope="row" class="column1">In Scheduled Downtime?</th>
-	    <td>{{helper.yes_no(host.in_scheduled_downtime)}}</td>
+	    <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
 	  </tr>	
 	</tbody>
 	<tbody class="switches">
 	  <tr class="odd">
 	    <th scope="row" class="column1">Active/passive Checks</th>
-	    <td title='This will also enable/disable this host services' onclick="toggle_checks('{{host.host_name}}' , '{{host.active_checks_enabled|host.passive_checks_enabled}}')"> {{!helper.get_input_bool(host.active_checks_enabled|host.passive_checks_enabled)}}</td>
+	    <td title='This will also enable/disable this host services' onclick="toggle_checks('{{elt.host_name}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Notifications</th>
-	    <td onclick="toggle_notifications('{{host.host_name}}' , '{{host.notifications_enabled}}')"> {{!helper.get_input_bool(host.notifications_enabled)}}</td>
+	    <td onclick="toggle_notifications('{{elt.host_name}}' , '{{elt.notifications_enabled}}')"> {{!helper.get_input_bool(elt.notifications_enabled)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Event Handler</th>
-	    <td onclick="toggle_event_handlers('{{host.host_name}}' , '{{host.event_handler_enabled}}')" > {{!helper.get_input_bool(host.event_handler_enabled)}}</td>
+	    <td onclick="toggle_event_handlers('{{elt.host_name}}' , '{{elt.event_handler_enabled}}')" > {{!helper.get_input_bool(elt.event_handler_enabled)}}</td>
 	  </tr>
 	  <tr>
 	    <th scope="row" class="column1">Flap Detection</th>
-	    <td onclick="toggle_flap_detection('{{host.host_name}}' , '{{host.flap_detection_enabled}}')" > {{!helper.get_input_bool(host.flap_detection_enabled)}}</td>
+	    <td onclick="toggle_flap_detection('{{elt.host_name}}' , '{{elt.flap_detection_enabled}}')" > {{!helper.get_input_bool(elt.flap_detection_enabled)}}</td>
 	  </tr>
 	</tbody>	
       </table>
@@ -143,13 +143,13 @@ Invalid host
 
 
       <div id="box_commannd">
-	<a href="#" onclick="try_to_fix('{{host.host_name}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
-	<a href="#" onclick="acknoledge('{{host.host_name}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
-	<a href="#" onclick="recheck_now('{{host.host_name}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
-	<a href="/depgraph/{{host.host_name}}" class="mb" title="Impact map of {{host.host_name}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
+	<a href="#" onclick="try_to_fix('{{elt.host_name}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
+	<a href="#" onclick="acknoledge('{{elt.host_name}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
+	<a href="#" onclick="recheck_now('{{elt.host_name}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
+	<a href="/depgraph/{{elt.host_name}}" class="mb" title="Impact map of {{elt.host_name}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
 	{{!helper.get_button('Submit Check Result', img='/static/images/passiveonly.gif')}}
 	{{!helper.get_button('Send Custom Notification', img='/static/images/notification.png')}}
-	{{!helper.get_button('Schedule Downtime For This Host', img='/static/images/downtime.png')}}
+	{{!helper.get_button('Schedule Downtime', img='/static/images/downtime.png')}}
 
 
 	<div class="clear"></div>
@@ -157,15 +157,15 @@ Invalid host
       <hr>
       
       %#    Now print the dependencies if we got somes
-      %if len(host.parent_dependencies) > 0:
-      <a id="togglelink-{{host.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{host.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
+      %if len(elt.parent_dependencies) > 0:
+      <a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
       <div class="clear"></div>
-      {{!helper.print_business_rules(datamgr.get_business_parents(host))}}
+      {{!helper.print_business_rules(datamgr.get_business_parents(elt))}}
       <hr>
       %end
 
       <div class='host-services'>
-	%for s in helper.get_host_services_sorted(host):
+	%for s in helper.get_host_services_sorted(elt):
 	  <div class="service">
 	    <div class="divstate{{s.state_id}}">
 	      %for i in range(0, s.business_impact-2):
