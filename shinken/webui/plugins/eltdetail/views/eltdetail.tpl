@@ -70,7 +70,13 @@ Invalid element name
     </dl>
     <dl class="grid_6">
       <dt>Notes:</dt>
-      <dd>{{elt.notes}} </dd>
+      %if elt.notes != '':
+      <dd>{{elt.notes}}</dd>
+      %else:
+      <dd>(none)</dd>
+      %end
+      <dt>Importance</dt>
+      <dd>{{!helper.get_business_impact_text(elt)}}</dd>
     </dl>
     <div class="grid_4">
       <img class="box_shadow host_img_80" src="/static/images/no_image.png">
@@ -105,10 +111,6 @@ Invalid element name
 	    <th scope="row" class="column1">Performance Data</th>	
 	    <td>{{elt.perf_data}}</td>
 	  </tr>
-	  <tr>
-	    <th scope="row" class="column1">Business importance</th>
-	    <td>{{!helper.get_business_impact_text(elt)}}</td>
-	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Current Attempt</th>
 	    <td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
