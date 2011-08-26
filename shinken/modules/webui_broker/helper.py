@@ -35,6 +35,23 @@ except ImportError:
 
 
 
+# Sort hosts and services by impact, states and co
+def hst_srv_sort(s1, s2):
+    if s1.business_impact > s2.business_impact:
+        return -1
+    if s2.business_impact > s1.business_impact:
+        return 1
+    # ok, here, same business_impact
+    # Compare warn and crit state
+    if s1.state_id > s2.state_id:
+        return -1
+    if s2.state_id > s1.state_id:
+        return 1
+    # Ok, so by name...
+    return s1.get_full_name() > s2.get_full_name()
+
+
+
 class Helper(object):
     def __init__(self):
         pass
@@ -257,21 +274,8 @@ class Helper(object):
     # For and host, return the services sorted by business
     # impact, then state, then desc
     def get_host_services_sorted(self, host):
-        def srv_sort(s1, s2):
-            if s1.business_impact > s2.business_impact:
-                return -1
-            if s2.business_impact > s1.business_impact:
-                return 1
-            # ok, here, same business_impact
-            # Compare warn and crit state
-            if s1.state_id > s2.state_id:
-                return -1
-            if s2.state_id > s1.state_id:
-                return 1
-            # Ok, so by name...
-            return s1.service_description > s2.service_description
         t = copy.copy(host.services)
-        t.sort(srv_sort)
+        t.sort(hst_srv_sort)
         return t
 
 
@@ -356,5 +360,12 @@ class Helper(object):
             r += '<li>%s</li>\n' % i.get_full_name()
         r += '</ul>\n'
         return r
+
+    # Return the impacts as a business sorted list
+    def get_impacts_sorted(self, obj):
+        t = copy.copy(obj.impacts)
+        t.sort(hst_srv_sort)
+        return t
+
     
 helper = Helper()

@@ -42,7 +42,7 @@ window.addEvent('domready', function(){
 
 	// And on leaving, hide them with opacity -> 0
 	host_services.addEvent('mouseleave', function(){
-		new Fx.Tween(host_services, {property: 'opacity'}).start(0.5);
+		new Fx.Tween(host_services, {property: 'opacity'}).start(0.3);
 	    });
     }
 

@@ -191,7 +191,9 @@ Invalid element name
       %end
 
       %# " Only print host service if elt is an host of course"
-      %if elt_type=='host':
+      %# " If the host is a problem, services will be print in the impacts, so don't"
+      %# " print twice "
+      %if elt_type=='host' and not elt.is_problem:
         <div class='host-services'>
 	  <h3> Services </h3>
 	  %for s in helper.get_host_services_sorted(elt):
@@ -207,8 +209,28 @@ Invalid element name
 	    %# End of this service
 	    %end
 	</div>
-	%end #of the only host part
-      
+     %end #of the only host part
+	
+
+     %if elt.is_problem:
+	<div class='host-services'>
+	<h3> Impacts </h3>
+	  
+	%for i in helper.get_impacts_sorted(elt):
+          <div class="service">
+            <div class="divstate{{i.state_id}}">
+              %for j in range(0, i.business_impact-2):
+                <img src='/static/images/star.png'>
+	      %end
+		  
+	      <span style="font-size:125%">{{i.get_full_name()}}</span> is <span style="font-size:125%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}, last check was {{helper.print_duration(i.last_chk)}}
+            </div>
+          </div>
+          %# End of this impact
+          %end
+	  </div>
+	%# end of the 'is problem' if
+	%end
 
     </dl>
   </div>
