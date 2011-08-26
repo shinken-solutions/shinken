@@ -68,7 +68,7 @@ Invalid element name
     %end 
 
     </dl>
-    <dl class="grid_6">
+    <dl class="grid_4">
       <dt>Notes:</dt>
       %if elt.notes != '':
       <dd>{{elt.notes}}</dd>
@@ -78,7 +78,7 @@ Invalid element name
       <dt>Importance</dt>
       <dd>{{!helper.get_business_impact_text(elt)}}</dd>
     </dl>
-    <div class="grid_4">
+    <div class="grid_2">
       <img class="box_shadow host_img_80" src="/static/images/no_image.png">
     </div>
     %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
