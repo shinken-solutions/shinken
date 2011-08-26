@@ -335,6 +335,17 @@ class Helper(object):
         if obj.problem_has_been_acknowledged:
             return 'ack'
         return obj.state.lower()
+
+    # For an object, give it's business impact as text 
+    # and stars if need
+    def get_business_impact_text(self, obj):
+        txts = {0 : 'None', 1 : 'Low', 2: 'Normal',
+                3 : 'High', 4 : 'Very important', 5 : 'Top for business'}
+        nb_stars = max(0, obj.business_impact - 2)
+        stars = '<img src="/static/images/star.png">\n' * nb_stars
+        
+        res = "%s %s" % (txts.get(obj.business_impact, 'Unknown'), stars)
+        return res
             
     
 helper = Helper()

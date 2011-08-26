@@ -96,8 +96,8 @@ Invalid element name
 	    <td>{{elt.perf_data}}</td>
 	  </tr>
 	  <tr>
-	    <th scope="row" class="column1">Business impact</th>	
-	    <td>{{elt.business_impact}}</td>
+	    <th scope="row" class="column1">Business importance</th>
+	    <td>{{!helper.get_business_impact_text(elt)}}</td>
 	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Current Attempt</th>
