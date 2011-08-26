@@ -34,15 +34,17 @@ window.addEvent('domready', function(){
     });
 
     // Now All Services
-    // We set display actions on hover
-    host_services.addEvent('mouseenter', function(){
-            new Fx.Tween(host_services, {property: 'opacity'}).start(1);
-	});
+    // We set display actions on hover, but only if they are present
+    if(host_services != null){
+	host_services.addEvent('mouseenter', function(){
+		new Fx.Tween(host_services, {property: 'opacity'}).start(1);
+	    });
 
-    // And on leaving, hide them with opacity -> 0
-    host_services.addEvent('mouseleave', function(){
-            new Fx.Tween(host_services, {property: 'opacity'}).start(0.5);
-	});
+	// And on leaving, hide them with opacity -> 0
+	host_services.addEvent('mouseleave', function(){
+		new Fx.Tween(host_services, {property: 'opacity'}).start(0.5);
+	    });
+    }
 
 
 

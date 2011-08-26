@@ -13,6 +13,8 @@ Invalid element name
 %helper = app.helper
 %datamgr = app.datamgr
 
+%elt_type = elt.__class__.my_type
+
 %top_right_banner_state = datamgr.get_overall_state()
 
 
@@ -36,21 +38,35 @@ Invalid element name
     <h2 class="icon_{{elt.state.lower()}}">{{elt.state}}: {{elt.host_name}}</h2>
 
     <dl class="grid_6">
-      <dt>Alias:</dt>
-      <dd>{{elt.alias}}</dd>
-      
-      <dt>Parents:</dt>
-      %if len(elt.parents) > 0:
-      <dd> {{','.join([h.get_name() for h in elt.parents])}}</dd>
-      %else:
-      <dd> No parents </dd>
-      %end
-      <dt>Members of:</dt>
-      %if len(elt.hostgroups) > 0:
-      <dd> {{','.join([hg.get_name() for hg in elt.hostgroups])}}</dd>
-      %else:
-      <dd> No groups </dd>
-      %end
+      %#Alias, apretns and hostgroups arefor host only
+      %if elt_type=='host':
+         <dt>Alias:</dt>
+         <dd>{{elt.alias}}</dd>
+
+         <dt>Parents:</dt>
+	 %if len(elt.parents) > 0:
+         <dd> {{','.join([h.get_name() for h in elt.parents])}}</dd>
+	 %else:
+         <dd> No parents </dd>
+	 %end
+         <dt>Members of:</dt>
+	 %if len(elt.hostgroups) > 0:
+         <dd> {{','.join([hg.get_name() for hg in elt.hostgroups])}}</dd>
+	 %else:
+         <dd> No groups </dd>
+	 %end
+    %# End of the host only case, so now service
+    %else:
+	 <dt>Host:</dt>
+         <dd> {{elt.host.host_name}}</dd>
+         <dt>Members of:</dt>
+         %if len(elt.servicegroups) > 0:
+         <dd> {{','.join([sg.get_name() for sg in elt.servicegroups])}}</dd>
+         %else:
+         <dd> No groups </dd>
+         %end
+    %end 
+
     </dl>
     <dl class="grid_6">
       <dt>Notes:</dt>
@@ -164,20 +180,23 @@ Invalid element name
       <hr>
       %end
 
-      <div class='host-services'>
-	%for s in helper.get_host_services_sorted(elt):
-	  <div class="service">
-	    <div class="divstate{{s.state_id}}">
-	      %for i in range(0, s.business_impact-2):
-	        <img src='/static/images/star.png'>
-	      %end
+      %# " Only print host service if elt is an host of course"
+      %if elt_type=='host':
+        <div class='host-services'>
+	  %for s in helper.get_host_services_sorted(elt):
+	    <div class="service">
+	      <div class="divstate{{s.state_id}}">
+	        %for i in range(0, s.business_impact-2):
+	          <img src='/static/images/star.png'>
+		%end
 		
 		<span style="font-size:125%">{{s.service_description}}</span> is <span style="font-size:125%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}, last check was {{helper.print_duration(s.last_chk)}}
+	      </div>
 	    </div>
-	  </div>
-	  %# End of this service
-	  %end
-      </div>
+	    %# End of this service
+	    %end
+	</div>
+	%end #of the only host part
       
     </dl>
   </div>
