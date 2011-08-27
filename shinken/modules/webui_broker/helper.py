@@ -35,6 +35,23 @@ except ImportError:
 
 
 
+# Sort hosts and services by impact, states and co
+def hst_srv_sort(s1, s2):
+    if s1.business_impact > s2.business_impact:
+        return -1
+    if s2.business_impact > s1.business_impact:
+        return 1
+    # ok, here, same business_impact
+    # Compare warn and crit state
+    if s1.state_id > s2.state_id:
+        return -1
+    if s2.state_id > s1.state_id:
+        return 1
+    # Ok, so by name...
+    return s1.get_full_name() > s2.get_full_name()
+
+
+
 class Helper(object):
     def __init__(self):
         pass
@@ -186,7 +203,7 @@ class Helper(object):
     def get_dep_graph_struct(self, elt, levels=2):
         t = elt.__class__.my_type
         d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
-             'data' : {'$dim': elt.business_impact*2},
+             'data' : {'$dim': max(elt.business_impact*elt.business_impact / 2, 5)},
              'adjacencies' : []
              }
         # Service got a 'star' type :)
@@ -194,15 +211,18 @@ class Helper(object):
             d['data']["$type"] = "star"
             d['data']["$color"] = {0 : 'green', 1 : 'orange', 2 : 'red', 3 : 'gray'}.get(elt.state_id, 'red')
         else: #host
-            d['data']["$color"] = {0 : 'green', 1 : 'red', 2 : 'orange', 3 : 'gray'}.get(elt.state_id, 'red')
+            d['data']["$color"] = {0 : 'green', 1 : 'red', 2 : '#CC6600', 3 : 'gray'}.get(elt.state_id, 'red')
 
         # Now put in adj our parents
         for p in elt.parent_dependencies:
             pd = {'nodeTo' : p.get_dbg_name(),
-                  'data' : {"$type":"arrow", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
+                  'data' : {"$type":"line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
             # Naive way of looking at impact
             if elt.state_id != 0 and p.state_id != 0:
-                pd['data']["$color"] = 'red'
+                pd['data']["$color"] = 'Tomato'
+            # If OK, show host->service as a green link
+            elif elt.__class__.my_type != p.__class__.my_type:
+                 pd['data']["$color"] = 'PaleGreen'
             d['adjacencies'].append(pd)
 
         # The sons case is now useful, it will be done by our sons
@@ -254,21 +274,8 @@ class Helper(object):
     # For and host, return the services sorted by business
     # impact, then state, then desc
     def get_host_services_sorted(self, host):
-        def srv_sort(s1, s2):
-            if s1.business_impact > s2.business_impact:
-                return -1
-            if s2.business_impact > s1.business_impact:
-                return 1
-            # ok, here, same business_impact
-            # Compare warn and crit state
-            if s1.state_id > s2.state_id:
-                return -1
-            if s2.state_id > s1.state_id:
-                return 1
-            # Ok, so by name...
-            return s1.service_description > s2.service_description
         t = copy.copy(host.services)
-        t.sort(srv_sort)
+        t.sort(hst_srv_sort)
         return t
 
 
@@ -280,5 +287,85 @@ class Helper(object):
             return """<input type="checkbox" checked="checked" %s/>\n""" % id_s
         else:
             return """<input type="checkbox" %s />\n""" % id_s
+
+
+    def print_business_rules(self, tree, level=0):
+        print "Should print tree", tree
+        node = tree['node']
+        name = node.get_dbg_name()
+        fathers = tree['fathers']
+        s = ''
+        # Do not print the node if it's the root one, we already know its state!
+        if level != 0:
+            s += "%s is %s since %s\n" % (name, node.state, self.print_duration(node.last_state_change, just_duration=True))
+        # If we got no parents, no need to print the expand icon
+        if len(fathers) > 0:
+            # We look ifthe below tree is goodor not
+            tree_is_good = (node.state_id == 0)
+            
+            # If the tree is good, we will use an expand image
+            # and hide the tree
+            if tree_is_good:
+                display = 'none'
+                img = 'expand.png'
+            else: # we will already show the tree, and use a reduce image
+                display = 'block'
+                img = 'reduce.png'
+
+            # If we are the root, we already got this
+            if level != 0:
+                s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/%s"> </a> \n""" % (name, name, name, img)
+                
+            s += """<ul id="business-parents-%s" style="display: %s; ">""" % (name, display)
+        
+            for n in fathers:
+                sub_node = n['node']
+                sub_s = self.print_business_rules(n, level=level+1)
+                s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
+            s += "</ul>"
+        print "Returing s:", s
+        return s
+
+
+    # Get the small state for host/service icons
+    def get_small_icon_state(self, obj):
+        if obj.state == 'PENDING':
+            return 'unknown'
+        if obj.state == 'OK':
+            return 'ok'
+        if obj.state == 'up':
+            return 'up'
+        # Outch, not a good state...
+        if obj.problem_has_been_acknowledged:
+            return 'ack'
+        return obj.state.lower()
+
+    # For an object, give it's business impact as text 
+    # and stars if need
+    def get_business_impact_text(self, obj):
+        txts = {0 : 'None', 1 : 'Low', 2: 'Normal',
+                3 : 'High', 4 : 'Very important', 5 : 'Top for business'}
+        nb_stars = max(0, obj.business_impact - 2)
+        stars = '<img src="/static/images/star.png">\n' * nb_stars
+        
+        res = "%s %s" % (txts.get(obj.business_impact, 'Unknown'), stars)
+        return res
+            
+
+    # We will outpout as a ul/li list the impacts of this 
+    def got_impacts_list_as_li(self, obj):
+        impacts = obj.impacts
+        r = '<ul>\n'
+        for i in impacts:
+            r += '<li>%s</li>\n' % i.get_full_name()
+        r += '</ul>\n'
+        return r
+
+    # Return the impacts as a business sorted list
+    def get_impacts_sorted(self, obj):
+        t = copy.copy(obj.impacts)
+        t.sort(hst_srv_sort)
+        return t
+
     
 helper = Helper()

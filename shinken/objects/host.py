@@ -446,6 +446,11 @@ class Host(SchedulingItem):
     def get_dbg_name(self):
         return self.host_name
 
+    # Same but for clean call, no debug
+    def get_full_name(self):
+        return self.host_name
+
+
 
     # Say if we got the other in one of your dep list
     def is_linked_with_host(self, other):

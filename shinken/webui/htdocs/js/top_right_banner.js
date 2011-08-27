@@ -16,3 +16,49 @@ window.addEvent('domready', function(){
 			      ); //Will fade the Element out and in twice.
 	}
     });
+
+
+
+
+
+/* This is the class that will manage a div with a background
+that scrool from right to left */
+bgScroller = new Class({
+	Implements: [Events, Options],
+	options: {
+	    duration: 40000
+	},
+	tweener: null,
+	length: 0,
+	count: 0,
+	verticalPosition: null,
+	run: function() {
+	    this.tweener.tween('background-position', ('-' + (++this.count * this.length) + 'px ' + this.verticalPosition));
+	},
+	initialize: function(element, options){
+	    this.setOptions(options);
+	    this.tweener = element;
+	    this.length = this.tweener.getSize().x;
+	    this.verticalPosition = this.tweener.getStyle("background-position").split(" ")[1];
+	    this.tweener.setStyle("background-position", ("0px " + this.verticalPosition));
+	    this.tweener.set('tween', {
+		    duration: this.options.duration,
+			transition: Fx.Transitions.linear,
+			onComplete: this.run.bind(this),
+			wait: false
+			});
+	    this.run();
+	}
+    });
+
+/* And now we call it*/
+window.addEvent("domready", function() {
+	/* Maybe the page do not have sucgh aera, if so, we bail out :)*/
+	var animate_area = $('animate-area');
+	if (animate_area != null){
+
+	    var frontScroller = new bgScroller($("animate-area"), { duration: 9000 });
+	    var middleScroller = new bgScroller($("animate-area-back-1"), { duration: 15000 });
+	    var backScroller = new bgScroller($("animate-area-back-2"), { duration: 12000 });
+	}
+    });

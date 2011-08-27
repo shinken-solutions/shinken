@@ -255,9 +255,12 @@ td.actions a {
 }
 
 .box_shadow {
-    -moz-box-shadow: 0px 0px 4px #E3E3E5; /* FF3.5+ */
-  	-webkit-box-shadow: 0px 0px 4px #E3E3E5; /* Saf3.0+, Chrome */
-    box-shadow: 0px 0px 4px #E3E3E5; /* Opera 10.5, IE9, Chrome 10+ */
+    -moz-box-shadow: 0px 0px 4px #777; /* FF3.5+ */
+    -webkit-box-shadow: 0px 0px 4px #777; /* Saf3.0+, Chrome */
+    box-shadow: 0px 0px 4px #777; /* Opera 10.5, IE9, Chrome 10+ */
+    /* For old IEs */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#E3E3E5')";
+    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#E3E3E5');
 }
 
 .box_round {
@@ -521,4 +524,74 @@ td.actions a {
     background-color:#d12f19;
     border:1px solid #d12f19;
     color:#fff;
+}
+
+
+
+/*    ************* TIP       ************* */
+/* The following is the only rule you need to customize your tip look */
+
+.floating-tip {
+    background-color: black;
+    padding: 5px 15px;
+    color: #dddddd;
+    font-weight: bold;
+    font-size: 11px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.tip a {
+   position: relative;
+   color: #787878;
+   text-decoration: none;
+   border-bottom: 1px gray dotted; /* We underline the text */
+}
+
+
+/* Top rigth banner */
+/* This is the front cloud aera. The image will change with the 
+overall status */
+#animate-area  { 
+/*  background-image:url(/static/images/sky_warning.png);*/
+  background-position:0px 0px;
+  background-repeat:repeat-x;
+  z-index : 5;
+  width:128px; 
+  height:128px; 
+  zoom:1; 
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 0;
+}
+
+/* The two area below are for parallax effect*/
+#animate-area-back-1  {     
+    background-image:url(/static/images/back_sky_1.png);
+    background-position:-40px -40px;
+    background-repeat:repeat-x;
+    z-index : 5;
+    width:128px; 
+    height:128px; 
+    zoom:1; 
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
+}
+
+#animate-area-back-2  { 
+    background-image:url(/static/images/back_sky_2.png);
+    background-position:-128px -20px;
+    background-repeat:repeat-x;
+    z-index : 5;
+    width:128px; 
+    height:128px; 
+    zoom:1; 
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
 }

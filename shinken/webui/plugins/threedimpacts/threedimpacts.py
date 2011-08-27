@@ -3,8 +3,6 @@
 app = None
 
 # Main impacts view
-#@route('/host')
-#@view('hostdetail')
 def show_3dimpacts():
     return get_data()
 

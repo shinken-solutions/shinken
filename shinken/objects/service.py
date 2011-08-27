@@ -327,6 +327,9 @@ class Service(SchedulingItem):
     def get_dbg_name(self):
         return "%s/%s" % (self.host.host_name, self.service_description)
 
+    def get_full_name(self):
+        return "%s/%s" % (self.host.host_name, self.service_description)
+
 
     # Check is required prop are set:
     # template are always correct

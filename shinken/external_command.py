@@ -930,7 +930,7 @@ class ExternalCommandManager:
 
     #ENABLE_HOST_EVENT_HANDLER;<host_name>
     def ENABLE_HOST_EVENT_HANDLER(self, host):
-        host.enable_event_handlers = True
+        host.event_handler_enabled = True
         self.sched.get_and_register_status_brok(host)
 
     #ENABLE_HOST_FLAP_DETECTION;<host_name>
