@@ -120,11 +120,7 @@ class Livestatus_broker(BaseModule):
         #external commands to the broker
         #self.from_q = self.properties['from_queue']
 
-        self.prepare_log_db()
         self.prepare_pnp_path()
-
-
-        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.from_q)
 
         m = MacroResolver()
         m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
@@ -843,6 +839,12 @@ class Livestatus_broker(BaseModule):
         # Maybe we got a debug dump to do
         if self.debug:
             self.set_debug()
+
+        # Open the logging database
+        self.prepare_log_db()
+
+        # This is the main object of this broker where the action takes place
+        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.from_q)
 
         last_number_of_objects = 0
         last_db_cleanup_time = 0
