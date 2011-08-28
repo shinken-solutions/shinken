@@ -41,6 +41,7 @@ from shinken.comment import Comment
 
 from shinken.modules import livestatus_broker
 from shinken.modules.livestatus_broker import Livestatus_broker
+from shinken.modules.livestatus_broker.livestatus import LiveStatus
 
 sys.setcheckinterval(10000)
 
@@ -304,6 +305,8 @@ class TestConfigSmall(TestConfig):
         #
         #    }
         self.livestatus_broker.init()
+        self.livestatus_broker.prepare_log_db()
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.dbconn, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()
@@ -2288,6 +2291,8 @@ class TestConfigBig(TestConfig):
         #}
         print "************* Intermediate SetUp:", time.time() - start_setUp
         self.livestatus_broker.init()
+        self.livestatus_broker.prepare_log_db()
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.dbconn, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()
@@ -3215,6 +3220,8 @@ class TestConfigComplex(TestConfig):
         self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
         self.livestatus_broker.create_queues()
         self.livestatus_broker.init()
+        self.livestatus_broker.prepare_log_db()
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.dbconn, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()
@@ -3286,6 +3293,9 @@ class TestConfigCrazy(TestConfig):
         self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
         self.livestatus_broker.create_queues()
         self.livestatus_broker.init()
+        self.livestatus_broker.prepare_log_db()
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.dbconn, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+
         self.sched.fill_initial_broks()
         self.update_broker()
         self.nagios_path = None
