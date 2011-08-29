@@ -91,8 +91,11 @@
 	  %##### OK, we print root problem NON ack first
 
 	  <br style="clear: both">
+	  %unack_pbs = [pb for pb in impact.source_problems if not pb.problem_has_been_acknowledged]
+	  %if len(unack_pbs) > 0:
 	  Root problems unacknowledged :
-	  %for pb in [pb for pb in impact.source_problems if not pb.problem_has_been_acknowledged]:
+	  %end
+	  %for pb in unack_pbs:
 	  %   pb_id += 1
 	  <div class="problem" id="{{pb_id}}">
 	    <div class="divhstate1">{{pb.get_name()}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
@@ -107,8 +110,11 @@
 	  
 	  %#### Then ackno problems
 	  <br style="clear: both">
-          Already acknowledged root problems :
-          %for pb in [pb for pb in impact.source_problems if pb.problem_has_been_acknowledged]:
+	  %ack_pbs = [pb for pb in impact.source_problems if pb.problem_has_been_acknowledged]
+	  %if len(ack_pbs) > 0:
+	  Already acknowledged root problems :
+	  %end
+          %for pb in ack_pbs:
           %   pb_id += 1
           <div class="problem" id="{{pb_id}}">
             <div class="divhstate1">{{pb.get_name()}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
