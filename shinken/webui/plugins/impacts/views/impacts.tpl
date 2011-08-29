@@ -1,5 +1,6 @@
 
 %helper = app.helper
+%datamgr = app.datamgr
 
 %include header js=['impacts/js/impacts.js'], title='All critical impacts for your business', css=['impacts/impacts.css']
 
@@ -91,14 +92,32 @@
 	  %##### OK, we print root problem NON ack first
 
 	  <br style="clear: both">
+	  %l_pb_id = 0
 	  %unack_pbs = [pb for pb in impact.source_problems if not pb.problem_has_been_acknowledged]
 	  %ack_pbs = [pb for pb in impact.source_problems if pb.problem_has_been_acknowledged]
 	  %nb_unack_pbs = len(unack_pbs)
-	  %if len(unack_pbs+ack_pbs) > 0:
-	  Root problems :
+	  %nb_ack_pbs = len(ack_pbs)
+	  %if nb_unack_pbs > 0:
+	  Root problems unacknoledged :
 	  %end
-	  %for pb in unack_pbs+ack_pbs:
+
+	  %guessed = []
+	  %if impact.state_id != 0 and len(unack_pbs+ack_pbs) == 0:
+	     %guessed = datamgr.guess_root_problems(impact)
+	  %end
+
+	  %for pb in unack_pbs+ack_pbs+guessed:
 	  %   pb_id += 1
+	  % l_pb_id += 1
+	  
+	  %if nb_ack_pbs != 0 and l_pb_id == nb_unack_pbs + 1:
+	  Acknoledged problems:
+	  %end
+
+	  %if len(guessed) != 0 and l_pb_id == nb_unack_pbs + nb_ack_pbs + 1:
+	  Pure guessed root problems :
+	  %end
+
 	  <div class="problem" id="{{pb_id}}">
 	    <div class="divhstate1">{{!helper.get_link(pb)}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
 	    <div class="problem-actions opacity_hover">
@@ -110,7 +129,7 @@
 	  </div>
 	  %# end for pb in impact.source_problems:
 	  %end
-	  
+
 	  
 	</div>
 %# end for imp_id in impacts:

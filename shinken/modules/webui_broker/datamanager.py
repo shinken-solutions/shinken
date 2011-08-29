@@ -97,6 +97,14 @@ class DataManager(object):
         print "get_business_parents::Give elements", res
         return res
 
+
+    # Ok, we do not have true root problems, but we can try to guess isn't it?
+    #We can just guess for services with the same services of this host in fact
+    def guess_root_problems(self, obj):
+        if obj.__class__.my_type != 'service':
+            return []
+        r = [s for s in obj.host.services if s.state_id != 0 and s != obj]
+        return r
         
 
 datamgr = DataManager()

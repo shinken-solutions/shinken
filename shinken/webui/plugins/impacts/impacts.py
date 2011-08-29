@@ -5,30 +5,6 @@ app = None
 
 
 
-def compare_impacts(imp1, imp2):
-    # Get max business impact
-    if imp1.business_impact > imp2.business_impact:
-        return 1
-    if imp2.business_impact > imp1.business_impact:
-        return -1
-    # OK here, same business_impact
-    # Now get worse state
-    if imp1.state_id > imp2.state_id:
-        return 1
-    if imp2.state_id > imp1.state_id:
-        return -1
-    # don't care so
-    return 0
-    
-
-def find_pb(problems, name):
-    for (i, pb) in problems.items():
-        if pb['name'] == name:
-            return i
-    return None
-
-
-
 # Sort hosts and services by impact, states and co
 def hst_srv_sort(s1, s2):
     if s1.business_impact > s2.business_impact:
@@ -61,6 +37,7 @@ def show_impacts():
 
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
+
     impacts = {}
 
     imp_id = 0

@@ -116,36 +116,6 @@ window.addEvent('domready', function(){
    appears the actiosn buttons with a smoot way (opacity)*/
 
 window.addEvent('domready', function(){
-    
-    /* We must avoid $$() call for IE, so call a standad way*/
-    var problems = $(document.body).getElements('.problem');
-    
-
-    // We set display actions on hover
-    problems.addEvent('mouseenter', function(){
-	var pb_nb = this.get('id');
-	el = document.getElementById("actions-" + pb_nb);
-	new Fx.Tween(el, {property: 'opacity'}).start(1);
-	
-    });
-    // And on leaving, hide them with opacity -> 0
-    problems.addEvent('mouseleave', function(){
-        var pb_nb = this.get('id');
-        el = document.getElementById("actions-" + pb_nb);
-	new Fx.Tween(el, {property: 'opacity'}).start(0.4);
-    });
-
-
-});
-
-
-
-
-
-/* Now a function for managingthe hovering of the problems. Will make
-   appears the actiosn buttons with a smoot way (opacity)*/
-
-window.addEvent('domready', function(){
 
 	$$('.opacity_hover').each(function(el){
 		// We set display actions on hover
