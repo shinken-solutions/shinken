@@ -207,7 +207,7 @@ class Service(SchedulingItem):
         'is_problem':         BoolProp   (default=False, fill_brok=['full_status']),
         'is_impact':          BoolProp   (default=False, fill_brok=['full_status']),
         # the save value of our business_impact for "problems"
-        'my_own_business_impact':   IntegerProp(default=-1),
+        'my_own_business_impact':   IntegerProp(default=-1, fill_brok=['full_status']),
         # list of problems that make us an impact
         'source_problems':    ListProp   (default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
         # list of the impact I'm the cause of

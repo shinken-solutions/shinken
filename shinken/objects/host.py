@@ -242,7 +242,7 @@ class Host(SchedulingItem):
         'is_impact':            StringProp(default=False, fill_brok=['full_status']),
 
         # the save value of our business_impact for "problems"
-        'my_own_business_impact':     IntegerProp(default=-1),
+        'my_own_business_impact':     IntegerProp(default=-1, fill_brok=['full_status']),
 
         # list of problems that make us an impact
         'source_problems':      StringProp(brok_transformation=to_svc_hst_distinct_lists, default=[], fill_brok=['full_status']),
