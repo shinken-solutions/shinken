@@ -383,7 +383,7 @@ class Regenerator:
         v = getattr(o, prop)
 
         if not v:
-            return
+            setattr(o, prop, [])
                 
         new_v = []
         #print "Linkify Dict SRV/Host", v, o.get_name(), prop
@@ -404,7 +404,7 @@ class Regenerator:
         v = getattr(o, prop)
 
         if not v:
-            return
+            setattr(o, prop, [])
 
         new_v = []
         for hname in v:
