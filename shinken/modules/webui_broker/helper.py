@@ -368,9 +368,13 @@ class Helper(object):
         return t
 
 
-    def get_link(self, obj):
+    def get_link(self, obj, short=False):
         if obj.__class__.my_type == 'service':
-            return '<a href="/service/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
+            if short:
+                name = obj.get_name()
+            else:
+                name = obj.get_full_name()
+            return '<a href="/service/%s"> %s </a>' % (obj.get_full_name(), name)
         # if not service, host
         return '<a href="/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
     

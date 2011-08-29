@@ -13,6 +13,11 @@ body
 	font: 13px/1.5 Arial,  Helvetica, 'Liberation Sans', FreeSans, sans-serif;
 }
 
+a {
+    color : black;
+    text-decoration: none;
+}
+
 a:focus
 {
 	outline: 1px dotted invert;

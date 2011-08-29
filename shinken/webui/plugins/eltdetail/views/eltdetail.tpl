@@ -205,7 +205,7 @@ Invalid element name
 	          <img src='/static/images/star.png'>
 		%end
 		
-		<span style="font-size:125%">{{s.service_description}}</span> is <span style="font-size:125%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}, last check was {{helper.print_duration(s.last_chk)}}
+		  <span style="font-size:125%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:125%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}, last check was {{helper.print_duration(s.last_chk)}}
 	      </div>
 	    </div>
 	    %# End of this service
