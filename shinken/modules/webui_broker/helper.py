@@ -292,12 +292,13 @@ class Helper(object):
     def print_business_rules(self, tree, level=0):
         print "Should print tree", tree
         node = tree['node']
-        name = node.get_dbg_name()
+        name = node.get_full_name()
         fathers = tree['fathers']
         s = ''
         # Do not print the node if it's the root one, we already know its state!
         if level != 0:
-            s += "%s is %s since %s\n" % (name, node.state, self.print_duration(node.last_state_change, just_duration=True))
+            s += "%s is %s since %s\n" % (self.get_link(node), node.state, self.print_duration(node.last_state_change, just_duration=True))
+
         # If we got no parents, no need to print the expand icon
         if len(fathers) > 0:
             # We look ifthe below tree is goodor not
