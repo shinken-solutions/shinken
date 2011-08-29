@@ -367,5 +367,11 @@ class Helper(object):
         t.sort(hst_srv_sort)
         return t
 
+
+    def get_link(self, obj):
+        if obj.__class__.my_type == 'service':
+            return '<a href="/service/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
+        # if not service, host
+        return '<a href="/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
     
 helper = Helper()

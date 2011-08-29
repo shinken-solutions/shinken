@@ -140,63 +140,22 @@ window.addEvent('domready', function(){
 
 
 
-/* Now register for images FIXIT a fitit call*/
+
+
+/* Now a function for managingthe hovering of the problems. Will make
+   appears the actiosn buttons with a smoot way (opacity)*/
+
 window.addEvent('domready', function(){
-    
-    /* We must avoid $$() call for IE, so call a standad way*/
-    var actions_fixit = $(document.body).getElements('.action-fixit');
-    
 
-    // We set display actions on hover
-    actions_fixit.addEvent('click', function(){
-	var args = this.get('id');
-	var reg = new RegExp("[/]+", "g");
-	var tab = args.split(reg);
-	var action = tab[0];
-	var site = tab[1];
-	var host = tab[2];
-	var desc = '';
-	var type = 'host' ;
-	// If got 4 part, it's a service
-	if (tab.length == 4){
-	    desc = tab[3];
-	    type = 'service';
-	}
-	
-	//alert('got tab'+tab);
-	performAction(this, action, type, site, host, desc);
+	$$('.opacity_hover').each(function(el){
+		// We set display actions on hover
+		el.addEvent('mouseenter', function(){
+			new Fx.Tween(el, {property: 'opacity'}).start(1);
+		    });
+
+		// And on leaving, hide them with opacity -> 0
+		el.addEvent('mouseleave', function(){
+			new Fx.Tween(el, {property: 'opacity'}).start(0.5);
+		    });
+	    });
     });
-});
-
-
-/* Now register for images an ACKNO call*/
-window.addEvent('domready', function(){
-    
-    /* We must avoid $$() call for IE, so call a standad way*/
-    var actions_ack = $(document.body).getElements('.action-ack');
-
-    // We set display actions on hover
-    actions_ack.addEvent('click', function(){
-	var args = this.get('id');
-	var reg = new RegExp("[/]+", "g");
-	var tab = args.split(reg);
-	var action = tab[0];
-	var site = tab[1];
-	var host = tab[2];
-	var desc = '';
-	var type = 'host' ;
-	// If got 4 part, it's a service
-	if (tab.length == 4){
-	    desc = tab[3];
-	    type = 'service';
-	}
-	
-	//alert('got tab'+tab);
-	performAction(this, action, type, site, host, desc);
-
-    });
-});
-
-
-
-

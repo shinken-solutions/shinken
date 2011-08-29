@@ -92,42 +92,25 @@
 
 	  <br style="clear: both">
 	  %unack_pbs = [pb for pb in impact.source_problems if not pb.problem_has_been_acknowledged]
-	  %if len(unack_pbs) > 0:
-	  Root problems unacknowledged :
+	  %ack_pbs = [pb for pb in impact.source_problems if pb.problem_has_been_acknowledged]
+	  %nb_unack_pbs = len(unack_pbs)
+	  %if len(unack_pbs+ack_pbs) > 0:
+	  Root problems :
 	  %end
-	  %for pb in unack_pbs:
+	  %for pb in unack_pbs+ack_pbs:
 	  %   pb_id += 1
 	  <div class="problem" id="{{pb_id}}">
-	    <div class="divhstate1">{{pb.get_name()}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
-	    <div class="problem-actions" id="actions-pb_id">
-	      <div class="action-fixit" id="fixit/paris/router-us"><img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</div> 
-	      <div class="action-ack" id="ack/paris/router-us"><img class="icon" title="Acknoledge it" src="static/images/link_processes.gif">Acknoledge it</div>
+	    <div class="divhstate1">{{!helper.get_link(pb)}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
+	    <div class="problem-actions opacity_hover">
+	      <div class="action-fixit"><a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</a></div>
+	      %if not pb.problem_has_been_acknowledged:
+	      <div class="action-ack"><a href="#" onclick="acknoledge('{{pb.get_full_name()}}')"><img class="icon" title="Acknoledge it" src="static/images/link_processes.gif">Acknoledge it</a></div>
+	      %end
 	    </div>
 	  </div>
 	  %# end for pb in impact.source_problems:
 	  %end
 	  
-	  
-	  %#### Then ackno problems
-	  <br style="clear: both">
-	  %ack_pbs = [pb for pb in impact.source_problems if pb.problem_has_been_acknowledged]
-	  %if len(ack_pbs) > 0:
-	  Already acknowledged root problems :
-	  %end
-          %for pb in ack_pbs:
-          %   pb_id += 1
-          <div class="problem" id="{{pb_id}}">
-            <div class="divhstate1">{{pb.get_name()}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
-            <div class="problem-actions" id="actions-pb_id">
-              <div class="action-fixit" id="fixit/paris/router-us"><img class="icon" title="Try to fix it" src="static/images/icon_ack.gi\
-f">Try to fix it</div>
-              <div class="action-ack" id="unack/paris/router-us"><img class="icon" title="Un-Acknoledge it" src="static/images/link_processes.\
-gif">Un-Acknoledge it</div>
-            </div>
-          </div>
-          %# end for pb in impact.source_problems:
-          %end
-
 	  
 	</div>
 %# end for imp_id in impacts:
