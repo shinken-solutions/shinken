@@ -61,6 +61,7 @@
     position: relative;
     zoom: 1;
     cursor: pointer;
+    vertical-align: middle;
 /*    background-image: url("alpha.png");*/
 }
 
@@ -144,12 +145,26 @@
 }
 
 
+
+
+/* The show problem status image, on the right of the impact*/
+.impact-status-icon {
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    margin-left: 250px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+}
+
+
 /* The show problem image, on the right of the impact*/
 .criticity-icon-1 {
     width: 20px;
     height: 20px;
     position: absolute;
-    margin-top: 8px;
+    margin-left: 50px;
     z-index: 1;
     outline: none;
     left: 20px;
@@ -161,7 +176,28 @@
     width: 20px;
     height: 20px;
     position: absolute;
-    margin-top: 18px;
+    margin-left: 62px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+}
+
+.criticity-icon-3 {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    margin-left: 74px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+}
+
+/* The same stars, but in the proble panel */
+.criticity-inpb-icon-1 {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    margin-left: 80px;
     z-index: 1;
     outline: none;
     left: 20px;
@@ -169,14 +205,37 @@
 
 
 /* The show problem image, on the right of the impact*/
-.criticity-icon-3 {
+.criticity-inpb-icon-2 {
     width: 20px;
     height: 20px;
     position: absolute;
-    margin-top: 28px;
+    margin-left: 92px;
     z-index: 1;
     outline: none;
     left: 20px;
+}
+
+
+/* The show problem image, on the right of the impact*/
+.criticity-inpb-icon-3 {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    margin-left: 104px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+}
+
+
+/* The show problem status image, on the right of the impact*/
+.impact-rows {
+    position: relative;
+    margin-top: 20px;
+    
+    z-index: 1;
+    outline: none;
+/*    left: 20px;*/
 }
 
 
@@ -186,6 +245,7 @@
     position: relative;
     line-height: 15px;
     left: 5px;
+    vertical-align: middle;
 }
 
 /* The link of the impact on its name */
@@ -193,6 +253,14 @@
     font-weight: bold;
     color: #333;
 }
+
+/* The link of the impact on its name */
+.impact-inpb-name {
+    font-size: 150%;
+    font-weight: bold;
+    color: #333;
+}
+
 
 /* The link of the impact on its name */
 .impact-state-text {

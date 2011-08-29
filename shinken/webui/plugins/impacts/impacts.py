@@ -4,37 +4,25 @@
 app = None
 
 
-# Main impacts view
-#@route('/impacts')
-#@view('impacts')
+
+# Sort hosts and services by impact, states and co
+def hst_srv_sort(s1, s2):
+    if s1.business_impact > s2.business_impact:
+        return -1
+    if s2.business_impact > s1.business_impact:
+        return 1
+    # ok, here, same business_impact
+    # Compare warn and crit state
+    if s1.state_id > s2.state_id:
+        return -1
+    if s2.state_id > s1.state_id:
+        return 1
+    # Ok, so by name...
+    return s1.get_full_name() > s2.get_full_name()
+
+
+
 def show_impacts():
-    return get_data()
-
-
-def compare_impacts(imp1, imp2):
-    # Get max business impact
-    if imp1.business_impact > imp2.business_impact:
-        return 1
-    if imp2.business_impact > imp1.business_impact:
-        return -1
-    # OK here, same business_impact
-    # Now get worse state
-    if imp1.state_id > imp2.state_id:
-        return 1
-    if imp2.state_id > imp1.state_id:
-        return -1
-    # don't care so
-    return 0
-    
-
-def find_pb(problems, name):
-    for (i, pb) in problems.items():
-        if pb['name'] == name:
-            return i
-    return None
-
-
-def get_data():
     # We need to output impacts:
     # 1 : Mails/Critical/criticity=5/since one hour/No mails can be send nor received   ---> 1, 2
     # 2 : ERP/Critical/criticiy=4/since one day/""       ---> 1
@@ -47,8 +35,9 @@ def get_data():
     # 2 : router-asia is Down since one hour with output connexion failed
     # 3 : db-server/Mssql is Warning since one hour with output connexion failed
 
-    all_imp_impacts = app.datamgr.get_important_impacts()
-    all_imp_impacts.sort(compare_impacts)
+    all_imp_impacts = app.datamgr.get_important_elements()
+    all_imp_impacts.sort(hst_srv_sort)
+
     impacts = {}
 
     imp_id = 0
@@ -57,7 +46,7 @@ def get_data():
         imp_id += 1
         impacts[imp_id] = imp
 
-    return {'impacts' : impacts}
+    return {'app' : app, 'impacts' : impacts}
 
 
 

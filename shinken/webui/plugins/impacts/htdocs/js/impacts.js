@@ -116,87 +116,16 @@ window.addEvent('domready', function(){
    appears the actiosn buttons with a smoot way (opacity)*/
 
 window.addEvent('domready', function(){
-    
-    /* We must avoid $$() call for IE, so call a standad way*/
-    var problems = $(document.body).getElements('.problem');
-    
 
-    // We set display actions on hover
-    problems.addEvent('mouseenter', function(){
-	var pb_nb = this.get('id');
-	el = document.getElementById("actions-" + pb_nb);
-	new Fx.Tween(el, {property: 'opacity'}).start(1);
-	
+	$$('.opacity_hover').each(function(el){
+		// We set display actions on hover
+		el.addEvent('mouseenter', function(){
+			new Fx.Tween(el, {property: 'opacity'}).start(1);
+		    });
+
+		// And on leaving, hide them with opacity -> 0
+		el.addEvent('mouseleave', function(){
+			new Fx.Tween(el, {property: 'opacity'}).start(0.5);
+		    });
+	    });
     });
-    // And on leaving, hide them with opacity -> 0
-    problems.addEvent('mouseleave', function(){
-        var pb_nb = this.get('id');
-        el = document.getElementById("actions-" + pb_nb);
-	new Fx.Tween(el, {property: 'opacity'}).start(0.4);
-    });
-
-
-});
-
-
-
-/* Now register for images FIXIT a fitit call*/
-window.addEvent('domready', function(){
-    
-    /* We must avoid $$() call for IE, so call a standad way*/
-    var actions_fixit = $(document.body).getElements('.action-fixit');
-    
-
-    // We set display actions on hover
-    actions_fixit.addEvent('click', function(){
-	var args = this.get('id');
-	var reg = new RegExp("[/]+", "g");
-	var tab = args.split(reg);
-	var action = tab[0];
-	var site = tab[1];
-	var host = tab[2];
-	var desc = '';
-	var type = 'host' ;
-	// If got 4 part, it's a service
-	if (tab.length == 4){
-	    desc = tab[3];
-	    type = 'service';
-	}
-	
-	//alert('got tab'+tab);
-	performAction(this, action, type, site, host, desc);
-    });
-});
-
-
-/* Now register for images an ACKNO call*/
-window.addEvent('domready', function(){
-    
-    /* We must avoid $$() call for IE, so call a standad way*/
-    var actions_ack = $(document.body).getElements('.action-ack');
-
-    // We set display actions on hover
-    actions_ack.addEvent('click', function(){
-	var args = this.get('id');
-	var reg = new RegExp("[/]+", "g");
-	var tab = args.split(reg);
-	var action = tab[0];
-	var site = tab[1];
-	var host = tab[2];
-	var desc = '';
-	var type = 'host' ;
-	// If got 4 part, it's a service
-	if (tab.length == 4){
-	    desc = tab[3];
-	    type = 'service';
-	}
-	
-	//alert('got tab'+tab);
-	performAction(this, action, type, site, host, desc);
-
-    });
-});
-
-
-
-

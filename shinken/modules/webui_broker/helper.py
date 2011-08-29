@@ -168,7 +168,7 @@ class Helper(object):
 
 
     # Need to create a X level higer and lower to teh element
-    def create_json_dep_graph(self, elt, levels=2):
+    def create_json_dep_graph(self, elt, levels=3):
         t0 = time.time()
         # First we need ALL elements
         all_elts = self.get_all_linked_elts(elt, levels=levels)
@@ -200,7 +200,7 @@ class Helper(object):
     #                      ]
     #              }
     # But as a python dict
-    def get_dep_graph_struct(self, elt, levels=2):
+    def get_dep_graph_struct(self, elt, levels=3):
         t = elt.__class__.my_type
         d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
              'data' : {'$dim': max(elt.business_impact*elt.business_impact / 2, 5)},
@@ -232,7 +232,7 @@ class Helper(object):
 
     # Return all linked elements of this elt, and 2 level
     # higer and lower :)
-    def get_all_linked_elts(self, elt, levels=2):
+    def get_all_linked_elts(self, elt, levels=3):
         if levels == 0 :
             return set()
 
@@ -292,12 +292,13 @@ class Helper(object):
     def print_business_rules(self, tree, level=0):
         print "Should print tree", tree
         node = tree['node']
-        name = node.get_dbg_name()
+        name = node.get_full_name()
         fathers = tree['fathers']
         s = ''
         # Do not print the node if it's the root one, we already know its state!
         if level != 0:
-            s += "%s is %s since %s\n" % (name, node.state, self.print_duration(node.last_state_change, just_duration=True))
+            s += "%s is %s since %s\n" % (self.get_link(node), node.state, self.print_duration(node.last_state_change, just_duration=True))
+
         # If we got no parents, no need to print the expand icon
         if len(fathers) > 0:
             # We look ifthe below tree is goodor not
@@ -367,5 +368,15 @@ class Helper(object):
         t.sort(hst_srv_sort)
         return t
 
+
+    def get_link(self, obj, short=False):
+        if obj.__class__.my_type == 'service':
+            if short:
+                name = obj.get_name()
+            else:
+                name = obj.get_full_name()
+            return '<a href="/service/%s"> %s </a>' % (obj.get_full_name(), name)
+        # if not service, host
+        return '<a href="/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
     
 helper = Helper()
