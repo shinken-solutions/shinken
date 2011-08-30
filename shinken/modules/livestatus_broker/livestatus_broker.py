@@ -689,7 +689,7 @@ class Livestatus_broker(BaseModule):
                         self.dbcursor.execute('INSERT INTO LOGS VALUES(%(0)s, %(1)s, %(2)s, %(3)s, %(4)s, %(5)s, %(6)s, %(7)s, %(8)s, %(9)s, %(10)s, %(11)s, %(12)s, %(13)s, %(14)s, %(15)s)', values)
                     else:
                         self.dbcursor.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
-                    self.dbconn.commit()
+                    #self.dbconn.commit()
             except sqlite3.Error, e:
                 print "An error occurred:", e.args[0]
                 print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
@@ -761,6 +761,14 @@ class Livestatus_broker(BaseModule):
         self.dbcursor.execute(cmd)
         self.dbconn.commit()
         # rowfactory will later be redefined (in livestatus.py)
+        self.next_log_db_commit = time.time() + 1
+
+
+    def commit_log_db(self):
+        now = time.time()
+        if self.next_log_db_commit <= now:
+            self.dbconn.commit()
+            self.next_log_db_commit = now + 1
 
 
     def cleanup_log_db(self):
@@ -885,6 +893,11 @@ class Livestatus_broker(BaseModule):
             except Exception, exp:
                 print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
                 raise
+
+            # Commit log broks to the database
+            self.commit_log_db()
+
+            # Check for pending livestatus requests
             inputready,outputready,exceptready = select.select(self.input,[],[], 0)
 
             now = time.time()
