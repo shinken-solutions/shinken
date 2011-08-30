@@ -6,7 +6,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js']
+%include header title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/accordion.css']
 
 
 	 
@@ -35,7 +35,7 @@
       %imp_level = pb.business_impact
 
        <h4 class="toggler">
-	<img src="/static/images/error.png" />
+	<img src="/static/images/state_{{pb.state.lower()}}.png" />
 	{{pb.get_full_name()}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}
 	<div style="float: right;">
 	  <img src="/static/images/accept.png" />Fix it! <img src="/static/images/accept.png" />Acknowledge it!

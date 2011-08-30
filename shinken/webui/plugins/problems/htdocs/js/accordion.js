@@ -4,10 +4,10 @@ window.addEvent('domready', function(){
 	var content = $$('.element');
  
 	var AccordionObject = new Accordion(toggles, content, {
-		//opacity: 0,
+		// By default we wqant no item displayed
+		display : -1,
+		// And user can choose to hide all elements
 		alwaysHide : true
-		/*onActive: function(toggler) { toggler.setStyle('color', '#f30'); },
-		  onBackground: function(toggler) { toggler.setStyle('color', '#000'); }*/
 	    });
 	
     });
