@@ -68,6 +68,10 @@ class Simple_log_broker(BaseModule):
         BaseModule.__init__(self, modconf)
         self.path = path
         self.archive_path = archive_path
+        try:
+            os.stat(archive_path)
+        except:
+            os.mkdir(archive_path)
 
 
     #Check the path file age. If it's last day, we
