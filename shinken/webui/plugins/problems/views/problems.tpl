@@ -1,4 +1,5 @@
 %import time
+%start = time.time()
 
 %helper = app.helper
 %datamgr = app.datamgr
@@ -28,19 +29,34 @@
     %imp_level = 10
 
     %for pb in pbs:
-      
+
+    <div class="clear"></div>      
       %if pb.business_impact != imp_level:
        <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
       %end
       %imp_level = pb.business_impact
 
-       <h4 class="toggler">
-	<img src="/static/images/state_{{pb.state.lower()}}.png" />
-	{{pb.get_full_name()}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}
-	<div style="float: right;">
-	  <img src="/static/images/accept.png" />Fix it! <img src="/static/images/accept.png" />Acknowledge it!
+
+	<div> 
+	  <div class="toggler">
+	    <h4 style="margin-bottom:3px;">
+	      <img src="/static/images/state_{{pb.state.lower()}}.png" />
+	      {{pb.get_full_name()}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}
+	    </h4>
+	  </div>
+	  <div style="float:right;">
+	    <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
+	  </div>
+	  <div style="float:right;">
+	    <a href="#" onclick="acknoledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
+	  </div>
+	  <div style="float:right;">
+	    <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
+	  </div>
 	</div>
-      </h4>
+
+    %# "This div is need so the element will came back in the center of the previous div"
+    <div class="clear"></div>
       <div class="element">
 	<table class="tableCriticity">
 	  <tr>
@@ -90,7 +106,7 @@
 <div class="clear"></div>
 </div>
 
-
+Page generated in {{"%.2f" % (time.time() - start)}} seconds
 %include footer
 
 
