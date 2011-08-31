@@ -463,10 +463,14 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK=0
 
-        # create the server
-        Pyro.config.PYRO_STORAGE = "."
-        Pyro.config.PYRO_COMPRESSION = 1
-        Pyro.config.PYRO_MULTITHREADED = 0        
+        # create the server, but Pyro > 4.8 veersion
+        # do not have such objets...
+        try:
+            Pyro.config.PYRO_STORAGE = "."
+            Pyro.config.PYRO_COMPRESSION = 1
+            Pyro.config.PYRO_MULTITHREADED = 0        
+        except:
+            pass
 
         self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl) 
 
