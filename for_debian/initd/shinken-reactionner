@@ -42,6 +42,9 @@ SCRIPTNAME=/etc/init.d/shinken-reactionner
 #
 do_start()
 {
+    DIRECTORY=$(dirname $PIDFILE)
+    [ ! -d $DIRECTORY ] && mkdir -p $DIRECTORY
+    chown shinken:shinken $DIRECTORY
 	# Return
 	#   0 if daemon has been started
 	#   1 if daemon was already running
