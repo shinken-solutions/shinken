@@ -247,7 +247,8 @@ Invalid element name
 	</ul>
       </div>
       <div class="feature">
-	<p><a href="#"> Add comments</a> <a href="#" onclick="delete_all_comments('{{elt.get_full_name()}}')">Delete all comments <img src="/static/images/delete.png"/></a></p>
+	  <a href="#">{{!helper.get_button('Add comment', img='/static/images/notification.png')}}</a>
+	  <a href="#" onclick="delete_all_comments('{{elt.get_full_name()}}')">{{!helper.get_button('Delete comments', img='/static/images/delete.png')}}</a>
 
 	%if len(elt.comments) > 0:
 	  <table>
@@ -275,7 +276,7 @@ Invalid element name
 
       %# " Now Downtimes  "
       <div class="feature">
-	<p><a href="#" onclick="delete_all_downtimes('{{elt.get_full_name()}}')">Delete all downtimes<img src="/static/images/delete.png"/></a></p>
+	<a href="#" onclick="delete_all_downtimes('{{elt.get_full_name()}}')">{{!helper.get_button('Delete downtimes', img='/static/images/delete.png')}}</a>
 
 	%if len(elt.downtimes) > 0:
 	  <table>

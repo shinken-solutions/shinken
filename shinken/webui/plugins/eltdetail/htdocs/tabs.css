@@ -1,6 +1,6 @@
 
 #home {background-color:#ddd; position:relative; height:600px; width:600px; margin-bottom:10px; }
-.feature { position:absolute; overflow:hidden; background-color:white; }
+.feature { position:absolute; overflow:hidden; }
 .feature img { border:none; }
 #tabs { margin-left:0;margin-bottom:0;}
 #tabs li {background-color:transparent;display:inline;float:none;list-style:none; }
