@@ -450,7 +450,9 @@ class Host(SchedulingItem):
     def get_full_name(self):
         return self.host_name
 
-
+    # Get our realm
+    def get_realm(self):
+        return self.realm
 
     # Say if we got the other in one of your dep list
     def is_linked_with_host(self, other):

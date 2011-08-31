@@ -331,6 +331,11 @@ class Service(SchedulingItem):
         return "%s/%s" % (self.host.host_name, self.service_description)
 
 
+    # Get our realm, so in fact our host one
+    def get_realm(self):
+        return self.host.get_realm()
+
+
     # Check is required prop are set:
     # template are always correct
     # contacts OR contactgroups is need

@@ -359,6 +359,16 @@ td.actions a {
         font-weight: bold;
 }
 
+.state_warning {
+        color: orange;
+        font-weight: bold;
+}
+
+.state_unreachable {
+        color: orange;
+        font-weight: bold;
+}
+
 /*
  * Dummy elements
  * 

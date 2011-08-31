@@ -21,6 +21,9 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from helper import hst_srv_sort
+
+
 class DataManager(object):
     def __init__(self):
         self.rg = None
@@ -52,6 +55,15 @@ class DataManager(object):
             if h.is_impact and h.state not in ['UP', 'PENDING']:
                 if h.business_impact > 2:
                     res.append(h)
+        return res
+
+
+    # Returns all problems
+    def get_all_problems(self):
+        res = []
+        res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
+        res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact])
+        res.sort(hst_srv_sort)
         return res
 
 

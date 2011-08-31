@@ -1,0 +1,4 @@
+.toggler  { cursor:pointer; /*font-weight:bold;*/ margin-left: 20px; /*margin-bottom: 5px;*/ width: 70%;float:left;
+}
+.toggler:hover   { background:#ddd; }
+.element   { margin-left: 30px;}

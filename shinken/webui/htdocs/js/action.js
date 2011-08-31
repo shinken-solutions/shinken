@@ -79,7 +79,7 @@ function get_elements(name){
 /* The command that will launch an event handler */
 function try_to_fix(name) {
     var elts = get_elements(name);
-    var url = '/action/LAUNCH_'+elt.type+'_EVENT_HANDLER/'+elt.namevalue;
+    var url = '/action/LAUNCH_'+elts.type+'_EVENT_HANDLER/'+elts.namevalue;
     // We can launch it :)
     launch(url);
 
