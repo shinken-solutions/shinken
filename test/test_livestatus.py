@@ -2078,6 +2078,9 @@ And: 2"""
         dbrows1 = self.livestatus_broker.dbcursor.fetchone()
         response, keepalive = self.livestatus_broker.livestatus.handle_request("GET log\nColumns: time")
         rows1 = len(response.splitlines())
+        # the broker main loop flushes in intervals of 1 second.
+        # we don't have this mainloop here, so flush manually.
+        self.livestatus_broker.dbconn.commit()
         size1 = os.path.getsize(self.livestatus_broker.database_file)
         # now delete log entries older than 6 seconds
         self.livestatus_broker.max_logs_age = 6.0 / 86400.0
