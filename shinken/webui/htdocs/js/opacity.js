@@ -4,6 +4,9 @@
 window.addEvent('domready', function(){
 
         $$('.opacity_hover').each(function(el){
+		
+		el.setStyle('opacity', 0.5);
+
                 // We set display actions on hover
                 el.addEvent('mouseenter', function(){
                         new Fx.Tween(el, {property: 'opacity'}).start(1);

@@ -206,3 +206,22 @@ function toggle_flap_detection(name, b){
         launch(url);
     }
 }
+
+
+
+/* The command that will launch an event handler */
+function delete_comment(name, i) {
+    var elts = get_elements(name);
+    var url = '/action/DEL_'+elts.type+'_COMMENT/'+i;
+    // We can launch it :)
+    launch(url);
+}
+
+
+/* The command that will launch an event handler */
+function delete_all_comments(name) {
+    var elts = get_elements(name);
+    var url = '/action/DEL_ALL_'+elts.type+'_COMMENTS/'+elts.nameslash;
+    // We can launch it :)
+    launch(url);
+}

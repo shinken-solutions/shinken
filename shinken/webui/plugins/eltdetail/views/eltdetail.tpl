@@ -239,15 +239,40 @@ Invalid element name
   <div class="clear"></div>
   <hr>
   <div id="host_more">
-    <dl class="grid_6">
-      <div class="tab-container opacity_hover">  
+    <dl class="grid_6 opacity_hover">
+      <div class="tab-container">  
 	<ul id="tabs" class="tabs">
 	  <li><a class="tab" href="#" id="tabone">Comments</a></li>
 	  <li><a class="tab" href="#" id="tabtwo">Downtimes</a></li>
 	</ul>
       </div>
       <div class="feature">
-	Here are comments
+	<p><a href="#"> Add comments</a> <a href="#" onclick="delete_all_comments('{{elt.get_full_name()}}')">Delete all comments <img src="/static/images/delete.png"/></a></p>
+
+	%if len(elt.comments) > 0:
+	  <table>
+	    <tr>
+	      <td class="tdBorderLeft tdCriticity" style="width:30px;"><b>Author</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:350px;"><b>Comment</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Date</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Expire</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Delete</b></td>
+	    </tr>
+	    %for c in elt.comments:
+	    <tr>
+	      <td class="tdBorderTop tdCriticity" >{{c.author}}</td>
+	      <td class="tdBorderTop tdBorderLeft tdBorderLeft tdCriticity" >{{c.comment}}</td>
+	      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(c.entry_time)}}</td>
+	      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(c.expire_time)}}</td>
+	      <td class="tdBorderTop tdBorderLeft tdCriticity"><a href="#" onclick="delete_comment('{{elt.get_full_name()}}', '{{c.id}}')"><img src="/static/images/delete.png"/></a></td>
+	    </tr>
+	    %end
+	  </table>
+	%else:
+	  No comments
+	%end
+
+	
       </div>
       
       <div class="feature">
