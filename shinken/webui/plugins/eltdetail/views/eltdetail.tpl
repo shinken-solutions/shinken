@@ -269,14 +269,37 @@ Invalid element name
 	    %end
 	  </table>
 	%else:
-	  No comments
+	  None
 	%end
-
-	
       </div>
-      
+
+      %# " Now Downtimes  "
       <div class="feature">
 	Here are downtimes
+	<p><a href="#" onclick="delete_all_downtimes('{{elt.get_full_name()}}')">Delete all downtimes<img src="/static/images/delete.png"/></a></p>
+
+	%if len(elt.downtimes) > 0:
+	  <table>
+	    <tr>
+	      <td class="tdBorderLeft tdCriticity" style="width:30px;"><b>Author</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:350px;"><b>Comment</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Date</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Expire</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Delete</b></td>
+	    </tr>
+	    %for dt in elt.downtimes:
+	    <tr>
+	      <td class="tdBorderTop tdCriticity" >{{dt.author}}</td>
+	      <td class="tdBorderTop tdBorderLeft tdBorderLeft tdCriticity" >{{dt.comment}}</td>
+	      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(dt.start_time)}}</td>
+	      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(dt.end_time)}}</td>
+	      <td class="tdBorderTop tdBorderLeft tdCriticity"><a href="#" onclick="delete_downtime('{{elt.get_full_name()}}', '{{dt.id}}')"><img src="/static/images/delete.png"/></a></td>
+	    </tr>
+	    %end
+	  </table>
+	%else:
+	  None
+	%end
       </div>
 	
       </div>

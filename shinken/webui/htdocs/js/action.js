@@ -225,3 +225,21 @@ function delete_all_comments(name) {
     // We can launch it :)
     launch(url);
 }
+
+
+/* The command that will launch an event handler */
+function delete_downtime(name, i) {
+    var elts = get_elements(name);
+    var url = '/action/DEL_'+elts.type+'_DOWNTIME/'+i;
+    // We can launch it :)
+    launch(url);
+}
+
+
+/* The command that will launch an event handler */
+function delete_all_downtimes(name) {
+    var elts = get_elements(name);
+    var url = '/action/DEL_ALL_'+elts.type+'_DOWNTIMES/'+elts.nameslash;
+    // We can launch it :)
+    launch(url);
+}
