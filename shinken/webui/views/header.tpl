@@ -32,6 +32,7 @@
     <script type="text/javascript" src="/static/js/floatingtips.js"></script>
     <script type="text/javascript" src="/static/js/tip.js"></script>
     <script type="text/javascript" src="/static/js/action.js"></script>
+    <script type="text/javascript" src="/static/js/opacity.js"></script>
     
 
 

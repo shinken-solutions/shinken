@@ -214,7 +214,7 @@ Invalid element name
      %end #of the only host part
 	
 
-     %if elt.is_problem:
+     %if elt.is_problem and len(elt.impacts) != 0:
 	<div class='host-services'>
 	<h3> Impacts </h3>
 	  
@@ -239,22 +239,22 @@ Invalid element name
   <div class="clear"></div>
   <hr>
   <div id="host_more">
-    <dl class="grid_6">
-      <ul id="tabs">
-	<li><a class="tab" href="#" id="tabone">Comments</a></li>
-	<li><a class="tab" href="#" id="tabtwo">Downtimes</a></li>
-      </ul>
-      <div>
-	<div class="feature">
-	  1
-	</div>
+    <dl class="grid_6 opacity_hover">
+      <div class="tab-container">  
+	<ul id="tabs" class="tabs">
+	  <li><a class="tab" href="#" id="tabone">Comments</a></li>
+	  <li><a class="tab" href="#" id="tabtwo">Downtimes</a></li>
+	</ul>
+      </div>
+      <div class="feature">
+	Here are comments
+      </div>
       
-	<div class="feature">
-	  adv
-	</div>
+      <div class="feature">
+	Here are downtimes
+      </div>
 	
       </div>
-      blabla
     </dl>
   </div>
 
