@@ -189,13 +189,14 @@ Invalid element name
       <a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
       <div class="clear"></div>
       {{!helper.print_business_rules(datamgr.get_business_parents(elt))}}
-      <hr>
+      <br/>
       %end
 
       %# " Only print host service if elt is an host of course"
       %# " If the host is a problem, services will be print in the impacts, so don't"
       %# " print twice "
       %if elt_type=='host' and not elt.is_problem:
+        <hr>
         <div class='host-services'>
 	  <h3> Services </h3>
 	  %for s in helper.get_host_services_sorted(elt):
@@ -235,11 +236,10 @@ Invalid element name
 	%end
 
     </dl>
-  </div>
-  <div class="clear"></div>
-  <hr>
-  <div id="host_more">
-    <dl class="grid_6 opacity_hover">
+
+    
+    <dl class="grid_10 opacity_hover">
+      <br/>
       <div class="tab-container">  
 	<ul id="tabs" class="tabs">
 	  <li><a class="tab" href="#" id="tabone">Comments</a></li>
@@ -275,7 +275,6 @@ Invalid element name
 
       %# " Now Downtimes  "
       <div class="feature">
-	Here are downtimes
 	<p><a href="#" onclick="delete_all_downtimes('{{elt.get_full_name()}}')">Delete all downtimes<img src="/static/images/delete.png"/></a></p>
 
 	%if len(elt.downtimes) > 0:
@@ -304,8 +303,9 @@ Invalid element name
 	
       </div>
     </dl>
+    
+    
   </div>
-
 
   <div class="clear"></div>
   <div id="footer" class="grid_16">
