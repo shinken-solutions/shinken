@@ -189,7 +189,7 @@ Invalid element name
       <a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
       <div class="clear"></div>
       {{!helper.print_business_rules(datamgr.get_business_parents(elt))}}
-      <br/>
+
       %end
 
       %# " Only print host service if elt is an host of course"
@@ -249,13 +249,13 @@ Invalid element name
       <div class="feature">
 	  <a href="#">{{!helper.get_button('Add comment', img='/static/images/notification.png')}}</a>
 	  <a href="#" onclick="delete_all_comments('{{elt.get_full_name()}}')">{{!helper.get_button('Delete comments', img='/static/images/delete.png')}}</a>
-
+	  <div class="clear"></div>
 	%if len(elt.comments) > 0:
 	  <table>
 	    <tr>
 	      <td class="tdBorderLeft tdCriticity" style="width:30px;"><b>Author</b></td>
 	      <td class="tdBorderLeft tdCriticity" style="width:350px;"><b>Comment</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Date</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Creation</b></td>
 	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Expire</b></td>
 	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Delete</b></td>
 	    </tr>
@@ -283,8 +283,8 @@ Invalid element name
 	    <tr>
 	      <td class="tdBorderLeft tdCriticity" style="width:30px;"><b>Author</b></td>
 	      <td class="tdBorderLeft tdCriticity" style="width:350px;"><b>Comment</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Date</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Expire</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Start</b></td>
+	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>End</b></td>
 	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Delete</b></td>
 	    </tr>
 	    %for dt in elt.downtimes:

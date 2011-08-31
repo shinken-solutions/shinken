@@ -54,7 +54,7 @@ body {
 
 #main_container{
 	background: #FFFFFF;
-	min-height: 650px;
+	min-height: 700px;
 }
 
 /* ----------------------------------------------------------------
@@ -62,7 +62,7 @@ body {
  * ----------------------------------------------------------------*/
 
 #left_container{
-	min-height: 650px;
+	min-height: 700px;
 	margin-left: 0;
 	border-right: 1px solid #E3E3E5;
 }
