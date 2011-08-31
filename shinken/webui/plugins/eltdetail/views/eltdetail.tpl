@@ -239,8 +239,8 @@ Invalid element name
   <div class="clear"></div>
   <hr>
   <div id="host_more">
-    <dl class="grid_6 opacity_hover">
-      <div class="tab-container">  
+    <dl class="grid_6">
+      <div class="tab-container opacity_hover">  
 	<ul id="tabs" class="tabs">
 	  <li><a class="tab" href="#" id="tabone">Comments</a></li>
 	  <li><a class="tab" href="#" id="tabtwo">Downtimes</a></li>

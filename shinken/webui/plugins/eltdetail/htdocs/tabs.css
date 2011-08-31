@@ -11,7 +11,7 @@
 
 
 /* tabs structure */  
-.tab-container  { width:320px; background:#eee; padding:5px 10px; opacity : 0.5;}
+.tab-container  { width:320px; background:#eee; padding:5px 10px; opacity: 0.5;}
 ul.tabs         { list-style-type:none; margin:0; padding:0; }  
 ul.tabs li      { float:left; margin:10px 5px 0 0; }  
 ul.tabs li a    { padding:5px 10px; border:1px solid #ddd; font-weight:bold; background:url(/static/images/tab-sprite.jpg) 0 0 repeat-x; color:#000; text-decoration:none; }  
