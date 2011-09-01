@@ -97,14 +97,17 @@ class DataManager(object):
         return max(h_state, s_state)
 
     # Return a tree of {'elt' : Host, 'fathers' : [{}, {}]}
-    def get_business_parents(self, obj, levels=2):
+    def get_business_parents(self, obj, levels=3):
         res = {'node' : obj, 'fathers' : []}
-        if levels == 0 :
-            return res
+#        if levels == 0 :
+#            return res
 
         for i in obj.parent_dependencies:
-            par_elts = self.get_business_parents(i, levels=levels - 1)
-            res['fathers'].append(par_elts)
+            # We want to get the levels deep for all elements, but
+            # go as far as we should for bad elements
+            if levels != 0 or i.state_id != 0:
+                par_elts = self.get_business_parents(i, levels=levels - 1)
+                res['fathers'].append(par_elts)
 
         print "get_business_parents::Give elements", res
         return res
