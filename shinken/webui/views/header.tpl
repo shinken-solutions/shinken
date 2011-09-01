@@ -1,6 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
-
 %#Set default values
 %if not 'js' in locals() : js = []
 %if not 'title' in locals() : title = 'No title'

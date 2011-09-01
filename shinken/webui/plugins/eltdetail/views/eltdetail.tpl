@@ -18,7 +18,7 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title=elt_type.upper() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
+%include header title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
 
 
 
@@ -206,7 +206,7 @@ Invalid element name
 	          <img src='/static/images/star.png'>
 		%end
 		
-		  <span style="font-size:125%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:125%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}, last check was {{helper.print_duration(s.last_chk)}}
+		  <span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
 	      </div>
 	    </div>
 	    %# End of this service
@@ -217,7 +217,7 @@ Invalid element name
 
      %if elt.is_problem and len(elt.impacts) != 0:
 	<div class='host-services'>
-	<h3> Impacts </h3>
+	  <h4 style="margin-bottom: 5px;"> Impacts </h4>
 	  
 	%for i in helper.get_impacts_sorted(elt):
           <div class="service">
@@ -226,7 +226,7 @@ Invalid element name
                 <img src='/static/images/star.png'>
 	      %end
 		  
-	      <span style="font-size:125%">{{i.get_full_name()}}</span> is <span style="font-size:125%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}, last check was {{helper.print_duration(i.last_chk)}}
+	      <span style="font-size:110%">{{i.get_full_name()}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
             </div>
           </div>
           %# End of this impact
