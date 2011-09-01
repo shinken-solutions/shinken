@@ -1,3 +1,5 @@
 .switches { opacity: 0.5;}
 
 .host-services { opacity: 0.3; max-height:300px; overflow:auto;}
+
+.hidden_impacts_services {opacity: 0; display:none;}

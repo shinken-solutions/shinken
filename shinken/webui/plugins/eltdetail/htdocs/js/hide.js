@@ -90,3 +90,22 @@ window.addEvent('domready', function(){
 			      ); //Will fade the Element out and in twice.
 	}
     });
+
+
+
+
+/* When he user ask for show all impacts ro services, we display them */
+function show_hidden_impacts_or_services() {
+
+    var imp_srv_s = $$('.hidden_impacts_services');
+    
+    imp_srv_s.each(function(el) {
+	    el.style.display = 'block';
+	    var fx = new Fx.Tween(el, {property: 'opacity'});
+	    fx.start(1);
+	});
+
+    /* An we can delete the button that toggle us */
+    var button = $('hidden_impacts_or_services_button');
+    button.style.display = 'none';
+}

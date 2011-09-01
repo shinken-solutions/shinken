@@ -199,8 +199,17 @@ Invalid element name
         <hr>
         <div class='host-services'>
 	  <h3> Services </h3>
+	  %nb = 0
 	  %for s in helper.get_host_services_sorted(elt):
-	    <div class="service">
+	  %nb += 1
+	  %if nb == 8:
+	  <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
+	  %end
+	  %if nb < 8:
+            <div class="service">
+	  %else:
+	    <div class="service hidden_impacts_services">
+	  %end
 	      <div class="divstate{{s.state_id}}">
 	        %for i in range(0, s.business_impact-2):
 	          <img src='/static/images/star.png'>
@@ -218,22 +227,30 @@ Invalid element name
      %if elt.is_problem and len(elt.impacts) != 0:
 	<div class='host-services'>
 	  <h4 style="margin-bottom: 5px;"> Impacts </h4>
-	  
+	%nb = 0
 	%for i in helper.get_impacts_sorted(elt):
-          <div class="service">
-            <div class="divstate{{i.state_id}}">
-              %for j in range(0, i.business_impact-2):
-                <img src='/static/images/star.png'>
-	      %end
+	  %nb += 1
+	  %if nb == 8:
+	  <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all impacts', img='/static/images/expand.png')}}</a></div>
+	  %end
+	  %if nb < 8:
+            <div class="service">
+	  %else:
+	    <div class="service hidden_impacts_services">
+	  %end
+              <div class="divstate{{i.state_id}}">
+                %for j in range(0, i.business_impact-2):
+                  <img src='/static/images/star.png'>
+		%end
 		  
-	      <span style="font-size:110%">{{i.get_full_name()}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
+		<span style="font-size:110%">{{i.get_full_name()}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
+              </div>
             </div>
-          </div>
-          %# End of this impact
-          %end
-	  </div>
-	%# end of the 'is problem' if
-	%end
+        %# End of this impact
+        %end
+	</div>
+    %# end of the 'is problem' if
+    %end
 
     </dl>
 
