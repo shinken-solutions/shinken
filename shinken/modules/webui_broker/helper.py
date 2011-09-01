@@ -379,4 +379,9 @@ class Helper(object):
         # if not service, host
         return '<a href="/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
     
+    #Give only the /service/blabla or /hsot blabla string, like for buttons inclusion
+    def get_link_dest(self, obj):
+        return "/%s/%s" % (obj.__class__.my_type, obj.get_full_name())
+        
+
 helper = Helper()

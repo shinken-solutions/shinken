@@ -44,14 +44,17 @@
 	      {{pb.get_full_name()}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}
 	    </h4>
 	  </div>
-	  <div style="float:right;">
-	    <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
-	  </div>
-	  <div style="float:right;">
-	    <a href="#" onclick="acknoledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
-	  </div>
-	  <div style="float:right;">
-	    <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
+	  %# " We put actions buttons with a opacity hover effect, so they won't be too visible"
+	  <div class="opacity_hover">
+	    <div style="float:right;">
+	      <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
+	    </div>
+	    <div style="float:right;">
+	      <a href="#" onclick="acknoledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
+	    </div>
+	    <div style="float:right;">
+	      <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
+	    </div>
 	  </div>
 	</div>
 
@@ -68,7 +71,10 @@
 	    <td class="tdBorderLeft tdCriticity" style="width:20px;"><b>Last check</b></td>
 	    <td class="tdBorderLeft tdCriticity" style="width:20px;"><b>Next check</b></td>
 	    <td class="tdCriticity" style="width:20px;"><b>Actions</b></td>
-	    <td class="tdCriticity" style="width:40px;"><img src="/static/images/heart_add.png" />Add to Fav </td>
+	    <td class="tdCriticity" style="width:40px;">	<div style="float:right;">
+		<a href="#">{{!helper.get_button('Add to fav', img='/static/images/heart_add.png')}}</a>
+	      </div>
+	    </td>
 	  </tr>
 	  <tr>
 	    <td class="tdBorderTop tdCriticity" style="width:20px;">{{pb.host_name}}</td>
@@ -80,9 +86,11 @@
 	    <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:20px;">in {{helper.print_duration(pb.next_chk, just_duration=True, x_elts=2)}}</td>
 	    
 	    <td class="tdCriticity" style="width:20px;"></td>
-	    <td class="tdCriticity" style="width:20px;"><img src="/static/images/accept.png" />Try to fix it! </td>
+	    <td class="tdCriticity" style="width:20px;"><div style="float:right;"> <a href="{{!helper.get_link_dest(pb)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a>
+	</div> </td>
 	  </tr>
 	</table>
+
 	<hr />
 	%if len(pb.impacts) > 0:
 	<h5>Impacts:</h5>
