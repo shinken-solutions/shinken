@@ -243,7 +243,7 @@ Invalid element name
                   <img src='/static/images/star.png'>
 		%end
 		  
-		<span style="font-size:110%">{{i.get_full_name()}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
+		  <span style="font-size:110%">{{!helper.get_link(i)}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
               </div>
             </div>
         %# End of this impact
