@@ -991,7 +991,7 @@ class Thrift_broker(BaseModule):
         # Start the thrift server
         handler = Thrift_brokerHandler(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.from_q)
         processor = Broker.Processor(handler)
-        transport = TSocket.TServerSocket(self.port)
+        transport = TSocket.TServerSocket("0.0.0.0",self.port)
         tfactory = TTransport.TBufferedTransportFactory()
         pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 

@@ -26,7 +26,7 @@ import os
 import sys
 
 #Thrift Specificities
-sys.path.append('../thrift/gen-py')
+sys.path.append(os.path.abspath(__file__).rsplit("/",3)[0]+"/thrift/gen-py")
 from org.shinken_monitoring.tsca import StateService
 from org.shinken_monitoring.tsca.ttypes import *
 from thrift.transport import TSocket
@@ -143,7 +143,7 @@ class TSCA_arbiter(BaseModule):
 
         handler = StateServiceHandler(self)
         processor = StateService.Processor(handler)
-        transport = TSocket.TServerSocket(9090)
+        transport = TSocket.TServerSocket("0.0.0.0",9090)
         tfactory = TTransport.TBufferedTransportFactory()
         pfactory = TBinaryProtocol.TBinaryProtocolFactory()
         # In order to accept multiple simultaneous clients, we use TThreadedServer
