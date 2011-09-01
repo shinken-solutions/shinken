@@ -375,7 +375,8 @@ function relocate(){
 	do 
 		cecho " > Processing $fic" green
 		cp $fic $fic.orig 
-		sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
+		#sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
+		sed -i 's#/usr/local/shinken#'$TARGET'#g' $fic 
 	done
 	# set some directives 
 	cadre "Set some configuration directives" green
