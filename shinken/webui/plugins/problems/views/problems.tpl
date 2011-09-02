@@ -23,6 +23,20 @@
   </div>
 </div>
 
+%# "We set the actions div that will be show/hide if we select elements"
+<div class="actions" id="actions">
+    <div style="float:right;">
+      <a href="#" onclick="try_to_fix_all()">{{!helper.get_button('Fix all!', img='/static/images/enabled.png')}}</a>
+    </div>
+    <div style="float:right;">
+      <a href="#" onclick="recheck_now_all()">{{!helper.get_button('Recheck all', img='/static/images/delay.gif')}}</a>
+    </div>
+    <div style="float:right;">
+      <a href="#" onclick="acknoledge_all()">{{!helper.get_button('Acknoledge all', img='/static/images/wrench.png')}}</a>
+    </div>
+
+</div>
+
 <div class="grid_13">
   <div id="accordion">
     %# " We will print Business impact level of course"
@@ -43,7 +57,8 @@
 	<div> 
 	  <div style="margin-left: 20px; width: 70%; float:left;">
 	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
-	      <tr>
+	      <tr class="tabledesc">
+	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
 	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <img src="/static/images/state_{{pb.state.lower()}}.png" /> </td>
 		%if pb.host_name == last_hname:
 		   <td class="tdBorderLeft tdCriticity" style="width: 120px;"> </td>
@@ -58,7 +73,7 @@
                   <td   class="tdBorderTop tdBorderLeft tdCriticity" style="width:120px;"></td>
                 %end
 		<td class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;"> {{pb.state}}</td>
-		<td title='{{helper.print_date(pb.last_state_change)}}' class="tdBorderTop tdBorderLeft tdCriticity" style="width:40px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
+		<td title='{{helper.print_date(pb.last_state_change)}}' class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		<td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output[:55]}}</td>
 		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" /> </td>
 		</tr>
