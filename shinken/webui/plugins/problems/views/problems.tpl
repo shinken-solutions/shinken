@@ -28,22 +28,42 @@
     %# " We will print Business impact level of course"
     %imp_level = 10
 
+    %# " We remember the last hname so see if we print or not the host for a 2nd service"
+    %last_hname = ''
     %for pb in pbs:
 
-    <div class="clear"></div>      
+      <div class="clear"></div>      
       %if pb.business_impact != imp_level:
        <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
+       %# "We reset teh last_hname so we won't overlap this feature across tables"
+       %last_hname = ''
       %end
       %imp_level = pb.business_impact
 
-
 	<div> 
-	  <div class="toggler">
-	    <h4 style="margin-bottom:3px;">
-	      <img src="/static/images/state_{{pb.state.lower()}}.png" />
-	      {{pb.get_full_name()}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}
-	    </h4>
-	  </div>
+	  <div style="margin-left: 20px; width: 70%; float:left;">
+	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
+	      <tr>
+	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <img src="/static/images/state_{{pb.state.lower()}}.png" /> </td>
+		%if pb.host_name == last_hname:
+		   <td class="tdBorderLeft tdCriticity" style="width: 120px;"> </td>
+		%else:
+		    <td class="tdBorderLeft tdCriticity" style="width: 120px;"> {{!helper.get_host_link(pb)}}</td>
+		%end
+		%last_hname = pb.host_name
+
+		%if pb.__class__.my_type == 'service':
+		  <td	class="tdBorderTop tdBorderLeft tdCriticity" style="width:120px;">{{!helper.get_link(pb, short=True)}}</td>
+		%else:
+                  <td   class="tdBorderTop tdBorderLeft tdCriticity" style="width:120px;"></td>
+                %end
+		<td class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;"> {{pb.state}}</td>
+		<td class="tdBorderTop tdBorderLeft tdCriticity" style="width:40px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
+		<td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output[:55]}}</td>
+		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" /> </td>
+		</tr>
+             </table>
+	  </div>  
 	  %# " We put actions buttons with a opacity hover effect, so they won't be too visible"
 	  <div class="opacity_hover">
 	    <div style="float:right;">
@@ -60,7 +80,7 @@
 
     %# "This div is need so the element will came back in the center of the previous div"
     <div class="clear"></div>
-      <div class="element">
+      <div id="{{pb.get_full_name()}}" class="detail">
 	<table class="tableCriticity">
 	  <tr>
 	    <td class="tdBorderLeft tdCriticity" style="width:20px;"><b>Host</b></td>
