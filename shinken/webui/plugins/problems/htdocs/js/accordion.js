@@ -20,16 +20,8 @@ var selected_elements = [];
 function add_remove_elements(name){
     if( selected_elements.contains(name)){
 	remove_element(name);
-	var selector = $('selector-'+name);
-	selector.src = '/static/images/untick.png';
-	if(selected_elements.length == 0){
-	    $('actions').fade('out');
-	}
     }else{
 	add_element(name);
-	var selector = $('selector-'+name);
-	selector.src = '/static/images/tick.png';
-	$('actions').fade('in');
     }
 }
 	
@@ -37,13 +29,32 @@ function add_remove_elements(name){
 /* function when we add an element*/
 function add_element(name){
     selected_elements.push(name);
+    var selector = $('selector-'+name);
+    selector.src = '/static/images/tick.png';
+    $('actions').fade('in');
 }
 
 /* And or course when we remove it... */
 function remove_element(name){
     selected_elements.erase(name);
+    if(selected_elements.length == 0){
+	$('actions').fade('out');
+    }
+    var selector = $('selector-'+name);
+    selector.src = '/static/images/untick.png';
 }
 
+
+/* Flush selected elements, so clean the list
+but also untick thems in the UI */
+function flush_selected_elements(){
+    /* We must copy the lsit so we can parse it in a clean way 
+     without fearing some bugs */
+    var cpy = Array.clone(selected_elements);
+    cpy.each(function(name){
+		 remove_element(name);
+	     });
+}
 
 
 /* Now actions buttons : */
@@ -51,6 +62,7 @@ function recheck_now_all(){
     selected_elements.each(function(name){
 			       recheck_now(name);
 			   });
+    flush_selected_elements();
 }
 
 
@@ -59,6 +71,7 @@ function try_to_fix_all(){
     selected_elements.each(function(name){
                                try_to_fix(name);
                            });
+    flush_selected_elements();
 }
 
 
@@ -67,4 +80,5 @@ function acknoledge_all(){
 			       ackno_element = name;
 			       do_acknoledge('Acknoledge from WebUI.');
 			   });
+    flush_selected_elements();
 }
