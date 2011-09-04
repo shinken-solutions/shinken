@@ -82,7 +82,9 @@ body {
 
 #login_footer {
 	background: #787878;
-	height: 90px;
+	height: 75px;
+	margin: 0;
+    width: 100%;
 }
 
 #login_footer h3 {
@@ -379,7 +381,7 @@ td.actions a {
 }
 
 .prefix_custom_2 {
-	margin-left: 33%;
+	margin-left: 25%;
 }
 
 #login-container {

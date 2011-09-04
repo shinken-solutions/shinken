@@ -2,3 +2,19 @@
 }
 .toggler:hover   { background:#ddd; }
 .element   { margin-left: 30px;}
+
+
+.shortdesc { cursor:pointer; width: 70%;float:left;}
+.tabledesc:hover   {background:#ddd; }
+.detail {margin-left: 30px;}
+
+
+
+.actions {
+  position: fixed;
+  top: 70px;
+  left: 700px;
+  background : white;
+  opacity : 0;
+  margin : 3px;
+}
