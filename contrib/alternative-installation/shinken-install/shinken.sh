@@ -371,6 +371,10 @@ function relocate(){
 	cadre "Relocate source tree to $TARGET" green
 	# relocate source tree
 	cd $TARGET
+
+	# relocate nagios plugin path
+	sed -i "#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
+	# relocate default /usr/local/shinken path
 	for fic in $(find . | grep -v "shinken-install" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
 	do 
 		cecho " > Processing $fic" green
@@ -540,7 +544,16 @@ function restore(){
 
 function supdate(){
 	trap 'trap_handler ${LINENO} $? update' ERR
+
+	curpath=$(pwd)
+	if [ "$src" == "$TARGET" ]
+	then
+		cecho "You should use the source tree for update not the target folder !!!!!" red
+		exit 2
+	fi
+
 	cadre "Updating shinken" green
+	
 	skill
 	backup
 	remove
