@@ -74,10 +74,12 @@ body {
 #footer {
 	background: #787878;
 	height: 20px;
+	margin: 0;
+    width: 100%;
 }
 
 /* ----------------------------------------------------------------
- *  Footer
+ * Login Footer
  * ----------------------------------------------------------------*/
 
 #login_footer {
@@ -391,6 +393,7 @@ td.actions a {
     position: relative;
     z-index: 200;
 	padding: 15px;
+	top: 200px;
 }
 
 #login-container h1 {
