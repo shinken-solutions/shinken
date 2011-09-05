@@ -35,7 +35,7 @@ Invalid element name
 </div>
 <div class="grid_13">
   <div id="host_preview">
-    <h2 class="icon_{{elt.state.lower()}}">{{elt.state}}: {{elt.get_full_name()}}</h2>
+    <h2 class="state_{{elt.state.lower()}} icon_{{elt.state.lower()}}">{{elt.state}}: {{elt.get_full_name()}}</h2>
 
     <dl class="grid_6">
       %#Alias, apretns and hostgroups arefor host only
@@ -255,14 +255,13 @@ Invalid element name
     </dl>
 
     
-    <dl class="grid_10 opacity_hover">
+    <div class="grid_16">
       <br/>
       <div class="tab-container">  
-	<ul id="tabs" class="tabs">
-	  <li><a class="tab" href="#" id="tabone">Comments</a></li>
-	  <li><a class="tab" href="#" id="tabtwo">Downtimes</a></li>
-	</ul>
-      </div>
+		<ul id="tabs" class="tabs">
+		  <li><a class="tab" href="#" id="tabone">Comments</a></li>
+		  <li><a class="tab" href="#" id="tabtwo">Downtimes</a></li>
+		</ul>
       <div class="feature">
 	  <a href="#">{{!helper.get_button('Add comment', img='/static/images/notification.png')}}</a>
 	  <a href="#" onclick="delete_all_comments('{{elt.get_full_name()}}')">{{!helper.get_button('Delete comments', img='/static/images/delete.png')}}</a>
@@ -318,9 +317,11 @@ Invalid element name
 	  None
 	%end
       </div>
+      </div>
+
 	
       </div>
-    </dl>
+    </div>
     
     
   </div>
