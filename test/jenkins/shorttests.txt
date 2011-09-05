@@ -82,5 +82,6 @@ test_regenerator.py
 test_missing_object_value.py
 test_uihelper.py
 test_linkify_template.py
+test_module_on_module.py
 test_timeout.py
 test_livestatus.py

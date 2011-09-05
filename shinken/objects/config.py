@@ -603,12 +603,14 @@ class Config(Item):
 
         #First fill default
         self.arbiterlinks.fill_default()
+        self.modules.fill_default()
 
         #print "****************** Pythonize ******************"
         self.arbiterlinks.pythonize()
 
         #print "****************** Linkify ******************"
         self.arbiterlinks.linkify(self.modules)
+        self.modules.linkify()
 
 
 
