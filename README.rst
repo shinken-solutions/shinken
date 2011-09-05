@@ -46,6 +46,21 @@ need the `python-setuptools` package for it. Then just run::
 For the compilation part in both way it's easy: there is no
 compilation!
 
+Third way: install script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use the shinken.sh utility script located at : shinken/contrib/alternative-installation/shinken-install
+The script create the user and group, install all dependencies and then install shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
+The only requirement is an internet connection for the server on which you want to install shinken. It also allow to modify the installation folder in a configuration file.
+
+If you want shinken installed in seconds in /opt/shinken, just run :
+
+  shinken.sh -i
+
+If you want to remove shinken, just run :
+
+  shinken.sh -d
+
 Requirements
 =========================
 
