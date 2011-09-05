@@ -18,8 +18,13 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css'], top_right_banner_state=top_right_banner_state 
+%include header title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css', 'eltdetail/gesture.css'], top_right_banner_state=top_right_banner_state 
 
+
+%#  "Thsi is the background canvas for all gesture detection things " 
+<canvas id="canvas"></canvas>
+%# " We will save our element name so gesture functions will be able to call for the good elements."
+<script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
 
 <div id="left_container" class="grid_2">
@@ -31,6 +36,12 @@ Invalid element name
       <li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">Overview</a></li>
       <li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">Detail</a></li>
     </ul>
+    <div class="opacity_hover"> Gestures : 
+      <br>
+      <img title="By keeping a left click pressed and drawing a check, you will launch an acknoledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknoledge<br>
+      <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
+      <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
+    </div>
   </div>
 </div>
 <div class="grid_13">
