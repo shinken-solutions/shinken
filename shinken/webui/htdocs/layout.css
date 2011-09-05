@@ -85,8 +85,6 @@ body {
 #login_footer {
 	background: #787878;
 	height: 75px;
-	margin: 0;
-    width: 100%;
 }
 
 #login_footer h3 {
@@ -344,32 +342,32 @@ td.actions a {
 }
 
 .state_ok {
-	color: green;
+	color: #7AB317;
 	font-weight: bold;
 }
 
 .state_up {
-        color: green;
+        color: #7AB317;
         font-weight: bold;
 }
 
 .state_critical {
-	color: red;
+	color: #B40406;
 	font-weight: bold;
 }
 
 .state_down {
-        color: red;
+        color: #B40406;
         font-weight: bold;
 }
 
 .state_warning {
-        color: orange;
+        color: #FFDD00;
         font-weight: bold;
 }
 
 .state_unreachable {
-        color: orange;
+        color: #87B2D3;
         font-weight: bold;
 }
 
