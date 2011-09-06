@@ -45,8 +45,8 @@ Invalid element name
   </div>
 </div>
 <div class="grid_13">
-  <div id="host_preview">
-    <h2 class="state_{{elt.state.lower()}} icon_{{elt.state.lower()}}">{{elt.state}}: {{elt.get_full_name()}}</h2>
+  <div id="host_preview" style="vertical-align:middle;">
+    <h2 class="state_{{elt.state.lower()}}""><img style="width : 64px; height:64px" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h2>
 
     <dl class="grid_6">
       %#Alias, apretns and hostgroups arefor host only
