@@ -357,6 +357,7 @@ class Helper(object):
         #Ok, no excuse, it's a true error...
         return obj.state.lower()
 
+
     # For an object, give it's business impact as text 
     # and stars if need
     def get_business_impact_text(self, obj):
