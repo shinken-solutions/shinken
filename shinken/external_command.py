@@ -738,7 +738,7 @@ class ExternalCommandManager:
 
     #DISABLE_HOST_CHECK;<host_name>
     def DISABLE_HOST_CHECK(self, host):
-        host.active_checks_enabled = False
+        host.disable_active_checks()
         self.sched.get_and_register_status_brok(host)
 
     #DISABLE_HOST_EVENT_HANDLER;<host_name>
@@ -838,7 +838,7 @@ class ExternalCommandManager:
 
     #DISABLE_SVC_CHECK;<host_name>;<service_description>
     def DISABLE_SVC_CHECK(self, service):
-        service.active_checks_enabled = False
+        service.disable_active_checks()
         self.sched.get_and_register_status_brok(service)
 
     #DISABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>

@@ -541,6 +541,19 @@ class SchedulingItem(Item):
             val = max(0, val + difference) #diff can be -
             setattr(self, p, val)
 
+    # For disabling active checks, we need to set active_checks_enabled
+    # to false, but also make a dummy current checks attempts so the
+    # effect is imediate.
+    def disable_active_checks(self):
+        self.active_checks_enabled = False
+        for c in self.checks_in_progress:
+            c.status = 'waitconsume'
+            c.exit_status = self.state_id
+            c.output = self.output
+            c.check_time = time.time()
+            c.execution_time = 0
+            c.perf_data = self.perf_data
+
 
     def remove_in_progress_check(self, c):
         # The check is consume, uptade the in_checking propertie
