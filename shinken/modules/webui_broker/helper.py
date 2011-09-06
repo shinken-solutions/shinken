@@ -399,6 +399,15 @@ class Helper(object):
         if obj.__class__.my_type == 'service':
             return self.get_link(obj.host)
         return self.get_link(obj)
+
+    # For an object, return the path of the icons
+    def get_icon_state(self, obj):
+        ico = self.get_small_icon_state(obj)
+        if obj.icon_set != '':
+            return '/static/images/sets/%s/state_%s.png' % (obj.icon_set, ico)
+        else:
+            return '/static/images/state_%s.png' % ico
+        
     
 
 helper = Helper()
