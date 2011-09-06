@@ -350,6 +350,11 @@ class Helper(object):
         # Outch, not a good state...
         if obj.problem_has_been_acknowledged:
             return 'ack'
+        if obj.in_scheduled_downtime:
+            return 'downtime'
+        if obj.is_flapping:
+            return 'flapping'
+        #Ok, no excuse, it's a true error...
         return obj.state.lower()
 
     # For an object, give it's business impact as text 
