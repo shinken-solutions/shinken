@@ -345,7 +345,7 @@ class Helper(object):
             return 'unknown'
         if obj.state == 'OK':
             return 'ok'
-        if obj.state == 'up':
+        if obj.state == 'UP':
             return 'up'
         # Outch, not a good state...
         if obj.problem_has_been_acknowledged:
