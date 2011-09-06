@@ -266,7 +266,7 @@ Invalid element name
     </dl>
 
     
-    <div class="grid_16">
+    <div class="grid_16 opacity_hover">
       <br/>
       <div class="tab-container">  
 		<ul id="tabs" class="tabs">
