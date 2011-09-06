@@ -1,12 +1,13 @@
-recursive-include shinken *
+recursive-include shinken *.* 
+recursive-include shinken/webui *.* 
 recursive-include etc *.cfg *.ini
 recursive-include windows .bat .reg
 recursive-include bin *.* *-*
 recursive-include libexec *.*
 include test *.py *.txt
-recursive-include doc *.html *.png *.txt *.css *.jpg *.xml
+recursive-include doc *.html *.png *.txt *.css *.jpg *.xml *.tpl *.gif *.js
 global-exclude .git *.pyc *.pyo
-global-exclude .debug .pid .exe
+global-exclude .debug .pid .exe *~
 include var/void_for_git
 include MANIFEST.in FROM_NAGIOS_TO_SHINKEN Changelog
 include COPYING THANKS README
