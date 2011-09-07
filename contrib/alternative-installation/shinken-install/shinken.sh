@@ -95,6 +95,41 @@ cecho ()
         return
 }
 
+readresponse(){
+        case "$2" in
+                "black")
+                        fcolor='30'
+                        ;;
+                "red")
+                        fcolor='31'
+                        ;;
+                "green")
+                        fcolor='32'
+                        ;;
+                "yellow")
+                        fcolor='33'
+                        ;;
+                "blue")
+                        fcolor='34'
+                        ;;
+                "magenta")
+                        fcolor='35'
+                        ;;
+                "cyan")
+                        fcolor='36'
+                        ;;
+                "white")
+                        fcolor='37'
+                        ;;
+                *)
+                        fcolor=''
+        esac
+	echo -ne "\E["$fcolor"m"$1
+	read response
+	echo -ne "\n"
+        tput sgr0
+}
+
 cline ()                    
 {
 
@@ -770,215 +805,63 @@ function shelp(){
 	cat $myscripts/README
 }
 
-function install_thruk(){
-	cd $TMP
-	cline " > What do you want to do ( [i]nstall or [r]emove )? : " green
-	read action
-	tput sgr0
-	case $(uname -i) in
-		x86_64)
-			suffix="64"
+function setprofile(){
+	case $1 in
+		poller)
+			setpoller 
+			exit 0
 			;;
 		*)
-			suffix=""
+			cecho " > Unknown profil" red
+			exit 2
 			;;
 	esac
+}
 
+setpoller(){
+	# default values
+	spare=0
+	poller_name="$(hostname -s)"
+        address=$(hostname)
+        port=7771
+	manage_sub_realms=0	#; optional and advanced: does it take jobs from schedulers of sub realms?
+	min_workers=4	#; optional : starts with N processes workers. 0 means : "number of cpus"
+	max_workers=4	#; optional : no more than N processes workers. 0 means : "number of cpus"
+	processes_by_worker=256	   #; optional : each workers manage 256 checks
+	polling_interval=1       #; optional : take jobs from schedulers each 1 second
+	timeout=3	      #; 'ping' timeout 
+	data_timeout=120 #	      ; 'data send' timeout
+	check_interval=60 #   ; ping it every minute
+	max_check_attempts=3 #    ;  if at least max_check_attempts ping failed, the node is DEAD
+       #optional
 
-	if [ ! -z $action ]
-	then
-		case $action in
-			# remove thruk
-			r)
-				cadre " > Removing addon Thruk" green	
+       
+       # advanced features
+       #modules		NrpeBooster
+       #poller_tags	None
+       #realm		All
 	
-				userdel -f -r $THRUKUSER > /dev/null 2>&1
-				groupdel $THRUKGRP > /dev/null 2>&1
-				case $CODE in
-					REDHAT)
-						chkconfig --level thruk off > /dev/null 2>&1
-						chkconfig --del thruk > /dev/null 2>&1
-						rm -f /etc/httpd/conf.d/thruk.conf 
-						rm -Rf $THRUKDIR
-						;;
-					*)
-						update-rc.d -f thruk remove > /dev/null 2>&1
-						;;
-				esac
-				exit 0
-				;;
-			i)
-				cadre " > Installing thruk (this should take a long time if you choosed to build thruk from sources)" green
-				;;
-				
-			*)
-				cecho "Invalid action for module" red
-				exit 2
-				;;
-		esac
-	fi
-	
-	# clean up tmp folder
-	rm -Rf $TMP/Thruk*
-	rm -Rf $TMP/mod_fastcgi*
-
-	# check exist
-	if [ -d "$THRUKDIR" ]
+	cadre "Poller profile configuration" green 
+	readresponse " > Is the poller a spare ? [$spare] : " green
+	if [ ! -z $response ]
 	then
-		cecho "Thruk allready exist" red
-		exit 2
+		spare=$response
 	fi
-	
-	# platform
-	if [ "$CODE" != "REDHAT" ]
+	readresponse " > poller name ? [$poller_name] : " green
+	if [ ! -z $response ]
 	then
-		cecho " > Curently not implemented" red
-		exit 2
+		poller_name=$response
 	fi
-	arch=$(perl -e 'use Config; print $Config{archname}')
-	vers=$(perl -e 'use Config; print $Config{version}')
-	# prerequisites
-	case $CODE in
-		REDHAT)
-			PACKAGES=$TYUMPKGS
-			QUERY="rpm -q "
-			;;
-		DEBIAN)
-			PACKAGES=$TAPTPKGS
-			QUERY="dpkg -l "
-			;;
-	esac
-	for p in $PACKAGES
-	do
-		$QUERY $p > /dev/null 2>&1
-		if [ $? -ne 0 ]
-		then
-			cecho " > Installing $p " yellow
-			installpkg pkg $p 
-			if [ $? -ne 0 ]
-			then 
-				cecho " > Error while trying to install $p" red 
-				exit 2 	
-			fi
-		else
-			cecho " > Package $p allready installed " green 
-		fi
-	done
-	
-	# user/group
-	if [ -z "$(cat /etc/passwd | grep $THRUKUSER)" ]
+	readresponse " > address ? [$poller_name] : " green
+	if [ ! -z $response ]
 	then
-		cecho " > Creating user $THRUKUSER" green
-		#groupadd $THRUKGRP > /dev/null 2>&1
-		useradd -d $THRUKDIR -m -s /bin/bash $THRUKUSER > /dev/null 2>&1
-
+		address=$response
 	fi
-	
-	# thruk
-	if [ "$THRUKVERS" = "SRC" ]
-	then
-		cecho " > Getting thruk sources " green
-		cecho " > Not implemented " red
-		exit 2 
-	else
-		cecho " > Getting thruk version $THRUKVERS" green
-		lvers=$(echo $vers | awk -F\. '{print $1"."$2""}')
-		larch=$(echo $arch | sed -e "s/linux-/linux-gnu-/g")
-		
-		case $lvers in
-			5.10)
-				vers="5.10.0"
-				arch=$larch
-				;;
-			5.8)
-				vers="5.8.8"
-				;;
-			5.12)
-				vers="5.12.1"
-				;;
-			*)
-				cecho "Unsuported version" red
-				exit 2
-				;;
-		esac	
-		cecho " > Arch is $arch, vers is $vers : downloading Thruk-$THRUKVERS-$arch-$vers.tar.gz" green
-		wget http://www.thruk.org/files/Thruk-$THRUKVERS-$arch-$vers.tar.gz > /dev/null 2>&1
 
-		if [ $? -ne 0 ]
-		then
-			cecho " > Error while getting Thruk-$THRUKVERS-$arch-$vers.tar.gz" red 
-		fi
-		cecho " > Extract thruk archive" green
-		tar zxvf Thruk-$THRUKVERS-$arch-$vers.tar.gz > /dev/null 2>&1
-		cecho " > Deploy thruk to $THRUKDIR" green
-		cp -Rf Thruk-$THRUKVERS/* $THRUKDIR
-		cecho " > Activate local config" green
-		sed -i "s/^<Component Thruk::Backend>/&\n\t<peer>\n\t\tname = Local shinken\n\t\ttype = livestatus\n\t\t<options>\n\t\t\tpeer = localhost:50000\n\t\t<\/options>\n\t<\/peer>/g" $THRUKDIR/thruk.conf
-		if [ "$CODE" = "REDHAT" ]
-		then
-			case $(uname -i) in
-				x86_64)
-					suffix="64"
-					;;
-				*)
-					suffix=""
-					;;
-			esac
-			# check mod fastcgi for apache
-			if [ -f /usr/lib$suffix/httpd/modules/mod_fastcgi.so ]
-			then
-				cecho " > mod_fastcgi module allready exist" green
-			else
-				# build module fastcgi !
-				cd $TMP 
-				cecho " > Downloading mod_fastcgi sources" yellow
-				wget http://www.fastcgi.com/dist/mod_fastcgi-current.tar.gz > /dev/null 2>&1
-				tar zxvf mod_fastcgi-current.tar.gz > /dev/null 2>&1
-				cd $(ls -1 | grep "^mod_fastcgi")
-				cecho " > Building mod_fastcgi sources" yellow
-				apxs -i -a -o mod_fastcgi.so -c *.c > /dev/null 2>&1
-			fi
-		fi
-		
-		# configure with mode fastcgi
-		cecho " > deploy apache fast_cgi configuration" green
-		case $CODE in
-			REDHAT)
-				httpd_conf_dir=/etc/httpd/conf.d
-				enable="chkconfig --add thruk && chkconfig thruk on"
-				;;
-			*)
-				httpd_conf_dir=/etc/apache2/conf.d
-				enable="update-rc.d thruk defaults"
-				;;
-		esac
-		cat $myscripts/addons/thruk/apache_thruk_fast_cgi_vhost.dist | sed   "s#THRUKDIR#"$THRUKDIR"#g" > $httpd_conf_dir/thruk.conf
-		cat $myscripts/addons/thruk/thruk.dist | sed   "s#THRUKDIR#"$THRUKDIR"#g" > /etc/init.d/thruk
-		sed -i "s/# Short-Description:\(.*\)/# Short-Description: &\n#Description: &/" /etc/init.d/thruk 
-		foo=$(enable)
-
-		# create htpasswd.users
-		cecho " > Deploy htpasswd.users file" green
-		cp $myscripts/addons/thruk/htpasswd.users $THRUKDIR/htpasswd.users
-
-
-		cecho " > Fix permissions" green
-		chmod -R g+rx $THRUKDIR
-		chown -R $THRUKUSER:$WWWGROUP $THRUKDIR
-		chown $WWWUSER:$WWWGROUP $THRUKDIR/htpasswd.users
-		
-	fi
-	mcadre "mcline" green
-	mcadre "Shinken is now installed" green
-	mcadre "mcline" green
-	mcadre "Target folder is : $THRUKDIR
-Start thruk with $THRUKDIR/scripts/thruk_server.pl
-You can access thruk at the followinf url : http://localhost:3000" green
-	mcadre "mcline" green
 }
 
 function usage(){
-echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a 
+echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a | -p poller 
 	-k	Kill shinken
 	-i	Install shinken 
 	-d 	Remove shinken
@@ -988,7 +871,7 @@ echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
-	-a	addon name (curently thruk)
+	-p	Set profile for this installation [currently only setting poller profile is supported]
 	-h	Show help
 "
 
@@ -1001,7 +884,7 @@ then
         cecho "You should start the script with sudo!" red
         exit 1
 fi
-while getopts "kidubcr:lzhsa:v" opt; do
+while getopts "kidubcr:lzhsvp:" opt; do
         case $opt in
 		a)
 			case $OPTARG in
@@ -1053,6 +936,10 @@ while getopts "kidubcr:lzhsa:v" opt; do
                        	restore $OPTARG 
                         exit 0
                         ;;
+                p)
+                       	setprofile $OPTARG 
+                        exit 0
+                        ;;
                 l)
                        	backuplist 
                         exit 0
@@ -1068,6 +955,5 @@ while getopts "kidubcr:lzhsa:v" opt; do
         esac
 done
 usage
-echo $src
 exit 0
 
