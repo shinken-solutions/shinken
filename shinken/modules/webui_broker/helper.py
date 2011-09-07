@@ -213,21 +213,22 @@ class Helper(object):
     # But as a python dict
     def get_dep_graph_struct(self, elt, levels=3):
         t = elt.__class__.my_type
+        # We set the values for webui/plugins/depgraph/htdocs/js/eltdeps.js
+        # so a node with important data for rendering
+        # type = custom, business_impact and img_src.
         d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
-             'data' : {'$dim': max(elt.business_impact*elt.business_impact / 2, 5)},
+             'data' : {'$type' : 'custom',
+                       'business_impact' : elt.business_impact,
+                       'img_src' : self.get_icon_state(elt)
+                       },
              'adjacencies' : []
              }
-        # Service got a 'star' type :)
-        if t == 'service':
-            d['data']["$type"] = "star"
-            d['data']["$color"] = {0 : 'green', 1 : 'orange', 2 : 'red', 3 : 'gray'}.get(elt.state_id, 'red')
-        else: #host
-            d['data']["$color"] = {0 : 'green', 1 : 'red', 2 : '#CC6600', 3 : 'gray'}.get(elt.state_id, 'red')
 
         # Now put in adj our parents
         for p in elt.parent_dependencies:
             pd = {'nodeTo' : p.get_dbg_name(),
                   'data' : {"$type":"line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
+
             # Naive way of looking at impact
             if elt.state_id != 0 and p.state_id != 0:
                 pd['data']["$color"] = 'Tomato'
