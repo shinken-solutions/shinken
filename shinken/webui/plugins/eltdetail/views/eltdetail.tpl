@@ -111,8 +111,8 @@ Invalid element name
       <table class="box_shadow">
 	<tbody>
 	  <tr>
-	    <th scope="row" class="column1">Host Status</th>
-	    <td><span class="state_{{elt.state.lower()}} icon_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
+	    <th scope="row" class="column1">{{elt_type.capitalize()}} Status</th>
+	    <td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
 	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Status Information</th>
