@@ -18,7 +18,7 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css', 'eltdetail/gesture.css'], top_right_banner_state=top_right_banner_state 
+%include header title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multibox.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/multibox.css', 'eltdetail/gesture.css'], top_right_banner_state=top_right_banner_state 
 
 
 %#  "Thsi is the background canvas for all gesture detection things " 
@@ -266,69 +266,91 @@ Invalid element name
     </dl>
 
     
-    <div class="grid_16 opacity_hover">
-      <br/>
-      <div class="tab-container">  
-		<ul id="tabs" class="tabs">
-		  <li><a class="tab" href="#" id="tabone">Comments</a></li>
-		  <li><a class="tab" href="#" id="tabtwo">Downtimes</a></li>
+    <div class="grid_16">
+    <script type="text/javascript">
+		document.write('<style type="text/css">');    
+		document.write('div.domtab div{display:none;}<');
+		document.write('/s'+'tyle>');    
+    </script>
+    
+    <div class="domtab">
+		<ul class="domtabs">
+			<li class="box_gradient_vertical"><a href="#comment">Comments</a></li>
+			<li class="box_gradient_vertical"><a href="#downtime">Downtimes</a></li>
 		</ul>
-      <div class="feature">
-	  <a href="#">{{!helper.get_button('Add comment', img='/static/images/notification.png')}}</a>
-	  <a href="#" onclick="delete_all_comments('{{elt.get_full_name()}}')">{{!helper.get_button('Delete comments', img='/static/images/delete.png')}}</a>
-	  <div class="clear"></div>
-	%if len(elt.comments) > 0:
-	  <table>
-	    <tr>
-	      <td class="tdBorderLeft tdCriticity" style="width:30px;"><b>Author</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:350px;"><b>Comment</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Creation</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Expire</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Delete</b></td>
-	    </tr>
-	    %for c in elt.comments:
-	    <tr>
-	      <td class="tdBorderTop tdCriticity" >{{c.author}}</td>
-	      <td class="tdBorderTop tdBorderLeft tdBorderLeft tdCriticity" >{{c.comment}}</td>
-	      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(c.entry_time)}}</td>
-	      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(c.expire_time)}}</td>
-	      <td class="tdBorderTop tdBorderLeft tdCriticity"><a href="#" onclick="delete_comment('{{elt.get_full_name()}}', '{{c.id}}')"><img src="/static/images/delete.png"/></a></td>
-	    </tr>
-	    %end
-	  </table>
-	%else:
-	  None
-	%end
-      </div>
+		<div class="tabcontent">
+			<h2 style="display: none"><a name="comment" id="comment">Comments</a></h2>
+				<ul class="tabmenu">
+					<li>
+						<a href="#" class="">Add Comments</a>
+					</li>
+					<li>
+						<a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a>
+					</li>
+				</ul>
+			  <div class="clear"></div>
+			%if len(elt.comments) > 0:
+			  <table>
+			    <tr>
+			      <td class="tdBorderLeft tdCriticity" style="width:30px;"><b>Author</b></td>
+			      <td class="tdBorderLeft tdCriticity" style="width:350px;"><b>Comment</b></td>
+			      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Creation</b></td>
+			      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Expire</b></td>
+			      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Delete</b></td>
+			    </tr>
+			    %for c in elt.comments:
+			    <tr>
+			      <td class="tdBorderTop tdCriticity" >{{c.author}}</td>
+			      <td class="tdBorderTop tdBorderLeft tdBorderLeft tdCriticity" >{{c.comment}}</td>
+			      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(c.entry_time)}}</td>
+			      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(c.expire_time)}}</td>
+			      <td class="tdBorderTop tdBorderLeft tdCriticity"><a href="#" onclick="delete_comment('{{elt.get_full_name()}}', '{{c.id}}')"><img src="/static/images/delete.png"/></a></td>
+			    </tr>
+			    %end
+			  </table>
+			%else:
+			  None
+			%end
+		</div>
+		<div>
+			<h2  style="display: none"><a name="downtime" id="downtime">Downtimes</a></h2>
 
-      %# " Now Downtimes  "
-      <div class="feature">
-	<a href="#" onclick="delete_all_downtimes('{{elt.get_full_name()}}')">{{!helper.get_button('Delete downtimes', img='/static/images/delete.png')}}</a>
+				<ul class="tabmenu">
+					<li>
+						<a href="#" class="">Add Downtime</a>
+					</li>
+					<li>
+						<a onclick="delete_all_downtimes('{{elt.get_full_name()}}')" href="#" class="">Delete Downtimes</a>
+					</li>
+				</ul>
+			%if len(elt.downtimes) > 0:
+			  <table>
+			    <tr>
+			      <td class="tdBorderLeft tdCriticity" style="width:30px;"><b>Author</b></td>
+			      <td class="tdBorderLeft tdCriticity" style="width:350px;"><b>Comment</b></td>
+			      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Start</b></td>
+			      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>End</b></td>
+			      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Delete</b></td>
+			    </tr>
+			    %for dt in elt.downtimes:
+			    <tr>
+			      <td class="tdBorderTop tdCriticity" >{{dt.author}}</td>
+			      <td class="tdBorderTop tdBorderLeft tdBorderLeft tdCriticity" >{{dt.comment}}</td>
+			      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(dt.start_time)}}</td>
+			      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(dt.end_time)}}</td>
+			      <td class="tdBorderTop tdBorderLeft tdCriticity"><a href="#" onclick="delete_downtime('{{elt.get_full_name()}}', '{{dt.id}}')"><img src="/static/images/delete.png"/></a></td>
+			    </tr>
+			    %end
+			  </table>
+			%else:
+			  None
+			%end
+	
+		</div>
+	</div>
+	
+      <br/>
 
-	%if len(elt.downtimes) > 0:
-	  <table>
-	    <tr>
-	      <td class="tdBorderLeft tdCriticity" style="width:30px;"><b>Author</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:350px;"><b>Comment</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Start</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>End</b></td>
-	      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Delete</b></td>
-	    </tr>
-	    %for dt in elt.downtimes:
-	    <tr>
-	      <td class="tdBorderTop tdCriticity" >{{dt.author}}</td>
-	      <td class="tdBorderTop tdBorderLeft tdBorderLeft tdCriticity" >{{dt.comment}}</td>
-	      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(dt.start_time)}}</td>
-	      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(dt.end_time)}}</td>
-	      <td class="tdBorderTop tdBorderLeft tdCriticity"><a href="#" onclick="delete_downtime('{{elt.get_full_name()}}', '{{dt.id}}')"><img src="/static/images/delete.png"/></a></td>
-	    </tr>
-	    %end
-	  </table>
-	%else:
-	  None
-	%end
-      </div>
-      </div>
 
 	
       </div>
