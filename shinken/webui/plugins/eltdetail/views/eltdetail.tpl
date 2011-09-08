@@ -309,7 +309,7 @@ Invalid element name
 			    %end
 			  </table>
 			%else:
-			  None
+			  <p>None</p>
 			%end
 		</div>
 		<div>
@@ -343,7 +343,7 @@ Invalid element name
 			    %end
 			  </table>
 			%else:
-			  None
+			  <p>None</p>
 			%end
 	
 		</div>

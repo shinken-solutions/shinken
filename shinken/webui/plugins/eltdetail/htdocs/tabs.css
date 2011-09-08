@@ -44,6 +44,11 @@
 			padding:1em 3em;
 			border: 1px solid #E3E3E5;
 		}
+		div.domtab p{
+			clear:both;
+			color:#787878;
+
+		}
 		ul.domtabs li.active a:link,
 		ul.domtabs li.active a:visited,
 		ul.domtabs li.active a:active,
