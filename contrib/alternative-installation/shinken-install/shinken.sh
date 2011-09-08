@@ -95,6 +95,41 @@ cecho ()
         return
 }
 
+readresponse(){
+        case "$2" in
+                "black")
+                        fcolor='30'
+                        ;;
+                "red")
+                        fcolor='31'
+                        ;;
+                "green")
+                        fcolor='32'
+                        ;;
+                "yellow")
+                        fcolor='33'
+                        ;;
+                "blue")
+                        fcolor='34'
+                        ;;
+                "magenta")
+                        fcolor='35'
+                        ;;
+                "cyan")
+                        fcolor='36'
+                        ;;
+                "white")
+                        fcolor='37'
+                        ;;
+                *)
+                        fcolor=''
+        esac
+	echo -ne "\E["$fcolor"m"$1
+	read response
+	echo -ne "\n"
+        tput sgr0
+}
+
 cline ()                    
 {
 
@@ -770,8 +805,26 @@ function shelp(){
 	cat $myscripts/README
 }
 
+function setprofile(){
+	case $1 in
+		poller)
+			setpoller 
+			exit 0
+			;;
+		*)
+			cecho " > Unknown profil" red
+			exit 2
+			;;
+	esac
+}
+
+setpoller(){
+	cadre "Poller profile configuration" green 
+	readresponse " > Is the poller a spare ? [N] : " green
+}
+
 function usage(){
-echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a 
+echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a | -p poller 
 	-k	Kill shinken
 	-i	Install shinken 
 	-d 	Remove shinken
@@ -781,6 +834,7 @@ echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
+	-p	Set profile for this installation [currently only setting poller profile is supported]
 	-h	Show help
 "
 
@@ -793,7 +847,7 @@ then
         cecho "You should start the script with sudo!" red
         exit 1
 fi
-while getopts "kidubcr:lzhsv" opt; do
+while getopts "kidubcr:lzhsvp:" opt; do
         case $opt in
 		a)
 			case $OPTARG in
@@ -845,6 +899,10 @@ while getopts "kidubcr:lzhsv" opt; do
                        	restore $OPTARG 
                         exit 0
                         ;;
+                p)
+                       	setprofile $OPTARG 
+                        exit 0
+                        ;;
                 l)
                        	backuplist 
                         exit 0
@@ -860,6 +918,5 @@ while getopts "kidubcr:lzhsv" opt; do
         esac
 done
 usage
-echo $src
 exit 0
 
