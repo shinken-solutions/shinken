@@ -818,15 +818,22 @@ function setprofile(){
 	esac
 }
 
+question(){
+	variable=$1
+	question=$2
+	default=$3
+	
+	echo -ne " > "$question" ["$default"] : "
+	read response 
+	if [ ! -z $response ]
+	then
+		eval "$variable=$response"
+	fi
+}
+
+
 setpoller(){
 	# default values
-	spare=0
-	poller_name="$(hostname -s)"
-        address=$(hostname)
-        port=7771
-	manage_sub_realms=0	#; optional and advanced: does it take jobs from schedulers of sub realms?
-	min_workers=4	#; optional : starts with N processes workers. 0 means : "number of cpus"
-	max_workers=4	#; optional : no more than N processes workers. 0 means : "number of cpus"
 	processes_by_worker=256	   #; optional : each workers manage 256 checks
 	polling_interval=1       #; optional : take jobs from schedulers each 1 second
 	timeout=3	      #; 'ping' timeout 
@@ -834,31 +841,30 @@ setpoller(){
 	check_interval=60 #   ; ping it every minute
 	max_check_attempts=3 #    ;  if at least max_check_attempts ping failed, the node is DEAD
        #optional
-
        
        # advanced features
        #modules		NrpeBooster
        #poller_tags	None
        #realm		All
-	
-	cadre "Poller profile configuration" green 
-	readresponse " > Is the poller a spare ? [$spare] : " green
-	if [ ! -z $response ]
-	then
-		spare=$response
-	fi
-	readresponse " > poller name ? [$poller_name] : " green
-	if [ ! -z $response ]
-	then
-		poller_name=$response
-	fi
-	readresponse " > address ? [$poller_name] : " green
-	if [ ! -z $response ]
-	then
-		address=$response
-	fi
+
+	declare -A config=(["00-spare"]="0|Is this poller a spare ?"
+		["01-poller_name"]="$(hostname -s)|What is the poller name ?"
+		["02-address"]="$(hostname)|What is the poller address ?"
+		["03-port"]="7771|What is the poller port ?"
+		["04-manage_sub_realms"]="0|Manage sub realms (Does this poller take jobs from schedulers or sub realms) ?"
+		["05-min_workers"]="4|Min workers (Starts with N processes workers. 0 means number of cpus) ?"
+		["06-max_workers"]="4|Max workers (no more than N processes workers. 0 means : number of cpus) ?")
+
+	for key in ${!config[@]}
+	do
+		default=$(echo ${config[$key]} | awk -F\| '{print $1}')
+		question=$(echo ${config[$key]} | awk -F\| '{print $2}')
+		question "$key" "$question" "$default" 	
+	done
+
 
 }
+
 
 function usage(){
 echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a | -p poller 
