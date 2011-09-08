@@ -59,7 +59,7 @@
 	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
 	      <tr class="tabledesc">
 	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
-	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <img src="/static/images/state_{{pb.state.lower()}}.png" /> </td>
+	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /> </td>
 		%if pb.host_name == last_hname:
 		   <td class="tdBorderLeft tdCriticity" style="width: 120px;"> </td>
 		%else:

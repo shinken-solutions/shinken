@@ -40,7 +40,7 @@
 
 	    
 	  <div class="impact-icon"><img src="static/images/50x50.png"></div>
-	  <div class="impact-status-icon"><img src="static/images/{{impact.state.lower()}}_medium.png"></div>
+	  <div class="impact-status-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"></div>
 	  <div class="impact-rows">
 	    <div class="impact-row"><span class="impact-name">{{impact.get_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span>
 
@@ -75,7 +75,7 @@
 	    <div class="pblink" id="{{imp_id}}"> Close </div>
 	  </div><br style="clear: both">
 
-	  <div class="impact-icon-big"><img src="static/images/80x80.png">
+	  <div class="impact-icon-big"><img style="width: 80px;height: 80px;" src="{{helper.get_icon_state(impact)}}">
 	  </div>
 	  %for i in range(2, impact.business_impact):
 	    <div class="criticity-inpb-icon-{{i-1}}">
@@ -119,7 +119,7 @@
 	  %end
 
 	  <div class="problem" id="{{pb_id}}">
-	    <div class="divhstate1">{{!helper.get_link(pb)}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
+	    <div class="divhstate1"> <img style="width: 32px;height: 32px;" src="{{helper.get_icon_state(pb)}}"> {{!helper.get_link(pb)}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
 	    <div class="problem-actions opacity_hover">
 	      <div class="action-fixit"><a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</a></div>
 	      %if not pb.problem_has_been_acknowledged:

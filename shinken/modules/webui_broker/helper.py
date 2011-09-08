@@ -213,21 +213,22 @@ class Helper(object):
     # But as a python dict
     def get_dep_graph_struct(self, elt, levels=3):
         t = elt.__class__.my_type
+        # We set the values for webui/plugins/depgraph/htdocs/js/eltdeps.js
+        # so a node with important data for rendering
+        # type = custom, business_impact and img_src.
         d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
-             'data' : {'$dim': max(elt.business_impact*elt.business_impact / 2, 5)},
+             'data' : {'$type' : 'custom',
+                       'business_impact' : elt.business_impact,
+                       'img_src' : self.get_icon_state(elt)
+                       },
              'adjacencies' : []
              }
-        # Service got a 'star' type :)
-        if t == 'service':
-            d['data']["$type"] = "star"
-            d['data']["$color"] = {0 : 'green', 1 : 'orange', 2 : 'red', 3 : 'gray'}.get(elt.state_id, 'red')
-        else: #host
-            d['data']["$color"] = {0 : 'green', 1 : 'red', 2 : '#CC6600', 3 : 'gray'}.get(elt.state_id, 'red')
 
         # Now put in adj our parents
         for p in elt.parent_dependencies:
             pd = {'nodeTo' : p.get_dbg_name(),
                   'data' : {"$type":"line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
+
             # Naive way of looking at impact
             if elt.state_id != 0 and p.state_id != 0:
                 pd['data']["$color"] = 'Tomato'
@@ -345,12 +346,18 @@ class Helper(object):
             return 'unknown'
         if obj.state == 'OK':
             return 'ok'
-        if obj.state == 'up':
+        if obj.state == 'UP':
             return 'up'
         # Outch, not a good state...
         if obj.problem_has_been_acknowledged:
             return 'ack'
+        if obj.in_scheduled_downtime:
+            return 'downtime'
+        if obj.is_flapping:
+            return 'flapping'
+        #Ok, no excuse, it's a true error...
         return obj.state.lower()
+
 
     # For an object, give it's business impact as text 
     # and stars if need
@@ -399,6 +406,15 @@ class Helper(object):
         if obj.__class__.my_type == 'service':
             return self.get_link(obj.host)
         return self.get_link(obj)
+
+    # For an object, return the path of the icons
+    def get_icon_state(self, obj):
+        ico = self.get_small_icon_state(obj)
+        if obj.icon_set != '':
+            return '/static/images/sets/%s/state_%s.png' % (obj.icon_set, ico)
+        else:
+            return '/static/images/state_%s.png' % ico
+        
     
 
 helper = Helper()

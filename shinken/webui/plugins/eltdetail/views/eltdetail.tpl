@@ -45,8 +45,8 @@ Invalid element name
   </div>
 </div>
 <div class="grid_13">
-  <div id="host_preview">
-    <h2 class="state_{{elt.state.lower()}} icon_{{elt.state.lower()}}">{{elt.state}}: {{elt.get_full_name()}}</h2>
+  <div id="host_preview" style="vertical-align:middle;">
+    <h2 class="state_{{elt.state.lower()}}"><img style="width : 64px; height:64px" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h2>
 
     <dl class="grid_6">
       %#Alias, apretns and hostgroups arefor host only
@@ -111,8 +111,8 @@ Invalid element name
       <table class="box_shadow">
 	<tbody>
 	  <tr>
-	    <th scope="row" class="column1">Host Status</th>
-	    <td><span class="state_{{elt.state.lower()}} icon_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
+	    <th scope="row" class="column1">{{elt_type.capitalize()}} Status</th>
+	    <td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
 	  </tr>	
 	  <tr class="odd">
 	    <th scope="row" class="column1">Status Information</th>
@@ -225,7 +225,7 @@ Invalid element name
 	        %for i in range(0, s.business_impact-2):
 	          <img src='/static/images/star.png'>
 		%end
-		
+		  <img style="width : 16px; height:16px" src="{{helper.get_icon_state(s)}}">
 		  <span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
 	      </div>
 	    </div>
@@ -253,7 +253,7 @@ Invalid element name
                 %for j in range(0, i.business_impact-2):
                   <img src='/static/images/star.png'>
 		%end
-		  
+		  <img style="width : 16px; height:16px" src="{{helper.get_icon_state(i)}}">
 		<span style="font-size:110%">{{!helper.get_link(i)}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
               </div>
             </div>
@@ -266,7 +266,7 @@ Invalid element name
     </dl>
 
     
-    <div class="grid_16">
+    <div class="grid_16 opacity_hover">
       <br/>
       <div class="tab-container">  
 		<ul id="tabs" class="tabs">

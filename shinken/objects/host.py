@@ -103,6 +103,7 @@ class Host(SchedulingItem):
         'action_url':           StringProp(default='', fill_brok=['full_status']),
         'icon_image':           StringProp(default='', fill_brok=['full_status']),
         'icon_image_alt':       StringProp(default='', fill_brok=['full_status']),
+        'icon_set':             StringProp (default='', fill_brok=['full_status']),
         'vrml_image':           StringProp(default='', fill_brok=['full_status']),
         'statusmap_image':      StringProp(default='', fill_brok=['full_status']),
 

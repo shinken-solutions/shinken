@@ -26,6 +26,33 @@ var Log = {
 };
 
 
+
+function dump(arr, level) {
+    var dumped_text = "";
+    if(!level) level = 0;
+    
+    //The padding given at the beginning of the line.
+    var level_padding = "";
+    for(var j=0;j<level+1;j++) level_padding += "    ";
+    
+    if(typeof(arr) == 'object') { //Array/Hashes/Objects 
+	for(var item in arr) {
+	    var value = arr[item];
+	    
+	    if(typeof(value) == 'object') { //If it is an array,
+		dumped_text += level_padding + "'" + item + "' ...\n";
+		dumped_text += dump(value,level+1);
+	    } else {
+		dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
+	    }
+	}
+    } else { //Stings/Chars/Numbers etc.
+	dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
+    }
+    return dumped_text;
+}
+
+
 window.onload = function init(){
     //init data
     //If a node in this JSON structure
@@ -33,6 +60,38 @@ window.onload = function init(){
     //defined it will override the "type" and
     //"dim" parameters globally defined in the
     //RGraph constructor.
+
+
+    //init nodetypes
+    //Here we implement custom node rendering types for the RGraph
+    //Using this feature requires some javascript and canvas experience.
+    $jit.RGraph.Plot.NodeTypes.implement({
+	    'custom': {
+		'render': function(node, canvas) {
+		    /*First we need to know where the node is, so we can draw 
+		     in the correct place for the GLOBAL canvas*/
+		    var pos = node.getPos().getc();
+		    var size = 24;
+
+		    var ctx = canvas.getCtx();
+		    img = new Image();
+		    
+		    /* We can have some missing data, so just add dummy info */
+		    if (typeof(node.data.img_src) == 'undefined'){
+			img.src = '/static/images/state_ok.png';
+		    }else{
+			img.src = node.data.img_src; //"/static/images/sets/disk/state_critical.png";
+			size = size * (node.data.business_impact - 1);
+		    }
+		    /* We scale the image. Thanks html5 canvas.*/
+		    img.width = size;
+		    img.height = size;
+		    /*Ok, we draw the image, and we set it in the middle ofthe node :)*/
+		    ctx.drawImage(img, pos.x-size/2, pos.y-size/2, img.width, img.height);
+		}
+	    }
+	    });
+
 
     //init RGraph
     var rgraph = new $jit.RGraph({
@@ -63,6 +122,7 @@ window.onload = function init(){
 	    Node: {
 		color: 'green',
 		'overridable': true,
+		type : 'custom',
 	    },
 	    Edge: {
 		color: 'SeaGreen',

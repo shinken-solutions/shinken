@@ -106,6 +106,7 @@ class Service(SchedulingItem):
         'action_url':             StringProp (default='', fill_brok=['full_status']),
         'icon_image':             StringProp (default='', fill_brok=['full_status']),
         'icon_image_alt':         StringProp (default='', fill_brok=['full_status']),
+        'icon_set':               StringProp (default='', fill_brok=['full_status']),
         'failure_prediction_enabled': BoolProp(default='0', fill_brok=['full_status']),
         'parallelize_check':       BoolProp  (default='1', fill_brok=['full_status']),
 

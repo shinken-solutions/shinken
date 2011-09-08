@@ -343,6 +343,17 @@ def append_file_with(infilename, outfilename, append_string):
     f.close()
 
 
+def gen_data_files(*dirs):
+    results = []
+    
+    for src_dir in dirs:
+        #print "Getting all files from", src_dir
+        for root,dirs,files in os.walk(src_dir):
+            for file in files:
+                results.append(os.path.join(root, file))
+    return results
+
+
 def update_file_with_string(infilename, outfilename, match, new_string):
     f = open(infilename)
     buf = f.read()
@@ -404,7 +415,19 @@ daemon_ini_files = ('brokerd.ini',
 
 resource_cfg_files = ('resource.cfg', )
 
+# Ok, for the webui files it's a bit tricky. we need to add all of them in
+#the package_data of setup(), but from a point of view of the
+# module shinken, so the directory shinken... but without movingfrom pwd!
+# so : sorry for the replace, really... I HATE SETUP()!
+full_path_webui_files = gen_data_files('shinken/webui')
+webui_files = [s.replace('shinken/webui/', 'webui/') for s in full_path_webui_files]
 
+
+package_data = ['*.py','modules/*.py','modules/*/*.py']
+package_data.extend(webui_files)
+
+
+print "All package _data"
 if __name__ == "__main__":
     
     setup(
@@ -418,7 +441,7 @@ if __name__ == "__main__":
         name = "Shinken",
         version = "0.6",
         packages = find_packages(),
-        package_data = {'':['*.py','modules/*.py','modules/*/*.py']},
+        package_data = {'' : package_data},
         description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
         long_description=open('README').read(),
         author = "Gabes Jean",
