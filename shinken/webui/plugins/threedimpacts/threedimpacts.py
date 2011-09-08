@@ -33,7 +33,7 @@ def get_data():
     problems[3] = {'name' : 'Mssql@db-server is Down since 93294 with output connexion failed'}
     
     
-    return {'impacts' : impacts, 'problems' : problems}
+    return {'impacts' : impacts, 'problems' : problems, 'app' : app}
 
 
 

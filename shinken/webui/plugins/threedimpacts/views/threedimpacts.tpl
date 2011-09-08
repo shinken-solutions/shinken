@@ -1,9 +1,17 @@
-<!DOCTYPE HTML>
-<html lang="en">
-	<head>
-		<title>Shinken 3D impacts</title>
-		<meta charset="utf-8">
-		<link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
+%helper = app.helper
+%datamgr = app.datamgr
+
+%include header title='Business impacts', print_menu=False, print_header=False
+
+
+
+
+%# <!DOCTYPE HTML>
+%#<html lang="en">
+%#	<head>
+%#		<title>Shinken 3D impacts</title>
+%#		<meta charset="utf-8">
+%#		<link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
 		<style type="text/css">
 			body {
 				color: #00ffff;
@@ -328,7 +336,7 @@
 				var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
 
 				var intersects = ray.intersectScene( scene );
-        //alert("clique sur"+intersects.length);
+			     //alert("clique sur"+intersects.length);
 				if ( intersects.length > 0 ) {
           //alert("move from"+intersects[ 0 ].object.position.x+"to"+Math.random());
           var object = intersects[ 0 ].object;
@@ -605,5 +613,5 @@
 
 		</script>
 
-	</body>
-</html>
+%#	</body>
+%#</html>

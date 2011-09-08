@@ -5,7 +5,7 @@
 %if not 'title' in locals() : title = 'No title'
 %if not 'css' in locals() : css = []
 %if not 'print_menu' in locals() : print_menu = True
-
+%if not 'print_header' in locals() : print_header = True
 
 %# If not need, disable the top right banner
 %if not 'top_right_banner_state' in locals() : top_right_banner_state = 0
@@ -51,6 +51,7 @@
 
 
 		<div class="container_16">
+%if print_header:
 			<!-- Header START -->
 			<div id="header" class="grid_16">
 				<h1 class="box_textshadow">Shinken</h1>
@@ -66,10 +67,10 @@
 				%end
 			</div>
 			<!-- Header END -->
+%end
 			<div class="clear"></div>
-			
 %# Only show the menu if we want.
-%if print_menu:
+%if print_menu:			
 			<div id="nav" class="grid_16">
 			  <ul>
 			    <li><a href="http://unitedseed.de/tmp/Meatball/host_detail.html#">Dashboard</a></li>
