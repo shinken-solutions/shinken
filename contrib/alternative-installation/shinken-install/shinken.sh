@@ -819,8 +819,45 @@ function setprofile(){
 }
 
 setpoller(){
+	# default values
+	spare=0
+	poller_name="$(hostname -s)"
+        address=$(hostname)
+        port=7771
+	manage_sub_realms=0	#; optional and advanced: does it take jobs from schedulers of sub realms?
+	min_workers=4	#; optional : starts with N processes workers. 0 means : "number of cpus"
+	max_workers=4	#; optional : no more than N processes workers. 0 means : "number of cpus"
+	processes_by_worker=256	   #; optional : each workers manage 256 checks
+	polling_interval=1       #; optional : take jobs from schedulers each 1 second
+	timeout=3	      #; 'ping' timeout 
+	data_timeout=120 #	      ; 'data send' timeout
+	check_interval=60 #   ; ping it every minute
+	max_check_attempts=3 #    ;  if at least max_check_attempts ping failed, the node is DEAD
+       #optional
+
+       
+       # advanced features
+       #modules		NrpeBooster
+       #poller_tags	None
+       #realm		All
+	
 	cadre "Poller profile configuration" green 
-	readresponse " > Is the poller a spare ? [N] : " green
+	readresponse " > Is the poller a spare ? [$spare] : " green
+	if [ ! -z $response ]
+	then
+		spare=$response
+	fi
+	readresponse " > poller name ? [$poller_name] : " green
+	if [ ! -z $response ]
+	then
+		poller_name=$response
+	fi
+	readresponse " > address ? [$poller_name] : " green
+	if [ ! -z $response ]
+	then
+		address=$response
+	fi
+
 }
 
 function usage(){
