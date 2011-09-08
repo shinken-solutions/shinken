@@ -3,6 +3,7 @@
 	<head>
 		<title>Shinken 3D impacts</title>
 		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
 		<style type="text/css">
 			body {
 				color: #00ffff;
@@ -34,11 +35,25 @@
 			  top: 25%;
 			  left : 75%;
 			  width : 25%;
-			  background-color: #FF0000;
+			  background-image: url("/static/images/alpha-white.png");
 			  z-index : 5;
 			  height: 60%;
 			  display : block;
 			  opacity : 0;
+			  border-radius: 5px;
+			}
+			.inner-objinfo{
+			  margin-top : 10px;
+			  margin-bottom : 10px;
+			  margin-left : 10px;
+                          width : 100%;
+                          background-color : gray;
+                          z-index : 6;
+                          height: 95%;
+                          display : block;
+                        /*opacity : 1;*/
+			  border-radius: 5px;
+
 			}
 			
 		</style>
@@ -46,7 +61,7 @@
 	<body>
 
 		<div id="container"></div>
-		<div id='objinfo-0' class='objinfo'>Info about the object 0 (ERP)</div>
+		<div id='objinfo-0' class='objinfo'><div class='inner-objinfo'>Info about the object 0 (ERP)</div></div>
 		<div id='objinfo-1' class='objinfo'>About OK 1</div>
 		<div id='objinfo-2' class='objinfo'>About OK 2</div>
 		<div id='objinfo-3' class='objinfo'>About OK 3</div>
