@@ -2,7 +2,7 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-%include header js=['impacts/js/impacts.js'], title='All critical impacts for your business', css=['impacts/impacts.css']
+%include header js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/impacts.css']
 
 
 
@@ -53,7 +53,9 @@
 
       </div>
       
-      <div class="right-panel"></div>
+      <div class="right-panel">
+	<a href="/3dimpacts" class="mb" title="Show impacts in 3D mode.">{{!helper.get_button('Show impacts in 3d', img='/static/images/state_ok.png')}}</a>
+      </div>
 
 
       
