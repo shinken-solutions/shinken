@@ -1,3 +1,89 @@
+/**
+ * 
+ * 
+ **/
+		div.domtab{
+			
+		}
+		
+		ul.domtabs{
+			float:left;
+			width:100%;
+			margin:2em 0 0 0;
+			list-style: none;
+		}
+		ul.domtabs li{
+			float:left;
+			margin: 0;
+		}
+		ul.domtabs a:link,
+		ul.domtabs a:visited,
+		ul.domtabs a:active,
+		ul.domtabs a:hover{
+			width:100px;
+			padding:5px 0 0 10px;
+			display:block;
+			color:#787878;
+			height:3em;
+			font-size: 13px;
+			text-decoration:none;
+			border: 1px solid #E3E3E5;
+		}
+		html>body ul.domtabs a:link,
+		html>body ul.domtabs a:visited,
+		html>body ul.domtabs a:active,
+		html>body ul.domtabs a:hover{
+			height:30px;
+		}
+		ul.domtabs a:hover{
+			background:#ffffff;
+		}
+		div.domtab div{
+			clear:both;
+			color:#fff;
+			padding:1em 3em;
+			border: 1px solid #E3E3E5;
+		}
+		div.domtab p{
+			clear:both;
+			color:#787878;
+
+		}
+		ul.domtabs li.active a:link,
+		ul.domtabs li.active a:visited,
+		ul.domtabs li.active a:active,
+		ul.domtabs li.active a:hover {
+			background:#FFF;
+			color:#787878;
+			font-weight: bold;
+		}
+
+
+		div.domtab div a:link,
+		div.domtab div a:visited,
+		div.domtab div a:active
+		{
+			color:#787878;
+			display:block;
+			padding:1em .5em;
+			font-weight:bold;
+		}
+		div.domtab div h2 a,
+		div.domtab div h2 a:hover,
+		div.domtab div h2 a:active {
+			display:inline;
+			padding:0;
+			font-weight:normal;
+
+		}
+
+.tabmenu li{
+	float: left;
+	 display: inline;
+}
+/**
+ * 	
+ **/
 
 #home {background-color:#ddd; position:relative; height:600px; width:600px; margin-bottom:10px; }
 .feature { position:absolute; overflow:hidden; min-width : 300px; }
