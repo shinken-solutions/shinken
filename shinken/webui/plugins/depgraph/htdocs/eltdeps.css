@@ -29,6 +29,10 @@ border-right: 1px solid #DDD;
 position: absolute;
 top : 0;
 background-color:white;
+-moz-box-shadow:#555 2px 2px 8px;
+-webkit-box-shadow:#555 2px 2px 8px;
+-o-box-shadow:#555 2px 2px 8px;
+border-radius: 15px;
 }
 
 /*TOOLTIPS*/

@@ -21,7 +21,7 @@ Invalid element
 
 <script type="text/javascript">
   var graph_root = '{{elt.get_full_name()}}';
-  var json_graph = {{helper.create_json_dep_graph(elt, levels=4)}};
+  var json_graph = {{!helper.create_json_dep_graph(elt, levels=4)}};
 </script>
 
 

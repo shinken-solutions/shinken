@@ -224,6 +224,17 @@ class Helper(object):
              'adjacencies' : []
              }
 
+        # Set the right info panel
+        d['data']['infos'] = r'''%s <h2 class="%s"><img style="width : 64px; height:64px" src="%s"/> %s: %s</h2>
+		       <p>since %s</p>
+		       <div style="float:right;"> <a href="%s">%s</a></div>'''  % (
+            '<img src="/static/images/star.png">' * (elt.business_impact - 2),
+            elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
+            self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
+            self.get_link_dest(elt), self.get_button('Go to details', img='/static/images/search.png'))
+        
+     
+
         # Now put in adj our parents
         for p in elt.parent_dependencies:
             pd = {'nodeTo' : p.get_dbg_name(),

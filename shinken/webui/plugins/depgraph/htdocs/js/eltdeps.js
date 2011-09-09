@@ -156,11 +156,12 @@ window.onload = function init(){
 		//Make right column relations list.
 		var html = "<h4>" + node.name + "</h4><b>Connections:</b>";
 		html += "<ul>";
-		node.eachAdjacency(function(adj){
+		html = node.data.infos;
+		/*node.eachAdjacency(function(adj){
 			var child = adj.nodeTo;
 			html += "<li>" + child.name + "</li>";
 		    });
-		html += "</ul>";
+		    html += "</ul>";*/
 		$jit.id('inner-details').innerHTML = html;
 	    },
 	    //Add node click handler and some styles.
