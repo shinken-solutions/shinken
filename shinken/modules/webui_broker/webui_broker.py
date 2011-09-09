@@ -146,13 +146,13 @@ class Webui_broker(BaseModule):
                 # If it's a web request, ask the webserver to do it
                 if s == srv.socket:
                     print "Handle Web request"
-                    self.global_lock.acquire()
-                    try:
-                       print "Got lock for http"
-                       srv.handle_request()
-                    finally:
-                       print "realease http lock"
-                       self.global_lock.release()
+                    # We are not managing the lock at this
+                    # level because we got 2 types of requests:
+                    # static images/css/js : no need for lock
+                    # pages : need it. So it's managed at a
+                    # function wrapper at loading pass
+                    srv.handle_request()
+
                     
     # It's the thread function that will get broks
     # and update data. Will lock the whole thing
@@ -173,6 +173,9 @@ class Webui_broker(BaseModule):
               self.global_lock.release()
 
 
+    # Here we will load all plugins (pages) under the webui/plugins
+    # directory. Each one can have a page, views and htdocs dir that we must
+    # route correctly
     def load_plugins(self):
         from shinken.webui import plugins
         plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
@@ -212,9 +215,15 @@ class Webui_broker(BaseModule):
                     if routes:
                         for r in routes:
                             print "link function", f, "and route", r
-                            f = route(r, callback=f)
-                        
-                    # Ifthe plugin declare a static entry, register it
+                            # Ok, we will just use the lock for all
+                            # plugin page, but not for static objects
+                            # so we set the lock at the function level.
+                            lock_version = self.lockable_function(f)
+                            f = route(r, callback=lock_version)
+                            
+                    # If the plugin declare a static entry, register it
+                    # and remeber : really static! because there is no lock
+                    # for them!
                     if static:
                         self.add_static(fdir, m_dir)
 
@@ -240,6 +249,22 @@ class Webui_broker(BaseModule):
             return static_file(path, root=os.path.join(m_dir, 'htdocs'))
         route(static_route, callback=plugin_static)
 
+
+    # We want a lock manager version of the plugin fucntions
+    def lockable_function(self, f):
+        print "We create a lock verion of", f
+        def lock_version():
+            t = time.time()
+            print "Got HTTP lock for f", f
+            self.global_lock.acquire()
+            try:
+                return f()
+            finally:
+                print "Release HTTP lock for f", f
+                print "in", time.time() - t
+                self.global_lock.release()
+        print "The lock version is", lock_version
+        return lock_version
 
 
     def declare_common_static(self):
