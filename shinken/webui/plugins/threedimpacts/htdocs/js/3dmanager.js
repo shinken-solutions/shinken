@@ -138,8 +138,9 @@ window.addEvent('domready', function(){
           
 		scene.addObject( textMesh);
           
-		// Particles
-
+		// Make sure the info panel is hide!
+		objinfo = document.getElementById('objinfo-'+i);
+		new Fx.Tween(objinfo, {property: 'opacity'}).start(0);
 
           
           

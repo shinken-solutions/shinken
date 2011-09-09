@@ -5,16 +5,8 @@
 
 
 		<div id="container"></div>
-%#		<div id='objinfo-0' class='objinfo'><div class='inner-objinfo'>Info about the object 0 (ERP)</div></div>
-%#		<div id='objinfo-1' class='objinfo'>About OK 1</div>
-%#		<div id='objinfo-2' class='objinfo'>About OK 2</div>
-%#		<div id='objinfo-3' class='objinfo'>About OK 3</div>
-%#		<div id='objinfo-4' class='objinfo'>About OK 5</div>
 
-%#		<script type="javascript">
-%#		  var all_impacts = new Array();
-%#		</script>
-
+		%# " all_impacts is what the 3dmanager.js will take it's impacts " 
 		%imp_id = 0
 		%for imp in impacts:
 
@@ -28,11 +20,18 @@
 		     };
 		     all_impacts.push(current_impact);
                    </script>
-		   <div id='objinfo-{{imp_id}}' class='objinfo'><div class='inner-objinfo'>Info about {{imp.get_full_name()}}</div></div>
+		   <div id='objinfo-{{imp_id}}' class='objinfo'><div class='inner-objinfo'>
+		       %for i in range(2, imp.business_impact):
+		         <img src="static/images/star.png">
+		       %end
+			 <h2 class="state_{{imp.state.lower()}}"><img style="width : 64px; height:64px" src="{{helper.get_icon_state(imp)}}" />{{imp.state}}: {{imp.get_full_name()}}</h2>
+		       <p>since {{helper.print_duration(imp.last_state_change, just_duration=True, x_elts=2)}}</p>
+		       <div style="float:right;"> <a href="{{!helper.get_link_dest(imp)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a></div>
+		   </div></div>
 		   %imp_id += 1
 		%end
 
-		<div id="info">Shinken test with Three.js about 3d impact visualisation. </div>
+		<div id="info">You can click on an object to get more information.</div>
 		
 		
 
