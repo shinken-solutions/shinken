@@ -5,13 +5,36 @@
 
 
 		<div id="container"></div>
-		<div id='objinfo-0' class='objinfo'><div class='inner-objinfo'>Info about the object 0 (ERP)</div></div>
-		<div id='objinfo-1' class='objinfo'>About OK 1</div>
-		<div id='objinfo-2' class='objinfo'>About OK 2</div>
-		<div id='objinfo-3' class='objinfo'>About OK 3</div>
-		<div id='objinfo-4' class='objinfo'>About OK 5</div>
+%#		<div id='objinfo-0' class='objinfo'><div class='inner-objinfo'>Info about the object 0 (ERP)</div></div>
+%#		<div id='objinfo-1' class='objinfo'>About OK 1</div>
+%#		<div id='objinfo-2' class='objinfo'>About OK 2</div>
+%#		<div id='objinfo-3' class='objinfo'>About OK 3</div>
+%#		<div id='objinfo-4' class='objinfo'>About OK 5</div>
+
+%#		<script type="javascript">
+%#		  var all_impacts = new Array();
+%#		</script>
+
+		%imp_id = 0
+		%for imp in impacts:
+
+		   Impact {{imp_id}} {{imp.get_full_name()}}<br>
+		  %# "Now we add this impact in our all_impacts array to give"
+		  %# "3d manager true objects"
+		   <script type="text/javascript">
+		     var current_impact = {'name' : '{{imp.get_full_name()}}',
+		     'state' : '{{imp.state.lower()}}',
+		     'business_impact' : {{imp.business_impact}}
+		     };
+		     all_impacts.push(current_impact);
+                   </script>
+		   <div id='objinfo-{{imp_id}}' class='objinfo'><div class='inner-objinfo'>Info about {{imp.get_full_name()}}</div></div>
+		   %imp_id += 1
+		%end
+
 		<div id="info">Shinken test with Three.js about 3d impact visualisation. </div>
-    
+		
+		
 
 		<script id="fragmentShader" type="x-shader/x-fragment">
 
