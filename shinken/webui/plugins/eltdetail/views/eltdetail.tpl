@@ -266,7 +266,7 @@ Invalid element name
     </dl>
 
     
-    <div class="grid_16">
+    <div class="grid_16 opacity_hover">
     <script type="text/javascript">
 		document.write('<style type="text/css">');    
 		document.write('div.domtab div{display:none;}<');
