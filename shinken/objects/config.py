@@ -92,6 +92,7 @@ class Config(Item):
     # *usage_text : if present, will print it to explain why it's no more useful
     properties = {
         'prefix':                   StringProp(default='/usr/local/shinken/'),
+        'workdir':                  StringProp(default=''),
         'log_file':                 UnusedProp(text=no_longer_used_txt),
         'object_cache_file':        UnusedProp(text=no_longer_used_txt),
         'precached_object_file':    UnusedProp(text='Shinken is faster enough to do not need precached object file.'),

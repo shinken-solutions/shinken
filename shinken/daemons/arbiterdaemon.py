@@ -402,7 +402,12 @@ class Arbiter(Daemon):
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
         
-        self.workdir = os.path.abspath(os.path.dirname(self.pidfile))
+        # If the user set a workdir, let use it. If not, use the
+        # pidfile directory
+        if self.conf.workdir == '':
+            self.workdir = os.path.abspath(os.path.dirname(self.pidfile))
+        else:
+            self.workdir = self.conf.workdir
         #print "DBG curpath=", os.getcwd()
         #print "DBG pidfile=", self.pidfile
         #print "DBG workdir=", self.workdir
