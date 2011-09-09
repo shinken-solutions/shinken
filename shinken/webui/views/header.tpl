@@ -21,6 +21,7 @@
     <link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/message.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/multibox.css" media="screen">
     <script type="text/javascript" src="/static/js/mootools.js"></script>
     <script type="text/javascript" src="/static/js/mootools-more.js"></script>
     <script type="text/javascript" src="/static/js/mootools-message.js"></script>
@@ -32,6 +33,7 @@
     <script type="text/javascript" src="/static/js/tip.js"></script>
     <script type="text/javascript" src="/static/js/action.js"></script>
     <script type="text/javascript" src="/static/js/opacity.js"></script>
+    <script type="text/javascript" src="/static/js/multibox.js"></script>
     
 
 
