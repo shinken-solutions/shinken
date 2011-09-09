@@ -253,12 +253,12 @@ class Webui_broker(BaseModule):
     # We want a lock manager version of the plugin fucntions
     def lockable_function(self, f):
         print "We create a lock verion of", f
-        def lock_version():
+        def lock_version(**args):
             t = time.time()
             print "Got HTTP lock for f", f
             self.global_lock.acquire()
             try:
-                return f()
+                return f(**args)
             finally:
                 print "Release HTTP lock for f", f
                 print "in", time.time() - t
