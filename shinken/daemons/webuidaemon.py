@@ -168,7 +168,7 @@ class Webui(Daemon):
         
         self.workdir = os.path.abspath(os.path.dirname(self.pidfile))
 
-        self.port = self.conf.webui_port
+        self.port = int(self.conf.webui_port)
         self.host = self.conf.webui_host
         
         logger.log("Configuration Loaded")
