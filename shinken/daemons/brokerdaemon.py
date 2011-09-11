@@ -606,7 +606,7 @@ class Broker(BaseSatellite):
             self.do_mainloop()
 
         except Exception, exp:
-            logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
+            logger.log("CRITICAL ERROR : I got an non recoverable error. I must exit")
             logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
             logger.log("Back trace of it: %s" % (traceback.format_exc()))
             raise

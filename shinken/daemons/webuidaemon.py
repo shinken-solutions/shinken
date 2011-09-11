@@ -183,7 +183,7 @@ class Webui(Daemon):
                 self.log.log(line)
 
             self.load_config_file()
-            self.do_daemon_init_and_start(use_pyro=False)
+            self.do_daemon_init_and_start()
 
             ## And go for the main loop
             self.do_mainloop()
@@ -268,7 +268,7 @@ class Webui(Daemon):
                 print "Loaded module m", m
                 print m.__file__
                 pages = m.pages
-                print "Try to laod pages", pages
+                print "Try to load pages", pages
                 for (f, entry) in pages.items():
                     routes = entry.get('routes', None)
                     v = entry.get('view', None)
