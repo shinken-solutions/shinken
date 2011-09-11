@@ -194,7 +194,7 @@ class Broker(BaseSatellite):
             #     print "I do nto ask for brok generation"
             links[id]['running_id'] = new_run_id
         except (Pyro.errors.ProtocolError, Pyro.errors.CommunicationError), exp:
-            logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
+            logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except Pyro.errors.NamingError, exp:
@@ -207,7 +207,7 @@ class Broker(BaseSatellite):
             traceback.print_stack()
             return
 
-        logger.log("[%s] Connexion OK to the %s %s" % (self.name, type, links[id]['name']))
+        logger.log("[%s] Connection OK to the %s %s" % (self.name, type, links[id]['name']))
 
 
     # Get a brok. Our role is to put it in the modules
@@ -283,7 +283,7 @@ class Broker(BaseSatellite):
                 print exp
                 self.pynag_con_init(sched_id, type=type)
             except Pyro.errors.ProtocolError , exp:
-                logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
             except AttributeError , exp:
@@ -292,7 +292,7 @@ class Broker(BaseSatellite):
             except Pyro.errors.NamingError , exp:
                 logger.log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
             except Pyro.errors.ConnectionClosedError , exp:
-                logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             #  What the F**k? We do not know what happenned,
             # so.. bye bye :)
@@ -441,7 +441,7 @@ class Broker(BaseSatellite):
             os.environ['TZ'] = use_timezone
             time.tzset()
         
-        # Connexion init with Schedulers
+        # Connection init with Schedulers
         for sched_id in self.schedulers:
             self.pynag_con_init(sched_id, type='scheduler')
 
