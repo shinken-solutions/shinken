@@ -67,6 +67,8 @@ class Webui_broker(BaseModule):
 
         self.port = int(getattr(modconf, 'port', '8080'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
+        self.http_backend = getattr(modconf, 'http_backend', 'wsgiref')
+        print "Webui : using the backend", self.http_backend
 
         self.rg = Regenerator()
         self.datamgr = datamgr
@@ -124,34 +126,26 @@ class Webui_broker(BaseModule):
         
         
         
-        print "Starting WebUI application"
-        srv = run(host=self.host, port=self.port, server='wsgirefselect')
-        print "Launch server", srv
 
         # Launch the data thread"
         self.data_thread = threading.Thread(None, self.manage_brok_thread, 'datathread')
         self.data_thread.start()
         # TODO : look for alive and killing
 
+        # Ok, you want to know why we are using a data thread instead of
+        # just call for a select with q._reader, the underliying file 
+        # handle of the Queue()? That's just because under Windows, select
+        # only manage winsock (so network) file descriptor! What a shame!
+        print "Starting WebUI application"
+        srv = run(host=self.host, port=self.port, server=self.http_backend)
 
-        # Main blocking loop
-        while True:
-            # Ok, you want to know why we are using a data thread instead of
-            # just call for a select with q._reader, the underliying file 
-            # handle of the Queue()? That's just because under Windows, select
-            # only manage winsock (so network) file descriptor! What a shame!
-            input = [srv.socket]
-            inputready,_,_ = select.select(input,[],[], 1)
-            for s in inputready:
-                # If it's a web request, ask the webserver to do it
-                if s == srv.socket:
-                    print "Handle Web request"
-                    # We are not managing the lock at this
-                    # level because we got 2 types of requests:
-                    # static images/css/js : no need for lock
-                    # pages : need it. So it's managed at a
-                    # function wrapper at loading pass
-                    srv.handle_request()
+        # ^ IMPORTANT ^
+        # We are not managing the lock at this
+        # level because we got 2 types of requests:
+        # static images/css/js : no need for lock
+        # pages : need it. So it's managed at a
+        # function wrapper at loading pass
+
 
                     
     # It's the thread function that will get broks

@@ -478,7 +478,8 @@ class Broker(BaseSatellite):
             try:
                 print "External Queue len (%s) : %s" % (inst.get_name(), inst.to_q.qsize())
             except Exception, exp:
-                print "External Queue len (%s) : Exception! %s" % (inst.get_name(), inst.to_q.qsize())
+                print "External Queue len (%s) : Exception! %s" % (inst.get_name(), exp)
+
 
         # Begin to clean modules
         self.check_and_del_zombie_modules()
