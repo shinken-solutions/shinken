@@ -36,6 +36,13 @@ class DataManager(object):
 
     def get_service(self, hname, sdesc):
         return self.rg.services.find_srv_by_name_and_hostname(hname, sdesc)
+
+
+    def get_contact(self, name):
+        return self.rg.contacts.find_by_name(name)
+
+    def get_contacts(self):
+        return self.rg.contacts
     
 
     def get_hosts(self):

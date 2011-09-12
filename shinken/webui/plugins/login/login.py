@@ -1,3 +1,5 @@
+
+
 ### Will be populated by the UI with it's own value
 app = None
 
@@ -12,5 +14,18 @@ def get_data():
 
 
 
-pages = {get_page : { 'routes' : ['/login', '/login/'], 'view' : 'login'}}
+def auth():
+    print "Got forms"
+    login = app.request.forms.get('login', '')
+    password = app.request.forms.get('password', '')
+    sid = app.check_auth (login, password)
+
+    if sid is not None:
+        app.response.set_cookie("sid", sid)
+
+    return {'sid' : sid}
+
+pages = {get_page : { 'routes' : ['/login', '/login/'], 'view' : 'login'},
+         auth : { 'routes' : ['/auth'], 'view' : 'auth', 'method' : 'POST'}
+             }
 

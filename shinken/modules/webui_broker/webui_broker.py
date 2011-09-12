@@ -33,11 +33,12 @@ import time
 import traceback
 import select
 import threading
+import base64
 
 
 from shinken.basemodule import BaseModule
 from shinken.message import Message
-from shinken.webui.bottle import Bottle, run, static_file, view, route
+from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response
 from shinken.misc.regenerator import Regenerator
 from shinken.log import logger
 from datamanager import datamgr
@@ -74,7 +75,10 @@ class Webui_broker(BaseModule):
         self.datamgr = datamgr
         datamgr.load(self.rg)
         self.helper = helper
-
+        self.request = request
+        self.response = response
+        self.sessions = {}
+        
 
 
     # Called by Broker so we can do init stuff
@@ -208,12 +212,14 @@ class Webui_broker(BaseModule):
                     # Maybe there is no route to link, so pass
                     if routes:
                         for r in routes:
-                            print "link function", f, "and route", r
+                            method = entry.get('method', 'GET')
+                            print "link function", f, "and route", r, "method", method
+                            
                             # Ok, we will just use the lock for all
                             # plugin page, but not for static objects
                             # so we set the lock at the function level.
                             lock_version = self.lockable_function(f)
-                            f = route(r, callback=lock_version)
+                            f = route(r, callback=lock_version, method=method)
                             
                     # If the plugin declare a static entry, register it
                     # and remeber : really static! because there is no lock
@@ -271,3 +277,16 @@ class Webui_broker(BaseModule):
         @route('/favicon.ico')
         def give_favicon():
             return static_file('favicon.ico', root=os.path.join(bottle_dir, 'htdocs', 'images'))
+
+
+
+    def check_auth(self, user, password):
+        print "Checking auth of", user, password
+        c = self.datamgr.get_contact(user)
+        print "Got", c
+        if c is not None:
+            sid = base64.urlsafe_b64encode(os.urandom(30))
+            self.sessions[sid] = c.get_name()
+            return sid
+        return None
+
