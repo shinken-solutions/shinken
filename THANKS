@@ -42,3 +42,5 @@ To Etienne Obriot for his patch about multiple = in macos values
 To obiouane for his bug report about missing object value
 To Thibault Cohen for his bug report about linkify and templates
 To Carmelle Monkoun for the bug report about Pyro4.8
+To Bruno Clermont for the fix in bottle call and the typos
+To Stéphane Duchesneau for his work on the setup.py file and log/run driectories.
