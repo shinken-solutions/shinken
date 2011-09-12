@@ -159,7 +159,12 @@ Invalid element name
 	<tbody class="switches">
 	  <tr class="odd">
 	    <th scope="row" class="column1">Active/passive Checks</th>
-	    <td title='This will also enable/disable this host services' onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}</td>
+	    %if elt_type=='host':
+	       %title = 'This will also enable/disable this host services'
+	    %else:
+	       %title = ''
+	    %end
+	    <td title="{{title}}" onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}</td>
 	  </tr>	
 	  <tr>
 	    <th scope="row" class="column1">Notifications</th>
