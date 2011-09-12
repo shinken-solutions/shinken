@@ -23,7 +23,7 @@ def auth():
     if sid is not None:
         app.response.set_cookie("sid", sid)
 
-    return {'sid' : sid}
+    return {'app' : app, 'sid' : sid}
 
 pages = {get_page : { 'routes' : ['/login', '/login/'], 'view' : 'login'},
          auth : { 'routes' : ['/auth'], 'view' : 'auth', 'method' : 'POST'}
