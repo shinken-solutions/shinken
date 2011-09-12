@@ -37,7 +37,6 @@ except ImportError:
 
 
 from shinken.bin import VERSION
-from shinken.objects import Config
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -205,6 +204,16 @@ class ShinkenAdmin(cmd.Cmd):
             f()
 
     def do_showconfig(self, line):
+
+	from shinken.objects import Config
+
+	from shinken.arbiterlink import ArbiterLink
+	from shinken.schedulerlink import SchedulerLink 
+	from shinken.pollerlink import PollerLink 
+	from shinken.reactionnerlink import ReactionnerLink 
+	from shinken.brokerlink import BrokerLink 
+	from shinken.receiverlink import ReceiverLink 
+
         self.look_connexion()
 
 	mapping={'poller':'poller_name','arbiter':'arbiter_name'}
@@ -219,7 +228,25 @@ class ShinkenAdmin(cmd.Cmd):
 		except:
 			type=line
 			name=None
-		
+
+		# get properties from link classes
+		if type == 'arbiter': 
+			o = ArbiterLink()
+		elif type =='scheduler': 
+			o = SchedulerLink()
+		elif type =='poller': 
+			o = PollerLink()
+		elif type =='broker': 
+			o = BrokerLink()
+		elif type =='reactionner': 
+			o = ReactionnerLink()
+		elif type =='receiver': 
+			o = ReceiverLink()
+		else: 
+			print "Unknown object type : %s" % (type)
+			return False
+
+		# load config
 		cfg=Config()
 		buf = cfg.read_config(["/opt/shinken/etc/shinken-specific.cfg"])
 		raw_objects = cfg.read_config_buf(buf)
@@ -227,15 +254,19 @@ class ShinkenAdmin(cmd.Cmd):
 		if not raw_objects.has_key(type):
 			print "Unknow object type %s" % (type)
 		else:
-			print "+---------------------------------------------------------------------------+"
-			print "| Config for : {0:60} |".format(type)
-			print "+---------------------------------------------------------------------------+"
-			print "| {0:30} | {1:40} |".format("Directive","Value" )
-			print "+---------------------------------------------------------------------------+"
+			print "+--------------------------------------------------------------------------------------+"
+			print "| Config for : {0:71} |".format(type)
+			print "+--------------------------------------------------------------------------------------+"
+			print "| {0:8} | {1:30} | {2:40} |".format("Default","Directive","Value" )
+			print "+--------------------------------------------------------------------------------------+"
+			
 			for e in raw_objects[type]:
-				for k,v in e.iteritems():
-					print "| {0:30} | {1:40} |".format(k,v)
-				print "+---------------------------------------------------------------------------+"
+				for key in o.properties.keys():
+					if e.has_key(key):
+						print "| {0:8} | {1:30} | {2:40} |".format(" ",key,e[key] )
+					else:
+						print "| {0:8} | {1:30} | {2:40} |".format("D",key,o.properties[key].default)
+				print "+--------------------------------------------------------------------------------------+"
 
 
 
