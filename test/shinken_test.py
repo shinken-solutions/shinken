@@ -57,6 +57,11 @@ livestatus_modconf.module_name = "livestatus"
 livestatus_modconf.module_type = livestatus_broker.properties['type']
 livestatus_modconf.properties = livestatus_broker.properties.copy()
 
+# We overwrite the functions time() and sleep()
+# This way we can modify sleep() so that it immediately returns although
+# for a following time() it looks like thee was actually a delay.
+# This massively speeds up the tests.
+
 time.my_offset = 0
 time.my_starttime = time.time()
 time.my_oldtime = time.time
@@ -66,13 +71,24 @@ def my_time_time():
     return now
 
 original_time_time = time.time
-#time.time = my_time_time
+time.time = my_time_time
 
 def my_time_sleep(delay):
     time.my_offset += delay
 
 original_time_sleep = time.sleep
-#time.sleep = my_time_sleep
+time.sleep = my_time_sleep
+
+# If external processes or time stamps for files are involved, we must
+# revert the fake timing routines, because these externals cannot be fooled.
+# They get their times from the operating system.
+# In this case we write the following lines in the test files:
+#
+# from shinken_test import *
+# # we have an external process, so we must un-fake time functions
+# time.time = original_time_time
+# time.sleep = original_time_sleep
+
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
