@@ -25,6 +25,9 @@
 
 #It's ugly I know....
 from shinken_test import *
+# we have an external process, so we must un-fake time functions
+time.time = original_time_time
+time.sleep = original_time_sleep
 from worker import Worker
 from multiprocessing import Queue, Manager
 from objects.service import Service
