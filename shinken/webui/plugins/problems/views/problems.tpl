@@ -7,7 +7,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/accordion.css'], refresh=True
+%include header title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/accordion.css'], refresh=True, menu_part='/problems'
 
 
 	 
