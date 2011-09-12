@@ -37,6 +37,8 @@ except ImportError:
 
 
 from shinken.bin import VERSION
+from shinken.objects import Config
+
 try:
     import shinken.pyro_wrapper as pyro
 except ImportError:
@@ -122,34 +124,55 @@ class ShinkenAdmin(cmd.Cmd):
         data = self.arb.get_all_states()
         
         arbs = data['arbiter']
-        print "Arbiter \t\t address \t port \t alive \t reachable \t last_check"
+
+	print "+-----------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} |".format("Arbiter", "address", "port", "alive", "reachable", "last_check")
+	print "+-----------------------------------------------------------------+"
         for a in arbs:
-            print " %.15s \t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (a.arbiter_name, a.address, a.port,
-                                                                     a.alive, a.reachable, get_since(a.last_check))
-        print "\nScheduler \t\t address \t port \t alive \t reachable \t last_check"
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} |".format(a.arbiter_name, a.address, a.port,
+									a.alive, a.reachable, get_since(a.last_check))
+	print "+-----------------------------------------------------------------+"
+
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Scheduler", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
         for s in data['scheduler']:
-            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.scheduler_name, s.address, s.port,
-                                                s.alive, s.reachable, get_since(s.last_check))
-            
-        print "\nPoller \t\t address \t port \t alive \t reachable \t last_check"
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.scheduler_name, s.address, s.port,
+									s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
+       
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Poller", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
         for s in data['poller']:
-            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.poller_name, s.address, s.port,
-                                                s.alive, s.reachable, get_since(s.last_check))
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.poller_name, s.address, s.port,
+                                                			s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
+
             
-        print "\nReactionner \t\t address \t port \t alive \t reachable \t last_check"
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Reactionner", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
         for s in data['reactionner']:
-            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.reactionner_name, s.address, s.port,
-                                                s.alive, s.reachable, get_since(s.last_check))
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.reactionner_name, s.address, s.port,
+                                                			s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
 
-        print "\nBroker \t\t address \t port \t alive \t reachable \t last_check"
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Broker", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
         for s in data['broker']:
-            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.broker_name, s.address, s.port,
-                                                s.alive, s.reachable, get_since(s.last_check))
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.broker_name, s.address, s.port,
+									s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
 
-        print "\nReceiver \t\t address \t port \t alive \t reachable \t last_check"
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Receiver", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
         for s in data['receiver']:
-            print " %.15s \t\t %.15s \t %.5s \t %.5s \t %.5s \t\t %s" % (s.receiver_name, s.address, s.port,
-                                                s.alive, s.reachable, get_since(s.last_check))
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.receiver_name, s.address, s.port,
+									s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
 
         
 
@@ -180,7 +203,39 @@ class ShinkenAdmin(cmd.Cmd):
         f = getattr(easter, line, None)
         if f:
             f()
-    
+
+    def do_showconfig(self, line):
+        self.look_connexion()
+
+	mapping={'poller':'poller_name','arbiter':'arbiter_name'}
+
+
+	if line == "help" or line == "":
+		print "Usage : showconfig objecttype [objectname]"
+		print "Exemple : showconfig poller poller-1"
+	else:
+		try:
+			type,name = line.split()
+		except:
+			type=line
+			name=None
+		
+		cfg=Config()
+		buf = cfg.read_config(["/opt/shinken/etc/shinken-specific.cfg"])
+		raw_objects = cfg.read_config_buf(buf)
+		
+		if not raw_objects.has_key(type):
+			print "Unknow object type %s" % (type)
+		else:
+			print "+---------------------------------------------------------------------------+"
+			print "| Config for : {0:60} |".format(type)
+			print "+---------------------------------------------------------------------------+"
+			print "| {0:30} | {1:40} |".format("Directive","Value" )
+			print "+---------------------------------------------------------------------------+"
+			for e in raw_objects[type]:
+				for k,v in e.iteritems():
+					print "| {0:30} | {1:40} |".format(k,v)
+				print "+---------------------------------------------------------------------------+"
 
 
 
