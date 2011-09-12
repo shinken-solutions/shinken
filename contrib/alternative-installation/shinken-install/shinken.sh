@@ -410,12 +410,12 @@ function relocate(){
 	# relocate nagios plugin path
 	sed -i "#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
 	# relocate default /usr/local/shinken path
-	for fic in $(find . | grep -v "shinken-install" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
+	for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
 	do 
 		cecho " > Processing $fic" green
-		cp $fic $fic.orig 
+		cp "$fic" "$fic.orig" 
 		#sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
-		sed -i 's#/usr/local/shinken#'$TARGET'#g' $fic 
+		sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
 	done
 	# set some directives 
 	cadre "Set some configuration directives" green
@@ -823,7 +823,7 @@ question(){
 	question=$2
 	default=$3
 	
-	echo -ne " > "$question" ["$default"] : "
+	echo -ne " > "$variable : $question" ["$default"] : "
 	read response 
 	if [ ! -z $response ]
 	then
@@ -847,19 +847,21 @@ setpoller(){
        #poller_tags	None
        #realm		All
 
-	declare -A config=(["00-spare"]="0|Is this poller a spare ?"
-		["01-poller_name"]="$(hostname -s)|What is the poller name ?"
-		["02-address"]="$(hostname)|What is the poller address ?"
-		["03-port"]="7771|What is the poller port ?"
-		["04-manage_sub_realms"]="0|Manage sub realms (Does this poller take jobs from schedulers or sub realms) ?"
-		["05-min_workers"]="4|Min workers (Starts with N processes workers. 0 means number of cpus) ?"
-		["06-max_workers"]="4|Max workers (no more than N processes workers. 0 means : number of cpus) ?")
+	declare -a config=("spare|0|Is this poller a spare ?" 
+		"poller_name|$(hostname -s)|What is the poller name ?" 
+		"address|$(hostname)|What is the poller address ?" 
+		"port|7771|What is the poller port ?" 
+		"manage_sub_realms|0|Manage sub realms (Does this poller take jobs from schedulers or sub realms) ?" 
+		"min_workers|4|Min workers (Starts with N processes workers. 0 means number of cpus) ?" 
+		"max_workers|4|Max workers (no more than N processes workers. 0 means : number of cpus) ?" )
 
-	for key in ${!config[@]}
+	for line in ${config[@]}
 	do
-		default=$(echo ${config[$key]} | awk -F\| '{print $1}')
-		question=$(echo ${config[$key]} | awk -F\| '{print $2}')
-		question "$key" "$question" "$default" 	
+		echo $line
+#		value=$(echo $line | awk -F\| '{print $0}')
+#		default=$(echo $line | awk -F\| '{print $1}')
+#		ask=$(echo $line | awk -F\| '{print $2}')
+#		question "$value" "$ask" "$default" 	
 	done
 
 
