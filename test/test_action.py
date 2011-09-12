@@ -28,6 +28,9 @@ import os
 from shinken_test import *
 from shinken.action import Action
 
+time.time = original_time_time
+time.sleep = original_time_sleep
+
 class TestAction(ShinkenTest):
     #setUp is in shinken_test
 

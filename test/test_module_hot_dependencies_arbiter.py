@@ -25,7 +25,10 @@
 
 import os, sys, time
 
-from shinken_test import unittest, ShinkenTest
+from shinken_test import unittest, ShinkenTest, original_time_time, original_time_sleep
+
+time.time = original_time_time
+time.sleep = original_time_sleep
 
 from shinken.log import logger
 
