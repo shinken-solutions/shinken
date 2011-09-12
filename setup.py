@@ -79,13 +79,15 @@ class install(_install):
     user_options = _install.user_options + [
         ( 'etc-path=', None, 'read-only single-machine data' ),
         ( 'var-path=', None, 'modifiable single-machine data' ),
+        ( 'run-path=', None, 'PID files' ),
+        ( 'log-path=', None, 'LOG files' ),
         ( 'plugins-path=', None, 'program executables' ),
         ( 'owner=', None, ( 
-                'change owner for etc/* and var (default: %s)' % DEFAULT_OWNER
+                'change owner for etc/*, var, run and log folders (default: %s)' % DEFAULT_OWNER
             )
         ),
         ( 'group=', None, (
-                'change group for etc/* and var (default: %s)' % DEFAULT_GROUP
+                'change group for etc/*, var, run and log folders (default: %s)' % DEFAULT_GROUP
             )
         ),
     ]
@@ -94,6 +96,8 @@ class install(_install):
         _install.initialize_options(self)
         self.etc_path = None
         self.var_path = None
+        self.run_path = None
+        self.log_path = None
         self.plugins_path = None
         self.owner = None
         self.group = None
@@ -104,6 +108,10 @@ class install(_install):
             self.etc_path = default_paths['etc']
         if self.var_path is None:
             self.var_path = default_paths['var']
+        if self.run_path is None:
+            self.run_path = default_paths['run']
+        if self.log_path is None:
+            self.log_path = default_paths['log']
         if self.plugins_path is None:
             self.plugins_path = default_paths['libexec']
         if self.owner is None:
@@ -112,7 +120,7 @@ class install(_install):
             self.group = DEFAULT_GROUP
 
         if self.root:
-            for attr in ('etc_path', 'var_path', 'plugins_path'):
+            for attr in ('etc_path', 'var_path', 'plugins_path', 'run_path', 'log_path'):
                 setattr(self, attr, change_root(self.root, getattr(self, attr)))
             
 
@@ -128,6 +136,8 @@ class build_config(Command):
         self.build_base = None
         self.etc_path = None
         self.var_path = None
+        self.run_path = None
+        self.log_path = None
         self.plugins_path = None
 
         self._install_scripts = None
@@ -146,6 +156,8 @@ class build_config(Command):
         self.set_undefined_options('install_config',
                                    ('etc_path', 'etc_path'),
                                    ('var_path', 'var_path'),
+                                   ('run_path', 'run_path'),
+                                   ('log_path', 'log_path'),
                                    ('plugins_path', 'plugins_path'),
                                    ('owner', 'owner'),
                                    ('group', 'group')
@@ -176,6 +188,8 @@ class build_config(Command):
             # substitute
             buf = buf.replace("$ETC$", self.etc_path)
             buf = buf.replace("$VAR$", self.var_path)
+            buf = buf.replace("$RUN$", self.run_path)
+            buf = buf.replace("$LOG$", self.log_path)
             buf = buf.replace("$SCRIPTS_BIN$", self._install_scripts)
             # write out the new file
             f = open(outfile, "w")
@@ -261,6 +275,8 @@ class install_config(Command):
         self.root = None
         self.etc_path = None  # typically /etc on Posix systems 
         self.var_path = None # typically /var on Posix systems 
+        self.run_path = None  # typically /etc on Posix systems 
+        self.log_path = None # typically /var on Posix systems 
         self.plugins_path = None    # typically /libexec on Posix systems
 
     def finalize_options(self):
@@ -273,6 +289,8 @@ class install_config(Command):
                ('root', 'root'),
                ('etc_path', 'etc_path'),
                ('var_path', 'var_path'),
+               ('run_path', 'run_path'),
+               ('log_path', 'log_path'),
                ('plugins_path', 'plugins_path'),
                ('owner', 'owner'),
                ('group', 'group')
@@ -297,6 +315,8 @@ class install_config(Command):
             # recursivly changing permissions for etc/shinken and var/lib/shinken
             self.recursive_chown(self.etc_path, uid, gid, self.owner, self.group)
             self.recursive_chown(self.var_path, uid, gid, self.owner, self.group)
+            self.recursive_chown(self.run_path, uid, gid, self.owner, self.group)
+            self.recursive_chown(self.log_path, uid, gid, self.owner, self.group)
 
 
     def get_inputs (self):
@@ -368,16 +388,22 @@ def update_file_with_string(infilename, outfilename, match, new_string):
 if 'win' in sys.platform:
     default_paths = {'var':      "c:\\shinken\\var",
                      'etc':      "c:\\shinken\\etc",
+                     'log':      "c:\\shinken\\var",
+                     'run':      "c:\\shinken\\var",
                      'libexec':  "c:\\shinken\\libexec",
                      }
 elif 'linux' in sys.platform:
     default_paths = {'var': "/var/lib/shinken/",
                      'etc': "/etc/shinken",
+                     'run': "/var/run/shinken",
+                     'log': "/var/log/shinken",
                      'libexec': "/usr/lib/shinken/plugins",
                      }
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
     default_paths = {'var': "/var/lib/shinken",
                      'etc': "/usr/local/etc/shinken",
+                     'run': "/var/run/shinken",
+                     'log': "/var/log/shinken",
                      'libexec': "/usr/local/libexec/shinken",
                      }
 else:
