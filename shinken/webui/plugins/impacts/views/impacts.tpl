@@ -2,7 +2,7 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-%include header js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/impacts.css']
+%include header js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/impacts.css'], refresh=True
 
 
 
