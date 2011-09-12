@@ -32,6 +32,10 @@ function add_element(name){
     var selector = $('selector-'+name);
     selector.src = '/static/images/tick.png';
     $('actions').fade('in');
+    /* The user will ask something, so it's good to reinit
+     the refresh time so he got time to launch its action,
+    see reload.js for this function */
+    reinit_refresh();
 }
 
 /* And or course when we remove it... */

@@ -7,7 +7,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/accordion.css']
+%include header title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/accordion.css'], refresh=True
 
 
 	 
@@ -132,7 +132,7 @@
 	%end
 	%for i in helper.get_impacts_sorted(pb):
 	<div class="state_{{i.state.lower()}}">
-	  <p><img src="/static/images/state_{{i.state.lower()}}.png" />
+	  <p><img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(i)}}" />
 	        %for j in range(0, i.business_impact-2):
 	          <img src='/static/images/star.png'>
 		%end

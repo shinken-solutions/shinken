@@ -6,6 +6,7 @@
 %if not 'css' in locals() : css = []
 %if not 'print_menu' in locals() : print_menu = True
 %if not 'print_header' in locals() : print_header = True
+%if not 'refresh' in locals() : refresh = False
 
 %# If not need, disable the top right banner
 %if not 'top_right_banner_state' in locals() : top_right_banner_state = 0
@@ -34,6 +35,9 @@
     <script type="text/javascript" src="/static/js/action.js"></script>
     <script type="text/javascript" src="/static/js/opacity.js"></script>
     <script type="text/javascript" src="/static/js/multibox.js"></script>
+    %if refresh:
+    <script type="text/javascript" src="/static/js/reload.js"></script>
+    %end
     
 
 
