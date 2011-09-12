@@ -29,6 +29,7 @@ import socket
 import sys
 import os
 import time
+import datetime
 import errno
 import re
 import traceback
@@ -74,13 +75,14 @@ properties = {
 #Class for the Livestatus Broker
 #Get broks and listen to livestatus query language requests
 class Livestatus_broker(BaseModule):
-    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path, debug=None, debug_queries=False):
+    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, archive_path, max_logs_age, pnp_path, debug=None, debug_queries=False):
         BaseModule.__init__(self, mod_conf)
         self.host = host
         self.port = port
         self.socket = socket
         self.allowed_hosts = allowed_hosts
         self.database_file = database_file
+        self.archive_path = archive_path
         self.max_logs_age = max_logs_age
         self.pnp_path = pnp_path
         self.debug = debug
@@ -762,13 +764,27 @@ class Livestatus_broker(BaseModule):
         self.dbconn.commit()
         # rowfactory will later be redefined (in livestatus.py)
         self.next_log_db_commit = time.time() + 1
+        today = datetime.date.today()
+        today = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
+        tomorrow = today + datetime.timedelta(days=1) + datetime.timedelta(minutes=15)
+        self.next_log_db_rotate = time.mktime(tomorrow.timetuple())
 
 
-    def commit_log_db(self):
+    def commit_and_rotate_log_db(self):
         now = time.time()
         if self.next_log_db_commit <= now:
             self.dbconn.commit()
             self.next_log_db_commit = now + 1
+        if self.next_log_db_rotate <= now:
+            # Take the current database file
+            # Move the messages into daily files
+            pass
+
+            today = datetime.date.today()
+            today = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
+            tomorrow = today + datetime.timedelta(days=1) + datetime.timedelta(minutes=15)
+            # A quarter past midnight
+            self.next_log_db_rotate = time.mktime(tomorrow.timetuple())
 
 
     def cleanup_log_db(self):
@@ -895,7 +911,7 @@ class Livestatus_broker(BaseModule):
                 raise
 
             # Commit log broks to the database
-            self.commit_log_db()
+            self.commit_and_rotate_log_db()
 
             # Check for pending livestatus requests
             inputready,outputready,exceptready = select.select(self.input,[],[], 0)

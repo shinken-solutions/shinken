@@ -66,7 +66,14 @@ def get_instance(plugin):
         database_file = plugin.database_file
     else:
         database_file = os.path.join(os.path.abspath('.'), 'var', 'livestatus.db')
-
+    if hasattr(plugin, 'archive_path'):
+        archive_path = plugin.archive_path
+    else:
+        archive_path = os.path.join(os.path.dirname(database_file), 'archives')
+    try:
+        os.stat(archive_path)
+    except:
+        os.mkdir(archive_path)
 
     if hasattr(plugin, 'max_logs_age'):
         maxmatch = re.match(r'^(\d+)([dwm])$', plugin.max_logs_age)
@@ -95,7 +102,7 @@ def get_instance(plugin):
     debug = getattr(plugin, 'debug', None)
     debug_queries = (getattr(plugin, 'debug_queries', '0') == '1')
 
-    instance = Livestatus_broker(plugin, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path, debug, debug_queries)
+    instance = Livestatus_broker(plugin, host, port, socket, allowed_hosts, database_file, archive_path, max_logs_age, pnp_path, debug, debug_queries)
     return instance
 
 
