@@ -1,6 +1,8 @@
 # /etc/default/shinken
 #$ETC$ is where we put all configuration files
-#$VAR$ is where we put all variables files (pid, and all)
+#$VAR$ is where we put some variables files (replaced by $RUN$ and $LOG$ for now)
+#$RUN$ is where we put pid files
+#$LOG$ is where we put log files
 #$SCRIPTS_BIN$ is where the launch scripts will be send
 
 
@@ -8,6 +10,8 @@
 ETC=$ETC$
 VAR=$VAR$
 BIN=$SCRIPTS_BIN$
+RUN=$RUN$
+LOG=$LOG$
 
 
 ###ARBITER PART
@@ -25,12 +29,12 @@ ARBITERDAEMON=$BIN/shinken-arbiter
 #The ARBITER PID
 if [ -r $SHINKENCFG ] ; then
     tmppid=`grep 'lock_file=' $SHINKENCFG | grep -v '#' | tail -n 1 | awk -F '=' '{print $2}'`
-    ARBITERPID=${tmppid-$VAR/arbiterd.pid}
+    ARBITERPID=${tmppid-$RUN/arbiterd.pid}
 else
-    ARBITERPID="$VAR/arbiterd.pid"
+    ARBITERPID="$RUN/arbiterd.pid"
 fi
 
-ARBITERDEBUGFILE="$VAR/arbiter-debug.log"
+ARBITERDEBUGFILE="$LOG/arbiter-debug.log"
 
 
 ###SCHEDULER PART
@@ -41,9 +45,9 @@ SCHEDULERCFG="$ETC/schedulerd.ini"
 SCHEDULERDAEMON=$BIN/shinken-scheduler
 
 #The SCHEDULER PID
-SCHEDULERPID="$VAR/schedulerd.pid"
+SCHEDULERPID="$RUN/schedulerd.pid"
 
-SCHEDULERDEBUGFILE="$VAR/scheduler-debug.log"
+SCHEDULERDEBUGFILE="$LOG/scheduler-debug.log"
 
 ###POLLER PART
 # location of the poller daemon configuration
@@ -53,9 +57,9 @@ POLLERCFG="$ETC/pollerd.ini"
 POLLERDAEMON=$BIN/shinken-poller
 
 #The poller pid
-POLLERPID="$VAR/pollerd.pid"
+POLLERPID="$RUN/pollerd.pid"
 
-POLLERDEBUGFILE="$VAR/poller-debug.log"
+POLLERDEBUGFILE="$LOG/poller-debug.log"
 
 
 ###REACTIONNER PART
@@ -66,9 +70,9 @@ REACTIONNERCFG="$ETC/reactionnerd.ini"
 REACTIONNERDAEMON=$BIN/shinken-reactionner
 
 #The reactionner pid
-REACTIONNERPID="$VAR/reactionnerd.pid"
+REACTIONNERPID="$RUN/reactionnerd.pid"
 
-REACTIONNERDEBUGFILE="$VAR/reactionner-debug.log"
+REACTIONNERDEBUGFILE="$LOG/reactionner-debug.log"
 
 
 ###BROKER PART
@@ -79,9 +83,9 @@ BROKERCFG="$ETC/brokerd.ini"
 BROKERDAEMON=$BIN/shinken-broker
 
 #The broker pid
-BROKERPID="$VAR/brokerd.pid"
+BROKERPID="$RUN/brokerd.pid"
 
-BROKERDEBUGFILE="$VAR/broker-debug.log"
+BROKERDEBUGFILE="$LOG/broker-debug.log"
 
 
 ###RECEIVER PART
@@ -92,9 +96,9 @@ RECEIVERCFG="$ETC/receiverd.ini"
 RECEIVERDAEMON=$BIN/shinken-receiver
 
 #The broker pid
-RECEIVERPID="$VAR/receiverd.pid"
+RECEIVERPID="$RUN/receiverd.pid"
 
-RECEIVERDEBUGFILE="$VAR/receiver-debug.log"
+RECEIVERDEBUGFILE="$LOG/receiver-debug.log"
 
 
 # nicelevel to run nagios daemon with
