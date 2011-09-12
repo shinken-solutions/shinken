@@ -204,7 +204,11 @@ class ShinkenAdmin(cmd.Cmd):
             f()
 
     def do_showconfig(self, line):
-
+	'''
+	Display daemon configuration
+	The column Default show that we are using default values when D is present 
+	Ex : show config poller will display configuration for all pollers
+	'''
 	from shinken.objects import Config
 
 	from shinken.arbiterlink import ArbiterLink
@@ -214,20 +218,13 @@ class ShinkenAdmin(cmd.Cmd):
 	from shinken.brokerlink import BrokerLink 
 	from shinken.receiverlink import ReceiverLink 
 
-        self.look_connexion()
-
-	mapping={'poller':'poller_name','arbiter':'arbiter_name'}
-
 
 	if line == "help" or line == "":
 		print "Usage : showconfig objecttype [objectname]"
 		print "Exemple : showconfig poller poller-1"
 	else:
-		try:
-			type,name = line.split()
-		except:
-			type=line
-			name=None
+		type=line
+		self.look_connexion()
 
 		# get properties from link classes
 		if type == 'arbiter': 
@@ -270,7 +267,7 @@ class ShinkenAdmin(cmd.Cmd):
 
 
 
-intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# quit'
+intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n#showconfig [daemon type]\n# quit'
 
 if __name__ == "__main__": 
     ShinkenAdmin().cmdloop(intro)
