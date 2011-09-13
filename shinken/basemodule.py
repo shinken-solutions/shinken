@@ -77,6 +77,8 @@ Example of task that a shinken module can do:
 `mod_conf´ is module configuration object for this new module instance. """
         self.myconf = mod_conf
         self.name = mod_conf.get_name()
+        # We can have sub modules
+        self.modules = mod_conf.modules
         self.props = mod_conf.properties.copy()
         self.properties = self.props # TODO: choose between 'props' or 'properties'..
         self.interrupted = False

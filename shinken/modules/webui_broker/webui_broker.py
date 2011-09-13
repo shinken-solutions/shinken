@@ -41,6 +41,10 @@ from shinken.message import Message
 from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response
 from shinken.misc.regenerator import Regenerator
 from shinken.log import logger
+from shinken.modulesmanager import ModulesManager
+from shinken.daemon import Daemon
+
+#Local import
 from datamanager import datamgr
 from helper import helper
 
@@ -60,7 +64,7 @@ bottle.TEMPLATE_PATH.append(bottle_dir)
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
-class Webui_broker(BaseModule):
+class Webui_broker(BaseModule, Daemon):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
 
@@ -78,6 +82,16 @@ class Webui_broker(BaseModule):
         self.helper = helper
         self.request = request
         self.response = response
+
+        # Daemon like init
+        self.debug_output = []
+        self.modules_manager = ModulesManager('webui', self.find_modules_path(), [])
+        # We can now output some previouly silented debug ouput
+        for s in self.debug_output:
+            print s
+        del self.debug_output
+
+        self.log = logger
         self.load_sessions()
         
 
@@ -119,6 +133,8 @@ class Webui_broker(BaseModule):
     # Conf from arbiter!
     def init(self):
         print "Init of the Webui '%s'" % self.name
+        self.modules_manager.set_modules(self.modules)
+        self.do_load_modules()
 
 
 
