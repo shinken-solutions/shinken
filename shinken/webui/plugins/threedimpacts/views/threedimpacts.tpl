@@ -3,6 +3,15 @@
 
 %include header title='Business impacts', print_menu=False, print_header=False, css=['threedimpacts/threedimpacts.css'], js=['threedimpacts/js/Three.js', 'threedimpacts/js/Detector.js', 'threedimpacts/js/RequestAnimationFrame.js', 'threedimpacts/js/Stats.js', 'threedimpacts/js/Tween.js', 'threedimpacts/js/optimer_bold.typeface.js', 'threedimpacts/js/3dmanager.js']
 
+%# " If the auth got problem, we bail out"
+%if not valid_user:
+<script type="text/javascript">
+  window.location.replace("/login");
+</script>
+%# " And if the javascript is not follow? not a problem, we gave no data here." 
+%end
+
+
 
 		<div id="container"></div>
 

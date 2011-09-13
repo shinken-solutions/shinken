@@ -5,6 +5,14 @@
 %include header js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/impacts.css'], refresh=True, menu_part = '/impacts'
 
 
+%# " If the auth succeed, we go in the /problems page "
+%if not valid_user:
+<script type="text/javascript">
+  window.location.replace("/login");
+</script>
+%# " And if the javascript is not follow? not a problem, we gave no data here."
+%end
+
 
 
     <div class="whole-page">
@@ -84,7 +92,6 @@
 	      <img src="static/images/star.png">
 	    </div>
 	  %end
-
 
 	  <center>
 	    <div class="impact-row"><span class="impact-inpb-name">{{impact.get_full_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span>

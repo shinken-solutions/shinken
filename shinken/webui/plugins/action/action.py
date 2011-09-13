@@ -7,6 +7,14 @@ from shinken.external_command import ExternalCommand, ExternalCommandManager
 
 # Our page
 def get_page(cmd=None):
+
+    # First we look for the user sid
+    # so we bail out if it's a false one
+    sid = app.request.get_cookie("sid")
+    if not app.is_valid(sid):
+        return {'status' : 401, 'text' : 'Invalid session'}
+
+
     now = int(time.time())
     print "Ask us an /action page", cmd
     elts = cmd.split('/')

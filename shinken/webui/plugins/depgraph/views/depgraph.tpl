@@ -8,6 +8,16 @@
 %include header title='Invalid element name'
 
 Invalid element
+
+%# " If we got auth problem, we bail out"
+%if not valid_user:
+<script type="text/javascript">
+  window.location.replace("/login");
+</script>
+%# " And if the javascript is not follow? not a problem, we gave no data here." 
+%end
+
+
 %else:
 
 %helper = app.helper

@@ -10,6 +10,15 @@
 %include header title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/accordion.css'], refresh=True, menu_part='/problems'
 
 
+%# " If the auth got problem, we bail out"
+%if not valid_user:
+<script type="text/javascript">
+  window.location.replace("/login");
+</script>
+%# " And if the javascript is not follow? not a problem, we gave no data here." 
+%end
+
+
 	 
 <div id="left_container" class="grid_2">
   <div id="dummy_box" class="box_gradient_horizontal"> 

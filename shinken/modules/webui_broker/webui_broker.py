@@ -34,7 +34,7 @@ import traceback
 import select
 import threading
 import base64
-
+import cPickle
 
 from shinken.basemodule import BaseModule
 from shinken.message import Message
@@ -68,6 +68,7 @@ class Webui_broker(BaseModule):
 
         self.port = int(getattr(modconf, 'port', '8080'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
+        self.sessions_file = getattr(modconf, 'sessions_file', 'sessions.ret')
         self.http_backend = getattr(modconf, 'http_backend', 'wsgiref')
         print "Webui : using the backend", self.http_backend
 
@@ -77,8 +78,40 @@ class Webui_broker(BaseModule):
         self.helper = helper
         self.request = request
         self.response = response
-        self.sessions = {}
+        self.load_sessions()
         
+
+    # Try to load sessions
+    def load_sessions(self):
+        # If the session file exist, try to load it
+        p = os.path.abspath(self.sessions_file)
+        if os.path.isfile(p):
+            print "Trying to read the session file", p
+            try:
+                f = open(p, 'rb')
+                self.sessions = cPickle.load(f)
+                f.close()
+                return
+            except Exception, exp:
+                print "Error in loading session file : %s" % exp
+        else:
+            print "No session file at", p
+        # Error : init sessions as void
+        self.sessions = {}        
+
+
+    # We got a new session, so we try to save our file
+    def save_sessions(self):
+        # If the session file exist, try to load it
+        p = os.path.abspath(self.sessions_file)
+        print "Trying to save the session file", p
+        try:
+            f = open(p, 'wb')
+            cPickle.dump(self.sessions, f)
+            f.close()
+            return
+        except Exception, exp:
+            print "Error in saving session file : %s" % exp
 
 
     # Called by Broker so we can do init stuff
@@ -286,7 +319,12 @@ class Webui_broker(BaseModule):
         print "Got", c
         if c is not None:
             sid = base64.urlsafe_b64encode(os.urandom(30))
-            self.sessions[sid] = c.get_name()
+            self.sessions[sid] = {'contact_name' : c.get_name(), 'logon_time' : time.time()}
+            # Ok, we now save our sessions
+            self.save_sessions()
             return sid
         return None
 
+
+    def is_valid(self, sid):
+        return sid in self.sessions

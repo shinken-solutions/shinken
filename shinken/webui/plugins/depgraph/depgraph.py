@@ -3,20 +3,26 @@
 app = None
 
 
-def show_host(name):
-    return get_data(name)
-
-
 def depgraph_host(name):
-    return get_data(name)
+    # First we look for the user sid
+    # so we bail out if it's a false one
+    sid = app.request.get_cookie("sid")
+    if not app.is_valid(sid):
+        return {'app' : app, 'elt' : None, 'valid_user' : False}
 
-def get_data(name):
     h = app.datamgr.get_host(name)
-    return {'app' : app, 'elt' : h}
+    return {'app' : app, 'elt' : h, 'valid_user' : True}
+
 
 def depgraph_srv(hname, desc):
+    # First we look for the user sid
+    # so we bail out if it's a false one
+    sid = app.request.get_cookie("sid")
+    if not app.is_valid(sid):
+        return {'app' : app, 'elt' : None, 'valid_user' : False}
+
     s = app.datamgr.get_service(hname, desc)
-    return {'app' : app, 'elt' : s}
+    return {'app' : app, 'elt' : s, 'valid_user' : True}
 
 pages = {depgraph_host : { 'routes' : ['/depgraph/:name'], 'view' : 'depgraph', 'static' : True},
          depgraph_srv : { 'routes' : ['/depgraph/:hname/:desc'], 'view' : 'depgraph', 'static' : True},

@@ -8,6 +8,17 @@
 %include header title='Invalid name'
 
 Invalid element name
+
+
+%# " If the auth got problem, we are here and bailout"
+%if not valid_user:
+<script type="text/javascript">
+  window.location.replace("/login");
+</script>
+%# " And if the javascript is not followed? not a problem, we gave no data here." 
+%end
+
+
 %else:
 
 %helper = app.helper
@@ -21,7 +32,7 @@ Invalid element name
 %include header title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/tabs.css', 'eltdetail/eltdetail.css', 'eltdetail/switchbuttons.css', 'eltdetail/hide.css', 'eltdetail/gesture.css'], top_right_banner_state=top_right_banner_state 
 
 
-%#  "Thsi is the background canvas for all gesture detection things " 
+%#  "This is the background canvas for all gesture detection things " 
 <canvas id="canvas"></canvas>
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>

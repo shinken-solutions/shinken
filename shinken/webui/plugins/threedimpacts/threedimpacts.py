@@ -20,23 +20,17 @@ def hst_srv_sort(s1, s2):
 
 
 def show_3dimpacts():
-    # We need to output impacts:
-    # 1 : Mails/Critical/criticity=5/since one hour/No mails can be send nor received   ---> 1, 2
-    # 2 : ERP/Critical/criticiy=4/since one day/""       ---> 1
-    # 3 : FileShare@server/warning/criticity=3/since one day/No more file access   ---> 1
-    # 4 : Print@server/Warning/since one day/Printer service is stopped  ---> 1,2
-
-
-    # problems:
-    # 1 : router-us is Down since 93294 with output Return in Dummy 2
-    # 2 : router-asia is Down since one hour with output connexion failed
-    # 3 : db-server/Mssql is Warning since one hour with output connexion failed
+    # First we look for the user sid
+    # so we bail out if it's a false one
+    sid = app.request.get_cookie("sid")
+    if not app.is_valid(sid):
+        return {'app' : app, 'impacts' : [], 'valid_user' : False}
 
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
 
 
-    return {'app' : app, 'impacts' : all_imp_impacts}
+    return {'app' : app, 'impacts' : all_imp_impacts, 'valid_user' : True}
 
 
 
