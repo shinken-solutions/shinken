@@ -24,6 +24,8 @@
 
 #It's ugly I know....
 from shinken_test import *
+#time.time = original_time_time
+#time.sleep = original_time_sleep
 from shinken.objects.timeperiod import Timeperiod
 
 
@@ -75,10 +77,12 @@ class TestConfig(ShinkenTest):
 
         # be sure we have some time before a new minute begins.
         # otherwise we get a race condition and a failed test here.
-        x = time.gmtime()
+        now = time.time()
+        x = time.gmtime(now)
         while x.tm_sec < 50:
             time.sleep(1)
-            x = time.gmtime()
+            now = time.time()
+            x = time.gmtime(now)
 
         now = time.time()
         print "now it is", time.asctime(time.localtime(now))
@@ -100,11 +104,23 @@ class TestConfig(ShinkenTest):
         self.assert_(not hasattr(svc3, 'in_maintenance'))
         #
         # now let the scheduler run and wait until the maintenance period begins
-        #
-        self.scheduler_loop(3, [[svc3, 0, 'OK']], do_sleep=True)
+        # it is now 10 seconds before the full minute. run for 30 seconds
+        # in 1-second-intervals. this should be enough to trigger the downtime
+        # in 10 seconds from now the downtime starts
+        print "scheduler_loop start", time.asctime(time.localtime(time.time()))
+        self.scheduler_loop(30, [[svc3, 0, 'OK']], do_sleep=True, sleep_time=1)
+        print "scheduler_loop end  ", time.asctime(time.localtime(time.time()))
 
         self.assert_(hasattr(svc3, 'in_maintenance'))
         self.assert_(len(self.sched.downtimes) == 1)
+        try:
+            print "........................................."
+            print self.sched.downtimes[1]
+            print "downtime starts", time.asctime(self.sched.downtimes[1].start_time)
+            print "downtime ends  ", time.asctime(self.sched.downtimes[1].end_time)
+        except:
+            print "looks like there is no downtime"
+            pass
         self.assert_(len(svc3.downtimes) == 1)
         self.assert_(svc3.downtimes[0] in self.sched.downtimes.values())
         self.assert_(svc3.in_scheduled_downtime)
@@ -115,8 +131,10 @@ class TestConfig(ShinkenTest):
 
         #
         # now the downtime should expire...
-        #
-        self.scheduler_loop(3, [[svc3, 0, 'OK']], do_sleep=True)
+        # we already have 20 seconds (after 10 seconds of startup).
+        # the downtime is 120 seconds long.
+        # run the remaining 100 seconds plus 5 seconds just to be sure
+        self.scheduler_loop(105, [[svc3, 0, 'OK']], do_sleep=True, sleep_time=1)
 
         self.assert_(len(self.sched.downtimes) == 0)
         self.assert_(len(svc3.downtimes) == 0)
