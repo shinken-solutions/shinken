@@ -20,6 +20,7 @@ sudo rm -fr var/*.cache
 sudo rm -fr var/rw/*cmd
 sudo rm -fr /tmp/retention.dat
 sudo rm -fr /tmp/*debug
+sudo rm -fr test/tmp/livelogs*
 sudo rm -fr /etc/default/shinken
 sudo rm -fr bin/default/shinken
 
