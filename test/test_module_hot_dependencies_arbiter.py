@@ -41,6 +41,7 @@ from shinken.modules.hot_dependencies_arbiter import Hot_dependencies_arbiter, g
 modconf = Module()
 modconf.module_name = "PickleRetention"
 modconf.module_type = hot_dependencies_arbiter.properties['type']
+modconf.modules = []
 modconf.properties = hot_dependencies_arbiter.properties.copy()
 
 

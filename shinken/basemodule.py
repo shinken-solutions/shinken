@@ -78,7 +78,7 @@ Example of task that a shinken module can do:
         self.myconf = mod_conf
         self.name = mod_conf.get_name()
         # We can have sub modules
-        self.modules = mod_conf.modules
+        self.modules = getattr(mod_conf, 'modules', [])
         self.props = mod_conf.properties.copy()
         self.properties = self.props # TODO: choose between 'props' or 'properties'..
         self.interrupted = False

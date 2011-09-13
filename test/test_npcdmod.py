@@ -39,6 +39,7 @@ sys.setcheckinterval(10000)
 modconf = Module()
 modconf.module_name = "ncpd"
 modconf.module_type = npcdmod_broker.properties['type']
+modconf.modules = []
 modconf.properties = npcdmod_broker.properties.copy()
 
 

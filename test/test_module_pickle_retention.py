@@ -37,6 +37,7 @@ from shinken.modules.pickle_retention_file_scheduler import get_instance
 modconf = Module()
 modconf.module_name = "PickleRetention"
 modconf.module_type = pickle_retention_file_scheduler.properties['type']
+modconf.modules = []
 modconf.properties = pickle_retention_file_scheduler.properties.copy()
 
 
