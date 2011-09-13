@@ -74,6 +74,9 @@ class Webui_broker(BaseModule, Daemon):
         self.host = getattr(modconf, 'host', '0.0.0.0')
         self.sessions_file = getattr(modconf, 'sessions_file', 'sessions.ret')
         self.http_backend = getattr(modconf, 'http_backend', 'wsgiref')
+        # Load the photo dir and make it a absolute path
+        self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
+        self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui : using the backend", self.http_backend
 
         self.rg = Regenerator()
@@ -93,6 +96,7 @@ class Webui_broker(BaseModule, Daemon):
 
         self.log = logger
         self.load_sessions()
+        self.check_photo_dir()
         
 
     # Try to load sessions
@@ -128,6 +132,18 @@ class Webui_broker(BaseModule, Daemon):
             print "Error in saving session file : %s" % exp
 
 
+    # We check if the photo directory exists. If not, try to create it
+    def check_photo_dir(self):
+        print "Checking photo path", self.photo_dir
+        if not os.path.exists(self.photo_dir):
+            print "Truing to create photo dir", self.photo_dir
+            try:
+                os.mkdir(self.photo_dir)
+            except Exception, exp:
+                print "Photo dir creation failed", exp
+                
+        
+
     # Called by Broker so we can do init stuff
     # TODO : add conf param to get pass with init
     # Conf from arbiter!
@@ -135,6 +151,10 @@ class Webui_broker(BaseModule, Daemon):
         print "Init of the Webui '%s'" % self.name
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
+        for inst in self.modules_manager.instances:
+            f = getattr(inst, 'load', None)
+            if f and callable(f):
+                f(self)
 
 
 
@@ -208,16 +228,25 @@ class Webui_broker(BaseModule, Daemon):
         print "Data thread started"
         while True:
            b = self.to_q.get()
-           print "Got a brok"
+           #print "Got a brok"
            # For updating, we cannot do it while
            # answer queries, so lock it
            self.global_lock.acquire()
            try:
-              print "Got data lock, manage brok"
-              self.rg.manage_brok(b)
+               #print "Got data lock, manage brok"
+               self.rg.manage_brok(b)
+               for mod in self.modules_manager.get_internal_instances():
+                   try:
+                       mod.manage_brok(b)
+                   except Exception , exp:
+                       print exp.__dict__
+                       logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                       logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                       logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                       self.modules_manager.set_to_restart(mod)
            finally:
-              print "Release data lock"
-              self.global_lock.release()
+               #print "Release data lock"
+               self.global_lock.release()
 
 
     # Here we will load all plugins (pages) under the webui/plugins
@@ -317,6 +346,14 @@ class Webui_broker(BaseModule, Daemon):
 
 
     def declare_common_static(self):
+        @route('/static/photos/:path#.+#')
+        def give_photo(path):
+            # If the file really exist, give it. If not, give a dummy image.
+            if os.path.exists(os.path.join(self.photo_dir, path+'.jpg')):
+                return static_file(path+'.jpg', root=self.photo_dir)
+            else:
+                return static_file('images/user.png', root=os.path.join(bottle_dir, 'htdocs'))
+
         # Route static files css files
         @route('/static/:path#.+#')
         def server_static(path):
@@ -326,6 +363,8 @@ class Webui_broker(BaseModule, Daemon):
         @route('/favicon.ico')
         def give_favicon():
             return static_file('favicon.ico', root=os.path.join(bottle_dir, 'htdocs', 'images'))
+
+
 
 
 

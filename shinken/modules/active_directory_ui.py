@@ -23,6 +23,7 @@ like check passwords, or get photos.
 """
 
 import ldap
+import os
 
 from shinken.basemodule import BaseModule
 
@@ -63,12 +64,76 @@ class AD_Webui(BaseModule):
         self.con = ldap.initialize(self.ldap_uri)
         self.con.set_option(ldap.OPT_REFERRALS,0)
 
-        print "Trying to connect to AD/Ldap"
+        print "Trying to connect to AD/Ldap", self.ldap_uri, self.username, self.password, self.basedn
         # Any errors will throw an ldap.LDAPError exception
         # or related exception so you can ignore the result
         self.con.simple_bind_s(self.username, self.password)
         print "AD/Ldap Connection done"
         
 
+    # To load the webui application
+    def load(self, app):
+        self.app = app
+
+
+    #Get a brok, parse it, and put in in database
+    #We call functions like manage_ TYPEOFBROK _brok that return us queries
+    def manage_brok(self, b):
+        type = b.type
+        manager = 'manage_'+type+'_brok'
+        f = getattr(self, manager, None)
+        if f:
+            f(b)
 
     
+
+    # One of our goal is to look for contacts and get all pictures
+    def manage_initial_broks_done_brok(self, b):
+        print "AD/LDAP : manage_initial_broks_done_brok, go for pictures"
+        searchScope = ldap.SCOPE_SUBTREE
+        ## retrieve all attributes - again adjust to your needs - see documentation for more options
+        retrieveAttributes = ["userPrincipalName", "thumbnailPhoto", "samaccountname", "email"]
+
+        print "Contacts?", len(self.app.datamgr.get_contacts())
+
+        for c in self.app.datamgr.get_contacts():
+            print "Doing contact", c.get_name()
+            cname = c.get_name()
+            email = c.email
+            #searchFilter = "(| (cn=j.gabes)(mail=j.gabes@blabla.com))"
+            searchFilter = "(| (samaccountname=%s)(mail=%s))" % (cname, email)
+            print "Filter", searchFilter
+            try:
+                ldap_result_id = self.con.search(self.basedn, searchScope, searchFilter, retrieveAttributes)
+                result_set = []
+                while 1:
+                    result_type, result_data = self.con.result(ldap_result_id, 0)
+                    if (result_data == []):
+                        print "No result for", cname
+                        break
+                    else:
+                        if result_type == ldap.RES_SEARCH_ENTRY:
+                            (_, elts) = result_data[0]
+                            try :
+                                account_name = elts['userPrincipalName'][0]
+                            except KeyError:
+                                account_name = str(result_data[0])
+                        # Got a result, try to get photo to write file
+                        print "account email", account_name
+                        try:
+                            photo = elts['thumbnailPhoto'][0]
+                            try:
+                                p = os.path.join(self.app.photo_dir, cname+'.jpg')
+                                f = open(p, 'wb')
+                                f.write(photo)
+                                f.close()
+                                break
+                            except Exception, exp:
+                                print "Cannot write", p, ":", exp
+                        except KeyError:
+                            print "No photo for", account_name
+            except ldap.LDAPError, e:
+                print "Ldap error", e, e.__dict__
+
+
+
