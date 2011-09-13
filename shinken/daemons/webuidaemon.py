@@ -183,7 +183,7 @@ class Webui(Daemon):
                 self.log.log(line)
 
             self.load_config_file()
-            self.do_daemon_init_and_start()
+            self.do_daemon_init_and_start(use_pyro=False)
 
             ## And go for the main loop
             self.do_mainloop()
