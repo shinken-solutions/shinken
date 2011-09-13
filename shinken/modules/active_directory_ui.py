@@ -55,6 +55,7 @@ class AD_Webui(BaseModule):
             self.active = False
         else:
             self.active = True
+        self.con = None
 
     # Try to connect if we got true parameter
     def init(self):
@@ -89,6 +90,8 @@ class AD_Webui(BaseModule):
 
     # One of our goal is to look for contacts and get all pictures
     def manage_initial_broks_done_brok(self, b):
+        if self.con is None:
+            return
         print "AD/LDAP : manage_initial_broks_done_brok, go for pictures"
         searchScope = ldap.SCOPE_SUBTREE
         ## retrieve all attributes - again adjust to your needs - see documentation for more options

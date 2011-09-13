@@ -372,7 +372,28 @@ class Webui_broker(BaseModule, Daemon):
         print "Checking auth of", user, password
         c = self.datamgr.get_contact(user)
         print "Got", c
-        if c is not None:
+        
+        # FIX : by default it's FALSE!!! here it's jsut for TEST!!!
+        # TODO : do not forgot this!!!
+        is_ok = (c is not None)
+        
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                f = getattr(mod, 'check_auth', None)
+                if f and callable(f):
+                    r = f(user, password)
+                    if r:
+                        is_ok = True
+                        # No need for other modules
+                        break
+            except Exception , exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)        
+
+        if is_ok and c is not None:
             sid = base64.urlsafe_b64encode(os.urandom(30))
             self.sessions[sid] = {'contact_name' : c.get_name(), 'logon_time' : time.time()}
             # Ok, we now save our sessions
