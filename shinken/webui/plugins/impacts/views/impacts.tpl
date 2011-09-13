@@ -39,8 +39,8 @@
 	  %end
 
 	    
-	  <div class="impact-icon"><img src="static/images/50x50.png"></div>
-	  <div class="impact-status-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"></div>
+%#	  <div class="impact-icon"><img src="static/images/50x50.png"></div>
+	  <div class="impact-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"></div>
 	  <div class="impact-rows">
 	    <div class="impact-row"><span class="impact-name">{{impact.get_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span>
 

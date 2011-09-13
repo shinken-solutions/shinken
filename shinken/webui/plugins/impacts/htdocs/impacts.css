@@ -130,9 +130,9 @@
 /* The impact icon (so the service one or the host one) */
 .impact-icon {
     float: left;
-    height: 50px;
+    height: 64px;
     overflow: hidden;
-    width: 50px;
+    width: 64px;
     margin-top: 3px;
 }
 
