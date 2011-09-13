@@ -74,7 +74,7 @@
 	<div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
 	  <div class="right-panel-top"> 
 
-	    <div class="pblink" id="{{imp_id}}"> Close </div>
+	    <div class="pblink" id="{{imp_id}}"> <img style="width: 16px;height: 16px;" src='/static/images/disabled.png'> Close </div>
 	  </div><br style="clear: both">
 
 	  <div class="impact-icon-big"><img style="width: 80px;height: 80px;" src="{{helper.get_icon_state(impact)}}">
@@ -90,6 +90,9 @@
 	    <div class="impact-row"><span class="impact-inpb-name">{{impact.get_full_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span>
 	    </div>
 	  </center>
+
+	  <div style="float:right;"> <a href="{{!helper.get_link_dest(impact)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a>
+	  </div>
 
 	  %##### OK, we print root problem NON ack first
 
