@@ -45,7 +45,7 @@
 
 #nav ul li a:hover, #nav ul li a#selected {
 	color: #FFFFFF;
-	background: transparent url(../img/icons/pointer.gif) bottom center no-repeat;
+	background: transparent url(/static/images/pointer.gif) bottom center no-repeat;
 }
 
 /* ----------------------------------------------------------------

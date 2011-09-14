@@ -19,11 +19,11 @@
 
     <title>{{title or 'No title'}}</title>
 
-    <link rel="stylesheet" type="text/css" href="/static/nav.css">
-    <link rel="stylesheet" type="text/css" href="/static/reset.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="/static/text.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="/static/grid.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/css/nav.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/reset.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/css/text.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/css/grid.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/ccs/layout.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/message.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/multibox.css" media="screen">
 
