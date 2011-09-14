@@ -26,8 +26,11 @@ def show_impacts():
     # First we look for the user sid
     # so we bail out if it's a false one
     sid = app.request.get_cookie("sid")
+    user = app.get_user(sid)
+    print "Impact give user", user
+
     if not app.is_valid(sid):
-        return {'app' : app, 'impacts' : {}, 'valid_user' : False}
+        return {'app' : app, 'impacts' : {}, 'valid_user' : False, 'user' : user}
 
     
     all_imp_impacts = app.datamgr.get_important_elements()
@@ -41,7 +44,7 @@ def show_impacts():
         imp_id += 1
         impacts[imp_id] = imp
 
-    return {'app' : app, 'impacts' : impacts, 'valid_user' : True}
+    return {'app' : app, 'impacts' : impacts, 'valid_user' : True, 'user' : user}
 
 
 

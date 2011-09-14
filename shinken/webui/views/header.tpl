@@ -7,6 +7,7 @@
 %if not 'print_menu' in locals() : print_menu = True
 %if not 'print_header' in locals() : print_header = True
 %if not 'refresh' in locals() : refresh = False
+%if not 'user' in locals() : user = None
 
 %# If not need, disable the top right banner
 %if not 'top_right_banner_state' in locals() : top_right_banner_state = 0
@@ -25,6 +26,11 @@
     <link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/message.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/multibox.css" media="screen">
+
+    %if user is not None:
+    <link rel="stylesheet" type="text/css" href="/static/userinfo.css" media="screen">
+    %end
+
     <script type="text/javascript" src="/static/js/mootools.js"></script>
     <script type="text/javascript" src="/static/js/mootools-more.js"></script>
     <script type="text/javascript" src="/static/js/mootools-message.js"></script>
@@ -37,6 +43,11 @@
     <script type="text/javascript" src="/static/js/action.js"></script>
     <script type="text/javascript" src="/static/js/opacity.js"></script>
     <script type="text/javascript" src="/static/js/multibox.js"></script>
+
+    %if user is not None:
+    <script type="text/javascript" src="/static/js/userinfo.js"></script>
+    %end
+
     %if refresh:
     <script type="text/javascript" src="/static/js/reload.js"></script>
     %end
@@ -57,11 +68,47 @@
   </head>
   <body class="main">
 
+    %if user is not None:
+    <!-- Userinfo -->
+    <div id="userinfo">
+      <div class="userinfoContent">
+	
+	<div class="left"><img style="width:60px; height:80px;" src='/static/photos/{{user.get_name()}}'>
+	</div>
+	<div>
+	  <p>Name : {{user.get_name()}}</p>
+	  <p>Email : {{user.email}}</p>
+        </div>
+
+
+
+	<div class="userinfoClose"><a href="#" id="closeUserinfo"><img style="width: 16px;height: 16px;" src="/static/images/disabled.png" title="">Close</a></div>
+      </div> <!-- /userinfo -->
+
+      <div class="clearfix"></div>
+    </div>
+    %# " End of the userinfo panel "
+    %end
 
 		<div class="container_16">
 %if print_header:
 			<!-- Header START -->
 			<div id="header" class="grid_16">
+			  
+
+    %if user is not None:
+      <div id="top">
+	<!-- userinfo -->
+	<ul class="userinfo">
+	  <li class="left">&nbsp;</li>
+	  <li>Hello {{user.get_name()}}!</li>
+	  <li>|</li>
+	  <li><a id="toggleUserinfo" href="#">Parameters</a></li>
+	</ul> <!-- / userinfo -->
+      </div><!-- / top -->
+    %# " End of the userinfo activator "
+    %end
+
 				<h1 class="box_textshadow">Shinken</h1>
 			%# Set the Top right banner if need
 				%if top_right_banner_state != 0:

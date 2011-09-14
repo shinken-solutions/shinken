@@ -405,3 +405,13 @@ class Webui_broker(BaseModule, Daemon):
 
     def is_valid(self, sid):
         return sid in self.sessions
+
+
+    def get_user(self, sid):
+        e = self.sessions.get(sid, None)
+        if e is None:
+            return None
+        cname = e['contact_name']
+        c = self.datamgr.get_contact(cname)
+        return c
+        
