@@ -6,7 +6,30 @@ function submitform()
 {
 document.forms["loginform"].submit();
 }
+
+/* Catch the key ENTER and launch the form 
+ Will be link in the password field
+*/
+function submitenter(myfield,e){
+  var keycode;
+  if (window.event) keycode = window.event.keyCode;
+  else if (e) keycode = e.which;
+  else return true;
+
+
+  if (keycode == 13){
+    submitform();
+    return false;
+  }else
+   return true;
+}
+
 </script>
+
+
+
+
+
 
 				<div id="login-container" class="prefix_custom_2">
 				<div class="grid_8">
@@ -21,7 +44,7 @@ document.forms["loginform"].submit();
 						</div>
 						<div class="text-field">
 							<label for="password">Password:</label>
-							<input name="password" type="password" tabindex="2" size="30">
+							<input name="password" type="password" tabindex="2" size="30" onKeyPress="return submitenter(this,event)">
 					  </div>
 						<input type="hidden" value="0" name="remember_me">
 					<div class="check-field">
