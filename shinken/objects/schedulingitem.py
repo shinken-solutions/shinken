@@ -590,6 +590,10 @@ class SchedulingItem(Item):
         # if not, only if we enable them (auto launch)
         if self.event_handler is None or ((not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd):
             return
+        
+        # If we do not force and we are in downtime, bailout
+        if not externalcmd and self.in_scheduled_downtime:
+            return
 
         m = MacroResolver()
         data = self.get_data_for_event_handler()

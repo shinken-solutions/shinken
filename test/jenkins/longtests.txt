@@ -78,6 +78,7 @@ test_uihelper.py
 test_linkify_template.py
 test_module_on_module.py
 test_disable_active_checks.py
+test_no_event_handler_during_downtime.py
 test_timeout.py
 
 # takes long
