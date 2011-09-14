@@ -86,6 +86,44 @@ class AD_Webui(BaseModule):
         if f:
             f(b)
 
+
+    # Give the entry for a contact
+    def find_contact_entry(self, contact):
+        if self.con is None:
+            return None
+        
+        print "AD/LDAP : search for contact", contact.get_name()
+        searchScope = ldap.SCOPE_SUBTREE
+        ## retrieve all attributes
+        retrieveAttributes = ["userPrincipalName", "thumbnailPhoto", "samaccountname", "email"]
+
+        cname = contact.get_name()
+        email = contact.email
+        searchFilter = "(| (samaccountname=%s)(mail=%s))" % (cname, email)
+        print "Filter", searchFilter
+        try:
+            ldap_result_id = self.con.search(self.basedn, searchScope, searchFilter, retrieveAttributes)
+            result_set = []
+            while 1:
+                result_type, result_data = self.con.result(ldap_result_id, 0)
+                if (result_data == []):
+                    print "No result for", cname
+                    return None
+
+                if result_type == ldap.RES_SEARCH_ENTRY:
+                    (_, elts) = result_data[0]
+                    try :
+                        account_name = elts['userPrincipalName'][0]
+                    except KeyError:
+                        account_name = str(result_data[0])
+                    # Got a result, try to get photo to write file
+                    print "Find account printicpalname", account_name
+                    return elts
+        except ldap.LDAPError, e:
+            print "Ldap error", e, e.__dict__
+            return None
+        
+
     
 
     # One of our goal is to look for contacts and get all pictures
@@ -93,6 +131,7 @@ class AD_Webui(BaseModule):
         if self.con is None:
             return
         print "AD/LDAP : manage_initial_broks_done_brok, go for pictures"
+
         searchScope = ldap.SCOPE_SUBTREE
         ## retrieve all attributes - again adjust to your needs - see documentation for more options
         retrieveAttributes = ["userPrincipalName", "thumbnailPhoto", "samaccountname", "email"]
@@ -100,43 +139,66 @@ class AD_Webui(BaseModule):
         print "Contacts?", len(self.app.datamgr.get_contacts())
 
         for c in self.app.datamgr.get_contacts():
-            print "Doing contact", c.get_name()
-            cname = c.get_name()
-            email = c.email
-            #searchFilter = "(| (cn=j.gabes)(mail=j.gabes@blabla.com))"
-            searchFilter = "(| (samaccountname=%s)(mail=%s))" % (cname, email)
-            print "Filter", searchFilter
+            print "Doing photo lookup for contact", c.get_name()
+            elts = self.find_contact_entry(c)
+
+            if elts is None:
+                print "No ldap entry for", c.get_name()
+                continue
+
+            # Ok, try to get photo from the entry
             try:
-                ldap_result_id = self.con.search(self.basedn, searchScope, searchFilter, retrieveAttributes)
-                result_set = []
-                while 1:
-                    result_type, result_data = self.con.result(ldap_result_id, 0)
-                    if (result_data == []):
-                        print "No result for", cname
-                        break
-                    else:
-                        if result_type == ldap.RES_SEARCH_ENTRY:
-                            (_, elts) = result_data[0]
-                            try :
-                                account_name = elts['userPrincipalName'][0]
-                            except KeyError:
-                                account_name = str(result_data[0])
-                        # Got a result, try to get photo to write file
-                        print "account email", account_name
-                        try:
-                            photo = elts['thumbnailPhoto'][0]
-                            try:
-                                p = os.path.join(self.app.photo_dir, cname+'.jpg')
-                                f = open(p, 'wb')
-                                f.write(photo)
-                                f.close()
-                                break
-                            except Exception, exp:
-                                print "Cannot write", p, ":", exp
-                        except KeyError:
-                            print "No photo for", account_name
-            except ldap.LDAPError, e:
-                print "Ldap error", e, e.__dict__
+                photo = elts['thumbnailPhoto'][0]
+                try:
+                    p = os.path.join(self.app.photo_dir, c.get_name()+'.jpg')
+                    f = open(p, 'wb')
+                    f.write(photo)
+                    f.close()
+                    print "Phto wrote for", c.get_name()
+                    break
+                except Exception, exp:
+                    print "Cannot write", p, ":", exp
+            except KeyError:
+                print "No photo for", account_name
 
 
 
+    # Try to auth a user in the ldap dir
+    def check_auth(self, user, password):
+        # If we do not have an ldap uri, no auth :)
+        if not self.ldap_uri:
+            return False
+        
+        print "Trying to auth by ldap", user, password
+
+        c = self.app.datamgr.get_contact(user)
+
+        # first we need to find the principalname of this entry
+        # because it can be a user name like j.gabes, but we should auth by ldap
+        # with j.gabes@google.com for example
+        elts = self.find_contact_entry(c)
+
+        try :
+            account_name = elts['userPrincipalName'][0]
+        except KeyError:
+            print "Cannot find the userPrincipalName entry, so use the user entry"
+            account_name = user
+
+        local_con = ldap.initialize(self.ldap_uri)
+        local_con.set_option(ldap.OPT_REFERRALS,0)
+        
+        # Any errors will throw an ldap.LDAPError exception
+        # or related exception so you can ignore the result
+        try:
+            local_con.simple_bind_s(account_name, password)
+            print "AD/Ldap Connection done with", user, password
+            return True
+        except ldap.LDAPError, exp:
+            print "LMdap auth error:", exp
+        
+        # The local_con will automatically close this connexion when 
+        # the object will be deleted, so no close need
+
+        # No good? so no auth :)
+        return False
+        
