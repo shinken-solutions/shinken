@@ -362,7 +362,7 @@ td.actions a {
 }
 
 .state_warning {
-        color: #FFDD00;
+        color: orange;
         font-weight: bold;
 }
 
