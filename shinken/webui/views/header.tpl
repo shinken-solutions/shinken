@@ -24,11 +24,11 @@
     <link rel="stylesheet" type="text/css" href="/static/css/text.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/css/grid.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/static/css/layout.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="/static/message.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="/static/multibox.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/css/message.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/css/multibox.css" media="screen">
 
     %if user is not None:
-    <link rel="stylesheet" type="text/css" href="/static/userinfo.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/css/userinfo.css" media="screen">
     %end
 
     <script type="text/javascript" src="/static/js/mootools.js"></script>
