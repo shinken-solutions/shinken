@@ -1,5 +1,5 @@
 %import time
-%start = time.time()
+%t0 = time.time()
 
 %helper = app.helper
 %datamgr = app.datamgr
@@ -7,7 +7,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/css/accordion.css'], refresh=True, menu_part='/problems', user=user
+%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css'], refresh=True, menu_part='/problems', user=user
 
 
 %# " If the auth got problem, we bail out"
@@ -47,6 +47,26 @@
 </div>
 
 <div class="grid_13">
+
+  %if navi is not None:
+      <div id="pagination">
+	<div class='pagenavi'>
+	  %for name, start, end, is_current in navi:
+	     %if is_current:
+	        <span class='current'>{{name}}</span>
+	     %elif start == None or end == None:
+		<span class='extend'>...</span>
+             %else:
+		<a href='/problems?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+	     %end
+          %end
+	</div>
+      </div>
+  %# end of the navi part
+  %end
+
+
+
   <div id="accordion">
     %# " We will print Business impact level of course"
     %imp_level = 10
@@ -150,15 +170,35 @@
 	</div>
 	%end
       </div>
+
+
     %end
   </div>
+
+  %if navi is not None:
+      <div id="pagination">
+	<div class='pagenavi'>
+	  %for name, start, end, is_current in navi:
+	     %if is_current:
+	        <span class='current'>{{name}}</span>
+	     %elif start == None or end == None:
+		<span class='extend'>...</span>
+             %else:
+		<a href='/problems?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+	     %end
+          %end
+	</div>
+      </div>
+  %# end of the navi part
+  %end
+
       
 </div>
 
 <div class="clear"></div>
 </div>
 
-Page generated in {{"%.2f" % (time.time() - start)}} seconds
+Page generated in {{"%.2f" % (time.time() - t0)}} seconds
 %include footer
 
 

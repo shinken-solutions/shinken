@@ -1,5 +1,8 @@
 
 
+%# " We should limit the number of impactto show here. Too much is jsut useless "
+%max_impacts = 200
+
 %print 'Elt value?', elt
 %import time
 
@@ -227,6 +230,11 @@ Invalid element name
 	  %nb = 0
 	  %for s in helper.get_host_services_sorted(elt):
 	  %nb += 1
+
+	  %# " We put a max imapct to print, bacuse too high is just useless"
+	  %if nb > max_impacts:
+	  %   break 
+
 	  %if nb == 8:
 	  <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
 	  %end

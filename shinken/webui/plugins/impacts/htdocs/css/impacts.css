@@ -78,7 +78,7 @@
 }
 
 .impact-active{
-    background-image: url("images/right-black-arrow.png");
+    background-image: url("/static/images/right-black-arrow.png");
     color: #FFF!important;
 }
 

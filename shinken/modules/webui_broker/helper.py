@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -22,6 +23,7 @@
 
 import time
 import copy
+import math
 try:
     import json
 except ImportError:
@@ -110,7 +112,7 @@ class Helper(object):
     def print_duration(self, t, just_duration=False, x_elts=0):
         if t == 0 or t == None:
             return 'N/A'
-        print "T", t
+        #print "T", t
         # Get the difference between now and the time of the user
         seconds = int(time.time()) - int(t)
         
@@ -126,11 +128,11 @@ class Helper(object):
         
         # Now manage all case like in the past
         seconds = abs(seconds)
-        print "In future?", in_future
+        #print "In future?", in_future
 
-        print "sec", seconds
+        #print "sec", seconds
         seconds = long(round(seconds))
-        print "Sec2", seconds
+        #print "Sec2", seconds
         minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)
         days, hours = divmod(hours, 24)
@@ -162,7 +164,7 @@ class Helper(object):
             if seconds > 0:
                 duration.append('%ds' % seconds)
 
-        print "Duration", duration
+        #print "Duration", duration
         # Now filter the number of printed elements if ask
         if x_elts >= 1:
             duration = duration[:x_elts]
@@ -426,6 +428,51 @@ class Helper(object):
         else:
             return '/static/images/state_%s.png' % ico
         
+
+
+
+    # Get 
+    def get_navi(self, total, pos, step=30):
+        step = float(step)
+        nb_pages = math.ceil(total / step)
+        current_page = int(pos / step)
+        
+        step = int(step)
+
+        res = []
+
+        if nb_pages == 0 or nb_pages == 1:
+            return None
+
+        if current_page >= 2:
+            # Name, start, end, is_current
+            res.append(('« First', 0, step, False))
+            res.append(('...', None, None, False))
+            
+
+        print "Range,", current_page - 1, current_page + 1
+        for i in xrange(current_page - 1, current_page + 2):
+            if i < 0:
+                continue
+            print "Doing PAGE", i
+            is_current = (i == current_page)
+            start = int(i*step)
+            end = int((i+1) * step)
+            res.append(('%d' % (i+1), start, end, is_current))
+
+        if current_page < nb_pages - 2:
+            start = int((nb_pages - 1)*step)
+            end = int(nb_pages*step)
+            res.append(('...', None, None, False))
+            res.append(('Last »', start, end, False))
+
+        print "Total :", total, "pos", pos, "step", step
+        print "nb pages", nb_pages, "current_page", current_page
+    
+        print "Res", res
+
+        return res
+
     
 
 helper = Helper()
