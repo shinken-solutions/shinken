@@ -1,2 +1,5 @@
-%rebase layout title='FooBar'
-<div> <h1> Rebase Layout </h1> </div>
+
+%rebase layout globals()
+<div> <h1> Rebase Layout {{host_name}} </h1> </div>
+
+			{{!'<br>'.join(globals())}}
