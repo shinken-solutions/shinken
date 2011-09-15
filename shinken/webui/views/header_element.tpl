@@ -13,7 +13,8 @@
     %# " End of the userinfo activator "
     %end
     
-      <h1 class="box_textshadow">Shinken</h1>
+	<h1 class="box_textshadow">Shinken</h1>
+
       %# Set the Top right banner if need
       %if top_right_banner_state != 0:
       <div id="animate-area-back-1">
