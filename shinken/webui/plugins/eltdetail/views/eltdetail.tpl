@@ -5,7 +5,7 @@
 
 %# If got no Elt, bailout
 %if not elt:
-%include header title='Invalid name'
+%rebase layou title='Invalid name'
 
 Invalid element name
 
@@ -29,7 +29,7 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%include header title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user
 
 
 %#  "This is the background canvas for all gesture detection things " 

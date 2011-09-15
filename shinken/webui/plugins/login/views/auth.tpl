@@ -1,4 +1,4 @@
-%include header title='Shinken UI login', print_menu=False
+%rebase layout title='Shinken UI login', print_menu=False
 
 
 
