@@ -155,7 +155,6 @@ class AD_Webui(BaseModule):
                     f.write(photo)
                     f.close()
                     print "Phto wrote for", c.get_name()
-                    break
                 except Exception, exp:
                     print "Cannot write", p, ":", exp
             except KeyError:
