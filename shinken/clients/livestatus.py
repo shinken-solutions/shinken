@@ -56,7 +56,7 @@ class LSSyncConnection:
                 self.alive = True
             except IOError, exp:
                 self.alive = False
-                print "Connexion problem", exp
+                print "Connection problem", exp
 
 
     def read(self, size):
@@ -202,7 +202,7 @@ class LSAsynConnection(asyncore.dispatcher):
                 self.alive = True
             except IOError, exp:
                 self.alive = False
-                print "Connexion problem", exp
+                print "Connection problem", exp
                 self.handle_close()
 
 
@@ -242,7 +242,7 @@ class LSAsynConnection(asyncore.dispatcher):
 
 
     def handle_close(self):
-        print "Closing connexion"
+        print "Closing connection"
         self.current = None
         self.queries = []
         self.close()
@@ -356,7 +356,7 @@ class LSAsynConnection(asyncore.dispatcher):
 
     def launch_raw_query(self, query):
         if not self.alive:
-            print "Cannot launch query. Connexion is closed"
+            print "Cannot launch query. Connection is closed"
             return None
 
         if not self.is_finished():
@@ -372,9 +372,9 @@ class LSAsynConnection(asyncore.dispatcher):
 
 
 
-class LSConnexionPool(object):
+class LSConnectionPool(object):
     def __init__(self, con_addrs):
-        self.connexions = []
+        self.connections = []
         for s in con_addrs:
             if s.startswith('tcp:'):
                 s = s[4:]
@@ -386,22 +386,22 @@ class LSConnexionPool(object):
                 path = s
                 con = LSAsynConnection(path=path)
             else:
-                print "Connexion type", con, "not managed"
+                print "Connection type", con, "not managed"
 
-            self.connexions.append(con)
+            self.connections.append(con)
 
 
     def launch_raw_query(self, query):
-        for c in self.connexions:
+        for c in self.connections:
             q = Query(query)
             c.stack_query(q)
-        still_working = [c for c in self.connexions if c.alive and not c.is_finished()]
+        still_working = [c for c in self.connections if c.alive and not c.is_finished()]
         while len(still_working) > 0:
             asyncore.poll(timeout=0.001)
-            still_working = [c for c in self.connexions if c.alive and not c.is_finished()]
+            still_working = [c for c in self.connections if c.alive and not c.is_finished()]
         # Now get all results
         res = []
-        for c in self.connexions:
+        for c in self.connections:
             if len(c.get_returns()) > 0:
                 q = c.get_returns().pop()
                 r = q.result
@@ -437,6 +437,6 @@ if __name__ == "__main__":
     #r = c.launch_raw_query('GET hosts\nColumns name\n')
     #print "Result", r
 
-    cp = LSConnexionPool(['tcp:localhost:50000', 'tcp:localhost:50000'])
+    cp = LSConnectionPool(['tcp:localhost:50000', 'tcp:localhost:50000'])
     r = cp.launch_raw_query('GET hosts\nColumns name\n')
     print "Result", r

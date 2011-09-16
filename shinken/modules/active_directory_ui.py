@@ -196,7 +196,7 @@ class AD_Webui(BaseModule):
         except ldap.LDAPError, exp:
             print "LMdap auth error:", exp
         
-        # The local_con will automatically close this connexion when 
+        # The local_con will automatically close this connection when 
         # the object will be deleted, so no close need
 
         # No good? so no auth :)

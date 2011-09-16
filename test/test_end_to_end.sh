@@ -72,40 +72,43 @@ function print_date {
 
 function check_good_run {
     VAR="$1"
+    RUN="$2"
+    LOG="$3"
+
     echo "Check for $NB_SCHEDULERS Scheduler"
     check_process_nb scheduler $NB_SCHEDULERS
-    is_file_present $VAR/schedulerd.pid
+    is_file_present $RUN/schedulerd.pid
 
     echo "Check for $NB_POLLERS pollers (1 master, 1 for multiporcess module (queue manager), 4 workers)"
     check_process_nb poller $NB_POLLERS
-    is_file_present $VAR/pollerd.pid
+    is_file_present $RUN/pollerd.pid
 
     echo "Check for $NB_REACTIONNERS reactionners (1 master, 1 for multiporcess module (queue manager) 1 worker)"
     check_process_nb reactionner $NB_REACTIONNERS
-    is_file_present $VAR/reactionnerd.pid
+    is_file_present $RUN/reactionnerd.pid
 
     echo "Check for $NB_BROKERS brokers (one master, one for livestatus.dati, one for WebUI)"
     check_process_nb broker $NB_BROKERS
-    is_file_present $VAR/brokerd.pid
+    is_file_present $RUN/brokerd.pid
 
     echo "Check for $NB_RECEIVERS receivers (one master)"
     check_process_nb receiver $NB_RECEIVERS
-    is_file_present $VAR/receiverd.pid
+    is_file_present $RUN/receiverd.pid
 
 
     echo "Check for $NB_ARBITERS arbiter"
     check_process_nb arbiter $NB_ARBITERS
-    is_file_present $VAR/arbiterd.pid
+    is_file_present $RUN/arbiterd.pid
 
     echo "Now checking for good file prensence"
     ls var
-    is_file_present $VAR/nagios.log
-    string_in_file "Waiting for initial configuration" $VAR/nagios.log
-    string_in_file "First scheduling" $VAR/nagios.log
-    string_in_file "OK, all schedulers configurations are dispatched :)" $VAR/nagios.log
-    string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
-    string_in_file "OK, no more poller sent need" $VAR/nagios.log
-    string_in_file "OK, no more broker sent need" $VAR/nagios.log
+    is_file_present $LOG/nagios.log
+    string_in_file "Waiting for initial configuration" $LOG/nagios.log
+    string_in_file "First scheduling" $LOG/nagios.log
+    string_in_file "OK, all schedulers configurations are dispatched :)" $LOG/nagios.log
+    string_in_file "OK, no more reactionner sent need" $LOG/nagios.log
+    string_in_file "OK, no more poller sent need" $LOG/nagios.log
+    string_in_file "OK, no more broker sent need" $LOG/nagios.log
 }
 
 function localize_config {
@@ -154,10 +157,10 @@ globalize_config etc/nagios.cfg etc/shinken-specific.cfg
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 5
+sleep 10
 
 #Now check if the run looks good with var in the direct directory
-check_good_run var
+check_good_run var var var
 
 echo "First launch check OK"
 
@@ -221,8 +224,8 @@ sudo /etc/init.d/shinken-receiver -d start
 sudo /etc/init.d/shinken-arbiter -d start
 
 echo "We will sleep again 5sec so every one is quite stable...."
-sleep 5
-check_good_run /var/lib/shinken
+sleep 10
+check_good_run /var/lib/shinken /var/run/shinken /var/log/shinken
 
 sudo /etc/init.d/shinken-arbiter status
 sudo /etc/init.d/shinken-scheduler status
@@ -238,7 +241,7 @@ sudo /etc/init.d/shinken-reactionner stop
 sudo /etc/init.d/shinken-broker stop
 sudo /etc/init.d/shinken-receiver stop
 
-sleep 2
+sleep 5
 ps -fu shinken
 
 check_process_nb arbiter 0
@@ -271,7 +274,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-ha-only.cf
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 5
+sleep 10
 
 #The number of process changed, we mush look for it
 
@@ -290,7 +293,7 @@ NB_RECEIVERS=1
 NB_ARBITERS=2
 
 #Now check if the run looks good with var in the direct directory
-check_good_run var
+check_good_run var var var
 
 echo "All launch of HA daemons is OK"
 
@@ -303,7 +306,7 @@ echo "All launch of HA daemons is OK"
 bin/stop_scheduler.sh
 
 #We sleep to be sruethe scheduler see us
-sleep 4
+sleep 15
 NB_SCHEDULERS=1
 print_date
 
@@ -314,14 +317,14 @@ string_in_file "Warning : Scheduler scheduler-Master had the configuration 0 but
 string_in_file "Dispatch OK of for conf in scheduler scheduler-Spare" $VAR/nagios.log
 
 #then is the broker know it and try to connect to the new scheduler-spare
-string_in_file "\[broker-Master\] Connexion OK to the scheduler scheduler-Spare" $VAR/nagios.log
+string_in_file "\[broker-Master\] Connection OK to the scheduler scheduler-Spare" $VAR/nagios.log
 
 
 echo "Now stop the poller-Master"
 #Now we stop the poller. We will see the sapre take the job (we hope in fact :) )
 bin/stop_poller.sh
 #check_good_run var
-sleep 4
+sleep 10
 print_date
 
 #The master should be look dead
@@ -329,13 +332,13 @@ string_in_file "Warning : The poller poller-Master seems to be down, I must re-d
 #The spare should got the conf
 string_in_file "\[All\] Dispatch OK of for configuration 0 to poller poller-Slave" $VAR/nagios.log
 #And he should got the scheduler link (the sapre one)
-string_in_file "\[poller-Slave\] Connexion OK with scheduler scheduler-Spare" $VAR/nagios.log
+string_in_file "\[poller-Slave\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
 
 
 echo "Now stop the reactionner"
 bin/stop_reactionner.sh
 #check_good_run var
-sleep 4
+sleep 10
 print_date
 
 #The master should be look dead
@@ -343,13 +346,13 @@ string_in_file "\[All\] Warning : The reactionner reactionner-Master seems to be
 #The spare should got the conf
 string_in_file "\[All\] Dispatch OK of for configuration 0 to reactionner reactionner-Spare" $VAR/nagios.log
 #And he should got the scheduler link (the sapre one)
-string_in_file "\[reactionner-Spare\] Connexion OK with scheduler scheduler-Spare" $VAR/nagios.log
+string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
 
 
 echo "Now we stop... the Broker!"
 bin/stop_broker.sh
 #check_good_run var
-sleep 4
+sleep 10
 print_date
 
 #The master should be look dead
@@ -357,10 +360,10 @@ string_in_file "\[All\] Warning : The broker broker-Master seems to be down, I m
 #The spare should got the conf
 string_in_file "\[All\] Dispatch OK of for configuration 0 to broker broker-Slave" $VAR/nagios.log
 #And he should got the scheduler link (the spare one)
-string_in_file "\[broker-Slave\] Connexion OK to the scheduler scheduler-Spare" $VAR/nagios.log
+string_in_file "\[broker-Slave\] Connection OK to the scheduler scheduler-Spare" $VAR/nagios.log
 #And to other satellites
-string_in_file "\[broker-Slave\] Connexion OK to the reactionner reactionner-Spare" $VAR/nagios.log
-string_in_file "\[broker-Slave\] Connexion problem to the poller poller-Master" $VAR/nagios.log
+string_in_file "\[broker-Slave\] Connection OK to the reactionner reactionner-Spare" $VAR/nagios.log
+string_in_file "\[broker-Slave\] Connection problem to the poller poller-Master" $VAR/nagios.log
 #And should have load the modules
 string_in_file "\[broker-Slave\] I correctly loaded the modules : \[Simple-log,Livestatus\]" $VAR/nagios.log
 
@@ -385,7 +388,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-lb-only.cf
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 5
+sleep 10
 
 #The number of process changed, we mush look for it
 
@@ -404,7 +407,7 @@ NB_RECEIVERS=1
 NB_ARBITERS=2
 
 #Now check if the run looks good with var in the direct directory
-check_good_run var
+check_good_run var var var
 
 echo "All launch of LB daemons is OK"
 
@@ -436,7 +439,7 @@ globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-passive-po
 echo "Now checking for existing apps"
 
 echo "we can sleep 5sec for conf dispatching and so good number of process"
-sleep 5
+sleep 10
 
 #The number of process changed, we mush look for it
 
@@ -455,7 +458,7 @@ NB_RECEIVERS=1
 NB_ARBITERS=2
 
 #Now check if the run looks good with var in the direct directory
-check_good_run var
+check_good_run var var var
 
 echo "All launch of LB daemons is OK"
 
@@ -469,7 +472,7 @@ string_in_file "OK, no more broker sent need" $VAR/nagios.log
 # We should see the poller 2 say it is passive
 string_in_file "\[poller-Master-2\] Passive mode enabled." $VAR/nagios.log
 # and the schedulers should connect to it too
-string_in_file "Connexion OK to the poller poller-Master-2" $VAR/nagios.log
+string_in_file "Connection OK to the poller poller-Master-2" $VAR/nagios.log
 
 
 echo "Now we clean it"

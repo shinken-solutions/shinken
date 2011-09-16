@@ -76,14 +76,14 @@ class SatelliteLink(Item):
             pyro.set_timeout(self.con, self.timeout)
         except Pyro_exp_pack , exp:
             self.con = None
-            logger.log('Error : in creation connexion for %s : %s' % (self.get_name(), str(exp)))
+            logger.log('Error : in creation connection for %s : %s' % (self.get_name(), str(exp)))
 
 
     def put_conf(self, conf):
 
         if self.con is None:
             self.create_connection()
-        #print "Connexion is OK, now we put conf", conf
+        #print "Connection is OK, now we put conf", conf
         #print "Try to put conf:", conf
 
         try:
@@ -178,7 +178,7 @@ class SatelliteLink(Item):
             if self.con is None:
                 self.create_connection()
 
-            # If the connexion failed to initialize, bailout
+            # If the connection failed to initialize, bailout
             if self.con is None:
                 self.add_failed_check_attempt()
                 return
@@ -212,7 +212,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connexion failed to initialize, bailout
+        # If the connection failed to initialize, bailout
         if self.con is None:
             return False
 
@@ -236,7 +236,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connexion failed to initialize, bailout
+        # If the connection failed to initialize, bailout
         if self.con is None:
             return False
 
@@ -256,7 +256,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connexion failed to initialize, bailout
+        # If the connection failed to initialize, bailout
         if self.con is None:
             return
 
@@ -272,7 +272,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connexion failed to initialize, bailout
+        # If the connection failed to initialize, bailout
         if self.con is None:
             self.managed_confs = []
             return
@@ -305,7 +305,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connexion failed to initialize, bailout
+        # If the connection failed to initialize, bailout
         if self.con is None:
             return False
 
@@ -321,7 +321,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connexion failed to initialize, bailout
+        # If the connection failed to initialize, bailout
         if self.con is None:
             return []
 

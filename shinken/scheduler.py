@@ -610,7 +610,7 @@ class Scheduler:
             pyro.set_timeout(con, 5)
             con.ping()
         except Pyro.errors.ProtocolError, exp:
-            logger.log("[] Connexion problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.log("[] Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except Pyro.errors.NamingError, exp:
@@ -627,7 +627,7 @@ class Scheduler:
             links[id]['con'] = None
             return
 
-        logger.log("[] Connexion OK to the %s %s" % (type, links[id]['name']))
+        logger.log("[] Connection OK to the %s %s" % (type, links[id]['name']))
 
 
     # We should push actions to our passives satellites
@@ -647,7 +647,7 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log("[] Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
@@ -684,7 +684,7 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log("[] Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
@@ -724,7 +724,7 @@ class Scheduler:
                     print "Received %d passive results" % nb_received
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log("[] Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
@@ -760,7 +760,7 @@ class Scheduler:
                     print "Received %d passive results" % nb_received
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log("[] Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:

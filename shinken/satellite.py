@@ -227,7 +227,7 @@ class Satellite(BaseSatellite):
             logger.log("[%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sname))
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
-        logger.log("[%s] Connexion OK with scheduler %s" % (self.name, sname))
+        logger.log("[%s] Connection OK with scheduler %s" % (self.name, sname))
 
 
     # Manage action return from Workers

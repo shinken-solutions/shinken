@@ -68,6 +68,7 @@ class Contact(Item):
         'can_submit_commands': BoolProp(default='0', fill_brok=['full_status']),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'notificationways': StringProp(default='', fill_brok=['full_status']),
+        'password' :        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()

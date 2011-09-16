@@ -340,7 +340,7 @@ class Webui_broker(BaseModule, Daemon):
         print "Got", c
         
         # TODO : do not forgot the False when release!
-        is_ok = (c is not None)#False
+        is_ok = False#(c is not None)#False
         
         for mod in self.modules_manager.get_internal_instances():
             try:
