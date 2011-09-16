@@ -963,12 +963,10 @@ class Hosts(Items):
         # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
 
-
     # Fill adress by host_name if not set
     def fill_predictive_missing_parameters(self):
         for h in self:
             h.fill_predictive_missing_parameters()
-
 
     # Link host with hosts (parents)
     def linkify_h_by_h(self):

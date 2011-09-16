@@ -1,9 +1,5 @@
-
-
-# Global value that will be changed by the main app
+### Will be populated by the UI with it's own value
 app = None
-
-
 
 # Sort hosts and services by impact, states and co
 def hst_srv_sort(s1, s2):
@@ -22,28 +18,20 @@ def hst_srv_sort(s1, s2):
 
 
 
-def show_impacts():
+def show_3dimpacts():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
 
     if not user:
-        return {'app' : app, 'impacts' : {}, 'valid_user' : False, 'user' : user}
+        return {'app' : app, 'impacts' : [], 'valid_user' : False}
 
-    
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
 
-    impacts = {}
 
-    imp_id = 0
-    for imp in all_imp_impacts:
-        print "FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name()
-        imp_id += 1
-        impacts[imp_id] = imp
-
-    return {'app' : app, 'impacts' : impacts, 'valid_user' : True, 'user' : user}
+    return {'app' : app, 'impacts' : all_imp_impacts, 'valid_user' : True}
 
 
 
-pages = {show_impacts : { 'routes' : ['/impacts'], 'view' : 'impacts', 'static' : True}  }
+pages = {show_3dimpacts : { 'routes' : ['/3dimpacts'], 'view' : 'threedimpacts', 'static' : True}}

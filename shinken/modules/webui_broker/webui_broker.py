@@ -72,7 +72,7 @@ class Webui_broker(BaseModule, Daemon):
 
         self.port = int(getattr(modconf, 'port', '7767'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
-        self.sessions_file = getattr(modconf, 'sessions_file', 'sessions.ret')
+        self.auth_secret = getattr(modconf, 'auth_secret').encode('utf8', 'replace')
         self.http_backend = getattr(modconf, 'http_backend', 'wsgiref')
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
@@ -95,42 +95,8 @@ class Webui_broker(BaseModule, Daemon):
         del self.debug_output
 
         self.log = logger
-        self.load_sessions()
         self.check_photo_dir()
         
-
-    # Try to load sessions
-    def load_sessions(self):
-        # If the session file exist, try to load it
-        p = os.path.abspath(self.sessions_file)
-        if os.path.isfile(p):
-            print "Trying to read the session file", p
-            try:
-                f = open(p, 'rb')
-                self.sessions = cPickle.load(f)
-                f.close()
-                return
-            except Exception, exp:
-                print "Error in loading session file : %s" % exp
-        else:
-            print "No session file at", p
-        # Error : init sessions as void
-        self.sessions = {}        
-
-
-    # We got a new session, so we try to save our file
-    def save_sessions(self):
-        # If the session file exist, try to load it
-        p = os.path.abspath(self.sessions_file)
-        print "Trying to save the session file", p
-        try:
-            f = open(p, 'wb')
-            cPickle.dump(self.sessions, f)
-            f.close()
-            return
-        except Exception, exp:
-            print "Error in saving session file : %s" % exp
-
 
     # We check if the photo directory exists. If not, try to create it
     def check_photo_dir(self):
@@ -373,9 +339,8 @@ class Webui_broker(BaseModule, Daemon):
         c = self.datamgr.get_contact(user)
         print "Got", c
         
-        # FIX : by default it's FALSE!!! here it's jsut for TEST!!!
-        # TODO : do not forgot this!!!
-        is_ok = (c is not None)
+        # TODO : do not forgot the False when release!
+        is_ok = False#(c is not None)#False
         
         for mod in self.modules_manager.get_internal_instances():
             try:
@@ -394,24 +359,19 @@ class Webui_broker(BaseModule, Daemon):
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)        
 
-        if is_ok and c is not None:
-            sid = base64.urlsafe_b64encode(os.urandom(30))
-            self.sessions[sid] = {'contact_name' : c.get_name(), 'logon_time' : time.time()}
-            # Ok, we now save our sessions
-            self.save_sessions()
-            return sid
-        return None
+        # Ok if we got a real contact, and if a module auth it
+        return (is_ok and c is not None)
 
-
-    def is_valid(self, sid):
-        return sid in self.sessions
-
-
-    def get_user(self, sid):
-        e = self.sessions.get(sid, None)
-        if e is None:
-            return None
-        cname = e['contact_name']
-        c = self.datamgr.get_contact(cname)
-        return c
         
+
+    def get_user_auth(self):
+        # First we look for the user sid
+        # so we bail out if it's a false one
+        user_name = self.request.get_cookie("user", secret=self.auth_secret)
+
+        # If we cannot check the cookie, bailout
+        if not user_name:
+            return None
+
+        c = self.datamgr.get_contact(user_name)
+        return c

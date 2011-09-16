@@ -3,7 +3,7 @@
 
 
 %# " If the auth succeed, we go in the /problems page "
-%if sid is not None:
+%if is_auth:
 <script type="text/javascript">
   window.location.replace("/problems");
 </script>

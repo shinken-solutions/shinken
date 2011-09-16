@@ -92,10 +92,17 @@ class SchedulingItem(Item):
     # Add a flapping change, but no more than 20 states
     # Then update the self.is_flapping bool by calling update_flapping
     def add_flapping_change(self, b):
+        cls = self.__class__
+
+        # If this element is not in flapping check, or
+        # the flapping is globally disable, bailout
+        if not self.flap_detection_enabled or not cls.enable_flap_detection:
+            return
+
         self.flapping_changes.append(b)
 
         # Keep just 20 changes (global flap_history value)
-        flap_history = self.__class__.flap_history
+        flap_history = cls.flap_history
 
         if len(self.flapping_changes) > flap_history:
             self.flapping_changes.pop(0)

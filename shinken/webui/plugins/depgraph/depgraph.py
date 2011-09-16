@@ -6,8 +6,9 @@ app = None
 def depgraph_host(name):
     # First we look for the user sid
     # so we bail out if it's a false one
-    sid = app.request.get_cookie("sid")
-    if not app.is_valid(sid):
+    user = app.get_user_auth()
+
+    if not user:
         return {'app' : app, 'elt' : None, 'valid_user' : False}
 
     h = app.datamgr.get_host(name)
@@ -17,8 +18,9 @@ def depgraph_host(name):
 def depgraph_srv(hname, desc):
     # First we look for the user sid
     # so we bail out if it's a false one
-    sid = app.request.get_cookie("sid")
-    if not app.is_valid(sid):
+    user = app.get_user_auth()
+
+    if not user:
         return {'app' : app, 'elt' : None, 'valid_user' : False}
 
     s = app.datamgr.get_service(hname, desc)

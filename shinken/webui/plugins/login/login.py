@@ -18,12 +18,12 @@ def auth():
     print "Got forms"
     login = app.request.forms.get('login', '')
     password = app.request.forms.get('password', '')
-    sid = app.check_auth (login, password)
+    is_auth = app.check_auth(login, password)
 
-    if sid is not None:
-        app.response.set_cookie("sid", sid)
+    if is_auth:
+        app.response.set_cookie('user', login, secret=app.auth_secret)
 
-    return {'app' : app, 'sid' : sid}
+    return {'app' : app, 'is_auth' : is_auth}
 
 pages = {get_page : { 'routes' : ['/login', '/login/'], 'view' : 'login'},
          auth : { 'routes' : ['/auth'], 'view' : 'auth', 'method' : 'POST'}

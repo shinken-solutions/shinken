@@ -155,11 +155,10 @@ class AD_Webui(BaseModule):
                     f.write(photo)
                     f.close()
                     print "Phto wrote for", c.get_name()
-                    break
                 except Exception, exp:
                     print "Cannot write", p, ":", exp
             except KeyError:
-                print "No photo for", account_name
+                print "No photo for", c.get_name()
 
 
 
@@ -196,7 +195,7 @@ class AD_Webui(BaseModule):
         except ldap.LDAPError, exp:
             print "LMdap auth error:", exp
         
-        # The local_con will automatically close this connexion when 
+        # The local_con will automatically close this connection when 
         # the object will be deleted, so no close need
 
         # No good? so no auth :)

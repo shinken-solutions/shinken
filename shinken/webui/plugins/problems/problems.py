@@ -7,13 +7,13 @@ def get_page():
     
     # First we look for the user sid
     # so we bail out if it's a false one
-    sid = app.request.get_cookie("sid")
+#    sid = app.request.get_cookie("sid")
     
-    user = app.get_user(sid)
-    print "Impact give user", user
 
-    if not app.is_valid(sid):
-        return {'app' : app, 'pbs' : [], 'valid_user' : False, 'user' : None}
+    user = app.get_user_auth()
+
+    if not user:
+        return {'app' : app, 'pbs' : [], 'valid_user' : False, 'user' : None, 'navi' : None}
  
     #We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
