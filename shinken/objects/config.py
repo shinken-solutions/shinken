@@ -94,6 +94,8 @@ class Config(Item):
     properties = {
         'prefix':                   StringProp(default='/usr/local/shinken/'),
         'workdir':                  StringProp(default=''),
+        'use_local_log':            BoolProp(default='1'),
+        'local_log':                StringProp(default='arbiterd.log'),
         'log_file':                 UnusedProp(text=no_longer_used_txt),
         'object_cache_file':        UnusedProp(text=no_longer_used_txt),
         'precached_object_file':    UnusedProp(text='Shinken is faster enough to do not need precached object file.'),

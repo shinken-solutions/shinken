@@ -225,6 +225,9 @@ class Arbiter(Daemon):
         buf = self.conf.read_config(self.config_files)
         raw_objects = self.conf.read_config_buf(buf)
 
+        print "Opening local log file"
+
+
         # First we need to get arbiters and modules first
         # so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
@@ -397,6 +400,8 @@ class Arbiter(Daemon):
 
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
+        self.use_local_log = self.conf.use_local_log
+        self.local_log = self.conf.local_log
         self.pidfile = os.path.abspath(self.conf.lock_file)
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
         self.user = self.conf.shinken_user

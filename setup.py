@@ -239,7 +239,8 @@ pidfile=%s/%sd.pid
 shinken_user=%s
 shinken_group=%s
 lock_file=%s/arbiterd.pid
-""" % ( self.owner, self.group, self.run_path )
+local_log=%s/arbiterd.log
+""" % ( self.owner, self.group, self.run_path, self.log_path )
             )
         
         # UPDATE Shinken-specific.cfg files too
