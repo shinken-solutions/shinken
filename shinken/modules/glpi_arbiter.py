@@ -149,7 +149,7 @@ class Glpi_arbiter(BaseModule):
             r['contacts'].append(h)
 
         # Get services
-        all_hosts = self.con.monitoring.shinkenServices(arg)
+        all_services = self.con.monitoring.shinkenServices(arg)
         print "Get all services", all_services
         for service_info in all_services:
             print "\n\n"
