@@ -30,6 +30,9 @@ class Check(Action):
     # running_properties names
     __metaclass__ = AutoSlots
 
+
+    my_type = 'check'
+
     properties = {
         'is_a':         StringProp(default='check'),
         'type':         StringProp(default=''),

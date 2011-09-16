@@ -24,7 +24,7 @@
 import os
 import time
 
-from shinken.util import to_int, to_bool
+from shinken.util import to_int, to_bool, safe_print
 from shinken.downtime import Downtime
 from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
@@ -74,7 +74,9 @@ class ExternalCommandManager:
         'DELAY_HOST_NOTIFICATION' : {'global' : False, 'args' : ['host', 'to_int']},
         'DELAY_SVC_NOTIFICATION' : {'global' : False, 'args' : ['service', 'to_int']},
         'DEL_ALL_HOST_COMMENTS' : {'global' : False, 'args' : ['host']},
+        'DEL_ALL_HOST_DOWNTIMES' : {'global' : False, 'args' : ['host']},
         'DEL_ALL_SVC_COMMENTS' : {'global' : False, 'args' : ['service']},
+        'DEL_ALL_SVC_DOWNTIMES' : {'global' : False, 'args' : ['service']},
         'DEL_CONTACT_DOWNTIME' : {'global' : True, 'args' : ['to_int']},
         'DEL_HOST_COMMENT' : {'global' : True, 'args' : ['to_int']},
         'DEL_HOST_DOWNTIME' : {'global' : True, 'args' : ['to_int']},
@@ -281,7 +283,7 @@ class ExternalCommandManager:
         command = command.strip()
 
         #Only log if we are in the Arbiter
-        if self.mode == 'dispatcher':
+        if self.mode == 'dispatcher' and self.conf.log_external_commands:
             logger.log('EXTERNAL COMMAND: '+command.rstrip())
         self.get_command_and_args(command)
 
@@ -315,7 +317,7 @@ class ExternalCommandManager:
 
     #We need to get the first part, the command name
     def get_command_and_args(self, command):
-        print "Trying to resolve", command
+        safe_print("Trying to resolve", command)
         command = command.rstrip()
         elts = command.split(';') # danger!!! passive checkresults with perfdata
         part1 = elts[0]
@@ -364,16 +366,16 @@ class ExternalCommandManager:
         tmp_host = ''
         try:
             for elt in elts[1:]:
-                print "Searching for a new arg:", elt, i
+                safe_print("Searching for a new arg:", elt, i)
                 val = elt.strip()
                 if val[-1] == '\n':
                     val = val[:-1]
 
-                print "For command arg", val
+                safe_print("For command arg", val)
 
                 if not in_service:
                     type_searched = entry['args'][i-1]
-                    print "Search for a arg", type_searched
+                    safe_print("Search for a arg", type_searched)
 
                     if type_searched == 'host':
                         if self.mode == 'dispatcher':
@@ -614,10 +616,20 @@ class ExternalCommandManager:
         for c in host.comments:
             self.DEL_HOST_COMMENT(c.id)
 
+    #DEL_ALL_HOST_COMMENTS;<host_name>
+    def DEL_ALL_HOST_DOWNTIMES(self, host):
+        for dt in host.downtimes:
+            self.DEL_HOST_DOWNTIME(dt.id)
+
     #DEL_ALL_SVC_COMMENTS;<host_name>;<service_description>
     def DEL_ALL_SVC_COMMENTS(self, service):
         for c in service.comments:
             self.DEL_SVC_COMMENT(c.id)
+
+    #DEL_ALL_SVC_COMMENTS;<host_name>;<service_description>
+    def DEL_ALL_SVC_DOWNTIMES(self, service):
+        for dt in service.downtimes:
+            self.DEL_SVC_DOWNTIME(dt.id)
 
     #DEL_CONTACT_DOWNTIME;<downtime_id>
     def DEL_CONTACT_DOWNTIME(self, downtime_id):
@@ -726,7 +738,7 @@ class ExternalCommandManager:
 
     #DISABLE_HOST_CHECK;<host_name>
     def DISABLE_HOST_CHECK(self, host):
-        host.active_checks_enabled = False
+        host.disable_active_checks()
         self.sched.get_and_register_status_brok(host)
 
     #DISABLE_HOST_EVENT_HANDLER;<host_name>
@@ -826,7 +838,7 @@ class ExternalCommandManager:
 
     #DISABLE_SVC_CHECK;<host_name>;<service_description>
     def DISABLE_SVC_CHECK(self, service):
-        service.active_checks_enabled = False
+        service.disable_active_checks()
         self.sched.get_and_register_status_brok(service)
 
     #DISABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>
@@ -930,7 +942,7 @@ class ExternalCommandManager:
 
     #ENABLE_HOST_EVENT_HANDLER;<host_name>
     def ENABLE_HOST_EVENT_HANDLER(self, host):
-        host.enable_event_handlers = True
+        host.event_handler_enabled = True
         self.sched.get_and_register_status_brok(host)
 
     #ENABLE_HOST_FLAP_DETECTION;<host_name>

@@ -39,15 +39,8 @@ from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.comment import Comment
 
-from shinken.modules import livestatus_broker
-from shinken.modules.livestatus_broker import Livestatus_broker
-
 sys.setcheckinterval(10000)
 
-modconf = Module()
-modconf.module_name = "livestatus"
-modconf.module_type = livestatus_broker.properties['type']
-modconf.properties = livestatus_broker.properties.copy()
 
 class TestConfig(ShinkenTest):
     def contains_line(self, text, pattern):
@@ -190,6 +183,8 @@ class TestConfig(ShinkenTest):
                 for line in text:
                     if re.search('^\s*criticity', line):
                         pass
+                    elif re.search('^\s*business_impact', line):
+                        pass
                     elif re.search('enable_problem_impacts_states_change', line):
                         pass
                     else:
@@ -292,22 +287,17 @@ class TestConfigSmall(TestConfig):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.livelogs = 'tmp/livelogs.db' + self.testid
-        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
-        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
-        self.livestatus_broker.create_queues()
-        #self.livestatus_broker.properties = {
-        #    'to_queue' : 0,
-        #    'from_queue' : 0
-        #
-        #    }
-        self.livestatus_broker.init()
+        self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None
         self.nagios_config = None
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.__class__.use_aggressive_host_checking = 1
 
 
 
@@ -621,10 +611,6 @@ ResponseHeader: fixed16
         #---------------------------------------------------------------
         # get the full hosts table
         #---------------------------------------------------------------
-        request = 'GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
-
         request = """GET hosts
 Stats: name !=
 Stats: check_type = 0
@@ -853,6 +839,31 @@ ResponseHeader: fixed16"""
         print response
         for s in self.livestatus_broker.livestatus.services.values():
             print "%s %d %s;%d" % (s.state, s.state_id, s.state_type, s.attempt)
+
+
+    def test_thruk_config(self):
+        self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('1r_1h_1s')
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
+        self.update_broker()
+        #---------------------------------------------------------------
+        # get the full hosts table
+        #---------------------------------------------------------------
+        request = 'GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
 
 
     def test_thruk_comments(self):
@@ -1124,6 +1135,74 @@ And: 2"""
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+
+
+    def test_thruk_logs_utf8(self):
+        self.print_header()
+        start = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        # -----------------------------------------------------------------> HERE is the UTF8 char :)
+        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 1, u'WARNINGé']])
+        self.update_broker()
+        duration = 600
+        now = time.time()
+        # downtime valid for the next 2 minutes
+        cmd = u"[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;1;0;%d;lausser;blablubé" % (now, now, now + duration, duration)
+        self.sched.run_external_command(cmd)
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        now = time.time()
+        cmd = "u[%lu] ADD_SVC_COMMENT;test_host_0;test_ok_0;1;lausser;commenté" % now
+        self.sched.run_external_command(cmd)
+        time.sleep(1)
+        self.scheduler_loop(1, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 2, 'DOWN'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+        time.sleep(1)
+        self.scheduler_loop(3, [[host, 0, 'UUP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
+        self.update_broker()
+#        time.sleep(1)
+#        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
+#        self.update_broker()
+        end = time.time()
+
+        # show history for service
+        request = """GET log
+Columns: time type options state current_host_name
+Filter: time >= """ + str(int(start)) + """
+Filter: time <= """ + str(int(end)) + """
+Filter: type = SERVICE ALERT
+Filter: type = HOST ALERT
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Or: 6
+Filter: current_host_name = test_host_0
+Filter: current_service_description = test_ok_0
+And: 2"""
+        request = """GET log
+Columns: time type options state current_host_name
+Filter: time >= """ + str(int(start)) + """
+Filter: time <= """ + str(int(end)) + """
+Filter: current_host_name = test_host_0
+Filter: current_service_description = test_ok_0
+And: 2"""
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
 
 
     def test_thruk_tac_svc(self):
@@ -1872,7 +1951,7 @@ test_host_0;test_ok_0;CUSTNAME;custvalue
         self.update_broker()
         # timeperiods must be manipulated in the broker, because status-broks
         # contain timeperiod names, not objects.
-        lshost = self.livestatus_broker.find_host("test_host_0")
+        lshost = self.livestatus_broker.hosts["test_host_0"]
         now = time.time()
         localnow = time.localtime(now)
         if localnow[5] > 45:
@@ -1964,6 +2043,47 @@ And: 2"""
         response = ';'.join(response.split(';')[1:])
         print response
         self.assert_(self.lines_equal(response, good_response))
+
+
+    def test_database_shrink(self):
+        self.print_header()
+        for cycle in xrange(10):
+            for brok in xrange(100):
+                now = time.time()
+                b = Brok('log', {'log' : "[%lu] EXTERNAL COMMAND: [%lu] DISABLE_NOTIFICATIONS" % (now, now) })
+                self.livestatus_broker.manage_log_brok(b)
+            time.sleep(1)
+
+        self.update_broker()
+        self.livestatus_broker.dbcursor.execute('SELECT COUNT(*) FROM logs')
+        dbrows1 = self.livestatus_broker.dbcursor.fetchone()
+        response, keepalive = self.livestatus_broker.livestatus.handle_request("GET log\nColumns: time")
+        rows1 = len(response.splitlines())
+        # the broker main loop flushes in intervals of 1 second.
+        # we don't have this mainloop here, so flush manually.
+        self.livestatus_broker.dbconn.commit()
+        size1 = os.path.getsize(self.livestatus_broker.database_file)
+        # now delete log entries older than 6 seconds
+        self.livestatus_broker.max_logs_age = 6.0 / 86400.0
+        self.livestatus_broker.cleanup_log_db()
+
+        self.livestatus_broker.dbcursor.execute('SELECT COUNT(*) FROM logs')
+        dbrows2 = self.livestatus_broker.dbcursor.fetchone()
+        response, keepalive = self.livestatus_broker.livestatus.handle_request("GET log\nColumns: time")
+        rows2 = len(response.splitlines())
+        size2 = os.path.getsize(self.livestatus_broker.database_file)
+        print "size1", size1
+        print "size2", size2
+        print "rows1", rows1
+        print "rows2", rows2
+        print "dbrows1", dbrows1
+        print "dbrows2", dbrows2
+        self.assert_(rows1 == dbrows1[0])
+        self.assert_(rows2 == dbrows2[0])
+        self.assert_(dbrows1 > dbrows2)
+        self.assert_(rows1 > rows2)
+        # The most important...database file shrunk
+        self.assert_(size1 > size2)
 
 
     def test_thruk_empty_stats(self):
@@ -2113,25 +2233,47 @@ Limit: 1001"""
         self.assert_(response == 'test_host_0;test_ok_0;1;blablub\n')
 
 
+    def test_display_name(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hosts
+Filter: name = test_host_0
+Columns: name display_name"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == 'test_host_0;test_host_0\n')
+        request = """GET services
+Filter: host_name = test_host_0
+Filter: description = test_ok_0
+Columns: description host_name display_name"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "hihi",response
+        self.assert_(response == 'test_ok_0;test_host_0;test_ok_0\n')
+
+
 
 class TestConfigBig(TestConfig):
     def setUp(self):
+        start_setUp = time.time()
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.livelogs = 'tmp/livelogs.db' + self.testid
-        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
-        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
-        self.livestatus_broker.create_queues()
-        #self.livestatus_broker.properties = {
-        #    'to_queue' : 0,
-        #    'from_queue' : 0
-        #}
-        self.livestatus_broker.init()
+        self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()
-
+        print "************* Overall Setup:", time.time() - start_setUp
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        host = self.sched.hosts.find_by_name("test_host_000")
+        host.__class__.use_aggressive_host_checking = 1
 
     def tearDown(self):
         self.stop_nagios()
@@ -2190,6 +2332,7 @@ Stats: state = 3"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print 'query_6_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == '2000;1993;3;3;1\n')
+
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
             print nagresponse
@@ -2510,21 +2653,552 @@ OutputFormat: csv
         self.assert_(len(((response.split("\n")[0]).split(';')[1]).split(',')) == 400)
 
 
+    def test_sorted_limit(self):
+        self.print_header()
+        if self.nagios_installed():
+            self.start_nagios('5r_100h_2000s')
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        # now send the list of services to the broker in an unordered way
+        sched_unsorted = '\n'.join(["%s;%s;%d" % (s.host_name, s.service_description, s.state_id) for s in self.sched.services])
+
+        self.update_broker()
+        live_sorted = '\n'.join(["%s;%s;%d" % (s.host_name, s.service_description, s.state_id) for s in self.livestatus_broker.services.values()])
+
+        # Unsorted in the scheduler, sorted in livestatus
+        self.assert_(sched_unsorted != live_sorted)
+        sched_live_sorted = '\n'.join(sorted(sched_unsorted.split('\n'))) + '\n'
+        sched_live_sorted = sched_live_sorted.strip()
+        print "first of sched\n(%s)\n--------------\n" % sched_unsorted[:100]
+        print "first of live \n(%s)\n--------------\n" % live_sorted[:100]
+        print "first of sssed \n(%s)\n--------------\n" % sched_live_sorted[:100]
+        print "last of sched\n(%s)\n--------------\n" % sched_unsorted[-100:]
+        print "last of live \n(%s)\n--------------\n" % live_sorted[-100:]
+        print "last of sssed \n(%s)\n--------------\n" % sched_live_sorted[-100:]
+        # But sorted they are the same. 
+        self.assert_('\n'.join(sorted(sched_unsorted.split('\n'))) == live_sorted)
+  
+        svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
+        print svc1
+        svc2 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_15")
+        print svc2
+        svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
+        print svc3
+        svc4 = self.sched.services.find_srv_by_name_and_hostname("test_host_007", "test_ok_05")
+        print svc4
+        svc5 = self.sched.services.find_srv_by_name_and_hostname("test_host_007", "test_ok_11")
+        svc6 = self.sched.services.find_srv_by_name_and_hostname("test_host_025", "test_ok_01")
+        svc7 = self.sched.services.find_srv_by_name_and_hostname("test_host_025", "test_ok_03")
+        self.scheduler_loop(1, [[svc1, 1, 'W'], [svc2, 1, 'W'], [svc3, 1, 'W'], [svc4, 2, 'C'], [svc5, 3, 'U'], [svc6, 2, 'C'], [svc7, 2, 'C']])
+        self.update_broker()
+        # 1993O, 3xW, 3xC, 1xU
+
+        # Get all bad services from livestatus
+        request = """GET services
+Columns: host_name service_description state
+ColumnHeaders: off
+OutputFormat: csv
+Filter: state != 0"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # Get all bad services from the scheduler
+        sched_bad_unsorted = '\n'.join(["%s;%s;%d" % (s.host_name, s.service_description, s.state_id) for s in self.sched.services if s.state_id != 0])
+        # Check if the result of the query is sorted
+        self.assert_('\n'.join(sorted(sched_bad_unsorted.split('\n'))) == response.strip())
+
+        # Now get the first 3 bad services from livestatus
+        request = """GET services
+Limit: 3
+Columns: host_name service_description state
+ColumnHeaders: off
+OutputFormat: csv
+Filter: state != 0"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_6_______________\n%s\n%s\n' % (request, response)
+
+        # Now compare the first 3 bad services with the scheduler data
+        self.assert_('\n'.join(sorted(sched_bad_unsorted.split('\n'))[:3]) == response.strip())
+
+        # Now check if all services are sorted when queried with a livestatus request
+        request = """GET services
+Columns: host_name service_description state
+ColumnHeaders: off
+OutputFormat: csv"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # Again, get all bad services from the scheduler
+        sched_bad_unsorted = '\n'.join(["%s;%s;%d" % (s.host_name, s.service_description, s.state_id) for s in self.sched.services])
+        # Check if the result of the query is sorted
+        self.assert_('\n'.join(sorted(sched_bad_unsorted.split('\n'))) == response.strip())
+
+
+
+    # We look for the perf of the unhandled srv
+    # page view of Thruk. We only enable it when we need
+    # it's not a true test.
+    def test_thruk_unhandled_srv_page_perf(self):
+        # COMMENT THIS LINE to enable the bench and call
+        # python test_livestatus.py TestConfigBig.test_thruk_unhandled_srv_page_perf
+        return
+        import cProfile
+        cProfile.runctx('''self.do_test_thruk_unhandled_srv_page_perf()''', globals(), locals(),'/tmp/livestatus_thruk_perf.profile')
+        
+
+
+    def do_test_thruk_unhandled_srv_page_perf(self):
+        self.print_header()
+
+        objlist = []
+        # We put 10% of elemetnsi n bad states
+        i = 0
+        for host in self.sched.hosts:
+            i += 1
+            if i % 10 == 0:
+                objlist.append([host, 1, 'DOWN'])
+            else:
+                objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            i += 1
+            if i % 10 == 0:
+                objlist.append([service, 2, 'CRITICAL'])
+            else:
+                objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(2, objlist)
+        self.update_broker()
+
+        # We will look for the overall page loading time
+        total_page = 0.0
+        
+        # First Query
+        query_start = time.time()
+        request = """
+GET status
+Columns: accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start program_version interval_length
+OutputFormat: json
+ResponseHeader: fixed16
+"""
+        print "Query 1 launched (Get overall status)"
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
+        load_time = time.time() - query_start
+        total_page += load_time
+        print "Response time 1 : %.3f" % load_time
+
+        #Second Query
+        query_start = time.time()
+        request = """
+GET hosts
+Stats: name !=
+StatsAnd: 1
+Stats: check_type = 0
+StatsAnd: 1
+Stats: check_type = 1
+StatsAnd: 1
+Stats: has_been_checked = 0
+StatsAnd: 1
+Stats: has_been_checked = 0
+Stats: active_checks_enabled = 0
+StatsAnd: 2
+Stats: has_been_checked = 0
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 2
+Stats: has_been_checked = 1
+Stats: state = 0
+StatsAnd: 2
+Stats: check_type = 0
+Stats: has_been_checked = 1
+Stats: state = 0
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: check_type = 1
+Stats: has_been_checked = 1
+Stats: state = 0
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: has_been_checked = 1
+Stats: state = 0
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 3
+Stats: has_been_checked = 1
+Stats: state = 1
+StatsAnd: 2
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: acknowledged = 1
+StatsAnd: 3
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 3
+Stats: check_type = 0
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: check_type = 1
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: active_checks_enabled = 1
+Stats: acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+StatsAnd: 5
+Stats: has_been_checked = 1
+Stats: state = 2
+StatsAnd: 2
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: acknowledged = 1
+StatsAnd: 3
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 3
+Stats: check_type = 0
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: check_type = 1
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: active_checks_enabled = 1
+Stats: acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+StatsAnd: 5
+Stats: is_flapping = 1
+StatsAnd: 1
+Stats: flap_detection_enabled = 0
+StatsAnd: 1
+Stats: notifications_enabled = 0
+StatsAnd: 1
+Stats: event_handler_enabled = 0
+StatsAnd: 1
+Stats: check_type = 0
+Stats: active_checks_enabled = 0
+StatsAnd: 2
+Stats: check_type = 1
+Stats: active_checks_enabled = 0
+StatsAnd: 2
+Stats: accept_passive_checks = 0
+StatsAnd: 1
+Stats: state = 1
+Stats: childs !=
+StatsAnd: 2
+OutputFormat: json
+ResponseHeader: fixed16
+"""
+        print "Query 2 launched (Get hosts stistics)"
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
+        load_time = time.time() - query_start
+        total_page += load_time
+        print "Response time 2 : %.3f" % load_time
+
+
+        # Now Query 3 (service stats)
+        query_start = time.time()
+        request = """
+GET services
+Stats: description !=
+StatsAnd: 1
+Stats: check_type = 0
+StatsAnd: 1
+Stats: check_type = 1
+StatsAnd: 1
+Stats: has_been_checked = 0
+StatsAnd: 1
+Stats: has_been_checked = 0
+Stats: active_checks_enabled = 0
+StatsAnd: 2
+Stats: has_been_checked = 0
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 2
+Stats: has_been_checked = 1
+Stats: state = 0
+StatsAnd: 2
+Stats: has_been_checked = 1
+Stats: state = 0
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 3
+Stats: check_type = 0
+Stats: has_been_checked = 1
+Stats: state = 0
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: check_type = 1
+Stats: has_been_checked = 1
+Stats: state = 0
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: has_been_checked = 1
+Stats: state = 1
+StatsAnd: 2
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 3
+Stats: check_type = 0
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: check_type = 1
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: acknowledged = 1
+StatsAnd: 3
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: host_state != 0
+StatsAnd: 3
+Stats: has_been_checked = 1
+Stats: state = 1
+Stats: host_state = 0
+Stats: active_checks_enabled = 1
+Stats: acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+StatsAnd: 6
+Stats: has_been_checked = 1
+Stats: state = 2
+StatsAnd: 2
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 3
+Stats: check_type = 0
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: check_type = 1
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: acknowledged = 1
+StatsAnd: 3
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: host_state != 0
+StatsAnd: 3
+Stats: has_been_checked = 1
+Stats: state = 2
+Stats: host_state = 0
+Stats: active_checks_enabled = 1
+Stats: acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+StatsAnd: 6
+Stats: has_been_checked = 1
+Stats: state = 3
+StatsAnd: 2
+Stats: has_been_checked = 1
+Stats: state = 3
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 3
+Stats: check_type = 0
+Stats: has_been_checked = 1
+Stats: state = 3
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: check_type = 1
+Stats: has_been_checked = 1
+Stats: state = 3
+Stats: active_checks_enabled = 0
+StatsAnd: 4
+Stats: has_been_checked = 1
+Stats: state = 3
+Stats: acknowledged = 1
+StatsAnd: 3
+Stats: has_been_checked = 1
+Stats: state = 3
+Stats: host_state != 0
+StatsAnd: 3
+Stats: has_been_checked = 1
+Stats: state = 3
+Stats: host_state = 0
+Stats: active_checks_enabled = 1
+Stats: acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+StatsAnd: 6
+Stats: is_flapping = 1
+StatsAnd: 1
+Stats: flap_detection_enabled = 0
+StatsAnd: 1
+Stats: notifications_enabled = 0
+StatsAnd: 1
+Stats: event_handler_enabled = 0
+StatsAnd: 1
+Stats: check_type = 0
+Stats: active_checks_enabled = 0
+StatsAnd: 2
+Stats: check_type = 1
+Stats: active_checks_enabled = 0
+StatsAnd: 2
+Stats: accept_passive_checks = 0
+StatsAnd: 1
+OutputFormat: json
+ResponseHeader: fixed16
+"""
+        print "Query 3 launched (Get services statistics)"
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
+        load_time = time.time() - query_start
+        total_page += load_time
+        print "Response time 3 : %.3f" % load_time
+
+
+        # 4th Query
+        query_start = time.time()
+        request = """
+GET comments
+Columns: author comment entry_time entry_type expires expire_time host_name id persistent service_description source type
+Filter: service_description !=
+Filter: service_description =
+Or: 2
+OutputFormat: json
+ResponseHeader: fixed16
+"""
+        print "Query 4 launched (Get comments)"
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
+        load_time = time.time() - query_start
+        total_page += load_time
+        print "Response time 4 : %.3f" % load_time
+
+
+
+        # 5th Query
+        query_start = time.time()
+        request = """
+GET downtimes
+Columns: author comment end_time entry_time fixed host_name id start_time service_description triggered_by
+Filter: service_description !=
+Filter: service_description =
+Or: 2
+OutputFormat: json
+ResponseHeader: fixed16
+"""
+        print "Query 5 launched (Get downtimes)"
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
+        load_time = time.time() - query_start
+        total_page += load_time
+        print "Response time 5 : %.3f" % load_time
+
+
+
+        # 6th Query
+        query_start = time.time()
+        request = """
+GET services
+Filter: host_has_been_checked = 0
+Filter: host_state = 0
+Filter: host_has_been_checked = 1
+And: 2
+Or: 2
+Filter: state = 1
+Filter: has_been_checked = 1
+And: 2
+Filter: state = 3
+Filter: has_been_checked = 1
+And: 2
+Filter: state = 2
+Filter: has_been_checked = 1
+And: 2
+Or: 3
+Filter: scheduled_downtime_depth = 0
+Filter: acknowledged = 0
+Filter: checks_enabled = 1
+And: 3
+And: 3
+Stats: description !=
+OutputFormat: json
+ResponseHeader: fixed16
+"""
+        print "Query 6 launched (Get bad services)"
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
+        load_time = time.time() - query_start
+        total_page += load_time
+        print "Response time 6 : %.3f" % load_time
+
+
+        # 7th Query
+        query_start = time.time()
+        request = """
+GET services
+Columns: accept_passive_checks acknowledged action_url action_url_expanded active_checks_enabled check_command check_interval check_options check_period check_type checks_enabled comments current_attempt current_notification_number description event_handler event_handler_enabled custom_variable_names custom_variable_values execution_time first_notification_delay flap_detection_enabled groups has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded host_active_checks_enabled host_address host_alias host_checks_enabled host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt host_is_executing host_is_flapping host_name host_notes_url_expanded host_notifications_enabled host_scheduled_downtime_depth host_state icon_image icon_image_alt icon_image_expanded is_executing is_flapping last_check last_notification last_state_change latency long_plugin_output low_flap_threshold max_check_attempts next_check notes notes_expanded notes_url notes_url_expanded notification_interval notification_period notifications_enabled obsess_over_service percent_state_change perf_data plugin_output process_performance_data retry_interval scheduled_downtime_depth state state_type is_impact source_problems impacts criticity business_impact is_problem got_business_rule parent_dependencies
+Filter: host_has_been_checked = 0
+Filter: host_state = 0
+Filter: host_has_been_checked = 1
+And: 2
+Or: 2
+Filter: state = 1
+Filter: has_been_checked = 1
+And: 2
+Filter: state = 3
+Filter: has_been_checked = 1
+And: 2
+Filter: state = 2
+Filter: has_been_checked = 1
+And: 2
+Or: 3
+Filter: scheduled_downtime_depth = 0
+Filter: acknowledged = 0
+Filter: checks_enabled = 1
+And: 3
+And: 3
+Limit: 150
+OutputFormat: json
+ResponseHeader: fixed16
+"""
+        print "Query 7 launched (Get bad service data)"
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #print response
+        load_time = time.time() - query_start
+        total_page += load_time
+        print "Response time 7 : %.3f" % load_time
+
+        print ""
+        print "Overall Queries time : %.3f" % total_page
+
+        
+
+
+        
+
 class TestConfigComplex(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_problem_impact.cfg')
         self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.livelogs = 'tmp/livelogs.db' + self.testid
-        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
-        self.livestatus_broker = Livestatus_broker(modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, 365, self.pnp4nagios)
-        self.livestatus_broker.create_queues()
-        self.livestatus_broker.init()
+        self.init_livestatus()
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()
         self.nagios_path = None
         self.livestatus_path = None
         self.nagios_config = None
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.__class__.use_aggressive_host_checking = 1
 
 
     def tearDown(self):
@@ -2564,6 +3238,131 @@ test_host_1;test_router_0,test_router_1;
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.assert_(self.lines_equal(response, good_response))
+
+
+
+def isprime(startnumber):
+    startnumber*=1.0
+    for divisor in range(2,int(startnumber**0.5)+1):
+        if startnumber/divisor==int(startnumber/divisor):
+            return False
+    return True
+
+
+# only for >= 2.7 @skip("skipping a very huge config. uncomment me for performance tests")
+class TestConfigCrazy(TestConfig):
+    def setUp(self):
+        print "comment me for performance tests"; return
+        self.setup_with_file('etc/nagios_10r_1000h_20000s.cfg')
+        self.testid = str(os.getpid() + random.randint(1, 1000))
+        self.init_livestatus()
+
+        self.sched.fill_initial_broks()
+        self.update_broker()
+        self.nagios_path = None
+        self.livestatus_path = None
+        self.nagios_config = None
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        host = self.sched.hosts.find_by_name("test_host_0000")
+        host.__class__.use_aggressive_host_checking = 1
+
+
+    def tearDown(self):
+        print "comment me for performance tests"; return
+        self.stop_nagios()
+        self.livestatus_broker.dbconn.commit()
+        self.livestatus_broker.dbconn.close()
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.pnp4nagios):
+            shutil.rmtree(self.pnp4nagios)
+        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
+        for attr in to_del:
+            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
+        self.livestatus_broker = None
+
+
+    def test_perf(self):
+        print "comment me for performance tests"; return
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        primes = [num for num in xrange(0, 999) if isprime(num)]
+        down_hosts = [self.sched.hosts.find_by_name("test_host_%04d" % num) for num in xrange(0, 1000) if num in primes]
+        crit_services = []
+        warn_services = []
+        for num in [x for x in xrange(100, 200) if x in primes]:
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_01"))
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_05"))
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_11"))
+        for num in [x for x in xrange(100, 200) if x in primes]:
+            warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_19"))
+
+        for num in [x for x in xrange(201, 999) if x in primes]:
+            warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_03"))
+            warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_07"))
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_13"))
+            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_17"))
+        print "%d services are in a warning state" % len(warn_services)
+        print "%d services are in a critical state" % len(crit_services)
+        nonok = []
+        nonok.extend([[w, 1, "W"] for w in warn_services])
+        nonok.extend([[c, 2, "C"] for c in crit_services])
+        nonok.extend([[h, 2, "D"] for h in down_hosts])
+        print "nonono", nonok
+        self.scheduler_loop(1, nonok)
+        nonok = []
+        nonok.extend([[w, 1, "W"] for w in warn_services if warn_services.index(w) in primes])
+        lenw = len(nonok)
+        nonok.extend([[c, 2, "C"] for c in crit_services if crit_services.index(c) in primes])
+        lenc = len(nonok) - lenw
+        nonok.extend([[h, 2, "D"] for h in down_hosts if down_hosts.index(h) in primes])
+        lenh = len(nonok) -lenc - lenw
+        print "%d hosts are hard/down" % lenh
+        print "%d services are in a hard/warning state" % lenw
+        print "%d services are in a hard/critical state" % lenc
+        self.scheduler_loop(3, nonok)
+        self.update_broker()
+
+        request = """GET services
+Columns: host_name description state state_type plugin_output
+OutputFormat: csv
+Filter: state != 0
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+
+        # Now read services but execute a lot of lambda-functions to read
+        # also host attributes
+        request = """GET services
+Columns: host_name description state state_type plugin_output host_state host_state_type host_plugin_output
+OutputFormat: csv
+Filter: host_state != 0
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+
+        # Now again the simple services-read, but with limit
+        request = """GET services
+Columns: host_name description state state_type plugin_output
+OutputFormat: csv
+Filter: state != 0
+Limit: 5000
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+
+        # Now again the services-read with host-lambdas, but with limit
+        request = """GET services
+Columns: host_name description state state_type plugin_output host_state host_state_type host_plugin_output
+OutputFormat: csv
+Filter: state != 0
+Limit: 5000
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
 
 
 

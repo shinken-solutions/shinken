@@ -21,15 +21,10 @@
 #Here for the configuration phase AND running one
 
 
-#This text is print at the import
-print "Detected module : Dummy module for Arbiter"
-
-
 import time
 
 
 from shinken.basemodule import BaseModule
-
 from shinken.external_command import ExternalCommand
 
 

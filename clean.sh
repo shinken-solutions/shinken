@@ -11,7 +11,7 @@ sudo rm -fr /etc/init.d/shinken*
 sudo rm -fr /var/lib/shinken
 sudo rm -fr test/var/*.pid
 sudo rm -fr var/*.debug
-sudo rm -fr var/*.log
+sudo rm -fr var/*.log*
 sudo rm -fr var/*.pid
 sudo rm -fr var/service-perfdata
 sudo rm -fr var/*.dat
@@ -20,6 +20,7 @@ sudo rm -fr var/*.cache
 sudo rm -fr var/rw/*cmd
 sudo rm -fr /tmp/retention.dat
 sudo rm -fr /tmp/*debug
+sudo rm -fr test/tmp/livelogs*
 sudo rm -fr /etc/default/shinken
 sudo rm -fr bin/default/shinken
 

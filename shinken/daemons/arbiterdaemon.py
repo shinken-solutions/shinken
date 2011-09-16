@@ -23,15 +23,9 @@
 import sys
 import os
 import time
-import random
 import traceback
 from Queue import Empty
-from multiprocessing import active_children
-
-try:
-    import shinken.pyro_wrapper as pyro
-except ImportError:
-    sys.exit("Shinken require the Python Pyro module. Please install it.")
+import socket
 
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
@@ -40,7 +34,6 @@ from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-from shinken.pyro_wrapper import Pyro
 
 
 # Interface for the other Arbiter
@@ -73,7 +66,7 @@ class IForArbiter(Interface):
 
 
 
-    # Here a function called by check_shinken to get deamon status
+    # Here a function called by check_shinken to get daemon status
     def get_satellite_status(self, daemon_type, daemon_name):
         daemon_name_attr = daemon_type+"_name"
         daemons = self.app.get_daemons(daemon_type)
@@ -84,7 +77,7 @@ class IForArbiter(Interface):
                         return {'alive' : dae.alive, 'spare' : dae.spare}
         return None
 
-    # Here a function called by check_shinken to get deamons list
+    # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type):
         satellite_list = []
         daemon_name_attr = daemon_type+"_name"
@@ -94,10 +87,25 @@ class IForArbiter(Interface):
                 if hasattr(dae, daemon_name_attr):
                     satellite_list.append(getattr(dae, daemon_name_attr))
                 else:
-                    #If one deamon has no name... ouch!
+                    #If one daemon has no name... ouch!
                     return None
             return satellite_list
         return None
+
+
+    # Dummy call. We are a master, we managed what we want
+    def what_i_managed(self):
+        return []
+
+
+    def get_all_states(self):
+        res = {'arbiter' : self.app.conf.arbiterlinks,
+               'scheduler' : self.app.conf.schedulerlinks,
+               'poller' : self.app.conf.pollers,
+               'reactionner' : self.app.conf.reactionners,
+               'receiver' : self.app.conf.receivers,
+               'broker' : self.app.conf.brokers}
+        return res
 
 
 # Main Arbiter Class
@@ -203,12 +211,12 @@ class Arbiter(Daemon):
 
 
     def get_daemon_links(self, daemon_type):
-       #the attribute name to get those differs for schedulers and arbiters
-       if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
+        #the attribute name to get those differs for schedulers and arbiters
+        if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
             daemon_links = daemon_type+'links'
-       else:
+        else:
             daemon_links = daemon_type+'s'
-       return daemon_links
+        return daemon_links
 
 
     def load_config_file(self):
@@ -229,9 +237,12 @@ class Arbiter(Daemon):
             if arb.is_me():
                 arb.need_conf = False
                 self.me = arb
-                print "I am the arbiter :", arb.get_name()
                 self.is_master = not self.me.spare
-                print "Am I the master?", self.is_master
+                if self.is_master:
+                    logger.log("I am the master Arbiter : %s" % arb.get_name())
+                else:
+                    logger.log("I am the spare Arbiter : %s" % arb.get_name())
+
                 # Set myself as alive ;)
                 self.me.alive = True
             else: #not me
@@ -241,11 +252,10 @@ class Arbiter(Daemon):
             sys.exit("Error: I cannot find my own Arbiter object, I bail out. "
                      "To solve it, please change the host_name parameter in "
                      "the object Arbiter in the file shinken-specific.cfg. "
+                     "With the value %s " % socket.gethostname(),
                      "Thanks.")
 
-        print "My own modules :"
-        for m in self.me.modules:
-            print m
+        logger.log("My own modules : " + ','.join([m.get_name() for m in self.me.modules]))
 
         # we request the instances without them being *started* 
         # (for these that are concerned ("external" modules):
@@ -312,6 +322,10 @@ class Arbiter(Daemon):
         
         # Remove templates from config
         self.conf.remove_templates()
+
+        # We removed templates, and so we must recompute the
+        # search lists
+        self.conf.create_reversed_list()
         
         # Pythonize values
         self.conf.pythonize()
@@ -328,7 +342,8 @@ class Arbiter(Daemon):
         self.conf.hack_old_nagios_parameters()
 
         # Raise warning about curently unmanaged parameters
-        self.conf.warn_about_unmanaged_parameters()
+        if self.verify_only:
+            self.conf.warn_about_unmanaged_parameters()
 
         # Exlode global conf parameters into Classes
         self.conf.explode_global_conf()
@@ -343,7 +358,8 @@ class Arbiter(Daemon):
 
 
         # Warn about useless parameters in Shinken
-        self.conf.notice_about_useless_parameters()
+        if self.verify_only:
+            self.conf.notice_about_useless_parameters()
 
         # Manage all post-conf modules
         self.hook_point('late_configuration')
@@ -386,7 +402,12 @@ class Arbiter(Daemon):
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
         
-        self.workdir = os.path.abspath(os.path.dirname(self.pidfile))
+        # If the user set a workdir, let use it. If not, use the
+        # pidfile directory
+        if self.conf.workdir == '':
+            self.workdir = os.path.abspath(os.path.dirname(self.pidfile))
+        else:
+            self.workdir = self.conf.workdir
         #print "DBG curpath=", os.getcwd()
         #print "DBG pidfile=", self.pidfile
         #print "DBG workdir=", self.workdir
@@ -396,6 +417,7 @@ class Arbiter(Daemon):
         self.port = self.me.port
         
         logger.log("Configuration Loaded")
+        print ""
 
 
     # Main loop function
@@ -424,7 +446,7 @@ class Arbiter(Daemon):
             # ends up here and must be handled.
             sys.exit(exp.code)
         except Exception, exp:
-            logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
+            logger.log("CRITICAL ERROR : I got an non recoverable error. I must exit")
             logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
             logger.log("Back trace of it: %s" % (traceback.format_exc()))
             raise
@@ -591,8 +613,9 @@ class Arbiter(Daemon):
             self.get_external_commands_from_brokers()
             self.get_external_commands_from_receivers()
             # send_conf_to_schedulers()
-
-            print "Nb Broks send:", self.nb_broks_send
+            
+            if self.nb_broks_send != 0:
+                print "Nb Broks send:", self.nb_broks_send
             self.nb_broks_send = 0
 
             # Now send all external commands to schedulers
@@ -608,23 +631,18 @@ class Arbiter(Daemon):
                 self.need_dump_memory = False
 
 
-    # This function returns the part of the conf where are stored the daemons of
-    # a given daemon type
     def get_daemons(self, daemon_type):
-    # We get the list of the daemons from their links
-    # 'schedulerlinks' for schedulers, 'arbiterlinks' for arbiters
-    # and 'pollers', 'brokers', 'reactionners' for the other
+        """ Returns the daemons list defined in our conf for the given type """
+        # We get the list of the daemons from their links
+        # 'schedulerlinks' for schedulers, 'arbiterlinks' for arbiters
+        # and 'pollers', 'brokers', 'reactionners' for the others
         if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
             daemon_links = daemon_type+'links'
         else:
             daemon_links = daemon_type+'s'
 
-        if hasattr(self.conf, daemon_links):
-            return getattr(self.conf, daemon_links);
-
-        # If the links cannot be found, we have a problem
-        return None
-
+        # shouldn't the 'daemon_links' (whetever it is above) be always present ?
+        return getattr(self.conf, daemon_links, None)
 
     # Helper functions for retention modules
     # So we give our broks and external commands

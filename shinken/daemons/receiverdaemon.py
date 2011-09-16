@@ -21,21 +21,17 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import sys
 import time
 import traceback
 
 from multiprocessing import active_children
 from Queue import Empty
 
-from shinken.satellite import BaseSatellite, IForArbiter
+from shinken.satellite import BaseSatellite
 
 from shinken.property import PathProp, IntegerProp
-from shinken.util import sort_by_ids
 from shinken.log import logger
 
-import shinken.pyro_wrapper as pyro
-from shinken.pyro_wrapper import Pyro
 
 from shinken.external_command import ExternalCommand
 

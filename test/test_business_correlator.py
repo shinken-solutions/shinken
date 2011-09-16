@@ -27,7 +27,7 @@ import re
 from shinken_test import *
 
 
-class TestConfig(ShinkenTest):
+class TestBusinesscorrel(ShinkenTest):
     # Uncomment this is you want to use a specific configuration
     # for your test
     def setUp(self):
@@ -255,7 +255,8 @@ class TestConfig(ShinkenTest):
         self.assert_(svc_cor.business_rule is not None)
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
-        self.assert_(bp_rule.of_values == 1)
+        # Simple 1of: so in fact a triple (1,2,2) (1of and MAX,MAX
+        self.assert_(bp_rule.of_values == (1,2,2))
         
         
         sons = bp_rule.sons
@@ -861,7 +862,186 @@ class TestConfig(ShinkenTest):
         self.assert_(svc_cor.state == 'OK')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
+
+
+
+
+
+
+
+    # We will try a simple 1of: bd1 OR/AND db2
+    def test_complex_ABCof_business_correlator(self):
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        print "Get the hosts and services"
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
         
+        A = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "A")
+        self.assert_(A.got_business_rule == False)
+        self.assert_(A.business_rule is None)
+        B = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "B")
+        self.assert_(B.got_business_rule == False)
+        self.assert_(B.business_rule is None)
+        C = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "C")
+        self.assert_(C.got_business_rule == False)
+        self.assert_(C.business_rule is None)
+        D = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "D")
+        self.assert_(D.got_business_rule == False)
+        self.assert_(D.business_rule is None)
+        E = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "E")
+        self.assert_(E.got_business_rule == False)
+        self.assert_(E.business_rule is None)
+
+        svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Complex_ABCOf")
+        self.assert_(svc_cor.got_business_rule == True)
+        self.assert_(svc_cor.business_rule is not None)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.operand == 'of:')
+        self.assert_(bp_rule.of_values == (5,1,1))
+        
+        
+        sons = bp_rule.sons
+        print "Sons,", sons
+        # We've got 2 sons, 2 services nodes
+        self.assert_(len(sons) == 5)
+        self.assert_(sons[0].operand == 'service')
+        self.assert_(sons[0].sons[0] == A)
+        self.assert_(sons[1].operand == 'service')
+        self.assert_(sons[1].sons[0] == B)
+        self.assert_(sons[2].operand == 'service')
+        self.assert_(sons[2].sons[0] == C)
+        self.assert_(sons[3].operand == 'service')
+        self.assert_(sons[3].sons[0] == D)
+        self.assert_(sons[4].operand == 'service')
+        self.assert_(sons[4].sons[0] == E)
+        
+        # Now state working on the states
+        self.scheduler_loop(1, [[A, 0, 'OK'], [B, 0, 'OK'], [C, 0, 'OK'], [D, 0, 'OK'], [E, 0, 'OK']])
+        self.assert_(A.state == 'OK')
+        self.assert_(A.state_type == 'HARD')
+        self.assert_(B.state == 'OK')
+        self.assert_(B.state_type == 'HARD')
+        self.assert_(C.state == 'OK')
+        self.assert_(C.state_type == 'HARD')
+        self.assert_(D.state == 'OK')
+        self.assert_(D.state_type == 'HARD')
+        self.assert_(E.state == 'OK')
+        self.assert_(E.state_type == 'HARD')
+        
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+        
+        # Now we set the A as soft/CRITICAL
+        self.scheduler_loop(1, [[A, 2, 'CRITICAL']])
+        self.assert_(A.state == 'CRITICAL')
+        self.assert_(A.state_type == 'SOFT')
+        self.assert_(A.last_hard_state_id == 0)
+
+        # The business rule must still be 0
+        # becase we want HARD states
+        state = bp_rule.get_state()
+        self.assert_(state == 0)
+        
+        # Now we get A CRITICAL/HARD
+        self.scheduler_loop(1, [[A, 2, 'CRITICAL']])
+        self.assert_(A.state == 'CRITICAL')
+        self.assert_(A.state_type == 'HARD')
+        self.assert_(A.last_hard_state_id == 2)
+        
+        # The rule still be OK
+        state = bp_rule.get_state()
+        self.assert_(state == 2)
+
+        # Now we also set B as CRITICAL/HARD...
+        self.scheduler_loop(2, [[B, 2, 'CRITICAL']])
+        self.assert_(B.state == 'CRITICAL')
+        self.assert_(B.state_type == 'HARD')
+        self.assert_(B.last_hard_state_id == 2)
+        
+        # And now the state of the rule must be 2 now
+        state = bp_rule.get_state()
+        self.assert_(state == 2)
+
+        # And If we set A dn B WARNING now?
+        self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 1, 'WARNING']])
+        self.assert_(A.state == 'WARNING')
+        self.assert_(A.state_type == 'HARD')
+        self.assert_(A.last_hard_state_id == 1)
+        self.assert_(B.state == 'WARNING')
+        self.assert_(B.state_type == 'HARD')
+        self.assert_(B.last_hard_state_id == 1)
+
+
+        # Must be WARNING (worse no 0 value for both, like for AND rule)
+        state = bp_rule.get_state()
+        print "state", state
+        self.assert_(state == 1)
+
+
+
+        # Ok now more fun, with changing of_values and states
+
+        ### W O O O O
+        # 4 of:   -> Ok (we got 4 OK, and not 4 warn or crit, so it's OK)
+        # 5,1,1  -> Warning (at least one warning, and no crit -> warning)
+        # 5,2,1 -> OK (we want warning only if we got 2 bad states, so not here)
+        self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 0, 'OK']])
+        #4 of: -> 4,5,5
+        bp_rule.of_values = (4,5,5)
+        bp_rule.is_of_mul = False
+        self.assert_(bp_rule.get_state() == 0)
+        # 5,1,1 
+        bp_rule.of_values = (5,1,1)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 1)
+        # 5,2,1
+        bp_rule.of_values = (5,2,1)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 0)
+
+        ###* W C O O O
+        # 4 of: -> Crtitical (not 4 ok, so we take the worse state, the critical)
+        # 4,1,1 -> Critical (2 states raise the waring, but on raise critical, so worse state is critical)
+        self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit']])
+        #4 of: -> 4,5,5
+        bp_rule.of_values = (4,5,5)
+        bp_rule.is_of_mul = False
+        self.assert_(bp_rule.get_state() == 2)
+        # 4,1,1
+        bp_rule.of_values = (4,1,1)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 2)
+
+        ##* W C C O O
+        #* 2 of: OK
+        #* 4,1,1 -> Critical (same as before)
+        #* 4,1,3 -> warning (the warning rule is raised, but the critical is not)
+        self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit'], [C, 2, 'Crit']])
+        #* 2 of: 2,5,5
+        bp_rule.of_values = (2,5,5)
+        bp_rule.is_of_mul = False
+        self.assert_(bp_rule.get_state() == 0)
+        #* 4,1,1
+        bp_rule.of_values = (4,1,1)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 2)
+        #* 4,1,3
+        bp_rule.of_values = (4,1,3)
+        bp_rule.is_of_mul = True
+        self.assert_(bp_rule.get_state() == 1)
+
+
 
 
 class TestConfigBroken(ShinkenTest):

@@ -26,9 +26,6 @@
 #Here for the configuration phase AND running one
 
 
-#This text is print at the import
-print "Detected module : Nrpe module for Poller"
-
 import sys
 import signal
 import time

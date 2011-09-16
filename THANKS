@@ -1,6 +1,7 @@
 To Fronteau Romuald for it's logo :)
 To Gerhard Lausser for it's cfg_dir patch and trailing \ patch, members patchs too :)
 To Icinga guys for theirs sql files!
+To David Walsh for mootools!
 To Maximilien Bersoult for it's setup.py
 To Sebastian Reimers for being the first to add a ticket in the Trac, and hunting a lot of bugs :)
 To Luke L for reading and correcting the website and the documentation :p
@@ -33,3 +34,13 @@ To Hienz Michael for the bug report about bad local_file :)
 To Ronny Lindner for the bug report about non host expressions for services
 To Olivier Hanesse for his bug report about fixed 60s interval in checks
 To Markus Elger for this bug report about no schedule retention data
+To Vincent Riquer for his bug report about HA installation and sapre broker that stay alive
+To Michael Grundmann for his bug report about service host exclusion and void hostgroup 
+To Jan Kaliszewski for his implementation of sorted dicts
+To Claneys Skyne for his typo report
+To Etienne Obriot for his patch about multiple = in macos values
+To obiouane for his bug report about missing object value
+To Thibault Cohen for his bug report about linkify and templates
+To Carmelle Monkoun for the bug report about Pyro4.8
+To Bruno Clermont for the fix in bottle call and the typos
+To Stéphane Duchesneau for his work on the setup.py file and log/run driectories.

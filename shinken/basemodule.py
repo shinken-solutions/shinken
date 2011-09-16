@@ -77,6 +77,8 @@ Example of task that a shinken module can do:
 `mod_conf´ is module configuration object for this new module instance. """
         self.myconf = mod_conf
         self.name = mod_conf.get_name()
+        # We can have sub modules
+        self.modules = getattr(mod_conf, 'modules', [])
         self.props = mod_conf.properties.copy()
         self.properties = self.props # TODO: choose between 'props' or 'properties'..
         self.interrupted = False
@@ -138,10 +140,9 @@ But clear queues if they were already set before recreating new one.  """
     def stop_process(self):
         """ Request the module process to stop and release it """
         if self.process:
-            logger.log("I'm stopping process pid:%s " % self.process.pid)
+            logger.log("I'm stopping module '%s' process pid:%s " % (self.get_name(), self.process.pid))
             self.process.terminate()
             self.process.join(timeout=1)
-            print dir(self.process)
             if self.process.is_alive():
                 logger.log("The process is still alive, I help it to die")
                 self.__kill()

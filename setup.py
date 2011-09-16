@@ -79,13 +79,15 @@ class install(_install):
     user_options = _install.user_options + [
         ( 'etc-path=', None, 'read-only single-machine data' ),
         ( 'var-path=', None, 'modifiable single-machine data' ),
+        ( 'run-path=', None, 'PID files' ),
+        ( 'log-path=', None, 'LOG files' ),
         ( 'plugins-path=', None, 'program executables' ),
         ( 'owner=', None, ( 
-                'change owner for etc/* and var (default: %s)' % DEFAULT_OWNER
+                'change owner for etc/*, var, run and log folders (default: %s)' % DEFAULT_OWNER
             )
         ),
         ( 'group=', None, (
-                'change group for etc/* and var (default: %s)' % DEFAULT_GROUP
+                'change group for etc/*, var, run and log folders (default: %s)' % DEFAULT_GROUP
             )
         ),
     ]
@@ -94,6 +96,8 @@ class install(_install):
         _install.initialize_options(self)
         self.etc_path = None
         self.var_path = None
+        self.run_path = None
+        self.log_path = None
         self.plugins_path = None
         self.owner = None
         self.group = None
@@ -104,6 +108,10 @@ class install(_install):
             self.etc_path = default_paths['etc']
         if self.var_path is None:
             self.var_path = default_paths['var']
+        if self.run_path is None:
+            self.run_path = default_paths['run']
+        if self.log_path is None:
+            self.log_path = default_paths['log']
         if self.plugins_path is None:
             self.plugins_path = default_paths['libexec']
         if self.owner is None:
@@ -112,7 +120,7 @@ class install(_install):
             self.group = DEFAULT_GROUP
 
         if self.root:
-            for attr in ('etc_path', 'var_path', 'plugins_path'):
+            for attr in ('etc_path', 'var_path', 'plugins_path', 'run_path', 'log_path'):
                 setattr(self, attr, change_root(self.root, getattr(self, attr)))
             
 
@@ -128,6 +136,8 @@ class build_config(Command):
         self.build_base = None
         self.etc_path = None
         self.var_path = None
+        self.run_path = None
+        self.log_path = None
         self.plugins_path = None
 
         self._install_scripts = None
@@ -146,6 +156,8 @@ class build_config(Command):
         self.set_undefined_options('install_config',
                                    ('etc_path', 'etc_path'),
                                    ('var_path', 'var_path'),
+                                   ('run_path', 'run_path'),
+                                   ('log_path', 'log_path'),
                                    ('plugins_path', 'plugins_path'),
                                    ('owner', 'owner'),
                                    ('group', 'group')
@@ -176,6 +188,8 @@ class build_config(Command):
             # substitute
             buf = buf.replace("$ETC$", self.etc_path)
             buf = buf.replace("$VAR$", self.var_path)
+            buf = buf.replace("$RUN$", self.run_path)
+            buf = buf.replace("$LOG$", self.log_path)
             buf = buf.replace("$SCRIPTS_BIN$", self._install_scripts)
             # write out the new file
             f = open(outfile, "w")
@@ -189,24 +203,18 @@ class build_config(Command):
         # Open a /etc/*d.ini file and change the ../var occurence with a
         # good value from the configuration file
         
-        for name in daemon_ini_files:
+        for (dname, name) in daemon_ini_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s : to "%s"' % (outname, self.var_path))
-            
-            if False:
-                ## disabled for now:
-                ## all daemons are now using relative paths by default 
-                ## (relative to the "VAR" one of /etc/default/shinken)
-                update_file_with_string(inname, outname,
-                                    "../var", self.var_path)
             
             # but we have to force the user/group & workdir values still:
             append_file_with(inname, outname, """
 user=%s
 group=%s
 workdir=%s
-""" % ( self.owner, self.group, self.var_path, ))
+pidfile=%s/%sd.pid
+""" % ( self.owner, self.group, self.var_path, self.run_path, dname))
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
@@ -225,19 +233,25 @@ workdir=%s
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
             
-            if False:
-                ## disabled for now :
-                ## nagios.cfg & shinken-specific use now relative paths (relative to the "VAR" one) 
-                update_file_with_string(inname, outname,
-                                    "/usr/local/shinken/var",
-                                    self.var_path)
             
             ## but we HAVE to set the shinken_user & shinken_group to thoses requested :
             append_file_with(inname, outname, """
 shinken_user=%s
 shinken_group=%s
-""" % ( self.owner, self.group )
+lock_file=%s/arbiterd.pid
+""" % ( self.owner, self.group, self.run_path )
             )
+        
+        # UPDATE Shinken-specific.cfg files too
+        for name in additionnal_config_files:
+            inname = os.path.join('etc', name)
+            outname = os.path.join(self.build_dir, name)
+            # And update the default log path too
+            log.info('updating log path in %s', outname)
+            update_file_with_string(inname, outname,
+                                    "nagios.log",
+                                    "%s/nagios.log" % self.log_path)
+
 
 class install_config(Command):
     description = "install the shinken config files"
@@ -261,6 +275,8 @@ class install_config(Command):
         self.root = None
         self.etc_path = None  # typically /etc on Posix systems 
         self.var_path = None # typically /var on Posix systems 
+        self.run_path = None  # typically /etc on Posix systems 
+        self.log_path = None # typically /var on Posix systems 
         self.plugins_path = None    # typically /libexec on Posix systems
 
     def finalize_options(self):
@@ -273,6 +289,8 @@ class install_config(Command):
                ('root', 'root'),
                ('etc_path', 'etc_path'),
                ('var_path', 'var_path'),
+               ('run_path', 'run_path'),
+               ('log_path', 'log_path'),
                ('plugins_path', 'plugins_path'),
                ('owner', 'owner'),
                ('group', 'group')
@@ -297,6 +315,8 @@ class install_config(Command):
             # recursivly changing permissions for etc/shinken and var/lib/shinken
             self.recursive_chown(self.etc_path, uid, gid, self.owner, self.group)
             self.recursive_chown(self.var_path, uid, gid, self.owner, self.group)
+            self.recursive_chown(self.run_path, uid, gid, self.owner, self.group)
+            self.recursive_chown(self.log_path, uid, gid, self.owner, self.group)
 
 
     def get_inputs (self):
@@ -343,6 +363,17 @@ def append_file_with(infilename, outfilename, append_string):
     f.close()
 
 
+def gen_data_files(*dirs):
+    results = []
+    
+    for src_dir in dirs:
+        #print "Getting all files from", src_dir
+        for root,dirs,files in os.walk(src_dir):
+            for file in files:
+                results.append(os.path.join(root, file))
+    return results
+
+
 def update_file_with_string(infilename, outfilename, match, new_string):
     f = open(infilename)
     buf = f.read()
@@ -357,16 +388,22 @@ def update_file_with_string(infilename, outfilename, match, new_string):
 if 'win' in sys.platform:
     default_paths = {'var':      "c:\\shinken\\var",
                      'etc':      "c:\\shinken\\etc",
+                     'log':      "c:\\shinken\\var",
+                     'run':      "c:\\shinken\\var",
                      'libexec':  "c:\\shinken\\libexec",
                      }
 elif 'linux' in sys.platform:
     default_paths = {'var': "/var/lib/shinken/",
                      'etc': "/etc/shinken",
+                     'run': "/var/run/shinken",
+                     'log': "/var/log/shinken",
                      'libexec': "/usr/lib/shinken/plugins",
                      }
 elif 'bsd' in sys.platform or 'dragonfly' in sys.platform:
     default_paths = {'var': "/var/lib/shinken",
                      'etc': "/usr/local/etc/shinken",
+                     'run': "/var/run/shinken",
+                     'log': "/var/log/shinken",
                      'libexec': "/usr/local/libexec/shinken",
                      }
 else:
@@ -384,27 +421,41 @@ etc_root = os.path.dirname(default_paths['etc'])
 
 # nagios/shinken global config
 main_config_files = ('nagios.cfg',
-                     'nagios-windows.cfg',
-                     'shinken-specific.cfg',
-                     'shinken-specific-high-availability.cfg',
-                     'shinken-specific-load-balanced-only.cfg',
-                     )
+                     'nagios-windows.cfg')
+
+additionnal_config_files = ('shinken-specific.cfg',
+                            'shinken-specific-high-availability.cfg',
+                            'shinken-specific-load-balanced-only.cfg'
+                            )
 
 # daemon configs
-daemon_ini_files = ('brokerd.ini',
-                    'brokerd-windows.ini',
-                    'receiverd.ini',
-                    'receiverd-windows.ini',
-                    'pollerd.ini',
-                    'pollerd-windows.ini',
-                    'reactionnerd.ini',
-                    'schedulerd.ini',
-                    'schedulerd-windows.ini',
+daemon_ini_files = (('broker', 'brokerd.ini'),
+                    ('broker', 'brokerd-windows.ini'),
+                    ('receiver', 'receiverd.ini'),
+                    ('receiver', 'receiverd-windows.ini'),
+                    ('poller', 'pollerd.ini'),
+                    ('poller', 'pollerd-windows.ini'),
+                    ('reactionner', 'reactionnerd.ini'),
+                    ('reactionner', 'reactionnerd-windows.ini'),
+                    ('scheduler', 'schedulerd.ini'),
+                    ('scheduler', 'schedulerd-windows.ini'),
                     )
 
 resource_cfg_files = ('resource.cfg', )
 
+# Ok, for the webui files it's a bit tricky. we need to add all of them in
+#the package_data of setup(), but from a point of view of the
+# module shinken, so the directory shinken... but without movingfrom pwd!
+# so : sorry for the replace, really... I HATE SETUP()!
+full_path_webui_files = gen_data_files('shinken/webui')
+webui_files = [s.replace('shinken/webui/', 'webui/') for s in full_path_webui_files]
 
+
+package_data = ['*.py','modules/*.py','modules/*/*.py']
+package_data.extend(webui_files)
+
+
+print "All package _data"
 if __name__ == "__main__":
     
     setup(
@@ -418,7 +469,7 @@ if __name__ == "__main__":
         name = "Shinken",
         version = "0.6",
         packages = find_packages(),
-        package_data = {'':['*.py','modules/*.py','modules/*/*.py']},
+        package_data = {'' : package_data},
         description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
         long_description=open('README').read(),
         author = "Gabes Jean",
@@ -506,7 +557,15 @@ if __name__ == "__main__":
                 default_paths['var'], 
                 [ 'var/void_for_git' ]
             ),
-
+            (
+                default_paths['run'],
+                [ 'var/void_for_git' ]
+            ),
+            (
+                default_paths['log'],
+                [ 'var/void_for_git' ]
+            )
+            ,
             (
                 default_paths['libexec'], ['libexec/check.sh']
             ),

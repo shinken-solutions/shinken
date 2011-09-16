@@ -35,10 +35,6 @@ from shinken.util import to_bool
 from shinken.log import logger
 
 
-#This text is print at the import
-print "Detected module : Nagios retention file for Scheduler (load only!)"
-
-
 properties = {
     'daemons' : ['scheduler'],
     'type' : 'nagios_retention_file',

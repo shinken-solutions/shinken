@@ -21,10 +21,6 @@
 #Here for the configuration phase AND running one
 
 
-#This text is print at the import
-print "Detected module : Memcache retention file for Scheduler"
-
-
 import memcache
 import cPickle
 

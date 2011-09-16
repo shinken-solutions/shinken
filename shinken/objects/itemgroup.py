@@ -108,6 +108,11 @@ class Itemgroup(Item):
     def __iter__(self):
         return self.members.__iter__()
 
+    def __delitem__(self, i):
+        try:
+            self.members.remove(i)
+        except ValueError:
+            pass
 
     #a item group is correct if all members actually exists,
     #so if unknown_members is still []
@@ -153,7 +158,7 @@ class Itemgroup(Item):
 
 class Itemgroups(Items):            
 
-    #If a prop is absent and is not required, put the default value
+    # If a prop is absent and is not required, put the default value
     def fill_default(self):
         for i in self:
             i.fill_default()
@@ -168,3 +173,5 @@ class Itemgroups(Items):
         if g is None:
             return []
         return getattr(g, 'members', [])
+
+    

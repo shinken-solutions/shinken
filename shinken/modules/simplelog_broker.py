@@ -35,9 +35,6 @@ from shinken.basemodule import BaseModule
 from shinken.util import get_day
 from shinken.log import logger
 
-#This text is print at the import
-print "I am simple log Broker"
-
 
 properties = {
     'daemons' : ['broker'],
@@ -71,6 +68,10 @@ class Simple_log_broker(BaseModule):
         BaseModule.__init__(self, modconf)
         self.path = path
         self.archive_path = archive_path
+        try:
+            os.stat(archive_path)
+        except:
+            os.mkdir(archive_path)
 
 
     #Check the path file age. If it's last day, we

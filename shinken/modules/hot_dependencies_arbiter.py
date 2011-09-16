@@ -41,9 +41,6 @@ except ImportError:
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
-#This text is print at the import
-print "Detected module : Hot dependencies modules for Arbiter"
-
 
 properties = {
     'daemons' : ['arbiter'],
@@ -60,7 +57,8 @@ def get_instance(plugin):
     mapping_command = getattr(plugin, 'mapping_command', '')
     mapping_command_interval = int(getattr(plugin, 'mapping_command_interval', '60'))
     mapping_command_timeout = int(getattr(plugin, 'mapping_command_timeout', '300'))
-    instance = Hot_dependencies_arbiter(plugin, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout)
+    in_debug = getattr(plugin, 'debug', '0') == '1'
+    instance = Hot_dependencies_arbiter(plugin, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout, in_debug)
     return instance
 
 
@@ -68,7 +66,7 @@ def get_instance(plugin):
 # Get hosts and/or services dep by launching a command
 # or read a flat file as json format taht got theses links
 class Hot_dependencies_arbiter(BaseModule):
-    def __init__(self, modconf, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout):
+    def __init__(self, modconf, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout, in_debug=False):
         BaseModule.__init__(self, modconf)
         self.mapping_file = mapping_file
         self.last_update = 0
@@ -80,6 +78,7 @@ class Hot_dependencies_arbiter(BaseModule):
         self.last_cmd_launch = 0
         self.process = None
         self.mapping_command_timeout = mapping_command_timeout
+        self.in_debug = in_debug
 
         
     #Called by Arbiter to say 'let's prepare yourself guy'
@@ -92,6 +91,11 @@ class Hot_dependencies_arbiter(BaseModule):
         return os.path.exists(self.mapping_file)
 
 
+    def debug(self, s):
+        if self.in_debug:
+            print "[HotDependency] %s " % s
+            
+
     # Look is the mapping filechanged since the last lookup
     def _is_mapping_file_changed(self):
         try:
@@ -99,8 +103,8 @@ class Hot_dependencies_arbiter(BaseModule):
             if last_update > self.last_update:
                 self.last_update = last_update
                 return True
-        except OSError : # Maybe the file got problem, we bypaass here
-            pass
+        except OSError, exp : # Maybe the file got problem, we bypaass here
+            self.debug(str(exp))
         return False
 
 
@@ -128,7 +132,7 @@ class Hot_dependencies_arbiter(BaseModule):
         
     # Launch the external command to generate the file
     def _launch_command(self):
-        print "Launching command", self.mapping_command
+        self.debug("Launching command %s" % self.mapping_command)
         self.last_cmd_launch = int(time.time())
 
         # windows subprocess do not want us to close fd
@@ -139,7 +143,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 close_fds=do_close_fd, shell=True)
         except OSError , exp:
-            print "Error in launchign the command %s : %s" % (self.mapping_command, exp)
+            self.debug("Error in launching the command %s : %s" % (self.mapping_command, exp))
 
 
     # Look if the command is finished or not
@@ -148,14 +152,13 @@ class Hot_dependencies_arbiter(BaseModule):
             # Ok, still unfinished, look if in timeout
             now = time.time()
             if (now - self.last_cmd_launch) > self.mapping_command_timeout:
-                print "The external command go in timeout!"
+                self.debug("The external command go in timeout!")
         else:
             print "The external command is done!"
             # it's finished! Cool
             (stdoutdata, stderrdata) = self.process.communicate()
             if self.process.returncode != 0:
-                print "The command return in error : %s" % stderrdata
-                print stdoutdata
+                self.debug("The command return in error : %s \n %s" % (stderrdata, stdoutdata))
             self.process = None
 
 
@@ -166,7 +169,7 @@ class Hot_dependencies_arbiter(BaseModule):
         if self.process is None:
             if now - self.last_cmd_launch > self.mapping_command_interval:
                 if self.mapping_command_interval != 0 and self.mapping_command != '':
-                    print "The command lunach is too old, launch a new one"
+                    self.debug("The command lunach is too old, launch a new one")
                     self._launch_command()
 #            else:
 #                print "The last cmd launch is too early", now - self.last_cmd_launch, self.mapping_command_interval
@@ -198,37 +201,37 @@ class Hot_dependencies_arbiter(BaseModule):
                 son = arb.conf.hosts.find_by_name(son_name)
                 father = arb.conf.hosts.find_by_name(father_name)
                 if son is not None and father is not None:
-                    print "finded!", son_name, father_name
+                    self.debug("Finded! %s %s" % (son_name, father_name))
                     if not son.is_linked_with_host(father):
-                        print "Doing simple link between", son.get_name(), 'and', father.get_name()
+                        self.debug("Doing simple link between %s and %s" % (son.get_name(), father.get_name()))
                         # Add a dep link between the son and the father
                         son.add_host_act_dependancy(father, ['w', 'u', 'd'], None, True)
                 else:
-                    print "Missing one of", son_name, father_name
+                    self.debug("Missing one of %s %s" % (son_name, father_name))
 
 
 
     def hook_tick(self, arb):
         now = int(time.time())
         self.tick_external_command()
-        print "*"*10, "Tick tick for hot dependency"
+        self.debug("Tick tick for hot dependency")
         # If the mapping file changed, we reload it and update our links
         # if we need it
         if self._is_mapping_file_changed():
-            print "The mapping file changed, I update it"
+            self.debug("The mapping file changed, I update it")
             self._update_mapping()
             additions, removed = self._got_mapping_changes()
-            print "Additions : ", additions
-            print "Remove : ", removed
+            self.debug("Additions : %s" % additions)
+            self.debug("Remove : %s " % removed)
             for father_k, son_k in additions:
                 son_type, son_name = son_k
                 father_type, father_name = father_k
-                print "Got new add", son_type, son_name, father_type, father_name
+                self.debug("Got new add %s %s %s %s" % (son_type, son_name, father_type, father_name))
                 son = arb.conf.hosts.find_by_name(son_name.strip())
                 father = arb.conf.hosts.find_by_name(father_name.strip())
                 # if we cannot find them in the conf, bypass them
                 if son is None or father is None:
-                    print "not find dumbass!"
+                    self.debug("not find dumbass!")
                     continue
                 print son_name, father_name
                 if son_type == 'host' and father_type == 'host':
@@ -237,18 +240,18 @@ class Hot_dependencies_arbiter(BaseModule):
                     extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
                     e = ExternalCommand(extcmd)
 
-                    print 'Raising external command', extcmd
+                    self.debug('Raising external command : %s' % extcmd)
                     arb.add(e)
             # And now the deletion part
             for father_k, son_k in removed:
                 son_type, son_name = son_k
                 father_type, father_name = father_k
-                print "Got new del", son_type, son_name, father_type, father_name
+                self.debug("Got new del %s %s %s %s" % (son_type, son_name, father_type, father_name))
                 son = arb.conf.hosts.find_by_name(son_name.strip())
                 father = arb.conf.hosts.find_by_name(father_name.strip())
                 # if we cannot find them in the conf, bypass them
                 if son is None or father is None:
-                    print "not find dumbass!"
+                    self.debug("not find dumbass!")
                     continue
                 print son_name, father_name
                 if son_type == 'host' and father_type == 'host':
@@ -257,9 +260,7 @@ class Hot_dependencies_arbiter(BaseModule):
                     extcmd = "[%lu] DEL_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
                     e = ExternalCommand(extcmd)
 
-                    print 'Raising external command', extcmd
+                    self.debug('Raising external command %s' % extcmd)
                     arb.add(e)
 
-
-        print '\n'*10
                 

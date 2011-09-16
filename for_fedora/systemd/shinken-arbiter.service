@@ -1,0 +1,10 @@
+[Unit]
+Description=Shinken Arbiter
+After=syslog.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/shinken-arbiter -d -c /etc/shinken/nagios.cfg -c /etc/shinken/shinken-specific.cfg
+
+[Install]
+WantedBy=multi-user.target

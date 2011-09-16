@@ -17,10 +17,6 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This text is print at the import
-print "I am Host Perfdata Broker"
-
-
 properties = {
     'daemons' : ['broker'],
     'type' : 'host_perfdata',

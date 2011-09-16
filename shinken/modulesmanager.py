@@ -78,7 +78,7 @@ The previous imported modules, if any, are cleaned before. """
         # our type
         del self.imported_modules[:]
         for fname in modules_files:
-            print "Try to load", fname
+            #print "Try to load", fname
             try:
                 m = __import__(fname)
                 if not hasattr(m, 'properties'):
@@ -88,7 +88,7 @@ The previous imported modules, if any, are cleaned before. """
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
             except ImportError , exp:
-                print "Warning :", exp        
+                logger.log("Warning in importing module : %s" % exp)
 
         del self.modules_assoc[:]
         for mod_conf in self.modules:
@@ -108,7 +108,7 @@ The previous imported modules, if any, are cleaned before. """
         """ Try to "init" the given module instance. 
 Returns: True on successfull init. False if instance init method raised any Exception. """ 
         try:
-            print "Trying to init module", inst.get_name()
+            logger.log("Trying to init module : %s" % inst.get_name())
             inst.init_try += 1
             # Maybe it's a retry
             if inst.init_try > 1:
@@ -168,8 +168,6 @@ The previous modules instance(s), if any, are all cleaned. """
                 logger.log("Back trace of this remove : %s" % (output.getvalue()))
                 output.close()
 
-        print "Loaded", len(self.instances), "module instances"
-
         for inst in self.instances:
             # External are not init now, but only when they are started
             if not inst.is_external and not self.try_instance_init(inst):
@@ -190,7 +188,7 @@ The previous modules instance(s), if any, are all cleaned. """
                 continue
             
             # ok, init succeed
-            print "Starting external module %s" % inst.get_name(), inst.from_q
+            logger.log("Starting external module %s" % inst.get_name())
             inst.start()
 
 

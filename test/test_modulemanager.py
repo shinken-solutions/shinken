@@ -25,6 +25,9 @@
 #It's ugly I know....
 from shinken_test import *
 
+time.time = original_time_time
+time.sleep = original_time_sleep
+
 
 class TestModuleManager(ShinkenTest):
     #Uncomment this is you want to use a specific configuration

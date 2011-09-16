@@ -69,8 +69,10 @@ opts, args = parser.parse_args()
 if args:
     parser.error("Does not accept any argument.")
 
-daemon = Poller(debug=opts.debug_file is not None, **opts.__dict__)
-daemon.main()
+# Protect for windows multiprocessing that will RELAUNCH all
+if __name__ == '__main__':
+    daemon = Poller(debug=opts.debug_file is not None, **opts.__dict__)
+    daemon.main()
 
 # For perf tuning :
 #import cProfile

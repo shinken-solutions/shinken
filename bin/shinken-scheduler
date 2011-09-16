@@ -65,6 +65,7 @@ import os
 import sys
 import optparse
 
+
 # We try to raise up recusion limit on
 # but we don't have resource module on windows
 if os.name != 'nt':
@@ -114,8 +115,10 @@ opts, args = parser.parse_args()
 if args:
     parser.error("Does not accept any argument.")
 
-daemon = Shinken(debug=opts.debug_file is not None, **opts.__dict__)
-daemon.main()
+# Protect for windows multiprocessing that will RELAUNCH all
+if __name__ == '__main__':
+    daemon = Shinken(debug=opts.debug_file is not None, **opts.__dict__)
+    daemon.main()
 # For perf running :
 #import cProfile
 #cProfile.run('''daemon.main()''', '/tmp/scheduler.profile')

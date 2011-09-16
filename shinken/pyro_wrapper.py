@@ -38,6 +38,7 @@ except ImportError: #ok, no Pyro3, maybe 4
 class InvalidWorkDir(Exception): pass
 class PortNotFree(Exception): pass
 
+PYRO_VERSION = 'UNKNOWN'
 
 
 #Try to see if we are Python 3 or 4
@@ -46,8 +47,8 @@ try:
     #Some one already go here, so we are in 4 if None
     if Pyro.core.ObjBase is None:
         raise AttributeError
-    print "Using Pyro", Pyro.constants.VERSION
-    
+
+    PYRO_VERSION = Pyro.constants.VERSION
     Pyro.errors.CommunicationError = Pyro.errors.ProtocolError
     
     class Pyro3Daemon(Pyro.core.Daemon):
@@ -121,8 +122,7 @@ try:
 
 except AttributeError, exp:
     
-    print "Using Pyro", Pyro.constants.VERSION
-    
+    PYRO_VERSION = Pyro.constants.VERSION    
     # Ok, in Pyro 4, interface do not need to
     # inherit from ObjBase, just a dummy class is good
     Pyro.core.ObjBase = dict
@@ -157,10 +157,10 @@ except AttributeError, exp:
                     break
                 except socket.error, exp:
                     msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
-                    # At 35, we are very not happy
-                    if nb_try == 35:
+                    # At 35 (or over), we are very not happy
+                    if nb_try >= 35:
                         raise PortNotFree(msg)
-                    print msg, "but we try anoter time in 1 sec"
+                    print msg, "but we try another time in 1 sec"
                     time.sleep(1)
                 except Exception, e:
                     # must be problem with pyro workdir :

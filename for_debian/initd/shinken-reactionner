@@ -1,0 +1,196 @@
+#!/bin/sh  
+
+### BEGIN INIT INFO
+# Provides:          shinken-reactionner
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Shinken reactionner daemon
+# Description:       Shinken is a monitoring tool and the Arbiter
+#                    is one of its daemon. This one reads the configuration,
+#                    cuts it into parts and dispatches it. Then it waits
+#                    for orders from the users to dispatch them too.
+### END INIT INFO
+
+# Author: David Hannequin <david.hannequin@gmail.com>
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC=shinken-reactionner             # Introduce a short description here
+NAME=reactionner             # Introduce the short server's name here
+DAEMON=/usr/sbin/shinken-reactionner # Introduce the server's location here
+DAEMON_ARGS="-d -c /etc/shinken/reactionnerd.ini"             # Arguments to run the daemon with
+PIDFILE=/var/run/shinken/reactionnerd.pid
+SCRIPTNAME=/etc/init.d/shinken-reactionner
+
+# Exit if the package is not installed
+[ -x $DAEMON ] || exit 0
+
+# Read configuration variable file if it is present
+[ -r /etc/default/shinken ] && . /etc/default/shinken
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+#
+# Function that starts the daemon/service
+#
+do_start()
+{
+    DIRECTORY=$(dirname $PIDFILE)
+    [ ! -d $DIRECTORY ] && mkdir -p $DIRECTORY
+    chown shinken:shinken $DIRECTORY
+	# Return
+	#   0 if daemon has been started
+	#   1 if daemon was already running
+	#   2 if daemon could not be started
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+		|| return 1
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- \
+		$DAEMON_ARGS \
+		|| return 2
+	# Add code here, if necessary, that waits for the process to be ready
+	# to handle requests from services started subsequently which depend
+	# on this one.  As a last resort, sleep for some time.
+}
+
+#
+# Function that stops the daemon/service
+#
+#######
+
+do_stop() {
+    if [ -f $PIDFILE ]; then 
+	pid=`cat $PIDFILE` 
+    fi
+    [ $? -ne 0 ] && {
+        echo "$statusoutput"
+        return 0
+    }
+    if [ ! -z "$pid" ]; then
+        kill "$pid"
+        sleep 0.5
+        ## TODO: instead of 'sleep 1' : wait up to when pid file is removed (with timeout) ?
+        for i in 1 2 3
+        do
+            # TODO : use a better way to get the children pids..
+            allpids="$(ps -aef | grep "$pid" | grep "shinken-reactionner" | awk '{print $2}')"
+            if [ -z "$allpids" ]; then
+                echo "OK"
+                return 0
+            fi
+            sleep 1
+        done
+        echo "there are still remaining processes to reactionner running.. ; trying to kill them (SIGTERM).."
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-reactionner" | awk '{print $2}')"
+        for cpid in $(ps -aef | grep "$pid" | grep "shinken-reactionner" | awk '{print $2}'); do
+            kill $cpid > /dev/null 2>&1
+        done
+        for i in 1 2 3
+        do
+            # TODO : eventually use a better way to get the children pids..
+            allpids="$(ps -aef | grep "$pid" | grep "shinken-reactionner" | awk '{print $2}')"
+            if [ -z "$allpids" ]; then
+                echo "OK"
+            	return 0
+            fi
+            sleep 1
+        done
+        echo "there are still remaining processes to reactionner running.. ; trying to kill -9 them.."
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-reactionner" | awk '{print $2}')"
+        for cpid in $(ps -aef | grep "$pid" | grep "shinken-reactionner" | awk '{print $2}'); do
+            kill -9 $cpid > /dev/null 2>&1
+        done
+        sleep 1
+        allpids="$(ps -aef | grep "$pid" | grep "shinken-reactionner" | awk '{print $2}')"
+        if [ ! -z "$allpids" ]; then
+            echo "FAILED: one or more process for reactionner are still running after kill -9 !"
+            echo "Remaining processes are (pids="$allpids"):"
+            ps -lf $(for p in $allpids ; do echo -n "-p$p " ; done)
+            echo "You should check this." 
+            return 1
+        fi
+        echo "OK"
+    else
+        echo "NOT RUNNING"
+    fi
+    return 0
+}
+
+#
+# Function that sends a SIGHUP to the daemon/service
+#
+do_reload() {
+	#
+	# If the daemon can reload its configuration without
+	# restarting (for example, when it is sent a SIGHUP),
+	# then implement that here.
+	#
+	start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
+	return 0
+}
+
+case "$1" in
+  start)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC " "$NAME"
+    do_start
+    case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
+  ;;
+  stop)
+	[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+	do_stop
+	case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
+	;;
+  status)
+       status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+       ;;
+  #reload|force-reload)
+	#
+	# If do_reload() is not implemented then leave this commented out
+	# and leave 'force-reload' as an alias for 'restart'.
+	#
+	#log_daemon_msg "Reloading $DESC" "$NAME"
+	#do_reload
+	#log_end_msg $?
+	#;;
+  restart|force-reload)
+	#
+	# If the "reload" option is implemented then remove the
+	# 'force-reload' alias
+	#
+	log_daemon_msg "Restarting $DESC" "$NAME"
+	do_stop
+	case "$?" in
+	  0|1)
+		do_start
+		case "$?" in
+			0) log_end_msg 0 ;;
+			1) log_end_msg 1 ;; # Old process is still running
+			*) log_end_msg 1 ;; # Failed to start
+		esac
+		;;
+	  *)
+	  	# Failed to stop
+		log_end_msg 1
+		;;
+	esac
+	;;
+  *)
+	#echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
+	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+	exit 3
+	;;
+esac
+
+:

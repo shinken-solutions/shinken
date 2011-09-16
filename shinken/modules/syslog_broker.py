@@ -24,10 +24,6 @@ import syslog
 
 from shinken.basemodule import BaseModule
 
-#This text is print at the import
-print "I am simple syslog Broker"
-
-
 properties = {
     'daemons' : ['broker'],
     'type' : 'syslog',

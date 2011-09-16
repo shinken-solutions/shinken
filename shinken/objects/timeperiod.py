@@ -90,7 +90,6 @@ class Timeperiod(Item):
         'timeperiod_name':  StringProp (fill_brok=['full_status']),
         'alias':            StringProp (default='',fill_brok=['full_status']),
         'use':              StringProp (default=''),
-        'exclude':          StringProp (default=''),
         'register':         IntegerProp(default='1'),
 
         # These are needed if a broker module calls methods on timeperiod objects
@@ -595,7 +594,7 @@ class Timeperiod(Item):
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)
-                elif 'default' in entry:
+                elif entry.has_default:
                     data[prop] = entry.default
 
 

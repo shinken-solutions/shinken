@@ -31,6 +31,7 @@ Pyro = pyro.Pyro
 
 from shinken.objects import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.log import logger
 
 # Pack of common Pyro exceptions
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
@@ -64,25 +65,29 @@ class SatelliteLink(Item):
         'attempt':              StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
         'reachable':            StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
         'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
+        'managed_confs':        StringProp(default=[]),
     })
 
 
     def create_connection(self):
-        self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
-        self.con = pyro.getProxy(self.uri)
-        pyro.set_timeout(self.con, self.timeout)
+        try:
+            self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
+            self.con = pyro.getProxy(self.uri)
+            pyro.set_timeout(self.con, self.timeout)
+        except Pyro_exp_pack , exp:
+            self.con = None
+            logger.log('Error : in creation connection for %s : %s' % (self.get_name(), str(exp)))
 
 
     def put_conf(self, conf):
 
         if self.con is None:
             self.create_connection()
-        #print "Connexion is OK, now we put conf", conf
+        #print "Connection is OK, now we put conf", conf
         #print "Try to put conf:", conf
 
         try:
             pyro.set_timeout(self.con, self.data_timeout)
-            print "DBG: put conf to", self.con.__dict__
             self.con.put_conf(conf)
             pyro.set_timeout(self.con, self.timeout)
             return True
@@ -122,37 +127,62 @@ class SatelliteLink(Item):
         #We are dead now. Must raise
         #a brok to say it
         if was_alive:
-            print "Setting the satellite %s to a dead state." % self.get_name()
+            logger.log("WARNING : Setting the satellite %s to a dead state." % self.get_name())
             b = self.get_update_status_brok()
             self.broks.append(b)
 
 
-    #Go in reachable=False and add a failed attempt
-    #if we reach the max, go dead
-    def add_failed_check_attempt(self):
-        print "Add failed attempt to", self.get_name()
+    # Go in reachable=False and add a failed attempt
+    # if we reach the max, go dead
+    def add_failed_check_attempt(self, reason=''):
         self.reachable = False
         self.attempt += 1
         self.attempt = min(self.attempt, self.max_check_attempts)
-        print "Attemps", self.attempt, self.max_check_attempts
-        #check when we just go HARD (dead)
+        # Don't need to warn again and again if the satellite is already dead
+        if self.alive:
+            s = "Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason)
+            logger.log(s)
+        # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
             self.set_dead()
 
 
-    def ping(self):
+    # Update satellite info each self.check_interval seconds
+    # so we smooth arbtier actions for just useful actions
+    # and not cry for a little timeout
+    def update_infos(self):
         # First look if it's not too early to ping
         now = time.time()
-        since_last_check = now - self.last_check        
-        if since_last_check < self.check_interval:            
+        since_last_check = now - self.last_check
+        if since_last_check < self.check_interval:
             return
-        
-        # Ok, save that we are doing a check now
+
         self.last_check = now
+
+        #We ping and update the managed list
+        self.ping()
+        self.update_managed_list()
+
+
+    # The elements just got a new conf_id, we put it in our list
+    # because maybe the satellite is too buzy to answer from now
+    def known_conf_managed_push(self, i):
+        self.managed_confs.append(i)
+        # unique the list
+        self.managed_confs = list(set(self.managed_confs))
+
+
+    def ping(self):        
         print "Pinging %s" % self.get_name()
         try:
             if self.con is None:
                 self.create_connection()
+
+            # If the connection failed to initialize, bailout
+            if self.con is None:
+                self.add_failed_check_attempt()
+                return
+
             r = self.con.ping()
             # Should return us pong string
             if r == 'pong':
@@ -160,8 +190,7 @@ class SatelliteLink(Item):
             else:
                 self.add_failed_check_attempt()
         except Pyro_exp_pack, exp:
-            print exp
-            self.add_failed_check_attempt()
+            self.add_failed_check_attempt(reason=str(exp))
 
 
 
@@ -183,6 +212,11 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
+        # If the connection failed to initialize, bailout
+        if self.con is None:
+            return False
+
+
         try:
             if magic_hash is None:
                 r = self.con.have_conf()
@@ -201,6 +235,12 @@ class SatelliteLink(Item):
     def got_conf(self):
         if self.con is None:
             self.create_connection()
+
+        # If the connection failed to initialize, bailout
+        if self.con is None:
+            return False
+
+
         try:
             r = self.con.got_conf()
             # Protect against bad Pyro return
@@ -215,6 +255,11 @@ class SatelliteLink(Item):
     def remove_from_conf(self, sched_id):
         if self.con is None:
             self.create_connection()
+
+        # If the connection failed to initialize, bailout
+        if self.con is None:
+            return
+
         try:
             self.con.remove_from_conf(sched_id)
             return True
@@ -223,24 +268,48 @@ class SatelliteLink(Item):
             return False
 
 
-    def what_i_managed(self):
+    def update_managed_list(self):
         if self.con is None:
             self.create_connection()
+
+        # If the connection failed to initialize, bailout
+        if self.con is None:
+            self.managed_confs = []
+            return
+
         try:
             tab = self.con.what_i_managed()
+            #print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
             # Protect against bad Pyro return
             if not isinstance(tab, list):
                 self.con = None
-                return []
-            return tab
+                self.managed_confs = []
+            # We can update our list now
+            self.managed_confs = tab
         except Pyro_exp_pack , exp:
+            # A timeout is not a crime, put this case aside
+            if type(exp) == Pyro.errors.TimeoutError:
+                return
             self.con = None
-            return []
+            #print "[%s]What i managed : Got exception : %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
+            self.managed_confs = []
+
+
+    # Return True if the satelltie said to managed a configuration
+    def do_i_manage(self, i):
+        return i in self.managed_confs
+        
 
 
     def push_broks(self, broks):
         if self.con is None:
             self.create_connection()
+
+        # If the connection failed to initialize, bailout
+        if self.con is None:
+            return False
+
+
         try:
             return self.con.push_broks(broks)
         except Pyro_exp_pack , exp:
@@ -251,6 +320,12 @@ class SatelliteLink(Item):
     def get_external_commands(self):
         if self.con is None:
             self.create_connection()
+
+        # If the connection failed to initialize, bailout
+        if self.con is None:
+            return []
+
+
         try:
             tab = self.con.get_external_commands()
             # Protect against bad Pyro return
@@ -276,12 +351,11 @@ class SatelliteLink(Item):
             if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
 
-    #Some parameters for satellites are not defined in the satellites conf
-    #but in the global configuration. We can pass them in the global
-    #property
+    # Some parameters for satellites are not defined in the satellites conf
+    # but in the global configuration. We can pass them in the global
+    # property
     def add_global_conf_parameters(self, params):
         for prop in params:
-            print "Add global parameter", prop, params[prop]
             self.cfg['global'][prop] = params[prop]
 
 
@@ -350,22 +424,26 @@ class SatelliteLinks(Items):
                 s.realm = p
             # Check if what we get is OK or not
             if p is not None:
-                print "Me", s.get_name(), "is linked with realm", s.realm.get_name()
                 s.register_to_my_realm()
             else:
                 err = "The %s %s got a unknown realm '%s'" % (s.__class__.my_type, s.get_name(), p_name)
                 s.configuration_errors.append(err)
-                print err
+                #print err
 
 
     def linkify_s_by_plug(self, modules):
         for s in self:
             new_modules = []
             for plug_name in s.modules:
-                plug = modules.find_by_name(plug_name.strip())
+                plug_name = plug_name.strip()
+                # don't tread void names
+                if plug_name == '':
+                    continue
+
+                plug = modules.find_by_name(plug_name)
                 if plug is not None:
                     new_modules.append(plug)
                 else:
-                    err = "Error : the module %s is unknow for %s" % (plug_name, s.get_name())
+                    err = "Error : the module %s is unknown for %s" % (plug_name, s.get_name())
                     s.configuration_errors.append(err)
             s.modules = new_modules

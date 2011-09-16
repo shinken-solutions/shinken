@@ -43,7 +43,7 @@ from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.acknowledge import Acknowledge
 from shinken.log import logger
-from shinken.util import nighty_five_percent
+from shinken.util import nighty_five_percent, safe_print
 from shinken.load import Load
 
 class Scheduler:
@@ -84,6 +84,8 @@ class Scheduler:
             # clean some times possibel overriden Queues, to do not explode in memory usage
             # every 1/4 of hour
             14 : ('clean_queues', self.clean_queues, 1),
+            # Look for new business_impact change by modulation every minute
+            15 : ('update_business_values', self.update_business_values, 60),
         }
 
         # stats part
@@ -185,7 +187,7 @@ class Scheduler:
 
     # We've got activity in the fifo, we get and run commands
     def run_external_command(self, command):
-        print "scheduler resolves command", command
+        safe_print("scheduler resolves command", command)
         ext_cmd = ExternalCommand(command)
         self.external_command.resolve_command(ext_cmd)
 
@@ -376,6 +378,37 @@ class Scheduler:
             self.comments[c_id].ref.del_comment(c_id)
             del self.comments[c_id]
 
+    # We update all business_impact for looking at new modulation
+    # start for impacts, and so update broks status and
+    # problems value too
+    def update_business_values(self):
+        for t in [self.hosts, self.services]:
+            # We first update impacts and classic elements
+            for i in [i for i in t if not i.is_problem]:
+                was = i.business_impact
+                i.update_business_impact_value()
+                new = i.business_impact
+                # Ok, the business_impact change, we can update the broks
+                if new != was:
+                    #print "The elements", i.get_name(), "change it's business_impact value"
+                    self.get_and_register_status_brok(i)
+                    
+        # When all impacts and classic elements are updated,
+        # we can update problems (their value depend on impacts, so
+        # they must be done after)
+        for t in [self.hosts, self.services]:
+            # We first update impacts and classic elements
+            for i in [i for i in t if i.is_problem]:
+                was = i.business_impact
+                i.update_business_impact_value()
+                new = i.business_impact
+                # Maybe one of the impacts change it's business_impact to a high value
+                # and so ask for the problem to raise too
+                if new != was:
+                    #print "The elements", i.get_name(), "change it's business_impact value from", was, "to", new 
+                    self.get_and_register_status_brok(i)
+
+
 
     # Called by poller to get checks
     # Can get checks and actions (notifications and co)
@@ -479,22 +512,36 @@ class Scheduler:
         if c.is_a == 'notification':
             # We will only see childnotifications here
             try:
+                timeout = False
+                if c.status == 'timeout':
+                    # Unfortunately the remove_in_progress_notification
+                    # sets the status to zombie, so we need to save it here.
+                    timeout = True
+                    execution_time = c.execution_time
                 self.actions[c.id].get_return_from(c)
                 item = self.actions[c.id].ref
                 item.remove_in_progress_notification(c)
                 self.actions[c.id].status = 'zombie'
                 item.last_notification = c.check_time
-                #If we' ve got a problem with the notification, raise a Warning log
-                if c.exit_status != 0:
+
+                # If we' ve got a problem with the notification, raise a Warning log
+                if timeout:
+                    logger.log("Warning: Contact %s %s notification command '%s ' timed out after %d seconds" % (self.actions[c.id].contact.contact_name, self.actions[c.id].ref.__class__.my_type, self.actions[c.id].command, int(execution_time)))
+                elif c.exit_status != 0:
                     logger.log("Warning : the notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
             except KeyError , exp: #bad number for notif, not so terrible
+                #print exp
                 pass
-            except AttributeError: # bad object, drop it
+            except AttributeError, exp: # bad object, drop it
+                #print exp
                 pass
 
 
         elif c.is_a == 'check':
             try:
+                if c.status == 'timeout':
+                    c.output = "(%s Check Timed Out)" % self.checks[c.id].ref.__class__.my_type.capitalize()
+                    c.long_output = c.output
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
             except KeyError , exp:
@@ -502,6 +549,8 @@ class Scheduler:
         elif c.is_a == 'eventhandler':
             # It just die
             try:
+                if c.status == 'timeout':
+                    logger.log("Warning: %s event handler command '%s ' timed out after %d seconds" % (self.actions[c.id].ref.__class__.my_type.capitalize(), self.actions[c.id].command, int(c.execution_time)))
                 self.actions[c.id].status = 'zombie'
             # Maybe we reveied a return of a old even handler, so we can forget it
             except KeyError:
@@ -561,7 +610,7 @@ class Scheduler:
             pyro.set_timeout(con, 5)
             con.ping()
         except Pyro.errors.ProtocolError, exp:
-            logger.log("[] Connexion problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.log("[] Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except Pyro.errors.NamingError, exp:
@@ -578,7 +627,7 @@ class Scheduler:
             links[id]['con'] = None
             return
 
-        logger.log("[] Connexion OK to the %s %s" % (type, links[id]['name']))
+        logger.log("[] Connection OK to the %s %s" % (type, links[id]['name']))
 
 
     # We should push actions to our passives satellites
@@ -598,7 +647,7 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log("[] Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
@@ -635,7 +684,7 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log("[] Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
@@ -675,7 +724,7 @@ class Scheduler:
                     print "Received %d passive results" % nb_received
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log("[] Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
@@ -711,7 +760,7 @@ class Scheduler:
                     print "Received %d passive results" % nb_received
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("[] Connexion problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log("[] Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
@@ -1009,6 +1058,9 @@ class Scheduler:
                 "modified_service_attributes" : 0,
                 "global_host_event_handler" : self.conf.global_host_event_handler,
                 'global_service_event_handler' : self.conf.global_service_event_handler,
+                'check_external_commands' : self.conf.check_external_commands,
+                'check_service_freshness' : self.conf.check_service_freshness,
+                'check_host_freshness' : self.conf.check_host_freshness,
                 'command_file' : self.conf.command_file
                 }
         b = Brok('program_status', data)
@@ -1232,7 +1284,7 @@ class Scheduler:
 
         gogogo = time.time()
 
-        self.load_one_min = Load()
+        self.load_one_min = Load(initial_value=1)
 
         while self.must_run:
             elapsed, _, _ = self.sched_daemon.handleRequests(timeout)
@@ -1242,7 +1294,11 @@ class Scheduler:
                     continue
 
             self.load_one_min.update_load(self.sched_daemon.sleep_time)
-            print "Time sleep : %.2f (average : %.2f)" % (self.sched_daemon.sleep_time, self.load_one_min.get_load())
+
+            # load of the scheduler is the percert of time it is waiting
+            l = min(100, 100.0 - self.load_one_min.get_load() * 100)
+            print "Load : (sleep) %.2f (average : %.2f) -> %d%%" % (self.sched_daemon.sleep_time, self.load_one_min.get_load(), l)
+
             self.sched_daemon.sleep_time = 0.0
 
             # Timeout or time over
@@ -1296,9 +1352,11 @@ class Scheduler:
             #        print "Notif:", a.id, a.type, a.status, a.ref.get_name(), a.ref.state, a.contact.get_name(), 'level:%d' % a.notif_nb, 'launch in', int(a.t_to_go - now)
             #    else:
             #        print "Event:", a.id, a.status
-            print "Nb checks send:", self.nb_checks_send
+            if self.nb_checks_send != 0:
+                print "Nb checks/notifications/event send:", self.nb_checks_send
             self.nb_checks_send = 0
-            print "Nb Broks send:", self.nb_broks_send
+            if self.nb_broks_send != 0:
+                print "Nb Broks send:", self.nb_broks_send
             self.nb_broks_send = 0
 
             time_elapsed = now - gogogo

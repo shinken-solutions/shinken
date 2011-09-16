@@ -42,12 +42,12 @@ class Resultmodulation(Item):
     })
     
 
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         return self.resultmodulation_name
 
 
-    #Make the return code modulation if need
+    # Make the return code modulation if need
     def module_return(self, return_code):
         #Only if in modulation_period of modulation_period == None
         if self.modulation_period is None or self.modulation_period.is_time_valid(time.time()):
@@ -60,13 +60,13 @@ class Resultmodulation(Item):
         return return_code
 
 
-    #We override the pythonize because we have special cases that we do not want
-    #to be do at running
+    # We override the pythonize because we have special cases that we do not want
+    # to be do at running
     def pythonize(self):
-        #First apply Item pythonize
+        # First apply Item pythonize
         super(self.__class__, self).pythonize()
 
-        #Then very special cases
+        # Then very special cases
         # Intify the exit_codes_match, and make list
         self.exit_codes_match = [ int(ec) for ec in getattr(self, 'exit_codes_match', []) ]
 
@@ -85,8 +85,8 @@ class Resultmodulations(Items):
         self.linkify_rm_by_tp(timeperiods)
 
 
-    #We just search for each timeperiod the tp
-    #and replace the name by the tp
+    # We just search for each timeperiod the tp
+    # and replace the name by the tp
     def linkify_rm_by_tp(self, timeperiods):
         for rm in self:
             mtp_name = rm.modulation_period.strip()

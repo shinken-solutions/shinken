@@ -24,6 +24,10 @@ import socket
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+import shinken.pyro_wrapper as pyro
+Pyro = pyro.Pyro
+
+from shinken.log import logger
 
 class ArbiterLink(SatelliteLink):
     id = 0
@@ -53,7 +57,7 @@ class ArbiterLink(SatelliteLink):
 
 
     def is_me(self):
-        print "Hostname:%s, gethostname:%s" % (self.host_name, socket.gethostname())
+        logger.log("And arbiter is launched with the hostname:%s of addr :%s" % (self.host_name, socket.gethostname()), print_it=False)
         return self.host_name == socket.gethostname()
 
 
@@ -74,6 +78,47 @@ class ArbiterLink(SatelliteLink):
             self.con = None
             return False
 
+    def get_satellite_list(self, daemon_type):
+        if self.con is None:
+            self.create_connection()
+        try:
+            r = self.con.get_satellite_list(daemon_type)
+            return r
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return []
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return []
+
+    def get_satellite_status(self, daemon_type, name):
+        if self.con is None:
+            self.create_connection()
+        try:
+            r = self.con.get_satellite_status(daemon_type, name)
+            return r
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return {}
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return {}
+
+
+    def get_all_states(self):
+        if self.con is None:
+            self.create_connection()
+        try:
+            r = self.con.get_all_states()
+            return r
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return None
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return None
+
+
 
 
 class ArbiterLinks(SatelliteLinks):
@@ -86,13 +131,3 @@ class ArbiterLinks(SatelliteLinks):
         self.linkify_s_by_plug(modules)
 
 
-    def linkify_s_by_plug(self, modules):
-        for s in self:
-            new_modules = []
-            for plug_name in s.modules:
-                plug = modules.find_by_name(plug_name.strip())
-                if plug is not None:
-                    new_modules.append(plug)
-                else:
-                    print "Error : the module %s is unknow for %s" % (plug_name, s.get_name())
-            s.modules = new_modules

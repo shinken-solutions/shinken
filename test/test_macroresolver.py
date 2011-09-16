@@ -111,6 +111,16 @@ class TestConfig(ShinkenTest):
         print "CUCU", com
         self.assert_(com == 'plugins/nothing interestingvalue')
 
+        # Look for multiple = in lines, should split the first
+        # and keep others in the macro value
+        dummy_call = "special_macro!$ANOTHERVALUE$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print "CUCU", com
+        self.assert_(com == 'plugins/nothing blabla=toto')
+
+
+        
 
 if __name__ == '__main__':
     unittest.main()

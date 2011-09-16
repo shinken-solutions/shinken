@@ -530,9 +530,8 @@ class DiscoveryMerger:
 
     def launch_runners(self):
         for r in self.allowed_runners():
-            print "I'm launching", r.get_name()
-            print r.discoveryrun_command
-            r.launch()
+            print "I'm launching", r.get_name(), "with a %d seconds timeout" % self.conf.runners_timeout
+            r.launch(timeout=self.conf.runners_timeout)
 
 
     def wait_for_runners_ends(self):

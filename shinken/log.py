@@ -41,18 +41,19 @@ class Log:
         name = name_
 
     # We enter a log message, we format it, and we add the log brok
-    def log(self, message, format = None):
+    def log(self, message, format = None, print_it=True):
         global obj
         global name
         global local_log
         global human_timestamp_log
 
-        # If the daemon is launch with a non UTF8 shell
-        # we can habe problem in printing
-        try:
-            print message
-        except UnicodeEncodeError:
-            print message.encode('ascii', 'ignore')
+        if print_it:
+            # If the daemon is launch with a non UTF8 shell
+            # we can habe problem in printing
+            try:
+                print message
+            except UnicodeEncodeError:
+                print message.encode('ascii', 'ignore')
 
         if format is None:
             if name is None:

@@ -46,6 +46,7 @@ def search_for_check_esx3():
     my_dir = os.path.dirname(me)
     possible_paths = [os.path.join(my_dir, 'check_esx3.pl'),
                       '/var/lib/nagios/check_esx3.pl',
+                      '/var/lib/plugins/nagios/check_esx3.pl',
                       '/var/lib/shinken/check_esx3.pl',
                       '/usr/local/nagios/libexec/check_esx3.pl',
                       '/usr/local/shinken/libexec/check_esx3.pl',

@@ -1,0 +1,273 @@
+#!/usr/bin/env python
+#Copyright (C) 2009-2011 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+#This file is part of Shinken.
+#
+#Shinken is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#Shinken is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+import os
+import cmd 
+import sys 
+import time
+
+try:
+    from shinken.bin import VERSION
+    import shinken
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+
+
+from shinken.bin import VERSION
+
+try:
+    import shinken.pyro_wrapper as pyro
+except ImportError:
+    sys.exit("Shinken require the Python Pyro module. Please install it.")
+from shinken.arbiterlink import ArbiterLink
+Pyro = pyro.Pyro
+
+class Dummy:
+    def add(self, o):
+        pass
+
+from shinken.log import logger
+logger.load_obj(Dummy())
+
+
+sat_types = ['arbiter', 'scheduler', 'poller', 'reactionner',
+             'receiver', 'broker']
+
+
+def get_since(t):
+    now = time.time()
+    if t == 0:
+        return "never"
+    return "%ds ago" % (int(now - t))
+    
+
+class ShinkenAdmin(cmd.Cmd):
+    prompt = "> " 
+    
+    def __init__(self):
+        cmd.Cmd.__init__(self)
+        self.arb = None
+    
+    # If we got no connexions, connect with a standard localhost one
+    def look_connexion(self):
+        if not self.arb:
+            self.do_connect('')
+
+    def emptyline(self):
+        return
+            
+
+    def do_connect(self, line):
+        '''
+        Connect to an arbiter daemon
+        Syntax : connect [host]:[port]
+        Ex : for Connecting to server, port 7770
+        > connect server:7770
+        Ex : connect to localhost, port 7770
+        > connect
+        '''
+        line = line.strip()
+      	tokens = line.split(':')
+        if line == '':
+            addr = 'localhost'
+            port = '7770'
+        else:
+            addr = tokens[0]
+            try:
+                port = tokens[1]
+            except IndexError:
+                port = '7770'
+        #port = int(port)
+        print "Connection to %s:%s" % (addr, port)
+        ArbiterLink.use_ssl = False
+        self.arb = ArbiterLink({'arbiter_name': 'unnamed arbiter', 'address' : addr, 'port' : port})
+        self.arb.fill_default()
+        self.arb.pythonize()
+        self.arb.update_infos()
+        if self.arb.reachable:
+            print "Connection OK"
+        else:
+            print "Connection problem"
+
+
+    def do_status(self, line):
+        '''
+        Get daemons status as the connected arbiter know. If you call it
+        without an already open arbiter connection with 'connect' it will automatically
+        connect to locahost:7770.
+        '''
+        self.look_connexion()
+        data = self.arb.get_all_states()
+        
+        arbs = data['arbiter']
+
+	print "+-----------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} |".format("Arbiter", "address", "port", "alive", "reachable", "last_check")
+	print "+-----------------------------------------------------------------+"
+        for a in arbs:
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} |".format(a.arbiter_name, a.address, a.port,
+									a.alive, a.reachable, get_since(a.last_check))
+	print "+-----------------------------------------------------------------+"
+
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Scheduler", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
+        for s in data['scheduler']:
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.scheduler_name, s.address, s.port,
+									s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
+       
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Poller", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
+        for s in data['poller']:
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.poller_name, s.address, s.port,
+                                                			s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
+
+            
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Reactionner", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
+        for s in data['reactionner']:
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.reactionner_name, s.address, s.port,
+                                                			s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
+
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Broker", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
+        for s in data['broker']:
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.broker_name, s.address, s.port,
+									s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
+
+	print "+-------------------------------------------------------------------------------+"
+        print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Receiver", "address", "port", "alive", "reachable", "last_check")
+	print "+-------------------------------------------------------------------------------+"
+        for s in data['receiver']:
+            print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.receiver_name, s.address, s.port,
+									s.alive, s.reachable, get_since(s.last_check))
+	print "+-------------------------------------------------------------------------------+"
+
+        
+
+    def do_gethostname(self, line):
+        '''
+        Return the hostname of this machine as is it look for the*
+        host_name parameter of the arbiter configuration.
+        '''
+        import socket
+        print socket.gethostname()
+
+
+    def do_EOF(self, line):
+        return self.do_quit('')
+
+
+    def do_quit(self,line): 
+        print "", 
+        return True 
+
+    
+    def do_easter(self, line):
+        '''
+        Surprise. Look closer to the code to know what to launch with it.
+        '''
+        import shinken.easter as easter
+        line = line.strip()
+        f = getattr(easter, line, None)
+        if f:
+            f()
+
+    def do_showconfig(self, line):
+	'''
+	Display daemon configuration
+	The column Default show that we are using default values when D is present 
+	Ex : show config poller will display configuration for all pollers
+	'''
+	from shinken.objects import Config
+
+	from shinken.arbiterlink import ArbiterLink
+	from shinken.schedulerlink import SchedulerLink 
+	from shinken.pollerlink import PollerLink 
+	from shinken.reactionnerlink import ReactionnerLink 
+	from shinken.brokerlink import BrokerLink 
+	from shinken.receiverlink import ReceiverLink 
+
+
+	if line == "help" or line == "":
+		print "Usage : showconfig objecttype [objectname]"
+		print "Exemple : showconfig poller poller-1"
+	else:
+		type=line
+		self.look_connexion()
+
+		# get properties from link classes
+		if type == 'arbiter': 
+			o = ArbiterLink()
+		elif type =='scheduler': 
+			o = SchedulerLink()
+		elif type =='poller': 
+			o = PollerLink()
+		elif type =='broker': 
+			o = BrokerLink()
+		elif type =='reactionner': 
+			o = ReactionnerLink()
+		elif type =='receiver': 
+			o = ReceiverLink()
+		else: 
+			print "Unknown object type : %s" % (type)
+			return False
+
+		# load config
+		cfg=Config()
+		buf = cfg.read_config(["/opt/shinken/etc/shinken-specific.cfg"])
+		raw_objects = cfg.read_config_buf(buf)
+		
+		if not raw_objects.has_key(type):
+			print "Unknow object type %s" % (type)
+		else:
+			print "+--------------------------------------------------------------------------------------+"
+			print "| Config for : {0:71} |".format(type)
+			print "+--------------------------------------------------------------------------------------+"
+			print "| {0:8} | {1:30} | {2:40} |".format("Default","Directive","Value" )
+			print "+--------------------------------------------------------------------------------------+"
+			
+			for e in raw_objects[type]:
+				for key in o.properties.keys():
+					if e.has_key(key):
+						print "| {0:8} | {1:30} | {2:40} |".format(" ",key,e[key] )
+					else:
+						print "| {0:8} | {1:30} | {2:40} |".format("D",key,o.properties[key].default)
+				print "+--------------------------------------------------------------------------------------+"
+
+
+
+intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n#showconfig [daemon type]\n# quit'
+
+if __name__ == "__main__": 
+    ShinkenAdmin().cmdloop(intro)

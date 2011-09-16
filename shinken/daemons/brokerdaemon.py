@@ -28,7 +28,7 @@ import traceback
 from multiprocessing import active_children
 from Queue import Empty
 
-from shinken.satellite import BaseSatellite, IForArbiter
+from shinken.satellite import BaseSatellite
 
 from shinken.property import PathProp, IntegerProp
 from shinken.util import sort_by_ids
@@ -75,6 +75,7 @@ class Broker(BaseSatellite):
         self.broks_internal_raised = []
 
         self.timeout = 1.0
+
 
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
@@ -193,7 +194,7 @@ class Broker(BaseSatellite):
             #     print "I do nto ask for brok generation"
             links[id]['running_id'] = new_run_id
         except (Pyro.errors.ProtocolError, Pyro.errors.CommunicationError), exp:
-            logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
+            logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except Pyro.errors.NamingError, exp:
@@ -206,7 +207,7 @@ class Broker(BaseSatellite):
             traceback.print_stack()
             return
 
-        logger.log("[%s] Connexion OK to the %s %s" % (self.name, type, links[id]['name']))
+        logger.log("[%s] Connection OK to the %s %s" % (self.name, type, links[id]['name']))
 
 
     # Get a brok. Our role is to put it in the modules
@@ -282,7 +283,7 @@ class Broker(BaseSatellite):
                 print exp
                 self.pynag_con_init(sched_id, type=type)
             except Pyro.errors.ProtocolError , exp:
-                logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
             except AttributeError , exp:
@@ -291,7 +292,7 @@ class Broker(BaseSatellite):
             except Pyro.errors.NamingError , exp:
                 logger.log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
             except Pyro.errors.ConnectionClosedError , exp:
-                logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             #  What the F**k? We do not know what happenned,
             # so.. bye bye :)
@@ -440,7 +441,7 @@ class Broker(BaseSatellite):
             os.environ['TZ'] = use_timezone
             time.tzset()
         
-        # Connexion init with Schedulers
+        # Connection init with Schedulers
         for sched_id in self.schedulers:
             self.pynag_con_init(sched_id, type='scheduler')
 
@@ -449,13 +450,53 @@ class Broker(BaseSatellite):
 
         for rea_id in self.reactionners:
             self.pynag_con_init(rea_id, type='reactionner')
+
+
+    # An arbiter ask us to wait a new conf, so we must clean
+    # all our mess we did, and close modules too
+    def clean_previous_run(self):
+        # Clean all lists
+        self.schedulers.clear()
+        self.pollers.clear()
+        self.reactionners.clear()
+        self.broks = self.broks[:]
+        self.broks_internal_raised = self.broks_internal_raised[:]
+        self.external_commands = self.external_commands[:]
+
+        # And now modules
+        self.have_modules = False
+        self.modules_manager.clear_instances()
+
         
 
     def do_loop_turn(self):
-        print "Begin Loop : manage broks", len(self.broks)
+        print "Begin Loop : managing old broks", len(self.broks)
+        
+        # Dump modules Queues size
+        insts = [ inst for inst in self.modules_manager.instances if inst.is_external]
+        for inst in insts:
+            try:
+                print "External Queue len (%s) : %s" % (inst.get_name(), inst.to_q.qsize())
+            except Exception, exp:
+                print "External Queue len (%s) : Exception! %s" % (inst.get_name(), exp)
+
 
         # Begin to clean modules
         self.check_and_del_zombie_modules()
+
+        # Maybe the arbiter ask us to wait for a new conf
+        # If true, we must restart all...
+        if self.cur_conf is None:
+            # Clean previous run from useless objects
+            # and close modules
+            self.clean_previous_run()
+            
+            self.wait_for_initial_conf()
+            # we may have been interrupted or so; then 
+            # just return from this loop turn
+            if not self.new_conf:  
+                return
+            self.setup_new_conf()
 
         # Now we check if arbiter speek to us in the pyro_daemon.
         # If so, we listen for it
@@ -566,7 +607,7 @@ class Broker(BaseSatellite):
             self.do_mainloop()
 
         except Exception, exp:
-            logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
+            logger.log("CRITICAL ERROR : I got an non recoverable error. I must exit")
             logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
             logger.log("Back trace of it: %s" % (traceback.format_exc()))
             raise

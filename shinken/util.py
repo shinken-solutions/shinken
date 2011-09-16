@@ -23,6 +23,7 @@
 import time
 import re
 import copy
+import sys
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
 except ImportError:
@@ -30,7 +31,43 @@ except ImportError:
 
 from shinken.macroresolver import MacroResolver
 #from memoized import memoized
+try:
+    stdout_encoding = sys.stdout.encoding
+    safe_stdout = (stdout_encoding == 'UTF-8')
+except Exception, exp:
+    print "Encoding detection error", exp
+    safe_stdout = False
+#import locale
+#print locale.getdefaultlocale()
+#utf8_safe = (locale.getdefaultlocale() == ('en_US','UTF8'))
+#local_encoding = locale.getdefaultlocale()[1]
 
+########### Strings #############
+# Try to print strings, but if there is an utf8 error, go in simple ascii mode
+# (Like if the terminal do not have en_US.UTF8 as LANG for example)
+def safe_print(*args):
+    l = []
+    for e in args:
+        # If we got an str, go in unicode, and if we cannot print
+        # utf8, go in ascii mode
+        if isinstance(e, str):
+            if safe_stdout:
+                s = unicode(e, 'utf8')
+            else:
+                s = e.decode('ascii', 'replace').encode('ascii', 'replace').decode('ascii', 'replace')
+            l.append(s)
+        # Same for unicode, but skip the unicode pass
+        elif isinstance(e, unicode):
+            if safe_stdout:
+                s = e
+            else:
+                s = e.encode('ascii', 'replace')
+            l.append(s)
+        # Other types can be directly convert in unicode
+        else:
+            l.append(unicode(e))
+    # Ok, now print it :)
+    print u' '.join(l)
 
 
 ################################### TIME ##################################

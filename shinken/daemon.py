@@ -59,8 +59,8 @@ else:
 # The standard I/O file descriptors are redirected to /dev/null by default.
 REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
-UMASK = 0
-VERSION = "0.5"
+UMASK = 027
+from shinken.bin import VERSION
 
 
 class InvalidPidFile(Exception): pass
@@ -152,10 +152,16 @@ class Daemon(object):
         #Keep a trace of the local_log file desc if need
         self.local_log_fd = None
 
+        # Put in queue some debug output we will raise
+        # when we will be in daemon
+        self.debug_output = []
+
         self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
 
         os.umask(UMASK)
         self.set_exit_handler()
+
+
 
     # At least, lose the local log file if need
     def do_stop(self):
@@ -264,11 +270,16 @@ class Daemon(object):
                 print("The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
                 sys.exit(2)   
 
-    def __open_pidfile(self):
+    def __open_pidfile(self, write=False):
         ## if problem on open or creating file it'll be raised to the caller:
         try:
-            print "opening pid file:", self.pidfile, os.path.abspath(self.pidfile) 
-            self.fpid = open(os.path.abspath(self.pidfile), 'arw+')
+            p = os.path.abspath(self.pidfile)
+            print "opening pid file:", self.pidfile, p
+            # Windows do not manage arw+ mode, so we must open in read mode first, then reopen it write mode...
+            if not write and os.path.exists(p):
+               self.fpid = open(p, 'r+')
+            else: # If do not exist too, we create it as void
+               self.fpid = open(p, 'w+')
         except Exception, e:
             raise InvalidPidFile(e)     
 
@@ -277,6 +288,14 @@ class Daemon(object):
         """ Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
 Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 """
+
+        # TODO: other daemon run on nt
+        if os.name == 'nt':
+            print("Sorry, the parallel daemon check is not available on nt")
+            self.__open_pidfile(write=True)
+            return
+
+        # First open the pid file in open mode
         self.__open_pidfile()
         try:
             pid = int(self.fpid.read())
@@ -309,8 +328,9 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.fpid.close()
         ## TODO: give some time to wait that previous instance finishes ?
         time.sleep(1)
-        ## we must also reopen the pid file cause the previous instance will normally have deleted it !!
-        self.__open_pidfile()
+        # we must also reopen the pid file in write mode 
+        # because cause the previous instance will normally have deleted it !!
+        self.__open_pidfile(write=True)
 
 
     def write_pid(self, pid=None):
@@ -396,13 +416,18 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         del self.fpid
         self.pid = os.getpid()
         print("We are now fully daemonized :) pid=%d" % (self.pid))
+        # We can now output some previouly silented debug ouput
+        for s in self.debug_output:
+            print s
+        del self.debug_output
 
 
-    def do_daemon_init_and_start(self):
+    def do_daemon_init_and_start(self, use_pyro=True):
         self.change_to_user_group()
         self.change_to_workdir()
         self.check_parallel_run()
-        self.setup_pyro_daemon()
+        if use_pyro:
+            self.setup_pyro_daemon()
         # Then start to log all in the local file if asked so
         self.register_local_log()
         if self.is_daemon:
@@ -438,10 +463,14 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             else:
                 Pyro.config.PYROSSL_POSTCONNCHECK=0
 
-        # create the server
-        Pyro.config.PYRO_STORAGE = "."
-        Pyro.config.PYRO_COMPRESSION = 1
-        Pyro.config.PYRO_MULTITHREADED = 0        
+        # create the server, but Pyro > 4.8 veersion
+        # do not have such objets...
+        try:
+            Pyro.config.PYRO_STORAGE = "."
+            Pyro.config.PYRO_COMPRESSION = 1
+            Pyro.config.PYRO_MULTITHREADED = 0        
+        except:
+            pass
 
         self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl) 
 
@@ -466,13 +495,13 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         # Now get the module path. It's in fact the directory modules
         # inside the shinken directory. So let's find it.
 
-        print "modulemanager file", shinken.modulesmanager.__file__
+        self.debug_output.append("modulemanager file %s" % shinken.modulesmanager.__file__)
         modulespath = os.path.abspath(shinken.modulesmanager.__file__)
-        print "modulemanager absolute file", modulespath
+        self.debug_output.append("modulemanager absolute file %s" % modulespath)
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        print("Using modules path : %s" % (modulespath))
+        self.debug_output.append("Using modules path : %s" % (modulespath))
         
         return modulespath
 
@@ -560,7 +589,6 @@ Also put default value in the properties if some are missing in the config_file 
             if not hasattr(self, prop):
                 value = entry.pythonize(entry.default)
                 setattr(self, prop, value)
-                print "Using default value :", prop, value
 
 
     #Some paths can be relatives. We must have a full path by taking

@@ -26,9 +26,6 @@ import xmlrpclib
 
 from shinken.basemodule import BaseModule
 
-#This text is print at the import
-print "Detected module : GLPI importer for Arbiter"
-
 
 properties = {
     'daemons' : ['arbiter'],
@@ -67,7 +64,7 @@ class Glpi_importer_arbiter(BaseModule):
     def init(self):
         print "I open the GLPI connection to %s" % self.uri
         self.con = xmlrpclib.ServerProxy(self.uri)
-        print "Connexion opened"
+        print "Connection opened"
         print "Authentification in progress"
         arg = {'login_name' : self.login_name , 'login_password' : self.login_password}
         res = self.con.glpi.doLogin(arg)

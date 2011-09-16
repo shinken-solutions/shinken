@@ -25,7 +25,10 @@
 
 import os, sys, time
 
-from shinken_test import unittest, ShinkenTest
+from shinken_test import unittest, ShinkenTest, original_time_time, original_time_sleep
+
+time.time = original_time_time
+time.sleep = original_time_sleep
 
 from shinken.log import logger
 
@@ -38,6 +41,7 @@ from shinken.modules.hot_dependencies_arbiter import Hot_dependencies_arbiter, g
 modconf = Module()
 modconf.module_name = "PickleRetention"
 modconf.module_type = hot_dependencies_arbiter.properties['type']
+modconf.modules = []
 modconf.properties = hot_dependencies_arbiter.properties.copy()
 
 

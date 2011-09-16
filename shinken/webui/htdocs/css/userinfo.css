@@ -1,0 +1,170 @@
+/*
+Name: Nice Login and Signup Panel using Mootools 1.2
+Tutorial URI: http://web-kreation.com/demos/login_form_mootools_1.2/
+Author: Jeremie Tisseau
+Author URI: http://web-kreation.com/
+Date: August 2008
+
+The CSS, XHTML and design is released under Creative Common License 2.5:
+http://creativecommons.org/licenses/by-sa/2.5/
+
+*/
+
+/* Userinfo Panel */
+#top {
+    background: url(/static/images/userinfo_top.png) repeat-x 0 0;
+    height: 0px;
+    position: relative;
+    margin: 0;
+    top : 0;
+    right: 150px;
+    border : 0;
+
+}
+
+ul.userinfo {
+    display: block;
+    position: relative;/*absolute;*/
+    float: right;
+    clear: right;
+    height: 38px;
+    width: auto;
+    font-weight: bold;
+    line-height: 38px;
+    margin: 0;
+    top : 0;
+    right: 150px;
+    border : 0;
+    color: white;
+    font-size: 80%;
+    text-align: center;
+    background: url(/static/images/userinfo_r.png) no-repeat right 0;
+    padding-right: 45px;
+}
+
+ul.userinfo li.left {
+    background: url(/static/images/userinfo_l.png) no-repeat left 0;
+    height: 38px;
+    width: 45px;
+    padding: 0;
+    margin: 0;
+    display: block;
+    float: left;
+}
+
+ul.userinfo li {
+    text-align: left;
+    padding: 0 6px;
+    display: block;
+    float: left;
+    height: 38px;
+    background: url(/static/images/userinfo_m.png) repeat-x 0 0;
+    margin : 0;
+}
+
+ul.userinfo li a {
+    color: #33CCCC;
+}
+
+ul.userinfo li a:hover {
+    color: white;
+}
+
+/*Userinfo*/
+/* toggle effect - show/hide userinfo*/
+#userinfo {
+    width: 100%;
+    color: white;
+    background: #1E1E1E;
+    overflow: hidden;
+    position: relative;
+    z-index: 3;
+    height: 0;
+}
+
+#userinfo a {
+    text-decoration: none;
+    color: #33CCCC;
+}
+
+#userinfo a:hover {
+    color: white;
+}
+
+#userinfo .userinfoContent {
+    width: 550px;
+    height: 80px;
+    margin: 0 auto;
+    padding-top: 10px;
+    text-align: left;
+    font-size: 0.85em;
+}
+
+#userinfo .userinfoContent .left {
+    width: 120px;
+    float: left;
+    padding-left: 65px;
+    font-size: 0.95em;
+}
+
+#userinfo .userinfoContent .right {
+    width: 290px;
+    float: right;
+    text-align: right;
+    padding-right: 65px;
+    font-size: 0.95em;
+}
+
+#userinfo .userinfoContent form {
+    margin: 0 0 10px 0;
+    height: 26px;
+}
+
+#userinfo .userinfoContent input.field {
+    border: 1px #1A1A1A solid;
+    background: #464646;
+    margin-right: 5px;
+    margin-top: 4px;
+    color: white;
+    height: 16px;
+}
+
+#userinfo .userinfoContent input:focus.field {
+    background: #545454;
+}
+
+#userinfo .userinfoContent input.rememberme {
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+#userinfo .userinfoContent input.button_userinfo {
+    width: 47px;
+    height: 20px;
+    cursor: pointer;
+    border: none;
+    background: transparent url(/static/images/button_userinfo.png) no-repeat 0 0;
+}
+
+#userinfo .userinfoClose {
+    display: block;
+    position: absolute;
+    right: 200px;
+    top: 10px;
+    width: 70px;
+    font-size: 0.8em;
+    text-align: left;
+}
+
+#userinfo .userinfoClose a {
+    display: block;
+    width: 100%;
+    height: 20px;
+    padding-right: 10px;
+    border: none;
+    font-size: 0.9em;
+    color: white;
+}
+

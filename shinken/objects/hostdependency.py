@@ -63,20 +63,35 @@ class Hostdependencies(Items):
             del self.items[id]
 
 
-    #We create new servicedep if necessery (host groups and co)
-    def explode(self):
-        #The "old" dependencies will be removed. All dependencies with
-        #more than one host or a host group will be in it
+    # We create new hostdep if necessery (host groups and co)
+    def explode(self, hostgroups):
+        # The "old" dependencies will be removed. All dependencies with
+        # more than one host or a host group will be in it
         hstdep_to_remove = []
 
-        #Then for every host create a copy of the dependency with just the host
-        #because we are adding services, we can't just loop in it
+        # Then for every host create a copy of the dependency with just the host
+        # because we are adding services, we can't just loop in it
         hostdeps = self.items.keys()
         for id in hostdeps:
             hd = self.items[id]
             if hd.is_tpl(): #Exploding template is useless
                 continue
-            hnames = hd.dependent_host_name.split(',')
+
+            hnames = []
+            if hasattr(hd, 'dependent_hostgroup_name'):
+                hg_names = hd.dependent_hostgroup_name.split(',')
+                hg_names = [hg_name.strip() for hg_name in hg_names]
+                for hg_name in hg_names:
+                    hg = hostgroups.find_by_name(hg_name)
+                    if hg is None:
+                        err = "ERROR : the hostdependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
+                        hg.configuration_errors.append(err)
+                        continue
+                    hnames.extend(hg.members.split(','))
+
+            if hasattr(hd, 'dependent_host_name'):
+                hnames.extend(hd.dependent_host_name.split(','))
+
             if len(hnames) >= 1:
                 for hname in hnames:
                     hname = hname.strip()

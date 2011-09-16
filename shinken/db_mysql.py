@@ -59,7 +59,7 @@ class DBMysql(DB):
         #print "[MysqlDB]I run query", query, "\n"
         try:
             self.db_cursor.execute(query)
-            self.db.commit ()
+            self.db.commit()
         except IntegrityError , exp:
             print "[MysqlDB] Warning : a query raise an integrity error : %s, %s" % (query, exp)
         except ProgrammingError , exp:
