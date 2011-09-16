@@ -18,10 +18,10 @@ def auth():
     print "Got forms"
     login = app.request.forms.get('login', '')
     password = app.request.forms.get('password', '')
-    sid = app.check_auth (login, password)
+    sid = app.check_auth(login, password)
 
     if sid is not None:
-        app.response.set_cookie("sid", sid)
+        app.response.set_cookie('user', login, secret=app.auth_secret)#'toto')
 
     return {'app' : app, 'sid' : sid}
 

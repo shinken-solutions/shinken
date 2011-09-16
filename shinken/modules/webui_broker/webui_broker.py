@@ -73,6 +73,7 @@ class Webui_broker(BaseModule, Daemon):
         self.port = int(getattr(modconf, 'port', '7767'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
         self.sessions_file = getattr(modconf, 'sessions_file', 'sessions.ret')
+        self.auth_secret = getattr(modconf, 'auth_secret').encode('utf8', 'replace')
         self.http_backend = getattr(modconf, 'http_backend', 'wsgiref')
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
@@ -415,3 +416,15 @@ class Webui_broker(BaseModule, Daemon):
         c = self.datamgr.get_contact(cname)
         return c
         
+
+    def get_user_auth(self):
+        # First we look for the user sid
+        # so we bail out if it's a false one
+        user_name = self.request.get_cookie("user", secret=self.auth_secret)
+
+        # If we cannot check the cookie, bailout
+        if not user_name:
+            return None
+
+        c = self.datamgr.get_contact(user_name)
+        return c

@@ -8,9 +8,8 @@ def get_page(arg1='nothing'):
 
 
 def get_data(arg1):
-    sid = app.request.get_cookie("sid")
-    user = app.get_user(sid)
-    print "Impact give user", user
+    user = app.get_user_auth()
+
 
     return {'host_name' : arg1, 'valid_user' : True, 'user' : user}
 

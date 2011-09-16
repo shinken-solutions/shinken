@@ -8,11 +8,9 @@ app = None
 def show_host(name):
     # First we look for the user sid
     # so we bail out if it's a false one
-    sid = app.request.get_cookie("sid")
-    user = app.get_user(sid)
-    print "Impact give user", user
+    user = app.get_user_auth()
 
-    if not app.is_valid(sid):
+    if not user:
         return {'app' : app, 'elt' : None, 'valid_user' : False, 'user' : user}
 
     # Ok, we can lookup it
@@ -24,11 +22,9 @@ def show_service(hname, desc):
 
     # First we look for the user sid
     # so we bail out if it's a false one
-    sid = app.request.get_cookie("sid")
-    user = app.get_user(sid)
-    print "Impact give user", user
+    user = app.get_user_auth()
 
-    if not app.is_valid(sid):
+    if not user:
         return {'app' : app, 'elt' : None, 'valid_user' : False, 'user' : user}
 
     # Ok, we can lookup it :)
