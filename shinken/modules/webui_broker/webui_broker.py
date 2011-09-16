@@ -70,7 +70,7 @@ class Webui_broker(BaseModule, Daemon):
 
         self.plugins = []
 
-        self.port = int(getattr(modconf, 'port', '8080'))
+        self.port = int(getattr(modconf, 'port', '7767'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
         self.sessions_file = getattr(modconf, 'sessions_file', 'sessions.ret')
         self.http_backend = getattr(modconf, 'http_backend', 'wsgiref')
