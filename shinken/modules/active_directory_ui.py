@@ -158,7 +158,7 @@ class AD_Webui(BaseModule):
                 except Exception, exp:
                     print "Cannot write", p, ":", exp
             except KeyError:
-                print "No photo for", account_name
+                print "No photo for", c.get_name()
 
 
 
