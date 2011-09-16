@@ -71,7 +71,8 @@ class Glpi_arbiter(BaseModule):
         r = {'commands' : [],
              'timeperiods' : [],
              'hosts' : [],
-             'contacts' : []}
+             'contacts' : [],
+             'services' : []}
         arg = {'session' : self.session}
 
         # Get commands
@@ -146,6 +147,23 @@ class Glpi_arbiter(BaseModule):
                  'pager' : contact_info['pager'],
                  }
             r['contacts'].append(h)
+
+        # Get services
+        all_hosts = self.con.monitoring.shinkenServices(arg)
+        print "Get all services", all_services
+        for service_info in all_services:
+            print "\n\n"
+            print "Service info in GLPI", service_info
+            h = {'host_name' : service_info['host_name'],
+                 'service_description' : service_info['service_description'],
+                 'check_command' : service_info['check_command'],
+                 'check_interval' : service_info['check_interval'],
+                 'retry_interval' : service_info['retry_interval'],
+                 'max_check_attempts' : service_info['max_check_attempts'],
+                 'check_period' : service_info['check_period'],
+                 'contacts' : service_info['contacts'],
+                 }
+            r['services'].append(h)
 
         #print "Returning to Arbiter the hosts:", r
         return r
