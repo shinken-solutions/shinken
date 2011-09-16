@@ -58,6 +58,7 @@ from hostdependency import Hostdependency, Hostdependencies
 from module import Module, Modules
 from discoveryrule import Discoveryrule, Discoveryrules
 from discoveryrun import Discoveryrun, Discoveryruns
+from hostextinfo import HostExtInfo, HostsExtInfo
 
 from shinken.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.schedulerlink import SchedulerLink, SchedulerLinks
@@ -205,7 +206,7 @@ class Config(Item):
         'use_embedded_perl_implicitly': BoolProp(managed=False, default='0'),
         'date_format':          StringProp(managed=False, default=None),
         'use_timezone':         StringProp(default='', class_inherit=[(Host, None), (Service, None), (Contact, None)]),
-        'illegal_object_name_chars': StringProp(default="""`~!$%^&*"|'<>?,()=""", class_inherit=[(Host, None), (Service, None), (Contact, None)]),
+        'illegal_object_name_chars': StringProp(default="""`~!$%^&*"|'<>?,()=""", class_inherit=[(Host, None), (Service, None), (Contact, None), (HostExtInfo, None)]),
         'illegal_macro_output_chars': StringProp(default='', class_inherit=[(Host, None), (Service, None), (Contact, None)]),
         'use_regexp_matching':  BoolProp(managed=False, default='0', help=' if you go some host or service definition like prod*, it will surely failed from now, sorry.'),
         'use_true_regexp_matching': BoolProp(managed=False, default=None),
@@ -310,6 +311,7 @@ class Config(Item):
         'hostescalation':   (Hostescalation, Hostescalations, 'hostescalations'),
         'discoveryrule':    (Discoveryrule, Discoveryrules, 'discoveryrules'),
         'discoveryrun':     (Discoveryrun, Discoveryruns, 'discoveryruns'),
+        'hostextinfo':      (HostExtInfo, HostsExtInfo, 'hostsextinfo'),
     }
 
     #This tab is used to transform old parameters name into new ones
@@ -453,7 +455,7 @@ class Config(Item):
                  'servicedependency', 'hostdependency', 'arbiter', 'scheduler',
                  'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module', 
                  'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
-                 'discoveryrun', 'discoveryrule', 'businessimpactmodulation']
+                 'discoveryrun', 'discoveryrule', 'businessimpactmodulation', 'hostextinfo']
         objectscfg = {}
         for t in types:
             objectscfg[t] = []
@@ -635,6 +637,8 @@ class Config(Item):
                                self.contacts, self.realms, \
                                self.resultmodulations, self.businessimpactmodulations, \
                                self.escalations, self.hostgroups)
+
+        self.hostsextinfo.merge(self.hosts)
 
         # Do the simplify AFTER explode groups
         #print "Hostgroups"
@@ -837,6 +841,8 @@ class Config(Item):
         self.hostdependencies.apply_inheritance()
         #Also timeperiods
         self.timeperiods.apply_inheritance()
+        #Also "Hostextinfo"
+        self.hostsextinfo.apply_inheritance()
 
 
     #Use to apply implicit inheritance
@@ -858,6 +864,7 @@ class Config(Item):
         self.servicegroups.fill_default()
         self.resultmodulations.fill_default()
         self.businessimpactmodulations.fill_default()
+        self.hostsextinfo.fill_default()
 
         #Also fill default of host/servicedep objects
         self.servicedependencies.fill_default()
@@ -1160,6 +1167,7 @@ class Config(Item):
         self.servicedependencies.linkify_templates()
         self.hostdependencies.linkify_templates()
         self.timeperiods.linkify_templates()
+        self.hostsextinfo.linkify_templates()
 
 
 
@@ -1222,7 +1230,7 @@ class Config(Item):
             logger.log("check global parameters failed")
             
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
-                  'escalations', 'services', 'servicegroups', 'timeperiods', 'commands'):
+                  'escalations', 'services', 'servicegroups', 'timeperiods', 'commands', 'hostsextinfo'):
             logger.log('Checking %s...' % (x))
             cur = getattr(self, x)
             if not cur.is_correct():
@@ -1291,7 +1299,7 @@ class Config(Item):
     def explode_global_conf(self):
         clss = [Service, Host, Contact, SchedulerLink,
                 PollerLink, ReactionnerLink, BrokerLink,
-                ReceiverLink, ArbiterLink]
+                ReceiverLink, ArbiterLink, HostExtInfo]
         for cls in clss:
             cls.load_global_conf(self)
 
