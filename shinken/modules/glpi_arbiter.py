@@ -155,14 +155,22 @@ class Glpi_arbiter(BaseModule):
             print "\n\n"
             print "Service info in GLPI", service_info
             h = {'host_name' : service_info['host_name'],
-                 'service_description' : service_info['service_description'],
-                 'check_command' : service_info['check_command'],
-                 'check_interval' : service_info['check_interval'],
-                 'retry_interval' : service_info['retry_interval'],
-                 'max_check_attempts' : service_info['max_check_attempts'],
-                 'check_period' : service_info['check_period'],
-                 'contacts' : service_info['contacts'],
+                 'service_description' : service_info['service_description']
                  }
+                 if "service_info['use']" in locals():
+                     h = {'use' : service_info['use']};
+                 if "service_info['check_command']" in locals():
+                     h = {'check_command' : service_info['check_command']};
+                 if "service_info['check_interval']" in locals():
+                     h = {'check_interval' : service_info['check_interval']};
+                 if "service_info['check_interval']" in locals():
+                     h = {'retry_interval' : service_info['retry_interval']};
+                 if "service_info['max_check_attempts']" in locals():
+                     h = {'max_check_attempts' : service_info['max_check_attempts']};
+                 if "service_info['check_period']" in locals():
+                     h = {'check_period' : service_info['check_period']};
+                 if "service_info['contacts']" in locals():
+                     h = {'contacts' : service_info['contacts']};                 
             r['services'].append(h)
 
         #print "Returning to Arbiter the hosts:", r
