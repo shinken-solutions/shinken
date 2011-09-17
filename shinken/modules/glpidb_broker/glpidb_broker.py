@@ -46,11 +46,21 @@ def de_unixify(t):
 #Get broks and puts them in merlin database
 class Glpidb_broker(BaseModule):
     def __init__(self, modconf, host=None, user=None, password=None, database=None, character_set=None, database_path=None):
-#Mapping for name of data, rename attributes and transform function
+        #Mapping for name of data, rename attributes and transform function
         self.mapping = {
            #Host
            'host_check_result' : {
                'plugin_monitoring_hosts_id' : {'transform' : None},
+               'event' : {'transform' : None},
+               'perf_data' : {'transform' : None},
+               'output' : {'transform' : None},
+               'state' : {'transform' : None},
+               'latency' : {'transform' : None},
+               'execution_time' : {'transform' : None},
+               },
+           #Service
+           'service_check_result' : {
+               'plugin_monitoring_hosts_services_id' : {'transform' : None},
                'event' : {'transform' : None},
                'perf_data' : {'transform' : None},
                'output' : {'transform' : None},
@@ -88,13 +98,21 @@ class Glpidb_broker(BaseModule):
 
 
     def preprocess(self, type, brok, checkst):
-        new_brok = copy.deepcopy(brok)
+        new_brok = copy.deepcopy(brok)        
         #Only preprocess if we can apply a mapping
         if type in self.mapping:
-            if brok.data['host_name']:
-               s = brok.data['host_name'].split('-')
-               new_brok.data['plugin_monitoring_hosts_id'] = s[1]
-               new_brok.data['event'] = brok.data['output']
+            print "brok data : ", brok.data
+            try:
+                s = brok.data['service_description'].split('-')
+                new_brok.data['plugin_monitoring_hosts_services_id'] = s[1]
+                new_brok.data['event'] = brok.data['output']
+            except:
+                try:
+                    s = brok.data['host_name'].split('-')
+                    new_brok.data['plugin_monitoring_hosts_id'] = s[1]
+                    new_brok.data['event'] = brok.data['output']
+                except: 
+                    pass
             to_del = []
             to_add = []
             mapping = self.mapping[brok.type]
@@ -152,7 +170,7 @@ class Glpidb_broker(BaseModule):
             return
 
 
-    #Same than service result, but for host result
+    #Host result
     def manage_host_check_result_brok(self, b):
         #logger.log("GLPI : data in DB %s " % b)
         b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -160,7 +178,7 @@ class Glpidb_broker(BaseModule):
         return [query]
 
 
-    #Same than service result, but for host result
+    #Host result
     def manage_host_check_resultup_brok(self, b):
         #logger.log("GLPI : data in DB %s " % b)
         new_data = copy.deepcopy(b.data)
@@ -176,8 +194,27 @@ class Glpidb_broker(BaseModule):
         query = self.db_backend.create_update_query('glpi_plugin_monitoring_hosts', new_data, where_clause)
         return [query]
 
+    #Service result
     def manage_service_check_result_brok(self, b):
         #logger.log("GLPI : data in DB %s " % b)
         b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
+        print "Add event service : ", b.data
         query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
+        return [query]
+
+    #Service result
+    def manage_service_check_resultup_brok(self, b):
+        #logger.log("GLPI : data in DB %s " % b)
+        new_data = copy.deepcopy(b.data)
+        new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
+        new_data['id'] = b.data['plugin_monitoring_hosts_services_id']
+        del new_data['plugin_monitoring_hosts_services_id']
+        del new_data['perf_data']
+        del new_data['output']
+        del new_data['state']
+        del new_data['latency']
+        del new_data['execution_time']
+        where_clause = {'id' : new_data['id']}
+        print "Update service : ", new_data
+        query = self.db_backend.create_update_query('glpi_plugin_monitoring_hosts_services', new_data, where_clause)
         return [query]

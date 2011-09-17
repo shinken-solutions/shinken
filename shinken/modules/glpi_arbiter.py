@@ -138,24 +138,46 @@ class Glpi_arbiter(BaseModule):
             print "\n\n"
             print "Service info in GLPI", service_info
             h = {'host_name' : service_info['host_name'],
-                 'service_description' : service_info['service_description']}
-            if "service_info['check_command']" in locals():
-                h = {'check_command' : service_info['check_command']};
-            if "service_info['check_interval']" in locals():
-                h = {'check_interval' : service_info['check_interval']};
-            if "service_info['retry_interval']" in locals():
-                h = {'retry_interval' : service_info['retry_interval']};
-            if "service_info['max_check_attempts']" in locals():
-                h = {'max_check_attempts' : service_info['max_check_attempts']};
-            if "service_info['check_period']" in locals():
-                h = {'check_period' : service_info['check_period']};
-            if "service_info['contacts']" in locals():
-                h = {'contacts' : service_info['contacts']};
-            h = {'notification_interval' : '30',
-                 'notification_period' : '24x7',
-                 'notification_options' : 'w,c,r',
-                 'active_checks_enabled' : '1',
-                 'process_perf_data' : '1'};
+                 'service_description' : service_info['service_description'],
+                 'notification_interval' : '30'};
+            if service_info['check_command']:
+                h['check_command'] = service_info['check_command']
+
+            if service_info['check_interval']:
+                h['check_interval'] = service_info['check_interval']
+
+            if service_info['retry_interval']:
+                h['retry_interval'] = service_info['retry_interval']
+
+            if service_info['max_check_attempts']:
+                h['max_check_attempts'] = service_info['max_check_attempts']
+
+            if service_info['check_period']:
+                h['check_period'] = service_info['check_period']
+
+            if service_info['contacts']:
+                h['contacts'] = service_info['contacts']
+
+            h['notification_period'] = '24x7'
+            h['notification_options'] = 'w,c,r'
+            h['active_checks_enabled'] = '1'
+            h['process_perf_data'] = '1'
+            h['active_checks_enabled'] = '1'
+            h['passive_checks_enabled'] = '1'
+            h['parallelize_check'] = '1'
+            h['obsess_over_service'] = '1'
+            h['check_freshness'] = '1'
+            h['freshness_threshold'] = '1'
+            h['notifications_enabled'] = '1'
+            h['event_handler_enabled'] = '0'
+            h['event_handler'] = 'super_event_kill_everyone!DIE'
+            h['flap_detection_enabled'] = '1'
+            h['failure_prediction_enabled'] = '1'
+            h['retain_status_information'] = '1'
+            h['retain_nonstatus_information'] = '1'
+            h['is_volatile'] = '0'
+            h['_httpstink'] = 'NO'
+            print "Service TEST : ", h
             r['services'].append(h)
 
         # Get contacts
