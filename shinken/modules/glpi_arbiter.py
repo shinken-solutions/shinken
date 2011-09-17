@@ -71,8 +71,8 @@ class Glpi_arbiter(BaseModule):
         r = {'commands' : [],
              'timeperiods' : [],
              'hosts' : [],
-             'contacts' : [],
-             'services' : []}
+             'services' : [],
+             'contacts' : []}
         arg = {'session' : self.session}
 
         # Get commands
@@ -116,6 +116,7 @@ class Glpi_arbiter(BaseModule):
             print "\n\n"
             print "Host info in GLPI", host_info
             h = {'host_name' : host_info['host_name'],
+                 'alias' : host_info['alias'],
                  'address' : host_info['address'],
                  'parents' : host_info['parents'],
                  'check_command' : host_info['check_command'],
@@ -123,8 +124,14 @@ class Glpi_arbiter(BaseModule):
                  'retry_interval' : host_info['retry_interval'],
                  'max_check_attempts' : host_info['max_check_attempts'],
                  'check_period' : host_info['check_period'],
+                 'process_perf_data' : 1,
                  'contacts' : host_info['contacts'],
-                 }
+                 'notification_interval' : '30',
+                 'notification_period' : '24x7',
+                 'notification_options' : 'd,u,r'}
+            #h = {'notification_interval' : '30'};
+            #h = {'notification_period' : 'Default'};
+            #h = {'notification_options' : 'd,u,r'};
             r['hosts'].append(h)
 
         # Get contacts
