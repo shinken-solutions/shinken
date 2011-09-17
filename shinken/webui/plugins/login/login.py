@@ -1,4 +1,4 @@
-
+from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
@@ -22,6 +22,9 @@ def auth():
 
     if is_auth:
         app.response.set_cookie('user', login, secret=app.auth_secret)
+        redirect("/problems")
+    else:
+        redirect("/login")
 
     return {'app' : app, 'is_auth' : is_auth}
 
