@@ -175,3 +175,9 @@ class Glpidb_broker(BaseModule):
         where_clause = {'id' : new_data['id']}
         query = self.db_backend.create_update_query('glpi_plugin_monitoring_hosts', new_data, where_clause)
         return [query]
+
+    def manage_service_check_result_brok(self, b):
+        #logger.log("GLPI : data in DB %s " % b)
+        b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
+        query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
+        return [query]

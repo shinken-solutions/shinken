@@ -66,7 +66,7 @@ class Glpi_arbiter(BaseModule):
         print "My session number", self.session
 
 
-    #Ok, main function that will load hosts from GLPI
+    #Ok, main function that will load config from GLPI
     def get_objects(self):
         r = {'commands' : [],
              'timeperiods' : [],
@@ -124,15 +124,39 @@ class Glpi_arbiter(BaseModule):
                  'retry_interval' : host_info['retry_interval'],
                  'max_check_attempts' : host_info['max_check_attempts'],
                  'check_period' : host_info['check_period'],
-                 'process_perf_data' : 1,
+                 'process_perf_data' : '1',
                  'contacts' : host_info['contacts'],
                  'notification_interval' : '30',
                  'notification_period' : '24x7',
-                 'notification_options' : 'd,u,r'}
-            #h = {'notification_interval' : '30'};
-            #h = {'notification_period' : 'Default'};
-            #h = {'notification_options' : 'd,u,r'};
+                 'notification_options' : 'd,u,r'};
             r['hosts'].append(h)
+
+        # Get services
+        all_services = self.con.monitoring.shinkenServices(arg)
+        print "Get all services", all_services
+        for service_info in all_services:
+            print "\n\n"
+            print "Service info in GLPI", service_info
+            h = {'host_name' : service_info['host_name'],
+                 'service_description' : service_info['service_description']}
+            if "service_info['check_command']" in locals():
+                h = {'check_command' : service_info['check_command']};
+            if "service_info['check_interval']" in locals():
+                h = {'check_interval' : service_info['check_interval']};
+            if "service_info['retry_interval']" in locals():
+                h = {'retry_interval' : service_info['retry_interval']};
+            if "service_info['max_check_attempts']" in locals():
+                h = {'max_check_attempts' : service_info['max_check_attempts']};
+            if "service_info['check_period']" in locals():
+                h = {'check_period' : service_info['check_period']};
+            if "service_info['contacts']" in locals():
+                h = {'contacts' : service_info['contacts']};
+            h = {'notification_interval' : '30',
+                 'notification_period' : '24x7',
+                 'notification_options' : 'w,c,r',
+                 'active_checks_enabled' : '1',
+                 'process_perf_data' : '1'};
+            r['services'].append(h)
 
         # Get contacts
         all_contacts = self.con.monitoring.shinkenContacts(arg)
@@ -154,33 +178,6 @@ class Glpi_arbiter(BaseModule):
                  'pager' : contact_info['pager'],
                  }
             r['contacts'].append(h)
-
-        # Get services
-        all_services = self.con.monitoring.shinkenServices(arg)
-        print "Get all services", all_services
-        for service_info in all_services:
-            print "\n\n"
-            print "Service info in GLPI", service_info
-            h = {'host_name' : service_info['host_name'],
-                 'service_description' : service_info['service_description']};
-            if "service_info['use']" in locals():
-                h = {'use' : service_info['use']};
-            if "service_info['check_command']" in locals():
-                h = {'check_command' : service_info['check_command']};
-            if "service_info['check_interval']" in locals():
-                h = {'check_interval' : service_info['check_interval']};
-            if "service_info['retry_interval']" in locals():
-                h = {'retry_interval' : service_info['retry_interval']};
-            if "service_info['max_check_attempts']" in locals():
-                h = {'max_check_attempts' : service_info['max_check_attempts']};
-            if "service_info['check_period']" in locals():
-                h = {'check_period' : service_info['check_period']};
-            if "service_info['contacts']" in locals():
-                h = {'contacts' : service_info['contacts']}; 
-            h = {'notification_interval' : '30'};
-            h = {'notification_period' : 'Default'};
-            h = {'notification_options' : 'w,c,r'};
-            r['services'].append(h)
 
         #print "Returning to Arbiter the hosts:", r
         return r
