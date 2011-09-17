@@ -9,5 +9,5 @@ all: $(OBJ)
 	pandoc -s -w man $< -o $@
 
 clean:
-	rm *.8
+	rm -f *.8
 
