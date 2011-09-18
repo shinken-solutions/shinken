@@ -5,30 +5,47 @@ app = None
 
 # Our page
 def get_page():
-    return get_data()
+    return user_login()
 
-
-
-def get_data():
+def user_login():
+    user = app.get_user_auth()
+    if user:
+        redirect("/problems")
     return {}
 
+def user_login_redirect():
+    redirect("/user/login")
+    return {}
 
+def user_logout():
+    # To delete it, send the same, with different date
+    user_name = app.request.get_cookie("user", secret=app.auth_secret)
+    if user_name:
+        app.response.set_cookie('user', False, secret=app.auth_secret, path='/')
+    else:
+        app.response.set_cookie('user', '', secret=app.auth_secret, path='/')
+    redirect("/user/login")
+    return {}
 
-def auth():
+def user_auth():
     print "Got forms"
     login = app.request.forms.get('login', '')
     password = app.request.forms.get('password', '')
     is_auth = app.check_auth(login, password)
 
     if is_auth:
-        app.response.set_cookie('user', login, secret=app.auth_secret)
+        app.response.set_cookie('user', login, secret=app.auth_secret, path='/')
         redirect("/problems")
     else:
-        redirect("/login")
+        redirect("/user/login")
 
     return {'app' : app, 'is_auth' : is_auth}
 
-pages = {get_page : { 'routes' : ['/login', '/login/'], 'view' : 'login'},
-         auth : { 'routes' : ['/auth'], 'view' : 'auth', 'method' : 'POST'}
-             }
+pages = { user_login : { 'routes' : ['/user/login', '/user/login/'], 
+                         'view' : 'login'},
+          user_login_redirect : { 'routes' : ['/login'] },
+          user_auth : { 'routes' : ['/user/auth'], 
+                        'view' : 'auth', 
+                        'method' : 'POST'},
+          user_logout : { 'routes' : ['/user/logout'] }}
 
