@@ -1,5 +1,3 @@
-%import time
-%t0 = time.time()
 
 %helper = app.helper
 %datamgr = app.datamgr
@@ -196,9 +194,9 @@
 </div>
 
 <div class="clear"></div>
-</div>
 
-Page generated in {{"%.2f" % (time.time() - t0)}} seconds
-%include footer
+
+
+
 
 
