@@ -2045,48 +2045,6 @@ And: 2"""
         self.assert_(self.lines_equal(response, good_response))
 
 
-    def test_database_shrink(self):
-        self.print_header()
-        for cycle in xrange(10):
-            for brok in xrange(100):
-                now = time.time()
-                b = Brok('log', {'log' : "[%lu] EXTERNAL COMMAND: [%lu] DISABLE_NOTIFICATIONS" % (now, now) })
-                self.livestatus_broker.manage_log_brok(b)
-            time.sleep(1)
-
-        self.update_broker()
-        cursor = self.livestatus_broker.db.dbconn.cursor()
-        cursor.execute('SELECT COUNT(*) FROM logs')
-        dbrows1 = cursor.fetchone()
-        response, keepalive = self.livestatus_broker.livestatus.handle_request("GET log\nColumns: time")
-        rows1 = len(response.splitlines())
-        # the broker main loop flushes in intervals of 1 second.
-        # we don't have this mainloop here, so flush manually.
-        self.livestatus_broker.db.commit()
-        size1 = os.path.getsize(self.livestatus_broker.database_file)
-        # now delete log entries older than 6 seconds
-        self.livestatus_broker.db.max_logs_age = 6.0 / 86400.0
-        self.livestatus_broker.db.cleanup_log_db()
-
-        cursor.execute('SELECT COUNT(*) FROM logs')
-        dbrows2 = cursor.fetchone()
-        response, keepalive = self.livestatus_broker.livestatus.handle_request("GET log\nColumns: time")
-        rows2 = len(response.splitlines())
-        size2 = os.path.getsize(self.livestatus_broker.database_file)
-        print "size1", size1
-        print "size2", size2
-        print "rows1", rows1
-        print "rows2", rows2
-        print "dbrows1", dbrows1
-        print "dbrows2", dbrows2
-        self.assert_(rows1 == dbrows1[0])
-        self.assert_(rows2 == dbrows2[0])
-        self.assert_(dbrows1 > dbrows2)
-        self.assert_(rows1 > rows2)
-        # The most important...database file shrunk
-        self.assert_(size1 > size2)
-
-
     def test_thruk_empty_stats(self):
         self.print_header()
         self.update_broker()
