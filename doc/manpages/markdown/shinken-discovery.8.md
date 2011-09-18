@@ -15,7 +15,7 @@ shinken-discovery [*options*] ...
 
 Shinken discovery daemon.
 
-Until now, there are two “discovery” modules :
+Until now, there are two discovery modules :
  * Standard network one, that uses the nmap tool
  * VMware one, that uses the *check_esx3.pl* script and a vcenter installation.
 
