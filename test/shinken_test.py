@@ -51,6 +51,7 @@ from shinken.misc.regenerator import Regenerator
 from shinken.modules import livestatus_broker
 from shinken.modules.livestatus_broker import Livestatus_broker
 from shinken.modules.livestatus_broker.livestatus import LiveStatus
+from shinken.modules.livestatus_broker.livestatus_db import LiveStatusDb
 
 livestatus_modconf = Module()
 livestatus_modconf.module_name = "livestatus"
@@ -78,6 +79,9 @@ def my_time_sleep(delay):
 
 original_time_sleep = time.sleep
 time.sleep = my_time_sleep
+
+def time_warp(duration):
+    time.my_offset += duration
 
 # If external processes or time stamps for files are involved, we must
 # revert the fake timing routines, because these externals cannot be fooled.
@@ -346,8 +350,8 @@ class ShinkenTest(unittest.TestCase):
         #
         #    }
         self.livestatus_broker.init()
-        self.livestatus_broker.prepare_log_db()
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.dbconn, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        self.livestatus_broker.db = LiveStatusDb(self.livestatus_broker.database_file, self.livestatus_broker.archive_path, self.livestatus_broker.max_logs_age)
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
 
 
 if __name__ == '__main__':
