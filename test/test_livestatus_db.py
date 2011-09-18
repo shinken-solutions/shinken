@@ -355,7 +355,7 @@ Columns: time type options state host_name"""
         self.assert_(lengths == [12,28,44,60])
 
 
-    def test_david_database(self):
+    def xtest_david_database(self):
         #os.removedirs("var/archives")
         self.print_header()
         lengths = []
@@ -378,6 +378,7 @@ Columns: time type options state host_name"""
             print "db entries", db, numlogs
             dbh.close()
         print "lengths is", lengths
+
 
     def test_archives_path(self):
         #os.removedirs("var/archives")

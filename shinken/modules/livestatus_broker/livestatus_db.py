@@ -167,7 +167,7 @@ class LiveStatusDb(object):
         while thisday <= maxday:
             nextday = thisday + datetime.timedelta(days=1)
             handle = "db" + thisday.strftime("%Y%m%d")
-            archive = os.path.join(self.archive_path, "livelogs-" + thisday.strftime("%Y-%m-%d") + ".db")
+            archive = os.path.join(self.archive_path, os.path.splitext(os.path.basename(self.database_file))[0] + "-" + thisday.strftime("%Y-%m-%d") + ".db")
             if os.path.exists(archive) or preview:
                 result.append([thisday, handle, archive, int(time.mktime(thisday.timetuple())), int(time.mktime(nextday.timetuple()))])
             thisday = nextday
