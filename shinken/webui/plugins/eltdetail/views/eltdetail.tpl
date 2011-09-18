@@ -193,7 +193,7 @@ Invalid element name
 	</tbody>	
       </table>
     </div>
-  
+  </div>
 
     <dl class="grid_10 box_shadow">
 
