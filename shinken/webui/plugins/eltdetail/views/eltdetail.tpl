@@ -193,7 +193,7 @@ Invalid element name
 	</tbody>	
       </table>
     </div>
-  
+  </div>
 
     <dl class="grid_10 box_shadow">
 
@@ -210,6 +210,7 @@ Invalid element name
 
 	<div class="clear"></div>
       </div>
+      </dl>
       <hr>
       
       %#    Now print the dependencies if we got somes
@@ -285,7 +286,7 @@ Invalid element name
     %# end of the 'is problem' if
     %end
 
-    </dl>
+    
 
     
     <div class="grid_16 opacity_hover">
@@ -382,7 +383,7 @@ Invalid element name
   </div>
 
   <div class="clear"></div>
-  <div id="footer" class="grid_16">
+
 
 
 
@@ -397,11 +398,12 @@ Invalid element name
   </script>
 
 </div>
-<div class="clear"></div>
 </div>
+<div class="clear"></div>
+
 
 %#End of the Host Exist or not case
 %end
+</div>
 
-%include footer
 

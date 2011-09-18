@@ -16,7 +16,7 @@
 %if not 'menu_part' in locals() : menu_part = ''
 
 
-<html slick-uniqueid="1">
+<html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
       <title>{{title or 'No title'}}</title>
