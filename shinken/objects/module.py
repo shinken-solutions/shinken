@@ -35,8 +35,6 @@ class Module(Item):
         'module_type': StringProp(),
         'modules'    : ListProp(default=''),
     })
-    
-    running_properties = {}
 
     macros = {}
 
