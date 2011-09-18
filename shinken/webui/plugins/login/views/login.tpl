@@ -31,7 +31,7 @@
 	</div>
 
 	<div id="login-form" class="grid_7">
-		<form method="post" id="loginform" action="/auth">			
+		<form method="post" id="loginform" action="/user/auth">			
 			<div class="text-field">
 			  <label for="login">Login:</label>
 				<input name="login" type="text" tabindex="1" size="30">
