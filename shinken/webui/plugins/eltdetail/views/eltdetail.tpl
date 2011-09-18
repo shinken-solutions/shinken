@@ -210,6 +210,7 @@ Invalid element name
 
 	<div class="clear"></div>
       </div>
+      </dl>
       <hr>
       
       %#    Now print the dependencies if we got somes
@@ -285,7 +286,7 @@ Invalid element name
     %# end of the 'is problem' if
     %end
 
-    </dl>
+    
 
     
     <div class="grid_16 opacity_hover">
@@ -403,5 +404,5 @@ Invalid element name
 %#End of the Host Exist or not case
 %end
 
-%include footer
+
 
