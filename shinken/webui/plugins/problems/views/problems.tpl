@@ -5,7 +5,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css'], refresh=True, menu_part='/problems', user=user
+%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/pulse.css'], refresh=True, menu_part='/problems', user=user
 
 
 %# " If the auth got problem, we bail out"
@@ -86,7 +86,12 @@
 	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
 	      <tr class="tabledesc">
 	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
-	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /> </td>
+	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <div class="aroundpulse">
+		    %# " We put a 'pulse' around the elements if it's an important one "
+		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
+		    <span class="pulse"></span>
+		    %end
+		    <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div> </td>
 		%if pb.host_name == last_hname:
 		   <td class="tdBorderLeft tdCriticity" style="width: 120px;"> </td>
 		%else:
