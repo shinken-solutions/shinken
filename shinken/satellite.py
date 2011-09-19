@@ -668,6 +668,10 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         self.manager = Manager()
         self.returns_queue = self.manager.list()
 
+        import socket
+        socket.setdefaulttimeout(None)
+
+
 
     def setup_new_conf(self):
         """ Setup the new received conf from arbiter """

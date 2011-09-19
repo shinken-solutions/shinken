@@ -27,11 +27,6 @@ import select
 import errno
 import time
 
-# By default Pyro got problem in connect() function that can take
-# long seconds to raise a timeout. And even with the _setTimeout()
-# call. So we cahgne teh whole default connect() timeout
-import socket
-socket.setdefaulttimeout(3)
 
 # Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
 try:

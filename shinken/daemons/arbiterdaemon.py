@@ -506,9 +506,17 @@ class Arbiter(Daemon):
 
     # We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
-        print "Waiting for master death"
+        logger.log("Waiting for master death")
         timeout = 1.0
         self.last_master_speack = time.time()
+
+        # Look for the master timeout
+        master_timeout = 300
+        for arb in self.conf.arbiterlinks:
+            if not arb.spare:
+                master_timeout = arb.check_interval * arb.max_check_attempts
+        logger.log("I'll wait master for %d seconds" % master_timeout)
+
         
         while not self.interrupted:
             elapsed, _, tcdiff = self.handleRequests(timeout)
@@ -529,8 +537,8 @@ class Arbiter(Daemon):
 
             # Now check if master is dead or not
             now = time.time()
-            if now - self.last_master_speack > 5:
-                print "Master is dead!!!"
+            if now - self.last_master_speack > master_timeout:
+                logger.log("Master is dead!!!")
                 self.must_run = True
                 break
 

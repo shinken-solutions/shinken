@@ -25,6 +25,7 @@
 #Arbiter with Conf Dispatcher.
 
 import time
+import socket
 
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
@@ -72,11 +73,22 @@ class SatelliteLink(Item):
     def create_connection(self):
         try:
             self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
+            # By default Pyro got problem in connect() function that can take
+            # long seconds to raise a timeout. And even with the _setTimeout()
+            # call. So we cahgne teh whole default connect() timeout
+            socket.setdefaulttimeout(self.timeout)
             self.con = pyro.getProxy(self.uri)
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imadiatly after
+            socket.setdefaulttimeout(None)
             pyro.set_timeout(self.con, self.timeout)
         except Pyro_exp_pack , exp:
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imadiatly after
+            socket.setdefaulttimeout(None)
             self.con = None
             logger.log('Error : in creation connection for %s : %s' % (self.get_name(), str(exp)))
+    
 
 
     def put_conf(self, conf):
