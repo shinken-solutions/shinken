@@ -17,6 +17,32 @@
 %end
 
 
+
+<script type="text/javascript">
+	function submitform()
+	{
+	document.forms["searchform"].submit();
+	}
+	
+	/* Catch the key ENTER and launch the form 
+	 Will be link in the password field
+	*/
+	function submitenter(myfield,e){
+	  var keycode;
+	  if (window.event) keycode = window.event.keyCode;
+	  else if (e) keycode = e.which;
+	  else return true;
+	
+	
+	  if (keycode == 13){
+	    submitform();
+	    return false;
+	  }else
+	   return true;
+	}
+</script>
+
+
 	 
 <div id="left_container" class="grid_2">
   <div id="dummy_box" class="box_gradient_horizontal"> 
@@ -26,7 +52,7 @@
     <ul>
       <li><a href="/problems">All problems</a></li>
       <li><a href="#">Overview</a></li>
-            <li>
+      <li>
 	<center>
 	  <table cellspacing="2" cellpadding="0" border="0">
 	    <tbody>
@@ -48,6 +74,21 @@
 	</center>
       </li>
 
+      <li><a href="#">Search</a></li>
+      
+      <li>
+      	<form method="get" id="searchform" action="/problems">			
+	  <div class="text-field">
+	    <label for="search">Name:</label>
+	    <input name="search" type="text" tabindex="1" size="30" value="{{search}}">
+	  </div>
+	  <center>
+	    <div class="buttons">
+	      <a style="padding:8px;" tabindex="4" class="button" href="javascript: submitform()"><img src="/static/images/search.png"> Search</a>
+	    </div>
+	  </center>
+	</form>
+      </li>
 
     </ul>
   </div>
