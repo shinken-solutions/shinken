@@ -5,7 +5,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/pulse.css'], refresh=True, menu_part='/problems', user=user
+%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css'], refresh=True, menu_part='/problems', user=user
 
 
 %# " If the auth got problem, we bail out"

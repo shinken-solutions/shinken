@@ -68,10 +68,14 @@ function toggleBusinessElt(e) {
 
     if (toc && toc.style.display == 'none') {
 	toc.style.display = 'block';
-	imgLink.src = img_src+'reduce.png';
+	if (imgLink != null){
+	    imgLink.src = img_src+'reduce.png';
+	}
     } else {
 	toc.style.display = 'none';
-	imgLink.src = img_src+'expand.png';
+	if (imgLink != null){
+	    imgLink.src = img_src+'expand.png';
+	}
     }
 }
 

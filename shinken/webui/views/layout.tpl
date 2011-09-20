@@ -8,6 +8,7 @@
 %if not 'print_header' in locals() : print_header = True
 %if not 'refresh' in locals() : refresh = False
 %if not 'user' in locals() : user = None
+%if not 'app' in locals() : app = None
 
 %# If not need, disable the top right banner
 %if not 'top_right_banner_state' in locals() : top_right_banner_state = 0
@@ -28,6 +29,7 @@
       <link rel="stylesheet" type="text/css" href="/static/css/layout.css" media="screen"/>
       <link rel="stylesheet" type="text/css" href="/static/css/message.css" media="screen"/>
       <link rel="stylesheet" type="text/css" href="/static/css/multibox.css" media="screen"/>
+      <link rel="stylesheet" type="text/css" href="/static/css/pulse.css" media="screen"/>
 
       %if user is not None:
         <link rel="stylesheet" type="text/css" href="/static/css/userinfo.css" media="screen"/>
