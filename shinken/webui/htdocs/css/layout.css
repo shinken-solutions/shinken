@@ -868,3 +868,19 @@ a.down-big {
     font-size: 16px;
     padding: 10px 15px;
 }
+
+
+
+
+#counters  { 
+  background-position:0px 0px;
+  background-repeat:repeat-x;
+  z-index : 5;
+/*  width:128px; 
+  height:128px; */
+  zoom:1; 
+  position: absolute;
+  top: 0;
+  right: 200px;
+  border: 0;
+}

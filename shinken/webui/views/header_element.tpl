@@ -16,6 +16,20 @@
     
 	<h1 class="box_textshadow">Shinken</h1>
 
+    <div id="counters">
+      <table>
+	<th>Problems</th>
+	<th>Impacts</th>
+	<th>All</th>
+	<tr>
+	  <td>10</td>
+	  <td>60</td>
+	  <td>7000</td>
+	</tr>
+      </table>
+    </div>
+
+
     %# Set the Top right banner if need
     %if top_right_banner_state != 0:
 	<div id="animate-area-back-1">
