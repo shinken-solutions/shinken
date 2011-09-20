@@ -235,6 +235,7 @@ Invalid element name
 	  %# " We put a max imapct to print, bacuse too high is just useless"
 	  %if nb > max_impacts:
 	  %   break 
+	  %end
 
 	  %if nb == 8:
 	  <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
@@ -256,7 +257,7 @@ Invalid element name
 	    %end
 	</div>
      %end #of the only host part
-	
+
 
      %if elt.is_problem and len(elt.impacts) != 0:
 	<div class='host-services'>
