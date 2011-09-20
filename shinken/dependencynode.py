@@ -302,11 +302,11 @@ class DependencyNodeFactory(object):
         is_service = False
         # h_name, service_desc are , separated
         elts = patern.split(',')
-        host_name = elts[0]
+        host_name = elts[0].strip()
         # Look if we have a service
         if len(elts) > 1:
             is_service = True
-            service_description = elts[1]
+            service_description = elts[1].strip()
         if is_service:
             obj = services.find_srv_by_name_and_hostname(host_name, service_description)
             if not obj:
