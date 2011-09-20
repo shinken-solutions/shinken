@@ -182,7 +182,7 @@ class Service(SchedulingItem):
         'last_problem_id':    IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'current_problem_id': IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'execution_time':     FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_notification':  FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_notification':  FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
         'current_notification_number': IntegerProp(default=0, fill_brok=['full_status'],retention=True),
         'current_notification_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'check_flapping_recovery_notification': BoolProp(default=True, fill_brok=['full_status'], retention=True),

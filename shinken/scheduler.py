@@ -531,6 +531,9 @@ class Scheduler:
                 self.actions[c.id].status = 'zombie'
                 item.last_notification = c.check_time
 
+                # And we ask the item to update it's state
+                self.get_and_register_status_brok(item)
+
                 # If we' ve got a problem with the notification, raise a Warning log
                 if timeout:
                     logger.log("Warning: Contact %s %s notification command '%s ' timed out after %d seconds" % (self.actions[c.id].contact.contact_name, self.actions[c.id].ref.__class__.my_type, self.actions[c.id].command, int(execution_time)))
