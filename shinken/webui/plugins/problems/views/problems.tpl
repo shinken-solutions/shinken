@@ -25,6 +25,29 @@
   <div id="nav_left">
     <ul>
       <li><a href="/problems">All problems</a></li>
+      <li><a href="#">Overview</a></li>
+            <li>
+	<center>
+	  <table cellspacing="2" cellpadding="0" border="0">
+	    <tbody>
+	      <tr>
+		<th>Problems</th><th>Unhandled</th><th>All</th>
+	      </tr>
+	      
+	      <tr>
+		<td>
+		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
+		</td>
+		<td>
+		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
+		</td>
+                <td><a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
+              </tr>
+	    </tbody>
+	  </table>
+	</center>
+      </li>
+
 
     </ul>
   </div>
