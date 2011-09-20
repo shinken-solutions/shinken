@@ -24,6 +24,7 @@ import os
 import sys
 import time
 import traceback
+import socket
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -38,6 +39,11 @@ import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 
 from shinken.external_command import ExternalCommand
+
+# Pack of common Pyro exceptions
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+                    Pyro.errors.CommunicationError, \
+                    Pyro.errors.DaemonError)
 
 
 # Our main APP class
@@ -170,7 +176,19 @@ class Broker(BaseSatellite):
         running_id = links[id]['running_id']
         # DBG: print "Running id before connection", running_id
         uri = links[id]['uri']
-        links[id]['con'] = Pyro.core.getProxyForURI(uri)
+        
+        try:
+            socket.setdefaulttimeout(3)
+            links[id]['con'] = Pyro.core.getProxyForURI(uri)
+            socket.setdefaulttimeout(None)
+        except Pyro_exp_pack , exp:
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imadiatly after
+            socket.setdefaulttimeout(None)
+            logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
+            sched['con'] = None
+            return
+
 
         try:
                 # intial ping must be quick
