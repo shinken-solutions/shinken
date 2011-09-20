@@ -187,7 +187,6 @@ class Glpidb_broker(BaseModule):
         del new_data['plugin_monitoring_hosts_id']
         del new_data['perf_data']
         del new_data['output']
-        del new_data['state']
         del new_data['latency']
         del new_data['execution_time']
         where_clause = {'id' : new_data['id']}
@@ -211,7 +210,6 @@ class Glpidb_broker(BaseModule):
         del new_data['plugin_monitoring_hosts_services_id']
         del new_data['perf_data']
         del new_data['output']
-        del new_data['state']
         del new_data['latency']
         del new_data['execution_time']
         where_clause = {'id' : new_data['id']}
