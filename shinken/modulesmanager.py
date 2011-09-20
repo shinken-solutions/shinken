@@ -87,7 +87,7 @@ The previous imported modules, if any, are cleaned before. """
                 # We want to keep only the modules of our type
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
-            except ImportError , exp:
+            except Exception , exp:
                 logger.log("Warning in importing module : %s" % exp)
 
         del self.modules_assoc[:]
