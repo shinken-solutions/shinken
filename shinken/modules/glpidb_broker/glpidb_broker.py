@@ -61,6 +61,7 @@ class Glpidb_broker(BaseModule):
            #Service
            'service_check_result' : {
                'plugin_monitoring_hosts_services_id' : {'transform' : None},
+               'plugin_monitoring_businessapplications_id' : {'transform' : None},
                'event' : {'transform' : None},
                'perf_data' : {'transform' : None},
                'output' : {'transform' : None},
@@ -104,8 +105,12 @@ class Glpidb_broker(BaseModule):
             print "brok data : ", brok.data
             try:
                 s = brok.data['service_description'].split('-')
-                new_brok.data['plugin_monitoring_hosts_services_id'] = s[1]
-                new_brok.data['event'] = brok.data['output']
+                try:
+                    if 'businessrules' in s[2]:
+                        new_brok.data['plugin_monitoring_businessapplications_id'] = s[1]
+                except:
+                    new_brok.data['plugin_monitoring_hosts_services_id'] = s[1]
+                    new_brok.data['event'] = brok.data['output']
             except:
                 try:
                     s = brok.data['host_name'].split('-')
@@ -196,23 +201,36 @@ class Glpidb_broker(BaseModule):
     #Service result
     def manage_service_check_result_brok(self, b):
         #logger.log("GLPI : data in DB %s " % b)
-        b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
-        print "Add event service : ", b.data
-        query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
-        return [query]
+        try:
+            b.data['plugin_monitoring_businessapplications_id']
+            return ''
+        except:
+            b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
+            print "Add event service : ", b.data
+            query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
+            return [query]
+        return ''
 
     #Service result
     def manage_service_check_resultup_brok(self, b):
-        #logger.log("GLPI : data in DB %s " % b)
+        logger.log("GLPI : data in DB %s " % b.data)
         new_data = copy.deepcopy(b.data)
         new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
-        new_data['id'] = b.data['plugin_monitoring_hosts_services_id']
-        del new_data['plugin_monitoring_hosts_services_id']
         del new_data['perf_data']
         del new_data['output']
         del new_data['latency']
         del new_data['execution_time']
+        try:
+            new_data['id'] = b.data['plugin_monitoring_businessapplications_id']
+            del new_data['plugin_monitoring_businessapplications_id']
+            table = 'glpi_plugin_monitoring_businessapplications'
+        except:
+            new_data['id'] = b.data['plugin_monitoring_hosts_services_id']
+            del new_data['plugin_monitoring_hosts_services_id']
+            table = 'glpi_plugin_monitoring_hosts_services'
+
         where_clause = {'id' : new_data['id']}
         print "Update service : ", new_data
-        query = self.db_backend.create_update_query('glpi_plugin_monitoring_hosts_services', new_data, where_clause)
+        query = self.db_backend.create_update_query(table, new_data, where_clause)
         return [query]
+        
