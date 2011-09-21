@@ -820,6 +820,7 @@ class Livestatus_broker(BaseModule):
         if self.socket:
             if os.path.exists(self.socket):
                 os.remove(self.socket)
+            os.umask(0)
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.setblocking(0)
             sock.bind(self.socket)

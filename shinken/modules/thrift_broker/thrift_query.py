@@ -33,7 +33,7 @@ from shinken.modules.livestatus_broker.hooker import Hooker
 from shinken.modules.livestatus_broker.mapping import out_map as LSout_map
 from thrift_response import ThriftResponse
 from shinken.modules.livestatus_broker.livestatus_stack import LiveStatusStack
-from shinken.moduleS.livestatus_broker.livestatus_constraints import LiveStatusConstraints
+from shinken.modules.livestatus_broker.livestatus_constraints import LiveStatusConstraints
 
 
 class Problem:
