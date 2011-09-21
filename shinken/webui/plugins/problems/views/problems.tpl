@@ -5,7 +5,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css'], refresh=True, menu_part='/problems', user=user
+%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css'], refresh=True, menu_part='/problems', user=user
 
 
 %# " If the auth got problem, we bail out"
@@ -16,6 +16,21 @@
 %# " And if the javascript is not follow? not a problem, we gave no data here." 
 %end
 
+
+%# " Add the auto copleter in the search input form"
+<script type="text/javascript">
+document.addEvent('domready', function() {
+ 
+  var inputWord = $('search_input');
+ 
+  // Our instance for the element with id "search_input"
+  new Autocompleter.Request.JSON(inputWord, '/lookup', {
+       'indicatorClass': 'autocompleter-loading',
+       'minLength': 3
+  });
+
+});
+</script>
 
 
 <script type="text/javascript">
@@ -80,7 +95,7 @@
       	<form method="get" id="searchform" action="/problems">			
 	  <div class="text-field">
 	    <label for="search">Name:</label>
-	    <input name="search" type="text" tabindex="1" size="30" value="{{search}}">
+	    <input name="search" type="text" tabindex="1" size="30" value="{{search}}" id="search_input">
 	  </div>
 	  <center>
 	    <div class="buttons">
