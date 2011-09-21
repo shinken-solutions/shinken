@@ -32,7 +32,7 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 
 %#  "This is the background canvas for all gesture detection things " 
@@ -41,22 +41,60 @@ Invalid element name
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
 
-<div id="left_container" class="grid_2">
+<div id="left_container" class="grid_3">
   <div id="dummy_box" class="box_gradient_horizontal"> 
   </div>
   <div id="nav_left">
     <ul>
       <li><a href="#">Overview</a></li>
+      
+      <li>
+	<center>
+	  <table cellspacing="2" cellpadding="0" border="0">
+	    <tbody>
+	      <tr>
+		<th>Problems</th><th>Unhandled</th><th>All</th>
+	      </tr>
+	      
+	      <tr>
+		<td>
+		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
+		</td>
+		<td>
+		  %# " Add a pulse if there are problems unacked "
+		  %nb_unack_pb = app.datamgr.get_nb_problems()
+		  %if nb_unack_pb > 0:
+		  <a href="/problems" style="padding-top:0;">
+		    <div class="aroundpulse">
+                      <span class="pulse" title=""></span>
+		      {{nb_unack_pb}}
+		    </div>
+		  </a>
+		  %else:
+		    {{nb_unack_pb}}
+		  %end
+		</td>
+                <td><a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
+              </tr>
+	    </tbody>
+	  </table>
+	</center>
+      </li>
+
+      <li>
+	<a href="#">Gestures</a>
+      </li>
     </ul>
-    <div class="opacity_hover"> Gestures : 
-      <br>
-      <img title="By keeping a left click pressed and drawing a check, you will launch an acknoledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknoledge<br>
-      <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
-      <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
-    </div>
+	<div class="opacity_hover">
+	  <br>
+	  <img title="By keeping a left click pressed and drawing a check, you will launch an acknoledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknoledge<br>
+	  <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
+	  <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
+	</div>
+
   </div>
 </div>
-<div class="grid_13">
+<div class="grid_12">
   <div id="host_preview" style="vertical-align:middle;">
     <h2 class="state_{{elt.state.lower()}}"><img style="width : 64px; height:64px" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h2>
 
@@ -210,7 +248,7 @@ Invalid element name
 
 	<div class="clear"></div>
       </div>
-      </dl>
+
       <hr>
       
       %#    Now print the dependencies if we got somes
@@ -235,6 +273,7 @@ Invalid element name
 	  %# " We put a max imapct to print, bacuse too high is just useless"
 	  %if nb > max_impacts:
 	  %   break 
+	  %end
 
 	  %if nb == 8:
 	  <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
@@ -256,7 +295,7 @@ Invalid element name
 	    %end
 	</div>
      %end #of the only host part
-	
+
 
      %if elt.is_problem and len(elt.impacts) != 0:
 	<div class='host-services'>
@@ -286,7 +325,7 @@ Invalid element name
     %# end of the 'is problem' if
     %end
 
-    
+    </dl>    
 
     
     <div class="grid_16 opacity_hover">

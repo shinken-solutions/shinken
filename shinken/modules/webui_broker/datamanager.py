@@ -73,6 +73,50 @@ class DataManager(object):
         res.sort(hst_srv_sort)
         return res
 
+    # Return all non managed impacts
+    def get_all_impacts(self):
+        res = []
+        for s in self.rg.services:
+            if s.is_impact and s.state not in ['OK', 'PENDING']:
+                # If s is acked, pass
+                if s.problem_has_been_acknowledged:
+                    continue
+                # We search for impacts that were NOT currently managed
+                if len([p for p in s.source_problems if not p.problem_has_been_acknowledged]) > 0:
+                    res.append(s)
+        for h in self.rg.hosts:
+            if h.is_impact and h.state not in ['UP', 'PENDING']:
+                # If h is acked, pass
+                if h.problem_has_been_acknowledged:
+                    continue
+                # We search for impacts that were NOT currently managed
+                if len([p for p in h.source_problems if not p.problem_has_been_acknowledged]) > 0:
+                    res.append(h)
+        return res
+
+
+
+    # Return the number of problems
+    def get_nb_problems(self):
+        return len(self.get_all_problems())
+
+    # Get the number of all problems, enven the ack ones
+    def get_nb_all_problems(self):
+        res = []
+        res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
+        res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact])
+        return len(res)
+
+
+    # Return the number of impacts
+    def get_nb_impacts(self):
+        return len(self.get_all_impacts())
+        
+
+    def get_nb_elements(self):
+        return len(self.rg.services) + len(self.rg.hosts)
+
+
 
     def get_important_elements(self):
         res = []

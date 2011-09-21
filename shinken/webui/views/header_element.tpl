@@ -1,3 +1,5 @@
+%if 'app' not in locals(): app = None
+
 <div id="header" class="grid_16">
 	%if user is not None:
     <div id="top">
@@ -15,6 +17,7 @@
     %end
     
 	<h1 class="box_textshadow">Shinken</h1>
+
 
     %# Set the Top right banner if need
     %if top_right_banner_state != 0:

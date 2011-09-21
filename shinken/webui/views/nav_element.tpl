@@ -1,4 +1,5 @@
 <div id="nav" class="grid_16">
+  <div style="float:left;">
 			  <ul>
 			    %menu = [ ('/', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/system', 'System') ]
 			    %for (key, value) in menu:
@@ -10,6 +11,12 @@
 			      %end
 			    %end
 			  </ul>
+  </div>
+  <div style="float:right;">
+    
+  </div>
+
+
 
 </div>
 <div class="clear"></div>

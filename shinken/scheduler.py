@@ -26,6 +26,7 @@ import os
 import traceback
 import cStringIO
 import sys
+import socket
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -45,6 +46,12 @@ from shinken.acknowledge import Acknowledge
 from shinken.log import logger
 from shinken.util import nighty_five_percent, safe_print
 from shinken.load import Load
+
+# Pack of common Pyro exceptions
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+                    Pyro.errors.CommunicationError, \
+                    Pyro.errors.DaemonError)
+
 
 class Scheduler:
     def __init__(self, scheduler_daemon):
@@ -524,6 +531,9 @@ class Scheduler:
                 self.actions[c.id].status = 'zombie'
                 item.last_notification = c.check_time
 
+                # And we ask the item to update it's state
+                self.get_and_register_status_brok(item)
+
                 # If we' ve got a problem with the notification, raise a Warning log
                 if timeout:
                     logger.log("Warning: Contact %s %s notification command '%s ' timed out after %d seconds" % (self.actions[c.id].contact.contact_name, self.actions[c.id].ref.__class__.my_type, self.actions[c.id].command, int(execution_time)))
@@ -601,9 +611,22 @@ class Scheduler:
 
         print "Init connection with", links[id]['uri']
 
+
         uri = links[id]['uri']
-        links[id]['con'] = Pyro.core.getProxyForURI(uri)
-        con = links[id]['con']
+        try:
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imediatly after
+            socket.setdefaulttimeout(3)
+            links[id]['con'] = Pyro.core.getProxyForURI(uri)
+            con = links[id]['con']
+            socket.setdefaulttimeout(None)
+        except Pyro_exp_pack , exp:
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imadiatly after
+            socket.setdefaulttimeout(None)
+            logger.log("[] Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            links[id]['con'] = None
+            return
 
         try:
             # intial ping must be quick

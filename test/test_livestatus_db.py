@@ -104,8 +104,10 @@ class TestConfigSmall(TestConfig):
         for attr in to_del:
             del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
         self.livestatus_broker = None
-        for db in os.listdir("tmp/archives"):
-            os.remove(os.path.join("tmp/archives", db))
+
+        if os.path.exists("tmp/archives"):
+            for db in os.listdir("tmp/archives"):
+                os.remove(os.path.join("tmp/archives", db))
 
 
     def write_logs(self, host, loops=0):

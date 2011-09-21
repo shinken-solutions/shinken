@@ -27,6 +27,7 @@ import select
 import errno
 import time
 
+
 # Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
 try:
     import Pyro

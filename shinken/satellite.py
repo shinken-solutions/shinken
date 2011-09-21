@@ -42,6 +42,7 @@ import time
 import sys
 import cPickle
 import traceback
+import socket
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -60,6 +61,12 @@ from shinken.brok import Brok
 from shinken.check import Check
 from shinken.notification import Notification
 from shinken.eventhandler import EventHandler
+
+
+# Pack of common Pyro exceptions
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+                    Pyro.errors.CommunicationError, \
+                    Pyro.errors.DaemonError)
 
 
 # Interface for Arbiter, our big MASTER
@@ -209,7 +216,18 @@ class Satellite(BaseSatellite):
         running_id = sched['running_id']
         logger.log("[%s] Init de connection with %s at %s" % (self.name, sname, uri))
 
-        sch_con = sched['con'] = Pyro.core.getProxyForURI(uri)
+        try:
+            socket.setdefaulttimeout(3)
+            sch_con = sched['con'] = Pyro.core.getProxyForURI(uri)
+            socket.setdefaulttimeout(None)
+        except Pyro_exp_pack , exp:
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imadiatly after
+            socket.setdefaulttimeout(None)
+            logger.log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
+            sched['con'] = None
+            return
+
 
         # timeout of 120 s
         # and get the running id
@@ -667,6 +685,10 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         self.q_by_mod['fork'] = {}
         self.manager = Manager()
         self.returns_queue = self.manager.list()
+
+        import socket
+        socket.setdefaulttimeout(None)
+
 
 
     def setup_new_conf(self):
