@@ -109,13 +109,14 @@ class Broker(BaseSatellite):
                 # so give me all dumbass!
                 if 'full_instance_id' in data:
                     c_id = data['full_instance_id']
-                    logger.log('A module is asking me to get all initial data from the scheduler %d' % c_id)
+                    source = elt.source
+                    logger.log('The module %s is asking me to get all initial data from the scheduler %d' % (source, c_id))
                     # so we just reset the connection adn the running_id, it will just get all new things
                     try:
                         self.schedulers[c_id]['con'] = None
                         self.schedulers[c_id]['running_id'] = 0
                     except KeyError: # maybe this instance was not known, forget it
-                        print "WARNING: a module ask me a full_instance_id for an unknown ID!", c_id
+                        logger.log("WARNING: the module %s ask me a full_instance_id for an unknown ID (%d)!" % (source, c_id))
             # Maybe a module say me that it's dead, I must log it's last words...
             if elt.get_type() == 'ICrash':
                 data = elt.get_data()
