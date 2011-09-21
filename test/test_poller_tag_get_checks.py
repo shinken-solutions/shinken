@@ -99,9 +99,11 @@ class TestPollerTagGetchecks(ShinkenTest):
         untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'], module_types=['fork'])
         print "Got untaggued_checks for forks", untaggued_checks
         self.assert_(len(untaggued_checks) > 0)
+        print "NB CHECKS", len(untaggued_checks)
         for c in untaggued_checks:
+            print c.command
             # Should be the service one, but not the host one
-            self.assert_(c.command.startswith('plugins/test_servicecheck.pl'))
+            self.assert_(c.command.startswith('plugins/test_servicecheck.pl') or c.command.startswith('plugins/test_hostcheck.pl'))
 
         # Now get only tag ones and with a bad module type, so get NOTHING
         taggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['mytestistrue'], module_types=['myassischicken'])
