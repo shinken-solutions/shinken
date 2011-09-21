@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+#Copyright (C) 2009-2011 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -1003,7 +1003,7 @@ class Scheduler:
 
     # Fill the self.broks with broks of self (process id, and co)
     # broks of service and hosts (initial status)
-    def fill_initial_broks(self):
+    def fill_initial_broks(self, with_logs=False):
         # First a Brok for delete all from my instance_id
         b = Brok('clean_all_my_instance_id', {'instance_id' : self.instance_id})
         self.add(b)
@@ -1024,11 +1024,13 @@ class Scheduler:
                 b = i.get_initial_status_brok()
                 self.add(b)
 
-        # Ask for INITIAL logs for services and hosts
-        for i in self.hosts:
-            i.raise_initial_state()
-        for i in self.services:
-            i.raise_initial_state()
+        # Only raise the all logs at the scehduler startup
+        if with_logs:
+            # Ask for INITIAL logs for services and hosts
+            for i in self.hosts:
+                i.raise_initial_state()
+            for i in self.services:
+                i.raise_initial_state()
 
         # Add a brok to say that we finished all initial_pass
         b = Brok('initial_broks_done', {'instance_id' : self.instance_id})
@@ -1290,7 +1292,7 @@ class Scheduler:
         self.retention_load()
 
         # Ok, now all is initilised, we can make the inital broks
-        self.fill_initial_broks()
+        self.fill_initial_broks(with_logs=True)
 
         logger.log("[%s] First scheduling launched" % self.instance_name)
         self.schedule()
