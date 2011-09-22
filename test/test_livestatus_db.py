@@ -238,9 +238,9 @@ Columns: time type options state host_name"""
 
         self.livestatus_broker.db.log_db_do_archive()
         self.assert_(os.path.exists("tmp/archives"))
-        self.assert_(len(os.listdir("tmp/archives")) == 4)
+        self.assert_(len([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]) == 4)
         lengths = []
-        for db in sorted(os.listdir("tmp/archives")):
+        for db in sorted([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]):
             dbh = LiveStatusDb("tmp/archives/" + db, "tmp", 3600)
             numlogs = dbh.execute("SELECT COUNT(*) FROM logs")
             lengths.append(numlogs[0][0])
@@ -345,9 +345,9 @@ Columns: time type options state host_name"""
         # 6 + 14 + 22 + 30  + 8 = 80
         self.livestatus_broker.db.log_db_do_archive()
         self.assert_(os.path.exists("tmp/archives"))
-        self.assert_(len(os.listdir("tmp/archives")) == 4)
+        self.assert_(len([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]) == 4)
         lengths = []
-        for db in sorted(os.listdir("tmp/archives")):
+        for db in sorted([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]):
             dbh = LiveStatusDb("tmp/archives/" + db, "tmp", 3600)
             numlogs = dbh.execute("SELECT COUNT(*) FROM logs")
             lengths.append(numlogs[0][0])
