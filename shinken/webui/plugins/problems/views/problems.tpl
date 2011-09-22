@@ -60,9 +60,7 @@ document.addEvent('domready', function() {
 
 	 
 <div id="left_container" class="grid_2">
-  <div id="dummy_box" class="box_gradient_horizontal"> 
 
-  </div>
   <div id="nav_left">
     <ul>
       <li><a href="/problems">All problems</a></li>
