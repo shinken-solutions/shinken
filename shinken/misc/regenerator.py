@@ -33,6 +33,7 @@ from shinken.schedulerlink import SchedulerLink, SchedulerLinks
 from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.brokerlink import BrokerLink, BrokerLinks
+from shinken.receiverlink import ReceiverLink, ReceiverLinks
 
 
 
@@ -57,6 +58,7 @@ class Regenerator:
         self.pollers = PollerLinks([])
         self.reactionners = ReactionnerLinks([])
         self.brokers = BrokerLinks([])
+        self.receivers = ReceiverLinks([])
 
         # And in progress one
         self.inp_hosts = {}
@@ -750,7 +752,6 @@ class Regenerator:
 
 
 
-
     def manage_initial_poller_status_brok(self, b):
         data = b.data
         poller_name = data['poller_name']
@@ -794,6 +795,21 @@ class Regenerator:
         #print "CMD:", c
         self.brokers[broker_name] = broker
         print "broker added"
+        #print "MONCUL: Add a new scheduler ", sched
+        #self.number_of_objects += 1
+
+
+    def manage_initial_receiver_status_brok(self, b):
+        data = b.data
+        receiver_name = data['receiver_name']
+        print "Creating Receiver:", receiver_name, data
+        receiver = ReceiverLink({})
+        print "Created a new receiver", receiver
+        self.update_element(receiver, data)
+        print "Updated receiver"
+        #print "CMD:", c
+        self.receivers[receiver_name] = receiver
+        print "receiver added"
         #print "MONCUL: Add a new scheduler ", sched
         #self.number_of_objects += 1
 
@@ -900,6 +916,16 @@ class Regenerator:
         broker_name = data['broker_name']
         try:
             s = self.brokers[broker_name]
+            self.update_element(s, data)
+        except Exception:
+            pass
+
+
+    def manage_update_receiver_status_brok(self, b):
+        data = b.data
+        receiver_name = data['receiver_name']
+        try:
+            s = self.receivers[receiver_name]
             self.update_element(s, data)
         except Exception:
             pass

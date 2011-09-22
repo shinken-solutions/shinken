@@ -51,6 +51,21 @@ class DataManager(object):
     def get_services(self):
         return self.rg.services
 
+    def get_schedulers(self):
+        return self.rg.schedulers
+
+    def get_pollers(self):
+        return self.rg.pollers
+
+    def get_brokers(self):
+        return self.rg.brokers
+
+    def get_receivers(self):
+        return self.rg.receivers
+
+    def get_reactionners(self):
+        return self.rg.reactionners
+
     
     def get_important_impacts(self):
         res = []

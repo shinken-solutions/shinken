@@ -74,14 +74,14 @@
     <!-- Userinfo -->
 	<div id="userinfo">
     	<div class="userinfoContent">
-			<img src='/static/images/cut_honeycomb.png' style="width:200px; height:108px;position: absolute;top: 0;left: 0px;border: 0;">
-			<div class="left"> <img style="width:60px; height:80px;" src='/static/photos/{{user.get_name()}}'> </div>
-			<div>
-		 		<p>Name : {{user.get_name()}}</p>
-		 		<p>Email : {{user.email}}</p>
-			</div>
-
-			<div class="userinfoClose"> <a href="#" id="closeUserinfo"><img style="width: 16px;height: 16px;" src="/static/images/disabled.png" title="">Close</a> </div>
+	  <img src='/static/images/cut_honeycomb.png' style="width:200px; height:108px;position: absolute;top: 0;left: 0px;border: 0;">
+	  <div class="left"> <img style="width:60px; height:80px;" src='/static/photos/{{user.get_name()}}'> </div>
+	  <div>
+	    <p>Name : {{user.get_name()}}</p>
+	    <p>Email : {{user.email}}</p>
+	  </div>
+	  
+	  <div class="userinfoClose"> <a href="#" id="closeUserinfo"><img style="width: 16px;height: 16px;" src="/static/images/disabled.png" title="">Close</a> </div>
       	</div>
       <!-- /userinfo -->
 
