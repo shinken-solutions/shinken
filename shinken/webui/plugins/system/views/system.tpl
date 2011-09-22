@@ -1,5 +1,5 @@
 
-%rebase layout globals()
+%rebase layout globals(), title='Architecture state'
 
 %helper = app.helper
 
@@ -18,7 +18,7 @@
 	<th class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">Alive</th>
 	<th class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">Attempts</th>
 	<th class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">Last check</th>
-	<th class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> </th>
+	<th class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;">Realm</th>
 
 	<tr class="tabledesc">
 	  <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" style="cursor:pointer;" onclick="add_remove_elements('{{s.get_name()}}')" id="selector-{{s.get_name()}}" > </td>
@@ -34,7 +34,7 @@
 	  <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;"> {{s.alive}}</td>
 	  <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;"> {{s.attempt}}/{{s.max_check_attempts}}</td>
 	  <td title='{{helper.print_date(s.last_check)}}' class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">{{helper.print_duration(s.last_check, just_duration=True, x_elts=2)}}</td>
-	  <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> </td>
+	  <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;">{{s.realm}}</td>
 	</tr>
 
     %# End of this satellite
