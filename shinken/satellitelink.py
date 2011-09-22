@@ -30,7 +30,7 @@ import socket
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
 
-from shinken.util import get_obj_name_two_args
+from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
@@ -56,7 +56,7 @@ class SatelliteLink(Item):
         'modules':            ListProp   (default='', to_send=True),
         'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'use_timezone':       StringProp (default='NOTSET', to_send=True),
-        'realm' :             StringProp (default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args),
+        'realm' :             StringProp (default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
     })
     
     running_properties = Item.running_properties.copy()

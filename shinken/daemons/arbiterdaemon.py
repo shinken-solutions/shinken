@@ -252,11 +252,11 @@ class Arbiter(Daemon):
                 arb.need_conf = True
 
         if not self.me:
-            sys.exit("Error: I cannot find my own Arbiter object, I bail out. "
-                     "To solve it, please change the host_name parameter in "
-                     "the object Arbiter in the file shinken-specific.cfg. "
-                     "With the value %s " % socket.gethostname(),
-                     "Thanks.")
+            sys.exit("Error: I cannot find my own Arbiter object, I bail out. \
+                     To solve it, please change the host_name parameter in \
+                     the object Arbiter in the file shinken-specific.cfg. \
+                     With the value %s \
+                     Thanks." % socket.gethostname())
 
         logger.log("My own modules : " + ','.join([m.get_name() for m in self.me.modules]))
 

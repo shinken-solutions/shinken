@@ -122,6 +122,9 @@ class Servicegroups(Itemgroups):
             new_mbrs = []
             seek = 0
             host_name = ''
+            if (len(mbrs) == 1):
+                sg.unknown_members.append('%s' % mbrs[0])
+
             for mbr in mbrs:
                 if seek % 2 == 0:
                     host_name = mbr.strip()
