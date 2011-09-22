@@ -174,6 +174,11 @@ class SatelliteLink(Item):
         #We ping and update the managed list
         self.ping()
         self.update_managed_list()
+        
+        # Update the state of this element
+        b = self.get_update_status_brok()
+        self.broks.append(b)
+
 
 
     # The elements just got a new conf_id, we put it in our list

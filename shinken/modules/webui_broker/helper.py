@@ -354,22 +354,34 @@ class Helper(object):
 
 
     # Get the small state for host/service icons
+    # and satellites ones
     def get_small_icon_state(self, obj):
-        if obj.state == 'PENDING':
-            return 'unknown'
-        if obj.state == 'OK':
+        if obj.__class__.my_type in ['service', 'host' ]:
+            if obj.state == 'PENDING':
+                return 'unknown'
+            if obj.state == 'OK':
+                return 'ok'
+            if obj.state == 'UP':
+                return 'up'
+            # Outch, not a good state...
+            if obj.problem_has_been_acknowledged:
+                return 'ack'
+            if obj.in_scheduled_downtime:
+                return 'downtime'
+            if obj.is_flapping:
+                return 'flapping'
+            #Ok, no excuse, it's a true error...
+            return obj.state.lower()
+        # Maybe it's a satellite
+        if obj.__class__.my_type in ['scheduler', 'poller', 
+                                     'reactionner', 'broker',
+                                     'receiver']:
+            if not obj.alive:
+                return 'critical'
+            if not obj.reachable:
+                return 'warning'
             return 'ok'
-        if obj.state == 'UP':
-            return 'up'
-        # Outch, not a good state...
-        if obj.problem_has_been_acknowledged:
-            return 'ack'
-        if obj.in_scheduled_downtime:
-            return 'downtime'
-        if obj.is_flapping:
-            return 'flapping'
-        #Ok, no excuse, it's a true error...
-        return obj.state.lower()
+        return 'unknown'
 
 
     # For an object, give it's business impact as text 
@@ -420,10 +432,11 @@ class Helper(object):
             return self.get_link(obj.host)
         return self.get_link(obj)
 
+
     # For an object, return the path of the icons
     def get_icon_state(self, obj):
         ico = self.get_small_icon_state(obj)
-        if obj.icon_set != '':
+        if getattr(obj, 'icon_set', '') != '':
             return '/static/images/sets/%s/state_%s.png' % (obj.icon_set, ico)
         else:
             return '/static/images/state_%s.png' % ico
