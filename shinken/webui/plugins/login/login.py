@@ -63,11 +63,24 @@ def user_auth():
 
     return {'app' : app, 'is_auth' : is_auth}
 
+
+# manage the /. If the user is known, go to problems page.
+# Should be /dashboad in the future. If not, go login :)
+def get_root():
+    user = app.request.get_cookie("user", secret=app.auth_secret)
+    if user:
+        redirect("/problems")
+    else:
+        redirect("/user/login")
+        
+
 pages = { user_login : { 'routes' : ['/user/login', '/user/login/'], 
                          'view' : 'login'},
           user_login_redirect : { 'routes' : ['/login'] },
           user_auth : { 'routes' : ['/user/auth'], 
                         'view' : 'auth', 
                         'method' : 'POST'},
-          user_logout : { 'routes' : ['/user/logout'] }}
+          user_logout : { 'routes' : ['/user/logout', '/logout'] },
+          get_root : {'routes' : ['/']},
+          }
 

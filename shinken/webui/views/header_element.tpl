@@ -9,6 +9,8 @@
 	 		 <li>Hello {{user.get_name()}}!</li>
 	 		 <li>|</li>
 	 		 <li><a id="toggleUserinfo" href="#">Parameters</a></li>
+	 		 <li>|</li>
+	 		 <li><a href="/user/logout">Log out</a></li>
 		</ul>
 	<!-- / userinfo -->
     </div> 
