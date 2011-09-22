@@ -1,5 +1,5 @@
 
-%rebase layout globals(), title='Architecture state'
+%rebase layout globals(), title='Architecture state', menu_part='/system'
 
 %helper = app.helper
 

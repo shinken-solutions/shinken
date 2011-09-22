@@ -14,7 +14,12 @@
   position: fixed;
   top: 70px;
   left: 700px;
-  background : white;
+  background : #424242;
   opacity : 0;
   margin : 3px;
+  padding : 5px;
+  border-radius: 3px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  z-index : 5;
 }
