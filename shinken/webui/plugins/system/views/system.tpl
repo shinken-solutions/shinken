@@ -1,7 +1,40 @@
-
 %rebase layout globals(), title='Architecture state', menu_part='/system'
 
 %helper = app.helper
+
+<div id="system_overview" class="grid_16 item">
+	<h2>System Overview</h2>
+	<!-- stats overview start -->
+		<table style="width: 100%">
+			<tbody>
+				<tr class="grid_16">
+					<th class="grid_4">Program Version</th>
+					<th class="grid_4">Program Start Time</th>
+					<th class="grid_4">Total Running Time</th>
+					<th class="grid_4">Last External Command Check</th>
+				</tr>							
+				<tr class="grid_16">
+					<td class="grid_4"> 0.6.5+</td>
+					<td class="grid_4"> Friday, 22.09.2011</td>
+					<td class="grid_4"> 9 Days 12 hours 2 min</td>
+					<td class="grid_4"> 5 mins</td>
+				</tr>							
+			</tbody>
+		</table> 
+	<!-- stats overview end -->
+	<!--
+	<ul>
+		<li> <a href="#">Arbiter</a></li>
+		<li> <a href="#">State</a> </li>
+		<li> <a href="#">Name</a> </li>
+		<li> <a href="#">Alive</a> </li>
+		<li> <a href="#">Attempts</a> </li>
+		<li> <a href="#">Last Check</a> </li>
+		<li> <a href="#">Realm</a> </li>
+	</ul>
+	-->
+</div>
+
 
 <div style="margin-left: 20px; width: 70%; float:left;">
   %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
