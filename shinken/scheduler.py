@@ -525,6 +525,12 @@ class Scheduler:
                     # sets the status to zombie, so we need to save it here.
                     timeout = True
                     execution_time = c.execution_time
+
+                # Add protection for strange charset
+                if isinstance(c.output, str):
+                    c.output = c.output.decode('utf8', 'ignore')
+                    c.long_output = c.long_output.decode('utf8', 'ignore')
+
                 self.actions[c.id].get_return_from(c)
                 item = self.actions[c.id].ref
                 item.remove_in_progress_notification(c)
