@@ -50,7 +50,7 @@ def list_to_comma(lst):
 #Get broks and puts them in merlin database
 class Merlindb_broker(BaseModule):
     def __init__(self, modconf, backend, host=None, user=None, password=None, database=None, character_set=None, database_path=None):
-        #Mapping for name of data, rename attributes and transform function
+        # Mapping for name of data, rename attributes and transform function
         self.mapping = {
             #Program status
             'program_status' : {'program_start' : {'transform' : None},
@@ -119,7 +119,7 @@ class Merlindb_broker(BaseModule):
                 'last_notification' : {'transform' : None},
                 'current_notification_number' : {'transform' : None},
                 'current_notification_id' : {'transform' : None},
-                'check_flapping_recovery_notification' : {'transform' : None},
+                'check_flapping_recovery_notification' : {'transform' : None, 'name' : 'check_flapping_recovery_notifi'},
                 'scheduled_downtime_depth' : {'transform' : None},
                 'pending_flex_downtime' : {'transform' : None},
                 },
@@ -175,7 +175,7 @@ class Merlindb_broker(BaseModule):
                 'last_notification' : {'transform' : None},
                 'current_notification_number' : {'transform' : None},
                 'current_notification_id' : {'transform' : None},
-                'check_flapping_recovery_notification' : {'transform' : None},
+                'check_flapping_recovery_notification' : {'transform' : None , 'name' : 'check_flapping_recovery_notifi'},
                 'scheduled_downtime_depth' : {'transform' : None},
                 'pending_flex_downtime' : {'transform' : None},
                 },
@@ -260,7 +260,7 @@ class Merlindb_broker(BaseModule):
                 'last_notification' : {'transform' : None},
                 'current_notification_number' : {'transform' : None},
                 'current_notification_id' : {'transform' : None},
-                'check_flapping_recovery_notification' : {'transform' : None},
+                'check_flapping_recovery_notification' : {'transform' : None, 'name' : 'check_flapping_recovery_notifi'},
                 'scheduled_downtime_depth' : {'transform' : None},
                 'pending_flex_downtime' : {'transform' : None},
                 },
@@ -316,7 +316,7 @@ class Merlindb_broker(BaseModule):
                 'last_notification' : {'transform' : None},
                 'current_notification_number' : {'transform' : None},
                 'current_notification_id' : {'transform' : None},
-                'check_flapping_recovery_notification' : {'transform' : None},
+                'check_flapping_recovery_notification' : {'transform' : None , 'name' : 'check_flapping_recovery_notifi'},
                 'scheduled_downtime_depth' : {'transform' : None},
                 'pending_flex_downtime' : {'transform' : None},
                 },
