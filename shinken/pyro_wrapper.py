@@ -67,6 +67,7 @@ try:
             else:
                 prtcol = 'PYRO'
 
+            print "Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
             # Now the real start
             try:
                 Pyro.core.Daemon.__init__(self, host=host, port=port, prtcol=prtcol, norange=True)
@@ -151,6 +152,7 @@ except AttributeError, exp:
             # so we allow to retry during 35 sec (30 sec is the default
             # timewait for close sockets)
             while nb_try <= 35:
+                print "Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
                 # And port already use now raise an exception
                 try:
                     Pyro.core.Daemon.__init__(self, host=host, port=port)
