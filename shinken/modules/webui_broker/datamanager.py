@@ -66,6 +66,10 @@ class DataManager(object):
     def get_reactionners(self):
         return self.rg.reactionners
 
+    def get_program_start(self):
+        for c in self.rg.configs.values():
+            return c.program_start
+        return None
     
     def get_important_impacts(self):
         res = []

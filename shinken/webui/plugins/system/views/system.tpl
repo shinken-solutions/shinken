@@ -1,5 +1,6 @@
 %rebase layout globals(), css=['system/css/system.css'], title='Architecture state', menu_part='/system'
 
+%from shinken.bin import VERSION
 %helper = app.helper
 
 <div id="system_overview" class="grid_16 item">
@@ -10,14 +11,10 @@
 				<tr class="grid_16">
 					<th class="grid_4">Program Version</th>
 					<th class="grid_4">Program Start Time</th>
-					<th class="grid_4">Total Running Time</th>
-					<th class="grid_4">Last External Command Check</th>
 				</tr>							
 				<tr class="grid_16">
-					<td class="grid_4"> 0.6.5+</td>
-					<td class="grid_4"> Friday, 22.09.2011</td>
-					<td class="grid_4"> 9 Days 12 hours 2 min</td>
-					<td class="grid_4"> 5 mins</td>
+				  <td class="grid_4"> {{VERSION}}</td>
+				  <td title="{{helper.print_date(app.datamgr.get_program_start())}}" class="grid_4"> {{helper.print_duration(app.datamgr.get_program_start())}}</td>
 				</tr>							
 			</tbody>
 		</table> 
