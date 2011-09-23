@@ -2,6 +2,7 @@
     font-size:0.8em;
     list-style:none;
     margin:7px;
+    z-index : 5;
 }
 
 #log {
@@ -15,25 +16,33 @@
 
 #infovis {
     position:relative;
-/*    width:600px;
-    height:600px;*/
     margin:auto;
     overflow:hidden;
-/*    background-color:black; */
 }
 
 #right-container {
-right: 0;
+right: 5px;
 background-position: center left;
-border-right: 1px solid #DDD;
+
 position: absolute;
-top : 0;
+top : 5px;
 background-color:white;
 -moz-box-shadow:#555 2px 2px 8px;
 -webkit-box-shadow:#555 2px 2px 8px;
 -o-box-shadow:#555 2px 2px 8px;
-border-radius: 15px;
+
 }
+
+
+.border {
+    position: absolute;
+    border: 5px solid #FEB515;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -moz-border-image: url(/static/depgraph/images/border-image.png) 5 5 5 5 stretch;
+    -webkit-border-image: url(/static/depgraph/images/border-image.png) 5 5 5 5 stretch;
+}
+
 
 /*TOOLTIPS*/
 .tip {

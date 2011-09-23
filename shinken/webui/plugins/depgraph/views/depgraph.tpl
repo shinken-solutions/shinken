@@ -36,7 +36,8 @@ Invalid element
 
 
 <div id="infovis"> </div>
-<div id="right-container">
+<div id="right-container" class="border">
+%#  <div class="border"></div>
   <div id="inner-details"></div>
 </div>
 
