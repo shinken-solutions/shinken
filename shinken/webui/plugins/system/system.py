@@ -21,5 +21,5 @@ def system_page():
 
 
 
-pages = {system_page : { 'routes' : ['/system', '/system/'], 'view' : 'system'}}
+pages = {system_page : { 'routes' : ['/system', '/system/'], 'view' : 'system', 'static' : True}}
 

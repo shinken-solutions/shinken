@@ -1,4 +1,4 @@
-%rebase layout globals(), title='Architecture state', menu_part='/system'
+%rebase layout globals(), css=['system/css/system.css'], title='Architecture state', menu_part='/system'
 
 %helper = app.helper
 
