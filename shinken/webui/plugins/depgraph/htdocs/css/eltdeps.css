@@ -34,6 +34,9 @@ background-color:white;
 }
 
 
+/*Border :  Copyright ZURB, freely available for distribution under the MIT license. 
+  http://www.zurb.com/playground/awesome-overlays
+ */
 .border {
     position: absolute;
     border: 5px solid #FEB515;
