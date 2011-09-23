@@ -108,19 +108,26 @@ document.addEvent('domready', function() {
 </div>
 
 %# "We set the actions div that will be show/hide if we select elements"
-<div class="actions" id="actions">
-    <div style="float:right;">
-      <a href="#" onclick="try_to_fix_all()">{{!helper.get_button('Fix all!', img='/static/images/enabled.png')}}</a>
-    </div>
-    <div style="float:right;">
-      <a href="#" onclick="recheck_now_all()">{{!helper.get_button('Recheck all', img='/static/images/delay.gif')}}</a>
-    </div>
-    <div style="float:right;">
-      <a href="#" onclick="acknoledge_all()">{{!helper.get_button('Acknoledge all', img='/static/images/wrench.png')}}</a>
-    </div>
-
+<div class="dockContainer" id="actions">
+  <div class="dockWrapper">
+    <div class="cap left"></div>
+    <ul class="dock">
+      <li class="active">
+	<span>Fix</span>
+	<a href="#" onclick="try_to_fix_all()"><img src="/static/images/tools.png" /></a>
+      </li>		
+      <li>
+	<span>Recheck</span>
+	<a href="#" onclick="recheck_now_all()"><img src="/static/images/big_refresh.png" /></a>
+      </li>
+      <li>
+	<span>Acknoledge</span>
+	<a href="#" onclick="acknoledge_all()"><img src="/static/images/big_ack.png" /></a>
+      </li>
+      
+    </ul>
+  </div>
 </div>
-
 <div class="grid_13">
 
   %if navi is not None:
