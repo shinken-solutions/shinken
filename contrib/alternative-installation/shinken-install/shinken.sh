@@ -691,19 +691,19 @@ function prerequisites(){
 					PACKAGES=$YUMPKGS
 					QUERY="rpm -q "
 					cd $TMP
-					$QUERY $RPMFORGENAME > /dev/null 2>&1
+					$QUERY $EPELNAME > /dev/null 2>&1
 					if [ $? -ne 0 ]
 					then
-						cecho " > Installing $RPMFORGEPKG" yellow
-						wget $RPMFORGE > /dev/null 2>&1 
+						cecho " > Installing $EPELPKG" yellow
+						wget $EPEL > /dev/null 2>&1 
 						if [ $? -ne 0 ]
 						then
-							cecho " > Error while trying to download rpm forge repositories" red 
+							cecho " > Error while trying to download EPEL repositories" red 
 							exit 2
 						fi
-						rpm -Uvh ./$RPMFORGEPKG > /dev/null 2>&1
+						rpm -Uvh ./$EPELPKG > /dev/null 2>&1
 					else
-						cecho " > $RPMFORGEPKG allready installed" green 
+						cecho " > $EPELPKG allready installed" green 
 					fi
 					;;
 				6)
