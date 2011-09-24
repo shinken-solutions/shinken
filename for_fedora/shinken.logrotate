@@ -1,10 +1,10 @@
 /var/log/shinken/*.log { 
     compress
-    weekly
+    daily
     missingok
     rotate 52
     compress
     notifempty
-    create 640 shinken shinken 
+    create 640 nagios nagios
     sharedscripts
 }
