@@ -221,7 +221,7 @@ class Helper(object):
         d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
              'data' : {'$type' : 'custom',
                        'business_impact' : elt.business_impact,
-                       'img_src' : self.get_icon_state(elt)
+                       'img_src' : self.get_icon_state(elt),
                        },
              'adjacencies' : []
              }
@@ -234,7 +234,16 @@ class Helper(object):
             elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
             self.get_link_dest(elt), self.get_button('Go to details', img='/static/images/search.png'))
-        
+
+        print "ELT:%s is %s" % (elt.get_full_name(), elt.state)
+        if elt.state in ['OK', 'UP', 'PENDING']:
+            d['data']['circle'] = 'none'
+        elif elt.state in ['DOWN', 'CRITICAL']:
+            d['data']['circle'] = 'red'
+        elif elt.state in ['WARNING', 'UNREACHABLE']:
+            d['data']['circle'] = 'orange'
+        else:
+            d['data']['circle'] = 'none'
      
 
         # Now put in adj our parents
