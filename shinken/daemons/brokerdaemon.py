@@ -125,7 +125,7 @@ class Broker(BaseSatellite):
                 # The module dead will be look elsewhere and put in restarted.
 
 
-    # Get teh good tabs for links by the kind. If unknown, return None
+    # Get the good tabs for links by the kind. If unknown, return None
     def get_links_from_type(self, type):
         t = {'scheduler' : self.schedulers, 'arbiter' : self.arbiters, \
              'poller' : self.pollers, 'reactionner' : self.reactionners}
@@ -153,7 +153,7 @@ class Broker(BaseSatellite):
     # initialise or re-initialise connection with scheduler or
     # arbiter if type == arbiter
     def pynag_con_init(self, id, type='scheduler'):
-            # Get teh good links tab for looping..
+            # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
             logger.log('DBG: Type unknown for connection! %s' % type)
@@ -276,7 +276,7 @@ class Broker(BaseSatellite):
     # We get new broks from schedulers
     # REF: doc/broker-modules.png (2)
     def get_new_broks(self, type='scheduler'):
-            # Get teh good links tab for looping..
+            # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
             logger.log('DBG: Type unknown for connection! %s' % type)

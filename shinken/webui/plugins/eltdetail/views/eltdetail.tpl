@@ -1,6 +1,6 @@
 
 
-%# " We should limit the number of impactto show here. Too much is jsut useless "
+%# " We should limit the number of impacts to show here. Too much is just useless "
 %max_impacts = 200
 
 %print 'Elt value?', elt

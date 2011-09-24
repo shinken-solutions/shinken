@@ -180,10 +180,10 @@ class Hot_dependencies_arbiter(BaseModule):
     #Ok, main function that will load dep from a json file
     def hook_late_configuration(self, arb):
         # We will return external commands to the arbiter, so
-        # it can jsut manage it easily and in a generic way
+        # it can just manage it easily and in a generic way
         ext_cmds = []
         
-        # If the file do not exist, we launc hthe command
+        # If the file do not exist, we launch the command
         # and we bail out
         if not self._is_file_existing():
             self._launch_command()

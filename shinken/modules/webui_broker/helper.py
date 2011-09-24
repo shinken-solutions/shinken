@@ -180,7 +180,7 @@ class Helper(object):
             return ' '.join(duration) + ' ago'
 
 
-    # Need to create a X level higer and lower to teh element
+    # Need to create a X level higer and lower to the element
     def create_json_dep_graph(self, elt, levels=3):
         t0 = time.time()
         # First we need ALL elements

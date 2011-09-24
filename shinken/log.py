@@ -109,7 +109,7 @@ class Log:
             local_log.close()
 
 
-    # Set teh output as human format
+    # Set the output as human format
     def set_human_format(self):
         global human_timestamp_log
         human_timestamp_log = True

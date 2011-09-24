@@ -28,7 +28,7 @@ from shinken.util import get_sec_from_morning, get_day, get_start_of_day, get_en
 #Get the day number (like 27 in July tuesday 27 2010 for call:
 #2010, july, tuesday, -1 (last tuesday of july 2010)
 def find_day_by_weekday_offset(year, month, weekday, offset):
-    #et the id if teh weekday (1 for tuesday)
+    #get the id of the weekday (1 for tuesday)
     weekday_id = Daterange.get_weekday_id(weekday)
     if weekday_id is None:
         return None

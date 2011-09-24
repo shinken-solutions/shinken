@@ -354,7 +354,7 @@ class Arbiter(Daemon):
         # set ourown timezone and propagate it to other satellites
         self.conf.propagate_timezone_option()
 
-        # Look for business rules, and create teh dep trees
+        # Look for business rules, and create the dep tree
         self.conf.create_business_rules()
         # And link them
         self.conf.create_business_rules_dependencies()

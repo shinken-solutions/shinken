@@ -502,7 +502,7 @@ class Ndodb_Mysql_broker(BaseModule):
         #Only the host is impacted
         where_clause = {'host_object_id' : host_id}
 
-        #Just update teh host status
+        #Just update the host status
         hoststatus_data = {'next_check' : de_unixify(data['next_chk'])}
         hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 

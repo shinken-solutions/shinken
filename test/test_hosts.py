@@ -46,9 +46,9 @@ class TestConfig(ShinkenTest):
     def test___getstate__(self):
         hst = self.get_hst()
         cls = hst.__class__
-        #We get teh state
+        #We get the state
         state = hst.__getstate__()
-        #Check it's the good lenght
+        #Check it's the good length
         self.assert_(len(state) == len(cls.properties) + len(cls.running_properties) + 1)
         #we copy the service
         hst_copy = copy.copy(hst)

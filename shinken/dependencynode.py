@@ -60,7 +60,7 @@ class DependencyNode(object):
                 state = 2
             return state
 
-        # First we get teh state of all our sons
+        # First we get the state of all our sons
         states = []
         for s in self.sons:
             st = s.get_state()

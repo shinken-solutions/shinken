@@ -65,7 +65,7 @@ class Discoveryrule(Item):
         self.not_matches = {} # for rules that should NOT match
         self.writing_properties = {}
 
-        # Get teh properties of the Class we want
+        # Get the properties of the Class we want
         if not 'creation_type' in params:
             params['creation_type'] = 'service'
 
