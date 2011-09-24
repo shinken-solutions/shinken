@@ -272,10 +272,12 @@ function check_distro(){
 			then
 				cecho " > Version checking for $DIST is not needed" green
 				versionok=1
+				return
 			else
 				if [ "$VERS" = "$version" ]
 				then
 					versionok=1
+					return
 				else
 					versionok=0
 				fi		
