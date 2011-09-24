@@ -274,7 +274,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.scheduler_loop(1, [[host, 2, 'CRITICAL | value1=1 value2=2']])
         print host.state, host.state_type
         # And here we DO NOT WANT new notification
-        # If you folow, it THE important point of this test!
+        # If you follow, it THE important point of this test!
         self.assert_(not self.any_log_match('HOST NOTIFICATION.*;DOWN'))
         self.show_and_clear_logs()
         

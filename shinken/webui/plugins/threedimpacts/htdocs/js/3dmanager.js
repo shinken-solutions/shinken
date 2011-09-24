@@ -31,7 +31,7 @@ window.addEvent('domready', function(){
 			
 	/* Let create and init all things*/
 	init();
-	/* And start teh animation loop*/
+	/* And start the animation loop*/
 	animate();
 
 

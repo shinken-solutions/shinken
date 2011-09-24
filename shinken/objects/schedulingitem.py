@@ -339,7 +339,7 @@ class SchedulingItem(Item):
         self.source_problems.remove(pb)
 
         # For know if we are still an impact, maybe our dependancies
-        # are not aware of teh remove of the impact state because it's not ordered
+        # are not aware of the remove of the impact state because it's not ordered
         # so we can just look at if we still have some problem in our list
         if len(self.source_problems) == 0:
             self.is_impact = False
@@ -642,7 +642,7 @@ class SchedulingItem(Item):
             self.in_hard_unknown_reach_phase = False
 
         # So if we are not in already in such a phase, we check for
-        # a start or not. So here we are sure to be in a HARD/HARD folowing
+        # a start or not. So here we are sure to be in a HARD/HARD following
         # state
         if not self.in_hard_unknown_reach_phase:
             if self.state == 'UNKNOWN' and self.last_state != 'UNKNOWN' \

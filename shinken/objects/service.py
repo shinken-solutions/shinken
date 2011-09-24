@@ -406,7 +406,7 @@ class Service(SchedulingItem):
     # Must be AFTER linkify
     def fill_daddy_dependancy(self):
         #  Depend of host, all status, is a networkdep
-        # and do not have timeperiod, and folow parents dep
+        # and do not have timeperiod, and follow parents dep
         if self.host is not None:
             # I add the dep in MY list
             self.act_depend_of.append( (self.host,
@@ -568,7 +568,7 @@ class Service(SchedulingItem):
         # we should put in last_state the good last state:
         # if not just change the state by an problem/impact
         # we can take current state. But if it's the case, the
-        # real old state is self.state_before_impact (it's teh TRUE
+        # real old state is self.state_before_impact (it's the TRUE
         # state in fact)
         # but only if the global conf have enable the impact state change
         cls = self.__class__

@@ -160,7 +160,7 @@ document.addEvent('domready', function() {
       <div class="clear"></div>      
       %if pb.business_impact != imp_level:
        <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
-       %# "We reset teh last_hname so we won't overlap this feature across tables"
+       %# "We reset the last_hname so we won't overlap this feature across tables"
        %last_hname = ''
       %end
       %imp_level = pb.business_impact
