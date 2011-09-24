@@ -85,6 +85,87 @@ window.onload = function init(){
     //"dim" parameters globally defined in the
     //RGraph constructor.
 
+    
+    /* Ok, for the circles, w need a particules system, and not recreate them too
+     much, but only once by iem, enven when it move! */
+    var particles;
+    var context;
+    var particles = [];
+    var particules_by_name = new Hash();
+
+    // Main printing loop for particules, graph is print only when need, 
+    // but particules are print each loop
+    function loop() {
+	
+	for (i = 0, len = particles.length; i < len; i++) {
+	    var particle = particles[i];
+	    
+	    var lp = { x: particle.position.x, y: particle.position.y };
+	    
+	    // Offset the angle to keep the spin going
+	    particle.angle += particle.speed;
+	    
+	    // Apply position
+	    particle.position.x = particle.shift.x + Math.cos(i + particle.angle) * (particle.orbit);
+	    particle.position.y = particle.shift.y + Math.sin(i + particle.angle) * (particle.orbit);
+
+	    // Compute the position of the cleaning arc
+	    var anti_x = particle.shift.x + Math.cos(i + particle.angle + Math.PI/2) * (particle.orbit);
+	    var anti_y = particle.shift.y + Math.sin(i + particle.angle + Math.PI/2) * (particle.orbit);
+	    
+	    // Compute a local size to make a up/down size effect
+	    var local_size = (Math.cos(particle.angle) - Math.sin(particle.angle) + 2 * particle.size) / 2;
+
+	    // Draw the color spiner
+	    context.beginPath();
+	    context.fillStyle = particle.fillColor;
+	    context.arc(particle.position.x, particle.position.y, local_size/2, 0, Math.PI*2, true);
+	    context.fill();
+	    
+	    // And clean the counter part, with an alpha WAY :)
+	    context.beginPath();
+	    context.fillStyle = 'rgba(255,255,255,0.8)';
+	    context.arc(anti_x, anti_y, 4,  0, Math.PI*(2), true);
+	    context.fill();
+
+	}
+    }
+
+
+    // We should NOT create 1000 particules again and again
+    // but remeber them to "transalte" them if need (graph rewrite)
+    function create_or_update_particule(name, x, y, color, size) {
+	if (particules_by_name.has(name)){
+	    p = particules_by_name.get(name);
+	    p.position = {x: x, y: y};
+	    p.shift = {x: x, y: y};
+	    p.angle = 0;
+	}else{ // New particule :) 
+	    var color_code = 'gray';
+	    if(color == 'red'){
+		color_code = '#E60000';
+	    }
+	    if(color == 'orange'){
+		color_code = '#E67E00';
+	    }
+
+	    var particle = {
+		// position to print
+		position: { x: x, y: y },
+		// position of the center
+		shift: { x: x, y: y },
+		size: 1 * (1 + (size - 2 / 5)), // make the size large of the particule change too
+		angle: 0,
+		speed: 0.1,
+		fillColor: color_code,
+		orbit: 20 * (1 + ((size - 2) / 4 )) // make the orbit bigger for important elements
+	    };
+	
+	    particles.push( particle );
+	    particules_by_name.set(name, particle);
+	}
+    }
+
 
     //init nodetypes
     //Here we implement custom node rendering types for the RGraph
@@ -98,19 +179,40 @@ window.onload = function init(){
 		    var size = 24;
 
 		    var ctx = canvas.getCtx();
+		    // save it
+		    context = ctx;
 		    img = new Image();
 		    
 		    /* We can have some missing data, so just add dummy info */
 		    if (typeof(node.data.img_src) == 'undefined'){
 			img.src = '/static/images/state_ok.png';
 		    }else{
-			img.src = node.data.img_src; //"/static/images/sets/disk/state_critical.png";
-			size = size * (node.data.business_impact - 1);
+			img.src = node.data.img_src;
+			size = size * (1 + (node.data.business_impact - 2)/3);
 		    }
 		    /* We scale the image. Thanks html5 canvas.*/
 		    img.width = size;
 		    img.height = size;
-		    /*Ok, we draw the image, and we set it in the middle ofthe node :)*/
+
+		    
+
+		    /* If we got a value for the circle */
+		    if (typeof(node.data.img_src) != 'undefined'){
+			color = node.data.circle;
+			if(color != 'none'){
+			    create_or_update_particule(node.id, pos.x, pos.y, color, node.data.business_impact - 1);
+			}else{
+			    // If we didn't print the circle, we can add one for the
+			    // root, so the user will show it. 
+			    // DO NOT PUT THE node.id here, because we need this particule to folow the root
+			    // whatever its name is ;)
+			    if(node.id == rgraph.root){
+				create_or_update_particule('graphrootforwebui', pos.x, pos.y, 'gray', node.data.business_impact - 1);
+			    }
+			}   
+		    }
+		    
+		    //Ok, we draw the image, and we set it in the middle ofthe node :)
 		    ctx.drawImage(img, pos.x-size/2, pos.y-size/2, img.width, img.height);
 		}
 	    }
@@ -124,13 +226,7 @@ window.onload = function init(){
 	    'height'    : 700,
 	    //Optional: Add a background canvas
 	    //that draws some concentric circles.
-	    'background': {
-		'CanvasStyles': {
-		    'strokeStyle': '#FFFFFF',
-		    //'shadowBlur': 50,
-		    //'shadowColor': '#ccc'
-		}
-	    },
+	    'background': false,
 	    //Add navigation capabilities:
 	    //zooming by scrolling and panning.
 	    Navigation: {
@@ -153,7 +249,7 @@ window.onload = function init(){
 		lineWidth : 0.5,
 		'overridable': true,
 	    },
-
+	
 	    //Set polar interpolation.
 	    //Default's linear.
 	    interpolation: 'polar',
@@ -176,16 +272,15 @@ window.onload = function init(){
 
 	    onBeforeCompute: function(node){
 		Log.write("Focusing on " + node.name + "...");
+		
+		// Clear the circles
+		//alert("clean");		alert("clean");
+		//particles.length=0;
 
 		//Make right column relations list.
 		var html = "<h4>" + node.name + "</h4><b>Connections:</b>";
 		html += "<ul>";
 		html = node.data.infos;
-		/*node.eachAdjacency(function(adj){
-			var child = adj.nodeTo;
-			html += "<li>" + child.name + "</li>";
-		    });
-		    html += "</ul>";*/
 		$jit.id('inner-details').innerHTML = html;
 	    },
 	    //Add node click handler and some styles.
@@ -213,6 +308,17 @@ window.onload = function init(){
 		var left = parseInt(style.left);
 		var w = domElement.offsetWidth;
 		style.left = (left - w / 2) + 'px';
+		if (node._depth <= 1) {  
+//		    style.fontSize = "0.8em";  
+//		    style.color = "#ddd";  
+  
+		} else if(node._depth == 2){  
+//		    style.fontSize = "0.7em";  
+//		    style.color = "#555";  
+  
+		} else {  
+//		    style.display = 'none';  
+		}  
 	    }
 	});
     //load graph.
@@ -226,6 +332,14 @@ window.onload = function init(){
     //rgraph.root =  graph.get('localhost');
     rgraph.controller.onBeforeCompute(rgraph.graph.getNode(rgraph.root));
     Log.write('');
+
+    
+    //create_or_update_particule('moncul', 100,100, 'green', 1);
+    
+    /*windowResizeHandler();*/
+    //loop();
+    
+    setInterval( loop, 1000 / 60 );
 
 }
 
