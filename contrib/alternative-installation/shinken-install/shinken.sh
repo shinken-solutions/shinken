@@ -757,6 +757,7 @@ function prerequisites(){
 			5)
 				# install setup tools for python 26
 				export PY="python26"
+				export PYEI="easy-install-2.6"
 				wget $RHELSETUPTOOLS > /dev/null 2>&1
 				tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz > /dev/null 2>&1
 				cd setuptools-$SETUPTOOLSVERS > /dev/null 2>&1
@@ -764,7 +765,8 @@ function prerequisites(){
 				PYLIBS=$PYLIBSRHEL
 				;;
 			6)
-				PY="python"
+				export PY="python"
+				export PYEI="easy-install"
 				PYLIBS=$PYLIBSRHEL6
 				;;
 		esac
@@ -773,31 +775,17 @@ function prerequisites(){
 			module=$(echo $p | awk -F: '{print $1'})
 			import=$(echo $p | awk -F: '{print $2'})
 
-			$PY $myscripts/tools/checkmodule.py -m $import #> /dev/null 2>&1
-			read taste
+			$PY $myscripts/tools/checkmodule.py -m $import > /dev/null 2>&1
 			if [ $? -eq 2 ]
 			then
 				cecho " > Module $module ($import) not found. Installing..." yellow
-				easy_install $module > /dev/null 2>&1
+				$PYEI $module > /dev/null 2>&1
 			else
 				cecho " > Module $module found." green 
 			fi
 
 			
 		done	
-#		module="pyro"
-#		import="Pyro.core"
-#
-#		$myscripts/checkmodule.py -m $import > /dev/null 2>&1
-#		
-#		if [ $? -eq 2 ]
-#		then
-#			cecho " > Module $module ($import) not found. Installing..." yellow
-#			cd $TMP
-#			easy_install $PYRO > /dev/null 2>&1
-#		else
-#			cecho " > Module $module found." green 
-#		fi
 	fi
 	
 }
