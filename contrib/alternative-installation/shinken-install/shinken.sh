@@ -757,7 +757,7 @@ function prerequisites(){
 			5)
 				# install setup tools for python 26
 				export PY="python26"
-				export PYEI="easy-install-2.6"
+				export PYEI="easy_install-2.6"
 				wget $RHELSETUPTOOLS > /dev/null 2>&1
 				tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz > /dev/null 2>&1
 				cd setuptools-$SETUPTOOLSVERS > /dev/null 2>&1
@@ -766,7 +766,7 @@ function prerequisites(){
 				;;
 			6)
 				export PY="python"
-				export PYEI="easy-install"
+				export PYEI="easy_install"
 				PYLIBS=$PYLIBSRHEL6
 				;;
 		esac
@@ -779,7 +779,7 @@ function prerequisites(){
 			if [ $? -eq 2 ]
 			then
 				cecho " > Module $module ($import) not found. Installing..." yellow
-				$PYEI $module > /dev/null 2>&1
+				$PYEI $module #> /dev/null 2>&1
 			else
 				cecho " > Module $module found." green 
 			fi
