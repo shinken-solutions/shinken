@@ -325,7 +325,7 @@ class Webui_broker(BaseModule, Daemon):
         def server_static(path):
             return static_file(path, root=os.path.join(bottle_dir, 'htdocs'))
 
-        # And add teh favicon ico too
+        # And add the favicon ico too
         @route('/favicon.ico')
         def give_favicon():
             return static_file('favicon.ico', root=os.path.join(bottle_dir, 'htdocs', 'images'))

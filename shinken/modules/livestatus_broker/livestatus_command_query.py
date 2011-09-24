@@ -34,7 +34,7 @@ class LiveStatusCommandQuery(LiveStatusQuery):
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
-            # a space folowing the :
+            # a space following the :
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')

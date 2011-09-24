@@ -76,7 +76,7 @@ class SatelliteLink(Item):
             self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
             # By default Pyro got problem in connect() function that can take
             # long seconds to raise a timeout. And even with the _setTimeout()
-            # call. So we cahgne teh whole default connect() timeout
+            # call. So we change the whole default connect() timeout
             socket.setdefaulttimeout(self.timeout)
             self.con = pyro.getProxy(self.uri)
             # But the multiprocessing module is not copatible with it!

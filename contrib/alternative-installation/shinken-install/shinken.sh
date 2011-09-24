@@ -419,6 +419,16 @@ function relocate(){
 		#sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
 		sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
 	done
+
+	# when read hat 5 try to use python26
+	if [ "$CODE" = "REDHAT" ]
+	then
+		if [ "$VERS" = "5" ]
+		then
+			for fic in $(find $TARGET | grep "\.py$"); do sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic; done
+		fi
+	fi
+
 	# set some directives 
 	cadre "Set some configuration directives" green
 	directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP"
@@ -444,6 +454,8 @@ function fix(){
 	chmod +x /etc/default/shinken
 	chmod +x $TARGET/bin/init.d/shinken
 	chown -R $SKUSER:$SKGROUP $TARGET
+	# remove tests directory
+	rm -Rf $TARGET/test
 }
 
 function enable(){
@@ -695,7 +707,7 @@ function prerequisites(){
 					if [ $? -ne 0 ]
 					then
 						cecho " > Installing $EPELPKG" yellow
-						wget $EPEL > /dev/null 2>&1 
+						wget $EPEL  > /dev/null 2>&1 
 						if [ $? -ne 0 ]
 						then
 							cecho " > Error while trying to download EPEL repositories" red 
@@ -743,9 +755,18 @@ function prerequisites(){
 	then
 		case $VERS in
 			5)
+				# install setup tools for python 26
+				export PY="python26"
+				export PYEI="easy_install-2.6"
+				wget $RHELSETUPTOOLS > /dev/null 2>&1
+				tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz > /dev/null 2>&1
+				cd setuptools-$SETUPTOOLSVERS > /dev/null 2>&1
+				python26 setup.py install > /dev/null 2>&1
 				PYLIBS=$PYLIBSRHEL
 				;;
 			6)
+				export PY="python"
+				export PYEI="easy_install"
 				PYLIBS=$PYLIBSRHEL6
 				;;
 		esac
@@ -754,30 +775,17 @@ function prerequisites(){
 			module=$(echo $p | awk -F: '{print $1'})
 			import=$(echo $p | awk -F: '{print $2'})
 
-			$myscripts/tools/checkmodule.py -m $import > /dev/null 2>&1
+			$PY $myscripts/tools/checkmodule.py -m $import > /dev/null 2>&1
 			if [ $? -eq 2 ]
 			then
 				cecho " > Module $module ($import) not found. Installing..." yellow
-				easy_install $module > /dev/null 2>&1
+				$PYEI $module #> /dev/null 2>&1
 			else
 				cecho " > Module $module found." green 
 			fi
 
 			
 		done	
-		module="pyro"
-		import="Pyro.core"
-
-		$myscripts/checkmodule.py -m $import > /dev/null 2>&1
-		
-		if [ $? -eq 2 ]
-		then
-			cecho " > Module $module ($import) not found. Installing..." yellow
-			cd $TMP
-			easy_install $PYRO > /dev/null 2>&1
-		else
-			cecho " > Module $module found." green 
-		fi
 	fi
 	
 }

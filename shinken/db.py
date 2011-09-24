@@ -79,7 +79,7 @@ class DB(object):
         query = u"UPDATE %s set " % (self.table_prefix + table)
 
         #First data manage
-        query_folow = ''
+        query_follow = ''
         i = 0 #for the , problem...
         for prop in data:
             #Do not need to update a property that is in where
@@ -98,9 +98,9 @@ class DB(object):
                 val = self.stringify(val)
 
                 if i == 1:
-                    query_folow += u"%s='%s' " % (prop, val)
+                    query_follow += u"%s='%s' " % (prop, val)
                 else:
-                    query_folow += u", %s='%s' " % (prop, val)
+                    query_follow += u", %s='%s' " % (prop, val)
 
         #Ok for data, now WHERE, same things
         where_clause = u" WHERE "
@@ -124,7 +124,7 @@ class DB(object):
             else:
                 where_clause += u"and %s='%s' " % (prop, val)
 
-        query = query + query_folow + where_clause
+        query = query + query_follow + where_clause
         return query
 
 

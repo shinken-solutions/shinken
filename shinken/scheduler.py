@@ -576,7 +576,7 @@ class Scheduler:
 
 
 
-    # Get teh good tabs for links by the kind. If unknown, return None
+    # Get the good tabs for links by the kind. If unknown, return None
     def get_links_from_type(self, type):
         t = { 'poller' : self.pollers, 'reactionner' : self.reactionners }
         if type in t :
@@ -596,7 +596,7 @@ class Scheduler:
     # initialise or re-initialise connection with a poller
     # or a reactionner
     def pynag_con_init(self, id, type='poller'):
-        # Get teh good links tab for looping..
+        # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
             logger.log('DBG: Type unknown for connection! %s' % type)

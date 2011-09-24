@@ -100,7 +100,7 @@ class Check(Action):
     #return a copy of the check but just what is important for execution
     #So we remove the ref and all
     def copy_shell(self):
-        #We create a dummy check with nothing in it, jsut defaults values
+        #We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__( Check('', '', '', '', '', id=self.id) )
 
 

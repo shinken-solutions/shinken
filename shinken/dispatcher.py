@@ -413,7 +413,7 @@ class Dispatcher:
 
                             # If we got a broker, we make the list to pop a new
                             # item first for each scheduler, so it will smooth the load
-                            # Butthe spare must stay atteh end ;)
+                            # But the spare must stay at the end ;)
                             if kind == "broker":
                                 nospare = [s for s in satellites if not s.spare]
                                 #Should look over the list, not over
