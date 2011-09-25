@@ -67,7 +67,7 @@ document.addEvent('domready', function() {
       <li><a href="#">Overview</a></li>
       <li>
 	<center>
-	  <table cellspacing="2" cellpadding="0" border="0">
+	  <table cellspacing="2" cellpadding="0">
 	    <tbody>
 	      <tr>
 		<th>Problems</th><th>Unhandled</th><th>All</th>
@@ -97,7 +97,7 @@ document.addEvent('domready', function() {
 	  </div>
 	  <center>
 	    <div class="buttons">
-	      <a style="padding:8px;" tabindex="4" class="button" href="javascript: submitform()"><img src="/static/images/search.png"> Search</a>
+	      <a style="padding:8px;" tabindex="4" class="button" href="javascript: submitform()"><img src="/static/images/search.png" alt="search"> Search</a>
 	    </div>
 	  </center>
 	</form>
@@ -114,15 +114,15 @@ document.addEvent('domready', function() {
     <ul class="dock">
       <li class="active">
 	<span>Fix</span>
-	<a href="#" onclick="try_to_fix_all()"><img src="/static/images/tools.png" /></a>
+	<a href="#" onclick="try_to_fix_all()"><img src="/static/images/tools.png" alt="tools"/></a>
       </li>		
       <li>
 	<span>Recheck</span>
-	<a href="#" onclick="recheck_now_all()"><img src="/static/images/big_refresh.png" /></a>
+	<a href="#" onclick="recheck_now_all()"><img src="/static/images/big_refresh.png" alt="refresh"/></a>
       </li>
       <li>
 	<span>Acknoledge</span>
-	<a href="#" onclick="acknoledge_all()"><img src="/static/images/big_ack.png" /></a>
+	<a href="#" onclick="acknoledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
       </li>
       
     </ul>
@@ -169,7 +169,7 @@ document.addEvent('domready', function() {
 	  <div style="margin-left: 20px; width: 70%; float:left;">
 	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
 	      <tr class="tabledesc">
-	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
+	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
 	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <div class="aroundpulse">
 		    %# " We put a 'pulse' around the elements if it's an important one "
 		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
@@ -196,7 +196,7 @@ document.addEvent('domready', function() {
 		%else:
 		   <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output}}</td>
 		%end
-		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" /> </td>
+		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
 		</tr>
              </table>
 	  </div>  
@@ -255,7 +255,7 @@ document.addEvent('domready', function() {
 	<div class="state_{{i.state.lower()}}">
 	  <p><img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(i)}}" />
 	        %for j in range(0, i.business_impact-2):
-	          <img src='/static/images/star.png'>
+	          <img src='/static/images/star.png' alt="star">
 		%end
 	     {{!helper.get_link(i)}} is {{i.state}}
 	  </p>
@@ -288,9 +288,3 @@ document.addEvent('domready', function() {
 </div>
 
 <div class="clear"></div>
-
-
-
-
-
-
