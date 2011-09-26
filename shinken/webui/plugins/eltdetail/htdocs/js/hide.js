@@ -120,3 +120,20 @@ function show_hidden_impacts_or_services() {
     var button = $('hidden_impacts_or_services_button');
     button.style.display = 'none';
 }
+
+
+/* When he user ask for show all impacts ro services, we display them */
+function show_hidden_info() {
+
+    var info_s = $$('.hidden_infos');
+    
+    info_s.each(function(el) {
+	    el.style.display = 'table-row';
+	    var fx = new Fx.Tween(el, {property: 'opacity'});
+	    fx.start(1);
+	});
+
+    /* An we can delete the button that toggle us */
+    var button = $('hidden_info_button');
+    button.style.display = 'none';
+}

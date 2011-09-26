@@ -3,3 +3,5 @@
 .host-services { opacity: 0.3; max-height:300px; overflow:auto;}
 
 .hidden_impacts_services {opacity: 0; display:none;}
+
+.hidden_infos {opacity: 0; display:none;}
