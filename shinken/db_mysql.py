@@ -28,6 +28,8 @@ import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError
 
+#Do we need?
+import _mysql_exceptions
 
 class DBMysql(DB):
     def __init__(self, host, user, password, database, character_set, table_prefix = ''):
@@ -41,16 +43,24 @@ class DBMysql(DB):
 
     #Create the database connection
     #TODO : finish (begin :) ) error catch and conf parameters...
+    #Import to catch exception
     def connect_database(self):
-        #self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
-        self.db = MySQLdb.connect (host = self.host, user = self.user, \
+        
+       try :
+            self.db = MySQLdb.connect (host = self.host, user = self.user, \
                                        passwd = self.password, db = self.database)
-        self.db.set_character_set(self.character_set)
-        self.db_cursor = self.db.cursor ()
-        self.db_cursor.execute('SET NAMES %s;' % self.character_set)
-        self.db_cursor.execute('SET CHARACTER SET %s;' % self.character_set)
-        self.db_cursor.execute('SET character_set_connection=%s;' % self.character_set)
-        #Thanks http://www.dasprids.de/blog/2007/12/17/python-mysqldb-and-utf-8 for utf8 code :)
+            
+            self.db.set_character_set(self.character_set)
+            self.db_cursor = self.db.cursor ()
+            self.db_cursor.execute('SET NAMES %s;' % self.character_set)
+            self.db_cursor.execute('SET CHARACTER SET %s;' % self.character_set)
+            self.db_cursor.execute('SET character_set_connection=%s;' % self.character_set)
+           #Thanks http://www.dasprids.de/blog/2007/12/17/python-mysqldb-and-utf-8 for utf8 code :)
+
+       except _mysql_exceptions.OperationalError as exp:
+            print "[MysqlDB] Module raise an exception : %s . Please check the arguments!" % exp
+            #Do we need?
+            #exit()
 
 
     #Just run the query

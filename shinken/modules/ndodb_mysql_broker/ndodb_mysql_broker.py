@@ -28,6 +28,7 @@ import copy
 import time
 import sys
 
+
 properties = {
     'daemons' : ['broker'],
     'type' : 'ndodb_mysql',
@@ -37,6 +38,9 @@ properties = {
 
 from shinken.db_mysql import DBMysql
 from shinken.basemodule import BaseModule
+#Do we need?
+import _mysql_exceptions
+
 
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
@@ -109,8 +113,14 @@ class Ndodb_Mysql_broker(BaseModule):
     #Create the database connection
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
-        self.db.connect_database()
-
+    
+        try :
+            self.db.connect_database()
+            
+        except _mysql_exceptions.OperationalError as exp:
+            print "[MysqlDB] Module raise an exception : %s . Please check the arguments!" % exp
+            #Do we need?
+            #exit         
 
 
     def get_instance_id(self):
