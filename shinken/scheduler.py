@@ -529,7 +529,6 @@ class Scheduler:
                 # Add protection for strange charset
                 if isinstance(c.output, str):
                     c.output = c.output.decode('utf8', 'ignore')
-                    c.long_output = c.long_output.decode('utf8', 'ignore')
 
                 self.actions[c.id].get_return_from(c)
                 item = self.actions[c.id].ref
@@ -1282,6 +1281,7 @@ class Scheduler:
                 worker_names[c.worker] += 1
         for a in self.actions.values():
             if a.status == 'inpoller' and a.t_to_go < now - 300:
+                
                 a.status = 'scheduled'
                 if a.worker not in worker_names:
                     worker_names[a.worker] = 1

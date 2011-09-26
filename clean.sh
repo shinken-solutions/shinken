@@ -37,3 +37,5 @@ sleep 3
 sudo killall -9 python2.6 2> /dev/null
 sudo killall -9 python 2> /dev/null
 sudo killall -9 /usr/bin/python 2> /dev/null
+
+echo ""

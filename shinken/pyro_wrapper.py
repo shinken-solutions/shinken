@@ -144,7 +144,11 @@ except AttributeError, exp:
         def __init__(self, host, port, use_ssl=False):
             # Pyro 4 i by default thread, should do select
             # (I hate threads!)
-            Pyro.config.SERVERTYPE = "select"
+            # And of course teh name changed since 4.5...
+            if PYRO_VERSION < "4.5":
+                Pyro.config.SERVERTYPE = "select"
+            else:
+                Pyro.config.SERVERTYPE = "multiplex"
             nb_try = 0
             is_good = False
             # Ok, Pyro4 do not close sockets like it should,

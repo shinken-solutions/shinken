@@ -178,10 +178,7 @@ Invalid element name
 	    <th scope="row" class="column1">Last Check Time</th>
 	    <td title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</td>
 	  </tr>	
-	  <tr>
-	    <th scope="row" class="column1">Check Latency / Duration</th>
-	    <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
-	  </tr>	
+
 	  <tr class="odd">
 	    <th scope="row" class="column1">Next Scheduled Active Check</th>
 	    <td title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</td>
@@ -190,19 +187,32 @@ Invalid element name
 	    <th scope="row" class="column1">Last State Change</th>
 	    <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 	  </tr>	
-	  <tr class="odd">
+	  <tr class="odd hidden_infos">
 	    <th scope="row" class="column1">Last Notification</th>
 	    <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+	  </tr>
+	  <tr class="hidden_infos">
+	    <th scope="row" class="column1">Check Latency / Duration</th>
+	    <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 	  </tr>	
-	  <tr>						
+	  <tr class="odd hidden_infos">						
 	    <th scope="row" class="column1">Is This Host Flapping?</th>
 	    <td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
 
 	  </tr>
-	  <tr class="odd">
+	  <tr class="hidden_infos">
 	    <th scope="row" class="column1">In Scheduled Downtime?</th>
 	    <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
-	  </tr>	
+	  </tr>
+	  <tr id="hidden_info_button" class="opacity_hover">
+	    <th></th>
+	    <td>
+	      <div style="float:left;" id="hidden_info_button"><a href="javascript:show_hidden_info()"> {{!helper.get_button('More', img='/static/images/expand.png')}}</a>
+	      </div>
+	      <div class="clear"></div>
+	    </td>
+	  </tr>
+
 	</tbody>
 	<tbody class="switches">
 	  <tr class="odd">
