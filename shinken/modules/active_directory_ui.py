@@ -100,6 +100,9 @@ class AD_Webui(BaseModule):
         if not self.active:
             return None
 
+        if not contact:
+            return None
+
         # First we try to connect, because there is no "KEEP ALIVE" option
         # available, so we will get a drop after one day...
         self.connect()
@@ -184,6 +187,10 @@ class AD_Webui(BaseModule):
         print "Trying to auth by ldap", user, password
 
         c = self.app.datamgr.get_contact(user)
+
+        if not c:
+            print "AD/Ldap : invalid user (not founded)", user
+            return False
 
         # first we need to find the principalname of this entry
         # because it can be a user name like j.gabes, but we should auth by ldap
