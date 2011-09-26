@@ -115,12 +115,14 @@ window.onload = function init(){
 	    
 	    // Compute a local size to make a up/down size effect
 	    var local_size = (Math.cos(particle.angle) - Math.sin(particle.angle) + 2 * particle.size) / 2;
+	    local_size = particle.size;
 
 	    // Draw the color spiner
 	    context.beginPath();
 	    context.fillStyle = particle.fillColor;
 	    context.arc(particle.position.x, particle.position.y, local_size/2, 0, Math.PI*2, true);
 	    context.fill();
+
 	    
 	    // And clean the counter part, with an alpha WAY :)
 	    context.beginPath();
@@ -140,6 +142,7 @@ window.onload = function init(){
 	    p.position = {x: x, y: y};
 	    p.shift = {x: x, y: y};
 	    p.angle = 0;
+	    p.size = 1 * (1 + (size - 2 / 5));
 	}else{ // New particule :) 
 	    var color_code = 'gray';
 	    if(color == 'red'){
@@ -308,11 +311,13 @@ window.onload = function init(){
 		var left = parseInt(style.left);
 		var w = domElement.offsetWidth;
 		style.left = (left - w / 2) + 'px';
-		if (node._depth <= 1) {  
-//		    style.fontSize = "0.8em";  
+		if (node._depth == 0) {  
+		    //style.fontSize = "100%";
 //		    style.color = "#ddd";  
   
-		} else if(node._depth == 2){  
+		} else if(node._depth == 1 ){
+		    //style.fontSize = "80%";
+		}else if(node._depth == 2){  
 //		    style.fontSize = "0.7em";  
 //		    style.color = "#555";  
   
