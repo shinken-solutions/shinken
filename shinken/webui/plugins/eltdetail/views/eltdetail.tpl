@@ -205,12 +205,12 @@ Invalid element name
 	    <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
 	  </tr>
 	  <tr id="hidden_info_button" class="opacity_hover">
-	    <th>
+	    <th></th>
+	    <td>
 	      <div style="float:left;" id="hidden_info_button"><a href="javascript:show_hidden_info()"> {{!helper.get_button('More', img='/static/images/expand.png')}}</a>
 	      </div>
-	      <divhidden_infos class="clear"></div>
-	    </th>
-	    <td></td>
+	      <div class="clear"></div>
+	    </td>
 	  </tr>
 
 	</tbody>
