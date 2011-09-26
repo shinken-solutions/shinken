@@ -62,7 +62,7 @@ class Ndodb_Mysql_broker(BaseModule):
         self.password = conf.password
         self.database = conf.database
         self.character_set = conf.character_set
-        self.nagios_mix_offset = int(conf.nagios_mix_offset)
+        self.synchronise_database_id = int(conf.synchronise_database_id)
 
 
     #Called by Broker so we can do init stuff
@@ -79,6 +79,9 @@ class Ndodb_Mysql_broker(BaseModule):
         self.services_cache = {}
         self.hosts_cache = {}
 
+        #Cache for database id
+        #In order not to query the database every time
+        self.database_id_cache={}
 
     #Get a brok, parse it, and put in in database
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
@@ -88,11 +91,12 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # We've got problem with instance_id == 0 so we add 1 every where
         if 'instance_id' in new_b.data:
-            #For nagios mix install, move more than 1
-            if self.nagios_mix_offset != 0:
-                new_b.data['instance_id'] = new_b.data['instance_id'] + self.nagios_mix_offset
+            #For nagios mix install, we convert the id to write properly in the base
+            if self.synchronise_database_id == 1:
+                new_b.data['instance_id'] = self.convert_id(new_b.data['instance_id'])
             else:
                 new_b.data['instance_id'] = new_b.data['instance_id'] + 1
+	    print new_b.data	   
 
         queries = BaseModule.manage_brok(self, new_b)
         if queries is not None:
@@ -106,6 +110,33 @@ class Ndodb_Mysql_broker(BaseModule):
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         self.db.connect_database()
+
+
+
+    def get_instance_id(self):
+	query = u"SELECT  max(instance_id) as ID from nagios_instances"
+	self.db.execute_query(query)
+	row = self.db.fetchone()
+
+        if len(row)<1:
+            return -1
+        #We are the first process writing in base      
+	if row is None:
+            return 1
+        else:
+	    return row[0]+1
+
+
+
+    def convert_id(self,id):
+	#Look if we have already encountered this id
+	if id in self.database_id_cache	:
+	    return self.database_id_cache[id]
+	else :
+	    data_id = self.get_instance_id()
+	    self.database_id_cache[id]=data_id
+            return data_id
+
 
 
     def get_host_object_id_by_name(self, host_name):
@@ -502,7 +533,7 @@ class Ndodb_Mysql_broker(BaseModule):
         #Only the host is impacted
         where_clause = {'host_object_id' : host_id}
 
-        #Just update the host status
+        #Just update teh host status
         hoststatus_data = {'next_check' : de_unixify(data['next_chk'])}
         hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
