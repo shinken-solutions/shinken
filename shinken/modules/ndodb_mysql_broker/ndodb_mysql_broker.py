@@ -124,27 +124,30 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     def get_instance_id(self):
-	query = u"SELECT  max(instance_id) as ID from nagios_instances"
-	self.db.execute_query(query)
-	row = self.db.fetchone()
+        query = u"SELECT  max(instance_id) as ID from nagios_instances"
+        self.db.execute_query(query)
+        row = self.db.fetchone()
 
         if len(row)<1:
             return -1
+        
         #We are the first process writing in base      
-	if row is None:
+        if row is None:
             return 1
+        
         else:
-	    return row[0]+1
+	        return row[0]+1
 
 
 
     def convert_id(self,id):
-	#Look if we have already encountered this id
-	if id in self.database_id_cache	:
-	    return self.database_id_cache[id]
-	else :
-	    data_id = self.get_instance_id()
-	    self.database_id_cache[id]=data_id
+    
+        #Look if we have already encountered this id
+        if id in self.database_id_cache	:
+            return self.database_id_cache[id]
+        else :
+            data_id = self.get_instance_id()
+            self.database_id_cache[id]=data_id
             return data_id
 
 
