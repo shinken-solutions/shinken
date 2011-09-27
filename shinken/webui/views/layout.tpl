@@ -35,6 +35,11 @@
         <link rel="stylesheet" type="text/css" href="/static/css/userinfo.css" media="screen"/>
       %end
 
+      %# And now for css files
+      %for p in css:
+		<link rel="stylesheet" type="text/css" href="/static/{{p}}">
+      %end
+
       <script type="text/javascript" src="/static/js/mootools.js"></script>
       <script type="text/javascript" src="/static/js/mootools-more.js"></script>
       <script type="text/javascript" src="/static/js/mootools-message.js"></script>
@@ -55,17 +60,13 @@
       %if refresh:
 		<script type="text/javascript" src="/static/js/reload.js"></script>
       %end
-    
+
       %# End of classic js import. Now call for specific ones
       %for p in js:
 		<script type="text/javascript" src="/static/{{p}}"></script>
       %end
 
 
-      %# And now for css files
-      %for p in css:
-		<link rel="stylesheet" type="text/css" href="/static/{{p}}">
-      %end
     </head>
     
 	<body class="main">

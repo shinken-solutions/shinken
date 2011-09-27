@@ -73,7 +73,7 @@ class Webui_broker(BaseModule, Daemon):
         self.port = int(getattr(modconf, 'port', '7767'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
         self.auth_secret = getattr(modconf, 'auth_secret').encode('utf8', 'replace')
-        self.http_backend = getattr(modconf, 'http_backend', 'wsgiref')
+        self.http_backend = getattr(modconf, 'http_backend', 'auto')
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
