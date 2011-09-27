@@ -28,7 +28,6 @@ import copy
 import time
 import sys
 
-
 properties = {
     'daemons' : ['broker'],
     'type' : 'ndodb_mysql',
@@ -38,9 +37,6 @@ properties = {
 
 from shinken.db_mysql import DBMysql
 from shinken.basemodule import BaseModule
-#Do we need?
-import _mysql_exceptions
-
 
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
@@ -87,69 +83,89 @@ class Ndodb_Mysql_broker(BaseModule):
         #In order not to query the database every time
         self.database_id_cache={}
 
+
+        #Todo list to manage brok
+        self.todo=[]
+
     #Get a brok, parse it, and put in in database
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         # We need to do some brok mod, so we copy it
         new_b = copy.deepcopy(b)
-
-        # We've got problem with instance_id == 0 so we add 1 every where
+    
         if 'instance_id' in new_b.data:
-            #For nagios mix install, we convert the id to write properly in the base
-            if self.synchronise_database_id == 1:
-                new_b.data['instance_id'] = self.convert_id(new_b.data['instance_id'])
-            else:
+            
+            if self.synchronise_database_id != 1:
+                # We've got problem with instance_id == 0 so we add 1 every where
                 new_b.data['instance_id'] = new_b.data['instance_id'] + 1
-	    print new_b.data	   
+            
+            #We have to synchronise database id
+            #so we wait for the instance name
+            elif 'instance_name' not in new_b.data :
+                self.todo.append(new_b)
+                #print("No instance name for %s : " % new_b.data)
+                return  
+                  
+            #We convert the id to write properly in the base using the 
+            #instance_name to reuse the instance_id in the base.
+            else:
+                new_b.data['instance_id'] = self.convert_id(new_b.data['instance_id'],new_b.data['instance_name'])
+                self.todo.append(new_b)
+                for brok in self.todo :
+                    #We have to put the good instance ID to all brok waiting
+                    #in the list then execute the query
+                    brok.data['instance_id']=new_b.data['instance_id']
+                    queries = BaseModule.manage_brok(self, brok)
+                    if queries is not None:
+                        for q in queries :
+                            self.db.execute_query(q)
 
-        queries = BaseModule.manage_brok(self, new_b)
+                self.todo=[]
+                return
+
+        #Executed if we don't synchronise or there is no instance_id
+        queries = BaseModule.manage_brok(self,new_b)
+        
         if queries is not None:
             for q in queries :
                 self.db.execute_query(q)
             return
-        #print "(ndodb)I don't manage this brok type", b
+
+
+        
 
 
     #Create the database connection
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
-    
-        try :
-            self.db.connect_database()
-            
-        except _mysql_exceptions.OperationalError as exp:
-            print "[MysqlDB] Module raise an exception : %s . Please check the arguments!" % exp
-            #Do we need?
-            #exit         
+        self.db.connect_database()
 
 
-    def get_instance_id(self):
-        query = u"SELECT  max(instance_id) as ID from nagios_instances"
+
+    def get_instance_id(self,name):
+       # query = u"SELECT  max(instance_id) as ID from nagios_instances"
+        query = u"SELECT min(instance_id) from nagios_instances where instance_id = (select max(instance_id) + 1 from nagios_instances ) or instance_name = '%s';" % name
         self.db.execute_query(query)
         row = self.db.fetchone()
 
         if len(row)<1:
             return -1
-        
         #We are the first process writing in base      
-        if row is None:
+        if row[0] is None:
             return 1
-        
         else:
-	        return row[0]+1
+            return row[0]
 
 
 
-    def convert_id(self,id):
-    
+    def convert_id(self,id,name):
         #Look if we have already encountered this id
-        if id in self.database_id_cache	:
+        if id in self.database_id_cache :
             return self.database_id_cache[id]
         else :
-            data_id = self.get_instance_id()
+            data_id = self.get_instance_id(name)
             self.database_id_cache[id]=data_id
             return data_id
-
 
 
     def get_host_object_id_by_name(self, host_name):
