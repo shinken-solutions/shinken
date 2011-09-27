@@ -5,7 +5,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css'], refresh=True, menu_part='/problems', user=user
+%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css'], refresh=True, menu_part='/'+page, user=user
 
 
 %# " If the auth got problem, we bail out"
@@ -63,7 +63,6 @@ document.addEvent('domready', function() {
 
   <div id="nav_left">
     <ul>
-      <li><a href="/problems">All problems</a></li>
       <li><a href="#">Overview</a></li>
       <li>
 	<center>
@@ -80,7 +79,7 @@ document.addEvent('domready', function() {
 		<td>
 		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
 		</td>
-                <td><a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
+                <td><a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
               </tr>
 	    </tbody>
 	  </table>
@@ -90,7 +89,7 @@ document.addEvent('domready', function() {
       <li><a href="#">Search</a></li>
       
       <li>
-      	<form method="get" id="searchform" action="/problems">			
+      	<form method="get" id="searchform" action="/{{page}}">			
 	  <div class="text-field">
 	    <label for="search">Name:</label>
 	    <input name="search" type="text" tabindex="1" size="30" value="{{search}}" id="search_input">
@@ -139,7 +138,7 @@ document.addEvent('domready', function() {
 	     %elif start == None or end == None:
 		<span class='extend'>...</span>
              %else:
-		<a href='/problems?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
 	     %end
           %end
 	</div>
@@ -276,7 +275,7 @@ document.addEvent('domready', function() {
 	     %elif start == None or end == None:
 		<span class='extend'>...</span>
              %else:
-		<a href='/problems?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
 	     %end
           %end
 	</div>
