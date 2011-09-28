@@ -138,8 +138,14 @@ class Ndodb_Mysql_broker(BaseModule):
     #Create the database connection
     #TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
-        self.db.connect_database()
-
+    
+        try :
+            self.db.connect_database()
+            
+        except _mysql_exceptions.OperationalError as exp:
+            print "[MysqlDB] Module raise an exception : %s . Please check the arguments!" % exp
+            #Do we need?
+            #exit 
 
 
     def get_instance_id(self,name):
