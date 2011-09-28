@@ -152,7 +152,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
     def get_instance_id(self,name):
        # query = u"SELECT  max(instance_id) as ID from nagios_instances"
-        query = u"SELECT min(instance_id) from nagios_instances where instance_id = (select max(instance_id) + 1 from nagios_instances ) or instance_name = '%s';" % name
+        query = u"SELECT min(instance_id) from nagios_instances where instance_id + 1 = (select max(instance_id) + 1 from nagios_instances ) or instance_name = '%s';" % name
         self.db.execute_query(query)
         row = self.db.fetchone()
 
