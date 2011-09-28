@@ -151,18 +151,26 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     def get_instance_id(self,name):
-       # query = u"SELECT  max(instance_id) as ID from nagios_instances"
-        query = u"SELECT min(instance_id) from nagios_instances where instance_id + 1 = (select max(instance_id) + 1 from nagios_instances ) or instance_name = '%s';" % name
-        self.db.execute_query(query)
-        row = self.db.fetchone()
+        query1 = u"SELECT  max(instance_id) + 1 from nagios_instances"
+        query2 = u"SELECT instance_id from nagios_instances where instance_name = '%s';" % name
 
-        if len(row)<1:
+        self.db.execute_query(query1)
+        row1  = self.db.fetchone()
+
+        self.db.execute_query(query2)
+        row2 = self.db.fetchone()
+
+        if len(row1)<1 || len(row2)<1 :
             return -1
         #We are the first process writing in base      
-        if row[0] is None:
+        elif row1[0] is None:
             return 1
+        #No previous instance found return max
+        elif row2[0] is None:
+            return row1[0]
+        #Return the previous instance
         else:
-            return row[0]
+            return row2[0]
 
 
 
