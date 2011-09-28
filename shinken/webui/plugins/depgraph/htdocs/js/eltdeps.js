@@ -110,18 +110,45 @@ window.onload = function init(){
 	    particle.position.x = particle.shift.x + Math.cos(i + particle.angle) * (particle.orbit);
 	    particle.position.y = particle.shift.y + Math.sin(i + particle.angle) * (particle.orbit);
 
+	    pos2_x = particle.shift.x + Math.cos(i + particle.angle + 2*Math.PI/3) * (particle.orbit);
+	    pos2_y = particle.shift.y + Math.sin(i + particle.angle + 2*Math.PI/3 ) * (particle.orbit);
+
+	    pos3_x = particle.shift.x + Math.cos(i + particle.angle + 4*Math.PI/3) * (particle.orbit);
+	    pos3_y = particle.shift.y + Math.sin(i + particle.angle + 4*Math.PI/3 ) * (particle.orbit);
+
+
 	    // Compute the position of the cleaning arc
-	    var anti_x = particle.shift.x + Math.cos(i + particle.angle + Math.PI/2) * (particle.orbit);
-	    var anti_y = particle.shift.y + Math.sin(i + particle.angle + Math.PI/2) * (particle.orbit);
+	    var anti_x = particle.shift.x + Math.cos(i + particle.angle + Math.PI/3) * (particle.orbit);
+	    var anti_y = particle.shift.y + Math.sin(i + particle.angle + Math.PI/3) * (particle.orbit);
+
+	    // Compute the position of the cleaning arc
+	    var anti2_x = particle.shift.x + Math.cos(i + particle.angle + 3*Math.PI/3) * (particle.orbit);
+	    var anti2_y = particle.shift.y + Math.sin(i + particle.angle + 3*Math.PI/3) * (particle.orbit);
+
+
+	    var anti3_x = particle.shift.x + Math.cos(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
+	    var anti3_y = particle.shift.y + Math.sin(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
+
 	    
 	    // Compute a local size to make a up/down size effect
 	    var local_size = (Math.cos(particle.angle) - Math.sin(particle.angle) + 2 * particle.size) / 2;
 	    local_size = particle.size;
 
+
 	    // Draw the color spiner
 	    context.beginPath();
 	    context.fillStyle = particle.fillColor;
 	    context.arc(particle.position.x, particle.position.y, local_size/2, 0, Math.PI*2, true);
+	    context.fill();
+
+	    context.beginPath();
+	    context.fillStyle = particle.fillColor;
+	    context.arc(pos2_x, pos2_y, local_size/2, 0, Math.PI*2, true);
+	    context.fill();
+
+	    context.beginPath();
+	    context.fillStyle = particle.fillColor;
+	    context.arc(pos3_x, pos3_y, local_size/2, 0, Math.PI*2, true);
 	    context.fill();
 
 	    
@@ -130,6 +157,17 @@ window.onload = function init(){
 	    context.fillStyle = 'rgba(255,255,255,0.8)';
 	    context.arc(anti_x, anti_y, 4,  0, Math.PI*(2), true);
 	    context.fill();
+
+	    context.beginPath();
+	    context.fillStyle = 'rgba(255,255,255,0.8)';
+	    context.arc(anti2_x, anti2_y, 4,  0, Math.PI*(2), true);
+	    context.fill();
+
+	    context.beginPath();
+	    context.fillStyle = 'rgba(255,255,255,0.8)';
+	    context.arc(anti3_x, anti3_y, 4,  0, Math.PI*(2), true);
+	    context.fill();
+
 
 	}
     }
