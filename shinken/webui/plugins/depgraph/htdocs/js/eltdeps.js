@@ -135,39 +135,27 @@ window.onload = function init(){
 	    local_size = particle.size;
 
 
-	    // Draw the color spiner
-	    context.beginPath();
-	    context.fillStyle = particle.fillColor;
-	    context.arc(particle.position.x, particle.position.y, local_size/2, 0, Math.PI*2, true);
-	    context.fill();
+	    // Number of cut we want in our orbital spinner
+	    var NB_PART=3;
+	    for(var j = 0; j < 2*NB_PART; j++){
 
-	    context.beginPath();
-	    context.fillStyle = particle.fillColor;
-	    context.arc(pos2_x, pos2_y, local_size/2, 0, Math.PI*2, true);
-	    context.fill();
+		pos_x = particle.shift.x + Math.cos(i + particle.angle + j*Math.PI/NB_PART) * (particle.orbit);
+		pos_y = particle.shift.y + Math.sin(i + particle.angle + j*Math.PI/NB_PART) * (particle.orbit);
 
-	    context.beginPath();
-	    context.fillStyle = particle.fillColor;
-	    context.arc(pos3_x, pos3_y, local_size/2, 0, Math.PI*2, true);
-	    context.fill();
-
-	    
-	    // And clean the counter part, with an alpha WAY :)
-	    context.beginPath();
-	    context.fillStyle = 'rgba(255,255,255,0.8)';
-	    context.arc(anti_x, anti_y, 4,  0, Math.PI*(2), true);
-	    context.fill();
-
-	    context.beginPath();
-	    context.fillStyle = 'rgba(255,255,255,0.8)';
-	    context.arc(anti2_x, anti2_y, 4,  0, Math.PI*(2), true);
-	    context.fill();
-
-	    context.beginPath();
-	    context.fillStyle = 'rgba(255,255,255,0.8)';
-	    context.arc(anti3_x, anti3_y, 4,  0, Math.PI*(2), true);
-	    context.fill();
-
+		// If it's a odd value, print a color one
+		if(j % 2 == 0){
+		    // Draw the color spiner
+		    context.beginPath();
+		    context.fillStyle = particle.fillColor;
+		    context.arc(pos_x, pos_y, local_size/2, 0, Math.PI*2, true);
+		    context.fill();
+		}else{ // print a cleaning particule
+		    context.beginPath();
+		    context.fillStyle = 'rgba(255,255,255,0.8)';
+		    context.arc(pos_x, pos_y, 4,  0, Math.PI*(2), true);
+		    context.fill();
+		}
+	    }
 
 	}
     }
