@@ -166,7 +166,7 @@ class Ndodb_Mysql_broker(BaseModule):
         elif row1[0] is None:
             return 1
         #No previous instance found return max
-        elif row2[0] is None:
+        elif row2 is None :
             return row1[0]
         #Return the previous instance
         else:
