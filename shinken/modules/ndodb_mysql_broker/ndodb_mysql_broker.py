@@ -160,7 +160,7 @@ class Ndodb_Mysql_broker(BaseModule):
         self.db.execute_query(query2)
         row2 = self.db.fetchone()
 
-        if len(row1)<1 || len(row2)<1 :
+        if len(row1)<1 or len(row2)<1 :
             return -1
         #We are the first process writing in base      
         elif row1[0] is None:
