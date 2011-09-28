@@ -37,6 +37,8 @@ properties = {
 
 from shinken.db_mysql import DBMysql
 from shinken.basemodule import BaseModule
+#Do we need?	 	
+import _mysql_exceptions
 
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
