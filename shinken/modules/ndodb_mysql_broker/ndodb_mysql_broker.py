@@ -145,6 +145,11 @@ class Ndodb_Mysql_broker(BaseModule):
             self.db.connect_database()
             
         except _mysql_exceptions.OperationalError as exp:
+
+            #TODO : Stop properly the module
+            #Otherwise the module will keep running and fail on 
+            #an non understandable exception
+
             print "[MysqlDB] Module raise an exception : %s . Please check the arguments!" % exp
             #Do we need?
             #exit 
