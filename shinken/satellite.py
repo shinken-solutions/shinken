@@ -309,7 +309,10 @@ class Satellite(BaseSatellite):
                 except AttributeError , exp: # the scheduler must  not be initialized
                     print exp
                 except Exception , exp:
-                    print ''.join(Pyro.util.getPyroTraceback(exp))
+                    if PYRO_VERSION < "4.0":
+                        print ''.join(Pyro.util.getPyroTraceback(exp))
+                    else:
+                        print ''.join(Pyro.util.getPyroTraceback())
                     sys.exit(0)
 
             # We clean ONLY if the send is OK
