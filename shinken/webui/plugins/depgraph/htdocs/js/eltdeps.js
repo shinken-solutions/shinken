@@ -220,6 +220,13 @@ window.onload = function init(){
 			img.src = node.data.img_src;
 			size = size * (1 + (node.data.business_impact - 2)/3);
 		    }
+		    
+		    var elt_type = 'service';
+		    /* We can have some missing data, so just add dummy info */
+                    if (typeof(node.data.elt_type) != 'undefined'){
+                        elt_type = node.data.elt_type;
+                    }
+
 		    /* We scale the image. Thanks html5 canvas.*/
 		    img.width = size;
 		    img.height = size;
@@ -338,18 +345,30 @@ window.onload = function init(){
 		var left = parseInt(style.left);
 		var w = domElement.offsetWidth;
 		style.left = (left - w / 2) + 'px';
-		if (node._depth == 0) {  
-		    //style.fontSize = "100%";
-//		    style.color = "#ddd";  
-  
+
+		var elt_type = 'service';
+		var business_impact = 2;
+		var state_id = 0;
+		var is_problem = false;
+		/* We can have some missing data, so just add dummy info */
+		if (typeof(node.data.elt_type) != 'undefined'){
+		    elt_type = node.data.elt_type;
+		    business_impact = node.data.business_impact;
+		    state_id = node.data.state_id;
+		    is_problem = node.data.is_problem;
+		}
+
+		// For distant service, we should tag them with no label
+		// but important one should be still tags of course.
+		// should saw root problem too
+		if (node._depth == 0) { 
 		} else if(node._depth == 1 ){
-		    //style.fontSize = "80%";
-		}else if(node._depth == 2){  
-//		    style.fontSize = "0.7em";  
-//		    style.color = "#555";  
-  
-		} else {  
-//		    style.display = 'none';  
+		}else if(node._depth >= 2){  
+		    if (elt_type == 'service' && business_impact <= 2 ){
+			if(state_id == 0 || !is_problem){
+			    style.display = 'none';
+			}
+		    }
 		}  
 	    }
 	});
