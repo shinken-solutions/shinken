@@ -1,3 +1,4 @@
+
 %rebase layout title='Shinken UI login', print_menu=False
 
 <script type="text/javascript">
@@ -26,6 +27,13 @@
 
 
 <div id="login-container" class="prefix_custom_2">
+%if error:
+<span id="login-error"> {{error}}</span>
+%end
+  
+%if login_text:
+<p><span id="login-text"> {{login_text}}</span></p>
+%end
 	<div class="grid_8">
 		<img src="/static/images/robot_rouge_alpha.png" alt="Shinken Login">
 	</div>

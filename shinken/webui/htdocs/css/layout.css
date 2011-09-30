@@ -382,6 +382,18 @@ td.actions a {
 	margin-left: 25%;
 }
 
+
+#login-error {
+    color: red;
+    font-weight: bold;
+}
+
+
+#login-text {
+    font-weight: bold;
+}
+
+
 #login-container {
     float: left;
     position: relative;
