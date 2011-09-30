@@ -1,7 +1,7 @@
 <div id="nav" class="grid_16">
   <div style="float:left;">
 			  <ul>
-			    %menu = [ ('/', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/system', 'System') ]
+			    %menu = [ ('/', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/system', 'System') ]
 			    %for (key, value) in menu:
 			      %# Check for the selected element, if there is one
 			      %if menu_part == key:

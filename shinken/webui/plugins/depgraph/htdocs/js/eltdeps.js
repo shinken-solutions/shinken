@@ -110,26 +110,52 @@ window.onload = function init(){
 	    particle.position.x = particle.shift.x + Math.cos(i + particle.angle) * (particle.orbit);
 	    particle.position.y = particle.shift.y + Math.sin(i + particle.angle) * (particle.orbit);
 
+	    pos2_x = particle.shift.x + Math.cos(i + particle.angle + 2*Math.PI/3) * (particle.orbit);
+	    pos2_y = particle.shift.y + Math.sin(i + particle.angle + 2*Math.PI/3 ) * (particle.orbit);
+
+	    pos3_x = particle.shift.x + Math.cos(i + particle.angle + 4*Math.PI/3) * (particle.orbit);
+	    pos3_y = particle.shift.y + Math.sin(i + particle.angle + 4*Math.PI/3 ) * (particle.orbit);
+
+
 	    // Compute the position of the cleaning arc
-	    var anti_x = particle.shift.x + Math.cos(i + particle.angle + Math.PI/2) * (particle.orbit);
-	    var anti_y = particle.shift.y + Math.sin(i + particle.angle + Math.PI/2) * (particle.orbit);
+	    var anti_x = particle.shift.x + Math.cos(i + particle.angle + Math.PI/3) * (particle.orbit);
+	    var anti_y = particle.shift.y + Math.sin(i + particle.angle + Math.PI/3) * (particle.orbit);
+
+	    // Compute the position of the cleaning arc
+	    var anti2_x = particle.shift.x + Math.cos(i + particle.angle + 3*Math.PI/3) * (particle.orbit);
+	    var anti2_y = particle.shift.y + Math.sin(i + particle.angle + 3*Math.PI/3) * (particle.orbit);
+
+
+	    var anti3_x = particle.shift.x + Math.cos(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
+	    var anti3_y = particle.shift.y + Math.sin(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
+
 	    
 	    // Compute a local size to make a up/down size effect
 	    var local_size = (Math.cos(particle.angle) - Math.sin(particle.angle) + 2 * particle.size) / 2;
 	    local_size = particle.size;
 
-	    // Draw the color spiner
-	    context.beginPath();
-	    context.fillStyle = particle.fillColor;
-	    context.arc(particle.position.x, particle.position.y, local_size/2, 0, Math.PI*2, true);
-	    context.fill();
 
-	    
-	    // And clean the counter part, with an alpha WAY :)
-	    context.beginPath();
-	    context.fillStyle = 'rgba(255,255,255,0.8)';
-	    context.arc(anti_x, anti_y, 4,  0, Math.PI*(2), true);
-	    context.fill();
+	    // Number of cut we want in our orbital spinner
+	    var NB_PART=3;
+	    for(var j = 0; j < 2*NB_PART; j++){
+
+		pos_x = particle.shift.x + Math.cos(i + particle.angle + j*Math.PI/NB_PART) * (particle.orbit);
+		pos_y = particle.shift.y + Math.sin(i + particle.angle + j*Math.PI/NB_PART) * (particle.orbit);
+
+		// If it's a odd value, print a color one
+		if(j % 2 == 0){
+		    // Draw the color spiner
+		    context.beginPath();
+		    context.fillStyle = particle.fillColor;
+		    context.arc(pos_x, pos_y, local_size/2, 0, Math.PI*2, true);
+		    context.fill();
+		}else{ // print a cleaning particule
+		    context.beginPath();
+		    context.fillStyle = 'rgba(255,255,255,0.8)';
+		    context.arc(pos_x, pos_y, 4,  0, Math.PI*(2), true);
+		    context.fill();
+		}
+	    }
 
 	}
     }
@@ -194,6 +220,13 @@ window.onload = function init(){
 			img.src = node.data.img_src;
 			size = size * (1 + (node.data.business_impact - 2)/3);
 		    }
+		    
+		    var elt_type = 'service';
+		    /* We can have some missing data, so just add dummy info */
+                    if (typeof(node.data.elt_type) != 'undefined'){
+                        elt_type = node.data.elt_type;
+                    }
+
 		    /* We scale the image. Thanks html5 canvas.*/
 		    img.width = size;
 		    img.height = size;
@@ -312,18 +345,30 @@ window.onload = function init(){
 		var left = parseInt(style.left);
 		var w = domElement.offsetWidth;
 		style.left = (left - w / 2) + 'px';
-		if (node._depth == 0) {  
-		    //style.fontSize = "100%";
-//		    style.color = "#ddd";  
-  
+
+		var elt_type = 'service';
+		var business_impact = 2;
+		var state_id = 0;
+		var is_problem = false;
+		/* We can have some missing data, so just add dummy info */
+		if (typeof(node.data.elt_type) != 'undefined'){
+		    elt_type = node.data.elt_type;
+		    business_impact = node.data.business_impact;
+		    state_id = node.data.state_id;
+		    is_problem = node.data.is_problem;
+		}
+
+		// For distant service, we should tag them with no label
+		// but important one should be still tags of course.
+		// should saw root problem too
+		if (node._depth == 0) { 
 		} else if(node._depth == 1 ){
-		    //style.fontSize = "80%";
-		}else if(node._depth == 2){  
-//		    style.fontSize = "0.7em";  
-//		    style.color = "#555";  
-  
-		} else {  
-//		    style.display = 'none';  
+		}else if(node._depth >= 2){  
+		    if (elt_type == 'service' && business_impact <= 2 ){
+			if(state_id == 0 || !is_problem){
+			    style.display = 'none';
+			}
+		    }
 		}  
 	    }
 	});

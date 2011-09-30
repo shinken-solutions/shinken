@@ -234,6 +234,11 @@ class Helper(object):
             elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
             self.get_link_dest(elt), self.get_button('Go to details', img='/static/images/search.png'))
+                       
+
+        d['data']['elt_type'] = elt.__class__.my_type
+        d['data']['is_problem'] = elt.is_problem
+        d['data']['state_id'] = elt.state_id
 
         print "ELT:%s is %s" % (elt.get_full_name(), elt.state)
         if elt.state in ['OK', 'UP', 'PENDING']:
