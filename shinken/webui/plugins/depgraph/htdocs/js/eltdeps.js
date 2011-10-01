@@ -100,7 +100,12 @@ window.onload = function init(){
 	
 	for (i = 0, len = particles.length; i < len; i++) {
 	    var particle = particles[i];
-	    
+
+	    // If the particule is disabled, bail out
+	    if(!particle.active){
+		continue;
+	    }
+
 	    var lp = { x: particle.position.x, y: particle.position.y };
 	    
 	    // Offset the angle to keep the spin going
@@ -161,6 +166,14 @@ window.onload = function init(){
     }
 
 
+    function clean_particule(name){
+	if (particules_by_name.has(name)){
+	    p = particules_by_name[name];
+            p.active = false;
+	}
+    }
+
+
     // We should NOT create 1000 particules again and again
     // but remeber them to "transalte" them if need (graph rewrite)
     function create_or_update_particule(name, x, y, color, size) {
@@ -170,6 +183,7 @@ window.onload = function init(){
 	    p.shift = {x: x, y: y};
 	    p.angle = 0;
 	    p.size = 1 * (1 + (size - 2 / 5));
+	    p.active = true;
 	}else{ // New particule :) 
 	    var color_code = 'gray';
 	    if(color == 'red'){
@@ -180,6 +194,7 @@ window.onload = function init(){
 	    }
 
 	    var particle = {
+		active : true,
 		// position to print
 		position: { x: x, y: y },
 		// position of the center
@@ -197,12 +212,57 @@ window.onload = function init(){
     }
 
 
+    // A node shouldbe print if it's a important one
+    // like an host, or a service near or with a huge business
+    // impact, or a root problem.
+    function should_be_print(node){
+	var b = true;
+	var elt_type = 'service';
+	var business_impact = 2;
+	var state_id = 0;
+	var is_problem = false;
+	/* We can have some missing data, so just add dummy info */
+	if (typeof(node.data.elt_type) != 'undefined'){
+	    elt_type = node.data.elt_type;
+	    business_impact = node.data.business_impact;
+	    state_id = node.data.state_id;
+	    is_problem = node.data.is_problem;
+	}
+
+	// For distant service, we should tag them with no label
+	// but important one should be still tags of course.
+	// should saw root problem too
+	if (node._depth == 0) { 
+	} else if(node._depth == 1 ){
+	}else if(node._depth >= 2){  
+	    if (elt_type == 'service' && business_impact <= 2 ){
+		if(state_id == 0 || !is_problem){
+		    b = false;
+		}
+	    }
+	}
+//	alert('Should be print '+node.id+ ' '+b);
+	return b;
+	
+    }
+
+
     //init nodetypes
     //Here we implement custom node rendering types for the RGraph
     //Using this feature requires some javascript and canvas experience.
     $jit.RGraph.Plot.NodeTypes.implement({
 	    'custom': {
 		'render': function(node, canvas) {
+
+		    // Look if we really need to render this node
+		    if(!should_be_print(node)){
+			// Remeber to clean the particule if need
+			clean_particule(node.id);
+			return;
+		    }
+
+
+		    //alert('Rendering node '+node.id);
 		    /*First we need to know where the node is, so we can draw 
 		     in the correct place for the GLOBAL canvas*/
 		    var pos = node.getPos().getc();
@@ -230,9 +290,7 @@ window.onload = function init(){
 		    /* We scale the image. Thanks html5 canvas.*/
 		    img.width = size;
 		    img.height = size;
-
 		    
-
 		    /* If we got a value for the circle */
 		    if (typeof(node.data.img_src) != 'undefined'){
 			color = node.data.circle;
@@ -246,7 +304,7 @@ window.onload = function init(){
 			    if(node.id == rgraph.root){
 				create_or_update_particule('graphrootforwebui', pos.x, pos.y, 'gray', node.data.business_impact - 1);
 			    }
-			}   
+			}
 		    }
 		    
 		    //Ok, we draw the image, and we set it in the middle ofthe node :)
@@ -302,22 +360,24 @@ window.onload = function init(){
 	    //an edge. This method is useful to change edge styles
 	    //individually.
 	    onBeforePlotLine: function(adj){
-		//Add some random lineWidth to each edge.
-		if (!adj.data.$lineWidth)
+		src = adj.nodeFrom;
+		dst = adj.nodeTo;
+
+		// If one of the line border is a no print node
+		// do not print this line
+		if(!should_be_print(src) || !should_be_print(dst)){
+		    adj.data.$lineWidth = 0.0001;
+		}else{
 		    adj.data.$lineWidth = 2;
+		}
 	    },
 
 	    onBeforeCompute: function(node){
 		Log.write("Focusing on " + node.name + "...");
-		
-		// Clear the circles
-		//alert("clean");		alert("clean");
-		//particles.length=0;
 
-		//Make right column relations list.
-		var html = "<h4>" + node.name + "</h4><b>Connections:</b>";
-		html += "<ul>";
-		html = node.data.infos;
+		
+		// Make right column relations list.
+		var html = node.data.infos;
 		$jit.id('inner-details').innerHTML = html;
 	    },
 	    //Add node click handler and some styles.
@@ -346,42 +406,26 @@ window.onload = function init(){
 		var w = domElement.offsetWidth;
 		style.left = (left - w / 2) + 'px';
 
-		var elt_type = 'service';
-		var business_impact = 2;
-		var state_id = 0;
-		var is_problem = false;
-		/* We can have some missing data, so just add dummy info */
-		if (typeof(node.data.elt_type) != 'undefined'){
-		    elt_type = node.data.elt_type;
-		    business_impact = node.data.business_impact;
-		    state_id = node.data.state_id;
-		    is_problem = node.data.is_problem;
+		// If the node should not be print
+		// do not print it :)
+		if(!should_be_print(node)){
+		    style.display = 'none';
 		}
-
-		// For distant service, we should tag them with no label
-		// but important one should be still tags of course.
-		// should saw root problem too
-		if (node._depth == 0) { 
-		} else if(node._depth == 1 ){
-		}else if(node._depth >= 2){  
-		    if (elt_type == 'service' && business_impact <= 2 ){
-			if(state_id == 0 || !is_problem){
-			    style.display = 'none';
-			}
-		    }
-		}  
 	    }
 	});
     //load graph.
     /*alert('Loading graph'+json_graph);*/
     rgraph.loadJSON(json_graph, 1);
     rgraph.root =  graph_root;
+
+
     //compute positions and plot
     rgraph.refresh();
+    rgraph.controller.onBeforeCompute(rgraph.graph.getNode(rgraph.root));
     //end
     //alert('Roto is'+rgraph.root);
     //rgraph.root =  graph.get('localhost');
-    rgraph.controller.onBeforeCompute(rgraph.graph.getNode(rgraph.root));
+
     Log.write('');
 
     
