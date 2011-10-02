@@ -2,7 +2,129 @@
 Shinken ChangeLog
 #######################
 
+	
+0.8 - XX/10/2001
+------------------
+	CORE ENHANCEMENTS
+	* Add : no_event_handlers_during_downtimes parameter to choose between nagios and shinken behavior to (not) run event handlers during a downtime.
+	* Add : added RUN var relocation in shinken default file
+	* Add : support for serviceextinfo
+	* Add : support for hostextinfo
+	* Add : a workdir parameter in the nagios.cfg file for set the arbiter working directory
+	* Add : modules for modules. Will be useful for the global configuration in the WebUI (it's a module, but will need additonnal modules)
+	* Added alternative installation way
+	* Add : shinken-admin command that can connect to an arbiter and ask daemons status.
+	* Add : discovery runners timeout parameter. Set by default at one hour.
+	* Add : rename criticity modulations into business impact modulations.
+	* Add : rename min_criticity into min_business_impact for contacts and notifways. And keep a mapping for old conf.
+	* Add : rename criticity into business_impact for hosts and services. Criticity is automatically mapped into business_impact in the configuration reading.
+	* Add : by default the poller will use ALL cpus of the server.
+	* Add : criticity modulation objects.
+	* Add : new tests for A,B,Cof: rules and a fix for the default return logic.
+	* Add : arbiter ask one a cehck_interval the managed conf for satellites. So more smooth decisions.
+	
+	CORE FIXES
+	* Fix : BugFix Pyro4 compatibility
+	* fix : try to fix bad notification output make scehduler crash.
+	* Fix : (SebSolon) catch incomplet service group members
+	* Fix : bad message for arbiter in HA without host_name value.
+	* Fix : (reported by: fraggod): inline comment in boolean cause an arbiter crash when lookup conf.
+	* Fix : (reported by titilambert) bug about linkify and templates, so need to clean search lists after remove templates.
+	* Fix : (reported by Vincent Riquer ) Pyro got problem in connect() and so need a low socket timeout by default.
+	* Fix : (reported by : grim) manage flap_detection_enabled and enable_flap_detection
+	* Fix : when disable active check was done, the pending check was still executed, so the effect was not immediate. Now we change it as a dumym check with curretn value the value of the host/service.
+	* Fix : external_command.py where the config setting log_external_commands was ignored
+	* Fix : (reported by : obiouane) missing object value is now reported correctly.
+	* Fix : (Etienne Obriot) multiple = in macos values
+	* Fix : a bug in config.py where resource macros containing a "=" were not correctly processed. Thanks Etienne
+	* Fix : (reported by Seb-Solon) custome macros get problems in notifications. 
+	* Fix : (reported by : Michael Grundmann) a service for a void hostgroup and a host exclusion was reporting a bad conf instead if forgot this service.
+	* Fix : (Reported by : Dirk Hallanzy) was not launching under XP due to some pid file creation bad mode.
+	* Fix : (reported by : Vincent Riquer) now a spare broker can be send to sleep again by the arbiter. It will clean its queues and stop modules.
+	* Fix: arbiter crash with a spare and the new smoothing wat i managed behavior.
+	* Fix : Change default check/eventhandler/notification timeouts and flap thresholds to make nagios more compatible to shinken.
+	* fix : Better handling of check timeouts (there was an empty output)
+	* fix : Log notification and eventhandler timeouts
+	* Fix: (reported by : Denis GERMAIN) service with no description cause an host problem in linking phase. 
+	* Fix : (reported by : Seb-Solon) manage utf8 in host and service perfdata.
+	* Fix: protect broker agains module taht ask for full instance init about unknown scheduler.
+	* Fix : (reported by Markus Elger) add next schedule date in the retention data.
+	* Fix: (reported by : Olivier Hanesse) bad realm configuration was not detected for satellites.
 
+	MODULES ENHANCEMENTS
+	    Add : module for autotagging polelr_tag from a custom macro.
+    fix : collumn name change in merlin ds.
+    *fix the livestatus sqlite test (ignore sqlite journal files)
+    bugfix in ncpdmod
+    *Make the livestatus socket world read/writable
+    *Derive the archives filenames from the main livestatus db
+    * Rewrite the livestatus sqlite code. Now there is one database file with logging events for each day.
+    * !! If you have a huge livestatus.db it is recommended to stop shinken and run the script contrib/livestatus/splitlivelogs.py
+    * create the simple-log archive dir automatically if it doesn't exist
+   the livestatus sqlite db will now be opened in do_start() instead of init(). Now only the livestatus process has an open filehandle. (the main broker process had one too)
+    Initial import of the thrift broker with a sample client in python
+    Fix Livestatus path database
+    Fix wrong umask value 027
+    Fix string comparison for livestatus. None is equivalent to empty string
+    Initial import of TSCA, Thrift Service Check Acceptor
+    performance improvement for livestatus queries with Limit:
+     Fix : (reported by: Seb-Solon) bad contact group insert in objects in NDO
+    Fix : (reported by: seb-colon) bad contact group id in NDO
+    Fix : (seb-solon) ndo contacts were not registered with the good id.
+    Add : current_notification_number in the ndo module.
+    Add : last_notification in ndo module.
+    Add : last_state_change to the ndo module.
+    Fix: add the flap_detection_enabled in the ndo status tables too. (I love duplicate data...)
+    Fix : the ndo module with is_flapping value for update states.
+    Add : add the is_flapping data to broks and update teh ndo module so it update the value.
+    Add : percent_state_change as check_result brok and in the ndo module. 
+     *implement host/service attribute display_name in the livestatus module
+    Module arbiter load all configuration from GLPI (plugin monitoring) by webservice 
+    *Fix: (reported by : Ronny Lindner & Markus Elger) LiveStatus crash in log parsing.
+    Fix : (reported by : Ronny Lindner) fix status.dat module with
+    utf8 characters
+    Fix: (reported by :Markus Elger) bad host count in realms.
+    Fix: (reported by :Markus Elger) bad host reaml conf were not detected.
+   Add a new module to import configuration data (hosts/services) from a MySQL database
+    Fix: (reported by : Olivier Hanesse) nrpe module did not tag the check_time value for checks, and so pnp and other tools were not happy. BP rules were alike.
+    Fix : (reported by Markus Elger) LiveStatus module did not clean previously added elements before recreating them. 
+    Add the REUSEADDR flag to livestatus's socket. Thanks Olivier Hanesse
+
+
+	MODULES FIXES
+
+	UI ENHANCEMENTS
+	    Enh : make appears on the dep graph only interesting elements, so near the root or hosts or service in real problems. Far more redable with huge conf.
+    Add : welcome text and error text in the login page.
+    *Enh : change default http backend from swsgi to auto, so if a better one (paste, cehrrypy) is founded, use it instead of the simple swsgi.
+    Add : less info in the detail page, with a mroe button for rarely used infos.
+    *Add : Andreas to main contributors :)
+    Add : dock effect for actions buttons on /problems.
+    Add : /system page with schedulers in it.
+    Add : autocompletion on the problem search field and a /lookup page for searchingthem.
+    Add : search form in the problems page. Search problems and impacts names too.
+    *Add : in cfg file password for users
+    Add : new way of handling cookies. Now it's a crypted way, and so stateless. Needto remove all session file thing so.
+    Fix : (reported by : Vincent Riquer) no event handlers during a downtime.
+    Add : ldap authentification with AD.
+    Add : UI auth can now be done with an apache passwd file.
+
+    Add : AD module that will get user photos from Ldap.
+
+    Add : network_service icon set
+    Add : icon set for servers.
+    Add : disk icon set and forgot database one.
+    Add : more icons for states
+    Add : icon set feature for host and service.
+    Add : gesture management for the detail page.
+   Add : select multiple items in the problem page, and actions them.
+    Add : parallax effect in the top right banner.
+    Enh : make known bad nodes shown in the dep tree, so the admin don't even have to expand and find the bad thing that cause him a problem. Lasy admin mdoe on :)
+    Add : swtich buttons for ths hostdetail page.
+
+
+
+	
 0.6 - 03/05/2011
 ------------------
 ENHANCEMENTS
