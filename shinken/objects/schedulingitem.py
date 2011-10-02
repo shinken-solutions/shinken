@@ -599,7 +599,8 @@ class SchedulingItem(Item):
             return
         
         # If we do not force and we are in downtime, bailout
-        if not externalcmd and self.in_scheduled_downtime:
+        # if the no_event_handlers_during_downtimes is 1 in conf
+        if cls.no_event_handlers_during_downtimes and not externalcmd and self.in_scheduled_downtime:
             return
 
         m = MacroResolver()

@@ -212,7 +212,7 @@ Like temporary attributes such as "imported_from", etc.. """
             # Manage the additive inheritance for the property,
             # if property is in plus, add or replace it
             if self.has_plus(prop):
-                value += ',' + self.get_plus_and_delete(prop)
+                value = self.get_plus_and_delete(prop) + ',' + value
             return value
         #Ok, I do not have prop, Maybe my templates do?
         # Same story for plus
@@ -220,7 +220,7 @@ Like temporary attributes such as "imported_from", etc.. """
             value = i.get_property_by_inheritance(items, prop)
             if value is not None:
                 if self.has_plus(prop):
-                    value += ','+self.get_plus_and_delete(prop)
+                    value = self.get_plus_and_delete(prop) + ',' + value
                 setattr(self, prop, value)
                 return value
         # I do not have prop, my templates too... Maybe a plus?
@@ -243,12 +243,12 @@ Like temporary attributes such as "imported_from", etc.. """
                     else:
                         value = self.customs[prop]
                     if self.has_plus(prop):
-                        value = value+self.get_plus_and_delete(prop)
+                        value = self.get_plus_and_delete(prop) + ',' + value
                     self.customs[prop] = value
         for prop in self.customs:
             value = self.customs[prop]
             if self.has_plus(prop):
-                value = value = value+','+self.get_plus_and_delete(prop)
+                value = self.get_plus_and_delete(prop) + ',' + value
                 self.customs[prop] = value
         # We can get custom properties in plus, we need to get all
         # entires and put

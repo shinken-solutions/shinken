@@ -227,7 +227,8 @@ class Config(Item):
         'idontcareaboutsecurity': BoolProp(default='0'),
         'flap_history': IntegerProp(default='20', class_inherit=[(Host, None), (Service, None)]),
         'max_plugins_output_length': IntegerProp(default='8192', class_inherit=[(Host, None), (Service, None)]),
-        
+        'no_event_handlers_during_downtimes': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
+
         # Interval between cleaning queues pass
         'cleaning_queues_interval' : IntegerProp(default='900'),
 
