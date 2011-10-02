@@ -1,4 +1,4 @@
-%if 'app' not in locals(): app = None
+%if not 'app' in locals() : app = None
 
 <script type="text/javascript">
 var myMenu = new UvumiDropdown("dropdown-menu",{
@@ -6,7 +6,7 @@ closeDelay:12000
 });
 </script>
 
-<div class="grid_16">
+<div id="navigation" class="grid_16">
 	<ul id="dropdown-menu" class="dropdown">
 	
 	%menu = [ ('/', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/system', 'System') ]
@@ -20,12 +20,14 @@ closeDelay:12000
 				%end
 			%end
 		<li class="menu_right">
-		<a href="tools.html">{{user.get_name()}}!</a>
+		<a href="tools.html">{{user.get_name()}}</a>
 		<!-- New UL starts here -->
 		<ul>
-			<li>
-				<a href="tools1.html">d</a>
-			</li>
+			<div> 
+				<span>{{user.get_name()}}</span>
+				<hr/>
+				<li><a href="/user/logout">Log out</a></li>
+			</div>
 		</ul>
 		<!-- New UL finished here -->
 		
