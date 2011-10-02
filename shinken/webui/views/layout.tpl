@@ -44,6 +44,7 @@
       <script type="text/javascript" src="/static/js/mootools-more.js"></script>
       <script type="text/javascript" src="/static/js/mootools-message.js"></script>
       
+      <script type="text/javascript" src="/static/js/UvumiDropdown.js"></script>
       <script type="text/javascript" src="/static/js/rotater.js"></script>
       <script type="text/javascript" src="/static/js/tabs.js"></script>
       <script type="text/javascript" src="/static/js/top_right_banner.js"></script>
