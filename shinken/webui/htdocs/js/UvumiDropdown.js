@@ -156,7 +156,7 @@ var UvumiDropdown = new Class({
 				}
 				innerUl.setStyles({
 					position:'absolute',
-					top:y,
+					top:y+10,
 					opacity:0
 				});
 				ul.getElements('ul').setStyle('display','block');

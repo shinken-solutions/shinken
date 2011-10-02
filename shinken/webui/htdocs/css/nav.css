@@ -63,9 +63,28 @@
 
 /* these are the LIs that contains a submenu*/
 .dropdown li.submenu-down{
-	background: url('expand_down.gif') center left no-repeat;
+	/*background: transparent url(/static/images/pointer.gif) center left no-repeat;
 	padding-left:20px;
-	width:105px;
+	width:105px;*/
+}
+
+
+
+.dropdown div {
+	-moz-box-shadow: -1px 1px 1px #CCCCCC;
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 1px solid #BEBEBE;
+    border-top: none;
+	background: #FFFFFF;
+	height: 100px;
+	width: 250px;
+	position: absolute;
+    right: -35px;
+}
+
+.dropdown span {
+	line-height: 22px;
+	padding: 10px 0 0 10px;
 }
 
 .menu_right{

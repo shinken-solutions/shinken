@@ -20,10 +20,11 @@ closeDelay:12000
 				%end
 			%end
 		<li class="menu_right">
-		<a href="tools.html">{{user.get_name()}}</a>
+		<a href="/user">User</a>
 		<!-- New UL starts here -->
 		<ul>
-			<div> 
+			<div>
+				<img style="width:20px; height:20px; padding:10px 0 0 10px;" src='/static/photos/{{user.get_name()}}'> 
 				<span>{{user.get_name()}}</span>
 				<hr/>
 				<li><a href="/user/logout">Log out</a></li>
