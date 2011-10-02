@@ -50,48 +50,60 @@ Shinken ChangeLog
 	* Fix: protect broker agains module taht ask for full instance init about unknown scheduler.
 	* Fix : (reported by Markus Elger) add next schedule date in the retention data.
 	* Fix: (reported by : Olivier Hanesse) bad realm configuration was not detected for satellites.
+	* Fix: (reported by :Markus Elger) bad host count in realms.
+	* Fix: (reported by :Markus Elger) bad host reaml conf were not detected.
 
+	
 	MODULES ENHANCEMENTS
-	    Add : module for autotagging polelr_tag from a custom macro.
-    fix : collumn name change in merlin ds.
-    *fix the livestatus sqlite test (ignore sqlite journal files)
-    bugfix in ncpdmod
+	* Add : module for autotagging polelr_tag from a custom macro.
+	* Add : Derive the archives filenames from the main livestatus db
+	* Add : Rewrite the livestatus sqlite code. Now there is one database file with logging events for each day.
+	* !! : If you have a huge livestatus.db it is recommended to stop shinken and run the script contrib/livestatus/splitlivelogs.py
+	* Add : create the simple-log archive dir automatically if it doesn't exist
+	* Add : the livestatus sqlite db will now be opened in do_start() instead of init(). Now only the livestatus process has an open filehandle. (the main broker process had one too)
+	* Add : Initial import of the thrift broker with a sample client in python
+	
+
+
+
     *Make the livestatus socket world read/writable
-    *Derive the archives filenames from the main livestatus db
-    * Rewrite the livestatus sqlite code. Now there is one database file with logging events for each day.
-    * !! If you have a huge livestatus.db it is recommended to stop shinken and run the script contrib/livestatus/splitlivelogs.py
-    * create the simple-log archive dir automatically if it doesn't exist
-   the livestatus sqlite db will now be opened in do_start() instead of init(). Now only the livestatus process has an open filehandle. (the main broker process had one too)
-    Initial import of the thrift broker with a sample client in python
-    Fix Livestatus path database
-    Fix wrong umask value 027
-    Fix string comparison for livestatus. None is equivalent to empty string
     Initial import of TSCA, Thrift Service Check Acceptor
     performance improvement for livestatus queries with Limit:
-     Fix : (reported by: Seb-Solon) bad contact group insert in objects in NDO
-    Fix : (reported by: seb-colon) bad contact group id in NDO
-    Fix : (seb-solon) ndo contacts were not registered with the good id.
     Add : current_notification_number in the ndo module.
     Add : last_notification in ndo module.
     Add : last_state_change to the ndo module.
+    Add : add the is_flapping data to broks and update teh ndo module so it update the value.
+    Add : percent_state_change as check_result brok and in the ndo module.
+
+    Module arbiter load all configuration from GLPI (plugin monitoring) by
+	webservice
+	    Add the REUSEADDR flag to livestatus's socket. Thanks Olivier
+	Hanesse
+	   Add a new module to import configuration data (hosts/services) from a MySQL database
+	
+
+		MODULES FIXES
+	    bugfix in ncpdmod
+    Fix Livestatus path database
+    Fix string comparison for livestatus. None is equivalent to empty string
+
+	fix : collumn name change in merlin ds.
+     Fix : (reported by: Seb-Solon) bad contact group insert in objects in NDO
+    Fix : (reported by: seb-colon) bad contact group id in NDO
+    Fix : (seb-solon) ndo contacts were not registered with the good id.
     Fix: add the flap_detection_enabled in the ndo status tables too. (I love duplicate data...)
     Fix : the ndo module with is_flapping value for update states.
-    Add : add the is_flapping data to broks and update teh ndo module so it update the value.
-    Add : percent_state_change as check_result brok and in the ndo module. 
-     *implement host/service attribute display_name in the livestatus module
-    Module arbiter load all configuration from GLPI (plugin monitoring) by webservice 
+
+
     *Fix: (reported by : Ronny Lindner & Markus Elger) LiveStatus crash in log parsing.
-    Fix : (reported by : Ronny Lindner) fix status.dat module with
-    utf8 characters
-    Fix: (reported by :Markus Elger) bad host count in realms.
-    Fix: (reported by :Markus Elger) bad host reaml conf were not detected.
-   Add a new module to import configuration data (hosts/services) from a MySQL database
+    Fix : (reported by : Ronny Lindner) fix status.dat module with utf8 characters
+
     Fix: (reported by : Olivier Hanesse) nrpe module did not tag the check_time value for checks, and so pnp and other tools were not happy. BP rules were alike.
     Fix : (reported by Markus Elger) LiveStatus module did not clean previously added elements before recreating them. 
-    Add the REUSEADDR flag to livestatus's socket. Thanks Olivier Hanesse
 
 
-	MODULES FIXES
+
+
 
 	UI ENHANCEMENTS
 	    Enh : make appears on the dep graph only interesting elements, so near the root or hosts or service in real problems. Far more redable with huge conf.
