@@ -437,7 +437,6 @@ Like temporary attributes such as "imported_from", etc.. """
         # Now config properties
         for prop, entry in cls.properties.items():
             # Is this property intended for brokking?
-#            if 'fill_brok' in cls.properties[prop]:
             if brok_type in entry.fill_brok:
                 data[prop] = self.get_property_value_for_brok(prop, cls.properties)
 

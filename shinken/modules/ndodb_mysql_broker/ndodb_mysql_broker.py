@@ -726,8 +726,21 @@ class Ndodb_Mysql_broker(BaseModule):
         return res
 
 
-
     #A notification have just be created, we INSERT it
-    #def manage_notification_raise_brok(self, b):
-    #    query = self.db.create_insert_query('notification', b.data)
-    #    return [query]
+    def manage_notification_raise_brok(self, b):
+
+        data = b.data
+        print "CREATING A NOTIFICATION", data
+        if data['service_description'] != '':
+            object_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
+        else:
+            object_id = self.get_host_object_id_by_name(data['host_name'])
+
+        notification_data = {'notification_id' : data['id'], 'instance_id' :  data['instance_id'],
+                             'start_time' : de_unixify(data['start_time']),
+                             'end_time' : de_unixify(data['end_time']),
+                             'state' : data['state']                             
+                             }
+        
+        query = self.db.create_insert_query('notifications', notification_data)
+        return [query]
