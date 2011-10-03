@@ -15,6 +15,8 @@
 
 
 
+
+
     <div class="whole-page">
       
       
@@ -24,6 +26,10 @@
 
 %# " We look for separate bad and good elements, so we remember last state"
 %last_was_bad = False
+%# " By default we won't expand an impact."
+<script type="text/javascript">
+  var  impact_to_expand = -1;
+</script>
 %for imp_id in impacts:
 %   impact = impacts[imp_id]
 
@@ -36,7 +42,13 @@
     %last_was_bad = True
   %end
 
-	<div class="impact pblink" id="{{imp_id}}">
+  %if imp_id == 1 and impact.state_id != 0:
+    <script type="text/javascript">
+      impact_to_expand = {{imp_id}};
+    </script>
+  %end
+    <div class="impact pblink" id="{{imp_id}}">
+
 	  <div class="show-problem" id="show-problem-{{imp_id}}">
 	    <img src="static/images/trig_right.png" id="show-problem-img-{{imp_id}}">
 	  </div>
@@ -78,8 +90,8 @@
 %for imp_id in impacts:
 %   impact = impacts[imp_id]
 
+      <div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
 
-	<div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
 	  <div class="right-panel-top"> 
 
 	    <div class="pblink" id="{{imp_id}}"> <img style="width: 16px;height: 16px;" src='/static/images/disabled.png'> Close </div>

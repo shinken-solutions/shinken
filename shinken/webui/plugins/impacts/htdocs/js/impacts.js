@@ -128,6 +128,13 @@ window.addEvent('domready', function(){
 	
 	}
     
+
+	// This values is filled by teh /impact page. By default ti's -1
+	// and so it do not ask for a default expand. But it will ask for the first value if
+	// it's an bad state
+	if(impact_to_expand != -1){
+	    toggleBox(impact_to_expand);
+	}
     
     });
 
