@@ -53,6 +53,7 @@
       <script type="text/javascript" src="/static/js/action.js"></script>
       <script type="text/javascript" src="/static/js/opacity.js"></script>
       <script type="text/javascript" src="/static/js/multibox.js"></script>
+      <script type="text/javascript" src="/static/js/deptree.js"></script>
 
       %if user is not None:
         <script type="text/javascript" src="/static/js/userinfo.js"></script>

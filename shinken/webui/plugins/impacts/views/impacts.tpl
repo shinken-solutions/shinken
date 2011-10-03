@@ -143,6 +143,13 @@
 	  %# end for pb in impact.source_problems:
 	  %end
 
+	  %if len(impact.parent_dependencies) > 0:
+	  <a id="togglelink-{{impact.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{impact.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
+	  <div class="clear"></div>
+	  {{!helper.print_business_rules(datamgr.get_business_parents(impact))}}
+	  
+	  %end
+
 	  
 	</div>
 %# end for imp_id in impacts:
