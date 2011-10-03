@@ -8,6 +8,6 @@ DEBUG_PATH="/tmp/arbiter.debug"
 # needed because arbiter doesn't have a default 'workdir' "properties" attribute:
 cd "$DIR/../var"
 echo "Launching Arbiter (that reads the configuration and dispatches it) in debug mode to the file $DEBUG_PATH"
-$BIN/shinken-arbiter -d -c $ETC/nagios.cfg -c $ETC/shinken-specific.cfg --debug $DEBUG_PATH
+$BIN/shinken-arbiter -d -c $ETC/nagios.cfg -c $ETC/shinken-specific.cfg -c $ETC/sample.cfg --debug $DEBUG_PATH
 
 
