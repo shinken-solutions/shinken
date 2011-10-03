@@ -201,24 +201,6 @@ cline ()
         fi
         return
 }
-######################################################################
-#   AUTHOR: Joe Negron - LOGIC Wizards ~ NYC
-#  LICENSE: BuyMe-a-Drinkware: Dual BSD or GPL (pick one)
-#    USAGE: byteMe (bytes)
-# ABSTRACT: Converts a numeric parameter to a human readable format.
-######################################################################
-function byteMe() { # Divides by 2^10 until < 1024 and then append metric suffix
-	declare -a METRIC=(' Bytes' 'KB' 'MB' 'GB' 'TB' 'XB' 'PB') # Array of suffixes
-	MAGNITUDE=0  # magnitude of 2^10
-	PRECISION="scale=1" # change this numeric value to inrease decimal precision
-	UNITS=`echo $1 | tr -d ‘,’`  # numeric arg val (in bytes) to be converted
-	while [ ${UNITS/.*} -ge 1024 ] # compares integers (b/c no floats in bash)
-	  do
-	   UNITS=`echo "$PRECISION; $UNITS/1024" | bc` # floating point math via `bc`
-	   ((MAGNITUDE++)) # increments counter for array pointer
-	  done
-	echo="$UNITS${METRIC[$MAGNITUDE]}"
-}
 
 function cadre(){
 	cecho "+--------------------------------------------------------------------------------" $2
@@ -335,23 +317,15 @@ function purgeSQLITE(){
 		cecho " > Livestatus db not found " yellow
 		exit 1
 	fi
-#	val=$(ls -la /opt/shinken/var/livestatus.db | awk '{print $5}')
-#	size1=$(byteMe $val)
-#	cecho " > Original size : $size1 " green
 	skill > /dev/null 2>&1
 	cecho " > we keep $KEEPDAYSLOG days of logs" green
 	sqlite3 $TARGET/var/livestatus.db "delete from logs where time < strftime('%s', 'now') - 3600*24*$KEEPDAYSLOG"
 	cecho " > Vaccum the sqlite DB" green
 	sqlite3 $TARGET/var/livestatus.db VACUUM
-#	val=$(ls -la /opt/shinken/var/livestatus.db | awk '{print $5}')
-#	size2=$(byteMe $val)
-#	cecho " > New size : $size1 " green
 }
 
 function skill(){
-	#cecho "Try to stop shinken the right way" green
 	/etc/init.d/shinken stop > /dev/null 2>&1
-	#cecho "Killing shinken" green
 	pc=$(ps -aef | grep "$TARGET" | grep -v "grep" | wc -l )
 	if [ $pc -ne 0 ]
 	then	
@@ -817,68 +791,6 @@ function shelp(){
 	cat $myscripts/README
 }
 
-function setprofile(){
-	case $1 in
-		poller)
-			setpoller 
-			exit 0
-			;;
-		*)
-			cecho " > Unknown profil" red
-			exit 2
-			;;
-	esac
-}
-
-question(){
-	variable=$1
-	question=$2
-	default=$3
-	
-	echo -ne " > "$variable : $question" ["$default"] : "
-	read response 
-	if [ ! -z $response ]
-	then
-		eval "$variable=$response"
-	fi
-}
-
-
-setpoller(){
-	# default values
-	processes_by_worker=256	   #; optional : each workers manage 256 checks
-	polling_interval=1       #; optional : take jobs from schedulers each 1 second
-	timeout=3	      #; 'ping' timeout 
-	data_timeout=120 #	      ; 'data send' timeout
-	check_interval=60 #   ; ping it every minute
-	max_check_attempts=3 #    ;  if at least max_check_attempts ping failed, the node is DEAD
-       #optional
-       
-       # advanced features
-       #modules		NrpeBooster
-       #poller_tags	None
-       #realm		All
-
-	declare -a config=("spare|0|Is this poller a spare ?" 
-		"poller_name|$(hostname -s)|What is the poller name ?" 
-		"address|$(hostname)|What is the poller address ?" 
-		"port|7771|What is the poller port ?" 
-		"manage_sub_realms|0|Manage sub realms (Does this poller take jobs from schedulers or sub realms) ?" 
-		"min_workers|4|Min workers (Starts with N processes workers. 0 means number of cpus) ?" 
-		"max_workers|4|Max workers (no more than N processes workers. 0 means : number of cpus) ?" )
-
-	for line in ${config[@]}
-	do
-		echo $line
-#		value=$(echo $line | awk -F\| '{print $0}')
-#		default=$(echo $line | awk -F\| '{print $1}')
-#		ask=$(echo $line | awk -F\| '{print $2}')
-#		question "$value" "$ask" "$default" 	
-	done
-
-
-}
-
 function cleanconf(){
 	if [ -z "$myscripts" ]
 	then
@@ -894,7 +806,7 @@ function cleanconf(){
 }
 
 function usage(){
-echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -p poller 
+echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a 
 	-k	Kill shinken
 	-i	Install shinken
 	-w	Remove demo configuration 
@@ -905,7 +817,6 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -p 
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
-	-p	Set profile for this installation [currently only setting poller profile is supported]
 	-h	Show help
 "
 
@@ -920,19 +831,6 @@ then
 fi
 while getopts "kidubcr:lzhsvp:w" opt; do
         case $opt in
-		a)
-			case $OPTARG in
-				thruk)
-					install_thruk
-					exit 0
-					;;
-				*)
-					cecho "Invalid addon ($OPTARG)"
-					exit 2
-					;;
-			esac
-			exit 0
-			;;
 		w)
 			cleanconf	
 			exit 0
@@ -972,10 +870,6 @@ while getopts "kidubcr:lzhsvp:w" opt; do
                         ;;
                 r)
                        	restore $OPTARG 
-                        exit 0
-                        ;;
-                p)
-                       	setprofile $OPTARG 
                         exit 0
                         ;;
                 l)
