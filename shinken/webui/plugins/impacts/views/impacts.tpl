@@ -99,6 +99,7 @@
 	  </center>
 
 	  <div style="float:right;"> <a href="{{!helper.get_link_dest(impact)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a>
+	    <a href="/depgraph/{{impact.get_full_name()}}" class="mb" title="Impact map of {{impact.get_full_name()}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
 	  </div>
 
 	  %##### OK, we print root problem NON ack first

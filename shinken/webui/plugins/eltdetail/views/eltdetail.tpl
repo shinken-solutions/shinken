@@ -13,15 +13,6 @@
 Invalid element name
 
 
-%# " If the auth got problem, we are here and bailout"
-%if not valid_user:
-<script type="text/javascript">
-  window.location.replace("/login");
-</script>
-%# " And if the javascript is not followed? not a problem, we gave no data here." 
-%end
-
-
 %else:
 
 %helper = app.helper

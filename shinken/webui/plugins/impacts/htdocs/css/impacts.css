@@ -3,7 +3,7 @@
 /* The panel that will contain all problem panels*/
 .problems-panels {
     position: fixed;
-    left: 480px;
+    left: 450px;
     right: 0;
     top: 100px;
     width: 100%;
