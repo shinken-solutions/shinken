@@ -268,6 +268,7 @@ function check_distro(){
 		version=$(echo $d | awk -F: '{print $2}')
 		if [ "$CODE" = "$distro" ]
 		then
+			cecho " > Found $CODE" green
 			if [ "$version" = "" ]
 			then
 				cecho " > Version checking for $DIST is not needed" green
@@ -278,8 +279,8 @@ function check_distro(){
 				then
 					versionok=1
 					return
-				else
-					versionok=0
+				#else
+				#	versionok=0
 				fi		
 			fi
 		fi
@@ -779,7 +780,7 @@ function prerequisites(){
 			if [ $? -eq 2 ]
 			then
 				cecho " > Module $module ($import) not found. Installing..." yellow
-				$PYEI $module #> /dev/null 2>&1
+				$PYEI $module > /dev/null 2>&1
 			else
 				cecho " > Module $module found." green 
 			fi
@@ -877,11 +878,25 @@ setpoller(){
 
 }
 
+function cleanconf(){
+	if [ -z "$myscripts" ]
+	then
+		cecho " > Files/Folders list not found" yellow
+		exit 2
+	else
+		for f in $(cat config.files)
+		do
+			cecho " > removing $TARGET/etc/$f" green
+			rm -Rf $TARGET/etc/$f
+		done
+	fi
+}
 
 function usage(){
-echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a | -p poller 
+echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -p poller 
 	-k	Kill shinken
-	-i	Install shinken 
+	-i	Install shinken
+	-w	Remove demo configuration 
 	-d 	Remove shinken
 	-u	Update an existing shinken installation
 	-v	purge livestatus sqlite db and shrink sqlite db
@@ -902,7 +917,7 @@ then
         cecho "You should start the script with sudo!" red
         exit 1
 fi
-while getopts "kidubcr:lzhsvp:" opt; do
+while getopts "kidubcr:lzhsvp:w" opt; do
         case $opt in
 		a)
 			case $OPTARG in
@@ -915,6 +930,10 @@ while getopts "kidubcr:lzhsvp:" opt; do
 					exit 2
 					;;
 			esac
+			exit 0
+			;;
+		w)
+			cleanconf	
 			exit 0
 			;;
 		s)
