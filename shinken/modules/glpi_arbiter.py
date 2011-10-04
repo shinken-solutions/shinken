@@ -157,26 +157,66 @@ class Glpi_arbiter(BaseModule):
             if service_info['contacts']:
                 h['contacts'] = service_info['contacts']
 
-            h['notification_interval'] = '30'
-            h['notification_period'] = '24x7'
-            h['notification_options'] = 'w,c,r'
-            h['active_checks_enabled'] = '1'
-            h['process_perf_data'] = '1'
-            h['active_checks_enabled'] = '1'
-            h['passive_checks_enabled'] = '1'
-            h['parallelize_check'] = '1'
-            h['obsess_over_service'] = '1'
-            h['check_freshness'] = '1'
-            h['freshness_threshold'] = '1'
-            h['notifications_enabled'] = '1'
-            h['event_handler_enabled'] = '0'
-            h['event_handler'] = 'super_event_kill_everyone!DIE'
-            h['flap_detection_enabled'] = '1'
-            h['failure_prediction_enabled'] = '1'
-            h['retain_status_information'] = '1'
-            h['retain_nonstatus_information'] = '1'
-            h['is_volatile'] = '0'
-            h['_httpstink'] = 'NO'
+            if service_info['notification_interval']:
+                h['notification_interval'] = service_info['notification_interval']
+
+            if service_info['notification_period']:
+                h['notification_period'] = service_info['notification_period']
+
+            if service_info['notification_options']:
+                h['notification_options'] = service_info['notification_options']
+
+            if service_info['active_checks_enabled']:
+                h['active_checks_enabled'] = service_info['active_checks_enabled']
+
+            if service_info['process_perf_data']:
+                h['process_perf_data'] = service_info['process_perf_data']
+
+            if service_info['active_checks_enabled']:
+                h['active_checks_enabled'] = service_info['active_checks_enabled']
+
+            if service_info['passive_checks_enabled']:
+                h['passive_checks_enabled'] = service_info['passive_checks_enabled']
+
+            if service_info['parallelize_check']:
+                h['parallelize_check'] = service_info['parallelize_check']
+
+            if service_info['obsess_over_service']:
+                h['obsess_over_service'] = service_info['obsess_over_service']
+
+            if service_info['check_freshness']:
+                h['check_freshness'] = service_info['check_freshness']
+
+            if service_info['freshness_threshold']:
+                h['freshness_threshold'] = service_info['freshness_threshold']
+
+            if service_info['notifications_enabled']:
+                h['notifications_enabled'] = service_info['notifications_enabled']
+
+            if service_info['event_handler_enabled']:
+                h['event_handler_enabled'] = service_info['event_handler_enabled']
+
+            if service_info['event_handler']:
+                h['event_handler'] = service_info['event_handler']
+
+            if service_info['flap_detection_enabled']:
+                h['flap_detection_enabled'] = service_info['flap_detection_enabled']
+
+            if service_info['failure_prediction_enabled']:
+                h['failure_prediction_enabled'] = service_info['failure_prediction_enabled']
+
+            if service_info['retain_status_information']:
+                h['retain_status_information'] = service_info['retain_status_information']
+
+            if service_info['retain_nonstatus_information']:
+                h['retain_nonstatus_information'] = service_info['retain_nonstatus_information']
+
+            if service_info['is_volatile']:
+                h['is_volatile'] = service_info['is_volatile']
+
+            if service_info['_httpstink']:
+                h['_httpstink'] = service_info['_httpstink']
+
             print "Service TEST : ", h
             r['services'].append(h)
 
