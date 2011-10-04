@@ -400,7 +400,8 @@ class SchedulingItem(Item):
                 parent_is_down.append(p_is_down)
 
         # if a parent is not down, no dep can explain the pb
-        if False in parent_is_down:
+        # or if we do'nt have any parents
+        if len(parent_is_down) == 0 or False in parent_is_down:
             return
         else:# every parents are dead, so... It's not my fault :)
             self.set_unreachable()

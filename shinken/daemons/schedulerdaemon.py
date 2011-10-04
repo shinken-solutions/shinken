@@ -154,8 +154,10 @@ class Shinken(BaseSatellite):
 
     def do_stop(self):
         if self.pyro_daemon:
-            self.pyro_daemon.unregister(self.ibroks)
-            self.pyro_daemon.unregister(self.ichecks)
+            if self.ibroks:
+                self.pyro_daemon.unregister(self.ibroks)
+            if self.ichecks:
+                self.pyro_daemon.unregister(self.ichecks)
         super(Shinken, self).do_stop()
 
 

@@ -145,6 +145,10 @@ except AttributeError, exp:
             # Pyro 4 i by default thread, should do select
             # (I hate threads!)
             # And of course teh name changed since 4.5...
+            # Since them, we got a better sock reuse, so
+            # before 4.5 we must wait 35 s for the port to stop
+            # and in >=4.5 we can use REUSE socket :)
+            max_try = 35
             if PYRO_VERSION < "4.5":
                 Pyro.config.SERVERTYPE = "select"
             else:
@@ -152,13 +156,15 @@ except AttributeError, exp:
                 # For Pyro >4.X hash
                 Pyro.config.HMAC_KEY = "NOTSET"
                 Pyro.config.SOCK_REUSE = True
+                max_try = 1
             nb_try = 0
             is_good = False
             # Ok, Pyro4 do not close sockets like it should,
             # so we got TIME_WAIT socket :(
             # so we allow to retry during 35 sec (30 sec is the default
             # timewait for close sockets)
-            while nb_try <= 35:
+            while nb_try < max_try:
+                nb_try += 1
                 print "Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
                 # And port already use now raise an exception
                 try:
@@ -168,7 +174,7 @@ except AttributeError, exp:
                 except socket.error, exp:
                     msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
                     # At 35 (or over), we are very not happy
-                    if nb_try >= 35:
+                    if nb_try >= max_try:
                         raise PortNotFree(msg)
                     print msg, "but we try another time in 1 sec"
                     time.sleep(1)

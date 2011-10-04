@@ -167,7 +167,7 @@ class BaseSatellite(Daemon):
         self.handleRequests(timeout)
 
     def do_stop(self):
-        if self.pyro_daemon:
+        if self.pyro_daemon and self.interface:
             print "Stopping all network connections"
             self.pyro_daemon.unregister(self.interface)
         super(BaseSatellite, self).do_stop()
@@ -396,8 +396,10 @@ class Satellite(BaseSatellite):
         # Close the pyro server socket if it was open
         if self.pyro_daemon:
             logger.log('Stopping all network connections')
-            self.pyro_daemon.unregister(self.brok_interface)
-            self.pyro_daemon.unregister(self.scheduler_interface)
+            if self.brok_interface:
+                self.pyro_daemon.unregister(self.brok_interface)
+            if self.scheduler_interface:
+                self.pyro_daemon.unregister(self.scheduler_interface)
         # And then call our master stop fro satellite code
         super(Satellite, self).do_stop()
 

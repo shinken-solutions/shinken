@@ -114,10 +114,14 @@ class Notification(Action):
         self.ref = ref
 
         # Set host_name and description from the ref
-        self.host_name = self.ref.host_name        
-        if self.ref.__class__.my_type == 'service':
-            self.service_description = self.ref.service_description
+        if ref != '':
+            self.host_name = self.ref.host_name        
+            if self.ref.__class__.my_type == 'service':
+                self.service_description = self.ref.service_description
+            else:
+                self.service_description = ''
         else:
+            self.host_name = ''
             self.service_description = ''
 
         self.env = env
