@@ -154,6 +154,11 @@ document.addEvent('domready', function() {
 
     %# " We remember the last hname so see if we print or not the host for a 2nd service"
     %last_hname = ''
+
+    %# " We try to make only importants things shown on same output "
+    %last_output = ''
+    %nb_same_output = 0
+
     %for pb in pbs:
 
       <div class="clear"></div>      
@@ -161,10 +166,25 @@ document.addEvent('domready', function() {
        <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
        %# "We reset the last_hname so we won't overlap this feature across tables"
        %last_hname = ''
+       %last_output = ''
+       %nb_same_output = 0
       %end
       %imp_level = pb.business_impact
 
-	<div> 
+      %# " We check for the same output and the same host. If we got more than 3 of same, make them opacity effect"
+      %if pb.output == last_output and pb.host_name == last_hname:
+          %nb_same_output += 1
+      %else:
+          %nb_same_output = 0
+      %end
+      %last_output = pb.output
+
+      %if nb_same_output > 3:
+       <div class='opacity_hover'>
+      %else:
+       <div>
+      %end
+
 	  <div style="margin-left: 20px; width: 70%; float:left;">
 	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
 	      <tr class="tabledesc">
