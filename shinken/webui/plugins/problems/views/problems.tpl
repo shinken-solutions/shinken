@@ -107,8 +107,8 @@ document.addEvent('domready', function() {
 </div>
 
 %# "We set the actions div that will be show/hide if we select elements"
-<div class="dockContainer" id="actions">
-  <div class="dockWrapper">
+<div class="dockContainer">
+  <div class="dockWrapper" id="actions">
     <div class="cap left"></div>
     <ul class="dock">
       <li class="active">
