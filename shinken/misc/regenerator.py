@@ -461,7 +461,7 @@ class Regenerator:
             print "Len after", len(hg.members)
 
         for s in to_del_srv:
-            print "Deleting", s.gt_dbg_name()
+            print "Deleting", s.get_full_name()
             del self.services[s.id]
 
         # Now clean service groups
