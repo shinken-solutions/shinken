@@ -206,9 +206,11 @@ Like temporary attributes such as "imported_from", etc.. """
             value = getattr(self, prop)
             # Maybe this value is 'null'. If so, we should NOT inherit
             # and just delete this entry, and hope of course.
-            if value == 'null':
-                delattr(self, prop)
-                return None
+            # Keep "null" values, because in "inheritance chaining" they must 
+            # be passed from one level to the next.
+            #if value == 'null':
+            #    delattr(self, prop)
+            #    return None
             # Manage the additive inheritance for the property,
             # if property is in plus, add or replace it
             if self.has_plus(prop):
@@ -693,6 +695,13 @@ class Items(object):
     def apply_partial_inheritance(self, prop):
         for i in self:
             i.get_property_by_inheritance(self, prop)
+            if not i.is_tpl():
+                # If a "null" attribute was inherited, delete it
+                try:
+                    if getattr(i, prop) == 'null':
+                        delattr(i, prop)
+                except:
+                    pass
 
 
     def apply_inheritance(self):
