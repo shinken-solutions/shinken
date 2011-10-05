@@ -455,6 +455,7 @@ function fix(){
 	chmod +x /etc/default/shinken
 	chmod +x $TARGET/bin/init.d/shinken
 	chown -R $SKUSER:$SKGROUP $TARGET
+	chmod -R g+w $TARGET
 	# remove tests directory
 	rm -Rf $TARGET/test
 }
