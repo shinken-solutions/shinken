@@ -824,6 +824,17 @@ function fixcentreondb(){
 	mysql -h $host -u $user -p$pass $db < /tmp/centreon.sql
 }
 
+function enablendodb(){
+
+}
+
+function disablenagios(){
+	chkconfig nagios off
+	chkocnfig ndo2db off
+	/etc/init.d/nagios stop
+	/etc/init.d/ndo2db stop
+}
+
 function usage(){
 echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z
 	-k	Kill shinken
@@ -857,8 +868,10 @@ while getopts "kidubcr:lzhsvp:w" opt; do
 			;;
 		z)
 			cleanconf
+			disablenagios
 			fixsudoers
 			fixcentreondb
+			enablendodb
 			exit 0
 			;;
 		s)
