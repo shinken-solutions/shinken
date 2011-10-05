@@ -805,8 +805,27 @@ function cleanconf(){
 	fi
 }
 
+function fixsudoers(){
+	cecho " > Fix /etc/sudoers file for shinken integration" green
+	cp /etc/sudoers /etc/sudoers.$(date +%Y%m%d%H%M%S)
+	cat $myscripts/sudoers.centreon | sed -e 's#TARGET#'$TARGET'#g' >> /etc/sudoers
+}
+
+function fixcentreondb(){
+	cecho " > Fix centreon database path for shinken integration" green
+	cat $myscripts/centreon.sql | sed -e 's#TARGET#'$TARGET'#g' > /tmp/centreon.sql
+
+	# get existing db access
+	host=$(cat /etc/centreon/conf.pm | grep "mysql_host" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	user=$(cat /etc/centreon/conf.pm | grep "mysql_user" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	pass=$(cat /etc/centreon/conf.pm | grep "mysql_passwd" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	db=$(cat /etc/centreon/conf.pm | grep "mysql_database_oreon" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+
+	mysql -h $host -u $user -p$pass $db < /tmp/centreon.sql
+}
+
 function usage(){
-echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a 
+echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z
 	-k	Kill shinken
 	-i	Install shinken
 	-w	Remove demo configuration 
@@ -817,6 +836,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
+	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
 	-h	Show help
 "
 
@@ -833,6 +853,12 @@ while getopts "kidubcr:lzhsvp:w" opt; do
         case $opt in
 		w)
 			cleanconf	
+			exit 0
+			;;
+		z)
+			cleanconf
+			fixsudoers
+			fixcentreondb
 			exit 0
 			;;
 		s)
