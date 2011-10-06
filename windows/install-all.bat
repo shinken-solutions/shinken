@@ -86,32 +86,32 @@ move /Y %PATH_BIN%\shinken-receiver %PATH_BIN%\shinken-receiver.py
 echo Windows Registry Editor Version 5.00  > %tmp%\Shinken_registry.reg
 echo. >> %tmp%\Shinken_registry.reg
 echo [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\Shinken-Arbiter\Parameters] >> %tmp%\Shinken_registry.reg
-echo "Application"="c:\\Python26\\python.exe"  >> %tmp%\Shinken_registry.reg
+echo "Application"="c:\\Python27\\python.exe"  >> %tmp%\Shinken_registry.reg
 echo "AppDirectory"="c:\\shinken"  >> %tmp%\Shinken_registry.reg
 echo "AppParameters"="c:\\shinken\\bin\\shinken-arbiter.py -c c:\\shinken\\etc\\nagios-windows.ini"  >> %tmp%\Shinken_registry.reg
 echo.  >> %tmp%\Shinken_registry.reg
 echo [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\Shinken-Broker\Parameters] >> %tmp%\Shinken_registry.reg
-echo "Application"="c:\\Python26\\python.exe" >> %tmp%\Shinken_registry.reg
+echo "Application"="c:\\Python27\\python.exe" >> %tmp%\Shinken_registry.reg
 echo "AppDirectory"="c:\\shinken" >> %tmp%\Shinken_registry.reg
 echo "AppParameters"="c:\\shinken\\bin\\shinken-broker.py -c c:\\shinken\\etc\\brokerd-windows.ini" >> %tmp%\Shinken_registry.reg
 echo.  >> %tmp%\Shinken_registry.reg
 echo [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\Shinken-Poller\Parameters] >> %tmp%\Shinken_registry.reg
-echo "Application"="c:\\Python26\\python.exe" >> %tmp%\Shinken_registry.reg
+echo "Application"="c:\\Python27\\python.exe" >> %tmp%\Shinken_registry.reg
 echo "AppDirectory"="c:\\shinken" >> %tmp%\Shinken_registry.reg
 echo "AppParameters"="c:\\shinken\\bin\\shinken-poller.py -c c:\\shinken\\etc\\pollerd-windows.ini" >> %tmp%\Shinken_registry.reg
 echo.  >> %tmp%\Shinken_registry.reg
 echo [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\Shinken-Reactionner\Parameters] >> %tmp%\Shinken_registry.reg
-echo "Application"="c:\\Python26\\python.exe" >> %tmp%\Shinken_registry.reg
+echo "Application"="c:\\Python27\\python.exe" >> %tmp%\Shinken_registry.reg
 echo "AppDirectory"="c:\\shinken" >> %tmp%\Shinken_registry.reg
 echo "AppParameters"="c:\\shinken\\bin\\shinken-reactionner.py -c c:\\shinken\\etc\\reactionnerd-windows.ini" >> %tmp%\Shinken_registry.reg
 echo.  >> %tmp%\Shinken_registry.reg
 echo [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\Shinken-Reactionner\Parameters] >> %tmp%\Shinken_registry.reg
-echo "Application"="c:\\Python26\\python.exe" >> %tmp%\Shinken_registry.reg
+echo "Application"="c:\\Python27\\python.exe" >> %tmp%\Shinken_registry.reg
 echo "AppDirectory"="c:\\shinken" >> %tmp%\Shinken_registry.reg
 echo "AppParameters"="c:\\shinken\\bin\\shinken-reactionner.py -c c:\\shinken\\etc\\reactionnerd-windows.ini" >> %tmp%\Shinken_registry.reg
 echo.  >> %tmp%\Shinken_registry.reg
 echo [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\Shinken-Scheduler\Parameters] >> %tmp%\Shinken_registry.reg
-echo "Application"="c:\\Python26\\python.exe" >> %tmp%\Shinken_registry.reg
+echo "Application"="c:\\Python27\\python.exe" >> %tmp%\Shinken_registry.reg
 echo "AppDirectory"="c:\\shinken" >> %tmp%\Shinken_registry.reg
 echo "AppParameters"="c:\\shinken\\bin\\shinken-scheduler.py -c c:\\shinken\\etc\\schedulerd-windows.ini" >> %tmp%\Shinken_registry.reg
 echo.  >> %tmp%\Shinken_registry.reg
