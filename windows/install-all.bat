@@ -116,7 +116,7 @@ echo "AppDirectory"="c:\\shinken" >> %tmp%\Shinken_registry.reg
 echo "AppParameters"="c:\\shinken\\bin\\shinken-scheduler.py -c c:\\shinken\\etc\\schedulerd-windows.ini" >> %tmp%\Shinken_registry.reg
 echo.  >> %tmp%\Shinken_registry.reg
 
-start /w reg inmport %tmp%\Shinken_registry.reg
+start /w reg import %tmp%\Shinken_registry.reg
 
 pause
 goto end
