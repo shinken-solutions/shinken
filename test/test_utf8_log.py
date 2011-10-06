@@ -36,6 +36,8 @@ class TestConfig(ShinkenTest):
     
     # Try to raise an utf8 log message
     def test_utf8log(self):
+        sutf = 'héhé'
+        logger.log(sutf)
         sutf8 = u'I love myself $Â£Â¤'
         logger.log(sutf8)
         s = unichr(40960) + u'abcd' + unichr(1972)

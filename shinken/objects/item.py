@@ -30,7 +30,7 @@ from copy import copy
 from shinken.commandcall import CommandCall
 from shinken.property import StringProp, ListProp
 from shinken.brok import Brok
-from shinken.util import strip_and_uniq
+from shinken.util import strip_and_uniq, safe_print
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 from shinken.log import logger
@@ -297,7 +297,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
-                print self.get_name(), "missing property :", prop
+                safe_print(self.get_name(), "missing property :", prop)
                 state = False
                 
         return state
@@ -371,7 +371,7 @@ Like temporary attributes such as "imported_from", etc.. """
     #  but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
-            print "Deleting acknowledged of", self.get_dbg_name()
+            safe_print("Deleting acknowledged of", self.get_dbg_name())
             self.problem_has_been_acknowledged = False
             # Should not be deleted, a None is Good
             self.acknowledgement = None
@@ -641,7 +641,7 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from
+                safe_print("Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from)
                 r = False
 
         # Then look if we have some errors in the conf
@@ -657,7 +657,7 @@ class Items(object):
         for i in self:
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown")
-                print "Error: In", i.get_name(), "is incorrect ; from", n
+                safe_print("Error: In", i.get_name(), "is incorrect ; from", n)
                 r = False        
         
         return r
@@ -728,7 +728,7 @@ class Items(object):
         for id in self.twins:
             i = self.items[id]
             type = i.__class__.my_type
-            print 'Warning: the', type, i.get_name(), 'is already defined.'
+            safe_print('Warning: the', type, i.get_name(), 'is already defined.')
             del self.items[id] # bye bye
         # do not remove twins, we should look in it, but just void it
         self.twins = []
