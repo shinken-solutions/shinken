@@ -40,7 +40,7 @@ if not *%CONT:~0,1% == *I if not *%CONT:~0,1% == *i goto remove
 
 :: Check needed programs
 if exist %PATH_INSTSRV%\instsrv.exe goto main
-echo You need to install  %PATH_INSTSRV%\instsrv.exe from Microsoft Website !!!
+echo You need to install  %PATH_INSTSRV%\instsrv.exe and %PATH_INSTSRV%\srvany.exefrom Microsoft Website !!!
 echo  http://www.microsoft.com/downloads/details.aspx?FamilyID=9D467A69-57FF-4AE7-96EE-B18C4790CFFD
 pause
 exit
