@@ -93,20 +93,28 @@ class Glpi_arbiter(BaseModule):
             print "\n\n"
             print "Timeperiod info in GLPI", timeperiod_info
             h = {'timeperiod_name' : timeperiod_info['timeperiod_name']};
-            if "timeperiod_info['sunday']" in locals():
-                h = {'sunday' : timeperiod_info['sunday']};
-            if "timeperiod_info['monday']" in locals():
-                h = {'monday' : timeperiod_info['monday']};
-            if "timeperiod_info['tuesday']" in locals():
-                h = {'tuesday' : timeperiod_info['tuesday']};
-            if "timeperiod_info['wednesday']" in locals():
-                h = {'wednesday' : timeperiod_info['wednesday']};
-            if "timeperiod_info['thursday']" in locals():
-                h = {'thursday' : timeperiod_info['thursday']};
-            if "timeperiod_info['friday']" in locals():
-                h = {'friday' : timeperiod_info['friday']};
-            if "timeperiod_info['saturday']" in locals():
-                h = {'saturday' : timeperiod_info['saturday']};
+
+            if timeperiod_info['sunday']:
+                h['sunday'] = timeperiod_info['sunday']
+
+            if timeperiod_info['monday']:
+                h['monday'] = timeperiod_info['monday']
+
+            if timeperiod_info['tuesday']:
+                h['tuesday'] = timeperiod_info['tuesday']
+
+            if timeperiod_info['wednesday']:
+                h['wednesday'] = timeperiod_info['wednesday']
+
+            if timeperiod_info['thursday']:
+                h['thursday'] = timeperiod_info['thursday']
+
+            if timeperiod_info['friday']:
+                h['friday'] = timeperiod_info['friday']
+
+            if timeperiod_info['saturday']:
+                h['saturday'] = timeperiod_info['saturday']
+
             r['timeperiods'].append(h)
 
         # Get hosts
@@ -124,11 +132,11 @@ class Glpi_arbiter(BaseModule):
                  'retry_interval' : host_info['retry_interval'],
                  'max_check_attempts' : host_info['max_check_attempts'],
                  'check_period' : host_info['check_period'],
-                 'process_perf_data' : '1',
                  'contacts' : host_info['contacts'],
-                 'notification_interval' : '30',
-                 'notification_period' : '24x7',
-                 'notification_options' : 'd,u,r'};
+                 'process_perf_data' : host_info['process_perf_data'],
+                 'notification_interval' : host_info['notification_interval'],
+                 'notification_period' : host_info['notification_period'],
+                 'notification_options' : host_info['notification_options']};
             r['hosts'].append(h)
 
         # Get services
