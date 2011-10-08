@@ -92,7 +92,8 @@ class Glpi_arbiter(BaseModule):
         for timeperiod_info in all_timeperiods:
             print "\n\n"
             print "Timeperiod info in GLPI", timeperiod_info
-            h = {'timeperiod_name' : timeperiod_info['timeperiod_name']};
+            h = {'timeperiod_name' : timeperiod_info['timeperiod_name'],
+                 'alias' : timeperiod_info['alias']};
 
             if timeperiod_info['sunday']:
                 h['sunday'] = timeperiod_info['sunday']
@@ -115,6 +116,7 @@ class Glpi_arbiter(BaseModule):
             if timeperiod_info['saturday']:
                 h['saturday'] = timeperiod_info['saturday']
 
+            #print "Returning to Arbiter the timeperiods:", h
             r['timeperiods'].append(h)
 
         # Get hosts
