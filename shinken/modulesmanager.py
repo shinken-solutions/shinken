@@ -162,7 +162,10 @@ The previous modules instance(s), if any, are all cleaned. """
                 assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
             except Exception , exp:
-                logger.log("Error : the module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), str(exp)))
+                s = str(exp)
+                if isinstance(s, str):
+                    s = s.decode('UTF-8', 'replace')
+                logger.log("Error : the module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), s))
                 output = cStringIO.StringIO()
                 traceback.print_exc(file=output)
                 logger.log("Back trace of this remove : %s" % (output.getvalue()))
