@@ -30,7 +30,7 @@ from copy import copy
 from shinken.commandcall import CommandCall
 from shinken.property import StringProp, ListProp
 from shinken.brok import Brok
-from shinken.util import strip_and_uniq
+from shinken.util import strip_and_uniq, safe_print
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 from shinken.log import logger
@@ -206,13 +206,15 @@ Like temporary attributes such as "imported_from", etc.. """
             value = getattr(self, prop)
             # Maybe this value is 'null'. If so, we should NOT inherit
             # and just delete this entry, and hope of course.
-            if value == 'null':
-                delattr(self, prop)
-                return None
+            # Keep "null" values, because in "inheritance chaining" they must 
+            # be passed from one level to the next.
+            #if value == 'null':
+            #    delattr(self, prop)
+            #    return None
             # Manage the additive inheritance for the property,
             # if property is in plus, add or replace it
             if self.has_plus(prop):
-                value += ',' + self.get_plus_and_delete(prop)
+                value = self.get_plus_and_delete(prop) + ',' + value
             return value
         #Ok, I do not have prop, Maybe my templates do?
         # Same story for plus
@@ -220,7 +222,7 @@ Like temporary attributes such as "imported_from", etc.. """
             value = i.get_property_by_inheritance(items, prop)
             if value is not None:
                 if self.has_plus(prop):
-                    value += ','+self.get_plus_and_delete(prop)
+                    value = self.get_plus_and_delete(prop) + ',' + value
                 setattr(self, prop, value)
                 return value
         # I do not have prop, my templates too... Maybe a plus?
@@ -243,12 +245,12 @@ Like temporary attributes such as "imported_from", etc.. """
                     else:
                         value = self.customs[prop]
                     if self.has_plus(prop):
-                        value = value+self.get_plus_and_delete(prop)
+                        value = self.get_plus_and_delete(prop) + ',' + value
                     self.customs[prop] = value
         for prop in self.customs:
             value = self.customs[prop]
             if self.has_plus(prop):
-                value = value = value+','+self.get_plus_and_delete(prop)
+                value = self.get_plus_and_delete(prop) + ',' + value
                 self.customs[prop] = value
         # We can get custom properties in plus, we need to get all
         # entires and put
@@ -295,7 +297,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
-                print self.get_name(), "missing property :", prop
+                safe_print(self.get_name(), "missing property :", prop)
                 state = False
                 
         return state
@@ -369,7 +371,7 @@ Like temporary attributes such as "imported_from", etc.. """
     #  but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
-            print "Deleting acknowledged of", self.get_dbg_name()
+            safe_print("Deleting acknowledged of", self.get_dbg_name())
             self.problem_has_been_acknowledged = False
             # Should not be deleted, a None is Good
             self.acknowledgement = None
@@ -437,7 +439,6 @@ Like temporary attributes such as "imported_from", etc.. """
         # Now config properties
         for prop, entry in cls.properties.items():
             # Is this property intended for brokking?
-#            if 'fill_brok' in cls.properties[prop]:
             if brok_type in entry.fill_brok:
                 data[prop] = self.get_property_value_for_brok(prop, cls.properties)
 
@@ -640,7 +641,7 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from
+                safe_print("Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from)
                 r = False
 
         # Then look if we have some errors in the conf
@@ -656,7 +657,7 @@ class Items(object):
         for i in self:
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown")
-                print "Error: In", i.get_name(), "is incorrect ; from", n
+                safe_print("Error: In", i.get_name(), "is incorrect ; from", n)
                 r = False        
         
         return r
@@ -694,6 +695,13 @@ class Items(object):
     def apply_partial_inheritance(self, prop):
         for i in self:
             i.get_property_by_inheritance(self, prop)
+            if not i.is_tpl():
+                # If a "null" attribute was inherited, delete it
+                try:
+                    if getattr(i, prop) == 'null':
+                        delattr(i, prop)
+                except:
+                    pass
 
 
     def apply_inheritance(self):
@@ -720,7 +728,7 @@ class Items(object):
         for id in self.twins:
             i = self.items[id]
             type = i.__class__.my_type
-            print 'Warning: the', type, i.get_name(), 'is already defined.'
+            safe_print('Warning: the', type, i.get_name(), 'is already defined.')
             del self.items[id] # bye bye
         # do not remove twins, we should look in it, but just void it
         self.twins = []

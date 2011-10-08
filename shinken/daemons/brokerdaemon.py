@@ -24,6 +24,7 @@ import os
 import sys
 import time
 import traceback
+import socket
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -38,6 +39,11 @@ import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import Pyro
 
 from shinken.external_command import ExternalCommand
+
+# Pack of common Pyro exceptions
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+                    Pyro.errors.CommunicationError, \
+                    Pyro.errors.DaemonError)
 
 
 # Our main APP class
@@ -103,13 +109,14 @@ class Broker(BaseSatellite):
                 # so give me all dumbass!
                 if 'full_instance_id' in data:
                     c_id = data['full_instance_id']
-                    logger.log('A module is asking me to get all initial data from the scheduler %d' % c_id)
+                    source = elt.source
+                    logger.log('The module %s is asking me to get all initial data from the scheduler %d' % (source, c_id))
                     # so we just reset the connection adn the running_id, it will just get all new things
                     try:
                         self.schedulers[c_id]['con'] = None
                         self.schedulers[c_id]['running_id'] = 0
                     except KeyError: # maybe this instance was not known, forget it
-                        print "WARNING: a module ask me a full_instance_id for an unknown ID!", c_id
+                        logger.log("WARNING: the module %s ask me a full_instance_id for an unknown ID (%d)!" % (source, c_id))
             # Maybe a module say me that it's dead, I must log it's last words...
             if elt.get_type() == 'ICrash':
                 data = elt.get_data()
@@ -118,7 +125,7 @@ class Broker(BaseSatellite):
                 # The module dead will be look elsewhere and put in restarted.
 
 
-    # Get teh good tabs for links by the kind. If unknown, return None
+    # Get the good tabs for links by the kind. If unknown, return None
     def get_links_from_type(self, type):
         t = {'scheduler' : self.schedulers, 'arbiter' : self.arbiters, \
              'poller' : self.pollers, 'reactionner' : self.reactionners}
@@ -146,7 +153,7 @@ class Broker(BaseSatellite):
     # initialise or re-initialise connection with scheduler or
     # arbiter if type == arbiter
     def pynag_con_init(self, id, type='scheduler'):
-            # Get teh good links tab for looping..
+            # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
             logger.log('DBG: Type unknown for connection! %s' % type)
@@ -170,7 +177,19 @@ class Broker(BaseSatellite):
         running_id = links[id]['running_id']
         # DBG: print "Running id before connection", running_id
         uri = links[id]['uri']
-        links[id]['con'] = Pyro.core.getProxyForURI(uri)
+        
+        try:
+            socket.setdefaulttimeout(3)
+            links[id]['con'] = Pyro.core.getProxyForURI(uri)
+            socket.setdefaulttimeout(None)
+        except Pyro_exp_pack , exp:
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imadiatly after
+            socket.setdefaulttimeout(None)
+            logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
+            sched['con'] = None
+            return
+
 
         try:
                 # intial ping must be quick
@@ -257,7 +276,7 @@ class Broker(BaseSatellite):
     # We get new broks from schedulers
     # REF: doc/broker-modules.png (2)
     def get_new_broks(self, type='scheduler'):
-            # Get teh good links tab for looping..
+            # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
             logger.log('DBG: Type unknown for connection! %s' % type)

@@ -91,7 +91,7 @@ class Npcd_broker(BaseModule):
         # one a minute
         if time.time() - self.last_need_data_send > 60:
             print "I ask the broker for instance id data :", c_id
-            msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
+            msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id}, source=self.get_name())
             self.from_q.put(msg)
             self.last_need_data_send = time.time()
         return
@@ -140,7 +140,7 @@ class Npcd_broker(BaseModule):
     # A host check has just arrived. Write the performance data to the file
     def manage_host_check_result_brok(self, b):
         #If we don't know about the host or the service, ask for a full init phase!
-        if not b.data['host_name'] in self.service_commands:
+        if not b.data['host_name'] in self.host_commands:
             self.ask_reinit(b.data['instance_id'])
             return
 

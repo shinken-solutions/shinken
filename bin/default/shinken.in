@@ -101,6 +101,6 @@ RECEIVERPID="$RUN/receiverd.pid"
 RECEIVERDEBUGFILE="$LOG/receiver-debug.log"
 
 
-# nicelevel to run nagios daemon with
+# nicelevel to run shinken daemon with
 NICENESS=5
 

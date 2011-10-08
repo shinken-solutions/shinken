@@ -113,10 +113,20 @@ class TestDispatcher(ShinkenTest):
     
     #Change ME :)
     def test_simple_dispatch(self):
+        for r in self.conf.realms:
+            print r.get_name()
+        r = self.conf.realms.find_by_name('All')
         print "The dispatcher", self.dispatcher
         # dummy for the arbiter
         for a in self.conf.arbiterlinks:
             a.__class__ = GoodArbiter
+        elts_types = ['schedulerlinks', 'pollers', 'reactionners', 'brokers', 'receivers']
+        for t in elts_types:
+            lst = getattr(self.conf, t)
+            for s in lst:
+                print "TAG s", s
+                s.realm = r
+        
         print "Preparing schedulers"
         scheduler1 = self.conf.schedulerlinks.find_by_name('scheduler-all-1')
         self.assert_(scheduler1 is not None)

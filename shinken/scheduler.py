@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+#Copyright (C) 2009-2011 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -26,6 +26,7 @@ import os
 import traceback
 import cStringIO
 import sys
+import socket
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -45,6 +46,12 @@ from shinken.acknowledge import Acknowledge
 from shinken.log import logger
 from shinken.util import nighty_five_percent, safe_print
 from shinken.load import Load
+
+# Pack of common Pyro exceptions
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+                    Pyro.errors.CommunicationError, \
+                    Pyro.errors.DaemonError)
+
 
 class Scheduler:
     def __init__(self, scheduler_daemon):
@@ -472,6 +479,7 @@ class Scheduler:
                                 new_c = c.copy_shell()
                                 res.append(new_c)
 
+
                         # If we have notification_interval then schedule the next notification (problems only)
                         if a.type == 'PROBLEM':
                             # Update the ref notif number after raise the one of the notification
@@ -518,11 +526,19 @@ class Scheduler:
                     # sets the status to zombie, so we need to save it here.
                     timeout = True
                     execution_time = c.execution_time
+
+                # Add protection for strange charset
+                if isinstance(c.output, str):
+                    c.output = c.output.decode('utf8', 'ignore')
+
                 self.actions[c.id].get_return_from(c)
                 item = self.actions[c.id].ref
                 item.remove_in_progress_notification(c)
                 self.actions[c.id].status = 'zombie'
                 item.last_notification = c.check_time
+
+                # And we ask the item to update it's state
+                self.get_and_register_status_brok(item)
 
                 # If we' ve got a problem with the notification, raise a Warning log
                 if timeout:
@@ -560,7 +576,7 @@ class Scheduler:
 
 
 
-    # Get teh good tabs for links by the kind. If unknown, return None
+    # Get the good tabs for links by the kind. If unknown, return None
     def get_links_from_type(self, type):
         t = { 'poller' : self.pollers, 'reactionner' : self.reactionners }
         if type in t :
@@ -580,7 +596,7 @@ class Scheduler:
     # initialise or re-initialise connection with a poller
     # or a reactionner
     def pynag_con_init(self, id, type='poller'):
-        # Get teh good links tab for looping..
+        # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
             logger.log('DBG: Type unknown for connection! %s' % type)
@@ -601,9 +617,22 @@ class Scheduler:
 
         print "Init connection with", links[id]['uri']
 
+
         uri = links[id]['uri']
-        links[id]['con'] = Pyro.core.getProxyForURI(uri)
-        con = links[id]['con']
+        try:
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imediatly after
+            socket.setdefaulttimeout(3)
+            links[id]['con'] = Pyro.core.getProxyForURI(uri)
+            con = links[id]['con']
+            socket.setdefaulttimeout(None)
+        except Pyro_exp_pack , exp:
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imadiatly after
+            socket.setdefaulttimeout(None)
+            logger.log("[] Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            links[id]['con'] = None
+            return
 
         try:
             # intial ping must be quick
@@ -980,7 +1009,7 @@ class Scheduler:
 
     # Fill the self.broks with broks of self (process id, and co)
     # broks of service and hosts (initial status)
-    def fill_initial_broks(self):
+    def fill_initial_broks(self, with_logs=False):
         # First a Brok for delete all from my instance_id
         b = Brok('clean_all_my_instance_id', {'instance_id' : self.instance_id})
         self.add(b)
@@ -1001,11 +1030,13 @@ class Scheduler:
                 b = i.get_initial_status_brok()
                 self.add(b)
 
-        # Ask for INITIAL logs for services and hosts
-        for i in self.hosts:
-            i.raise_initial_state()
-        for i in self.services:
-            i.raise_initial_state()
+        # Only raise the all logs at the scehduler startup
+        if with_logs:
+            # Ask for INITIAL logs for services and hosts
+            for i in self.hosts:
+                i.raise_initial_state()
+            for i in self.services:
+                i.raise_initial_state()
 
         # Add a brok to say that we finished all initial_pass
         b = Brok('initial_broks_done', {'instance_id' : self.instance_id})
@@ -1251,6 +1282,7 @@ class Scheduler:
                 worker_names[c.worker] += 1
         for a in self.actions.values():
             if a.status == 'inpoller' and a.t_to_go < now - 300:
+                
                 a.status = 'scheduled'
                 if a.worker not in worker_names:
                     worker_names[a.worker] = 1
@@ -1267,7 +1299,7 @@ class Scheduler:
         self.retention_load()
 
         # Ok, now all is initilised, we can make the inital broks
-        self.fill_initial_broks()
+        self.fill_initial_broks(with_logs=True)
 
         logger.log("[%s] First scheduling launched" % self.instance_name)
         self.schedule()

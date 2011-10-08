@@ -30,10 +30,11 @@ class Message:
     _type = None
     _data = None
     _from = None
-    def __init__(self, id, type, data=None):
+    def __init__(self, id, type, data=None, source=None):
         self._type = type
         self._data = data
         self._from = id
+        self.source = source
 
 
     def get_type(self):
@@ -48,4 +49,4 @@ class Message:
 
 
     def str(self):
-        return "Message from %d, Type: %s Data: %s" % (self._from, self._type, self._data)
+        return "Message from %d (%s), Type: %s Data: %s" % (self._from, self.source, self._type, self._data)

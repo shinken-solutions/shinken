@@ -28,7 +28,7 @@ class LiveStatusRequest:
    
     """A class describing a livestatus request."""
     
-    def __init__(self, data, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue, counters):
+    def __init__(self, data, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, db, pnp_path, return_queue, counters):
         self.data = data
         # Runtime data form the global LiveStatus object
         self.configs = configs
@@ -44,7 +44,7 @@ class LiveStatusRequest:
         self.pollers = pollers
         self.reactionners = reactionners
         self.brokers = brokers
-        self.dbconn = dbconn
+        self.db = db
         self.pnp_path = pnp_path
         self.return_queue = return_queue
         self.counters = counters
@@ -67,7 +67,7 @@ class LiveStatusRequest:
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
-            # a space folowing the :
+            # a space following the :
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
@@ -84,15 +84,15 @@ class LiveStatusRequest:
                 query_cmds.append(line)
         if len(external_cmds) > 0:
             for external_cmd in external_cmds:
-                query = LiveStatusCommandQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+                query = LiveStatusCommandQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.pnp_path, self.return_queue, self.counters)
                 query.parse_input(external_cmd)
                 self.queries.append(query)
         if len(wait_cmds) > 1:
-            query = LiveStatusWaitQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+            query = LiveStatusWaitQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.pnp_path, self.return_queue, self.counters)
             query.parse_input('\n'.join(wait_cmds))
             self.queries.append(query)
         if len(query_cmds) > 0:
-            query = LiveStatusQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
+            query = LiveStatusQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.pnp_path, self.return_queue, self.counters)
             query.parse_input('\n'.join(query_cmds))
             self.queries.append(query)
 

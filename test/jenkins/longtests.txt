@@ -79,7 +79,9 @@ test_linkify_template.py
 test_module_on_module.py
 test_disable_active_checks.py
 test_no_event_handler_during_downtime.py
+test_livestatus_db.py
 test_timeout.py
+test_service_template_inheritance.py
 
 # takes long
 test_livestatus.py

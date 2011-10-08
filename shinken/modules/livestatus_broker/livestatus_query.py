@@ -19,6 +19,7 @@
 import os
 import re
 import time
+import datetime
 import copy 
 
 try:
@@ -35,6 +36,8 @@ from mapping import out_map as LSout_map
 from livestatus_response import LiveStatusResponse
 from livestatus_stack import LiveStatusStack
 from livestatus_constraints import LiveStatusConstraints
+from livestatus_db import LiveStatusDbError
+from log_line import Logline
 
 
 class Problem:
@@ -48,7 +51,7 @@ class LiveStatusQuery(Hooker):
 
     my_type = 'query'
 
-    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, dbconn, pnp_path, return_queue, counters):
+    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, db, pnp_path, return_queue, counters):
         # Runtime data form the global LiveStatus object
         self.configs = configs
         self.hosts = hosts
@@ -63,7 +66,7 @@ class LiveStatusQuery(Hooker):
         self.pollers = pollers
         self.reactionners = reactionners
         self.brokers = brokers
-        self.dbconn = dbconn
+        self.db = db
         self.pnp_path = pnp_path
         self.return_queue = return_queue
         self.counters = counters
@@ -217,7 +220,7 @@ class LiveStatusQuery(Hooker):
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
-            # a space folowing the :
+            # a space following the :
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
@@ -641,38 +644,63 @@ member_key: the key to be used to sort each resulting element of a group member.
         output_map = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
         without_filter = len(self.filtercolumns) == 0
         result = []
-        if self.table == 'log':
-            out_map = self.out_map['Logline']
-            # We can apply the filterstack here as well. we have columns and filtercolumns.
-            # the only additional step is to enrich log lines with host/service-attributes
-            # A timerange can be useful for a faster preselection of lines
-            filter_clause, filter_values = sql_filter_func()
-            c = self.dbconn.cursor()
-            try:
-                if sqlite3.paramstyle == 'pyformat':
-                    matchcount = 0
-                    for m in re.finditer(r"\?", filter_clause):
-                        filter_clause = re.sub('\\?', '%(' + str(matchcount) + ')s', filter_clause, 1)
-                        matchcount += 1
-                    filter_values = dict(zip([str(x) for x in xrange(len(filter_values))], filter_values))
-                c.execute('SELECT * FROM logs WHERE %s' % filter_clause, filter_values)
-            except sqlite3.Error, e:
-                print "An error occurred:", e.args[0]
-            dbresult = c.fetchall()
-            if sqlite3.paramstyle == 'pyformat':
-                dbresult = [self.row_factory(c, d) for d in dbresult]
-
+        # We can apply the filterstack here as well. we have columns and filtercolumns.
+        # the only additional step is to enrich log lines with host/service-attributes
+        # A timerange can be useful for a faster preselection of lines
+        filter_clause, filter_values = sql_filter_func()
+        full_filter_clause = filter_clause
+        matchcount = 0
+        for m in re.finditer(r"\?", full_filter_clause):
+            full_filter_clause = re.sub('\\?', str(filter_values[matchcount]), full_filter_clause, 1)
+            matchcount += 1
+        fromtime = 0
+        totime = int(time.time()) + 1
+        gtpat = re.search(r'^(\(*time|(.*\s+time))\s+>\s+(\d+)', full_filter_clause)
+        gepat = re.search(r'^(\(*time|(.*\s+time))\s+>=\s+(\d+)', full_filter_clause)
+        ltpat = re.search(r'^(\(*time|(.*\s+time))\s+<\s+(\d+)', full_filter_clause)
+        lepat = re.search(r'^(\(*time|(.*\s+time))\s+<=\s+(\d+)', full_filter_clause)
+        if gtpat != None:
+            fromtime = int(gtpat.group(3)) + 1
+        if gepat != None:
+            fromtime = int(gepat.group(3))
+        if ltpat != None:
+            totime = int(ltpat.group(3)) - 1
+        if lepat != None:
+            totime = int(lepat.group(3))
+        # now find the list of datafiles
+        filtresult = []
+        for dateobj, handle, archive, fromtime, totime in self.db.log_db_relevant_files(fromtime, totime):
+            dbresult = self.select_live_data_log(filter_clause, filter_values, handle, archive, fromtime, totime)
             prefiltresult = [y for y in (x.fill(self.hosts, self.services, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
-            filtresult = [self.create_output(output_map, x) for x in prefiltresult]
-            if self.stats_request:
-                result = self.statsify_result(filtresult)
-            else:
-                # Results are host/service/etc dicts with the requested attributes
-                # Columns: = keys of the dicts
-                result = filtresult
+            filtresult.extend([self.create_output(output_map, x) for x in prefiltresult])
+        if self.stats_request:
+            result = self.statsify_result(filtresult)
+        else:
+            # Results are host/service/etc dicts with the requested attributes
+            # Columns: = keys of the dicts
+            result = filtresult
 
-        #print "result is", result
         return result
+
+
+    def row_factory(self, cursor, row):
+        """Handler for the sqlite fetch method."""
+        return Logline(cursor, row)
+
+
+    def select_live_data_log(self, filter_clause, filter_values, handle, archive, fromtime, totime):
+        dbresult = []
+        try:
+            if handle == "main":
+                dbresult = self.db.execute('SELECT * FROM logs WHERE %s' % filter_clause, filter_values, self.row_factory)
+            else:
+                self.db.commit()
+                self.db.execute_attach("ATTACH DATABASE '%s' AS %s" % (archive, handle))
+                dbresult = self.db.execute('SELECT * FROM %s.logs WHERE %s' % (handle, filter_clause), filter_values, self.row_factory)
+                self.db.execute("DETACH DATABASE %s" % handle)
+        except LiveStatusDbError, e:
+            print "An error occurred:", e.args[0]
+        return dbresult
 
 
     def create_output(self, out_map, elt):

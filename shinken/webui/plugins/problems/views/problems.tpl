@@ -1,5 +1,3 @@
-%import time
-%t0 = time.time()
 
 %helper = app.helper
 %datamgr = app.datamgr
@@ -7,7 +5,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css'], refresh=True, menu_part='/problems', user=user
+%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css'], refresh=True, menu_part='/'+page, user=user
 
 
 %# " If the auth got problem, we bail out"
@@ -19,33 +17,116 @@
 %end
 
 
+%# " Add the auto copleter in the search input form"
+<script type="text/javascript">
+document.addEvent('domready', function() {
+ 
+  var inputWord = $('search_input');
+ 
+  // Our instance for the element with id "search_input"
+  new Autocompleter.Request.JSON(inputWord, '/lookup', {
+       'indicatorClass': 'autocompleter-loading',
+       'minLength': 3
+  });
+
+});
+</script>
+
+
+<script type="text/javascript">
+	function submitform()
+	{
+	document.forms["searchform"].submit();
+	}
+	
+	/* Catch the key ENTER and launch the form 
+	 Will be link in the password field
+	*/
+	function submitenter(myfield,e){
+	  var keycode;
+	  if (window.event) keycode = window.event.keyCode;
+	  else if (e) keycode = e.which;
+	  else return true;
+	
+	
+	  if (keycode == 13){
+	    submitform();
+	    return false;
+	  }else
+	   return true;
+	}
+</script>
+
+
 	 
 <div id="left_container" class="grid_2">
-  <div id="dummy_box" class="box_gradient_horizontal"> 
 
-  </div>
   <div id="nav_left">
     <ul>
-      <li><a href="/problems">All problems</a></li>
+      <li><a href="#">Overview</a></li>
+      <li>
+	<center>
+	  <table cellspacing="2" cellpadding="0">
+	    <tbody>
+	      <tr>
+		<th>Problems</th><th>Unhandled</th><th>All</th>
+	      </tr>
+	      
+	      <tr>
+		<td>
+		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
+		</td>
+		<td>
+		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
+		</td>
+                <td><a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
+              </tr>
+	    </tbody>
+	  </table>
+	</center>
+      </li>
+
+      <li><a href="#">Search</a></li>
+      
+      <li>
+      	<form method="get" id="searchform" action="/{{page}}">			
+	  <div class="text-field">
+	    <label for="search">Name:</label>
+	    <input name="search" type="text" tabindex="1" size="30" value="{{search}}" id="search_input">
+	  </div>
+	  <center>
+	    <div class="buttons">
+	      <a style="padding:8px;" tabindex="4" class="button" href="javascript: submitform()"><img src="/static/images/search.png" alt="search"> Search</a>
+	    </div>
+	  </center>
+	</form>
+      </li>
 
     </ul>
   </div>
 </div>
 
 %# "We set the actions div that will be show/hide if we select elements"
-<div class="actions" id="actions">
-    <div style="float:right;">
-      <a href="#" onclick="try_to_fix_all()">{{!helper.get_button('Fix all!', img='/static/images/enabled.png')}}</a>
-    </div>
-    <div style="float:right;">
-      <a href="#" onclick="recheck_now_all()">{{!helper.get_button('Recheck all', img='/static/images/delay.gif')}}</a>
-    </div>
-    <div style="float:right;">
-      <a href="#" onclick="acknoledge_all()">{{!helper.get_button('Acknoledge all', img='/static/images/wrench.png')}}</a>
-    </div>
-
+<div class="dockContainer">
+  <div class="dockWrapper" id="actions">
+    <div class="cap left"></div>
+    <ul class="dock">
+      <li class="active">
+	<span>Fix</span>
+	<a href="#" onclick="try_to_fix_all()"><img src="/static/images/tools.png" alt="tools"/></a>
+      </li>		
+      <li>
+	<span>Recheck</span>
+	<a href="#" onclick="recheck_now_all()"><img src="/static/images/big_refresh.png" alt="refresh"/></a>
+      </li>
+      <li>
+	<span>Acknoledge</span>
+	<a href="#" onclick="acknoledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
+      </li>
+      
+    </ul>
+  </div>
 </div>
-
 <div class="grid_13">
 
   %if navi is not None:
@@ -57,7 +138,7 @@
 	     %elif start == None or end == None:
 		<span class='extend'>...</span>
              %else:
-		<a href='/problems?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
 	     %end
           %end
 	</div>
@@ -73,22 +154,47 @@
 
     %# " We remember the last hname so see if we print or not the host for a 2nd service"
     %last_hname = ''
+
+    %# " We try to make only importants things shown on same output "
+    %last_output = ''
+    %nb_same_output = 0
+
     %for pb in pbs:
 
       <div class="clear"></div>      
       %if pb.business_impact != imp_level:
        <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
-       %# "We reset teh last_hname so we won't overlap this feature across tables"
+       %# "We reset the last_hname so we won't overlap this feature across tables"
        %last_hname = ''
+       %last_output = ''
+       %nb_same_output = 0
       %end
       %imp_level = pb.business_impact
 
-	<div> 
+      %# " We check for the same output and the same host. If we got more than 3 of same, make them opacity effect"
+      %if pb.output == last_output and pb.host_name == last_hname:
+          %nb_same_output += 1
+      %else:
+          %nb_same_output = 0
+      %end
+      %last_output = pb.output
+
+      %if nb_same_output > 3:
+       <div class='opacity_hover'>
+      %else:
+       <div>
+      %end
+
 	  <div style="margin-left: 20px; width: 70%; float:left;">
 	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
 	      <tr class="tabledesc">
-	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
-	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /> </td>
+	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
+	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <div class="aroundpulse">
+		    %# " We put a 'pulse' around the elements if it's an important one "
+		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
+		    <span class="pulse"></span>
+		    %end
+		    <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div> </td>
 		%if pb.host_name == last_hname:
 		   <td class="tdBorderLeft tdCriticity" style="width: 120px;"> </td>
 		%else:
@@ -103,8 +209,13 @@
                 %end
 		<td class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;"> {{pb.state}}</td>
 		<td title='{{helper.print_date(pb.last_state_change)}}' class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
-		<td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output[:55]}}</td>
-		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" /> </td>
+		%# "We put a title (so a tip) on the output onlly if need"
+		%if len(pb.output) > 55:
+		   <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output[:55]}}</td>
+		%else:
+		   <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output}}</td>
+		%end
+		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
 		</tr>
              </table>
 	  </div>  
@@ -163,7 +274,7 @@
 	<div class="state_{{i.state.lower()}}">
 	  <p><img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(i)}}" />
 	        %for j in range(0, i.business_impact-2):
-	          <img src='/static/images/star.png'>
+	          <img src='/static/images/star.png' alt="star">
 		%end
 	     {{!helper.get_link(i)}} is {{i.state}}
 	  </p>
@@ -184,7 +295,7 @@
 	     %elif start == None or end == None:
 		<span class='extend'>...</span>
              %else:
-		<a href='/problems?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
 	     %end
           %end
 	</div>
@@ -196,9 +307,3 @@
 </div>
 
 <div class="clear"></div>
-</div>
-
-Page generated in {{"%.2f" % (time.time() - t0)}} seconds
-%include footer
-
-

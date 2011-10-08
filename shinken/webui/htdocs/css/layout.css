@@ -37,6 +37,11 @@ body {
 /* ----------------------------------------------------------------
  *  Header
  * ----------------------------------------------------------------*/
+#header{
+	margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+}
 
 #header h1 {
 	font-weight:normal;
@@ -49,12 +54,25 @@ body {
 }
 
 /* ----------------------------------------------------------------
+ *  Navigation container
+ * ----------------------------------------------------------------*/
+
+#navigation {
+	margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+}
+
+/* ----------------------------------------------------------------
  *  Main container
  * ----------------------------------------------------------------*/
 
 #main_container{
 	background: #FFFFFF;
 	min-height: 700px;
+	margin-left: 0;
+    margin-right: 0;
+    width: 100%;
 }
 
 /* ----------------------------------------------------------------
@@ -74,7 +92,8 @@ body {
 #footer {
 	background: #787878;
 	height: 20px;
-	margin: 0;
+	margin-left: 0;
+    margin-right: 0;
     width: 100%;
 }
 
@@ -174,7 +193,7 @@ table {
 }
 
 tbody {
-	border-top: 3px solid #E3E3E5;
+	border-top: 1px solid #E3E3E5;
 }
 
 th {
@@ -383,6 +402,18 @@ td.actions a {
 .prefix_custom_2 {
 	margin-left: 25%;
 }
+
+
+#login-error {
+    color: red;
+    font-weight: bold;
+}
+
+
+#login-text {
+    font-weight: bold;
+}
+
 
 #login-container {
     float: left;
@@ -870,3 +901,123 @@ a.down-big {
     font-size: 16px;
     padding: 10px 15px;
 }
+
+
+
+
+#counters  { 
+  background-position:0px 0px;
+  background-repeat:repeat-x;
+  z-index : 5;
+/*  width:128px; 
+  height:128px; */
+  zoom:1; 
+/*  position: absolute;
+  top: 0;*/
+  margin-right: 150px;
+  border: 0;
+
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;  
+}
+
+
+/* ************************************
+
+Dep tree list display, with icons
+
+***************************************
+*/
+
+
+/*             Some small LI state, with icon   */
+li.ok{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/tick.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.up{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/tick.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+
+li.unknown{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/unknown.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.ack{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/ack.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.down{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/down.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.unreachable{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/unreachable.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.warning{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/warning.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.critical{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/down.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+

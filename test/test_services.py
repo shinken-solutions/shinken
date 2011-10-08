@@ -46,9 +46,9 @@ class TestService(ShinkenTest):
     def test___getstate__(self):
         svc = self.get_svc()
         cls = svc.__class__
-        #We get teh state
+        #We get the state
         state = svc.__getstate__()
-        #Check it's the good lenght
+        #Check it's the good length
         self.assert_(len(state) == len(cls.properties) + len(cls.running_properties) + 1)
         #we copy the service
         svc_copy = copy.copy(svc)

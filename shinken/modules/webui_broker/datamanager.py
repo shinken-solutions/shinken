@@ -37,6 +37,13 @@ class DataManager(object):
     def get_service(self, hname, sdesc):
         return self.rg.services.find_srv_by_name_and_hostname(hname, sdesc)
 
+    def get_all_hosts_and_services(self):
+        all = []
+        all.extend(self.rg.hosts)
+        all.extend(self.rg.services)
+        all.sort(hst_srv_sort)
+        return all
+
 
     def get_contact(self, name):
         return self.rg.contacts.find_by_name(name)
@@ -51,6 +58,25 @@ class DataManager(object):
     def get_services(self):
         return self.rg.services
 
+    def get_schedulers(self):
+        return self.rg.schedulers
+
+    def get_pollers(self):
+        return self.rg.pollers
+
+    def get_brokers(self):
+        return self.rg.brokers
+
+    def get_receivers(self):
+        return self.rg.receivers
+
+    def get_reactionners(self):
+        return self.rg.reactionners
+
+    def get_program_start(self):
+        for c in self.rg.configs.values():
+            return c.program_start
+        return None
     
     def get_important_impacts(self):
         res = []
@@ -72,6 +98,50 @@ class DataManager(object):
         res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact and not h.problem_has_been_acknowledged])
         res.sort(hst_srv_sort)
         return res
+
+    # Return all non managed impacts
+    def get_all_impacts(self):
+        res = []
+        for s in self.rg.services:
+            if s.is_impact and s.state not in ['OK', 'PENDING']:
+                # If s is acked, pass
+                if s.problem_has_been_acknowledged:
+                    continue
+                # We search for impacts that were NOT currently managed
+                if len([p for p in s.source_problems if not p.problem_has_been_acknowledged]) > 0:
+                    res.append(s)
+        for h in self.rg.hosts:
+            if h.is_impact and h.state not in ['UP', 'PENDING']:
+                # If h is acked, pass
+                if h.problem_has_been_acknowledged:
+                    continue
+                # We search for impacts that were NOT currently managed
+                if len([p for p in h.source_problems if not p.problem_has_been_acknowledged]) > 0:
+                    res.append(h)
+        return res
+
+
+
+    # Return the number of problems
+    def get_nb_problems(self):
+        return len(self.get_all_problems())
+
+    # Get the number of all problems, enven the ack ones
+    def get_nb_all_problems(self):
+        res = []
+        res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
+        res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact])
+        return len(res)
+
+
+    # Return the number of impacts
+    def get_nb_impacts(self):
+        return len(self.get_all_impacts())
+        
+
+    def get_nb_elements(self):
+        return len(self.rg.services) + len(self.rg.hosts)
+
 
 
     def get_important_elements(self):

@@ -73,7 +73,9 @@ class Webui_broker(BaseModule, Daemon):
         self.port = int(getattr(modconf, 'port', '7767'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
         self.auth_secret = getattr(modconf, 'auth_secret').encode('utf8', 'replace')
-        self.http_backend = getattr(modconf, 'http_backend', 'wsgiref')
+        self.http_backend = getattr(modconf, 'http_backend', 'auto')
+        self.login_text = getattr(modconf, 'login_text', None)
+
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
@@ -325,7 +327,7 @@ class Webui_broker(BaseModule, Daemon):
         def server_static(path):
             return static_file(path, root=os.path.join(bottle_dir, 'htdocs'))
 
-        # And add teh favicon ico too
+        # And add the favicon ico too
         @route('/favicon.ico')
         def give_favicon():
             return static_file('favicon.ico', root=os.path.join(bottle_dir, 'htdocs', 'images'))
@@ -338,6 +340,8 @@ class Webui_broker(BaseModule, Daemon):
         print "Checking auth of", user, password
         c = self.datamgr.get_contact(user)
         print "Got", c
+        if not c:
+            print "Warning: You need to have a contact having the same name as your user %s" % user
         
         # TODO : do not forgot the False when release!
         is_ok = False#(c is not None)#False

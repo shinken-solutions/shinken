@@ -23,6 +23,7 @@
 
 import time
 from shinken.comment import Comment
+from shinken.property import BoolProp, IntegerProp, StringProp
 
 class Downtime:
     id = 1
@@ -30,19 +31,19 @@ class Downtime:
     #Just to list the properties we will send as pickle
     #so to others daemons, so all but NOT REF
     properties = {
-        'activate_me':  None,
-        'entry_time':   None,
-        'fixed':        None,
-        'start_time':   None,
-        'duration':     None,
-        'trigger_id':   None,
-        'end_time':     None,
-        'real_end_time': None,
-        'author':       None,
-        'comment':      None,
-        'is_in_effect': None,
-        'has_been_triggered': None,
-        'can_be_deleted': None,
+        'activate_me':  StringProp (default=[]),
+        'entry_time':   IntegerProp(default=0 ,  fill_brok=['full_status']),
+        'fixed':        BoolProp   (default=True,  fill_brok=['full_status']),
+        'start_time':   IntegerProp(default=0,  fill_brok=['full_status']),
+        'duration':     IntegerProp(default=0,  fill_brok=['full_status']),
+        'trigger_id':   IntegerProp(default=0),
+        'end_time':     IntegerProp(default=0,  fill_brok=['full_status']),
+        'real_end_time': IntegerProp(default=0),
+        'author':       StringProp (default='',  fill_brok=['full_status']),
+        'comment':      StringProp (default=''),
+        'is_in_effect': BoolProp   (default=False),
+        'has_been_triggered': BoolProp(default=False),
+        'can_be_deleted': BoolProp(default=False),
 # TODO: find a very good way to handle the downtime "ref"
 # ref must effectively not be in properties because it points onto a real object.
 #        'ref':          None
@@ -197,6 +198,25 @@ class Downtime:
             self.extra_comment.can_be_deleted = True
         #self.ref.del_comment(self.comment_id)
 
+
+    #Fill data with info of item by looking at brok_type
+    #in props of properties or running_propterties
+    def fill_data_brok_from(self, data, brok_type):
+        cls = self.__class__
+        #Now config properties
+        for prop, entry in cls.properties.items():
+            if hasattr(prop, 'fill_brok'):
+                if brok_type in entry['fill_brok']:
+                    data[prop] = getattr(self, prop)
+
+
+    #Get a brok with initial status
+    def get_initial_status_brok(self):
+        data = {'id': self.id}
+
+        self.fill_data_brok_from(data, 'full_status')
+        b = Brok('downtime_raise', data)
+        return b
 
 
     #Call by picle for dataify the downtime

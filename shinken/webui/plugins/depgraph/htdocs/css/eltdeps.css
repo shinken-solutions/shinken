@@ -2,6 +2,7 @@
     font-size:0.8em;
     list-style:none;
     margin:7px;
+    z-index : 5;
 }
 
 #log {
@@ -10,30 +11,42 @@
     font-size:1.0em;
     font-weight:bold;
     color:#23A4FF;
+/*    text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;*/
 }
 
 
 #infovis {
     position:relative;
-/*    width:600px;
-    height:600px;*/
     margin:auto;
     overflow:hidden;
-/*    background-color:black; */
 }
 
 #right-container {
-right: 0;
+right: 5px;
 background-position: center left;
-border-right: 1px solid #DDD;
+
 position: absolute;
-top : 0;
+top : 5px;
 background-color:white;
 -moz-box-shadow:#555 2px 2px 8px;
 -webkit-box-shadow:#555 2px 2px 8px;
 -o-box-shadow:#555 2px 2px 8px;
-border-radius: 15px;
+
 }
+
+
+/*Border :  Copyright ZURB, freely available for distribution under the MIT license. 
+  http://www.zurb.com/playground/awesome-overlays
+ */
+.border {
+    position: absolute;
+    border: 5px solid #FEB515;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -moz-border-image: url(/static/depgraph/images/border-image.png) 5 5 5 5 stretch;
+    -webkit-border-image: url(/static/depgraph/images/border-image.png) 5 5 5 5 stretch;
+}
+
 
 /*TOOLTIPS*/
 .tip {

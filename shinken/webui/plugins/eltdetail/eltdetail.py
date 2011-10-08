@@ -1,7 +1,29 @@
+#!/usr/bin/env python
+#Copyright (C) 2009-2011 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+#This file is part of Shinken.
+#
+#Shinken is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#Shinken is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 ### Will be populated by the UI with it's own value
 app = None
 
+from shinken.webui.bottle import redirect
 
 # Main impacts view
 #@route('/host')
@@ -11,7 +33,7 @@ def show_host(name):
     user = app.get_user_auth()
 
     if not user:
-        return {'app' : app, 'elt' : None, 'valid_user' : False, 'user' : user}
+        redirect("/user/login")
 
     # Ok, we can lookup it
     h = app.datamgr.get_host(name)
@@ -25,7 +47,8 @@ def show_service(hname, desc):
     user = app.get_user_auth()
 
     if not user:
-        return {'app' : app, 'elt' : None, 'valid_user' : False, 'user' : user}
+        redirect("/user/login")
+#        return {'app' : app, 'elt' : None, 'valid_user' : False, 'user' : user}
 
     # Ok, we can lookup it :)
     s = app.datamgr.get_service(hname, desc)

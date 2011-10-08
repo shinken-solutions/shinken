@@ -61,6 +61,10 @@ class AD_Webui(BaseModule):
     def init(self):
         if not self.active:
             return
+#        self.connect()
+
+
+    def connect(self):
         print "Trying to initalize the AD/Ldap connection"
         self.con = ldap.initialize(self.ldap_uri)
         self.con.set_option(ldap.OPT_REFERRALS,0)
@@ -71,6 +75,10 @@ class AD_Webui(BaseModule):
         self.con.simple_bind_s(self.username, self.password)
         print "AD/Ldap Connection done"
         
+
+    def disconnect(self):
+        self.con = None
+
 
     # To load the webui application
     def load(self, app):
@@ -89,8 +97,15 @@ class AD_Webui(BaseModule):
 
     # Give the entry for a contact
     def find_contact_entry(self, contact):
-        if self.con is None:
+        if not self.active:
             return None
+
+        if not contact:
+            return None
+
+        # First we try to connect, because there is no "KEEP ALIVE" option
+        # available, so we will get a drop after one day...
+        self.connect()
         
         print "AD/LDAP : search for contact", contact.get_name()
         searchScope = ldap.SCOPE_SUBTREE
@@ -114,7 +129,7 @@ class AD_Webui(BaseModule):
                     (_, elts) = result_data[0]
                     try :
                         account_name = elts['userPrincipalName'][0]
-                    except KeyError:
+                    except Exception:
                         account_name = str(result_data[0])
                     # Got a result, try to get photo to write file
                     print "Find account printicpalname", account_name
@@ -122,8 +137,9 @@ class AD_Webui(BaseModule):
         except ldap.LDAPError, e:
             print "Ldap error", e, e.__dict__
             return None
-        
-
+        # Always clean on exit
+        finally:
+            self.disconnect()
     
 
     # One of our goal is to look for contacts and get all pictures
@@ -155,11 +171,10 @@ class AD_Webui(BaseModule):
                     f.write(photo)
                     f.close()
                     print "Phto wrote for", c.get_name()
-                    break
                 except Exception, exp:
                     print "Cannot write", p, ":", exp
             except KeyError:
-                print "No photo for", account_name
+                print "No photo for", c.get_name()
 
 
 
@@ -172,6 +187,10 @@ class AD_Webui(BaseModule):
         print "Trying to auth by ldap", user, password
 
         c = self.app.datamgr.get_contact(user)
+
+        if not c:
+            print "AD/Ldap : invalid user (not founded)", user
+            return False
 
         # first we need to find the principalname of this entry
         # because it can be a user name like j.gabes, but we should auth by ldap

@@ -180,7 +180,7 @@ class Helper(object):
             return ' '.join(duration) + ' ago'
 
 
-    # Need to create a X level higer and lower to teh element
+    # Need to create a X level higer and lower to the element
     def create_json_dep_graph(self, elt, levels=3):
         t0 = time.time()
         # First we need ALL elements
@@ -221,7 +221,7 @@ class Helper(object):
         d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
              'data' : {'$type' : 'custom',
                        'business_impact' : elt.business_impact,
-                       'img_src' : self.get_icon_state(elt)
+                       'img_src' : self.get_icon_state(elt),
                        },
              'adjacencies' : []
              }
@@ -234,7 +234,21 @@ class Helper(object):
             elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
             self.get_link_dest(elt), self.get_button('Go to details', img='/static/images/search.png'))
-        
+                       
+
+        d['data']['elt_type'] = elt.__class__.my_type
+        d['data']['is_problem'] = elt.is_problem
+        d['data']['state_id'] = elt.state_id
+
+        print "ELT:%s is %s" % (elt.get_full_name(), elt.state)
+        if elt.state in ['OK', 'UP', 'PENDING']:
+            d['data']['circle'] = 'none'
+        elif elt.state in ['DOWN', 'CRITICAL']:
+            d['data']['circle'] = 'red'
+        elif elt.state in ['WARNING', 'UNREACHABLE']:
+            d['data']['circle'] = 'orange'
+        else:
+            d['data']['circle'] = 'none'
      
 
         # Now put in adj our parents
@@ -354,22 +368,34 @@ class Helper(object):
 
 
     # Get the small state for host/service icons
+    # and satellites ones
     def get_small_icon_state(self, obj):
-        if obj.state == 'PENDING':
-            return 'unknown'
-        if obj.state == 'OK':
+        if obj.__class__.my_type in ['service', 'host' ]:
+            if obj.state == 'PENDING':
+                return 'unknown'
+            if obj.state == 'OK':
+                return 'ok'
+            if obj.state == 'UP':
+                return 'up'
+            # Outch, not a good state...
+            if obj.problem_has_been_acknowledged:
+                return 'ack'
+            if obj.in_scheduled_downtime:
+                return 'downtime'
+            if obj.is_flapping:
+                return 'flapping'
+            #Ok, no excuse, it's a true error...
+            return obj.state.lower()
+        # Maybe it's a satellite
+        if obj.__class__.my_type in ['scheduler', 'poller', 
+                                     'reactionner', 'broker',
+                                     'receiver']:
+            if not obj.alive:
+                return 'critical'
+            if not obj.reachable:
+                return 'warning'
             return 'ok'
-        if obj.state == 'UP':
-            return 'up'
-        # Outch, not a good state...
-        if obj.problem_has_been_acknowledged:
-            return 'ack'
-        if obj.in_scheduled_downtime:
-            return 'downtime'
-        if obj.is_flapping:
-            return 'flapping'
-        #Ok, no excuse, it's a true error...
-        return obj.state.lower()
+        return 'unknown'
 
 
     # For an object, give it's business impact as text 
@@ -420,10 +446,11 @@ class Helper(object):
             return self.get_link(obj.host)
         return self.get_link(obj)
 
+
     # For an object, return the path of the icons
     def get_icon_state(self, obj):
         ico = self.get_small_icon_state(obj)
-        if obj.icon_set != '':
+        if getattr(obj, 'icon_set', '') != '':
             return '/static/images/sets/%s/state_%s.png' % (obj.icon_set, ico)
         else:
             return '/static/images/state_%s.png' % ico

@@ -32,7 +32,9 @@ class TestConfig(ShinkenTest):
     #Change ME :)
     def test_satellite_failed_check(self):
         print "Create a Scheduler dummy"
-        creation_tab = {'scheduler_name' : 'scheduler-1', 'address' : '0.0.0.0', 'spare' : '0', 'port' : '9999', 'check_interval' : '1'}
+        r = self.conf.realms.find_by_name('Default')
+
+        creation_tab = {'scheduler_name' : 'scheduler-1', 'address' : '0.0.0.0', 'spare' : '0', 'port' : '9999', 'check_interval' : '1', 'realm' : 'Default'}
         s = SchedulerLink(creation_tab)
         s.last_check = time.time()-100
         s.timeout = 3
@@ -40,9 +42,11 @@ class TestConfig(ShinkenTest):
         s.data_timeout = 120
         s.port = 9999
         s.max_check_attempts = 4
+        s.realm = r
         #Lie : we start at true here
         s.alive = True
         print s.__dict__
+
         #Should be attempt = 0
         self.assert_(s.attempt == 0)
         #Now make bad ping, sould be unreach and dead (but not dead

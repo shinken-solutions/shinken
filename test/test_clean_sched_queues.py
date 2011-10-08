@@ -59,7 +59,7 @@ class TestSchedCleanQueues(ShinkenTest):
         # So get our 1000 external commands
         self.assert_(len(self.sched.actions) >= 1000)
         
-        # Try to call the clean ,they are jsut too many!
+        # Try to call the clean, they are just too many!
         self.sched.clean_queues()
         # Should have something like 16 event handler
         print len(self.sched.actions)
@@ -73,7 +73,7 @@ class TestSchedCleanQueues(ShinkenTest):
         # So get our 1000 notifications
         self.assert_(len(self.sched.actions) >= 1000)
 
-        # Try to call the clean ,they are jsut too many!
+        # Try to call the clean, they are just too many!
         self.sched.clean_queues()
         print len(self.sched.actions)
         self.assert_(len(self.sched.actions) < 30)

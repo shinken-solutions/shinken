@@ -43,9 +43,44 @@ test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
 export LANG=en_US.UTF8
 
+
+# We try to find the LAST possible Python VERSION
+pythonver() {
+    versions="2.4 2.5 2.6 2.7"
+    LASTFOUND=""
+    # Is there any python here ?
+    for v in $versions
+    do
+	which python$v > /dev/null 2>&1
+	if [ $? -eq 0 ]
+	then
+	    LASTFOUND="python$v"
+	fi
+    done
+    if [ -z "$LASTFOUND" ]
+    then
+        # Finaly try to find a default python
+	which python > /dev/null 2>&1
+	if [ $? -ne 0 ]
+	then
+	    echo "No python interpreter found !"
+	    exit 2
+	else
+  	    echo "python found"
+	    LASTFOUND=$(which python)
+	fi
+    fi
+    PYTHON=$LASTFOUND
+}
+
+# Ok, go search this Python version
+pythonver
+
 # Uncomment the line below if you got the **lib** shinken installed
 # on a non standard place (not in /usr/lib/python*)
 #export PYTHONPATH="${PATH:+$PATH:}/opt/shinken"
+# Or uncommentif you want to force the Python version
+#export PYTHON=python2.7
 
 # default
 DEBUG=false
@@ -59,6 +94,8 @@ SUBMODULES=""
 ## to easily use your own config
 
 #echo "Using $SHINKEN_DEFAULT_FILE .."
+
+
 
 usage() {
     cat << END

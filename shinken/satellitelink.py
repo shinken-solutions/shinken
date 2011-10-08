@@ -25,10 +25,12 @@
 #Arbiter with Conf Dispatcher.
 
 import time
+import socket
 
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
 
+from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
@@ -54,7 +56,7 @@ class SatelliteLink(Item):
         'modules':            ListProp   (default='', to_send=True),
         'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'use_timezone':       StringProp (default='NOTSET', to_send=True),
-        'realm' :             StringProp (default=''),
+        'realm' :             StringProp (default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
     })
     
     running_properties = Item.running_properties.copy()
@@ -72,11 +74,22 @@ class SatelliteLink(Item):
     def create_connection(self):
         try:
             self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
+            # By default Pyro got problem in connect() function that can take
+            # long seconds to raise a timeout. And even with the _setTimeout()
+            # call. So we change the whole default connect() timeout
+            socket.setdefaulttimeout(self.timeout)
             self.con = pyro.getProxy(self.uri)
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imadiatly after
+            socket.setdefaulttimeout(None)
             pyro.set_timeout(self.con, self.timeout)
         except Pyro_exp_pack , exp:
+            # But the multiprocessing module is not copatible with it!
+            # so we must disable it imadiatly after
+            socket.setdefaulttimeout(None)
             self.con = None
             logger.log('Error : in creation connection for %s : %s' % (self.get_name(), str(exp)))
+    
 
 
     def put_conf(self, conf):
@@ -162,6 +175,11 @@ class SatelliteLink(Item):
         #We ping and update the managed list
         self.ping()
         self.update_managed_list()
+        
+        # Update the state of this element
+        b = self.get_update_status_brok()
+        self.broks.append(b)
+
 
 
     # The elements just got a new conf_id, we put it in our list

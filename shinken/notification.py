@@ -65,7 +65,6 @@ class Notification(Action):
         't_to_go':             IntegerProp(default=0),
         'is_a':                StringProp (default=''),
         'command':             StringProp (default=''),
-        'host_name':           StringProp (default=''),
         'sched_id':            IntegerProp(default=0),
         'timeout':             IntegerProp(default=10),
         'check_time':          IntegerProp(default=0),
@@ -113,6 +112,17 @@ class Notification(Action):
         self.output = None
         self.execution_time = 0
         self.ref = ref
+
+        # Set host_name and description from the ref
+        try:
+            self.host_name = self.ref.host_name        
+        except:
+            self.host_name = host_name        
+        try:
+            self.service_description = self.ref.service_description
+        except:
+            self.service_description = service_description
+
         self.env = env
         self.module_type = module_type
         #self.ref_type = ref_type
@@ -122,8 +132,6 @@ class Notification(Action):
 
         #For brok part
         self.contact_name = contact_name
-        self.host_name = host_name
-        self.service_description = service_description
         self.reason_type = reason_type
         self.state = state
         self.ack_author = ack_author
@@ -142,7 +150,7 @@ class Notification(Action):
     #return a copy of the check but just what is important for execution
     #So we remove the ref and all
     def copy_shell(self):
-        #We create a dummy check with nothing in it, jsut defaults values
+        #We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__( Notification('', '', '', '', '', '', '', id=self.id) )
 
 
@@ -173,15 +181,14 @@ class Notification(Action):
         #self.execution_time = c.execution_time
 
 
-    #Fill data with info of item by looking at brok_type
-    #in props of properties or running_propterties
+    # Fill data with info of item by looking at brok_type
+    # in props of properties or running_propterties
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
-        #Now config properties
+        # Now config properties
         for prop, entry in cls.properties.items():
-            if hasattr(prop, 'fill_brok'):
-                if brok_type in entry['fill_brok']:
-                    data[prop] = getattr(self, prop)
+            if brok_type in entry.fill_brok:
+                data[prop] = getattr(self, prop)
 
 
     #Get a brok with initial status

@@ -56,7 +56,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
-            # a space folowing the :
+            # a space following the :
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
@@ -241,31 +241,37 @@ class LiveStatusWaitQuery(LiveStatusQuery):
         output_map = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
         without_filter = len(self.filtercolumns) == 0
         result = []
-        if self.table == 'log':
-            out_map = self.out_map['Logline']
-            # We can apply the filterstack here as well. we have columns and filtercolumns.
-            # the only additional step is to enrich log lines with host/service-attributes
-            # A timerange can be useful for a faster preselection of lines
-            filter_clause, filter_values = sql_filter_func()
-            c = self.dbconn.cursor()
-            try:
-                if sqlite3.paramstyle == 'pyformat':
-                    matchcount = 0
-                    for m in re.finditer(r"\?", filter_clause):
-                        filter_clause = re.sub('\\?', '%(' + str(matchcount) + ')s', filter_clause, 1)
-                        matchcount += 1
-                    filter_values = dict(zip([str(x) for x in xrange(len(filter_values))], filter_values))
-                c.execute('SELECT * FROM logs WHERE %s' % filter_clause, filter_values)
-            except sqlite3.Error, e:
-                print "An error occurred:", e.args[0]
-            dbresult = c.fetchall()
-            if sqlite3.paramstyle == 'pyformat':
-                dbresult = [self.row_factory(c, d) for d in dbresult]
 
+        # We can apply the filterstack here as well. we have columns and filtercolumns.
+        # the only additional step is to enrich log lines with host/service-attributes
+        # A timerange can be useful for a faster preselection of lines
+        filter_clause, filter_values = sql_filter_func()
+        full_filter_clause = filter_clause
+        matchcount = 0
+        for m in re.finditer(r"\?", full_filter_clause):
+            full_filter_clause = re.sub('\\?', str(filter_values[matchcount]), full_filter_clause, 1)
+            matchcount += 1
+        fromtime = 0
+        totime = int(time.time()) + 1
+        gtpat = re.search(r'^(\(*time|(.*\s+time))\s+>\s+(\d+)', full_filter_clause)
+        gepat = re.search(r'^(\(*time|(.*\s+time))\s+>=\s+(\d+)', full_filter_clause)
+        ltpat = re.search(r'^(\(*time|(.*\s+time))\s+<\s+(\d+)', full_filter_clause)
+        lepat = re.search(r'^(\(*time|(.*\s+time))\s+<=\s+(\d+)', full_filter_clause)
+        if gtpat != None:
+            fromtime = int(gtpat.group(3)) + 1
+        if gepat != None:
+            fromtime = int(gepat.group(3))
+        if ltpat != None:
+            totime = int(ltpat.group(3)) - 1
+        if lepat != None:
+            totime = int(lepat.group(3))
+        # now find the list of datafiles
+        filtresult = []
+        for dateobj, handle, archive, fromtime, totime in self.db.log_db_relevant_files(fromtime, totime):
+            dbresult = self.select_live_data_log(filter_clause, filter_values, handle, archive, fromtime, totime)
             prefiltresult = [y for y in (x.fill(self.hosts, self.services, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
-            filtresult = [self.create_output(output_map, x) for x in prefiltresult]
-            result = filtresult
-
+            filtresult.extend([self.create_output(output_map, x) for x in prefiltresult])
+        result = filtresult
         self.filter_stack.put_stack(filter_func)
         self.sql_filter_stack.put_stack(sql_filter_func)
         #print "result is", result

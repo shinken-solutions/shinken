@@ -3,6 +3,7 @@
      Gerhard Lausser, Gerhard.Lausser@consol.de
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
+     Andreas Karfusehr, andreas@karfusehr.de
  
  This file is part of Shinken.
  

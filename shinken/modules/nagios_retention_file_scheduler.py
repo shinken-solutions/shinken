@@ -204,7 +204,7 @@ class Nagios_retention_scheduler(BaseModule):
         #List where we put objects
         lst = []
         for obj_cfg in raw_objects[t]:
-            #We create teh object
+            #We create the object
             #print "Create obj", obj_cfg
             o = cls(obj_cfg)
             o.clean()

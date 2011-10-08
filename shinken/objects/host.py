@@ -193,7 +193,7 @@ class Host(SchedulingItem):
         'last_problem_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'current_problem_id':   IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'execution_time':       FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_notification':    FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_notification':    FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
         'current_notification_number': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'current_notification_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'check_flapping_recovery_notification': BoolProp(default=True, fill_brok=['full_status'], retention=True),
@@ -586,7 +586,7 @@ class Host(SchedulingItem):
         # we should put in last_state the good last state:
         # if not just change the state by an problem/impact
         # we can take current state. But if it's the case, the
-        # real old state is self.state_before_impact (it's teh TRUE
+        # real old state is self.state_before_impact (it's the TRUE
         # state in fact)
         # And only if we enable the impact state change
         cls = self.__class__
@@ -743,7 +743,7 @@ class Host(SchedulingItem):
 
 
     #fill act_depend_of with my parents (so network dep)
-    #and say parents they impact me, no timeperiod and folow parents of course
+    #and say parents they impact me, no timeperiod and follow parents of course
     def fill_parents_dependancie(self):
         for parent in self.parents:
             if parent is not None:
@@ -760,8 +760,8 @@ class Host(SchedulingItem):
     # Register a child in our lists
     def register_child(self, child):
         # We've got 2 list : a list for our child
-        # where we just put the pointer, it's jsut for broking
-        # and anotehr with all data, useful for 'running' part
+        # where we just put the pointer, it's just for broking
+        # and another with all data, useful for 'running' part
         self.childs.append(child)
         self.act_depend_of_me.append( (child, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
 
@@ -1053,7 +1053,7 @@ class Hosts(Items):
 
 
     # Parent graph: use to find quickly relations between all host, and loop
-    # return True if tehre is a loop
+    # return True if there is a loop
     def no_loop_in_parents(self):
         # Ok, we say "from now, no loop :) "
         r = True

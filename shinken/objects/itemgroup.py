@@ -27,6 +27,7 @@
 from item import Item, Items
 
 from shinken.brok import Brok
+from shinken.util import safe_print
 from shinken.property import StringProp
 
 
@@ -121,7 +122,7 @@ class Itemgroup(Item):
 
         if self.unknown_members != []:
             for m in self.unknown_members:
-                print "Error : the", self.__class__.my_type, self.get_name(), "got a unknown member" , m
+                safe_print("Error : the", self.__class__.my_type, self.get_name(), "got a unknown member" , m)
             res = False
 
         if self.configuration_errors != []:

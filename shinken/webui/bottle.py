@@ -1869,6 +1869,7 @@ class FlupFCGIServer(ServerAdapter):
 class WSGIRefServer(ServerAdapter):
     def run(self, handler): # pragma: no cover
         from wsgiref.simple_server import make_server, WSGIRequestHandler
+        print "Launching Swsgi backend"
         if self.quiet:
             class QuietHandler(WSGIRequestHandler):
                 def log_request(*args, **kw): pass
@@ -1893,6 +1894,7 @@ class WSGIRefServerSelect(ServerAdapter):
 class CherryPyServer(ServerAdapter):
     def run(self, handler): # pragma: no cover
         from cherrypy import wsgiserver
+        print "Launching CherryPy backend"
         server = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
         try:
             server.start()
@@ -1902,6 +1904,7 @@ class CherryPyServer(ServerAdapter):
 class PasteServer(ServerAdapter):
     def run(self, handler): # pragma: no cover
         from paste import httpserver
+        print "Launching Paste backend"
         if not self.quiet:
             from paste.translogger import TransLogger
             handler = TransLogger(handler)

@@ -1,6 +1,6 @@
 
 
-%# " We should limit the number of impactto show here. Too much is jsut useless "
+%# " We should limit the number of impacts to show here. Too much is just useless "
 %max_impacts = 200
 
 %print 'Elt value?', elt
@@ -13,15 +13,6 @@
 Invalid element name
 
 
-%# " If the auth got problem, we are here and bailout"
-%if not valid_user:
-<script type="text/javascript">
-  window.location.replace("/login");
-</script>
-%# " And if the javascript is not followed? not a problem, we gave no data here." 
-%end
-
-
 %else:
 
 %helper = app.helper
@@ -32,7 +23,7 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 
 %#  "This is the background canvas for all gesture detection things " 
@@ -41,22 +32,60 @@ Invalid element name
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
 
-<div id="left_container" class="grid_2">
+<div id="left_container" class="grid_3">
   <div id="dummy_box" class="box_gradient_horizontal"> 
   </div>
   <div id="nav_left">
     <ul>
       <li><a href="#">Overview</a></li>
+      
+      <li>
+	<center>
+	  <table cellspacing="2" cellpadding="0" border="0">
+	    <tbody>
+	      <tr>
+		<th>Problems</th><th>Unhandled</th><th>All</th>
+	      </tr>
+	      
+	      <tr>
+		<td>
+		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
+		</td>
+		<td>
+		  %# " Add a pulse if there are problems unacked "
+		  %nb_unack_pb = app.datamgr.get_nb_problems()
+		  %if nb_unack_pb > 0:
+		  <a href="/problems" style="padding-top:0;">
+		    <div class="aroundpulse">
+                      <span class="pulse" title=""></span>
+		      {{nb_unack_pb}}
+		    </div>
+		  </a>
+		  %else:
+		    {{nb_unack_pb}}
+		  %end
+		</td>
+                <td><a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
+              </tr>
+	    </tbody>
+	  </table>
+	</center>
+      </li>
+
+      <li>
+	<a href="#">Gestures</a>
+      </li>
     </ul>
-    <div class="opacity_hover"> Gestures : 
-      <br>
-      <img title="By keeping a left click pressed and drawing a check, you will launch an acknoledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknoledge<br>
-      <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
-      <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
-    </div>
+	<div class="opacity_hover">
+	  <br>
+	  <img title="By keeping a left click pressed and drawing a check, you will launch an acknoledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknoledge<br>
+	  <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
+	  <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
+	</div>
+
   </div>
 </div>
-<div class="grid_13">
+<div class="grid_12">
   <div id="host_preview" style="vertical-align:middle;">
     <h2 class="state_{{elt.state.lower()}}"><img style="width : 64px; height:64px" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h2>
 
@@ -91,7 +120,7 @@ Invalid element name
     %end 
 
     </dl>
-    <dl class="grid_4">
+    <dl class="grid_5">
       <dt>Notes:</dt>
       %if elt.notes != '':
       <dd>{{elt.notes}}</dd>
@@ -101,9 +130,7 @@ Invalid element name
       <dt>Importance</dt>
       <dd>{{!helper.get_business_impact_text(elt)}}</dd>
     </dl>
-    <div class="grid_2">
-      <img class="box_shadow host_img_80" src="/static/images/no_image.png">
-    </div>
+
     %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
     %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
     <div class="grid_4 box_shadow" id="important_banner">
@@ -142,10 +169,7 @@ Invalid element name
 	    <th scope="row" class="column1">Last Check Time</th>
 	    <td title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</td>
 	  </tr>	
-	  <tr>
-	    <th scope="row" class="column1">Check Latency / Duration</th>
-	    <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
-	  </tr>	
+
 	  <tr class="odd">
 	    <th scope="row" class="column1">Next Scheduled Active Check</th>
 	    <td title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</td>
@@ -154,19 +178,32 @@ Invalid element name
 	    <th scope="row" class="column1">Last State Change</th>
 	    <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 	  </tr>	
-	  <tr class="odd">
+	  <tr class="odd hidden_infos">
 	    <th scope="row" class="column1">Last Notification</th>
 	    <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+	  </tr>
+	  <tr class="hidden_infos">
+	    <th scope="row" class="column1">Check Latency / Duration</th>
+	    <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 	  </tr>	
-	  <tr>						
+	  <tr class="odd hidden_infos">						
 	    <th scope="row" class="column1">Is This Host Flapping?</th>
 	    <td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
 
 	  </tr>
-	  <tr class="odd">
+	  <tr class="hidden_infos">
 	    <th scope="row" class="column1">In Scheduled Downtime?</th>
 	    <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
-	  </tr>	
+	  </tr>
+	  <tr id="hidden_info_button" class="opacity_hover">
+	    <th></th>
+	    <td>
+	      <div style="float:left;" id="hidden_info_button"><a href="javascript:show_hidden_info()"> {{!helper.get_button('More', img='/static/images/expand.png')}}</a>
+	      </div>
+	      <div class="clear"></div>
+	    </td>
+	  </tr>
+
 	</tbody>
 	<tbody class="switches">
 	  <tr class="odd">
@@ -193,7 +230,7 @@ Invalid element name
 	</tbody>	
       </table>
     </div>
-  
+  </div>
 
     <dl class="grid_10 box_shadow">
 
@@ -210,6 +247,7 @@ Invalid element name
 
 	<div class="clear"></div>
       </div>
+
       <hr>
       
       %#    Now print the dependencies if we got somes
@@ -234,6 +272,7 @@ Invalid element name
 	  %# " We put a max imapct to print, bacuse too high is just useless"
 	  %if nb > max_impacts:
 	  %   break 
+	  %end
 
 	  %if nb == 8:
 	  <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
@@ -255,7 +294,7 @@ Invalid element name
 	    %end
 	</div>
      %end #of the only host part
-	
+
 
      %if elt.is_problem and len(elt.impacts) != 0:
 	<div class='host-services'>
@@ -285,7 +324,7 @@ Invalid element name
     %# end of the 'is problem' if
     %end
 
-    </dl>
+    </dl>    
 
     
     <div class="grid_16 opacity_hover">
@@ -382,7 +421,7 @@ Invalid element name
   </div>
 
   <div class="clear"></div>
-  <div id="footer" class="grid_16">
+
 
 
 
@@ -397,11 +436,12 @@ Invalid element name
   </script>
 
 </div>
-<div class="clear"></div>
 </div>
+<div class="clear"></div>
+
 
 %#End of the Host Exist or not case
 %end
+</div>
 
-%include footer
 

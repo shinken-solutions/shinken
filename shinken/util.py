@@ -207,6 +207,14 @@ def expand_with_macros(ref, value):
 def get_obj_name(obj):
     return obj.get_name()
 
+# Same as before, but call with object,prop instead of just value
+# But if we got a 
+def get_obj_name_two_args_and_void(obj, value):
+    try:
+        return value.get_name()
+    except AttributeError:
+        return ''
+
 # return the list of keys of the custom dict
 # but without the _ before
 def get_customs_keys(d):

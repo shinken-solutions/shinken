@@ -12,14 +12,19 @@
  *  Top navigation
  * ----------------------------------------------------------------*/
  
-#nav{
-	/*margin: 0;
-	padding: 0;*/
+/* this is the main UL element*/
+.dropdown{
+	display:none;
+	margin:0;
+	padding:0;
+	list-style:none;
 	background: #222222;
 	height: 40px;
 }
 
-#nav ul{
+/* these are the inner menus*/
+.dropdown ul{
+	list-style:none;
 	margin: 0;
 	margin-left: 15px; 
 	float: left;
@@ -27,27 +32,64 @@
 	background: #222222;
 }
 
-#nav ul li{
-	display: inline;
-}
-
-
-#nav ul li a{
-	float: left;
+/* these are all the LIs in the menu*/
+.dropdown li{
 	color: #636363;
 	font-size: 13px;
 	margin-left: 20px;
 	margin-right: 20px;
 	padding-top: 10px;
-	padding-bottom: 11px;
-	text-decoration: none;
+	cursor:pointer;
 }
 
-#nav ul li a:hover, #nav ul li a#selected {
+/* these are anchor in the menu, if you want to style them differently from the rest of you website*/
+.dropdown a{
+	text-decoration:none;
+	color:#636363;
+	width:100%;
+}
+
+.dropdown a:hover, .dropdown a#selected{
+	padding-bottom: 10px;
 	color: #FFFFFF;
 	background: transparent url(/static/images/pointer.gif) bottom center no-repeat;
 }
 
+/* these are the LIs that only belong to submenu*/
+.dropdown ul li{
+	border-top:0;
+	margin-left:-1px;
+}
+
+/* these are the LIs that contains a submenu*/
+.dropdown li.submenu-down{
+	/*background: transparent url(/static/images/pointer.gif) center left no-repeat;
+	padding-left:20px;
+	width:105px;*/
+}
+
+
+
+.dropdown div {
+	-moz-box-shadow: -1px 1px 1px #CCCCCC;
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 1px solid #BEBEBE;
+    border-top: none;
+	background: #FFFFFF;
+	height: 100px;
+	width: 250px;
+	position: absolute;
+    right: -35px;
+}
+
+.dropdown span {
+	line-height: 22px;
+	padding: 10px 0 0 10px;
+}
+
+.menu_right{
+	float:right !important;
+}
 /* ----------------------------------------------------------------
  *  Side navigation
  * ----------------------------------------------------------------*/
@@ -235,3 +277,8 @@ div.current-lft-blue1 {
 	width: 350px;
 	height: 200px; /* same as .qthead-lft-blue1 */
 }
+/*
+ * 
+ * 
+ */
+

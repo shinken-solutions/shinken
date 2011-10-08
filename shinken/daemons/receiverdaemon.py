@@ -88,7 +88,7 @@ class Receiver(BaseSatellite):
             self.external_commands.append(elt)
 
 
-#    # Get teh good tabs for links by the kind. If unknown, return None
+#    # Get the good tabs for links by the kind. If unknown, return None
 #    def get_links_from_type(self, type):
 #        t = {'scheduler' : self.schedulers, 'arbiter' : self.arbiters, \
 #             'poller' : self.pollers, 'reactionner' : self.reactionners}

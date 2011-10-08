@@ -3,6 +3,7 @@
      Gerhard Lausser, Gerhard.Lausser@consol.de
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
+     Andreas Karfusehr, andreas@karfusehr.de
  
  This file is part of Shinken.
  
@@ -58,24 +59,6 @@ window.addEvent('domready', function(){
 
 
 
-/* The business rules toggle buttons*/
-function toggleBusinessElt(e) {
-    //alert('Toggle'+e);
-    var toc = document.getElementById('business-parents-'+e);
-    var imgLink = document.getElementById('business-parents-img-'+e);
-    
-    img_src = '/static/images/';
-
-    if (toc && toc.style.display == 'none') {
-	toc.style.display = 'block';
-	imgLink.src = img_src+'reduce.png';
-    } else {
-	toc.style.display = 'none';
-	imgLink.src = img_src+'expand.png';
-    }
-}
-
-
 
 /* Important_impact_div */
 window.addEvent('domready', function(){
@@ -113,5 +96,22 @@ function show_hidden_impacts_or_services() {
 
     /* An we can delete the button that toggle us */
     var button = $('hidden_impacts_or_services_button');
+    button.style.display = 'none';
+}
+
+
+/* When he user ask for show all impacts ro services, we display them */
+function show_hidden_info() {
+
+    var info_s = $$('.hidden_infos');
+    
+    info_s.each(function(el) {
+	    el.style.display = 'table-row';
+	    var fx = new Fx.Tween(el, {property: 'opacity'});
+	    fx.start(1);
+	});
+
+    /* An we can delete the button that toggle us */
+    var button = $('hidden_info_button');
     button.style.display = 'none';
 }
