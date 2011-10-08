@@ -81,23 +81,8 @@ class Webui_broker(BaseModule, Daemon):
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui : using the backend", self.http_backend
 
-        self.rg = Regenerator()
-        self.datamgr = datamgr
-        datamgr.load(self.rg)
-        self.helper = helper
-        self.request = request
-        self.response = response
 
-        # Daemon like init
-        self.debug_output = []
-        self.modules_manager = ModulesManager('webui', self.find_modules_path(), [])
-        # We can now output some previouly silented debug ouput
-        for s in self.debug_output:
-            print s
-        del self.debug_output
 
-        self.log = logger
-        self.check_photo_dir()
         
 
     # We check if the photo directory exists. If not, try to create it
@@ -117,16 +102,40 @@ class Webui_broker(BaseModule, Daemon):
     # Conf from arbiter!
     def init(self):
         print "Init of the Webui '%s'" % self.name
+
+
+
+
+
+    def main(self):
+        self.log = logger
+        self.log.load_obj(self)
+        
+        # Daemon like init
+        self.debug_output = []
+        self.modules_manager = ModulesManager('webui', self.find_modules_path(), [])
         self.modules_manager.set_modules(self.modules)
+        # We can now output some previouly silented debug ouput
         self.do_load_modules()
         for inst in self.modules_manager.instances:
             f = getattr(inst, 'load', None)
             if f and callable(f):
                 f(self)
+                
+        
+        for s in self.debug_output:
+            print s
+        del self.debug_output
 
+        self.log = logger
+        self.check_photo_dir()
+        self.rg = Regenerator()
+        self.datamgr = datamgr
+        datamgr.load(self.rg)
+        self.helper = helper
 
-
-    def main(self):
+        self.request = request
+        self.response = response
         try:
             #import cProfile
             #cProfile.runctx('''self.do_main()''', globals(), locals(),'/tmp/livestatus.profile')
