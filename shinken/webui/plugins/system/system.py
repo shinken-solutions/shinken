@@ -1,7 +1,6 @@
 ### Will be populated by the UI with it's own value
 app = None
 
-
 def system_page():
     user = app.get_user_auth()
 
@@ -19,7 +18,4 @@ def system_page():
             'receivers' : receivers, 'pollers' : pollers,
             }
 
-
-
 pages = {system_page : { 'routes' : ['/system', '/system/'], 'view' : 'system', 'static' : True}}
-

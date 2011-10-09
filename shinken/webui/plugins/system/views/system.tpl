@@ -33,48 +33,45 @@
 </div>
 
 
+
+<!-- System Detail START -->
+
 <div id="system_detail" class="grid_16">
-  %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
 
-  %for (sat_type, sats) in types:
-    <h2> {{sat_type.capitalize()}} : </h2>
-    <table>
-    %for s in sats:
+	<ul>
+		%types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
+	%for (sat_type, sats) in types:
+		<li class="grid_3">
+		<a  class="box_round_small">
+			<div class="modul_name box_halfround_small"><h3>{{sat_type.capitalize()}} :</h3></div>
+				%for s in sats:
+				<dl>
+				
+					<dt>State</dt>
+					<dd>	     
+	      				%if not s.alive:
+	      					<span class="pulse"></span>
+	      				%end
+	      				<img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(s)}}" alt="stateicon"/>
+	      			</dd>
+					<dt>Name</dt>
+					<dd>{{s.get_name()}}</dd>
+					<dt>Alive</dt>
+					<dd>{{s.alive}}</dd>
+					<dt>Attempts</dt>
+					<dd>{{s.attempt}}/{{s.max_check_attempts}}</dd>
+					<dt>Last check</dt>
+					<dd title='{{helper.print_date(s.last_check)}}'>{{helper.print_duration(s.last_check, just_duration=True, x_elts=2)}}</dd>
+					<dt>Realm</dt>
+					<dd>{{s.realm}}</dd>
+				
+				</dl>
+				%# end of this satellite type
+ 				%end
+		</a>
+		</li>
+			%# end of this satellite type
+ 	%end
+	</ul>
 
-
-	<th class="grid_2"> </th>
-	<th class="grid_2"> State</th>
-	<th class="grid_2"> Name</th>
-	<th class="grid_2">Alive</th>
-	<th class="grid_2">Attempts</th>
-	<th class="grid_2">Last check</th>
-	<th class="grid_2">Realm</th>
-
-	<tr class="tabledesc">
-	  <td class="grid_2"> <img src="/static/images/untick.png" alt="untick" style="cursor:pointer;" onclick="add_remove_elements('{{s.get_name()}}')" id="selector-{{s.get_name()}}" > </td>
-	  <td class="grid_2">
-	  	<div class="aroundpulse">
-	      %# " We put a 'pulse' around the elements if it's an important one "
-	      %if not s.alive:
-	      <span class="pulse"></span>
-	      %end
-	      <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(s)}}" alt="stateicon"/>
-	    </div>
-	  </td>
-	  <td class="grid_2"> {{s.get_name()}}</td>
-	  <td class="grid_2"> {{s.alive}}</td>
-	  <td class="grid_2"> {{s.attempt}}/{{s.max_check_attempts}}</td>
-	  <td class="grid_2" title='{{helper.print_date(s.last_check)}}'>{{helper.print_duration(s.last_check, just_duration=True, x_elts=2)}}</td>
-	  <td class="grid_2">{{s.realm}}</td>
-	</tr>
-
-    %# End of this satellite
-    %end
-    </table> 
- %# end of this satellite type
- %end
-
-	   
-</div>
-
-	
+</div>	

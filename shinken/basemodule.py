@@ -103,6 +103,7 @@ But clear queues if they were already set before recreating new one.  """
         self.from_q = Queue()
         self.to_q = Queue()
 
+
     def clear_queues(self):
         """ Release the resources associated with the queues of this instance """
         for q in (self.to_q, self.from_q):
@@ -111,15 +112,27 @@ But clear queues if they were already set before recreating new one.  """
             q.join_thread()
         self.to_q = self.from_q = None
 
+
     def start(self):
         """ Start this module process if it's external. if not -> donothing """
         if not self.is_external:
             return
         self.stop_process()
         logger.log("Starting external process for instance %s" % (self.name))
-        p = self.process = Process(target=self.main, args=())
-        self.properties['process'] = p  ## TODO: temporary
+        p = Process(target=self.main, args=())
+
+        # Under windows we should not call a start on an object that got
+        # it's process as object, so we remove it it we set it in a earlier
+        # start
+        try:
+          del self.properties['process']
+        except:
+          pass
+
         p.start()
+        # We save the process data AFTER the fork()
+        self.process = p
+        self.properties['process'] = p  ## TODO: temporary
         logger.log("%s is now started ; pid=%d" % (self.name, p.pid))
 
 
