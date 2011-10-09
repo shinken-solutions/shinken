@@ -100,7 +100,7 @@
 #nav_left li{
 	margin-left: 0;
 /*	border-bottom: 1px solid #E3E3E5;*/
-	height: 45px;
+/*	height: 45px;*/
 	text-align: center;
 	background-color:#FFFFFF
 }
@@ -109,7 +109,7 @@
 	padding: 0;
 	margin: 0;
 	list-style-type: none;
-	background-color:#E3E3E5
+/*	background-color:#E3E3E5*/
 }
 
 #nav_left a{
@@ -117,13 +117,18 @@
 	text-decoration: none;
 	color: #787878;
 	font-size: 13px;
-	padding-top: 14px;
+	padding-top:10px;
+	padding-bottom:10px;
+/*	padding-top: 14px;*/
 	
 }
 
 #nav_left li:hover{
-	/*background-color: #F8FBBD;*/
 	font-weight: bold;
+}
+
+#nav_left li.left_title{
+	background-color: #F1F1F1;
 }
 
 /* ----------------------------------------------------------------
@@ -131,16 +136,24 @@
  * ----------------------------------------------------------------*/
 
 div.tac_content{
-	width:100%;
+	width:95%;
 	height:20px;
 	border-bottom:1px solid #E3E3E5;
+	border-right:1px solid #E3E3E5;
+	margin-left:5px;
+	margin-right:5px;
+	margin-bottom:15px;
 }
 
 div.tac_header{
-	width:100%;
+	width:95%;
 	height:20px;
 	border-top:1px solid #E3E3E5;
 	border-bottom:1px solid #E3E3E5;
+	border-right:1px solid #E3E3E5;
+	margin-left:5px;
+	margin-right:5px;
+	margin-top:15px;
 }
 
 div div.tac_col_1{
@@ -168,8 +181,51 @@ div div.tac_col_3{
 	font-color:#787878;
 }
 
+/* ----------------------------------------------------------------
+ * search 
+ * ----------------------------------------------------------------*/
 
+#search_form span.table {
+	display:table;
+	width:200px;
+}
 
+#search_form span.table span.row {
+	display:table-row;
+	width:200px;
+	vertical-align:top;
+}
+
+#search_form span.table span.row span.cell {
+	display:table-cell;
+	border:1px solid red
+	height:25px;
+}
+
+#search_form span.table span.row span input {
+	height:25px;
+	margin-top:0px;
+	margin-bottom:0px;
+	margin-left:5px;
+	margin-right:0px;
+	padding-top:0px;
+	padding-bottom:0px;
+	padding-left:0px;
+	padding-right:0px;
+}
+
+#search_form span.table span.row span img {
+	vertical-align:bottom;
+	height:25px;
+	margin-top:0px;
+	margin-bottom:0px;
+	margin-left:0px;
+	margin-right:0px;
+	padding-top:0px;
+	padding-bottom:0px;
+	padding-left:0px;
+	padding-right:0px;
+}
 
 /* ----------------------------------------------------------------
  *  Tab navigation

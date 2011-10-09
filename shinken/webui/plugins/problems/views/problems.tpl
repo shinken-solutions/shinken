@@ -36,7 +36,7 @@ document.addEvent('domready', function() {
 <script type="text/javascript">
 	function submitform()
 	{
-	document.forms["searchform"].submit();
+	document.forms["search_form"].submit();
 	}
 	
 	/* Catch the key ENTER and launch the form 
@@ -63,7 +63,7 @@ document.addEvent('domready', function() {
 
   <div id="nav_left">
     <ul>
-      <li><a href="#">Overview</a></li>
+      <li class="left_title"><a href="#">Overview</a></li>
       <li>
 					<div class="tac_header">
 						<div class="tac_col_1">
@@ -89,20 +89,23 @@ document.addEvent('domready', function() {
 					</div>
       </li>
 
-      <li><a href="#">Search</a></li>
-      
+      <li class="left_title"><a href="#">Search</a></li>
       <li>
-      	<form method="get" id="searchform" action="/{{page}}">			
-					<div class="text-field">
-	    			<label for="search">Name:</label>
-	    				<input name="search" type="text" tabindex="1" size="30" value="{{search}}" id="search_input">
-	  			</div>
-			    <div class="buttons">
-	    		  <a style="padding:8px;" tabindex="4" class="button" href="javascript: submitform()"><img src="/static/images/search.png" alt="search"> Search</a>
-	    		</div>
+				<form method="get" id="search_form" action="/{{page}}">
+					<span class="table">
+						<span class="row">
+							<span class="cell">
+								<input name="search" type="text" tabindex="1" value="{{search}}" id="search_input"/>
+							</span>
+							<span class="cell">
+								<a tabindex="4" href="javascript: submitform()">
+								<img src="/static/images/search.png" alt="search"/>
+								</a>
+							</span>
+						</span>
+					</span>
 				</form>
       </li>
-
     </ul>
   </div>
 </div>
