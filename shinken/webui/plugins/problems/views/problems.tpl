@@ -59,47 +59,48 @@ document.addEvent('domready', function() {
 
 
 	 
-<div id="left_container" class="grid_2">
+<div id="left_container" class="grid_3">
 
   <div id="nav_left">
     <ul>
       <li><a href="#">Overview</a></li>
       <li>
-	<center>
-	  <table cellspacing="2" cellpadding="0">
-	    <tbody>
-	      <tr>
-		<th>Problems</th><th>Unhandled</th><th>All</th>
-	      </tr>
-	      
-	      <tr>
-		<td>
-		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
-		</td>
-		<td>
-		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
-		</td>
-                <td><a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
-              </tr>
-	    </tbody>
-	  </table>
-	</center>
+					<div class="tac_header">
+						<div class="tac_col_1">
+							Problems
+						</div>
+						<div class="tac_col_2">
+							Unhandled
+						</div>
+						<div class="tac_col_3">
+							All
+						</div>
+					</div>
+					<div class="tac_content">
+						<div class="tac_col_1">
+							<a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
+						</div>
+						<div class="tac_col_2">
+							<a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
+						</div>
+						<div class="tac_col_3">
+							<a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a>
+						</div>
+					</div>
       </li>
 
       <li><a href="#">Search</a></li>
       
       <li>
       	<form method="get" id="searchform" action="/{{page}}">			
-	  <div class="text-field">
-	    <label for="search">Name:</label>
-	    <input name="search" type="text" tabindex="1" size="30" value="{{search}}" id="search_input">
-	  </div>
-	  <center>
-	    <div class="buttons">
-	      <a style="padding:8px;" tabindex="4" class="button" href="javascript: submitform()"><img src="/static/images/search.png" alt="search"> Search</a>
-	    </div>
-	  </center>
-	</form>
+					<div class="text-field">
+	    			<label for="search">Name:</label>
+	    				<input name="search" type="text" tabindex="1" size="30" value="{{search}}" id="search_input">
+	  			</div>
+			    <div class="buttons">
+	    		  <a style="padding:8px;" tabindex="4" class="button" href="javascript: submitform()"><img src="/static/images/search.png" alt="search"> Search</a>
+	    		</div>
+				</form>
       </li>
 
     </ul>

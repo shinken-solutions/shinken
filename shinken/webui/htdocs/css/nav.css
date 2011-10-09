@@ -99,15 +99,17 @@
 }
 #nav_left li{
 	margin-left: 0;
-	border-bottom: 1px solid #E3E3E5;
+/*	border-bottom: 1px solid #E3E3E5;*/
 	height: 45px;
 	text-align: center;
+	background-color:#FFFFFF
 }
 
 #nav_left ul{
 	padding: 0;
 	margin: 0;
 	list-style-type: none;
+	background-color:#E3E3E5
 }
 
 #nav_left a{
@@ -123,6 +125,51 @@
 	/*background-color: #F8FBBD;*/
 	font-weight: bold;
 }
+
+/* ----------------------------------------------------------------
+ * TAC 
+ * ----------------------------------------------------------------*/
+
+div.tac_content{
+	width:100%;
+	height:20px;
+	border-bottom:1px solid #E3E3E5;
+}
+
+div.tac_header{
+	width:100%;
+	height:20px;
+	border-top:1px solid #E3E3E5;
+	border-bottom:1px solid #E3E3E5;
+}
+
+div div.tac_col_1{
+	border-left: 1px solid #E3E3E5; ;
+	width:33%;
+	height:20px;
+	float:left;
+	font-weight:bold;
+	font-color:#787878;
+}
+div div.tac_col_2{
+	border-left: 1px solid #E3E3E5; ;
+	width:33%;
+	height:20px;
+	float:left;
+	font-weight:bold;
+	font-color:#787878;
+}
+div div.tac_col_3{
+	border-left: 1px solid #E3E3E5; ;
+	width:32%;
+	height:20px;
+	float:left;
+	font-weight:bold;
+	font-color:#787878;
+}
+
+
+
 
 /* ----------------------------------------------------------------
  *  Tab navigation
