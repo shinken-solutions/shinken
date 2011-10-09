@@ -6,7 +6,7 @@ DIR=`/usr/bin/dirname $0`
 # search for an argument -v so i konw if we want to do a config check 
 
 function pythonver(){
-	versions="2.4 2.5 2.6 2.7 3.2"
+	versions="2.4 2.5 2.6 2.7"
 	LASTFOUND=""
 	# is there any python here ?
 	for v in $versions
@@ -26,8 +26,8 @@ function pythonver(){
 			echo "No python interpreter found !"
 			exit 2
 		else
-			echo "python$v found"
-			LASTFOUND="python$v"
+			echo "python found"
+			LASTFOUND=$(which python)
 		fi
 	fi
 	PY=$LASTFOUND		
