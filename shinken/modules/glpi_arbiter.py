@@ -227,7 +227,6 @@ class Glpi_arbiter(BaseModule):
             if service_info['_httpstink']:
                 h['_httpstink'] = service_info['_httpstink']
 
-            print "Service TEST : ", h
             r['services'].append(h)
 
         # Get contacts
