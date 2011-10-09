@@ -57,6 +57,7 @@ class Glpidb_broker(BaseModule):
                'state' : {'transform' : None},
                'latency' : {'transform' : None},
                'execution_time' : {'transform' : None},
+               'state_type' : {'transform' : None},
                },
            #Service
            'service_check_result' : {
@@ -68,6 +69,7 @@ class Glpidb_broker(BaseModule):
                'state' : {'transform' : None},
                'latency' : {'transform' : None},
                'execution_time' : {'transform' : None},
+               'state_type' : {'transform' : None},
                }
            }
         # Last state of check
