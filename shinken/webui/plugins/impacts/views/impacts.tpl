@@ -123,7 +123,7 @@
 	  %nb_unack_pbs = len(unack_pbs)
 	  %nb_ack_pbs = len(ack_pbs)
 	  %if nb_unack_pbs > 0:
-	  Root problems unacknoledged :
+	  Root problems unacknowledged :
 	  %end
 
 	  %guessed = []
@@ -136,7 +136,7 @@
 	  % l_pb_id += 1
 	  
 	  %if nb_ack_pbs != 0 and l_pb_id == nb_unack_pbs + 1:
-	  Acknoledged problems:
+	  Acknowledged problems:
 	  %end
 
 	  %if len(guessed) != 0 and l_pb_id == nb_unack_pbs + nb_ack_pbs + 1:
@@ -148,7 +148,7 @@
 	    <div class="problem-actions opacity_hover">
 	      <div class="action-fixit"><a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</a></div>
 	      %if not pb.problem_has_been_acknowledged:
-	      <div class="action-ack"><a href="#" onclick="acknoledge('{{pb.get_full_name()}}')"><img class="icon" title="Acknoledge it" src="static/images/link_processes.gif">Acknoledge it</a></div>
+	      <div class="action-ack"><a href="#" onclick="acknoledge('{{pb.get_full_name()}}')"><img class="icon" title="Acknowledge it" src="static/images/link_processes.gif">Acknowledge it</a></div>
 	      %end
 	    </div>
 	  </div>
