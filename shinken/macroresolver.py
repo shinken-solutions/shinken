@@ -156,24 +156,6 @@ class MacroResolver(Borg):
                     env['NAGIOS__' + o.__class__.__name__.upper() + cmacro[1:].upper()] = o.customs[cmacro]
         return env
 
-        clss = [d.__class__ for d in data]
-        for o in data:
-            for cls in clss:
-                if o.__class__ == cls:
-                    macros = cls.macros
-                    for macro in macros:
-#                        print "Macro in %s : %s" % (o.__class__, macro)
-                        prop = macros[macro]
-                        value = self.get_value_from_element(o, prop)
-#                        print "Value: %s" % value
-                        env['NAGIOS_'+macro] = value
-                    if hasattr(o, 'customs'):
-                        # make NAGIOS__HOSTMACADDR from _MACADDR
-                        for cmacro in o.customs:
-                            env['NAGIOS__' + o.__class__.__name__.upper() + cmacro[1:].upper()] = o.customs[cmacro]
-
-        return env
-
 
     # This function will look at elements in data (and args if it filled)
     # to replace the macros in c_line with real value.
