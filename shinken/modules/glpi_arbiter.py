@@ -41,24 +41,18 @@ def get_instance(plugin):
     uri = plugin.uri
     login_name = plugin.login_name
     login_password = plugin.login_password
-    if hasattr(plugin, 'use_property'):
-        use_property = plugin.use_property
-    else:
-        use_property = 'otherserial'
-    instance = Glpi_arbiter(plugin, uri, login_name, login_password, use_property)
+    instance = Glpi_arbiter(plugin, uri, login_name, login_password)
     return instance
 
 
 
 #Just get hostname from a GLPI webservices
 class Glpi_arbiter(BaseModule):
-    def __init__(self, mod_conf, uri, login_name, login_password, use_property):
+    def __init__(self, mod_conf, uri, login_name, login_password):
         BaseModule.__init__(self, mod_conf)
         self.uri = uri
         self.login_name = login_name
         self.login_password = login_password
-        self.use_property = use_property
-
 
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
@@ -72,11 +66,12 @@ class Glpi_arbiter(BaseModule):
         print "My session number", self.session
 
 
-    #Ok, main function that will load hosts from GLPI
+    #Ok, main function that will load config from GLPI
     def get_objects(self):
         r = {'commands' : [],
              'timeperiods' : [],
              'hosts' : [],
+             'services' : [],
              'contacts' : []}
         arg = {'session' : self.session}
 
@@ -89,11 +84,6 @@ class Glpi_arbiter(BaseModule):
             h = {'command_name' : command_info['command_name'],
                  'command_line' : command_info['command_line'],
                  }
-
-            #Then take use only if there is a value inside
-            if command_info[self.use_property] != '':
-                h['use'] = command_info[self.use_property]
-
             r['commands'].append(h)
 
         # Get timeperiods
@@ -103,18 +93,30 @@ class Glpi_arbiter(BaseModule):
             print "\n\n"
             print "Timeperiod info in GLPI", timeperiod_info
             h = {'timeperiod_name' : timeperiod_info['timeperiod_name'],
-                 'sunday' : timeperiod_info['sunday'],
-                 'monday' : timeperiod_info['monday'],
-                 'tuesday' : timeperiod_info['tuesday'],
-                 'wednesday' : timeperiod_info['wednesday'],
-                 'thursday' : timeperiod_info['thursday'],
-                 'friday' : timeperiod_info['friday'],
-                 'saturday' : timeperiod_info['saturday'],
-                 }
-            #Then take use only if there is a value inside
-            if timeperiod_info[self.use_property] != '':
-                h['use'] = timeperiod_info[self.use_property]
+                 'alias' : timeperiod_info['alias']};
 
+            if timeperiod_info['sunday']:
+                h['sunday'] = timeperiod_info['sunday']
+
+            if timeperiod_info['monday']:
+                h['monday'] = timeperiod_info['monday']
+
+            if timeperiod_info['tuesday']:
+                h['tuesday'] = timeperiod_info['tuesday']
+
+            if timeperiod_info['wednesday']:
+                h['wednesday'] = timeperiod_info['wednesday']
+
+            if timeperiod_info['thursday']:
+                h['thursday'] = timeperiod_info['thursday']
+
+            if timeperiod_info['friday']:
+                h['friday'] = timeperiod_info['friday']
+
+            if timeperiod_info['saturday']:
+                h['saturday'] = timeperiod_info['saturday']
+
+            #print "Returning to Arbiter the timeperiods:", h
             r['timeperiods'].append(h)
 
         # Get hosts
@@ -124,6 +126,7 @@ class Glpi_arbiter(BaseModule):
             print "\n\n"
             print "Host info in GLPI", host_info
             h = {'host_name' : host_info['host_name'],
+                 'alias' : host_info['alias'],
                  'address' : host_info['address'],
                  'parents' : host_info['parents'],
                  'check_command' : host_info['check_command'],
@@ -132,12 +135,99 @@ class Glpi_arbiter(BaseModule):
                  'max_check_attempts' : host_info['max_check_attempts'],
                  'check_period' : host_info['check_period'],
                  'contacts' : host_info['contacts'],
-                 }
-            #Then take use only if there is a value inside
-            if host_info[self.use_property] != '':
-                h['use'] = host_info[self.use_property]
-
+                 'process_perf_data' : host_info['process_perf_data'],
+                 'notification_interval' : host_info['notification_interval'],
+                 'notification_period' : host_info['notification_period'],
+                 'notification_options' : host_info['notification_options']};
             r['hosts'].append(h)
+
+        # Get services
+        all_services = self.con.monitoring.shinkenServices(arg)
+        print "Get all services", all_services
+        for service_info in all_services:
+            print "\n\n"
+            print "Service info in GLPI", service_info
+            h = {'host_name' : service_info['host_name'],
+                 'service_description' : service_info['service_description']};
+            if service_info['check_command']:
+                h['check_command'] = service_info['check_command']
+
+            if service_info['check_interval']:
+                h['check_interval'] = service_info['check_interval']
+
+            if service_info['retry_interval']:
+                h['retry_interval'] = service_info['retry_interval']
+
+            if service_info['max_check_attempts']:
+                h['max_check_attempts'] = service_info['max_check_attempts']
+
+            if service_info['check_period']:
+                h['check_period'] = service_info['check_period']
+
+            if service_info['contacts']:
+                h['contacts'] = service_info['contacts']
+
+            if service_info['notification_interval']:
+                h['notification_interval'] = service_info['notification_interval']
+
+            if service_info['notification_period']:
+                h['notification_period'] = service_info['notification_period']
+
+            if service_info['notification_options']:
+                h['notification_options'] = service_info['notification_options']
+
+            if service_info['active_checks_enabled']:
+                h['active_checks_enabled'] = service_info['active_checks_enabled']
+
+            if service_info['process_perf_data']:
+                h['process_perf_data'] = service_info['process_perf_data']
+
+            if service_info['active_checks_enabled']:
+                h['active_checks_enabled'] = service_info['active_checks_enabled']
+
+            if service_info['passive_checks_enabled']:
+                h['passive_checks_enabled'] = service_info['passive_checks_enabled']
+
+            if service_info['parallelize_check']:
+                h['parallelize_check'] = service_info['parallelize_check']
+
+            if service_info['obsess_over_service']:
+                h['obsess_over_service'] = service_info['obsess_over_service']
+
+            if service_info['check_freshness']:
+                h['check_freshness'] = service_info['check_freshness']
+
+            if service_info['freshness_threshold']:
+                h['freshness_threshold'] = service_info['freshness_threshold']
+
+            if service_info['notifications_enabled']:
+                h['notifications_enabled'] = service_info['notifications_enabled']
+
+            if service_info['event_handler_enabled']:
+                h['event_handler_enabled'] = service_info['event_handler_enabled']
+
+            if service_info['event_handler']:
+                h['event_handler'] = service_info['event_handler']
+
+            if service_info['flap_detection_enabled']:
+                h['flap_detection_enabled'] = service_info['flap_detection_enabled']
+
+            if service_info['failure_prediction_enabled']:
+                h['failure_prediction_enabled'] = service_info['failure_prediction_enabled']
+
+            if service_info['retain_status_information']:
+                h['retain_status_information'] = service_info['retain_status_information']
+
+            if service_info['retain_nonstatus_information']:
+                h['retain_nonstatus_information'] = service_info['retain_nonstatus_information']
+
+            if service_info['is_volatile']:
+                h['is_volatile'] = service_info['is_volatile']
+
+            if service_info['_httpstink']:
+                h['_httpstink'] = service_info['_httpstink']
+
+            r['services'].append(h)
 
         # Get contacts
         all_contacts = self.con.monitoring.shinkenContacts(arg)
@@ -158,10 +248,6 @@ class Glpi_arbiter(BaseModule):
                  'email' : contact_info['email'],
                  'pager' : contact_info['pager'],
                  }
-            #Then take use only if there is a value inside
-            if contact_info[self.use_property] != '':
-                h['use'] = contact_info[self.use_property]
-
             r['contacts'].append(h)
 
         #print "Returning to Arbiter the hosts:", r

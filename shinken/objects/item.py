@@ -189,6 +189,9 @@ Like temporary attributes such as "imported_from", etc.. """
                 #print "Missing prop value", exp
                 err = "ERROR : the property '%s' of '%s' do not have value" % (prop, self.get_name())
                 self.configuration_errors.append(err)
+            except ValueError, exp:
+                err = "ERROR : incorrect type for property '%s' of '%s'" % (prop, self.get_name())
+                self.configuration_errors.append(err)
 
 
     def get_templates(self):

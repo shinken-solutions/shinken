@@ -78,7 +78,7 @@ Invalid element name
     </ul>
 	<div class="opacity_hover">
 	  <br>
-	  <img title="By keeping a left click pressed and drawing a check, you will launch an acknoledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknoledge<br>
+	  <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge<br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
 	</div>
@@ -137,7 +137,7 @@ Invalid element name
       <table>
 	<th scope="row" class="column1"><img src="/static/images/errorMedium.png"></th>
 	<td>
-	  This element got an important impact on your business, please fix it or acknoledge it.
+	  This element got an important impact on your business, please fix it or acknowledge it.
       </td></table>
     </div>
     %# "end of the 'SOLVE THIS' highlight box"

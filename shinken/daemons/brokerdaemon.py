@@ -187,7 +187,7 @@ class Broker(BaseSatellite):
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
             logger.log("[%s] Connexion problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
-            sched['con'] = None
+            links[id]['con'] = None
             return
 
 
