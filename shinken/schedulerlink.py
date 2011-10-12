@@ -26,6 +26,7 @@ from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
 from shinken.pyro_wrapper import Pyro
+from shinken.util import safe_print
 
 
 class SchedulerLink(SatelliteLink):
@@ -57,7 +58,7 @@ class SchedulerLink(SatelliteLink):
             self.create_connection()
         if not self.alive:
             return None
-        print "Send command", command
+        safe_print("Send command", command)
         try:
             self.con.run_external_command(command)
         except Pyro.errors.URIError , exp:

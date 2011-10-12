@@ -292,13 +292,13 @@ class ExternalCommandManager:
     #by the hostname which scheduler have the host. Then send
     #it the command
     def search_host_and_dispatch(self, host_name, command):
-        print "Calling search_host_and_dispatch", 'for', host_name
+        safe_print("Calling search_host_and_dispatch", 'for', host_name)
         for cfg in self.confs.values():
             if cfg.hosts.find_by_name(host_name) is not None:
-                print "Host", host_name, "found in a configuration"
+                safe_print("Host", host_name, "found in a configuration")
                 if cfg.is_assigned :
                     sched = cfg.assigned_to
-                    print "Sending command to the scheduler", sched.get_name()
+                    safe_print("Sending command to the scheduler", sched.get_name())
                     sched.run_external_command(command)
                 else:
                     print "Problem: a configuration is found, but is not assigned!"
@@ -310,7 +310,7 @@ class ExternalCommandManager:
     #The command is global, so sent it to every schedulers
     def dispatch_global_command(self, command):
         for sched in self.conf.schedulerlinks:
-            print "Sending a command", command, 'to scheduler', sched
+            safe_print("Sending a command", command, 'to scheduler', sched)
             if sched.alive:
                 sched.run_external_command(command)
 
@@ -325,11 +325,11 @@ class ExternalCommandManager:
         elts2 = part1.split(' ')
         print "Elts2:", elts2
         if len(elts2) != 2:
-            print "Malformed command", command
+            safe_print("Malformed command", command)
             return None
         c_name = elts2[1]
 
-        print "Get command name", c_name
+        safe_print("Get command name", c_name)
         if c_name not in ExternalCommandManager.commands:
             print "This command is not recognized, sorry"
             return None
@@ -431,7 +431,7 @@ class ExternalCommandManager:
                     elif type_searched == 'service':
                         in_service = True
                         tmp_host = elt.strip()
-                        print "TMP HOST", tmp_host
+                        safe_print("TMP HOST", tmp_host)
                         if tmp_host[-1] == '\n':
                             tmp_host = tmp_host[:-1]
                             #If
@@ -445,7 +445,7 @@ class ExternalCommandManager:
                     srv_name = elt
                     if srv_name[-1] == '\n':
                         srv_name = srv_name[:-1]
-                    print "Got service full", tmp_host, srv_name
+                    safe_print("Got service full", tmp_host, srv_name)
                     s = self.services.find_srv_by_name_and_hostname(tmp_host, srv_name)
                     if s is not None:
                         args.append(s)
@@ -453,15 +453,15 @@ class ExternalCommandManager:
                         logger.log("Warning: a command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
 
         except IndexError:
-            print "Sorry, the arguments are not corrects"
+            safe_print("Sorry, the arguments are not corrects")
             return None
-        print 'Finally got ARGS:', args
+        safe_print('Finally got ARGS:', args)
         if len(args) == len(entry['args']):
-            print "OK, we can call the command", c_name, "with", args
+            safe_print("OK, we can call the command", c_name, "with", args)
             f = getattr(self, c_name)
             apply(f, args)
         else:
-            print "Sorry, the arguments are not corrects", args
+            safe_print("Sorry, the arguments are not corrects", args)
 
 
 
