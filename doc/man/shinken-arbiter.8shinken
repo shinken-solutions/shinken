@@ -24,7 +24,7 @@ Run in daemon mode.
 
 =item B<-r|--replace>
 
-Replace previous running scheduler.
+Replace previous running arbiter.
 
 =item B<-h|--help>
 
