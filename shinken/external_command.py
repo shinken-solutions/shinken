@@ -293,16 +293,19 @@ class ExternalCommandManager:
     #it the command
     def search_host_and_dispatch(self, host_name, command):
         safe_print("Calling search_host_and_dispatch", 'for', host_name)
+        host_found = False
         for cfg in self.confs.values():
             if cfg.hosts.find_by_name(host_name) is not None:
                 safe_print("Host", host_name, "found in a configuration")
                 if cfg.is_assigned :
+                    host_found = True
                     sched = cfg.assigned_to
                     safe_print("Sending command to the scheduler", sched.get_name())
                     sched.run_external_command(command)
+                    break
                 else:
                     print "Problem: a configuration is found, but is not assigned!"
-            else:
+        if not host_found:
                 logger.log("Warning:  Passive check result was received for host '%s', but the host could not be found!" % host_name)
                 #print "Sorry but the host", host_name, "was not found"
 
