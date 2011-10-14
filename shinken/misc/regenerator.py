@@ -863,11 +863,10 @@ class Regenerator:
                       'maintenance_period', 'realm', 'customs', 'escalations']
 
         # some are only use when a topology change happened
-        toplogy_change = data['topology_change']
-        if not toplogoy_change:
+        toplogy_change = b.data['topology_change']
+        if not toplogy_change:
             other_to_clean = ['childs', 'parents', 'child_dependencies', 'parent_dependencies']
             clean_prop.extend(other_to_clean)
-            
 
         data = b.data
         for prop in clean_prop:
@@ -885,6 +884,7 @@ class Regenerator:
             
             # If the topology change, update it
             if toplogy_change:
+                print "Topology change for", h.get_name(), h.parent_dependencies
                 self.linkify_host_and_hosts(h, 'parents')
                 self.linkify_host_and_hosts(h, 'childs')
                 self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')
@@ -901,17 +901,15 @@ class Regenerator:
         # There are some properties taht should nto change and are already linked
         # so just remove them
         clean_prop = ['check_command', 'servicegroups',
-                      'contacts', 'notification_period', 'contact_groups', 'child_dependencies',
-                      'check_period', 'parent_dependencies', 'event_handler',
+                      'contacts', 'notification_period', 'contact_groups',
+                      'check_period', 'event_handler',
                       'maintenance_period', 'customs', 'escalations']
 
         # some are only use when a topology change happened
-        toplogy_change = data['topology_change']
-        if not toplogoy_change:
+        toplogy_change = b.data['topology_change']
+        if not toplogy_change:
             other_to_clean = ['child_dependencies', 'parent_dependencies']
             clean_prop.extend(other_to_clean)
-
-
 
         data = b.data
         for prop in clean_prop:
