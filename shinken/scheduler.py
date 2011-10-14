@@ -93,6 +93,8 @@ class Scheduler:
             14 : ('clean_queues', self.clean_queues, 1),
             # Look for new business_impact change by modulation every minute
             15 : ('update_business_values', self.update_business_values, 60),
+            # Reset the topology change flag if need
+            16 : ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
         }
 
         # stats part
@@ -833,6 +835,16 @@ class Scheduler:
         # They are gone, we keep none!
         self.broks = {}
         return res
+
+    # An element can have its topology changed by an external command
+    # if so a brok will be generated with this flag. Now need to reset all of
+    # them.
+    def reset_topology_change_flag(self):
+        for i in self.hosts:
+            i.topology_change = False
+        for i in  self.services:
+            i.topology_change = False
+
 
 
     # Update the retention file and give it all of ours data in

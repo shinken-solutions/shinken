@@ -270,6 +270,9 @@ class Host(SchedulingItem):
         'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'state_before_hard_unknown_reach_phase' : StringProp(default='UP', retention=True),
 
+        # Set if the element just change its father/son topology
+        'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
+
     })
 
     # Hosts macros and prop that give the information

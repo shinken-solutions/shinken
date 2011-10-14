@@ -1340,6 +1340,11 @@ class ExternalCommandManager:
     def ADD_SIMPLE_HOST_DEPENDENCY(self, son, father):
         if not son.is_linked_with_host(father):
             print "Doing simple link between", son.get_name(), 'and', father.get_name()
+            # Flag them so the modules will know that a topology change
+            # happened
+            son.topology_change = True
+            father.topology_change = True
+            # Now do the work
             # Add a dep link between the son and the father
             son.add_host_act_dependancy(father, ['w', 'u', 'd'], None, True)
             self.sched.get_and_register_status_brok(son)
@@ -1350,6 +1355,11 @@ class ExternalCommandManager:
     def DEL_HOST_DEPENDENCY(self, son, father):
         if son.is_linked_with_host(father):
             print "removing simple link between", son.get_name(), 'and', father.get_name()
+            # Flag them so the modules will know that a topology change
+            # happened
+            son.topology_change = True
+            father.topology_change = True
+            # Now do the work
             son.del_host_act_dependancy(father)
             self.sched.get_and_register_status_brok(son)
             self.sched.get_and_register_status_brok(father)
