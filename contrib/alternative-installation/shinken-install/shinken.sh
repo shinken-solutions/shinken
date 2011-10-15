@@ -1,7 +1,7 @@
 #!/bin/bash  
 
 # environnement
-myscripts=$(readlink -f $(dirname $0))
+export myscripts=$(readlink -f $(dirname $0))
 src=$(readlink -f "$myscripts/../../..")
 . $myscripts/shinken.conf
 
@@ -734,8 +734,13 @@ function prerequisites(){
 				# install setup tools for python 26
 				export PY="python26"
 				export PYEI="easy_install-2.6"
-				wget $RHELSETUPTOOLS > /dev/null 2>&1
-				tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz > /dev/null 2>&1
+				if [ ! -d "setuptools-$SETUPTOOLSVERS" ]
+				then
+					cecho " > Downloading setuptoos for python 2.6" green
+					wget $RHELSETUPTOOLS > /dev/null 2>&1
+					tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz > /dev/null 2>&1
+				fi
+				cecho " > installing setuptoos for python 2.6" green
 				cd setuptools-$SETUPTOOLSVERS > /dev/null 2>&1
 				python26 setup.py install > /dev/null 2>&1
 				PYLIBS=$PYLIBSRHEL
@@ -813,7 +818,6 @@ function fixsudoers(){
 
 function fixcentreondb(){
 	cecho " > Fix centreon database path for shinken integration" green
-	cat $myscripts/centreon.sql | sed -e 's#TARGET#'$TARGET'#g' > /tmp/centreon.sql
 
 	# get existing db access
 	host=$(cat /etc/centreon/conf.pm | grep "mysql_host" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
@@ -821,18 +825,72 @@ function fixcentreondb(){
 	pass=$(cat /etc/centreon/conf.pm | grep "mysql_passwd" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
 	db=$(cat /etc/centreon/conf.pm | grep "mysql_database_oreon" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
 
+	cat $myscripts/centreon.sql | sed -e 's#TARGET#'$TARGET'#g' > /tmp/centreon.sql
+
 	mysql -h $host -u $user -p$pass $db < /tmp/centreon.sql
 }
 
-function enablendodb(){
+function pythonver(){
+	versions="2.4 2.5 2.6 2.7"
+        LASTFOUND=""
+        # is there any python here ?
+        for v in $versions
+        do
+                which python$v > /dev/null 2>&1
+                if [ $? -eq 0 ]
+                then
+                        LASTFOUND="python$v"
+                fi
+        done
+        if [ -z "$LASTFOUND" ]
+        then
+                # finaly try to find a default python
+                which python > /dev/null 2>&1
+                if [ $? -ne 0 ]
+                then
+                        echo "No python interpreter found !"
+                        exit 2
+                else
+                        echo "python found"
+                        LASTFOUND=$(which python)
+                fi
+        fi
+        PY=$LASTFOUND
+	echo $PY
+}
 
+function enablendodb(){
+	cecho " > FIX shinken ndo configuration" green
+	# get existing db access
+	host=$(cat /etc/centreon/conf.pm | grep "mysql_host" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	user=$(cat /etc/centreon/conf.pm | grep "mysql_user" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	pass=$(cat /etc/centreon/conf.pm | grep "mysql_passwd" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	db="centreon_status"
+	# add ndo module to broker
+	# first get existing broker modules
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
+	cecho " > Getting existing modules list" green
+	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
+	modules="$modules ,ToNdodb_Mysql"
+	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+	cecho " > $result" green
+	# configure ndo broker with centreon credentials
+	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d database -v "$db")
+	cecho " > $result" green
+	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d host -v "$host")
+	cecho " > $result" green
+	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d user -v "$user")
+	cecho " > $result" green
+	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d password -v "$pass")
+	cecho " > $result" green
 }
 
 function disablenagios(){
 	chkconfig nagios off
-	chkocnfig ndo2db off
-	/etc/init.d/nagios stop
-	/etc/init.d/ndo2db stop
+	chkconfig ndo2db off
+	/etc/init.d/nagios stop > /dev/null 2>&1
+	/etc/init.d/ndo2db stop > /dev/null 2>&1
 }
 
 function usage(){

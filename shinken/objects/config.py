@@ -326,6 +326,8 @@ class Config(Item):
         'nagios_group': 'shinken_group'
     }
 
+    read_config_silent = 0
+
     def __init__(self):
         self.params = {}
         self.resource_macros_names = []
@@ -384,7 +386,8 @@ class Config(Item):
             #if the previous does not finish with a line return
             res += os.linesep
             res += '# IMPORTEDFROM=%s' % (file) + os.linesep
-            print "Opening configuration file", file
+            if self.read_config_silent == 0:
+               print "Opening configuration file ",file
             try:
                 # Open in Universal way for Windows, Mac, Linux
                 fd = open(file, 'rU')

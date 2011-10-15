@@ -28,3 +28,4 @@ update centreon.options set value='TARGET/bin/nagios' where `key`='nagios_path_b
 update centreon.options set value='/etc/init.d/shinken' where `key`='nagios_init_script';
 
 update centreon.cfg_cgi set main_config_file='TARGET/etc/nagios.cfg' where cgi_id=10;
+

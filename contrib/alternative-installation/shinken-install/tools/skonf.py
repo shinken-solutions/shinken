@@ -5,6 +5,18 @@ import sys
 import time
 import datetime
 
+try:
+    from shinken.bin import VERSION
+    import shinken
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+
+
+from shinken.bin import VERSION
 from shinken.objects.config import Config
 
 import getopt, sys
@@ -206,6 +218,7 @@ def setparam(config,objectype,directive,value,filters):
 def loadconfig(configfile):
 	try:
 		c=Config()
+		c.read_config_silent=1
 		r=c.read_config(configfile)
 		b=c.read_config_buf(r)
 		return b
