@@ -886,6 +886,46 @@ function enablendodb(){
 	cecho " > $result" green
 }
 
+function enableretention(){
+
+	cecho " > Enable retention for broker scheduler and arbiter" green
+
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
+	cecho " > Getting existing scheduler modules list" green
+	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules)	
+	if [ -z "$modules" ]
+	then	
+		modules="PickleRetention"
+	else
+		modules="$modules ,PickleRetention"
+	fi
+	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules -v "$modules")
+	cecho " > $result" green
+
+	cecho " > Getting existing broker modules list" green
+	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
+	if [ -z "$modules" ]
+	then
+		modules="PickleRetentionBroker"
+	else	
+		modules="$modules ,PickleRetentionBroker"
+	fi
+	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+	cecho " > $result" green
+
+	cecho " > Getting existing arbiter modules list" green
+	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules)	
+	if [ -z "$modules" ]
+	then
+		modules="PickleRetentionArbiter"
+	else	
+		modules=$modules" ,PickleRetentionArbiter"
+	fi
+	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules -v "$modules")
+	cecho " > $result" green
+}
+
 function disablenagios(){
 	chkconfig nagios off
 	chkconfig ndo2db off
@@ -930,6 +970,7 @@ while getopts "kidubcr:lzhsvp:w" opt; do
 			fixsudoers
 			fixcentreondb
 			enablendodb
+			enableretention
 			exit 0
 			;;
 		s)

@@ -173,7 +173,11 @@ def getdirective(config,objectype,directive,filters):
 			else:
 				filterok=filterok-1	
 		if filterok == len(dfilters):
-			value=config[objectype][0][directive]
+			if not config[objectype][0].has_key(directive):
+				value=""
+			else:
+				value=config[objectype][0][directive]
+			
 			print value
 			sys.exit(0)
 	else:
