@@ -9,64 +9,60 @@ body {
 	margin-right: 0%;
 }
 
-#top_container {
-	height: 4em;
-	/*background: #00CCFF; */
+/* -------------------Simple spinner-------------------- */
+#fullscreen_info_outer { 
+	display:block; 
+	position:relative; 
+	width:100%; 
+	height:260px; 
+	margin:0px auto 0px; 
+ 
+}
+#fullscreen_info_inner { 
+	position:relative ; 
+	overflow:hidden ; 
+	width:100% ; 
+	height:260px ; 
+	margin:0px auto 0px;  
+}
+#fullscreen_info_items { 
+	display:block; 
+	position:relative; 
 }
 
-#top_container p {
-	font-size: 2em;
-	color: #787878;
-	float: right;
-}
+#fullscreen_info_items .info_item{
+	display:block; 
+	position:relative;
+	width:100%;
+	height:260px;
+	float:left;
 
-#top_container a {
-	color: #787878;
-	text-decoration: none;
-}
-
-#tacical_overview {
-	/*border: 2px solid #222;
-    -webkit-box-shadow: 0px 0px 4px #000; /* Saf3.0+, Chrome */
-    /* -moz-box-shadow: 0px 0px 4px #000; /* FF3.5 - 3.6 */
-       /*   box-shadow: 0px 0px 4px #000; /* Opera 10.5, IE9, FF4+, Chrome 10+ */
+	text-align:justify;
 
 }
 
-#tacical_overview table {
-	width: 100%;
-	border: none;
-}
-
-#tacical_overview tbody, #tacical_overview td,
-#tacical_overview tr, #tacical_overview th {
-	border: none;
-	background: #222222;
-	font-size: 1.2em;
-}
-
-#dash_container {
+#fullscreen_info_items {
 	height: 100%;
 	/*background: #008000;*/
 	color: #787878;
 }
 
-#dash_container h2 {
+#fullscreen_info_items h2 {
 	color: #787878;
 	font-size: 2em;
 	margin-left: 1%;
 }
 
-#dash_container ul {
+#fullscreen_info_items ul {
 	
 }
 
-#dash_container li {
+#fullscreen_info_items li {
 	display:inline;
 	padding-top: 20px;
 }
 
-#dash_container li a {
+#fullscreen_info_items li a {
     border: 1px solid #787878;
     color: #787878;
     display: block;
@@ -80,25 +76,6 @@ body {
     font-weight: bold;
 	font-size: 1.2em;
 }
-
-#dash_header {
-	
-}
-
-
-/**/
-.box_round_small {
-  -webkit-border-radius: 8px; /* Saf3-4, iOS 1-3.2, Android <1.6 */
-     -moz-border-radius: 8px; /* FF1-3.6 */
-          border-radius: 8px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */
-          
-  /* useful if you don't want a bg color from leaking outside the border: */        
-  -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box; 
-}
-
-/*
- * 
- */
 
 .spezial_state_critical {
     background-color: #B40406;
@@ -135,8 +112,4 @@ body {
 .spezial_state_ok {
     background-color: #7AB317;
     color: #FFFFFF;
-}
-
-#footer {
-    display: none;
 }
