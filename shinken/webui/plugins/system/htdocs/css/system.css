@@ -84,6 +84,10 @@
 	width: 100%;
 }
 
+#system_detail li a:hover {
+    border: 1px solid #787878;
+}
+
 #system_detail h3 {
 	font-size: 15px;
 	margin-left: 8px;

@@ -270,6 +270,9 @@ class Host(SchedulingItem):
         'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'state_before_hard_unknown_reach_phase' : StringProp(default='UP', retention=True),
 
+        # Set if the element just change its father/son topology
+        'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
+
     })
 
     # Hosts macros and prop that give the information
@@ -480,7 +483,13 @@ class Host(SchedulingItem):
                 to_del.append( (h, status, type, timeperiod, inherits_parent) )
         for t in to_del:
             other.act_depend_of_me.remove(t)
-        
+
+        # Remove in child/parents deps too
+        # Me in father list
+        other.child_dependencies.remove(self)
+        # and father list in mine
+        self.parent_dependencies.remove(other)
+
 
     # Add a dependancy for action event handler, notification, etc)
     # and add ourself in it's dep list

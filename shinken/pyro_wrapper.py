@@ -130,6 +130,7 @@ except AttributeError, exp:
     Pyro.core.ObjBase = dict
     Pyro.errors.URIError = Pyro.errors.ProtocolError
     Pyro.core.getProxyForURI = Pyro.core.Proxy
+    Pyro.config.HMAC_KEY = "NOTSET"
     
     # Hack for Pyro 4 : with it, there is
     # no more way to send huge packet!
@@ -144,7 +145,7 @@ except AttributeError, exp:
         def __init__(self, host, port, use_ssl=False):
             # Pyro 4 i by default thread, should do select
             # (I hate threads!)
-            # And of course teh name changed since 4.5...
+            # And of course the name changed since 4.5...
             # Since them, we got a better sock reuse, so
             # before 4.5 we must wait 35 s for the port to stop
             # and in >=4.5 we can use REUSE socket :)
@@ -154,7 +155,6 @@ except AttributeError, exp:
             else:
                 Pyro.config.SERVERTYPE = "multiplex"
                 # For Pyro >4.X hash
-                Pyro.config.HMAC_KEY = "NOTSET"
                 Pyro.config.SOCK_REUSE = True
                 max_try = 1
             nb_try = 0

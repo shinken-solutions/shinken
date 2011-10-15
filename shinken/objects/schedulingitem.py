@@ -684,12 +684,15 @@ class SchedulingItem(Item):
 
         # Same for current output
         # TODO : remove in future version, this is need only for
-        # migration from old shinken version, that got outpout as str
+        # migration from old shinken version, that got output as str
         # and not unicode
         # if str, go in unicode
         if isinstance(self.output, str):
             self.output = self.output.decode('utf8', 'ignore')
             self.long_output = self.long_output.decode('utf8', 'ignore')
+
+        if isinstance(c.perf_data, str):
+            c.perf_data = c.perf_data.decode('utf8', 'ignore')
 
         # We check for stalking if necessery
         # so if check is here
