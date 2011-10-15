@@ -232,6 +232,8 @@ function check_distro(){
 	if [ ! -e /usr/bin/lsb_release ]
 	then	
 		cecho " > No compatible distribution found" red
+		cecho " > maybe the lsb_release utility is not found" red
+		cecho " > on redhat like distro you should try yum install redhat-lsb"
 		exit 2
 	fi
 
@@ -464,6 +466,11 @@ function sinstall(){
 	cp $TARGET/bin/init.d/shinken* /etc/init.d/
 	mkdir -p $TARGET/var/archives
 	fix
+	cecho "+------------------------------------------------------------------------------" green
+	cecho "| shinken is now installed on your server " green
+	cecho "| You can start it with /etc/init.d/shinken start " green
+	cecho "| The Web Interface is available at : http://"$(ifconfig | grep "inet adr:" | grep Bcast | awk '{print $2}' | awk -F: '{print $2}')":7767" green
+	cecho "+------------------------------------------------------------------------------" green
 }
 
 function rheldvd(){
