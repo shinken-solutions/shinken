@@ -933,6 +933,24 @@ function enableretention(){
 	cecho " > $result" green
 }
 
+function enableperfdata(){
+
+	cecho " > Enable perfdata " green
+
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
+	cecho " > Getting existing broker modules list" green
+	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
+	if [ -z "$modules" ]
+	then	
+		modules="Service-Perfdata, Host-Perfdata"
+	else
+		modules=$modules", Service-Perfdata, Host-Perfdata"
+	fi
+	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+	cecho " > $result" green
+}
+
 function disablenagios(){
 	chkconfig nagios off
 	chkconfig ndo2db off
@@ -978,6 +996,7 @@ while getopts "kidubcr:lzhsvp:w" opt; do
 			fixcentreondb
 			enablendodb
 			enableretention
+			enableperfdata
 			exit 0
 			;;
 		s)
