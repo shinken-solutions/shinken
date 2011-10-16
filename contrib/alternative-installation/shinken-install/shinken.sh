@@ -1011,35 +1011,35 @@ while getopts "kidubcr:lzhsvp:w" opt; do
 			check_distro
 			exit 0
 			;;
-                k)
-                        skill
-                        exit 0
-                        ;;
-                i)
-			FROMSRC=1
-                       	sinstall 
-                        exit 0
-                        ;;
-                d)
-                       	remove 
-                        exit 0
-                        ;;
-                u)
-                       	supdate 
-                        exit 0
-                        ;;
-                b)
-                       	backup 
-                        exit 0
-                        ;;
-                r)
-                       	restore $OPTARG 
-                        exit 0
-                        ;;
-                l)
-                       	backuplist 
-                        exit 0
-                        ;;
+        k)
+            skill
+            exit 0
+            ;;
+        i)
+            FROMSRC=1
+            sinstall 
+            exit 0
+            ;;
+        d)
+            remove 
+            exit 0
+            ;;
+        u)
+            supdate 
+            exit 0
+            ;;
+        b)
+            backup 
+            exit 0
+            ;;
+        r)
+            restore $OPTARG 
+            exit 0
+            ;;
+        l)
+            backuplist 
+            exit 0
+            ;;
 		c)
 			compresslogs
 			exit 0
@@ -1048,7 +1048,7 @@ while getopts "kidubcr:lzhsvp:w" opt; do
 			shelp	
 			exit 0
 			;;
-        esac
+    esac
 done
 usage
 exit 0
