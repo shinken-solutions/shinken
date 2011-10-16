@@ -1,5 +1,4 @@
 
-
 %# " We should limit the number of impacts to show here. Too much is just useless "
 %max_impacts = 200
 
@@ -137,7 +136,7 @@ Invalid element name
       <table>
 	<th scope="row" class="column1"><img src="/static/images/errorMedium.png"></th>
 	<td>
-	  This element got an important impact on your business, please fix it or acknowledge it.
+	  This element has got an important impact on your business, please fix it or acknowledge it.
       </td></table>
     </div>
     %# "end of the 'SOLVE THIS' highlight box"
