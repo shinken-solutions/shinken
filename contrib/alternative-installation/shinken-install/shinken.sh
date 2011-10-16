@@ -402,7 +402,19 @@ function relocate(){
 	then
 		if [ "$VERS" = "5" ]
 		then
-			for fic in $(find $TARGET | grep "\.py$"); do sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic; done
+			cecho " > translating python version to python26" green
+			for fic in $(find $TARGET | grep "\.py$") 
+			do
+				sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
+			done
+			# also try to translate python script without py extension
+			for fic in $(find $TARGET/bin)
+			do
+				if [ ! -z "$(file $fic | grep "python")" ]
+				then
+					sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
+				fi
+			done
 		fi
 	fi
 
