@@ -469,7 +469,7 @@ function sinstall(){
 	cecho "+------------------------------------------------------------------------------" green
 	cecho "| shinken is now installed on your server " green
 	cecho "| You can start it with /etc/init.d/shinken start " green
-	cecho "| The Web Interface is available at : http://"$(ifconfig | grep "inet adr:" | grep Bcast | awk '{print $2}' | awk -F: '{print $2}')":7767" green
+	cecho "| The Web Interface is available at : http://localhost:7767" green
 	cecho "+------------------------------------------------------------------------------" green
 }
 
@@ -958,8 +958,16 @@ function disablenagios(){
 	/etc/init.d/ndo2db stop > /dev/null 2>&1
 }
 
+function setdaemons(){
+    daemons="$(echo $1)"
+    avail="AVAIL_MODULES=\"$daemons\""
+    echo $daemons
+    cecho "Enabling the followings daemons : $daemons" green
+    sed -i "s/^AVAIL_MODULES=.*$/$avail/g" /etc/init.d/shinken
+}
+
 function usage(){
-echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z
+echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z | -e daemons
 	-k	Kill shinken
 	-i	Install shinken
 	-w	Remove demo configuration 
@@ -970,6 +978,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
+    -e which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
 	-h	Show help
 "
@@ -983,8 +992,12 @@ then
         cecho "You should start the script with sudo!" red
         exit 1
 fi
-while getopts "kidubcr:lzhsvp:w" opt; do
+while getopts "kidubcr:lzhsvp:we:" opt; do
         case $opt in
+        e)
+            setdaemons "$OPTARG"
+            exit 0
+            ;;
 		w)
 			cleanconf	
 			exit 0
