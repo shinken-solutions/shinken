@@ -4,6 +4,7 @@ import cmd
 import sys 
 import time
 import datetime
+import copy
 
 try:
     from shinken.bin import VERSION
@@ -22,8 +23,21 @@ from shinken.objects.config import Config
 import getopt, sys
 
 def usage():
-    print "modify shinken parameter : skonf.py -a setparam -f configfile -o objecttype -d directive -v value -r directive=value,directive=value"
-    print "display shinken config for a specific objecttypei : skonf.py -a showconfig -f configfile -o objectype"
+    print "skonf.py -a action -f configfile -o objecttype -d directive -v value -r directive=value,directive=value"
+    print ""
+    print " * actions:"
+    print "   - addobject : add a shinken object to the shinken configuration file"
+    print "   - delobject : remove a shinken object from the shinken configuration file"
+    print "   - cloneobject : clone an object (currently only pollers are suported" 
+    print "   - showconfig : display configuration of object"
+    print "   - setparam : set directive value for an object"
+    print "   - getdirective : get a directive value from an object"
+    print "   - getaddresses : list the IP addresses involved in the shinken configuration"
+    print " * configfile : full path to the shinken-specific.cfg file"
+    print " * objectype : configuration object type on which the action apply"
+    print " * directive : the directive name of a configuration object"
+    print " * value : the directive value of a configuration object"
+    print " * r : this parameter restric the application to objects matching the directive/value pair list"
 
 def main():
     config=()
@@ -33,15 +47,17 @@ def main():
     directive=""
     value=""
     filters=""
+    quiet=0
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "q:a:f:o:d:v:r:",[])
+        opts, args = getopt.getopt(sys.argv[1:], "qa:f:o:d:v:r:",[])
     except getopt.GetoptError, err:
         print str(err) 
         usage()
         sys.exit(2)
     for o, a in opts:
         if o == "-a":
-            if a == "setparam" or a == "showconfig" or a == "addobject" or a == "getdirective":
+            actions=["setparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject"]
+            if a in actions:
                 action=a
             else:
                 print "Invalid action"
@@ -49,6 +65,8 @@ def main():
                 sys.exit(2)
         elif o == "-f":
             configfile = a 
+        elif o == "-q":
+            quiet = 1 
         elif o == "-o":
             objectype = a
         elif o == "-d":
@@ -73,13 +91,17 @@ def main():
         usage()
         sys.exit(2)
     
-    if objectype == "":
+    if objectype == "" and action != "getaddresses" and action != "showconfig":
         print "object type is mandatory"
         usage()
         sys.exit(2)
-    
-    if directive == "" and action == "setparam":
+    if directive == "" and (action == "setparam" or action == "addobject"):
         print "directive is mandatory"
+        usage()
+        sys.exit(2)
+
+    if filters == "" and action == "delobject": 
+        print "filters is mandatory"
         usage()
         sys.exit(2)
     
@@ -88,20 +110,96 @@ def main():
         usage()
         sys.exit(2)
 
-    if directive == "" and action == "addobject":
-        print "directive is mandatory"
-        usage()
-        sys.exit(2)
+    allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner' ]
 
     if action == "setparam":
         confignew=setparam(config,objectype,directive,value,filters)
         writeconfig(confignew,configfile)
+        if quiet == 0 : dumpconfig(objectype,confignew,allowed)
     elif action == "showconfig":
-        showconfig(config,objectype,filters)
+        allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module' ]
+        dumpconfig(objectype,config,allowed)
+    elif action == "cloneobject":
+        allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module' ]
+        if objectype not in allowed:
+            print "Clone of %s is not supported" % (objectype)
+        else:
+            confignew=cloneobject(config,objectype,directive,filters)
+            writeconfig(confignew,configfile)
+            if quiet == 0 : 
+                dumpconfig(objectype,confignew,allowed)
+            else:
+                print "The objectype %s has been cloned with the new attributes : %s" % (objectype,filter)
     elif action == "addobject":
-        addobject(config,objectype,directive)
+        confignew = addobject(config,objectype,directive)
+        writeconfig(confignew,configfile)
+        if quiet == 0 : 
+            dumpconfig(objectype,confignew,allowed)
+        else:
+            print "Added %s : %s" % (objectype,directive)
+    elif action == "delobject":
+        confignew = delobject(config,objectype,filters)
+        writeconfig(confignew,configfile)
+        if quiet == 0 : dumpconfig(objectype,confignew,allowed)
     elif action == "getdirective":
         getdirective(config,objectype,directive,filters)
+    elif action == "getaddresses":
+        getaddresses(config)
+    else:
+        print "Unknown action %s" % (action)
+        sys.exit(2)
+
+def delobject(config,objectype,filters):
+    print "NOT IMPLEMENTED (YET)"
+
+def cloneobject(config,objectype,directive,filter):
+    directives={}
+    filters={}
+    newobj={}
+    # extract directives to be modified 
+    for pair in directive.split(','):
+        (d,v)=pair.split('=')
+        directives[d]=v
+    # extract filters
+    for pair in filter.split(','):
+        (d,v)=pair.split('=')
+        filters[d]=v
+    filterok=0
+    # find the matching object
+    for o in config[objectype]:
+        for (d,v) in filters.items():
+            if o.has_key(d) and o[d] == v:
+                filterok=filterok+1
+        if filterok == len(filters):
+            newobj=copy.deepcopy(o)
+            filterok=0
+    if len(newobj) == 0:
+        print "I was unable to find the object to be cloned"
+        sys.exit(2)
+    # create the new object
+    for (d,v) in directives.items():
+        newobj[d]=v
+    # verify the unicity of the object
+    for o in config[objectype]:
+        if o[objectype+"_name"] == newobj[objectype+"_name"]:
+            print "An object of type %s with the name %s allready exist" % (objectype,newobj[objectype+"_name"])
+            sys.exit(2)
+
+    config[objectype].append(newobj)
+    return config
+
+
+def getaddresses(config):
+    allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner' ]
+    addresses=[]
+    for (ot,oc) in config.items():
+        if ot in allowed:
+            for o in oc:
+                for (d,v) in o.items():
+                    if d == "address" and v != "localhost" and v != "127.0.01" :
+                        if not v in addresses:
+                            addresses.append(v)
+                            print v
 
 def showconfig(config,objectype,filters=""):
     dfilters={}
@@ -188,10 +286,49 @@ def addobject(config,objectype,directive):
 
 
     # so we can create the new object
-    print "define %s {" % (objectype)
+    newobject= {} 
     for (d,v) in directives.items():
-        print "    %s    %s" % (d,v)
-    print "}"
+        if d != "imported_from":
+            newobject[d]=v
+    config[objectype].append(newobject)
+    return config
+
+def splitCount(s, count):
+    return [s[i:i+count] for i in range(0, len(s), count)]
+
+def dumpconfig(type,config,allowed):
+    for (k,oc) in config.items():
+        if k in allowed:
+            if type != "" and type == k:
+                display=1
+            else:
+                display=0
+
+            if display==1:
+                print "".center(100,"=")
+                print "| "+k.center(97," ")+"|"
+                print "".center(100,"=")
+                for o in oc:
+                    print "+".ljust(99,"-")+"+"
+                    for (d,v) in o.items():
+                        if d != "imported_from":
+                            if len(v) > 48:
+                                vp = splitCount(v,47)
+                                col1 = "| "+d.ljust(47," ")+"| "
+                                col2 = vp[0].ljust(48," ")+"|"
+                                print col1+col2
+                                vp.pop(0)
+                                for vpe in vp:
+                                    col1 = "| "+" ".ljust(47," ")+"| "
+                                    col2 = vpe.ljust(48," ")+"|"
+                                    print col1+col2 
+                            else:
+                                col1 = "| "+d.ljust(47," ")+"| "
+                                col2 = v.ljust(48," ")+"|"
+                                print col1+col2 
+                    print "+".ljust(99,"-")+"+"
+
+
 
 def getdirective(config,objectype,directive,filters):
     dfilters={}

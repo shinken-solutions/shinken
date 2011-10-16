@@ -880,16 +880,16 @@ function enablendodb(){
 	cecho " > Getting existing modules list" green
 	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
 	modules="$modules ,ToNdodb_Mysql"
-	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
 	cecho " > $result" green
 	# configure ndo broker with centreon credentials
-	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d database -v "$db")
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d database -v "$db")
 	cecho " > $result" green
-	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d host -v "$host")
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d host -v "$host")
 	cecho " > $result" green
-	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d user -v "$user")
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d user -v "$user")
 	cecho " > $result" green
-	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d password -v "$pass")
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d password -v "$pass")
 	cecho " > $result" green
 }
 
@@ -907,7 +907,7 @@ function enableretention(){
 	else
 		modules="$modules ,PickleRetention"
 	fi
-	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules -v "$modules")
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules -v "$modules")
 	cecho " > $result" green
 
 	cecho " > Getting existing broker modules list" green
@@ -918,7 +918,7 @@ function enableretention(){
 	else	
 		modules="$modules ,PickleRetentionBroker"
 	fi
-	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
 	cecho " > $result" green
 
 	cecho " > Getting existing arbiter modules list" green
@@ -929,7 +929,7 @@ function enableretention(){
 	else	
 		modules=$modules" ,PickleRetentionArbiter"
 	fi
-	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules -v "$modules")
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules -v "$modules")
 	cecho " > $result" green
 }
 
@@ -947,8 +947,49 @@ function enableperfdata(){
 	else
 		modules=$modules", Service-Perfdata, Host-Perfdata"
 	fi
-	result=$($PY $myscripts/tools/skonf.py -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
 	cecho " > $result" green
+}
+
+function setdaemonsaddresses(){
+    localip=$(ifconfig $IF | grep "^ *inet adr:" | awk -F : '{print $2}' | awk '{print $1}')
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d address -v "$localip")
+    cecho " > $result" green    
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d address -v "$localip")
+    cecho " > $result" green    
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o reactionner -d address -v "$localip")
+    cecho " > $result" green    
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o receiver -d address -v "$localip")
+    cecho " > $result" green    
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o poller -d address -v "$localip" -r "poller_name=poller-1")
+    cecho " > $result" green    
+}
+
+function addCESPollers(){
+    if [ ! -z "ADDPOLLERS" ]
+    then
+        for p in $ADDPOLLERS
+        do
+            pollname=$(echo $p | awk -F = '{print $1}')
+            pollip=$(echo $p | awk -F = '{print $2}')
+            result=$($PY $myscripts/tools/skonf.py -q -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
+            if [ $? -eq 0 ]
+            then
+                color="green"
+            else
+                color="red"
+            fi
+            cecho " > $result" $color 
+        done
+    fi
+}
+
+function enableCESCentralDaemons(){
+    setdaemons "arbiter reactionner receiver scheduler broker poller"  
+}
+
+function enableCESPollerDaemons(){
+    setdaemons "poller"  
 }
 
 function disablenagios(){
@@ -961,13 +1002,24 @@ function disablenagios(){
 function setdaemons(){
     daemons="$(echo $1)"
     avail="AVAIL_MODULES=\"$daemons\""
-    echo $daemons
-    cecho "Enabling the followings daemons : $daemons" green
+    cecho " > Enabling the followings daemons : $daemons" green
     sed -i "s/^AVAIL_MODULES=.*$/$avail/g" /etc/init.d/shinken
 }
 
+function addpoller(){
+    args=$1
+    result=$($PY $myscripts/tools/skonf.py -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
+    if [ $? -eq 0 ]
+    then
+        color="green"
+    else
+        color="red"
+    fi
+    cecho " > $result" $color 
+}
+
 function usage(){
-echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z | -e daemons
+echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -j pollername=polleraddress
 	-k	Kill shinken
 	-i	Install shinken
 	-w	Remove demo configuration 
@@ -978,8 +1030,9 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
-    -e which daemons to keep enabled at boot time
+    -e  which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
+    -j  Add a poller to the shinken configuration. 
 	-h	Show help
 "
 
@@ -992,8 +1045,12 @@ then
         cecho "You should start the script with sudo!" red
         exit 1
 fi
-while getopts "kidubcr:lzhsvp:we:" opt; do
+while getopts "kidubcr:lz:hsvp:we:j:" opt; do
         case $opt in
+        j)
+            addpoller "$OPTARG"
+            exit 0
+            ;;
         e)
             setdaemons "$OPTARG"
             exit 0
@@ -1003,13 +1060,22 @@ while getopts "kidubcr:lzhsvp:we:" opt; do
 			exit 0
 			;;
 		z)
+            mode=$OPTARG
 			cleanconf
 			disablenagios
 			fixsudoers
-			fixcentreondb
-			enablendodb
-			enableretention
-			enableperfdata
+            if [ "$mode" = "centreon" ]
+            then
+                fixcentreondb
+                enablendodb
+                enableretention
+                enableperfdata
+                setdaemonsaddresses
+                enableCESCentralDaemons
+                #addCESPollers
+            else
+                enableCESPollerDaemons
+            fi
 			exit 0
 			;;
 		s)
