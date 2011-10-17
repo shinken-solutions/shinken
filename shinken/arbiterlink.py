@@ -43,6 +43,10 @@ class ArbiterLink(SatelliteLink):
         return self.arbiter_name
 
 
+    def get_config(self):
+        return self.con.get_config()
+
+
     #Check is required prop are set:
     #contacts OR contactgroups is need
     def is_correct(self):

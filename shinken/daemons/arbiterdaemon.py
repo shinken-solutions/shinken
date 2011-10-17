@@ -53,6 +53,9 @@ class IForArbiter(Interface):
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
 
+    def get_config(self):
+        return self.app.conf
+
     # The master arbiter asks me not to run!
     def do_not_run(self):
         # If i'm the master, then F**K YOU!
