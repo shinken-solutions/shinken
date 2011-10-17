@@ -29,7 +29,7 @@ Shinken.
 
 import sys
 
-VERSION = "0.6.5+"
+VERSION = "0.8"
 
 # Make sure people are using Python 2.4 or higher
 if sys.version_info < (2,4):

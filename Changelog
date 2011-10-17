@@ -3,7 +3,7 @@ Shinken ChangeLog
 #######################
 
 	
-0.8 - XX/10/2001
+0.8 - 17/10/2001
 ------------------
 	CORE ENHANCEMENTS
 	* Add : WebUI broker module. More info in the UI changelog part.
@@ -94,7 +94,7 @@ Shinken ChangeLog
 	* Fix : (reported by Markus Elger) LiveStatus module did not clean previously added elements before recreating them. 
 
 
-	UI ENHANCEMENTS
+	UI
 	* Add : Andreas to main contributors :)
 	* Add : welcome text and error text in the login page.
 	* Add : make appears on the dep graph only interesting elements, so near the root or hosts or service in real problems. Far more redable with huge conf.
@@ -111,6 +111,7 @@ Shinken ChangeLog
 	* Add : parallax effect in the top right banner to see huge impacts
 	* Add : make known bad nodes shown in the dep tree, so the admin don't even have to expand and find the bad thing that cause him a problem. Lasy admin mdoe on :)
 	* Add : swtich buttons for ths hostdetail page for enable/disable things.
+	* Add : if you change host topology (new dependency like fror VMotion), the UI is updated too.
 
 
 
