@@ -372,7 +372,7 @@ class Config(Item):
 
     def _cut_line(self, line):
         #punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
-        tmp = re.split("[" + string.whitespace + "]+" , line)
+        tmp = re.split("[" + string.whitespace + "]+" , line, 1)
         r = [elt for elt in tmp if elt != '']
         return r
 
