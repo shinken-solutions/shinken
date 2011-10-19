@@ -468,7 +468,7 @@ if __name__ == "__main__":
         },
       
         name = "Shinken",
-        version = "0.6",
+        version = "0.8",
         packages = find_packages(),
         package_data = {'' : package_data},
         description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
