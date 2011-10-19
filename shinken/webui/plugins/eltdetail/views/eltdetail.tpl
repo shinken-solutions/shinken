@@ -1,4 +1,3 @@
-
 %# " We should limit the number of impacts to show here. Too much is just useless "
 %max_impacts = 200
 
@@ -7,7 +6,7 @@
 
 %# If got no Elt, bailout
 %if not elt:
-%rebase layou title='Invalid name'
+%rebase layout title='Invalid name'
 
 Invalid element name
 
