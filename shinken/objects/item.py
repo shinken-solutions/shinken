@@ -216,24 +216,64 @@ Like temporary attributes such as "imported_from", etc.. """
             #    return None
             # Manage the additive inheritance for the property,
             # if property is in plus, add or replace it
+            # Template should keep the '+' at the begining of the chain
             if self.has_plus(prop):
                 value = self.get_plus_and_delete(prop) + ',' + value
+                if self.is_tpl():
+                    value = '+' + value
             return value
-        #Ok, I do not have prop, Maybe my templates do?
+        # Ok, I do not have prop, Maybe my templates do?
         # Same story for plus
         for i in self.templates:
             value = i.get_property_by_inheritance(items, prop)
+
             if value is not None:
-                if self.has_plus(prop):
-                    value = self.get_plus_and_delete(prop) + ',' + value
+                # If our template give us a '+' value, we should continue to loop
+                still_loop = False
+                if value.startswith('+'):
+                    value = value[1:]
+                    still_loop = True
+
+                # Maybe in the prvious loop, we set a value, use it too
+                if hasattr(self, prop):
+                    value = ','.join([getattr(self, prop), value])
+
+                # Ok, we can set it
                 setattr(self, prop, value)
-                return value
-        # I do not have prop, my templates too... Maybe a plus?
+
+                # If we only got some '+' values, we must still loop
+                # for an end value without it
+                if not still_loop:
+                    # And set my own value in the end if need
+                    if self.has_plus(prop):
+                        value = ','.join([getattr(self, prop), self.get_plus_and_delete(prop)])
+                        # Template should keep their '+'
+                        if self.is_tpl():
+                            value = '+' + value
+                    return value
+
+        # Maybe templates only give us + values, so we didn't quit, but we already got a
+        # self.prop value after all
+        template_with_only_plus = hasattr(self, prop)
+        
+        # I do not have endingprop, my templates too... Maybe a plus?
+        # warning : ifall my templates gave me '+' values, do not forgot to
+        # add the already set self.prop value
         if self.has_plus(prop):
-            value = self.get_plus_and_delete(prop)
+            if template_with_only_plus:
+                value = ','.join([getattr(self, prop), self.get_plus_and_delete(prop)])
+            else:
+                value = self.get_plus_and_delete(prop)
+            # Template should keep their '+' chain
+            # We must say it's a '+' value, so our son will now that it must
+            # still loop
+            if self.is_tpl():
+                value = '+'+value
             setattr(self, prop, value)
+
             return value
-        # Not event a plus... so None :)
+
+        # Not even a plus... so None :)
         return None
 
 

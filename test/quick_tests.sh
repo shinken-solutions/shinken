@@ -125,7 +125,9 @@ launch_and_assert test_linkify_template.py
 launch_and_assert test_module_on_module.py
 launch_and_assert test_disable_active_checks.py
 launch_and_assert test_no_event_handler_during_downtime.py
+launch_and_assert test_inheritance_and_plus.py
 launch_and_assert test_livestatus_db.py
+launch_and_assert test_service_template_inheritance.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.
