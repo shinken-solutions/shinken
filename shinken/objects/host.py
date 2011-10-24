@@ -365,6 +365,8 @@ class Host(SchedulingItem):
         state = True #guilty or not? :)
         cls = self.__class__
 
+        source = getattr(self, 'imported_from', 'unknown')
+
         special_properties = ['check_period', 'notification_interval', 'check_period',
                               'notification_period']
         for prop, entry in cls.properties.items():
@@ -384,7 +386,7 @@ class Host(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.log("Waring : the host %s do not have contacts nor contact_groups" % self.get_name())
+            logger.log("Waring : the host %s do not have contacts nor contact_groups in (%s)" % (self.get_name(), source))
         
         if getattr(self, 'check_command', None) is None:
             logger.log("%s : I've got no check_command" % self.get_name())
