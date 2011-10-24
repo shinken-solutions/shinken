@@ -23,6 +23,7 @@
 import os
 import time
 import traceback
+import sys
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -175,7 +176,9 @@ class Receiver(BaseSatellite):
         
 
     def do_loop_turn(self):
-        print "."
+        sys.stdout.write(".")
+        sys.stdout.flush()
+
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
