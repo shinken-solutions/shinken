@@ -50,7 +50,7 @@ def safe_print(*args):
     for e in args:
         # If we got an str, go in unicode, and if we cannot print
         # utf8, go in ascii mode
-        if isinstance(e, str, errors='ignore'):
+        if isinstance(e, str):
             if safe_stdout:
                 s = unicode(e, 'utf8')
             else:
