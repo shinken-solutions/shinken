@@ -131,6 +131,8 @@ except AttributeError, exp:
     Pyro.errors.URIError = Pyro.errors.ProtocolError
     Pyro.core.getProxyForURI = Pyro.core.Proxy
     Pyro.config.HMAC_KEY = "NOTSET"
+
+    old_versions = ["4.1", "4.2", "4.3", "4.4"]
     
     # Hack for Pyro 4 : with it, there is
     # no more way to send huge packet!
@@ -141,6 +143,7 @@ except AttributeError, exp:
     class Pyro4Daemon(Pyro.core.Daemon):
         pyro_version = 4
         protocol = 'PYRO'
+
         
         def __init__(self, host, port, use_ssl=False):
             # Pyro 4 i by default thread, should do select
@@ -150,7 +153,7 @@ except AttributeError, exp:
             # before 4.5 we must wait 35 s for the port to stop
             # and in >=4.5 we can use REUSE socket :)
             max_try = 35
-            if PYRO_VERSION < "4.5":
+            if PYRO_VERSION in old_versions:
                 Pyro.config.SERVERTYPE = "select"
             else:
                 Pyro.config.SERVERTYPE = "multiplex"
@@ -184,14 +187,14 @@ except AttributeError, exp:
 
 
         def get_sockets(self):
-            if PYRO_VERSION < "4.5":
+            if PYRO_VERSION in old_versions:
                 return self.sockets()
             else:
                 return self.sockets
     
         
         def handleRequests(self, s):
-            if PYRO_VERSION < "4.5":
+            if PYRO_VERSION in old_versions:
                 Pyro.core.Daemon.handleRequests(self, [s])
             else:
                 Pyro.core.Daemon.events(self, [s])
