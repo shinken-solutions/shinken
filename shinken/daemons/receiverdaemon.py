@@ -23,6 +23,7 @@
 import os
 import time
 import traceback
+import sys
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -175,7 +176,9 @@ class Receiver(BaseSatellite):
         
 
     def do_loop_turn(self):
-        print "."
+        sys.stdout.write(".")
+        sys.stdout.flush()
+
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
@@ -280,8 +283,8 @@ class Receiver(BaseSatellite):
             self.do_mainloop()
 
         except Exception, exp:
-            logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
-            logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
+            logger.log("CRITICAL ERROR: I got an unrecoverable error. I have to exit")
+            logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket to get help")
             logger.log("Back trace of it: %s" % (traceback.format_exc()))
             raise
 

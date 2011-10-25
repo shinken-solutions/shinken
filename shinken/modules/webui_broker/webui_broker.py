@@ -221,6 +221,13 @@ class Webui_broker(BaseModule, Daemon):
                        logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
                        logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                        self.modules_manager.set_to_restart(mod)
+           except Exception, exp:            
+               msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
+               self.from_q.put(msg)
+               # wait 2 sec so we know that the broker got our message, and die
+               time.sleep(2)
+               # No need to raise here, we are in a thread, exit!
+               os._exit(2)
            finally:
                #print "Release data lock"
                self.global_lock.release()
