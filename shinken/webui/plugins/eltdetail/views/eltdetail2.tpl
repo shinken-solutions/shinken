@@ -85,7 +85,11 @@ Invalid element name
 			<dd>{{!helper.get_business_impact_text(elt)}}</dd>
 		</dl>
 		<div class="grid_6">
+		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
+		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
 			<p class="error">This element has got an important impact on your business, please fix it or acknowledge it.</p>
+		    %# "end of the 'SOLVE THIS' highlight box"
+		    %end
 		</div>				
 	</div>
 		<div id="detail_container">
