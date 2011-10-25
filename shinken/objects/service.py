@@ -347,6 +347,8 @@ class Service(SchedulingItem):
         state = True # guilty or not? :)
         cls = self.__class__
 
+        source = getattr(self, 'imported_from', 'unknown')
+
         desc = getattr(self, 'service_description', 'unamed')
         hname = getattr(self, 'host_name', 'unamed')
 
@@ -371,7 +373,7 @@ class Service(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.log("Warning The service '%s' in the host '%s' do not have contacts nor contact_groups" % (desc, hname))
+            logger.log("Warning The service '%s' in the host '%s' do not have contacts nor contact_groups in '%s'" % (desc, hname, source))
 
         if not hasattr(self, 'check_command'):
             logger.log("%s : I've got no check_command" % self.get_name())

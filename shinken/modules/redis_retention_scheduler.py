@@ -102,7 +102,7 @@ class Redis_retention_scheduler(BaseModule):
             val = self.mc.get(key)
             if val is not None:
                 # redis get unicode, but we send string, so we are ok
-                val = str(unicode(val))
+#                val = str(unicode(val))
                 val = cPickle.loads(val)
                 ret_hosts[h.host_name] = val
 
@@ -113,7 +113,7 @@ class Redis_retention_scheduler(BaseModule):
             #print "Using key", key
             val = self.mc.get(key)
             if val is not None:
-                val = str(unicode(val))
+#                val = str(unicode(val))
                 val = cPickle.loads(val)
                 ret_services[(s.host.host_name, s.service_description)] = val
 

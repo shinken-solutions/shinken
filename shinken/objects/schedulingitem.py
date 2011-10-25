@@ -1023,7 +1023,6 @@ class SchedulingItem(Item):
 
         # We search since when we are in notification for escalations
         # that are based on time
-        in_notif_time = cls.interval_length * self.first_notification_delay + (n.notif_nb-1) * self.notification_interval
         in_notif_time = time.time() - n.creation_time
 
         # Check is an escalation match the current_notification_number
