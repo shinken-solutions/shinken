@@ -154,7 +154,7 @@ div.content {
 .info, .success, .warning, .error, .validation {
   border: 1px solid;
   margin: 10px 0px;
-  padding:5px 10px 5px 50px;
+  padding:5px 10px 5px 60px;
   background-repeat: no-repeat;
   background-position: 10px center;
 }
@@ -176,7 +176,7 @@ div.content {
 .error {
   color: #D8000C;
   background-color: #FFBABA;
-  background-image: url('error.png');
+  background-image: url('/static/images/errorMedium.png');
 }
 
 /*.icon_down {
