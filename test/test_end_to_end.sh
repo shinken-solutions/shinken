@@ -29,7 +29,8 @@ echo "Going to dir $DIR/.."
 cd $DIR/..
 
 
-
+NB_CPUS=`cat /proc/cpuinfo  | grep 'processor' | wc -l` || 4
+echo "NB CPUS : " $NB_CPUS
 
 
 #check for a process existance with good number
@@ -130,7 +131,8 @@ function globalize_config {
 
 #Standard launch process packets
 NB_SCHEDULERS=1
-NB_POLLERS=6
+# NB Poller is 2 for core + nb cpus
+NB_POLLERS=$((2 + $NB_CPUS))
 NB_REACTIONNERS=3
 NB_BROKERS=3
 NB_RECEIVERS=1
@@ -281,8 +283,8 @@ sleep 10
 
 #Standard launch process packets
 NB_SCHEDULERS=2
-#6 for stack 1, and 2 for 2 (not active, so no worker)
-NB_POLLERS=8
+#2+NB_CPUS for stack 1, and 2 for 2 (not active, so no worker)
+NB_POLLERS=$((2 + $NB_CPUS + 2))
 #3 for stack1, 2 for stack2 (no worker from now)
 NB_REACTIONNERS=5
 #2 for stack 1, 1 for stack2 (no livesatus.dat nor log worker launch)
@@ -395,8 +397,8 @@ sleep 10
 
 #Standard launch process packets
 NB_SCHEDULERS=2
-#6 for stack 1, and 6 for stack 2
-NB_POLLERS=12
+#2 + nb cpus for stack 1, and same for stack 2
+NB_POLLERS=$((2 + $NB_CPUS + 2 + $NB_CPUS))
 #3 for stack1, same for stack 2
 NB_REACTIONNERS=6
 #2 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
@@ -447,7 +449,7 @@ sleep 10
 #Standard launch process packets
 NB_SCHEDULERS=2
 #6 for stack 1, and 6 for stack 2
-NB_POLLERS=12
+NB_POLLERS=$((2 + $NB_CPUS + 2 + $NB_CPUS))
 #3 for stack1, Only 2 for stack 2 because it is not active
 NB_REACTIONNERS=5
 #2 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
