@@ -21,7 +21,7 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 
 %#  "This is the background canvas for all gesture detection things " 
@@ -126,7 +126,7 @@ Invalid element name
 						        <li class="tab">Services</li>
 						        <li class="tab">Comments/Downtimes</li>
 						        <li class="tab">Dependency Cloud</li>
-						        
+						        <li class="tab">Graphs</li>
 						    </ul>
 						    <div class="content">
 						   <div id="elt_summary">
@@ -314,6 +314,34 @@ Invalid element name
 						    </div>
 						    <div class="content">
 						        Lorem Ipsum ....
+						    </div>
+						    <div class="content">
+						    	<h2 style="display: none"><a name="graphs" id="graph">Graphs</a></h2>
+								%uris = app.get_graph_uris(elt, graphstart, graphend)
+								%if len(uris) == 0:
+								  <p>No graphs, sorry</p>
+								%else:
+								<ul class="tabmenu">
+								  %now = int(time.time())
+								  %fourhours = now - 3600*4
+								  %lastday = now - 86400
+								  %lastweek = now - 86400*7
+								  %lastmonth = now - 86400*31
+								  %lastyear = now - 86400*365
+								  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{fourhours}}&graphend={{now}}#graphs" class="">4 hours</a></li>
+								  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastday}}&graphend={{now}}#graphs" class="">Day</a></li>
+								  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastweek}}&graphend={{now}}#graphs" class="">Week</a></li>
+								  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastmonth}}&graphend={{now}}#graphs" class="">Month</a></li>
+								  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></li>
+								</ul>
+								%end
+								
+								%for g in uris:
+								   %img_src = g['img_src']
+								   %link = g['link']
+								<p><a href="{{link}}"><img src="{{img_src}}" class="graphimg"></img></a></p>
+								moncul
+								%end
 						    </div>
 						</div>
 	</div>
