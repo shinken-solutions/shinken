@@ -399,7 +399,7 @@ class Webui_broker(BaseModule, Daemon):
 
 
     # Try to got for an element the graphs uris from modules
-    def get_graph_uris(self, elt):
+    def get_graph_uris(self, elt, graphstart, graphend):
         print "Checking graph uris ", elt.get_full_name()
 
         uris = []
@@ -408,7 +408,7 @@ class Webui_broker(BaseModule, Daemon):
                 f = getattr(mod, 'get_graph_uris', None)
                 print "Get graph uris ", f, "from", mod.get_name()
                 if f and callable(f):
-                    r = f(elt)
+                    r = f(elt, graphstart, graphend)
                     uris.extend(r)
             except Exception , exp:
                 print exp.__dict__

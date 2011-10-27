@@ -84,7 +84,7 @@ class PNP_Webui(BaseModule):
 
     # Ask for an host or a service the graph UI taht the UI should
     # give to get the graph image link and PNP page link too.
-    def get_graph_uris(self, elt):
+    def get_graph_uris(self, elt, graphstart, graphend):
         if not elt:
             return []
 
@@ -96,7 +96,7 @@ class PNP_Webui(BaseModule):
             for i in range(nb_metrics):
                 v = {}
                 v['link'] = self.uri+'graph?host=%s&srv=_HOST_' % elt.get_name()
-                v['img_src'] = self.uri+'image?host=%s&srv=_HOST_&view=0&source=%d' % (elt.get_name(), i)
+                v['img_src'] = self.uri+'image?host=%s&srv=_HOST_&view=0&source=%d&start=%d&end=%d' % (elt.get_name(), i, graphstart, graphend)
                 r.append(v)
             return r
         if t == 'service':
@@ -104,7 +104,7 @@ class PNP_Webui(BaseModule):
             for i in range(nb_metrics):
                 v = {}
                 v['link'] = self.uri+'graph?host=%s&srv=%s' % (elt.host.host_name, elt.service_description)
-                v['img_src'] = self.uri+'image?host=%s&srv=%s&view=0&source=%d' % (elt.host.host_name, elt.service_description, i)
+                v['img_src'] = self.uri+'image?host=%s&srv=%s&view=0&source=%d&start=%d&end=%d' % (elt.host.host_name, elt.service_description, i, graphstart, graphend)
                 r.append(v)
             return r
 

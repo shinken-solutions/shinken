@@ -21,7 +21,7 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js', 'eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 
 %#  "This is the background canvas for all gesture detection things " 
@@ -341,18 +341,37 @@ Invalid element name
 
 		<div class="tabcontent">
 			<h2 style="display: none"><a name="graphs" id="graph">Graphs</a></h2>
-			%uris = app.get_graph_uris(elt)
+			%uris = app.get_graph_uris(elt, graphstart, graphend)
+			%if len(uris) == 0:
+			  No graphs
+			%else:
+			<ul class="tabmenu">
+			  %now = int(time.time())
+			  %fourhours = now - 3600*4
+			  %lastday = now - 86400
+			  %lastweek = now - 86400*7
+			  %lastmonth = now - 86400*31
+			  %lastyear = now - 86400*365
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{fourhours}}&graphend={{now}}#graphs" class="">4 hours</a></li>
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastday}}&graphend={{now}}#graphs" class="">Day</a></li>
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastweek}}&graphend={{now}}#graphs" class="">Week</a></li>
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastmonth}}&graphend={{now}}#graphs" class="">Month</a></li>
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></li>
+			</ul>
+			%end
+			
 			%for g in uris:
 			   %img_src = g['img_src']
 			   %link = g['link']
-			<p><a href="{{link}}"><img src="{{img_src}}" /></a></p>
+			<p><a href="{{link}}"><img src="{{img_src}}" class="graphimg"></img></a></p>
+			moncul
 			%end
 		</div>
 
 		<div class="tabcontent">
 			<h2 style="display: none"><a name="comment" id="comment">Comments</a></h2>
 				<ul class="tabmenu">
-					<li>
+				  <li>
 						<a href="#" class="">Add Comments</a>
 					</li>
 					<li>
