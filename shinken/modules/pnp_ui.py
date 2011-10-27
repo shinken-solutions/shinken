@@ -103,8 +103,8 @@ class PNP_Webui(BaseModule):
             nb_metrics = self.get_number_of_metrics(elt)
             for i in range(nb_metrics):
                 v = {}
-                v['link'] = self.uri+'graph?host=%s&srv=%s' % (elt.host.get_name(), elt.service_description)
-                v['img_src'] = self.uri+'image?host=%s&srv=%s&view=0&source=%d' % (elt.get_name(), elt.service_description, i)
+                v['link'] = self.uri+'graph?host=%s&srv=%s' % (elt.host.host_name, elt.service_description)
+                v['img_src'] = self.uri+'image?host=%s&srv=%s&view=0&source=%d' % (elt.host.host_name, elt.service_description, i)
                 r.append(v)
             return r
 
