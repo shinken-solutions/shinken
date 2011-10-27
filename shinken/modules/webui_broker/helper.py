@@ -35,6 +35,7 @@ except ImportError:
         print "Error : you need the json or simplejson module"
         raise
 
+from shinken.util import safe_print
 
 
 # Sort hosts and services by impact, states and co
@@ -188,11 +189,11 @@ class Helper(object):
         print "We got all our elements"
         dicts = []
         for i in all_elts:
-            print "Elt", i.get_dbg_name()
+            safe_print("Elt", i.get_dbg_name())
             d = self.get_dep_graph_struct(i)
             dicts.append(d)
         j = json.dumps(dicts)
-        print "Create json", j
+        safe_print("Create json", j)
         print "create_json_dep_graph::Json creation time", time.time() - t0
         return j
 
@@ -240,7 +241,7 @@ class Helper(object):
         d['data']['is_problem'] = elt.is_problem
         d['data']['state_id'] = elt.state_id
 
-        print "ELT:%s is %s" % (elt.get_full_name(), elt.state)
+        safe_print("ELT:%s is %s" % (elt.get_full_name(), elt.state))
         if elt.state in ['OK', 'UP', 'PENDING']:
             d['data']['circle'] = 'none'
         elif elt.state in ['DOWN', 'CRITICAL']:
@@ -287,7 +288,7 @@ class Helper(object):
             for c in par_elts:
                 my.add(c)
             
-        print "get_all_linked_elts::Give elements", my
+        safe_print("get_all_linked_elts::Give elements", my)
         return my
 
 
@@ -329,7 +330,7 @@ class Helper(object):
 
 
     def print_business_rules(self, tree, level=0):
-        print "Should print tree", tree
+        safe_print("Should print tree", tree)
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
@@ -363,7 +364,7 @@ class Helper(object):
                 sub_s = self.print_business_rules(n, level=level+1)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
-        print "Returing s:", s
+        safe_print("Returing s:", s)
         return s
 
 
