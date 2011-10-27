@@ -95,16 +95,16 @@ class PNP_Webui(BaseModule):
             nb_metrics = self.get_number_of_metrics(elt)
             for i in range(nb_metrics):
                 v = {}
-                v['link'] = self.uri+'graph?host=%s&srv=_HOST_' % elt.get_name()
-                v['img_src'] = self.uri+'image?host=%s&srv=_HOST_&view=0&source=%d&start=%d&end=%d' % (elt.get_name(), i, graphstart, graphend)
+                v['link'] = self.uri+'index.php/graph?host=%s&srv=_HOST_' % elt.get_name()
+                v['img_src'] = self.uri+'index.php/image?host=%s&srv=_HOST_&view=0&source=%d&start=%d&end=%d' % (elt.get_name(), i, graphstart, graphend)
                 r.append(v)
             return r
         if t == 'service':
             nb_metrics = self.get_number_of_metrics(elt)
             for i in range(nb_metrics):
                 v = {}
-                v['link'] = self.uri+'graph?host=%s&srv=%s' % (elt.host.host_name, elt.service_description)
-                v['img_src'] = self.uri+'image?host=%s&srv=%s&view=0&source=%d&start=%d&end=%d' % (elt.host.host_name, elt.service_description, i, graphstart, graphend)
+                v['link'] = self.uri+'index.php/graph?host=%s&srv=%s' % (elt.host.host_name, elt.service_description)
+                v['img_src'] = self.uri+'index.php/image?host=%s&srv=%s&view=0&source=%d&start=%d&end=%d' % (elt.host.host_name, elt.service_description, i, graphstart, graphend)
                 r.append(v)
             return r
 
