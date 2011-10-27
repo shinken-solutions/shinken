@@ -334,9 +334,21 @@ Invalid element name
     
     <div class="domtab">
 		<ul class="domtabs">
+			<li class="box_gradient_vertical"><a href="#graph">Graphs</a></li>
 			<li class="box_gradient_vertical"><a href="#comment">Comments</a></li>
 			<li class="box_gradient_vertical"><a href="#downtime">Downtimes</a></li>
 		</ul>
+
+		<div class="tabcontent">
+			<h2 style="display: none"><a name="graphs" id="graph">Graphs</a></h2>
+			%uris = app.get_graph_uris(elt)
+			%for g in uris:
+			   %img_src = g['img_src']
+			   %link = g['link']
+			<p><a href="{{link}}"><img src="{{img_src}}" /></a></p>
+			%end
+		</div>
+
 		<div class="tabcontent">
 			<h2 style="display: none"><a name="comment" id="comment">Comments</a></h2>
 				<ul class="tabmenu">

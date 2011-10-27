@@ -395,3 +395,28 @@ class Webui_broker(BaseModule, Daemon):
 
         c = self.datamgr.get_contact(user_name)
         return c
+
+
+
+    # Try to got for an element the graphs uris from modules
+    def get_graph_uris(self, elt):
+        print "Checking graph uris ", elt.get_full_name()
+
+        uris = []
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                f = getattr(mod, 'get_graph_uris', None)
+                print "Get graph uris ", f, "from", mod.get_name()
+                if f and callable(f):
+                    r = f(elt)
+                    uris.extend(r)
+            except Exception , exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)        
+
+        print "Will return", uris
+        # Ok if we got a real contact, and if a module auth it
+        return uris
