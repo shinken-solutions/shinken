@@ -37,7 +37,7 @@ Invalid element name
 %#  "Left Container End"
 
 %#  "Content Container Start"
-<div class="grid_13">
+<div id="content_container" class="grid_13">
 	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down">{{elt.state}}: {{elt.get_full_name()}}</h1>
 	<div id="overview_container" class="grid_16">
 		<dl class="grid_5">
@@ -171,28 +171,23 @@ Invalid element name
 								<h2>Additonal Informations</h2>
 									<table>
 										<tbody>
-											<tr class="odd hidden_infos">
+											<tr>
 												<th scope="row" class="column1">Last Notification</th>
 												<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
 											</tr>
-											<tr class="hidden_infos">
+											<tr>
 												<th scope="row" class="column1">Check Latency / Duration</th>
 												<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 											</tr>
-											<tr class="odd hidden_infos">
+											<tr>
 												<th scope="row" class="column1">Is This Host Flapping?</th>
 												<td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
 											</tr>
-											<tr class="hidden_infos">
+											<tr>
 												<th scope="row" class="column1">In Scheduled Downtime?</th>
 												<td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
 											</tr>
-											<tr id="hidden_info_button" class="opacity_hover">
-												<th></th>
-												<td>
-													<div style="float:left;" id="hidden_info_button"><a href="javascript:show_hidden_info()"> {{!helper.get_button('More', img='/static/images/expand.png')}}</a> </div>	
-												</td>
-											</tr>
+											
 										</tbody>
 									</table>
 								</div>

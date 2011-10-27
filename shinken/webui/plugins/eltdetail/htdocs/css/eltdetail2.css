@@ -1,3 +1,7 @@
+#content_container {
+	padding-top: 10px;
+}
+
 #overview_container {
 	background: #FAFAFA;
 	border: 1px solid #E3E3E5;
@@ -175,10 +179,10 @@ div.content {
   background-image: url('error.png');
 }
 
-.icon_down {
+/*.icon_down {
 	background: url("/static/images/state_unreachable.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
     height: 25px;
     width: 25px;
-}
+}*/
