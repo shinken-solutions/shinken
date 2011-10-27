@@ -343,7 +343,7 @@ Invalid element name
 			<h2 style="display: none"><a name="graphs" id="graph">Graphs</a></h2>
 			%uris = app.get_graph_uris(elt, graphstart, graphend)
 			%if len(uris) == 0:
-			  No graphs
+			  <p>No graphs</p>
 			%else:
 			<ul class="tabmenu">
 			  %now = int(time.time())
