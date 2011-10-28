@@ -64,7 +64,7 @@ def get_instance(plugin):
 
 
 # Get hosts and/or services dep by launching a command
-# or read a flat file as json format taht got theses links
+# or read a flat file as json format that got theses links
 class Hot_dependencies_arbiter(BaseModule):
     def __init__(self, modconf, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout, in_debug=False):
         BaseModule.__init__(self, modconf)

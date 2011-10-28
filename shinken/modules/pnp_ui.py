@@ -82,7 +82,7 @@ class PNP_Webui(BaseModule):
         
 
 
-    # Ask for an host or a service the graph UI taht the UI should
+    # Ask for an host or a service the graph UI that the UI should
     # give to get the graph image link and PNP page link too.
     def get_graph_uris(self, elt, graphstart, graphend):
         if not elt:
