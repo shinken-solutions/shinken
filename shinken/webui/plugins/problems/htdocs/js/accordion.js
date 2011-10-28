@@ -103,10 +103,10 @@ function try_to_fix_all(){
 }
 
 
-function acknoledge_all(){
+function acknowledge_all(){
     selected_elements.each(function(name){
 			       ackno_element = name;
-			       do_acknoledge('Acknoledge from WebUI.');
+			       do_acknowledge('Acknowledge from WebUI.');
 			   });
     flush_selected_elements();
 }

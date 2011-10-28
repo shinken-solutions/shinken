@@ -110,9 +110,9 @@ function try_to_fix(name) {
 
 
 
-/* For acknoledge, we can ask for a message first */
+/* For acknowledge, we can ask for a message first */
 var ackno_element = null;
-function acknoledge(hname){
+function acknowledge(hname){
     ackno_element = hname;
     var obj = new Element('div', {
 	    'id': 'dummydummy',
@@ -131,14 +131,14 @@ function acknoledge(hname){
 		/*passEvent: e,*/
 		autoDismiss: false,
 		title: 'Have a Comment?' ,
-		message: '<textarea id="commentText" cols="3" rows="5" class="msgEditable">Acknoledged.</textarea>',
-		callback: do_acknoledge
+		message: '<textarea id="commentText" cols="3" rows="5" class="msgEditable">Acknowledged.</textarea>',
+		callback: do_acknowledge
 		}).say();
 }
  
-function do_acknoledge(text){
+function do_acknowledge(text){
     var elts = get_elements(ackno_element);
-    /*alert('acknoledge'+ackno_element+text);*/
+    /*alert('acknowledge'+ackno_element+text);*/
     var url = '/action/ACKNOWLEDGE_'+elts.type+'_PROBLEM/'+elts.nameslash+'/1/0/1/webui/'+text;
     launch(url);
 }

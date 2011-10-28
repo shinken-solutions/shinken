@@ -124,8 +124,8 @@ document.addEvent('domready', function() {
 	<a href="#" onclick="recheck_now_all()"><img src="/static/images/big_refresh.png" alt="refresh"/></a>
       </li>
       <li>
-	<span>Acknoledge</span>
-	<a href="#" onclick="acknoledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
+	<span>Acknowledge</span>
+	<a href="#" onclick="acknowledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
       </li>
       
     </ul>
@@ -229,7 +229,7 @@ document.addEvent('domready', function() {
 	      <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
 	    </div>
 	    <div style="float:right;">
-	      <a href="#" onclick="acknoledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
+	      <a href="#" onclick="acknowledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
 	    </div>
 	    <div style="float:right;">
 	      <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
