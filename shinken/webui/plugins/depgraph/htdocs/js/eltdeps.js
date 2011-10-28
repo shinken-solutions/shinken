@@ -345,6 +345,15 @@ window.onload = function init(){
 		'overridable': true,
 	    },
 	
+	    //Add tooltips
+	    Tips: {
+		enable: true,
+		onShow: function(tip, node) {
+		    var html = "<div class=\"tip-title border\">" + node.data.infos + "</div>";
+		    tip.innerHTML = html;
+		}
+	    },
+	    
 	    //Set polar interpolation.
 	    //Default's linear.
 	    interpolation: 'polar',
