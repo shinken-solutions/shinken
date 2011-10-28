@@ -25,9 +25,4 @@
    all element graph */
 
 window.addEvent('domready', function(){
-
-    var graphimages = $$('.graphimg');
-    graphimages.each(function(el) {
-	});
-
 });

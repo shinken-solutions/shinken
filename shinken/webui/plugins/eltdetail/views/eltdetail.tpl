@@ -360,11 +360,12 @@ Invalid element name
 			</ul>
 			%end
 			
+			%img_id = 0
 			%for g in uris:
+			   %img_id += 1
 			   %img_src = g['img_src']
 			   %link = g['link']
-			<p><a href="{{link}}"><img src="{{img_src}}" class="graphimg"></img></a></p>
-			moncul
+			<p><a href="{{link}}"><img src="{{img_src}}" class="graphimg" id="graphimg-{{img_id}}"></img></a></p>
 			%end
 		</div>
 
