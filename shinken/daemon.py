@@ -36,7 +36,7 @@ from shinken.pyro_wrapper import InvalidWorkDir, Pyro
 
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
-from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp
+from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp
 
 
 if os.name != 'nt':
@@ -116,7 +116,8 @@ class Daemon(object):
         'use_local_log': BoolProp(default='1'),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
-        'spare':         BoolProp(default='0')
+        'spare':         BoolProp(default='0'),
+        'max_queue_size':IntegerProp(default='0'),
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
@@ -156,6 +157,7 @@ class Daemon(object):
         # when we will be in daemon
         self.debug_output = []
 
+        
         self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
 
         os.umask(UMASK)
@@ -229,7 +231,8 @@ class Daemon(object):
             # the config file by reference
             self.relative_paths_to_full(os.path.dirname(self.config_file))
             pass
-        
+        # Set the modules watchdogs
+        self.modules_manager.set_max_queue_size(self.max_queue_size)
 
 
     def change_to_workdir(self):
