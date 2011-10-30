@@ -28,7 +28,19 @@
 #they can die if they do not do anything (param timeout)
 
 from Queue import Empty
-from multiprocessing import Process, Queue
+
+# In android, we sould use threads, not process
+is_android = True
+try:
+   import android
+except ImportError:
+   is_android = False
+
+if not is_android:
+   from multiprocessing import Process, Queue
+else:
+   from Queue import Queue
+   from threading import Thread as Process
 
 import time
 import sys
@@ -74,7 +86,9 @@ class Worker:
     # AND close correctly the queues (input and output)
     # each queue got a thread, so close it too....
     def terminate(self):
-        self._process.terminate()
+        # We can just terminate process, not threads
+        if not is_android:
+            self._process.terminate()
         self._c.close()
         self._c.join_thread()
         self.input_queue.close()
@@ -164,7 +178,11 @@ class Worker:
                 #We answer to the master
                 #msg = Message(id=self.id, type='Result', data=action)
                 try:
-                    self.returns_queue.append(action)#msg)
+                    # In android, the Queue is changed
+                    if not is_android:
+                        self.returns_queue.append(action)
+                    else:
+                        self.returns_queue.put(action)
                 except IOError , exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
                     sys.exit(2)
@@ -200,7 +218,9 @@ class Worker:
     #c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         ## restore default signal handler for the workers:
-        signal.signal(signal.SIGTERM, signal.SIG_DFL)
+        # but on android, we are a thread, so don't do it
+        if not is_android:
+           signal.signal(signal.SIGTERM, signal.SIG_DFL)
         timeout = 1.0
         self.checks = []
         self.returns_queue = returns_queue
