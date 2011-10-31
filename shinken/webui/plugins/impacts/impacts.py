@@ -21,7 +21,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from shinken.util import safe_print
 from shinken.webui.bottle import redirect
 
 # Global value that will be changed by the main app
@@ -63,7 +63,7 @@ def show_impacts():
 
     imp_id = 0
     for imp in all_imp_impacts:
-        print "FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name()
+        safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
         imp_id += 1
         impacts[imp_id] = imp
 
