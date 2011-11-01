@@ -122,7 +122,7 @@ function launch_gesture(gesture, score){
 	//alert(gesture+' '+score);
 	/* Gestures :
 	   reactange or circle : recheck now
-	   v or 'check' : acknoledge
+	   v or 'check' : acknowledge
 	   'zig-zag' or 'right curly brace' or left one : try to fix
 	 */
 	if(gesture == 'rectange' || gesture == 'circle'){
@@ -130,7 +130,7 @@ function launch_gesture(gesture, score){
 	}
 	if(gesture == 'v' || gesture == 'check'){
 	    ackno_element = elt_name;
-	    do_acknoledge('Acknoledged by WebUI gesture.');
+	    do_acknowledge('Acknowledged by WebUI gesture.');
 	}
 	if(gesture == 'zig-zag' || gesture == 'left curly brace' || gesture == 'right curly brace'){
 	    try_to_fix(elt_name);

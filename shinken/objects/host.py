@@ -228,10 +228,10 @@ class Host(SchedulingItem):
         # Here it's the elements we are depending on
         # so our parents as network relation, or a host
         # we are depending in a hostdependency
-        # or even if we are businesss based.
+        # or even if we are business based.
         'parent_dependencies' : StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
-        # Here it's the guys taht depend on us. So it's the total
-        # oposite of the parent_dependencies 
+        # Here it's the guys that depend on us. So it's the total
+        # opposite of the parent_dependencies 
         'child_dependencies':   StringProp(
             brok_transformation=to_svc_hst_distinct_lists,
             default=set(),
@@ -264,7 +264,7 @@ class Host(SchedulingItem):
         # Our Dependency node for the business rule
         'business_rule' : StringProp(default=None),
         
-        # Manage the unkown/unreach during hard state
+        # Manage the unknown/unreach during hard state
         # From now its not really used
         'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),

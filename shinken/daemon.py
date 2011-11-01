@@ -36,10 +36,10 @@ from shinken.pyro_wrapper import InvalidWorkDir, Pyro
 
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
-from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp
+from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp
 
 
-if os.name != 'nt':
+try:
     import pwd, grp
     from pwd import getpwnam
     from grp import getgrnam
@@ -48,12 +48,20 @@ if os.name != 'nt':
 
     def get_cur_group():
         return grp.getgrgid( os.getgid() ).gr_name
-else:
+except ImportError, exp: # Like in nt system or Android
     # temporary workarround :
     def get_cur_user():
         return "shinken"
     def get_cur_group():
         return "shinken"
+
+# Try to see if we are in an android device or not
+is_android = True
+try:
+   import android
+except ImportError:
+   is_android = False
+
 
 ##########################   DAEMON PART    ###############################
 # The standard I/O file descriptors are redirected to /dev/null by default.
@@ -94,6 +102,12 @@ class Interface(Pyro.core.ObjBase, object):
         return self.app.cur_conf is not None
 
 
+# If we are under android, we can't give parameters
+if is_android:
+  DEFAULT_WORK_DIR = '/sdcard/sl4a/scripts/'
+else:
+  DEFAULT_WORK_DIR = 'var'
+
 
 class Daemon(object):
 
@@ -105,7 +119,7 @@ class Daemon(object):
         #  os.path.join( os.getcwd(), sys.argv[0] )
         # 
         # as returned once the daemon is started.
-        'workdir':       PathProp(default='var'),
+        'workdir':       PathProp(default=DEFAULT_WORK_DIR),
         'host':          StringProp(default='0.0.0.0'),
         'user':          StringProp(default=get_cur_user()),
         'group':         StringProp(default=get_cur_group()),
@@ -116,7 +130,8 @@ class Daemon(object):
         'use_local_log': BoolProp(default='1'),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
-        'spare':         BoolProp(default='0')
+        'spare':         BoolProp(default='0'),
+        'max_queue_size':IntegerProp(default='0'),
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
@@ -156,6 +171,7 @@ class Daemon(object):
         # when we will be in daemon
         self.debug_output = []
 
+        
         self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
 
         os.umask(UMASK)
@@ -229,7 +245,8 @@ class Daemon(object):
             # the config file by reference
             self.relative_paths_to_full(os.path.dirname(self.config_file))
             pass
-        
+        # Set the modules watchdogs
+        self.modules_manager.set_max_queue_size(self.max_queue_size)
 
 
     def change_to_workdir(self):
@@ -538,6 +555,10 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
 If change failed we sys.exit(2) """
         if insane is None:
             insane = not self.idontcareaboutsecurity
+
+        if is_android:
+           print "Sorry, you can't change user on this system"
+           return
 
         # TODO: change user on nt
         if os.name == 'nt':

@@ -148,6 +148,9 @@ then
     SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
 fi
 
+# If var or run dir is missing, create them and chown them
+[ ! -d $VAR ] && mkdir -p $VAR && chown $SHINKENUSER:$SHINKENGROUP $VAR
+[ ! -d $RUN ] && mkdir -p $RUN && chown $SHINKENUSER:$SHINKENGROUP $RUN
 
 # Now place us in our var directory so even our arbiter will be
 # happy for opening its pid and cmd files

@@ -34,8 +34,18 @@ if arbiter want it to have a new conf, satellite forgot old schedulers
 (and actions into) take new ones and do the (new) job.
 """
 
+# Try to see if we are in an android device or not
+is_android = True
+try:
+   import android
+except ImportError:
+   is_android = False
 
-from multiprocessing import Queue, Manager, active_children, cpu_count
+if not is_android:
+   from multiprocessing import Queue, Manager, active_children, cpu_count
+else:
+   from Queue import Queue
+
 import os
 import copy
 import time
@@ -430,8 +440,10 @@ class Satellite(BaseSatellite):
     # *0.005% : alien attack
     # So they need to be detected, and restart if need
     def check_and_del_zombie_workers(self):
-        # Active children make a join with every one, useful :)
-        active_children()
+        # In android, we are using threads, so there is not active_children call
+        if not is_android:
+           # Active children make a join with every one, useful :)
+           active_children()
 
         w_to_del = []
         for w in self.workers.values():
@@ -585,6 +597,20 @@ class Satellite(BaseSatellite):
                 sys.exit(0)
 
 
+    # In android we got a Queue, and a manager list for others
+    def get_returns_queue_len(self):
+        if not is_android:
+            return len(self.returns_queue)
+        return self.returns_queue.qsize()
+        
+        
+    # In android we got a Queue, and a manager list for others
+    def get_returns_queue_item(self):
+        if not is_android:
+            return self.returns_queue.pop()
+        return self.returns_queue.get()
+
+
     def do_loop_turn(self):
         print "Loop turn"
         # Maybe the arbiter ask us to wait for a new conf
@@ -628,7 +654,7 @@ class Satellite(BaseSatellite):
                 # In workers we've got actions send to queue - queue size
                 for (i, q) in self.q_by_mod[mod].items():
                     print '[%d][%s][%s]Stats : Workers:%d (Queued:%d TotalReturnWait:%d)' % \
-                        (sched_id, sched['name'], mod, i, q.qsize(), len(self.returns_queue))
+                        (sched_id, sched['name'], mod, i, q.qsize(), self.get_returns_queue_len())
 
 
         # Before return or get new actions, see how we manage
@@ -663,8 +689,8 @@ class Satellite(BaseSatellite):
 
         # Manage all messages we've got in the last timeout
         # for queue in self.return_messages:
-        while len(self.returns_queue) != 0:
-            self.manage_action_return(self.returns_queue.pop())
+        while self.get_returns_queue_len() != 0:
+            self.manage_action_return(self.get_returns_queue_item())
             
         # If we are passive, we do not initiate the check getting
         # and return
@@ -688,8 +714,14 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER
         self.q_by_mod['fork'] = {}
-        self.manager = Manager()
-        self.returns_queue = self.manager.list()
+        
+        # Under Android, we do not have multiprocessing lib
+        # so use standard threads things
+        if not is_android:
+            self.manager = Manager()
+            self.returns_queue = self.manager.list()
+        else:
+            self.returns_queue = Queue()
 
         import socket
         socket.setdefaulttimeout(None)
@@ -749,14 +781,14 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         # Now the limit part, 0 mean : number of cpu of this machine :)
         # if not available, use 4 (modern hardware)
         self.max_workers = g_conf['max_workers']
-        if self.max_workers == 0:
+        if self.max_workers == 0 and not is_android:
             try:
                 self.max_workers = cpu_count()
             except NotImplementedError:
                 self.max_workers =4
             logger.log("Using max workers : %s" % self.max_workers)
         self.min_workers = g_conf['min_workers']
-        if self.min_workers == 0:
+        if self.min_workers == 0 and not is_android:
             try:
                 self.min_workers = cpu_count()
             except NotImplementedError:

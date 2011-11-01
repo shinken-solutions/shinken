@@ -141,7 +141,7 @@
 	    <div class="problem-actions opacity_hover">
 	      <div class="action-fixit"><a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</a></div>
 	      %if not pb.problem_has_been_acknowledged:
-	      <div class="action-ack"><a href="#" onclick="acknoledge('{{pb.get_full_name()}}')"><img class="icon" title="Acknowledge it" src="static/images/link_processes.gif">Acknowledge it</a></div>
+	      <div class="action-ack"><a href="#" onclick="acknowledge('{{pb.get_full_name()}}')"><img class="icon" title="Acknowledge it" src="static/images/link_processes.gif">Acknowledge it</a></div>
 	      %end
 	    </div>
 	  </div>

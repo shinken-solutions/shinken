@@ -350,7 +350,7 @@ Like temporary attributes such as "imported_from", etc.. """
     # to transform Nagios2 parameters to Nagios3
     # ones, like normal_check_interval to
     # check_interval. There is a old_parameters tab
-    # in Classes taht give such modifications to do.
+    # in Classes that give such modifications to do.
     def old_properties_names_to_new(self):
         old_properties = self.__class__.old_properties
         for old_name, new_name in old_properties.items():
@@ -668,7 +668,7 @@ class Items(object):
                 if t is not None:
                     new_tpls.append(t)
                 else: # not find? not good!
-                    err = "ERROR: the template '%s' defined for '%s' is unkown" % (tpl, i.get_name())
+                    err = "ERROR: the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
                     i.configuration_errors.append(err)
             i.templates = new_tpls
 
@@ -795,7 +795,7 @@ class Items(object):
                         # Else : Add in the errors tab.
                         # will be raised at is_correct
                         else:
-                            err = "ERROR: the contact '%s' defined for '%s' is unkown" % (c_name, i.get_name())
+                            err = "ERROR: the contact '%s' defined for '%s' is unknown" % (c_name, i.get_name())
                             i.configuration_errors.append(err)
                 # Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
@@ -883,7 +883,7 @@ class Items(object):
                 for cgname in cgnames:
                     cg = contactgroups.find_by_name(cgname)
                     if cg is None:
-                        err = "The contact group '%s'defined on the %s '%s' do not exist" % (cgname, i.__class__.my_type, i.get_name())
+                        err = "The contact group '%s' defined on the %s '%s' do not exist" % (cgname, i.__class__.my_type, i.get_name())
                         i.configuration_errors.append(err)
                         continue
                     cnames = contactgroups.get_members_by_name(cgname)

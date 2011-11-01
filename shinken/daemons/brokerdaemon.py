@@ -252,12 +252,14 @@ class Broker(BaseSatellite):
         # internal modules
         self.broks.extend(broks)
 
+
     # Each turn we get all broks from
     # self.broks_internal_raised and we put them in
     # self.broks
     def interger_internal_broks(self):
         self.add_broks_to_queue(self.broks_internal_raised)
         self.broks_internal_raised = []
+
 
     # Get 'objects' from external modules
     # from now nobody use it, but it can be useful
@@ -326,6 +328,7 @@ class Broker(BaseSatellite):
     # Helper function for module, will give our broks
     def get_retention_data(self):
         return self.broks
+
 
     # Get back our broks from a retention module
     def restore_retention_data(self, data):

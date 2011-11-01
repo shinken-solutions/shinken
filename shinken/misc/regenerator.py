@@ -855,7 +855,7 @@ class Regenerator:
 
     # In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
-        # There are some properties taht should nto change and are already linked
+        # There are some properties that should not change and are already linked
         # so just remove them
         clean_prop = ['check_command', 'hostgroups',
                       'contacts', 'notification_period', 'contact_groups',
@@ -898,7 +898,7 @@ class Regenerator:
 
     #In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
-        # There are some properties taht should nto change and are already linked
+        # There are some properties that should not change and are already linked
         # so just remove them
         clean_prop = ['check_command', 'servicegroups',
                       'contacts', 'notification_period', 'contact_groups',

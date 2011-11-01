@@ -43,12 +43,18 @@ class ModulesManager(object):
         self.modules_assoc = []
         self.instances = []
         self.to_restart = []
+        self.max_queue_size = 0
+
 
 
     def set_modules(self, modules):
         """ Set the modules requested for this manager """
         self.modules = modules
         self.allowed_types = [ mod.module_type for mod in modules ]
+
+
+    def set_max_queue_size(self, max_queue_size):
+        self.max_queue_size = max_queue_size
 
 
     def load_and_init(self):
@@ -213,7 +219,6 @@ If instance is external also shutdown it cleanly """
 
 
     def check_alive_instances(self):
-        #to_del = []
         #Only for external
         for inst in self.instances:
             if not inst in self.to_restart:
@@ -223,6 +228,29 @@ If instance is external also shutdown it cleanly """
                     # We clean its queues, they are no more useful
                     inst.clear_queues()
                     self.to_restart.append(inst)
+                    # Ok, no need to look at queue size now
+                    continue
+
+                # Now look for man queue size. If above value, the module should got a huge problem
+                # and so bailout. It's not a perfect solution, more a watchdog
+                # If max_queue_size is 0, don't check this
+                if self.max_queue_size == 0:
+                    continue
+                # Ok, go launch the dog!
+                queue_size = 0
+                try:
+                    queue_size = inst.to_q.qsize()
+                except Exception, exp:
+                    pass
+                if queue_size > self.max_queue_size:
+                    logger.log("Error : the external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name()), queue_size, self.max_queue_size)
+                    logger.log("Setting the module %s to restart" % inst.get_name())
+                    # We clean its queues, they are no more useful
+                    inst.clear_queues()
+                    self.to_restart.append(inst)
+
+
+
 
                 
     def try_to_restart_deads(self):

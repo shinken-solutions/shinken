@@ -22,7 +22,6 @@ SHINKENCFG="$ETC/nagios.cfg"
 #configuration (only the shinken.cfg part)
 SHINKENSPECIFICCFG="$ETC/shinken-specific.cfg"
 
-
 # The command to launch
 ARBITERDAEMON=$BIN/shinken-arbiter
 
@@ -104,3 +103,6 @@ RECEIVERDEBUGFILE="$LOG/receiver-debug.log"
 # nicelevel to run shinken daemon with
 NICENESS=5
 
+# user/group for the var/run rights
+SHINKENUSER=shinken
+SHINKENGROUP=shinken
