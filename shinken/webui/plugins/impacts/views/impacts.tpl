@@ -1,87 +1,80 @@
-
 %helper = app.helper
 %datamgr = app.datamgr
 
 %rebase layout js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/css/impacts.css'], refresh=True, menu_part = '/impacts', user=user
 
-
 %# " If the auth succeed, we go in the /problems page "
 %if not valid_user:
-<script type="text/javascript">
-  window.location.replace("/login");
-</script>
+	<script type="text/javascript">
+		window.location.replace("/login");
+	</script>
 %# " And if the javascript is not follow? not a problem, we gave no data here."
 %end
 
+<div id="impact-container">
 
+	<div class="impacts-panel grid_4" style="min-height: 983px; ">
 
+		%# " We look for separate bad and good elements, so we remember last state"
+		%last_was_bad = False
+		%# " By default we won't expand an impact."
+		<script type="text/javascript">
+		  var  impact_to_expand = -1;
+		</script>
+		%for imp_id in impacts:
+		%   impact = impacts[imp_id]
+	
+	  	%# "When we swtich, add a HR to really separate things"
+	  	%if impact.state_id == 0 and last_was_bad and imp_id != 1:
+	    	<hr>
+	    	%last_was_bad = False
+	  	%end
+	  	%if impact.state_id != 0:
+	    	%last_was_bad = True
+	  	%end
+	
+	  	%if imp_id == 1 and impact.state_id != 0:
+		    <script type="text/javascript">
+		    	impact_to_expand = {{imp_id}};
+		    </script>
+	  	%end
+	  	
+	    <div class="impact pblink" id="{{imp_id}}">
+			<div class="show-problem" id="show-problem-{{imp_id}}">
+				<img src="static/images/trig_right.png" id="show-problem-img-{{imp_id}}">
+			</div>
+			
+		%for i in range(2, impact.business_impact):
+			<div class="criticity-icon-{{i-1}}">
+				<img src="static/images/star.png">
+			</div>
+		%end
+	
+		%#	<div class="impact-icon"><img src="static/images/50x50.png"></div>
+			<div class="impact-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"></div>
+			<div class="impact-rows">
+				<div class="impact-row">
+					<span class="impact-name">{{impact.get_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span>
+				</div>
+				<div class="impact-row">
+					<span class="impact-duration">since {{helper.print_duration(impact.last_state_change, just_duration=True, x_elts=2)}}</span>
+				</div>
+			</div>
+		</div>
+		%# end of the for imp_id in impacts:
+		%end
 
-
-    <div class="whole-page">
-      
-      
-      
-
-      <div class="impacts-panel" style="min-height: 983px; ">
-
-%# " We look for separate bad and good elements, so we remember last state"
-%last_was_bad = False
-%# " By default we won't expand an impact."
-<script type="text/javascript">
-  var  impact_to_expand = -1;
-</script>
-%for imp_id in impacts:
-%   impact = impacts[imp_id]
-
-  %# "When we swtich, add a HR to really separate things"
-  %if impact.state_id == 0 and last_was_bad and imp_id != 1:
-    <hr>
-    %last_was_bad = False
-  %end
-  %if impact.state_id != 0:
-    %last_was_bad = True
-  %end
-
-  %if imp_id == 1 and impact.state_id != 0:
-    <script type="text/javascript">
-      impact_to_expand = {{imp_id}};
-    </script>
-  %end
-    <div class="impact pblink" id="{{imp_id}}">
-
-	  <div class="show-problem" id="show-problem-{{imp_id}}">
-	    <img src="static/images/trig_right.png" id="show-problem-img-{{imp_id}}">
-	  </div>
-	  %for i in range(2, impact.business_impact):
-	    <div class="criticity-icon-{{i-1}}">
-	      <img src="static/images/star.png">
-	    </div>
-	  %end
-
-	    
-%#	  <div class="impact-icon"><img src="static/images/50x50.png"></div>
-	  <div class="impact-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"></div>
-	  <div class="impact-rows">
-	    <div class="impact-row"><span class="impact-name">{{impact.get_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span>
-
-	    </div>
-	    <div class="impact-row"><span class="impact-duration">since {{helper.print_duration(impact.last_state_change, just_duration=True, x_elts=2)}}</span></div>
-	  </div>
 	</div>
-%# end of the for imp_id in impacts:
-%end
-
-      </div>
       
-      <div class="right-panel">
-	<a href="/3dimpacts" class="mb" title="Show impacts in 3D mode.">{{!helper.get_button('Show impacts in 3d', img='/static/images/state_ok.png')}}</a>
-      </div>
+	<!--<div class="right-panel">
+		<a href="/3dimpacts" class="mb" title="Show impacts in 3D mode.">{{!helper.get_button('Show impacts in 3d', img='/static/images/state_ok.png')}}</a>
+	</div> -->
 
 
       
 
 %# "#######    Now we will output righ panel with all root problems"
-      <div class="problems-panels">
+      <div class="problems-panels grid_12">
 
 
 %# Iinit pb_id
@@ -90,7 +83,7 @@
 %for imp_id in impacts:
 %   impact = impacts[imp_id]
 
-      <div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
+      <div class="problems-panel grid_16" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
 
 	  <div class="right-panel-top"> 
 
@@ -172,9 +165,4 @@
 
       </div>
     </div>
-    
-    <table class="footer"><tbody><tr><td class="left"></td><td class="middle"></td><td class="right"></td></tr></tbody>
-    </table>
-
-%include footer
-    
+ 
