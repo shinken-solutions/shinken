@@ -277,7 +277,12 @@ class ExternalCommandManager:
 
 
     def resolve_command(self, excmd):
-        command = excmd.cmd_line
+        # Maybe the command is invalid. Bailout
+        try:
+            command = excmd.cmd_line
+        except AttributeError, exp:
+            print "DBG: resolve_command:: error with command", excmd, exp
+            return
 
         # Strip and get utf8 only strings
         command = command.strip()

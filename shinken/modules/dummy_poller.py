@@ -98,7 +98,7 @@ class Dummy_poller(BaseModule):
         for action in self.checks:
             to_del.append(action)
             try:
-                self.returns_queue.append(action)
+                self.returns_queue.put(action)
             except IOError , exp:
                 print "[%d]Exiting: %s" % (self.id, exp)
                 sys.exit(2)

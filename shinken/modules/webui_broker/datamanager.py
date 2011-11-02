@@ -20,7 +20,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from shinken.util import safe_print
 from helper import hst_srv_sort
 
 
@@ -152,7 +152,7 @@ class DataManager(object):
         res.extend([h for h in self.rg.hosts if (h.business_impact > 2 and not 0 <= h.my_own_business_impact <= 2)] )
         print "DUMP IMPORTANT"
         for i in res:
-            print i.get_full_name(), i.business_impact, i.my_own_business_impact
+            safe_print(i.get_full_name(), i.business_impact, i.my_own_business_impact)
         return res
 
 

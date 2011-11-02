@@ -35,6 +35,7 @@ import socket
 import itertools
 import time
 import random
+from StringIO import StringIO
 
 
 from item import Item
@@ -379,13 +380,13 @@ class Config(Item):
 
     def read_config(self, files):
         #just a first pass to get the cfg_file and all files in a buf
-        res = u''
+        res = StringIO()
 
         for file in files:
             #We add a \n (or \r\n) to be sure config files are separated
             #if the previous does not finish with a line return
-            res += os.linesep
-            res += '# IMPORTEDFROM=%s' % (file) + os.linesep
+            res.write(os.linesep)
+            res.write('# IMPORTEDFROM=%s' % (file) + os.linesep)
             if self.read_config_silent == 0:
                print "Opening configuration file ",file
             try:
@@ -405,7 +406,7 @@ class Config(Item):
                 # Should not be useful anymore with the Universal open
                 # if os.name != 'nt':
                 #  line = line.replace("\r\n", "\n")
-                res += line
+                res.write(line)
                 line = line[:-1]
                 line = line.strip()
                 if re.search("^cfg_file", line) or re.search("^resource_file", line):
@@ -418,10 +419,10 @@ class Config(Item):
                     try:
                         fd = open(cfg_file_name, 'rU')
                         logger.log("Processing object config file '%s'" % cfg_file_name)
-                        res += os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep
-                        res += fd.read().decode('utf8', 'replace')
+                        res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
+                        res.write(fd.read().decode('utf8', 'replace'))
                         #Be sure to add a line return so we won't mix files
-                        res += '\n'
+                        res.write('\n')
                         fd.close()
                     except IOError, exp:
                         logger.log("Error: Cannot open config file '%s' for reading: %s" % (cfg_file_name, exp))
@@ -443,15 +444,18 @@ class Config(Item):
                             if re.search("\.cfg$", file):
                                 logger.log("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
-                                    res += os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep
+                                    res.write(os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep)
                                     fd = open(os.path.join(root, file), 'rU')
-                                    res += fd.read().decode('utf8', 'replace')
+                                    res.write(fd.read().decode('utf8', 'replace'))
                                     fd.close()
                                 except IOError, exp:
                                     logger.log("Error: Cannot open config file '%s' for reading: %s" % (os.path.join(root, file), exp))
                                     # The configuration is invalid
                                     # because we have a bad file!
                                     self.conf_is_correct = False
+        config = res.getvalue()
+        res.close()
+        return config
         return res
 #        self.read_config_buf(res)
 

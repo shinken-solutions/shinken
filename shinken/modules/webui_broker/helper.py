@@ -501,6 +501,32 @@ class Helper(object):
 
         return res
 
+
+    # Get a perfometer part for html printing
+    def get_perfometer(self, elt):
+        if elt.perf_data != '':
+            lnk = '#'
+            metrics = [('#68f', 35), ('white', 64)]
+            title = '35%'
+            s = '<a href="%s">' % lnk
+            s += '''<div class="content">
+                       <table>
+                          <tbody>
+                            <tr>\n'''
+
+            for (color, pct) in metrics:
+                s += '            <td class="inner" style="background-color: %s; width: %s%%;"></td>\n' % (color, pct)
+
+            s += '''        </tr>
+                         </tbody>
+                      </table>
+                    </div>
+                    <div class="title">%s</div>
+                    <img class="glow" src="/static/images/glow.png"/>
+                 </a>\n''' % title
+            return s
+        return '\n'
+
     
 
 helper = Helper()

@@ -5,8 +5,9 @@
     position: fixed;
     left: 450px;
     right: 0;
-    top: 100px;
-    width: 100%;
+    top: 85px;
+    /*width: 100%;*/
+	margin-left: 0;
 }
 
 
@@ -30,6 +31,7 @@
     overflow: hidden;
     opacity : 0;
     padding: 10px 20px;
+    width: 75%;
 }
 
 
@@ -43,8 +45,9 @@
     position: relative;
     background: white;
     height: 100%;
-    min-height: 600px;
+    min-height: 983px;
     z-index: 4;
+    margin-right:0;
 }
 
 
@@ -283,7 +286,7 @@
 
 
 /* Global container */
-.whole-page {
+#impact-container {
 /*    width: 92%;
     margin-left: 4%;
     margin-right: 4%;*/

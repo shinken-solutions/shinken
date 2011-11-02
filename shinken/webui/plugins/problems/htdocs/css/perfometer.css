@@ -1,0 +1,52 @@
+
+td.perfometer {
+    padding: 1px 1px 1px 0px;
+    width: 120px;
+    min-width : 120px;
+}
+
+
+td.perfometer img.glow {
+    position: relative;
+    top: 1px;
+    width: 118px;
+    height: 22px;
+    z-index: 3;
+}
+
+
+td.perfometer a {
+    color: black;
+    text-decoration: none;
+}
+
+
+td.perfometer div.title {
+    position: relative;
+    top: 5px;
+    width: 120px;
+    height: 0px;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 4;
+}
+
+
+td.perfometer div.content {
+    position: relative;
+    left: 1px;
+    height: 0px;
+}
+
+
+td.perfometer table {
+    width: 120px;
+    border: 1px solid #AAA;
+}
+
+
+td.perfometer td.inner {
+    padding: 0;
+    border: none;
+    height: 22px;
+}

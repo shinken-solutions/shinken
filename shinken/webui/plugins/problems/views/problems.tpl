@@ -5,7 +5,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css'], refresh=True, menu_part='/'+page, user=user
+%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css', 'problems/css/perfometer.css'], refresh=True, menu_part='/'+page, user=user
 
 
 %# " If the auth got problem, we bail out"
@@ -219,8 +219,13 @@ document.addEvent('domready', function() {
 		%else:
 		   <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output}}</td>
 		%end
+		<td class="perfometer">
+%#		  {{!helper.get_perfometer(pb)}}
+		</td>
 		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
+		
 		</tr>
+	      
              </table>
 	  </div>  
 	  %# " We put actions buttons with a opacity hover effect, so they won't be too visible"
