@@ -964,6 +964,8 @@ function enableperfdata(){
 }
 
 function setdaemonsaddresses(){
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
     localip=$(ifconfig $IF | grep "^ *inet adr:" | awk -F : '{print $2}' | awk '{print $1}')
 	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d address -v "$localip")
     cecho " > $result" green    
@@ -977,24 +979,24 @@ function setdaemonsaddresses(){
     cecho " > $result" green    
 }
 
-function addCESPollers(){
-    if [ ! -z "ADDPOLLERS" ]
-    then
-        for p in $ADDPOLLERS
-        do
-            pollname=$(echo $p | awk -F = '{print $1}')
-            pollip=$(echo $p | awk -F = '{print $2}')
-            result=$($PY $myscripts/tools/skonf.py -q -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
-            if [ $? -eq 0 ]
-            then
-                color="green"
-            else
-                color="red"
-            fi
-            cecho " > $result" $color 
-        done
-    fi
-}
+#function addCESPollers(){
+#    if [ ! -z "ADDPOLLERS" ]
+#    then
+#        for p in $ADDPOLLERS
+#        do
+#            pollname=$(echo $p | awk -F = '{print $1}')
+#            pollip=$(echo $p | awk -F = '{print $2}')
+#            result=$($PY $myscripts/tools/skonf.py -q -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
+#            if [ $? -eq 0 ]
+#            then
+#                color="green"
+#            else
+#                color="red"
+#            fi
+#            cecho " > $result" $color 
+#        done
+#    fi
+#}
 
 function enableCESCentralDaemons(){
     setdaemons "arbiter reactionner receiver scheduler broker poller"  
@@ -1018,16 +1020,24 @@ function setdaemons(){
     sed -i "s/^AVAIL_MODULES=.*$/$avail/g" /etc/init.d/shinken
 }
 
-function addpoller(){
-    args=$1
-    result=$($PY $myscripts/tools/skonf.py -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
-    if [ $? -eq 0 ]
-    then
-        color="green"
-    else
-        color="red"
-    fi
-    cecho " > $result" $color 
+#function addpoller(){
+#    args=$1
+#    result=$($PY $myscripts/tools/skonf.py -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
+#    if [ $? -eq 0 ]
+#    then
+#        color="green"
+#    else
+#        color="red"
+#    fi
+#    cecho " > $result" $color 
+#}
+
+function fixHtpasswdPath(){
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
+    # fix the htpasswd.users file path for WEBUI authentication
+    result=$($PY $myscripts/tools/skonf.py -f $TARGET/etc/shinken-specific.cfg -a setparam -o module -r "module_name=Apache_passwd" -d "passwd" -v "$TARGET/etc/htpasswd.users")
+    cecho " > $result" green    
 }
 
 function usage(){
@@ -1092,6 +1102,7 @@ while getopts "kidubcr:lz:hsvp:we:j:" opt; do
                 enableperfdata
                 setdaemonsaddresses
                 enableCESCentralDaemons
+                #fixHtpasswdPath
                 #addCESPollers
             else
                 enableCESPollerDaemons
@@ -1117,6 +1128,7 @@ while getopts "kidubcr:lz:hsvp:we:j:" opt; do
         i)
             FROMSRC=1
             sinstall 
+            fixHtpasswdPath
             exit 0
             ;;
         d)
