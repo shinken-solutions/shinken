@@ -231,6 +231,52 @@ If instance is external also shutdown it cleanly """
                     # Ok, no need to look at queue size now
                     continue
 
+                # Maybe the thread's queue of the module got a problem
+                # if so, restart this module
+                if inst.to_q is not None:
+                    thr = inst.to_q._thread
+                    if thr is not None and not thr.is_alive():
+                        # Ok, it's nevera good idea to call a _function, especially
+                        # this one. But we must be sure we do not let the die thread
+                        try:
+                            thr._jointhread()
+                        except Exception, exp:
+                            print "_jointhread exception :", exp
+                        # Set this queue to start a new thread
+                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
+                        inst.to_q._thread = None
+                        
+
+#                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
+#                        logger.log("Setting the module %s to restart" % inst.get_name())
+#                        # We clean its queues, they are no more useful
+#                        inst.clear_queues()
+#                        self.to_restart.append(inst)
+#                        # Ok, no need to look at queue size now
+#                        continue
+
+                # Same for from_q
+                if inst.from_q is not None:
+                    thr = inst.from_q._thread
+                    if thr is not None and not thr.is_alive():
+                        # Ok, it's nevera good idea to call a _function, especially
+                        # this one. But we must be sure we do not let the die thread
+                        try:
+                            thr._jointhread()
+                        except Exception, exp:
+                            print "_jointhread exception :", exp
+                        # Set this queue to start a new thread
+                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
+                        inst.from_q._thread = None
+#                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
+#                        logger.log("Setting the module %s to restart" % inst.get_name())
+#                        # We clean its queues, they are no more useful
+#                        inst.clear_queues()
+#                        self.to_restart.append(inst)
+#                        # Ok, no need to look at queue size now
+#                        continue
+
+
                 # Now look for man queue size. If above value, the module should got a huge problem
                 # and so bailout. It's not a perfect solution, more a watchdog
                 # If max_queue_size is 0, don't check this
