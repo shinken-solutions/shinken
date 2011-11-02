@@ -32,7 +32,7 @@ from Queue import Empty
 
 
 from shinken.basemodule import BaseModule
-
+from shinken.external_command import ExternalCommand
 
 properties = {
     'daemons' : ['reactionner'],
@@ -167,18 +167,27 @@ class Android_reactionner(BaseModule):
                         continue
                     hname = elts[0]
                     sdesc = ' '.join(elts[1:])
-                    cmd = 'ACKNOWLEDGE_SVC_PROBLEM;%s;%s;1;1;1;SMSPhoneAck;None' % (hname, sdesc)
-                    cmds.append(cmd)
+                    extcmd = 'ACKNOWLEDGE_SVC_PROBLEM;%s;%s;1;1;1;SMSPhoneAck;None\n' % (hname, sdesc)
+                    e = ExternalCommand(extcmd)
+                    cmds.append(e)
                 else:
                     hname = raw
-                    cmd = 'ACKNOWLEDGE_HOST_PROBLEM;%s;1;1;1;SMSPhoneAck;None' % hname
-                    cmds.append(cmd)
+                    extcmd = 'ACKNOWLEDGE_HOST_PROBLEM;%s;1;1;1;SMSPhoneAck;None\n' % hname
+                    e = ExternalCommand(extcmd)
+                    cmds.append(e)
 
         # Mark all read messages as read
-        #r = self.android.smsMarkMessageRead(to_mark, True)
+        r = self.android.smsMarkMessageRead(to_mark, True)
 
         print "Raise messages: "
         print cmds
+        for cmd in cmds:
+            try:
+                # Under android we got a queue here
+                self.returns_queue.put(cmd)
+            except IOError , exp:
+                print "[%d]Exiting: %s" % (self.id, exp)
+                sys.exit(2)
         
 
 
