@@ -599,15 +599,15 @@ class Satellite(BaseSatellite):
 
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_len(self):
-        if not is_android:
-            return len(self.returns_queue)
+#        if not is_android:
+#            return len(self.returns_queue)
         return self.returns_queue.qsize()
         
         
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_item(self):
-        if not is_android:
-            return self.returns_queue.pop()
+#        if not is_android:
+#            return self.returns_queue.pop()
         return self.returns_queue.get()
 
 
@@ -716,13 +716,18 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         self.q_by_mod['fork'] = {}
         
         # Under Android, we do not have multiprocessing lib
-        # so use standard threads things
-        if not is_android:
-            self.manager = Manager()
-            self.returns_queue = self.manager.list()
-        else:
-            self.returns_queue = Queue()
+        # so use standard Queue threads things
+        # but in multiprocess, we are also using a Queue(). It's just
+        # not the same
+        self.returns_queue = Queue()
+#        if not is_android:
+#            self.manager = Manager()
+#            self.returns_queue = self.manager.list()
+#        else:
+#            self.returns_queue = Queue()
 
+        # For multiprocess things, we should not have
+        # sockettimeouts. will be set explicitly in Pyro calls
         import socket
         socket.setdefaulttimeout(None)
 

@@ -702,7 +702,7 @@ function prerequisites(){
 					if [ $? -ne 0 ]
 					then
 						cecho " > Installing $EPELPKG" yellow
-						wget $EPEL  > /dev/null 2>&1 
+						wget $WGETPROXY $EPEL  > /dev/null 2>&1 
 						if [ $? -ne 0 ]
 						then
 							cecho " > Error while trying to download EPEL repositories" red 
@@ -756,7 +756,7 @@ function prerequisites(){
 				if [ ! -d "setuptools-$SETUPTOOLSVERS" ]
 				then
 					cecho " > Downloading setuptoos for python 2.6" green
-					wget $RHELSETUPTOOLS > /dev/null 2>&1
+					wget $WGETPROXY $RHELSETUPTOOLS > /dev/null 2>&1
 					tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz > /dev/null 2>&1
 				fi
 				cecho " > installing setuptoos for python 2.6" green
@@ -779,7 +779,7 @@ function prerequisites(){
 			if [ $? -eq 2 ]
 			then
 				cecho " > Module $module ($import) not found. Installing..." yellow
-				$PYEI $module > /dev/null 2>&1
+				$PYEI $module #> /dev/null 2>&1
 			else
 				cecho " > Module $module found." green 
 			fi
@@ -1057,6 +1057,14 @@ then
         cecho "You should start the script with sudo!" red
         exit 1
 fi
+
+if [ ! -z "$PROXY" ]
+then
+	export http_proxy=$PROXY
+	export https_proxy=$PROXY
+	export WGETPROXY=" -Y on "
+fi
+
 while getopts "kidubcr:lz:hsvp:we:j:" opt; do
         case $opt in
         j)

@@ -178,11 +178,12 @@ class Worker:
                 #We answer to the master
                 #msg = Message(id=self.id, type='Result', data=action)
                 try:
+                   self.returns_queue.put(action)
                     # In android, the Queue is changed
-                    if not is_android:
-                        self.returns_queue.append(action)
-                    else:
-                        self.returns_queue.put(action)
+                   # if not is_android:
+                   #     self.returns_queue.append(action)
+                   # else:
+                   #     self.returns_queue.put(action)
                 except IOError , exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
                     sys.exit(2)
