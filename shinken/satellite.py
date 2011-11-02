@@ -71,7 +71,7 @@ from shinken.brok import Brok
 from shinken.check import Check
 from shinken.notification import Notification
 from shinken.eventhandler import EventHandler
-
+from shinken.external_command import ExternalCommand
 
 # Pack of common Pyro exceptions
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
@@ -211,6 +211,10 @@ class Satellite(BaseSatellite):
         self.returns_queue = None
         self.q_by_mod = {}
 
+        # Can have a queue of external_commands give by modules
+        # will be taken by arbiter to process
+        self.external_commands = []
+
 
     def pynag_con_init(self, id):
         """ Initialize or re-initialize connection with scheduler """
@@ -262,6 +266,13 @@ class Satellite(BaseSatellite):
     # We just put them into the sched they are for
     # and we clean unused properties like sched_id
     def manage_action_return(self, action):
+       # Maybe our workers end us something else than an action
+       # if so, just add this in other queues and return
+        cls_type = action.__class__.my_type
+        if cls_type not in ['check', 'notification', 'eventhandler']:
+           self.add(action)
+           return 
+       
         # Ok, it's a result. We get it, and fill verifs of the good sched_id
         sched_id = action.sched_id
 
@@ -414,15 +425,26 @@ class Satellite(BaseSatellite):
         super(Satellite, self).do_stop()
 
 
+    # Call by arbiter to get our external commands
+    def get_external_commands(self):
+        res = self.external_commands
+        self.external_commands = []
+        return res
+
+
     # A simple fucntion to add objects in self
     # like broks in self.broks, etc
     # TODO : better tag ID?
     def add(self, elt):
-        if isinstance(elt, Brok):
+        cls_type = elt.__class__.my_type
+        if cls_type == 'brok':
             # For brok, we TAG brok with our instance_id
             elt.data['instance_id'] = 0
             self.broks[elt.id] = elt
             return
+        elif cls_type == 'externalcommand':
+            print "Adding in queue an external command", elt.__dict__
+            self.external_commands.append(elt)
 
 
     # Someone ask us our broks. We send them, and clean the queue
@@ -611,11 +633,24 @@ class Satellite(BaseSatellite):
         return self.returns_queue.get()
 
 
+    # An arbiter ask us to wait a new conf, so we must clean
+    # all our mess we did, and close modules too
+    def clean_previous_run(self):
+        # Clean all lists
+        self.schedulers.clear()
+        self.broks = self.broks[:]
+        self.external_commands = self.external_commands[:]
+
+
     def do_loop_turn(self):
         print "Loop turn"
         # Maybe the arbiter ask us to wait for a new conf
         # If true, we must restart all...
         if self.cur_conf is None:
+            # Clean previous run from useless objects
+            # and close modules
+            self.clean_previous_run()
+
             self.wait_for_initial_conf()
             # we may have been interrupted or so; then 
             # just return from this loop turn

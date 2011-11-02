@@ -166,24 +166,18 @@ class Arbiter(Daemon):
                     self.broks.clear()
 
 
-    # We must take external_commands from all brokers
-    def get_external_commands_from_brokers(self):
-        for brk in self.conf.brokers:
-            # Get only if alive of course
-            if brk.alive:
-                new_cmds = brk.get_external_commands()
-                for new_cmd in new_cmds:
-                    self.external_commands.append(new_cmd)
-
-
-    # We must take external_commands from all brokers
-    def get_external_commands_from_receivers(self):
-        for rec in self.conf.receivers:
-            # Get only if alive of course
-            if rec.alive:
-                new_cmds = rec.get_external_commands()
-                for new_cmd in new_cmds:
-                    self.external_commands.append(new_cmd)
+    # We must take external_commands from all satellites
+    # like brokers, pollers, reactionners or receivers
+    def get_external_commands_from_satellites(self):
+        sat_lists = [self.conf.brokers, self.conf.receivers,
+                     self.conf.pollers, self.conf.reactionners]
+        for lst in sat_lists:
+            for sat in lst:
+                # Get only if alive of course
+                if sat.alive:
+                    new_cmds = sat.get_external_commands()
+                    for new_cmd in new_cmds:
+                        self.external_commands.append(new_cmd)
 
 
     # Our links to satellites can raise broks. We must send them
@@ -626,8 +620,8 @@ class Arbiter(Daemon):
             # One broker is responsible for our broks,
             # we must give him our broks
             self.push_broks_to_broker()
-            self.get_external_commands_from_brokers()
-            self.get_external_commands_from_receivers()
+            self.get_external_commands_from_satellites()
+            #self.get_external_commands_from_receivers()
             # send_conf_to_schedulers()
             
             if self.nb_broks_send != 0:
