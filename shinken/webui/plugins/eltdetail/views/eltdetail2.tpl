@@ -40,7 +40,7 @@ Invalid element name
 <div id="content_container" class="grid_13">
 	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down">{{elt.state}}: {{elt.get_full_name()}}</h1>
 	<div id="overview_container" class="grid_16">
-		<dl class="grid_5">
+		<dl class="grid_4">
 		%#Alias, Parents and Hostgroups are for host only
       	%if elt_type=='host':
 			<dt>Alias:</dt>
@@ -73,7 +73,7 @@ Invalid element name
          	%end
     	%end 
 		</dl>
-		<dl class="grid_5">
+		<dl class="grid_4">
 			<dt>Notes:</dt>
 			%if elt.notes != '':
       		<dd>{{elt.notes}}</dd>
@@ -84,7 +84,7 @@ Invalid element name
 			<dt>Importence:</dt>
 			<dd>{{!helper.get_business_impact_text(elt)}}</dd>
 		</dl>
-		<div class="grid_6">
+		<div class="grid_8">
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
 			<p class="error">This element has got an important impact on your business, please fix it or acknowledge it.</p>

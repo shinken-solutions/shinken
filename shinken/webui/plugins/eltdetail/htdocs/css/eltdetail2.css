@@ -98,7 +98,7 @@ li.tab {
     padding: 8px 1em 2px 1em;
     margin-left: 0px;
     list-style: none;
-    /*background-color: #222;*/
+    cursor: pointer;
     border: 1px #E3E3E5 solid;
    /* -moz-border-radius: 4px 4px 0 0;
     -webkit-border-radius: 4px 4px 0 0;
@@ -157,6 +157,7 @@ div.content {
   padding:5px 10px 5px 60px;
   background-repeat: no-repeat;
   background-position: 10px center;
+  height: 40px;
 }
 .info {
   color: #00529B;

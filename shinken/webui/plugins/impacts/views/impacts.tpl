@@ -66,9 +66,9 @@
 
 	</div>
       
-	<!--<div class="right-panel">
+	<div class="right-panel">
 		<a href="/3dimpacts" class="mb" title="Show impacts in 3D mode.">{{!helper.get_button('Show impacts in 3d', img='/static/images/state_ok.png')}}</a>
-	</div> -->
+	</div> 
 
 
       
@@ -89,16 +89,16 @@
 		
 		<br style="clear: both">
 	
-		<div class="impact-icon-big"><img style="width: 80px;height: 80px;" src="{{helper.get_icon_state(impact)}}"> </div>
+		<!--<div class="impact-icon-big"><img style="width: 80px;height: 80px;" src="{{helper.get_icon_state(impact)}}"> </div>-->
 		%for i in range(2, impact.business_impact):
 			<div class="criticity-inpb-icon-{{i-1}}">
 		    	<img src="static/images/star.png">
 		    </div>
 		%end
-	
-		<center>
+		<h2 class="state_{{impact.state.lower()}}"><img style="width : 64px; height:64px" src="{{helper.get_icon_state(impact)}}" />{{impact.state}}: {{impact.get_full_name()}}</h2>
+		<!--<center>
 			<div class="impact-row"><span class="impact-inpb-name">{{impact.get_full_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span></div>
-		</center>
+		</center>-->
 	
 		<div style="float:right;">
 			<a href="{{!helper.get_link_dest(impact)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a>
