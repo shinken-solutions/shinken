@@ -3,7 +3,7 @@
 /* The panel that will contain all problem panels*/
 .problems-panels {
     position: fixed;
-    /*left: 450px;*/
+    left: 450px;
     right: 0;
     top: 85px;
     /*width: 100%;*/
@@ -31,12 +31,13 @@
     overflow: hidden;
     opacity : 0;
     padding: 10px 20px;
+    width: 75%;
 }
 
 
 /* The whole left panel for impacts*/
 .impacts-panel {
-    /*width: 445px;*/
+    width: 445px;
     float: left;
     display: inline-block;
     border-radius: 6px;
@@ -44,7 +45,7 @@
     position: relative;
     background: white;
     height: 100%;
-    min-height: 600px;
+    min-height: 983px;
     z-index: 4;
     margin-right:0;
 }
@@ -285,20 +286,20 @@
 
 
 /* Global container */
-.whole-page {
+#impact-container {
 /*    width: 92%;
     margin-left: 4%;
     margin-right: 4%;*/
     /*min-width: 920px;
     max-width: 1040px;*/
-    /*margin: 5px 40px;
+    /*margin: 5px 40px;*/
     margin-top : 5px;
     position: relative;
     z-index: 1;
     border-radius: 5px;
     overflow: hidden;
     text-align: left;
-    background: #DDEEF6;*/
+    background: #DDEEF6;
 }
 
 
