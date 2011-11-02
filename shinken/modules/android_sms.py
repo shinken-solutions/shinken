@@ -59,7 +59,7 @@ class Android_reactionner(BaseModule):
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the android module"
-        self.android = android.droid()
+        
 
 
 
@@ -136,6 +136,51 @@ class Android_reactionner(BaseModule):
         for chk in to_del:
             self.checks.remove(chk)
 
+    
+    # We will read unread SMS and raise ACK if we read
+    # something like 'ack host/service'
+    def read_and_parse_sms(self):
+        # Get only unread SMS of the inbox
+        SMSmsgs = self.android.smsGetMessages(True, 'inbox').result 
+        to_mark = []
+        cmds = []
+        for message in SMSmsgs:
+            # Read the message
+            body = message['body'].encode('utf8', 'ignore')
+            to_mark.append(message['_id'])
+            print 'Addr', type(message['address'])
+            print 'Message', type(body)
+            print message
+            if body.startswith(('ack', 'Ack', 'ACK')):
+                elts = body.split(' ')
+        
+                if len(elts) <= 1:
+                    print "Bad message length"
+                    continue
+
+                # Ok, look for host or host/service
+                raw = elts[1]
+                if '/' in raw:
+                    elts = raw.split('/')
+                    # If not service desc, bail out
+                    if len(elts) == 1:
+                        continue
+                    hname = elts[0]
+                    sdesc = ' '.join(elts[1:])
+                    cmd = 'ACKNOWLEDGE_SVC_PROBLEM;%s;%s;1;1;1;SMSPhoneAck;None' % (hname, sdesc)
+                    cmds.append(cmd)
+                else:
+                    hname = raw
+                    cmd = 'ACKNOWLEDGE_HOST_PROBLEM;%s;1;1;1;SMSPhoneAck;None' % hname
+                    cmds.append(cmd)
+
+        # Mark all read messages as read
+        #r = self.android.smsMarkMessageRead(to_mark, True)
+
+        print "Raise messages: "
+        print cmds
+        
+
 
     #id = id of the worker
     #s = Global Queue Master->Slave
@@ -144,6 +189,7 @@ class Android_reactionner(BaseModule):
     #c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         print "Module Android started!"
+        self.android = android.Android()
         timeout = 1.0
         self.checks = []
         self.returns_queue = returns_queue
@@ -163,6 +209,9 @@ class Android_reactionner(BaseModule):
                 self.launch_new_checks()
             # REF: doc/shinken-action-queues.png (5)
             self.manage_finished_checks()
+
+            # Got read SMS and raise ACK commands from it
+            self.read_and_parse_sms()
 
             # Now get order from master
             try:
