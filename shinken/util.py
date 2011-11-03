@@ -134,6 +134,15 @@ def to_split(val):
         val = []
     return val
 
+def to_best_int_float(val):
+    i = int(float(val))
+    f = float(val)
+    # If the f is a .0 value,
+    # best match is int
+    if i == f:
+        return i
+    return f
+
 #bool('0') = true, so...
 def to_bool(val):
     if val == '1':
