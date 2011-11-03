@@ -36,7 +36,7 @@ except ImportError:
         raise
 
 from shinken.util import safe_print
-
+from shinken.misc.perfdata import PerfDatas
 
 # Sort hosts and services by impact, states and co
 def hst_srv_sort(s1, s2):
@@ -485,6 +485,10 @@ class Helper(object):
             print "Doing PAGE", i
             is_current = (i == current_page)
             start = int(i*step)
+            # Maybe we are generating a page too high, bail out
+            if start > total:
+                continue
+
             end = int((i+1) * step)
             res.append(('%d' % (i+1), start, end, is_current))
 
