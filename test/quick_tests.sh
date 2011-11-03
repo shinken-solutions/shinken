@@ -127,6 +127,7 @@ launch_and_assert test_disable_active_checks.py
 launch_and_assert test_no_event_handler_during_downtime.py
 launch_and_assert test_inheritance_and_plus.py
 launch_and_assert test_livestatus_db.py
+launch_and_assert test_parse_perfdata.py
 launch_and_assert test_service_template_inheritance.py
 
 launch_and_assert test_maintenance_period.py
