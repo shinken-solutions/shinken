@@ -78,7 +78,7 @@ if __name__ == "__main__":
     output = args.output
     to = args.to
 
-    sender = 'david.hannequin@fullsave.com'   
+    sender = 'shinken@localhost'   
 
     subject = "** " + notify + " alert - " + hostname + "/" + desc + " is " + state + " **"
 
