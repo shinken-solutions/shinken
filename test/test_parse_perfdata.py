@@ -24,7 +24,7 @@
 
 #It's ugly I know....
 from shinken_test import *
-from shinken.misc.perfdata import Metric
+from shinken.misc.perfdata import Metric,PerfDatas
 
 class TestParsePerfdata(ShinkenTest):
     #Uncomment this is you want to use a specific configuration
@@ -55,6 +55,31 @@ class TestParsePerfdata(ShinkenTest):
         self.assert_(m.critical == 95)
         self.assert_(m.min == 0)
         self.assert_(m.max == 100)
+
+        s = 'ramused=1009MB;;;0;1982 swapused=540MB;;;; memused=90%'
+        p = PerfDatas(s)
+        p.metrics
+        m = p['swapused']
+        self.assert_(m.name == 'swapused')
+        self.assert_(m.value == 540)
+        self.assert_(m.uom == 'MB')
+        self.assert_(m.warning == None)
+        self.assert_(m.critical == None)
+        self.assert_(m.min == None)
+        self.assert_(m.max ==None)
+
+        m = p['memused']
+        self.assert_(m.name == 'memused')
+        self.assert_(m.value == 90)
+        self.assert_(m.uom == '%')
+        self.assert_(m.warning == None)
+        self.assert_(m.critical == None)
+        self.assert_(m.min == 0)
+        self.assert_(m.max == 100)
+
+        self.assert_(len(p) == 3)
+
+
 
 
 if __name__ == '__main__':

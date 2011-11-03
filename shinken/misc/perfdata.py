@@ -38,7 +38,8 @@ class Metric:
         print "Analysis string", s
         r = metric_patern.match(s)
         if r:
-            self.name = r.group(1)
+            # Get the name but remove all ' in it
+            self.name = r.group(1).replace("'", "")
             self.value = guess_int_or_float(r.group(2))
             self.uom = r.group(3)
             self.warning = guess_int_or_float(r.group(4))
@@ -53,3 +54,26 @@ class Metric:
                 self.min = 0
                 self.max = 100
         
+
+
+class PerfDatas:
+    def __init__(self, s):
+        elts = s.split(' ')
+        elts = [e for e in elts if e != '']
+        self.metrics = {}
+        for e in elts:
+            m = Metric(e)
+            if m.name is not None:
+                self.metrics[m.name] = m
+
+
+    def __iter__(self):
+        return self.metrics.itervalues()
+
+
+    def __len__(self):
+        return len(self.metrics)
+
+
+    def __getitem__(self, key):
+        return self.metrics[key]
