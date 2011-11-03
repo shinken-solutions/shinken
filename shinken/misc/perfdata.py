@@ -77,3 +77,7 @@ class PerfDatas:
 
     def __getitem__(self, key):
         return self.metrics[key]
+
+
+    def __contains__(self, key):
+        return key in self.metrics

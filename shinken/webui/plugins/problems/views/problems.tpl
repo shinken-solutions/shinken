@@ -220,7 +220,7 @@ document.addEvent('domready', function() {
 		   <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output}}</td>
 		%end
 		<td class="perfometer">
-%#		  {{!helper.get_perfometer(pb)}}
+		  {{!helper.get_perfometer(pb)}}
 		</td>
 		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
 		

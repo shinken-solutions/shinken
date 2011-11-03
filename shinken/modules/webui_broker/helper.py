@@ -37,6 +37,9 @@ except ImportError:
 
 from shinken.util import safe_print
 from shinken.misc.perfdata import PerfDatas
+#TODO : manage it in a clean way.
+from shinken.modules.webui_broker.perfdata_guess import get_perfometer_table_values
+
 
 # Sort hosts and services by impact, states and co
 def hst_srv_sort(s1, s2):
@@ -509,9 +512,14 @@ class Helper(object):
     # Get a perfometer part for html printing
     def get_perfometer(self, elt):
         if elt.perf_data != '':
-            lnk = '#'
-            metrics = [('#68f', 35), ('white', 64)]
-            title = '35%'
+            r = get_perfometer_table_values(elt)
+            #If the perfmeter are not good, bail out
+            if r is None:
+                return '\n'
+
+            lnk = r['lnk']
+            metrics = r['metrics']
+            title = r['title']
             s = '<a href="%s">' % lnk
             s += '''<div class="content">
                        <table>
@@ -531,6 +539,14 @@ class Helper(object):
             return s
         return '\n'
 
+
+
+
+
+
+
+
+    
     
 
 helper = Helper()
