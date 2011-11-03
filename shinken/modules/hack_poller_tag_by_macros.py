@@ -58,8 +58,14 @@ class Hack_pt_by_macros(BaseModule):
         logger.log("[HackPollerTagByMacros in hook late config")
         for h in arb.conf.hosts:
             if h.poller_tag == 'None' and self.host_macro_name.upper() in h.customs:
-                h.poller_tag = h.customs[self.host_macro_name.upper()]
+                v = h.customs[self.host_macro_name.upper()]
+                # We should tag the host, but also the command because this phase is
+                # after the automatic command inheritance
+                h.poller_tag = v
+                h.check_command.poller_tag = v
         for s in arb.conf.services:
             if s.poller_tag == 'None' and self.service_macro_name.upper() in s.customs:
-                s.poller_tag = s.customs[self.service_macro_name.upper()]
+                v = s.customs[self.service_macro_name.upper()]
+                s.poller_tag = v
+                s.check_command.poller_tag = v
                 

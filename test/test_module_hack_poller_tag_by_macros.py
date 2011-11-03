@@ -58,16 +58,30 @@ class TestHackPollerTagByMacors(ShinkenTest):
         self.assert_(h1.poller_tag == 'None')
         h2 = self.sched.hosts.find_by_name("test_router_0")
         self.assert_(h2.poller_tag == 'DMZ')
+        self.assert_(h2.check_command.poller_tag == 'DMZ')
 
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "test_ok_0")
 
         print svc.poller_tag
         self.assert_(svc.poller_tag == 'None')
-        print svc2.poller_tag
+        print svc2.poller_tag, svc2.check_command.poller_tag
+        
         self.assert_(svc2.poller_tag == 'DMZ2')
+        self.assert_(svc2.check_command.poller_tag  == 'DMZ2')
 
+        # In tests we schedule before applying hook_late_conf, so we must reschedule it
+        h2.checks_in_progress = []
+        h2.in_checking = False
+        h2.schedule()
+        t = h2.checks_in_progress.pop().poller_tag
+        self.assert_(t == 'DMZ')
 
+        svc2.checks_in_progress = []
+        svc2.in_checking = False
+        svc2.schedule()
+        t = svc2.checks_in_progress.pop().poller_tag
+        self.assert_(t == 'DMZ2')
 
 
 if __name__ == '__main__':
