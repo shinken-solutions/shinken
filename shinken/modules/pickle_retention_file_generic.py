@@ -23,7 +23,7 @@
 
 import cPickle
 import shutil
-
+import traceback
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
@@ -107,11 +107,11 @@ class Pickle_retention_generic(BaseModule):
             print exp
             return False
         except IndexError , exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
+            s = "WARNING: Sorry, the ressource file is not compatible : %s" % traceback.format_exc()
             log_mgr.log(s)
             return False
         except TypeError , exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
+            s = "WARNING: Sorry, the ressource file is not compatible : %s" % traceback.format_exc()
             log_mgr.log(s)
             return False
 
