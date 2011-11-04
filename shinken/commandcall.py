@@ -90,3 +90,25 @@ class CommandCall(DummyCommandCall):
     def get_name(self):
         return self.call
 
+
+
+    # Call by picle for dataify the coment
+    # because we DO NOT WANT REF in this pickleisation!
+    def __getstate__(self):
+        cls = self.__class__
+        # id is not in *_properties
+        res = {'id' : self.id}
+        for prop in cls.properties:
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+
+        return res
+
+
+    # Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state['id']
+        for prop in cls.properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
