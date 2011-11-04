@@ -737,6 +737,9 @@ class Satellite(BaseSatellite):
             # REF: doc/shinken-action-queues.png (6)
             self.manage_returns()
 
+        # Say to modules it's a new tick :)
+        self.hook_point('tick')
+
 
     def do_post_daemon_init(self):
         """ Do this satellite (poller or reactionner) post "daemonize" init:

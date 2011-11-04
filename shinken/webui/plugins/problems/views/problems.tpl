@@ -229,7 +229,7 @@ document.addEvent('domready', function() {
              </table>
 	  </div>  
 	  %# " We put actions buttons with a opacity hover effect, so they won't be too visible"
-	  <div class="opacity_hover">
+	  <div class="opacity_hover" >
 	    <div style="float:right;">
 	      <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
 	    </div>
