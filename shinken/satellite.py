@@ -817,7 +817,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
             self.schedulers[sched_id]['active'] = s['active']
 
             # Do not connect if we are a passive satellite
-            if not self.passive:
+            if not self.passive and not already_got:
                 # And then we connect to it :)
                 self.pynag_con_init(sched_id)
 
