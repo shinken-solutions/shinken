@@ -778,6 +778,7 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         self.new_conf = None
         self.cur_conf = conf
         g_conf = conf['global']
+
         # Got our name from the globals
         if 'poller_name' in g_conf:
             name = g_conf['poller_name']
@@ -788,23 +789,33 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         self.name = name
 
         self.passive = g_conf['passive']
-        print "Is passive?", self.passive
         if self.passive:
             logger.log("[%s] Passive mode enabled." % self.name)
 
         # If we've got something in the schedulers, we do not want it anymore
         for sched_id in conf['schedulers'] :
+
             already_got = False
+
+            # We can already got this conf id, but with another address
             if sched_id in self.schedulers:
+               new_addr = conf['schedulers'][sched_id]['address']
+               old_addr = self.schedulers[sched_id]['address']
+               new_port = conf['schedulers'][sched_id]['port']
+               old_port = self.schedulers[sched_id]['port']
+               # Should got all the same to be ok :)
+               if new_addr == old_addr and new_port == old_port:
+                  already_got = True
+            
+            if already_got:
                 logger.log("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
-                already_got = True
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
                 actions = self.schedulers[sched_id]['actions']
+
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
 
             uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
-            print "DBG: scheduler UIR:", uri
 
             self.schedulers[sched_id]['uri'] = uri
             if already_got:

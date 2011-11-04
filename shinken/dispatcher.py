@@ -403,7 +403,6 @@ class Dispatcher:
                     for kind in ( 'reactionner', 'poller', 'broker' ):
                         if r.to_satellites_need_dispatch[kind][cfg_id]:
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
-                            #print "*"*10, "DBG: cfg_for_satellite_part", cfg_for_satellite_part, r.get_name(), cfg_id
                             
                             # make copies of potential_react list for sort
                             satellites = []
@@ -444,16 +443,9 @@ class Dispatcher:
 
                             # Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
-                            for satellite in satellites:
-                                # We get the already managed conf of this satellite
-                                # for not resending it the same conf again and again
-                                sat_cfg_ids = satellite.managed_confs
-                                
+                            for satellite in satellites:                                
                                 # Send only if we need, and if we can
                                 if nb_cfg_sent < r.get_nb_of_must_have_satellites(kind) and satellite.alive:
-                                    #If the satellite already got the conf, we pass the sending
-                                    already_got = (cfg_id in sat_cfg_ids)
-                                    
                                     satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part
                                     if satellite.manage_arbiters:
                                         satellite.cfg['arbiters'] = arbiters_cfg
@@ -462,11 +454,8 @@ class Dispatcher:
                                     if kind == "broker":
                                         r.fill_broker_with_poller_reactionner_links(satellite)
                                     
-                                    if not already_got:
-                                        logger.log('[%s] Trying to send configuration to %s %s' %(r.get_name(), kind, satellite.get_name()))
-                                        is_sent = satellite.put_conf(satellite.cfg)
-                                    else: #already got? so yes, it's sent :)
-                                        is_sent = True
+                                    logger.log('[%s] Trying to send configuration to %s %s' %(r.get_name(), kind, satellite.get_name()))
+                                    is_sent = satellite.put_conf(satellite.cfg)
 
                                     if is_sent:
                                         satellite.active = True
