@@ -102,10 +102,10 @@ class TestConfig(ShinkenTest):
         fd = open(mod.path)
         buf = fd.readline().decode('utf8')
         print fd.read()
-        print "BUF:", buf, type(buf)
+
         
         comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD ', ' value1=0 value2=0'+u'\xf6', 'CRITICAL')
-        print "Comparison:", comparison, type(comparison)
+
         self.assert_(buf == comparison)
         fd.close()
         os.unlink(mod.path)
