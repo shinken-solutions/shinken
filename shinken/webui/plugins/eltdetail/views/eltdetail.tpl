@@ -74,13 +74,16 @@ Invalid element name
       </li>
     </ul>
 	<div class="opacity_hover">
+	%#  "This is the background canvas for all gesture detection things " 
+	%# " Don't ask me why, but the size must be included in the
+	%# canvas line here or we got problem!"
+	<center><canvas id="canvas" width="200" height="200"  style="border: 1px solid black;"></canvas></center>
+
 	  <br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge<br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
 	</div>
-	%#  "This is the background canvas for all gesture detection things " 
-	<canvas id="canvas"></canvas>
   </div>
 </div>
 <div class="grid_12">

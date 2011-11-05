@@ -1,7 +1,7 @@
 #canvas {
-/*    display : block;*/
-    background-color : grey;
-/*    z-index : 50;*/
-    width : 150px;
-    height : 200px;
+/*    background-color : none;*/
+}
+
+#canvas:hover {
+    background-color : #100000;
 }
