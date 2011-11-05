@@ -6,8 +6,25 @@ var _points = [];
 var isMouseDown = false; // mouse only bool
 var threshold = 10; // number of pixels required to be moved for a movement to count
 
+/*window.addEventListener("load", function(e) {
+//    canvas = document.getElementById("canvas");
+//    ctx = canvas.getContext("2d");
+    alert('canvas' + canvas.width);
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    }, false);
+*/
 
-document.addEventListener('touchstart', function(e) {
+window.addEvent('domready',function(){
+    canvas = document.getElementById("canvas");  
+/*    canvas.width = window.innerWidth;                                                                                                                                                                                                      
+    canvas.height = window.innerHeight;
+    canvas.height = 300;
+    canvas.width = 300;*/
+//    alert(canvas.height + ' ' + canvas.width);
+    ctx = canvas.getContext("2d");
+  
+/*    canvas.addEventListener('touchstart', function(e) {
 	e.preventDefault();
 	_points = [];
 	var touch = e.touches[0];
@@ -20,7 +37,8 @@ document.addEventListener('touchstart', function(e) {
 	oldY = touch.pageY;
     }, false);
 
-document.addEventListener('touchmove', function(e) {
+
+    canvas.addEventListener('touchmove', function(e) {
 	if (oldX - e.pageX < 3 && oldX - e.pageX > -3) {
 	    return;
 	}
@@ -40,7 +58,7 @@ document.addEventListener('touchmove', function(e) {
 	_points[_points.length] = new Point(oldX,oldY);
     }, false);
 
-document.addEventListener('touchend', function(e) {
+canvas.addEventListener('touchend', function(e) {
 	ctx.closePath();
 	if (_points.length >= 10) {
 	    var result = _r.Recognize(_points);
@@ -51,23 +69,26 @@ document.addEventListener('touchend', function(e) {
 	ctx.clearRect(0,0,canvas.width,canvas.height);
     }, false);
 
+*/
 
-window.addEventListener("load", function(e) {
-	canvas = document.getElementById("canvas");  
-	ctx = canvas.getContext("2d");
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-    }, false);
-
-
+    function get_pos(e){
+	e._x = e.offsetX;
+	e._y = e.offsetY;
+    }
 
 
 // MOUSE BINDS FOR THE HELL OF IT
-document.addEventListener('mousedown', function(e) {
+canvas.addEventListener('mousedown', function(e) {
+    get_pos(e);
+
+//    alert('mousedown');
 	isMouseDown = true;
 	e.preventDefault();
 	_points = [];
+
 	ctx.beginPath();
+//    alert('move to' + e._x +' ' + e._y);
+	ctx.moveTo(e._x,e._y);
 	ctx.strokeStyle = "#bae1ff";
 	ctx.lineCap = "round";
 	ctx.lineJoin = "round";
@@ -76,42 +97,45 @@ document.addEventListener('mousedown', function(e) {
 	ctx.shadowOffsetX = 0;
 	ctx.shadowOffsetY = 0;
 	ctx.shadowBlur = 10;
-	oldX = e.pageX;
-	oldY = e.pageY;
+    oldX = e._x;//pageX;
+    oldY = e._y;//pageY;
     }, false);
 
-document.addEventListener('mousemove', function(e) {
+canvas.addEventListener('mousemove', function(e) {
 	if (!isMouseDown) {
 	    return;
 	}
-	if (oldX - e.pageX < 3 && oldX - e.pageX > -3) {
+    get_pos(e);
+	if (oldX - e._x < 3 && oldX - e._x > -3) {
 	    return;
 	}
-	if (oldY - e.pageY < 3 && oldY - e.pageY > -3) {
+	if (oldY - e._y < 3 && oldY - e._y > -3) {
 	    return;
 	}
+
 	ctx.moveTo(oldX,oldY);
-	oldX = e.pageX;
-	oldY = e.pageY;
+//    alert('line from'+oldX+' '+e._x);
+	oldX = e._x;
+	oldY = e._y;
+
 	ctx.lineTo(oldX,oldY);
 	ctx.stroke();
 	_points[_points.length] = new Point(oldX,oldY);
     }, false);
 
-document.addEventListener('mouseup', function(e) {
+canvas.addEventListener('mouseup', function(e) {
 	isMouseDown = false;
 	ctx.closePath();
 	if (_points.length >= 10) {
 	    var result = _r.Recognize(_points);
 	    /*alert(result.Name + Math.round(result.Score*100) + "%");*/
 	    launch_gesture(result.Name, Math.round(result.Score*100));
-	    /*$("shapeOutput").text(result.Name);
-	      $("mathOutput").text(Math.round(result.Score*100) + "%");*/
 	}
 	_points = [];
 	ctx.clearRect(0,0,canvas.width,canvas.height);
     }, false);
 
+});
 
 /* Look for gesture but launch them only
 if we reach a score to be sure :)*/
