@@ -821,7 +821,7 @@ function cleanconf(){
 		cecho " > Files/Folders list not found" yellow
 		exit 2
 	else
-		for f in $(cat config.files)
+		for f in $(cat $myscripts/config.files)
 		do
 			cecho " > removing $TARGET/etc/$f" green
 			rm -Rf $TARGET/etc/$f
