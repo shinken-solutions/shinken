@@ -88,7 +88,7 @@ Invalid element name
 		    %end
 		</div>				
 	</div>
-		<div id="detail_container">
+		<div id="elt_container">
 
 		<script type="text/javascript">
 			document.addEvent('domready', function() {
@@ -275,14 +275,16 @@ Invalid element name
 						    <div class="content">
 						       	<div class="tabcontent">
 									<h2 style="display: none"><a name="comment" id="comment">Comments</a></h2>
-										<ul class="tabmenu">
-											<li>
-												<a href="#" class="">Add Comments</a>
-											</li>
-											<li>
-												<a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a>
-											</li>
-										</ul>
+										<div id="minimenu">
+											<ul>
+												<li>
+													<a href="#" class="">Add Comments</a>
+												</li>
+												<li>
+													<a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a>
+												</li>
+											</ul>
+										</div>
 									  <div class="clear"></div>
 									%if len(elt.comments) > 0:
 									  <table>
@@ -304,7 +306,7 @@ Invalid element name
 									    %end
 									  </table>
 									%else:
-									  <p>None</p>
+									  <p>No comments available</p>
 									%end
 								</div>
 						    </div>
