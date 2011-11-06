@@ -96,6 +96,9 @@ Invalid element name
          <dt>Alias:</dt>
          <dd>{{elt.alias}}</dd>
 
+			<dt>Address:</dt>
+			<dd>{{elt.address}}</dd>
+
          <dt>Parents:</dt>
 	 %if len(elt.parents) > 0:
          <dd> {{','.join([h.get_name() for h in elt.parents])}}</dd>

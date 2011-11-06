@@ -45,35 +45,31 @@ Invalid element name
       	%if elt_type=='host':
 			<dt>Alias:</dt>
 			<dd>{{elt.alias}}</dd>
-					
+	
+			<dt>Address:</dt>
+			<dd>{{elt.address}}</dd>				
+			
 			<dt>Parents:</dt>
 			%if len(elt.parents) > 0:
 			<dd>{{','.join([h.get_name() for h in elt.parents])}}</dd>
 			%else:
 			<dd>No Parents</dd>
 			%end
-				
-			<dt>Members of:</dt>
+			
+			%# End of the host only case, so now service
+    		%else:
+	 		<dt>Host:</dt>
+         	<dd> {{elt.host.host_name}}</dd>
+    	%end 
+		</dl>
+		<dl class="grid_4">
+					<dt>Members of:</dt>
 			%if len(elt.hostgroups) > 0:	
 			<dd>{{','.join([hg.get_name() for hg in elt.hostgroups])}}</dd>
 			%else:
 			<dd>No Hostgroups</dd>
 			%end
 			
-			%# End of the host only case, so now service
-    		%else:
-	 		<dt>Host:</dt>
-         	<dd> {{elt.host.host_name}}</dd>
-         
-         	<dt>Members of:</dt>
-         	%if len(elt.servicegroups) > 0:
-         	<dd> {{','.join([sg.get_name() for sg in elt.servicegroups])}}</dd>
-         	%else:
-         	<dd> No groups </dd>
-         	%end
-    	%end 
-		</dl>
-		<dl class="grid_4">
 			<dt>Notes:</dt>
 			%if elt.notes != '':
       		<dd>{{elt.notes}}</dd>
