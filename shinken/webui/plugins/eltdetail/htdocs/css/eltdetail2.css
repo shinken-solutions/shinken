@@ -94,15 +94,16 @@ ul.tabs {
 }
 
 li.tab {
-    display: inline;
-    padding: 8px 1em 2px 1em;
+     display: inline;
+    padding: 12px 1em 2px 28px;
     margin-left: 0px;
     list-style: none;
-    cursor: pointer;
+    /*background-color: #222;*/
     border: 1px #E3E3E5 solid;
    /* -moz-border-radius: 4px 4px 0 0;
     -webkit-border-radius: 4px 4px 0 0;
     border-radius: 4px 4px 0 0;*/
+    font-size: 12px; 
 }
 
 li.tab.active {
