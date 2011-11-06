@@ -889,20 +889,12 @@ function enablendodb(){
 	# first get existing broker modules
 	export PYTHONPATH=$TARGET
 	export PY="$(pythonver)"
-	cecho " > Getting existing modules list" green
-	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
-	modules="$modules ,ToNdodb_Mysql"
-	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
-	cecho " > $result" green
-	# configure ndo broker with centreon credentials
-	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d database -v "$db")
-	cecho " > $result" green
-	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d host -v "$host")
-	cecho " > $result" green
-	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d user -v "$user")
-	cecho " > $result" green
-	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o module -r module_type=ndodb_mysql -d password -v "$pass")
-	cecho " > $result" green
+	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_ndo.macro -d $host,$db,$user,$pass)
+    if [ $? -ne 0 ]
+    then
+        cecho $result red
+        exit 2
+    fi
 }
 
 function enableretention(){
@@ -911,38 +903,44 @@ function enableretention(){
 
 	export PYTHONPATH=$TARGET
 	export PY="$(pythonver)"
-	cecho " > Getting existing scheduler modules list" green
-	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules)	
-	if [ -z "$modules" ]
-	then	
-		modules="PickleRetention"
-	else
-		modules="$modules ,PickleRetention"
-	fi
-	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules -v "$modules")
-	cecho " > $result" green
-
-	cecho " > Getting existing broker modules list" green
-	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
-	if [ -z "$modules" ]
-	then
-		modules="PickleRetentionBroker"
-	else	
-		modules="$modules ,PickleRetentionBroker"
-	fi
-	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
-	cecho " > $result" green
-
-	cecho " > Getting existing arbiter modules list" green
-	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules)	
-	if [ -z "$modules" ]
-	then
-		modules="PickleRetentionArbiter"
-	else	
-		modules=$modules" ,PickleRetentionArbiter"
-	fi
-	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules -v "$modules")
-	cecho " > $result" green
+	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_retention.macro)	
+    if [ $? -ne 0 ]
+    then
+        cecho $result red
+        exit 2
+    fi
+#	cecho " > Getting existing scheduler modules list" green
+#	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules)	
+#	if [ -z "$modules" ]
+#	then	
+#		modules="PickleRetention"
+#	else
+#		modules="$modules ,PickleRetention"
+#	fi
+#	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules -v "$modules")
+#	cecho " > $result" green
+#
+#	cecho " > Getting existing broker modules list" green
+#	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
+#	if [ -z "$modules" ]
+#	then
+#		modules="PickleRetentionBroker"
+#	else	
+#		modules="$modules ,PickleRetentionBroker"
+#	fi
+#	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+#	cecho " > $result" green
+#
+#	cecho " > Getting existing arbiter modules list" green
+#	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules)	
+#	if [ -z "$modules" ]
+#	then
+#		modules="PickleRetentionArbiter"
+#	else	
+#		modules=$modules" ,PickleRetentionArbiter"
+#	fi
+#	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules -v "$modules")
+#	cecho " > $result" green
 }
 
 function enableperfdata(){
