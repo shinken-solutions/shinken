@@ -366,6 +366,41 @@ td.actions a {
     padding-left: 24px;
 }
 
+
+.icon_comment {
+    background: url("/static/images/icons/comment_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+    padding-left: 24px;
+    background-size: 17px 17px;
+}
+
+.icon_summary {
+    background: url("/static/images/icons/sum_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+    padding-left: 24px;
+    background-size: 17px 17px;
+}
+
+.icon_dependency {
+    background: url("/static/images/icons/globe_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+} 
+
+.icon_service {
+    background: url("/static/images/icons/flag_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+} 
+
+.icon_graph {
+    background: url("/static/images/icons/chart_area_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+} 
 .state_ok {
 	color: #7AB317;
 	font-weight: bold;

@@ -24,8 +24,7 @@ Invalid element name
 %rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js', 'eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 
-%#  "This is the background canvas for all gesture detection things " 
-<canvas id="canvas"></canvas>
+
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
@@ -75,12 +74,16 @@ Invalid element name
       </li>
     </ul>
 	<div class="opacity_hover">
+	%#  "This is the background canvas for all gesture detection things " 
+	%# " Don't ask me why, but the size must be included in the
+	%# canvas line here or we got problem!"
+	<center><canvas id="canvas" width="200" height="200"  style="border: 1px solid black;"></canvas></center>
+
 	  <br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge<br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
 	</div>
-
   </div>
 </div>
 <div class="grid_12">
@@ -92,6 +95,9 @@ Invalid element name
       %if elt_type=='host':
          <dt>Alias:</dt>
          <dd>{{elt.alias}}</dd>
+
+			<dt>Address:</dt>
+			<dd>{{elt.address}}</dd>
 
          <dt>Parents:</dt>
 	 %if len(elt.parents) > 0:

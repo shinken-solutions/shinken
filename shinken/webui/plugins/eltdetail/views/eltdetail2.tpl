@@ -45,35 +45,31 @@ Invalid element name
       	%if elt_type=='host':
 			<dt>Alias:</dt>
 			<dd>{{elt.alias}}</dd>
-					
+	
+			<dt>Address:</dt>
+			<dd>{{elt.address}}</dd>				
+			
 			<dt>Parents:</dt>
 			%if len(elt.parents) > 0:
 			<dd>{{','.join([h.get_name() for h in elt.parents])}}</dd>
 			%else:
 			<dd>No Parents</dd>
 			%end
-				
-			<dt>Members of:</dt>
+			
+			%# End of the host only case, so now service
+    		%else:
+	 		<dt>Host:</dt>
+         	<dd> {{elt.host.host_name}}</dd>
+    	%end 
+		</dl>
+		<dl class="grid_4">
+					<dt>Members of:</dt>
 			%if len(elt.hostgroups) > 0:	
 			<dd>{{','.join([hg.get_name() for hg in elt.hostgroups])}}</dd>
 			%else:
 			<dd>No Hostgroups</dd>
 			%end
 			
-			%# End of the host only case, so now service
-    		%else:
-	 		<dt>Host:</dt>
-         	<dd> {{elt.host.host_name}}</dd>
-         
-         	<dt>Members of:</dt>
-         	%if len(elt.servicegroups) > 0:
-         	<dd> {{','.join([sg.get_name() for sg in elt.servicegroups])}}</dd>
-         	%else:
-         	<dd> No groups </dd>
-         	%end
-    	%end 
-		</dl>
-		<dl class="grid_4">
 			<dt>Notes:</dt>
 			%if elt.notes != '':
       		<dd>{{elt.notes}}</dd>
@@ -92,7 +88,7 @@ Invalid element name
 		    %end
 		</div>				
 	</div>
-		<div id="detail_container">
+		<div id="elt_container">
 
 		<script type="text/javascript">
 			document.addEvent('domready', function() {
@@ -122,11 +118,11 @@ Invalid element name
 
 		<div id="demo" class="grid_16">
 						    <ul class="tabs">
-						        <li class="tab">Summary</li>
-						        <li class="tab">Services</li>
-						        <li class="tab">Comments/Downtimes</li>
-						        <li class="tab">Dependency Cloud</li>
-						        <li class="tab">Graphs</li>
+						        <li class="tab icon_summary">Summary</li>
+						        <li class="tab icon_service">Services</li>
+						        <li class="tab icon_comment">Comments/Downtimes</li>
+						        <li class="tab icon_dependency ">Dependency Cloud</li>
+						        <li class="tab icon_graph">Graphs</li>
 						    </ul>
 						    <div class="content">
 						   <div id="elt_summary">
@@ -279,14 +275,16 @@ Invalid element name
 						    <div class="content">
 						       	<div class="tabcontent">
 									<h2 style="display: none"><a name="comment" id="comment">Comments</a></h2>
-										<ul class="tabmenu">
-											<li>
-												<a href="#" class="">Add Comments</a>
-											</li>
-											<li>
-												<a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a>
-											</li>
-										</ul>
+										<div id="minimenu">
+											<ul>
+												<li>
+													<a href="#" class="">Add Comments</a>
+												</li>
+												<li>
+													<a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a>
+												</li>
+											</ul>
+										</div>
 									  <div class="clear"></div>
 									%if len(elt.comments) > 0:
 									  <table>
@@ -308,7 +306,7 @@ Invalid element name
 									    %end
 									  </table>
 									%else:
-									  <p>None</p>
+									  <p>No comments available</p>
 									%end
 								</div>
 						    </div>
