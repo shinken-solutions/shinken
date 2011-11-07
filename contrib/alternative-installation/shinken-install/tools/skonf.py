@@ -247,7 +247,7 @@ def domacros(configfile,args=[]):
             "setparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
             "getdirective":r"(?P<directives>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
             "writeconfig":r"",
-            "sync":r""
+            "sync":r"(?P<authfile>.*)"
             }
 
     """ Compile regexp """
@@ -285,6 +285,10 @@ def domacros(configfile,args=[]):
                             return (code,message)
                     elif command == "showconfig":
                         dumpconfig(result.group('object'),config,allowed)
+                    elif command == "sync":
+                        code,message = sync(config,configfile,result.group('authfile'))
+                        if not code:
+                            return (code,message)
                     elif command == "getdirective":
                         code,last = getdirective(config,result.group('object'),result.group('directives'),result.group('clauses'))
                         if not code:
@@ -299,8 +303,6 @@ def domacros(configfile,args=[]):
                         code,message = writeconfig(config,configfile)    
                         if not code:
                             return (code,message)
-                    if command == "sync":
-                        code,message = sync(config,configfile)
                 matched=True
         if not matched:
             if not line == "":
