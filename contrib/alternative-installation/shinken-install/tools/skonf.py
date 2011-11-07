@@ -586,15 +586,17 @@ def setparam(config,objectype,directive,value,filters):
                 else:
                     filterok=filterok-1    
             if filterok == len(dfilters):
-                """ check if directive value allready exist """
-                if re.match(value,config[objectype][i][directive]) == None:
+                """ if directive does not exist create it ! """
+                if not config[objectype][i].has_key(directive):
                     config[objectype][i][directive]=value
-                    if len(dfilters)>0:
-                        message = "updated configuration of %s[%d] %s=%s where %s" % (objectype,i,directive,value,filters)
-                    else:
-                        message =  "updated configuration of %s[%d] %s=%s" % (objectype,i,directive,value)
+                    message = "Added configuration %s[%d] %s=%s" % (objectype,i,directive,value)
                 else:
-                    message = "Directive value allready added"
+                    """ check if directive value allready exist """
+                    if re.search(value,config[objectype][i][directive]) != None:
+                        message = "Directive value allready exist"
+                    else:
+                        config[objectype][i][directive]=value
+                        message =  "updated configuration of %s[%d] %s=%s" % (objectype,i,directive,value)
                 return (True,message)
     else:
         return (False, "Unknown object type %s" % (o))
