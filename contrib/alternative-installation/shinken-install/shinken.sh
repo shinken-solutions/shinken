@@ -779,7 +779,7 @@ function prerequisites(){
 			if [ $? -eq 2 ]
 			then
 				cecho " > Module $module ($import) not found. Installing..." yellow
-				$PYEI $module #> /dev/null 2>&1
+				$PYEI $module > /dev/null 2>&1
 			else
 				cecho " > Module $module found." green 
 			fi
