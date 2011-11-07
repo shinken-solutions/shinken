@@ -236,7 +236,7 @@ def domacros(configfile,args=[]):
             "setparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
             "getdirective":r"(?P<directives>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
             "writeconfig":r"",
-            "synchconfig":r""
+            "synch":r""
             }
 
     """ Compile regexp """
@@ -288,6 +288,8 @@ def domacros(configfile,args=[]):
                         code,message = writeconfig(config,configfile)    
                         if not code:
                             return (code,message)
+                    if command == "synch":
+                        code,message = synch(config,configfile)
                 matched=True
         if not matched:
             if not line == "":
@@ -405,7 +407,7 @@ def showconfig(config,objectype,filters=""):
         print "Unknown object type %s" % (o)
     return config        
 
-def sync(config):
+def sync(config,configfile):
     """ detect local adresses """
     import socket
     local = socket.gethostbyname(socket.gethostname())
@@ -563,6 +565,7 @@ def getdirective(config,objectype,directive,filters):
         return (False,"Unknown error in getdirective" ) 
 
 def setparam(config,objectype,directive,value,filters):
+    import re
     dfilters={}
     if len(filters) > 0:
         t=filters.split(',')
@@ -583,11 +586,15 @@ def setparam(config,objectype,directive,value,filters):
                 else:
                     filterok=filterok-1    
             if filterok == len(dfilters):
-                config[objectype][i][directive]=value
-                if len(dfilters)>0:
-                    message = "updated configuration of %s[%d] %s=%s where %s" % (objectype,i,directive,value,filters)
+                """ check if directive value allready exist """
+                if re.match(value,config[objectype][i][directive]) == None:
+                    config[objectype][i][directive]=value
+                    if len(dfilters)>0:
+                        message = "updated configuration of %s[%d] %s=%s where %s" % (objectype,i,directive,value,filters)
+                    else:
+                        message =  "updated configuration of %s[%d] %s=%s" % (objectype,i,directive,value)
                 else:
-                    message =  "updated configuration of %s[%d] %s=%s" % (objectype,i,directive,value)
+                    message = "Directive value allready added"
                 return (True,message)
     else:
         return (False, "Unknown object type %s" % (o))
